@@ -33,11 +33,22 @@
 []
 
 [Postprocessors]
-  [./average]
+  [average]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
+  [maxValue]
+    type = ElementExtremeValue
+    variable = u
+    value_type = max
+  []
+  [minValue]
+    type = ElementExtremeValue
+    variable = u
+    value_type = min
+  []
 []
+
 
 [Executioner]
   type = Transient

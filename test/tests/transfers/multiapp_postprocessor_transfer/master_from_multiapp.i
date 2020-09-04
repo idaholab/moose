@@ -50,6 +50,30 @@
   [./sub_minimum]
     type = Receiver
   [../]
+  [./sub_max_average]
+    type = Receiver
+  [../]
+  [./sub_max_sum]
+    type = Receiver
+  [../]
+  [./sub_max_maximum]
+    type = Receiver
+  [../]
+  [./sub_max_minimum]
+    type = Receiver
+  [../]
+  [./sub_min_average]
+    type = Receiver
+  [../]
+  [./sub_min_sum]
+    type = Receiver
+  [../]
+  [./sub_min_maximum]
+    type = Receiver
+  [../]
+  [./sub_min_minimum]
+    type = Receiver
+  [../]
 []
 
 [Executioner]
@@ -83,31 +107,31 @@
     reduction_type = average
     direction = from_multiapp
     multi_app = sub
-    from_postprocessor = average
-    to_postprocessor = sub_average
+    from_postprocessor = 'average maxValue minValue'
+    to_postprocessor = 'sub_average sub_max_average sub_min_average'
   [../]
   [./pp_transfer_sum]
     type = MultiAppPostprocessorTransfer
     reduction_type = sum
     direction = from_multiapp
     multi_app = sub
-    from_postprocessor = average
-    to_postprocessor = sub_sum
+    from_postprocessor = 'average maxValue minValue'
+    to_postprocessor = 'sub_sum sub_max_sum sub_min_sum'
   [../]
   [./pp_transfer_min]
     type = MultiAppPostprocessorTransfer
     reduction_type = minimum
     direction = from_multiapp
     multi_app = sub
-    from_postprocessor = average
-    to_postprocessor = sub_minimum
+    from_postprocessor = 'average maxValue minValue'
+    to_postprocessor = 'sub_minimum sub_max_minimum sub_max_minimum'
   [../]
   [./pp_transfer_max]
     type = MultiAppPostprocessorTransfer
     reduction_type = maximum
     direction = from_multiapp
     multi_app = sub
-    from_postprocessor = average
-    to_postprocessor = sub_maximum
+    from_postprocessor = 'average maxValue minValue'
+    to_postprocessor = 'sub_maximum sub_max_maximum sub_min_maximum'
   [../]
 []

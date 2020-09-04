@@ -28,12 +28,12 @@ MultiAppPostprocessorTransfer::validParams()
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
       "Transfers postprocessor data between the master application and sub-application(s).");
-  params.addRequiredParam<PostprocessorName>(
+  params.addRequiredParam<std::vector<PostprocessorName>>(
       "from_postprocessor",
-      "The name of the Postprocessor in the Master to transfer the value from.");
-  params.addRequiredParam<PostprocessorName>(
+      "The name of the Postprocessor(s) in the Master to transfer the value from.");
+  params.addRequiredParam<std::vector<PostprocessorName>>(
       "to_postprocessor",
-      "The name of the Postprocessor in the MultiApp to transfer the value to. "
+      "The name of the Postprocessor(s) in the MultiApp to transfer the value to. "
       " This should most likely be a Reporter Postprocessor.");
   MooseEnum reduction_type("average sum maximum minimum");
   params.addParam<MooseEnum>("reduction_type",
@@ -45,12 +45,16 @@ MultiAppPostprocessorTransfer::validParams()
 
 MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
-    _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
+    _from_pp_name(getParam<std::vector<PostprocessorName>>("from_postprocessor")),
+    _to_pp_name(getParam<std::vector<PostprocessorName>>("to_postprocessor")),
     _reduction_type(getParam<MooseEnum>("reduction_type"))
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
+
+  if (_from_pp_name.size() != _to_pp_name.size())
+    mooseError("In MultiAppPostprocessorTransfer, the must specify 'reduction_type' if direction = "
+               "from_multiapp");
 
   if (_current_direction == FROM_MULTIAPP)
     if (!_reduction_type.isValid())
@@ -69,80 +73,87 @@ MultiAppPostprocessorTransfer::execute()
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
 
-      Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
+      for (size_t iname = 0; iname < _from_pp_name.size(); iname++)
+      {
+        Real pp_value = from_problem.getPostprocessorValue(_from_pp_name[iname]);
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblemBase(i).getPostprocessorValue(_to_pp_name) = pp_value;
+        for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+          if (_multi_app->hasLocalApp(i))
+            _multi_app->appProblemBase(i).getPostprocessorValue(_to_pp_name[iname]) = pp_value;
+      }
       break;
     }
     case FROM_MULTIAPP:
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
-
-      Real reduced_pp_value;
-      switch (_reduction_type)
+      for (size_t iname = 0; iname < _from_pp_name.size(); iname++)
       {
-        case AVERAGE:
-        case SUM:
-          reduced_pp_value = 0;
-          break;
-        case MAXIMUM:
-          reduced_pp_value = -std::numeric_limits<Real>::max();
-          break;
-        case MINIMUM:
-          reduced_pp_value = std::numeric_limits<Real>::max();
-          break;
-        default:
-          mooseError(
-              "Can't get here unless someone adds a new enum and fails to add it to this switch");
-      }
-
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-      {
-        if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
+        Real reduced_pp_value;
+        switch (_reduction_type)
         {
-          Real curr_pp_value = _multi_app->appProblemBase(i).getPostprocessorValue(_from_pp_name);
-          switch (_reduction_type)
+          case AVERAGE:
+          case SUM:
+            reduced_pp_value = 0;
+            break;
+          case MAXIMUM:
+            reduced_pp_value = -std::numeric_limits<Real>::max();
+            break;
+          case MINIMUM:
+            reduced_pp_value = std::numeric_limits<Real>::max();
+            break;
+          default:
+            mooseError(
+                "Can't get here unless someone adds a new enum and fails to add it to this switch");
+        }
+
+        for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+        {
+          if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
           {
-            case AVERAGE:
-            case SUM:
-              reduced_pp_value += curr_pp_value;
-              break;
-            case MAXIMUM:
-              reduced_pp_value = std::max(curr_pp_value, reduced_pp_value);
-              break;
-            case MINIMUM:
-              reduced_pp_value = std::min(curr_pp_value, reduced_pp_value);
-              break;
-            default:
-              mooseError("Can't get here unless someone adds a new enum and fails to add it to "
-                         "this switch");
+
+            Real curr_pp_value =
+                _multi_app->appProblemBase(i).getPostprocessorValue(_from_pp_name[iname]);
+            switch (_reduction_type)
+            {
+              case AVERAGE:
+              case SUM:
+                reduced_pp_value += curr_pp_value;
+                break;
+              case MAXIMUM:
+                reduced_pp_value = std::max(curr_pp_value, reduced_pp_value);
+                break;
+              case MINIMUM:
+                reduced_pp_value = std::min(curr_pp_value, reduced_pp_value);
+                break;
+              default:
+                mooseError("Can't get here unless someone adds a new enum and fails to add it to "
+                           "this switch");
+            }
           }
         }
-      }
 
-      switch (_reduction_type)
-      {
-        case AVERAGE:
-          _communicator.sum(reduced_pp_value);
-          reduced_pp_value /= static_cast<Real>(_multi_app->numGlobalApps());
-          break;
-        case SUM:
-          _communicator.sum(reduced_pp_value);
-          break;
-        case MAXIMUM:
-          _communicator.max(reduced_pp_value);
-          break;
-        case MINIMUM:
-          _communicator.min(reduced_pp_value);
-          break;
-        default:
-          mooseError(
-              "Can't get here unless someone adds a new enum and fails to add it to this switch");
-      }
+        switch (_reduction_type)
+        {
+          case AVERAGE:
+            _communicator.sum(reduced_pp_value);
+            reduced_pp_value /= static_cast<Real>(_multi_app->numGlobalApps());
+            break;
+          case SUM:
+            _communicator.sum(reduced_pp_value);
+            break;
+          case MAXIMUM:
+            _communicator.max(reduced_pp_value);
+            break;
+          case MINIMUM:
+            _communicator.min(reduced_pp_value);
+            break;
+          default:
+            mooseError(
+                "Can't get here unless someone adds a new enum and fails to add it to this switch");
+        }
 
-      to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;
+        to_problem.getPostprocessorValue(_to_pp_name[iname]) = reduced_pp_value;
+      }
       break;
     }
   }

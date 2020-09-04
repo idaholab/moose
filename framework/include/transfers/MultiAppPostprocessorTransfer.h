@@ -38,7 +38,7 @@ public:
   };
 
 protected:
-  PostprocessorName _from_pp_name;
-  PostprocessorName _to_pp_name;
+  std::vector<PostprocessorName> _from_pp_name;
+  std::vector<PostprocessorName> _to_pp_name;
   MooseEnum _reduction_type;
 };
