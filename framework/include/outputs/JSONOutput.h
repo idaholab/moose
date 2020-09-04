@@ -27,6 +27,4 @@ protected:
 
 private:
   nlohmann::json _json;
-
-  // bool _distributed = false;
 };

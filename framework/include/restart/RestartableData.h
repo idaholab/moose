@@ -63,8 +63,10 @@ public:
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
-  virtual void store(nlohmann::json & json) const = 0;
-  virtual void load(const nlohmann::json & json) = 0;
+
+  // save/load to JSON object
+  virtual void toJSON(nlohmann::json & json) const = 0;
+  virtual void fromJSON(const nlohmann::json & json) = 0;
 
 protected:
   /// The full (unique) name of this particular piece of data.
@@ -126,12 +128,12 @@ public:
   /**
    * Store the restartable data into a JSON object
    */
-  virtual void store(nlohmann::json & json) const override;
+  virtual void toJSON(nlohmann::json & json) const override;
 
   /**
    * Load the restartable data into a JSON object
    */
-  virtual void load(const nlohmann::json & json) override;
+  virtual void fromJSON(const nlohmann::json & json) override;
 
 private:
   /// Stored value.
@@ -172,7 +174,7 @@ RestartableData<T>::load(std::istream & stream)
 
 template <typename T>
 inline void
-RestartableData<T>::store(nlohmann::json & /*json*/) const
+RestartableData<T>::toJSON(nlohmann::json & /*json*/) const
 {
   // TODO: see JsonIO.h
   // T & tmp = *_value_ptr;
@@ -181,7 +183,7 @@ RestartableData<T>::store(nlohmann::json & /*json*/) const
 
 template <typename T>
 inline void
-RestartableData<T>::load(const nlohmann::json & /*json*/)
+RestartableData<T>::fromJSON(const nlohmann::json & /*json*/)
 {
   // TODO: see JsonIO.h
   // T & tmp = *_value_ptr;

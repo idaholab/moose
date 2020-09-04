@@ -85,11 +85,6 @@ public:
    */
   virtual void load(std::istream & stream) override;
 
-  /// Re-define to avoid "was hidden [-Woverloaded-virtual]" warning
-  virtual void store(std::ostream & stream) override;
-  virtual void store(nlohmann::json & json) const override;
-  virtual void load(const nlohmann::json & json) override;
-
 private:
   /// Name of data that state is associated
   const ReporterName _reporter_name;
@@ -189,25 +184,4 @@ ReporterState<T>::load(std::istream & stream)
     loadHelper(stream, *iter, nullptr);
     std::advance(iter, 1);
   }
-}
-
-template <typename T>
-void
-ReporterState<T>::store(std::ostream & stream)
-{
-  RestartableData<std::list<T>>::store(stream);
-}
-
-template <typename T>
-void
-ReporterState<T>::store(nlohmann::json & json) const
-{
-  RestartableData<std::list<T>>::store(json);
-}
-
-template <typename T>
-void
-ReporterState<T>::load(const nlohmann::json & json)
-{
-  RestartableData<std::list<T>>::load(json);
 }

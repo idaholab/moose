@@ -19,12 +19,11 @@
 //
 // To enable output of RestartableData general the following needs to be done.
 //
-//     1. RestartableData<T>::store(nlohmann::json &) should call the storeHelper method loadted
+//     1. RestartableData<T>::toJSON(nlohmann::json &) should call the storeHelper method located
 //        in this file
-//     2. RestartableData<T>::load(const nlohmann::json &) should call the loadHelper method
+//     2. RestartableData<T>::fromJSON(const nlohmann::json &) should call the loadHelper method
 //        located in this file
-//     3. Create the necessary load/store overloads for the various types must be created using the
-//        "to_json" function
+//     3. Create the necessary overloads for the various types must be created using "to_json"
 //     4. Implement a means via Checkpoint to use the JSON format
 
 #pragma once
