@@ -1,0 +1,26 @@
+[Tests]
+  design = 'VectorPostprocessorDifferenceMeasure.md'
+  issues = '#15803'
+
+  [group]
+    requirement = "Vector post-processor values shall be able to be compute a difference measure between two vectors and return a Real "
+                  "value for"
+
+    [l2]
+      type = 'CSVDiff'
+      input = 'vector_postprocessor_difference.i'
+      csvdiff = 'l2.csv'
+
+      detail = "l2 or euclidean distance, or"
+    []
+    [difference]
+      type = 'CSVDiff'
+      input = 'vector_postprocessor_difference.i'
+      cli_args = 'Postprocessors/vpp_difference/difference_type=difference '
+                 'Outputs/file_base=difference'
+      csvdiff = 'difference.csv'
+
+      detail = "summed difference"
+    []
+  []
+[]
