@@ -108,4 +108,44 @@
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
   [../]
+  [./periodic_surface_interface_2D]
+    type = Exodiff
+    input = 'periodic_surface_interface_2D.i'
+    exodiff = 'periodic_surface_interface_2D_out.e'
+    requirement = "The CZM model should work with periodic boundary conditions using the CZM action and non-split boundaries"
+    issues = '#15584'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    recover = false
+  [../]
+  [./periodic_surface_interface_2D_noaction]
+    type = Exodiff
+    input = 'periodic_surface_interface_2D_noaction.i'
+    exodiff = 'periodic_surface_interface_2D_noaction_out.e'
+    requirement = "The CZM model should work with periodic boundary conditions when manually setting the CZMInterfaceKernel and usind non-split boundaries"
+    issues = '#15584'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    recover = false
+  [../]
+  [./periodic_surface_interface_2D_PBC_split_boundary]
+    type = Exodiff
+    input = 'periodic_surface_interface_2D_PBC_split_boundary.i'
+    exodiff = 'periodic_surface_interface_2D_PBC_split_boundary_out.e'
+    requirement = "The CZM model should work with periodic boundary conditions using the CZM action and split boundaries"
+    issues = '#15584'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    recover = false
+  [../]
+  [./periodic_surface_interface_2D_PBC_split_boundary_noaction]
+    type = Exodiff
+    input = 'periodic_surface_interface_2D_PBC_split_boundary_noaction.i'
+    exodiff = 'periodic_surface_interface_2D_PBC_split_boundary_noaction_out.e'
+    requirement = "The CZM model should work with periodic boundary conditions when manually setting the CZMInterfaceKernel and usind split boundaries"
+    issues = '#15584'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    recover = false
+  [../]
 []

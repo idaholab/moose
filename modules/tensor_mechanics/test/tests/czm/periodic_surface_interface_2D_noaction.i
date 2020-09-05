@@ -83,11 +83,21 @@
   []
 []
 
-[Modules/TensorMechanics/CohesiveZoneMaster]
-  [./czm1]
-    boundary = 'interface'
-    displacements = 'disp_x disp_y'
-  [../]
+[InterfaceKernels]
+  [czmx]
+    type = CZMInterfaceKernel
+    variable =disp_x
+    neighbor_var = disp_x
+    component = 0
+    boundary = interface
+  []
+  [czmy]
+    type = CZMInterfaceKernel
+    variable =disp_y
+    neighbor_var = disp_y
+    component = 1
+    boundary = interface
+  []
 []
 
 [BCs]
@@ -301,8 +311,8 @@
   nl_abs_tol = 1e-10
 
   start_time = 0.0
-  dt = 0.2
   dtmin = 0.2
+  dt = 0.2
   end_time = 0.2
 []
 
