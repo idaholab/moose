@@ -377,26 +377,18 @@ template <typename T>
 class ReporterGatherContext : public ReporterContext<T>
 {
 public:
+  ReporterGatherContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterGatherContext(const libMesh::ParallelObject & other,
                         ReporterState<T> & state,
-                        const T & value);
-  ReporterGatherContext(const libMesh::ParallelObject & other,
-                        ReporterState<T> & state,
-                        const T & default_value,
-                        const T & value);
+                        const T & default_value);
 
   virtual void finalize() override;
-
-private:
-  /// The values to Gather
-  const T & _value;
 };
 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
-                                                ReporterState<T> & state,
-                                                const T & value)
-  : ReporterContext<T>(other, state), _value(value)
+                                                ReporterState<T> & state)
+  : ReporterContext<T>(other, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -405,9 +397,8 @@ ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & 
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
                                                 ReporterState<T> & state,
-                                                const T & default_value,
-                                                const T & value)
-  : ReporterContext<T>(other, state, default_value), _value(value)
+                                                const T & default_value)
+  : ReporterContext<T>(other, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -420,19 +411,16 @@ ReporterGatherContext<T>::finalize()
   for (const auto & pair : this->_state.getConsumerModes())
   {
     const ReporterMode consumer = pair.first;
-    const std::string & object_name = pair.second;
     if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_ROOT))
       mooseError("The Reporter value '",
                  this->name(),
                  "' is being produced in ",
                  REPORTER_MODE_DISTRIBUTED,
                  " mode, but the '",
-                 object_name,
+                 pair.second, // object name
                  "' object is requesting to consume it in ",
                  consumer,
                  " mode, which is not supported. The mode must be UNSET or ROOT.");
   }
-
-  this->_state.value() = _value;
   this->comm().gather(0, this->_state.value());
 }

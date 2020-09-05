@@ -28,14 +28,11 @@ TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
     _bcast_value(declareValue<Real, ReporterBroadcastContext>("broadcast")),
     _scatter_value(
         declareValue<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
-    _gather_value(
-        declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather", _values_to_gather))
+    _gather_value(declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather"))
 {
   if (processor_id() == 0)
     for (dof_id_type rank = 0; rank < n_processors(); ++rank)
       _values_to_scatter.push_back(rank);
-
-  _values_to_gather.resize(1, processor_id());
 }
 
 void
@@ -48,6 +45,8 @@ TestDeclareReporter::execute()
 
   if (processor_id() == 0)
     _bcast_value = 42;
+
+  _gather_value.resize(1, processor_id());
 }
 
 InputParameters

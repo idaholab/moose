@@ -214,7 +214,7 @@ private:
   ///
   /// The declareReporterValue method relies on the emplace method, so this muse remain a std::set
   /// to operate correctly with the initialization process.
-  std::set<std::unique_ptr<ReporterContextBase>> _context_ptrs;
+  std::vector<std::unique_ptr<ReporterContextBase>> _context_ptrs;
 
   /// Names of objects that have been declared
   std::set<ReporterName> _declare_names;
@@ -261,7 +261,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   // Create the ReporterContext
   auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
-  _context_ptrs.emplace(std::move(context_ptr));
+  _context_ptrs.emplace_back(std::move(context_ptr));
 
   return state_ref.value();
 }
