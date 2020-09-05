@@ -117,6 +117,8 @@
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
+    min_parallel = 2
+    max_parallel = 4
   [../]
   [./periodic_surface_interface_2D_noaction]
     type = Exodiff
@@ -127,6 +129,8 @@
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
+    min_parallel = 2
+    max_parallel = 4
   [../]
   [./periodic_surface_interface_2D_PBC_split_boundary]
     type = Exodiff
@@ -137,6 +141,8 @@
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
+    min_parallel = 2
+    max_parallel = 4
   [../]
   [./periodic_surface_interface_2D_PBC_split_boundary_noaction]
     type = Exodiff
@@ -147,5 +153,7 @@
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
+    min_parallel = 2
+    max_parallel = 4
   [../]
 []
