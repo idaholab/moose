@@ -61,3 +61,10 @@ CohesiveZoneMasterAction::act()
     }
   }
 }
+
+void
+CohesiveZoneMasterAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  InputParameters ips = _factory.getValidParams("CZMInterfaceKernel");
+  addRelationshipManagers(input_rm_type, ips);
+}
