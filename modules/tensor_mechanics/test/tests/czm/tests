@@ -113,6 +113,7 @@
     input = 'periodic_surface_interface_2D.i'
     exodiff = 'periodic_surface_interface_2D_out.e'
     requirement = "The CZM model should work with periodic boundary conditions using the CZM action and non-split boundaries"
+    cli_args = "BCs/Periodic/inactive='x_x_1 y_x_1 x_x_3 y_x_3 x_y_1 x_y_3 y_y_3' InterfaceKernels/inactive='czmx czmy'  Outputs/file_base=periodic_surface_interface_2D_out"
     issues = '#15584'
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
@@ -122,10 +123,11 @@
   [../]
   [./periodic_surface_interface_2D_noaction]
     type = Exodiff
-    input = 'periodic_surface_interface_2D_noaction.i'
+    input = 'periodic_surface_interface_2D.i'
     exodiff = 'periodic_surface_interface_2D_noaction_out.e'
     requirement = "The CZM model should work with periodic boundary conditions when manually setting the CZMInterfaceKernel and usind non-split boundaries"
     issues = '#15584'
+    cli_args = "BCs/Periodic/inactive='x_x_1 y_x_1 x_x_3 y_x_3 x_y_1 x_y_3 y_y_3' Modules/TensorMechanics/CohesiveZoneMaster/inactive='czm1'  Outputs/file_base=periodic_surface_interface_2D_noaction_out"
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
@@ -134,10 +136,11 @@
   [../]
   [./periodic_surface_interface_2D_PBC_split_boundary]
     type = Exodiff
-    input = 'periodic_surface_interface_2D_PBC_split_boundary.i'
+    input = 'periodic_surface_interface_2D.i'
     exodiff = 'periodic_surface_interface_2D_PBC_split_boundary_out.e'
     requirement = "The CZM model should work with periodic boundary conditions using the CZM action and split boundaries"
     issues = '#15584'
+    cli_args = "BCs/Periodic/inactive='x_x y_x x_y y_y' InterfaceKernels/inactive='czmx czmy'  Outputs/file_base=periodic_surface_interface_2D_PBC_split_boundary_out"
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     recover = false
@@ -146,9 +149,10 @@
   [../]
   [./periodic_surface_interface_2D_PBC_split_boundary_noaction]
     type = Exodiff
-    input = 'periodic_surface_interface_2D_PBC_split_boundary_noaction.i'
+    input = 'periodic_surface_interface_2D.i'
     exodiff = 'periodic_surface_interface_2D_PBC_split_boundary_noaction_out.e'
     requirement = "The CZM model should work with periodic boundary conditions when manually setting the CZMInterfaceKernel and usind split boundaries"
+    cli_args = "BCs/Periodic/inactive='x_x y_x x_y y_y' Modules/TensorMechanics/CohesiveZoneMaster/inactive='czm1'  Outputs/file_base=periodic_surface_interface_2D_PBC_split_boundary_noaction_out"
     issues = '#15584'
     mesh_mode = 'REPLICATED'
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'

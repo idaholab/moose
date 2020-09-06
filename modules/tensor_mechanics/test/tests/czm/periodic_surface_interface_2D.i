@@ -69,6 +69,11 @@
     coord = '-0.5 -0.5 0'
     new_boundary = node_move
   []
+  [break_boundary]
+    input = node_move
+    type = BreakBoundaryOnSubdomainGenerator
+    boundaries = 'x1 x0 y1 y0'
+  []
 []
 
 [GlobalParams]
@@ -84,14 +89,36 @@
 []
 
 [Modules/TensorMechanics/CohesiveZoneMaster]
+  inactive=''
   [./czm1]
     boundary = 'interface'
     displacements = 'disp_x disp_y'
   [../]
 []
 
+
+[InterfaceKernels]
+  inactive=''
+  [czmx]
+    type = CZMInterfaceKernel
+    variable =disp_x
+    neighbor_var = disp_x
+    component = 0
+    boundary = interface
+  []
+  [czmy]
+    type = CZMInterfaceKernel
+    variable =disp_y
+    neighbor_var = disp_y
+    component = 1
+    boundary = interface
+  []
+[]
+
+
 [BCs]
   [Periodic]
+    inactive=''
     [x_x]
       variable = disp_x
       primary  = x0
@@ -114,6 +141,54 @@
       variable = disp_y
       primary  = y0
       secondary = y1
+      translation = '0 2 0'
+    []
+    [x_x_1]
+      variable = disp_x
+      primary  = x0_to_1
+      secondary = x1_to_3
+      translation = '2 0 0'
+    []
+    [y_x_1]
+      variable = disp_y
+      primary  = x0_to_1
+      secondary = x1_to_3
+      translation = '2 0 0'
+    []
+    [x_x_3]
+      variable = disp_x
+      primary  = x0_to_2
+      secondary = x1_to_4
+      translation = '2 0 0'
+    []
+    [y_x_3]
+      variable = disp_y
+      primary  = x0_to_2
+      secondary = x1_to_4
+      translation = '2 0 0'
+    []
+    [x_y_1]
+      variable = disp_x
+      primary  = y0_to_1
+      secondary = y1_to_2
+      translation = '0 2 0'
+    []
+    [y_y_1]
+      variable = disp_y
+      primary  = y0_to_1
+      secondary = y1_to_2
+      translation = '0 2 0'
+    []
+    [x_y_3]
+      variable = disp_x
+      primary  = y0_to_3
+      secondary = y1_to_4
+      translation = '0 2 0'
+    []
+    [y_y_3]
+      variable = disp_y
+      primary  = y0_to_3
+      secondary = y1_to_4
       translation = '0 2 0'
     []
   []
