@@ -22,6 +22,61 @@
       detail = 'Weibull (3 parameter),'
     []
 
+    [kernel1d_gaussian]
+      type = CSVDiff
+      input = kernel_density_1d_gaussian.i
+      csvdiff = 'kernel_density_1d_gaussian_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Kernel Density 1D with a Gaussian kernel and data file as input,'
+    []
+
+    [kernel1d_uniform]
+      type = CSVDiff
+      input = kernel_density_1d_uniform.i
+      csvdiff = 'kernel_density_1d_uniform_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Kernel Density 1D with a Uniform kernel and data file as input,'
+    []
+
+    [kernel1d_datvec]
+      type = CSVDiff
+      input = kernel_density_1d_datvec.i
+      csvdiff = 'kernel_density_1d_datvec_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Kernel Density 1D with a Gaussian kernel and data vector as input,'
+    []
+
+    [kernel1d_userbw]
+      type = CSVDiff
+      input = kernel_density_1d_userbw.i
+      csvdiff = 'kernel_density_1d_userbw_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Kernel Density 1D with a Gaussian kernel and user defined bandwidth,'
+    []
+
+    [kernel1d_sdbw]
+      type = CSVDiff
+      input = kernel_density_1d_sdbw.i
+      csvdiff = 'kernel_density_1d_sdbw_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Kernel Density 1D with a Gaussian kernel and standard deviation as bandwidth,'
+    []
+
     [normal]
       type = CSVDiff
       input = normal.i
