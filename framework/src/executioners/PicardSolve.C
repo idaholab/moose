@@ -103,6 +103,17 @@ PicardSolve::validParams()
                         "Whether to automatically advance sub-applications regardless of whether "
                         "their solve converges.");
 
+  params.addParam<bool>(
+      "output_picard_iteration", false, "True to output during Picard iterations");
+  params.addParam<unsigned int>(
+      "picard_output_interval",
+      1,
+      "Perform outputs every this number of picard iterations starting from the first iteration");
+  params.addParam<Real>("picard_output_dt_divisor",
+                        100,
+                        "Number of divisions applied to time step when outputting solutions on "
+                        "each Picard iteration during transient");
+
   return params;
 }
 
@@ -257,14 +268,14 @@ PicardSolve::solve()
       {
         if (_has_picard_norm)
         {
-          _console << "\n 0 Picard |R| = "
+          _console << "\n  0 Picard |R| = "
                    << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm)
                    << '\n';
 
           for (unsigned int i = 0; i <= _picard_it; ++i)
           {
             Real max_norm = std::max(_picard_timestep_begin_norm[i], _picard_timestep_end_norm[i]);
-            _console << std::setw(2) << i + 1
+            _console << std::setw(3) << std::right << i + 1
                      << " Picard |R| = " << Console::outputNorm(_picard_initial_norm, max_norm)
                      << '\n';
           }
@@ -326,6 +337,22 @@ PicardSolve::solve()
 
     _problem.dt() =
         current_dt; // _dt might be smaller than this at this point for multistep methods
+
+    if (getParam<bool>("output_picard_iteration"))
+    {
+      if ((_picard_it % getParam<unsigned int>("picard_output_interval")) == 0)
+      {
+        // for transient problem, the output system uses system time otherwise it uses time step
+        Real t = _problem.time();
+        if (_problem.isTransient())
+          _problem.time() =
+              _problem.timeOld() + (_picard_it + 1) / getParam<Real>("picard_output_dt_divisor");
+        _problem.outputStep(EXEC_TIMESTEP_END);
+        _problem.time() = t;
+        if (!_problem.isTransient())
+          _problem.timeStep()++;
+      }
+    }
   }
 
   if (converged && _picard_self_relaxation_factor != 1.0)

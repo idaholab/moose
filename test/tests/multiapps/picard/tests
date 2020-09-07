@@ -117,4 +117,23 @@
     issues = '#14642'
     requirement = "The system shall allow convergence check with the convergence of a user defined postprocessor."
   [../]
+
+  [./test_transient_picard_output]
+    type = 'Exodiff'
+    input = 'transient_picard_output.i'
+    exodiff = 'transient_picard_output_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#11934'
+    requirement = "The system shall allow the main transient app to output during Picard iterations"
+  [../]
+  [./test_steady_picard_output]
+    type = 'Exodiff'
+    input = 'steady_picard_output.i'
+    exodiff = 'steady_picard_output_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#11934'
+    requirement = "The system shall allow the main steady app to output during Picard iterations"
+  [../]
 []
