@@ -49,8 +49,8 @@ Eigenvalue::validParams()
 
   params.addParam<PostprocessorName>(
       "normalization", "Postprocessor evaluating norm of eigenvector for normalization");
-  params.addParam<Real>(
-      "normal_factor", 1.0, "Normalize eigenvector to make a defined norm equal to this factor");
+  params.addParam<Real>("normal_factor",
+                        "Normalize eigenvector to make a defined norm equal to this factor");
 
   params.addParam<bool>("auto_initialization",
                         true,
@@ -103,28 +103,45 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   _eigen_problem.outputInverseEigenvalue(getParam<bool>("output_inverse_eigenvalue"));
 #endif
 
-  if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
+  if (!isParamValid("normalization") && isParamValid("normal_factor"))
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
 
   // _feproblem_solve calls FEProblemBase
   _picard_solve.setInnerSolve(_feproblem_solve);
-
   _time = _system_time;
+
+  if (isParamValid("normalization"))
+  {
+    auto normpp = getParam<PostprocessorName>("normalization");
+    if (isParamValid("normal_factor"))
+      _eigen_problem.setNormalization(normpp, getParam<Real>("normal_factor"));
+    else
+      _eigen_problem.setNormalization(normpp);
+  }
 }
 
 void
 Eigenvalue::init()
 {
+  if (_app.isRecovering())
+  {
+    _console << "\nCannot recover eigenvaue solves!\nExiting...\n" << std::endl;
+    return;
+  }
+
 #ifdef LIBMESH_HAVE_SLEPC
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 #endif
-  if (_app.isRecovering())
+
+  if (isParamValid("normalization"))
   {
-    _console << "\nCannot recover eigenvaue solves!\nExiting...\n" << std::endl;
-    return;
+    auto normpp = getParam<PostprocessorName>("normalization");
+    const auto & exec = _eigen_problem.getUserObject<UserObject>(normpp).getExecuteOnEnum();
+    if (!exec.contains(EXEC_LINEAR))
+      mooseError("Normalization postprocessor ", normpp, " requires execute_on = 'linear'");
   }
 
   // Does not allow time kernels

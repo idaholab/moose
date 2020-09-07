@@ -138,7 +138,7 @@ public:
    *
    * @return all converged eigenvalues as complex numbers
    */
-  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues()
+  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues() const
   {
     return _eigen_values;
   }
