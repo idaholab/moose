@@ -190,7 +190,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
   auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
 
-  if (var_type == "MooseVariableScalar" || var_type == "ArrayMooseVariable")
+  if (var_type == "MooseVariableScalar")
     return;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -216,7 +216,9 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
     else
     {
-      auto * var = _vars[tid].getActualFieldVariable<Real>(name);
+      MooseVariableBase * var_base = _vars[tid].getVariable(name);
+
+      MooseVariable * var = dynamic_cast<MooseVariable *>(var_base);
 
       if (var)
       {
@@ -229,6 +231,22 @@ AuxiliarySystem::addVariable(const std::string & var_type,
         {
           _elem_vars[tid].push_back(var);
           _elem_std_vars[tid].push_back(var);
+        }
+      }
+
+      ArrayMooseVariable * avar = dynamic_cast<ArrayMooseVariable *>(var_base);
+
+      if (avar)
+      {
+        if (avar->feType().family == LAGRANGE)
+        {
+          _nodal_vars[tid].push_back(avar);
+          _nodal_std_vars[tid].push_back(avar);
+        }
+        else
+        {
+          _elem_vars[tid].push_back(avar);
+          _elem_std_vars[tid].push_back(avar);
         }
       }
     }
