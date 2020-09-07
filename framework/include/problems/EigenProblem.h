@@ -113,6 +113,9 @@ public:
   unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
 #endif
 
+  void setNormalization(const PostprocessorName pp,
+                        const Real value = std::numeric_limits<Real>::max());
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
@@ -128,4 +131,8 @@ protected:
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
   PerfID _compute_jacobian_blocks_timer;
+
+  bool _has_normalization;
+  PostprocessorName _normalization;
+  Real _normal_factor;
 };

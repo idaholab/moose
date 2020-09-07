@@ -48,8 +48,8 @@ Eigenvalue::validParams()
 
   params.addParam<PostprocessorName>(
       "normalization", "Postprocessor evaluating norm of eigenvector for normalization");
-  params.addParam<Real>(
-      "normal_factor", 1.0, "Normalize eigenvector to make a defined norm equal to this factor");
+  params.addParam<Real>("normal_factor",
+                        "Normalize eigenvector to make a defined norm equal to this factor");
 
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
@@ -63,9 +63,7 @@ Eigenvalue::validParams()
 Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Steady(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
-        "_eigen_problem", "This might happen if you don't have a mesh")),
-    _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
-                                                 : nullptr)
+        "_eigen_problem", "This might happen if you don't have a mesh"))
 {
 // Extract and store SLEPc options
 #if LIBMESH_HAVE_SLEPC
@@ -75,9 +73,18 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
 #endif
 
-  if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
+  if (!isParamValid("normalization") && isParamValid("normal_factor"))
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
+
+  if (isParamValid("normalization"))
+  {
+    auto normpp = getParam<PostprocessorName>("normalization");
+    if (isParamValid("normal_factor"))
+      _eigen_problem.setNormalization(normpp, getParam<Real>("normal_factor"));
+    else
+      _eigen_problem.setNormalization(normpp);
+  }
 }
 
 void
@@ -88,6 +95,13 @@ Eigenvalue::init()
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 #endif
+  if (isParamValid("normalization"))
+  {
+    auto normpp = getParam<PostprocessorName>("normalization");
+    const auto & exec = _problem.getUserObject<UserObject>(normpp).getExecuteOnEnum();
+    if (!exec.contains(EXEC_LINEAR))
+      mooseError("Normalization postprocessor ", normpp, " requires execute_on = 'linear'");
+  }
   Steady::init();
 }
 
@@ -117,28 +131,4 @@ Eigenvalue::execute()
 #endif
 
   Steady::execute();
-}
-
-void
-Eigenvalue::postSolve()
-{
-#ifdef LIBMESH_HAVE_SLEPC
-  if (_normalization)
-  {
-    Real val = getParam<Real>("normal_factor");
-
-    if (MooseUtils::absoluteFuzzyEqual(*_normalization, 0.0))
-      mooseError("Cannot normalize eigenvector by 0");
-    else
-      val /= *_normalization;
-
-    if (!MooseUtils::absoluteFuzzyEqual(val, 1.0))
-    {
-      _eigen_problem.scaleEigenvector(val);
-      // update all aux variables and user objects
-      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
-        _problem.execute(flag);
-    }
-  }
-#endif
 }

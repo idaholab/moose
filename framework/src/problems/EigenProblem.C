@@ -59,7 +59,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
     _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
     _solve_timer(registerTimedSection("solve", 1)),
-    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3))
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
+    _has_normalization(false)
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -346,6 +347,29 @@ EigenProblem::solve()
     TIME_SECTION(_solve_timer);
     _nl->solve();
     _nl->update();
+
+    if (_has_normalization)
+    {
+      Real v;
+      if (_normal_factor == std::numeric_limits<Real>::max())
+      {
+        // when normal factor is not provided, we use the inverse of the norm of
+        // the active eigenvalue for normalization
+        auto eig = _nl_eigen->getAllConvergedEigenvalues()[activeEigenvalueIndex()];
+        v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+      }
+      else
+        v = _normal_factor;
+
+      Real c = getPostprocessorValue(_normalization);
+      while (!MooseUtils::absoluteFuzzyEqual(v, c))
+      {
+        scaleEigenvector(v / c);
+        // need one residual evaluation to sync objects on linear
+        computeResidualL2Norm();
+        c = getPostprocessorValue(_normalization);
+      }
+    }
   }
 
   // sync solutions in displaced problem
@@ -356,6 +380,14 @@ EigenProblem::solve()
   if (!_app.isUltimateMaster())
     PetscOptionsPop();
 #endif
+}
+
+void
+EigenProblem::setNormalization(const PostprocessorName pp, const Real value)
+{
+  _has_normalization = true;
+  _normalization = pp;
+  _normal_factor = value;
 }
 
 void
