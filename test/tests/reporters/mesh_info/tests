@@ -1,0 +1,26 @@
+[Tests]
+  issue = '#11323'
+  design = 'IterationInfo.md'
+  [info]
+    requirement = "The system shall include the ability to report mesh information:"
+
+    [default]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = mesh_info_out.json
+      min_parallel = 2
+      max_parallel = 2
+
+      detail = "that outputs all information be default;"
+    []
+
+    [limit]
+      type = JSONDiff
+      input = mesh_info.i
+      jsondiff = limit_out.json
+      cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_out'
+
+      detail = "that outputs specific information."
+    []
+  []
+[]

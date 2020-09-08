@@ -11,9 +11,12 @@
 
 #include "GeneralReporter.h"
 class Transient;
-// class NonlinearSystem;
-// class AuxiliarySystem;
-// class EquationSystems;
+namespace libMesh
+{
+class EquationSystems;
+class System;
+class MeshBase;
+}
 
 /**
  * Report the time and iteration information for the simulation.
@@ -30,21 +33,27 @@ public:
 protected:
   const MultiMooseEnum & _items;
 
-  // Reporter values to return (all are computed as "distributed" values)
+  // Reporter values to return
   unsigned int & _num_dofs;
   unsigned int & _num_dofs_nl;
   unsigned int & _num_dofs_aux;
   unsigned int & _num_elem;
   unsigned int & _num_node;
+  unsigned int & _num_local_dofs;
+  unsigned int & _num_local_dofs_nl;
+  unsigned int & _num_local_dofs_aux;
+  unsigned int & _num_local_elem;
+  unsigned int & _num_local_node;
 
   // Used to allow for optional declare
   unsigned int _dummy_unsigned_int = 0;
 
   // Helper to perform optional declaration based on "_items"
-  unsigned int & declareHelper(const std::string & item_name);
+  unsigned int & declareHelper(const std::string & item_name, const ReporterMode mode);
 
 private:
-  // const EquationSystems & _equation_systems;
-  // const NonlinearSystem & _nonlinear_system;
-  // const AuxiliarySystem & _aux_system;
+  const libMesh::EquationSystems & _equation_systems;
+  const libMesh::System & _nonlinear_system;
+  const libMesh::System & _aux_system;
+  const libMesh::MeshBase & _mesh;
 };
