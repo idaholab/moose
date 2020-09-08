@@ -19,6 +19,7 @@ class JSONDiff(RunApp):
         params = RunApp.validParams()
         params.addRequiredParam('jsondiff',   [], "A list of XML files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
+        params.addParam('skip_keys', [], "A list of keys to skip in the JSON comparison")
         return params
 
     def __init__(self, name, params):
@@ -57,7 +58,7 @@ class JSONDiff(RunApp):
                     gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
                     test = os.path.join(self.getTestDir(), file)
 
-                    differ = JSONDiffer(gold, test)
+                    differ = JSONDiffer(gold, test, skip_keys=specs['skip_keys'])
 
                     # Print the results of the Jsondiff whether it passed or failed.
                     output += differ.message() + '\n'

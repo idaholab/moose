@@ -24,7 +24,7 @@ class JSONDiffer(object):
     def __init__(self, input0, input1, **kwargs):
         kwargs.setdefault('sort_keys', True)
         kwargs.setdefault('indent', 4)
-        skip = kwargs.pop('skip', ['current_time', 'executable', 'executable_time', 'moose_version', 'libmesh_version', 'petsc_version', 'slepc_version'])
+        skip = kwargs.pop('skip_keys', [])
         color = kwargs.pop('color', True)
 
         self._data0 = self._load(input0)

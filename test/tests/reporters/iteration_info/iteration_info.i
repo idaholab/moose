@@ -48,5 +48,8 @@
 []
 
 [Outputs]
-  json = true
+  [out]
+    type = JSON
+    execute_system_information_on = NONE
+  []
 []

@@ -9,6 +9,7 @@
       input = iteration_info.i
       jsondiff = iteration_info_out.json
       recover = false # iteration info changes with --recover
+      skip_keys = 'part number_of_parts'
 
       detail = "that outputs all information be default;"
     []
@@ -19,6 +20,7 @@
       jsondiff = limit_out.json
       cli_args = 'Reporters/iteration_info/items=time timestep Outputs/file_base=limit_out'
       recover = false # iteration info changes with --recover
+      skip_keys = 'part number_of_parts'
 
       detail = "that outputs specific information;"
     []
@@ -28,11 +30,12 @@
       input = iteration_info_steady.i
       jsondiff = iteration_info_steady_out.json
       recover = false # iteration info changes with --recover
+      skip_keys = 'part number_of_parts'
 
       detail = "automatically disables items based on execution;"
     []
 
-    [steady_rror]
+    [steady_error]
       type = RunException
       input = iteration_info_steady.i
       cli_args = 'Reporters/iteration_info/items=num_picard_iterations'

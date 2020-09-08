@@ -10,10 +10,9 @@
 #pragma once
 
 #include "nlohmann/json.h"
+#include "AdvancedOutput.h"
 
-#include "FileOutput.h"
-
-class JSONOutput : public FileOutput
+class JSONOutput : public AdvancedOutput
 {
 public:
   static InputParameters validParams();
@@ -21,10 +20,12 @@ public:
 
 protected:
   virtual void output(const ExecFlagType & type) override;
+  virtual void outputReporters() override;
+  virtual void outputSystemInformation() override;
   virtual std::string filename() override;
-
   const ReporterData & _reporter_data;
 
 private:
+  /// The root JSON node for output
   nlohmann::json _json;
 };

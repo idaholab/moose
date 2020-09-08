@@ -1,12 +1,4 @@
 {
-    "app_name": "main",
-    "current_time": "Fri Sep  4 16:28:31 2020",
-    "executable": "/Users/slauae/projects/moose/test/moose_test-dbg",
-    "executable_time": "Fri Sep  4 16:14:33 2020",
-    "libmesh_version": "053cc54aaf127bec1dd617a7302b65455a205908",
-    "moose_version": "git commit f2e1ed6261 on 2020-09-04",
-    "petsc_version": "3.13.3",
-    "slepc_version": "3.13.3",
     "time_steps": [
         {
             "reporters": [

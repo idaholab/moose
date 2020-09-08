@@ -13,24 +13,21 @@
 #include "MooseApp.h"
 #include "JsonIO.h"
 
-registerMooseObject("MooseApp", JSONOutput);
+registerMooseObjectAliased("MooseApp", JSONOutput, "JSON");
 
 InputParameters
 JSONOutput::validParams()
 {
-  InputParameters params = FileOutput::validParams();
-  params += AdvancedOutput::enableOutputTypes("system_information");
+  InputParameters params = AdvancedOutput::validParams();
+  params += AdvancedOutput::enableOutputTypes("system_information reporter");
   params.addClassDescription("Output for Reporter values using JSON format.");
-
   params.set<ExecFlagEnum>("execute_system_information_on", /*quite_mode=*/true) = EXEC_INITIAL;
   return params;
 }
 
 JSONOutput::JSONOutput(const InputParameters & parameters)
-  : FileOutput(parameters), _reporter_data(_problem_ptr->getReporterData())
+  : AdvancedOutput(parameters), _reporter_data(_problem_ptr->getReporterData())
 {
-  // Write the MooseApp information to the JSON file
-  storeHelper(_json, _app);
 }
 
 std::string
@@ -48,7 +45,13 @@ JSONOutput::filename()
 }
 
 void
-JSONOutput::output(const ExecFlagType & /*type*/)
+JSONOutput::outputSystemInformation()
+{
+  storeHelper(_json, _app);
+}
+
+void
+JSONOutput::outputReporters()
 {
   if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
   {
@@ -72,7 +75,16 @@ JSONOutput::output(const ExecFlagType & /*type*/)
 
     // Add Reporter values to the current node
     _reporter_data.store(current_node["reporters"]);
+  }
+}
 
+void
+JSONOutput::output(const ExecFlagType & type)
+{
+  AdvancedOutput::output(type);
+
+  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  {
     std::ofstream out(filename().c_str());
     out << std::setw(4) << _json << std::endl;
   }

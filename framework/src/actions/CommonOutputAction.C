@@ -179,7 +179,7 @@ CommonOutputAction::act()
     create("XMLOutput");
 
   if (getParam<bool>("json"))
-    create("JSONOutput");
+    create("JSON");
 
 #ifdef LIBMESH_HAVE_VTK
   if (getParam<bool>("vtk"))

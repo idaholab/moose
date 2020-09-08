@@ -19,6 +19,7 @@
       input = mesh_info.i
       jsondiff = limit_out.json
       cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_out'
+      skip_keys = 'part number_of_parts'
 
       detail = "that outputs specific information."
     []
