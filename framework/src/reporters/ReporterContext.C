@@ -13,3 +13,16 @@ ReporterContextBase::ReporterContextBase(const libMesh::ParallelObject & other)
   : libMesh::ParallelObject(other)
 {
 }
+
+void
+ReporterContextBase::init(const ReporterMode & mode)
+{
+  if (mode != REPORTER_MODE_UNSET)
+    _producer_enum.assign(mode);
+}
+
+const ReporterProducerEnum &
+ReporterContextBase::getProducerModeEnum() const
+{
+  return _producer_enum;
+}

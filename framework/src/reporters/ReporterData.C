@@ -118,3 +118,14 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
   std::string name = data_ptr->name();
   return _app.registerRestartableData(name, std::move(data_ptr), 0, !declare);
 }
+
+bool
+ReporterData::hasReporterWithMode(const ReporterMode & mode) const
+{
+  for (auto & context_ptr : _context_ptrs)
+  {
+    if (context_ptr->getProducerModeEnum() == mode)
+      return true;
+  }
+  return false;
+}

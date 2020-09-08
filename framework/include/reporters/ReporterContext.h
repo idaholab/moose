@@ -58,6 +58,25 @@ public:
 
   /// Called by FEProblemBase::joinAndFinalize via ReporterData
   virtual void finalize() = 0; // new ReporterContext objects should override
+
+  /**
+   * Initialize the producer mode.
+   *
+   * This done after construction to allow the constructor to define the available values in the
+   * ReporterProducerEnum.
+   *
+   * @see ReporterData::declareReporterValue
+   */
+  void init(const ReporterMode & mode);
+
+  /**
+   * Return the Reporter value produced mode
+   */
+  const ReporterProducerEnum & getProducerModeEnum() const;
+
+protected:
+  /// Defines how the Reporter value can be produced and how it is being produced
+  ReporterProducerEnum _producer_enum;
 };
 
 /**
@@ -99,16 +118,6 @@ public:
   virtual std::string type() const final;
 
   /**
-   * Initialize the producer mode.
-   *
-   * This done after construction to allow the constructor to define the available values in the
-   * ReporterProducerEnum.
-   *
-   * @see ReporterData::declareReporterValue
-   */
-  void init(const ReporterMode & mode);
-
-  /**
    * Perform automatic parallel communication based on the producer/consumer modes
    */
   virtual void finalize() override;
@@ -116,9 +125,6 @@ public:
 protected:
   /// The state on which this context object operates
   ReporterState<T> & _state;
-
-  /// Defines how the Reporter value can be produced and how it is being produced
-  ReporterProducerEnum _producer_enum;
 
   // The following are called by the ReporterData and are not indented for external use
   virtual void copyValuesBack() override;
@@ -140,14 +146,6 @@ ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
   : ReporterContext(other, state)
 {
   _state.value() = default_value;
-}
-
-template <typename T>
-void
-ReporterContext<T>::init(const ReporterMode & mode)
-{
-  if (mode != REPORTER_MODE_UNSET)
-    _producer_enum.assign(mode);
 }
 
 template <typename T>

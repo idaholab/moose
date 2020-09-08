@@ -50,20 +50,30 @@ JSONOutput::filename()
 void
 JSONOutput::output(const ExecFlagType & /*type*/)
 {
-  // Create the current output node
-  auto & current_node = _json["time_steps"].emplace_back();
+  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  {
+    // Create the current output node
+    auto & current_node = _json["time_steps"].emplace_back();
 
-  // Add time/iteration information
-  current_node["time"] = _problem_ptr->time();
-  current_node["time_step"] = _problem_ptr->timeStep();
-  if (_execute_enum.contains(EXEC_LINEAR) && !_on_nonlinear_residual)
-    current_node["linear_iteration"] = _linear_iter;
-  if (_execute_enum.contains(EXEC_NONLINEAR))
-    current_node["nonlinear_iteration"] = _nonlinear_iter;
+    // Add time/iteration information
+    current_node["time"] = _problem_ptr->time();
+    current_node["time_step"] = _problem_ptr->timeStep();
+    if (_execute_enum.contains(EXEC_LINEAR) && !_on_nonlinear_residual)
+      current_node["linear_iteration"] = _linear_iter;
+    if (_execute_enum.contains(EXEC_NONLINEAR))
+      current_node["nonlinear_iteration"] = _nonlinear_iter;
 
-  // Add Reporter values to the current node
-  _reporter_data.store(current_node["reporters"]);
+    // Inject processor info
+    if (n_processors() > 1)
+    {
+      _json["part"] = processor_id();
+      _json["number_of_parts"] = n_processors();
+    }
 
-  std::ofstream out(filename().c_str());
-  out << std::setw(4) << _json << std::endl;
+    // Add Reporter values to the current node
+    _reporter_data.store(current_node["reporters"]);
+
+    std::ofstream out(filename().c_str());
+    out << std::setw(4) << _json << std::endl;
+  }
 }

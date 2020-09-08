@@ -179,6 +179,13 @@ public:
    */
   void check() const;
 
+  /**
+   * Return true if the supplied mode exists in the produced Repoter values
+   *
+   * @see JSONOutput.C/h
+   */
+  bool hasReporterWithMode(const ReporterMode & mode) const;
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;
