@@ -17,16 +17,16 @@ FunctionDerivativeAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<FunctionName>("function", "The function to use as the value");
-  params.addRequiredParam<unsigned int>(
-      "component",
-      "What component to take the derivative with respect to. Should be either 1, 2, or 3.");
+  MooseEnum component_enum("x y z");
+  params.addRequiredParam<MooseEnum>(
+      "component", component_enum, "What component to take the derivative with respect to.");
   return params;
 }
 
 FunctionDerivativeAux::FunctionDerivativeAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _func(getFunction("function")),
-    _component(getParam<unsigned int>("component"))
+    _component(getParam<MooseEnum>("component"))
 {
 }
 
@@ -34,7 +34,7 @@ Real
 FunctionDerivativeAux::computeValue()
 {
   if (isNodal())
-    return _func.gradient(_t, *_current_node)(_component - 1);
+    return _func.gradient(_t, *_current_node)(_component);
   else
-    return _func.gradient(_t, _q_point[_qp])(_component - 1);
+    return _func.gradient(_t, _q_point[_qp])(_component);
 }

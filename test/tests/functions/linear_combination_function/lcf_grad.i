@@ -36,14 +36,14 @@
 
 [AuxKernels]
   [./the_linear_combo_x]
-    type = FunctionGradAux
-    dimension_index = x
+    type = FunctionDerivativeAux
+    component = x
     variable = the_linear_combo_x
     function = the_linear_combo
   [../]
   [./the_linear_combo_y]
-    type = FunctionGradAux
-    dimension_index = y
+    type = FunctionDerivativeAux
+    component = y
     variable = the_linear_combo_y
     function = the_linear_combo
   [../]
