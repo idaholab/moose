@@ -104,3 +104,22 @@ because there is less geometric ghosting than algebraic. In this scenario we
 would likely attempt to access degrees of freedom in the solution vector
 corresponding to elements that had been deleted (in a `DistributedMesh`
 context), and our simulation would fail.
+
+## Relationship Managers and Actions
+
+As explained above, `RelationshipManagers` are usually added to a simulation
+through the `validParams` of `MooseObjects`. However, during simulation setup,
+`MooseObjects` themselves do not add the relationship managers because if they
+did it would be too late to have any impact on the simulation...remote elements
+would already be deleted from the mesh because the mesh is prepared way before
+any `MooseObjects` are added (other than `MeshGenerators`). So it is the
+`MooseObjectAction` itself that detects whether a `MooseObject` (through its
+`validParams`) has signaled that it needs a relationship manager and adds
+it. However, if the `MooseObjectAction` is not adding the `MooseObject` , and
+the `MooseObject` is being added through a custom `action`, then that custom
+action has to be responsible for detecting and adding the associated
+relationship managers. The method that the custom `Action` should override to
+add relationsip managers is
+`addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)`. Both
+the `ContactAction` in the contact module, and `PorousFlowActionBase` in the
+porous flow module provide examples of overriding this method.
