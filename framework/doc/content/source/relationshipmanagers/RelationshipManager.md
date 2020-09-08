@@ -105,7 +105,7 @@ would likely attempt to access degrees of freedom in the solution vector
 corresponding to elements that had been deleted (in a `DistributedMesh`
 context), and our simulation would fail.
 
-## Relationship Managers and Actions
+## Relationship Managers and Actions id=rm_action
 
 As explained above, `RelationshipManagers` are usually added to a simulation
 through the `validParams` of `MooseObjects`. However, during simulation setup,
