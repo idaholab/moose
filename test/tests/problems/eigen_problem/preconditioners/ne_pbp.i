@@ -82,7 +82,6 @@
 [Executioner]
   type = Eigenvalue
   solve_type = JFNK
-  eigen_problem_type = GEN_NON_HERMITIAN
 []
 
 [VectorPostprocessors]

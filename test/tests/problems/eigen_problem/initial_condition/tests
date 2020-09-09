@@ -24,8 +24,12 @@
     type = 'Exodiff'
     input = 'ne_ic.i'
     exodiff = 'ne_ic_out_extra.e'
-    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra'
+    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra -eps_view'
     slepc_version = '>=3.8.0'
+    # Make sure we do not have an extra prefix
+    absent_out = '(eps_power_)'
+    # Make sure '-eps_view' actually work
+    expect_out = 'SNES Object:'
     requirement = "The system shall support extra power iterations."
   [../]
 
@@ -33,9 +37,13 @@
     type = 'CSVDiff'
     input = 'ne_ic.i'
     csvdiff = 'ne_ic_out_extra_eigenvalues_0001.csv'
-    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra'
+    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra -eps_view'
     slepc_version = '>=3.8.0'
     prereq = 'extra_power_iterations'
+    # Make sure we do not have an extra prefix
+    absent_out = '(eps_power_)'
+    # Make sure '-eps_view' actually work
+    expect_out = 'SNES Object:'
     requirement = "The system shall support extra power iterations and check eigenvaue."
   [../]
 []

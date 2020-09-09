@@ -57,7 +57,7 @@ PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 PetscErrorCode mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionAB(SNES snes, Vec x, Vec Ax, Vec Bx, void * ctx);
 PetscErrorCode mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,PetscInt nev,EPSConvergedReason *reason,void *ctx);
-PetscErrorCode epsGetSNES(EPS eps, SNES * snes);
+PetscErrorCode mooseSlepcEPSGetSNES(EPS eps, SNES * snes);
 PetscErrorCode mooseSlepcEPSMonitor(EPS eps,
                                     int its,
                                     int nconv,
@@ -66,6 +66,9 @@ PetscErrorCode mooseSlepcEPSMonitor(EPS eps,
                                     PetscReal * errest,
                                     int nest,
                                     void * mctx);
+
+PetscErrorCode mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps);
+PetscErrorCode mooseSlepcEPSSNESSetCustomizePC(EPS eps);
 
 void attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
 

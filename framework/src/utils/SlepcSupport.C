@@ -128,29 +128,28 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameter
   if (eigen_problem.isNonlinearEigenvalueSolver())
   {
     // nonlinear solver tolerances
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_it",
+    Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
                                               stringify(params.get<unsigned int>("nl_max_its")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_funcs",
+    Moose::PetscSupport::setSinglePetscOption("-snes_max_funcs",
                                               stringify(params.get<unsigned int>("nl_max_funcs")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_atol",
+    Moose::PetscSupport::setSinglePetscOption("-snes_atol",
                                               stringify(params.get<Real>("nl_abs_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_rtol",
+    Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
                                               stringify(params.get<Real>("nl_rel_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_stol",
+    Moose::PetscSupport::setSinglePetscOption("-snes_stol",
                                               stringify(params.get<Real>("nl_rel_step_tol")));
 
     // linear solver
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_max_it",
+    Moose::PetscSupport::setSinglePetscOption("-ksp_max_it",
                                               stringify(params.get<unsigned int>("l_max_its")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_rtol",
-                                              stringify(params.get<Real>("l_tol")));
+    Moose::PetscSupport::setSinglePetscOption("-ksp_rtol", stringify(params.get<Real>("l_tol")));
 
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_atol",
+    Moose::PetscSupport::setSinglePetscOption("-ksp_atol",
                                               stringify(params.get<Real>("l_abs_tol")));
   }
   else
@@ -332,7 +331,7 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
 void setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it",stringify(free_power_iterations));
 }
 
@@ -340,7 +339,8 @@ void clearFreeNonlinearPowerIterations(const InputParameters & params)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it","1");
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_it", stringify(params.get<unsigned int>("nl_max_its")));
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
+                                            stringify(params.get<unsigned int>("nl_max_its")));
 }
 
 void
@@ -363,17 +363,14 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
   Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
   if (solver_params._eigen_matrix_free)
   {
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
     if (initial_power)
       Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
-  }
-
-  if (solver_params._customized_pc_for_eigen)
+  } else
   {
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
-
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
     if (initial_power)
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "0");
   }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
   Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
@@ -393,10 +390,9 @@ setNonlinearPowerOptions(SolverParams & solver_params)
   Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
   if (solver_params._eigen_matrix_free)
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
-
-  if (solver_params._customized_pc_for_eigen)
-    Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
+  else
+    Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
 
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
   Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
@@ -983,7 +979,7 @@ mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,Petsc
 }
 
 PetscErrorCode
-epsGetSNES(EPS eps, SNES * snes)
+mooseSlepcEPSGetSNES(EPS eps, SNES * snes)
 {
   PetscErrorCode ierr;
   PetscBool same, nonlinear;
@@ -1003,6 +999,50 @@ epsGetSNES(EPS eps, SNES * snes)
   ierr = EPSPowerGetSNES(eps, snes);
   LIBMESH_CHKERR(ierr);
 
+  return 0;
+}
+
+PetscErrorCode
+mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps)
+{
+  PetscErrorCode ierr;
+  SNES snes;
+  const char * prefix = nullptr;
+
+  ierr = mooseSlepcEPSGetSNES(eps, &snes);
+  LIBMESH_CHKERR(ierr);
+  // There is an extra "eps_power" in snes that users do not like it.
+  // Let us remove that from snes.
+  // Retrieve option prefix from EPS
+  ierr = PetscObjectGetOptionsPrefix((PetscObject)eps, &prefix);
+  LIBMESH_CHKERR(ierr);
+  // Set option prefix to SNES
+  ierr = SNESSetOptionsPrefix(snes, prefix);
+  LIBMESH_CHKERR(ierr);
+
+  return 0;
+}
+
+PetscErrorCode
+mooseSlepcEPSSNESSetCustomizePC(EPS eps)
+{
+  PetscErrorCode ierr;
+  SNES snes;
+  KSP ksp;
+  PC pc;
+
+  // Get SNES from EPS
+  ierr = mooseSlepcEPSGetSNES(eps, &snes);
+  LIBMESH_CHKERR(ierr);
+  // Get KSP from SNES
+  ierr = SNESGetKSP(snes, &ksp);
+  LIBMESH_CHKERR(ierr);
+  // Get PC from KSP
+  ierr = KSPGetPC(ksp, &pc);
+  LIBMESH_CHKERR(ierr);
+  // Set PC type
+  ierr = PCSetType(pc, "moosepc");
+  LIBMESH_CHKERR(ierr);
   return 0;
 }
 

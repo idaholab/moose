@@ -80,13 +80,10 @@
   type = Eigenvalue
   matrix_free = true
   solve_type = NEWTON
-  eigen_problem_type = GEN_NON_HERMITIAN
-  petsc_options_iname = '-init_eps_power_pc_type
-                         -init_eps_power_pc_hmg_use_subspace_coarsening
-                         -eps_power_pc_type
-                         -eps_power_pc_hmg_use_subspace_coarsening'
-  petsc_options_value = 'hmg true hmg true'
-  petsc_options = '-init_eps_view -eps_view'
+  petsc_options_iname = '-pc_type
+                         -pc_hmg_use_subspace_coarsening'
+  petsc_options_value = 'hmg true'
+  petsc_options = '-eps_view'
 []
 
 [VectorPostprocessors]

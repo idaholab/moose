@@ -30,14 +30,30 @@ SlepcEigenSolverConfiguration::configure_solver()
 
   if (_eigen_problem.isNonlinearEigenvalueSolver())
   {
+    // Set custom monitors for SNES and KSP
     _eigen_problem.initPetscOutput();
+    // Let us remove extra "eps_power" from SNES since users do not like it
+    ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps());
+    LIBMESH_CHKERR(ierr);
+    // Let us hook up a customize PC if users ask. Users still can use petsc options to override
+    // this setting
+    if (_eigen_problem.solverParams()._customized_pc_for_eigen)
+    {
+      ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetCustomizePC(_slepc_solver.eps());
+      LIBMESH_CHKERR(ierr);
+    }
 
+    // A customized stopping test for nonlinear free power iterations.
+    // Nonlinear power iterations need to be marked as converged in EPS to
+    // retrieve solution from SLEPc EPS.
     ierr = EPSSetStoppingTestFunction(
         _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcStoppingTest, &_eigen_problem, NULL);
     LIBMESH_CHKERR(ierr);
 
+    // Remove all SLEPc monitors.
     ierr = EPSMonitorCancel(_slepc_solver.eps());
     LIBMESH_CHKERR(ierr);
+    // A customized EPS monitor in moose. We need to print only eigenvalue
     ierr = EPSMonitorSet(
         _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcEPSMonitor, &_eigen_problem, NULL);
     LIBMESH_CHKERR(ierr);
