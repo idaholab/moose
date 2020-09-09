@@ -366,11 +366,14 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
     Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
     if (initial_power)
       Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+<<<<<<< HEAD
   } else
   {
     Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
     if (initial_power)
       Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "0");
+=======
+>>>>>>> Eigen solver: Remove extra option "-eps_power" from SNES
   }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
   Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
