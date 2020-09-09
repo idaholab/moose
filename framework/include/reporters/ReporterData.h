@@ -219,9 +219,13 @@ private:
   /// include a reference to the associated ReporterState values. This container stores the
   /// context object for each Reporter value.
   ///
-  /// The declareReporterValue method relies on the emplace method, so this muse remain a std::set
-  /// to operate correctly with the initialization process.
-  std::vector<std::unique_ptr<ReporterContextBase>> _context_ptrs;
+  /// This container must be consistently sorted across processors to achieve a consistent iteration
+  /// order for parallel operations as well as for output. Objects are inserted based
+  /// on the combined ReporterName. A std::list was selected to achieve fast insert times
+  /// without re-allocating. A std::vector can also be used, but this was more fun. Do not use a
+  /// std::set, like I did initially, since the order is actually differs in each rank because it
+  /// is sorted by the pointer which causes all sorts of problems.
+  std::list<std::unique_ptr<ReporterContextBase>> _context_ptrs;
 
   /// Names of objects that have been declared
   std::set<ReporterName> _declare_names;
@@ -268,8 +272,13 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   // Create the ReporterContext
   auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
-  _context_ptrs.emplace_back(std::move(context_ptr));
 
+  // Locate the insert position (see comment for _context_ptrs in ReporterData.h))
+  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
+    return reporter_name < ptr->name();
+  };
+  const auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
+  _context_ptrs.emplace(ptr, std::move(context_ptr));
   return state_ref.value();
 }
 

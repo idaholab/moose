@@ -40,17 +40,9 @@ ReporterData::finalize(const std::string & object_name)
 void
 ReporterData::store(nlohmann::json & json) const
 {
-  // Create a map to the raw pointers as an easy way to sort the objects, it is important to
-  // sort the output so that resulting JSON structure is consistent. Without this the  data
-  // is arbitary because it is sorted in the set by the pointer value
-  std::map<std::string, ReporterContextBase *> _sorted_context_ptrs;
-  for (const auto & uptr : _context_ptrs)
-    _sorted_context_ptrs[uptr->name().getCombinedName()] = uptr.get();
-
   // Write information to JSON object
-  for (const auto & map_pair : _sorted_context_ptrs)
+  for (const auto & context_ptr : _context_ptrs)
   {
-    auto & context_ptr = map_pair.second;
     auto & node = json.emplace_back();
     node["object_name"] = context_ptr->name().getObjectName();
     node["value_name"] = context_ptr->name().getValueName();
