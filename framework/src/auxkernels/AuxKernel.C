@@ -22,6 +22,7 @@
 
 defineLegacyParams(AuxKernel);
 defineLegacyParams(VectorAuxKernel);
+defineLegacyParams(ArrayAuxKernel);
 
 template <typename ComputeValueType>
 InputParameters
@@ -61,6 +62,8 @@ AuxKernelTempl<ComputeValueType>::validParams()
 
   if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(VectorAuxKernel).name())
     params.registerBase("VectorAuxKernel");
+  if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(ArrayAuxKernel).name())
+    params.registerBase("ArrayAuxKernel");
   return params;
 }
 
@@ -75,8 +78,11 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
             .isNodal(),
         "variable",
         Moose::VarKindType::VAR_AUXILIARY,
-        std::is_same<Real, ComputeValueType>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
-                                                    : Moose::VarFieldType::VAR_FIELD_VECTOR),
+        std::is_same<Real, ComputeValueType>::value
+            ? Moose::VarFieldType::VAR_FIELD_STANDARD
+            : (std::is_same<RealVectorValue, ComputeValueType>::value
+                   ? Moose::VarFieldType::VAR_FIELD_VECTOR
+                   : Moose::VarFieldType::VAR_FIELD_ARRAY)),
     BlockRestrictable(this),
     BoundaryRestrictable(this, mooseVariableBase()->isNodal()),
     SetupInterface(this),
@@ -358,6 +364,75 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
 }
 
+template <>
+void
+AuxKernelTempl<RealEigenVector>::compute()
+{
+  precalculateValue();
+
+  if (isNodal()) /* nodal variables */
+  {
+    if (_var.isNodalDefined())
+    {
+      _qp = 0;
+      RealEigenVector value = computeValue();
+      // update variable data, which is referenced by other kernels, so the value is up-to-date
+      _var.setNodalValue(value);
+    }
+  }
+  else /* elemental variables */
+  {
+    _n_local_dofs = _var.numberOfDofs();
+    if (_n_local_dofs == 1) /* p0 */
+    {
+      RealEigenVector value = RealEigenVector::Zero(_var.count());
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        value += _JxW[_qp] * _coord[_qp] * computeValue();
+      value /= (_bnd ? _current_side_volume : _current_elem_volume);
+      // update the variable data referenced by other kernels.
+      // Note that this will update the values at the quadrature points too
+      // (because this is an Elemental variable)
+      _var.setNodalValue(value);
+    }
+    else /* high-order */
+    {
+      _local_re.resize(_n_local_dofs);
+      for (unsigned int i = 0; i < _local_re.size(); ++i)
+        _local_re(i) = RealEigenVector::Zero(_var.count());
+      _local_ke.resize(_n_local_dofs, _n_local_dofs);
+      _local_ke.zero();
+
+      // assemble the local mass matrix and the load
+      for (unsigned int i = 0; i < _test.size(); i++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        {
+          Real t = _JxW[_qp] * _coord[_qp] * _test[i][_qp];
+          _local_re(i) += t * computeValue();
+          for (unsigned int j = 0; j < _test.size(); j++)
+            _local_ke(i, j) += t * _test[j][_qp];
+        }
+
+      // mass matrix is always SPD
+      _local_sol.resize(_n_local_dofs);
+      for (unsigned int i = 0; i < _local_re.size(); ++i)
+        _local_sol(i) = RealEigenVector::Zero(_var.count());
+      DenseVector<Number> re(_n_local_dofs);
+      DenseVector<Number> sol(_n_local_dofs);
+      for (unsigned int i = 0; i < _var.count(); ++i)
+      {
+        for (unsigned int j = 0; j < _n_local_dofs; ++j)
+          re(j) = _local_re(j)(i);
+        _local_ke.cholesky_solve(re, sol);
+        for (unsigned int j = 0; j < _n_local_dofs; ++j)
+          _local_sol(j)(i) = sol(j);
+      }
+
+      _var.setDofValues(_local_sol);
+    }
+  }
+}
+
 // Explicitly instantiates the two versions of the AuxKernelTempl class
 template class AuxKernelTempl<Real>;
 template class AuxKernelTempl<RealVectorValue>;
+template class AuxKernelTempl<RealEigenVector>;

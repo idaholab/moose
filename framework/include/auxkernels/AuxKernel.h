@@ -36,6 +36,7 @@ class AuxKernelTempl;
 
 typedef AuxKernelTempl<Real> AuxKernel;
 typedef AuxKernelTempl<RealVectorValue> VectorAuxKernel;
+typedef AuxKernelTempl<RealEigenVector> ArrayAuxKernel;
 
 class SubProblem;
 class AuxiliarySystem;
@@ -47,6 +48,9 @@ InputParameters validParams<AuxKernel>();
 
 template <>
 InputParameters validParams<VectorAuxKernel>();
+
+template <>
+InputParameters validParams<ArrayAuxKernel>();
 
 /**
  * Base class for creating new auxiliary kernels and auxiliary boundary conditions.
@@ -240,10 +244,12 @@ protected:
   /// number of local dofs for elemental variables
   unsigned int _n_local_dofs;
 
+  typedef typename Moose::DOFType<ComputeValueType>::type OutputData;
+
   /// for holding local load
-  DenseVector<Number> _local_re;
+  DenseVector<OutputData> _local_re;
   /// for holding local solution
-  DenseVector<Number> _local_sol;
+  DenseVector<OutputData> _local_sol;
   /// for holding local mass matrix
   DenseMatrix<Number> _local_ke;
 

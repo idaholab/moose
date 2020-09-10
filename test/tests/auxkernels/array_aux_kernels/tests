@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'function_array_aux.i'
+    exodiff = 'function_array_aux_out.e'
+    abs_zero = 1e-9
+    issues = '#15811'
+    design = 'auxkernels/FunctionArrayAux.md'
+    requirement = "MOOSE shall include the ability to set the value of an array variable using a function."
+  [../]
+[]

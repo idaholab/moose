@@ -49,18 +49,24 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _elemental_aux_storage(_app.getExecuteOnEnum()),
     _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
     _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
+    _nodal_array_aux_storage(_app.getExecuteOnEnum()),
+    _elemental_array_aux_storage(_app.getExecuteOnEnum()),
     _compute_scalar_vars_timer(registerTimedSection("computeScalarVars", 1)),
     _compute_nodal_vars_timer(registerTimedSection("computeNodalVars", 1)),
     _compute_nodal_vec_vars_timer(registerTimedSection("computeNodalVecVars", 1)),
+    _compute_nodal_array_vars_timer(registerTimedSection("computeNodalArrayVars", 1)),
     _compute_elemental_vars_timer(registerTimedSection("computeElementalVars", 1)),
-    _compute_elemental_vec_vars_timer(registerTimedSection("computeElementalVecVars", 1))
+    _compute_elemental_vec_vars_timer(registerTimedSection("computeElementalVecVars", 1)),
+    _compute_elemental_array_vars_timer(registerTimedSection("computeElementalArrayVars", 1))
 {
   _nodal_vars.resize(libMesh::n_threads());
   _nodal_std_vars.resize(libMesh::n_threads());
   _nodal_vec_vars.resize(libMesh::n_threads());
+  _nodal_array_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
   _elem_std_vars.resize(libMesh::n_threads());
   _elem_vec_vars.resize(libMesh::n_threads());
+  _elem_array_vars.resize(libMesh::n_threads());
 
   if (!_fe_problem.defaultGhosting())
   {
@@ -110,11 +116,17 @@ AuxiliarySystem::initialSetup()
     _nodal_vec_aux_storage.sort(tid);
     _nodal_vec_aux_storage.initialSetup(tid);
 
+    _nodal_array_aux_storage.sort(tid);
+    _nodal_array_aux_storage.initialSetup(tid);
+
     _elemental_aux_storage.sort(tid);
     _elemental_aux_storage.initialSetup(tid);
 
     _elemental_vec_aux_storage.sort(tid);
     _elemental_vec_aux_storage.initialSetup(tid);
+
+    _elemental_array_aux_storage.sort(tid);
+    _elemental_array_aux_storage.initialSetup(tid);
   }
 }
 
@@ -126,8 +138,10 @@ AuxiliarySystem::timestepSetup()
     _aux_scalar_storage.timestepSetup(tid);
     _nodal_aux_storage.timestepSetup(tid);
     _nodal_vec_aux_storage.timestepSetup(tid);
+    _nodal_array_aux_storage.timestepSetup(tid);
     _elemental_aux_storage.timestepSetup(tid);
     _elemental_vec_aux_storage.timestepSetup(tid);
+    _elemental_array_aux_storage.timestepSetup(tid);
   }
 }
 
@@ -139,8 +153,10 @@ AuxiliarySystem::subdomainSetup()
     _aux_scalar_storage.subdomainSetup(tid);
     _nodal_aux_storage.subdomainSetup(tid);
     _nodal_vec_aux_storage.subdomainSetup(tid);
+    _nodal_array_aux_storage.subdomainSetup(tid);
     _elemental_aux_storage.subdomainSetup(tid);
     _elemental_vec_aux_storage.subdomainSetup(tid);
+    _elemental_array_aux_storage.subdomainSetup(tid);
   }
 }
 
@@ -152,8 +168,10 @@ AuxiliarySystem::jacobianSetup()
     _aux_scalar_storage.jacobianSetup(tid);
     _nodal_aux_storage.jacobianSetup(tid);
     _nodal_vec_aux_storage.jacobianSetup(tid);
+    _nodal_array_aux_storage.jacobianSetup(tid);
     _elemental_aux_storage.jacobianSetup(tid);
     _elemental_vec_aux_storage.jacobianSetup(tid);
+    _elemental_array_aux_storage.jacobianSetup(tid);
   }
 }
 
@@ -165,8 +183,10 @@ AuxiliarySystem::residualSetup()
     _aux_scalar_storage.residualSetup(tid);
     _nodal_aux_storage.residualSetup(tid);
     _nodal_vec_aux_storage.residualSetup(tid);
+    _nodal_array_aux_storage.residualSetup(tid);
     _elemental_aux_storage.residualSetup(tid);
     _elemental_vec_aux_storage.residualSetup(tid);
+    _elemental_array_aux_storage.residualSetup(tid);
   }
 }
 
@@ -176,8 +196,10 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   _aux_scalar_storage.updateActive(tid);
   _nodal_aux_storage.updateActive(tid);
   _nodal_vec_aux_storage.updateActive(tid);
+  _nodal_array_aux_storage.updateActive(tid);
   _elemental_aux_storage.updateActive(tid);
   _elemental_vec_aux_storage.updateActive(tid);
+  _elemental_array_aux_storage.updateActive(tid);
 }
 
 void
@@ -241,12 +263,12 @@ AuxiliarySystem::addVariable(const std::string & var_type,
         if (avar->feType().family == LAGRANGE)
         {
           _nodal_vars[tid].push_back(avar);
-          _nodal_std_vars[tid].push_back(avar);
+          _nodal_array_vars[tid].push_back(avar);
         }
         else
         {
           _elem_vars[tid].push_back(avar);
-          _elem_std_vars[tid].push_back(avar);
+          _elem_array_vars[tid].push_back(avar);
         }
       }
     }
@@ -290,6 +312,16 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
         _nodal_vec_aux_storage.addObject(kernel, tid);
       else
         _elemental_vec_aux_storage.addObject(kernel, tid);
+    }
+
+    else if (parameters.get<std::string>("_moose_base") == "ArrayAuxKernel")
+    {
+      std::shared_ptr<ArrayAuxKernel> kernel =
+          _factory.create<ArrayAuxKernel>(kernel_name, name, parameters, tid);
+      if (kernel->isNodal())
+        _nodal_array_aux_storage.addObject(kernel, tid);
+      else
+        _elemental_array_aux_storage.addObject(kernel, tid);
     }
   }
 }
@@ -388,8 +420,10 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_vars[0].fieldVariables().size() > 0)
   {
+    computeNodalArrayVars(type);
     computeNodalVecVars(type);
     computeNodalVars(type);
+    computeElementalArrayVars(type);
     computeElementalVecVars(type);
     computeElementalVars(type);
 
@@ -429,6 +463,17 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
+  // Elemental ArrayAuxKernels
+  {
+    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
+        _elemental_array_aux_storage[type].getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
   // Nodal AuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernel>> & auxs =
@@ -444,6 +489,17 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   {
     const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _nodal_vec_aux_storage[type].getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Nodal ArrayAuxKernels
+  {
+    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
+        _nodal_array_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
@@ -481,6 +537,17 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
+  // Elemental ArrayAuxKernels
+  {
+    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
+        _elemental_array_aux_storage.getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
   // Nodal AuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
@@ -495,6 +562,17 @@ AuxiliarySystem::getDependObjects()
   {
     const std::vector<std::shared_ptr<VectorAuxKernel>> & auxs =
         _nodal_vec_aux_storage.getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Nodal ArrayAuxKernels
+  {
+    const std::vector<std::shared_ptr<ArrayAuxKernel>> & auxs =
+        _nodal_array_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
@@ -589,6 +667,13 @@ AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
 }
 
 void
+AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
+{
+  const MooseObjectWarehouse<ArrayAuxKernel> & nodal = _nodal_array_aux_storage[type];
+  computeNodalVarsHelper<ArrayAuxKernel>(nodal, _nodal_array_vars, _compute_nodal_array_vars_timer);
+}
+
+void
 AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
@@ -601,6 +686,14 @@ AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
   const MooseObjectWarehouse<VectorAuxKernel> & elemental = _elemental_vec_aux_storage[type];
   computeElementalVarsHelper<VectorAuxKernel>(
       elemental, _elem_vec_vars, _compute_elemental_vec_vars_timer);
+}
+
+void
+AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
+{
+  const MooseObjectWarehouse<ArrayAuxKernel> & elemental = _elemental_array_aux_storage[type];
+  computeElementalVarsHelper<ArrayAuxKernel>(
+      elemental, _elem_array_vars, _compute_elemental_array_vars_timer);
 }
 
 void

@@ -85,3 +85,4 @@ ComputeNodalAuxBcsThread<AuxKernelType>::join(const ComputeNodalAuxBcsThread & /
 
 template class ComputeNodalAuxBcsThread<AuxKernel>;
 template class ComputeNodalAuxBcsThread<VectorAuxKernel>;
+template class ComputeNodalAuxBcsThread<ArrayAuxKernel>;

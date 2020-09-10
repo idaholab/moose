@@ -7,16 +7,17 @@ of equations. Examples for both of these use cases shall be discussed further in
 sections.
 
 Creating a custom AuxKernel object is done by creating a new C++ object that inherits from
-`AuxKernel` or `VectorAuxKernel` and overriding the `computeValue` method, which returns a
-scalar (`Real`) or vector (`RealVectorValue`) for the two types respectively. A third type
-(`AuxScalarKernel`) also exists, but the syntax for these objects is different and detailed
-in the [syntax/AuxScalarKernels/index.md].
+`AuxKernel`, `VectorAuxKernel` or `ArrayAuxKernel` and overriding the `computeValue` method,
+which returns a scalar (`Real`), vector (`RealVectorValue`) or a Eigen vector (`RealEigenVector`)
+for the two types respectively. A forth type (`AuxScalarKernel`) also exists, but the syntax for
+these objects is different and detailed in the [syntax/AuxScalarKernels/index.md].
 
 AuxKernel objects, like Kernel objects, must operate on a variable. Thus, there is a required
 parameter ("variable") that indicates the variable that the AuxKernel object is computing. These
-variables are defined in the [AuxVariables](syntax/AuxVariables/index.md) block of the input file,
-for example the following input file snippet creates an auxiliary variable suitable for use
-with an VectorAuxKernel.
+variables are defined in the [AuxVariables](syntax/AuxVariables/index.md) block of the input file.
+AuxKernel objects derived from `AuxKernel`, `VectorAuxKernel` or `ArrayAuxKernel` operate on
+standard scalar, vector or array field variables respectively. For example the following input
+file snippet creates an auxiliary variable suitable for use with an `VectorAuxKernel`.
 
 !listing vector_function_aux.i block=AuxVariables
 
@@ -40,7 +41,7 @@ constant so there is a single DOF per element, but higher monomials are also sup
 
 As is evident by the functionality detailed, the distinction between the two arises from the nature
 of the finite element shape functions. For Lagrange shape functions the DOF values correspond with
-the nodes, while for monomial shape functions the DOF values are not associated with nodes.
+the nodes, while for elemental shape functions the DOF values are not associated with nodes.
 
 The same AuxKernel object can be designed work both as elemental or nodal, for example the
 `computeValue` method for the [FunctionAux.md] object properly handles using the correct spatial
