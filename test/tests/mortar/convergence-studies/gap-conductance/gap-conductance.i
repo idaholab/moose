@@ -42,9 +42,15 @@
     input = right_block
     subdomain_id = 2
   [../]
+  [right_block_change_boundary_id]
+    type = RenameBoundaryGenerator
+    input = right_block_id
+    old_boundary_id = '0 1 2 3'
+    new_boundary_id = '100 101 102 103'
+  []
   [./combined]
     type = MeshCollectionGenerator
-    inputs = 'left_block_id right_block_id'
+    inputs = 'left_block_id right_block_change_boundary_id'
   [../]
   [./block_rename]
     type = RenameBlockGenerator
@@ -80,19 +86,19 @@
     block = right_block
     normal = '0 -1 0'
   []
-  [slave]
+  [secondary]
     input = right_bottom_sideset
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'lb_right'
     new_block_id = '10001'
-    new_block_name = 'slave_lower'
+    new_block_name = 'secondary_lower'
   []
-  [master]
-    input = slave
+  [primary]
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'rb_left'
     new_block_id = '10000'
-    new_block_name = 'master_lower'
+    new_block_name = 'primary_lower'
   []
 []
 
@@ -102,7 +108,7 @@
     order = SECOND
   [../]
   [./lambda]
-    block = 'slave_lower'
+    block = 'secondary_lower'
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -149,11 +155,11 @@
     type = ParsedFunction
     value = ''
   []
-  [mms_slave]
+  [mms_secondary]
     type = ParsedFunction
     value = ''
   []
-  [mms_master]
+  [mms_primary]
     type = ParsedFunction
     value = ''
   []
@@ -166,16 +172,16 @@
 [Constraints]
   [./mortar]
     type = GapHeatConductanceTest
-    master_boundary = rb_left
-    slave_boundary = lb_right
-    master_subdomain = master_lower
-    slave_subdomain = slave_lower
-    slave_variable = T
+    primary_boundary = rb_left
+    secondary_boundary = lb_right
+    primary_subdomain = primary_lower
+    secondary_subdomain = secondary_lower
+    secondary_variable = T
     variable = lambda
-    slave_gap_conductance = 1
-    master_gap_conductance = 1
-    slave_mms_function = mms_slave
-    master_mms_function = mms_master
+    secondary_gap_conductance = 1
+    primary_gap_conductance = 1
+    secondary_mms_function = mms_secondary
+    primary_mms_function = mms_primary
   [../]
 []
 
@@ -211,7 +217,7 @@
     variable = lambda
     function = exact_soln_lambda
     execute_on = 'timestep_end'
-    block = 'slave_lower'
+    block = 'secondary_lower'
   []
   [L2u]
     type = ElementL2Error
