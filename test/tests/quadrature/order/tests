@@ -42,4 +42,14 @@
     issues = '#3380'
     design = 'Quadrature/index.md'
   [../]
+  [./material-bumps-block-order]
+    type = CSVDiff
+    input = 'material_with_order.i'
+    csvdiff = 'material_with_order_out.csv'
+
+    requirement = 'The system shall support the ability to allow object code to increase'
+                  ' the quadrature order used for numerical integration on a per-block basis.'
+    issues = '#14055 #15072'
+    design = 'Quadrature/index.md'
+  [../]
 []

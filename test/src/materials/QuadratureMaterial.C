@@ -34,7 +34,7 @@ QuadratureMaterial::QuadratureMaterial(const InputParameters & parameters)
       blocks = _mesh.meshSubdomains();
 
     for (auto & blk : blockIDs())
-      _assembly.bumpVolumeQRuleOrder(EIGHTH, blk);
+      _fe_problem.bumpAllQRuleOrder(EIGHTH, blk);
   }
 }
 

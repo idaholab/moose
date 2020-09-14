@@ -58,9 +58,13 @@
     type = NumElemQPs
     block = 1
   []
-  [block2_qps]
+  [block5_qps]
     type = NumElemQPs
     block = 5
+  []
+  [block6_qps]
+    type = NumElemQPs
+    block = 6
   []
 []
 
