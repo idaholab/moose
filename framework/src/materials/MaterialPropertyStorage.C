@@ -356,6 +356,31 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 }
 
 void
+MaterialPropertyStorage::copy(MaterialData & material_data,
+                              const Elem & elem_to,
+                              const HashMap<unsigned int, MaterialProperties> & props_from,
+                              const HashMap<unsigned int, MaterialProperties> & props_from_old,
+                              const HashMap<unsigned int, MaterialProperties> & props_from_older,
+                              unsigned int side,
+                              unsigned int n_qpoints)
+{
+  initProps(material_data, elem_to, side, n_qpoints);
+  for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+  {
+    for (unsigned int qp = 0; qp < n_qpoints; ++qp)
+    {
+      props(&elem_to, side)[i]->qpCopy(qp, props_from.at(side)[i], qp);
+      propsOld(&elem_to, side)[i]->qpCopy(qp, props_from_old.at(side)[i], qp);
+      if (hasOlderProperties())
+      {
+        mooseAssert(!props_from_older.empty(), "trying to access empty older properties");
+        propsOlder(&elem_to, side)[i]->qpCopy(qp, props_from_older.at(side)[i], qp);
+      }
+    }
+  }
+}
+
+void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

@@ -25,8 +25,8 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
     GuaranteeConsumer(this),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
-    _rotation_total(declareProperty<RankTwoTensor>("rotation_total")),
-    _rotation_total_old(getMaterialPropertyOldByName<RankTwoTensor>("rotation_total")),
+    _rotation_total(declareProperty<RankTwoTensor>(_base_name + "rotation_total")),
+    _rotation_total_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "rotation_total")),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),

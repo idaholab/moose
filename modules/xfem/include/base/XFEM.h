@@ -320,6 +320,27 @@ private:
   std::map<unique_id_type, std::vector<Real>> _cached_aux_solution;
 
   /**
+   * Data structures to store material properties of the children elements prior to heal. These
+   * material properties are copied back to the children elements if the healed element is re-cut.
+   */
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties;
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties_old;
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties_older;
+  std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
+
+  /// healed geometric cuts
+  std::map<const Elem *, const GeometricCutUserObject *> _healed_cuts;
+
+  /**
    * Store the solution in stored_solution for a given node
    * @param node_to_store_to   Node for which the solution will be stored
    * @param node_to_store_from Node from which the solution to be stored is obtained
@@ -398,4 +419,46 @@ private:
    * @param sys  System for which the dof indices are found
    */
   std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
+
+  /**
+   * Get the GeometricCutUserObject associated with an element
+   * @param elem The element
+   * @return     A constant pointer to the GeometricCutUserObject, nullptr if nothing found
+   */
+  const GeometricCutUserObject * getGeometricCutForElem(const Elem * elem) const;
+
+  /**
+   * Helper function to store the material properties of a healed element
+   * @param parent_elem The parent element
+   * @param elem1       The first child element
+   * @param elem2       The second child element
+   */
+  void storeMaterialPropertiesForElements(const Elem * parent_elem,
+                                          const Elem * elem1,
+                                          const Elem * elem2);
+
+  /**
+   * Helper function to store the material properties of a healed element
+   * @param parent_elem The parent element
+   * @param cut_elem    The element being cut
+   * @param props       The material properties to be set
+   * @param props_old   The old material properties to be set
+   * @param props_older The older material properties to be set
+   */
+  void setMaterialPropertiesForElement(
+      const Elem * parent_elem,
+      const Elem * cut_elem,
+      const HashMap<unsigned int, MaterialProperties> & props,
+      const HashMap<unsigned int, MaterialProperties> & props_old,
+      const HashMap<unsigned int, MaterialProperties> & props_older) const;
+
+  /**
+   * Determine which side of the element belongs to relative to the cut
+   * @param parent_elem The parent element
+   * @param cut_elem    The element being cut
+   * @param gcuo        The GeometricCutUserObject for the cut
+   */
+  bool getElemConsistentSideBoolean(const Elem * parent_elem,
+                                    const Elem * cut_elem,
+                                    const GeometricCutUserObject * gcuo) const;
 };
