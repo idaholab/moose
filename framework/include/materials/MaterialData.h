@@ -79,6 +79,13 @@ public:
   /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
 
+  /// copy material properties into an element
+  void copy(const Elem & elem_to,
+            const HashMap<unsigned int, MaterialProperties> & props,
+            const HashMap<unsigned int, MaterialProperties> & props_old,
+            const HashMap<unsigned int, MaterialProperties> & props_older,
+            unsigned int side);
+
   /// material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
 

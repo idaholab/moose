@@ -18,6 +18,7 @@
 #include "libmesh/quadrature.h"
 
 #include "GeometricCutUserObject.h"
+#include "LevelSetCutUserObject.h"
 
 // Forward declarations
 class SystemBase;
@@ -320,6 +321,24 @@ private:
   std::map<unique_id_type, std::vector<Real>> _cached_aux_solution;
 
   /**
+   * Data structures to store material properties of the children elements prior to heal. These
+   * material properties are copied back to the children elements if the healed element is re-cut.
+   */
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties;
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties_old;
+  std::map<const Elem *,
+           std::pair<HashMap<unsigned int, MaterialProperties>,
+                     HashMap<unsigned int, MaterialProperties>>>
+      _healed_material_properties_older;
+  std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
+
+  /**
    * Store the solution in stored_solution for a given node
    * @param node_to_store_to   Node for which the solution will be stored
    * @param node_to_store_from Node from which the solution to be stored is obtained
@@ -398,4 +417,18 @@ private:
    * @param sys  System for which the dof indices are found
    */
   std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
+
+  const GeometricCutUserObject * getGeometricCutForElem(const Elem * elem) const;
+
+  void storeMaterialPropertiesForElements(const Elem *, const Elem *, const Elem *);
+  void setMaterialPropertiesForElement(
+      const Elem * parent_elem,
+      const Elem * cut_elem,
+      const HashMap<unsigned int, MaterialProperties> & props,
+      const HashMap<unsigned int, MaterialProperties> & props_old,
+      const HashMap<unsigned int, MaterialProperties> & props_older) const;
+
+  /// Check if this element is on the positive side of the levelset cut
+  bool
+  isElemOnLevelSetPositiveSide(const Elem *, const Elem *, const LevelSetCutUserObject *) const;
 };

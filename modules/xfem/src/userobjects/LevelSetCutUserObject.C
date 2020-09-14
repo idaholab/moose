@@ -164,3 +164,10 @@ LevelSetCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
 }
+
+Number
+LevelSetCutUserObject::getLevelSetVarNodalValue(const Node * node) const
+{
+  dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
+  return _solution(ls_dof_id);
+}

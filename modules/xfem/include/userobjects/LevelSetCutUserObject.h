@@ -38,6 +38,8 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  Number getLevelSetVarNodalValue(const Node * n) const;
+
 protected:
   /// The variable number of the level set variable we using to define the cuts
   const unsigned int _level_set_var_number;
