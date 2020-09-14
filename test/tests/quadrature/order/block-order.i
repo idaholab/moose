@@ -1,5 +1,4 @@
 [Mesh]
-  construct_side_list_from_node_list = true
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
