@@ -1966,6 +1966,17 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 }
 
 void
+MooseApp::attachRelationshipManagers(MeshBase & mesh)
+{
+  for (auto & rm : _relationship_managers)
+    if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && rm->attachGeometricEarly())
+    {
+      rm->set_mesh(&mesh);
+      mesh.add_ghosting_functor(*rm);
+    }
+}
+
+void
 MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 {
   for (auto & rm : _relationship_managers)
@@ -1982,7 +1993,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         auto & mesh = _action_warehouse.mesh();
 
         rm->init();
-
+        rm->set_mesh(&mesh->getMesh());
         mesh->getMesh().add_ghosting_functor(*rm);
 
         // The reference and displaced meshes should have the same geometric RMs.
@@ -2003,6 +2014,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 
         // Ensure that the relationship manager is initialized
         rm->init();
+        rm->set_mesh(&problem.mesh().getMesh());
 
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())

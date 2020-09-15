@@ -14,6 +14,9 @@
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_coupling_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "add_algebraic_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "add_coupling_rm");
 
 defineLegacyParams(AddRelationshipManager);
 
@@ -29,16 +32,20 @@ void
 AddRelationshipManager::act()
 {
   Moose::RelationshipManagerType rm_type;
-  if (_current_task == "attach_geometric_rm")
+  if (_current_task == "attach_geometric_rm" || _current_task == "add_geometric_rm")
     rm_type = Moose::RelationshipManagerType::GEOMETRIC;
-  else if (_current_task == "attach_algebraic_rm")
+  else if (_current_task == "attach_algebraic_rm" || _current_task == "add_algebraic_rm")
     rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
   else
     rm_type = Moose::RelationshipManagerType::COUPLING;
 
-  const auto & all_action_ptrs = _awh.allActionBlocks();
-  for (const auto & action_ptr : all_action_ptrs)
-    action_ptr->addRelationshipManagers(rm_type);
-
-  _app.attachRelationshipManagers(rm_type);
+  if (_current_task == "add_geometric_rm" || _current_task == "add_algebraic_rm" ||
+      _current_task == "add_coupling_rm")
+  {
+    const auto & all_action_ptrs = _awh.allActionBlocks();
+    for (const auto & action_ptr : all_action_ptrs)
+      action_ptr->addRelationshipManagers(rm_type);
+  }
+  else
+    _app.attachRelationshipManagers(rm_type);
 }

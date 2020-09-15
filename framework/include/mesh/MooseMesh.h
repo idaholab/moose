@@ -16,6 +16,7 @@
 #include "MooseEnum.h"
 #include "PerfGraphInterface.h"
 #include "MooseHashing.h"
+#include "MooseApp.h"
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -1650,6 +1651,8 @@ MooseMesh::buildTypedMesh(unsigned int dim)
 
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
+
+  _app.attachRelationshipManagers(*mesh);
 
   return mesh;
 }
