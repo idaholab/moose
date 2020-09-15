@@ -51,14 +51,15 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
 {
 }
 
-AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnInterface & others)
-  : RelationshipManager(others),
-    _amg(others._amg),
-    _has_attached_amg(others._has_attached_amg),
-    _primary_boundary_name(others._primary_boundary_name),
-    _secondary_boundary_name(others._secondary_boundary_name),
-    _primary_subdomain_name(others._primary_boundary_name),
-    _secondary_subdomain_name(others._secondary_boundary_name)
+AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnInterface & other)
+  : RelationshipManager(other),
+    _amg(other._amg),
+    _has_attached_amg(other._has_attached_amg),
+    _primary_boundary_name(other._primary_boundary_name),
+    _secondary_boundary_name(other._secondary_boundary_name),
+    _primary_subdomain_name(other._primary_subdomain_name),
+    _secondary_subdomain_name(other._secondary_subdomain_name),
+    _is_coupling_functor(other._is_coupling_functor)
 {
 }
 
@@ -90,22 +91,22 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
                                        processor_id_type p,
                                        map_type & coupled_elements)
 {
-
   // We ask the user to pass boundary names instead of ids to our constraint object.  We are
   // unable to get the boundary ids until we've read in the mesh, which is done after we add
-  // geometric relationship managers. Hence we can't do the below in our constructor. Now that
-  // we're doing ghosting we've definitely read in the mesh
-  auto primary_boundary_id = _mesh.getBoundaryID(_primary_boundary_name);
-  auto secondary_boundary_id = _mesh.getBoundaryID(_secondary_boundary_name);
-  auto primary_subdomain_id = _mesh.getSubdomainID(_primary_subdomain_name);
-  auto secondary_subdomain_id = _mesh.getSubdomainID(_secondary_subdomain_name);
+  // geometric relationship managers. Hence we can't do the below in our constructor.
+  bool generating_mesh = !_moose_mesh->getMeshPtr();
+  auto primary_boundary_id =
+      generating_mesh ? Moose::ANY_BOUNDARY_ID : _moose_mesh->getBoundaryID(_primary_boundary_name);
+  auto secondary_boundary_id = generating_mesh
+                                   ? Moose::ANY_BOUNDARY_ID
+                                   : _moose_mesh->getBoundaryID(_secondary_boundary_name);
+  auto primary_subdomain_id = generating_mesh
+                                  ? Moose::INVALID_BLOCK_ID
+                                  : _moose_mesh->getSubdomainID(_primary_subdomain_name);
+  auto secondary_subdomain_id = generating_mesh
+                                    ? Moose::INVALID_BLOCK_ID
+                                    : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
 
-  // Note that as indicated by our error in internalInit this ghosting functor will not work on a
-  // distributed mesh. This logic below will have to changed in order to support distributed
-  // mesh. The FEProblemBase and Executioner do not get created until after the mesh has been
-  // prepared and we have potentially deleted remote elements (although we do now have code that
-  // illustrates delaying deletion of remote elements until after the equation systems init,
-  // e.g. until after we've run ghosting functors on the DofMap
   if (!_has_attached_amg && _app.getExecutioner())
   {
     _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
@@ -113,6 +114,10 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
         std::make_pair(primary_subdomain_id, secondary_subdomain_id),
         _use_displaced_mesh);
     _has_attached_amg = true;
+
+    mooseAssert(
+        !generating_mesh,
+        "If we have an executioner, then we should definitely not still be generating the mesh.");
   }
 
   const CouplingMatrix * const null_mat = libmesh_nullptr;
@@ -124,7 +129,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // MatSetValues, especially if the mesh displacements are relatively small
   if ((!_amg || _use_displaced_mesh) && !_is_coupling_functor)
   {
-    for (const auto & elem : _moose_mesh->getMesh().active_element_ptr_range())
+    for (const auto & elem : _mesh->active_element_ptr_range())
     {
       if (_amg)
       {
@@ -148,7 +153,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
                                                                      : secondary_boundary_id;
 
           mooseAssert(
-              _mesh.getMesh().get_boundary_info().has_boundary_id(ip, side, bnd_id),
+              _mesh->get_boundary_info().has_boundary_id(ip, side, bnd_id),
               "The interior parent for the lower-dimensional element does not lie on the boundary");
 #endif
         }
@@ -157,20 +162,35 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
       {
         // If we do not have an AutomaticMortarGeneration object then we may not have added our
         // lower-dimensional elements yet. Consequently to be safe we need to query based on the
-        // boundary ids
+        // boundary ids. Moreover, we may not even have the right boundary ids available yet! So we
+        // actually ghost all boundary elements and all lower dimensional elements who have parents
+        // on a boundary if we're still generating the mesh
 
-        const BoundaryInfo & binfo = _mesh.getMesh().get_boundary_info();
-
-        for (auto side : elem->side_index_range())
-          if ((elem->processor_id() != p) &&
-              (binfo.has_boundary_id(elem, side, primary_boundary_id) ||
-               binfo.has_boundary_id(elem, side, secondary_boundary_id)))
+        if (generating_mesh)
+        {
+          if (elem->on_boundary())
             coupled_elements.insert(std::make_pair(elem, null_mat));
+          else if (const Elem * const ip = elem->interior_parent())
+          {
+            if (ip->on_boundary())
+              coupled_elements.insert(std::make_pair(elem, null_mat));
+          }
+        }
+        else
+        {
+          const BoundaryInfo & binfo = _mesh->get_boundary_info();
 
-        // We still to need to add the lower-dimensional elements if they exist
-        if ((elem->processor_id() != p) && (elem->subdomain_id() == primary_subdomain_id ||
-                                            elem->subdomain_id() == secondary_subdomain_id))
-          coupled_elements.insert(std::make_pair(elem, null_mat));
+          for (auto side : elem->side_index_range())
+            if ((elem->processor_id() != p) &&
+                (binfo.has_boundary_id(elem, side, primary_boundary_id) ||
+                 binfo.has_boundary_id(elem, side, secondary_boundary_id)))
+              coupled_elements.insert(std::make_pair(elem, null_mat));
+
+          // We still to need to add the lower-dimensional elements if they exist
+          if ((elem->processor_id() != p) && (elem->subdomain_id() == primary_subdomain_id ||
+                                              elem->subdomain_id() == secondary_subdomain_id))
+            coupled_elements.insert(std::make_pair(elem, null_mat));
+        }
       }
     }
   }
@@ -186,7 +206,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
       for (const auto & pr : as_range(bounds))
       {
         auto coupled_elem_id = pr.second;
-        const Elem * coupled_elem = _mesh.getMesh().elem_ptr(coupled_elem_id);
+        const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
         mooseAssert(coupled_elem,
                     "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
