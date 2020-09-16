@@ -63,6 +63,11 @@ public:
 
   virtual bool lastSolveConverged() const override { return _last_solve_converged; }
 
+  /**
+   *  There are two ways to output eigenvalue. "inverse" corresponds to k-eigenvalue
+   */
+  virtual void outputInverseEigenvalue (bool inverse);
+
 private:
   void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
   void clearFreeNonlinearPowerIterations();

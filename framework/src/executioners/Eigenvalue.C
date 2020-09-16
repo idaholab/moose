@@ -374,3 +374,9 @@ Eigenvalue::checkIntegrity()
   if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvaue simulation");
 }
+
+void
+Eigenvalue::outputInverseEigenvalue(bool inverse)
+{
+  _eigen_problem.outputInverseEigenvalue(inverse);
+}
