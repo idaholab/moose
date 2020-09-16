@@ -2039,17 +2039,20 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         rm->init();
         rm->set_mesh(&problem.mesh().getMesh());
 
+        std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
+        if (_action_warehouse.displacedMesh())
+        {
+          clone_rm = rm->clone();
+          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+        }
+
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
           // The reference and displaced meshes should have the same geometric RMs.
           // It is necessary for keeping both meshes consistent.
           if (_action_warehouse.displacedMesh())
-          {
-            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
-            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
             _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
-          }
 
           problem.mesh().getMesh().add_ghosting_functor(*rm);
         }
@@ -2072,7 +2075,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
+            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
+                                                                       /*to_mesh = */ false);
         }
         else // undisplaced
         {

@@ -678,6 +678,12 @@ public:
   void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
   /**
+   * Add an algebraic ghosting functor to this problem's DofMaps
+   */
+  void addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf,
+                                   bool to_mesh = true);
+
+  /**
    * Automatic scaling setter
    * @param automatic_scaling A boolean representing whether we are performing automatic scaling
    */
