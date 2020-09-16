@@ -29,6 +29,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./et]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./area]
     order = CONSTANT
     family = MONOMIAL
@@ -36,14 +40,6 @@
   [./react_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-[]
-
-[Functions]
-  [./hf]
-    type = PiecewiseLinear
-    x = '0    0.0001  0.0003  0.0023'
-    y = '50e6 52e6    54e6    56e6'
   [../]
 []
 
@@ -105,8 +101,8 @@
   petsc_options_value = 'lu'
   nl_abs_tol = 1e-11
   l_max_its = 20
-  dt = 1e-3
-  num_steps = 100
+  dt = 1e-1
+  num_steps = 3
 []
 
 [Kernels]
@@ -127,13 +123,19 @@
     type = ComputeIncrementalTrussStrain
     displacements = 'disp_x'
     area = area
+    eigenstrain_names = 'thermal'
   [../]
-  [./truss]
-    type = ComputePlasticTrussResultants
+
+  [./stress]
+    type = ComputeTrussResultants
     area = area
-    yield_stress = 1e4
-    hardening_constant = 0.
-    outputs = exodus
+  [../]
+  [./thermal]
+    type = ComputeThermalExpansionEigenstrainTruss
+    thermal_expansion_coeff = 1e-4
+    temperature = 100
+    stress_free_temperature = 0
+    eigenstrain_name = thermal
   [../]
 []
 

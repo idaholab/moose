@@ -36,17 +36,15 @@ public:
   virtual Real getValue() override;
 
 protected:
-  const unsigned int _var_0;
-  const unsigned int _var_1;
-  const unsigned int _var_2;
+  // std::vector<MooseVariable *> _disp_var;
+
+  std::vector<VariableName> _displacements;
+
   /// The vector of displacements number we are operating on
   std::vector<int> _disp_num;
-  /// Number of displacement variables
-  unsigned int _ndisp;
 
   /// A reference to the system containing the variable
   const System & _system;
-  // System sys1;
 
   /// The point to locate
   const std::vector<Point> & _first_point;

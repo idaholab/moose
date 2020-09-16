@@ -83,7 +83,6 @@
 [BCs]
   [./symmy]
     type = DirichletBC
-    # type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
@@ -105,7 +104,6 @@
     variable = disp_x
     boundary = right
     function = strain_history
-    # value    = -1.97e-4
   [../]
 []
 

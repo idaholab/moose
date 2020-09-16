@@ -30,7 +30,6 @@ ComputeIncrementalTrussStrain::validParams()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addCoupledVar("youngs_modulus", "Variable containing Young's modulus");
   params.addRequiredCoupledVar(
       "area",
       "Cross-section area of the truss. Can be supplied as either a number or a variable name.");
@@ -88,42 +87,19 @@ ComputeIncrementalTrussStrain::initQpStatefulProperties()
 void
 ComputeIncrementalTrussStrain::computeProperties()
 {
-  // fetch the two end nodes for current element
+  // calculate original length of a truss element (nodal positions do not change with time as undisplaced mesh is used by material classes by default)
+  // fetch the solution for the two end nodes for current element
   std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
     node.push_back(_current_elem->node_ptr(i));
-
-  // calculate original length of a truss element
-  // Nodal positions do not change with time as undisplaced mesh is used by material classes by
-  // default
   RealGradient dxyz;
   for (unsigned int i = 0; i < _ndisp; ++i)
     dxyz(i) = (*node[1])(i) - (*node[0])(i);
-
-  _original_length[_qp] = dxyz.norm();
-
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    computeQpStrain();
+    _original_length[_qp] = dxyz.norm();
 
-  if (_fe_problem.currentlyComputingJacobian())
-    computeStiffnessMatrix();
-}
-
-void
-ComputeIncrementalTrussStrain::computeQpStrain()
-{
-  std::vector<const Node *> node;
-  for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->node_ptr(i));
-  // calculate original length of a truss element
-  // Nodal positions do not change with time as undisplaced mesh is used by material classes by
-  // default
-  RealGradient dxyz;
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    dxyz(i) = (*node[1])(i) - (*node[0])(i);
-  _original_length[_qp] = dxyz.norm();
-
-  // fetch the solution for the two end nodes to calculate the current length of a truss element
+  // calculate the current length of a truss element
+  // fetch the solution for the two end nodes
   NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
   const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
   std::vector<Real> disp0, disp1;
@@ -134,13 +110,27 @@ ComputeIncrementalTrussStrain::computeQpStrain()
   }
   for (unsigned int i = 0; i < _ndisp; ++i)
     dxyz(i) += disp1[i] - disp0[i];
-  _current_length[_qp] = dxyz.norm();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    _current_length[_qp] = dxyz.norm();
 
+  // compute strain and the stiffneess matrix
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    computeQpStrain();
+    if (_fe_problem.currentlyComputingJacobian())
+      computeStiffnessMatrix();
+  }
+}
+
+void
+ComputeIncrementalTrussStrain::computeQpStrain()
+{
   _mech_disp_strain_increment[_qp](0) = _current_length[_qp] / _original_length[_qp] - 1.0;
   _mech_disp_strain_increment[_qp](1) = 0.;
   _mech_disp_strain_increment[_qp](2) = 0.;
 
   _total_disp_strain[_qp] = _mech_disp_strain_increment[_qp];
+
   for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
     _mech_disp_strain_increment[_qp] -= (*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp];
 }
@@ -148,6 +138,5 @@ ComputeIncrementalTrussStrain::computeQpStrain()
 void
 ComputeIncrementalTrussStrain::computeStiffnessMatrix()
 {
-  const Real A_avg = (_area[0] + _area[1]) / 2.0;
-  _e_over_l[_qp] = _material_stiffness[0] * A_avg / _original_length[0];
+  _e_over_l[_qp] = _material_stiffness[_qp] * _area[_qp] / _original_length[_qp];
 }

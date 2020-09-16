@@ -35,8 +35,6 @@ GeneralizedKelvinVoigtBase::updateQpViscousStrains()
 
   RankTwoTensor effective_stress = _first_elasticity_tensor_old[_qp] * _elastic_strain_old[_qp];
 
-  // out << " effective_stress "<< effective_stress << " _elastic_strain_old "<< _elastic_strain_old[_qp] << std::endl;
-
   if (_has_driving_eigenstrain)
     effective_stress += _first_elasticity_tensor_old[_qp] * (*_driving_eigenstrain_old)[_qp];
 

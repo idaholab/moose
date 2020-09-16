@@ -232,9 +232,6 @@
     last_point  = '30.0 0.0 0.0
                     0.0 0.0 0.0'
     displacements = 'disp_x disp_y disp_z'
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
   [./forces_x]
     type = PointValue

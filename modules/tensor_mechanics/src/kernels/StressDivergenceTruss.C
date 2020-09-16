@@ -67,7 +67,7 @@ StressDivergenceTruss::computeResidual()
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
 
-  VectorValue<Real> force_local = _force[_qp] * orientation;
+  VectorValue<Real> force_local = _force[0] * orientation;
 
   _local_re(0) = -force_local(_component);
   _local_re(1) = -_local_re(0);
@@ -87,7 +87,7 @@ StressDivergenceTruss::computeStiffness(unsigned int i, unsigned int j)
 {
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
-  return ((orientation(i) * orientation(j) * _e_over_l[_qp])==0)?1e-8:orientation(i) * orientation(j) * _e_over_l[_qp];
+  return orientation(i) * orientation(j) * _e_over_l[0];
 }
 
 void

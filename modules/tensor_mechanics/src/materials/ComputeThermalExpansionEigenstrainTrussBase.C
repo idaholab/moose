@@ -32,22 +32,8 @@ ComputeThermalExpansionEigenstrainTrussBase::ComputeThermalExpansionEigenstrainT
 void
 ComputeThermalExpansionEigenstrainTrussBase::computeQpEigenstrain()
 {
-  // fetch the two end nodes for current element
-  std::vector<const Node *> node;
-  for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->node_ptr(i));
-
-  // calculate initial axis of the truss element
-  for (unsigned int i = 0; i < 2; ++i)
-    _initial_axis(i) = (*node[1])(i) - (*node[0])(i);
-
-  _initial_axis /= _initial_axis.norm();
-
   Real thermal_strain = 0.0;
-
   computeThermalStrain(thermal_strain);
-
   _disp_eigenstrain[_qp].zero();
-  // _disp_eigenstrain[_qp] = _initial_axis * thermal_strain;
   _disp_eigenstrain[_qp](0) = thermal_strain;
 }
