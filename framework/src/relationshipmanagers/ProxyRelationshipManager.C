@@ -89,8 +89,10 @@ ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & /*
   {
     auto other_system_elem = other_coupled_it->first;
 
-    coupled_elements.emplace(unique_id_to_elem_map[other_system_elem->unique_id()],
-                             other_coupled_it->second);
+    auto unique_id_to_elem_map_it = unique_id_to_elem_map.find(other_system_elem->unique_id());
+    mooseAssert(unique_id_to_elem_map_it != unique_id_to_elem_map.end(), "no matching unique id");
+
+    coupled_elements.emplace(unique_id_to_elem_map_it->second, other_coupled_it->second);
   }
 }
 
