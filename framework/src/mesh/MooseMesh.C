@@ -252,6 +252,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(false),
+    _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
@@ -316,6 +317,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(other_mesh._need_delete),
+    _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
@@ -2304,6 +2306,7 @@ void
 MooseMesh::setMeshBase(std::unique_ptr<MeshBase> mesh_base)
 {
   _mesh = std::move(mesh_base);
+  _mesh->allow_remote_element_removal(_allow_remote_element_removal);
 }
 
 void
@@ -3202,4 +3205,12 @@ MooseMesh::partitioning()
   MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc",
                          "default");
   return partitioning;
+}
+
+void
+MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
+{
+  _allow_remote_element_removal = allow_remote_element_removal;
+  if (_mesh)
+    _mesh->allow_remote_element_removal(allow_remote_element_removal);
 }

@@ -1103,6 +1103,16 @@ public:
   bool needsRemoteElemDeletion() const { return _need_delete; }
 
   /**
+   * Set whether to allow remote element removal
+   */
+  void allowRemoteElementRemoval(bool allow_removal);
+
+  /**
+   * Whether we are allow remote element removal
+   */
+  bool allowRemoteElementRemoval() const { return _allow_remote_element_removal; }
+
+  /**
    * Whether mesh base object was constructed or not
    */
   bool hasMeshBase() const { return _mesh.get() != nullptr; }
@@ -1505,6 +1515,9 @@ private:
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;
 
+  /// Whether to allow removal of remote elements
+  bool _allow_remote_element_removal;
+
   /// Set of elements ghosted by ghostGhostedBoundaries
   std::set<Elem *> _ghost_elems_from_ghost_boundaries;
 
@@ -1653,6 +1666,7 @@ MooseMesh::buildTypedMesh(unsigned int dim)
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
 
+  mesh->allow_remote_element_removal(allowRemoteElementRemoval());
   _app.attachRelationshipManagers(*mesh);
 
   return mesh;

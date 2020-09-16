@@ -119,12 +119,19 @@ CreateDisplacedProblemAction::act()
     }
 
     if (_current_task == "add_geometric_rm")
-      // We can't do anything at this time because the systems haven't been created
-      // but we do need to tell the mesh to hang onto extra elements just in case
-      _mesh->getMesh().allow_remote_element_removal(false);
+    {
+      if (_mesh->getMeshPtr())
+        mooseError(
+            "We should be adding geometric rms so early that we haven't set our MeshBase yet");
+
+      _mesh->allowRemoteElementRemoval(false);
+    }
 
     if (_current_task == "add_algebraic_rm")
     {
+      if (!_displaced_mesh)
+        mooseError("We should have created a displaced mesh by now");
+
       auto & undisplaced_nl = _problem->getNonlinearSystemBase();
       auto & undisplaced_aux = _problem->getAuxiliarySystem();
 
@@ -151,11 +158,16 @@ CreateDisplacedProblemAction::act()
       // removal during the initial MeshBase::prepare_for_use call. If we're using a distributed
       // mesh we need to make sure we now allow remote element removal and then delete the remote
       // elmeents after the EquationSystems init
+      if (_mesh->allowRemoteElementRemoval())
+        mooseError("We should not have been allowing remote element deletion prior to the addition "
+                   "of algebraic relationship managers");
+      _mesh->allowRemoteElementRemoval(true);
+      _displaced_mesh->allowRemoteElementRemoval(true);
+
       if (_mesh->isDistributedMesh())
       {
         _mesh->needsRemoteElemDeletion(true);
-        if (_displaced_mesh)
-          _displaced_mesh->needsRemoteElemDeletion(true);
+        _displaced_mesh->needsRemoteElemDeletion(true);
       }
     }
   }
