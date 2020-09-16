@@ -342,7 +342,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _popped_final_mesh_generator(false)
+    _popped_final_mesh_generator(false),
+    _geometric_rms_attached(false)
 {
 #ifdef HAVE_GPERFTOOLS
   if (std::getenv("MOOSE_PROFILE_BASE"))
@@ -1972,8 +1973,11 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh)
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && rm->attachGeometricEarly())
     {
       rm->set_mesh(&mesh);
+      rm->init();
       mesh.add_ghosting_functor(*rm);
     }
+
+  _geometric_rms_attached = true;
 }
 
 void
@@ -1992,18 +1996,37 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
         auto & mesh = _action_warehouse.mesh();
 
-        rm->init();
-        rm->set_mesh(&mesh->getMesh());
-        mesh->getMesh().add_ghosting_functor(*rm);
+        MeshBase & mesh_base = mesh->getMesh();
 
-        // The reference and displaced meshes should have the same geometric RMs.
-        // It is necessary for keeping both meshes consistent.
-        if (_action_warehouse.displacedMesh())
+        if (_geometric_rms_attached)
         {
-          // Use shared_ptr here so that mesh can share its ownership
-          std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
-          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
-          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+          // We already attached the geometric ghosting functors, so we should not attach them
+          // again. Instead we do a sanity check to make sure that we did indeed add them
+
+          const GhostingFunctor * const gf = rm.get();
+
+          auto it =
+              std::find(mesh_base.ghosting_functors_begin(), mesh_base.ghosting_functors_end(), gf);
+
+          if (it == mesh_base.ghosting_functors_end())
+            mooseError("We claim to have attached a geometric rm, but it's not attached to the "
+                       "MeshBase object");
+        }
+        else
+        {
+          rm->set_mesh(&mesh_base);
+          rm->init();
+          mesh->getMesh().add_ghosting_functor(*rm);
+
+          // The reference and displaced meshes should have the same geometric RMs.
+          // It is necessary for keeping both meshes consistent.
+          if (_action_warehouse.displacedMesh())
+          {
+            // Use shared_ptr here so that mesh can share its ownership
+            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
+            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+          }
         }
       }
 
