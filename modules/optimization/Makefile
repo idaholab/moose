@@ -31,7 +31,7 @@ CONTACT                     := no
 EXTERNAL_PETSC_SOLVER       := no
 FLUID_PROPERTIES            := no
 FUNCTIONAL_EXPANSION_TOOLS  := no
-HEAT_CONDUCTION             := no
+HEAT_CONDUCTION             := yes
 LEVEL_SET                   := no
 MISC                        := no
 NAVIER_STOKES               := no
@@ -40,7 +40,7 @@ POROUS_FLOW                 := no
 RDG                         := no
 RICHARDS                    := no
 SOLID_MECHANICS             := no
-STOCHASTIC_TOOLS            := no
+STOCHASTIC_TOOLS            := yes
 TENSOR_MECHANICS            := no
 XFEM                        := no
 
