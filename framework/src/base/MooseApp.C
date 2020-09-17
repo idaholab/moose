@@ -1972,8 +1972,7 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh)
   for (auto & rm : _relationship_managers)
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && rm->attachGeometricEarly())
     {
-      rm->set_mesh(&mesh);
-      rm->init();
+      rm->init(mesh);
       mesh.add_ghosting_functor(*rm);
     }
 
@@ -2014,8 +2013,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         }
         else
         {
-          rm->set_mesh(&mesh_base);
-          rm->init();
+          rm->init(mesh_base);
           mesh->getMesh().add_ghosting_functor(*rm);
 
           // The reference and displaced meshes should have the same geometric RMs.
@@ -2036,8 +2034,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         auto & problem = _executioner->feProblem();
 
         // Ensure that the relationship manager is initialized
-        rm->init();
-        rm->set_mesh(&problem.mesh().getMesh());
+        rm->init(problem.mesh().getMesh());
 
         std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
         if (_action_warehouse.displacedMesh())

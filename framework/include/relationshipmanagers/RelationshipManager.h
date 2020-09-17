@@ -48,6 +48,15 @@ public:
   }
 
   /**
+   * Called before this RM is attached.  Will only be called once. Also sets the mesh
+   */
+  void init(const MeshBase & mesh)
+  {
+    init();
+    set_mesh(&mesh);
+  }
+
+  /**
    * Whether or not this RM has been inited
    */
   bool inited() { return _inited; }
