@@ -2001,13 +2001,17 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         {
           // We already attached the geometric ghosting functors, so we should not attach them
           // again. Instead we do a sanity check to make sure that we did indeed add them
+          bool rm_found = false;
+          for (const GhostingFunctor * const gf :
+               as_range(mesh_base.ghosting_functors_begin(), mesh_base.ghosting_functors_end()))
+            if (const auto * const as_rm = dynamic_cast<const RelationshipManager * const>(gf))
+              if ((*as_rm) == *rm)
+              {
+                rm_found = true;
+                break;
+              }
 
-          const GhostingFunctor * const gf = rm.get();
-
-          auto it =
-              std::find(mesh_base.ghosting_functors_begin(), mesh_base.ghosting_functors_end(), gf);
-
-          if (it == mesh_base.ghosting_functors_end())
+          if (!rm_found)
             mooseError("We claim to have attached a geometric rm, but it's not attached to the "
                        "MeshBase object");
         }
