@@ -4860,6 +4860,15 @@ FEProblemBase::init()
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
+  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update all
+  // of our mesh information. We need to make sure that mesh information is up-to-date before
+  // EquationSystems::init because that will call through to updateGeomSearch (for sparsity
+  // augmentation) and if we haven't added back boundary node information before that latter call,
+  // then we're screwed. We'll get things like "Unable to find closest node!"
+  _mesh.meshChanged();
+  if (_displaced_problem)
+    _displaced_mesh->meshChanged();
+
   // do not assemble system matrix for JFNK solve
   if (solverParams()._type == Moose::ST_JFNK)
     _nl->turnOffJacobian();
