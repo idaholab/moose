@@ -74,8 +74,6 @@ PlasticTruss::computeQpStrain()
 void
 PlasticTruss::computeQpStress()
 {
-  out <<" PlasticTruss::computeQpStress()"<< " qp " << _qp<<std::endl;
-
   Real strain_increment = _total_stretch[_qp] - _total_stretch_old[_qp];
   Real trial_stress = _stress_old[_qp] + _youngs_modulus[_qp] * strain_increment;
 
@@ -121,9 +119,6 @@ PlasticTruss::computeQpStress()
   }
   _elastic_stretch[_qp] = _total_stretch[_qp] - _plastic_strain[_qp];
   _axial_stress[_qp] = _stress_old[_qp] + _youngs_modulus[_qp] * elastic_strain_increment;
-
-  out << " strain_increment "<< strain_increment <<" elastic_strain_increment " << elastic_strain_increment << " _stress_old "<< _stress_old[_qp] << " _axial_stress" << _axial_stress[_qp] <<  std::endl;
-
 }
 
 Real

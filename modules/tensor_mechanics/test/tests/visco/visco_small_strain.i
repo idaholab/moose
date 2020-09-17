@@ -91,37 +91,21 @@
     boundary = back
     value = 0
   [../]
-  # [./axial_load]
-  #   type = NeumannBC
-  #   variable = disp_x
-  #   boundary = right
-  #   value    = 10e6
-  # [../]
   [./axial_load]
-    type = DirichletBC
+    type = NeumannBC
     variable = disp_x
     boundary = right
-    value    = -1.97e-04
+    value    = 10e6
   [../]
 []
 
 [Materials]
   [./kelvin_voigt]
     type = GeneralizedKelvinVoigtModel
-    creep_modulus =   ' 1.515918662e3
-                        5.319148936e9
-                        6.150855892e1
-                        6.861628402e1
-                        4.484787600e1
-                        1.050831891e9'
-    creep_viscosity = ' 1.515918662e3
-                        5.319148936e10
-                        6.150855892e3
-                        6.861628402e4
-                        4.484787600e5
-                        1.050830000e14'
+    creep_modulus = '10e9 10e9'
+    creep_viscosity = '1 10'
     poisson_ratio = 0.2
-    young_modulus = 3.368284903e10
+    young_modulus = 10e9
   [../]
   [./stress]
     type = ComputeLinearViscoelasticStress
@@ -174,8 +158,7 @@
   nl_abs_tol = 1e-8
 
   dtmin = 0.01
-  # end_time = 100
-  end_time = 17000
+  end_time = 100
   [./TimeStepper]
     type = LogConstantDT
     first_dt = 0.1
@@ -185,16 +168,6 @@
 []
 
 [Outputs]
-  # file_base = visco_small_strain_out
-  # exodus = true
-  perf_graph     = true
-  csv = true
-  [./Console]
-    type = Console
-  [../]
-  [./Exo]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
-
+  file_base = visco_small_strain_out
+  exodus = true
 []

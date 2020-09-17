@@ -244,8 +244,6 @@
     outputs = exodus
     output_properties = 'forces moments'
   [../]
-
-
   [./elasticity_cons]
     type = ComputeElasticityBeam
     shear_coefficient = 1.0
