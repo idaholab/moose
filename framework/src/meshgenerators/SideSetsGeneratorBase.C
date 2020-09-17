@@ -19,6 +19,7 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/elem.h"
+#include "libmesh/unstructured_mesh.h"
 
 defineLegacyParams(SideSetsGeneratorBase);
 
@@ -64,6 +65,14 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
   _fe_face = FEBase::build(dim, fe_type);
   _qface = libmesh_make_unique<QGauss>(dim - 1, FIRST);
   _fe_face->attach_quadrature_rule(_qface.get());
+
+  // We need neighbor pointers to determine if an element's side is on the boundary
+  // Depending on the status of mesh, the neighbor maps may not be available so build them anyway
+  // Cast to an UnstructuredMesh because find_neighbors doesn't exist in MeshBase
+  UnstructuredMesh * unstructured_mesh = dynamic_cast<UnstructuredMesh *>(&mesh);
+  if (!unstructured_mesh)
+    mooseError("Not an UnstructuredMesh in ", type(), ": cannot call find_neighbors()");
+  unstructured_mesh->find_neighbors();
 }
 
 void
