@@ -83,7 +83,13 @@ public:
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;
 
+  ///@{
+  /**
+   * Degree of freedom value setters
+   */
   virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
+  virtual void setElementalValue(const OutputType & value) = 0;
+  ///@}
 
   /**
    * AD solution getter
@@ -129,4 +135,81 @@ public:
    * Return the AD dof values
    */
   virtual const MooseArray<ADReal> & adDofValues() const = 0;
+
+  ///@{
+  /**
+   * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase
+   */
+  virtual const MooseArray<OutputType> & nodalValueArray() const = 0;
+  virtual const MooseArray<OutputType> & nodalValueOldArray() const = 0;
+  virtual const MooseArray<OutputType> & nodalValueOlderArray() const = 0;
+  ///@}
+
+  /**
+   * @return the current elemental solution
+   */
+  virtual const FieldVariableValue & sln() const = 0;
+
+  /**
+   * @return the old elemental solution, e.g. that of the previous timestep
+   */
+  virtual const FieldVariableValue & slnOld() const = 0;
+
+  /**
+   * @return the current neighbor solution
+   */
+  virtual const FieldVariableValue & slnNeighbor() const = 0;
+
+  /**
+   * @return the old neighbor solution, e.g. that of the previous timestep
+   */
+  virtual const FieldVariableValue & slnOldNeighbor() const = 0;
+
+  /**
+   * @return the older elemental solution, e.g. that of two timesteps ago
+   */
+  virtual const FieldVariableValue & slnOlder() const = 0;
+
+  /// element gradients
+  virtual const FieldVariableGradient & gradSln() const = 0;
+  virtual const FieldVariableGradient & gradSlnOld() const = 0;
+
+  /// neighbor solution gradients
+  virtual const FieldVariableGradient & gradSlnNeighbor() const = 0;
+  virtual const FieldVariableGradient & gradSlnOldNeighbor() const = 0;
+
+  /**
+   * Return the variable's elemental shape functions
+   */
+  virtual const FieldVariablePhiValue & phi() const = 0;
+
+  /**
+   * Set local DOF values and evaluate the values on quadrature points
+   */
+  virtual void setDofValues(const DenseVector<OutputData> & values) = 0;
+
+  ///@{
+  /**
+   * dof values getters
+   */
+  virtual const DoFValue & dofValues() const = 0;
+  virtual const DoFValue & dofValuesOld() const = 0;
+  virtual const DoFValue & dofValuesOlder() const = 0;
+  virtual const DoFValue & dofValuesPreviousNL() const = 0;
+  virtual const DoFValue & dofValuesNeighbor() const = 0;
+  virtual const DoFValue & dofValuesOldNeighbor() const = 0;
+  virtual const DoFValue & dofValuesOlderNeighbor() const = 0;
+  virtual const DoFValue & dofValuesPreviousNLNeighbor() const = 0;
+  virtual const DoFValue & dofValuesDot() const = 0;
+  virtual const DoFValue & dofValuesDotNeighbor() const = 0;
+  virtual const DoFValue & dofValuesDotOld() const = 0;
+  virtual const DoFValue & dofValuesDotOldNeighbor() const = 0;
+  virtual const DoFValue & dofValuesDotDot() const = 0;
+  virtual const DoFValue & dofValuesDotDotNeighbor() const = 0;
+  virtual const DoFValue & dofValuesDotDotOld() const = 0;
+  virtual const DoFValue & dofValuesDotDotOldNeighbor() const = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDu() const = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDu() const = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const = 0;
 };

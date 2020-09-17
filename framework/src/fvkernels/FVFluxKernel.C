@@ -22,6 +22,9 @@ FVFluxKernel::validParams()
   InputParameters params = FVKernel::validParams();
   params += TwoMaterialPropertyInterface::validParams();
   params.registerSystemAttributeName("FVFluxKernel");
+  params.addParam<bool>("force_boundary_execution",
+                        false,
+                        "Whether to force execution of this object on the boundary.");
   return params;
 }
 
@@ -36,7 +39,8 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     _u_elem(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor()),
     _grad_u_elem(_var.adGradSln()),
-    _grad_u_neighbor(_var.adGradSlnNeighbor())
+    _grad_u_neighbor(_var.adGradSlnNeighbor()),
+    _force_boundary_execution(getParam<bool>("force_boundary_execution"))
 {
   addMooseVariableDependency(&_var);
 }
@@ -49,18 +53,17 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
 bool
 FVFluxKernel::skipForBoundary(const FaceInfo & fi)
 {
-  if (!fi.isBoundary())
+  if (!fi.isBoundary() || _force_boundary_execution)
     return false;
 
-  std::vector<FVDirichletBC *> dirichlet_bcs;
-  _app.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVDirichletBC")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var.number())
-      .queryInto(dirichlet_bcs);
-  return dirichlet_bcs.size() == 0;
+  // If we have flux bcs then we do skip
+  const auto & flux_pr = _var.getFluxBCs(fi);
+  if (flux_pr.first)
+    return true;
+
+  // If we don't have flux bcs *and* we do have dirichlet bcs then we don't skip. If we don't have
+  // either then we assume natural boundary condition and we should skip
+  return !_var.getDirichletBC(fi).first;
 }
 
 void
@@ -90,7 +93,8 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any residual contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::ELEM && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::ELEM &&
+       (_force_boundary_execution || _var.hasDirichletBC())) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the elem element
@@ -98,7 +102,8 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR &&
+       (_force_boundary_execution || _var.hasDirichletBC())) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the neighbor element
@@ -171,7 +176,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any jacobian contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::ELEM && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::ELEM &&
+       (_force_boundary_execution || _var.hasDirichletBC())) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
@@ -198,7 +204,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, element_functor);
   }
 
-  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR &&
+       (_force_boundary_execution || _var.hasDirichletBC())) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR) == (_var.dofIndices().size() == 0),
@@ -231,22 +238,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 }
 
 ADReal
-FVFluxKernel::gradUDotNormal()
+FVFluxKernel::gradUDotNormal() const
 {
-  // We compute "grad_u dot _normal" by assuming the mesh is orthogonal, and
-  // recognizing that it is equivalent to delta u between the two cell
-  // centroids but for one unit in the normal direction.  We know delta u for
-  // the length between cell centroids (u_neighbor - u_elem) and then we just
-  // divide that by the distance between the centroids to convert it to delta
-  // u for one unit in the normal direction.  Because the _normal vector is
-  // defined to be outward from the elem element, u_neighbor-u_elem gives delta u
-  // when moving in the positive normal direction.  So we divide by the
-  // (positive) distance between centroids because one unit in the normal
-  // direction is always positive movement.
-  ADReal dudn = (_u_neighbor[_qp] - _u_elem[_qp]) /
-                (_face_info->neighborCentroid() - _face_info->elemCentroid()).norm();
-  // TODO: need to apply cross-diffusion correction factor here.  This
-  // currently is only correct if the vector between the elem-neighbor cell
-  // centroids is parallel to the normal vector.
-  return dudn;
+  return FVFaceInterface::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
 }

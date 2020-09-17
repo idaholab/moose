@@ -72,6 +72,8 @@
 #include "TimedPrint.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
+#include "FVElementalKernel.h"
+#include "FVFluxKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -272,7 +274,31 @@ NonlinearSystemBase::initialSetup()
       _element_dampers.initialSetup(tid);
       _nodal_dampers.initialSetup(tid);
       _integrated_bcs.initialSetup(tid);
+
+      if (_fe_problem.haveFV())
+      {
+        std::vector<FVElementalKernel *> fv_elemental_kernels;
+        _fe_problem.theWarehouse()
+            .query()
+            .template condition<AttribSystem>("FVElementalKernel")
+            .template condition<AttribThread>(tid)
+            .queryInto(fv_elemental_kernels);
+
+        for (auto * fv_kernel : fv_elemental_kernels)
+          fv_kernel->initialSetup();
+
+        std::vector<FVFluxKernel *> fv_flux_kernels;
+        _fe_problem.theWarehouse()
+            .query()
+            .template condition<AttribSystem>("FVFluxKernel")
+            .template condition<AttribThread>(tid)
+            .queryInto(fv_flux_kernels);
+
+        for (auto * fv_kernel : fv_flux_kernels)
+          fv_kernel->initialSetup();
+      }
     }
+
     _scalar_kernels.initialSetup();
     _constraints.initialSetup();
     _general_dampers.initialSetup();
@@ -451,7 +477,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
   // NodalBCBase
   if (nbc)
   {
-    if (!nbc->variable().isNodal())
+    if (nbc->checkNodalVar() && !nbc->variable().isNodal())
       mooseError("Trying to use nodal boundary condition '",
                  nbc->name(),
                  "' on a non-nodal variable '",
@@ -1354,6 +1380,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _element_dampers.residualSetup(tid);
     _nodal_dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
+    _vars[tid].residualSetup();
   }
   _scalar_kernels.residualSetup();
   _constraints.residualSetup();
@@ -1376,7 +1403,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
     if (_fe_problem.haveFV())
     {
-      using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+      using FVRange = StoredRange<std::vector<FaceInfo *>::const_iterator, FaceInfo *>;
       ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
       FVRange faces(&_fe_problem.mesh().faceInfo());
       Threads::parallel_reduce(faces, fvr);
@@ -2304,6 +2331,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     _element_dampers.jacobianSetup(tid);
     _nodal_dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
+    _vars[tid].jacobianSetup();
   }
   _scalar_kernels.jacobianSetup();
   _constraints.jacobianSetup();
@@ -2367,7 +2395,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         {
           // the same loop works for both residual and jacobians because it keys
           // off of FEProblem's _currently_computing_jacobian parameter
-          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo *>;
           ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
           FVRange faces(&_fe_problem.mesh().faceInfo());
           Threads::parallel_reduce(faces, fvj);
@@ -2402,7 +2430,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
         if (_fe_problem.haveFV())
         {
-          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo *>;
           ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
           FVRange faces(&_fe_problem.mesh().faceInfo());
           Threads::parallel_reduce(faces, fvj);

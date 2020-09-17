@@ -51,4 +51,7 @@ protected:
   const ADVariableValue & _u;
   const unsigned int _qp = 0;
   const Elem * const & _current_elem;
+
+  /// The physical location of the element's quadrature Points, indexed by _qp
+  const MooseArray<Point> & _q_point;
 };

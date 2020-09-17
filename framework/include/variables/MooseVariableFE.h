@@ -194,7 +194,7 @@ public:
 
   unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
 
-  const FieldVariablePhiValue & phi() const { return _element_data->phi(); }
+  const FieldVariablePhiValue & phi() const override { return _element_data->phi(); }
   const FieldVariablePhiGradient & gradPhi() const { return _element_data->gradPhi(); }
   const MappedArrayVariablePhiGradient & arrayGradPhi() const
   {
@@ -268,14 +268,20 @@ public:
   }
 
   /// element solutions
-  const FieldVariableValue & sln() const { return _element_data->sln(Moose::Current); }
-  const FieldVariableValue & slnOld() const { return _element_data->sln(Moose::Old); }
-  const FieldVariableValue & slnOlder() const { return _element_data->sln(Moose::Older); }
+  const FieldVariableValue & sln() const override { return _element_data->sln(Moose::Current); }
+  const FieldVariableValue & slnOld() const override { return _element_data->sln(Moose::Old); }
+  const FieldVariableValue & slnOlder() const override { return _element_data->sln(Moose::Older); }
   const FieldVariableValue & slnPreviousNL() const { return _element_data->sln(Moose::PreviousNL); }
 
   /// element gradients
-  const FieldVariableGradient & gradSln() const { return _element_data->gradSln(Moose::Current); }
-  const FieldVariableGradient & gradSlnOld() const { return _element_data->gradSln(Moose::Old); }
+  const FieldVariableGradient & gradSln() const override
+  {
+    return _element_data->gradSln(Moose::Current);
+  }
+  const FieldVariableGradient & gradSlnOld() const override
+  {
+    return _element_data->gradSln(Moose::Old);
+  }
   const FieldVariableGradient & gradSlnOlder() const
   {
     return _element_data->gradSln(Moose::Older);
@@ -351,8 +357,14 @@ public:
   const VariableValue & duDotDotDu() const { return _element_data->duDotDotDu(); }
 
   /// neighbor solutions
-  const FieldVariableValue & slnNeighbor() const { return _neighbor_data->sln(Moose::Current); }
-  const FieldVariableValue & slnOldNeighbor() const { return _neighbor_data->sln(Moose::Old); }
+  const FieldVariableValue & slnNeighbor() const override
+  {
+    return _neighbor_data->sln(Moose::Current);
+  }
+  const FieldVariableValue & slnOldNeighbor() const override
+  {
+    return _neighbor_data->sln(Moose::Old);
+  }
   const FieldVariableValue & slnOlderNeighbor() const { return _neighbor_data->sln(Moose::Older); }
   const FieldVariableValue & slnPreviousNLNeighbor() const
   {
@@ -360,11 +372,11 @@ public:
   }
 
   /// neighbor solution gradients
-  const FieldVariableGradient & gradSlnNeighbor() const
+  const FieldVariableGradient & gradSlnNeighbor() const override
   {
     return _neighbor_data->gradSln(Moose::Current);
   }
-  const FieldVariableGradient & gradSlnOldNeighbor() const
+  const FieldVariableGradient & gradSlnOldNeighbor() const override
   {
     return _neighbor_data->gradSln(Moose::Old);
   }
@@ -439,11 +451,12 @@ public:
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
   virtual void setDofValue(const OutputData & value, unsigned int index) override;
+  virtual void setElementalValue(const OutputType & value) override;
 
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  void setDofValues(const DenseVector<OutputData> & values);
+  void setDofValues(const DenseVector<OutputData> & values) override;
 
   /**
    * Write a nodal value to the passed-in solution vector
@@ -501,28 +514,28 @@ public:
   void addSolutionNeighbor(const DenseVector<Number> & v);
 
   const DoFValue & dofValue() const;
-  const DoFValue & dofValues() const;
-  const DoFValue & dofValuesOld() const;
-  const DoFValue & dofValuesOlder() const;
-  const DoFValue & dofValuesPreviousNL() const;
-  const DoFValue & dofValuesNeighbor() const;
-  const DoFValue & dofValuesOldNeighbor() const;
-  const DoFValue & dofValuesOlderNeighbor() const;
-  const DoFValue & dofValuesPreviousNLNeighbor() const;
-  const DoFValue & dofValuesDot() const;
-  const DoFValue & dofValuesDotNeighbor() const;
+  const DoFValue & dofValues() const override;
+  const DoFValue & dofValuesOld() const override;
+  const DoFValue & dofValuesOlder() const override;
+  const DoFValue & dofValuesPreviousNL() const override;
+  const DoFValue & dofValuesNeighbor() const override;
+  const DoFValue & dofValuesOldNeighbor() const override;
+  const DoFValue & dofValuesOlderNeighbor() const override;
+  const DoFValue & dofValuesPreviousNLNeighbor() const override;
+  const DoFValue & dofValuesDot() const override;
+  const DoFValue & dofValuesDotNeighbor() const override;
   const DoFValue & dofValuesDotNeighborResidual() const;
-  const DoFValue & dofValuesDotOld() const;
-  const DoFValue & dofValuesDotOldNeighbor() const;
-  const DoFValue & dofValuesDotDot() const;
-  const DoFValue & dofValuesDotDotNeighbor() const;
+  const DoFValue & dofValuesDotOld() const override;
+  const DoFValue & dofValuesDotOldNeighbor() const override;
+  const DoFValue & dofValuesDotDot() const override;
+  const DoFValue & dofValuesDotDotNeighbor() const override;
   const DoFValue & dofValuesDotDotNeighborResidual() const;
-  const DoFValue & dofValuesDotDotOld() const;
-  const DoFValue & dofValuesDotDotOldNeighbor() const;
-  const MooseArray<Number> & dofValuesDuDotDu() const;
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const;
-  const MooseArray<Number> & dofValuesDuDotDotDu() const;
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const;
+  const DoFValue & dofValuesDotDotOld() const override;
+  const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  const MooseArray<Number> & dofValuesDuDotDu() const override;
+  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
+  const MooseArray<Number> & dofValuesDuDotDotDu() const override;
+  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
 
   /**
    * Return the AD dof values
@@ -603,18 +616,15 @@ public:
   const OutputType & nodalValueDuDotDuNeighbor() const;
   const OutputType & nodalValueDuDotDotDuNeighbor() const;
 
-  /**
-   * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase
-   */
-  const MooseArray<OutputType> & nodalValueArray()
+  const MooseArray<OutputType> & nodalValueArray() const override
   {
     return _element_data->nodalValueArray(Moose::Current);
   }
-  const MooseArray<OutputType> & nodalValueOldArray()
+  const MooseArray<OutputType> & nodalValueOldArray() const override
   {
     return _element_data->nodalValueArray(Moose::Old);
   }
-  const MooseArray<OutputType> & nodalValueOlderArray()
+  const MooseArray<OutputType> & nodalValueOlderArray() const override
   {
     return _element_data->nodalValueArray(Moose::Older);
   }

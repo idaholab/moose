@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVKernel.h"
+#include "FVFaceInterface.h"
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborMooseVariableInterface.h"
@@ -25,25 +26,12 @@ class FaceInfo;
 /// kernels are AD-based - be sure to use AD material properties and other AD
 /// values to maintain good jacobian/derivative quality.
 class FVFluxKernel : public FVKernel,
+                     public FVFaceInterface,
                      public TwoMaterialPropertyInterface,
                      public NeighborMooseVariableInterface<Real>,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  /// This codifies a set of available ways to interpolate with elem+neighbor
-  /// solution information to calculate values (e.g. solution, material
-  /// properties, etc.) at the face (centroid).  These methods are used in the
-  /// class's interpolate functions.  Some interpolation methods are only meant
-  /// to be used with advective terms (e.g. upwind), others are more
-  /// generically applicable.
-  enum class InterpMethod
-  {
-    /// (elem+neighbor)/2
-    Average,
-    /// weighted
-    Upwind,
-  };
-
   static InputParameters validParams();
   FVFluxKernel(const InputParameters & params);
 
@@ -55,63 +43,18 @@ public:
   /// @}
 
 protected:
-  /// Provides interpolation of face values for non-advection-specific purposes
-  /// (although it can/will still be used by advective kernels sometimes).  The
-  /// interpolated value is stored in result.  This should be called when a
-  /// face value needs to be computed using elem and neighbor information (e.g. a
-  /// material property, solution value, etc.).  elem and neighbor represent the
-  /// property/value to compute the face value for.
-  template <typename T>
-  void interpolate(InterpMethod m, T & result, const T & elem, const T & neighbor)
-  {
-    switch (m)
-    {
-      case InterpMethod::Average:
-        result = (elem + neighbor) * 0.5;
-        break;
-      default:
-        mooseError("unsupported interpolation method for FVFluxKernel::interpolate");
-    }
-  }
-
-  /// Provides interpolation of face values for advective flux kernels.  This
-  /// should be called by advective kernels when a u_face value is needed from
-  /// u_elem and u_neighbor.  The interpolated value is stored in result.  elem
-  /// and neighbor represent the property/value being advected in the elem and
-  /// neighbor elements respectively.  advector represents the vector quantity at
-  /// the face that is doing the advecting (e.g. the flow velocity at the
-  /// face); this value often will have been computed using a call to the
-  /// non-advective interpolate function.
-  template <typename T>
-  void interpolate(
-      InterpMethod m, T & result, const T & elem, const T & neighbor, ADRealVectorValue advector)
-  {
-    switch (m)
-    {
-      case InterpMethod::Average:
-        result = (elem + neighbor) * 0.5;
-        break;
-      case InterpMethod::Upwind:
-        if (advector * _normal > 0)
-          result = elem;
-        else
-          result = neighbor;
-        break;
-      default:
-        mooseError("unsupported interpolation method for FVFluxKernel::interpolate");
-    }
-  }
-
   /// This is the primary function that must be implemented for flux kernel
   /// terms.  Material properties will be initialized on the face - using any
   /// reconstructed fv variable gradients if any.  Values for the solution are
   /// provided for both the elem and neighbor side of the face.
   virtual ADReal computeQpResidual() = 0;
 
-  /// Calculates and returns "_grad_u dot _normal" on the face to be used for
+  /// Calculates and returns "grad_u dot normal" on the face to be used for
   /// diffusive terms.  If using any cross-diffusion corrections, etc. all
   /// those calculations will be handled for appropriately by this function.
-  virtual ADReal gradUDotNormal();
+  virtual ADReal gradUDotNormal() const;
+
+  const ADRealVectorValue & normal() const override final { return _normal; }
 
   MooseVariableFV<Real> & _var;
 
@@ -154,4 +97,6 @@ private:
   /// conditions - otherwise this returns false and all jacobian/residual calcs
   /// should be skipped.
   bool skipForBoundary(const FaceInfo & fi);
+
+  const bool _force_boundary_execution;
 };

@@ -71,7 +71,11 @@ class NodeFaceConstraint;
 /// at which to compute the factor.  point and factor can be either Point and
 /// Real or ADPoint and ADReal.
 template <typename P, typename C>
-void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor);
+void coordTransformFactor(const SubProblem & s,
+                          SubdomainID sub_id,
+                          const P & point,
+                          C & factor,
+                          SubdomainID neighbor_sub_id = libMesh::Elem::invalid_subdomain_id);
 
 /**
  * Keeps track of stuff related to assembling

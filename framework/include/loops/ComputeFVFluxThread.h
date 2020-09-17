@@ -18,6 +18,7 @@
 #include "FVFluxBC.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
+#include "MaterialBase.h"
 #include "libmesh/libmesh_exceptions.h"
 #include "libmesh/elem.h"
 
@@ -174,7 +175,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       typename RangeType::const_iterator faceinfo = range.begin();
       for (faceinfo = range.begin(); faceinfo != range.end(); ++faceinfo)
       {
-        const Elem & elem = faceinfo->elem();
+        const Elem & elem = (*faceinfo)->elem();
 
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
@@ -183,19 +184,24 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         _neighbor_subdomain = Elem::invalid_subdomain_id;
-        if (faceinfo->neighborPtr())
-          _neighbor_subdomain = faceinfo->neighbor().subdomain_id();
+        if ((*faceinfo)->neighborPtr())
+          _neighbor_subdomain = (*faceinfo)->neighbor().subdomain_id();
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
 
-        onFace(*faceinfo);
+        onFace(**faceinfo);
+        // Cache data now because onBoundary may clear it. E.g. there was a nasty bug for two
+        // variable FV systems where if one variable was executing an FVFluxKernel on a boundary
+        // while the other was executing an FVFluxBC, the FVFluxKernel data would get lost because
+        // onBoundary would clear the residual/Jacobian data before it was cached
+        postFace(**faceinfo);
 
-        const std::set<BoundaryID> boundary_ids = faceinfo->boundaryIDs();
+        const std::set<BoundaryID> boundary_ids = (*faceinfo)->boundaryIDs();
         for (auto & it : boundary_ids)
-          onBoundary(*faceinfo, it);
+          onBoundary(**faceinfo, it);
 
-        postFace(*faceinfo);
+        postFace(**faceinfo);
 
       } // range
       post();
@@ -451,6 +457,19 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
     const auto & mdeps = k->getMatPropDependencies();
     needed_mat_props.insert(mdeps.begin(), mdeps.end());
   }
+
+  // lindsayad: When a user is using an FVFluxKernel, then it's clear that when they couple any kind
+  // of variable in, then we should reinit it. However, with a Material, it's not clear whether a
+  // coupled variable needs to be computed for FE or FV calcs. For performance reasons, I am only
+  // going to request reinit for variables coupled into materials that are actually FV variables.
+  // Later, we may revisit this
+  std::set<MooseVariableFieldBase *> required_material_vars;
+  const auto & materials = _fe_problem.getMaterialWarehouse();
+  materials.updateBlockVariableDependency(_subdomain, required_material_vars, _tid);
+
+  for (auto * const var : required_material_vars)
+    if (var->isFV())
+      _needed_fv_vars.insert(var);
 
   _fe_problem.setActiveElementalMooseVariables(needed_fe_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);

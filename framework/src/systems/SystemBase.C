@@ -139,17 +139,18 @@ SystemBase::SystemBase(SubProblem & subproblem,
 {
 }
 
-MooseVariableFEBase &
-SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
+MooseVariableFieldBase &
+SystemBase::getVariable(THREAD_ID tid, const std::string & var_name) const
 {
-  MooseVariableFEBase * var = dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_name));
+  MooseVariableFieldBase * var =
+      dynamic_cast<MooseVariableFieldBase *>(_vars[tid].getVariable(var_name));
   if (!var)
     mooseError("Variable '", var_name, "' does not exist in this system");
   return *var;
 }
 
-MooseVariableFEBase &
-SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
+MooseVariableFieldBase &
+SystemBase::getVariable(THREAD_ID tid, unsigned int var_number) const
 {
   if (var_number < _numbered_vars[tid].size())
     if (_numbered_vars[tid][var_number])
@@ -280,7 +281,7 @@ Order
 SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  const std::vector<MooseVariableFEBase *> & vars = _vars[0].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[0].fieldVariables();
   for (const auto & var : vars)
   {
     FEType fe_type = var->feType();
@@ -296,9 +297,9 @@ SystemBase::prepare(THREAD_ID tid)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariableFEBase *> & active_elemental_moose_variables =
+    const std::set<MooseVariableFieldBase *> & active_elemental_moose_variables =
         _subproblem.getActiveElementalMooseVariables(tid);
-    const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+    const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->clearDofIndices();
 
@@ -308,7 +309,7 @@ SystemBase::prepare(THREAD_ID tid)
   }
   else
   {
-    const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+    const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->prepare();
   }
@@ -320,12 +321,12 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
   // We only need to do something if the element prepare was restricted
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariableFEBase *> & active_elemental_moose_variables =
+    const std::set<MooseVariableFieldBase *> & active_elemental_moose_variables =
         _subproblem.getActiveElementalMooseVariables(tid);
 
-    std::vector<MooseVariableFEBase *> newly_prepared_vars;
+    std::vector<MooseVariableFieldBase *> newly_prepared_vars;
 
-    const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+    const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
     {
       // If it wasn't in the active list, we need to prepare it
@@ -350,7 +351,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 void
 SystemBase::prepareNeighbor(THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->prepareNeighbor();
 }
@@ -358,7 +359,7 @@ SystemBase::prepareNeighbor(THREAD_ID tid)
 void
 SystemBase::prepareLowerD(THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->prepareLowerD();
 }
@@ -369,7 +370,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariableFEBase *> & active_elemental_moose_variables =
+    const std::set<MooseVariableFieldBase *> & active_elemental_moose_variables =
         _subproblem.getActiveElementalMooseVariables(tid);
     for (const auto & var : active_elemental_moose_variables)
       if (&(var->sys()) == this)
@@ -377,7 +378,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   }
   else
   {
-    const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+    const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->computeElemValues();
   }
@@ -389,7 +390,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/,
                            BoundaryID /*bnd_id*/,
                            THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeElemValuesFace();
 }
@@ -400,7 +401,7 @@ SystemBase::reinitNeighborFace(const Elem * /*elem*/,
                                BoundaryID /*bnd_id*/,
                                THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeNeighborValuesFace();
 }
@@ -408,7 +409,7 @@ SystemBase::reinitNeighborFace(const Elem * /*elem*/,
 void
 SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeNeighborValues();
 }
@@ -416,7 +417,7 @@ SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 void
 SystemBase::reinitLowerD(THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeLowerDValues();
 }
@@ -424,7 +425,7 @@ SystemBase::reinitLowerD(THREAD_ID tid)
 void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNode();
@@ -436,7 +437,7 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNode();
@@ -448,7 +449,7 @@ SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_
 void
 SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNodes(nodes);
@@ -459,7 +460,7 @@ SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 void
 SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
+  const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNodesNeighbor(nodes);
@@ -793,7 +794,7 @@ SystemBase::addVariable(const std::string & var_type,
 
     _vars[tid].add(name, var);
 
-    if (auto fe_var = dynamic_cast<MooseVariableFEBase *>(var.get()))
+    if (auto fe_var = dynamic_cast<MooseVariableFieldBase *>(var.get()))
     {
       auto required_size = var_num + components;
       if (required_size > _numbered_vars[tid].size())
@@ -1410,19 +1411,15 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
 
   // loop over all faces
   auto & faces = mesh().faceInfo();
-  for (auto & p : faces)
+  for (auto * p : faces)
   {
     // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = p.elem();
-    const Elem * neighbor_elem = p.neighborPtr();
+    const Elem & elem_elem = p->elem();
+    const Elem * neighbor_elem = p->neighborPtr();
     SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
     SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
     if (neighbor_elem)
       neighbor_subdomain_id = neighbor_elem->subdomain_id();
-
-    // TODO: what happens if elem and neighbor subdomain ids have different
-    // coordinate transforms here?  Figure out how to handle this robustly.
-    coordTransformFactor(_subproblem, elem_subdomain_id, p.faceCentroid(), p.faceCoord());
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
@@ -1446,14 +1443,14 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
         var->getDofIndices(&elem_elem, elem_dof_indices);
       else
         elem_dof_indices = {libMesh::DofObject::invalid_id};
-      p.elemDofIndices(var_name) = elem_dof_indices;
+      p->elemDofIndices(var_name) = elem_dof_indices;
       // neighbor
       std::vector<dof_id_type> neighbor_dof_indices;
       if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
         var->getDofIndices(neighbor_elem, neighbor_dof_indices);
       else
         neighbor_dof_indices = {libMesh::DofObject::invalid_id};
-      p.neighborDofIndices(var_name) = neighbor_dof_indices;
+      p->neighborDofIndices(var_name) = neighbor_dof_indices;
 
       /**
        * The following paragraph of code assigns the VarFaceNeighbors
@@ -1468,21 +1465,23 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
       bool var_defined_neighbor =
           var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
       if (var_defined_elem && var_defined_neighbor)
-        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+        p->faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
       else if (!var_defined_elem && !var_defined_neighbor)
-        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+        p->faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
       else
       {
         // this is a boundary face for this variable, set elem or neighbor
         if (var_defined_elem)
-          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
+          p->faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
         else if (var_defined_neighbor)
-          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+          p->faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
         else
           mooseError("Should never get here");
       }
     }
   }
+
+  mesh().computeFaceInfoFaceCoords(_subproblem);
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,

@@ -201,7 +201,13 @@ public:
    */
   void setDofValues(const DenseVector<OutputData> & values);
 
+  ///@{
+  /**
+   * dof value setters
+   */
   void setDofValue(const OutputData & value, unsigned int index);
+  void setElementalValue(const OutputType & value);
+  ///@}
 
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;

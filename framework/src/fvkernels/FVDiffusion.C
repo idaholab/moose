@@ -16,6 +16,7 @@ FVDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
+  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 

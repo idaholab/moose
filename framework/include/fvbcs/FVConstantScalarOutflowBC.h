@@ -24,5 +24,5 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  ADRealVectorValue _velocity;
+  const ADRealVectorValue _velocity;
 };

@@ -148,7 +148,7 @@ public:
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
 
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
                               const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
@@ -217,11 +217,12 @@ public:
                             const Real div_threshold);
 
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFEBase & getVariable(
-      THREAD_ID tid,
-      const std::string & var_name,
-      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
-      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) override;
+  virtual MooseVariableFEBase &
+  getVariable(THREAD_ID tid,
+              const std::string & var_name,
+              Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+              Moose::VarFieldType expected_var_field_type =
+                  Moose::VarFieldType::VAR_FIELD_ANY) const override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -1879,6 +1880,8 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0) override;
 
+  bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2092,6 +2095,9 @@ protected:
 
   /// Determines whether a check to verify an active material on every subdomain
   bool _material_coverage_check;
+
+  /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
+  const bool _fv_bcs_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;

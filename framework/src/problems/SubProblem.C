@@ -748,8 +748,8 @@ SubProblem::getVariableHelper(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
-                              SystemBase & nl,
-                              SystemBase & aux)
+                              const SystemBase & nl,
+                              const SystemBase & aux) const
 {
   // Eventual return value
   MooseVariableFEBase * var = nullptr;

@@ -16,6 +16,7 @@
 #include "NonlinearSystem.h"
 
 #include "libmesh/default_coupling.h"
+#include "libmesh/point_neighbor_coupling.h"
 #include "libmesh/dof_map.h"
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
@@ -33,17 +34,25 @@ ElementSideNeighborLayers::validParams()
       "element_side_neighbor_layers>=1 & element_side_neighbor_layers<=10",
       "The number of additional geometric elements to make available when "
       "using distributed mesh. No effect with replicated mesh.");
+  params.addParam<bool>("use_point_neighbors",
+                        false,
+                        "Whether to use point neighbors, which introduces additional ghosting to "
+                        "that used for simple face neighbors.");
 
   return params;
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
-  : FunctorRelationshipManager(parameters), _layers(getParam<unsigned short>("layers"))
+  : FunctorRelationshipManager(parameters),
+    _layers(getParam<unsigned short>("layers")),
+    _use_point_neighbors(getParam<bool>("use_point_neighbors"))
 {
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const ElementSideNeighborLayers & other)
-  : FunctorRelationshipManager(other), _layers(other._layers)
+  : FunctorRelationshipManager(other),
+    _layers(other._layers),
+    _use_point_neighbors(other._use_point_neighbors)
 {
 }
 
@@ -75,17 +84,20 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   else
     // We use a >= comparison instead of == for _layers because if we already have more ghosting
     // than the new RM provides, then that's an indication that we should *not* add the new one
-    return _layers >= rm->_layers && isType(rm->_rm_type) && _system_type == rm->_system_type;
+    return _layers >= rm->_layers && isType(rm->_rm_type) && _system_type == rm->_system_type &&
+           _use_point_neighbors == rm->_use_point_neighbors;
 }
 
-void
-ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
+namespace
 {
-  auto functor = libmesh_make_unique<DefaultCoupling>();
-  functor->set_n_levels(_layers);
+template <typename Functor>
+void
+initFunctor(Functor & functor, MooseApp & app, unsigned short layers)
+{
+  functor.set_n_levels(layers);
 
   // Need to see if there are periodic BCs - if so we need to dig them out
-  auto executioner_ptr = _app.getExecutioner();
+  auto executioner_ptr = app.getExecutioner();
 
   if (executioner_ptr)
   {
@@ -96,15 +108,37 @@ ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
 
     mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
 
-    functor->set_periodic_boundaries(periodic_boundaries_ptr);
+    functor.set_periodic_boundaries(periodic_boundaries_ptr);
   }
+}
+}
 
-  _functor = std::move(functor);
+void
+ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
+{
+  if (_use_point_neighbors)
+  {
+    auto functor = libmesh_make_unique<PointNeighborCoupling>();
+    initFunctor(*functor, _app, _layers);
+    _functor = std::move(functor);
+  }
+  else
+  {
+    auto functor = libmesh_make_unique<DefaultCoupling>();
+    initFunctor(*functor, _app, _layers);
+    _functor = std::move(functor);
+  }
 }
 
 void
 ElementSideNeighborLayers::dofmap_reinit()
 {
   if (_dof_map)
-    static_cast<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
+  {
+    if (_use_point_neighbors)
+      static_cast<PointNeighborCoupling *>(_functor.get())
+          ->set_dof_coupling(_dof_map->_dof_coupling);
+    else
+      static_cast<DefaultCoupling *>(_functor.get())->set_dof_coupling(_dof_map->_dof_coupling);
+  }
 }

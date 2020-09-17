@@ -1439,6 +1439,48 @@ MooseVariableData<OutputType>::setDofValue(const OutputData & value, unsigned in
   }
 }
 
+template <>
+void
+MooseVariableData<Real>::setElementalValue(const Real & value)
+{
+  mooseAssert(
+      _dof_indices.size() == _dof_values.size() && _dof_indices.size() == 1,
+      "Use of the setDofValue single-arg API only makes sense when their is only one dof index");
+
+  _dof_values[0] = value;
+  _has_dof_values = true;
+
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+    _u[qp] = (*_phi)[0][qp] * _dof_values[0];
+}
+
+template <>
+void
+MooseVariableData<RealVectorValue>::setElementalValue(const RealVectorValue & value)
+{
+  mooseAssert(_dof_indices.size() == _dof_values.size() && _dof_indices.size() <= LIBMESH_DIM,
+              "Index and values sizes should match");
+
+  for (MooseIndex(_dof_indices) i = 0; i < _dof_indices.size(); ++i)
+    _dof_values[i] = value(i);
+
+  _has_dof_values = true;
+
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+  {
+    _u[qp] = (*_phi)[0][qp] * _dof_values[0];
+    for (unsigned int i = 1; i < _dof_values.size(); i++)
+      _u[qp] += (*_phi)[i][qp] * _dof_values[i];
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::setElementalValue(const OutputType &)
+{
+  mooseError("setElementValue not implemented for current template type");
+}
+
 template <typename OutputType>
 void
 MooseVariableData<OutputType>::setDofValues(const DenseVector<OutputData> & values)

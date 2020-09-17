@@ -90,7 +90,7 @@ DisplacedProblem::isTransient() const
 }
 
 Moose::CoordinateSystemType
-DisplacedProblem::getCoordSystem(SubdomainID sid)
+DisplacedProblem::getCoordSystem(SubdomainID sid) const
 {
   return _mproblem.getCoordSystem(sid);
 }
@@ -404,7 +404,7 @@ MooseVariableFEBase &
 DisplacedProblem::getVariable(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
-                              Moose::VarFieldType expected_var_field_type)
+                              Moose::VarFieldType expected_var_field_type) const
 {
   return getVariableHelper(
       tid, var_name, expected_var_type, expected_var_field_type, _displaced_nl, _displaced_aux);

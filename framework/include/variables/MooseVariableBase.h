@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "BlockRestrictable.h"
 #include "OutputInterface.h"
+#include "SetupInterface.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
@@ -34,7 +35,10 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
-class MooseVariableBase : public MooseObject, public BlockRestrictable, public OutputInterface
+class MooseVariableBase : public MooseObject,
+                          public BlockRestrictable,
+                          public OutputInterface,
+                          public SetupInterface
 {
 public:
   static InputParameters validParams();

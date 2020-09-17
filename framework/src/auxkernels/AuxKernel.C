@@ -78,9 +78,9 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
         std::is_same<Real, ComputeValueType>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                     : Moose::VarFieldType::VAR_FIELD_VECTOR),
     BlockRestrictable(this),
-    BoundaryRestrictable(this, mooseVariable()->isNodal()),
+    BoundaryRestrictable(this, mooseVariableBase()->isNodal()),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, mooseVariable()->isNodal()),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, mooseVariableBase()->isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -90,7 +90,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
-                    mooseVariable()->isNodal()),
+                    mooseVariableBase()->isNodal()),
     GeometricSearchInterface(this),
     Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
@@ -101,8 +101,8 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
     _aux_sys(*getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _var(_aux_sys.getFieldVariable<ComputeValueType>(_tid,
-                                                     parameters.get<AuxVariableName>("variable"))),
+    _var(_aux_sys.getActualFieldVariable<ComputeValueType>(
+        _tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
     _u(_nodal ? _var.nodalValueArray() : _var.sln()),
     _u_old(_nodal ? _var.nodalValueOldArray() : _var.slnOld()),
@@ -127,7 +127,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _current_boundary_id(_assembly.currentBoundaryID()),
     _solution(_aux_sys.solution())
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   const auto & coupled_vars = getCoupledVars();
@@ -308,10 +308,13 @@ AuxKernelTempl<ComputeValueType>::compute()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         value += _JxW[_qp] * _coord[_qp] * computeValue();
       value /= (_bnd ? _current_side_volume : _current_elem_volume);
-      // update the variable data referenced by other kernels.
-      // Note that this will update the values at the quadrature points too
-      // (because this is an Elemental variable)
-      _var.setNodalValue(value);
+      if (_var.isFV())
+        _var.setElementalValue(value);
+      else
+        // update the variable data referenced by other kernels.
+        // Note that this will update the values at the quadrature points too
+        // (because this is an Elemental variable)
+        _var.setNodalValue(value);
     }
     else /* high-order */
     {

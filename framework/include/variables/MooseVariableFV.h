@@ -26,6 +26,14 @@ template <typename>
 class MooseVariableFV;
 
 typedef MooseVariableFV<Real> MooseVariableFVReal;
+class FVDirichletBC;
+class FVFluxBC;
+
+namespace libMesh
+{
+template <typename>
+class NumericVector;
+}
 
 /// This class provides variable solution values for other classes/objects to
 /// bind to when looping over faces or elements.  It provides both
@@ -61,6 +69,8 @@ public:
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
+
+  using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
 
   static InputParameters validParams();
 
@@ -167,6 +177,9 @@ public:
   {
     mooseError("dofIndicesLower not supported by MooseVariableFVBase");
   }
+
+  unsigned int numberOfDofs() const override final { return _element_data->numberOfDofs(); }
+
   virtual unsigned int numberOfDofsNeighbor() override final
   {
     mooseError("numberOfDofsNeighbor not supported by MooseVariableFVBase");
@@ -179,6 +192,7 @@ public:
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
   virtual void setDofValue(const OutputData & value, unsigned int index) override;
+  virtual void setElementalValue(const OutputType & value) override;
 
   void clearDofIndices() override;
 
@@ -225,13 +239,33 @@ public:
   }
 
   const FieldVariableValue & uDot() const { return _element_data->uDot(); }
-  const FieldVariableValue & sln() const { return _element_data->sln(Moose::Current); }
-  const FieldVariableGradient & gradSln() const { return _element_data->gradSln(Moose::Current); }
+  const FieldVariableValue & sln() const override { return _element_data->sln(Moose::Current); }
+  const FieldVariableValue & slnOld() const override { return _element_data->sln(Moose::Old); }
+  const FieldVariableValue & slnOlder() const override { return _element_data->sln(Moose::Older); }
+  const FieldVariableGradient & gradSln() const override
+  {
+    return _element_data->gradSln(Moose::Current);
+  }
+  const FieldVariableGradient & gradSlnOld() const override
+  {
+    return _element_data->gradSln(Moose::Old);
+  }
   const FieldVariableValue & uDotNeighbor() const { return _neighbor_data->uDot(); }
-  const FieldVariableValue & slnNeighbor() const { return _neighbor_data->sln(Moose::Current); }
-  const FieldVariableGradient & gradSlnNeighbor() const
+  const FieldVariableValue & slnNeighbor() const override
+  {
+    return _neighbor_data->sln(Moose::Current);
+  }
+  const FieldVariableValue & slnOldNeighbor() const override
+  {
+    return _neighbor_data->sln(Moose::Old);
+  }
+  const FieldVariableGradient & gradSlnNeighbor() const override
   {
     return _neighbor_data->gradSln(Moose::Current);
+  }
+  const FieldVariableGradient & gradSlnOldNeighbor() const override
+  {
+    return _neighbor_data->gradSln(Moose::Old);
   }
 
   const VariableValue & duDotDu() const { return _element_data->duDotDu(); }
@@ -250,6 +284,28 @@ public:
     checkIndexingScalingCompatibility();
     return _element_data->adGradSln();
   }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Retrieve (or potentially compute) the gradient on the provided element
+   * @param elem The element for which to retrieve the gradient
+   */
+  const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
+
+  /**
+   * Retrieve (or potentially compute) the gradient on the provided face
+   * @param face The face for which to retrieve the gradient
+   */
+  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi) const;
+
+  /**
+   * Retrieve (or potentially compute) the uncorrected gradient on the provided face
+   * @param face The face for which to retrieve the gradient
+   */
+  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi) const;
+
+#endif
+
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
     checkIndexingScalingCompatibility();
@@ -301,7 +357,7 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  void setDofValues(const DenseVector<OutputData> & values);
+  void setDofValues(const DenseVector<OutputData> & values) override;
 
   /// Get the current value of this variable on an element
   /// @param[in] elem   Element at which to get value
@@ -322,26 +378,26 @@ public:
   virtual void insert(NumericVector<Number> & residual) override;
   virtual void add(NumericVector<Number> & residual) override;
 
-  const DoFValue & dofValues();
-  const DoFValue & dofValuesOld();
-  const DoFValue & dofValuesOlder();
-  const DoFValue & dofValuesPreviousNL();
-  const DoFValue & dofValuesNeighbor();
-  const DoFValue & dofValuesOldNeighbor();
-  const DoFValue & dofValuesOlderNeighbor();
-  const DoFValue & dofValuesPreviousNLNeighbor();
-  const DoFValue & dofValuesDot();
-  const DoFValue & dofValuesDotNeighbor();
-  const DoFValue & dofValuesDotOld();
-  const DoFValue & dofValuesDotOldNeighbor();
-  const DoFValue & dofValuesDotDot();
-  const DoFValue & dofValuesDotDotNeighbor();
-  const DoFValue & dofValuesDotDotOld();
-  const DoFValue & dofValuesDotDotOldNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDu();
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDotDu();
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor();
+  const DoFValue & dofValues() const override;
+  const DoFValue & dofValuesOld() const override;
+  const DoFValue & dofValuesOlder() const override;
+  const DoFValue & dofValuesPreviousNL() const override;
+  const DoFValue & dofValuesNeighbor() const override;
+  const DoFValue & dofValuesOldNeighbor() const override;
+  const DoFValue & dofValuesOlderNeighbor() const override;
+  const DoFValue & dofValuesPreviousNLNeighbor() const override;
+  const DoFValue & dofValuesDot() const override;
+  const DoFValue & dofValuesDotNeighbor() const override;
+  const DoFValue & dofValuesDotOld() const override;
+  const DoFValue & dofValuesDotOldNeighbor() const override;
+  const DoFValue & dofValuesDotDot() const override;
+  const DoFValue & dofValuesDotDotNeighbor() const override;
+  const DoFValue & dofValuesDotDotOld() const override;
+  const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  const MooseArray<Number> & dofValuesDuDotDu() const override;
+  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
+  const MooseArray<Number> & dofValuesDuDotDotDu() const override;
+  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
 
   /// Returns the AD dof values.
   const MooseArray<ADReal> & adDofValues() const override;
@@ -365,7 +421,60 @@ public:
     return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC();
   }
 
+  std::pair<bool, const FVDirichletBC *> getDirichletBC(const FaceInfo & fi) const;
+
+  std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
+
+  void residualSetup() override;
+  void jacobianSetup() override;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Get the solution value for the provided element and seed the derivative for the corresponding
+   * dof index
+   * @param elem The element to retrieive the solution value for
+   */
+  ADReal getElemValue(const Elem * elem) const;
+
+  ADReal getNeighborValue(const Elem * const neighbor,
+                          const FaceInfo & fi,
+                          const ADReal & elem_value) const;
+
+  ADReal
+  getFaceValue(const Elem * const neighbor, const FaceInfo & fi, const ADReal & elem_value) const;
+
+  const ADReal & getVertexValue(const Node & vertex) const;
+
+  /**
+   * Get custom coefficients on a per-element basis. These should correspond to \p a
+   * coefficients in the notation of Moukallad's "Finite Volume Method in Computational Fluid
+   * Dynamics"
+   */
+  const ADReal &
+  adCoeff(const Elem * elem, void * context, ADReal (*fn)(const Elem * const, void *)) const;
+#endif
+
+  const MooseArray<OutputType> & nodalValueArray() const override
+  {
+    mooseError("Finite volume variables do not have defined values at nodes.");
+  }
+  const MooseArray<OutputType> & nodalValueOldArray() const override
+  {
+    mooseError("Finite volume variables do not have defined values at nodes.");
+  }
+  const MooseArray<OutputType> & nodalValueOlderArray() const override
+  {
+    mooseError("Finite volume variables do not have defined values at nodes.");
+  }
+
+  const FieldVariablePhiValue & phi() const override { return *_phi; }
+
 protected:
+  /**
+   * clear finite volume caches
+   */
+  void clearCaches();
+
   usingMooseVariableBaseMembers;
 
   /// Holder for all the data associated with the "main" element
@@ -384,9 +493,31 @@ private:
    */
   void checkIndexingScalingCompatibility() const;
 
+  /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer because the solution might not exist at the time that this variable is constructed, so we cannot safely dereference at that time
+  const NumericVector<Number> * const & _solution;
+
+  /// Shape functions
+  const FieldVariablePhiValue * _phi;
+
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   /// Whether we've already performed a scaling factor check for this variable
   mutable bool _scaling_params_checked = false;
+
+  /// A cache for storing gradients on elements
+  mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
+
+  /// A cache for storing uncorrected gradients on faces
+  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
+
+  /// A cache for storing gradients on faces
+  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
+
+  /// A cache for storing FV \p a coefficients on elements
+  mutable std::unordered_map<const Elem *, ADReal> _elem_to_coeff;
+
+  mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
+
+  const bool _use_extended_stencil;
 #endif
 };
 

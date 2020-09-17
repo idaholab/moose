@@ -35,8 +35,17 @@
 
 template <typename P, typename C>
 void
-coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor)
+coordTransformFactor(const SubProblem & s,
+                     const SubdomainID sub_id,
+                     const P & point,
+                     C & factor,
+                     const SubdomainID libmesh_dbg_var(neighbor_sub_id))
 {
+  mooseAssert(neighbor_sub_id != libMesh::Elem::invalid_subdomain_id
+                  ? s.getCoordSystem(sub_id) == s.getCoordSystem(neighbor_sub_id)
+                  : true,
+              "Coordinate systems must be the same between element and neighbor");
+
   switch (s.getCoordSystem(sub_id))
   {
     case Moose::COORD_XYZ:
@@ -4393,11 +4402,13 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
 
-template void coordTransformFactor<Point, Real>(SubProblem & s,
+template void coordTransformFactor<Point, Real>(const SubProblem & s,
                                                 SubdomainID sub_id,
                                                 const Point & point,
-                                                Real & factor);
-template void coordTransformFactor<ADPoint, ADReal>(SubProblem & s,
+                                                Real & factor,
+                                                SubdomainID neighbor_sub_id);
+template void coordTransformFactor<ADPoint, ADReal>(const SubProblem & s,
                                                     SubdomainID sub_id,
                                                     const ADPoint & point,
-                                                    ADReal & factor);
+                                                    ADReal & factor,
+                                                    SubdomainID neighbor_sub_id);

@@ -1,0 +1,39 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "FVFunctionDirichletBC.h"
+#include "Function.h"
+
+registerMooseObject("MooseApp", FVFunctionDirichletBC);
+
+InputParameters
+FVFunctionDirichletBC::validParams()
+{
+  InputParameters params = FVDirichletBC::validParams();
+  params.addRequiredParam<FunctionName>("function", "The exact solution function.");
+  params.addClassDescription(
+      "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "
+      "is a (possibly) time and space-dependent MOOSE Function.");
+
+  // Set this to some dummy value
+  params.set<Real>("value") = 1;
+  params.suppressParameter<Real>("value");
+  return params;
+}
+
+FVFunctionDirichletBC::FVFunctionDirichletBC(const InputParameters & parameters)
+  : FVDirichletBC(parameters), _function(getFunction("function"))
+{
+}
+
+Real
+FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi) const
+{
+  return _function.value(_t, fi.faceCentroid());
+}

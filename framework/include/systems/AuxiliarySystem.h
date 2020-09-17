@@ -209,9 +209,14 @@ protected:
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_std_vars;
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_vec_vars;
 
-  std::vector<std::vector<MooseVariableFEBase *>> _elem_vars;
-  std::vector<std::vector<MooseVariableFEBase *>> _elem_std_vars;
-  std::vector<std::vector<MooseVariableFEBase *>> _elem_vec_vars;
+  ///@{
+  /**
+   * Elemental variables. These may be either finite element or finite volume variables
+   */
+  std::vector<std::vector<MooseVariableFieldBase *>> _elem_vars;
+  std::vector<std::vector<MooseVariableFieldBase *>> _elem_std_vars;
+  std::vector<std::vector<MooseVariableFieldBase *>> _elem_vec_vars;
+  ///@}
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;

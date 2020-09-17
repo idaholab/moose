@@ -1,0 +1,54 @@
+[Tests]
+  design = 'FVKernels/index.md'
+  issues = '#14549'
+  [diffusion]
+    type = Exodiff
+    input = 'diffusion.i'
+    exodiff = 'diffusion_out.e'
+    requirement = 'The system shall be able to solve a diffusion problem with the finite volume method and display second order convergence.'
+  []
+  [advection-diffusion]
+    type = Exodiff
+    input = 'advection-diffusion.i'
+    exodiff = 'advection-diffusion_out.e'
+    requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method and display second order convergence.'
+  []
+  [advection-diffusion-flux-bcs]
+    type = Exodiff
+    input = 'advection-diffusion-flux-bcs.i'
+    exodiff = 'advection-diffusion-flux-bcs_out.e'
+    requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method, using flux boundary conditions, and display second order convergence.'
+  []
+  [mat-advection-diffusion]
+    type = Exodiff
+    input = 'mat-advection-diffusion.i'
+    exodiff = 'mat-advection-diffusion_out.e'
+    requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method, using a velocity supplied by a material, and display second order convergence.'
+  []
+  [advection]
+    type = Exodiff
+    input = 'advection.i'
+    exodiff = 'advection_out.e'
+    requirement = 'The system shall be able to solve a advection problem with the finite volume method and display second order convergence.'
+  []
+  [mat-advection]
+    type = Exodiff
+    input = 'mat-advection.i'
+    exodiff = 'mat-advection_out.e'
+    requirement = 'The system shall be able to solve a advection problem with the finite volume method, using a velocity supplied by a material, and display second order convergence.'
+  []
+  [upwind-advection-diffusion]
+    type = Exodiff
+    input = 'advection-diffusion.i'
+    exodiff = 'upwind-advection-diffusion_out.e'
+    cli_args = "GlobalParams/advected_interp_method='upwind' Outputs/file_base=upwind-advection-diffusion_out"
+    requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method and display first order convergence with an upwind scheme for the advection operator.'
+  []
+  [upwind-advection]
+    type = Exodiff
+    input = 'advection.i'
+    exodiff = 'upwind-advection_out.e'
+    cli_args = "GlobalParams/advected_interp_method='upwind' Outputs/file_base=upwind-advection_out"
+    requirement = 'The system shall be able to solve a advection problem with the finite volume method and display first order convergence with an upwind scheme.'
+  []
+[]

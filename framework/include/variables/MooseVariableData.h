@@ -360,7 +360,14 @@ public:
    */
   void setDofValues(const DenseVector<OutputData> & values);
 
+  ///@{
+  /**
+   * dof value setters
+   */
   void setDofValue(const OutputData & value, unsigned int index);
+  /** @brief only use when there is currently only one dof index */
+  void setElementalValue(const OutputType & value);
+  ///@}
 
   /**
    * Write a nodal value to the passed-in solution vector

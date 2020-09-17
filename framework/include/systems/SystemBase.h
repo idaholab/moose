@@ -475,7 +475,7 @@ public:
    * @param var_name variable name
    * @return reference the variable (class)
    */
-  MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableFieldBase & getVariable(THREAD_ID tid, const std::string & var_name) const;
 
   /**
    * Gets a reference to a variable with specified number
@@ -484,7 +484,7 @@ public:
    * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
-  MooseVariableFEBase & getVariable(THREAD_ID tid, unsigned int var_number);
+  MooseVariableFieldBase & getVariable(THREAD_ID tid, unsigned int var_number) const;
 
   /**
    * Gets a reference to a variable of with specified name
@@ -728,7 +728,7 @@ public:
                                  const std::string & source_name,
                                  const std::string & timestep);
 
-  const std::vector<MooseVariableFEBase *> & getVariables(THREAD_ID tid)
+  const std::vector<MooseVariableFieldBase *> & getVariables(THREAD_ID tid)
   {
     return _vars[tid].fieldVariables();
   }
@@ -924,7 +924,7 @@ protected:
   std::shared_ptr<TimeIntegrator> _time_integrator;
 
   /// Map variable number to its pointer
-  std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
+  std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;
 
   /// Storage for MooseVariable objects
   MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;

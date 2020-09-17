@@ -522,6 +522,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       .template condition<AttribThread>(_tid)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .template condition<AttribVar>(_var_num)
+      .template condition<AttribSysNum>(_var.sys().number())
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
   _has_dirichlet_bc = bcs.size() > 0;
@@ -541,7 +542,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
   if (_need_ad_u_dot)
     _ad_u_dot.resize(nqp);
 
-  if (bcs.size() > 0)
+  if (_has_dirichlet_bc)
   {
     // extrapolate from the boundary element across the boundary face using
     // the given BC face value to determine a ghost cell value for u.  Be sure
@@ -838,6 +839,17 @@ void
 MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
 {
   _dof_values[index] = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::setElementalValue(const OutputType & value)
+{
+  mooseAssert(
+      _dof_indices.size() == 1 && _dof_values.size() == 1,
+      "Use of the setDofValue single-arg API only makes sense when their is only one dof index");
+
+  _dof_values[0] = value;
 }
 
 template <typename OutputType>

@@ -180,6 +180,11 @@ FEProblemBase::validParams()
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>("fv_bcs_integrity_check",
+                        true,
+                        "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
+                        "and/or multiple DirichletBCs per sideset");
+
   params.addParam<bool>(
       "material_dependency_check", true, "Set to false to disable material dependency check");
   params.addParam<bool>("parallel_barrier_messaging",
@@ -265,6 +270,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
+    _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
@@ -518,9 +524,9 @@ FEProblemBase::~FEProblemBase()
 }
 
 Moose::CoordinateSystemType
-FEProblemBase::getCoordSystem(SubdomainID sid)
+FEProblemBase::getCoordSystem(SubdomainID sid) const
 {
-  std::map<SubdomainID, Moose::CoordinateSystemType>::iterator it = _coord_sys.find(sid);
+  auto it = _coord_sys.find(sid);
   if (it != _coord_sys.end())
     return (*it).second;
   else
@@ -4475,7 +4481,7 @@ MooseVariableFEBase &
 FEProblemBase::getVariable(THREAD_ID tid,
                            const std::string & var_name,
                            Moose::VarKindType expected_var_type,
-                           Moose::VarFieldType expected_var_field_type)
+                           Moose::VarFieldType expected_var_field_type) const
 {
   return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, *_nl, *_aux);
 }
@@ -5484,7 +5490,22 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     for (auto tag : tags)
       if (_nl->hasMatrix(tag))
-        _nl->getMatrix(tag).zero();
+      {
+        auto & matrix = _nl->getMatrix(tag);
+        matrix.zero();
+#ifdef LIBMESH_HAVE_PETSC
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        if (haveFV())
+          // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
+          // diagonal dependence. For finite volumes with global AD indexing we only add non-zero
+          // dependence, so PETSc will scream at us unless we artificially add the diagonals. We
+          // will have to remove the haveFV() check when we implement global indexing for finite
+          // elements
+          for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
+            matrix.add(index, index, 0);
+#endif
+#endif
+      }
 
     _nl->zeroVariablesForJacobian();
     _aux->zeroVariablesForJacobian();

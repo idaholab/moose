@@ -82,6 +82,9 @@ template <typename T>
 MooseVariableFE<T> *
 MooseVariableInterface<T>::mooseVariable() const
 {
+  if (!_variable)
+    mooseError(
+        "_variable is null in ", _moose_object.name(), ". Are you using a finite volume variable?");
   return _variable;
 }
 
@@ -343,6 +346,21 @@ MooseVariableInterface<T>::secondPhiFace()
     mooseError("second derivatives are not defined at nodes");
 
   return _mvi_assembly->secondPhiFace(*_variable);
+}
+
+template <typename T>
+MooseVariableField<T> &
+MooseVariableInterface<T>::mooseVariableField()
+{
+  if (_variable)
+    return *_variable;
+  else
+  {
+    if (!_fv_variable)
+      mooseError("Either _variable or _fv_variable must be non-null in MooseVariableInterface");
+
+    return *_fv_variable;
+  }
 }
 
 template class MooseVariableInterface<Real>;
