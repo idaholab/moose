@@ -1,0 +1,17 @@
+[Tests]
+  [average]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestAverage
+    method = '!dbg'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using an average interpolation scheme and produce second order convergence for the velocity components and zeroth order convergence for the pressure because of the checkerboard pattern.'
+  []
+  [rc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestRC
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a Rhie-Chow interpolation scheme and produce second order convergence for the velocity components and first order convergence for the pressure.'
+    method = '!dbg'
+    min_parallel = 8
+  []
+[]

@@ -1,0 +1,62 @@
+[Tests]
+  [1d-average]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DAverage
+    method = '!dbg'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
+  []
+  [1d-rc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DRC
+    method = '!dbg'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
+  []
+  [2d-average]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DAverage
+    method = '!dbg'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
+  []
+  [2d-rc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DRC
+    method = '!dbg'
+    min_parallel = 8
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
+    heavy = 'true'
+    valgrind = 'none'
+  []
+  [2d-rc-no-slip]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DRCNoSlip
+    method = '!dbg'
+    min_parallel = 8
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, no slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
+    heavy = 'true'
+    valgrind = 'none'
+  []
+  [2d-average-with-temp]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DAverageTemp
+    method = '!dbg'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
+    heavy = 'true'
+    valgrind = 'none'
+  []
+  [2d-rc-with-temp]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test2DRCTemp
+    method = '!dbg'
+    min_parallel = 8
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
+    heavy = 'true'
+    valgrind = 'none'
+  []
+[]
