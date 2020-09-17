@@ -69,6 +69,7 @@ PetscErrorCode mooseSlepcEPSMonitor(EPS eps,
 
 PetscErrorCode mooseSlepcEPSSNESSetUpOptionPrefix(EPS eps);
 PetscErrorCode mooseSlepcEPSSNESSetCustomizePC(EPS eps);
+PetscErrorCode mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps);
 
 void attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
 

@@ -1047,6 +1047,26 @@ mooseSlepcEPSSNESSetCustomizePC(EPS eps)
 }
 
 PetscErrorCode
+mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
+{
+  PetscErrorCode ierr;
+  SNES snes;
+  KSP ksp;
+
+  // Get SNES from EPS
+  ierr = mooseSlepcEPSGetSNES(eps, &snes);
+  LIBMESH_CHKERR(ierr);
+  // Get KSP from SNES
+  ierr = SNESGetKSP(snes, &ksp);
+  LIBMESH_CHKERR(ierr);
+
+  Moose::PetscSupport::petscSetDefaultPCSide(problem, ksp);
+
+  Moose::PetscSupport::petscSetDefaultKSPNormType(problem, ksp);
+  return 0;
+}
+
+PetscErrorCode
 mooseSlepcEPSMonitor(EPS /*eps*/,
                      int its,
                      int /*nconv*/,

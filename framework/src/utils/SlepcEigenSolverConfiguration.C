@@ -42,7 +42,10 @@ SlepcEigenSolverConfiguration::configure_solver()
       ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetCustomizePC(_slepc_solver.eps());
       LIBMESH_CHKERR(ierr);
     }
-
+    // Let set a default PC side. I would like to have the setting be consistent with
+    // what we do in regular nonlinear executioner. Petsc options are able to override
+    // this setting
+    Moose::SlepcSupport::mooseSlepcEPSSNESKSPSetPCSide(_eigen_problem, _slepc_solver.eps());
     // A customized stopping test for nonlinear free power iterations.
     // Nonlinear power iterations need to be marked as converged in EPS to
     // retrieve solution from SLEPc EPS.
