@@ -4,6 +4,8 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+#include "IsopodAppTypes.h"
+
 InputParameters
 isopodApp::validParams()
 {
@@ -29,7 +31,18 @@ isopodApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"isopodApp"});
   Registry::registerActionsTo(af, {"isopodApp"});
 
-  /* register custom execute flags, action syntax, etc. here */
+  auto & syntax = s;
+  auto & factory = f;
+
+  // Optimization execution flags
+  registerExecFlag(EXEC_OBJECTIVE);
+  registerExecFlag(EXEC_GRADIENT);
+  registerExecFlag(EXEC_HESSIAN);
+
+  // Form Function actions
+  registerSyntaxTask("AddFormFunctionAction", "FormFunction", "add_form_function");
+  registerMooseObjectTask("add_form_function", FormFunction, false);
+  addTaskDependency("add_form_function", "add_vector_postprocessor");
 }
 
 void
