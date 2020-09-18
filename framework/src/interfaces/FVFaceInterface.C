@@ -32,18 +32,10 @@ FVFaceInterface::gradUDotNormal(const T &
   return fv_var.adGradSln(face_info) * normal();
 #else
 
-  // Orthogonal correction approach
-
   // Orthogonal contribution
   auto orthogonal = (neighbor_value - elem_value) / face_info.dCFMag();
 
-  // // Non-orthogonal contribution. Can't use it because uncorrectedAdGradSln relies on
-  // // MOOSE_GLOBAL_AD_INDEXING
-  // const auto & linear_interp_grad = fv_var.uncorrectedAdGradSln(face_info);
-  // const auto t_vec = face_info.normal() - face_info.eCF();
-  // auto non_orthogonal = linear_interp_grad * t_vec;
-
-  return orthogonal; // + non_orthogonal;
+  return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
 #endif
 }
 

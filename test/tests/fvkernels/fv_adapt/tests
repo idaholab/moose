@@ -13,6 +13,7 @@
     exodiff = 'transient-adapt_out.e transient-adapt_out.e-s002'
     requirement = 'The system shall be able to perform finite volume simulations with adaptivity and give correct results'
     cli_args = 'Variables/u/fv=true'
+    ad_indexing_type = 'global'
   []
   [steady-mms]
     type = PythonUnitTest
@@ -21,5 +22,6 @@
     requirement = 'The system shall display first order convergence when there is significant skewness in the mesh due to mismatch between cell levels.'
     method = '!dbg'
     min_parallel = 8
+    required_python_packages = 'pandas matplotlib'
   []
 []

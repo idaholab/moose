@@ -18,6 +18,7 @@
     input = 'advection-diffusion-flux-bcs.i'
     exodiff = 'advection-diffusion-flux-bcs_out.e'
     requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method, using flux boundary conditions, and display second order convergence.'
+    ad_indexing_type = 'global' # different gradUDotNormal computation results in different results for FVDiffusionFunctionBC
   []
   [mat-advection-diffusion]
     type = Exodiff

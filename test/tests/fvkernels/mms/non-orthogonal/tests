@@ -6,6 +6,8 @@
     requirement = 'The system shall display second order convergence, when using face side neighbors to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
     min_parallel = 2
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
   []
   [extended]
     type = PythonUnitTest
@@ -15,5 +17,7 @@
     requirement = 'The system shall display 1.5 order convergence, when using face vertex neighbors to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
     min_parallel = 2
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
   []
 []
