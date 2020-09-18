@@ -1,25 +1,16 @@
-###########################################################
-# This is test of the Dirac delta function System. The
-# ConstantPointSource object is used to apply a constant
-# Dirac delta contribution at a specified point in the
-# domain.
-#
-# @Requirement F3.50
-###########################################################
-
-
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 10
+  file = square.e
+  uniform_refine = 4
 []
 
 [Variables]
   active = 'u'
+
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
+
   [./v]
     order = FIRST
     family = LAGRANGE
@@ -27,6 +18,8 @@
 []
 
 [Kernels]
+  active = 'diff'
+
   [./diff]
     type = Diffusion
     variable = u
@@ -34,31 +27,37 @@
 []
 
 [DiracKernels]
+
   [./point_source]
     type = ConstantPointSource
     variable = u
-    value = 2.0
-    point = '0.2 0 0'
+    value = 1.0
+    point = '0.2 0.3'
   [../]
   [./point_source2]
     type = ConstantPointSource
     variable = u
     value = 2.0
-    point = '0.8 0 0'
+    point = '0.8 0.3'
   [../]
+
+
 []
 
 [BCs]
+  active = 'left right'
+
   [./left]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = 1
     value = 0
   [../]
+
   [./right]
     type = DirichletBC
     variable = u
-    boundary = right
+    boundary = 2
     value = 1
   [../]
 []
@@ -67,10 +66,9 @@
   type = Steady
 
   solve_type = 'PJFNK'
-
 []
 
 [Outputs]
-  file_base = 1d_out
+  file_base = 2d_out
   exodus = true
 []

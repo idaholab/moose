@@ -32,9 +32,5 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
-
-  const Real & _value;
-  std::vector<Real> _point_param;
-  Point _p;
+  std::map<Point, Real> _point_to_value;
 };
-

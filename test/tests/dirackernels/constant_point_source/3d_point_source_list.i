@@ -1,17 +1,9 @@
-###########################################################
-# This is test of the Dirac delta function System. The
-# ConstantPointSource object is used to apply a constant
-# Dirac delta contribution at a specified point in the
-# domain.
-#
-# @Requirement F3.50
-###########################################################
-
-
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 3
   nx = 10
+  ny = 10
+  nz = 10
 []
 
 [Variables]
@@ -37,14 +29,8 @@
   [./point_source]
     type = ConstantPointSource
     variable = u
-    value = 2.0
-    point = '0.2 0 0'
-  [../]
-  [./point_source2]
-    type = ConstantPointSource
-    variable = u
-    value = 2.0
-    point = '0.8 0 0'
+    value = '1.0 2.0 -1.0'
+    point = '0.2 0.3 0.4 0.2 0.8 0.2 0.8 0.2 0.2'
   [../]
 []
 
@@ -71,6 +57,6 @@
 []
 
 [Outputs]
-  file_base = 1d_out
+  file_base = 3d_out
   exodus = true
 []

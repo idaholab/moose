@@ -32,6 +32,18 @@
     value = 1.0
     point = '0.2 0.3 0.4'
   [../]
+  [./point_source1]
+    type = ConstantPointSource
+    variable = u
+    value = 2.0
+    point = '0.2 0.8 0.2'
+  [../]
+  [./point_source2]
+    type = ConstantPointSource
+    variable = u
+    value = -1.0
+    point = '0.8 0.2 0.2'
+  [../]
 []
 
 [BCs]
@@ -57,5 +69,6 @@
 []
 
 [Outputs]
+    file_base = 3d_out
   exodus = true
 []

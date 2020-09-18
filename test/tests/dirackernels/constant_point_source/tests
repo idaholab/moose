@@ -7,25 +7,46 @@
     [1D]
       type = 'Exodiff'
       input = '1d_point_source.i'
-      exodiff = '1d_point_source_out.e'
+      exodiff = '1d_out.e'
 
-      detail = 'in 1D,'
+      detail = 'in 1D, '
+    []
+    [1D_list]
+      type = 'Exodiff'
+      input = '1d_point_source_list.i'
+      exodiff = '1d_out.e'
+
+      detail = 'in 1D with a list of inputs, '
     []
 
     [2D]
       type = 'Exodiff'
-      input = 'constant_point_source_test.i'
-      exodiff = 'out.e'
+      input = '2d_point_source.i'
+      exodiff = '2d_out.e'
 
-      detail = 'in 2D, and'
+      detail = 'in 2D, '
+    []
+    [2D_list]
+      type = 'Exodiff'
+      input = '2d_point_source_list.i'
+      exodiff = '2d_out.e'
+
+      detail = 'in 2D with a list of inputs, '
     []
 
     [3D]
       type = 'Exodiff'
       input = '3d_point_source.i'
-      exodiff = '3d_point_source_out.e'
+      exodiff = '3d_out.e'
 
-      detail = 'in 3D.'
+      detail = 'in 3D, and '
+    []
+    [3D_list]
+      type = 'Exodiff'
+      input = '3d_point_source.i'
+      exodiff = '3d_out.e'
+
+      detail = 'in 3D with a list of inputs.'
     []
   []
 []
