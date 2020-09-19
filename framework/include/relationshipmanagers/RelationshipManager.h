@@ -40,20 +40,14 @@ public:
   /**
    * Called before this RM is attached.  Will only be called once.
    */
-  void init()
-  {
-    if (!_inited)
-      internalInit();
-    _inited = true;
-  }
-
-  /**
-   * Called before this RM is attached.  Will only be called once. Also sets the mesh
-   */
   void init(const MeshBase & mesh)
   {
-    init();
-    set_mesh(&mesh);
+    if (!_inited)
+    {
+      internalInit(mesh);
+      set_mesh(&mesh);
+    }
+    _inited = true;
   }
 
   /**
@@ -120,7 +114,7 @@ protected:
   /**
    * Called before this RM is attached.  Only called once
    */
-  virtual void internalInit() = 0;
+  virtual void internalInit(const MeshBase & mesh) = 0;
 
   /// Whether or not this has been initialized
   bool _inited = false;

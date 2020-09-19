@@ -125,6 +125,7 @@ CreateDisplacedProblemAction::act()
             "We should be adding geometric rms so early that we haven't set our MeshBase yet");
 
       _mesh->allowRemoteElementRemoval(false);
+      // Displaced mesh should not exist yet
     }
 
     if (_current_task == "add_algebraic_rm")
@@ -155,20 +156,11 @@ CreateDisplacedProblemAction::act()
       addProxyGeometricRelationshipManagers(displaced_nl, undisplaced_nl);
 
       // When adding the geometric relationship mangers we told the mesh not to allow remote element
-      // removal during the initial MeshBase::prepare_for_use call. If we're using a distributed
-      // mesh we need to make sure we now allow remote element removal and then delete the remote
-      // elmeents after the EquationSystems init
-      if (_mesh->allowRemoteElementRemoval())
+      // removal during the initial MeshBase::prepare_for_use call. Verify that we did indeed tell
+      // the mesh that
+      if (_mesh->allowRemoteElementRemoval() || _displaced_mesh->allowRemoteElementRemoval())
         mooseError("We should not have been allowing remote element deletion prior to the addition "
-                   "of algebraic relationship managers");
-      _mesh->allowRemoteElementRemoval(true);
-      _displaced_mesh->allowRemoteElementRemoval(true);
-
-      if (_mesh->isDistributedMesh())
-      {
-        _mesh->needsRemoteElemDeletion(true);
-        _displaced_mesh->needsRemoteElemDeletion(true);
-      }
+                   "of late geometric ghosting functors");
     }
   }
 }

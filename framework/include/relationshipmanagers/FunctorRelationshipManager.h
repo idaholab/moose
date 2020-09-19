@@ -55,8 +55,8 @@ public:
   {
     if (_functor)
     {
-       _functor->set_mesh(mesh);
-       _mesh = mesh;
+      _functor->set_mesh(mesh);
+      _mesh = mesh;
     }
     else
       mooseError("functor does not exist");

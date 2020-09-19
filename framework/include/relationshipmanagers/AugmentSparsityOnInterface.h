@@ -51,7 +51,9 @@ public:
    * different meshes. The operations in  GhostingFunctor are mesh dependent.
    */
   virtual std::unique_ptr<GhostingFunctor> clone() const override
-  { return libmesh_make_unique<AugmentSparsityOnInterface>(*this); }
+  {
+    return libmesh_make_unique<AugmentSparsityOnInterface>(*this);
+  }
 
   /**
    * According to the base class docs, "We call mesh_reinit() whenever
@@ -71,7 +73,7 @@ public:
   virtual bool operator==(const RelationshipManager & other) const override;
 
 protected:
-  virtual void internalInit() override;
+  virtual void internalInit(const MeshBase &) override;
 
   /**
    * The Mesh we're calculating on

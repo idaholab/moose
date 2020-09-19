@@ -47,7 +47,7 @@ public:
   void dofmap_reinit() override;
 
 protected:
-  virtual void internalInit() override;
+  virtual void internalInit(const MeshBase &) override;
 
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.

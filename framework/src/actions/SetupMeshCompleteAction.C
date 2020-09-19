@@ -114,9 +114,13 @@ SetupMeshCompleteAction::act()
   }
   else if (_current_task == "delete_remote_elements_post_equation_systems_init")
   {
+    if (_displaced_mesh &&
+        (_mesh->needsRemoteElemDeletion() != _displaced_mesh->needsRemoteElemDeletion()))
+      mooseError("Our reference and displaced meshes are not in sync with respect to whether we "
+                 "should delete remote elements.");
+
     // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
-    // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
-    // trigger this.
+    // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
       _mesh->getMesh().delete_remote_elements();

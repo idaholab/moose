@@ -305,8 +305,8 @@ addActionTypes(Syntax & syntax)
                            "(add_coupling_rm)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
-                           "(init_problem)"
                            "(delete_remote_elements_post_equation_systems_init)"
+                           "(init_problem)"
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this

@@ -1970,11 +1970,28 @@ void
 MooseApp::attachRelationshipManagers(MeshBase & mesh)
 {
   for (auto & rm : _relationship_managers)
-    if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && rm->attachGeometricEarly())
+  {
+    if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
-      rm->init(mesh);
-      mesh.add_ghosting_functor(*rm);
+      if (rm->attachGeometricEarly())
+      {
+        rm->init(mesh);
+        mesh.add_ghosting_functor(*rm);
+      }
+      else
+      {
+        // If we have a geometric ghosting functor that can't be attached early, then we have to
+        // prevent the mesh from deleting remote elements
+        mesh.allow_remote_element_removal(false);
+
+        // The MooseMesh and MeshBase should't be connected yet
+        MooseMesh * const moose_mesh = _action_warehouse.mesh().get();
+        if (moose_mesh->getMeshPtr())
+          mooseError("The MeshBase and MooseMesh shouldn't be connected yet.");
+        moose_mesh->allowRemoteElementRemoval(false);
+      }
     }
+  }
 
   _geometric_rms_attached = true;
 }
@@ -1986,49 +2003,29 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
   {
     if (rm->isType(rm_type))
     {
-      // Will attach them later (during algebraic)
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !rm->attachGeometricEarly())
-        continue;
-
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !_geometric_rms_attached)
       {
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
-        auto & mesh = _action_warehouse.mesh();
+        MooseMesh * const mesh = _action_warehouse.mesh().get();
 
-        MeshBase & mesh_base = mesh->getMesh();
-
-        if (_geometric_rms_attached)
+        if (!rm->attachGeometricEarly())
         {
-          // We already attached the geometric ghosting functors, so we should not attach them
-          // again. Instead we do a sanity check to make sure that we did indeed add them
-          bool rm_found = false;
-          for (const GhostingFunctor * const gf :
-               as_range(mesh_base.ghosting_functors_begin(), mesh_base.ghosting_functors_end()))
-            if (const auto * const as_rm = dynamic_cast<const RelationshipManager * const>(gf))
-              if ((*as_rm) == *rm)
-              {
-                rm_found = true;
-                break;
-              }
+          // Will attach them later (during algebraic). But also, we need to tell the mesh that we
+          // shouldn't be deleting remote elements yet
+          if (!mesh->getMeshPtr())
+            mooseError("We should have attached a MeshBase object to the mesh by now");
 
-          if (!rm_found)
-            mooseError("We claim to have attached a geometric rm, but it's not attached to the "
-                       "MeshBase object");
+          mesh->allowRemoteElementRemoval(false);
         }
         else
         {
+          MeshBase & mesh_base = mesh->getMesh();
           rm->init(mesh_base);
-          mesh->getMesh().add_ghosting_functor(*rm);
+          mesh_base.add_ghosting_functor(*rm);
 
-          // The reference and displaced meshes should have the same geometric RMs.
-          // It is necessary for keeping both meshes consistent.
           if (_action_warehouse.displacedMesh())
-          {
-            // Use shared_ptr here so that mesh can share its ownership
-            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
-            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
-            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
-          }
+            mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
+                       "geometric relationship managers.");
         }
       }
 

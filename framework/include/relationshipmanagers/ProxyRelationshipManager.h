@@ -56,7 +56,7 @@ public:
   }
 
 protected:
-  virtual void internalInit() override{};
+  virtual void internalInit(const MeshBase &) override{};
 
   System * _other_system;
 };
