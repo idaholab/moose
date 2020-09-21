@@ -38,4 +38,34 @@
     cli_args = 'Mesh/patch/partitioner=centroid --mesh-only generate_radiation_patch_centroid.e'
     issues = "#14000"
   [../]
+
+  [./generate_radiation_patch_grid]
+    type = 'Exodiff'
+    input = 'generate_radiation_patch.i'
+    exodiff = 'generate_radiation_patch_grid.e'
+    requirement = "The system shall be able to use a uniform grid for subdividing sidesets into patches."
+    design = 'source/meshgenerators/PatchSidesetGenerator.md'
+    cli_args = 'Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid.e'
+    issues = "#15829"
+  [../]
+
+  [./generate_radiation_patch_grid_2D]
+    type = 'Exodiff'
+    input = 'generate_radiation_patch_grid_2D.i'
+    exodiff = 'generate_radiation_patch_grid_2D_in.e'
+    requirement = "The system shall be able to use a uniform grid for subdividing 1D sidesets into patches."
+    design = 'source/meshgenerators/PatchSidesetGenerator.md'
+    cli_args = 'Mesh/patch/partitioner=grid --mesh-only'
+    issues = "#15829"
+  [../]
+
+  [./generate_radiation_patch_grid_2D_overpart]
+    type = 'Exodiff'
+    input = 'generate_radiation_patch_grid_2D.i'
+    exodiff = 'generate_radiation_patch_grid_2D_overpart.e'
+    requirement = "The system shall be able to adjust the number of patches of partitions that end up empty."
+    design = 'source/meshgenerators/PatchSidesetGenerator.md'
+    cli_args = 'Mesh/patch/n_patches=61 Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid_2D_overpart.e'
+    issues = "#15829"
+  [../]
 []

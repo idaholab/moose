@@ -33,7 +33,19 @@ protected:
 
   Elem * boundaryElementHelper(MeshBase & mesh, libMesh::ElemType type) const;
 
+  /// a function for implementing custom partitioning
+  void partition(MeshBase & mesh);
+
+  /**
+   * Checks partitions and makes sure every partition has at least one elem.
+   * If a partition is empty, it's removed and the remaining ones are "renamed"
+   */
+  void checkPartitionAndCompress(MeshBase & mesh);
+
   std::unique_ptr<MeshBase> & _input;
+
+  /// dimensionality of the sidesets to partition
+  unsigned int _dim;
 
   /// the number of patches that this sideset generator divides _sideset into
   unsigned int _n_patches;
