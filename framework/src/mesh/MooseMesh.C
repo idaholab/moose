@@ -19,6 +19,7 @@
 #include "NonlinearSystemBase.h"
 #include "Assembly.h"
 #include "SubProblem.h"
+#include "MooseVariableBase.h"
 
 #include <utility>
 
@@ -3249,4 +3250,83 @@ MooseMesh::deleteRemoteElements()
   _mesh->allow_remote_element_removal(true);
 
   _mesh->delete_remote_elements();
+}
+
+void
+MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars)
+{
+  if (_face_info_dirty)
+    buildFaceInfo();
+
+  for (FaceInfo & face : _all_face_info)
+  {
+    if (face.processor_id() != this->processor_id())
+      continue;
+
+    // get elem & neighbor elements, and set subdomain ids
+    const Elem & elem_elem = face.elem();
+    const Elem * const neighbor_elem = face.neighborPtr();
+    const SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
+    const SubdomainID neighbor_subdomain_id =
+        neighbor_elem ? neighbor_elem->subdomain_id() : Elem::invalid_subdomain_id;
+
+    // loop through vars
+    for (unsigned int j = 0; j < moose_vars.size(); ++j)
+    {
+      // get the variable, its name, and its domain of definition
+      const MooseVariableBase * const var = moose_vars[j];
+      const auto & var_name = var->name();
+      std::set<SubdomainID> var_subdomains = var->blockIDs();
+
+      // unfortunately, MOOSE is lazy and all subdomains has its own
+      // ID. If ANY_BLOCK_ID is in var_subdomains, inject all subdomains explicitly
+      if (var_subdomains.find(Moose::ANY_BLOCK_ID) != var_subdomains.end())
+        var_subdomains = this->meshSubdomains();
+
+      // first stash away DoF information; this is more difficult than you would
+      // think because var can be defined on the elem subdomain, the neighbor subdomain
+      // or both subdomains
+      // elem
+      std::vector<dof_id_type> elem_dof_indices;
+      if (var_subdomains.find(elem_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(&elem_elem, elem_dof_indices);
+      else
+        elem_dof_indices = {libMesh::DofObject::invalid_id};
+      face.elemDofIndices(var_name) = elem_dof_indices;
+      // neighbor
+      std::vector<dof_id_type> neighbor_dof_indices;
+      if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(neighbor_elem, neighbor_dof_indices);
+      else
+        neighbor_dof_indices = {libMesh::DofObject::invalid_id};
+      face.neighborDofIndices(var_name) = neighbor_dof_indices;
+
+      /**
+       * The following paragraph of code assigns the VarFaceNeighbors
+       * 1. The face is an internal face of this variable if it is defined on
+       *    the elem and neighbor subdomains
+       * 2. The face is an invalid face of this variable if it is neither defined
+       *    on the elem nor the neighbor subdomains
+       * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
+       *    applies
+       */
+      bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
+      bool var_defined_neighbor =
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
+      if (var_defined_elem && var_defined_neighbor)
+        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+      else if (!var_defined_elem && !var_defined_neighbor)
+        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+      else
+      {
+        // this is a boundary face for this variable, set elem or neighbor
+        if (var_defined_elem)
+          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
+        else if (var_defined_neighbor)
+          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+        else
+          mooseError("Should never get here");
+      }
+    }
+  }
 }

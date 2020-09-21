@@ -37,6 +37,7 @@
 class MooseMesh;
 class Assembly;
 class RelationshipManager;
+class MooseVariableBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1027,7 +1028,8 @@ public:
 
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
-  std::vector<FaceInfo *> & faceInfo()
+  /// Accessor for local \p FaceInfo objects
+  const std::vector<const FaceInfo *> & faceInfo()
   {
     buildFaceInfo();
     return _face_info;
@@ -1036,6 +1038,17 @@ public:
   // const
   ///@}
 
+  /**
+   * Cache \p elem and \p neighbor dof indices information for variables in all the local \p
+   * FaceInfo objects to save computational expense
+   */
+  void cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars);
+
+  /**
+   * Compute the face coordinate value for all \p FaceInfo objects. 'Coordinate' here means a
+   * coordinate value associated with the coordinate system. For Cartesian coordinate systems,
+   * 'coordinate' is simply '1'; in RZ, '2*pi*r', and in spherical, '4*pi*r^2'
+   */
   void computeFaceInfoFaceCoords(const SubProblem & subproblem);
 
   /**
@@ -1223,9 +1236,10 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
-  /// FaceInfo object storing information for face based loops
-  std::vector<FaceInfo *> _face_info;
+  /// FaceInfo object storing information for face based loops. This container holds all the \p FaceInfo objects accessible from this process
   std::vector<FaceInfo> _all_face_info;
+  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id, e.g. the local \p FaceInfo objects
+  std::vector<const FaceInfo *> _face_info;
 
   /// Map from elem-side pair to FaceInfo
   std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *> _elem_side_to_face_info;

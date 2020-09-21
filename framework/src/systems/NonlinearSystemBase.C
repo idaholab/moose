@@ -1403,9 +1403,9 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
     if (_fe_problem.haveFV())
     {
-      using FVRange = StoredRange<std::vector<FaceInfo *>::const_iterator, FaceInfo *>;
+      using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
       ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
-      FVRange faces(&_fe_problem.mesh().faceInfo());
+      FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
       Threads::parallel_reduce(faces, fvr);
     }
 
@@ -2395,9 +2395,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         {
           // the same loop works for both residual and jacobians because it keys
           // off of FEProblem's _currently_computing_jacobian parameter
-          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo *>;
+          using FVRange =
+              StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
           ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-          FVRange faces(&_fe_problem.mesh().faceInfo());
+          FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
           Threads::parallel_reduce(faces, fvj);
         }
 
@@ -2430,9 +2431,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
         if (_fe_problem.haveFV())
         {
-          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo *>;
+          using FVRange =
+              StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
           ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-          FVRange faces(&_fe_problem.mesh().faceInfo());
+          FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
           Threads::parallel_reduce(faces, fvj);
         }
 
