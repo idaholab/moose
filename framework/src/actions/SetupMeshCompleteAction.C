@@ -18,7 +18,7 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
 registerMooseAction("MooseApp",
                     SetupMeshCompleteAction,
-                    "delete_remote_elements_post_equation_systems_init");
+                    "delete_remote_elements_after_late_geometric_ghosting");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "execute_mesh_modifiers");
 
@@ -112,7 +112,7 @@ SetupMeshCompleteAction::act()
       }
     }
   }
-  else if (_current_task == "delete_remote_elements_post_equation_systems_init")
+  else if (_current_task == "delete_remote_elements_after_late_geometric_ghosting")
   {
     if (_displaced_mesh &&
         (_mesh->needsRemoteElemDeletion() != _displaced_mesh->needsRemoteElemDeletion()))

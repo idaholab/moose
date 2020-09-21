@@ -181,7 +181,7 @@ addActionTypes(Syntax & syntax)
   registerTask("execute_mesh_generators", true);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
-  registerTask("delete_remote_elements_post_equation_systems_init", false);
+  registerTask("delete_remote_elements_after_late_geometric_ghosting", false);
   registerTask("setup_mesh_complete", true); // calls prepare
   registerTask("add_geometric_rm", false);
   registerTask("attach_geometric_rm", true);
@@ -305,7 +305,7 @@ addActionTypes(Syntax & syntax)
                            "(add_coupling_rm)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
-                           "(delete_remote_elements_post_equation_systems_init)"
+                           "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
                            "(add_output)"
                            "(add_postprocessor)"
