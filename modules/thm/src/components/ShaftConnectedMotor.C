@@ -29,11 +29,14 @@ ShaftConnectedMotor::addVariables()
 void
 ShaftConnectedMotor::addMooseObjects()
 {
+  const UserObjectName & uo_name = getShaftConnectedUserObjectName();
   {
     std::string class_name = "ShaftConnectedMotorUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<Real>("torque") = _torque;
     params.set<Real>("inertia") = _inertia;
-    _sim.addUserObject(class_name, getShaftConnectedUserObjectName(), params);
+    _sim.addUserObject(class_name, uo_name, params);
+    connectObject(params, uo_name, "torque");
+    connectObject(params, uo_name, "inertia");
   }
 }
