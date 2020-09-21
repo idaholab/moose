@@ -89,12 +89,6 @@ AddPeriodicBCAction::autoTranslationBoundaries()
     // everywhere because we don't know what we need...
     if (_mesh->isDistributedMesh())
     {
-      const std::set<BoundaryID> & ids = _mesh->meshBoundaryIds();
-      for (const auto & bid : ids)
-        _problem->addGhostedBoundary(bid);
-
-      _problem->ghostGhostedBoundaries();
-
       bool is_orthogonal_mesh = _mesh->detectOrthogonalDimRanges();
 
       // If we can't detect the orthogonal dimension ranges for this
@@ -196,9 +190,6 @@ AddPeriodicBCAction::act()
       p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
       setPeriodicVars(p, getParam<std::vector<VariableName>>("variable"));
 
-      _problem->addGhostedBoundary(p.myboundary);
-      _problem->addGhostedBoundary(p.pairedboundary);
-
       nl.dofMap().add_periodic_boundary(p);
       if (displaced_problem)
         displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
@@ -225,9 +216,6 @@ AddPeriodicBCAction::act()
       ipb.pairedboundary =
           _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
       setPeriodicVars(ipb, getParam<std::vector<VariableName>>("variable"));
-
-      _problem->addGhostedBoundary(ipb.myboundary);
-      _problem->addGhostedBoundary(ipb.pairedboundary);
 
       // Add the pair of periodic boundaries to the dof map
       nl.dofMap().add_periodic_boundary(pb, ipb);
