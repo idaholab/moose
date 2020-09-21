@@ -323,30 +323,6 @@ Eigenvalue::prepareSolverOptions()
 }
 
 void
-Eigenvalue::postSolve()
-{
-#ifdef LIBMESH_HAVE_SLEPC
-  if (_normalization)
-  {
-    Real val = getParam<Real>("normal_factor");
-
-    if (MooseUtils::absoluteFuzzyEqual(*_normalization, 0.0))
-      mooseError("Cannot normalize eigenvector by 0");
-    else
-      val /= *_normalization;
-
-    if (!MooseUtils::absoluteFuzzyEqual(val, 1.0))
-    {
-      _eigen_problem.scaleEigenvector(val);
-      // update all aux variables and user objects
-      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
-        _eigen_problem.execute(flag);
-    }
-  }
-#endif
-}
-
-void
 Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
 #ifdef LIBMESH_HAVE_SLEPC

@@ -60,7 +60,10 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
     _solve_timer(registerTimedSection("solve", 1)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
-    _has_normalization(false)
+    _has_normalization(false),
+    _normal_factor(1.0),
+    _pre_scale_factor(1.0),
+    _has_pre_scale(false)
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -431,31 +434,15 @@ EigenProblem::solve()
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
+
+    // Scale eigen vector if necessary
+    preScaleEigenVector();
+
     _nl->solve();
     _nl->update();
 
-    if (_has_normalization)
-    {
-      Real v;
-      if (_normal_factor == std::numeric_limits<Real>::max())
-      {
-        // when normal factor is not provided, we use the inverse of the norm of
-        // the active eigenvalue for normalization
-        auto eig = _nl_eigen->getAllConvergedEigenvalues()[activeEigenvalueIndex()];
-        v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
-      }
-      else
-        v = _normal_factor;
-
-      Real c = getPostprocessorValue(_normalization);
-      while (!MooseUtils::absoluteFuzzyEqual(v, c))
-      {
-        scaleEigenvector(v / c);
-        // need one residual evaluation to sync objects on linear
-        computeResidualL2Norm();
-        c = getPostprocessorValue(_normalization);
-      }
-    }
+    // Scale eigen vector if users ask
+    postScaleEigenVector();
   }
 
   // sync solutions in displaced problem
@@ -466,6 +453,70 @@ EigenProblem::solve()
   if (!_app.isUltimateMaster())
     PetscOptionsPop();
 #endif
+}
+
+void
+EigenProblem::preScaleEigenVector()
+{
+  if (_has_pre_scale)
+    scaleEigenvector(_pre_scale_factor);
+
+  _has_pre_scale = false;
+}
+
+void
+EigenProblem::postScaleEigenVector()
+{
+  if (_has_normalization)
+  {
+    Real v;
+    if (_normal_factor == std::numeric_limits<Real>::max())
+    {
+      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+        mooseError("Number of converged eigenvalues ",
+                   _nl_eigen->getNumConvergedEigenvalues(),
+                   " but you required eigenvaue ",
+                   _active_eigen_index);
+
+      // when normal factor is not provided, we use the inverse of the norm of
+      // the active eigenvalue for normalization
+      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
+      v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+    }
+    else
+      v = _normal_factor;
+
+    Real c = getPostprocessorValue(_normalization);
+
+    // We scale SLEPc eigen vector here, so we need to scale it back for optimal
+    // convergence if we call EPS solver again
+    _has_pre_scale = true;
+    mooseAssert(v != 0., "normal factor can not be zero");
+    _pre_scale_factor = c / v;
+
+    unsigned int itr = 0;
+
+    while (!MooseUtils::absoluteFuzzyEqual(v, c))
+    {
+      // If postprocessor is not defined on eigen variables, scaling might not work
+      if (itr > 10)
+        mooseError("Can not scale eigenvector to the required factor ",
+                   v,
+                   " please check if postprocessor is defined on only eigen variables");
+
+      mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
+
+      scaleEigenvector(v / c);
+
+      // update all aux variables and user objects
+      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
+        execute(flag);
+
+      c = getPostprocessorValue(_normalization);
+
+      itr++;
+    }
+  }
 }
 
 void

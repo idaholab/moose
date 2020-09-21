@@ -46,11 +46,6 @@ public:
 
   virtual void execute() override;
 
-  /**
-   * Here we scale the solution by the specified scalar and postprocessor value
-   */
-  virtual void postSolve() override;
-
   /*
    * Prepare right petsc options
    */

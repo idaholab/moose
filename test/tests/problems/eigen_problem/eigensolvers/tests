@@ -154,6 +154,11 @@
     input = 'ne_coupled_scaled.i'
     exodiff = 'ne_coupled_scaled_out.e'
     slepc_version = '>=3.8.0'
+    # This is used to make sure eigenvector prescaling work properly. Without "prescaling", the initial
+    # residual will be around "e-01".
+    expect_out = '\s*Nonlinear\s+Newton\s+iteration\s+starts\s+0\s+Nonlinear\s+\|R\|\s+=\s+\d+\.\d+e-0[23]'
+    # Without this, the above regex will not work. Do not know how to match a colored number
+    cli_args = '--color off'
     issues = '#14500'
     requirement = "Eigenvalue system should be able scale eigenvector such that postprocessor is a certain value"
   []

@@ -165,10 +165,29 @@ public:
    */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
 
-#endif
-
+  /**
+   * Set postprocessor and normalization factor
+   * 'Postprocessor' is often used to compute an integral of physics variables
+   */
   void setNormalization(const PostprocessorName pp,
                         const Real value = std::numeric_limits<Real>::max());
+
+  /**
+   * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
+   * This might be useful when couple to other physics
+   */
+  void postScaleEigenVector();
+
+  /**
+   * Eigenvector need to be scaled back if it was scaled in an ealier stage
+   * Scaling eigen vector does not affect solution (eigenvaue, eigenvector),
+   * but it does affect the convergence rate. To have a optimal converge rate,
+   * We pre scale eigen vector using the same factor as that computed in
+   * "postScaleEigenVector"
+   */
+  void preScaleEigenVector();
+
+#endif
 
 protected:
   unsigned int _n_eigen_pairs_required;
@@ -194,4 +213,7 @@ protected:
   bool _has_normalization;
   PostprocessorName _normalization;
   Real _normal_factor;
+  // Pre scale factor
+  Real _pre_scale_factor;
+  bool _has_pre_scale;
 };
