@@ -3220,3 +3220,15 @@ MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
     // happens when algebraic ghosting functors are added)
     _need_delete = true;
 }
+
+void
+MooseMesh::deleteRemoteElements()
+{
+  _allow_remote_element_removal = true;
+  if (!_mesh)
+    mooseError("Cannot delete remote elements because we have not yet attached a MeshBase");
+
+  _mesh->allow_remote_element_removal(true);
+
+  _mesh->delete_remote_elements();
+}

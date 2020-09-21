@@ -1113,6 +1113,11 @@ public:
   bool allowRemoteElementRemoval() const { return _allow_remote_element_removal; }
 
   /**
+   * Delete remote elements
+   */
+  void deleteRemoteElements();
+
+  /**
    * Whether mesh base object was constructed or not
    */
   bool hasMeshBase() const { return _mesh.get() != nullptr; }

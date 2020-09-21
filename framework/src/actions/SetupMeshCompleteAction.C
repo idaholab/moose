@@ -123,9 +123,9 @@ SetupMeshCompleteAction::act()
     // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
-      _mesh->getMesh().delete_remote_elements();
+      _mesh->deleteRemoteElements();
       if (_displaced_mesh)
-        _displaced_mesh->getMesh().delete_remote_elements();
+        _displaced_mesh->deleteRemoteElements();
     }
   }
   else
