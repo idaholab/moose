@@ -26,6 +26,13 @@
 
       detail = 'in 2D, '
     []
+    [2D_file]
+      type = 'Exodiff'
+      input = '2d_point_source_file.i'
+      exodiff = '2d_out.e'
+
+      detail = 'in 2D with a file of inputs, '
+    []
     [2D_list]
       type = 'Exodiff'
       input = '2d_point_source_list.i'
@@ -39,11 +46,18 @@
       input = '3d_point_source.i'
       exodiff = '3d_out.e'
 
-      detail = 'in 3D, and '
+      detail = 'in 3D, '
+    []
+    [3D_file]
+      type = 'Exodiff'
+      input = '3d_point_source_file.i'
+      exodiff = '3d_out.e'
+
+      detail = 'in 3D with a file of inputs, and '
     []
     [3D_list]
       type = 'Exodiff'
-      input = '3d_point_source.i'
+      input = '3d_point_source_list.i'
       exodiff = '3d_out.e'
 
       detail = 'in 3D with a list of inputs.'

@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConstantPointSource.h"
+#include "MooseUtils.h"
+#include "DelimitedFileReader.h"
 
 registerMooseObject("MooseApp", ConstantPointSource);
 
@@ -18,17 +20,30 @@ ConstantPointSource::validParams()
 {
   InputParameters params = DiracKernel::validParams();
 
-  params.addParam<std::vector<Real>>("value", "The values of the point sources");
-  params.addParam<std::vector<Real>>("point", "The x,y,z coordinates of the points");
+  params.addParam<std::vector<Real>>("value", "The list of values (v0...vn) of the point sources");
+  params.addParam<std::vector<Real>>("point",
+                                     "The list of coordinates (x0,y0,z0...xn,yn,zn) of the points");
   params.declareControllable("value");
+  params.addParam<FileName>("position_value_file",
+                            "The file containing positions and corresponding values.");
   return params;
 }
 
 ConstantPointSource::ConstantPointSource(const InputParameters & parameters)
   : DiracKernel(parameters)
 {
-  const std::vector<Real> value = getParam<std::vector<Real>>("value");
-  const std::vector<Real> point_param = getParam<std::vector<Real>>("point");
+
+  std::vector<Real> value = getParam<std::vector<Real>>("value");
+  std::vector<Real> point_param = getParam<std::vector<Real>>("point");
+
+  if (isParamValid("position_value_file"))
+  {
+    readFromFile(value, point_param);
+  }
+
+  if (value.size() == 0 || point_param.size() == 0)
+    mooseError("ConstantPointSource: No values or points created by input or position_value_file.");
+
   size_t dim = point_param.size() / value.size();
   Point pt;
   _point_to_value.clear();
@@ -63,4 +78,40 @@ ConstantPointSource::computeQpResidual()
 {
   //  This is negative because it's a forcing function that has been brought over to the left side
   return -_test[_i][_qp] * _point_to_value[_current_point];
+}
+
+void
+ConstantPointSource::readFromFile(std::vector<Real> & value, std::vector<Real> & point_param)
+{
+  if (value.size() != 0)
+    mooseError("ConstantPointSource: Please provide value and point in the input file or read "
+               "them from a position_value_file, not both.");
+
+  MooseUtils::DelimitedFileReader position_value_file(getParam<FileName>("position_value_file"));
+  position_value_file.setHeaderFlag(MooseUtils::DelimitedFileReader::HeaderFlag::AUTO);
+  position_value_file.read();
+  std::vector<std::vector<Real>> data = position_value_file.getData();
+  size_t num_columns = data.size();
+  if (num_columns != 4 && num_columns != 5)
+    mooseError("ConstantPointSource: The number of columns in ",
+               getParam<FileName>("position_value_file"),
+               " should be 4, or if you are including the nodal id then 5.",
+               " Even 1d and 2d models require all 3 coordinates (x,y,z)",
+               " when reading from file.");
+
+  unsigned int skip_gid_column = 0;
+  if (num_columns == 5)
+    skip_gid_column = 1;
+
+  unsigned int num_rows = data[0].size();
+  point_param.resize(3 * num_rows);
+  value.resize(num_rows);
+
+  for (unsigned int i = 0; i < num_rows; ++i)
+  {
+    point_param[3 * i + 0] = data[0][i];
+    point_param[3 * i + 1] = data[1][i];
+    point_param[3 * i + 2] = data[2][i];
+    value[i] = data[3 + skip_gid_column][i];
+  }
 }

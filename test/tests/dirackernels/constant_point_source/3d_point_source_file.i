@@ -1,16 +1,17 @@
 [Mesh]
-  file = square.e
-  uniform_refine = 4
+  type = GeneratedMesh
+  dim = 3
+  nx = 10
+  ny = 10
+  nz = 10
 []
 
 [Variables]
   active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./v]
     order = FIRST
     family = LAGRANGE
@@ -18,8 +19,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -30,36 +29,31 @@
   [./point_source]
     type = ConstantPointSource
     variable = u
-    value = '1.0 2.0'
-    point = '0.2 0.3 0.8 0.3'
+    position_value_file = 3d_point_value_file.csv 
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
 []
 
 [Outputs]
-  file_base = 2d_out
+  file_base = 3d_out
   exodus = true
 []

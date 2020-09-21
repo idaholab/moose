@@ -30,8 +30,7 @@
   [./point_source]
     type = ConstantPointSource
     variable = u
-    value = '1.0 2.0'
-    point = '0.2 0.3 0.8 0.3'
+    position_value_file = 2d_point_value_file.csv
   [../]
 []
 

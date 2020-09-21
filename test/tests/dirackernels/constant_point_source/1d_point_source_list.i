@@ -38,7 +38,7 @@
     type = ConstantPointSource
     variable = u
     value = '2.0 2.0'
-    point = '0.2 0 0 0.8 0 0'
+    point = '0.2 0.8'
   [../]
 []
 

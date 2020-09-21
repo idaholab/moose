@@ -27,7 +27,6 @@
 []
 
 [DiracKernels]
-
   [./point_source]
     type = ConstantPointSource
     variable = u
@@ -40,8 +39,6 @@
     value = 2.0
     point = '0.8 0.3'
   [../]
-
-
 []
 
 [BCs]

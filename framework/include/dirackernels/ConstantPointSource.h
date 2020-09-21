@@ -19,18 +19,25 @@ template <>
 InputParameters validParams<ConstantPointSource>();
 
 /**
- * TOOD
+ * A ConstantPointSource DiracKernel is used to create constant point sources.
+ * Coordinates and values for the point source can be given in the input or read from file
  */
 class ConstantPointSource : public DiracKernel
 {
 public:
   static InputParameters validParams();
 
+  /// map to associate points with their value in computeQpResidual
   ConstantPointSource(const InputParameters & parameters);
 
   virtual void addPoints() override;
 
 protected:
   virtual Real computeQpResidual() override;
+  /// map to associate points with their value in computeQpResidual
   std::map<Point, Real> _point_to_value;
+
+private:
+  /// helper to read from file
+  void readFromFile(std::vector<Real> & value, std::vector<Real> & point_param);
 };
