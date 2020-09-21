@@ -18,14 +18,6 @@ Optimize::Optimize(const InputParameters & parameters) : Steady(parameters), _op
 }
 
 void
-Optimize::init()
-{
-  checkIntegrity();
-  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _problem.initialSetup();
-}
-
-void
 Optimize::execute()
 {
   _problem.outputStep(EXEC_INITIAL);

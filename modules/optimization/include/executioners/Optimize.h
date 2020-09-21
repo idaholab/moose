@@ -18,8 +18,6 @@ public:
 
   Optimize(const InputParameters & parameters);
 
-  virtual void init() override;
-
   virtual void execute() override;
 
 protected:

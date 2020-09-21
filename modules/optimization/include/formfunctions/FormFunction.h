@@ -2,6 +2,7 @@
 
 #include "MooseObject.h"
 
+#include "OptimizationResults.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
@@ -15,7 +16,7 @@ public:
    * Function to set parameters.
    * This is the first function called in objective/gradient/hessian routine
    */
-  void setParameters(const libMesh::PetscVector<Number> & x) { _parameters = x; }
+  void setParameters(const libMesh::PetscVector<Number> & x);
 
   /**
    * Function to compute objective.
@@ -44,6 +45,11 @@ public:
   /**
    * Function to retrieve current parameters
    */
+  dof_id_type getNumberOfParameters() const { return _ndof; }
+
+  /**
+   * Function to retrieve current parameters
+   */
   libMesh::PetscVector<Number> & getParameters() { return _parameters; }
   const libMesh::PetscVector<Number> & getParameters() const { return _parameters; }
 
@@ -62,6 +68,9 @@ public:
 protected:
   /// Initial conditions
   const std::vector<Real> & _initial_condition;
+
+  /// VPP to sent data to
+  OptimizationResults & _results_vpp;
 
   /// Number of parameters
   const dof_id_type _ndof;

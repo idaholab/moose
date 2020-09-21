@@ -7,7 +7,8 @@ FormFunction::validParams()
 
   params.addRequiredParam<std::vector<Real>>("initial_condition",
                                              "Initial parameters values for optimization.");
-
+  params.addRequiredParam<VectorPostprocessorName>("optimization_results",
+                                                   "OptimizationResults vector postprocessor.");
   params.registerBase("FormFunction");
   params.registerSystemAttributeName("FormFunction");
   return params;
@@ -16,11 +17,13 @@ FormFunction::validParams()
 FormFunction::FormFunction(const InputParameters & parameters)
   : MooseObject(parameters),
     _initial_condition(getParam<std::vector<Real>>("initial_condition")),
-    _ndof(_parameters.size()),
+    _results_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->getUserObject<OptimizationResults>(getParam<VectorPostprocessorName>("optimization_results"))),
+    _ndof(_initial_condition.size()),
     _parameters(_communicator, _ndof, SERIAL),
     _gradient(_communicator, _ndof, SERIAL),
     _hessian(_communicator)
 {
+  _results_vpp.setParameterValues(_initial_condition);
   _parameters = _initial_condition;
   _hessian.init(/*global_rows =*/_ndof,
                 /*global_cols =*/_ndof,
@@ -28,4 +31,14 @@ FormFunction::FormFunction(const InputParameters & parameters)
                 /*local_cols =*/_ndof,
                 /*block_diag_nz =*/_ndof,
                 /*block_off_diag_nz =*/0);
+}
+
+void
+FormFunction::setParameters(const libMesh::PetscVector<Number> & x)
+{
+  _parameters = x;
+
+  std::vector<Real> transfer;
+  _parameters.localize(transfer);
+  _results_vpp.setParameterValues(transfer);
 }

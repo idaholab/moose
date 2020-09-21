@@ -1,0 +1,7 @@
+[Tests]
+  [quadratic_optim]
+    type = CSVDiff
+    input = quadratic_minimize.i
+    csvdiff = quadratic_minimize_out_results_0001.csv
+  []
+[]

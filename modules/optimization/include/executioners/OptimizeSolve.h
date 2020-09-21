@@ -28,11 +28,8 @@ protected:
   virtual void hessianFunction(const libMesh::PetscVector<Number> & x,
                                libMesh::PetscMatrix<Number> & hessian);
 
-  /// Options to give to tao
-  const std::string & _tao_options;
-
   /// List of execute flags for when to solve the system
-  const std::set<ExecFlagType> & _solve_on;
+  const ExecFlagEnum & _solve_on;
 
   /// Form function defining objective, gradient, and hessian
   FormFunction * _form_function = nullptr;

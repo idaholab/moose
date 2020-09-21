@@ -8,37 +8,34 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addRequiredParam<std::string>("form_function", "Form function object.");
-  params.addParam<std::string>(
-      "tao_options", "", "Command line parameters for PETSc/tao optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE, EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN);
   exec_enum = {EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN};
   params.addParam<ExecFlagEnum>(
-      "solve_on", exec_enum, "List of flags indicated when inner system solve should occur.");
+      "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
   return params;
 }
 
 OptimizeSolve::OptimizeSolve(Executioner * ex)
   : SolveObject(ex),
-    _tao_options(getParam<std::string>("tao_options")),
-    _solve_on(getParam<ExecFlagEnum>("solve_on").items())
+    _solve_on(getParam<ExecFlagEnum>("solve_on"))
 {
 }
 
 bool
 OptimizeSolve::solve()
 {
+  // Initial solve
+  _inner_solve->solve();
+
   // Grab form function
-  auto ff_name = getParam<std::string>("form_function");
   std::vector<FormFunction *> ffs;
   _problem.theWarehouse()
       .query()
-      .condition<AttribName>(ff_name)
       .condition<AttribSystem>("FormFunction")
       .queryInto(ffs);
   if (ffs.empty())
-    mooseError("Unable to find a FormFunction object with the name '" + ff_name + "'");
+    mooseError("No form function object found.");
   _form_function = ffs[0];
 
   // Petsc error code to be checked after each petsc call
@@ -48,16 +45,8 @@ OptimizeSolve::solve()
   ierr = TaoCreate(_communicator.get(), &_tao);
   CHKERRQ(ierr);
 
-  // Set input parameters
-  ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
-  CHKERRQ(ierr);
-
   // Set solve type
   ierr = TaoSetType(_tao, TAONTR);
-  CHKERRQ(ierr);
-
-  // Set initial guess
-  ierr = TaoSetInitialVector(_tao, _form_function->getParameters().vec());
   CHKERRQ(ierr);
 
   // Set objective, gradient, and hessian functions
@@ -72,14 +61,29 @@ OptimizeSolve::solve()
                               this);
   CHKERRQ(ierr);
 
-  // Solve system
+  // Set initial guess
+  ierr = TaoSetInitialVector(_tao, _form_function->getParameters().vec());
+  CHKERRQ(ierr);
+
+  // Set petsc options
+  ierr = TaoSetFromOptions(_tao);
+  CHKERRQ(ierr);
+
+  // Solve optimization
   ierr = TaoSolve(_tao);
   CHKERRQ(ierr);
+
+  // Print solve statistics
+  if (getParam<bool>("verbose"))
+  {
+    ierr = TaoView(_tao, PETSC_VIEWER_STDOUT_WORLD);
+    CHKERRQ(ierr);
+  }
 
   ierr = TaoDestroy(&_tao);
   CHKERRQ(ierr);
 
-  return true;
+  return ierr == 0;
 }
 
 PetscErrorCode
@@ -117,7 +121,7 @@ OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & x)
   _form_function->setParameters(x);
   _problem.execute(EXEC_OBJECTIVE);
   _problem.execMultiApps(EXEC_OBJECTIVE);
-  if (_solve_on.find(EXEC_OBJECTIVE) != _solve_on.end())
+  if (_solve_on.contains(EXEC_OBJECTIVE))
     _inner_solve->solve();
   return _form_function->computeObjective();
 }
@@ -129,10 +133,10 @@ OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & x,
   _form_function->setParameters(x);
   _problem.execute(EXEC_GRADIENT);
   _problem.execMultiApps(EXEC_GRADIENT);
-  if (_solve_on.find(EXEC_GRADIENT) != _solve_on.end())
+  if (_solve_on.contains(EXEC_GRADIENT))
     _inner_solve->solve();
   _form_function->computeGradient();
-  gradient.swap(_form_function->getGradient());
+  gradient = _form_function->getGradient();
 }
 
 void
@@ -142,7 +146,7 @@ OptimizeSolve::hessianFunction(const libMesh::PetscVector<Number> & x,
   _form_function->setParameters(x);
   _problem.execute(EXEC_HESSIAN);
   _problem.execMultiApps(EXEC_HESSIAN);
-  if (_solve_on.find(EXEC_HESSIAN) != _solve_on.end())
+  if (_solve_on.contains(EXEC_HESSIAN))
     _inner_solve->solve();
   _form_function->computeHessian();
   hessian.swap(_form_function->getHessian());
