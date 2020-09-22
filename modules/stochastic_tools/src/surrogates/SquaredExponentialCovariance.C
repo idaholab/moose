@@ -37,6 +37,9 @@ SquaredExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
                                                       const RealEigenMatrix & xp,
                                                       const bool is_self_covariance) const
 {
+  if ((unsigned)x.cols() != _length_factor.size())
+    mooseError("length_factor size does not match dimension of trainer input.");
+
   SquaredExponentialFunction(
       K, x, xp, _length_factor, _sigma_f_squared, _sigma_n_squared, is_self_covariance);
 }

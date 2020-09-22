@@ -34,20 +34,18 @@ ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
 }
 
 void
-ExponentialCovariance::buildHyperParamMap(
+ExponentialCovariance::buildAdditionalHyperParamMap(
     std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
+    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const
 {
-  CovarianceFunctionBase::buildHyperParamMap(map, vec_map);
   map["gamma"] = _gamma;
 }
 
 void
-ExponentialCovariance::loadHyperParamMap(
+ExponentialCovariance::loadAdditionalHyperParamMap(
     std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map)
+    std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/)
 {
-  CovarianceFunctionBase::loadHyperParamMap(map, vec_map);
   _gamma = map["gamma"];
 }
 
@@ -57,6 +55,9 @@ ExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
                                                const RealEigenMatrix & xp,
                                                const bool is_self_covariance) const
 {
+  if ((unsigned)x.cols() != _length_factor.size())
+    mooseError("length_factor size does not match dimension of trainer input.");
+
   ExponentialFunction(
       K, x, xp, _length_factor, _sigma_f_squared, _sigma_n_squared, _gamma, is_self_covariance);
 }

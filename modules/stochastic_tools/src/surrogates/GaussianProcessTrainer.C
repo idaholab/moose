@@ -41,7 +41,6 @@ GaussianProcessTrainer::validParams()
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
-  params.addParam<bool>("tune", false, "Perform hyperparameter tuning using PETSc/TAO");
   params.addParam<std::string>(
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>("show_tao", false, "Switch to show TAO solver results");
@@ -70,14 +69,14 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         "_hyperparam_vec_map")),
     _covariance_function(
         getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"))),
-    _do_tuning(getParam<bool>("tune")),
+    _do_tuning(isParamValid("tune_parameters")),
     _tao_options(getParam<std::string>("tao_options")),
     _show_tao(getParam<bool>("show_tao"))
 
 {
 #ifndef LIBMESH_HAVE_PETSC
   if (_do_tuning)
-    ::mooseError("Hyperparameter tuning requires PETSc/TAO");
+    mooseError("Hyperparameter tuning requires PETSc/TAO");
 #endif
 
   _num_tunable = 0;
@@ -85,10 +84,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   // Error Checking
   if (isParamValid("tuning_min") &&
       (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
-    ::mooseError("tuning_min size does not match tune_parameters");
+    mooseError("tuning_min size does not match tune_parameters");
   if (isParamValid("tuning_max") &&
       (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
-    ::mooseError("tuning_max size does not match tune_parameters");
+    mooseError("tuning_max size does not match tune_parameters");
   // Fill Out Tunable Paramater information
   for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
   {

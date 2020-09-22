@@ -32,22 +32,29 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
 
+  /// Used for outputting additional Hyper-parameter settings in derived
+  virtual void buildAdditionalHyperParamMap(
+      std::unordered_map<std::string, Real> & /*map*/,
+      std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/) const {};
+
   /// Used for outputting Hyper-parameter settings for use in surrogate
   virtual void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
                                  std::unordered_map<std::string, std::vector<Real>> & vec_map);
+
+  /// Used for outputting Hyper-parameter settings for use in surrogate for derived
+  virtual void
+  loadAdditionalHyperParamMap(std::unordered_map<std::string, Real> & /*map*/,
+                              std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/){};
 
   /// Redirect dK/dhp for hyperparameter "hp"
   virtual void computedKdhyper(RealEigenMatrix & /*dKdhp*/,
                                const RealEigenMatrix & /*x*/,
                                std::string /*hyper_param_name*/,
-                               unsigned int /*ind*/) const {};
+                               unsigned int /*ind*/) const;
 
-  virtual bool isTunable(std::string /*name*/) const;
+  virtual bool isTunable(std::string name) const;
 
-  virtual void getTuningData(std::string /*name*/,
-                             unsigned int & /*size*/,
-                             Real & /*min*/,
-                             Real & /*max*/) const;
+  virtual void getTuningData(std::string name, unsigned int & size, Real & min, Real & max) const;
 
 protected:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters

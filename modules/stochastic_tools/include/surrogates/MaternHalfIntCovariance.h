@@ -33,13 +33,14 @@ public:
                                     const bool is_self_covariance);
 
   /// Used for outputting Hyper-parameter settings
-  void
-  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
+  void buildAdditionalHyperParamMap(
+      std::unordered_map<std::string, Real> & map,
+      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
   /// Used for setting Hyper-parameter settings
-  void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
-                         std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
+  void loadAdditionalHyperParamMap(
+      std::unordered_map<std::string, Real> & map,
+      std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
 
   /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,

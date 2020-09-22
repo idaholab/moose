@@ -69,16 +69,10 @@
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    tune = 'false'
-    tao_options = '-tao_bncg_type kd'
-    show_tao = 'true'
     distributions = 'k_dist q_dist'
     sampler = train_sample
     results_vpp = results
     results_vector = data:avg
-    tune_parameters = ' signal_variance length_factor'
-    tuning_min = ' 1e-9 1e-9'
-    tuning_max = ' 1e16  1e16'
   []
 []
 

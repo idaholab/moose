@@ -16,11 +16,12 @@ CovarianceFunctionBase::validParams()
   params.addClassDescription("Base class for covariance functions");
   params.registerBase("CovarianceFunctionBase");
   params.registerSystemAttributeName("CovarianceFunctionBase");
-  params.addParam<std::vector<Real>>("length_factor", "Length Factor to use for Covariance Kernel");
-  params.addParam<Real>("signal_variance",
-                        "Signal Variance ($\\sigma_f^2$) to use for kernel calculation.");
-  params.addParam<Real>("noise_variance",
-                        "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length Factor to use for Covariance Kernel");
+  params.addRequiredParam<Real>("signal_variance",
+                                "Signal Variance ($\\sigma_f^2$) to use for kernel calculation.");
+  params.addParam<Real>(
+      "noise_variance", 0, "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
   return params;
 }
 
@@ -41,6 +42,8 @@ CovarianceFunctionBase::buildHyperParamMap(
   map["signal_variance"] = _sigma_f_squared;
 
   vec_map["length_factor"] = _length_factor;
+
+  buildAdditionalHyperParamMap(map, vec_map);
 }
 
 void
@@ -52,6 +55,18 @@ CovarianceFunctionBase::loadHyperParamMap(
   _sigma_f_squared = map["signal_variance"];
 
   _length_factor = vec_map["length_factor"];
+
+  loadAdditionalHyperParamMap(map, vec_map);
+}
+
+void
+CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
+                                        const RealEigenMatrix & /*x*/,
+                                        std::string /*hyper_param_name*/,
+                                        unsigned int /*ind*/) const
+{
+  mooseError("Hyperparameter tuning not set up for this covariance function. Please define "
+             "computedKdhyper() to compute gradient.");
 }
 
 bool
@@ -60,9 +75,9 @@ CovarianceFunctionBase::isTunable(std::string name) const
   if (_tunable_hp.find(name) != _tunable_hp.end())
     return true;
   else if (isParamValid(name))
-    ::mooseError("Tuning not supported for parameter ", name);
+    mooseError("Tuning not supported for parameter ", name);
   else
-    ::mooseError("Parameter ", name, " selected for tuning is not a valid parameter");
+    mooseError("Parameter ", name, " selected for tuning is not a valid parameter");
   return false;
 }
 
@@ -75,13 +90,13 @@ CovarianceFunctionBase::getTuningData(std::string name,
   if ((name == "noise_variance") || (name == "signal_variance"))
   {
     min = 1e-9;
-    max = PETSC_INFINITY;
+    max = 1e9;
     size = 1;
   }
   else if (name == "length_factor")
   {
     min = 1e-9;
-    max = PETSC_INFINITY;
+    max = 1e9;
     size = _length_factor.size();
   }
 }
