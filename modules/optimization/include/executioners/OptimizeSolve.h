@@ -16,6 +16,8 @@ public:
 
   virtual bool solve() override;
 
+  const FormFunction & getFormFunction() const { return *_form_function; }
+
 protected:
   /// Objective routine
   virtual Real objectiveFunction(const libMesh::PetscVector<Number> & x);

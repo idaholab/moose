@@ -38,11 +38,14 @@ OptimizeSolve::solve()
     mooseError("No form function object found.");
   _form_function = ffs[0];
 
+  // Communicator used by form function
+  MPI_Comm my_comm = _form_function->getComm().get();
+
   // Petsc error code to be checked after each petsc call
   PetscErrorCode ierr;
 
   // Initialize tao object
-  ierr = TaoCreate(_communicator.get(), &_tao);
+  ierr = TaoCreate(my_comm, &_tao);
   CHKERRQ(ierr);
 
   // Set solve type
@@ -90,7 +93,7 @@ PetscErrorCode
 OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getMooseApp().comm());
+  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
   (*objective) = solver->objectiveFunction(param);
   return 0;
 }
@@ -99,8 +102,8 @@ PetscErrorCode
 OptimizeSolve::gradientFunctionWrapper(Tao /*tao*/, Vec x, Vec gradient, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getMooseApp().comm());
-  libMesh::PetscVector<Number> grad(gradient, solver->getMooseApp().comm());
+  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
+  libMesh::PetscVector<Number> grad(gradient, solver->getFormFunction().getComm());
   solver->gradientFunction(param, grad);
   return 0;
 }
@@ -109,8 +112,8 @@ PetscErrorCode
 OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat hessian, Mat /*pc*/, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getMooseApp().comm());
-  libMesh::PetscMatrix<Number> mat(hessian, solver->getMooseApp().comm());
+  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
+  libMesh::PetscMatrix<Number> mat(hessian, solver->getFormFunction().getComm());
   solver->hessianFunction(param, mat);
   return 0;
 }

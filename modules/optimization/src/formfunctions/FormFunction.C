@@ -16,12 +16,15 @@ FormFunction::validParams()
 
 FormFunction::FormFunction(const InputParameters & parameters)
   : MooseObject(parameters),
+    _my_comm(MPI_COMM_SELF),
     _initial_condition(getParam<std::vector<Real>>("initial_condition")),
-    _results_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->getUserObject<OptimizationResults>(getParam<VectorPostprocessorName>("optimization_results"))),
+    _results_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
+                     ->getUserObject<OptimizationResults>(
+                         getParam<VectorPostprocessorName>("optimization_results"))),
     _ndof(_initial_condition.size()),
-    _parameters(_communicator, _ndof, SERIAL),
-    _gradient(_communicator, _ndof, SERIAL),
-    _hessian(_communicator)
+    _parameters(_my_comm, _ndof),
+    _gradient(_my_comm, _ndof),
+    _hessian(_my_comm)
 {
   _results_vpp.setParameterValues(_initial_condition);
   _parameters = _initial_condition;

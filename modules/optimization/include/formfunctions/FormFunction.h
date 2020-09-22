@@ -65,7 +65,15 @@ public:
   libMesh::PetscMatrix<Number> & getHessian() { return _hessian; }
   const libMesh::PetscMatrix<Number> & getHessian() const { return _hessian; }
 
+  /**
+   * Get communicator used for matrices
+   */
+  const libMesh::Parallel::Communicator & getComm() const { return _my_comm; }
+
 protected:
+  /// Communicator used for operations
+  const libMesh::Parallel::Communicator _my_comm;
+
   /// Initial conditions
   const std::vector<Real> & _initial_condition;
 
