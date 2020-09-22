@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "Function.h"
+#include "PiecewiseBase.h"
 #include "LinearInterpolation.h"
 
-class PiecewiseBase;
+class Piecewise;
 
 template <>
-InputParameters validParams<PiecewiseBase>();
+InputParameters validParams<Piecewise>();
 
 /**
  * Function base which provides a piecewise approximation to a provided
@@ -23,26 +23,29 @@ InputParameters validParams<PiecewiseBase>();
  * (constant, linear) of the approximation and how the (x,y) data set
  * is generated, should be used directly.
  */
-class PiecewiseBase : public Function
+class Piecewise : public PiecewiseBase
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseBase(const InputParameters & parameters);
-
-  virtual Real functionSize() const;
-  virtual Real domain(const int i) const;
-  virtual Real range(const int i) const;
-
-  /**
-   * Provides a means for explicitly setting the x and y data. This must
-   * be called in the constructor of inherited classes.
-   */
-  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y);
+  Piecewise(const InputParameters & parameters);
 
 protected:
-  ///@{ raw function data as read
-  std::vector<Real> _raw_x;
-  std::vector<Real> _raw_y;
+  /// function value scale factor
+  const Real & _scale_factor;
+
+  ///@{ if _has_axis is true point component to use as function argument, otherwise use t
+  int _axis;
+  const bool _has_axis;
   ///@}
+
+private:
+  /// Reads data from supplied CSV file.
+  void buildFromFile();
+
+  /// Builds data from 'x' and 'y' parameters.
+  void buildFromXandY();
+
+  /// Builds data from 'xy_data' parameter.
+  void buildFromXY();
 };
