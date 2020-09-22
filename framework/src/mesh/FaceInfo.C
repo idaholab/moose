@@ -14,6 +14,7 @@
 #include "libmesh/node.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature_gauss.h"
+#include "libmesh/remote_elem.h"
 
 FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   : _processor_id(elem->processor_id())
@@ -41,8 +42,10 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
   _normal = normals[0];
 
-  // the neighbor info does not exist for domain boundaries
-  if (!_neighbor)
+  // the neighbor info does not exist for domain boundaries. Additionally, we don't have any info if
+  // the neighbor is a RemoteElem. This can happen for ghosted elements on the edge of a stencil,
+  // for whom we have may have deleted some of their neighbors when running with a distributed mesh
+  if (!_neighbor || neighbor == remote_elem)
   {
     _neighbor_side_id = std::numeric_limits<unsigned int>::max();
     _neighbor_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
