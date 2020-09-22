@@ -26,7 +26,7 @@ protected:
   const MooseArray<ADReal> & _adv_quant;
 
   /// The interpolation method to use for the advected quantity
-  InterpMethod _advected_interp_method;
+  Moose::FV::InterpMethod _advected_interp_method;
 
   const Function & _flux_variable_exact_solution;
   const Function & _vel_x_exact_solution;

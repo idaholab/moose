@@ -42,6 +42,8 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
                             ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
                             : _u_neighbor)
 {
+  using namespace Moose::FV;
+
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
     _advected_interp_method = InterpMethod::Average;
@@ -58,10 +60,16 @@ FVMatAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal u_interface;
 
-  // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+  using namespace Moose::FV;
 
-  interpolate(
-      _advected_interp_method, u_interface, _adv_quant_elem[_qp], _adv_quant_neighbor[_qp], v);
+  // Currently only Average is supported for the velocity
+  interpolate(InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info);
+
+  interpolate(_advected_interp_method,
+              u_interface,
+              _adv_quant_elem[_qp],
+              _adv_quant_neighbor[_qp],
+              v,
+              *_face_info);
   return _normal * v * u_interface;
 }

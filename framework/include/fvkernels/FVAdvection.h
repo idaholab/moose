@@ -23,5 +23,5 @@ protected:
   const RealVectorValue _velocity;
 
   /// The interpolation method to use for the advected quantity
-  InterpMethod _advected_interp_method;
+  Moose::FV::InterpMethod _advected_interp_method;
 };

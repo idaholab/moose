@@ -10,14 +10,13 @@
 #pragma once
 
 #include "FVBoundaryCondition.h"
-#include "FVFaceInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
+#include "FVUtils.h"
 
 // Provides an interface for computing residual contributions from finite
 // volume numerical fluxes computed on faces to neighboring elements.
 class FVFluxBC : public FVBoundaryCondition,
-                 public FVFaceInterface,
                  public CoupleableMooseVariableDependencyIntermediateInterface,
                  public MaterialPropertyInterface
 {
@@ -32,7 +31,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() = 0;
 
-  const ADRealVectorValue & normal() const override final { return _normal; }
+  const ADRealVectorValue & normal() const { return _normal; }
 
   const unsigned int _qp = 0;
   const ADVariableValue & _u;

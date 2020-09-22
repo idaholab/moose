@@ -240,5 +240,5 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 ADReal
 FVFluxKernel::gradUDotNormal() const
 {
-  return FVFaceInterface::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
+  return Moose::FV::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
 }

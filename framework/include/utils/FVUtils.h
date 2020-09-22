@@ -15,8 +15,14 @@
 #include "Assembly.h"
 #include "FaceInfo.h"
 #include "libmesh/elem.h"
+#include "libmesh/compare_types.h"
+
+template <typename>
+class MooseVariableFV;
 
 namespace Moose
+{
+namespace FV
 {
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
@@ -33,6 +39,81 @@ enum class InterpMethod
   // Rhie-Chow
   RhieChow
 };
+
+/**
+ * A simple linear interpolation of values between cell centers to a cell face
+ */
+template <typename T, typename T2>
+typename libMesh::CompareTypes<T, T2>::supertype
+linearInterpolation(const T & elem_value, const T2 & neighbor_value, const FaceInfo & fi)
+{
+  return fi.gC() * elem_value + (1. - fi.gC()) * neighbor_value;
+}
+
+/**
+ * A simple linear interpolation of values between cell centers to a cell face
+ */
+template <typename T, typename T2>
+libMesh::VectorValue<typename libMesh::CompareTypes<T, T2>::supertype>
+linearInterpolation(const libMesh::VectorValue<T> & elem_value,
+                    const libMesh::VectorValue<T2> & neighbor_value,
+                    const FaceInfo & fi)
+{
+  return fi.gC() * elem_value + (1. - fi.gC()) * neighbor_value;
+}
+
+/// Provides interpolation of face values for non-advection-specific purposes
+/// (although it can/will still be used by advective kernels sometimes).  The
+/// interpolated value is stored in result.  This should be called when a
+/// face value needs to be computed using elem and neighbor information (e.g. a
+/// material property, solution value, etc.).  elem and neighbor represent the
+/// property/value to compute the face value for.
+template <typename T, typename T2, typename T3>
+void
+interpolate(InterpMethod m, T & result, const T2 & elem, const T3 & neighbor, const FaceInfo & fi)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+      result = linearInterpolation(elem, neighbor, fi);
+      break;
+    default:
+      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+  }
+}
+
+/// Provides interpolation of face values for advective flux kernels.  This
+/// should be called by advective kernels when a u_face value is needed from
+/// u_elem and u_neighbor.  The interpolated value is stored in result.  elem
+/// and neighbor represent the property/value being advected in the elem and
+/// neighbor elements respectively.  advector represents the vector quantity at
+/// the face that is doing the advecting (e.g. the flow velocity at the
+/// face); this value often will have been computed using a call to the
+/// non-advective interpolate function.
+template <typename T, typename T2, typename T3, typename Vector>
+void
+interpolate(InterpMethod m,
+            T & result,
+            const T2 & elem,
+            const T3 & neighbor,
+            const Vector & advector,
+            const FaceInfo & fi)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+      result = linearInterpolation(elem, neighbor, fi);
+      break;
+    case InterpMethod::Upwind:
+      if (advector * fi.normal() > 0)
+        result = elem;
+      else
+        result = neighbor;
+      break;
+    default:
+      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+  }
+}
 
 template <typename ActionFunctor>
 void
@@ -122,10 +203,13 @@ loopOverElemFaceInfo(const Elem & elem,
   }
 }
 
-template <typename T>
-T
-linearAverage(const T & elem_value, const T & neighbor_value, const FaceInfo & fi)
-{
-  return fi.gC() * elem_value + (1. - fi.gC()) * neighbor_value;
+/// Calculates and returns "grad_u dot normal" on the face to be used for
+/// diffusive terms.  If using any cross-diffusion corrections, etc. all
+/// those calculations should be handled appropriately by this function.
+template <typename T, typename T2>
+ADReal gradUDotNormal(const T & elem_value,
+                      const T2 & neighbor_value,
+                      const FaceInfo & face_info,
+                      const MooseVariableFV<Real> & fv_var);
 }
 }

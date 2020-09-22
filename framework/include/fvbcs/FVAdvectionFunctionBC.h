@@ -26,5 +26,5 @@ protected:
   const Function & _exact_solution;
   const RealVectorValue _velocity;
 
-  InterpMethod _advected_interp_method;
+  Moose::FV::InterpMethod _advected_interp_method;
 };

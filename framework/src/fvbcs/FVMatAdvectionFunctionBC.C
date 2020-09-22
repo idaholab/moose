@@ -58,9 +58,9 @@ FVMatAdvectionFunctionBC::FVMatAdvectionFunctionBC(const InputParameters & param
 {
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
-    _advected_interp_method = InterpMethod::Average;
+    _advected_interp_method = Moose::FV::InterpMethod::Average;
   else if (advected_interp_method == "upwind")
-    _advected_interp_method = InterpMethod::Upwind;
+    _advected_interp_method = Moose::FV::InterpMethod::Upwind;
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(advected_interp_method));
@@ -91,8 +91,9 @@ FVMatAdvectionFunctionBC::computeQpResidual()
                                   _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid())
                             : 0);
 
-  interpolate(InterpMethod::Average, v_face, _vel[_qp], v_ghost);
+  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info);
 
-  interpolate(_advected_interp_method, flux_var_face, _adv_quant[_qp], flux_var_ghost, v_face);
+  interpolate(
+      _advected_interp_method, flux_var_face, _adv_quant[_qp], flux_var_ghost, v_face, *_face_info);
   return _normal * v_face * flux_var_face;
 }

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FVKernel.h"
-#include "FVFaceInterface.h"
+#include "FVUtils.h"
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborMooseVariableInterface.h"
@@ -26,7 +26,6 @@ class FaceInfo;
 /// kernels are AD-based - be sure to use AD material properties and other AD
 /// values to maintain good jacobian/derivative quality.
 class FVFluxKernel : public FVKernel,
-                     public FVFaceInterface,
                      public TwoMaterialPropertyInterface,
                      public NeighborMooseVariableInterface<Real>,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface
@@ -54,7 +53,7 @@ protected:
   /// those calculations will be handled for appropriately by this function.
   virtual ADReal gradUDotNormal() const;
 
-  const ADRealVectorValue & normal() const override final { return _normal; }
+  const ADRealVectorValue & normal() const { return _normal; }
 
   MooseVariableFV<Real> & _var;
 

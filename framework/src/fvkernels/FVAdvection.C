@@ -28,6 +28,8 @@ FVAdvection::validParams()
 FVAdvection::FVAdvection(const InputParameters & params)
   : FVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
 {
+  using namespace Moose::FV;
+
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
     _advected_interp_method = InterpMethod::Average;
@@ -42,6 +44,7 @@ ADReal
 FVAdvection::computeQpResidual()
 {
   ADReal u_interface;
-  interpolate(_advected_interp_method, u_interface, _u_elem[_qp], _u_neighbor[_qp], _velocity);
+  interpolate(
+      _advected_interp_method, u_interface, _u_elem[_qp], _u_neighbor[_qp], _velocity, *_face_info);
   return _normal * _velocity * u_interface;
 }

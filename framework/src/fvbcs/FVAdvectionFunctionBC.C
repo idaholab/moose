@@ -35,6 +35,8 @@ FVAdvectionFunctionBC::FVAdvectionFunctionBC(const InputParameters & parameters)
     _exact_solution(getFunction("exact_solution")),
     _velocity(getParam<RealVectorValue>("velocity"))
 {
+  using namespace Moose::FV;
+
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
     _advected_interp_method = InterpMethod::Average;
@@ -54,6 +56,7 @@ FVAdvectionFunctionBC::computeQpResidual()
       u_face,
       _u[_qp],
       _exact_solution.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid()),
-      _velocity);
+      _velocity,
+      *_face_info);
   return _normal * _velocity * u_face;
 }
