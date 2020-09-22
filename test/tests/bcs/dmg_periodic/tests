@@ -12,12 +12,9 @@
   [../]
 
   [./check_one_step]
-    type = 'Exodiff'
+    type = 'RunApp'
     input = 'dmg_periodic_bc.i'
-    exodiff = 'dmg_periodic_bc_out_one_step.e'
-    cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160 Outputs/hide="pid" Outputs/file_base=dmg_periodic_bc_out_one_step Executioner/num_steps=1'
-    abs_zero = 1e-6
-    rel_err = 1e-5
+    cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160 Outputs/hide="pid" Outputs/exodus=false Executioner/num_steps=1'
     requirement = "The system shall make sure that boundaries are actually distributed."
     min_parallel = 2
   [../]
