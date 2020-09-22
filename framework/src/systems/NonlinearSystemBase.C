@@ -2359,7 +2359,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached jacobians that might be hanging around
-        _fe_problem.assembly(i).addCachedJacobianContributions();
+        _fe_problem.assembly(i).addCachedJacobian();
     }
 
     // Get our element range for looping over
@@ -2417,7 +2417,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions();
+            _fe_problem.assembly(i).addCachedJacobian();
         }
       }
       break;
@@ -2451,7 +2451,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions();
+            _fe_problem.assembly(i).addCachedJacobian();
         }
       }
       break;
@@ -2603,7 +2603,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     } // end loop over boundary nodes
 
     // Set the cached NodalBCBase values in the Jacobian matrix
-    _fe_problem.assembly(0).setCachedJacobianContributions();
+    _fe_problem.assembly(0).setCachedJacobian();
   }
   PARALLEL_CATCH;
 

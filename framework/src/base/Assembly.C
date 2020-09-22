@@ -2469,11 +2469,6 @@ Assembly::init(const CouplingMatrix * cm)
       _jacobian_block_nonlocal_used[tag][i].resize(n_vars);
     }
   }
-
-  // Cached Jacobian contributions
-  _cached_jacobian_contribution_vals.resize(num_matrix_tags);
-  _cached_jacobian_contribution_rows.resize(num_matrix_tags);
-  _cached_jacobian_contribution_cols.resize(num_matrix_tags);
 }
 
 void
@@ -3210,17 +3205,33 @@ Assembly::cacheResidual()
 }
 
 void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
+Assembly::cacheResidual(dof_id_type dof, Real value, TagID tag_id)
 {
   _cached_residual_values[tag_id].push_back(value);
   _cached_residual_rows[tag_id].push_back(dof);
 }
 
 void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags)
+Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tags)
 {
   for (auto & tag : tags)
-    cacheResidualContribution(dof, value, tag);
+    cacheResidual(dof, value, tag);
+}
+
+void
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
+{
+  mooseDeprecated("please use cacheResidual");
+
+  cacheResidual(dof, value, tag_id);
+}
+
+void
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags)
+{
+  mooseDeprecated("please use cacheResidual");
+
+  cacheResidual(dof, value, tags);
 }
 
 void
@@ -4090,14 +4101,33 @@ Assembly::addJacobianOffDiagScalar(unsigned int ivar)
 }
 
 void
+Assembly::cacheJacobian(numeric_index_type i, numeric_index_type j, Real value, TagID tag)
+{
+  _cached_jacobian_rows[tag].push_back(i);
+  _cached_jacobian_cols[tag].push_back(j);
+  _cached_jacobian_values[tag].push_back(value);
+}
+
+void
+Assembly::cacheJacobian(numeric_index_type i,
+                        numeric_index_type j,
+                        Real value,
+                        const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      cacheJacobian(i, j, value, tag);
+}
+
+void
 Assembly::cacheJacobianContribution(numeric_index_type i,
                                     numeric_index_type j,
                                     Real value,
                                     TagID tag)
 {
-  _cached_jacobian_contribution_rows[tag].push_back(i);
-  _cached_jacobian_contribution_cols[tag].push_back(j);
-  _cached_jacobian_contribution_vals[tag].push_back(value);
+  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
+
+  cacheJacobian(i, j, value, tag);
 }
 
 void
@@ -4106,91 +4136,82 @@ Assembly::cacheJacobianContribution(numeric_index_type i,
                                     Real value,
                                     const std::set<TagID> & tags)
 {
-  for (auto tag : tags)
+  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
+
+  cacheJacobian(i, j, value, tags);
+}
+
+void
+Assembly::setCachedJacobian()
+{
+  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
-      cacheJacobianContribution(i, j, value, tag);
+    {
+      // First zero the rows (including the diagonals) to prepare for
+      // setting the cached values.
+      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
+
+      // TODO: Use SparseMatrix::set_values() for efficiency
+      for (MooseIndex(_cached_jacobian_values) i = 0; i < _cached_jacobian_values[tag].size(); ++i)
+        _sys.getMatrix(tag).set(_cached_jacobian_rows[tag][i],
+                                _cached_jacobian_cols[tag][i],
+                                _cached_jacobian_values[tag][i]);
+    }
+
+  clearCachedJacobian();
 }
 
 void
 Assembly::setCachedJacobianContributions()
 {
-  for (MooseIndex(_cached_jacobian_contribution_rows) tag = 0;
-       tag < _cached_jacobian_contribution_rows.size();
-       tag++)
+  mooseDeprecated("please use setCachedJacobian instead");
+
+  setCachedJacobian();
+}
+
+void
+Assembly::zeroCachedJacobian()
+{
+  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
     if (_sys.hasMatrix(tag))
-    {
-      // First zero the rows (including the diagonals) to prepare for
-      // setting the cached values.
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
+      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
 
-      // TODO: Use SparseMatrix::set_values() for efficiency
-      for (MooseIndex(_cached_jacobian_contribution_vals) i = 0;
-           i < _cached_jacobian_contribution_vals[tag].size();
-           ++i)
-        _sys.getMatrix(tag).set(_cached_jacobian_contribution_rows[tag][i],
-                                _cached_jacobian_contribution_cols[tag][i],
-                                _cached_jacobian_contribution_vals[tag][i]);
-    }
-
-  clearCachedJacobianContributions();
+  clearCachedJacobian();
 }
 
 void
 Assembly::zeroCachedJacobianContributions()
 {
-  for (MooseIndex(_cached_jacobian_contribution_rows) tag = 0;
-       tag < _cached_jacobian_contribution_rows.size();
-       tag++)
-    if (_sys.hasMatrix(tag))
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
+  mooseDeprecated("please use zeroCachedJacobian instead");
 
-  clearCachedJacobianContributions();
+  zeroCachedJacobian();
 }
 
 void
 Assembly::addCachedJacobianContributions()
 {
-  for (MooseIndex(_cached_jacobian_contribution_rows) tag = 0;
-       tag < _cached_jacobian_contribution_rows.size();
-       tag++)
-    if (_sys.hasMatrix(tag))
-    {
-      // TODO: Use SparseMatrix::set_values() for efficiency
-      for (MooseIndex(_cached_jacobian_contribution_vals[tag]) i = 0;
-           i < _cached_jacobian_contribution_vals[tag].size();
-           ++i)
-        _sys.getMatrix(tag).add(_cached_jacobian_contribution_rows[tag][i],
-                                _cached_jacobian_contribution_cols[tag][i],
-                                _cached_jacobian_contribution_vals[tag][i]);
-    }
+  mooseDeprecated("please use addCachedJacobian instead");
 
-  clearCachedJacobianContributions();
+  addCachedJacobian();
+}
+
+void
+Assembly::clearCachedJacobian()
+{
+  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
+  {
+    _cached_jacobian_rows[tag].clear();
+    _cached_jacobian_cols[tag].clear();
+    _cached_jacobian_values[tag].clear();
+  }
 }
 
 void
 Assembly::clearCachedJacobianContributions()
 {
-  for (MooseIndex(_cached_jacobian_contribution_rows) tag = 0;
-       tag < _cached_jacobian_contribution_rows.size();
-       tag++)
-  {
-    auto orig_size = _cached_jacobian_contribution_rows[tag].size();
+  mooseDeprecated("please use clearCachedJacobian instead");
 
-    _cached_jacobian_contribution_rows[tag].clear();
-    _cached_jacobian_contribution_cols[tag].clear();
-    _cached_jacobian_contribution_vals[tag].clear();
-
-    // It's possible (though massively unlikely) that clear() will
-    // change the capacity of the vectors, so let's be paranoid and
-    // explicitly reserve() the same amount of memory to avoid multiple
-    // push_back() induced allocations.  We reserve 20% more than the
-    // original size that was cached to account for variations in the
-    // number of BCs assigned to each thread (for when the Jacobian
-    // contributions are computed threaded).
-    _cached_jacobian_contribution_rows[tag].reserve(1.2 * orig_size);
-    _cached_jacobian_contribution_cols[tag].reserve(1.2 * orig_size);
-    _cached_jacobian_contribution_vals[tag].reserve(1.2 * orig_size);
-  }
+  clearCachedJacobian();
 }
 
 void

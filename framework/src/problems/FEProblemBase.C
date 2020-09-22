@@ -1524,22 +1524,14 @@ FEProblemBase::addCachedJacobian(THREAD_ID tid)
   _assembly[tid]->addCachedJacobian();
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(tid);
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  // global indexing uses a different cache Jacobian API in assembly that actually feeds values into
-  // different assembly data members. So we have to call a different addCached method in order to
-  // accumulate the values into the Jacobian
-  if (haveFV())
-    addCachedJacobianContributions(tid);
-#endif
 }
 
 void
 FEProblemBase::addCachedJacobianContributions(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobianContributions();
-  if (_displaced_problem)
-    _displaced_problem->addCachedJacobianContributions(tid);
+  mooseDeprecated("please use addCachedJacobian");
+
+  addCachedJacobian(tid);
 }
 
 void

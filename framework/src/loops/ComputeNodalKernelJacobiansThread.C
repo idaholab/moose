@@ -125,7 +125,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       {
         _num_cached = 0;
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.assembly(_tid).addCachedJacobianContributions();
+        _fe_problem.assembly(_tid).addCachedJacobian();
       }
     }
   }

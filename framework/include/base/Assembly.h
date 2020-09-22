@@ -740,7 +740,7 @@ public:
    * @param value The value of the residual contribution.
    * @param TagID  the contribution should go to the tagged residual
    */
-  void cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id);
+  void cacheResidual(dof_id_type dof, Real value, TagID tag_id);
 
   /**
    * Cache individual residual contributions.  These will ultimately get added to the residual when
@@ -749,6 +749,16 @@ public:
    * @param dof The degree of freedom to add the residual contribution to
    * @param value The value of the residual contribution.
    * @param tags the contribution should go to all tags
+   */
+  void cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tags);
+
+  /**
+   * Deperecated method. Use \p cacheResidual
+   */
+  void cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id);
+
+  /**
+   * Deperecated method. Use \p cacheResidual
    */
   void cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags);
 
@@ -1351,9 +1361,30 @@ public:
    * dof_id_type) since that is what the SparseMatrix interface uses,
    * but at the time of this writing, those two types are equivalent.
    */
+  void cacheJacobian(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
+
+  /**
+   * Caches the Jacobian entry 'value', to eventually be
+   * added/set in the (i,j) location of the matrices in corresponding to \p tags.
+   *
+   * We use numeric_index_type for the index arrays (rather than
+   * dof_id_type) since that is what the SparseMatrix interface uses,
+   * but at the time of this writing, those two types are equivalent.
+   */
+  void cacheJacobian(numeric_index_type i,
+                     numeric_index_type j,
+                     Real value,
+                     const std::set<TagID> & tags);
+
+  /**
+   * Deprecated method. Use cacheJacobian instead
+   */
   void
   cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
 
+  /**
+   * Deprecated method. Use cacheJacobian instead
+   */
   void cacheJacobianContribution(numeric_index_type i,
                                  numeric_index_type j,
                                  Real value,
@@ -1362,15 +1393,25 @@ public:
   /**
    * Sets previously-cached Jacobian values via SparseMatrix::set() calls.
    */
+  void setCachedJacobian();
+
+  /**
+   * Deprecated. Use \p setCachedJacobian instead
+   */
   void setCachedJacobianContributions();
 
   /**
    * Zero out previously-cached Jacobian rows.
    */
+  void zeroCachedJacobian();
+
+  /**
+   * Deprecated. Use \p zeroCachedJacobian instead
+   */
   void zeroCachedJacobianContributions();
 
   /**
-   * Adds previously-cached Jacobian values via SparseMatrix::add() calls.
+   * Deprecated. Call \p addCachedJacobian
    */
   void addCachedJacobianContributions();
 
@@ -1609,10 +1650,14 @@ protected:
   void addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseVariableBase & jvar);
 
   /**
-   * Clear any currently cached jacobian contributions
+   * Clear any currently cached jacobians
    *
-   * This is automatically called by setCachedJacobianContributions and
-   * addCachedJacobianContributions
+   * This is automatically called by setCachedJacobian
+   */
+  void clearCachedJacobian();
+
+  /**
+   * Deprecated. Call \p clearCachedJacobian
    */
   void clearCachedJacobianContributions();
 
@@ -2203,13 +2248,6 @@ protected:
   /// Temporary work data for reinitAtPhysical()
   std::vector<Point> _temp_reference_points;
 
-  /**
-   * Storage for cached Jacobian entries
-   */
-  std::vector<std::vector<Real>> _cached_jacobian_contribution_vals;
-  std::vector<std::vector<numeric_index_type>> _cached_jacobian_contribution_rows;
-  std::vector<std::vector<numeric_index_type>> _cached_jacobian_contribution_cols;
-
   /// AD quantities
   std::vector<VectorValue<DualReal>> _ad_dxyzdxi_map;
   std::vector<VectorValue<DualReal>> _ad_dxyzdeta_map;
@@ -2404,7 +2442,7 @@ Assembly::processDerivatives(const ADReal & residual,
   mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
 
   for (std::size_t i = 0; i < column_indices.size(); ++i)
-    cacheJacobianContribution(row_index, column_indices[i], values[i], matrix_tags);
+    cacheJacobian(row_index, column_indices[i], values[i], matrix_tags);
 #else
   local_functor(residual, row_index, matrix_tags);
 #endif

@@ -850,7 +850,9 @@ DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 void
 DisplacedProblem::addCachedJacobianContributions(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobianContributions();
+  mooseDeprecated("please use addCachedJacobian");
+
+  addCachedJacobian(tid);
 }
 
 void
