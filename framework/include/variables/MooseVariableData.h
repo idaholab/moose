@@ -365,8 +365,6 @@ public:
    * dof value setters
    */
   void setDofValue(const OutputData & value, unsigned int index);
-  /** @brief only use when there is currently only one dof index */
-  void setElementalValue(const OutputType & value);
   ///@}
 
   /**

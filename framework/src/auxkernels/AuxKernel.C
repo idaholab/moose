@@ -283,6 +283,22 @@ AuxKernelTempl<ComputeValueType>::coupledDotDu(const std::string & var_name,
   return Coupleable::coupledDotDu(var_name, comp);
 }
 
+template <>
+void
+AuxKernelTempl<Real>::setDofValueHelper(const Real & value)
+{
+  mooseAssert(_n_local_dofs == 1,
+              "Should only be calling setDofValue if there is one dof for the aux var");
+  _var.setDofValue(value, 0);
+}
+
+template <>
+void
+AuxKernelTempl<RealVectorValue>::setDofValueHelper(const RealVectorValue &)
+{
+  mooseError("Not implemented");
+}
+
 template <typename ComputeValueType>
 void
 AuxKernelTempl<ComputeValueType>::compute()
@@ -309,7 +325,7 @@ AuxKernelTempl<ComputeValueType>::compute()
         value += _JxW[_qp] * _coord[_qp] * computeValue();
       value /= (_bnd ? _current_side_volume : _current_elem_volume);
       if (_var.isFV())
-        _var.setElementalValue(value);
+        setDofValueHelper(value);
       else
         // update the variable data referenced by other kernels.
         // Note that this will update the values at the quadrature points too

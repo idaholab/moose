@@ -192,7 +192,6 @@ public:
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
   virtual void setDofValue(const OutputData & value, unsigned int index) override;
-  virtual void setElementalValue(const OutputType & value) override;
 
   void clearDofIndices() override;
 

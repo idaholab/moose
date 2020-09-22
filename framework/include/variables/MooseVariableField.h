@@ -88,7 +88,6 @@ public:
    * Degree of freedom value setters
    */
   virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
-  virtual void setElementalValue(const OutputType & value) = 0;
   ///@}
 
   /**

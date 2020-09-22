@@ -843,17 +843,6 @@ MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned 
 
 template <typename OutputType>
 void
-MooseVariableDataFV<OutputType>::setElementalValue(const OutputType & value)
-{
-  mooseAssert(
-      _dof_indices.size() == 1 && _dof_values.size() == 1,
-      "Use of the setDofValue single-arg API only makes sense when their is only one dof index");
-
-  _dof_values[0] = value;
-}
-
-template <typename OutputType>
-void
 MooseVariableDataFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
 {
   for (unsigned int i = 0; i < values.size(); i++)

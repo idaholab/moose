@@ -206,7 +206,6 @@ public:
    * dof value setters
    */
   void setDofValue(const OutputData & value, unsigned int index);
-  void setElementalValue(const OutputType & value);
   ///@}
 
   OutputData
