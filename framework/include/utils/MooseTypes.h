@@ -126,6 +126,7 @@ class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
+typedef Eigen::Matrix<DualReal, Eigen::Dynamic, 1> DualRealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
@@ -166,6 +167,17 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 }
 }
 
+// These functions enable TypeVector<DualRealEigenVector> instantiation.
+namespace std
+{
+DualReal norm(const DualRealEigenVector &);
+DualReal norm(DualRealEigenVector &&);
+DualRealEigenVector sqrt(const DualRealEigenVector &);
+DualRealEigenVector sqrt(DualRealEigenVector &&);
+DualRealEigenVector abs(const DualRealEigenVector &);
+DualRealEigenVector abs(DualRealEigenVector &&);
+}
+
 /**
  * various MOOSE typedefs
  */
@@ -185,6 +197,9 @@ using RestartableDataMapName = std::string; // see MooseApp.h
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
+class FVDirichletBC;
+class FVArrayDirichletBC;
+
 namespace Moose
 {
 
@@ -201,6 +216,18 @@ enum GeometryType
 {
   Volume,
   Face
+};
+
+template <typename OutputType>
+struct FVDirichletBCType
+{
+  typedef FVDirichletBC type;
+};
+
+template <>
+struct FVDirichletBCType<RealEigenVector>
+{
+  typedef FVArrayDirichletBC type;
 };
 
 template <typename OutputType>
@@ -327,6 +354,7 @@ namespace Moose
 // type conversion from regular to AD
 template <typename T>
 struct ADType;
+
 template <>
 struct ADType<Real>
 {
@@ -355,7 +383,7 @@ struct ADType<W<Real>>
 template <>
 struct ADType<RealEigenVector>
 {
-  typedef RealEigenVector type;
+  typedef DualRealEigenVector type;
 };
 template <>
 struct ADType<VariableValue>
