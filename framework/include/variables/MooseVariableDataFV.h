@@ -440,12 +440,12 @@ private:
   FieldVariableCurl _curl_u_older;
 
   /// AD u
-  ADTemplateVariableValue<OutputShape> _ad_u;
-  ADTemplateVariableGradient<OutputShape> _ad_grad_u;
-  ADTemplateVariableSecond<OutputShape> _ad_second_u;
+  ADTemplateVariableValue<OutputType> _ad_u;
+  ADTemplateVariableGradient<OutputType> _ad_grad_u;
+  ADTemplateVariableSecond<OutputType> _ad_second_u;
   MooseArray<DualReal> _ad_dof_values;
   MooseArray<DualReal> _ad_dofs_dot;
-  ADTemplateVariableValue<OutputShape> _ad_u_dot;
+  ADTemplateVariableValue<OutputType> _ad_u_dot;
 
   // time derivatives
 
