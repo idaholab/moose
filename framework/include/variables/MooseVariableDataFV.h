@@ -64,6 +64,7 @@ public:
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
   typedef MooseArray<OutputData> DoFValue;
+  typedef MooseArray<typename Moose::ADType<OutputData>::type> ADDoFValue;
 
   MooseVariableDataFV(const MooseVariableFV<OutputType> & var,
                       const SystemBase & sys,
@@ -248,7 +249,7 @@ public:
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues() const;
+  const ADDoFValue & adDofValues() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -279,7 +280,27 @@ public:
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }
 
+  void buildDofValues(const std::vector<dof_id_type> & dof_indices,
+                      const NumericVector<Number> & sol,
+                      DoFValue & dof_values) const;
+  void buildADDofValues(const std::vector<dof_id_type> & dof_indices,
+                        const NumericVector<Number> & sol,
+                        ADDoFValue & dof_values) const;
+
 private:
+  /// Returns an index into the solution vector (also used as sparse AD
+  /// derivative ID) for the array variable entry associated with the given
+  /// "index" into _dof_indices and the given index into the array variable.
+  unsigned int globalADOffset(const std::vector<dof_id_type> & dof_indices,
+                              unsigned int index = 0,
+                              unsigned int array_var_index = 0) const;
+
+  /// Returns an index into the (local) AD derivatives for the specified "index"
+  /// into _dof_indices.
+  unsigned int localADOffset(const std::vector<dof_id_type> & dof_indices,
+                             unsigned int index = 0,
+                             unsigned int array_var_index = 0) const;
+
   void initializeSolnVars();
 
   /**
@@ -287,8 +308,8 @@ private:
    * values as they're referred to here in this class). These methods are only truly meaningful
    * for nodal basis families
    */
-  void fetchDoFValues();
-  void fetchADDoFValues();
+  void fetchDofValues();
+  void fetchADDofValues();
   void zeroSizeDofValues();
 
   /// A const reference to the owning MooseVariableFE object
@@ -443,8 +464,8 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
-  MooseArray<DualReal> _ad_dof_values;
-  MooseArray<DualReal> _ad_dofs_dot;
+  ADDoFValue _ad_dof_values;
+  ADDoFValue _ad_dofs_dot;
   ADTemplateVariableValue<OutputType> _ad_u_dot;
 
   // time derivatives
@@ -500,9 +521,47 @@ private:
 /////////////////////// General template definitions //////////////////////////////////////
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseVariableDataFV<OutputType>::ADDoFValue &
 MooseVariableDataFV<OutputType>::adDofValues() const
 {
   _need_ad = true;
   return _ad_dof_values;
 }
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::computeGhostValuesFace(
+    const FaceInfo & fi, MooseVariableDataFV<RealEigenVector> & other_face);
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::computeValues();
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::computeAD(const unsigned int num_dofs,
+                                                     const unsigned int nqp);
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::fetchADDofValues();
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::fetchDofValues();
+
+template <>
+void
+MooseVariableDataFV<RealEigenVector>::buildDofValues(const std::vector<dof_id_type> & dof_indices,
+                                                     const NumericVector<Number> & sol,
+                                                     DoFValue & vals) const;
+
+template <>
+void
+MooseVariableDataFV<RealEigenVector>::buildADDofValues(const std::vector<dof_id_type> & dof_indices,
+                                                       const NumericVector<Number> & sol,
+                                                       ADDoFValue & vals) const;
+
+template <>
+void MooseVariableDataFV<RealEigenVector>::insert(NumericVector<Number> & residual);
+
+template <>
+typename MooseVariableDataFV<RealEigenVector>::OutputData
+MooseVariableDataFV<RealEigenVector>::getElementalValue(const Elem * /*elem*/,
+                                                        Moose::SolutionState /*state*/,
+                                                        unsigned int /*idx*/) const;

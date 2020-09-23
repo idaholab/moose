@@ -69,6 +69,7 @@ public:
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
+  using ADDoFValue = typename MooseVariableField<OutputType>::ADDoFValue;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
   using FieldVariablePhiGradient =
@@ -283,7 +284,8 @@ public:
    * Retrieve (or potentially compute) the gradient on the provided element
    * @param elem The element for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
+  const VectorValue<typename Moose::ADType<OutputData>::type> &
+  adGradSln(const Elem * const elem) const;
 
   /**
    * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
@@ -292,7 +294,8 @@ public:
    * gradients does
    * @param face The face for which to retrieve the gradient.
    */
-  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi) const;
+  const VectorValue<typename Moose::ADType<OutputData>::type> &
+  adGradSln(const FaceInfo & fi) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -303,7 +306,8 @@ public:
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi) const;
+  const VectorValue<typename Moose::ADType<OutputData>::type> &
+  uncorrectedAdGradSln(const FaceInfo & fi) const;
 
 #endif
 
@@ -401,7 +405,7 @@ public:
   const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
 
   /// Returns the AD dof values.
-  const MooseArray<ADReal> & adDofValues() const override;
+  const ADDoFValue & adDofValues() const override;
 
   /// Note: const monomial is always the case - higher order solns are
   /// reconstructed - so this is simpler func than FE equivalent.
@@ -422,9 +426,14 @@ public:
     return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC();
   }
 
-  std::pair<bool, const FVDirichletBC *> getDirichletBC(const FaceInfo & fi) const;
+  /// Returns true if a Dirichlet BC exists on the given face.
+  virtual bool hasDirichletBC(const FaceInfo & fi) const override;
 
-  std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
+  virtual std::pair<bool, const typename Moose::FVDirichletBCType<OutputType>::type *>
+  getDirichletBC(const FaceInfo & fi) const;
+
+  virtual std::pair<bool, std::vector<const FVFluxBC *>>
+  getFluxBCs(const FaceInfo & fi) const override;
 
   void residualSetup() override;
   void jacobianSetup() override;
@@ -435,7 +444,7 @@ public:
    * dof index
    * @param elem The element to retrieive the solution value for
    */
-  ADReal getElemValue(const Elem * elem) const;
+  typename Moose::ADType<OutputData>::type getElemValue(const Elem * elem) const;
 
   /**
    * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
@@ -449,9 +458,10 @@ public:
    * @return The neighbor solution value with derivative seeding according to the associated degree
    * of freedom
    */
-  ADReal getNeighborValue(const Elem * const neighbor,
-                          const FaceInfo & fi,
-                          const ADReal & elem_value) const;
+  typename Moose::ADType<OutputData>::type
+  getNeighborValue(const Elem * const neighbor,
+                   const FaceInfo & fi,
+                   const typename Moose::ADType<OutputData>::type & elem_value) const;
 
 private:
   /**
@@ -467,8 +477,10 @@ private:
    * used as part of a linear interpolation
    * @return The interpolated face value
    */
-  ADReal
-  getFaceValue(const Elem * const neighbor, const FaceInfo & fi, const ADReal & elem_value) const;
+  typename Moose::ADType<OutputData>::type
+  getFaceValue(const Elem * const neighbor,
+               const FaceInfo & fi,
+               const typename Moose::ADType<OutputData>::type & elem_value) const;
 
   /**
    * Get the finite volume solution interpolated to \p vertex. This interpolation is done doing a
@@ -477,7 +489,7 @@ private:
    * @return The interpolated vertex value with derivative information from the degrees of freedom
    * associated with the neighboring cell centers
    */
-  const ADReal & getVertexValue(const Node & vertex) const;
+  const typename Moose::ADType<OutputData>::type & getVertexValue(const Node & vertex) const;
 
 public:
 #endif
@@ -584,16 +596,22 @@ private:
   mutable bool _scaling_params_checked = false;
 
   /// A cache for storing gradients on elements
-  mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
+  mutable std::unordered_map<const Elem *, VectorValue<typename Moose::ADType<OutputData>::type>>
+      _elem_to_grad;
 
   /// A cache for storing uncorrected gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
+  mutable std::unordered_map<const FaceInfo *,
+                             VectorValue<typename Moose::ADType<OutputData>::type>>
+      _face_to_unc_grad;
 
   /// A cache for storing gradients on faces
-  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
+  mutable std::unordered_map<const FaceInfo *,
+                             VectorValue<typename Moose::ADType<OutputData>::type>>
+      _face_to_grad;
 
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
-  mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
+  mutable std::unordered_map<const Node *, typename Moose::ADType<OutputData>::type>
+      _vertex_to_value;
 
   /// Whether to use an extended stencil for interpolating the solution to face centers. If this is
   /// true then the face center value is computed as a weighted average of connected vertices. If it
@@ -603,8 +621,39 @@ private:
 #endif
 };
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+
+template <>
+const ADRealEigenVector &
+MooseVariableFV<RealEigenVector>::getVertexValue(const Node & vertex) const;
+
+template <>
+ADRealEigenVector MooseVariableFV<RealEigenVector>::getElemValue(const Elem * const elem) const;
+
+template <>
+ADRealEigenVector MooseVariableFV<RealEigenVector>::getNeighborValue(
+    const Elem * const neighbor, const FaceInfo & fi, const ADRealEigenVector & elem_value) const;
+
+template <>
+ADRealEigenVector MooseVariableFV<RealEigenVector>::getFaceValue(
+    const Elem * const neighbor, const FaceInfo & fi, const ADRealEigenVector & elem_value) const;
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::adGradSln(const Elem * const elem) const;
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::uncorrectedAdGradSln(const FaceInfo & fi) const;
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::adGradSln(const FaceInfo & fi) const;
+
+#endif
+
 template <typename OutputType>
-inline const MooseArray<ADReal> &
+inline const typename MooseVariableFV<OutputType>::ADDoFValue &
 MooseVariableFV<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();

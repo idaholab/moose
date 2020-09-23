@@ -84,6 +84,7 @@ public:
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
   typedef MooseArray<OutputData> DoFValue;
+  typedef MooseArray<typename Moose::ADType<OutputData>::type> ADDoFValue;
 
   MooseVariableData(const MooseVariableFE<OutputType> & var,
                     const SystemBase & sys,
@@ -445,7 +446,7 @@ public:
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues() const;
+  const ADDoFValue & adDofValues() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -675,8 +676,8 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
-  MooseArray<ADReal> _ad_dof_values;
-  MooseArray<ADReal> _ad_dofs_dot;
+  ADDoFValue _ad_dof_values;
+  ADDoFValue _ad_dofs_dot;
   ADTemplateVariableValue<OutputType> _ad_u_dot;
 
   // time derivatives
@@ -792,7 +793,7 @@ private:
 /////////////////////// General template definitions //////////////////////////////////////
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseVariableData<OutputType>::ADDoFValue &
 MooseVariableData<OutputType>::adDofValues() const
 {
   _need_ad = true;

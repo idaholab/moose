@@ -86,6 +86,7 @@ public:
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
+  using ADDoFValue = typename MooseVariableField<OutputType>::ADDoFValue;
 
   MooseVariableFE(const InputParameters & parameters);
 
@@ -538,9 +539,8 @@ public:
   const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
 
   /**
-   * Return the AD dof values
-   */
-  const MooseArray<ADReal> & adDofValues() const override;
+   * Return the AD dof values */
+  const ADDoFValue & adDofValues() const override;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -651,7 +651,7 @@ protected:
 };
 
 template <typename OutputType>
-inline const MooseArray<ADReal> &
+inline const typename MooseVariableFE<OutputType>::ADDoFValue &
 MooseVariableFE<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();

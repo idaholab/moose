@@ -21,6 +21,8 @@ class Point;
 }
 
 class FaceInfo;
+class FVDirichletBC;
+class FVFluxBC;
 
 class MooseVariableFieldBase;
 template <>
@@ -183,4 +185,7 @@ public:
    * Return the number of shape functions on the lower dimensional element for this variable
    */
   virtual std::size_t phiLowerSize() const = 0;
+
+  virtual bool hasDirichletBC(const FaceInfo & fi) const;
+  virtual std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 };
