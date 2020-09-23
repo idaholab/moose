@@ -21,3 +21,15 @@ MooseVariableFieldBase::MooseVariableFieldBase(const InputParameters & parameter
   : MooseVariableBase(parameters)
 {
 }
+
+bool
+MooseVariableFieldBase::hasDirichletBC(const FaceInfo & /*fi*/) const
+{
+  mooseError("This variable type does not implement special dirichlet BC handling");
+}
+
+std::pair<bool, std::vector<const FVFluxBC *>>
+MooseVariableFieldBase::getFluxBCs(const FaceInfo & /*fi*/) const
+{
+  mooseError("This variable type does not implement special flux BC handling");
+}
