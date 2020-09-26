@@ -26,13 +26,13 @@ validParams<RadiationTransferAction>()
   params.addClassDescription(
       "This action sets up the net radiation calculation between specified sidesets.");
 
-  params.addRequiredParam<std::vector<boundary_id_type>>(
+  params.addRequiredParam<std::vector<BoundaryName>>(
       "sidesets", "The sidesets that participate in the radiative exchange.");
 
-  params.addParam<std::vector<boundary_id_type>>(
+  params.addParam<std::vector<BoundaryName>>(
       "adiabatic_sidesets", "The adiabatic sidesets that participate in the radiative exchange.");
 
-  params.addParam<std::vector<boundary_id_type>>(
+  params.addParam<std::vector<BoundaryName>>(
       "fixed_temperature_sidesets",
       "The fixed temperature sidesets that participate in the radiative exchange.");
 
@@ -64,7 +64,7 @@ validParams<RadiationTransferAction>()
 
 RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
   : Action(params),
-    _boundary_ids(getParam<std::vector<boundary_id_type>>("sidesets")),
+    _boundary_names(getParam<std::vector<BoundaryName>>("sidesets")),
     _n_patches(getParam<std::vector<unsigned int>>("n_patches"))
 {
 }
@@ -148,7 +148,7 @@ RadiationTransferAction::addRadiationObject() const
 
   // input parameter check
   std::vector<Real> emissivity = getParam<std::vector<Real>>("emissivity");
-  if (emissivity.size() != _boundary_ids.size())
+  if (emissivity.size() != _boundary_names.size())
     mooseError("emissivity parameter needs to be the same size as the sidesets parameter.");
 
   // the action only sets up ViewFactorObjectSurfaceRadiation, because after splitting
@@ -157,7 +157,7 @@ RadiationTransferAction::addRadiationObject() const
   params.set<std::vector<VariableName>>("temperature") = {getParam<VariableName>("temperature")};
 
   std::vector<Real> extended_emissivity;
-  for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+  for (unsigned int j = 0; j < _boundary_names.size(); ++j)
     for (unsigned int i = 0; i < _n_patches[j]; ++i)
       extended_emissivity.push_back(emissivity[j]);
   params.set<std::vector<Real>>("emissivity") = extended_emissivity;
@@ -172,29 +172,29 @@ RadiationTransferAction::addRadiationObject() const
   // add adiabatic_boundary parameter if required
   if (isParamValid("adiabatic_sidesets"))
   {
-    std::vector<boundary_id_type> adiabatic_boundary_ids =
-        getParam<std::vector<boundary_id_type>>("adiabatic_sidesets");
-    std::vector<BoundaryName> adiabatic_boundary_names;
-    for (unsigned int k = 0; k < adiabatic_boundary_ids.size(); ++k)
+    std::vector<BoundaryName> adiabatic_boundary_names =
+        getParam<std::vector<BoundaryName>>("adiabatic_sidesets");
+    std::vector<BoundaryName> adiabatic_patch_names;
+    for (unsigned int k = 0; k < adiabatic_boundary_names.size(); ++k)
     {
-      boundary_id_type abid = adiabatic_boundary_ids[k];
+      BoundaryName bnd_name = adiabatic_boundary_names[k];
 
-      // find the right entry in _boundary_ids
-      auto it = std::find(_boundary_ids.begin(), _boundary_ids.end(), abid);
+      // find the right entry in _boundary_names
+      auto it = std::find(_boundary_names.begin(), _boundary_names.end(), bnd_name);
 
       // check if entry was found: it must be found or an error would occur later
-      if (it == _boundary_ids.end())
-        mooseError("Adiabatic sideset ", abid, " not present in sidesets.");
+      if (it == _boundary_names.end())
+        mooseError("Adiabatic sideset ", bnd_name, " not present in sidesets.");
 
-      // this is the position in the _boundary_ids vector; this is what
+      // this is the position in the _boundary_names vector; this is what
       // we are really after
-      auto index = std::distance(_boundary_ids.begin(), it);
+      auto index = std::distance(_boundary_names.begin(), it);
 
       // collect the correct boundary names
       for (auto & e : radiation_patch_names[index])
-        adiabatic_boundary_names.push_back(e);
+        adiabatic_patch_names.push_back(e);
     }
-    params.set<std::vector<BoundaryName>>("adiabatic_boundary") = adiabatic_boundary_names;
+    params.set<std::vector<BoundaryName>>("adiabatic_boundary") = adiabatic_patch_names;
   }
 
   // add isothermal sidesets if required
@@ -204,42 +204,42 @@ RadiationTransferAction::addRadiationObject() const
       mooseError("fixed_temperature_sidesets is provided so fixed_boundary_temperatures must be "
                  "provided too");
 
-    std::vector<boundary_id_type> fixed_T_boundary_ids =
-        getParam<std::vector<boundary_id_type>>("fixed_temperature_sidesets");
+    std::vector<BoundaryName> fixed_T_boundary_names =
+        getParam<std::vector<BoundaryName>>("fixed_temperature_sidesets");
 
     std::vector<FunctionName> fixed_T_funcs =
         getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
 
     // check length of fixed_boundary_temperatures
-    if (fixed_T_funcs.size() != fixed_T_boundary_ids.size())
+    if (fixed_T_funcs.size() != fixed_T_boundary_names.size())
       mooseError("Size of parameter fixed_boundary_temperatures and fixed_temperature_sidesets "
                  "must be equal.");
 
-    std::vector<BoundaryName> fixed_T_boundary_names;
+    std::vector<BoundaryName> fixed_T_patch_names;
     std::vector<FunctionName> fixed_T_function_names;
-    for (unsigned int k = 0; k < fixed_T_boundary_ids.size(); ++k)
+    for (unsigned int k = 0; k < fixed_T_boundary_names.size(); ++k)
     {
-      boundary_id_type bid = fixed_T_boundary_ids[k];
+      BoundaryName bnd_name = fixed_T_boundary_names[k];
 
-      // find the right entry in _boundary_ids
-      auto it = std::find(_boundary_ids.begin(), _boundary_ids.end(), bid);
+      // find the right entry in _boundary_names
+      auto it = std::find(_boundary_names.begin(), _boundary_names.end(), bnd_name);
 
       // check if entry was found: it must be found or an error would occur later
-      if (it == _boundary_ids.end())
-        mooseError("Fixed temperature sideset ", bid, " not present in sidesets.");
+      if (it == _boundary_names.end())
+        mooseError("Fixed temperature sideset ", bnd_name, " not present in sidesets.");
 
-      // this is the position in the _boundary_ids vector; this is what
+      // this is the position in the _boundary_names vector; this is what
       // we are really after
-      auto index = std::distance(_boundary_ids.begin(), it);
+      auto index = std::distance(_boundary_names.begin(), it);
 
       // collect the correct boundary names
       for (auto & e : radiation_patch_names[index])
       {
-        fixed_T_boundary_names.push_back(e);
+        fixed_T_patch_names.push_back(e);
         fixed_T_function_names.push_back(fixed_T_funcs[k]);
       }
     }
-    params.set<std::vector<BoundaryName>>("fixed_temperature_boundary") = fixed_T_boundary_names;
+    params.set<std::vector<BoundaryName>>("fixed_temperature_boundary") = fixed_T_patch_names;
     params.set<std::vector<FunctionName>>("fixed_boundary_temperatures") = fixed_T_function_names;
   }
 
@@ -258,10 +258,11 @@ RadiationTransferAction::addRadiationObject() const
 std::vector<std::vector<std::string>>
 RadiationTransferAction::radiationPatchNames() const
 {
-  std::vector<std::vector<std::string>> radiation_patch_names(_boundary_ids.size());
-  for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+  std::vector<std::vector<std::string>> radiation_patch_names(_boundary_names.size());
+  std::vector<BoundaryID> boundary_ids = _mesh->getBoundaryIDs(_boundary_names);
+  for (unsigned int j = 0; j < boundary_ids.size(); ++j)
   {
-    boundary_id_type bid = _boundary_ids[j];
+    boundary_id_type bid = boundary_ids[j];
     std::string base_name = _mesh->getBoundaryName(bid);
     std::vector<std::string> bnames;
     for (unsigned int i = 0; i < _n_patches[j]; ++i)
@@ -278,16 +279,19 @@ RadiationTransferAction::radiationPatchNames() const
 std::vector<std::vector<std::string>>
 RadiationTransferAction::bcRadiationPatchNames() const
 {
-  auto ad_bnd_ids = getParam<std::vector<boundary_id_type>>("adiabatic_sidesets");
-  auto ft_bnd_ids = getParam<std::vector<boundary_id_type>>("fixed_temperature_sidesets");
+  auto ad_bnd_names = getParam<std::vector<BoundaryName>>("adiabatic_sidesets");
+  auto ft_bnd_names = getParam<std::vector<BoundaryName>>("fixed_temperature_sidesets");
   std::vector<std::vector<std::string>> radiation_patch_names;
-  for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+  std::vector<BoundaryID> boundary_ids = _mesh->getBoundaryIDs(_boundary_names);
+  for (unsigned int j = 0; j < boundary_ids.size(); ++j)
   {
-    boundary_id_type bid = _boundary_ids[j];
+    boundary_id_type bid = boundary_ids[j];
+    BoundaryName bnd_name = _boundary_names[j];
+
     // check if this sideset is adiabatic or isothermal
-    auto it_a = std::find(ad_bnd_ids.begin(), ad_bnd_ids.end(), bid);
-    auto it_t = std::find(ft_bnd_ids.begin(), ft_bnd_ids.end(), bid);
-    if (it_a != ad_bnd_ids.end() || it_t != ft_bnd_ids.end())
+    auto it_a = std::find(ad_bnd_names.begin(), ad_bnd_names.end(), bnd_name);
+    auto it_t = std::find(ft_bnd_names.begin(), ft_bnd_names.end(), bnd_name);
+    if (it_a != ad_bnd_names.end() || it_t != ft_bnd_names.end())
       continue;
 
     std::string base_name = _mesh->getBoundaryName(bid);
@@ -310,21 +314,21 @@ RadiationTransferAction::addMeshGenerator() const
   if (!_pars.isParamSetByUser("partitioners"))
   {
     partitioners.clear();
-    for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+    for (unsigned int j = 0; j < _boundary_names.size(); ++j)
       partitioners.push_back("metis");
   }
 
   MultiMooseEnum direction = getParam<MultiMooseEnum>("centroid_partitioner_directions");
 
   // check input parameters
-  if (_boundary_ids.size() != _n_patches.size())
+  if (_boundary_names.size() != _n_patches.size())
     mooseError("n_patches parameter must have same length as sidesets parameter.");
 
-  if (_boundary_ids.size() != partitioners.size())
+  if (_boundary_names.size() != partitioners.size())
     mooseError("partitioners parameter must have same length as sidesets parameter.");
 
   for (unsigned int j = 0; j < partitioners.size(); ++j)
-    if (partitioners[j] == "centroid" && direction.size() != _boundary_ids.size())
+    if (partitioners[j] == "centroid" && direction.size() != _boundary_names.size())
       mooseError(
           "centroid partitioner is selected for at least one sideset. "
           "centroid_partitioner_directions parameter must have same length as sidesets parameter.");
@@ -337,18 +341,16 @@ RadiationTransferAction::addMeshGenerator() const
 
   MeshGeneratorName input = getParam<MeshGeneratorName>("final_mesh_generator");
 
-  for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+  for (unsigned int j = 0; j < _boundary_names.size(); ++j)
   {
-    boundary_id_type bid = _boundary_ids[j];
-
-    // create the name of this PatchSidesetGenerator
+    BoundaryName bnd_name = _boundary_names[j];
     std::stringstream ss;
-    ss << "patch_side_set_generator_" << bid;
+    ss << "patch_side_set_generator_" << bnd_name;
     MeshGeneratorName mg_name = ss.str();
 
     InputParameters params = _factory.getValidParams("PatchSidesetGenerator");
     params.set<MeshGeneratorName>("input") = input;
-    params.set<boundary_id_type>("sideset") = bid;
+    params.set<BoundaryName>("sideset") = bnd_name;
     params.set<unsigned int>("n_patches") = _n_patches[j];
     params.set<MooseEnum>("partitioner") = partitioners[j];
 
