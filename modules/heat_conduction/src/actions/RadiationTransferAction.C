@@ -27,14 +27,14 @@ validParams<RadiationTransferAction>()
       "This action sets up the net radiation calculation between specified sidesets.");
 
   params.addRequiredParam<std::vector<BoundaryName>>(
-      "sidesets", "The sidesets that participate in the radiative exchange.");
+      "boundary", "The boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
-      "adiabatic_sidesets", "The adiabatic sidesets that participate in the radiative exchange.");
+      "adiabatic_boundary", "The adiabatic boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<BoundaryName>>(
-      "fixed_temperature_sidesets",
-      "The fixed temperature sidesets that participate in the radiative exchange.");
+      "fixed_temperature_boundary",
+      "The fixed temperature boundaries that participate in the radiative exchange.");
 
   params.addParam<std::vector<FunctionName>>("fixed_boundary_temperatures",
                                              "The temperatures of the fixed boundary.");
@@ -64,7 +64,7 @@ validParams<RadiationTransferAction>()
 
 RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
   : Action(params),
-    _boundary_names(getParam<std::vector<BoundaryName>>("sidesets")),
+    _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     _n_patches(getParam<std::vector<unsigned int>>("n_patches"))
 {
 }
@@ -170,10 +170,10 @@ RadiationTransferAction::addRadiationObject() const
   params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
 
   // add adiabatic_boundary parameter if required
-  if (isParamValid("adiabatic_sidesets"))
+  if (isParamValid("adiabatic_boundary"))
   {
     std::vector<BoundaryName> adiabatic_boundary_names =
-        getParam<std::vector<BoundaryName>>("adiabatic_sidesets");
+        getParam<std::vector<BoundaryName>>("adiabatic_boundary");
     std::vector<BoundaryName> adiabatic_patch_names;
     for (unsigned int k = 0; k < adiabatic_boundary_names.size(); ++k)
     {
@@ -198,21 +198,21 @@ RadiationTransferAction::addRadiationObject() const
   }
 
   // add isothermal sidesets if required
-  if (isParamValid("fixed_temperature_sidesets"))
+  if (isParamValid("fixed_temperature_boundary"))
   {
     if (!isParamValid("fixed_boundary_temperatures"))
-      mooseError("fixed_temperature_sidesets is provided so fixed_boundary_temperatures must be "
+      mooseError("fixed_temperature_boundary is provided so fixed_boundary_temperatures must be "
                  "provided too");
 
     std::vector<BoundaryName> fixed_T_boundary_names =
-        getParam<std::vector<BoundaryName>>("fixed_temperature_sidesets");
+        getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
 
     std::vector<FunctionName> fixed_T_funcs =
         getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
 
     // check length of fixed_boundary_temperatures
     if (fixed_T_funcs.size() != fixed_T_boundary_names.size())
-      mooseError("Size of parameter fixed_boundary_temperatures and fixed_temperature_sidesets "
+      mooseError("Size of parameter fixed_boundary_temperatures and fixed_temperature_boundary "
                  "must be equal.");
 
     std::vector<BoundaryName> fixed_T_patch_names;
@@ -279,8 +279,8 @@ RadiationTransferAction::radiationPatchNames() const
 std::vector<std::vector<std::string>>
 RadiationTransferAction::bcRadiationPatchNames() const
 {
-  auto ad_bnd_names = getParam<std::vector<BoundaryName>>("adiabatic_sidesets");
-  auto ft_bnd_names = getParam<std::vector<BoundaryName>>("fixed_temperature_sidesets");
+  auto ad_bnd_names = getParam<std::vector<BoundaryName>>("adiabatic_boundary");
+  auto ft_bnd_names = getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
   std::vector<std::vector<std::string>> radiation_patch_names;
   std::vector<BoundaryID> boundary_ids = _mesh->getBoundaryIDs(_boundary_names);
   for (unsigned int j = 0; j < boundary_ids.size(); ++j)
@@ -350,7 +350,7 @@ RadiationTransferAction::addMeshGenerator() const
 
     InputParameters params = _factory.getValidParams("PatchSidesetGenerator");
     params.set<MeshGeneratorName>("input") = input;
-    params.set<BoundaryName>("sideset") = bnd_name;
+    params.set<BoundaryName>("boundary") = bnd_name;
     params.set<unsigned int>("n_patches") = _n_patches[j];
     params.set<MooseEnum>("partitioner") = partitioners[j];
 

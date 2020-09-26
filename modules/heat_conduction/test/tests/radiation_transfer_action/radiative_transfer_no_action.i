@@ -58,7 +58,7 @@
 
   [./split_inner_bottom]
     type = PatchSidesetGenerator
-    sideset = 4
+    boundary = 4
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = x
@@ -67,7 +67,7 @@
 
   [./split_inner_left]
     type = PatchSidesetGenerator
-    sideset = 5
+    boundary = 5
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = y
@@ -76,7 +76,7 @@
 
   [./split_inner_right]
     type = PatchSidesetGenerator
-    sideset = 6
+    boundary = 6
     n_patches = 2
     partitioner = centroid
     centroid_partitioner_direction = y
@@ -85,7 +85,7 @@
 
   [./split_inner_top]
     type = PatchSidesetGenerator
-    sideset = 7
+    boundary = 7
     n_patches = 3
     partitioner = centroid
     centroid_partitioner_direction = x

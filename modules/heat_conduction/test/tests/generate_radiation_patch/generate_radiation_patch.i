@@ -17,7 +17,7 @@
 
   [patch]
     type = PatchSidesetGenerator
-    sideset = 0
+    boundary = 0
     n_patches = 10
     input = cmg
   []

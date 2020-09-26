@@ -13,9 +13,9 @@
     type = 'Exodiff'
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out_bnd_names.e'
-    cli_args = 'GrayDiffuseRadiation/cavity/sidesets="inner_bottom 5 inner_right inner_top"
-                GrayDiffuseRadiation/cavity/adiabatic_sidesets="inner_top"
-                GrayDiffuseRadiation/cavity/fixed_temperature_sidesets="inner_bottom"
+    cli_args = 'GrayDiffuseRadiation/cavity/boundary="inner_bottom 5 inner_right inner_top"
+                GrayDiffuseRadiation/cavity/adiabatic_boundary="inner_top"
+                GrayDiffuseRadiation/cavity/fixed_temperature_boundary="inner_bottom"
                 Outputs/file_base=radiative_transfer_action_out_bnd_names'
     requirement = 'The system shall allow specifying boundary names and ids in the radiative heat transfer action'
     issues = '#15843'

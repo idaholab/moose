@@ -44,7 +44,8 @@ PatchSidesetGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<BoundaryName>("sideset", "The sideset that will be divided into patches");
+  params.addRequiredParam<BoundaryName>("boundary",
+                                        "The boundary that will be divided into patches");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "n_patches", "n_patches>0", "Number of patches");
 
@@ -72,7 +73,7 @@ PatchSidesetGenerator::PatchSidesetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _n_patches(getParam<unsigned int>("n_patches")),
-    _sideset_name(getParam<BoundaryName>("sideset")),
+    _sideset_name(getParam<BoundaryName>("boundary")),
     _partitioner_name(getParam<MooseEnum>("partitioner"))
 {
 }
