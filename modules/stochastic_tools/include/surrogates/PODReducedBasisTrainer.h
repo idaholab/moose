@@ -17,7 +17,10 @@
 #include "DistributedData.h"
 
 // Forward declarations
+namespace libMesh
+{
 class ReplicatedMesh;
+}
 
 typedef StochasticTools::DistributedData<std::shared_ptr<DenseVector<Real>>> DistributedSnapshots;
 
