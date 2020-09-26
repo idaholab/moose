@@ -16,6 +16,9 @@
 #include "libmesh/parallel.h"
 #include "DistributedData.h"
 
+// Forward declarations
+class ReplicatedMesh;
+
 typedef StochasticTools::DistributedData<std::shared_ptr<DenseVector<Real>>> DistributedSnapshots;
 
 class PODReducedBasisTrainer : public SurrogateTrainer
