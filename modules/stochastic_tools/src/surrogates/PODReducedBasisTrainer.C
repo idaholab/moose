@@ -17,14 +17,6 @@
 
 registerMooseObject("StochasticToolsApp", PODReducedBasisTrainer);
 
-typedef std::function<void(
-    ReplicatedMesh &,
-    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &,
-    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &,
-    processor_id_type,
-    const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &)>
-    passingFunction;
-
 InputParameters
 PODReducedBasisTrainer::validParams()
 {
@@ -139,11 +131,11 @@ PODReducedBasisTrainer::finalize()
 }
 
 void
-PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
-                                    dof_id_type g_ind,
+PODReducedBasisTrainer::addSnapshot(unsigned int var_i,
+                                    unsigned int glob_i,
                                     const std::shared_ptr<DenseVector<Real>> & snapshot)
 {
-  _snapshots[v_ind].addNewEntry(g_ind, snapshot);
+  _snapshots[var_i].addNewEntry(glob_i, snapshot);
 }
 
 void
@@ -155,7 +147,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   const auto no_snaps = getSnapsSize(0);
 
   // Initializing the correlation matrices for each variable.
-  for (dof_id_type var_i = 0; var_i < _snapshots.size(); ++var_i)
+  for (unsigned int var_i = 0; var_i < _snapshots.size(); ++var_i)
     _corr_mx[var_i] = DenseMatrix<Real>(no_snaps, no_snaps);
 
   /*
@@ -194,13 +186,13 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   pointers to the data, this should not include a considerable amount of copy
   operations.
   */
-  std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
-  for (dof_id_type loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalEntries(); ++loc_vec_i)
+  std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
+  for (unsigned int loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalEntries(); ++loc_vec_i)
   {
-    const dof_id_type glob_vec_i = _snapshots[0].getGlobalIndex(loc_vec_i);
+    const unsigned int glob_vec_i = _snapshots[0].getGlobalIndex(loc_vec_i);
     auto & entry = local_vectors[glob_vec_i];
 
-    for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+    for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
       entry.push_back(_snapshots[v_ind].getLocalEntry(loc_vec_i));
   }
 
@@ -210,15 +202,15 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   sent to other processors only once. send_map, on the other hand, will be used
   by the communicator and contains the required snapshots for each processor
   which is not the the current rank.
-  std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> type
+  std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> type
   is a container that uses (global snapshot index, variable index, snapshot) to
   identify and send/receive snapshots during the communication.
   */
 
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> send_vectors;
+  std::unordered_map<processor_id_type, std::set<unsigned int>> send_vectors;
   std::unordered_map<
       processor_id_type,
-      std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>>
+      std::vector<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>>
       send_map;
 
   // Fill the send map with snapshots we need to send for each processor. First,
@@ -229,8 +221,8 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       // The centroids in the mesh correspond to the 2D corrdinates of the elements
       // in the mesh.
       const auto centroid = elem->centroid();
-      const dof_id_type i = centroid(0);
-      const dof_id_type j = centroid(1);
+      const unsigned int i = centroid(0);
+      const unsigned int j = centroid(1);
 
       /*
       Checking if the current processor has the required snapshot.
@@ -247,7 +239,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // Add another entry to the map if another processor needs the owned
         // snapshot.
         send_vectors[elem->processor_id()].insert(i);
-        for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+        for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
           send_map[elem->processor_id()].emplace_back(
               i, v_ind, _snapshots[v_ind].getGlobalEntry(i));
       }
@@ -260,7 +252,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // Add another entry to the map if another processor needs the owned
         // snapshot.
         send_vectors[elem->processor_id()].insert(j);
-        for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+        for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
           send_map[elem->processor_id()].emplace_back(
               j, v_ind, _snapshots[v_ind].getGlobalEntry(j));
       }
@@ -271,14 +263,16 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
   // Creating container for received data. In this case the map contains the snapshots
   // for each variable for each required global snapshot index.
-  std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> received_vectors;
+  std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>>
+      received_vectors;
 
   // Converting function to functor to be able to pass to push packed range.
   auto functor =
       [this, &mesh, &received_vectors, &local_vectors](
           processor_id_type pid,
           const std::vector<
-              std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> & vectors) {
+              std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> &
+              vectors) {
         PODReducedBasisTrainer::receiveObjects(mesh, received_vectors, local_vectors, pid, vectors);
       };
 
@@ -286,8 +280,9 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
   // This extra call is necessary in case a processor has all the elements it needs
   // (hence doesn't receive any).
-  functor(processor_id(),
-          std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>());
+  functor(
+      processor_id(),
+      std::vector<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>());
 
   // Now, the correlation matrices aregathered and  summed to make sure every processor
   // sees them.
@@ -295,20 +290,20 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
   // The lower triangle of the matrices are then filled using symmetry.
   for (auto & corr_mx : _corr_mx)
-    for (dof_id_type row_i = 1; row_i < corr_mx.m(); ++row_i)
-      for (dof_id_type col_i = 0; col_i < row_i; ++col_i)
+    for (unsigned int row_i = 1; row_i < corr_mx.m(); ++row_i)
+      for (unsigned int col_i = 0; col_i < row_i; ++col_i)
         corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
 }
 
 void
 PODReducedBasisTrainer::receiveObjects(
     ReplicatedMesh & mesh,
-    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+    std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> &
         received_vectors,
-    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+    std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> &
         local_vectors,
     processor_id_type /*pid*/,
-    const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &
+    const std::vector<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> &
         vectors)
 {
   for (auto & tuple : vectors)
@@ -338,8 +333,8 @@ PODReducedBasisTrainer::receiveObjects(
 
     // Getting pointers to the necessary snapshots for the matrix entry.
     // This points to a vector of size (number of variables).
-    const dof_id_type i = elem->centroid()(0);
-    const dof_id_type j = elem->centroid()(1);
+    const unsigned int i = elem->centroid()(0);
+    const unsigned int j = elem->centroid()(1);
     std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
     std::vector<std::shared_ptr<DenseVector<Real>>> * j_vec = nullptr;
 
@@ -372,7 +367,7 @@ PODReducedBasisTrainer::receiveObjects(
     }
 
     // Coputing the available matrix entries for every variable.
-    for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+    for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
       _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
 
     // Set the 'filled' flag to 1 (true) to make sure it is not recomputed.
@@ -450,25 +445,25 @@ void
 PODReducedBasisTrainer::computeBasisVectors()
 {
   // Looping over all the variables.
-  for (dof_id_type var_i = 0; var_i < _eigenvectors.size(); ++var_i)
+  for (unsigned int var_i = 0; var_i < _eigenvectors.size(); ++var_i)
   {
     unsigned int no_bases = _eigenvalues[var_i].size();
-    dof_id_type no_snaps = _snapshots[var_i].getNumberOfLocalEntries();
+    unsigned int no_snaps = _snapshots[var_i].getNumberOfLocalEntries();
 
     _base[var_i].resize(no_bases);
 
     // Filling the containers using the local snapshots and the eigenvalues and
     // eigenvectors of the correlation matrices.
-    for (dof_id_type base_i = 0; base_i < no_bases; ++base_i)
+    for (unsigned int base_i = 0; base_i < no_bases; ++base_i)
     {
       _base[var_i][base_i].resize(_snapshots[var_i].getLocalEntry(0)->size());
 
-      for (dof_id_type loc_i = 0; loc_i < no_snaps; ++loc_i)
+      for (unsigned int loc_i = 0; loc_i < no_snaps; ++loc_i)
       {
-        dof_id_type glob_i = _snapshots[var_i].getGlobalIndex(loc_i);
+        unsigned int glob_i = _snapshots[var_i].getGlobalIndex(loc_i);
         const DenseVector<Real> & snapshot = *_snapshots[var_i].getLocalEntry(loc_i);
 
-        for (dof_id_type i = 0; i < _base[var_i][base_i].size(); ++i)
+        for (unsigned int i = 0; i < _base[var_i][base_i].size(); ++i)
         {
           _base[var_i][base_i](i) += _eigenvectors[var_i](glob_i, base_i) * snapshot(i);
         }
@@ -524,11 +519,10 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
   _empty_operators = false;
 }
 
-dof_id_type
-PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i) const
+unsigned int
+PODReducedBasisTrainer::getSnapsSize(unsigned int var_i) const
 {
-  dof_id_type val = _snapshots[var_i].getNumberOfGlobalEntries();
-  return val;
+  return _snapshots[var_i].getNumberOfGlobalEntries();
 }
 
 unsigned int
@@ -595,7 +589,7 @@ PODReducedBasisTrainer::printEigenvalues()
       paramError("filenames",
                  "The number of file names is not equal to the number of variable names!");
 
-    for (dof_id_type var_i = 0; var_i < _var_names.size(); ++var_i)
+    for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
     {
       std::filebuf fb;
       fb.open(filenames[var_i], std::ios::out);

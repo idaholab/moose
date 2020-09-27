@@ -28,20 +28,20 @@ public:
 
   /// Initialize the container with a given number of samples. this partitions
   /// the samples using linearPartitioning.
-  void initializeContainer(dof_id_type num_global_entries);
+  void initializeContainer(unsigned int num_global_entries);
 
   /// Changing a sample with a global index if it is owned locally.
-  void changeEntry(dof_id_type glob_i, const T & sample);
+  void changeEntry(unsigned int glob_i, const T & sample);
 
   /// Adding a new sample locally with a global index.
-  void addNewEntry(dof_id_type glob_i, const T & sample);
+  void addNewEntry(unsigned int glob_i, const T & sample);
 
   /// Closes the container meaning that no new samples can be added or the
   /// already existing samples canot be changed.
   void closeContainer() { _closed = true; };
 
   /// Checking of sample with global ID is locally owned ot not.
-  bool hasGlobalEntry(dof_id_type glob_i) const;
+  bool hasGlobalEntry(unsigned int glob_i) const;
 
   /// Getting an itertor to the beginning of the local samples.
   typename std::vector<T>::iterator localEntryBegin() { return _local_entries.begin(); };
@@ -50,50 +50,50 @@ public:
   typename std::vector<T>::iterator localEntryEnd() { return _local_entries.end(); };
 
   /// Getting an iterator to the beginning of the locally owned sample IDs.
-  typename std::vector<dof_id_type>::iterator localEntryIDBegin()
+  typename std::vector<unsigned int>::iterator localEntryIDBegin()
   {
     return _local_entry_ids.begin();
   };
 
   /// Getting an iterator to the end of the locally owned sample IDs.
-  typename std::vector<dof_id_type>::iterator localEntryIDEnd() { return _local_entry_ids.end(); };
+  typename std::vector<unsigned int>::iterator localEntryIDEnd() { return _local_entry_ids.end(); };
 
   /// Getting a sample using its global index.
-  const T & getGlobalEntry(dof_id_type glob_i) const;
+  const T & getGlobalEntry(unsigned int glob_i) const;
 
   /// Getting a sample using its local index.
-  const T & getLocalEntry(dof_id_type loc_i) const;
+  const T & getLocalEntry(unsigned int loc_i) const;
 
   /// Getting all of the locally owned samples.
   const std::vector<T> & getLocalEntries() const { return _local_entries; };
 
   /// Getting the vector of sample IDs for locally owned samples.
-  const std::vector<dof_id_type> & getLocalEntryIDs() const { return _local_entry_ids; };
+  const std::vector<unsigned int> & getLocalEntryIDs() const { return _local_entry_ids; };
 
   /// Getting the number of global samples.
-  dof_id_type getNumberOfGlobalEntries() const;
+  unsigned int getNumberOfGlobalEntries() const;
 
   /// Getting the number of locally owned samples.
-  dof_id_type getNumberOfLocalEntries() const { return _n_local_entries; };
+  unsigned int getNumberOfLocalEntries() const { return _n_local_entries; };
 
   /// Getting the local index of a global sample if locally owned.
-  dof_id_type getLocalIndex(dof_id_type glob_i) const;
+  unsigned int getLocalIndex(unsigned int glob_i) const;
 
   /// Getting the global index of a locally owned sample.
-  dof_id_type getGlobalIndex(dof_id_type loc_i) const;
+  unsigned int getGlobalIndex(unsigned int loc_i) const;
 
 protected:
   /// The vector where the samples are stored.
   std::vector<T> _local_entries;
 
   /// The vector where the global sample IDs are stored.
-  std::vector<dof_id_type> _local_entry_ids;
+  std::vector<unsigned int> _local_entry_ids;
 
   /// Flag which shows if the container is closed or not.
   bool _closed;
 
   /// Number of local samples.
-  dof_id_type _n_local_entries;
+  unsigned int _n_local_entries;
 };
 
 } // StochasticTools namespace

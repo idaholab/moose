@@ -23,25 +23,29 @@ DistributedData<T>::DistributedData(const libMesh::Parallel::Communicator & comm
 
 template <typename T>
 void
-DistributedData<T>::initializeContainer(dof_id_type n_global_entries)
+DistributedData<T>::initializeContainer(unsigned int n_global_entries)
 {
   // This function can be used when a linear partitioning is required and the
-  // number of global samples is known in advance.
+  // number of global samples is known in advance. We must temporarily
+  // use dof_id_type for the last three args (pass by reference),
+  // but will cast back to unsigned int later
   dof_id_type local_entry_begin;
   dof_id_type local_entry_end;
+  dof_id_type n_local_entries;
+
   MooseUtils::linearPartitionItems(n_global_entries,
                                    n_processors(),
                                    processor_id(),
-                                   _n_local_entries,
+                                   n_local_entries,
                                    local_entry_begin,
                                    local_entry_end);
-
+  _n_local_entries = n_local_entries;
   _local_entries.resize(_n_local_entries);
   _local_entry_ids.resize(_n_local_entries);
 
   // Filling the sample ID vector, leaving the elements of the sample vector
   // with the default constructor.
-  for (dof_id_type entry_i = local_entry_begin; entry_i < local_entry_end; ++entry_i)
+  for (unsigned int entry_i = local_entry_begin; entry_i < (unsigned int)local_entry_end; ++entry_i)
   {
     _local_entry_ids[entry_i] = entry_i;
   }
@@ -49,7 +53,7 @@ DistributedData<T>::initializeContainer(dof_id_type n_global_entries)
 
 template <typename T>
 void
-DistributedData<T>::addNewEntry(dof_id_type glob_i, const T & entry)
+DistributedData<T>::addNewEntry(unsigned int glob_i, const T & entry)
 {
   auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it != _local_entry_ids.end())
@@ -64,7 +68,7 @@ DistributedData<T>::addNewEntry(dof_id_type glob_i, const T & entry)
 
 template <typename T>
 void
-DistributedData<T>::changeEntry(dof_id_type glob_i, const T & entry)
+DistributedData<T>::changeEntry(unsigned int glob_i, const T & entry)
 {
   auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it == _local_entry_ids.end())
@@ -77,7 +81,7 @@ DistributedData<T>::changeEntry(dof_id_type glob_i, const T & entry)
 
 template <typename T>
 const T &
-DistributedData<T>::getGlobalEntry(dof_id_type glob_i) const
+DistributedData<T>::getGlobalEntry(unsigned int glob_i) const
 {
   auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it == _local_entry_ids.end())
@@ -88,7 +92,7 @@ DistributedData<T>::getGlobalEntry(dof_id_type glob_i) const
 
 template <typename T>
 const T &
-DistributedData<T>::getLocalEntry(dof_id_type loc_i) const
+DistributedData<T>::getLocalEntry(unsigned int loc_i) const
 {
   if (loc_i > _n_local_entries - 1)
     ::mooseError("The requested local index (",
@@ -101,17 +105,17 @@ DistributedData<T>::getLocalEntry(dof_id_type loc_i) const
 }
 
 template <typename T>
-dof_id_type
+unsigned int
 DistributedData<T>::getNumberOfGlobalEntries() const
 {
-  dof_id_type val = _n_local_entries;
+  unsigned int val = _n_local_entries;
   _communicator.sum(val);
   return val;
 }
 
 template <typename T>
 bool
-DistributedData<T>::hasGlobalEntry(dof_id_type glob_i) const
+DistributedData<T>::hasGlobalEntry(unsigned int glob_i) const
 {
   const auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it != _local_entry_ids.end())
@@ -121,8 +125,8 @@ DistributedData<T>::hasGlobalEntry(dof_id_type glob_i) const
 }
 
 template <typename T>
-dof_id_type
-DistributedData<T>::getLocalIndex(dof_id_type glob_i) const
+unsigned int
+DistributedData<T>::getLocalIndex(unsigned int glob_i) const
 {
   const auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it == _local_entry_ids.end())
@@ -132,8 +136,8 @@ DistributedData<T>::getLocalIndex(dof_id_type glob_i) const
 }
 
 template <typename T>
-dof_id_type
-DistributedData<T>::getGlobalIndex(dof_id_type loc_i) const
+unsigned int
+DistributedData<T>::getGlobalIndex(unsigned int loc_i) const
 {
   if (loc_i > _n_local_entries - 1)
     ::mooseError("The requested local index (",
