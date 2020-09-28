@@ -12,23 +12,22 @@
 #include "PiecewiseBase.h"
 #include "LinearInterpolation.h"
 
-class Piecewise;
+class PiecewiseTabularBase;
 
 template <>
-InputParameters validParams<Piecewise>();
+InputParameters validParams<PiecewiseTabularBase>();
 
 /**
- * Function base which provides a piecewise approximation to a provided
- * (x,y) point data set.  Derived classes, which control the order
- * (constant, linear) of the approximation and how the (x,y) data set
- * is generated, should be used directly.
+ * Function base which provides a piecewise approximation to a provided (x,y) point data set via
+ * input parameter specifications. Derived classes, which control the order (constant, linear) of
+ * the approximation and how the (x,y) data set is generated, should be used directly.
  */
-class Piecewise : public PiecewiseBase
+class PiecewiseTabularBase : public PiecewiseBase
 {
 public:
   static InputParameters validParams();
 
-  Piecewise(const InputParameters & parameters);
+  PiecewiseTabularBase(const InputParameters & parameters);
 
 protected:
   /// function value scale factor

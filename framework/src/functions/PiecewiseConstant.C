@@ -16,7 +16,7 @@ defineLegacyParams(PiecewiseConstant);
 InputParameters
 PiecewiseConstant::validParams()
 {
-  InputParameters params = Piecewise::validParams();
+  InputParameters params = PiecewiseTabularBase::validParams();
   MooseEnum direction("left right", "left");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());
@@ -44,7 +44,7 @@ PiecewiseConstant::getDirection(const std::string & direction)
 }
 
 PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
-  : Piecewise(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
+  : PiecewiseTabularBase(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
 {
 }
 

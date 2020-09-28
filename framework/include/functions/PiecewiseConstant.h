@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Piecewise.h"
+#include "PiecewiseTabularBase.h"
 
 // Forward declarations
 class PiecewiseConstant;
@@ -21,7 +21,7 @@ InputParameters validParams<PiecewiseConstant>();
  * Function which provides a piecewise continuous constant interpolation
  * of a provided (x,y) point data set.
  */
-class PiecewiseConstant : public Piecewise
+class PiecewiseConstant : public PiecewiseTabularBase
 {
 public:
   static InputParameters validParams();

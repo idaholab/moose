@@ -14,13 +14,13 @@ defineLegacyParams(PiecewiseLinearBase);
 InputParameters
 PiecewiseLinearBase::validParams()
 {
-  InputParameters params = Piecewise::validParams();
+  InputParameters params = PiecewiseTabularBase::validParams();
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }
 
 PiecewiseLinearBase::PiecewiseLinearBase(const InputParameters & parameters)
-  : Piecewise(parameters), _linear_interp(nullptr)
+  : PiecewiseTabularBase(parameters), _linear_interp(nullptr)
 {
 }
 
@@ -75,6 +75,6 @@ PiecewiseLinearBase::average() const
 void
 PiecewiseLinearBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 {
-  Piecewise::setData(x, y);
+  PiecewiseTabularBase::setData(x, y);
   buildInterpolation();
 }
