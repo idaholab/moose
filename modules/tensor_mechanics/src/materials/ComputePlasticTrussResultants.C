@@ -63,10 +63,12 @@ ComputePlasticTrussResultants::ComputePlasticTrussResultants(const InputParamete
     _max_its(1000)
 {
   if (!parameters.isParamSetByUser("hardening_constant") && !isParamValid("hardening_function"))
-    mooseError("ComputePlasticTrussResultants: Either hardening_constant or hardening_function must be defined");
+    mooseError("ComputePlasticTrussResultants: Either hardening_constant or hardening_function "
+               "must be defined");
 
   if (parameters.isParamSetByUser("hardening_constant") && isParamValid("hardening_function"))
-    mooseError("ComputePlasticTrussResultants: Only the hardening_constant or only the hardening_function can be defined but not both");
+    mooseError("ComputePlasticTrussResultants: Only the hardening_constant or only the "
+               "hardening_function can be defined but not both");
 }
 
 void
@@ -117,7 +119,8 @@ ComputePlasticTrussResultants::computeQpProperties()
       residual = std::abs(trial_stress) - _hardening_variable[_qp] - _yield_stress -
                  _material_stiffness[_qp] * plastic_strain_increment;
 
-      reference_residual = std::abs(trial_stress) - _material_stiffness[_qp] * plastic_strain_increment;
+      reference_residual =
+          std::abs(trial_stress) - _material_stiffness[_qp] * plastic_strain_increment;
 
       ++iteration;
       if (iteration > _max_its) // not converging

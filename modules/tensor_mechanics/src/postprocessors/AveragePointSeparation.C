@@ -17,14 +17,12 @@
 
 #include "libmesh/system.h"
 
-
 #include "ComputeIncrementalBeamStrain.h"
 #include "Assembly.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
-
 
 registerMooseObject("MooseApp", AveragePointSeparation);
 
@@ -41,7 +39,8 @@ AveragePointSeparation::validParams()
                                               "A list of first points in the numerical domain");
   params.addRequiredParam<std::vector<Point>>("last_point",
                                               "A list of last points in the numerical domain");
-  params.addClassDescription("Compute the average separation between a list of two specified locations");
+  params.addClassDescription(
+      "Compute the average separation between a list of two specified locations");
   return params;
 }
 
@@ -55,11 +54,14 @@ AveragePointSeparation::AveragePointSeparation(const InputParameters & parameter
     _value(0)
 {
   // fetch coupled variables and gradients (as stateful properties if necessary)
-  _disp_num=std::vector<int>(_displacements.size());
+  _disp_num = std::vector<int>(_displacements.size());
   for (unsigned int i = 0; i < _displacements.size(); ++i)
-    _disp_num[i] = _subproblem.getVariable(_tid,
-                                           _displacements[i], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD
-                                          ).number();
+    _disp_num[i] = _subproblem
+                       .getVariable(_tid,
+                                    _displacements[i],
+                                    Moose::VarKindType::VAR_ANY,
+                                    Moose::VarFieldType::VAR_FIELD_STANDARD)
+                       .number();
 }
 
 void
@@ -72,11 +74,12 @@ AveragePointSeparation::execute()
     sq_diff = 0;
     for (unsigned int j = 0; j < _displacements.size(); ++j)
       sq_diff += pow(_system.point_value(_disp_num[j], _first_point[i], false) -
-                     _system.point_value(_disp_num[j], _last_point[i], false), 2.0);
+                         _system.point_value(_disp_num[j], _last_point[i], false),
+                     2.0);
 
     _value += std::sqrt(sq_diff);
   }
-  _value = _value/_first_point.size();
+  _value = _value / _first_point.size();
 }
 
 Real

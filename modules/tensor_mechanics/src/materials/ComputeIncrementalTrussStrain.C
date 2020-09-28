@@ -87,8 +87,9 @@ ComputeIncrementalTrussStrain::initQpStatefulProperties()
 void
 ComputeIncrementalTrussStrain::computeProperties()
 {
-  // calculate original length of a truss element (nodal positions do not change with time as undisplaced mesh is used by material classes by default)
-  // fetch the solution for the two end nodes for current element
+  // calculate original length of a truss element (nodal positions do not change with time as
+  // undisplaced mesh is used by material classes by default) fetch the solution for the two end
+  // nodes for current element
   std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
     node.push_back(_current_elem->node_ptr(i));
@@ -132,7 +133,8 @@ ComputeIncrementalTrussStrain::computeQpStrain()
   _total_disp_strain[_qp] = _mech_disp_strain_increment[_qp];
 
   for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
-    _mech_disp_strain_increment[_qp] -= (*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp];
+    _mech_disp_strain_increment[_qp] -=
+        (*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp];
 }
 
 void
