@@ -45,6 +45,8 @@ ComputeTrussResultants::initQpStatefulProperties()
 void
 ComputeTrussResultants::computeQpProperties()
 {
-  _force[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0) * _area[_qp] + _force_old[_qp];
-  _axial_stress[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0) + _axial_stress_old[_qp];
+  _force[_qp] =
+      _material_stiffness[_qp] * _disp_strain_increment[_qp](0) * _area[_qp] + _force_old[_qp];
+  _axial_stress[_qp] =
+      _material_stiffness[_qp] * _disp_strain_increment[_qp](0) + _axial_stress_old[_qp];
 }
