@@ -1,0 +1,24 @@
+[Tests]
+    design = Parser.md
+    issues = '#14894'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to read input file syntax and write into map parameters.'
+  []
+  [odd_entries]
+    type = RunException
+    input = test.i
+    requirement = 'The system shall error if a user supplies an odd number of entries, implying an unbalanced key-value set, to a map parameter.'
+    expect_err = 'There must be an even number or else you will end up with a key without a value'
+    cli_args = "Kernels/inactive='map bad_value'"
+  []
+  [bad_value]
+    type = RunException
+    input = test.i
+    requirement = 'The system shall error if a user supplies syntax in a map parameter that cannot be cast to the requested mapped type.'
+    expect_err = 'invalid.*syntax for map parameter.*a'
+    cli_args = "Kernels/inactive='map odd_entries'"
+  []
+[]
