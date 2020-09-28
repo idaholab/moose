@@ -54,4 +54,6 @@ ADComputeMultiplePorousInelasticStress::computeQpProperties()
   _porosity[_qp] =
       (1.0 - _porosity_old[_qp]) * (_inelastic_strain[_qp] - _inelastic_strain_old[_qp]).trace() +
       _porosity_old[_qp];
+  if (_porosity[_qp] < 0.0)
+    _porosity[_qp] = 0.0;
 }
