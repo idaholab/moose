@@ -1,0 +1,26 @@
+[Tests]
+  design = '/SaturationPressureMaterial.md'
+  issues = '#15860'
+
+  [ad]
+    type = 'CSVDiff'
+    input = 'saturation_pressure_material.i'
+    csvdiff = 'saturation_pressure_material_out.csv'
+    recover = false
+
+    requirement = 'The system shall provide a material that computes saturation pressure using automatic differentiation material properties.'
+  []
+  [nonad]
+    type = 'CSVDiff'
+    input = 'saturation_pressure_material.i'
+    cli_args = "
+      Materials/T_mat/type=GenericConstantMaterial
+      Materials/p_sat_mat/type=SaturationPressureMaterial
+      Postprocessors/p_sat_pp/type=ElementAverageMaterialProperty"
+    csvdiff = 'saturation_pressure_material_out.csv'
+    prereq = 'ad'
+    recover = false
+
+    requirement = 'The system shall provide a material that computes saturation pressure using non-automatic differentiation material properties.'
+  []
+[]
