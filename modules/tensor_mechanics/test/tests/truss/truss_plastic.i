@@ -123,7 +123,6 @@
     type = PlasticTruss
     youngs_modulus = 2.0e11
     yield_stress = 500e5
-    hardening_constant = 0.
     outputs = exodus
   [../]
 []
