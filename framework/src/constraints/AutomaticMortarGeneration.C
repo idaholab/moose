@@ -129,8 +129,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
 
-  // Create an offset by the maximum number of mortar segment elements that can be created. Recall
-  // that the number of mortar segments created is a function of node projection
+  // Create an offset by the maximum number of mortar segment elements that can be created *plus*
+  // the number of lower-dimensional secondary subdomain elements. Recall that the number of mortar
+  // segments created is a function of node projection, *and* that if we split elems we will delete
+  // that elem which has already taken a unique id
   for (const auto & pr : primary_secondary_boundary_id_pairs)
   {
     const auto primary_bnd_id = pr.first;
@@ -140,7 +142,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const auto num_secondary_nodes =
         std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
 
-    node_unique_id_offset += num_primary_nodes + num_secondary_nodes;
+    node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
   }
 
   // 1.) Add all lower-dimensional secondary side elements as the "initial" mortar segments.
