@@ -91,7 +91,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
   } while (0)
 
 #ifdef NDEBUG
-#define mooseAssert(asserted, msg)
+#define mooseAssert(asserted, msg) ((void)0)
 #else
 #define mooseAssert(asserted, msg)                                                                 \
   do                                                                                               \
