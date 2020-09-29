@@ -1,22 +1,40 @@
 [Tests]
   design = 'DerivativeSumMaterial.md'
   issues = '#14914 #5039'
-  [./random_ic]
-    type = 'Exodiff'
-    input = 'random_ic.i'
-    exodiff = 'random_ic_out.e'
+  [random_ic]
     requirement = 'The system shall provide a method for summing multiple DerivativeParsedMaterials'
-                  'and compare exact to a single DerivativeParsedMaterial'
-    mesh_mode = REPLICATED
-  [../]
-  [./random_ic_no_validating]
-    type = 'Exodiff'
-    prereq = 'random_ic'
-    input = 'random_ic.i'
-    exodiff = 'random_ic_out.e'
-    cli_args = 'Materials/free_energy/validate_coupling=false'
-    requirement = 'The system shall provide a method for summing multiple DerivativeParsedMaterials'
-                  'and compare exact to a single DerivativeParsedMaterial without validating coupling'
-    mesh_mode = REPLICATED
-  [../]
+                  'and compare exact to a single DerivativeParsedMaterial '
+    [validating]
+      type = 'Exodiff'
+      input = 'random_ic.i'
+      exodiff = 'random_ic_out.e'
+      detail = 'validating coupling'
+      mesh_mode = REPLICATED
+    []
+    [no_validating]
+      type = 'Exodiff'
+      prereq = 'random_ic/validating'
+      input = 'random_ic.i'
+      exodiff = 'random_ic_out.e'
+      cli_args = 'Materials/free_energy/validate_coupling=false'
+      detail = 'without validating coupling'
+      mesh_mode = REPLICATED
+    []
+    [ad_validating]
+      type = 'Exodiff'
+      input = 'ad_random_ic.i'
+      exodiff = 'ad_random_ic_out.e'
+      detail = 'validating coupling using automatic differentiation'
+      mesh_mode = REPLICATED
+    []
+    [ad_no_validating]
+      type = 'Exodiff'
+      prereq = 'random_ic/ad_validating'
+      input = 'ad_random_ic.i'
+      exodiff = 'ad_random_ic_out.e'
+      cli_args = 'Materials/free_energy/validate_coupling=false'
+      detail = 'without validating coupling using automatic differentiation'
+      mesh_mode = REPLICATED
+    []
+  []
 []
