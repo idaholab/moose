@@ -12,6 +12,7 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("MooseApp", DerivativeSumMaterial);
+registerMooseObject("MooseApp", ADDerivativeSumMaterial);
 
 template <bool is_ad>
 InputParameters
@@ -76,15 +77,15 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
 
   for (unsigned int n = 0; n < _num_materials; ++n)
   {
-    _summand_F[n] = &this->template getMaterialProperty<Real>(_sum_materials[n]);
+    _summand_F[n] = &this->template getGenericMaterialProperty<Real, is_ad>(_sum_materials[n]);
     _summand_dF[n].resize(_nargs);
     _summand_d2F[n].resize(_nargs);
     _summand_d3F[n].resize(_nargs);
 
     for (unsigned int i = 0; i < _nargs; ++i)
     {
-      _summand_dF[n][i] =
-          &this->template getMaterialPropertyDerivative<Real>(_sum_materials[n], _arg_names[i]);
+      _summand_dF[n][i] = &this->template getMaterialPropertyDerivative<Real, is_ad>(
+          _sum_materials[n], _arg_names[i]);
       _summand_d2F[n][i].resize(_nargs);
 
       if (_third_derivatives)
@@ -92,7 +93,7 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
 
       for (unsigned int j = 0; j < _nargs; ++j)
       {
-        _summand_d2F[n][i][j] = &this->template getMaterialPropertyDerivative<Real>(
+        _summand_d2F[n][i][j] = &this->template getMaterialPropertyDerivative<Real, is_ad>(
             _sum_materials[n], _arg_names[i], _arg_names[j]);
 
         if (_third_derivatives)
@@ -100,7 +101,7 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
           _summand_d3F[n][i][j].resize(_nargs);
 
           for (unsigned int k = 0; k < _nargs; ++k)
-            _summand_d3F[n][i][j][k] = &this->template getMaterialPropertyDerivative<Real>(
+            _summand_d3F[n][i][j][k] = &this->template getMaterialPropertyDerivative<Real, is_ad>(
                 _sum_materials[n], _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
