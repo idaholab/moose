@@ -8,6 +8,7 @@
 
     requirement = "The system shall produce a valid periodic node map with only one periodic constraint direction."
     recover = false  # Steady Test (Needs to be here since we don't want the checkpoints clobbering each other)
+    mesh_mode = 'replicated' # We no longer ghost all periodic boundaries for all procs
   [../]
   [./2D]
     type = 'RunApp'
@@ -16,6 +17,7 @@
 
     requirement = "The system shall produce a valid periodic node map with two periodic constraint directions."
     recover = false  # Steady Test (Needs to be here since we don't want the checkpoints clobbering each other)
+    mesh_mode = 'replicated' # We no longer ghost all periodic boundaries for all procs
   [../]
   [./3D]
     type = 'RunApp'
@@ -24,5 +26,6 @@
 
     requirement = "The system shall produce a valid periodic node map with three periodic constraint directions."
     recover = false  # Steady Test (Needs to be here since we don't want the checkpoints clobbering each other)
+    mesh_mode = 'replicated' # We no longer ghost all periodic boundaries for all procs
   [../]
 []
