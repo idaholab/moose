@@ -3,6 +3,9 @@
 /* The size of the derivative backing array */
 #undef AD_MAX_DOFS_PER_ELEM
 
+/* Whether to use a global indexing scheme for AD */
+#undef GLOBAL_AD_INDEXING
+
 /* Whether or not libpng was detected on the system */
 #undef HAVE_LIBPNG
 

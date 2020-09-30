@@ -633,6 +633,7 @@ ac_user_opts='
 enable_option_checking
 with_derivative_type
 with_derivative_size
+with_ad_indexing_type
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1249,6 +1250,8 @@ Optional Packages:
                           Specify the derivative type to use
   --with-derivative-size=<n>
                           Specify the size of the derivative backing array
+  --with-ad-indexing-type=local,global
+                          Specify the indexing scheme for AD derivatives
 
 Report bugs to <moose-users@googlegroups.com>.
 moose home page: <https://mooseframework.org>.
@@ -1705,25 +1708,17 @@ ac_config_commands="$ac_config_commands include/base/MooseConfig.h"
 
 # Check whether --with-derivative-type was given.
 if test "${with_derivative_type+set}" = set; then :
-  withval=$with_derivative_type; derivative_type="$withval"
+  withval=$with_derivative_type;
+              derivative_type="$withval"
+              user_set_derivative_type=yes
+
 else
-  derivative_type=nonsparse
+
+              derivative_type=nonsparse
+              user_det_derivative_type=no
+
 fi
 
-
-case "$derivative_type" in #(
-  sparse) :
-
-$as_echo "#define SPARSE_AD 1" >>confdefs.h
- ;; #(
-  nonsparse) :
-     ;; #(
-  *) :
-    as_fn_error $? "bad value \"$derivative_type\" for --with-derivative-type" "$LINENO" 5 ;;
-esac
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with derivative type $derivative_type" >&5
-$as_echo "configuring with derivative type $derivative_type" >&6; }
 
 
 # Check whether --with-derivative-size was given.
@@ -1742,6 +1737,55 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with derivative backing array size of $derivative_size" >&5
 $as_echo "configuring with derivative backing array size of $derivative_size" >&6; }
+
+
+# Check whether --with-ad-indexing-type was given.
+if test "${with_ad_indexing_type+set}" = set; then :
+  withval=$with_ad_indexing_type; ad_indexing_type="$withval"
+else
+  ad_indexing_type=local
+fi
+
+
+case "$ad_indexing_type" in #(
+  global) :
+
+          if test "$derivative_type" = nonsparse; then :
+
+                   if test "$user_set_derivative_type" = yes; then :
+                           as_fn_error $? "cannot request global AD indexing and a nonsparse derivative container" "$LINENO" 5
+else
+                           derivative_type=sparse
+
+fi
+
+fi
+
+$as_echo "#define GLOBAL_AD_INDEXING 1" >>confdefs.h
+
+         ;; #(
+  local) :
+     ;; #(
+  *) :
+    as_fn_error $? "bad value \"$ad_indexing_type\" for --with-ad-indexing-type" "$LINENO" 5 ;;
+esac
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with AD indexing type $ad_indexing_type" >&5
+$as_echo "configuring with AD indexing type $ad_indexing_type" >&6; }
+
+case "$derivative_type" in #(
+  sparse) :
+
+$as_echo "#define SPARSE_AD 1" >>confdefs.h
+ ;; #(
+  nonsparse) :
+     ;; #(
+  *) :
+    as_fn_error $? "bad value \"$derivative_type\" for --with-derivative-type" "$LINENO" 5 ;;
+esac
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: configuring with derivative type $derivative_type" >&5
+$as_echo "configuring with derivative type $derivative_type" >&6; }
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -1859,6 +1903,7 @@ $as_echo "configuring with libpng support" >&6; }
 $as_echo "configuring without libpng support" >&6; }
   fi
 fi
+
 
 
 

@@ -59,12 +59,19 @@ FVElementalKernel::computeResidual()
 void
 FVElementalKernel::computeJacobian()
 {
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
-  auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
-  auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
   const auto r = computeQpResidual() * _assembly.elemVolume();
-  _local_ke(0, 0) += r.derivatives()[ad_offset];
-  accumulateTaggedLocalMatrix();
+
+  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+
+  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    prepareMatrixTag(_assembly, _var.number(), _var.number());
+    auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
+    auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
+    _local_ke(0, 0) += residual.derivatives()[ad_offset];
+    accumulateTaggedLocalMatrix();
+  };
+
+  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }
 
 void
@@ -72,39 +79,45 @@ FVElementalKernel::computeOffDiagJacobian()
 {
   const auto r = computeQpResidual() * _assembly.elemVolume();
 
-  auto & ce = _assembly.couplingEntries();
-  for (const auto & it : ce)
-  {
-    MooseVariableFieldBase & ivariable = *(it.first);
-    MooseVariableFieldBase & jvariable = *(it.second);
+  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-    // We currently only support coupling to other FV variables
-    if (!jvariable.isFV())
-      continue;
+  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    auto & ce = _assembly.couplingEntries();
+    for (const auto & it : ce)
+    {
+      MooseVariableFieldBase & ivariable = *(it.first);
+      MooseVariableFieldBase & jvariable = *(it.second);
 
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
+      // We currently only support coupling to other FV variables
+      if (!jvariable.isFV())
+        continue;
 
-    if (ivar != _var.number())
-      continue;
+      unsigned int ivar = ivariable.number();
+      unsigned int jvar = jvariable.number();
 
-    auto ad_offset =
-        Moose::adOffset(jvar, _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem());
+      if (ivar != _var.number())
+        continue;
 
-    prepareMatrixTag(_assembly, ivar, jvar);
+      auto ad_offset =
+          Moose::adOffset(jvar, _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem());
 
-    mooseAssert(
-        _local_ke.m() == 1,
-        "We are currently only supporting constant monomials for finite volume calculations");
-    mooseAssert(
-        _local_ke.n() == 1,
-        "We are currently only supporting constant monomials for finite volume calculations");
-    mooseAssert(jvariable.dofIndices().size() == 1,
-                "The AD derivative indexing below only makes sense for constant monomials, e.g. "
-                "for a number of dof indices equal to  1");
+      prepareMatrixTag(_assembly, ivar, jvar);
 
-    _local_ke(0, 0) = r.derivatives()[ad_offset];
+      mooseAssert(
+          _local_ke.m() == 1,
+          "We are currently only supporting constant monomials for finite volume calculations");
+      mooseAssert(
+          _local_ke.n() == 1,
+          "We are currently only supporting constant monomials for finite volume calculations");
+      mooseAssert(jvariable.dofIndices().size() == 1,
+                  "The AD derivative indexing below only makes sense for constant monomials, e.g. "
+                  "for a number of dof indices equal to  1");
 
-    accumulateTaggedLocalMatrix();
-  }
+      _local_ke(0, 0) = residual.derivatives()[ad_offset];
+
+      accumulateTaggedLocalMatrix();
+    }
+  };
+
+  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }

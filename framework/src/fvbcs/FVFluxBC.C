@@ -123,21 +123,27 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+  ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  // Even though the elem element is always the non-null pointer on mesh
-  // external boundary faces, this could be an "internal" boundary - one
-  // created by variable block restriction where the var is only defined on
-  // one side of the face (either elem or neighbor).  We need to make sure
-  // that we add the residual contribution to only the correct side - the one
-  // where the variable is defined.
-  // Also, we don't need to worry about ElementNeighbor or NeighborElement
-  // contributions here because, once again, this is a boundary face with the
-  // variable only defined on one side.
-  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
-    computeJacobian(Moose::ElementElement, r);
-  else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-    computeJacobian(Moose::NeighborNeighbor, r);
-  else
-    mooseError("should never get here");
+  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+
+  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    // Even though the elem element is always the non-null pointer on mesh
+    // external boundary faces, this could be an "internal" boundary - one
+    // created by variable block restriction where the var is only defined on
+    // one side of the face (either elem or neighbor).  We need to make sure
+    // that we add the residual contribution to only the correct side - the one
+    // where the variable is defined.
+    // Also, we don't need to worry about ElementNeighbor or NeighborElement
+    // contributions here because, once again, this is a boundary face with the
+    // variable only defined on one side.
+    if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+      computeJacobian(Moose::ElementElement, residual);
+    else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+      computeJacobian(Moose::NeighborNeighbor, residual);
+    else
+      mooseError("should never get here");
+  };
+
+  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }
