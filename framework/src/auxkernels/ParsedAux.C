@@ -21,6 +21,10 @@ ParsedAux::validParams()
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "function expression");
   params.addCoupledVar("args", "coupled variables");
+  params.addParam<bool>(
+      "use_xyzt",
+      false,
+      "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
@@ -35,12 +39,21 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledComponents("args")),
-    _args(coupledValues("args"))
+    _args(coupledValues("args")),
+    _use_xyzt(getParam<bool>("use_xyzt"))
 {
   // build variables argument
   std::string variables;
-  for (unsigned int i = 0; i < _nargs; ++i)
+
+  // coupled field variables
+  for (std::size_t i = 0; i < _nargs; ++i)
     variables += (i == 0 ? "" : ",") + getVar("args", i)->name();
+
+  // "system" variables
+  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
+  if (_use_xyzt)
+    for (auto & v : xyzt)
+      variables += (variables.empty() ? "" : ",") + v;
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -66,15 +79,31 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   if (_enable_jit)
     _func_F->JITCompile();
 
+  // obtain current time
+  if (_use_xyzt)
+  {
+    auto fpb = dynamic_cast<FEProblemBase *>(&_subproblem);
+    if (!fpb)
+      paramError("use_xyzt", "Cannot access simulation time t. Set 'use_xyzt' to false.");
+    _time = &fpb->time();
+  }
+
   // reserve storage for parameter passing bufefr
-  _func_params.resize(_nargs);
+  _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
 }
 
 Real
 ParsedAux::computeValue()
 {
-  for (unsigned int j = 0; j < _nargs; ++j)
+  for (std::size_t j = 0; j < _nargs; ++j)
     _func_params[j] = (*_args[j])[_qp];
+
+  if (_use_xyzt)
+  {
+    for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
+      _func_params[_nargs + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
+    _func_params[_nargs + 3] = *_time;
+  }
 
   return evaluate(_func_F);
 }
