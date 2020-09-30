@@ -20,7 +20,10 @@ registerMooseAction("TensorMechanicsApp", LegacyTensorMechanicsAction, "add_kern
 InputParameters
 LegacyTensorMechanicsAction::validParams()
 {
-  return TensorMechanicsAction::validParams();
+  InputParameters params = TensorMechanicsAction::validParams();
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  return params;
 }
 
 LegacyTensorMechanicsAction::LegacyTensorMechanicsAction(const InputParameters & params)

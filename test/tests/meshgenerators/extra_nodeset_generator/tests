@@ -4,7 +4,6 @@
     input = 'generate_extra_nodeset.i'
     cli_args = '--mesh-only'
     exodiff = 'generate_extra_nodeset_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
 
     requirement = 'The system shall have the ability to add extra mesh node sets based on existing node IDs.'
@@ -16,7 +15,6 @@
     input = 'generate_extra_nodeset_coord.i'
     cli_args = '--mesh-only'
     exodiff = 'generate_extra_nodeset_coord_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
 
     requirement = 'The system shall have the ability to add extra mesh node sets based on node coordinates.'
@@ -28,7 +26,6 @@
     input = 'generate_extra_nodeset_multiple_coord.i'
     cli_args = '--mesh-only'
     exodiff = 'generate_extra_nodeset_multiple_coord_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
 
     requirement = 'The system shall have the ability to add extra mesh node sets based on multiple node coordinates.'

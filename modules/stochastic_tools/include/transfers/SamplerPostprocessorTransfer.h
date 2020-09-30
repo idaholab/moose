@@ -64,4 +64,6 @@ protected:
 
   /// Temporary storage for batch mode execution
   std::vector<VectorPostprocessorValue> _current_data;
+
+  const bool _keep_diverge;
 };

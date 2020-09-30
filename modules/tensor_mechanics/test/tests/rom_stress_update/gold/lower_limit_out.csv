@@ -1,0 +1,3 @@
+time,creep_rate_avg,creep_rate_diff,creep_rate_exact,wall_disloactions,cell_dislocations,temp_avg,vonmises_stress
+0,0,0,0,0,0,0,0
+100000,3.3707642781529e-12,-2.7815285762853e-19,3.370764e-12,439118921503.14,5987645601157.4,800.0160634,2010652.8389996

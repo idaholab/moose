@@ -34,7 +34,7 @@ MultiMooseEnum makeCalculatorEnum();
  *
  * The purpose of these objects are to provide an API for computing statistics in serial or parallel
  * without any state. This allows future statistics to be quickly added and for each statistic
- * to be used with the BoostrapCalculator for computing bootstrap statistics such as confidence
+ * to be used with the BootstrapCalculator for computing bootstrap statistics such as confidence
  * level intervals.
  *
  * The Calculator objects are created as const objects by the Statistics object via

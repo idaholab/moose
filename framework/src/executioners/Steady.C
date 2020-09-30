@@ -118,6 +118,7 @@ Steady::execute()
   {
     TIME_SECTION(_final_timer)
     _problem.execMultiApps(EXEC_FINAL);
+    _problem.finalizeMultiApps();
     _problem.execute(EXEC_FINAL);
     _time = _time_step;
     _problem.outputStep(EXEC_FINAL);

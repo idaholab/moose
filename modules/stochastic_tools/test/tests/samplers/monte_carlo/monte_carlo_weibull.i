@@ -3,9 +3,10 @@
 
 [Distributions]
   [weibull]
-    type = BoostWeibull
+    type = Weibull
     scale = 1
     shape = 5
+    location = 0
   []
 []
 

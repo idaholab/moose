@@ -49,19 +49,10 @@ INSADMomentumCoupledForce::INSADMomentumCoupledForce(const InputParameters & par
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
   obj_tracker.set("has_coupled_force", true);
   if (has_coupled)
-  {
-    std::vector<const ADVectorVariableValue *> coupled_vars;
-    for (const auto i : make_range(coupledComponents("coupled_vector_var")))
-      coupled_vars.push_back(&adCoupledVectorValue("coupled_vector_var", i));
-    obj_tracker.set("coupled_force_var", coupled_vars);
-  }
+    obj_tracker.set("coupled_force_var", getParam<std::vector<VariableName>>("coupled_vector_var"));
   if (has_function)
-  {
-    std::vector<const Function *> coupled_functions;
-    for (const auto & fn_name : getParam<std::vector<FunctionName>>("vector_function"))
-      coupled_functions.push_back(&_fe_problem.getFunction(fn_name, _tid));
-    obj_tracker.set("coupled_force_vector_function", coupled_functions);
-  }
+    obj_tracker.set("coupled_force_vector_function",
+                    getParam<std::vector<FunctionName>>("vector_function"));
 }
 
 ADRealVectorValue

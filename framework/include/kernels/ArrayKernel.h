@@ -93,7 +93,11 @@ protected:
    * Put necessary evaluations depending on qp but independent on test and shape functions here for
    * off-diagonal Jacobian assembly
    */
-  virtual void initQpOffDiagJacobian(MooseVariableFEBase &) {}
+  virtual void initQpOffDiagJacobian(MooseVariableFEBase & jvar)
+  {
+    if (jvar.number() == _var.number())
+      initQpJacobian();
+  }
 
   /// This is an array kernel so we cast to a ArrayMooseVariable
   ArrayMooseVariable & _var;

@@ -65,8 +65,21 @@ public:
   }
 
 private:
+  template <typename T>
+  static bool notEqual(const T & val1, const T & val2);
+
   InputParameters _tracker_params;
 };
+
+template <typename T>
+bool
+INSADObjectTracker::notEqual(const T & val1, const T & val2)
+{
+  return val1 != val2;
+}
+
+template <>
+bool INSADObjectTracker::notEqual(const MooseEnum & val1, const MooseEnum & val2);
 
 template <typename T>
 void
@@ -75,8 +88,8 @@ INSADObjectTracker::set(const std::string & name, const T & value)
   if (_tracker_params.isParamSetByUser(name))
   {
     const T & current_value = _tracker_params.get<T>(name);
-    if (current_value != value)
-      mooseError("Two INSADObjects set different values for the parameter", name);
+    if (INSADObjectTracker::notEqual(current_value, value))
+      mooseError("Two INSADObjects set different values for the parameter ", name);
   }
   else if (!_tracker_params.have_parameter<T>(name))
     mooseError("Attempting to set parameter ", name, " that is not a valid param");

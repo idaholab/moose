@@ -41,5 +41,8 @@ public:
   virtual void restore() override;
 
 private:
+  /// Switch to tell executioner to keep going despite app solve not converging
+  const bool _ignore_diverge;
+
   std::vector<Executioner *> _executioners;
 };

@@ -18,8 +18,11 @@
 
 // For quickly computing polynomials
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wparentheses"
 #include <boost/math/special_functions/legendre.hpp>
 #include <boost/math/special_functions/hermite.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 #include <cmath>
@@ -37,11 +40,6 @@ makePolynomial(const Distribution * dist)
 
   const Normal * n_dist = dynamic_cast<const Normal *>(dist);
   if (n_dist)
-    return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
-                                              dist->getParam<Real>("standard_deviation"));
-
-  const BoostNormal * bn_dist = dynamic_cast<const BoostNormal *>(dist);
-  if (bn_dist)
     return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
                                               dist->getParam<Real>("standard_deviation"));
 

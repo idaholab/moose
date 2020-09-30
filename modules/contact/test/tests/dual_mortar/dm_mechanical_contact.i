@@ -22,8 +22,6 @@ refine = 0
     incremental = true
     add_variables = true
     block = '1 2'
-
-    use_displaced_mesh = true
   [../]
 []
 

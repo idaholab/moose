@@ -237,6 +237,10 @@ protected:
   std::set<Real> & _sync_times;
 
   bool _abort;
+  /// This parameter controls how the system will deal with _dt <= _dtmin
+  /// If true, the time stepper is expected to throw an error
+  /// If false, the executioner will continue through EXEC_FINAL
+  const bool _error_on_dtmin;
 
   ///if to use time interval output
   bool & _time_interval;

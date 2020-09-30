@@ -35,7 +35,7 @@ SamplerFullSolveMultiApp::validParams()
       "mode",
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
-      "'batch' creates on sub-application for each processor and re-executes for each row.");
+      "'batch' creates one sub-application for each processor and re-executes for each row.");
 
   return params;
 }
@@ -52,8 +52,18 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+  {
+    if (n_processors() > _sampler.getNumberOfRows())
+      paramError(
+          "mode",
+          "There appears to be more available processors (",
+          n_processors(),
+          ") than samples (",
+          _sampler.getNumberOfRows(),
+          "), this is not supported in "
+          "batch mode. Consider switching to \'normal\' to allow multiple processors per sample.");
     init(n_processors());
-
+  }
   else
     init(_sampler.getNumberOfRows());
 }

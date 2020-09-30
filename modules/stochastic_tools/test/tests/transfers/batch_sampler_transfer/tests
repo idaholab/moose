@@ -11,8 +11,9 @@
       input = master.i
       csvdiff = 'master_out_storage_0001.csv master_out_data_0001.csv'
       cli_args = 'MultiApps/runner/mode=normal'
+      max_parallel = 1
 
-      detail = "on a single processor and"
+      detail = "on a single processor, "
     []
     [n2]
       type = CSVDiff
@@ -23,7 +24,19 @@
       min_parallel = 2
       max_parallel = 2
 
-      detail = "on multiple processors."
+      detail = "on multiple processors, "
+    []
+    [n3]
+      type = CSVDiff
+      input = master.i
+      csvdiff = 'master_small_storage_0001.csv master_small_data_0001.csv'
+      cli_args = 'MultiApps/runner/mode=normal
+                  Samplers/mc/num_rows=3
+                  Outputs/file_base=master_small'
+      min_parallel = 4
+      max_parallel = 4
+
+      detail = "and on more processors than samples."
     []
   []
 
