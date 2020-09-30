@@ -18,8 +18,11 @@
 
 // For quickly computing polynomials
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wparentheses"
 #include <boost/math/special_functions/legendre.hpp>
 #include <boost/math/special_functions/hermite.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 #include <cmath>
