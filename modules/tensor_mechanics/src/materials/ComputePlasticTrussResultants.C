@@ -82,11 +82,7 @@ ComputePlasticTrussResultants::initQpStatefulProperties()
 void
 ComputePlasticTrussResultants::computeQpProperties()
 {
-  // Real strain_increment = _total_stretch[_qp] - _total_stretch_old[_qp];
-  // Real strain_increment = _disp_strain_increment[_qp](0);
   Real strain_increment = _total_disp_strain[_qp](0) - _total_disp_strain_old[_qp](0);
-
-  // Real trial_stress = _stress_old[_qp] + _material_stiffness[_qp] * strain_increment;
   Real trial_stress = _axial_stress_old[_qp] + _material_stiffness[_qp] * strain_increment;
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
