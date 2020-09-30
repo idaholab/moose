@@ -737,9 +737,9 @@ public:
    * Attach geometric relationship managers to the given \p MeshBase object. This API is designed to
    * work with \p MeshGenerators which are executed at the very beginning of a simulation. No
    * attempt will be made to add relationship managers to a displaced mesh, because it doesn't exist
-   * yet
+   * yet.
    */
-  void attachRelationshipManagers(MeshBase & mesh);
+  void attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh);
 
   /**
    * Retrieve the relationship managers

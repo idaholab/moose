@@ -1672,7 +1672,7 @@ MooseMesh::buildTypedMesh(unsigned int dim)
     mesh->allow_renumbering(false);
 
   mesh->allow_remote_element_removal(_allow_remote_element_removal);
-  _app.attachRelationshipManagers(*mesh);
+  _app.attachRelationshipManagers(*mesh, *this);
 
   return mesh;
 }
