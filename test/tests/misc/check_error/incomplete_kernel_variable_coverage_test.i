@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]
@@ -20,13 +25,11 @@
   [./diff]
     type = Diffusion
     variable = u
-    block = 1
   [../]
 
   [./body_force]
     type = BodyForce
     variable = u
-    block = 1
     value = 10
   [../]
 []
@@ -37,14 +40,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 1
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []

@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 # Solves a pair of coupled diffusion equations where u=v on the boundary
@@ -40,14 +45,14 @@
   [./right_v]
     type = DirichletBC
     variable = v
-    boundary = 2
+    boundary = 1
     value = 3
   [../]
 
   [./left_u]
     type = MatchedValueBC
     variable = u
-    boundary = 1
+    boundary = 3
     v = v
   [../]
 []
@@ -74,5 +79,3 @@
   file_base = out
   exodus = true
 []
-
-

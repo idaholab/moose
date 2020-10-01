@@ -1,12 +1,14 @@
 [Mesh]
-  [./fmg]
-    type = FileMeshGenerator
-    file = square.e
-  []
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 
   [./extra_nodeset]
     type = ExtraNodesetGenerator
-    input = fmg
+    input = square
     new_boundary = 'middle_node'
     nodes = '2'
   []

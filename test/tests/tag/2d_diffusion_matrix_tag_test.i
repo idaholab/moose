@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]
@@ -58,7 +63,7 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
     extra_matrix_tags = mat_tag1
   [../]
@@ -66,7 +71,7 @@
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
     extra_matrix_tags = mat_tag1
   [../]
