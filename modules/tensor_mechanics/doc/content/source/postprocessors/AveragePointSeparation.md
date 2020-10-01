@@ -8,7 +8,7 @@ This `PostProcessor` computes average distance between a set of points specified
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/postprocessors/AveragePointSeparation/euler_pipe_axial_force.i block=Postprocessors/avg_disp
+!listing modules/tensor_mechanics/test/tests/postprocessors/AveragePointSeparation/AveragePointSeparation.i block=Postprocessors/avg_disp
 
 
 !syntax parameters /Postprocessors/AveragePointSeparation
