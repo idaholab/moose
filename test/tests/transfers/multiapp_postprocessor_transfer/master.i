@@ -42,16 +42,6 @@
     type = ElementAverageValue
     variable = u
   []
-  [maxValue]
-    type = ElementExtremeValue
-    variable = u
-    value_type = max
-  []
-  [minValue]
-    type = ElementExtremeValue
-    variable = u
-    value_type = min
-  []
 []
 
 [Executioner]
@@ -67,8 +57,7 @@
 []
 
 [Outputs]
-  exodus = false
-  csv = true
+  exodus = true
 []
 
 [MultiApps]
@@ -86,7 +75,7 @@
     type = MultiAppPostprocessorTransfer
     direction = to_multiapp
     multi_app = pp_sub
-    from_postprocessor = 'average maxValue minValue'
-    to_postprocessor = 'from_master1 from_master2 from_master3'
+    from_postprocessor = average
+    to_postprocessor = from_master
   []
 []
