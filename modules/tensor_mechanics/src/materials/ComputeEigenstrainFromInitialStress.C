@@ -43,7 +43,9 @@ ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _eigenstrain_old(getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_name)),
-    _ini_aux_provided(isParamValid("initial_stress_aux"))
+    _ini_aux_provided(isParamValid("initial_stress_aux")),
+    _ini_aux(_ini_aux_provided ? coupledValues("initial_stress_aux")
+                               : std::vector<const VariableValue *>())
 {
   const std::vector<FunctionName> & fcn_names(
       getParam<std::vector<FunctionName>>("initial_stress"));
@@ -68,9 +70,6 @@ ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(
                  "ComputeEigenstrainFromInitialStress: If you supply initial_stress_aux, " +
                      Moose::stringify(LIBMESH_DIM * LIBMESH_DIM) +
                      " values must be given.  You supplied " + Moose::stringify(aux_size) + "\n");
-    _ini_aux.resize(0);
-    for (unsigned i = 0; i < aux_size; ++i)
-      _ini_aux.push_back(&coupledValue("initial_stress_aux", i));
   }
 }
 

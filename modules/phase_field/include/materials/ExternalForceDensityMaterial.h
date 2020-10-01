@@ -40,9 +40,9 @@ private:
   /// stiffness constant
   const Real _k;
 
-  unsigned int _op_num;
-  std::vector<const VariableValue *> _vals;
-  std::vector<VariableName> _vals_name;
+  const unsigned int _op_num;
+  const std::vector<const VariableValue *> _vals;
+  const std::vector<VariableName> _vals_name;
 
   /// force density material
   MaterialProperty<std::vector<RealGradient>> & _dF;

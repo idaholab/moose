@@ -33,6 +33,15 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
     return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
 }
 
+std::vector<const VariableValue *>
+NeighborCoupleable::coupledNeighborValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) {
+    return &coupledNeighborValue(var_name, comp);
+  };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
 const ADVariableValue &
 NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigned int comp) const
 {
@@ -49,6 +58,15 @@ NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigne
                "not appropriate. Please use coupledNeighborValue instead");
 
   return var->adSlnNeighbor();
+}
+
+std::vector<const ADVariableValue *>
+NeighborCoupleable::adCoupledNeighborValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) {
+    return &adCoupledNeighborValue(var_name, comp);
+  };
+  return coupledVectorHelper<const ADVariableValue *>(var_name, func);
 }
 
 const ADVectorVariableValue &

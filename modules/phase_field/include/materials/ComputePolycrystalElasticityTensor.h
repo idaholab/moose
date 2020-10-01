@@ -38,7 +38,7 @@ protected:
   const unsigned int _op_num;
 
   /// Order parameters
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
 
   /// vector of elasticity tensor material properties
   std::vector<MaterialProperty<RankFourTensor> *> _D_elastic_tensor;

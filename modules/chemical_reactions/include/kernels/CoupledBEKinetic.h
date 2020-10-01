@@ -30,7 +30,7 @@ private:
   /// Weight of the kinetic mineral concentration in the total primary species concentration
   const std::vector<Real> _weight;
   /// Coupled kinetic mineral concentrations
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
   /// Coupled old values of kinetic mineral concentrations
-  std::vector<const VariableValue *> _vals_old;
+  const std::vector<const VariableValue *> _vals_old;
 };

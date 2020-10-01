@@ -30,8 +30,8 @@ CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters
     _g_order(getParam<MooseEnum>("g_order")),
     _W_ij(getParam<std::vector<Real>>("W_ij")),
     _num_eta(coupledComponents("etas")),
-    _eta_names(_num_eta),
-    _eta(_num_eta),
+    _eta_names(coupledNames("etas")),
+    _eta(coupledValues("etas")),
     _prop_g(declareProperty<Real>(_function_name)),
     _prop_dg(_num_eta),
     _prop_d2g(_num_eta)
@@ -48,15 +48,11 @@ CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters
 
   // declare g derivative properties, fetch eta values
   for (unsigned int i = 0; i < _num_eta; ++i)
-  {
     _prop_d2g[i].resize(_num_eta);
-    _eta_names[i] = getVar("etas", i)->name();
-  }
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
     _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, _eta_names[i]);
-    _eta[i] = &coupledValue("etas", i);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
       _prop_d2g[i][j] = _prop_d2g[j][i] =

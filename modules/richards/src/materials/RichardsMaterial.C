@@ -82,6 +82,10 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters)
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
 
+    _perm_change(isCoupled("perm_change")
+                     ? coupledValues("perm_change")
+                     : std::vector<const VariableValue *>(LIBMESH_DIM * LIBMESH_DIM, &_zero)),
+
     _trace_perm(_material_perm.tr()),
 
     _material_viscosity(getParam<std::vector<Real>>("viscosity")),
@@ -152,13 +156,6 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters)
                " components of perm_change must be given to a RichardsMaterial.  You supplied ",
                coupledComponents("perm_change"),
                "\n");
-
-  _perm_change.resize(LIBMESH_DIM * LIBMESH_DIM);
-  for (unsigned int i = 0; i < LIBMESH_DIM * LIBMESH_DIM; ++i)
-    _perm_change[i] = (isCoupled("perm_change") ? &coupledValue("perm_change", i)
-                                                : &_zero); // coupledValue returns a reference (an
-                                                           // alias) to a VariableValue, and the &
-                                                           // turns it into a pointer
 
   if (!(_material_viscosity.size() == _num_p &&
         getParam<std::vector<UserObjectName>>("relperm_UO").size() == _num_p &&

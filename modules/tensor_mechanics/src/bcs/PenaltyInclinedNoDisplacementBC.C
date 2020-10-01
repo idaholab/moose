@@ -29,15 +29,10 @@ PenaltyInclinedNoDisplacementBC::PenaltyInclinedNoDisplacementBC(const InputPara
   : IntegratedBC(parameters),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _disp(3),
-    _disp_var(_ndisp),
+    _disp(coupledValues("displacements")),
+    _disp_var(coupledIndices("displacements")),
     _penalty(getParam<Real>("penalty"))
 {
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp[i] = &coupledValue("displacements", i);
-    _disp_var[i] = coupled("displacements", i);
-  }
 }
 
 Real

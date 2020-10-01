@@ -35,9 +35,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
   /// Order parameters
-  unsigned int _num_etas;
-  std::vector<const VariableValue *> _eta;
-  std::vector<const VariableGradient *> _grad_eta;
+  const unsigned int _num_etas;
+  const std::vector<const VariableValue *> _eta;
+  const std::vector<const VariableGradient *> _grad_eta;
 
   /// Lookup table from couple variable number into the etas vector
   std::vector<int> _eta_vars;

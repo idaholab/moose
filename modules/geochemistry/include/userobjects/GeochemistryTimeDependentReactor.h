@@ -59,7 +59,7 @@ protected:
   /// Number of source species
   const unsigned _num_source_species;
   /// Rates of the source species
-  std::vector<const VariableValue *> _source_species_rates;
+  const std::vector<const VariableValue *> _source_species_rates;
   /// Names of species to remove the fixed activity or fugacity constraint from
   const std::vector<std::string> _remove_fixed_activity_name;
   /// Times at which to remove the fixed activity or fugacity from the species in _remove_fixed_activity_name
@@ -73,7 +73,7 @@ protected:
   /// Number of species with controlled activity or fugacity
   const unsigned _num_controlled_activity;
   /// Activity or fugacity of the species with controlled activity or fugacity
-  std::vector<const VariableValue *> _controlled_activity_species_values;
+  const std::vector<const VariableValue *> _controlled_activity_species_values;
   /// Moles of each basis species added at the current timestep, along with kinetic rates
   DenseVector<Real> _mole_additions;
   /// Derivative of moles_added

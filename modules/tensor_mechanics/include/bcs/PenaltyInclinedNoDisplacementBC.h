@@ -32,11 +32,11 @@ protected:
   const unsigned int _component;
 
   /// Coupled displacement variables
-  unsigned int _ndisp;
-  std::vector<const VariableValue *> _disp;
+  const unsigned int _ndisp;
+  const std::vector<const VariableValue *> _disp;
 
   /// Variable IDs of coupled displacement variables
-  std::vector<unsigned int> _disp_var;
+  const std::vector<unsigned int> _disp_var;
 
 private:
   Real _penalty;

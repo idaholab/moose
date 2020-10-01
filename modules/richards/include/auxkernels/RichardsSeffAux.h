@@ -40,5 +40,5 @@ protected:
    * where N is the number of arguments that the _seff_UO requires)
    * Eg, for twophase simulations N=2
    */
-  std::vector<const VariableValue *> _pressure_vals;
+  const std::vector<const VariableValue *> _pressure_vals;
 };

@@ -25,9 +25,9 @@ protected:
   const Real _eta_top;
   const unsigned int _op_num;
 
-  std::vector<const VariableValue *> _eta;
-  std::vector<const VariableValue *> _deta_dt;
-  std::vector<const VariableGradient *> _grad_eta;
+  const std::vector<const VariableValue *> _eta;
+  const std::vector<const VariableValue *> _deta_dt;
+  const std::vector<const VariableGradient *> _grad_eta;
 
   Real _value;
   Real _new_val;

@@ -28,10 +28,10 @@ protected:
   const VariableValue & _log_k;
   /// Stoichiometric coefficients of coupled primary species
   const std::vector<Real> _sto_v;
-  /// Coupled primary species
-  std::vector<const VariableValue *> _vals;
-  /// Activity coefficients of coupled primary species
-  std::vector<const VariableValue *> _gamma_v;
   /// Activity coefficient of equilibrium species
   const VariableValue & _gamma_eq;
+  /// Coupled primary species
+  const std::vector<const VariableValue *> _vals;
+  /// Activity coefficients of coupled primary species
+  const std::vector<const VariableValue *> _gamma_v;
 };

@@ -30,7 +30,12 @@ AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & param
   : AuxKernel(parameters),
     _log_k(coupledValue("log_k")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
-    _gamma_eq(coupledValue("gamma"))
+    _gamma_eq(coupledValue("gamma")),
+    _vals(coupledValues("v")),
+    _gamma_v(isCoupled("gamma_v")
+                 ? coupledValues("gamma_v") // have value
+                 : std::vector<const VariableValue *>(coupledComponents("v"),
+                                                      &coupledValue("gamma_v"))) // default
 {
   const unsigned int n = coupledComponents("v");
 
@@ -46,16 +51,6 @@ AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & param
       mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
                  "coupled species in ",
                  _name);
-
-  _vals.resize(n);
-  _gamma_v.resize(n);
-
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    // If gamma_v has been supplied, use those values, but if not, use the default value
-    _gamma_v[i] = (isCoupled("gamma_v") ? &coupledValue("gamma_v", i) : &coupledValue("gamma_v"));
-  }
 }
 
 Real

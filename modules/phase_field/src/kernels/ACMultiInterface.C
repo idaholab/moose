@@ -30,8 +30,8 @@ ACMultiInterface::validParams()
 ACMultiInterface::ACMultiInterface(const InputParameters & parameters)
   : Kernel(parameters),
     _num_etas(coupledComponents("etas")),
-    _eta(_num_etas),
-    _grad_eta(_num_etas),
+    _eta(coupledValues("etas")),
+    _grad_eta(coupledGradients("etas")),
     _eta_vars(_fe_problem.getNonlinearSystemBase().nVariables(), -1),
     _kappa_names(getParam<std::vector<MaterialPropertyName>>("kappa_names")),
     _kappa(_num_etas),
@@ -45,10 +45,6 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters)
   int a = -1;
   for (unsigned int i = 0; i < _num_etas; ++i)
   {
-    // get all order parameters and their gradients
-    _eta[i] = &coupledValue("etas", i);
-    _grad_eta[i] = &coupledGradient("etas", i);
-
     // populate lookup table form jvar to _eta index
     unsigned int var = coupled("etas", i);
     if (var < nvariables)

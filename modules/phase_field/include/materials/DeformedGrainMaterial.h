@@ -32,7 +32,7 @@ protected:
   const unsigned int _op_num;
 
   /// order parameter values
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
 
   const Real _length_scale;
   const Real _int_width;

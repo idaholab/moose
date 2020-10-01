@@ -35,15 +35,12 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledComponents("args")),
-    _args(_nargs)
+    _args(coupledValues("args"))
 {
   // build variables argument
   std::string variables;
   for (unsigned int i = 0; i < _nargs; ++i)
-  {
     variables += (i == 0 ? "" : ",") + getVar("args", i)->name();
-    _args[i] = &coupledValue("args", i);
-  }
 
   // base function object
   _func_F = std::make_shared<SymFunction>();

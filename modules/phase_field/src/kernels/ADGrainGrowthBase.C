@@ -21,10 +21,7 @@ ADGrainGrowthBase::validParams()
 ADGrainGrowthBase::ADGrainGrowthBase(const InputParameters & parameters)
   : ADAllenCahnBase<Real>(parameters),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
+    _vals(adCoupledValues("v")),
     _mu(getADMaterialProperty<Real>("mu"))
 {
-  // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _op_num; ++i)
-    _vals[i] = &adCoupledValue("v", i);
 }

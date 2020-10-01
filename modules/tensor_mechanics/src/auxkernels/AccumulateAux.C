@@ -22,10 +22,8 @@ AccumulateAux::validParams()
 }
 
 AccumulateAux::AccumulateAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _values(coupledComponents("accumulate_from_variable"))
+  : AuxKernel(parameters), _values(coupledValues("accumulate_from_variable"))
 {
-  for (MooseIndex(_values) i = 0; i < _values.size(); ++i)
-    _values[i] = &coupledValue("accumulate_from_variable", i);
 }
 
 Real

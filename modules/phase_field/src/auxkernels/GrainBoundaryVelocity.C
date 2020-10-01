@@ -28,17 +28,10 @@ GrainBoundaryVelocity::GrainBoundaryVelocity(const InputParameters & parameters)
     _eta_bottom(getParam<Real>("eta_bottom")),
     _eta_top(getParam<Real>("eta_top")),
     _op_num(coupledComponents("v")),
-    _eta(_op_num),
-    _deta_dt(_op_num),
-    _grad_eta(_op_num)
+    _eta(coupledValues("v")),
+    _deta_dt(coupledDots("v")),
+    _grad_eta(coupledGradients("v"))
 {
-  for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    // Grab necessary variables
-    _grad_eta[i] = &coupledGradient("v", i);
-    _deta_dt[i] = &coupledDot("v", i);
-    _eta[i] = &coupledValue("v", i);
-  }
 }
 
 Real

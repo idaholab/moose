@@ -52,7 +52,7 @@ protected:
   const unsigned int _nvals;
 
   /// coupled variable that is being binned
-  std::vector<const VariableValue *> _values;
+  const std::vector<const VariableValue *> _values;
 
   /// current quadrature point - used in computeVolume()
   unsigned int _qp;
@@ -69,4 +69,3 @@ protected:
   /// aggregated global average vectors
   std::vector<VectorPostprocessorValue *> _average;
 };
-

@@ -49,20 +49,16 @@ Q2PMaterial::Q2PMaterial(const InputParameters & parameters)
     _porosity_old(declareProperty<Real>("porosity_old")),
     _porosity(declareProperty<Real>("porosity")),
     _permeability(declareProperty<RealTensorValue>("permeability")),
-    _gravity(declareProperty<RealVectorValue>("gravity"))
+    _gravity(declareProperty<RealVectorValue>("gravity")),
+    _perm_change(isCoupled("perm_change")
+                     ? coupledValues("perm_change")
+                     : std::vector<const VariableValue *>(LIBMESH_DIM * LIBMESH_DIM, &_zero))
 {
   if (isCoupled("perm_change") && (coupledComponents("perm_change") != LIBMESH_DIM * LIBMESH_DIM))
     mooseError(LIBMESH_DIM * LIBMESH_DIM,
                " components of perm_change must be given to a Q2PMaterial.  You supplied ",
                coupledComponents("perm_change"),
                "\n");
-
-  _perm_change.resize(LIBMESH_DIM * LIBMESH_DIM);
-  for (unsigned int i = 0; i < LIBMESH_DIM * LIBMESH_DIM; ++i)
-    _perm_change[i] = (isCoupled("perm_change") ? &coupledValue("perm_change", i)
-                                                : &_zero); // coupledValue returns a reference (an
-                                                           // alias) to a VariableValue, and the &
-                                                           // turns it into a pointer
 }
 
 void

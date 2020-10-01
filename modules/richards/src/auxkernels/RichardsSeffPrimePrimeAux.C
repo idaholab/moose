@@ -34,17 +34,14 @@ RichardsSeffPrimePrimeAux::RichardsSeffPrimePrimeAux(const InputParameters & par
   : AuxKernel(parameters),
     _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
     _wrt1(getParam<int>("wrtnum1")),
-    _wrt2(getParam<int>("wrtnum2"))
+    _wrt2(getParam<int>("wrtnum2")),
+    _pressure_vals(coupledValues("pressure_vars"))
 {
   int n = coupledComponents("pressure_vars");
   if (_wrt1 < 0 || _wrt1 >= n)
     mooseError("Your wrtnum1 is ", _wrt1, " but it must obey 0 <= wrtnum1 < ", n, ".");
   if (_wrt2 < 0 || _wrt2 >= n)
     mooseError("Your wrtnum2 is ", _wrt2, " but it must obey 0 <= wrtnum2 < ", n, ".");
-  _pressure_vals.resize(n);
-
-  for (int i = 0; i < n; ++i)
-    _pressure_vals[i] = &coupledValue("pressure_vars", i);
 
   _mat.resize(n);
   for (int i = 0; i < n; ++i)

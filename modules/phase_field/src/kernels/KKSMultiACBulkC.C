@@ -26,8 +26,8 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
   : KKSMultiACBulkBase(parameters),
     _c1_name(getVar("cj_names", 0)
                  ->name()), // Can use any dFj/dcj since they are equal so pick first cj in the list
-    _cjs(_num_j),
-    _cjs_var(_num_j),
+    _cjs(coupledValues("cj_names")),
+    _cjs_var(coupledIndices("cj_names")),
     _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0],
                                                      _c1_name)), // Use first Fj in list for dFj/dcj
     _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name)),
@@ -35,13 +35,6 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
 {
   if (_num_j != coupledComponents("cj_names"))
     paramError("cj_names", "Need to pass in as many cj_names as Fj_names");
-
-  // Load concentration variables into the arrays
-  for (unsigned int i = 0; i < _num_j; ++i)
-  {
-    _cjs[i] = &coupledValue("cj_names", i);
-    _cjs_var[i] = coupled("cj_names", i);
-  }
 
   // get second partial derivatives wrt c1 and other coupled variable
   for (unsigned int i = 0; i < _n_args; ++i)

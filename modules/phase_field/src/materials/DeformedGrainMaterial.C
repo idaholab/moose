@@ -36,7 +36,7 @@ DeformedGrainMaterial::validParams()
 DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
   : Material(parameters),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
+    _vals(coupledValues("v")),
     _length_scale(getParam<Real>("length_scale")),
     _int_width(getParam<Real>("int_width")),
     _time_scale(getParam<Real>("time_scale")),
@@ -60,9 +60,6 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
 {
   if (_op_num == 0)
     paramError("op_num", "Model requires op_num > 0");
-
-  for (unsigned int i = 0; i < _op_num; ++i)
-    _vals[i] = &coupledValue("v", i);
 }
 
 void

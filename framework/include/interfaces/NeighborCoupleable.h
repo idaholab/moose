@@ -36,12 +36,16 @@ public:
   virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
                                                      unsigned int comp = 0) const;
 
+  std::vector<const VariableValue *> coupledNeighborValues(const std::string & var_name) const;
+
   /**
    * Get the coupled neighbor variable value for \p var_name with derivative information for
    * automatic differentiation objects
    */
   virtual const ADVariableValue & adCoupledNeighborValue(const std::string & var_name,
                                                          unsigned int comp = 0) const;
+
+  std::vector<const ADVariableValue *> adCoupledNeighborValues(const std::string & var_name) const;
 
   /**
    * Get the coupled neighbor vector variable value for \p var_name with derivative information for

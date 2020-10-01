@@ -31,8 +31,8 @@ protected:
   const unsigned int _nrots;
 
   /// The Cosserat rotations
-  std::vector<const VariableValue *> _wc;
+  const std::vector<const VariableValue *> _wc;
 
   /// Grad(Cosserat rotation)
-  std::vector<const VariableGradient *> _grad_wc;
+  const std::vector<const VariableGradient *> _grad_wc;
 };

@@ -49,9 +49,9 @@ protected:
   /// no. of order parameters
   const unsigned int _op_num;
   /// Variable value for the order parameters
-  std::vector<const VariableValue *> _vals;
-  std::vector<unsigned int> _vals_var;
-  std::vector<const VariableGradient *> _grad_vals;
+  const std::vector<const VariableValue *> _vals;
+  const std::vector<unsigned int> _vals_var;
+  const std::vector<const VariableGradient *> _grad_vals;
 
   /// base name specifying type of force density material
   const std::string _base_name;

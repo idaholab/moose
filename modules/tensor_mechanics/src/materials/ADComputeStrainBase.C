@@ -37,8 +37,8 @@ ADComputeStrainBase::validParams()
 ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
   : ADMaterial(parameters),
     _ndisp(coupledComponents("displacements")),
-    _disp(3),
-    _grad_disp(3),
+    _disp(adCoupledValues("displacements")),
+    _grad_disp(adCoupledGradients("displacements")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(declareADProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareADProperty<RankTwoTensor>(_base_name + "total_strain")),
@@ -51,6 +51,13 @@ ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
                                    !this->isBoundaryMaterial()),
     _current_elem_volume(_assembly.elemVolume())
 {
+  // set unused dimensions to zero
+  for (unsigned i = _ndisp; i < 3; ++i)
+  {
+    _disp.push_back(&_ad_zero);
+    _grad_disp.push_back(&_ad_grad_zero);
+  }
+
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
     _eigenstrain_names[i] = _base_name + _eigenstrain_names[i];
@@ -68,19 +75,6 @@ void
 ADComputeStrainBase::initialSetup()
 {
   displacementIntegrityCheck();
-  // fetch coupled variables and gradients (as stateful properties if necessary)
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp[i] = &adCoupledValue("displacements", i);
-    _grad_disp[i] = &adCoupledGradient("displacements", i);
-  }
-
-  // set unused dimensions to zero
-  for (unsigned i = _ndisp; i < 3; ++i)
-  {
-    _disp[i] = &_ad_zero;
-    _grad_disp[i] = &_ad_grad_zero;
-  }
 }
 
 void

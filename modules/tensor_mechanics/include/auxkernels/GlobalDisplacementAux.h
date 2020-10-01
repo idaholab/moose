@@ -42,5 +42,5 @@ protected:
   const unsigned int _ndisp;
 
   /// Displacement variables
-  std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp;
 };

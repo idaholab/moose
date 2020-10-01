@@ -30,8 +30,8 @@ ACSEDGPoly::validParams()
 ACSEDGPoly::ACSEDGPoly(const InputParameters & parameters)
   : ACBulk<Real>(parameters),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
-    _vals_var(_op_num),
+    _vals(coupledValues("v")),
+    _vals_var(coupledIndices("v")),
     _beta(getMaterialProperty<Real>("beta")),
     _rho_eff(getMaterialProperty<Real>("rho_eff")),
     _Disloc_Den_i(getMaterialProperty<Real>("Disloc_Den_i")),
@@ -39,12 +39,6 @@ ACSEDGPoly::ACSEDGPoly(const InputParameters & parameters)
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _op_index(getParam<unsigned int>("op_index"))
 {
-  // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v", i);
-  }
 }
 
 Real

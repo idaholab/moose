@@ -26,22 +26,19 @@ ThirdPhaseSuppressionMaterial::ThirdPhaseSuppressionMaterial(const InputParamete
   : DerivativeMaterialInterface<Material>(parameters),
     _function_name(getParam<std::string>("function_name")),
     _num_eta(coupledComponents("etas")),
-    _eta(_num_eta),
+    _eta(coupledValues("etas")),
     _prop_g(declareProperty<Real>(_function_name)),
     _prop_dg(_num_eta),
     _prop_d2g(_num_eta)
 {
-  std::vector<std::string> eta_name(_num_eta);
+  const auto eta_name = coupledNames("etas");
+
   for (unsigned int i = 0; i < _num_eta; ++i)
-  {
     _prop_d2g[i].resize(_num_eta);
-    // declare derivative properties, fetch eta values
-    eta_name[i] = getVar("etas", i)->name();
-  }
+
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
     _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, eta_name[i]);
-    _eta[i] = &coupledValue("etas", i);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
       _prop_d2g[i][j] = _prop_d2g[j][i] =

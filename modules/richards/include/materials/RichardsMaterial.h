@@ -57,7 +57,7 @@ protected:
   std::vector<const RichardsDensity *> _material_density_UO;
   std::vector<const RichardsSUPG *> _material_SUPG_UO;
 
-  std::vector<const VariableValue *> _perm_change;
+  const std::vector<const VariableValue *> _perm_change;
 
   virtual void computeProperties();
 

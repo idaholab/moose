@@ -38,32 +38,27 @@ RichardsVarNames::RichardsVarNames(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, false),
     _num_v(coupledComponents("richards_vars")),
-    _var_types(getParam<MooseEnum>("var_types"))
+    _var_types(getParam<MooseEnum>("var_types")),
+    _moose_var_num(coupledIndices("richards_vars")),
+    _moose_var_value(coupledValues("richards_vars")),
+    _moose_var_value_old(_is_transient ? coupledValuesOld("richards_vars")
+                                       : std::vector<const VariableValue *>(_num_v, &_zero)),
+    _moose_grad_var(coupledGradients("richards_vars"))
 {
   unsigned int max_moose_var_num_seen = 0;
 
-  _moose_var_num.resize(_num_v);
-  _moose_var_value.resize(_num_v);
-  _moose_var_value_old.resize(_num_v);
   _moose_nodal_var_value.resize(_num_v);
   _moose_nodal_var_value_old.resize(_num_v);
-  _moose_grad_var.resize(_num_v);
   for (unsigned int i = 0; i < _num_v; ++i)
   {
-    _moose_var_num[i] = coupled("richards_vars", i);
     max_moose_var_num_seen =
         (max_moose_var_num_seen > _moose_var_num[i] ? max_moose_var_num_seen : _moose_var_num[i]);
-    _moose_var_value[i] = &coupledValue("richards_vars", i); // coupledValue returns a reference (an
-                                                             // alias) to a VariableValue, and the &
-                                                             // turns it into a pointer
-    _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("richards_vars", i) : &_zero);
     _moose_nodal_var_value[i] = &coupledDofValues("richards_vars", i); // coupledDofValues returns
                                                                        // a reference (an alias) to
                                                                        // a VariableValue, and the
                                                                        // & turns it into a pointer
     _moose_nodal_var_value_old[i] =
         (_is_transient ? &coupledDofValuesOld("richards_vars", i) : &_zero);
-    _moose_grad_var[i] = &coupledGradient("richards_vars", i);
   }
 
   _ps_var_num.resize(max_moose_var_num_seen + 1);

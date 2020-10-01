@@ -30,5 +30,5 @@ protected:
 
   const unsigned int _dim;
   const unsigned int _coupled_components;
-  std::vector<const VariableValue *> _velocity;
+  const std::vector<const VariableValue *> _velocity;
 };

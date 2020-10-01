@@ -29,17 +29,12 @@ ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & p
   : ComputeStrainBase(parameters),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _nrots(coupledComponents("Cosserat_rotations")),
-    _wc(_nrots),
-    _grad_wc(_nrots)
+    _wc(coupledValues("Cosserat_rotations")),
+    _grad_wc(coupledGradients("Cosserat_rotations"))
 {
   if (_nrots != 3)
     mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional "
                "simulations so 3 Cosserat rotation variables are needed");
-  for (unsigned i = 0; i < _nrots; ++i)
-  {
-    _wc[i] = &coupledValue("Cosserat_rotations", i);
-    _grad_wc[i] = &coupledGradient("Cosserat_rotations", i);
-  }
 }
 
 void
