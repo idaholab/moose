@@ -100,6 +100,10 @@ PatchSidesetGenerator::generate()
   if (ss.fail())
     _sideset = boundary_info.get_id_by_name(_sideset_name);
 
+  // make sure that _sideset exists
+  if (_sideset == BoundaryInfo::invalid_id)
+    paramError("sideset_name", "Not a valid boundary");
+
   // create a dim - 1 dimensional mesh
   auto boundary_mesh =
       libmesh_make_unique<libMesh::ReplicatedMesh>(comm(), mesh->mesh_dimension() - 1);
