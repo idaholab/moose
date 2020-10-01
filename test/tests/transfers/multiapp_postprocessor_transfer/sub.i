@@ -38,13 +38,7 @@
 []
 
 [Postprocessors]
-  [./from_master1]
-    type = Receiver
-  [../]
-  [./from_master2]
-    type = Receiver
-  [../]
-  [./from_master3]
+  [./from_master]
     type = Receiver
   [../]
 []
@@ -63,6 +57,5 @@
 []
 
 [Outputs]
-  exodus = false
-  csv = true
+  exodus = true
 []

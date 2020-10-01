@@ -5,17 +5,17 @@
   [transfer]
     requirement = "The system shall support the transfer of scalar post processing data:"
     [to_multiapp]
-      type = 'CSVDiff'
+      type = 'Exodiff'
       input = 'master.i'
-      csvdiff = 'master_out_pp_sub0.csv master_out_pp_sub1.csv master_out.csv'
+      exodiff = 'master_out_pp_sub0.e master_out_pp_sub1.e master_out.e'
 
       detail = "from the master application to sub-applications and"
     []
     [from_multiapp]
-      type = 'CSVDiff'
+      type = 'Exodiff'
       input = 'master_from_multiapp.i'
-      csvdiff = 'master_from_multiapp_out_sub0.csv master_from_multiapp_out_sub1.csv '
-                'master_from_multiapp_out.csv'
+      exodiff = 'master_from_multiapp_out_sub0.e master_from_multiapp_out_sub1.e '
+                'master_from_multiapp_out.e'
 
       detail = "to the master application from sub-applications."
     []
@@ -23,9 +23,9 @@
 
   [from_one_sub]
     # We need this test to make sure everything is working when n_procs > n_apps
-    type = 'CSVDiff'
+    type = 'Exodiff'
     input = 'from_one_sub_master.i'
-    csvdiff = 'from_one_sub_master_out.csv from_one_sub_master_out_sub0.csv'
+    exodiff = 'from_one_sub_master_out.e from_one_sub_master_out_sub0.e'
 
     requirement = "The system shall support the transfer of scalar post processing data from a "
                   "single sub-application."
