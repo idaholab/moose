@@ -11,7 +11,7 @@ This directory contains the conda recipes necessary for MOOSE Application based 
 
   ```bash
   conda config --add channels conda-forge
-  conda config --add channels https://mooseframework.org/conda/moose
+  conda config --add channels idaholab
   ```
 
 - Install the moose-env package from Idaholab and name your environment 'moose':
