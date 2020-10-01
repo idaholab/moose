@@ -18,6 +18,12 @@
 #define MOOSE_AD_MAX_DOFS_PER_ELEM 50
 #endif
 
+/* Whether to use a global indexing scheme for AD */
+/* #undef GLOBAL_AD_INDEXING */
+
+/* Whether or not libpng was detected on the system */
+/* #undef HAVE_LIBPNG */
+
 /* Define to the address where bug reports for this package should be sent. */
 #ifndef MOOSE_PACKAGE_BUGREPORT
 #define MOOSE_PACKAGE_BUGREPORT "moose-users@googlegroups.com"

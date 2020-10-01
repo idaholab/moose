@@ -242,36 +242,44 @@ public:
   /// AD
   const ADTemplateVariableValue<OutputType> & adSln() const override
   {
+    checkIndexingScalingCompatibility();
     return _element_data->adSln();
   }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
+    checkIndexingScalingCompatibility();
     return _element_data->adGradSln();
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
+    checkIndexingScalingCompatibility();
     return _element_data->adSecondSln();
   }
   const ADTemplateVariableValue<OutputType> & adUDot() const override
   {
+    checkIndexingScalingCompatibility();
     return _element_data->adUDot();
   }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
   {
+    checkIndexingScalingCompatibility();
     return _neighbor_data->adSln();
   }
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
   {
+    checkIndexingScalingCompatibility();
     return _neighbor_data->adGradSln();
   }
   const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
   {
+    checkIndexingScalingCompatibility();
     return _neighbor_data->adSecondSln();
   }
   const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override
   {
+    checkIndexingScalingCompatibility();
     return _neighbor_data->adUDot();
   }
 
@@ -365,6 +373,21 @@ protected:
 
   /// Holder for all the data associated with the neighbor element
   std::unique_ptr<MooseVariableDataFV<OutputType>> _neighbor_data;
+
+private:
+  /**
+   * Check and see whether the AD indexing scheme is compatible with the scaling factors. Currently
+   * non-unity scaling is not supported when doing global dof indexing. This is because we add
+   * Jacobian entries based only on a global index, and we do not a priori know what variable, and
+   * hence scaling factor, that global index is tied to. Eventually we will implement some
+   * global-index-to-var lookup that we use after we've cached all of our Jacobian entries
+   */
+  void checkIndexingScalingCompatibility() const;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /// Whether we've already performed a scaling factor check for this variable
+  mutable bool _scaling_params_checked = false;
+#endif
 };
 
 template <typename OutputType>
@@ -372,4 +395,20 @@ inline const MooseArray<ADReal> &
 MooseVariableFV<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
+}
+
+template <typename OutputType>
+inline void
+MooseVariableFV<OutputType>::checkIndexingScalingCompatibility() const
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  if (!_scaling_params_checked)
+  {
+    for (const auto scaling_factor : _scaling_factor)
+      if (scaling_factor != 1.)
+        this->paramError("scaling", "Scaling with global AD indexing is not yet implemented.");
+
+    _scaling_params_checked = true;
+  }
+#endif
 }

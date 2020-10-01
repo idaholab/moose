@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#15857'
+  design = 'ElementL1Error.md'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'element_l1_error.i'
+    csvdiff = 'element_l1_error_out.csv'
+
+    requirement = 'The system shall compute the L1 error between an elemental field variable and an analytical function.'
+  []
+[]
