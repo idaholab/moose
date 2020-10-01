@@ -25,46 +25,39 @@ Now, inspect the files that provide the `ADKernel` base class to decide how to p
 The most important members that `ADKernel` objects have access to are the following:
 
 - `_u`, `_grad_u`\\
-  Value and gradient of the variable this Kernel is operating on
+  Value and gradient of the variable being operated on.
 
 - `_test`, `_grad_test`\\
-  Value ($\psi$) and gradient ($\nabla \psi$) of the test functions at the quadrature points
+  Value ($\psi$) and gradient ($\nabla \psi$) of the test function.
 
-- `_i`
-  Current index for test function
+- `_i`\\
+  Current index for the test function component.
 
 - `_q_point`\\
-  Coordinates of the current quadrature point
+  Coordinates of the current quadrature point.
 
 - `_qp`\\
-  Current quadrature point index
+  Current quadrature point index.
 
-There are are also several methods that `ADKernel` objects have access to. For now, the one to be aware of is `computeQpResidual` (or `precomputeQpResidual()` for special cases). "Qp" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the residual terms in the weak form of a [!ac](PDE) are integrated. Finite elements usually contain several quadrature points and, when the integrals at each are superposed, they produce an approximate solution.
+There are are also several methods that `ADKernel` objects have access to. For now, the one to be aware of is `computeQpResidual` (or `precomputeQpResidual()` for special cases). The "`Qp`" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the weak form of a [!ac](PDE) is numerically integrated. Finite elements usually contain multiple quadrature points at specific, symmetrically placed locations and the Gauss quadrature formula is a summation over all of these points that yields an exact value for the integral of a polynomial over $\Omega$.
 
 ## Demonstration id=demo
 
-## Statement of Physics id=physics
-
-Recall that the foregoing zero-gravity, divergence-free form of Darcy's pressure law is given by,
-
-!equation id=darcy-strong
--\nabla \cdot \dfrac{\bold{K}}{\mu} \nabla p = 0 \in \Omega
-
-It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity of the fluid (water), is $\mu_{f} = 7.98 \times 10^{-4} \textrm{Pa} \cdot \textrm{s}$. Also, assume that the permeability tensor takes on an isotropic, scalar value of $K = 0.8451 \times 10^{-9} \textrm{m}^{2}$ to represent the 1 mm steel sphere medium in the pipe<!--This should also be given in the problem statement, so long as it remains constant throughout the tutorial-->.
-
-In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it was shown that the weak form of [darcy-strong] is the following:
+In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it was shown that the weak form of the Darcy pressure equation is the following:
 
 !equation id=darcy-weak
-(\nabla \psi, \dfrac{K}{\mu} \nabla p) - \langle \psi, \dfrac{K}{\mu} \nabla p \cdot \hat{n} \rangle = 0
+(\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p) - \langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle = 0
 
-[darcy-strong] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$, where $\hat{n}$ is the surface normal vector, on the remaining boundaries. Therefore, it is possible to drop the second term in [darcy-weak] and express it, more simply, as the following:
+[darcy-weak] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$ on the remaining boundaries. Therefore, it is possible to drop the second term in [darcy-weak] and express it, more simply, as
 
 !equation id=darcy-weak-kernel
-(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+
+It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity, $\mu$, of the fluid (water) is $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the permeability tensor, $\mathbf{K}$, takes on an isotropic, scalar value of $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ to represent the 1 mm steel sphere medium inside the pipe<!--This should also be given in the problem statement, so long as it remains constant throughout the tutorial-->.
 
 ### Source Code id=source-demo
 
-To solve [darcy-strong] in the form of [darcy-weak-kernel], a new `ADKernelGrad` object must be created, and it shall be called `DarcyPressure`. Start by creating the directories to store files for objects that are part of the Kernels System:
+To evaluate [darcy-weak-kernel], a new `ADKernelGrad` object can be created and it shall be called `DarcyPressure`. Start by making the directories to store files for objects that are part of the Kernels System:
 
 ```bash
 cd ~/projects/babbler
@@ -79,7 +72,7 @@ In `include/kernels/`, create a file named `DarcyPressure.h` and add the code gi
          caption=Header file for the `DarcyPressure` object.
 
 In `src/kernels`, create a file named `DarcyPressure.C` and add the code given in [darcy-source].
-Here, the header file for this object was included. Next, the `registerMooseObject()` method was called for `"BabblerApp"` and the `DarcyPressure` object. The `validParams()` method is the subject of the [next step](tutorial01_app_development/step06_input_params.md), so, for now, it is okay to simply copy and paste its definition. In the constructor method the `_permeability` and `_viscosity` attributes were set according to the values that were given in the [#physics] section. Finally, the `precomputeQpResidual()` method was programmed to return the left-hand side of [darcy-weak-kernel], except that the $\nabla \psi$ (`_grad_test`) term is automatically handled by the base class.
+Here, the header file for this object was included. Next, the `registerMooseObject()` method was called for `"BabblerApp"` and the `DarcyPressure` object. The `validParams()` method is the subject of the [next step](tutorial01_app_development/step06_input_params.md), so, for now, it is okay to simply copy and paste its definition. In the constructor method the `_permeability` and `_viscosity` attributes were set according to the values that were given earlier. Finally, the `precomputeQpResidual()` method was programmed to return the left-hand side of [darcy-weak-kernel], except that the $\nabla \psi$ (`_grad_test`) term is automatically handled by the base class.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/src/kernels/DarcyPressure.C
          link=False
@@ -120,9 +113,9 @@ cd ~/projects/babbler/problems
 !media tutorial01_app_development/step05_result.png
        style=width:100%;margin-left:auto;margin-right:auto;
        id=results
-       caption=Rendering of the [!ac](FEM) solution of [darcy-strong] subject to the [!ac](BVP) given in [#physics].
+       caption=Rendering of the [!ac](FEM) solution of Darcy's pressure equation subject to the given [!ac](BVP).
 
-One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu$, is constant, and since the foregoing [!ac](BVP) is a simple one that only involves essential boundary conditions,
+One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu_{f}$, is constant and since the foregoing [!ac](BVP) is a simple one that only involves essential boundary conditions,
 the solution produced by the new `DarcyPressure` object, shown in [results],
 is identical to the [previous one](tutorial01_app_development/step02_input_file.md#results) produced by the `ADDiffusion` object.
 

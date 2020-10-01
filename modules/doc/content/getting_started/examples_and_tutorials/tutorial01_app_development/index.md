@@ -19,16 +19,4 @@ This tutorial is the focus of the live hosted [examples_and_tutorials/index.md#w
                  no_prefix=1
                  no_count=preface problem-statement
 
-!!!
-Each step should have the following basic components:
-1. Summary/Goals
-2. Concepts/Theory
-3. Demonstration
- - Statement of Physics
- - Source code
- - Input File
- - Results
- - Commit
-!!!
-
 !content pagination next=tutorial01_app_development/preface.md

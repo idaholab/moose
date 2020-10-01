@@ -1,7 +1,7 @@
 # Step 3: Introduction to MOOSE Objects
 
 In this step, [#objects], and the purposes they serve, will be introduced.
-To demonstrate this concept, consider the same problem discussed in [Step 2](tutorial01_app_development/step02_input_file.md#physics) and explore the basics of how the Laplace equation was developed in the form of a C++ class.
+To demonstrate this concept, consider the same problem discussed in [Step 2](tutorial01_app_development/step02_input_file.md#demo) and explore the basics of how the Laplace equation was developed in the form of a C++ class.
 
 Anyone who feels that they need to review C++ and/or object-oriented programming are highly encouraged to do so before proceeding with the remainder of this tutorial. The [getting_started/examples_and_tutorials/index.md#programming] provides some helpful starting points for this.
 
@@ -47,19 +47,17 @@ The source (`.C`) file simply defines the functionality of these three component
 
 ## Demonstration id=demo
 
-### Statement of Physics id=physics
-
-Recall, from [Step 2](tutorial01_app_development/step02_input_file.md#physics), that the foregoing [!ac](BVP) is governed by the following [!ac](PDE):
+Recall, from [Step 2](tutorial01_app_development/step02_input_file.md#demo), that the foregoing [!ac](BVP) is governed by the following [!ac](PDE):
 
 !equation id=laplace
 -\nabla \cdot \nabla u = 0 \in \Omega
 
-It is necessary to acknowledge that [!ac](PDEs) must be expressed in a certain format to be able to solve them with MOOSE. That is, assuming that the natural boundary condition, $\nabla u \cdot \hat{n}$, is satisfied, then the *weak form* of [laplace] is
+It is necessary to acknowledge that [!ac](PDEs) must be expressed in a certain format to be able to solve them with MOOSE. That is, assuming that the natural boundary condition, $\nabla u \cdot \hat{n} = 0$, is satisfied, then the *weak form* of [laplace] is
 
 !equation id=weak
 \int_{\Omega} \nabla \psi \cdot \nabla u \, d\Omega = 0, \,\,\, \forall \, \psi
 
-In the [next step](tutorial01_app_development/step04_weak_form.md), exactly what is meant by the terminology, "weak form," will be explained when the Galerkin [!ac](FEM) is discussed, so do not worry about this just yet.
+In the [next step](tutorial01_app_development/step04_weak_form.md), exactly what is meant by the terminology, "weak form," will be explained, so do not worry about this just yet.
 
 ### Source Code
 

@@ -76,8 +76,6 @@ The command-line syntax for running Peacock can be simplified by creating a bash
 
 ## Demonstration id=demo
 
-### Statement of Physics id=physics
-
 The Laplace equation shall be employed to model the steady-state diffusion of pressure, $u$, on the domain $\Omega$. Thus, find $u$, such that
 
 !equation id=laplace
@@ -94,7 +92,7 @@ cd ~/projects/babbler
 mkdir problems
 ```
 
-Next, use a [text editor](getting_started/new_users.md#helpful-software) to create a file named `pressure_diffusion.i` in the `problems/` directory. This file is where the block-structured ([!ac](HIT)) format will be used to setup the inputs needed to solve the [!ac](BVP) given in the [#physics] section.
+Next, use a [text editor](getting_started/new_users.md#helpful-software) to create a file named `pressure_diffusion.i` in the `problems/` directory. This file is where the block-structured ([!ac](HIT)) format will be used to setup the inputs needed to solve the given [!ac](BVP).
 
 !alert note title=Input File Block Order
 The blocks need not be in any particular order within the input file.
@@ -173,9 +171,9 @@ After running the above commands, the Peacock window opens to the "ExodusViewer"
 !media tutorial01_app_development/step02_result.png
        style=width:100%;margin-left:auto;margin-right:auto;
        id=results
-       caption=Rendering of the [!ac](FEM) solution of [laplace] subject to the [!ac](BVP) given in [#physics].
+       caption=Rendering of the [!ac](FEM) solution of [laplace] subject to the given [!ac](BVP).
 
-Notice that the [!ac](FEM) solution depicted in [results] satisfies the boundary conditions given in the [#physics], i.e., a pressure of 4000 Pa can be observed at the inlet and zero pressure at the outlet. The pressure distribution over the length of the pipe also appears to be uniform across its radius, indicating that there is no flux through any of the remaining boundaries. Thus, $\nabla u \cdot \hat{n} = 0$ is also satisfied at those boundaries.
+Notice that the [!ac](FEM) solution depicted in [results] satisfies the boundary conditions, i.e., a pressure of 4000 Pa can be observed at the inlet and zero pressure at the outlet. The pressure distribution over the length of the pipe also appears to be uniform across its radius, indicating that there is no flux through any of the remaining boundaries. Thus, $\nabla u \cdot \hat{n} = 0$ is also satisfied at those boundaries.
 
 ### Commit id=commit-demo
 

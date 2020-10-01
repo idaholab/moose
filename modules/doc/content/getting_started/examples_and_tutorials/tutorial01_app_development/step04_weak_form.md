@@ -12,9 +12,9 @@ For a complete introduction to the [!ac](FEM), please refer to the myriad of lit
 [The Method of Mean Weighted Residuals](https://en.wikipedia.org/wiki/Method_of_mean_weighted_residuals) assumes that the solutions to [!ac](PDEs) are well approximated by a finite sum of test functions, $\psi$. It involves rearranging the strong form of a [!ac](PDE) so that all terms are on one side of the equation, with zero on the other, and then multiplying by all $\psi_{i}$. For the Laplace equation, this method is an attempt to find $u$, such that
 
 !equation id=laplace-residual
-(-\nabla \cdot \nabla u) \psi_{i} = 0, \,\,\, \forall \, \psi_{i}
+\psi (-\nabla \cdot \nabla u) = 0, \,\,\, \forall \, \psi
 
-is satisfied. The left-hand side of [laplace-residual] is called the *residual*.
+The left-hand side of [laplace-residual] is called the *residual* and the coefficients, $\psi_{i}$, are arbitrary, except for requiring that $\psi$ satisfy homogeneous boundary conditions.
 
 There is a general procedure for expressing a residual as one that is readily solved with MOOSE. First, integrate with respect to the problem domain, $\Omega$, and apply the integrand sum rule, e.g.,
 
@@ -55,7 +55,7 @@ The general procedure for expressing the weak form of a [!ac](PDE) is as follows
 
 ## The Galerkin Finite Element Method
 
-In general, the [!ac](FEM) assumes that solutions to [!ac](PDEs) take on simple forms, such as a polynomial. This assumption enables difficult analytical derivative expressions to be directly integrated in a piecewise-continuous fashion. +The Galerkin [!ac](FEM) is one that uses the same functions to approximate the solution of a [!ac](PDE) as those used for all test functions, $\boldsymbol{\psi_{i}}$.+ There are many approaches to achieve solutions using the [!ac](FEM), but the Galerkin approach is particularly useful for multiphysics applications, because it is a purely numerical one whose efficacy is independent of the underlying physics.
+In general, the [!ac](FEM) assumes that solutions to [!ac](PDEs) take on simple forms, such as a polynomial. This assumption enables difficult analytical derivative expressions to be directly integrated in a piecewise-continuous fashion. +The Galerkin [!ac](FEM) is one that uses the same functions to approximate the solution of a [!ac](PDE) as those used for all test functions, $\boldsymbol{\psi}$.+ There are many approaches to achieve solutions using the [!ac](FEM), but the Galerkin approach is particularly useful for multiphysics applications, because it is a purely numerical one whose effectiveness is independent of the underlying physics.
 
 ## Demonstration id=demo
 
