@@ -291,7 +291,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
-    _start_time(0.0),
+    _start_time(-std::numeric_limits<Real>::max()),
     _global_time_offset(0.0),
     _output_warehouse(*this),
     _input_parameter_warehouse(new InputParameterWarehouse()),
