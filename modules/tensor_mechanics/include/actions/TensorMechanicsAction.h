@@ -24,6 +24,7 @@ public:
 protected:
   void actSubdomainChecks();
   void actOutputGeneration();
+  void actEigenstrainNames();
   void actOutputMatProp();
   void actGatherActionParameters();
 
@@ -103,9 +104,14 @@ protected:
   bool _cylindrical_axis_point1_valid;
   bool _cylindrical_axis_point2_valid;
   bool _direction_valid;
+  bool _eigenstrain_names_valid;
 
   /// points used to determine axis of rotation for cyclindrical stress/strain quantities
   Point _cylindrical_axis_point1;
   Point _cylindrical_axis_point2;
   Point _direction;
+
+  std::vector<MaterialPropertyName> _eigenstrain_names;
+
+  std::vector<MaterialPropertyName> _block_based_eigenstrain_names;
 };

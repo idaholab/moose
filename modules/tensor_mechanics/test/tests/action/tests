@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#7555'
+  issues = '#7555 #15871'
   [./two_block_base_name]
     type = Exodiff
     input = 'two_block_base_name.i'
@@ -70,5 +70,21 @@
     prereq = 'two_coord'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file assigns the same TensorMechanics MasterAction block to mesh blocks with different coordinate systems.'
+  [../]
+
+  [./eigenstrain_no_defined_block]
+    type = Exodiff
+    input = 'action_eigenstrain.i'
+    exodiff = 'action_eigenstrain_out.e'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+
+  [./eigenstrain_two_blocks]
+    type = CSVDiff
+    input = 'action_multi_eigenstrain.i'
+    csvdiff = 'action_multi_eigenstrain_out.csv'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
   [../]
 []

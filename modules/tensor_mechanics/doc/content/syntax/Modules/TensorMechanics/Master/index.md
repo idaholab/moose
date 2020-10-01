@@ -12,6 +12,7 @@ mechanics system setup. It performs
 - Optional: Setup of displacement variables (with the correct order for the current mesh)
 - Optional: Add AuxVariables and AuxKernels for various tensor components and quantity outputs
 - Optional: Set up out-of-plane stress/strain consistently
+- Optional: Automatic extraction of eigenstrain names from materials and correct application to proper blocks
 
 ## Constructed MooseObjects
 

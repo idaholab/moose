@@ -14,6 +14,11 @@
 #include "MooseObjectAction.h"
 #include "TensorMechanicsAction.h"
 
+//#include "AddMaterialAction.h"
+//#include "ActionWarehouse.h"
+#include "Material.h"
+//#include "MooseObjectAction.h"
+
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
@@ -32,6 +37,8 @@ registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_kernel");
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_kernel");
 
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material");
+
+registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_master_action_material");
 
 InputParameters
 TensorMechanicsAction::validParams()
@@ -86,7 +93,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
-    _direction_valid(params.isParamSetByUser("direction"))
+    _direction_valid(params.isParamSetByUser("direction")),
+    _eigenstrain_names_valid(params.isParamSetByUser("eigenstrain_names"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -175,6 +183,9 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   // Get direction for tensor component if set by user
   if (_direction_valid)
     _direction = getParam<Point>("direction");
+
+  if (_eigenstrain_names_valid)
+    _eigenstrain_names = getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
 }
 
 void
@@ -240,8 +251,10 @@ TensorMechanicsAction::act()
   }
 
   // Add Materials
-  else if (_current_task == "add_material")
+  else if (_current_task == "add_master_action_material")
   {
+    actEigenstrainNames();
+
     std::string type;
 
     // no plane strain
@@ -302,6 +315,12 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(ad_prepend + type);
+
+    // If eigenstrain_names parameter exists, and is full, don't refill
+    if (_eigenstrain_names.size() < 1)
+      params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
+          _block_based_eigenstrain_names;
+
     params.applyParameters(parameters(),
                            {"displacements",
                             "use_displaced_mesh",
@@ -439,7 +458,7 @@ TensorMechanicsAction::actOutputGeneration()
     for (auto out : _generate_output)
     {
       InputParameters params = emptyInputParameters();
-      ;
+
       params = _factory.getValidParams(ad_prepend + "MaterialRealAux");
       params.applyParameters(parameters());
       params.set<MaterialPropertyName>("property") = _base_name + out;
@@ -451,6 +470,44 @@ TensorMechanicsAction::actOutputGeneration()
   }
 }
 
+void
+TensorMechanicsAction::actEigenstrainNames()
+{
+  // Determine all the materials(eigenstrains) all ready created
+  auto materials = _problem->getMaterialWarehouse().getObjects();
+
+  for (auto & mat : materials)
+  {
+    const InputParameters & params = mat->parameters();
+    // Check for eigenstrain names, only deal with those materials
+    if (params.isParamValid("eigenstrain_name"))
+    {
+      // It might be possible that an eigenstrain is applied multiple blocks
+      auto block = params.get<std::vector<SubdomainName>>("block");
+      auto name = params.get<std::string>("eigenstrain_name");
+      for (unsigned int i = 0; i < _subdomain_names.size(); ++i)
+      {
+        for (unsigned int j = 0; j < block.size(); ++j)
+        {
+          auto unique_name = std::find(
+              _block_based_eigenstrain_names.begin(), _block_based_eigenstrain_names.end(), name);
+          // For only 1 block, the names shouldn't be duplicate
+          if (block.at(j) == _subdomain_names.at(i) && _subdomain_names.size() < 2)
+            _block_based_eigenstrain_names.push_back(name);
+          // For more than 1 block, the names will duplicate, so avoid that
+          if (unique_name != _block_based_eigenstrain_names.end())
+            ;
+          // This name is unique for more than 1 block grouping
+          else if (block.at(j) == _subdomain_names.at(i) && _subdomain_names.size() > 1)
+            _block_based_eigenstrain_names.push_back(name);
+        }
+      }
+      // It might also be possible that there are no explicit block numbers
+      if (_subdomain_names.size() < 1)
+        _block_based_eigenstrain_names.push_back(name);
+    }
+  }
+}
 void
 TensorMechanicsAction::actOutputMatProp()
 {
