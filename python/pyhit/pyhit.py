@@ -11,13 +11,8 @@
 import os
 import subprocess
 import moosetree
+import hit
 from mooseutils import message
-try:
-    from . import hit
-except:
-    testdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'test'))
-    subprocess.run(['make', 'hit'], cwd=testdir)
-    from . import hit
 
 class Node(moosetree.Node):
     """
@@ -320,6 +315,16 @@ def parse(content, root=None, filename=''):
     root = Node(root, hit_node) if root is not None else Node(None, hit_node)
     _parse_hit(root, hit_node, filename)
     return root
+
+def tokenize(content, filename=''):
+    """
+    Tokenize a hit tree from a string
+
+    Inputs:
+       content[str]: string to process
+       filename[str]: (Optional) filename for error reporting
+    """
+    return hit.tokenize(filename, content)
 
 def _parse_hit(root, hit_node, filename):
     """Internal helper for parsing HIT tree"""

@@ -154,6 +154,10 @@ private:
   std::vector<Token> _tokens;
 };
 
+/// This is *the* function in the hit namespace. It takes a given hit input text and returns a list
+/// of tokens. This is used for syntax highlighting and autocomplete in the peacock editor
+std::vector<Token> tokenize(const std::string & fname, const std::string & input);
+
 #define EOF TMPEOF
 
 } // namespace hit
