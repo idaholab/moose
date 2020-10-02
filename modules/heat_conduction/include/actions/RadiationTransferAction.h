@@ -31,7 +31,7 @@ protected:
   UserObjectName radiationObjectName() const;
 
   /// the boundary ids participating in the radiative heat transfer
-  std::vector<boundary_id_type> _boundary_ids;
+  std::vector<BoundaryName> _boundary_names;
 
   /// the number of radiation patches per boundary
   std::vector<unsigned int> _n_patches;
