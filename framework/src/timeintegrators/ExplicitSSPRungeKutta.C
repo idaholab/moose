@@ -35,6 +35,7 @@ ExplicitSSPRungeKutta::ExplicitSSPRungeKutta(const InputParameters & parameters)
 
     _order(getParam<MooseEnum>("order")),
 
+    _stage(0),
     _solution_intermediate_stage(_nl.addVector("solution_intermediate_stage", false, GHOSTED)),
     _tmp_solution(_nl.addVector("tmp_solution", false, GHOSTED)),
     _tmp_mass_solution_product(_nl.addVector("tmp_mass_solution_product", false, GHOSTED))

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PiecewiseBase.h"
+#include "PiecewiseTabularBase.h"
 
 // Forward declarations
 class PiecewiseLinearBase;
@@ -21,7 +21,7 @@ InputParameters validParams<PiecewiseLinearBase>();
  * Base class for functions which provides a piecewise continuous linear
  * interpolation of an (x,y) point data set.
  */
-class PiecewiseLinearBase : public PiecewiseBase
+class PiecewiseLinearBase : public PiecewiseTabularBase
 {
 public:
   static InputParameters validParams();

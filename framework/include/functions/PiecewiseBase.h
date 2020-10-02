@@ -18,10 +18,9 @@ template <>
 InputParameters validParams<PiecewiseBase>();
 
 /**
- * Function base which provides a piecewise approximation to a provided
- * (x,y) point data set.  Derived classes, which control the order
- * (constant, linear) of the approximation and how the (x,y) data set
- * is generated, should be used directly.
+ * Function base which provides a piecewise approximation to a specified (x,y) point data set.
+ * Derived classes can either directly implement the x/y data, or provide input parameter mechanisms
+ * for such data formulation.
  */
 class PiecewiseBase : public Function
 {
@@ -45,22 +44,4 @@ protected:
   std::vector<Real> _raw_x;
   std::vector<Real> _raw_y;
   ///@}
-
-  /// function value scale factor
-  const Real & _scale_factor;
-
-  ///@{ if _has_axis is true point component to use as function argument, otherwise use t
-  int _axis;
-  const bool _has_axis;
-  ///@}
-
-private:
-  /// Reads data from supplied CSV file.
-  void buildFromFile();
-
-  /// Builds data from 'x' and 'y' parameters.
-  void buildFromXandY();
-
-  /// Builds data from 'xy_data' parameter.
-  void buildFromXY();
 };
