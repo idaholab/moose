@@ -55,7 +55,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
   ```bash
   channels:
-    - https://mooseframework.org/conda/moose
+    - idaholab
     - conda-forge
     - defaults
   ```
