@@ -24,6 +24,16 @@
       detail = 'a uniform distribution replicated across processors,'
     []
 
+    [uniform_distributed]
+      type = 'CSVDiff'
+      input = 'monte_carlo_uniform.i'
+      csvdiff = 'monte_carlo_uniform_distributed_out_data_0000.csv.0 monte_carlo_uniform_distributed_out_data_0000.csv.1 monte_carlo_uniform_distributed_out_data_0001.csv.0 monte_carlo_uniform_distributed_out_data_0001.csv.1'
+      cli_args = 'VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=monte_carlo_uniform_distributed_out'
+      min_parallel = 2
+      max_parallel = 2
+      detail = 'a uniform distribution distributed across processors (output is also distributed),'
+    []
+
     [weibull]
       type = 'CSVDiff'
       input = 'monte_carlo_weibull.i'
