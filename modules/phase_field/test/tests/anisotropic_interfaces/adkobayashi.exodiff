@@ -1,0 +1,21 @@
+# USE_OLD_FLOOR does not appear to be supported, so that behavior
+# needs to come in via the command line option
+
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES
+	w relative 5.5e-6 floor 1.e-10
+	T relative 5.5e-6 floor 1.e-10
+
+ELEMENT VARIABLES
+	dfbulk/dT relative 5.5e-6 floor 1.e-10
+	dfbulk/dw relative 5.5e-6 floor 1.e-10
+	fbulk relative 1.e-8 floor 1.e-3
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
