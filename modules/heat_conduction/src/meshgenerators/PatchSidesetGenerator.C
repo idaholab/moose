@@ -44,8 +44,8 @@ PatchSidesetGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<boundary_id_type>("sideset",
-                                            "The sideset that will be divided into patches");
+  params.addRequiredParam<BoundaryName>("boundary",
+                                        "The boundary that will be divided into patches");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "n_patches", "n_patches>0", "Number of patches");
 
@@ -73,7 +73,7 @@ PatchSidesetGenerator::PatchSidesetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _n_patches(getParam<unsigned int>("n_patches")),
-    _sideset(getParam<boundary_id_type>("sideset")),
+    _sideset_name(getParam<BoundaryName>("boundary")),
     _partitioner_name(getParam<MooseEnum>("partitioner"))
 {
 }
@@ -90,6 +90,19 @@ PatchSidesetGenerator::generate()
 
   // get a list of all sides; vector of tuples (elem, loc_side, side_set)
   auto side_list = boundary_info.build_active_side_list();
+
+  // check if the provided sideset name is actually a sideset id
+  // if _sideset_name can be converted to integer it's interpreted
+  // as sideset id
+  std::stringstream ss;
+  ss << _sideset_name;
+  ss >> _sideset;
+  if (ss.fail())
+    _sideset = boundary_info.get_id_by_name(_sideset_name);
+
+  // make sure that _sideset exists
+  if (_sideset == BoundaryInfo::invalid_id)
+    paramError("sideset_name", "Not a valid boundary");
 
   // create a dim - 1 dimensional mesh
   auto boundary_mesh =

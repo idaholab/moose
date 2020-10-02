@@ -39,8 +39,14 @@ protected:
   unsigned int _n_patches;
 
   /// The sideset that will be subdivided
-  const boundary_id_type & _sideset;
+  const BoundaryName & _sideset_name;
 
   /// the name of the partitioner being used
   MooseEnum _partitioner_name;
+
+  /// The sideset that will be subdivided
+  subdomain_id_type _sideset;
+
+  /// number of elements of the boundary mesh
+  dof_id_type _n_boundary_mesh_elems;
 };

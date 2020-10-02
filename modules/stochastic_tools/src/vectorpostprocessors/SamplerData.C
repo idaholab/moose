@@ -91,9 +91,11 @@ SamplerData::execute()
 void
 SamplerData::finalize()
 {
-  if (_sampler_method != "get_global_samples")
+  if (!isDistributed() && _sampler_method != "get_global_samples")
+  {
     for (auto & ppv_ptr : _sample_vectors)
       _communicator.gather(0, *ppv_ptr);
+  }
 }
 
 void

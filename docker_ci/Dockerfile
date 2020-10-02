@@ -25,6 +25,14 @@ WORKDIR /opt
 ARG MOOSE_JOBS=1
 
 #-----------------------------------------------------------------------------#
+# Add user dev
+#-----------------------------------------------------------------------------#
+RUN useradd dev ; \
+mkdir -p /home/dev/.ssh ; \
+chmod 700 /home/dev/.ssh ; \
+chown -R dev:dev /home/dev
+
+#-----------------------------------------------------------------------------#
 # Install managed packages and clear cache
 #-----------------------------------------------------------------------------#
 
@@ -88,7 +96,9 @@ ENV PETSC_DIR=/usr/local
 ARG LIBMESH_REV
 ENV LIBMESH_DIR=/usr/local \
 libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
+
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
+
 RUN git clone https://github.com/libMesh/libmesh.git ; \
 cd libmesh ; \
 git checkout ${LIBMESH_REV} ; \
@@ -100,8 +110,12 @@ rm -rf libmesh/* libmesh/.* || true
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework and tests
 #-----------------------------------------------------------------------------#
-COPY . ${MOOSE_DIR}
+RUN chown -R dev:dev /opt /home/dev
+
+USER dev
+COPY --chown=dev:dev . ${MOOSE_DIR}
 RUN cd test ; make -j ${MOOSE_JOBS}
+USER root
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment

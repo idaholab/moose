@@ -69,6 +69,17 @@ class RunApp(Tester):
         else:
             return None # Not all testers that inherit from RunApp have an input file
 
+    def getInputFileContents(self):
+        input_file = self.getInputFile()
+        if input_file and os.path.exists(os.path.join(self.getTestDir(), input_file)):
+            with open(os.path.join(self.getTestDir(), input_file), 'r') as f:
+                input_file = f.read()
+        # Test is supposed to have an input file, but we couldn't find it. Don't error on that event here, and
+        # instead allow the TestHarness to continue. It will error appropriately elsewhere.
+        else:
+            input_file = None
+        return input_file
+
     def checkRunnable(self, options):
         if options.enable_recover:
             if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
