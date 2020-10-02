@@ -40,7 +40,7 @@ convergence.
 
 !include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
-In the case of isotropic linear hardening plasticity, with the hardening function $ r = hp$, the
+In the case of isotropic linear hardening plasticity, with the hardening function $r = hp$, the
 effective plastic strain increment has the form:
 \begin{equation}
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}
@@ -103,6 +103,12 @@ class.
 
 More details on how to write the equivalent yield surface equation for a creep model are given in
 Dunne and Petrinic.
+
+## Substepping
+
+We provide the substepping capability in `ADRadialReturnStressUpdate` for nonlinear material models in order to improve the convergence. The idea is that when material is undergoing large deformation and the return mapping algorithm struggles to converge, we would divide the original strain into smaller strain increments and take several substeps where incremental strain is applied at each substep.  The following shows an example of the syntax for using substepping.
+
+!listing modules/tensor_mechanics/test/tests/substepping/power_law_creep.i block=Materials/power_law_creep
 
 <!-- !syntax children /Materials/RadialReturnStressUpdate -->
 

@@ -51,6 +51,14 @@ public:
                            const ADRankFourTensor & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old) override;
 
+  virtual void updateStateSubstep(ADRankTwoTensor & strain_increment,
+                                  ADRankTwoTensor & inelastic_strain_increment,
+                                  const ADRankTwoTensor & rotation_increment,
+                                  ADRankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const ADRankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old) override;
+
   virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
                                         const ADReal & scalar_effective_inelastic_strain) override;
 
@@ -71,6 +79,15 @@ public:
    * Does the model require the elasticity tensor to be isotropic?
    */
   bool requiresIsotropicTensor() override { return true; }
+
+  /**
+   * If substepping is enabled, calculated the number of substeps as a function
+   * of the elastic strain increment guess and the maximum inelastic strain increment
+   * ratio based on a user-specified tolerance.
+   * @param strain_increment    When called, this is the elastic strain guess
+   * @return                    The number of substeps required
+   */
+  virtual int calculateNumberSubsteps(const ADRankTwoTensor & strain_increment) override;
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -109,6 +126,23 @@ protected:
 
   ADMaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
+
+  /// Stores the scalar effective inelastic strain increment from Newton iteration
+  ADReal _scalar_effective_inelastic_strain;
+
+  /**
+   * Maximum allowable scalar inelastic strain increment, used to control the
+   * timestep size in conjunction with a user object
+   */
   Real _max_inelastic_increment;
+
+  /**
+   * Used to calculate the number of substeps taken in the radial return algorithm,
+   * when substepping is enabled, based on the elastic strain increment ratio
+   * to the maximum inelastic increment
+   */
+  const Real _substep_tolerance;
+
+  /// Debugging option to enable specifying instead of calculating strain
   const bool _apply_strain;
 };

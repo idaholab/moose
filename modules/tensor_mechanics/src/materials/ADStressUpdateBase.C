@@ -39,6 +39,19 @@ ADStressUpdateBase::ADStressUpdateBase(const InputParameters & parameters)
 }
 
 void
+ADStressUpdateBase::updateStateSubstep(ADRankTwoTensor & /*strain_increment*/,
+                                       ADRankTwoTensor & /*inelastic_strain_increment*/,
+                                       const ADRankTwoTensor & /*rotation_increment*/,
+                                       ADRankTwoTensor & /*stress_new*/,
+                                       const RankTwoTensor & /*stress_old*/,
+                                       const ADRankFourTensor & /*elasticity_tensor*/,
+                                       const RankTwoTensor & /*elastic_strain_old*/)
+{
+  paramError("use_substep",
+             "updateStateSubstep called: it needs to be implemented by your inelastic model");
+}
+
+void
 ADStressUpdateBase::setQp(unsigned int qp)
 {
   _qp = qp;
