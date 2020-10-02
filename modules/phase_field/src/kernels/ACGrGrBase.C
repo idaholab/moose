@@ -21,14 +21,8 @@ ACGrGrBase::validParams()
 ACGrGrBase::ACGrGrBase(const InputParameters & parameters)
   : ACBulk<Real>(parameters),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
-    _vals_var(_op_num),
+    _vals(coupledValues("v")),
+    _vals_var(coupledIndices("v")),
     _mu(getMaterialProperty<Real>("mu"))
 {
-  // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v", i);
-  }
 }

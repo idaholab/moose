@@ -135,7 +135,7 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     _closed_system(false),
     _source_species_names(getParam<std::vector<std::string>>("source_species_names")),
     _num_source_species(_source_species_names.size()),
-    _source_species_rates(0),
+    _source_species_rates(coupledValues("source_species_rates")),
     _remove_fixed_activity_name(getParam<std::vector<std::string>>("remove_fixed_activity_name")),
     _remove_fixed_activity_time(getParam<std::vector<Real>>("remove_fixed_activity_time")),
     _num_removed_fixed(_remove_fixed_activity_name.size()),
@@ -143,7 +143,7 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     _controlled_activity_species_names(
         getParam<std::vector<std::string>>("controlled_activity_name")),
     _num_controlled_activity(_controlled_activity_species_names.size()),
-    _controlled_activity_species_values(0),
+    _controlled_activity_species_values(coupledValues("controlled_activity_value")),
     _mole_additions(_num_basis + _num_kin),
     _dmole_additions(_num_basis + _num_kin, _num_basis + _num_kin),
     _mode(coupledValue("mode")),
@@ -153,8 +153,6 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
   // check sources and set the rates
   if (coupledComponents("source_species_rates") != _num_source_species)
     paramError("source_species_names", "must have the same size as source_species_rates");
-  for (unsigned i = 0; i < _num_source_species; ++i)
-    _source_species_rates.push_back(&coupledValue("source_species_rates", i));
   for (unsigned i = 0; i < _num_source_species; ++i)
     if (!(_mgd.basis_species_index.count(_source_species_names[i]) == 1 ||
           _mgd.eqm_species_index.count(_source_species_names[i]) == 1))
@@ -189,8 +187,6 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
                "must be of the same size as remove_fixed_activity_time");
   if (coupledComponents("controlled_activity_value") != _num_controlled_activity)
     paramError("controlled_activity_name", "must have the same size as controlled_activity_value");
-  for (unsigned i = 0; i < _num_controlled_activity; ++i)
-    _controlled_activity_species_values.push_back(&coupledValue("controlled_activity_value", i));
 
   // record coupled variables
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();

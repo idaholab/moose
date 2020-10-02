@@ -32,24 +32,19 @@ ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters)
     _cgb(getParam<Real>("cgb")),
     _k(getParam<Real>("k")),
     _op_num(coupledComponents(
-        "etas")),   // determine number of grains from the number of names passed in.
-    _vals(_op_num), // Size variable arrays
-    _grad_vals(_op_num),
-    _vals_name(_op_num),
+        "etas")), // determine number of grains from the number of names passed in.
+    _vals(coupledValues("etas")),
+    _grad_vals(coupledGradients("etas")),
+    _vals_name(coupledNames("etas")),
     _product_etas(_op_num),
     _sum_grad_etas(_op_num),
     _dF(declareProperty<std::vector<RealGradient>>("force_density")),
     _dFdc(declarePropertyDerivative<std::vector<RealGradient>>("force_density", _c_name)),
     _dFdgradeta(_op_num)
 {
-  // Loop through grains and load coupled variables into the arrays
+  // Loop through grains and load derivatives
   for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("etas", i);
-    _grad_vals[i] = &coupledGradient("etas", i);
-    _vals_name[i] = getVar("etas", i)->name();
     _dFdgradeta[i] = &declarePropertyDerivative<std::vector<Real>>("force_density", _vals_name[i]);
-  }
 }
 
 void

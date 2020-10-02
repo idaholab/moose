@@ -23,7 +23,7 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  Moose::CoordinateSystemType _coord_system;
+  const Moose::CoordinateSystemType _coord_system;
   std::vector<const ADVariableGradient *> _grad_disp;
   const ADVariableValue & _disp_r;
 

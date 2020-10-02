@@ -53,11 +53,11 @@ InertialTorque::InertialTorque(const InputParameters & parameters)
     _alpha(getParam<Real>("alpha")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _disp_num(_ndisp),
-    _disp(_ndisp),
-    _disp_old(_ndisp),
-    _vel_old(_ndisp),
-    _accel_old(_ndisp),
+    _disp_num(coupledIndices("displacements")),
+    _disp(coupledValues("displacements")),
+    _disp_old(coupledValuesOld("displacements")),
+    _vel_old(coupledValuesOld("velocities")),
+    _accel_old(coupledValuesOld("accelerations")),
     _accel(_ndisp),
     _vel(_ndisp),
     _daccel(_ndisp),
@@ -68,14 +68,6 @@ InertialTorque::InertialTorque(const InputParameters & parameters)
     mooseError(
         "InertialTorque: This Kernel is only defined for 3-dimensional simulations so 3 "
         "displacement variables, 3 velocity variables and 3 acceleration variables are needed");
-  for (unsigned i = 0; i < _ndisp; ++i)
-  {
-    _disp_num[i] = coupled("displacements", i);
-    _disp[i] = &coupledValue("displacements", i);
-    _disp_old[i] = &coupledValueOld("displacements", i);
-    _vel_old[i] = &coupledValueOld("velocities", i);
-    _accel_old[i] = &coupledValueOld("accelerations", i);
-  }
 }
 
 Real

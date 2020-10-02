@@ -54,7 +54,7 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
     _ref_point(parameters.get<Point>("reference_point")),
     _dim(_mesh.dimension()),
     _ndisp(coupledComponents("displacements")),
-    _disp(_ndisp)
+    _disp(coupledValues("displacements"))
 {
   if (!isNodal())
     paramError("variable", "GlobalDisplacementAux must be used on a nodal auxiliary variable");
@@ -66,9 +66,6 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
                " does not exist for ",
                _dim,
                " dimensional problems");
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp[i] = &coupledValue("displacements", i);
 }
 
 Real

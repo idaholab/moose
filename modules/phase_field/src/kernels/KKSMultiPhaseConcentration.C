@@ -32,7 +32,7 @@ KKSMultiPhaseConcentration::validParams()
 KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>(parameters),
     _num_j(coupledComponents("cj")),
-    _cj(_num_j),
+    _cj(coupledValues("cj")),
     _cj_map(getParameterJvarMap("cj")),
     _k(-1),
     _c(coupledValue("c")),
@@ -61,7 +61,6 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
   // Load concentration variables into the arrays
   for (unsigned int m = 0; m < _num_j; ++m)
   {
-    _cj[m] = &coupledValue("cj", m);
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
     _prop_dhjdetai[m].resize(_num_j);
     // Set _k to the position of the nonlinear variable in the list of cj's

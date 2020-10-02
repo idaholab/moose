@@ -39,5 +39,5 @@ protected:
   const unsigned int _n_components;
 
   /// Variables to pass to boundary flux user object, in the correct order
-  std::vector<const VariableValue *> _U;
+  const std::vector<const VariableValue *> _U;
 };

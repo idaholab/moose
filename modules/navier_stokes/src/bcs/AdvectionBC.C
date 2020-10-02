@@ -26,7 +26,8 @@ AdvectionBC::validParams()
 AdvectionBC::AdvectionBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _dim(_mesh.dimension()),
-    _coupled_components(coupledComponents("velocity_vector"))
+    _coupled_components(coupledComponents("velocity_vector")),
+    _velocity(coupledValues("velocity_vector"))
 {
   if (_dim > _coupled_components)
     paramError(
@@ -35,10 +36,6 @@ AdvectionBC::AdvectionBC(const InputParameters & parameters)
   if (_coupled_components > 3)
     paramError("velocity_vector",
                "You cannot supply more than 3 components for the velocity vector");
-
-  _velocity.resize(_coupled_components);
-  for (unsigned int j = 0; j < _coupled_components; ++j)
-    _velocity[j] = &coupledValue("velocity_vector", j);
 }
 
 Real

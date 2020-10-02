@@ -107,17 +107,17 @@ protected:
   MooseEnum _var_types;
 
   /// _moose_var_num[i] = the moose variable number corresponding to richards variable i
-  std::vector<unsigned int> _moose_var_num;
+  const std::vector<unsigned int> _moose_var_num;
 
   /// _pressure_var_num[i] = the richards variable corresponding to moose variable i
   std::vector<unsigned int> _ps_var_num;
 
   /// moose_var_value[i] = values of richards variable i
-  std::vector<const VariableValue *>
+  const std::vector<const VariableValue *>
       _moose_var_value; // this is a vector of pointers to VariableValues
 
   /// moose_var_value_old[i] = old values of richards variable i
-  std::vector<const VariableValue *> _moose_var_value_old;
+  const std::vector<const VariableValue *> _moose_var_value_old;
 
   /// moose_var_value[i] = values of richards variable i
   std::vector<const VariableValue *>
@@ -127,5 +127,5 @@ protected:
   std::vector<const VariableValue *> _moose_nodal_var_value_old;
 
   /// moose_grad_var[i] = gradient values of richards variable i
-  std::vector<const VariableGradient *> _moose_grad_var;
+  const std::vector<const VariableGradient *> _moose_grad_var;
 };

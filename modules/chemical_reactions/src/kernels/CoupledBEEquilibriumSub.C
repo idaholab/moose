@@ -41,9 +41,20 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _gamma_u(coupledValue("gamma_u")),
     _gamma_u_old(coupledValueOld("gamma_u")),
+    _gamma_v(isCoupled("gamma_v")
+                 ? coupledValues("gamma_v") // have value
+                 : std::vector<const VariableValue *>(coupledComponents("v"),
+                                                      &coupledValue("gamma_v"))), // default
+    _gamma_v_old(isCoupled("gamma_v")
+                     ? coupledValuesOld("gamma_v") // have value
+                     : std::vector<const VariableValue *>(coupledComponents("v"),
+                                                          &coupledValue("gamma_v"))), // default
     _gamma_eq(coupledValue("gamma_eq")),
     _gamma_eq_old(coupledValueOld("gamma_eq")),
     _porosity(getMaterialProperty<Real>("porosity")),
+    _vars(coupledIndices("v")),
+    _v_vals(coupledValues("v")),
+    _v_vals_old(coupledValuesOld("v")),
     _u_old(valueOld())
 {
   const unsigned int n = coupledComponents("v");
@@ -59,23 +70,6 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
       mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
                  "coupled species in ",
                  _name);
-
-  _vars.resize(n);
-  _v_vals.resize(n);
-  _v_vals_old.resize(n);
-  _gamma_v.resize(n);
-  _gamma_v_old.resize(n);
-
-  for (unsigned int i = 0; i < _vars.size(); ++i)
-  {
-    _vars[i] = coupled("v", i);
-    _v_vals[i] = &coupledValue("v", i);
-    _v_vals_old[i] = &coupledValueOld("v", i);
-    // If gamma_v has been supplied, use those values, but if not, use the default value
-    _gamma_v[i] = (isCoupled("gamma_v") ? &coupledValue("gamma_v", i) : &coupledValue("gamma_v"));
-    _gamma_v_old[i] =
-        (isCoupled("gamma_v") ? &coupledValueOld("gamma_v", i) : &coupledValue("gamma_v"));
-  }
 }
 
 Real

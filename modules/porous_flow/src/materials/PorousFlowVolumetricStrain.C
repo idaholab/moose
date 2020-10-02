@@ -39,10 +39,10 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
   : PorousFlowMaterialVectorBase(parameters),
     _consistent(getParam<bool>("consistent_with_displaced_mesh")),
     _ndisp(coupledComponents("displacements")),
-    _disp(3),
-    _disp_var_num(3),
-    _grad_disp(3),
-    _grad_disp_old(3),
+    _disp(coupledValues("displacements")),
+    _disp_var_num(coupledIndices("displacements")),
+    _grad_disp(coupledGradients("displacements")),
+    _grad_disp_old(coupledGradientsOld("displacements")),
 
     _vol_strain_rate_qp(declareProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
     _dvol_strain_rate_qp_dvar(
@@ -54,26 +54,16 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
   if (_ndisp != _mesh.dimension())
     paramError("displacements", "The number of variables supplied must match the mesh dimension.");
 
-  // fetch coupled variables and gradients (as stateful properties if necessary)
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp[i] = &coupledValue("displacements", i);
-    _disp_var_num[i] = coupled("displacements", i);
-    _grad_disp[i] = &coupledGradient("displacements", i);
-    _grad_disp_old[i] = &coupledGradientOld("displacements", i);
-  }
-
   // set unused dimensions to zero
+  _disp.resize(3, &_zero);
+  _disp_var_num.resize(3, 0);
+  _grad_disp.resize(3, &_grad_zero);
+  _grad_disp_old.resize(3, &_grad_zero);
   for (unsigned i = _ndisp; i < 3; ++i)
-  {
-    _disp[i] = &_zero;
-    _disp_var_num[i] = 0;
     while (_dictator.isPorousFlowVariable(_disp_var_num[i]))
       _disp_var_num[i]++; // increment until disp_var_num[i] is not a porflow var
-    _grad_disp[i] = &_grad_zero;
-    _grad_disp_old[i] = &_grad_zero;
-  }
-  if (_nodal_material == true)
+
+  if (_nodal_material)
     mooseError("PorousFlowVolumetricStrain classes are only defined for at_nodes = false");
 }
 

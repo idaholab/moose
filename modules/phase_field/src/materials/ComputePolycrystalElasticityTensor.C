@@ -34,16 +34,13 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(
     _pressure_scale(getParam<Real>("pressure_scale")),
     _grain_tracker(getUserObject<GrainDataTracker<RankFourTensor>>("grain_tracker")),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
+    _vals(coupledValues("v")),
     _D_elastic_tensor(_op_num),
     _JtoeV(6.24150974e18)
 {
   // Loop over variables (ops)
   for (MooseIndex(_op_num) op_index = 0; op_index < _op_num; ++op_index)
   {
-    // Initialize variables
-    _vals[op_index] = &coupledValue("v", op_index);
-
     // declare elasticity tensor derivative properties
     _D_elastic_tensor[op_index] = &declarePropertyDerivative<RankFourTensor>(
         _elasticity_tensor_name, getVar("v", op_index)->name());

@@ -33,9 +33,9 @@ protected:
   Moose::CoordinateSystemType _coord_system;
 
   /// Number of displacment components.
-  unsigned int _ndisp;
+  const unsigned int _ndisp;
   /// Coupled variable values of the displacement components.
-  std::vector<const VariableValue *> _disp_vals;
+  const std::vector<const VariableValue *> _disp_vals;
 
   /// Point used to define an origin for 2D axisymmetric or
   /// 3D Cartesian systems.

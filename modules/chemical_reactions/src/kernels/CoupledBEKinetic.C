@@ -25,17 +25,10 @@ CoupledBEKinetic::validParams()
 CoupledBEKinetic::CoupledBEKinetic(const InputParameters & parameters)
   : TimeDerivative(parameters),
     _porosity(getMaterialProperty<Real>("porosity")),
-    _weight(getParam<std::vector<Real>>("weight"))
+    _weight(getParam<std::vector<Real>>("weight")),
+    _vals(coupledValues("v")),
+    _vals_old(coupledValuesOld("v"))
 {
-  const unsigned int n = coupledComponents("v");
-  _vals.resize(n);
-  _vals_old.resize(n);
-
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_old[i] = &coupledValueOld("v", i);
-  }
 }
 
 Real

@@ -30,23 +30,16 @@ ComputeCosseratIncrementalSmallStrain::ComputeCosseratIncrementalSmallStrain(
   : ComputeIncrementalStrainBase(parameters),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _nrots(coupledComponents("Cosserat_rotations")),
-    _wc(_nrots),
-    _wc_old(_nrots),
-    _grad_wc(_nrots),
-    _grad_wc_old(_nrots),
+    _wc(coupledValues("Cosserat_rotations")),
+    _wc_old(coupledValuesOld("Cosserat_rotations")),
+    _grad_wc(coupledGradients("Cosserat_rotations")),
+    _grad_wc_old(coupledGradientsOld("Cosserat_rotations")),
     _curvature_old(getMaterialPropertyOld<RankTwoTensor>("curvature")),
     _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment"))
 {
   if (_nrots != 3)
     mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional "
                "simulations so 3 Cosserat rotation variables are needed");
-  for (unsigned i = 0; i < _nrots; ++i)
-  {
-    _wc[i] = &coupledValue("Cosserat_rotations", i);
-    _wc_old[i] = &coupledValueOld("Cosserat_rotations", i);
-    _grad_wc[i] = &coupledGradient("Cosserat_rotations", i);
-    _grad_wc_old[i] = &coupledGradientOld("Cosserat_rotations", i);
-  }
 }
 
 void

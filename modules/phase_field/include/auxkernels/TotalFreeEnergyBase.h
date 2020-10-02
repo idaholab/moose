@@ -29,8 +29,8 @@ protected:
 
   /// Coupled interface variables
   unsigned int _nvars;
-  std::vector<const VariableValue *> _vars;
-  std::vector<const VariableGradient *> _grad_vars;
+  const std::vector<const VariableValue *> _vars;
+  const std::vector<const VariableGradient *> _grad_vars;
 
   /// Gradient free energy prefactor kappa
   std::vector<MaterialPropertyName> _kappa_names;

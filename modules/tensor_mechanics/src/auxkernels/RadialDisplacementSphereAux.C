@@ -29,7 +29,9 @@ RadialDisplacementSphereAux::validParams()
 }
 
 RadialDisplacementSphereAux::RadialDisplacementSphereAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _ndisp(coupledComponents("displacements")), _disp_vals(_ndisp)
+  : AuxKernel(parameters),
+    _ndisp(coupledComponents("displacements")),
+    _disp_vals(coupledValues("displacements"))
 {
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   const auto & sbd_begin = *subdomains.begin();
@@ -41,9 +43,6 @@ RadialDisplacementSphereAux::RadialDisplacementSphereAux(const InputParameters &
       mooseError(
           "RadialDisplacementSphereAux requires that all subdomains have the same coordinate type");
   }
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_vals[i] = &coupledValue("displacements", i);
 
   if (_ndisp != _mesh.dimension())
     mooseError("The number of displacement variables supplied must match the mesh dimension.");

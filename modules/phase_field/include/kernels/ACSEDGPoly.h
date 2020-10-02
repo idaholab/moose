@@ -36,8 +36,8 @@ protected:
 
   const unsigned int _op_num;
 
-  std::vector<const VariableValue *> _vals;
-  std::vector<unsigned int> _vals_var;
+  const std::vector<const VariableValue *> _vals;
+  const std::vector<unsigned int> _vals_var;
 
   /// the prefactor needed to calculate the deformation energy from dislocation density
   const MaterialProperty<Real> & _beta;

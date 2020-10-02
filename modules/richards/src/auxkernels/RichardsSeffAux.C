@@ -25,13 +25,10 @@ RichardsSeffAux::validParams()
 }
 
 RichardsSeffAux::RichardsSeffAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _seff_UO(getUserObject<RichardsSeff>("seff_UO"))
+  : AuxKernel(parameters),
+    _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
+    _pressure_vals(coupledValues("pressure_vars"))
 {
-  int n = coupledComponents("pressure_vars");
-  _pressure_vals.resize(n);
-
-  for (int i = 0; i < n; ++i)
-    _pressure_vals[i] = &coupledValue("pressure_vars", i);
 }
 
 Real

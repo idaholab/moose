@@ -44,9 +44,9 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _grad_c(coupledGradient("c")),
     _c_dofs(getVar("c", 0)->dofIndices()),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
-    _vals_var(_op_num),
-    _grad_vals(_op_num),
+    _vals(coupledValues("v")),
+    _vals_var(coupledIndices("v")),
+    _grad_vals(coupledGradients("v")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
     _grain_forces(_grain_force_torque.getForceValues()),
@@ -58,13 +58,6 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
     _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes"))
 {
-  // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v", i);
-    _grad_vals[i] = &coupledGradient("v", i);
-  }
 }
 
 void

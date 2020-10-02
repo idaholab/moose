@@ -27,5 +27,5 @@ protected:
   virtual Real computeValue();
 
   // coupled variable values to be aggregated
-  std::vector<const VariableValue *> _values;
+  const std::vector<const VariableValue *> _values;
 };

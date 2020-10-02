@@ -35,7 +35,7 @@ MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters
     _g_order(getParam<MooseEnum>("g_order")),
     _well_only(getParam<bool>("well_only")),
     _num_eta(coupledComponents("etas")),
-    _eta(_num_eta),
+    _eta(coupledValues("etas")),
     _prop_g(declareProperty<Real>(_function_name)),
     _prop_dg(_num_eta),
     _prop_d2g(_num_eta)
@@ -46,7 +46,6 @@ MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters
     const VariableName & eta_name = getVar("etas", i)->name();
     _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, eta_name);
     _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
-    _eta[i] = &coupledValue("etas", i);
   }
 }
 

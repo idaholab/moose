@@ -43,7 +43,7 @@ protected:
   MaterialProperty<RealTensorValue> & _permeability;
   MaterialProperty<RealVectorValue> & _gravity;
 
-  std::vector<const VariableValue *> _perm_change;
+  const std::vector<const VariableValue *> _perm_change;
 
   virtual void computeQpProperties();
 };

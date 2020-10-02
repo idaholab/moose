@@ -26,6 +26,7 @@ ADDensity::validParams()
 ADDensity::ADDensity(const InputParameters & parameters)
   : ADMaterial(parameters),
     _coord_system(getBlockCoordSystem()),
+    _grad_disp(adCoupledGradients("displacements")),
     _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),
     _initial_density(getParam<Real>("density")),
     _density(declareADProperty<Real>("density"))
@@ -41,10 +42,6 @@ ADDensity::ADDensity(const InputParameters & parameters)
     paramError(
         "displacements",
         "The system uses a displaced problem but 'displacements' are not provided in ADDensity.");
-
-  _grad_disp.resize(ndisp);
-  for (unsigned int i = 0; i < ndisp; ++i)
-    _grad_disp[i] = &adCoupledGradient("displacements", i);
 
   // fill remaining components with zero
   _grad_disp.resize(3, &_ad_grad_zero);

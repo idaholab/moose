@@ -26,6 +26,6 @@ public:
 
 protected:
   const unsigned int _op_num;
-  std::vector<const ADVariableValue *> _vals;
+  const std::vector<const ADVariableValue *> _vals;
   const ADMaterialProperty<Real> & _mu;
 };

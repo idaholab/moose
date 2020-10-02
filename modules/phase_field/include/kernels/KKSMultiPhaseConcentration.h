@@ -43,7 +43,7 @@ protected:
 
 private:
   const unsigned int _num_j;
-  std::vector<const VariableValue *> _cj;
+  const std::vector<const VariableValue *> _cj;
   const JvarMap & _cj_map;
 
   /// Position of the nonlinear variable in the list of cj's

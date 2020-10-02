@@ -34,7 +34,7 @@ protected:
   } _function;
 
   /// Coupled variable value for the order parameter
-  std::vector<const ADVariableValue *> _op;
+  const std::vector<const ADVariableValue *> _op;
 
   /// property name
   const MaterialPropertyName _f_name;

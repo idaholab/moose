@@ -38,21 +38,16 @@ KineticDisPreRateAux::KineticDisPreRateAux(const InputParameters & parameters)
     _gas_const(getParam<Real>("gas_const")),
     _ref_temp(getParam<Real>("ref_temp")),
     _sys_temp(coupledValue("sys_temp")),
-    _sto_v(getParam<std::vector<Real>>("sto_v"))
+    _sto_v(getParam<std::vector<Real>>("sto_v")),
+    _vals(coupledValues("v"))
 {
-  const unsigned int n = coupledComponents("v");
-
   // Check that the number of stoichiometric coefficients is equal to the number
   // of reactant species
-  if (_sto_v.size() != n)
+  if (_sto_v.size() != coupledComponents("v"))
     mooseError(
         "The number of stoichiometric coefficients in sto_v is not equal to the number of reactant "
         "species in ",
         _name);
-
-  _vals.resize(n);
-  for (unsigned int i = 0; i < n; ++i)
-    _vals[i] = &coupledValue("v", i);
 }
 
 Real
