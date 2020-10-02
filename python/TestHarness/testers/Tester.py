@@ -231,6 +231,10 @@ class Tester(MooseObject):
         """ return the input file if applicable to this Tester """
         return None
 
+    def getInputFileContents(self):
+        """ return the contents of the input file applicable to this Tester """
+        return None
+
     def getOutputFiles(self):
         """ return the output files if applicable to this Tester """
         return []

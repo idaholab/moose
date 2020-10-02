@@ -652,21 +652,26 @@ class TestHarness:
                         else:
                             output_dir = job.getTestDir()
 
+                        output = ''
+                        # Append input file contents to output
+                        if self.options.include_input:
+                            # This is a file i/o operation. We only want to do this once, and only if necessary
+                            input_file = job.getInputFileContents()
+                            if input_file:
+                                output += "\n\nINPUT FILE:\n" + str(input_file)
+
+                        output += "\n\nTEST OUTPUT:" + job.getOutput()
+
                         # Yes, by design test dir will be apart of the output file name
                         output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
                                                                          job.getTestNameShort().replace(os.sep, '.'),
                                                                          status,
                                                                          'txt']))
 
-                        formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
+                        formated_results = util.formatResult(job, self.options, result=output, color=False)
 
-                        # Passing tests
-                        if self.options.ok_files and job.isPass():
-                            with open(output_file, 'w') as f:
-                                f.write(formated_results)
-
-                        # Failing tests
-                        if self.options.fail_files and job.isFail():
+                        if (self.options.ok_files and job.isPass()) or \
+                           (self.options.fail_files and job.isFail()):
                             with open(output_file, 'w') as f:
                                 f.write(formated_results)
 
@@ -810,6 +815,7 @@ class TestHarness:
         outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
         outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
         outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+        outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
