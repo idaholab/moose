@@ -136,11 +136,9 @@ MooseMesh::validParams()
                              "In particular you must supply this for GMSH meshes. "
                              "Note: This is completely ignored for ExodusII meshes!");
 
-  MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc",
-                         "default");
   params.addParam<MooseEnum>(
       "partitioner",
-      partitioning,
+      partitioning(),
       "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
   MooseEnum direction("x y z radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction",
@@ -3198,4 +3196,12 @@ MooseMesh::buildFaceInfo()
       }
     }
   }
+}
+
+MooseEnum
+MooseMesh::partitioning()
+{
+  MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc",
+                         "default");
+  return partitioning;
 }

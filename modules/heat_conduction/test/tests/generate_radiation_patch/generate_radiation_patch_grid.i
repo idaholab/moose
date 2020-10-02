@@ -17,7 +17,7 @@
 
   [patch]
     type = PatchSidesetGenerator
-    sideset = back
+    boundary = back
     n_patches = 19
     input = cmg
     partitioner = grid
