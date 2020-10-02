@@ -403,7 +403,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
-  // // well before our FEProblemBase is constructed. Historically, in MooseMesh we have a bunch of
+  // // well before our Problem(s) are constructed. Historically, in MooseMesh we have a bunch of
   // // needs_prepare type flags that make it so we never call prepare_for_use (and consequently
   // // delete_remote_elements) again. So the below line, historically, has had no impact. HOWEVER:
   // // I've added some code in SetupMeshCompleteAction for deleting remote elements post

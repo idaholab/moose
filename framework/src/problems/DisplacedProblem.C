@@ -69,8 +69,16 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _displaced_nl.addTimeIntegrator(_mproblem.getNonlinearSystemBase().getSharedTimeIntegrator());
   _displaced_aux.addTimeIntegrator(_mproblem.getAuxiliarySystem().getSharedTimeIntegrator());
 
-  if (!_default_ghosting)
-    _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
+  // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
+  // // well before our Problem(s) are constructed. Historically, in MooseMesh we have a bunch of
+  // // needs_prepare type flags that make it so we never call prepare_for_use (and consequently
+  // // delete_remote_elements) again. So the below line, historically, has had no impact. HOWEVER:
+  // // I've added some code in SetupMeshCompleteAction for deleting remote elements post
+  // // EquationSystems::init. If I execute that code without default ghosting, then I get > 40 MOOSE
+  // // test failures, so we clearly have some simulations that are not yet covered properly by
+  // // relationship managers. Until that is resolved, I am going to retain default geometric ghosting
+  // if (!_default_ghosting)
+  //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
   automaticScaling(_mproblem.automaticScaling());
 }
