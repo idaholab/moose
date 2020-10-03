@@ -16,13 +16,7 @@ In [kernel-inheritance], notice that the `ADDiffusion` object is declared as one
 !alert note title=Automatic Differentiation
 "AD" (often used as a prefix for class names) stands for "Automatic Differentiation," which is a feature available to MOOSE application developers that drastically simplifies the implementation of new a `MooseObject`. <!--The non-AD counterparts of objects are the subject of the next tutorial-->
 
-Now, inspect the files that provide the `ADKernel` base class to decide how to properly implement a new object of this type:
-
-!listing framework/include/kernels/ADKernel.h
-
-!listing framework/src/kernels/ADKernel.C
-
-The most important members that `ADKernel` objects have access to are the following:
+Now, one might inspect the files that provide the base class, i.e., [`ADKernel.h`](framework/include/kernels/ADKernel.h) and [`ADKernel.C`](framework/src/kernels/ADKernel.C), to see what tools are available and decide how to properly implement a new object of this type. Variable members that `ADKernel` objects have access to include, but are not limited to, the following:
 
 - `_u`, `_grad_u`\\
   Value and gradient of the variable being operated on.
@@ -39,7 +33,16 @@ The most important members that `ADKernel` objects have access to are the follow
 - `_qp`\\
   Current quadrature point index.
 
-There are are also several methods that `ADKernel` objects have access to. For now, the one to be aware of is `computeQpResidual` (or `precomputeQpResidual()` for special cases). The "`Qp`" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the weak form of a [!ac](PDE) is numerically integrated. Finite elements usually contain multiple quadrature points at specific, symmetrically placed locations and the Gauss quadrature formula is a summation over all of these points that yields an exact value for the integral of a polynomial over $\Omega$.
+There are are several methods that `ADKernel` (and `Kernel`) objects may override. The most important ones are those which work to evaluate the kernel term in the weak form and they are explained in [kernel-methods].
+
+!table id=kernel-methods caption=Methods used by different types of Kernel objects that compute the residual term.
+| Base | Override | Use |
+| :- | :- | :- |
+| Kernel\\ +ADKernel+ | computeQpResidual | Use when the term in the [!ac](PDE) is multiplied by both the test function and the gradient of the test function (`_test` and `_grad_test` must be applied) |
+| KernelValue\\ +ADKernelValue+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the test function (do not use `_test` in the override, it is applied automatically) |
+| KernelGrad\\ +ADKernelGrad+ | precomputeQpResidual | Use when the term computed in the [!ac](PDE) is only multiplied by the gradient of the test function (do not use `_grad_test` in the override, it is applied automatically) |
+
+For this step, the method to be aware of is `precomputeQpResidual()`; the same one used by [`ADDiffusion`](framework/src/kernels/ADDiffusion.C). The "`Qp`" stands for "quadrature point," which is a characteristic feature of the [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature). These are the points at which the weak form of a [!ac](PDE) is numerically integrated. Finite elements usually contain multiple quadrature points at specific, symmetrically placed locations and the Gauss quadrature formula is a summation over all of these points that yields an exact value for the integral of a polynomial over $\Omega$.
 
 ## Demonstration id=demo
 
@@ -64,7 +67,7 @@ cd ~/projects/babbler
 mkdir include/kernels src/kernels
 ```
 
-In `include/kernels/`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` and a constructor method, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value. Finally, two attributes, `_permeability` and `_viscosity` were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
+In `include/kernels/`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` and a constructor method, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu_{f}$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/include/kernels/DarcyPressure.h
          link=False
@@ -79,7 +82,7 @@ Here, the header file for this object was included. Next, the `registerMooseObje
          id=darcy-source
          caption=Source file for the `DarcyPressure` object.
 
-Since the application's source code has been modified, the executable must be recompiled:
+Since the source code has been modified, the executable must be recompiled:
 
 ```bash
 cd ~/projects/babbler
@@ -115,7 +118,7 @@ cd ~/projects/babbler/problems
        id=results
        caption=Rendering of the [!ac](FEM) solution of Darcy's pressure equation subject to the given [!ac](BVP).
 
-One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu_{f}$, is constant and since the foregoing [!ac](BVP) is a simple one that only involves essential boundary conditions,
+One should be convinced that, because this is a steady-state problem, where the coefficient, $K / \mu_{f}$, is constant and since the foregoing [!ac](BVP) is a simple one that involves only essential boundary conditions,
 the solution produced by the new `DarcyPressure` object, shown in [results],
 is identical to the [previous one](tutorial01_app_development/step02_input_file.md#results) produced by the `ADDiffusion` object.
 
