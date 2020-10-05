@@ -11,6 +11,7 @@
 
 #include "MooseObject.h"
 #include "PerfGraphInterface.h"
+#include "PostprocessorInterface.h"
 
 class SolveObject;
 class Executioner;

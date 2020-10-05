@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "ReporterName.h"
+
 ReporterName::ReporterName(const std::string & object_name, const std::string & value_name)
   : _object_name(object_name),
     _value_name(value_name),

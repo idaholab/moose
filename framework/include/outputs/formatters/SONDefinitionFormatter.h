@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <sstream>
 
 /**
  * This class produces a dump of the InputFileParameters in the Standard Object

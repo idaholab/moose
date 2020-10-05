@@ -13,6 +13,7 @@
 #include "MultiApp.h"
 #include "PenetrationInfo.h"
 #include "MaterialPropertyStorage.h"
+#include "SystemInfo.h"
 
 #include "libmesh/libmesh_config.h"
 #include "libmesh/node.h"
