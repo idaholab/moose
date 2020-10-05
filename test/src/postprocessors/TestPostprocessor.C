@@ -32,8 +32,8 @@ TestPostprocessor::TestPostprocessor(const InputParameters & parameters)
     _test_type(getParam<MooseEnum>("test_type")),
     _old_val(getPostprocessorValueOldByName(name())),
     _older_val(getPostprocessorValueOlderByName(name())),
-    _execute_count(declareRestartableData<unsigned int>("execute_count")),
-    _report_old(getPostprocessorValueOld("report_name"))
+    _report_old(getPostprocessorValueOld("report_name")),
+    _execute_count(declareRestartableData<unsigned int>("execute_count"))
 {
   if (_test_type == "report_old" && !isParamValid("report_name"))
     mooseError("Must set 'report_name' parameter when using the 'report_old' test type.");
