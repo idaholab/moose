@@ -1,5 +1,8 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
@@ -27,13 +30,13 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []

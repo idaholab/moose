@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 #  init_unif_refine = 6
 []
 
@@ -57,28 +62,28 @@
   [./left_u]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
   [./right_u]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 100
   [../]
 
   [./left_v]
     type = DirichletBC
     variable = v
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
   [./right_v]
     type = DirichletBC
     variable = v
-    boundary = 2
+    boundary = 1
     value = 0
   [../]
 []

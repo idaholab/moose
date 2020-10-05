@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
   uniform_refine = 4
 []
 
@@ -60,23 +65,23 @@
 [Materials]
   [./mat4]
    type = RandomMaterial
-   block = 1
+   block = 0
   [../]
   [./mat3]
    type = MTMaterial
-   block = 1
+   block = 0
   [../]
   [./mat1]
    type = GenericConstantMaterial
    prop_names = prop1
    prop_values = 1.0
-   block = 1
+   block = 0
   [../]
   [./mat2]
    type = CoupledMaterial
    mat_prop = prop2
    coupled_mat_prop = prop1
-   block = 1
+   block = 0
   [../]
 []
 

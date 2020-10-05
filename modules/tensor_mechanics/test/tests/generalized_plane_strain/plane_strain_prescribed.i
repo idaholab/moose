@@ -3,11 +3,16 @@
   family = LAGRANGE
   displacements = 'disp_x disp_y'
   scalar_out_of_plane_strain = scalar_strain_zz
-  block = 1
+  block = 0
 []
 
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  [../]
 []
 
 [AuxVariables]
@@ -56,13 +61,13 @@
 [BCs]
   [./bottomx]
     type = DirichletBC
-    boundary = 1
+    boundary = 0
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
     type = DirichletBC
-    boundary = 1
+    boundary = 0
     variable = disp_y
     value = 0.0
   [../]

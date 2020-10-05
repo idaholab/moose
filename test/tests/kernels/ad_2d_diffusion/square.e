@@ -1,1 +1,0 @@
-../2d_diffusion/square.e

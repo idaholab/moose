@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]
@@ -21,7 +26,7 @@
     type = PenaltyDirichletBC
     penalty = 1e9
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
@@ -29,7 +34,7 @@
     type = PenaltyDirichletBC
     penalty = 1e9
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []
@@ -48,4 +53,3 @@
   file_base = out
   exodus = true
 []
-
