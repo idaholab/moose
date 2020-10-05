@@ -262,6 +262,15 @@ public:
   std::unique_ptr<MeshBase> buildMeshBaseObject(ParallelType override_type = ParallelType::DEFAULT);
 
   /**
+   * Shortcut method to construct a libMesh mesh instance. The created derived-from-MeshBase object
+   * will have its \p allow_remote_element_removal flag set to whatever our value is. We will also
+   * attach any geometric \p RelationshipManagers that have been requested by our simulation objects
+   * to the \p MeshBase object
+   */
+  template <typename T>
+  T buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
+
+  /**
    * Method to set the mesh_base object. If this method is NOT called prior to calling init(), a
    * MeshBase object will be automatically constructed and set.
    */

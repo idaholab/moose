@@ -2310,6 +2310,18 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
   return mesh;
 }
 
+template <typename T>
+T
+MooseMesh::buildTypedMesh(unsigned int dim)
+{
+  if (dim == libMesh::invalid_uint)
+    dim = getParam<MooseEnum>("dim");
+
+  T mesh(_communicator, dim);
+
+  return mesh;
+}
+
 void
 MooseMesh::setMeshBase(std::unique_ptr<MeshBase> mesh_base)
 {
@@ -3199,3 +3211,6 @@ MooseMesh::buildFaceInfo()
     }
   }
 }
+
+template ReplicatedMesh MooseMesh::buildTypedMesh(unsigned int);
+template DistributedMesh MooseMesh::buildTypedMesh(unsigned int);
