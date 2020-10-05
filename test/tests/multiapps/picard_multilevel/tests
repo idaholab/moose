@@ -5,7 +5,7 @@
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
 
-    issues = '#5126'
+    issues = '#5126 #15837'
     requirement = 'The system shall support Picard iteration with multiple levels of Multiapps.'
   [../]
   [./test_force_norms]
@@ -16,7 +16,7 @@
     exodiff = 'picard_master_out_extra.e picard_master_out_extra_sub10.e picard_master_out_extra_sub10_sub20.e'
     prereq = test
 
-    issues = '#12709'
+    issues = '#12709 #15837'
     requirement = 'The system shall support the evaluation of TIMESTEP_BEGIN and TIMESTEP_END norms even when there are not active Multiapps on both of those execute_on times.'
   [../]
 []
