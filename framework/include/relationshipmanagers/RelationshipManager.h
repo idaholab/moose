@@ -117,6 +117,9 @@ protected:
   /// Reference to the Mesh object
   MooseMesh & _mesh;
 
+  /// Pointer to the \p MooseMesh object
+  MooseMesh * const _moose_mesh;
+
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
   const DofMap * _dof_map;
