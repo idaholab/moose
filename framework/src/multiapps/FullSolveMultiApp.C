@@ -55,7 +55,7 @@ FullSolveMultiApp::backup()
 }
 
 void
-FullSolveMultiApp::restore()
+FullSolveMultiApp::restore(bool /*force*/)
 {
   if (getParam<bool>("no_backup_and_restore"))
     return;

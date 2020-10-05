@@ -131,11 +131,13 @@ public:
   virtual void backup();
 
   /**
-   * Restore the state of every Sub App
+   * Restore the state of every Sub App. This allows us to "Restore" this state later
+   * If the app is not forced to restore, it is only done as needed (and also for the
+   * apps underneath as needed)
    *
-   * This allows us to "Restore" this state later
+   * @param force Whether the restoration has to happen no matter what.
    */
-  virtual void restore();
+  virtual void restore(bool force = true);
 
   /**
    * Whether or not this MultiApp should be restored at the beginning of
