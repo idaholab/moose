@@ -71,14 +71,14 @@ private:
 };
 
 // This with the operator== allow this to be used as a key in a std::unordered_map
-template <>
-struct std::hash<ReporterName>
+namespace std
 {
-  std::size_t operator()(const ReporterName & other) const
-  {
-    return std::hash<std::string>{}(other);
-  }
+template <>
+struct hash<ReporterName>
+{
+  size_t operator()(const ReporterName & other) const { return hash<string>{}(other); }
 };
+}
 
 // Support << output
 std::ostream & operator<<(std::ostream & os, const ReporterName & state);
