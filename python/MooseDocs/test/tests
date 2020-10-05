@@ -19,6 +19,7 @@
       command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe '
       prereq = materialize/barrier
       detail = "using a pipe-based parallel scheme; and"
+      skip = '#15887'
     []
     [queue]
       type = RunCommand
@@ -47,6 +48,7 @@
       command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
       prereq = html/barrier
       detail = "using a pipe-based parallel scheme; and"
+      skip = '#15887'
     []
     [queue]
       type = RunCommand
