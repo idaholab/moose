@@ -1688,6 +1688,17 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 srcdir=`dirname $0`
 top_srcdir=`dirname $0`
 
+test -n "$top_srcdir" &&
+ac_top_srcdir_ls_di=`cd "$top_srcdir" && ls -di .` ||
+  as_fn_error $? "top source directory cannot be determined"
+
+ac_pwd=`pwd` && test -n "$ac_pwd" &&
+ac_pwd_ls_di=`cd "$ac_pwd" && ls -di .` ||
+  as_fn_error $? "working directory cannot be determined"
+
+test "X$ac_top_srcdir_ls_di" = "X$ac_pwd_ls_di" ||
+  as_fn_error $? "MOOSE configure must be run from the root directory"
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ---------------------------------------------" >&5
 $as_echo "---------------------------------------------" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ----------- Configuring MOOSE ---------------" >&5
@@ -1698,11 +1709,11 @@ $as_echo "---------------------------------------------" >&6; }
 
 
 # Create a temporary file with e.g. SPARSE_AD
-ac_config_headers="$ac_config_headers include/base/MooseConfig.h.tmp:include/base/MooseConfig.h.in"
+ac_config_headers="$ac_config_headers framework/include/base/MooseConfig.h.tmp:framework/include/base/MooseConfig.h.in"
 
 # Prefixes everything in the temporary file with MOOSE_, e.g. MOOSE_SPARSE_AD
 
-ac_config_commands="$ac_config_commands include/base/MooseConfig.h"
+ac_config_commands="$ac_config_commands framework/include/base/MooseConfig.h"
 
 
 
@@ -2612,8 +2623,8 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "include/base/MooseConfig.h.tmp") CONFIG_HEADERS="$CONFIG_HEADERS include/base/MooseConfig.h.tmp:include/base/MooseConfig.h.in" ;;
-    "include/base/MooseConfig.h") CONFIG_COMMANDS="$CONFIG_COMMANDS include/base/MooseConfig.h" ;;
+    "framework/include/base/MooseConfig.h.tmp") CONFIG_HEADERS="$CONFIG_HEADERS framework/include/base/MooseConfig.h.tmp:framework/include/base/MooseConfig.h.in" ;;
+    "framework/include/base/MooseConfig.h") CONFIG_COMMANDS="$CONFIG_COMMANDS framework/include/base/MooseConfig.h" ;;
     "conf_vars.mk") CONFIG_FILES="$CONFIG_FILES conf_vars.mk" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
@@ -3165,12 +3176,12 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
 
   case $ac_file$ac_mode in
-    "include/base/MooseConfig.h":C) ac_prefix_conf_OUT=`echo include/base/MooseConfig.h`
+    "framework/include/base/MooseConfig.h":C) ac_prefix_conf_OUT=`echo framework/include/base/MooseConfig.h`
 ac_prefix_conf_DEF=`echo _$ac_prefix_conf_OUT | sed -e "y:abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:" -e "s/[^abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g"`
 ac_prefix_conf_PKG=`echo MOOSE`
 ac_prefix_conf_LOW=`echo _$ac_prefix_conf_PKG | sed -e "y:ABCDEFGHIJKLMNOPQRSTUVWXYZ-:abcdefghijklmnopqrstuvwxyz_:"`
 ac_prefix_conf_UPP=`echo $ac_prefix_conf_PKG | sed -e "y:abcdefghijklmnopqrstuvwxyz-:ABCDEFGHIJKLMNOPQRSTUVWXYZ_:"  -e "/^[0123456789]/s/^/_/"`
-ac_prefix_conf_INP=`echo "include/base/MooseConfig.h.tmp" | sed -e 's/ *//'`
+ac_prefix_conf_INP=`echo "framework/include/base/MooseConfig.h.tmp" | sed -e 's/ *//'`
 if test ".$ac_prefix_conf_INP" = "."; then
    for ac_file in : $CONFIG_HEADERS; do test "_$ac_file" = _: && continue
      case "$ac_file" in
