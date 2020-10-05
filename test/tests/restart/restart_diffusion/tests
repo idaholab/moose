@@ -68,7 +68,7 @@
     input = 'restart_diffusion_from_end_part1.i'
 
     issues = "#5748"
-    requirement = "The system shall support writting out several timesteps to a solution file to test reading from a specific point."
+    requirement = "The system shall support writing out several timesteps to a solution file to test reading from a specific point."
   [../]
 
   [./restart_use_end_part2]

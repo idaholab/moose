@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]

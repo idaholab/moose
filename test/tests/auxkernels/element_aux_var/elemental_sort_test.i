@@ -1,5 +1,10 @@
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]
@@ -49,7 +54,7 @@
   [./five]
     type = ConstantAux
     variable = five
-    boundary = '1 2'
+    boundary = '3 1'
     value = 5
   [../]
 []
@@ -60,14 +65,14 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []

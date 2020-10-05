@@ -6,7 +6,12 @@
 []
 
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  [../]
 []
 
 [Modules/TensorMechanics/Master]
@@ -26,21 +31,21 @@
 []
 
 [BCs]
-  [./leftx]
+  [./rightx]
     type = DirichletBC
-    boundary = 2
+    boundary = 1
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
     type = DirichletBC
-    boundary = 1
+    boundary = 0
     variable = disp_y
     value = 0.0
   [../]
   [./pull]
     type = FunctionDirichletBC
-    boundary = 3
+    boundary = 2
     variable = disp_y
     function = pull
   [../]
@@ -49,11 +54,11 @@
 [Materials]
   [./linear_stress]
     type = ComputeLinearElasticStress
-    block = 1
+    block = 0
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 1
+    block = 0
     poissons_ratio = 0.3
     youngs_modulus = 1e10
   [../]

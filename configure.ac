@@ -5,6 +5,17 @@ AC_PREREQ([2.69])
 srcdir=`dirname $0`
 top_srcdir=`dirname $0`
 
+test -n "$top_srcdir" &&
+ac_top_srcdir_ls_di=`cd "$top_srcdir" && ls -di .` ||
+  as_fn_error $? "top source directory cannot be determined"
+
+ac_pwd=`pwd` && test -n "$ac_pwd" &&
+ac_pwd_ls_di=`cd "$ac_pwd" && ls -di .` ||
+  as_fn_error $? "working directory cannot be determined"
+
+test "X$ac_top_srcdir_ls_di" = "X$ac_pwd_ls_di" ||
+  as_fn_error $? "MOOSE configure must be run from the root directory"
+
 AC_MSG_RESULT(---------------------------------------------)
 AC_MSG_RESULT(----------- Configuring MOOSE ---------------)
 AC_MSG_RESULT(---------------------------------------------)
@@ -12,9 +23,9 @@ AC_MSG_RESULT(---------------------------------------------)
 AC_CONFIG_MACRO_DIR([m4])
 
 # Create a temporary file with e.g. SPARSE_AD
-AC_CONFIG_HEADER(include/base/MooseConfig.h.tmp:include/base/MooseConfig.h.in)
+AC_CONFIG_HEADER(framework/include/base/MooseConfig.h.tmp:framework/include/base/MooseConfig.h.in)
 # Prefixes everything in the temporary file with MOOSE_, e.g. MOOSE_SPARSE_AD
-AX_PREFIX_CONFIG_H(include/base/MooseConfig.h,MOOSE,include/base/MooseConfig.h.tmp)
+AX_PREFIX_CONFIG_H(framework/include/base/MooseConfig.h,MOOSE,framework/include/base/MooseConfig.h.tmp)
 
 AC_ARG_WITH(derivative-type,
             AS_HELP_STRING([--with-derivative-type=sparse,nonsparse],[Specify the derivative type to use]),

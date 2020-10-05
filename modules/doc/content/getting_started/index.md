@@ -60,7 +60,8 @@ your application is ready to be further developed.
 ## Customizing MOOSE configuration
 
 MOOSE can be customized by running a `configure` script in
-`$MOOSE_DIR/framework`. Below we summarize the configuration options available:
+`$MOOSE_DIR`. Note that the `configure` script *must* be invoked from
+`$MOOSE_DIR`. Below we summarize the configuration options available:
 
 ### Automatic differentiation
 

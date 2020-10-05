@@ -9,9 +9,9 @@
 
 #pragma once
 
-/* include/base/MooseConfig.h. Generated automatically at end of configure. */
-/* include/base/MooseConfig.h.tmp.  Generated from MooseConfig.h.in by configure.  */
-/* include/base/MooseConfig.h.in.  Generated from configure.ac by autoheader.  */
+/* framework/include/base/MooseConfig.h. Generated automatically at end of configure. */
+/* framework/include/base/MooseConfig.h.tmp.  Generated from MooseConfig.h.in by configure.  */
+/* framework/include/base/MooseConfig.h.in.  Generated from configure.ac by autoheader.  */
 
 /* The size of the derivative backing array */
 #ifndef MOOSE_AD_MAX_DOFS_PER_ELEM

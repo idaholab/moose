@@ -1,4 +1,4 @@
-/* include/base/MooseConfig.h.in.  Generated from configure.ac by autoheader.  */
+/* framework/include/base/MooseConfig.h.in.  Generated from configure.ac by autoheader.  */
 
 /* The size of the derivative backing array */
 #undef AD_MAX_DOFS_PER_ELEM

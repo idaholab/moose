@@ -7,8 +7,12 @@
 #
 
 [Mesh]
-  dim = 2
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
   uniform_refine = 3
   displacements = 'u aux_v'
 []
@@ -68,28 +72,28 @@
   [./uleft]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
   [./uright]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 0.1
   [../]
 
   [./vleft]
     type = DirichletBC
     variable = v
-    boundary = 1
+    boundary = 3
     value = 1
   [../]
 
   [./vright]
     type = DirichletBC
     variable = v
-    boundary = 2
+    boundary = 1
     value = 0
   [../]
 []

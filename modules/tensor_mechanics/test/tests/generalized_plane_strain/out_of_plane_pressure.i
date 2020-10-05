@@ -1,7 +1,12 @@
 # Tests for application of out-of-plane pressure in generalized plane strain.
 
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  [../]
   displacements = 'disp_x disp_y'
 []
 
@@ -163,13 +168,13 @@
 [BCs]
   [./leftx]
     type = DirichletBC
-    boundary = 4
+    boundary = 3
     variable = disp_x
     value = 0.0
   [../]
   [./bottomy]
     type = DirichletBC
-    boundary = 1
+    boundary = 0
     variable = disp_y
     value = 0.0
   [../]

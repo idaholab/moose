@@ -4,7 +4,16 @@
 []
 
 [Mesh]
-  file = square.e
+  [./square]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 1
+    ny = 1
+    xmin = -0.5
+    xmax = 0.5
+    ymin = -0.5
+    ymax = 0.5
+  [../]
 []
 
 [Variables]
@@ -47,14 +56,14 @@
   [./b1x]
     type = DirichletBC
     variable = v
-    boundary = 1
+    boundary = 0
     value = 0
   [../]
 
   [./b2x]
     type = DirichletBC
     variable = v
-    boundary = 3
+    boundary = 2
     value = 2
   [../]
 []

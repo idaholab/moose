@@ -54,7 +54,7 @@
     input = 'bad_bc_test.i'
     expect_err = "A '\w+' is not a registered object"
 
-    requirement = 'The system shall report an error when an attempt to is made to instantiate a non-existent BoundaryCondition object.'
+    requirement = 'The system shall report an error when an attempt is made to instantiate a non-existent BoundaryCondition object.'
     issues = '#10486'
   [../]
 

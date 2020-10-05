@@ -9,7 +9,7 @@ LIBMESH_DIR       ?= $(MOOSE_DIR)/libmesh/installed
 MOOSE_JOBS        ?= 8
 
 # Include variables defined by MOOSE configure if it's been run
--include $(FRAMEWORK_DIR)/conf_vars.mk
+-include $(MOOSE_DIR)/conf_vars.mk
 
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
