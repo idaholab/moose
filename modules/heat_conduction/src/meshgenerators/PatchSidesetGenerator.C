@@ -50,12 +50,13 @@ PatchSidesetGenerator::validParams()
   params.addRequiredRangeCheckedParam<unsigned int>(
       "n_patches", "n_patches>0", "Number of patches");
 
-  MooseEnum partitioning(
-      "default=-3 metis=-2 parmetis=-1 linear=0 grid=2 centroid hilbert_sfc morton_sfc", "default");
+  MooseEnum partitioning = MooseMesh::partitioning(); // default MOOSE partitioning
+  partitioning += "grid";                             // ...but also add our own
   params.addParam<MooseEnum>(
       "partitioner",
       partitioning,
       "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
+
   MooseEnum direction("x y z radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction",
                              direction,
