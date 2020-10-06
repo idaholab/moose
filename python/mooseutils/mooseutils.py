@@ -119,7 +119,7 @@ def find_moose_executable(loc, **kwargs):
 
     show_error = kwargs.pop('show_error', True)
 
-    # Handle 'combined' and 'tests'
+    # Handle 'tests'
     if os.path.isdir(loc):
         if name == 'test':
             name = 'moose_test'
@@ -169,8 +169,8 @@ def run_executable(app_path, args, mpi=None, suppress_output=False):
         cmd = [app_path]
     cmd += args
 
-    if suppress_output:
-        return subprocess.check_output(cmd)
+    if not suppress_output:
+        return subprocess.check_output(cmd, encoding='utf-8')
     else:
         return subprocess.call(cmd)
 

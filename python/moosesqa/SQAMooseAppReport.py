@@ -43,7 +43,7 @@ class SQAMooseAppReport(SQAReport):
         super().__init__(**kwargs)
 
         # Default attributes
-        self.exe_name = os.path.basename(self.exe_directory)
+        self.exe_name = self.exe_name or os.path.basename(self.exe_directory)
         self.working_dir = self.working_dir or mooseutils.git_root_dir()
         self.content_directory = self.content_directory or os.path.join(self.exe_directory, 'doc', 'content')
         self.object_prefix = self.object_prefix or os.path.join(self.content_directory, 'source')
@@ -62,6 +62,18 @@ class SQAMooseAppReport(SQAReport):
         # Populate the available list of files
         file_cache = mooseutils.git_ls_files(content_dir)
 
+        # Check that the supplied exe dir exists
+        exe_dir = mooseutils.eval_path(self.exe_directory)
+        if not os.path.isdir(exe_dir):
+            exe_dir = os.path.join(self.working_dir, exe_dir)
+        if not os.path.isdir(exe_dir):
+            raise NotADirectoryError("'exe_directory' input is not a directory: {}".format(exe_dir))
+
+        # Locate the executable
+        exe = mooseutils.find_moose_executable(exe_dir, name=self.exe_name, show_error=False)
+        if exe is None:
+            raise OSError("An executable was not found in '{}' with a name '{}'.".format(exe_dir, self.exe_name))
+
         # Build syntax tree if not provided
         if self.app_syntax is None:
 
@@ -71,16 +83,6 @@ class SQAMooseAppReport(SQAReport):
             alias = self._loadYamlFiles(self.alias)
             unregister = self._loadYamlFiles(self.unregister)
 
-            # Check that the supplied exe dir exists
-            exe_dir = mooseutils.eval_path(self.exe_directory)
-            if not os.path.isdir(exe_dir):
-                exe_dir = os.path.join(self.working_dir, exe_dir)
-            if not os.path.isdir(exe_dir):
-                raise NotADirectoryError("'exe_directory' input is not a directory: {}".format(exe_dir))
-
-            # Locate the executable
-            exe = mooseutils.find_moose_executable(exe_dir, name=self.exe_name, show_error=False)
-
             # Build the complete syntax tree
             self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
                                                                 alias=alias, unregister=unregister,
@@ -88,14 +90,14 @@ class SQAMooseAppReport(SQAReport):
 
         # Determine the application type (e.g., MooseTestApp)
         if self.app_types is None:
-            out = mooseutils.runExe(exe, ['--type'])
+            out = mooseutils.run_executable(exe, ['--type'])
             match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
             if match:
                 self.app_types = [match.group("type").replace('TestApp', 'App')]
 
         # Perform the checks
-        kwargs.setdefault('syntax_prefix', self.syntax_prefix)
-        kwargs.setdefault('object_prefix', self.object_prefix)
+        kwargs.setdefault('syntax_prefix', mooseutils.eval_path(self.syntax_prefix))
+        kwargs.setdefault('object_prefix', mooseutils.eval_path(self.object_prefix))
         logger = check_syntax(self.app_syntax, self.app_types, file_cache, **kwargs)
 
         # Create stub pages

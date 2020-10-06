@@ -22,9 +22,8 @@ class TestSQAMooseAppReport(unittest.TestCase):
                       remove=['framework/doc/remove.yml', 'test/doc/remove.yml'])
 
         reporter = SQAMooseAppReport(**kwargs)
-        reporter.getReport()
-        self.assertEqual(reporter.status, SQAReport.Status.ERROR)
-
+        with self.assertRaises(IOError):
+            reporter.getReport()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

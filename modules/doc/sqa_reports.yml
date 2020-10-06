@@ -43,7 +43,7 @@ Applications:
         show_warning: false
 
     external_petsc_solver:
-        exe_directory: modules/external_petsc_solver
+        exe_directory: modules/combined
         app_types:
             - ExternalPetscApp
         content_directory: modules/external_petsc_solver/doc/content

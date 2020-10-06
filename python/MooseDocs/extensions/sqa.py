@@ -160,20 +160,26 @@ class SQAExtension(command.CommandExtension):
         if general_reports is not None:
             self.__reports['__empty__'] = moosesqa.get_sqa_reports(general_reports)
 
-        # Get the syntax tree and app types from the appsyntax extension
+        # The following attempts to save computation time by avoiding re-computing the application
+        # syntax for each report. This is done by extracting the syntax from the appsyntax extension
+        # and using it within the SQAMooseAppReport objects.
+
+        # Get the syntax tree and executable info from the appsyntax extension
         app_syntax = None
-        app_types = None
+        exe_dir = None
+        exe_name = None
         for ext in self.translator.extensions:
             if isinstance(ext, appsyntax.AppSyntaxExtension):
                 app_syntax = ext.syntax
-                app_types = [ext.apptype]
+                exe_dir, exe_name = os.path.split(ext.executable) if ext.executable else (None, None)
                 break
 
         # Setup the SQAMooseAppReports to use the syntax from the running app
         for reports in self.__reports.values():
             for app_report in reports[2]:
-                app_report.app_types = app_types
                 app_report.app_syntax = app_syntax
+                app_report.exe_directory = exe_dir
+                app_report.exe_name = exe_name.split('-')[0] if exe_name else None
                 if app_syntax is None:
                     msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
                     LOG.warning(msg)
@@ -850,7 +856,7 @@ class RenderSQAReport(components.RenderComponent):
             # Header
             li = html.Tag(ul, 'li')
             hdr = html.Tag(li, 'div', class_='collapsible-header', string=report.title)
-            if report.status ==report.Status.WARNING:
+            if report.status == report.Status.WARNING:
                 badge = ('WARNING', 'yellow')
             elif report.status == report.Status.ERROR:
                 badge = ('ERROR', 'red')
