@@ -12,6 +12,8 @@
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedSystem.h"
+#include "SystemBase.h"
+#include "SubProblem.h"
 #include "Assembly.h"
 #include "FVUtils.h"
 #include "FVFluxBC.h"
@@ -37,7 +39,7 @@ MooseVariableFV<OutputType>::validParams()
 template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
-    _solution(_sys.currentSolution()),
+    _solution(this->_sys.currentSolution()),
     _phi(&_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 #ifdef MOOSE_GLOBAL_AD_INDEXING
     ,
@@ -360,14 +362,14 @@ MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
   std::vector<FVDirichletBC *> bcs;
 
-  _subproblem.getMooseApp()
+  this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
       .template condition<AttribSystem>("FVDirichletBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .template condition<AttribVar>(_var_num)
-      .template condition<AttribSysNum>(_sys.number())
+      .template condition<AttribSysNum>(this->_sys.number())
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
 
@@ -389,14 +391,14 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 {
   std::vector<const FVFluxBC *> bcs;
 
-  _subproblem.getMooseApp()
+  this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .template condition<AttribVar>(_var_num)
-      .template condition<AttribSysNum>(_sys.number())
+      .template condition<AttribSysNum>(this->_sys.number())
       .queryInto(bcs);
 
   bool has_flux_bc = bcs.size() > 0;
