@@ -474,6 +474,13 @@ lexHit(Lexer * l)
   return l->error("invalid character '" + std::string(1, c) + "' - did you leave a field value blank after a previous '='?");
 }
 
+std::vector<Token>
+tokenize(const std::string & fname, const std::string & input)
+{
+  Lexer lex(fname, input);
+  auto tokens = lex.run(lexHit);
+  return tokens;
+}
 } // namespace hit
 
 #define EOF TMPEOF

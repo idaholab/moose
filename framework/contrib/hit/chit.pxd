@@ -94,3 +94,34 @@ cdef extern from "parse.h" namespace "hit":
 cdef extern from "parse.h" namespace "hit":
     cdef cppclass Section "hit::Section":
         Section(const string & path)
+
+# LEXER
+cdef extern from "lex.h" namespace "hit":
+    cdef cppclass TokType:
+        pass
+
+cdef extern from "lex.h" namespace "hit::TokType":
+    cdef TokType TokenError "hit::TokType::Error"
+    cdef TokType TokenEOF "hit::TokType::EOF"
+    cdef TokType TokenEquals "hit::TokType::Equals"
+    cdef TokType TokenLeftBracket "hit::TokType::LeftBracket"
+    cdef TokType TokenRightBracket "hit::TokType::RightBracket"
+    cdef TokType TokenIdent "hit::TokType::Ident"
+    cdef TokType TokenPath "hit::TokType::Path"
+    cdef TokType TokenNumber "hit::TokType::Number"
+    cdef TokType TokenString "hit::TokType::String"
+    cdef TokType TokenComment "hit::TokType::Comment"
+    cdef TokType TokenInlineComment "hit::TokType::InlineComment"
+    cdef TokType TokenBlankLine "hit::TokType::BlankLine"
+
+cdef extern from "lex.h" namespace "hit":
+    cdef cppclass Token:
+        Token(TokType t, const string & val, size_t offset, line)
+        string str()
+        TokType type
+        string val
+        size_t offset
+        int line
+
+cdef extern from "lex.h" namespace "hit":
+    vector[Token] tokenize(string fname, string input) except +
