@@ -1,4 +1,6 @@
 import sys
+import enum
+
 cimport chit
 
 from libcpp.string cimport string
@@ -268,3 +270,106 @@ cpdef explode(Node n):
 
 cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)
+
+# LEXER
+# The following code exposes some basic hit lexer to the pyhit library. The purpose is to provide
+# tools necessary for a Peacock based hit file editor with highlighting and autocomplete.
+class TokenType(enum.Enum):
+    """
+    A python Enum object for defining the various token types.
+    """
+    BLANKLINE = 1      # "hit::TokType::BlankLine"
+    LEFTBRACKET = 10   # "hit::TokType::LeftBracket"
+    PATH = 11          # "hit::TokType::Path"
+    RIGHTBRACKET = 12  # "hit::TokType::RightBracket"
+    IDENT = 20         # "hit::TokType::Ident"
+    EQUALS = 21        # "hit::TokType::Equals"
+    NUMBER = 22        # "hit::TokType::Number"
+    STRING = 23        # "hit::TokType::String"
+    INLINECOMMENT = 30 # "hit::TokType::InlineComment"
+    COMMENT = 31       # "hit::TokType::Comment"
+    EOF = 100          # "hit::TokType::EOF"
+    ERROR = 200        # "hit::TokType::Error"
+
+class Token(object):
+    """
+    A python version of the Token struct in lex.h
+
+    Inputs:
+        ttype[TokenType]: The type of token being create
+        value: The token content
+        offset: byte offset where the token was found (see lex.h)
+        line: line number
+    """
+    def __init__(self, ttype, value, offset, line):
+        self.__token_type = ttype
+        self.__value = value
+        self.__offset = offset
+        self.__line = line
+
+    @property
+    def type(self):
+        return self.__token_type
+
+    @property
+    def value(self):
+        return self.__value
+
+    @property
+    def offset(self):
+        return self.__offset
+
+    @property
+    def line(self):
+        return self.__line
+
+    def __str__(self):
+        return '{}:{}:{}:{}'.format(self.__token_type, self.__value, self.__offset, self.__line)
+
+    def __eq__(self, other):
+        if isinstance(other, Token):
+            return all([self.type == other.type, self.value == other.value,
+                        self.offset == other.offset, self.line == other.line])
+        elif isinstance(other, TokenType):
+            return self.type == other
+        else:
+            raise TypeError("Comparison is only valid with Token and TokenType, {} provided".format(type(other)))
+
+def tokenize(fname, text):
+    """
+    Uses the lexer in lex.h/cc to create a list of tokens, which are converted to the python Token
+    class above and returned.
+
+    Inputs:
+        fname[str]: Filename of the hit string being to be tokenified
+        text[str]: The content of the file
+    """
+    cdef vector[chit.Token] ctokens = chit.tokenize(fname.encode('utf-8'), text.encode('utf-8'))
+    tokens = list()
+    for i in range(ctokens.size()):
+        if <int>ctokens[i].type == <int>chit.TokenError:
+            ttype = TokenType.ERROR
+        elif <int>ctokens[i].type == <int>chit.TokenEOF:
+            ttype = TokenType.EOF
+        elif <int>ctokens[i].type == <int>chit.TokenEquals:
+            ttype = TokenType.EQUALS
+        elif <int>ctokens[i].type == <int>chit.TokenLeftBracket:
+            ttype = TokenType.LEFTBRACKET
+        elif <int>ctokens[i].type == <int>chit.TokenRightBracket:
+            ttype = TokenType.RIGHTBRACKET
+        elif <int>ctokens[i].type == <int>chit.TokenIdent:
+            ttype = TokenType.IDENT
+        elif <int>ctokens[i].type == <int>chit.TokenPath:
+            ttype = TokenType.PATH
+        elif <int>ctokens[i].type == <int>chit.TokenNumber:
+            ttype = TokenType.NUMBER
+        elif <int>ctokens[i].type == <int>chit.TokenString:
+            ttype = TokenType.STRING
+        elif <int>ctokens[i].type == <int>chit.TokenComment:
+            ttype = TokenType.COMMENT
+        elif <int>ctokens[i].type == <int>chit.TokenInlineComment:
+            ttype = TokenType.INLINECOMMENT
+        elif <int>ctokens[i].type == <int>chit.TokenBlankLine:
+            ttype = TokenType.BLANKLINE
+        tokens.append(Token(ttype, ctokens[i].val, ctokens[i].offset, ctokens[i].line))
+    return tokens

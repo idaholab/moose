@@ -1,9 +1,17 @@
 [Tests]
   issues = '#11189'
   design = 'python/index.md'
-  [pyhit]
+  [parser]
     type = PythonUnitTest
-    input = test_pyhit.py
-    requirement = "MOOSE python utilities shall include a tool for reading hit files."
+    input = test_parser.py
+    requirement = "MOOSE python utilities shall include a tool for parsing HIT files."
+  []
+
+  [tokenize]
+    type = PythonUnitTest
+    input = test_tokenize.py
+
+    issues = '#15889'
+    requirement = "MOOSE python utilities shall include a tool for tokenizing HIT files."
   []
 []
