@@ -140,7 +140,7 @@ PatchSidesetGenerator::generate()
       std::vector<dof_id_type> bnd_elem_node_ids(boundary_elem->n_nodes());
 
       // loop through the nodes in boundary_elem
-      for (unsigned int j = 0; j < boundary_elem->n_nodes(); ++j)
+      for (MooseIndex(boundary_elem->n_nodes()) j = 0; j < boundary_elem->n_nodes(); ++j)
       {
         const Node * node = boundary_elem->node_ptr(j);
 
@@ -179,7 +179,7 @@ PatchSidesetGenerator::generate()
       // set the nodes & subdomain_id of the new element by looping over the
       // boundary_elem and then inserting its nodes into new_bnd_elem in the
       // same order
-      for (unsigned int j = 0; j < boundary_elem->n_nodes(); ++j)
+      for (MooseIndex(boundary_elem->n_nodes()) j = 0; j < boundary_elem->n_nodes(); ++j)
       {
         dof_id_type old_node_id = boundary_elem->node_ptr(j)->id();
         if (mesh_node_id_to_boundary_node_id.find(old_node_id) ==
@@ -241,7 +241,7 @@ PatchSidesetGenerator::generate()
   }
 
   // make sure new boundary names are set
-  for (unsigned int j = 0; j < boundary_ids.size(); ++j)
+  for (MooseIndex(boundary_ids.size()) j = 0; j < boundary_ids.size(); ++j)
   {
     boundary_info.sideset_name(boundary_ids[j]) = sideset_names[j];
     boundary_info.nodeset_name(boundary_ids[j]) = sideset_names[j];
@@ -328,7 +328,7 @@ PatchSidesetGenerator::checkPartitionAndCompress(MeshBase & mesh)
 
   // now remap the processor ids
   std::map<processor_id_type, processor_id_type> processor_id_remap;
-  for (unsigned int j = 0; j < processor_ids_vec.size(); ++j)
+  for (MooseIndex(processor_ids_vec.size()) j = 0; j < processor_ids_vec.size(); ++j)
     processor_id_remap[processor_ids_vec[j]] = j;
 
   for (auto & elem_ptr : mesh.active_element_ptr_range())
