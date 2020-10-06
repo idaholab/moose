@@ -79,7 +79,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
 }
 
 void
-ElementSideNeighborLayers::internalInit(const MeshBase &)
+ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
   auto functor = libmesh_make_unique<DefaultCoupling>();
   functor->set_n_levels(_layers);

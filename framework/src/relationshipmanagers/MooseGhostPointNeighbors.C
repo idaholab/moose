@@ -68,7 +68,7 @@ MooseGhostPointNeighbors::operator==(const RelationshipManager & rhs) const
 }
 
 void
-MooseGhostPointNeighbors::internalInit(const MeshBase & mesh)
+MooseGhostPointNeighbors::internalInitWithMesh(const MeshBase & mesh)
 {
   auto functor = libmesh_make_unique<GhostPointNeighbors>(mesh);
 

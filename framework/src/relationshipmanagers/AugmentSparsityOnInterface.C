@@ -73,7 +73,7 @@ AugmentSparsityOnInterface::mesh_reinit()
 }
 
 void
-AugmentSparsityOnInterface::internalInit(const MeshBase &)
+AugmentSparsityOnInterface::internalInitWithMesh(const MeshBase &)
 {
 }
 

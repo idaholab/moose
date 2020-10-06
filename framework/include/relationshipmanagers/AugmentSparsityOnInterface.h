@@ -73,7 +73,7 @@ public:
   virtual bool operator==(const RelationshipManager & other) const override;
 
 protected:
-  virtual void internalInit(const MeshBase &) override;
+  virtual void internalInitWithMesh(const MeshBase &) override;
 
   /**
    * The Mesh we're calculating on

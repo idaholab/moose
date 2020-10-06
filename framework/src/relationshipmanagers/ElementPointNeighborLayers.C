@@ -71,7 +71,7 @@ ElementPointNeighborLayers::operator==(const RelationshipManager & rhs) const
 }
 
 void
-ElementPointNeighborLayers::internalInit(const MeshBase &)
+ElementPointNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
   auto functor = libmesh_make_unique<PointNeighborCoupling>();
   functor->set_n_levels(_layers);

@@ -25,7 +25,7 @@ InputParameters validParams<ProxyRelationshipManager>();
 
 /**
  * Intermediate base class for RelationshipManagers that are simply built
- * using ghosting functors.  The functor should be built in internalInit()
+ * using ghosting functors.  The functor should be built in internalInitWithMesh()
  * and set as _functor
  */
 class ProxyRelationshipManager : public RelationshipManager
@@ -56,7 +56,7 @@ public:
   }
 
 protected:
-  virtual void internalInit(const MeshBase &) override{};
+  virtual void internalInitWithMesh(const MeshBase &) override{};
 
   System * _other_system;
 };

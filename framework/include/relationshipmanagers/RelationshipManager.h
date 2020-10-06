@@ -44,7 +44,7 @@ public:
   {
     if (!_inited)
     {
-      internalInit(mesh);
+      internalInitWithMesh(mesh);
       set_mesh(&mesh);
     }
     _inited = true;
@@ -114,7 +114,8 @@ protected:
   /**
    * Called before this RM is attached.  Only called once
    */
-  virtual void internalInit(const MeshBase & mesh) = 0;
+  virtual void internalInitWithMesh(const MeshBase &) { internalInit(); }
+  virtual void internalInit() {}
 
   /// Whether or not this has been initialized
   bool _inited = false;

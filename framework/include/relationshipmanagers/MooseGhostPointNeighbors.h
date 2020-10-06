@@ -44,5 +44,5 @@ public:
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
 protected:
-  virtual void internalInit(const MeshBase & mesh) override;
+  virtual void internalInitWithMesh(const MeshBase & mesh) override;
 };
