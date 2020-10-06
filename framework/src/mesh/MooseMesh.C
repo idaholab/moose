@@ -27,18 +27,15 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/mesh_communication.h"
-#include "libmesh/parallel_mesh.h"
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/fe_interface.h"
-#include "libmesh/serial_mesh.h"
 #include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_elem.h"
-#include "libmesh/parallel_mesh.h"
 #include "libmesh/parallel_node.h"
 #include "libmesh/parallel_ghost_sync.h"
 #include "libmesh/utility.h"
@@ -2310,18 +2307,6 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
   return mesh;
 }
 
-template <typename T>
-T
-MooseMesh::buildTypedMesh(unsigned int dim)
-{
-  if (dim == libMesh::invalid_uint)
-    dim = getParam<MooseEnum>("dim");
-
-  T mesh(_communicator, dim);
-
-  return mesh;
-}
-
 void
 MooseMesh::setMeshBase(std::unique_ptr<MeshBase> mesh_base)
 {
@@ -3211,6 +3196,3 @@ MooseMesh::buildFaceInfo()
     }
   }
 }
-
-template ReplicatedMesh MooseMesh::buildTypedMesh(unsigned int);
-template DistributedMesh MooseMesh::buildTypedMesh(unsigned int);

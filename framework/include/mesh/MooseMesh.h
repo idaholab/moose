@@ -24,6 +24,8 @@
 // libMesh
 #include "libmesh/elem_range.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/replicated_mesh.h"
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/node_range.h"
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/vector_value.h"
@@ -265,7 +267,9 @@ public:
    * Shortcut method to construct a libMesh mesh instance. The created derived-from-MeshBase object
    * will have its \p allow_remote_element_removal flag set to whatever our value is. We will also
    * attach any geometric \p RelationshipManagers that have been requested by our simulation objects
-   * to the \p MeshBase object
+   * to the \p MeshBase object. If the parameter \p dim is not provided, then its value will be
+   * taken from the input file mesh block. This API should be used by any \p MeshGenerator that
+   * needs to build a \p MeshBase object
    */
   template <typename T>
   T buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
@@ -1601,3 +1605,15 @@ struct MooseMesh::const_bnd_elem_iterator : variant_filter_iterator<MeshBase::Pr
  */
 typedef StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> ConstBndNodeRange;
 typedef StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> ConstBndElemRange;
+
+template <typename T>
+T
+MooseMesh::buildTypedMesh(unsigned int dim)
+{
+  if (dim == libMesh::invalid_uint)
+    dim = getParam<MooseEnum>("dim");
+
+  T mesh(_communicator, dim);
+
+  return mesh;
+}
