@@ -79,15 +79,6 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   if (_enable_jit)
     _func_F->JITCompile();
 
-  // obtain current time
-  if (_use_xyzt)
-  {
-    auto fpb = dynamic_cast<FEProblemBase *>(&_subproblem);
-    if (!fpb)
-      paramError("use_xyzt", "Cannot access simulation time t. Set 'use_xyzt' to false.");
-    _time = &fpb->time();
-  }
-
   // reserve storage for parameter passing bufefr
   _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
 }
@@ -102,7 +93,7 @@ ParsedAux::computeValue()
   {
     for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
       _func_params[_nargs + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
-    _func_params[_nargs + 3] = *_time;
+    _func_params[_nargs + 3] = _t;
   }
 
   return evaluate(_func_F);

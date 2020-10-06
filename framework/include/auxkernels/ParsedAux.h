@@ -35,9 +35,6 @@ protected:
   /// import coordinates and time
   const bool _use_xyzt;
 
-  /// current simulation time
-  Real * _time;
-
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
 
