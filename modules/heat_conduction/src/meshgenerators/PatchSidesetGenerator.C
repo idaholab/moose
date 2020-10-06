@@ -198,13 +198,8 @@ PatchSidesetGenerator::generate()
     partition(*boundary_mesh);
   else
   {
-    // the enum of this class and MooseMesh enum are different
-    // so we have to go through these intermediate steps to not
-    // mess things up with partitioner
-    std::string pstring = _partitioner_name;
-    MooseEnum penum = MooseMesh::partitioning();
-    penum = pstring;
-    MooseMesh::setPartitioner(*boundary_mesh, penum, false, _pars, *this);
+    auto partitioner_enum = getParam<MooseEnum>("partitioner");
+    MooseMesh::setPartitioner(*boundary_mesh, partitioner_enum, false, _pars, *this);
     boundary_mesh->partition(_n_patches);
   }
 
