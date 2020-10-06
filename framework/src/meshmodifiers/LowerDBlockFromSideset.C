@@ -59,8 +59,6 @@ LowerDBlockFromSideset::modify()
 {
   MeshBase & mesh = _mesh_ptr->getMesh();
   bool distributed = dynamic_cast<DistributedMesh *>(&mesh);
-  if (distributed)
-    _mesh_ptr->needsPrepareForUse();
 
   auto side_list = mesh.get_boundary_info().build_side_list();
   std::sort(side_list.begin(),
@@ -126,4 +124,15 @@ LowerDBlockFromSideset::modify()
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
     mesh.subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
+
+  if (distributed)
+  {
+    mesh.skip_partitioning(true); // We did our own partitioning
+
+    // Finding neighbors with this modifier is broken after a libmesh update, and this
+    // object is deprecated so I don't care to figure out why
+    mesh.allow_find_neighbors(false);
+
+    _mesh_ptr->prepare(/*force=*/true);
+  }
 }
