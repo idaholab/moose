@@ -23,7 +23,7 @@ Further information can be found at the
 
 ## Example Input Syntax
 
-!listing examples/ex04_bcs/trapezoid.i block=Functions
+!listing examples/ex13_functions/ex13.i block=Functions
 
 !syntax parameters /Functions/ParsedFunction
 

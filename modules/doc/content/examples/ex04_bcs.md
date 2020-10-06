@@ -6,7 +6,7 @@ in [Example 3](examples/ex03_coupling.md). In this example, we extend MOOSE's bu
 Neumann boundary condition objects by allowing them to be coupled to independent variables in your
 equation system.  We also provide an example of using MOOSE's built-in periodic boundary
 conditions. For more detailed information about boundary conditions in MOOSE, see the
-[BCs System Documentation](syntax/BCs/index.md) 
+[BCs System Documentation](syntax/BCs/index.md)
 
 ## Coupled Dirichlet
 
@@ -70,12 +70,9 @@ parsing user-specified analytical functions from input files. Parsed functions c
 many things in input files and are discussed in more detail in [Example 13](examples/ex13_functions.md).
 TODO: briefly explain how to use PeriodicBC.
 
-Here are some results using periodic BCs from running `periodic_bc.i` and `trapezoid.i`:
+Here is a result using periodic BCs from running `periodic_bc.i`:
 
 !media large_media/examples/ex04_out_pbc.png
-       style=width:50%;
-
-!media large_media/examples/ex04_out_trap.png
        style=width:50%;
 
 ## Complete source files
@@ -88,5 +85,3 @@ Here are some results using periodic BCs from running `periodic_bc.i` and `trape
 - [examples/ex04_bcs/src/bcs/CoupledNeumannBC.C]
 - [examples/ex04_bcs/src/base/ExampleApp.C]
 - [examples/ex04_bcs/periodic_bc.i]
-- [examples/ex04_bcs/trapezoid.i]
-
