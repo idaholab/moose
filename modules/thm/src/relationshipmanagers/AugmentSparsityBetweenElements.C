@@ -53,7 +53,7 @@ AugmentSparsityBetweenElements::operator()(const MeshBase::const_element_iterato
     if (it != _elem_map.end())
     {
       for (auto & coupled_elem_id : it->second)
-        coupled_elements.insert(std::make_pair(_mesh.elemPtr(coupled_elem_id), null_mat));
+        coupled_elements.insert(std::make_pair(_moose_mesh->elemPtr(coupled_elem_id), null_mat));
     }
   }
 }
