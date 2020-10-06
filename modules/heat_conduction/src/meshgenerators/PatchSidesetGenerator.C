@@ -281,19 +281,19 @@ PatchSidesetGenerator::partition(MeshBase & mesh)
       }
     }
 
-    Real dx = delta(0) / nx;
-    Real dy = delta(1) / ny;
+    const Real dx = delta(0) / nx;
+    const Real dy = delta(1) / ny;
     for (auto & elem_ptr : mesh.active_element_ptr_range())
     {
       // Find the element it lands in in the GeneratedMesh
-      Point centroid = elem_ptr->centroid();
-      unsigned int proc_id;
+      const Point centroid = elem_ptr->centroid();
+      processor_id_type proc_id;
       if (_dim == 1)
         proc_id = std::floor((centroid(0) - min(0)) / dx);
       else
       {
-        unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
-        unsigned int iy = std::floor((centroid(1) - min(1)) / dy);
+        const unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
+        const unsigned int iy = std::floor((centroid(1) - min(1)) / dy);
         proc_id = ix + iy * nx;
       }
       elem_ptr->processor_id() = proc_id;
