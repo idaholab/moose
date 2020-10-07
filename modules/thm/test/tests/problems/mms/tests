@@ -1,0 +1,16 @@
+[Tests]
+  [1phase]
+    type = 'CSVDiff'
+    input = 'mms_1phase.i'
+    csvdiff = 'mms_1phase_out.csv'
+    allow_test_objects = true
+    recover = false
+  []
+  [2phase]
+    type = 'CSVDiff'
+    input = 'mms_2phase.i'
+    csvdiff = 'mms_2phase_out.csv'
+    allow_test_objects = true
+    recover = false
+  []
+[]
