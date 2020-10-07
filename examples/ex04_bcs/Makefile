@@ -41,4 +41,3 @@ test: all
 	$(call TEST_exodiff,dirichlet_bc.i,dirichlet_bc_out.e)
 	$(call TEST_exodiff,neumann_bc.i,neumann_bc_out.e)
 	$(call TEST_exodiff,periodic_bc.i,periodic_bc_out.e)
-	$(call TEST_exodiff,trapezoid.i,trapezoid_out.e)
