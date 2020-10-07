@@ -9,6 +9,42 @@ There are two types of MeshGenerators:
 
 The point of these objects is to create complex meshes using only one input file. Indeed, you can use several MeshGenerator blocks in your input file. Those represent the different steps necessary to create your complex mesh.
 
+Objects that create a mesh (such as `FileMeshGenerator`,
+`GeneratedMeshGenerator`, etc.) should build their libMesh mesh base objects
+through `MooseMesh` APIs. This will guarantee that non-local elements will be
+handled properly when `prepare_for_use` is called. This is because during
+`Action` execution during simulation setup, MOOSE objects such as periodic
+boundary conditions or a displaced problem will signal the `MooseMesh`
+if they need to delay remote/non-local element removal or if they need certain
+remote/non-local elements preserved using the
+[`RelationshipManager`](/RelationshipManager.md) system. This information needs
+to be communicated to any `MeshGenerators` that are building new meshes in order
+for the simulation to run correctly.
+
+There are two `MooseMesh` APIs that should
+be used by `MeshGenerators`. `MooseMesh::buildMeshBaseObject` should be called
+to construct the mesh that will be returned by the derived class implementation
+of `MeshGenerator::generate`. This is a `std::unique_ptr`. If you want to guarantee
+that the derived class type of the `std::unique_ptr<MeshBase>` returned by
+`_mesh->buildMeshBaseObject()` is a certain type, then
+`_mesh->buildMeshBaseObject()` should be preceded by a call to
+`_mesh->setParallelType(Moose::ParallelType::REPLICATED)` or
+`_mesh->setParallelType(Moose::ParallelType::DISTRIBUTED)`.
+
+The second API, `MooseMesh::buildTypedMesh`, should be used for constructing
+auxiliary meshes whose data may be used in the `MeshBase` object that is
+returned by `DerivedMeshGenerator::generate`. An example is stitching
+meshes. `MooseMesh::buildTypedMesh` takes a single template argument that is the
+type of derived `MeshBase` object that you want to build. So if you want a
+`ReplicatedMesh`, you would create a `ReplicatedMesh` instance by calling
+`_mesh->buildTypedMesh<ReplicatedMesh>(dim)` where `dim` is the desired dimensio
+of the mesh. If `dim` is not provided, then `buildTypedMesh` will use the value
+of `dim` from the `MooseMesh` `InputParameters` object. Note the difference in
+return type between `MooseMesh::buildMeshBaseObject` and
+`MooseMesh::buildTypedMesh`. The former will return `std::unique_ptr<MeshBase`
+and the latter will return `T` where `T` is the value of the template argument
+provided to the `MooseMesh::buildTypedMesh` method.
+
 ## Input File Example
 
 For instance, take a look at the following input file:
