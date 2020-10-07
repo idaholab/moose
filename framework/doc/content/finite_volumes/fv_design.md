@@ -148,7 +148,54 @@ that require intercepting and modifying any face information objects need.
 
 ## Reconstruction
 
-TODO: implement reconstruction and discuss design decisions here.
+Gradient reconstruction is implemented using the Green-Gauss method, e.g.
+
+\begin{equation}
+\nabla \phi_C = \frac{1}{\Omega} \sum\limits_{faces} \phi_f \vec{S}_f
+\end{equation}
+
+where $\phi_f$ is the value of the quantity of interest on the face and
+$\vec{S}_f$ is equal to the surface area times the outward normal,
+e.g. $\vec{S}_f = A\hat{n}$. The value of $\phi_f$ can be computed in a couple
+of ways. The first, which is the default in MOOSE, uses a compact stencil and
+does a simple linear interpolation between the neighboring cell center values to
+the face. The second uses an extended stencil, where the face value is taken to
+be a weighted average of the face vertex values, which are in turn taken to be
+a weighted average of the cell centers neighboring the point. To use the
+extended stencil method, you can specify your finite volume variable input block
+like the following:
+
+!listing extended-cartesian.i block=Variables
+
+On regular, orthogonal meshes both the compact and extended stencils have
+demonstrated second order convergence with respect to mesh refinement. On a
+non-orthogonal mesh test (see the
+[compact](non-orthogonal/advection-diffusion-reaction.i) and
+[extended](/extended-adr.i) input files) the compact stencil displays second
+order convergence while the extended stencil drops a half order to 1.5 order
+convergence. On a
+[skewed mesh test](fv_adapt/steady-adapt.i) where skewness is introduced via
+unequal neighboring mesh refinement levels, the compact stencil maintains first
+order convergence. Due to its reduced stencil size (smaller memory footprint for
+the Jacobian matrix), its reduced computational expense, and demonstrated
+convergence properties, we generally recommend use of the compact stencil. The
+extended stencil is supposed to be more accurate [!cite](moukalled2016finite),
+so perhaps there is a bug in the implementation that needs to be found.
+
+On regular, orthogonal grids, the face gradient $\nabla \phi_f$ can be computed
+using a simple linear interpolation between neighboring cell gradients,
+e.g. between $\nabla \phi_C$ and $\nabla \phi_F$. However, on non-orthgonal
+grids, some correction has to be made. The correction implemented is that shown
+in section 9.4 of [!cite](moukalled2016finite):
+
+\begin{equation}
+\nabla \phi_f = \overline{\nabla \phi}_f +
+    \left[\frac{\phi_F - \phi_C}{d_{CF}} - \left(\overline{\nabla \phi}_f \cdot \vec{e}_{CF}\right)\right]
+    \vec{e}_{CF}
+\end{equation}
+
+where $\overline{\nabla \phi}_f$ denotes the linearly interpolated face pressure
+gradient.
 
 ## Known Limitations/Issues
 
@@ -160,14 +207,7 @@ TODO: implement reconstruction and discuss design decisions here.
   0-index quadrature point. See
   [idaholab/moose#15062](https://github.com/idaholab/moose/issues/15062)
 
-* Currently there is no automated handling of cross-diffusion correction
-  factors for non-orthogonal meshes. See
-  [idaholab/moose#15063](https://github.com/idaholab/moose/issues/15063)
-
 * FV functionality does NOT work with mesh displacements yet. See
   [idaholab/moose#15064](https://github.com/idaholab/moose/issues/15064)
-
-* Higher order solution reconstruction is not supported yet. See
-  [idaholab/moose#15066](https://github.com/idaholab/moose/issues/15066)
 
 * Have not tested vector-FV varaibles - they almost certainly don't work (yet).

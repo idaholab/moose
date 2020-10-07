@@ -1,4 +1,6 @@
 [Tests]
+  design = 'fv_design.md'
+  issues = '#15063'
   [compact]
     type = PythonUnitTest
     input = 'test.py'

@@ -16,6 +16,10 @@ InputParameters
 FVMatAdvectionFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "arising from integration by parts of an advection operator, where "
+                             "the advected quantity is computed in a material, and "
+                             "where the exact solution can be specified.");
   params.addRequiredParam<MaterialPropertyName>("vel", "advection velocity");
   params.addParam<MaterialPropertyName>(
       "advected_quantity",

@@ -1,5 +1,7 @@
 # FVKernels System
 
+For an overview of MOOSE FV please see [/fv_design.md].
+
 For the finite volume method (FVM), `FVKernels` are the base class for `FVFluxKernel`, `FVElementalKernel`. These specialized objects satisfy the following tasks:
 
 * `FVFluxKernel` represents numerical fluxes evaluate on the element faces.

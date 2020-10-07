@@ -105,6 +105,8 @@ Extensions:
             distributions: syntax/Distributions/index.md
             executioners: syntax/Executioner/index.md
             functions: syntax/Functions/index.md
+            fvbcs: syntax/FVBCs/index.md
+            fvkernels: syntax/FVKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
             interfacekernels: syntax/InterfaceKernels/index.md

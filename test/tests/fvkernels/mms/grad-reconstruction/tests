@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#15066'
+  design = 'fv_design.md'
   [cartesian]
     type = Exodiff
     input = cartesian.i

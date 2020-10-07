@@ -16,6 +16,9 @@ InputParameters
 FVDiffusionFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "arising from integration by parts of a Laplacian operator, and "
+                             "where the exact solution can be specified.");
   params.addRequiredParam<FunctionName>("exact_solution", "The exact solution.");
   params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
   params.addRequiredParam<FunctionName>("coeff_function", "A function describing the coefficient");
