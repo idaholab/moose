@@ -68,54 +68,48 @@ public:
    * @return the void volume
    * @param node_id the node ID
    */
-  Real getNodalVoidVolume(unsigned node_id) const;
+  Real getNodalVoidVolume(const Node * node) const;
 
 private:
   /// porosity
   const VariableValue & _porosity;
 
   /**
-   * whether rebuilding of _my_node_number and MPI communication lists is needed, for instance after
-   * the mesh has changed
+   * whether reinitializing of _nodal_void_volume and rebuilding MPI communication lists is needed,
+   * for instance after the mesh has changed
    */
   bool _rebuilding_needed;
 
-  /// Number of nodes known about by this object
-  unsigned _num_nodes;
-
-  /// _my_node_number[global_node_number] = node number used in this object
-  std::unordered_map<dof_id_type, unsigned> _my_node_number;
-
   /**
-   * _nodal_void_volume[my_node_number] = void volume of the node with my_node_number.  The purpose
-   * of this UserObject is to compute _nodal_void_volume
+   * _nodal_void_volume[node] = void volume of the node.  The purpose of this UserObject is to
+   * compute _nodal_void_volume
    */
-  std::vector<Real> _nodal_void_volume;
+  std::unordered_map<const Node *, Real> _nodal_void_volume;
 
   /// processor ID of this object
   const processor_id_type _my_pid;
 
   /**
-   * _nodes_to_receive[proc_id] = list of my nodal IDs.  proc_id will send us _nodal_void_volume
+   * _nodes_to_receive[proc_id] = list of my nodes.  proc_id will send us _nodal_void_volume
    * at those nodes. _nodes_to_receive is built (in buildCommLists()) using global node IDs, but
-   * after construction, a translation to my node IDs is made, for efficiency.
-   * The result is: we will receive _nodal_void_volume[_nodes_to_receive[proc_id][i]] from proc_id
+   * after construction, a translation to Node pointers is made.
+   * The result is: we will receive _nodal_void_volume[_nodes_to_receive[proc_id][:]] from proc_id
    */
-  std::map<processor_id_type, std::vector<dof_id_type>> _nodes_to_receive;
+  std::map<processor_id_type, std::vector<const Node *>> _nodes_to_receive;
 
   /**
-   * _nodes_to_send[proc_id] = list of my nodal IDs.  We will send _nodal_void_volume at those
+   * _nodes_to_send[proc_id] = list of my nodes.  We will send _nodal_void_volume at those
    * nodes to proc_id.  _nodes_to_send is built (in buildCommLists()) using global node IDs, but
-   * after construction, a translation to my node IDs is made, for efficiency.  The result is: we
-   * will send _nodal_void_volume[_nodes_to_receive[proc_id][i]] to proc_id
+   * after construction, a translation to my Node pointers is made.  The result is: we
+   * will send _nodal_void_volume[_nodes_to_receive[proc_id][:]] to proc_id
    */
-  std::map<processor_id_type, std::vector<dof_id_type>> _nodes_to_send;
+  std::map<processor_id_type, std::vector<const Node *>> _nodes_to_send;
 
   /// shape function
   const VariablePhiValue & _phi;
 
   /**
-   * rebuild _my_node_number and MPI communication lists of this object
+   * reinitialize _nodal_void_volume and rebuild MPI communication lists of this object
    */
   void rebuildStructures();
 

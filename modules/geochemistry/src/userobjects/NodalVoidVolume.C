@@ -43,9 +43,7 @@ NodalVoidVolume::NodalVoidVolume(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _porosity(coupledValue("porosity")),
     _rebuilding_needed(true),
-    _num_nodes(0),
-    _my_node_number(),
-    _nodal_void_volume(0),
+    _nodal_void_volume(),
     _my_pid(processor_id()),
     _nodes_to_receive(),
     _nodes_to_send(),
@@ -59,7 +57,7 @@ NodalVoidVolume::initialSetup()
 {
   ElementUserObject::initialSetup();
   if (_rebuilding_needed)
-    rebuildStructures(); // rebuild _my_node_number and MPI communication lists
+    rebuildStructures(); // reinitialize _nodal_void_volume and rebuild MPI communication lists
 }
 
 void
@@ -74,7 +72,7 @@ NodalVoidVolume::timestepSetup()
 {
   ElementUserObject::timestepSetup();
   if (_rebuilding_needed)
-    rebuildStructures(); // rebuild _my_node_number and MPI communication lists
+    rebuildStructures(); // reinitialize _nodal_void_volume and rebuild MPI communication lists
 }
 
 void
@@ -86,14 +84,12 @@ NodalVoidVolume::rebuildStructures()
   // ghosted elements are not visited in execute() so the nodal volume is incorrectly computed for
   // all the nodes belonging to ghosted elements.  So MPI communication of nodal volume info is
   // needed (implemented in exchangeGhostedInfo).
-  _num_nodes = 0;
-  _my_node_number.clear();
+  _nodal_void_volume.clear();
   for (const auto & elem : _fe_problem.getEvaluableElementRange())
     if (this->hasBlocks(elem->subdomain_id()))
       for (unsigned i = 0; i < elem->n_nodes(); ++i)
-        if (_my_node_number.count(elem->node_id(i)) == 0)
-          _my_node_number[elem->node_id(i)] = _num_nodes++;
-  _nodal_void_volume.assign(_num_nodes, 0.0);
+        if (_nodal_void_volume.count(elem->node_ptr(i)) == 0)
+          _nodal_void_volume[elem->node_ptr(i)] = 0.0;
   if (_app.n_processors() > 1)
     buildCommLists();
   _rebuilding_needed = false;
@@ -102,8 +98,11 @@ NodalVoidVolume::rebuildStructures()
 void
 NodalVoidVolume::buildCommLists()
 {
+  // global_node_nums_to_receive[pid] is a list of node numbers connected to elements owned by
+  // processor pid.  _nodes_to_receive[pid] is a list of node pointers.  Both lists have the same
+  // ordering
+  std::map<processor_id_type, std::vector<dof_id_type>> global_node_nums_to_receive;
   _nodes_to_receive.clear();
-
   // run through all elements known by this processor (the owned + 1 layer of ghosted elements),
   // recording nodes that are attached to elements that aren't owned by this processor
   for (const auto & elem : _fe_problem.getEvaluableElementRange())
@@ -112,42 +111,39 @@ NodalVoidVolume::buildCommLists()
       const processor_id_type elem_pid = elem->processor_id();
       if (elem_pid != _my_pid)
       {
-        if (_nodes_to_receive.find(elem_pid) == _nodes_to_receive.end())
-          _nodes_to_receive[elem_pid] = std::vector<dof_id_type>();
+        if (global_node_nums_to_receive.count(elem_pid) == 0)
+        {
+          global_node_nums_to_receive[elem_pid] = std::vector<dof_id_type>();
+          _nodes_to_receive[elem_pid] = std::vector<const Node *>();
+        }
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
-          if (std::find(_nodes_to_receive[elem_pid].begin(),
-                        _nodes_to_receive[elem_pid].end(),
-                        elem->node_id(i)) == _nodes_to_receive[elem_pid].end())
-            _nodes_to_receive[elem_pid].push_back(elem->node_id(i));
+          if (std::find(global_node_nums_to_receive[elem_pid].begin(),
+                        global_node_nums_to_receive[elem_pid].end(),
+                        elem->node_id(i)) == global_node_nums_to_receive[elem_pid].end())
+          {
+            global_node_nums_to_receive[elem_pid].push_back(elem->node_id(i));
+            _nodes_to_receive[elem_pid].push_back(elem->node_ptr(i));
+          }
       }
     }
-  // nodes_to_receive[pid] is a list of nodes connected to elements owned by processor pid
 
-  // exchange this info with other processors, building _nodes_to_send at the same time
-  _nodes_to_send.clear();
-  auto nodes_action_functor = [this](processor_id_type pid, const std::vector<dof_id_type> & nts) {
-    _nodes_to_send[pid] = nts;
+  // exchange this info with other processors, building global_node_nums_to_send at the same time
+  std::map<processor_id_type, std::vector<dof_id_type>> global_node_nums_to_send;
+  auto nodes_action_functor = [&](processor_id_type pid, const std::vector<dof_id_type> & nts) {
+    global_node_nums_to_send[pid] = nts;
   };
-  Parallel::push_parallel_vector_data(this->comm(), _nodes_to_receive, nodes_action_functor);
+  Parallel::push_parallel_vector_data(
+      this->comm(), global_node_nums_to_receive, nodes_action_functor);
 
-  // At the moment, _nodes_to_send and _nodes_to_receive contain global node numbers
-  // It is slightly more efficient to convert to local node numbers
-  // so that we don't have to keep doing things like
-  // _u_nodal[_my_node_number.at(_nodes_to_send[pid][i])]
-  // every time we send/receive
-  for (auto & kv : _nodes_to_send)
+  // Build _nodes_to_send using global_node_nums_to_send, keeping the same ordering in the
+  // std::vector
+  _nodes_to_send.clear();
+  for (const auto & kv : global_node_nums_to_send)
   {
     const processor_id_type pid = kv.first;
-    const std::size_t num_nodes = kv.second.size();
-    for (unsigned i = 0; i < num_nodes; ++i)
-      _nodes_to_send[pid][i] = _my_node_number.at(_nodes_to_send[pid][i]);
-  }
-  for (auto & kv : _nodes_to_receive)
-  {
-    const processor_id_type pid = kv.first;
-    const std::size_t num_nodes = kv.second.size();
-    for (unsigned i = 0; i < num_nodes; ++i)
-      _nodes_to_receive[pid][i] = _my_node_number.at(_nodes_to_receive[pid][i]);
+    _nodes_to_send[pid] = std::vector<const Node *>();
+    for (const auto & node_num : kv.second)
+      _nodes_to_send[pid].push_back(_mesh.nodePtr(node_num));
   }
 }
 
@@ -161,7 +157,7 @@ NodalVoidVolume::exchangeGhostedInfo()
     const processor_id_type pid = kv.first;
     nvv_to_send[pid] = std::vector<Real>();
     for (const auto & nd : kv.second)
-      nvv_to_send[pid].push_back(_nodal_void_volume[nd]);
+      nvv_to_send[pid].push_back(_nodal_void_volume.at(nd));
   }
 
   auto nvv_action_functor = [this](processor_id_type pid, const std::vector<Real> & nvv_received) {
@@ -171,7 +167,8 @@ NodalVoidVolume::exchangeGhostedInfo()
                                  << ", incompatible with nodes_to_receive, which has size "
                                  << _nodes_to_receive[pid].size());
     for (unsigned i = 0; i < msg_size; ++i)
-      _nodal_void_volume[_nodes_to_receive[pid][i]] += nvv_received[i];
+      _nodal_void_volume[_nodes_to_receive[pid][i]] =
+          _nodal_void_volume.at(_nodes_to_receive[pid][i]) + nvv_received[i];
   };
   Parallel::push_parallel_vector_data(this->comm(), nvv_to_send, nvv_action_functor);
 }
@@ -179,7 +176,8 @@ NodalVoidVolume::exchangeGhostedInfo()
 void
 NodalVoidVolume::initialize()
 {
-  _nodal_void_volume.assign(_num_nodes, 0.0);
+  for (auto & nvv : _nodal_void_volume)
+    nvv.second = 0.0;
 }
 
 void
@@ -196,8 +194,8 @@ NodalVoidVolume::threadJoin(const UserObject & uo)
 {
   // _nodal_void_volume will have been computed by other threads: add their contributions to ours.
   const NodalVoidVolume & nvv = static_cast<const NodalVoidVolume &>(uo);
-  for (unsigned i = 0; i < _num_nodes; ++i)
-    _nodal_void_volume[i] += nvv._nodal_void_volume[i];
+  for (auto & our_nvv : _nodal_void_volume)
+    our_nvv.second += nvv._nodal_void_volume.at(our_nvv.first);
   // Now _nodal_void_volume is correct for all nodes within this processor's domain (but potentially
   // not those on the boundary: exchangeGhostedInfo() will fix that)
 }
@@ -209,29 +207,20 @@ NodalVoidVolume::execute()
   // correctly computes _nodal_void_volume for nodes compltely within this processor's domain.
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
-    const dof_id_type global_node_number = _current_elem->node_id(i);
-    const unsigned my_node_number = _my_node_number.at(global_node_number);
     for (unsigned qp = 0; qp < _qrule->n_points(); ++qp)
-      _nodal_void_volume[my_node_number] += _JxW[qp] * _coord[qp] * _phi[i][qp] * _porosity[qp];
+      _nodal_void_volume[_current_elem->node_ptr(i)] =
+          _nodal_void_volume.at(_current_elem->node_ptr(i)) +
+          _JxW[qp] * _coord[qp] * _phi[i][qp] * _porosity[qp];
   }
 }
 
 Real
-NodalVoidVolume::getNodalVoidVolume(unsigned node_id) const
+NodalVoidVolume::getNodalVoidVolume(const Node * node) const
 {
-  try
-  {
-    return _nodal_void_volume[_my_node_number.at(node_id)];
-  }
-  catch (std::out_of_range)
-  {
-    mooseError("nodal id ",
-               node_id,
-               " not in NodalVoidVolume's data structures.  Perhaps the execute_on parameter of "
-               "NodalVoidVolume needs to be set differently");
-  }
-  catch (...)
-  {
-    throw;
-  }
+  if (_nodal_void_volume.count(node) == 1)
+    return _nodal_void_volume.at(node);
+  mooseError("nodal id ",
+             node->id(),
+             " not in NodalVoidVolume's data structures.  Perhaps the execute_on parameter of "
+             "NodalVoidVolume needs to be set differently");
 }

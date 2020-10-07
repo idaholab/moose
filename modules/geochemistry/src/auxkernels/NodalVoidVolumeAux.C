@@ -32,5 +32,5 @@ NodalVoidVolumeAux::NodalVoidVolumeAux(const InputParameters & parameters)
 Real
 NodalVoidVolumeAux::computeValue()
 {
-  return _nvv.getNodalVoidVolume(_current_node->id());
+  return _nvv.getNodalVoidVolume(_current_node);
 }
