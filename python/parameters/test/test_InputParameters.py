@@ -29,6 +29,13 @@ class TestInputParameters(unittest.TestCase):
         self.assertEqual(len(log.output), 1)
         self.assertIn("Cannot add parameter, the parameter 'foo' already exists.", log.output[0])
 
+        sub = InputParameters()
+        params.add('bar', InputParameters())
+        with self.assertLogs(level='WARNING') as log:
+            params.add('bar_something')
+        self.assertEqual(len(log.output), 1)
+        self.assertIn("Cannot add a parameter with the name 'bar_something', a sub parameter exists with the name 'bar'.", log.output[0])
+
     def testContains(self):
         params = InputParameters()
         params.add('foo')
@@ -84,7 +91,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             params.remove('bar')
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot remove parameter, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
     def testIsValid(self):
         params = InputParameters()
@@ -96,7 +103,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             self.assertIsNone(params.isValid('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot determine if the parameters is valid, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
     def testSetDefault(self):
         params = InputParameters()
@@ -113,7 +120,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             params.setDefault('other', 1980)
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot set default, the parameter 'other' does not exist", log.output[0])
+        self.assertIn("The parameter 'other' does not exist", log.output[0])
 
     def testGetDefault(self):
         params = InputParameters()
@@ -124,7 +131,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             self.assertIsNone(params.getDefault('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot get default, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
     def testIsDefault(self):
         params = InputParameters()
@@ -136,7 +143,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             self.assertIsNone(params.isDefault('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot determine if the parameter is default, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
     def testSet(self):
         params = InputParameters()
@@ -152,7 +159,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             params.set('bar', 1980)
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot set value, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
         # Sub-options
         params2 = InputParameters()
@@ -173,34 +180,18 @@ class TestInputParameters(unittest.TestCase):
         self.assertEqual(params3.get('bar'), 2011)
         self.assertEqual(params.get('sub').get('bar'), 2011)
 
-        params.set('sub', bar=1944)
+        params.set('sub', 'bar', 1944)
         self.assertEqual(params2.get('bar'), 1954)
         self.assertEqual(params3.get('bar'), 1944)
         self.assertEqual(params.get('sub').get('bar'), 1944)
-
-        # More errors
-        with self.assertLogs(level='WARNING') as log:
-            params.set('foo', 1980, this='that')
-        self.assertEqual(len(log.output), 1)
-        self.assertIn("Key, value pairs are not allowed when setting the 'foo' parameter.", log.output[0])
 
         with self.assertLogs(level='WARNING') as log:
             params.set('foo', 1980, 2011)
             params.set('foo')
 
         self.assertEqual(len(log.output), 2)
-        self.assertIn("A single second argument is required for the 'foo' parameter.", log.output[0])
-        self.assertIn("A single second argument is required for the 'foo' parameter.", log.output[1])
-
-        with self.assertLogs(level='WARNING') as log:
-            params.set('sub', 1980, bar=1948)
-        self.assertEqual(len(log.output), 1)
-        self.assertIn("Key, value pairs are not allowed when setting the 'sub' parameter with a supplied dict argument.", log.output[0])
-
-        with self.assertLogs(level='WARNING') as log:
-            params.set('sub', 1980)
-        self.assertEqual(len(log.output), 1)
-        self.assertIn("The second argument for the 'sub' parameter must be a dict() or InputParametrs object", log.output[0])
+        self.assertIn("Extra argument(s) found: 1980", log.output[0])
+        self.assertIn("One or more names must be supplied.", log.output[1])
 
     def testGet(self):
         params = InputParameters()
@@ -210,7 +201,7 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             self.assertIsNone(params.get('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot get value, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
     def testHasParameter(self):
         params = InputParameters()
@@ -233,27 +224,81 @@ class TestInputParameters(unittest.TestCase):
         with self.assertLogs(level='WARNING') as log:
             params.update(foo=2011, bar=2013)
         self.assertEqual(len(log.output), 1)
-        self.assertIn("The following parameters do not exist: bar", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist.", log.output[0])
 
     def testErrorMode(self):
         params = InputParameters(InputParameters.ErrorMode.WARNING)
         with self.assertLogs(level='WARNING') as log:
             self.assertIsNone(params.isValid('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot determine if the parameters is valid, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
 
         params = InputParameters(InputParameters.ErrorMode.ERROR)
         with self.assertLogs(level='ERROR') as log:
             self.assertIsNone(params.isValid('bar'))
         self.assertEqual(len(log.output), 1)
-        self.assertIn("Cannot determine if the parameters is valid, the parameter 'bar' does not exist", log.output[0])
+        self.assertIn("The parameter 'bar' does not exist", log.output[0])
+
+        params = InputParameters(InputParameters.ErrorMode.NONE)
+        self.assertIsNone(params.isValid('bar'))
 
         params = InputParameters(InputParameters.ErrorMode.EXCEPTION)
         with self.assertRaises(InputParameters.InputParameterException):
             with self.assertLogs(level='CRITICAL') as log:
                 self.assertIsNone(params.isValid('bar'))
             self.assertEqual(len(log.output), 1)
-            self.assertIn("Cannot determine if the parameters is valid, the parameter 'bar' does not exist", log.output[0])
+            self.assertIn("The parameter 'bar' does not exist", log.output[0])
+
+    def testSetWithSubOption(self):
+        andrew = InputParameters()
+        andrew.add('year')
+
+        people = InputParameters()
+        people.add('andrew', default=andrew)
+
+        people.set('andrew', 'year', 1949)
+        self.assertEqual(andrew.get('year'), 1949)
+
+        people.set('andrew', {'year':1954})
+        self.assertEqual(andrew.get('year'), 1954)
+
+        people.set('andrew_year', 1977)
+        self.assertEqual(andrew.get('year'), 1977)
+
+        yo_dawg = InputParameters()
+        yo_dawg.add('nunchuck')
+        andrew.add('skills', yo_dawg)
+        self.assertEqual(yo_dawg.get('nunchuck'), None)
+
+        people.set('andrew_skills', 'nunchuck', True)
+        self.assertEqual(yo_dawg.get('nunchuck'), True)
+
+        with self.assertLogs(level='WARNING') as log:
+            people.set('andrew_day', 'python', False)
+        self.assertEqual(len(log.output), 1)
+        self.assertIn("The parameter 'day' does not exist", log.output[0])
+
+        with self.assertLogs(level='WARNING') as log:
+            people.set('andrew_skills', 'python', False)
+        self.assertEqual(len(log.output), 1)
+        self.assertIn("The parameter 'python' does not exist.", log.output[0])
+
+    def testGetWithSubOption(self):
+        unit = InputParameters()
+        unit.add('name', 'pts')
+
+        font = InputParameters()
+        font.add('size', default=24)
+        font.add('unit', unit)
+
+        text = InputParameters()
+        text.add('font', font)
+
+        self.assertEqual(text.get('font', 'size'), 24)
+        self.assertEqual(text.get('font', 'unit', 'name'), 'pts')
+
+        self.assertEqual(text.get('font_size'), 24)
+        self.assertEqual(text.get('font_unit_name'), 'pts')
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)
