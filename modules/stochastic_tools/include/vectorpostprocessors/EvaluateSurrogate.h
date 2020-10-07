@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 #include "SurrogateModelInterface.h"
 #include "SurrogateModel.h"
 
@@ -19,7 +18,6 @@
  * A tool for output Sampler data.
  */
 class EvaluateSurrogate : public GeneralVectorPostprocessor,
-                          SamplerInterface,
                           SurrogateModelInterface
 {
 public:

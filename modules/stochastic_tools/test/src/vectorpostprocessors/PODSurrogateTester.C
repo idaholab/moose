@@ -18,7 +18,6 @@ InputParameters
 PODSurrogateTester::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling POD surrogate model.");
   params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of POD surrogate models.");
@@ -39,7 +38,6 @@ PODSurrogateTester::validParams()
 
 PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples")),

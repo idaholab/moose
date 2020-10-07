@@ -11,12 +11,10 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 #include "PolynomialChaos.h"
 #include "SurrogateModelInterface.h"
 
 class PolynomialChaosLocalSensitivity : public GeneralVectorPostprocessor,
-                                        SamplerInterface,
                                         SurrogateModelInterface
 {
 public:

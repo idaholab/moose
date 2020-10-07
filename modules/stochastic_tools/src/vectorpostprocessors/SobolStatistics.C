@@ -36,7 +36,6 @@ SobolStatistics::validParams()
 
 SobolStatistics::SobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     _sobol_sampler(getSampler<SobolSampler>("sampler")),
     _perf_execute(registerTimedSection("execute", 1))
 {

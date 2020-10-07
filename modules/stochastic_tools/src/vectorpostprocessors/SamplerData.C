@@ -21,7 +21,6 @@ SamplerData::validParams()
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Tool for extracting Sampler object data and storing in VectorPostprocessor vectors.");
-  params += SamplerInterface::validParams();
   params.addRequiredParam<SamplerName>("sampler",
                                        "The sample from which to extract distribution data.");
 
@@ -40,7 +39,6 @@ SamplerData::validParams()
 
 SamplerData::SamplerData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     _sampler(getSampler("sampler")),
     _sampler_method(getParam<MooseEnum>("sampler_method"))
 {

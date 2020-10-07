@@ -11,12 +11,11 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 
 /**
  * A tool for output Sampler data.
  */
-class SamplerData : public GeneralVectorPostprocessor, SamplerInterface
+class SamplerData : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();

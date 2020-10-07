@@ -10,14 +10,13 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 
 class SobolSampler;
 
 /**
  * Computes Sobol sensitivity indices, see SobolCalculators
  */
-class SobolStatistics : public GeneralVectorPostprocessor, SamplerInterface
+class SobolStatistics : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();

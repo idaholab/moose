@@ -17,7 +17,7 @@
  * UserObject for testing Sampler object threaded and parallel behavior, it should be used for
  * anything else, see TestSampler object.
  */
-class SamplerTester : public GeneralPostprocessor, public SamplerInterface
+class SamplerTester : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();

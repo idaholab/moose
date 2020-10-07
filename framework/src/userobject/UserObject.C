@@ -19,6 +19,7 @@ InputParameters
 UserObject::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += SamplerInterface::validParams();
 
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_end'
   params += SetupInterface::validParams();
@@ -55,6 +56,7 @@ UserObject::UserObject(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     DistributionInterface(this),
+    SamplerInterface(this),
     Restartable(this, "UserObjects"),
     MeshMetaDataInterface(this),
     MeshChangedInterface(parameters),
