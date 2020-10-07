@@ -521,9 +521,9 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
     }
     else if (_problem_ptr->hasScalarVariable(var_name))
       _execute_data["scalars"].show.insert(var_name);
-    else if (hasPostprocessorByName(var_name))
+    else if (hasPostprocessorObjectByName(var_name))
       _execute_data["postprocessors"].show.insert(var_name);
-    else if (hasVectorPostprocessorByName(var_name))
+    else if (hasVectorPostprocessorObjectByName(var_name))
       _execute_data["vector_postprocessors"].show.insert(var_name);
     else if ((var_name.find("/") != std::string::npos) &&
              (hasReporterValueByName(ReporterName(var_name))))
@@ -576,7 +576,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       _execute_data["scalars"].hide.insert(var_name);
     else if (hasPostprocessorByName(var_name))
       _execute_data["postprocessors"].hide.insert(var_name);
-    else if (hasVectorPostprocessorByName(var_name))
+    else if (hasVectorPostprocessorObjectByName(var_name))
       _execute_data["vector_postprocessors"].hide.insert(var_name);
     else
       unknown.insert(var_name);

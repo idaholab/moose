@@ -121,16 +121,36 @@ VectorPostprocessorInterface::getScatterVectorPostprocessorValueOldByName(
 }
 
 bool
-VectorPostprocessorInterface::hasVectorPostprocessor(const std::string & name) const
+VectorPostprocessorInterface::hasVectorPostprocessor(const std::string & name,
+                                                     const std::string & vector_name) const
 {
-  return hasVectorPostprocessorByName(_vpi_params.get<VectorPostprocessorName>(name));
+  return hasVectorPostprocessorByName(_vpi_params.get<VectorPostprocessorName>(name), vector_name);
 }
 
 bool
-VectorPostprocessorInterface::hasVectorPostprocessorByName(
+VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostprocessorName & name,
+                                                           const std::string & vector_name) const
+{
+  ReporterName r_name(name, vector_name);
+  return _vpi_feproblem.getReporterData().hasReporterValue<VectorPostprocessorValue>(r_name);
+}
+
+bool
+VectorPostprocessorInterface::hasVectorPostprocessorObject(const std::string & name) const
+{
+  return hasVectorPostprocessorObjectByName(_vpi_params.get<VectorPostprocessorName>(name));
+}
+
+bool
+VectorPostprocessorInterface::hasVectorPostprocessorObjectByName(
     const VectorPostprocessorName & name) const
 {
-  return _vpi_feproblem.hasUserObject(name);
+  if (_vpi_feproblem.hasUserObject(name))
+  {
+    const UserObject & uo = _vpi_feproblem.getUserObjectBase(name);
+    return dynamic_cast<const VectorPostprocessor *>(&uo) != nullptr;
+  }
+  return false;
 }
 
 bool

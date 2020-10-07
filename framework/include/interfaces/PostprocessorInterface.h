@@ -89,7 +89,7 @@ public:
   ///@}
 
   /**
-   * Determine if the Postprocessor exists
+   * Determine if the Postprocessor data exists
    * @param name The name of the Postprocessor parameter
    * @param index The index of the Postprocessor
    * @return True if the Postprocessor exists
@@ -99,13 +99,28 @@ public:
   bool hasPostprocessor(const std::string & name, unsigned int index = 0) const;
 
   /**
-   * Determine if the Postprocessor exists
+   * Determine if the Postprocessor data exists
    * @param name The name of the Postprocessor
    * @return True if the Postprocessor exists
    *
    * @see hasPostprocessor getPostprocessorValueByName
    */
   bool hasPostprocessorByName(const PostprocessorName & name) const;
+
+  /**
+   * Determine if the Postprocessor object exists
+   * @param name The name of the Postprocessor parameter
+   * @param index The index of the Postprocessor
+   * @return True if the Postprocessor exists
+   */
+  bool hasPostprocessorObject(const std::string & name, unsigned int index = 0) const;
+
+  /**
+   * Determine if the Postprocessor object exists
+   * @param name The name of the Postprocessor
+   * @return True if the Postprocessor exists
+   */
+  bool hasPostprocessorObjectByName(const PostprocessorName & name) const;
 
   /**
    * Returns number of Postprocessors coupled under parameter name

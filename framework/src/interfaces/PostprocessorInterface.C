@@ -12,6 +12,7 @@
 #include "Postprocessor.h"
 #include "MooseTypes.h"
 #include "MooseObject.h"
+#include "UserObject.h"
 
 PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
   : _ppi_params(moose_object->parameters()),
@@ -83,6 +84,25 @@ PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name) c
 {
   ReporterName r_name(name, "value");
   return _pi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(r_name);
+}
+
+bool
+PostprocessorInterface::hasPostprocessorObject(const std::string & name, unsigned int index) const
+{
+  if (singlePostprocessor(name))
+    return hasPostprocessorObjectByName(_ppi_params.get<PostprocessorName>(name));
+  return hasPostprocessorObjectByName(_ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+}
+
+bool
+PostprocessorInterface::hasPostprocessorObjectByName(const PostprocessorName & name) const
+{
+  if (_pi_feproblem.hasUserObject(name))
+  {
+    const UserObject & uo = _pi_feproblem.getUserObjectBase(name);
+    return dynamic_cast<const Postprocessor *>(&uo) != nullptr;
+  }
+  return false;
 }
 
 const PostprocessorValue &

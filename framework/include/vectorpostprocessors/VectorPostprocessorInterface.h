@@ -239,22 +239,38 @@ public:
                                               const std::string & vector_name);
 
   /**
-   * Determine if the VectorPostprocessor exists
+   * Determine if the VectorPostprocessor data exists
    * @param name The name of the VectorPostprocessor parameter
    * @return True if the VectorPostprocessor exists
    *
    * @see hasVectorPostprocessorByName getVectorPostprocessorValue
    */
-  bool hasVectorPostprocessor(const std::string & name) const;
+  bool hasVectorPostprocessor(const std::string & name, const std::string & vector_name) const;
 
   /**
-   * Determine if the VectorPostprocessor exists
+   * Determine if the VectorPostprocessor data exists
    * @param name The name of the VectorPostprocessor
    * @return True if the VectorPostprocessor exists
    *
    * @see hasVectorPostprocessor getVectorPostprocessorValueByName
    */
-  bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
+  bool hasVectorPostprocessorByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name) const;
+
+  /**
+   * Determine if the VectorPostprocessor object exists
+   * @param name The name of the VectorPostprocessor parameter
+   * @return True if the VectorPostprocessor exists
+   * @return True if the C++ object exists
+   */
+  bool hasVectorPostprocessorObject(const std::string & name) const;
+
+  /**
+   * Determine if the VectorPostprocessor object exists
+   * @param name The name of the VectorPostprocessor
+   * @return True if the C++ object exists
+   */
+  bool hasVectorPostprocessorObjectByName(const VectorPostprocessorName & name) const;
 
   ///@{
   /**

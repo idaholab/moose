@@ -158,9 +158,18 @@ public:
     {
       all.insert(v);
       auto & uo = UserObjectInterface::getUserObjectBaseByName(v);
-      auto uos = uo.getDependObjects();
-      for (auto & t : uos)
-        all.insert(t);
+
+      // Add dependencies of other objects, but don't allow it to call itself. This can happen
+      // through the PostprocessorInterface if a Postprocessor calls getPostprocessorValueByName
+      // with it's own name. This happens in the Receiver, which could use the FEProblem version of
+      // the get method, but this is a fix that prevents an infinite loop occurring by accident for
+      // future objects.
+      if (uo.name() != name())
+      {
+        auto uos = uo.getDependObjects();
+        for (auto & t : uos)
+          all.insert(t);
+      }
     }
     return all;
   }

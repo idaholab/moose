@@ -29,7 +29,7 @@ Receiver::validParams()
 Receiver::Receiver(const InputParameters & params)
   : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(getPostprocessorValueByName(name()))
+    _my_value(getPostprocessorValueByName(name())) // use FEProblem to avoid cyclic dependency
 {
   // Initialize old/older data
   getPostprocessorValueOldByName(name());
