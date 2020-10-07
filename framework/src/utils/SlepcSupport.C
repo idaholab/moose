@@ -110,7 +110,8 @@ getSlepcEigenProblemValidParams()
 
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
 
-  params.addParam<unsigned int>("extra_power_iterations", 0, "The number of extra free power iterations");
+  params.addParam<unsigned int>(
+      "extra_power_iterations", 0, "The number of extra free power iterations");
 
   return params;
 }
@@ -328,17 +329,19 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
   }
 }
 
-void setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+void
+setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
   Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "1");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it",stringify(free_power_iterations));
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
 }
 
-void clearFreeNonlinearPowerIterations(const InputParameters & params)
+void
+clearFreeNonlinearPowerIterations(const InputParameters & params)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it","1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
   Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
                                             stringify(params.get<unsigned int>("nl_max_its")));
 }
@@ -366,14 +369,12 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
     Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "1");
     if (initial_power)
       Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
-<<<<<<< HEAD
-  } else
+  }
+  else
   {
     Moose::PetscSupport::setSinglePetscOption("-snes_mf_operator", "0");
     if (initial_power)
       Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "0");
-=======
->>>>>>> Eigen solver: Remove extra option "-eps_power" from SNES
   }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
   Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
@@ -959,12 +960,18 @@ PCSetUp_MoosePC(PC pc)
 }
 
 PetscErrorCode
-mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,PetscInt nev,EPSConvergedReason *reason,void *ctx)
+mooseSlepcStoppingTest(EPS eps,
+                       PetscInt its,
+                       PetscInt max_it,
+                       PetscInt nconv,
+                       PetscInt nev,
+                       EPSConvergedReason * reason,
+                       void * ctx)
 {
   PetscErrorCode ierr;
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
 
-  ierr = EPSStoppingBasic(eps,its,max_it,nconv,nev,reason,NULL);
+  ierr = EPSStoppingBasic(eps, its, max_it, nconv, nev, reason, NULL);
   LIBMESH_CHKERR(ierr);
 
   // If we do free power iteration, we need to mark the solver as converged.

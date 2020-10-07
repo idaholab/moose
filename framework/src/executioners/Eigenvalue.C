@@ -159,35 +159,34 @@ Eigenvalue::init()
   // The initial solver is a Inverse Power, and it is used to compute a good initial
   // guess for Newton
   auto free_power_iterations = getParam<unsigned int>("free_power_iterations");
-  if (free_power_iterations
-    && _eigen_problem.isNonlinearEigenvalueSolver()
-    && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
-    {
-      _eigen_problem.doFreePowerIteration(true);
-      // Set free power iterations
-      setFreeNonlinearPowerIterations(free_power_iterations);
+  if (free_power_iterations && _eigen_problem.isNonlinearEigenvalueSolver() &&
+      _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+  {
+    _eigen_problem.doFreePowerIteration(true);
+    // Set free power iterations
+    setFreeNonlinearPowerIterations(free_power_iterations);
 
-      // Provide vector of ones to solver
-      // "auto_initialization" is on by default and we init the vector values associated
-      // with eigen-variables as ones. If "auto_initialization" is turned off by users,
-      // it is up to users to provide an initial guess. If "auto_initialization" is off
-      // and users does not provide an initial guess, slepc will automatically generate
-      // a random vector as the initial guess. The motivation to offer this option is
-      // that we have to initialize  ONLY eigen variables in multiphysics simulation.
-      if (_eigen_problem.needInitializeEigenVector())
-        _eigen_problem.initEigenvector(1.0);
+    // Provide vector of ones to solver
+    // "auto_initialization" is on by default and we init the vector values associated
+    // with eigen-variables as ones. If "auto_initialization" is turned off by users,
+    // it is up to users to provide an initial guess. If "auto_initialization" is off
+    // and users does not provide an initial guess, slepc will automatically generate
+    // a random vector as the initial guess. The motivation to offer this option is
+    // that we have to initialize  ONLY eigen variables in multiphysics simulation.
+    if (_eigen_problem.needInitializeEigenVector())
+      _eigen_problem.initEigenvector(1.0);
 
-      _console << " Free power iteration starts" << std::endl;
+    _console << " Free power iteration starts" << std::endl;
 
-      // Call solver
-      _eigen_problem.solve();
+    // Call solver
+    _eigen_problem.solve();
 
-      // Clear free power iterations
-      clearFreeNonlinearPowerIterations();
+    // Clear free power iterations
+    clearFreeNonlinearPowerIterations();
 
-      _eigen_problem.doFreePowerIteration(false);
-    }
- #endif
+    _eigen_problem.doFreePowerIteration(false);
+  }
+#endif
 }
 
 void
@@ -332,11 +331,11 @@ Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
     PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
 #endif
 
- Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
+  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
- if (!_app.isUltimateMaster())
-   PetscOptionsPop();
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
 #endif
 #endif
 }
@@ -351,11 +350,11 @@ Eigenvalue::clearFreeNonlinearPowerIterations()
     PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
 #endif
 
- Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
+  Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
- if (!_app.isUltimateMaster())
-   PetscOptionsPop();
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
 #endif
 #endif
 }

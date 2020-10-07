@@ -109,7 +109,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   sys().attach_assemble_function(Moose::assemble_matrix);
 
   SlepcEigenSolver<Number> * solver =
-    libmesh_cast_ptr<SlepcEigenSolver<Number>* >(&(*_transient_sys.eigen_solver));
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_transient_sys.eigen_solver));
 
   if (!solver)
     mooseError("A slepc eigen solver is required");

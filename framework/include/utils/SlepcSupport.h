@@ -56,7 +56,13 @@ PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, v
 PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionAB(SNES snes, Vec x, Vec Ax, Vec Bx, void * ctx);
-PetscErrorCode mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,PetscInt nev,EPSConvergedReason *reason,void *ctx);
+PetscErrorCode mooseSlepcStoppingTest(EPS eps,
+                                      PetscInt its,
+                                      PetscInt max_it,
+                                      PetscInt nconv,
+                                      PetscInt nev,
+                                      EPSConvergedReason * reason,
+                                      void * ctx);
 PetscErrorCode mooseSlepcEPSGetSNES(EPS eps, SNES * snes);
 PetscErrorCode mooseSlepcEPSMonitor(EPS eps,
                                     int its,

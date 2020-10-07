@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-
 #include "SlepcEigenSolverConfiguration.h"
 #include "SlepcSupport.h"
 
@@ -16,12 +15,11 @@
 /**
  * Constructur: get a reference to the \p SlepcEigenSolver variable to be able to manipulate it
  */
-SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(EigenProblem & eigen_problem, libMesh::SlepcEigenSolver<libMesh::Number> &slepc_eigen_solver):
-  SolverConfiguration(),
-  _eigen_problem(eigen_problem),
-  _slepc_solver(slepc_eigen_solver)
-{}
-
+SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(
+    EigenProblem & eigen_problem, libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver)
+  : SolverConfiguration(), _eigen_problem(eigen_problem), _slepc_solver(slepc_eigen_solver)
+{
+}
 
 void
 SlepcEigenSolverConfiguration::configure_solver()

@@ -15,11 +15,11 @@
 class SlepcEigenSolverConfiguration : public libMesh::SolverConfiguration
 {
 public:
-
   /**
    * Constructur: get a reference to the \p SlepcEigenSolver variable to be able to manipulate it
    */
-  SlepcEigenSolverConfiguration(EigenProblem & eigen_problem, libMesh::SlepcEigenSolver<libMesh::Number> &slepc_eigen_solver);
+  SlepcEigenSolverConfiguration(EigenProblem & eigen_problem,
+                                libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver);
 
   /**
    * empty destructor
@@ -29,8 +29,6 @@ public:
   virtual void configure_solver() override;
 
 private:
-
-
   EigenProblem & _eigen_problem;
 
   /**
