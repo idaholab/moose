@@ -13,11 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
 #include "TensorMechanicsAction.h"
-
-//#include "AddMaterialAction.h"
-//#include "ActionWarehouse.h"
 #include "Material.h"
-//#include "MooseObjectAction.h"
 
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
@@ -93,8 +89,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
-    _direction_valid(params.isParamSetByUser("direction")),
-    _eigenstrain_names_valid(params.isParamSetByUser("eigenstrain_names"))
+    _direction_valid(params.isParamSetByUser("direction"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -184,8 +179,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   if (_direction_valid)
     _direction = getParam<Point>("direction");
 
-  if (_eigenstrain_names_valid)
-    _eigenstrain_names = getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
+  // Get eigenstrain names if passed by user
+  _eigenstrain_names = getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
 }
 
 void
@@ -315,12 +310,6 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(ad_prepend + type);
-
-    // If eigenstrain_names parameter exists, and is full, don't refill
-    if (_eigenstrain_names.size() < 1)
-      params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
-          _block_based_eigenstrain_names;
-
     params.applyParameters(parameters(),
                            {"displacements",
                             "use_displaced_mesh",
@@ -473,40 +462,69 @@ TensorMechanicsAction::actOutputGeneration()
 void
 TensorMechanicsAction::actEigenstrainNames()
 {
+  // Create containers for collecting blockIDs and eigenstrain names from materials
+  std::map<std::string, std::vector<SubdomainID>> material_eigenstrain_map;
+  std::set<std::string> eigenstrain_set;
+
+  // Copy the current set of subdomain ids
+  std::vector<SubdomainID> current_subdomains(_subdomain_ids.size());
+  std::copy(_subdomain_ids.begin(), _subdomain_ids.end(), current_subdomains.begin());
+
+  // Copy the current vector of eigenstrain names
+  std::vector<MaterialPropertyName> eigenstrain_names_copy(_eigenstrain_names.size());
+  std::copy(_eigenstrain_names.begin(), _eigenstrain_names.end(), eigenstrain_names_copy.begin());
+
   // Determine all the materials(eigenstrains) all ready created
   auto materials = _problem->getMaterialWarehouse().getObjects();
-
   for (auto & mat : materials)
   {
-    const InputParameters & params = mat->parameters();
+    const InputParameters & mat_params = mat->parameters();
+
     // Check for eigenstrain names, only deal with those materials
-    if (params.isParamValid("eigenstrain_name"))
+    if (mat_params.isParamValid("eigenstrain_name"))
     {
-      // It might be possible that an eigenstrain is applied multiple blocks
-      auto block = params.get<std::vector<SubdomainName>>("block");
-      auto name = params.get<std::string>("eigenstrain_name");
-      for (unsigned int i = 0; i < _subdomain_names.size(); ++i)
+      auto name = mat_params.get<std::string>("eigenstrain_name");
+
+      // If the block is defined on the material
+      if (mat_params.isParamValid("block"))
       {
-        for (unsigned int j = 0; j < block.size(); ++j)
-        {
-          auto unique_name = std::find(
-              _block_based_eigenstrain_names.begin(), _block_based_eigenstrain_names.end(), name);
-          // For only 1 block, the names shouldn't be duplicate
-          if (block.at(j) == _subdomain_names.at(i) && _subdomain_names.size() < 2)
-            _block_based_eigenstrain_names.push_back(name);
-          // For more than 1 block, the names will duplicate, so avoid that
-          if (unique_name != _block_based_eigenstrain_names.end())
-            ;
-          // This name is unique for more than 1 block grouping
-          else if (block.at(j) == _subdomain_names.at(i) && _subdomain_names.size() > 1)
-            _block_based_eigenstrain_names.push_back(name);
-        }
+        // Get the IDs from the supplied block names
+        auto blocks = mat_params.get<std::vector<SubdomainName>>("block");
+        auto vec_ids = _mesh->getSubdomainIDs(blocks);
+        // Names will be unique based on blockIDs
+        if (eigenstrain_set.insert(name).second)
+          material_eigenstrain_map.insert(std::make_pair(name, vec_ids));
       }
-      // It might also be possible that there are no explicit block numbers
-      if (_subdomain_names.size() < 1)
-        _block_based_eigenstrain_names.push_back(name);
+      // Blocks are not supplied, apply everywhere
+      else
+        eigenstrain_set.insert(name);
     }
   }
+  std::cout << "Printing out map" << std::endl;
+  std::map<std::string, std::vector<SubdomainID>>::iterator itr;
+  for (itr = material_eigenstrain_map.begin(); itr != material_eigenstrain_map.end(); ++itr)
+  {
+    std::cout << itr->first << std::endl;
+    for (auto it2 = itr->second.begin(); it2 != itr->second.end(); ++it2)
+      std::cout << *it2 << "  ";
+    std::cout << std::endl;
+  }
+  // Correlate BlockIDs with eigenstrain names
+  for (auto i : material_eigenstrain_map)
+    if (i.second == current_subdomains)
+      eigenstrain_set.insert(i.first);
+
+  // Transfer set to vector
+  _block_based_eigenstrain_names.resize(eigenstrain_set.size());
+  std::copy(eigenstrain_set.begin(), eigenstrain_set.end(), _block_based_eigenstrain_names.begin());
+
+  // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
+  // current subdomainID
+  std::set_union(_block_based_eigenstrain_names.begin(),
+                 _block_based_eigenstrain_names.end(),
+                 eigenstrain_names_copy.begin(),
+                 eigenstrain_names_copy.end(),
+                 std::inserter(_eigenstrain_names, _eigenstrain_names.begin()));
 }
 void
 TensorMechanicsAction::actOutputMatProp()

@@ -104,7 +104,6 @@ protected:
   bool _cylindrical_axis_point1_valid;
   bool _cylindrical_axis_point2_valid;
   bool _direction_valid;
-  bool _eigenstrain_names_valid;
 
   /// points used to determine axis of rotation for cyclindrical stress/strain quantities
   Point _cylindrical_axis_point1;
@@ -114,4 +113,7 @@ protected:
   std::vector<MaterialPropertyName> _eigenstrain_names;
 
   std::vector<MaterialPropertyName> _block_based_eigenstrain_names;
+
+  /// Pointer to Mesh
+  MooseMesh * _blk_mesh;
 };
