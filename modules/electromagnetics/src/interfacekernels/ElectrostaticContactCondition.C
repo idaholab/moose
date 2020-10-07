@@ -76,10 +76,7 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      res = 0.5 *
-            (_conductivity_secondary[_qp] * _grad_neighbor_value[_qp] * _normals[_qp] -
-             contact_conductance * (_neighbor_value[_qp] - _u[_qp])) *
-            _test[_i][_qp];
+      res = -contact_conductance * (_neighbor_value[_qp] - _u[_qp]) * _test[_i][_qp];
       break;
 
     case Moose::Neighbor:
