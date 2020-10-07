@@ -33,6 +33,7 @@
   [./nodal_void_volume]
     type = NodalVoidVolume
     porosity = porosity
+    concentration = u
   [../]
 []
 

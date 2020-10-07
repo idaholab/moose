@@ -43,12 +43,9 @@ NodalVoidVolume::NodalVoidVolume(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _porosity(coupledValue("porosity")),
     _rebuilding_needed(true),
-    _nodal_void_volume(),
     _my_pid(processor_id()),
-    _nodes_to_receive(),
-    _nodes_to_send(),
-    _phi(_assembly.fePhi<Real>(isParamValid("concentration") ? getVar("concentration", 0)->feType()
-                                                             : FEType(1, FEFamily::LAGRANGE)))
+    _phi(isParamValid("concentration") ? getVar("concentration", 0)->phi()
+                                       : _assembly.fePhi<Real>(FEType(1, FEFamily::LAGRANGE)))
 {
 }
 
@@ -87,9 +84,8 @@ NodalVoidVolume::rebuildStructures()
   _nodal_void_volume.clear();
   for (const auto & elem : _fe_problem.getEvaluableElementRange())
     if (this->hasBlocks(elem->subdomain_id()))
-      for (unsigned i = 0; i < elem->n_nodes(); ++i)
-        if (_nodal_void_volume.count(elem->node_ptr(i)) == 0)
-          _nodal_void_volume[elem->node_ptr(i)] = 0.0;
+      for (const auto & node : elem->node_ref_range())
+        _nodal_void_volume[&node] = 0.0;
   if (_app.n_processors() > 1)
     buildCommLists();
   _rebuilding_needed = false;
@@ -103,6 +99,8 @@ NodalVoidVolume::buildCommLists()
   // ordering
   std::map<processor_id_type, std::vector<dof_id_type>> global_node_nums_to_receive;
   _nodes_to_receive.clear();
+  // seen_nodes are those that have been seen to be attached to an element of given processor ID
+  std::map<processor_id_type, std::set<const Node *>> seen_nodes;
   // run through all elements known by this processor (the owned + 1 layer of ghosted elements),
   // recording nodes that are attached to elements that aren't owned by this processor
   for (const auto & elem : _fe_problem.getEvaluableElementRange())
@@ -111,18 +109,12 @@ NodalVoidVolume::buildCommLists()
       const processor_id_type elem_pid = elem->processor_id();
       if (elem_pid != _my_pid)
       {
-        if (global_node_nums_to_receive.count(elem_pid) == 0)
-        {
-          global_node_nums_to_receive[elem_pid] = std::vector<dof_id_type>();
-          _nodes_to_receive[elem_pid] = std::vector<const Node *>();
-        }
-        for (unsigned i = 0; i < elem->n_nodes(); ++i)
-          if (std::find(global_node_nums_to_receive[elem_pid].begin(),
-                        global_node_nums_to_receive[elem_pid].end(),
-                        elem->node_id(i)) == global_node_nums_to_receive[elem_pid].end())
+        auto & pid_nodes = seen_nodes[elem_pid];
+        for (const auto & node : elem->node_ref_range())
+          if (pid_nodes.insert(&node).second) // true if the node has not been seen
           {
-            global_node_nums_to_receive[elem_pid].push_back(elem->node_id(i));
-            _nodes_to_receive[elem_pid].push_back(elem->node_ptr(i));
+            global_node_nums_to_receive[elem_pid].push_back(node.id());
+            _nodes_to_receive[elem_pid].push_back(&node);
           }
       }
     }
@@ -141,9 +133,10 @@ NodalVoidVolume::buildCommLists()
   for (const auto & kv : global_node_nums_to_send)
   {
     const processor_id_type pid = kv.first;
-    _nodes_to_send[pid] = std::vector<const Node *>();
+    auto & pid_entry = _nodes_to_send[pid];
+    pid_entry.reserve(kv.second.size());
     for (const auto & node_num : kv.second)
-      _nodes_to_send[pid].push_back(_mesh.nodePtr(node_num));
+      pid_entry.push_back(_mesh.nodePtr(node_num));
   }
 }
 
@@ -155,20 +148,21 @@ NodalVoidVolume::exchangeGhostedInfo()
   for (const auto & kv : _nodes_to_send)
   {
     const processor_id_type pid = kv.first;
-    nvv_to_send[pid] = std::vector<Real>();
+    auto & pid_entry = nvv_to_send[pid];
+    pid_entry.reserve(kv.second.size());
     for (const auto & nd : kv.second)
-      nvv_to_send[pid].push_back(_nodal_void_volume.at(nd));
+      pid_entry.push_back(_nodal_void_volume.at(nd));
   }
 
   auto nvv_action_functor = [this](processor_id_type pid, const std::vector<Real> & nvv_received) {
     const std::size_t msg_size = nvv_received.size();
-    mooseAssert(msg_size == _nodes_to_receive[pid].size(),
+    auto & receive_pid_entry = _nodes_to_receive[pid];
+    mooseAssert(msg_size == receive_pid_entry.size(),
                 "Message size, " << msg_size
                                  << ", incompatible with nodes_to_receive, which has size "
-                                 << _nodes_to_receive[pid].size());
-    for (unsigned i = 0; i < msg_size; ++i)
-      _nodal_void_volume[_nodes_to_receive[pid][i]] =
-          _nodal_void_volume.at(_nodes_to_receive[pid][i]) + nvv_received[i];
+                                 << receive_pid_entry.size());
+    for (std::size_t i = 0; i < msg_size; ++i)
+      _nodal_void_volume[receive_pid_entry[i]] += nvv_received[i];
   };
   Parallel::push_parallel_vector_data(this->comm(), nvv_to_send, nvv_action_functor);
 }
@@ -207,18 +201,20 @@ NodalVoidVolume::execute()
   // correctly computes _nodal_void_volume for nodes compltely within this processor's domain.
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
+    const Node * node = _current_elem->node_ptr(i);
+    mooseAssert(_nodal_void_volume.count(node) == 1, "Node missing in _nodal_void_volume map");
+    auto & nvv = _nodal_void_volume[node];
     for (unsigned qp = 0; qp < _qrule->n_points(); ++qp)
-      _nodal_void_volume[_current_elem->node_ptr(i)] =
-          _nodal_void_volume.at(_current_elem->node_ptr(i)) +
-          _JxW[qp] * _coord[qp] * _phi[i][qp] * _porosity[qp];
+      nvv += _JxW[qp] * _coord[qp] * _phi[i][qp] * _porosity[qp];
   }
 }
 
 Real
 NodalVoidVolume::getNodalVoidVolume(const Node * node) const
 {
-  if (_nodal_void_volume.count(node) == 1)
-    return _nodal_void_volume.at(node);
+  auto find = _nodal_void_volume.find(node);
+  if (find != _nodal_void_volume.end())
+    return find->second;
   mooseError("nodal id ",
              node->id(),
              " not in NodalVoidVolume's data structures.  Perhaps the execute_on parameter of "
