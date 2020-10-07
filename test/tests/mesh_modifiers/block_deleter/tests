@@ -60,12 +60,6 @@
     exodiff = 'BlockDeleterTest10_out.e'
     no_error_deprecated = true
   [../]
-  [./BlockDeleterTest11]
-    type = 'Exodiff'
-    input = 'BlockDeleterTest11.i'
-    exodiff = 'BlockDeleterTest11_out.e'
-    no_error_deprecated = true
-  [../]
   [./BlockDeleterTest12]
     type = 'Exodiff'
     input = 'BlockDeleterTest12.i'
