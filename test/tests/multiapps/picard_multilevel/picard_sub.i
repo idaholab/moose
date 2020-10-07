@@ -46,6 +46,16 @@
   [../]
 []
 
+[Postprocessors]
+  # Accumulate the number of times 'timestep_end' is reached
+  # (which is an indicator of the number of Picard iterations)
+  [./cumulative_picard_its_pp]
+    type = TestPostprocessor
+    test_type = custom_execute_on
+    execute_on = 'timestep_end'
+  [../]
+[]
+
 [Executioner]
   type = Transient
   num_steps = 5

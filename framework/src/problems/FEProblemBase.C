@@ -4372,8 +4372,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
                << std::endl;
 
     for (const auto & multi_app : multi_apps)
-      if (force || multi_app->needsRestoration())
-        multi_app->restore();
+      multi_app->restore(force);
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
