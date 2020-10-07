@@ -12,7 +12,7 @@ unset PETSC_DIR PETSC_ARCH
 
 !alert! note
 If you plan to run a large-scale simulation, we recommend building petsc with 64-bit indices.
-That can be accomplished by using the following scripts:
+This can be accomplished with the following:
 
 ```bash
 cd ~/projects/moose
@@ -24,7 +24,7 @@ unset PETSC_DIR PETSC_ARCH
 !alert-end!
 
 !alert! note
-If you prefer to install PETSc into a specified location, you could use the following script:
+If you prefer to install PETSc into a specified location, use the following:
 
 ```bash
 cd ~/projects/moose

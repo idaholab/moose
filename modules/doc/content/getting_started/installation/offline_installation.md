@@ -150,7 +150,7 @@ Proceed only if PETSc completed successfully.
 
 !alert! note
 If you plan to run large-scale simulation, we recommend building petsc with 64-bit indices.
-That can be accomplished by using the following script:
+This can be accomplished with the following:
 
 ```bash
 cd ~/offline/moose
