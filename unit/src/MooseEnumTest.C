@@ -171,8 +171,8 @@ TEST(MooseEnum, testErrors)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Invalid option"), std::string::npos) << "failed with unexpected error: "
-                                                             << msg;
+    ASSERT_NE(msg.find("Invalid option"), std::string::npos)
+        << "failed with unexpected error: " << msg;
   }
 
   // Whitespace around equals sign
@@ -353,6 +353,17 @@ TEST(MooseEnum, operatorEqual)
     ASSERT_NE(msg.find("Invalid id \"3\" in MooseEnum. Valid ids are \"1,2\"."), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
+}
+
+TEST(MooseEnum, operatorPlus)
+{
+  MooseEnum a("a=1 b=2", "a");
+  a += "c=3";
+  a += {"d=4", "e=5"};
+
+  MooseEnum b("a=1 b=2 c=3 d=4 e=5");
+
+  EXPECT_TRUE(a.items() == b.items());
 }
 
 TEST(MooseEnum, getIDs)
