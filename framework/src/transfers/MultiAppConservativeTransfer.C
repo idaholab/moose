@@ -369,7 +369,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
   if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-    mooseError(" To postproessor has a zero value ");
+    mooseError("To postprocessor has a zero value ");
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);

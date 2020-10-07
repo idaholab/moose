@@ -432,53 +432,65 @@ MultiApp::backup()
 }
 
 void
-MultiApp::restore()
+MultiApp::restore(bool force)
 {
   TIME_SECTION(_perf_restore);
 
-  // Must be restarting / recovering so hold off on restoring
-  // Instead - the restore will happen in createApp()
-  // Note that _backups was already populated by dataLoad()
-  if (_apps.empty())
-    return;
-
-  // We temporatily copy and store solutions for all subapps
-  if (_keep_solution_during_restore)
+  if (force || needsRestoration())
   {
-    _end_solutions.resize(_my_num_apps);
+    // Must be restarting / recovering so hold off on restoring
+    // Instead - the restore will happen in createApp()
+    // Note that _backups was already populated by dataLoad()
+    if (_apps.empty())
+      return;
 
-    for (unsigned int i = 0; i < _my_num_apps; i++)
+    // We temporarily copy and store solutions for all subapps
+    if (_keep_solution_during_restore)
     {
-      _end_solutions[i] =
-          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution().clone();
-      auto & sub_multiapps =
-          _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
+      _end_solutions.resize(_my_num_apps);
 
-      // multiapps of each subapp should do the same things
-      // It is implemented recursively
-      for (auto & multi_app : sub_multiapps)
-        multi_app->keepSolutionDuringRestore(_keep_solution_during_restore);
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+      {
+        _end_solutions[i] =
+            _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution().clone();
+        auto & sub_multiapps =
+            _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
+
+        // multiapps of each subapp should do the same things
+        // It is implemented recursively
+        for (auto & multi_app : sub_multiapps)
+          multi_app->keepSolutionDuringRestore(_keep_solution_during_restore);
+      }
+    }
+
+    _console << "Begining restoring MultiApp " << name() << std::endl;
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+      _apps[i]->restore(_backups[i]);
+    _console << "Finished restoring MultiApp " << name() << std::endl;
+
+    // Now copy the latest solutions back for each subapp
+    if (_keep_solution_during_restore)
+    {
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+      {
+        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution() =
+            *_end_solutions[i];
+
+        // We need to synchronize solution so that local_solution has the right values
+        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().update();
+      }
+
+      _end_solutions.clear();
     }
   }
-
-  _console << "Begining restoring MultiApp " << name() << std::endl;
-  for (unsigned int i = 0; i < _my_num_apps; i++)
-    _apps[i]->restore(_backups[i]);
-  _console << "Finished restoring MultiApp " << name() << std::endl;
-
-  // Now copy the latest solutions back for each subapp
-  if (_keep_solution_during_restore)
+  else
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().solution() =
-          *_end_solutions[i];
-
-      // We need to synchronize solution so that local_solution has the right values
-      _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase().update();
+      for (auto & sub_app :
+           _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
+        sub_app->restore(false);
     }
-
-    _end_solutions.clear();
   }
 }
 

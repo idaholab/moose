@@ -53,5 +53,5 @@ private:
   ///@}
 
   /// A test counter
-  unsigned int _execute_count = 0;
+  unsigned int & _execute_count;
 };
