@@ -32,13 +32,18 @@
 []
 
 [DiracKernels]
-  active = 'point_source'
-
-  [./point_source]
+  active = 'point_source1 point_source2'
+  [./point_source1]
     type = ConstantPointSource
     variable = u
     value = 1.0
     point = '0.2 0.3'
+  [../]
+  [./point_source2]
+    type = ConstantPointSource
+    variable = u
+    value = -0.5
+    point = '0.2 0.8'
   [../]
 []
 
@@ -62,11 +67,10 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
 []
 
 [Outputs]
-  file_base = out
+  file_base = 2d_out
   exodus = true
 []

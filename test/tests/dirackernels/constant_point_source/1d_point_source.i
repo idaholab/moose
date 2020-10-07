@@ -34,11 +34,17 @@
 []
 
 [DiracKernels]
-  [./point_source]
+  [./point_source1]
     type = ConstantPointSource
     variable = u
     value = 1.0
     point = '0.2 0 0'
+  [../]
+  [./point_source2]
+    type = ConstantPointSource
+    variable = u
+    value = -0.5
+    point = '0.7 0 0'
   [../]
 []
 
@@ -65,5 +71,6 @@
 []
 
 [Outputs]
+  file_base = 1d_out
   exodus = true
 []
