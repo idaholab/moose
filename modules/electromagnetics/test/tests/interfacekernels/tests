@@ -50,4 +50,9 @@
     difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15647e-8
     prereq = electrostatic_contact_conductance_calculated
   [../]
+  [./electrostatic_contact_analytic_solution_test]
+    type = CSVDiff
+    input = 'analytic_solution_test.i'
+    csvdiff = 'analytic_solution_test_out.csv'
+  [../]
 []
