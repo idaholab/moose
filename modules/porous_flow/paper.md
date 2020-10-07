@@ -52,7 +52,7 @@ Fluid mass conservation for fluid species $\kappa$ reads
   v}_{s} + \nabla\cdot \mathbf{F}^{\kappa} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \ .
 \end{equation}
 Here $t$ denotes time and $\nabla$ is a vector of spatial derivatives; $M$ is the mass of fluid per bulk volume (which involves a sum over all fluid phases present in the system); $\mathbf{v}_{s}$ is the velocity of the porous solid
-skeleton (so the second term ensures mass conservation under an evolving skeleton); $\mathbf{F}$ is the fluid flux vector (that includes advection by Darcy's law as well as diffusion and hydrodynamic dispersion); $\Lambda$ is a radioactive decay rate; $\phi I_{\mathrm{chem}}$ represents chemical precipitation or dissolution ($\phi$ is the porosity); and $q$ is a source.
+skeleton (so the second term ensures mass conservation under an evolving skeleton); $\mathbf{F}$ is the fluid flux vector (that includes advection by Darcy's law as well as diffusion and hydrodynamic dispersion); $\Lambda$ is a radioactive decay rate; $\phi I_{\mathrm{chem}}$ represents chemical precipitation or dissolution ($\phi$ is the porosity); and $q$ is a source.    The Lagrangian coordinate system is used, meaning the mesh moves with $\mathbf{v}_{s}$.
 
 Heat-energy conservation reads
 \begin{equation}
@@ -64,9 +64,8 @@ Heat-energy conservation reads
  - q^{T} \ .
 \end{equation}
 Here $\mathcal{E}$ is the heat energy per unit volume in the rock-fluid
-system (which involves the porous skeleton's heat energy as well as the fluids' heat energy, accounting for their saturations); $\mathbf{F}^{T}$ is the heat flux (which involves heat conduction and advection by the fluid); $\nu$ describes the ratio of
-plastic-deformation energy that gets transferred to heat energy during plastic deformation of the solid skeleton,
-$\sigma^{\mathrm{eff}}_{ij}$ is the effective stress, $\epsilon_{ij}^{\mathrm{plastic}}$ is the plastic strain, and $q^{T}$ is a heat source.
+system (which involves the porous skeleton's heat energy as well as the fluids' heat energy, accounting for their saturations); $\mathbf{F}^{T}$ is the heat flux vector (which involves heat conduction and advection by the fluid); $\nu$ describes the ratio of
+plastic-deformation energy that gets transferred to heat energy during plastic deformation of the solid skeleton; and $q^{T}$ is a heat source.  The effective stress components are denoted by $\sigma^{\mathrm{eff}}_{ij}$, where $i$ and $j$ are spatial indices (the sum over $i$ and $j$ is implied) and $\epsilon^{\mathrm{plastic}}$ is the plastic strain.
 
 Conservation of momentum reads
 \begin{equation}
@@ -84,7 +83,7 @@ A comprehensive listing of equations, including fluid equations of state, the ev
 
 ``PorousFlow`` is built upon the open-source, massively parallel, fully implicit multiphysics simulation framework MOOSE (Multiphysics Object-Oriented Simulation Environment) [@permann2020moose].  MOOSE is an open-source library from Idaho National Laboratory that provides a high-level interface to the libMesh finite element library [@libmesh] and PETSc nonlinear solvers [@petsc].  MOOSE and ``PorousFlow`` follow [strict quality controls](https://mooseframework.org/sqa/index.html).
 
-Other open-source codes that can also perform tightly-coupled THMC simulations to some degree include OpenGeoSys [@opengeosys], PFLOTRAN [@pflotran] and work under the Open Porous Media initiative [@opm].
+Other open-source codes that can also perform tightly-coupled thermal-hydraulic-mechanical-chemical simulations to some degree include OpenGeoSys [@opengeosys], PFLOTRAN [@pflotran] and work under the Open Porous Media initiative [@opm].
 
 One aspect that makes ``PorousFlow`` different to these codes is the ease of coupling additional physics to the base flow and transport capabilities, and the relative speed and simplicity of developing new capability using the APIs provided by MOOSE.  Harnessing the power of MOOSE means that ``PorousFlow`` simulations efficiently use multiprocessors and automatically utilize threading/OpenMP, without developers or users having to worry about the software technicalities.  From the user's perspective, mesh adaptivity with a variety of integration schemes and unstructured meshes may be used.  Various time-stepping schemes may be employed.  A variety of I/O formats are available, such as Exodus and VTK files as well as CSV plaintext.  Users may utilize the "MultiApp" system that allows simulations to be embedded inside other simulations.  A GUI helps users create, run and analyse models.  An example ``PorousFlow`` result is shown in \autoref{fig:example}.
 
