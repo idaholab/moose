@@ -27,3 +27,12 @@ public:
   static InputParameters validParams() { return ADKernel::validParams(); };
   GenericKernel(const InputParameters & parameters) : ADKernel(parameters) {}
 };
+
+#define usingGenericKernelMembers                                                                  \
+  using GenericKernel<is_ad>::_qp;                                                                 \
+  using GenericKernel<is_ad>::_i;                                                                  \
+  using GenericKernel<is_ad>::_t;                                                                  \
+  using GenericKernel<is_ad>::_test;                                                               \
+  using GenericKernel<is_ad>::_q_point;                                                            \
+  usingFunctionInterfaceMembers;                                                                   \
+  usingPostprocessorInterfaceMembers
