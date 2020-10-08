@@ -26,10 +26,10 @@
     type = VectorPostprocessorPointSource
     variable = u
     vector_postprocessor = csv_reader
-    xcoordName = x3
-    ycoordName = y3
-    zcoordName = z3
-    valueName = value3
+    x_coord_name = x3
+    y_coord_name = y3
+    z_coord_name = z3
+    value_name = value3
   [../]
 []
 

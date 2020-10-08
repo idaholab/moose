@@ -25,10 +25,10 @@ VectorPostprocessorPointSource::validParams()
   params.addParam<VectorPostprocessorName>(
       "vector_postprocessor",
       "The name of the VectorPostprocessor containing positions and corresponding");
-  params.addParam<std::string>("xcoordName", "x", "name of column containing x coordinates.");
-  params.addParam<std::string>("ycoordName", "y", "name of column containing y coordinates.");
-  params.addParam<std::string>("zcoordName", "z", "name of column containing z coordinates.");
-  params.addParam<std::string>("valueName", "value", "name of column containing values.");
+  params.addParam<std::string>("x_coord_name", "x", "name of column containing x coordinates.");
+  params.addParam<std::string>("y_coord_name", "y", "name of column containing y coordinates.");
+  params.addParam<std::string>("z_coord_name", "z", "name of column containing z coordinates.");
+  params.addParam<std::string>("value_name", "value", "name of column containing values.");
 
   // fixme lynn do I need this?
   params.addParam<bool>(
@@ -46,7 +46,7 @@ VectorPostprocessorPointSource::VectorPostprocessorPointSource(const InputParame
     VectorPostprocessorInterface(this),
     _use_broadcast(getParam<bool>("use_broadcast")),
     _vpp_values(getVectorPostprocessorValue(
-        "vector_postprocessor", getParam<std::string>("valueName"), _use_broadcast))
+        "vector_postprocessor", getParam<std::string>("value_name"), _use_broadcast))
 {
 }
 
@@ -54,11 +54,11 @@ void
 VectorPostprocessorPointSource::addPoints()
 {
   const auto xcoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("xcoordName"), _use_broadcast));
+      "vector_postprocessor", getParam<std::string>("x_coord_name"), _use_broadcast));
   const auto ycoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("ycoordName"), _use_broadcast));
+      "vector_postprocessor", getParam<std::string>("y_coord_name"), _use_broadcast));
   const auto zcoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("zcoordName"), _use_broadcast));
+      "vector_postprocessor", getParam<std::string>("z_coord_name"), _use_broadcast));
 
   mooseAssert(xcoord.size() != 0,
               "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp.");

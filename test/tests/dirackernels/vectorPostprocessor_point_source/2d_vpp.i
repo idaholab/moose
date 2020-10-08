@@ -30,8 +30,6 @@
   [../]
 []
 
-
-
 [BCs]
   [./left]
     type = DirichletBC
