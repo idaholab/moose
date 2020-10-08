@@ -110,7 +110,6 @@ tar -pzcf offline.tar.gz offline
 
 !alert note
 If operating on a Macintosh machine, creating a tarball to be extracted on a Linux machine produces warnings. They are warnings only, and can be safely ignored.
-!alert-end!
 
 If copying the tarball over, you can extract it with:
 
