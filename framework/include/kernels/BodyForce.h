@@ -10,12 +10,6 @@
 #pragma once
 
 #include "GenericKernel.h"
-#include "FunctionInterface.h"
-#include "PostprocessorInterface.h"
-
-template <bool is_ad>
-class BodyForceTempl;
-class Function;
 
 /**
  * This kernel implements a generic functional

@@ -29,14 +29,14 @@ template <bool is_ad>
 GenericReal<is_ad>
 GenericValueTestTempl<is_ad>::computeQpResidual()
 {
-  return -this->_u[this->_qp] * this->_test[this->_i][this->_qp];
+  return -_u[_qp] * _test[_i][_qp];
 }
 
 template <bool is_ad>
 Real
 GenericValueTestTempl<is_ad>::computeQpJacobian()
 {
-  return -this->_phi[this->_j][this->_qp] * this->_test[this->_i][this->_qp];
+  return -_phi[_j][_qp] * _test[_i][_qp];
 }
 
 template class GenericValueTestTempl<false>;
