@@ -11,10 +11,9 @@
 
 #include "StochasticToolsApp.h"
 #include "GeneralUserObject.h"
-#include "SamplerInterface.h"
 #include "LoadSurrogateDataAction.h"
 
-class SurrogateTrainer : public GeneralUserObject, public SamplerInterface
+class SurrogateTrainer : public GeneralUserObject
 {
 public:
   static InputParameters validParams();

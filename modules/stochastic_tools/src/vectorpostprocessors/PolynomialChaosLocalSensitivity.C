@@ -21,7 +21,6 @@ PolynomialChaosLocalSensitivity::validParams()
   params += SurrogateModelInterface::validParams();
   params.addClassDescription(
       "Tool for calculating local sensitivity with polynomial chaos expansion.");
-  params += SamplerInterface::validParams();
 
   params.addRequiredParam<UserObjectName>("pc_name", "Name of PolynomialChaos.");
 
@@ -42,7 +41,6 @@ PolynomialChaosLocalSensitivity::validParams()
 
 PolynomialChaosLocalSensitivity::PolynomialChaosLocalSensitivity(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     SurrogateModelInterface(this),
     _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
     _sampler(isParamValid("local_points_sampler") ? &getSampler("local_points_sampler") : nullptr),

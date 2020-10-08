@@ -9,10 +9,9 @@
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 
 /* SOBOL test function, see Slaughter, Eq. 5.51 */
-class GFunction : public GeneralVectorPostprocessor, public SamplerInterface
+class GFunction : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();

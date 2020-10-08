@@ -25,7 +25,6 @@ GFunction::validParams()
 
 GFunction::GFunction(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     _sampler(getSampler("sampler")),
     _q_vector(getParam<std::vector<Real>>("q_vector")),
     _values(declareVector("g_values"))

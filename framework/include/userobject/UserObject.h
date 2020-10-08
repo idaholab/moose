@@ -23,6 +23,7 @@
 #include "ScalarCoupleable.h"
 #include "SetupInterface.h"
 #include "PerfGraphInterface.h"
+#include "SamplerInterface.h"
 
 #include "libmesh/parallel.h"
 
@@ -45,6 +46,7 @@ class UserObject : public MooseObject,
                    protected PostprocessorInterface,
                    protected VectorPostprocessorInterface,
                    protected DistributionInterface,
+                   protected SamplerInterface,
                    protected Restartable,
                    protected MeshMetaDataInterface,
                    protected MeshChangedInterface,
