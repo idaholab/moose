@@ -34,7 +34,7 @@ BodyForceTempl<is_ad>::validParams()
 template <bool is_ad>
 BodyForceTempl<is_ad>::BodyForceTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _scale(getParam<Real>("value")),
+    _scale(this->template getParam<Real>("value")),
     _function(getFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
@@ -47,3 +47,6 @@ BodyForceTempl<is_ad>::computeQpResidual()
   Real factor = _scale * _postprocessor * _function.value(_t, _q_point[_qp]);
   return _test[_i][_qp] * -factor;
 }
+
+template class BodyForceTempl<false>;
+template class BodyForceTempl<true>;
