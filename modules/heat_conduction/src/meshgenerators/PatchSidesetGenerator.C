@@ -110,8 +110,7 @@ PatchSidesetGenerator::generate()
     paramError("sideset_name", "Not a valid boundary");
 
   // create a dim - 1 dimensional mesh
-  auto boundary_mesh =
-      libmesh_make_unique<libMesh::ReplicatedMesh>(comm(), mesh->mesh_dimension() - 1);
+  auto boundary_mesh = buildReplicatedMesh(mesh->mesh_dimension() - 1);
   boundary_mesh->set_mesh_dimension(mesh->mesh_dimension() - 1);
   boundary_mesh->set_spatial_dimension(mesh->mesh_dimension());
 

@@ -259,20 +259,21 @@ public:
 
   /**
    * Method to construct a libMesh::MeshBase object that is normally set and used by the MooseMesh
-   * object during the "init()" phase.
+   * object during the "init()" phase. If the parameter \p dim is not
+   * provided, then its value will be taken from the input file mesh block.
    */
-  std::unique_ptr<MeshBase> buildMeshBaseObject(ParallelType override_type = ParallelType::DEFAULT);
+  std::unique_ptr<MeshBase> buildMeshBaseObject(unsigned int dim = libMesh::invalid_uint,
+                                                ParallelType override_type = ParallelType::DEFAULT);
 
   /**
-   * Shortcut method to construct a libMesh mesh instance. The created derived-from-MeshBase object
-   * will have its \p allow_remote_element_removal flag set to whatever our value is. We will also
-   * attach any geometric \p RelationshipManagers that have been requested by our simulation objects
-   * to the \p MeshBase object. If the parameter \p dim is not provided, then its value will be
-   * taken from the input file mesh block. This API should be used by any \p MeshGenerator that
-   * needs to build a \p MeshBase object
+   * Shortcut method to construct a unique pointer to a libMesh mesh instance. The created
+   * derived-from-MeshBase object will have its \p allow_remote_element_removal flag set to whatever
+   * our value is. We will also attach any geometric \p RelationshipManagers that have been
+   * requested by our simulation objects to the \p MeshBase object. If the parameter \p dim is not
+   * provided, then its value will be taken from the input file mesh block.
    */
   template <typename T>
-  T buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
+  std::unique_ptr<T> buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
 
   /**
    * Method to set the mesh_base object. If this method is NOT called prior to calling init(), a
@@ -1610,13 +1611,16 @@ typedef StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> ConstBn
 typedef StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> ConstBndElemRange;
 
 template <typename T>
-T
+std::unique_ptr<T>
 MooseMesh::buildTypedMesh(unsigned int dim)
 {
   if (dim == libMesh::invalid_uint)
     dim = getParam<MooseEnum>("dim");
 
-  T mesh(_communicator, dim);
+  auto mesh = libmesh_make_unique<T>(_communicator, dim);
+
+  if (!getParam<bool>("allow_renumbering"))
+    mesh->allow_renumbering(false);
 
   return mesh;
 }

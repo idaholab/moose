@@ -111,7 +111,7 @@ std::unique_ptr<MeshBase>
 AnnularMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
 
   const Real dt = (_dmax - _dmin) / _nt;
 

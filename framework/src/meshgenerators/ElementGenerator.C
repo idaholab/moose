@@ -180,7 +180,7 @@ ElementGenerator::generate()
 
   // If there was no input mesh then let's just make a new one
   if (!mesh)
-    mesh = _mesh->buildMeshBaseObject();
+    mesh = buildMeshBaseObject();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
   auto elem = getElemType(elem_type_enum);

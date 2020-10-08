@@ -48,3 +48,30 @@ MeshGenerator::getMeshByName(const MeshGeneratorName & input_mesh_generator)
   _depends_on.push_back(input_mesh_generator);
   return _app.getMeshGeneratorOutput(input_mesh_generator);
 }
+
+std::unique_ptr<MeshBase>
+MeshGenerator::buildMeshBaseObject(unsigned int dim)
+{
+  if (!_mesh)
+    mooseError("We need a MooseMesh object in order to build ReplicatedMesh objects through the "
+               "buildReplicatedMesh API");
+  return _mesh->buildMeshBaseObject(dim);
+}
+
+std::unique_ptr<ReplicatedMesh>
+MeshGenerator::buildReplicatedMesh(unsigned int dim)
+{
+  if (!_mesh)
+    mooseError("We need a MooseMesh object in order to build ReplicatedMesh objects through the "
+               "buildReplicatedMesh API");
+  return _mesh->buildTypedMesh<ReplicatedMesh>(dim);
+}
+
+std::unique_ptr<DistributedMesh>
+MeshGenerator::buildDistributedMesh(unsigned int dim)
+{
+  if (!_mesh)
+    mooseError("We need a MooseMesh object in order to build DistributedMesh objects through the "
+               "buildDistributedMesh API");
+  return _mesh->buildTypedMesh<DistributedMesh>(dim);
+}

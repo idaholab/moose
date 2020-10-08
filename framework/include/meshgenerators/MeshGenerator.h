@@ -22,6 +22,11 @@
 // Forward declarations
 class MeshGenerator;
 class MooseMesh;
+namespace libMesh
+{
+class ReplicatedMesh;
+class DistributedMesh;
+}
 
 template <>
 InputParameters validParams<MeshGenerator>();
@@ -85,6 +90,32 @@ protected:
 
   /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
   std::shared_ptr<MooseMesh> & _mesh;
+
+  /**
+   * Build a \p MeshBase object whose underlying type will be determined by the Mesh input file
+   * block
+   * @param dim The logical dimension of the mesh, e.g. 3 for hexes/tets, 2 for quads/tris. If the
+   * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
+   * be used
+   */
+  std::unique_ptr<MeshBase> buildMeshBaseObject(unsigned int dim = libMesh::invalid_uint);
+
+  /**
+   * Build a replicated mesh
+   * @param dim The logical dimension of the mesh, e.g. 3 for hexes/tets, 2 for quads/tris. If the
+   * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
+   * be used
+   */
+  std::unique_ptr<ReplicatedMesh> buildReplicatedMesh(unsigned int dim = libMesh::invalid_uint);
+
+  /**
+   * Build a distributed mesh that has correct remote element removal behavior and geometric
+   * ghosting functors based on the simulation objects
+   * @param dim The logical dimension of the mesh, e.g. 3 for hexes/tets, 2 for quads/tris. If the
+   * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
+   * be used
+   */
+  std::unique_ptr<DistributedMesh> buildDistributedMesh(unsigned int dim = libMesh::invalid_uint);
 
 private:
   /// A list of generators that are required to run before this generator may run

@@ -70,7 +70,7 @@ SpiralAnnularMeshGenerator::SpiralAnnularMeshGenerator(const InputParameters & p
 std::unique_ptr<MeshBase>
 SpiralAnnularMeshGenerator::generate()
 {
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  std::unique_ptr<ReplicatedMesh> mesh = buildReplicatedMesh(2);
 
   {
     // Compute the radial bias given:
