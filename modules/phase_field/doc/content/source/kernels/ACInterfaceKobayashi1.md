@@ -12,3 +12,5 @@ This kernel implements the first two terms on the right side of eq. (3) of the p
 !syntax inputs /Kernels/ACInterfaceKobayashi1
 
 !syntax children /Kernels/ACInterfaceKobayashi1
+
+!bibtex bibliography

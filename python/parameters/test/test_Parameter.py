@@ -41,6 +41,12 @@ class TestParameter(unittest.TestCase):
         self.assertEqual(opt.default, 12345)
         self.assertEqual(opt.value, '12345')
 
+        opt = Parameter('bar', default=1980, vtype=int)
+        with self.assertLogs(level=logging.WARNING) as cm:
+            opt.default = 'nope'
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn("'bar' must be of type (<class 'int'>,) but <class 'str'> provided.", cm.output[0])
+
     def testAllow(self):
         opt = Parameter('foo', allow=(1, 'two'))
         self.assertIsNone(opt.default)
@@ -64,9 +70,6 @@ class TestParameter(unittest.TestCase):
 
         opt.value = 1
         self.assertEqual(opt.value, 1)
-
-        opt.value = 4.7
-        self.assertEqual(opt.value, 4)
 
         with self.assertLogs(level=logging.WARNING) as cm:
             opt.value = 's'
@@ -219,17 +222,48 @@ class TestParameter(unittest.TestCase):
         self.assertNotIn('Type', s)
         self.assertNotIn('Allow', s)
 
-        opt = Parameter('year', default=1980, vtype=int, allow=(1949, 1954, 1975, 1980))
+        opt = Parameter('year', default=1980, vtype=int, allow=(1949, 1954, 1977, 1980))
         opt.value = 1954
         s = str(opt)
         self.assertIn('Value:   1954', s)
         self.assertIn('Default: 1980', s)
         self.assertIn("Type(s): ('int',)", s)
-        self.assertIn('Allow:   (1949, 1954, 1975, 1980)', s)
+        self.assertIn('Allow:   (1949, 1954, 1977, 1980)', s)
 
         opt = Parameter('year', default=1980, doc="The best year.")
         s = str(opt)
         self.assertIn("best", s)
+
+    def testVerify(self):
+        opt = Parameter('year', verify=(lambda v: v > 1980, "The year must be greater than 1980."))
+        self.assertEqual(opt.value, None)
+        opt.value = 1990
+        self.assertEqual(opt.value, 1990)
+
+        with self.assertLogs(level=logging.WARNING) as cm:
+            opt.value = 1949
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn("Verify function failed with the given value of 1949\nThe year must be greater than 1980.", cm.output[0])
+
+        with self.assertRaises(TypeError) as e:
+            Parameter('year', verify="wrong")
+        self.assertIn("The supplied 'verify' argument must be a 'tuple' with callable function and 'str' error message, but <class 'str'> was provided.", str(e.exception))
+
+        with self.assertRaises(TypeError) as e:
+            Parameter('year', verify=("wrong", 1, 2))
+        self.assertIn("The supplied 'verify' argument must be a 'tuple' with two items a callable function and 'str' error message, but <class 'tuple'> with 3 items was provided.", str(e.exception))
+
+        with self.assertRaises(TypeError) as e:
+            Parameter('year', verify=("wrong", "message"))
+        self.assertIn("The first item in the 'verify' argument tuple must be a callable function with a single argument, but <class 'str'> was provided", str(e.exception))
+
+        with self.assertRaises(TypeError) as e:
+            Parameter('year', verify=(lambda x,y: True, "message"))
+        self.assertIn("The first item in the 'verify' argument tuple must be a callable function with a single argument, but <class 'function'> was provided that has 2 arguments.", str(e.exception))
+
+        with self.assertRaises(TypeError) as e:
+            Parameter('year', verify=(lambda v: True, 42))
+        self.assertIn("The second item in the 'verify' argument tuple must be a string, but <class 'int'> was provided", str(e.exception))
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True)

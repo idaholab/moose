@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 from collections import OrderedDict
+import re
 import enum
 import logging
 import copy
@@ -17,12 +18,14 @@ class InputParameters(object):
     """
     A warehouse for creating and storing options
     """
+    __PARAM_TYPE__ = Parameter
 
     class ErrorMode(enum.Enum):
-        """Defines the error mode."""
-        WARNING = 1  # logging.warning
-        ERROR = 2    # logging.error
-        EXCEPTION =3 # logging.critical and raises InputParametersException
+        """Defines the error mode for all instances"""
+        NONE = 0      # disable errors
+        WARNING = 1   # logging.warning
+        ERROR = 2     # logging.error
+        EXCEPTION = 3 # logging.critical and raises InputParametersException
 
     class InputParameterException(Exception):
         """Custom Exception used in for ErrorMode.EXCEPTION"""
@@ -31,9 +34,10 @@ class InputParameters(object):
 
     LOG = logging.getLogger('InputParameters')
 
-    def __init__(self, mode=ErrorMode.WARNING):
-        self.__mode = mode
+    def __init__(self, mode=None):
         self.__parameters = OrderedDict()
+        self.add('_error_mode', default=mode or InputParameters.ErrorMode.WARNING,
+                 vtype=InputParameters.ErrorMode, private=True)
 
     def add(self, *args, **kwargs):
         """
@@ -46,11 +50,17 @@ class InputParameters(object):
             self.__errorHelper("Cannot add parameter, the parameter '{}' already exists.", args[0])
             return
 
+        if '_' in args[0]:
+            group, subname = args[0].split('_', 1)
+            if (group in self.__parameters) and isinstance(self.__parameters[group].value, InputParameters):
+                self.__errorHelper("Cannot add a parameter with the name '{}', "
+                                   "a sub parameter exists with the name '{}'.", args[0], group)
+
         default = kwargs.get('default', None)
         if isinstance(default, InputParameters):
             kwargs['vtype'] = InputParameters
 
-        self.__parameters[args[0]] = Parameter(*args, **kwargs)
+        self.__parameters[args[0]] = self.__PARAM_TYPE__(*args, **kwargs)
 
     def __contains__(self, name):
         """
@@ -74,20 +84,32 @@ class InputParameters(object):
         Provides dict.items() functionality.
         """
         for name, param in self.__parameters.items():
-            yield name, param.value
+            if not param.private:
+                yield name, param.value
 
     def values(self):
         """
         Provides dict.values() functionality.
         """
         for param in self.__parameters.values():
-            yield param.value
+            if not param.private:
+                yield param.value
 
     def keys(self):
         """
         Provides dict.keys() functionality.
         """
-        return self.__parameters.keys()
+        return [key for key, value in self.__parameters.items() if not value.private]
+
+    def parameters(self):
+        """
+        Direct iteration over the Parameter objects
+        """
+        for param in self.__parameters.values():
+            if isinstance(param, InputParameters):
+                yield param.parameters()
+            else:
+                yield param
 
     def remove(self, name):
         """
@@ -97,58 +119,60 @@ class InputParameters(object):
             name[str]: The name of the Parameter to remove
         """
         if name not in self.__parameters:
-            self.__errorHelper("Cannot remove parameter, the parameter '{}' does not exist.", name)
+            self.__errorHelper("The parameter '{}' does not exist.", name)
         else:
             self.__parameters.pop(name)
 
-    def isValid(self, name):
+    def isValid(self, *args):
         """
         Test if the given option is valid (i.e., !None). (public)
 
         Inputs:
             name[str]: The name of the Parameter to retrieve
         """
-        opt = self.__parameters.get(name, None)
-        if opt is None:
-            self.__errorHelper("Cannot determine if the parameters is valid, the parameter '{}' does not exist.", name)
-            return None
-        else:
+        opt = self._getParameter(*args)
+        if opt is not None:
             return opt.value is not None
 
-    def setDefault(self, name, default):
+    def setDefault(self, *args):
         """
         Set the default value, this will onluy set the value if it is None
         """
-        opt = self.__parameters.get(name, None)
-        if opt is None:
-            self.__errorHelper("Cannot set default, the parameter '{}' does not exist.", name)
-        else:
-            opt.default = default
+        opt = self._getParameter(*args[:-1])
+        if opt is not None:
+            opt.default = args[-1]
 
-    def getDefault(self, name):
+    def getDefault(self, *args):
         """
         Return the default value
         """
-        opt = self.__parameters.get(name, None)
-        if opt is None:
-            self.__errorHelper("Cannot get default, the parameter '{}' does not exist.", name)
-            return None
-        return opt.default
+        opt = self._getParameter(*args)
+        if opt is not None:
+            return opt.default
 
-    def isDefault(self, name):
+    def isDefault(self, *args):
         """
         Return True if the supplied option is set to the default value.
 
         Inputs:
             name[str]: The name of the Parameter to test.
         """
-        opt = self.__parameters.get(name, None)
-        if opt is None:
-            self.__errorHelper("Cannot determine if the parameter is default, the parameter '{}' does not exist.", name)
-            return None
-        return opt.value == opt.default
+        opt = self._getParameter(*args)
+        if opt is not None:
+            return opt.value == opt.default
 
-    def set(self, name, *args, **kwargs):
+    def isSetByUser(self, *args):
+        """
+        Return True if the supplied option was set after construction.
+
+        Inputs:
+            name[str]: The name of the Parameter to test.
+        """
+        opt = self._getParameter(*args)
+        if opt is not None:
+            return opt.isSetByUser()
+
+    def set(self, *args):
         """
         Set the value of a parameter or update contents of a sub-parameters.
 
@@ -157,51 +181,30 @@ class InputParameters(object):
 
         Use:
            params.set('foo', 42)            # foo is an 'int'
-           params.set('bar', year=1980)     # bar is an 'InputParameters' object
+           params.set('bar', 'year', 1980)  # bar is an 'InputParameters' object
            params.set('bar', {'year':1980}) # bar is an 'InputParameters' object
+           params.set('bar_year', 1980)     # bar is an 'InputParameters' object
 
         Inputs:
-            name[str]: The name of the Parameter to modify
-            value|kwargs: The value to set the parameter or key, value pairs if the parameter is
-                          an InputParameters object
+            name(s)[str]: The name(s) of the Parameter to modify
+            value: The value for setting set the parameter
         """
-        opt = self.__parameters.get(name, None)
+        param = self._getParameter(*args[:-1])
+        if (param is not None) and isinstance(param.value, InputParameters) and isinstance(args[-1], dict):
+            param.value.update(**args[-1])
+        elif param is not None:
+            param.value = args[-1]
 
-        if opt is None:
-            self.__errorHelper("Cannot set value, the parameter '{}' does not exist.", name)
-
-        elif isinstance(opt.value, InputParameters):
-            if len(args) > 0 and kwargs:
-                self.__errorHelper("Key, value pairs are not allowed when setting the '{}' parameter with a supplied dict argument.", name)
-            elif len(args) == 1 and isinstance(args[0], dict):
-                opt.value.update(**args[0])
-            elif len(args) == 1 and isinstance(args[0], InputParameters):
-                opt.value = args[0]
-            elif len(args) == 1:
-                self.__errorHelper("The second argument for the '{}' parameter must be a dict() or InputParametrs object.", name)
-            else:
-                opt.value.update(**kwargs)
-        else:
-            if len(args) != 1:
-                self.__errorHelper("A single second argument is required for the '{}' parameter.", name)
-            elif kwargs:
-                self.__errorHelper("Key, value pairs are not allowed when setting the '{}' parameter.", name)
-            else:
-                opt.value = args[0]
-
-    def get(self, name):
+    def get(self, *args):
         """
         Overload for accessing the parameter value by name with []
 
         Inputs:
-            name[str]: The name of the Parameter to retrieve
+            *args[str]: The name(s) of the Parameter to retrieve, use multiple names for nested parameters
         """
-        opt = self.__parameters.get(name, None)
-        if opt is None:
-            self.__errorHelper("Cannot get value, the parameter '{}' does not exist.", name)
-            return None
-        else:
-            return opt.value
+        obj = self._getParameter(*args)
+        if obj is not None:
+            return obj.value
 
     def hasParameter(self, name):
         """
@@ -220,31 +223,26 @@ class InputParameters(object):
             *args: InputParameters objects to use for updating this object.
             **kwargs: key, values pairs to used for updating this object.
         """
-        # Unused options
-        unused = set()
-
         # Update from InputParameters object
         for opt in args:
             if not isinstance(opt, InputParameters):
                 self.__errorHelper("The supplied arguments must be InputParameters objects or key, value pairs.")
             else:
                 for key in opt.keys():
-                    if self.hasParameter(key):
-                        self.set(key, opt.get(key))
-                    else:
-                        unused.add(key)
+                    value = opt.get(key)
+                    if self.hasParameter(key) and (value is not None):
+                        self.set(key, value)
 
         # Update from kwargs
         for k, v in kwargs.items():
-            if k in self.keys():
-                self.set(k, v)
-            else:
-                unused.add(k)
+            self.set(k, v)
 
-        # Warning for unused
-        if len(unused) > 0:
-            msg = 'The following parameters do not exist: {}'
-            self.__errorHelper(msg, ' '.join(unused))
+    def validate(self):
+        """
+        Validate that all parameters marked as required are defined
+        """
+        for param in self.__parameters.values():
+            param.validate()
 
     def __str__(self):
         """
@@ -252,24 +250,58 @@ class InputParameters(object):
         """
         return self.toString()
 
-    def toString(self):
+    def toString(self, *keys, prefix=None, level=0):
         """
         Create a string of all parameters using Parameter.toString
         """
         out = []
-        for param in self.itervalues():
-            out.append(param.toString())
+        keys = keys or self.keys()
+        for key, param in self.__parameters.items():
+            if key in keys:
+                out.append(param.toString(prefix=prefix, level=level))
         return '\n\n'.join(out)
+
+    def _getParameter(self, *args):
+        """
+        A helper for returning the a Parameter object that handles nested InputParameters.
+
+        Use:
+             _getParameter('foo')
+             _getParameter('foo', 'bar')
+
+        Inputs:
+            *args[str]: The name(s) of the Parameter to retrieve, use multiple names for nested parameters
+        """
+        if len(args) < 1:
+            self.__errorHelper("One or more names must be supplied.")
+            return
+
+        opt = self.__parameters.get(args[0])
+        if (opt is None) and ('_' in args[0]):
+            group, subname = args[0].split('_', 1)
+            args = [group, subname] + list(args[1:]) if len(args) > 1 else [group, subname]
+            return self._getParameter(*args)
+
+        if opt is None:
+            self.__errorHelper("The parameter '{}' does not exist.", args[0])
+            return None
+        elif isinstance(opt.value, InputParameters) and len(args) > 1:
+            return opt.value._getParameter(*args[1:])
+        elif (not isinstance(opt.value, InputParameters)) and len(args) > 1:
+            self.__errorHelper("Extra argument(s) found: {}", ', '.join(str(a) for a in args[1:]))
+        else:
+            return opt
 
     def __errorHelper(self, text, *args, **kwargs):
         """
         Produce warning, error, or exception based on operation mode.
         """
         msg = text.format(*args, **kwargs)
-        if self.__mode == InputParameters.ErrorMode.WARNING:
+        mode = self.get('_error_mode')
+        if mode == InputParameters.ErrorMode.WARNING:
             self.LOG.warning(msg)
-        elif self.__mode == InputParameters.ErrorMode.ERROR:
+        elif mode == InputParameters.ErrorMode.ERROR:
             self.LOG.error(msg)
-        else:
+        elif mode == InputParameters.ErrorMode.EXCEPTION:
             self.LOG.critical(msg)
             raise InputParameters.InputParameterException(msg)
