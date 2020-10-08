@@ -13,11 +13,11 @@
 #include "Function.h"
 
 registerMooseObject("MooseApp", BodyForce);
+registerMooseObject("MooseApp", ADBodyForce);
 
-defineLegacyParams(BodyForce);
-
+template <bool is_ad>
 InputParameters
-BodyForce::validParams()
+BodyForceTempl<is_ad>::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Demonstrates the multiple ways that scalar values can be introduced "
@@ -31,16 +31,18 @@ BodyForce::validParams()
   return params;
 }
 
-BodyForce::BodyForce(const InputParameters & parameters)
-  : Kernel(parameters),
-    _scale(getParam<Real>("value")),
+template <bool is_ad>
+BodyForceTempl<is_ad>::BodyForceTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _scale(this->template getParam<Real>("value")),
     _function(getFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }
 
-Real
-BodyForce::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+BodyForceTempl<is_ad>::computeQpResidual()
 {
   Real factor = _scale * _postprocessor * _function.value(_t, _q_point[_qp]);
   return _test[_i][_qp] * -factor;
