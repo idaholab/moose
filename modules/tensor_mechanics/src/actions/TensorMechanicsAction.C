@@ -15,6 +15,8 @@
 #include "TensorMechanicsAction.h"
 #include "Material.h"
 
+#include "BlockRestrictable.h"
+
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
@@ -330,6 +332,8 @@ TensorMechanicsAction::act()
       params.set<std::vector<VariableName>>("out_of_plane_strain") = {
           getParam<VariableName>("out_of_plane_strain")};
 
+    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
+
     _problem->addMaterial(ad_prepend + type, name() + "_strain", params);
   }
 
@@ -463,16 +467,13 @@ void
 TensorMechanicsAction::actEigenstrainNames()
 {
   // Create containers for collecting blockIDs and eigenstrain names from materials
-  std::map<std::string, std::vector<SubdomainID>> material_eigenstrain_map;
+  std::map<std::string, std::set<SubdomainID>> material_eigenstrain_map;
   std::set<std::string> eigenstrain_set;
 
-  // Copy the current set of subdomain ids
-  std::vector<SubdomainID> current_subdomains(_subdomain_ids.size());
-  std::copy(_subdomain_ids.begin(), _subdomain_ids.end(), current_subdomains.begin());
-
-  // Copy the current vector of eigenstrain names
-  std::vector<MaterialPropertyName> eigenstrain_names_copy(_eigenstrain_names.size());
-  std::copy(_eigenstrain_names.begin(), _eigenstrain_names.end(), eigenstrain_names_copy.begin());
+  // Copy the current  vector of eigenstrain names
+  std::set<MaterialPropertyName> eigenstrain_names_copy(_eigenstrain_names.begin(),
+                                                        _eigenstrain_names.end());
+  std::set<MaterialPropertyName> verified_eigenstrain_names;
 
   // Determine all the materials(eigenstrains) all ready created
   auto materials = _problem->getMaterialWarehouse().getObjects();
@@ -483,49 +484,90 @@ TensorMechanicsAction::actEigenstrainNames()
     // Check for eigenstrain names, only deal with those materials
     if (mat_params.isParamValid("eigenstrain_name"))
     {
+      std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
       auto name = mat_params.get<std::string>("eigenstrain_name");
-
-      // If the block is defined on the material
-      if (mat_params.isParamValid("block"))
+      // Check block restrictions
+      if (blk)
       {
-        // Get the IDs from the supplied block names
-        auto blocks = mat_params.get<std::vector<SubdomainName>>("block");
-        auto vec_ids = _mesh->getSubdomainIDs(blocks);
-        // Names will be unique based on blockIDs
+        const std::set<SubdomainID> & blocks =
+            blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
+        // Don't add duplicate
         if (eigenstrain_set.insert(name).second)
-          material_eigenstrain_map.insert(std::make_pair(name, vec_ids));
+          material_eigenstrain_map.insert(std::make_pair(name, blocks));
       }
-      // Blocks are not supplied, apply everywhere
-      else
-        eigenstrain_set.insert(name);
+    }
+
+    // Remove eigenstrain names when using reduced eigenstrains
+    if (mat_params.isParamValid("input_eigenstrain_names"))
+    {
+      auto remove_list =
+          mat_params.get<std::vector<MaterialPropertyName>>("input_eigenstrain_names");
+      for (auto i : remove_list)
+      {
+        eigenstrain_set.erase(i);
+        material_eigenstrain_map.erase(i);
+      }
+    }
+
+    // Account for MaterialConverter
+    if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in"))
+    {
+      std::set<SubdomainID> temp_block;
+      auto remove_listb = mat_params.get<std::vector<std::string>>("reg_props_in");
+      for (auto i : remove_listb)
+      {
+        eigenstrain_set.erase(i);
+        temp_block = material_eigenstrain_map[i];
+        material_eigenstrain_map.erase(i);
+      }
+      auto add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
+      for (auto o : add_list)
+      {
+        eigenstrain_set.insert(o);
+        material_eigenstrain_map.insert(std::make_pair(o, temp_block));
+      }
+    }
+    if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out"))
+    {
+      std::set<SubdomainID> temp_block;
+      auto remove_listb = mat_params.get<std::vector<std::string>>("ad_props_in");
+      for (auto i : remove_listb)
+      {
+        eigenstrain_set.erase(i);
+        temp_block = material_eigenstrain_map[i];
+        material_eigenstrain_map.erase(i);
+      }
+      auto add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
+      for (auto o : add_list)
+      {
+        eigenstrain_set.insert(o);
+        material_eigenstrain_map.insert(std::make_pair(o, temp_block));
+      }
     }
   }
-  std::cout << "Printing out map" << std::endl;
-  std::map<std::string, std::vector<SubdomainID>>::iterator itr;
-  for (itr = material_eigenstrain_map.begin(); itr != material_eigenstrain_map.end(); ++itr)
-  {
-    std::cout << itr->first << std::endl;
-    for (auto it2 = itr->second.begin(); it2 != itr->second.end(); ++it2)
-      std::cout << *it2 << "  ";
-    std::cout << std::endl;
-  }
-  // Correlate BlockIDs with eigenstrain names
-  for (auto i : material_eigenstrain_map)
-    if (i.second == current_subdomains)
-      eigenstrain_set.insert(i.first);
 
-  // Transfer set to vector
-  _block_based_eigenstrain_names.resize(eigenstrain_set.size());
-  std::copy(eigenstrain_set.begin(), eigenstrain_set.end(), _block_based_eigenstrain_names.begin());
+  // Correlate BlockIDs with eigenstrain names (remove irrelevant subdomainIDs)
+  if (!_subdomain_ids.empty())
+    for (auto i : material_eigenstrain_map)
+      if (i.second != _subdomain_ids)
+        eigenstrain_set.erase(i.first);
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
   // current subdomainID
-  std::set_union(_block_based_eigenstrain_names.begin(),
-                 _block_based_eigenstrain_names.end(),
+  std::set_union(eigenstrain_set.begin(),
+                 eigenstrain_set.end(),
                  eigenstrain_names_copy.begin(),
                  eigenstrain_names_copy.end(),
-                 std::inserter(_eigenstrain_names, _eigenstrain_names.begin()));
+                 std::inserter(verified_eigenstrain_names, verified_eigenstrain_names.begin()));
+
+  // Ensure the eigenstrain names previously passed include any missing names
+  _eigenstrain_names.clear();
+  _eigenstrain_names.resize(verified_eigenstrain_names.size());
+  std::copy(verified_eigenstrain_names.begin(),
+            verified_eigenstrain_names.end(),
+            _eigenstrain_names.begin());
 }
+
 void
 TensorMechanicsAction::actOutputMatProp()
 {
