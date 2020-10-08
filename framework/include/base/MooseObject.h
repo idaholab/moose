@@ -19,7 +19,8 @@
 
 #define usingMooseObjectMembers                                                                    \
   using MooseObject::isParamValid;                                                                 \
-  using MooseObject::paramError
+  using MooseObject::paramError;                                                                   \
+  using MooseObject::getParam
 
 class MooseApp;
 class MooseObject;

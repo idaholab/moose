@@ -29,13 +29,23 @@ public:
 };
 
 #define usingGenericKernelMembers                                                                  \
+  usingFunctionInterfaceMembers;                                                                   \
+  usingPostprocessorInterfaceMembers;                                                              \
+  usingMooseObjectMembers;                                                                         \
+  usingTransientInterfaceMembers;                                                                  \
+  usingTaggingInterfaceMembers;                                                                    \
+  usingBlockRestrictableMembers;                                                                   \
   using GenericKernel<is_ad>::_qp;                                                                 \
   using GenericKernel<is_ad>::_i;                                                                  \
   using GenericKernel<is_ad>::_j;                                                                  \
   using GenericKernel<is_ad>::_u;                                                                  \
   using GenericKernel<is_ad>::_phi;                                                                \
-  using GenericKernel<is_ad>::_t;                                                                  \
   using GenericKernel<is_ad>::_test;                                                               \
   using GenericKernel<is_ad>::_q_point;                                                            \
-  usingFunctionInterfaceMembers;                                                                   \
-  usingPostprocessorInterfaceMembers
+  using GenericKernel<is_ad>::_var;                                                                \
+  using GenericKernel<is_ad>::_name;                                                               \
+  using GenericKernel<is_ad>::getVar;                                                              \
+  using Coupleable::coupled;                                                                       \
+  using Coupleable::coupledComponents;                                                             \
+  using Coupleable::coupledGenericValue;                                                           \
+  using MaterialPropertyInterface::getGenericMaterialProperty

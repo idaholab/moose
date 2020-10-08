@@ -34,7 +34,7 @@ BodyForceTempl<is_ad>::validParams()
 template <bool is_ad>
 BodyForceTempl<is_ad>::BodyForceTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
-    _scale(this->template getParam<Real>("value")),
+    _scale(getParam<Real>("value")),
     _function(getFunction("function")),
     _postprocessor(getPostprocessorValue("postprocessor"))
 {
