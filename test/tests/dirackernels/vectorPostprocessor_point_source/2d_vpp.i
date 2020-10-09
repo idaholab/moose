@@ -26,6 +26,7 @@
   [./vpp_point_source]
     type = VectorPostprocessorPointSource
     variable = u
+    value_name = 'u'
     vector_postprocessor = csv_reader
   [../]
 []
@@ -59,6 +60,5 @@
 []
 
 [Outputs]
-  file_base = 2d_out
   exodus = true
 []

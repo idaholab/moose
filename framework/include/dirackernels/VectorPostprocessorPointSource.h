@@ -20,8 +20,9 @@ template <>
 InputParameters validParams<VectorPostprocessorPointSource>();
 
 /**
- * A VectorPostprocessorPointSource DiracKernel is used to create constant point sources.
- * Coordinates and values for the point source can be given in the input or read from file
+ * A VectorPostprocessorPointSource DiracKernel is used to create variable valued point sources.
+ * Coordinates and values are given by a vector Postprocessor.  Values and coordinates for the point
+ * source are allowed change as the vector Postprocessor is updated.
  */
 class VectorPostprocessorPointSource : public DiracKernel, public VectorPostprocessorInterface
 {
@@ -36,6 +37,9 @@ protected:
 private:
   const bool _use_broadcast;
   const VectorPostprocessorValue & _vpp_values;
+  const std::string _x_coord_name;
+  const std::string _y_coord_name;
+  const std::string _z_coord_name;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
 };

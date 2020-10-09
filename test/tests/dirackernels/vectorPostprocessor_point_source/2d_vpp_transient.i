@@ -86,6 +86,5 @@
 []
 
 [Outputs]
-  file_base = 2d_transient_out
   csv = true
 []

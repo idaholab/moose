@@ -62,6 +62,5 @@
 []
 
 [Outputs]
-  file_base = 3d_out
   exodus = true
 []

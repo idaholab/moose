@@ -24,13 +24,12 @@ VectorPostprocessorPointSource::validParams()
 
   params.addParam<VectorPostprocessorName>(
       "vector_postprocessor",
-      "The name of the VectorPostprocessor containing positions and corresponding");
+      "The name of the VectorPostprocessor containing positions and corresponding load values");
   params.addParam<std::string>("x_coord_name", "x", "name of column containing x coordinates.");
   params.addParam<std::string>("y_coord_name", "y", "name of column containing y coordinates.");
   params.addParam<std::string>("z_coord_name", "z", "name of column containing z coordinates.");
   params.addParam<std::string>("value_name", "value", "name of column containing values.");
 
-  // fixme lynn do I need this?
   params.addParam<bool>(
       "use_broadcast",
       false,
@@ -46,25 +45,27 @@ VectorPostprocessorPointSource::VectorPostprocessorPointSource(const InputParame
     VectorPostprocessorInterface(this),
     _use_broadcast(getParam<bool>("use_broadcast")),
     _vpp_values(getVectorPostprocessorValue(
-        "vector_postprocessor", getParam<std::string>("value_name"), _use_broadcast))
+        "vector_postprocessor", getParam<std::string>("value_name"), _use_broadcast)),
+    _x_coord_name(getParam<std::string>("x_coord_name"), _use_broadcast),
+    _y_coord_name(getParam<std::string>("y_coord_name"), _use_broadcast),
+    _z_coord_name(getParam<std::string>("z_coord_name"), _use_broadcast)
 {
 }
 
 void
 VectorPostprocessorPointSource::addPoints()
 {
-  const auto xcoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("x_coord_name"), _use_broadcast));
-  const auto ycoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("y_coord_name"), _use_broadcast));
-  const auto zcoord(getVectorPostprocessorValue(
-      "vector_postprocessor", getParam<std::string>("z_coord_name"), _use_broadcast));
+  const auto xcoord =
+      getVectorPostprocessorValue("vector_postprocessor", _x_coord_name, _use_broadcast);
+  const auto ycoord =
+      getVectorPostprocessorValue("vector_postprocessor", _y_coord_name, _use_broadcast);
+  const auto zcoord =
+      getVectorPostprocessorValue("vector_postprocessor", _z_coord_name, _use_broadcast);
 
-  mooseAssert(
-      xcoord.size() != 0,
-      "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp, vpp must have \n"
-      "data on before the Dirac Kernel is called.\n"
-      "Try setting \"execute_on = timestep_begin\" in the vpp being read. ");
+  mooseAssert(_vpp_values.size() * xcoord.size() * ycoord.size() * zcoord.size() != 0,
+              "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp, \n"
+              "vpp must have data before the Dirac Kernel is called.\n"
+              "Try setting \"execute_on = timestep_begin\" in the vpp being read. ");
 
   for (std::size_t i = 0; i < xcoord.size(); ++i)
   {
