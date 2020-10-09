@@ -60,8 +60,11 @@ VectorPostprocessorPointSource::addPoints()
   const auto zcoord(getVectorPostprocessorValue(
       "vector_postprocessor", getParam<std::string>("z_coord_name"), _use_broadcast));
 
-  mooseAssert(xcoord.size() != 0,
-              "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp.");
+  mooseAssert(
+      xcoord.size() != 0,
+      "VectorPostprocessorPointSource::addPoints():  Nothing read from vpp, vpp must have \n"
+      "data on before the Dirac Kernel is called.\n"
+      "Try setting \"execute_on = timestep_begin\" in the vpp being read. ");
 
   for (std::size_t i = 0; i < xcoord.size(); ++i)
   {
