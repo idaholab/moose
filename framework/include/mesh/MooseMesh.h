@@ -1523,6 +1523,21 @@ private:
 
   /// Build extra data for faster access to the information of extra element integers
   void buildElemIDInfo();
+
+  template <typename T>
+  struct MeshType;
+};
+
+template <>
+struct MooseMesh::MeshType<ReplicatedMesh>
+{
+  static const ParallelType value = ParallelType::REPLICATED;
+};
+
+template <>
+struct MooseMesh::MeshType<DistributedMesh>
+{
+  static const ParallelType value = ParallelType::DISTRIBUTED;
 };
 
 /**
@@ -1622,6 +1637,12 @@ template <typename T>
 std::unique_ptr<T>
 MooseMesh::buildTypedMesh(unsigned int dim)
 {
+  // If the requested mesh type to build doesn't match our current value for _use_distributed_mesh,
+  // then we need to make sure to make our state consistent because other objects, like the periodic
+  // boundary condition action, will be querying isDistributedMesh()
+  if (_use_distributed_mesh != std::is_same<T, DistributedMesh>::value)
+    setParallelType(MeshType<T>::value);
+
   if (dim == libMesh::invalid_uint)
     dim = getParam<MooseEnum>("dim");
 
