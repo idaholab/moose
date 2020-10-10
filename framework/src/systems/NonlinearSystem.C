@@ -132,30 +132,6 @@ NonlinearSystem::init()
     _transient_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
 }
 
-SparseMatrix<Number> &
-NonlinearSystem::addMatrix(TagID tag)
-{
-  if (!_subproblem.matrixTagExists(tag))
-    mooseError("Cannot add a tagged matrix with matrix_tag, ",
-               tag,
-               ", that tag does not exist in System ",
-               name());
-
-  if (hasMatrix(tag))
-    return getMatrix(tag);
-
-  auto matrix_name = _subproblem.matrixTagName(tag);
-
-  SparseMatrix<Number> * mat = &_transient_sys.add_matrix(matrix_name);
-
-  if (_tagged_matrices.size() < tag + 1)
-    _tagged_matrices.resize(tag + 1);
-
-  _tagged_matrices[tag] = mat;
-
-  return *mat;
-}
-
 void
 NonlinearSystem::solve()
 {

@@ -39,13 +39,25 @@ public:
     return _undisplaced_system.getVector(tag_id);
   }
 
-  virtual TagID residualVectorTag() override { return _undisplaced_system.residualVectorTag(); }
+  virtual TagID residualVectorTag() const override
+  {
+    return _undisplaced_system.residualVectorTag();
+  }
 
-  virtual TagID systemMatrixTag() override { return _undisplaced_system.systemMatrixTag(); }
+  virtual TagID systemMatrixTag() const override { return _undisplaced_system.systemMatrixTag(); }
 
-  virtual TagID timeVectorTag() override { return _undisplaced_system.timeVectorTag(); }
+  virtual TagID timeVectorTag() const override { return _undisplaced_system.timeVectorTag(); }
 
-  virtual TagID nonTimeVectorTag() override { return _undisplaced_system.nonTimeVectorTag(); }
+  virtual TagID nonTimeVectorTag() const override { return _undisplaced_system.nonTimeVectorTag(); }
+
+  virtual std::set<TagID> defaultVectorTags() const override
+  {
+    return _undisplaced_system.defaultVectorTags();
+  }
+  virtual std::set<TagID> defaultMatrixTags() const override
+  {
+    return _undisplaced_system.defaultMatrixTags();
+  }
 
   virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag) override
   {
@@ -57,9 +69,14 @@ public:
     _undisplaced_system.disassociateVectorFromTag(vec, tag);
   }
 
-  virtual void disassociateAllTaggedVectors() override
+  virtual void disassociateVectorFromTag(TagID tag) override
   {
-    _undisplaced_system.disassociateAllTaggedVectors();
+    _undisplaced_system.disassociateVectorFromTag(tag);
+  }
+
+  virtual void disassociateDefaultVectorTags() override
+  {
+    _undisplaced_system.disassociateDefaultVectorTags();
   }
 
   virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag) override
@@ -72,9 +89,14 @@ public:
     _undisplaced_system.disassociateMatrixFromTag(matrix, tag);
   }
 
-  virtual void disassociateAllTaggedMatrices() override
+  virtual void disassociateMatrixFromTag(TagID tag) override
   {
-    _undisplaced_system.disassociateAllTaggedMatrices();
+    _undisplaced_system.disassociateMatrixFromTag(tag);
+  }
+
+  virtual void disassociateDefaultMatrixTags() override
+  {
+    _undisplaced_system.disassociateDefaultMatrixTags();
   }
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;

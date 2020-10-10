@@ -628,13 +628,10 @@ public:
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 
-  virtual TagID timeVectorTag() override { return _Re_time_tag; }
-
-  virtual TagID nonTimeVectorTag() override { return _Re_non_time_tag; }
-
-  virtual TagID residualVectorTag() override { return _Re_tag; }
-
-  virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
+  TagID timeVectorTag() const override { return _Re_time_tag; }
+  TagID nonTimeVectorTag() const override { return _Re_non_time_tag; }
+  TagID residualVectorTag() const override { return _Re_tag; }
+  TagID systemMatrixTag() const override { return _Ke_system_tag; }
 
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
