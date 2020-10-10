@@ -28,7 +28,6 @@ StochasticResults::validParams()
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "Storage container for stochastic simulation results coming from a Postprocessor.");
-  params += SamplerInterface::validParams();
 
   params.addDeprecatedParam<std::vector<SamplerName>>(
       "samplers",
@@ -41,7 +40,7 @@ StochasticResults::validParams()
 }
 
 StochasticResults::StochasticResults(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters), SamplerInterface(this)
+  : GeneralVectorPostprocessor(parameters)
 {
 }
 

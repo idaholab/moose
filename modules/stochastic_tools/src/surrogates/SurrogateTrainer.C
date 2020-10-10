@@ -16,14 +16,12 @@ InputParameters
 SurrogateTrainer::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params += SamplerInterface::validParams();
   params.registerBase("SurrogateTrainer");
   return params;
 }
 
 SurrogateTrainer::SurrogateTrainer(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    SamplerInterface(this),
     _model_meta_data_name(_type + "_" + name())
 {
   _app.registerRestartableDataMapName(_model_meta_data_name, name());

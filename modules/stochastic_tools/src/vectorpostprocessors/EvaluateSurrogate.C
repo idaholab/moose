@@ -18,7 +18,6 @@ InputParameters
 EvaluateSurrogate::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling surrogate models.");
   params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of surrogate models.");
@@ -34,7 +33,6 @@ EvaluateSurrogate::validParams()
 
 EvaluateSurrogate::EvaluateSurrogate(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    SamplerInterface(this),
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples"))

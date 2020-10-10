@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
 #include "StochasticResultsAction.h"
 
 /**
@@ -28,7 +27,7 @@ struct StochasticResultsData
 /**
  * A tool for output Sampler data.
  */
-class StochasticResults : public GeneralVectorPostprocessor, SamplerInterface
+class StochasticResults : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
