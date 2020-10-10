@@ -470,6 +470,24 @@ NonlinearEigenSystem::computeScalingResidual()
   _eigen_problem.computeResidualTag(*_current_solution, RHS(), nonEigenVectorTag());
 }
 
+std::set<TagID>
+NonlinearEigenSystem::defaultVectorTags() const
+{
+  auto tags = NonlinearSystemBase::defaultVectorTags();
+  tags.insert(eigenVectorTag());
+  tags.insert(nonEigenVectorTag());
+  return tags;
+}
+
+std::set<TagID>
+NonlinearEigenSystem::defaultMatrixTags() const
+{
+  auto tags = NonlinearSystemBase::defaultMatrixTags();
+  tags.insert(eigenMatrixTag());
+  tags.insert(nonEigenMatrixTag());
+  return tags;
+}
+
 #else
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem,

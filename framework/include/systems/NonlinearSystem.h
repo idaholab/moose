@@ -29,8 +29,6 @@ public:
   NonlinearSystem(FEProblemBase & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
-  virtual SparseMatrix<Number> & addMatrix(TagID tag) override;
-
   virtual void solve() override;
 
   void init() override;

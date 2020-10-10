@@ -487,19 +487,6 @@ AuxiliarySystem::getDependObjects()
   return depend_objects;
 }
 
-NumericVector<Number> &
-AuxiliarySystem::addVector(const std::string & vector_name,
-                           const bool project,
-                           const ParallelType type)
-{
-  if (hasVector(vector_name))
-    return getVector(vector_name);
-
-  NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
-
-  return *vec;
-}
-
 void
 AuxiliarySystem::setScalarVariableCoupleableTags(ExecFlagType type)
 {
