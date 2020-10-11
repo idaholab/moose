@@ -640,11 +640,15 @@ void
 MooseVariableDataFV<OutputType>::computeValues()
 {
   initDofIndices();
+  initializeSolnVars();
 
   unsigned int num_dofs = _dof_indices.size();
 
   if (num_dofs > 0)
     fetchDoFValues();
+  else
+    // We don't have any dofs. There's nothing to do
+    return;
 
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = 1;
@@ -652,8 +656,6 @@ MooseVariableDataFV<OutputType>::computeValues()
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
   auto && active_coupleable_matrix_tags =
       _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
-
-  initializeSolnVars();
 
   _u[0] = _dof_values[0];
   _grad_u[0] = 0;
