@@ -2948,32 +2948,6 @@ FEProblemBase::getMaterial(std::string name,
   return material;
 }
 
-std::shared_ptr<MaterialBase>
-FEProblemBase::getInterfaceMaterial(std::string name,
-                                    Moose::MaterialDataType type,
-                                    THREAD_ID tid,
-                                    bool no_warn)
-{
-  switch (type)
-  {
-    case Moose::INTERFACE_MATERIAL_DATA:
-      name += "_interface";
-      break;
-    default:
-      break;
-  }
-
-  std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
-    mooseWarning("You are retrieving a Material object (",
-                 material->name(),
-                 "), but its compute flag is set to true. This indicates that MOOSE is "
-                 "computing this property which may not be desired and produce un-expected "
-                 "results.");
-
-  return material;
-}
-
 std::shared_ptr<MaterialData>
 FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
