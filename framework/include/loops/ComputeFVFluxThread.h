@@ -177,6 +177,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       {
         const Elem & elem = (*faceinfo)->elem();
 
+        _fe_problem.setCurrentSubdomainID(&elem, _tid);
+
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
         if (_subdomain != _old_subdomain)
@@ -184,8 +186,11 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         _neighbor_subdomain = Elem::invalid_subdomain_id;
-        if ((*faceinfo)->neighborPtr())
-          _neighbor_subdomain = (*faceinfo)->neighbor().subdomain_id();
+        if (const Elem * const neighbor = (*faceinfo)->neighborPtr())
+        {
+          _fe_problem.setNeighborSubdomainID(neighbor, _tid);
+          _neighbor_subdomain = neighbor->subdomain_id();
+        }
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
