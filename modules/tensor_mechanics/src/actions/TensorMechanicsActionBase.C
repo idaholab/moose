@@ -173,14 +173,14 @@ TensorMechanicsActionBase::outputPropertiesType()
 }
 
 void
-TensorMechanicsActionBase::addCartesianComponentOutput(const std::string & name)
+TensorMechanicsActionBase::addCartesianComponentOutput(const std::string & enum_name,
+                                                       const std::string & prop_name)
 {
-  _rank_two_cartesian_component_table.emplace(name, name);
-}
-
-void
-TensorMechanicsActionBase::addCartesianComponentOutput(
-    const std::pair<std::string, std::string> & name)
-{
-  _rank_two_cartesian_component_table.insert(name);
+  if (prop_name.empty())
+    // the enum name is the actual tensor material property name
+    _rank_two_cartesian_component_table.emplace(enum_name, enum_name);
+  else
+    // supply a different name for the enum options (this is done for
+    // 'strain' -> 'mechanical_strain' in the TMA)
+    _rank_two_cartesian_component_table.emplace(enum_name, prop_name);
 }
