@@ -512,6 +512,13 @@ The `component` is zero because this is an axially-symmetric (2D RZ) problem.  T
 
 !media media/porous_flow/2D_thm_compare_seff_tt_fig.png caption=Comparison between the PorousFlow result and the analytic expression derived by LaForce et al. for the effective hoop stress (Eq. (A3) in [!citet](laforce2014b)).  The small discrepancy at the borehole wall is due to the finite resolution of the MOOSE model, where stresses are evaluated at finite-element centroids instead of at nodes. id=seff_tt_cf_fig
 
+## Acknowledgement
+
 The authors wish to acknowledge financial assistance provided through Australian National Low Emissions Coal Research and Development [ANLEC R&D](https://anlecrd.com.au).  ANLEC R&D is supported by Australian Coal Association Low Emissions Technology Limited and the Australian Government through the Clean Energy Initiative.
+
+## A chemically-reactive, elastic reservoir
+
+[Another page](thmc_example.md) describes how the model of this page may be extended to include geochemical reactions in the reservoir.
+
 
 !bibtex bibliography

@@ -38,7 +38,7 @@ and geomechanics.
 - [Underground mining](porous_flow/coal_mining.md)
 - [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
 - [Convective mixing](porous_flow/lava_lamp.md)
-- [Two-phase THM injection benchmark example](porous_flow/thm_example.md)
+- [Two-phase THM injection benchmark example](porous_flow/thm_example.md) and a [THMC problem](porous_flow/thmc_example.md)
 - [Tidal impacts on porepressure](porous_flow/tidal.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
 - [Heterogeneous models](porous_flow/heterogeneous_models.md)
