@@ -1,0 +1,13 @@
+[Tests]
+  issues = 'NONE'
+  design = 'NONE'
+  [vpp_vpp_transfer]
+    type = 'CSVDiff'
+    input = 'master.i'
+    csvdiff = 'master_receive_values_0001.csv'
+    rel_err = 1e-05
+
+    requirement = "Transfers an entire vpp to and from a vpp on the master and sub app using a vpp receiver."
+    "need another test to check that vpp sent to sub app is correct.  which it is but it is not being tested"
+  []
+[]
