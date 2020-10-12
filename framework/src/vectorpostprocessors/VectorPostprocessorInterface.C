@@ -12,6 +12,7 @@
 #include "ReporterData.h"
 #include "VectorPostprocessor.h"
 #include "MooseTypes.h"
+#include "UserObject.h"
 
 VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * moose_object,
                                                            bool broadcast_by_default)
