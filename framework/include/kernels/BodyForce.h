@@ -11,6 +11,8 @@
 
 #include "GenericKernel.h"
 
+class Function;
+
 /**
  * This kernel implements a generic functional
  * body force term:

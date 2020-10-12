@@ -46,6 +46,4 @@ public:
   using GenericKernel<is_ad>::_name;                                                               \
   using GenericKernel<is_ad>::getVar;                                                              \
   using Coupleable::coupled;                                                                       \
-  using Coupleable::coupledComponents;                                                             \
-  using Coupleable::coupledGenericValue;                                                           \
-  using MaterialPropertyInterface::getGenericMaterialProperty
+  using Coupleable::coupledComponents
