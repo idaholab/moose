@@ -920,6 +920,7 @@ XFEM::healMesh()
   _healed_material_properties_old.clear();
   _healed_material_properties_older.clear();
   _healed_material_properties_used.clear();
+  _healed_ls.clear();
 
   for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
   {
@@ -995,6 +996,7 @@ XFEM::healMesh()
               dynamic_cast<const LevelSetCutUserObject *>(_geometric_cuts[i]);
           if (lscuo)
           {
+            _healed_ls.emplace(elem1, lscuo);
             if (isElemOnLevelSetPositiveSide(elem1, elem1, lscuo))
               storeMaterialPropertiesForElements(elem1, elem1, elem2);
             else if (isElemOnLevelSetPositiveSide(elem2, elem2, lscuo))
@@ -1364,22 +1366,6 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     // TODO: Also need to copy neighbor material data
     if (parent_elem->processor_id() == _mesh->processor_id())
     {
-      // Store solution for all elements affected by XFEM
-      storeSolutionForElement(libmesh_elem,
-                              parent_elem,
-                              nl,
-                              _cached_solution,
-                              current_solution,
-                              old_solution,
-                              older_solution);
-      storeSolutionForElement(libmesh_elem,
-                              parent_elem,
-                              aux,
-                              _cached_aux_solution,
-                              current_aux_solution,
-                              old_aux_solution,
-                              older_aux_solution);
-
       // If the parent element was previously healed, copy the stored material properties into the
       // new element. If the parent element wasn't previously healed, copy the parent's material
       // properties into the new element.
@@ -1396,6 +1382,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         {
           if (isElemOnLevelSetPositiveSide(parent_elem, libmesh_elem, lscuo))
           {
+            mooseAssert(!_healed_material_properties_used[parent_elem].first,
+                        "revisting a healed material properties");
             setMaterialPropertiesForElement(parent_elem,
                                             libmesh_elem,
                                             hmpit->second.first,
@@ -1405,6 +1393,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
           }
           else
           {
+            mooseAssert(!_healed_material_properties_used[parent_elem].second,
+                        "revisting a healed material properties");
             setMaterialPropertiesForElement(parent_elem,
                                             libmesh_elem,
                                             hmpit->second.second,
@@ -1428,6 +1418,22 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
           }
         }
       }
+
+      // Store solution for all elements affected by XFEM
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              nl,
+                              _cached_solution,
+                              current_solution,
+                              old_solution,
+                              older_solution);
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              aux,
+                              _cached_aux_solution,
+                              current_aux_solution,
+                              old_aux_solution,
+                              older_aux_solution);
     }
   }
 
@@ -1439,24 +1445,19 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     if (elem->processor_id() == _mesh->processor_id() &&
         (!hmpuit.second.first || !hmpuit.second.second))
     {
-      _console << "element " << elem->id() << " was healed but is not being re-cut" << std::endl;
-      const GeometricCutUserObject * gcuo = getGeometricCutForElem(elem);
-      const LevelSetCutUserObject * lscuo = dynamic_cast<const LevelSetCutUserObject *>(gcuo);
-      if (lscuo)
-      {
-        if (isElemOnLevelSetPositiveSide(elem, elem, lscuo))
-          setMaterialPropertiesForElement(elem,
-                                          elem,
-                                          _healed_material_properties[elem].first,
-                                          _healed_material_properties_old[elem].first,
-                                          _healed_material_properties_older[elem].first);
-        else
-          setMaterialPropertiesForElement(elem,
-                                          elem,
-                                          _healed_material_properties[elem].second,
-                                          _healed_material_properties_old[elem].second,
-                                          _healed_material_properties_older[elem].second);
-      }
+      const LevelSetCutUserObject * lscuo = _healed_ls[elem];
+      if (isElemOnLevelSetPositiveSide(elem, elem, lscuo))
+        setMaterialPropertiesForElement(elem,
+                                        elem,
+                                        _healed_material_properties[elem].first,
+                                        _healed_material_properties_old[elem].first,
+                                        _healed_material_properties_older[elem].first);
+      else
+        setMaterialPropertiesForElement(elem,
+                                        elem,
+                                        _healed_material_properties[elem].second,
+                                        _healed_material_properties_old[elem].second,
+                                        _healed_material_properties_older[elem].second);
     }
   }
 
@@ -2183,10 +2184,9 @@ XFEM::setMaterialPropertiesForElement(
   {
     std::vector<boundary_id_type> parent_boundary_ids;
     _mesh->boundary_info->boundary_ids(parent_elem, side, parent_boundary_ids);
-    std::vector<boundary_id_type>::iterator it_bd = parent_boundary_ids.begin();
-    for (; it_bd != parent_boundary_ids.end(); ++it_bd)
+    for (auto bdid : parent_boundary_ids)
     {
-      if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
+      if (_fe_problem->needBoundaryMaterialOnSide(bdid, 0))
         (*_bnd_material_data)[0]->copy(*cut_elem, props, props_old, props_older, side);
     }
   }
