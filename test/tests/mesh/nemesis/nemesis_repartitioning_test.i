@@ -55,6 +55,7 @@
   type = Steady
   solve_type = 'NEWTON'
   nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-14
   [Adaptivity]
     steps = 1
     refine_fraction = 0.1
