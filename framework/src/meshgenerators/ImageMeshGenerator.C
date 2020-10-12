@@ -54,7 +54,7 @@ ImageMeshGenerator::ImageMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 ImageMeshGenerator::generate()
 {
-  auto mesh = libmesh_make_unique<ReplicatedMesh>(comm());
+  auto mesh = buildReplicatedMesh();
 
   // A list of filenames of length 1 means we are building a 2D mesh
   if (_filenames.size() == 1)

@@ -105,7 +105,7 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
 std::unique_ptr<MeshBase>
 ConcentricCircleMeshGenerator::generate()
 {
-  auto mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  auto mesh = buildReplicatedMesh(2);
 
   // Set dimension of mesh
   mesh->set_mesh_dimension(2);

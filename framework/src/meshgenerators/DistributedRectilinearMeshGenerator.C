@@ -1040,13 +1040,13 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 std::unique_ptr<MeshBase>
 DistributedRectilinearMeshGenerator::generate()
 {
-  // DistributedRectilinearMeshGenerator always generates a distributed mesh
-  _mesh->setParallelType(MooseMesh::ParallelType::DISTRIBUTED);
   // We will set up boundaries accordingly. We do not want to call
   // ghostGhostedBoundaries in which allgather_packed_range  is unscalable.
   // ghostGhostedBoundaries will gather all boundaries to every single processor
   _mesh->needGhostGhostedBoundaries(false);
-  auto mesh = _mesh->buildMeshBaseObject(MooseMesh::ParallelType::DISTRIBUTED);
+
+  // DistributedRectilinearMeshGenerator always generates a distributed mesh
+  auto mesh = buildDistributedMesh();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

@@ -101,7 +101,7 @@ PatchMeshGenerator::PatchMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 PatchMeshGenerator::generate()
 {
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   unsigned num_nodes = 0;

@@ -45,7 +45,7 @@ std::unique_ptr<MeshBase>
 SphereSurfaceMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
