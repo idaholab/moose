@@ -1,4 +1,5 @@
-# Regression test for ElectrostaticContactCondition with analytic solution
+# Regression test for ElectrostaticContactCondition with analytic solution with
+# two blocks
 #
 # dim = 1D
 # X = [0,2]
@@ -27,7 +28,7 @@
     bottom_left = '1 0 0'
     top_right = '2 0 0'
   [../]
-  [./block_name]
+  [./block_rename]
     type = RenameBlockGenerator
     input = break
     old_block_id = 0
@@ -35,7 +36,7 @@
   [../]
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
-    input = block_name
+    input = block_rename
     primary_block = 'stainless_steel'
     paired_block = 'graphite'
     new_boundary = 'ssg_interface'
@@ -122,7 +123,6 @@
     type = ADGenericConstantMaterial
     prop_names = electrical_conductivity
     prop_values = 73069.2
-    temperature = temperature_graphite
     block = graphite
   [../]
 
@@ -131,7 +131,6 @@
     type = ADGenericConstantMaterial
     prop_names = electrical_conductivity
     prop_values = 1.41867e6
-    temperature = temperature_stainless_steel
     block = stainless_steel
   [../]
 

@@ -18,6 +18,12 @@ public:
 
 protected:
 
+  /// Function used to calculate two block test case analytic solution
+  Real twoBlockFunction(Real t, const Point & p) const;
+
+  /// Function used to calculate three block test case analytic solution
+  Real threeBlockFunction(Real t, const Point & p) const;
+
   /// Electrical conductivity property for graphite
   const Real & _electrical_conductivity_graphite;
 
@@ -38,4 +44,24 @@ protected:
    *  needs to be enabled (Stainless Steel vs. Graphite)
    */
   const MooseEnum & _domain;
+
+  /// Boolean to determine if test function is being used in three block test case
+  const bool & _is_three_block;
+
+  /**
+   * MooseEnum to determine which stainless steel region needs to be enabled in
+   * the three block analytic solution.
+   */
+  const MooseEnum & _side;
+
+private:
+  /**
+   * Enum used in comparisons with _domain. Enum-to-enum comparisons are a bit
+   * more lightweight, so we should create another enum with the possible choices.
+   */
+  enum DomainEnum
+  {
+    STAINLESS_STEEL,
+    GRAPHITE
+  };
 };
