@@ -13,14 +13,13 @@
 #include "ComputeFiniteStrain.h"
 
 // map tensor name shortcuts to tensor material property names
-const std::map<std::string, std::string>
-    TensorMechanicsActionBase::_rank_two_cartesian_component_table = {
-        {"strain", "total_strain"},
-        {"stress", "stress"},
-        {"elastic_strain", "elastic_strain"},
-        {"plastic_strain", "plastic_strain"},
-        {"creep_strain", "creep_strain"},
-        {"creep_stress", "creep_stress"}};
+std::map<std::string, std::string> TensorMechanicsActionBase::_rank_two_cartesian_component_table =
+    {{"strain", "total_strain"},
+     {"stress", "stress"},
+     {"elastic_strain", "elastic_strain"},
+     {"plastic_strain", "plastic_strain"},
+     {"creep_strain", "creep_strain"},
+     {"creep_stress", "creep_stress"}};
 const std::vector<char> TensorMechanicsActionBase::_component_table = {'x', 'y', 'z'};
 
 // map aux variable name prefixes to RankTwoInvariant option and list of permitted tensor name
@@ -171,4 +170,17 @@ TensorMechanicsActionBase::outputPropertiesType()
       options += " " + r2cc.first + "_" + r;
 
   return MultiMooseEnum(options);
+}
+
+void
+TensorMechanicsActionBase::addCartesianComponentOutput(const std::string & enum_name,
+                                                       const std::string & prop_name)
+{
+  if (prop_name == "")
+    // the enum name is the actual tensor material property name
+    _rank_two_cartesian_component_table.emplace(enum_name, enum_name);
+  else
+    // supply a different name for the enum options (this is done for
+    // 'strain' -> 'mechanical_strain' in the TMA)
+    _rank_two_cartesian_component_table.emplace(enum_name, prop_name);
 }
