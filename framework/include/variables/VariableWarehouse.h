@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "MooseVariableFV.h"
 #include "HashMap.h"
 
 #include <vector>
@@ -27,6 +28,8 @@ class MooseVariableBase;
 class MooseVariableFieldBase;
 template <typename>
 class MooseVariableFE;
+template <typename>
+class MooseVariableFV;
 template <typename>
 class MooseVariableField;
 typedef MooseVariableFE<Real> MooseVariable;
@@ -175,13 +178,7 @@ protected:
   HashMap<unsigned, MooseVariable *> _regular_vars_by_number;
 
   /// map of non-vector finite element variables with name keys
-  HashMap<std::string, MooseVariableFVReal *> _fv_vars_by_name;
-
-  /// map of non-vector finite element variables with name keys
   HashMap<std::string, MooseVariable *> _regular_vars_by_name;
-
-  /// map of non-vector finite element variables with unsigned keys
-  HashMap<unsigned, MooseVariableFVReal *> _fv_vars_by_number;
 
   /// map of vector finite element variables with name keys
   HashMap<std::string, VectorMooseVariable *> _vector_vars_by_name;
@@ -194,6 +191,18 @@ protected:
 
   /// map of vector finite element variables with unsigned keys
   HashMap<unsigned, ArrayMooseVariable *> _array_vars_by_number;
+
+  /// map of non-vector finite element variables with unsigned keys
+  HashMap<unsigned, MooseVariableFVReal *> _fv_vars_by_number;
+
+  /// map of non-vector finite element variables with name keys
+  HashMap<std::string, MooseVariableFVReal *> _fv_vars_by_name;
+
+  /// map of non-vector finite element variables with unsigned keys
+  HashMap<unsigned, MooseVariableFVArray *> _fv_array_vars_by_number;
+
+  /// map of non-vector finite element variables with name keys
+  HashMap<std::string, MooseVariableFVArray *> _fv_array_vars_by_name;
 
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;

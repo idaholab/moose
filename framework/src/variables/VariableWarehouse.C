@@ -36,6 +36,11 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
       _fv_vars_by_number[tmp_var->number()] = tmp_var;
       _fv_vars_by_name[var_name] = tmp_var;
     }
+    else if (auto * tmp_var = dynamic_cast<MooseVariableFVArray *>(raw_var))
+    {
+      _fv_array_vars_by_number[tmp_var->number()] = tmp_var;
+      _fv_array_vars_by_name[var_name] = tmp_var;
+    }
     else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(raw_var))
     {
       _vector_vars_by_number[tmp_var->number()] = tmp_var;
@@ -224,14 +229,20 @@ template <>
 MooseVariableField<RealEigenVector> *
 VariableWarehouse::getActualFieldVariable<RealEigenVector>(const std::string & var_name)
 {
-  return getFieldVariable<RealEigenVector>(var_name);
+  auto it = _array_vars_by_name.find(var_name);
+  if (it != _array_vars_by_name.end())
+    return it->second;
+  return _fv_array_vars_by_name.at(var_name);
 }
 
 template <>
 MooseVariableField<RealEigenVector> *
 VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_number)
 {
-  return getFieldVariable<RealEigenVector>(var_number);
+  auto it = _array_vars_by_number.find(var_number);
+  if (it != _array_vars_by_number.end())
+    return it->second;
+  return _fv_array_vars_by_number.at(var_number);
 }
 
 void

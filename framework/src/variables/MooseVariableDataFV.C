@@ -831,7 +831,7 @@ MooseVariableDataFV<RealEigenVector>::computeGhostValuesFace(
     auto bc = bcs[0];
 
     RealEigenVector u_face_tmp = bc->boundaryValue(fi);
-    DualRealEigenVector u_face;
+    ADRealEigenVector u_face;
     u_face.resize(_count);
     for (unsigned int v = 0; v < _count; v++)
       u_face(v) = u_face_tmp(v);
@@ -841,7 +841,7 @@ MooseVariableDataFV<RealEigenVector>::computeGhostValuesFace(
     // been initialized - causing this call to not work.  However, an ugly
     // hack has been implemented by initializing _need_ad_u and friends to 'true'
     // by default.  Consider perhaps a better solution to this problem.
-    DualRealEigenVector u_other;
+    ADRealEigenVector u_other;
     if (_subproblem.currentlyComputingJacobian())
       u_other = other_face.adSln()[0];
     else
@@ -871,7 +871,7 @@ MooseVariableDataFV<RealEigenVector>::computeGhostValuesFace(
     // to make the value on elem and neighbor the same
     // TODO: make sure DirichletBC and FluxBC are _not_ defined on
     // the same sideset
-    DualRealEigenVector u_other;
+    ADRealEigenVector u_other;
     if (_subproblem.currentlyComputingJacobian())
       u_other = other_face.adSln()[0];
     else
