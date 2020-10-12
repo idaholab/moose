@@ -338,6 +338,9 @@ private:
       _healed_material_properties_older;
   std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
 
+  /// healed levelset cut
+  std::map<const Elem *, const LevelSetCutUserObject *> _healed_ls;
+
   /**
    * Store the solution in stored_solution for a given node
    * @param node_to_store_to   Node for which the solution will be stored
