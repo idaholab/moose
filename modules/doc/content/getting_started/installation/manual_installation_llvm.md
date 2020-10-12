@@ -34,8 +34,6 @@ export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
 
 !include manual_mpich_llvm.md
 
-!include manual_petsc.md
-
 !include manual_miniconda.md
 
 ## bash_profile
@@ -50,7 +48,6 @@ Append the following contents into a new file called `moose-environment.sh`:
 # GCC __GCC__
 # LLVM __LLVM__
 # MPICH __MPICH__
-# PETSc __PETSC_DEFAULT__
 
 export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
 
@@ -60,7 +57,6 @@ export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$CPLUS_INCLUDE_PATH
 export FPATH=$PACKAGES_DIR/mpich-__MPICH__/include:$FPATH
 export MANPATH=$PACKAGES_DIR/mpich-__MPICH__/share/man:$MANPATH
-export PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__
 export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90
@@ -77,7 +73,6 @@ source /path/to/moose-environment.sh
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
 
-!include manual_cleanup.md
 
 ## Compiler Stack Finished
 
