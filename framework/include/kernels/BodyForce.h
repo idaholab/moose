@@ -9,14 +9,9 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
-// Forward Declarations
-class BodyForce;
 class Function;
-
-template <>
-InputParameters validParams<BodyForce>();
 
 /**
  * This kernel implements a generic functional
@@ -26,15 +21,16 @@ InputParameters validParams<BodyForce>();
  * The coefficient and function both have defaults
  * equal to 1.0.
  */
-class BodyForce : public Kernel
+template <bool is_ad>
+class BodyForceTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  BodyForce(const InputParameters & parameters);
+  BodyForceTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// Scale factor
   const Real & _scale;
@@ -44,4 +40,9 @@ protected:
 
   /// Optional Postprocessor value
   const PostprocessorValue & _postprocessor;
+
+  usingGenericKernelMembers;
 };
+
+typedef BodyForceTempl<false> BodyForce;
+typedef BodyForceTempl<true> ADBodyForce;
