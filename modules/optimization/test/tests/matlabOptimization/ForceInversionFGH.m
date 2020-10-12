@@ -24,8 +24,9 @@ for i=1:nparams
     Hessian(:,i) = forceInversion.ApplyHessian(IdentityMatrix(:,i));
 end
 
-value = forceInversion.ObjectiveFunctionValue(parameterV);
 gradient = forceInversion.Gradient(parameterV);
+value = forceInversion.ObjectiveFunctionValue(parameterV);
+
 
 
 end

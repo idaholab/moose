@@ -43,8 +43,15 @@ classdef SOLVER < handle
             coordFilename = "zForwardInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=obj.Force;
+            
+            %write header to file
             inputFilename = "zForwardInput/inputForces.csv";
-            csvwrite(inputFilename,data);
+            cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
+            textHeader = strjoin(cHeader, ',');
+            fid = fopen(inputFilename,'w');
+            fprintf(fid,'%s\n',textHeader);
+            fclose(fid);
+            dlmwrite(inputFilename,data,'-append');
             
             system('../../../isopod-opt -i ./forwardSolve.i > junk.txt');
             
@@ -65,8 +72,15 @@ classdef SOLVER < handle
             coordFilename = "zForwardInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=rhs;
+            
+            %write header to file
             inputFilename = "zForwardInput/inputForces.csv";
-            csvwrite(inputFilename,data);
+            cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
+            textHeader = strjoin(cHeader, ',');
+            fid = fopen(inputFilename,'w');
+            fprintf(fid,'%s\n',textHeader);
+            fclose(fid);
+            dlmwrite(inputFilename,data,'-append');
             
             system('../../../isopod-opt -i ./forwardSolve.i > junk.txt');
 
@@ -84,8 +98,15 @@ classdef SOLVER < handle
             coordFilename = "zAdjointInput/initialCoords.csv";
             data = csvread(coordFilename,R1,C1); % doing this to get coords
             data(:,5)=rhs;
+            
+            %write header to file
             inputFilename = "zAdjointInput/inputForces.csv";
-            csvwrite(inputFilename,data);
+            cHeader = {'x' 'y' 'z' 'id' 'value'}; %header
+            textHeader = strjoin(cHeader, ',');
+            fid = fopen(inputFilename,'w');
+            fprintf(fid,'%s\n',textHeader);
+            fclose(fid);
+            dlmwrite(inputFilename,data,'-append');
 
             system('../../../isopod-opt -i ./adjointSolve.i > junk.txt');
 

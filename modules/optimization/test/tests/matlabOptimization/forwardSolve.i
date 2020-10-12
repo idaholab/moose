@@ -26,7 +26,7 @@
 
 [DiracKernels]
   [force_0]
-    type = ConstantPointSource
+    type = FileConstantPointSource
     variable = temperature
     position_value_file=zForwardInput/inputForces.csv
   []

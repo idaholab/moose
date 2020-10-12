@@ -26,10 +26,10 @@
 
 [DiracKernels]
   [force_0]
-    type = ConstantPointSource
+    type = FileConstantPointSource
     variable = temperature
     position_value_file=zAdjointInput/inputForces.csv
-    # make this take a vpp there is csv reader vpp so try having that vpp read in the csv instead of this and apply here. 
+    # make this take a vpp there is csv reader vpp so try having that vpp read in the csv instead of this and apply here.
   []
 []
 
