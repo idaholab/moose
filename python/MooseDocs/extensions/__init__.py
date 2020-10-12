@@ -35,3 +35,4 @@ from . import package
 from . import sqa
 from . import style
 from . import table
+from . import special

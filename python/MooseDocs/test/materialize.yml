@@ -22,6 +22,7 @@ Extensions:
     disable_defaults: True
     MooseDocs.extensions.config: default
     MooseDocs.extensions.core: default
+    MooseDocs.extensions.special: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.style: default
     MooseDocs.extensions.command: default
