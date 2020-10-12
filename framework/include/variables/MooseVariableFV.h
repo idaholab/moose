@@ -26,6 +26,8 @@ template <typename>
 class MooseVariableFV;
 
 typedef MooseVariableFV<Real> MooseVariableFVReal;
+typedef MooseVariableFV<RealEigenVector> MooseVariableFVArray;
+
 class FVDirichletBC;
 class FVFluxBC;
 

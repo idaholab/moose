@@ -79,6 +79,12 @@ public:
                                                                unsigned int comp = 0) const;
   virtual const ArrayVariableGradient & coupledArrayNeighborGradient(const std::string & var_name,
                                                                      unsigned int comp = 0) const;
+
+  virtual const ADArrayVariableValue & adCoupledArrayNeighborValue(const std::string & var_name,
+                                                                   unsigned int comp = 0) const;
+  virtual const ADArrayVariableGradient &
+  adCoupledArrayNeighborGradient(const std::string & var_name, unsigned int comp = 0) const;
+
   virtual const ArrayVariableGradient &
   coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp = 0) const;
   virtual const ArrayVariableGradient &

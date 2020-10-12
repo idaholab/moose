@@ -21,37 +21,3 @@ const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 const TagID INVALID_TAG_ID = static_cast<TagID>(-1);
 const TagTypeID INVALID_TAG_TYPE_ID = static_cast<TagTypeID>(-1);
 }
-
-namespace std
-{
-DualReal
-norm(const DualRealEigenVector &)
-{
-  mooseError("undefined operation");
-}
-DualReal
-norm(DualRealEigenVector &&)
-{
-  mooseError("undefined operation");
-}
-DualRealEigenVector
-sqrt(const DualRealEigenVector &)
-{
-  mooseError("undefined operation");
-}
-DualRealEigenVector
-sqrt(DualRealEigenVector &&)
-{
-  mooseError("undefined operation");
-}
-DualRealEigenVector
-abs(const DualRealEigenVector &)
-{
-  mooseError("undefined operation");
-}
-DualRealEigenVector
-abs(DualRealEigenVector &&)
-{
-  mooseError("undefined operation");
-}
-}

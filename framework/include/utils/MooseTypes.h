@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseArray.h"
 #include "ADReal.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankThreeTensorForward.h"
@@ -126,7 +127,7 @@ class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
-typedef Eigen::Matrix<DualReal, Eigen::Dynamic, 1> DualRealEigenVector;
+typedef Eigen::Matrix<DualReal, Eigen::Dynamic, 1> ADRealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
@@ -165,17 +166,6 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
   typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> type;
 };
 }
-}
-
-// These functions enable TypeVector<DualRealEigenVector> instantiation.
-namespace std
-{
-DualReal norm(const DualRealEigenVector &);
-DualReal norm(DualRealEigenVector &&);
-DualRealEigenVector sqrt(const DualRealEigenVector &);
-DualRealEigenVector sqrt(DualRealEigenVector &&);
-DualRealEigenVector abs(const DualRealEigenVector &);
-DualRealEigenVector abs(DualRealEigenVector &&);
 }
 
 /**
@@ -341,12 +331,24 @@ typedef libMesh::VectorValue<ADReal> ADPoint;
 typedef libMesh::TensorValue<ADReal> ADRealTensorValue;
 typedef libMesh::DenseMatrix<ADReal> ADDenseMatrix;
 typedef libMesh::DenseVector<ADReal> ADDenseVector;
+
 typedef MooseArray<ADReal> ADVariableValue;
 typedef MooseArray<ADRealVectorValue> ADVariableGradient;
 typedef MooseArray<ADRealTensorValue> ADVariableSecond;
+
 typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
 typedef MooseArray<libMesh::TypeNTensor<3, DualReal>> ADVectorVariableSecond;
+
+// MooseArray stuffs its type into a unique ptr which tries to instantiate it
+// which causes us to need the std::norm,. etc. funcs that are overloaded for
+// the ADRealEigenVector type.  But the compiler can't find them for some
+// reason.  Why?  Somewhere a MooseArray<...<ADRAealEigenVector>> or similar
+// is being instantiated in a location that can't see the std::norm,etc
+// overloads in this file... where?
+typedef MooseArray<ADRealEigenVector> ADArrayVariableValue;
+typedef MooseArray<libMesh::VectorValue<ADRealEigenVector>> ADArrayVariableGradient;
+typedef MooseArray<libMesh::TensorValue<ADRealEigenVector>> ADArrayVariableSecond;
 
 namespace Moose
 {
@@ -381,11 +383,6 @@ struct ADType<W<Real>>
   typedef W<ADReal> type;
 };
 template <>
-struct ADType<RealEigenVector>
-{
-  typedef DualRealEigenVector type;
-};
-template <>
 struct ADType<VariableValue>
 {
   typedef ADVariableValue type;
@@ -399,6 +396,30 @@ template <>
 struct ADType<VariableSecond>
 {
   typedef ADVariableSecond type;
+};
+
+template <>
+struct ADType<RealEigenVector>
+{
+  typedef ADRealEigenVector type;
+};
+
+template <>
+struct ADType<ArrayVariableValue>
+{
+  typedef ADArrayVariableValue type;
+};
+
+template <>
+struct ADType<ArrayVariableGradient>
+{
+  typedef ADArrayVariableGradient type;
+};
+
+template <>
+struct ADType<ArrayVariableSecond>
+{
+  typedef ADArrayVariableSecond type;
 };
 
 } // namespace Moose
