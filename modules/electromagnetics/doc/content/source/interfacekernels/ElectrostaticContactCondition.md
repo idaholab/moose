@@ -47,6 +47,14 @@ For reference, the harmonic mean calculation for two values, $V_a$ and $V_b$, is
   V_{Harm} = \frac{2 V_a V_b}{V_a + V_b}
 \end{equation}
 
+!alert warning title=Order of variables matters!
+Please note that `variable` *must always* refer to the variable of higher potential,
+while the `neighbor_var` *must always* refer to the variable of lower potential in
+your model. Knowledge of your boundary conditions (where potential is applied or
+grounded) and electrical conductivities on either side of the boundary is vital
+to making the right choice! Please refer to the ELK test examples as well as
+[!citep](cincotti2007sps) for guidance and usage.
+
 ## Example Input File Syntax
 
 !listing contact_conductance_calculated.i block=InterfaceKernels/electrostatic_contact
