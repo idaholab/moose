@@ -475,6 +475,9 @@ TensorMechanicsAction::actEigenstrainNames()
                                                         _eigenstrain_names.end());
   std::set<MaterialPropertyName> verified_eigenstrain_names;
 
+  std::map<std::string, std::string> remove_add_map;
+  std::set<std::string> remove_reduced_set;
+
   // Determine all the materials(eigenstrains) all ready created
   auto materials = _problem->getMaterialWarehouse().getObjects();
   for (auto & mat : materials)
@@ -497,60 +500,58 @@ TensorMechanicsAction::actEigenstrainNames()
       }
     }
 
-    // Remove eigenstrain names when using reduced eigenstrains
+    // Account for reduced eigenstrains
     if (mat_params.isParamValid("input_eigenstrain_names"))
     {
       auto remove_list =
           mat_params.get<std::vector<MaterialPropertyName>>("input_eigenstrain_names");
       for (auto i : remove_list)
-      {
-        eigenstrain_set.erase(i);
-        material_eigenstrain_map.erase(i);
-      }
+        remove_reduced_set.insert(i);
     }
 
-    // Account for MaterialConverter
-    if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in"))
+    // Account for MaterialConverter, add or remove later
+    if (mat_params.isParamValid("RankTwoTensorMaterialConverter") ||
+        mat_params.isParamValid("RankFourTensorMaterialConverter") ||
+        mat_params.isParamValid("MaterialConverter"))
     {
-      std::set<SubdomainID> temp_block;
-      auto remove_listb = mat_params.get<std::vector<std::string>>("reg_props_in");
-      for (auto i : remove_listb)
+      std::vector<std::string> remove_list;
+      std::vector<std::string> add_list;
+
+      if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in"))
       {
-        eigenstrain_set.erase(i);
-        temp_block = material_eigenstrain_map[i];
-        material_eigenstrain_map.erase(i);
+        remove_list = mat_params.get<std::vector<std::string>>("reg_props_in");
+        add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
       }
-      auto add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
-      for (auto o : add_list)
+      if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out"))
       {
-        eigenstrain_set.insert(o);
-        material_eigenstrain_map.insert(std::make_pair(o, temp_block));
+        remove_list = mat_params.get<std::vector<std::string>>("ad_props_in");
+        add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
       }
-    }
-    if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out"))
-    {
-      std::set<SubdomainID> temp_block;
-      auto remove_listb = mat_params.get<std::vector<std::string>>("ad_props_in");
-      for (auto i : remove_listb)
-      {
-        eigenstrain_set.erase(i);
-        temp_block = material_eigenstrain_map[i];
-        material_eigenstrain_map.erase(i);
-      }
-      auto add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
-      for (auto o : add_list)
-      {
-        eigenstrain_set.insert(o);
-        material_eigenstrain_map.insert(std::make_pair(o, temp_block));
-      }
+      // These vectors are the same size as checked in MaterialConverter
+      for (unsigned int index = 0; index < remove_list.size(); index++)
+        remove_add_map.insert(std::make_pair(remove_list[index], add_list[index]));
     }
   }
+  // All the materials have been accounted for, now remove or add parts
 
   // Correlate BlockIDs with eigenstrain names (remove irrelevant subdomainIDs)
   if (!_subdomain_ids.empty())
     for (auto i : material_eigenstrain_map)
       if (i.second != _subdomain_ids)
         eigenstrain_set.erase(i.first);
+
+  // Remove names which aren't eigenstrains (converter properties)
+  for (auto remove_add_index : remove_add_map)
+  {
+    const bool is_in = eigenstrain_set.find(remove_add_index.first) != eigenstrain_set.end();
+    if (is_in)
+    {
+      eigenstrain_set.erase(remove_add_index.first);
+      eigenstrain_set.insert(remove_add_index.second);
+    }
+  }
+  for (auto index : remove_reduced_set)
+    eigenstrain_set.erase(index);
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
   // current subdomainID
