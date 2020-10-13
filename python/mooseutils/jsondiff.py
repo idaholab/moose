@@ -24,17 +24,11 @@ class JSONDiffer(object):
     def __init__(self, input0, input1, **kwargs):
         kwargs.setdefault('sort_keys', True)
         kwargs.setdefault('indent', 4)
-        skip = kwargs.pop('skip_keys', [])
         color = kwargs.pop('color', True)
+        self._skip_keys = kwargs.pop('skip_keys', [])
 
         self._data0 = self._load(input0)
         self._data1 = self._load(input1)
-
-        for key in skip:
-            if isinstance(self._data0, dict) and key in self._data0:
-                self._data0.pop(key)
-            if isinstance(self._data1, dict) and key in self._data1:
-                self._data1.pop(key)
 
         self._diff = mooseutils.text_unidiff(json.dumps(self._data0, **kwargs),
                                              json.dumps(self._data1, **kwargs),
@@ -51,15 +45,16 @@ class JSONDiffer(object):
     def __str__(self):
         return self._diff
 
-    @staticmethod
-    def _load(input0):
+    def _load(self, input0):
         if os.path.isfile(input0):
             with open(input0, 'r', encoding='utf-8') as fid:
-                return json.load(fid, object_pairs_hook=collections.OrderedDict)
+                return json.load(fid, object_hook=self._skip)
         elif isinstance(input0, str):
-            return json.loads(input0, object_pairs_hook=collections.OrderedDict)
+            return json.loads(input0, object_hook=self._skip)
         return input0
 
+    def _skip(self, data):
+        return collections.OrderedDict({k:v for k, v in data.items() if k not in self._skip_keys})
 
 if __name__ == '__main__':
     args = parse_args()
