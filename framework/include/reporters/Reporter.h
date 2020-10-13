@@ -58,16 +58,16 @@ protected:
    *             by the S template parameter. If S = ReporterContext then the first argument
    *             can be used as the default value (see ReporterContext.h).
    *
-   * The 'mode' indicates how the value that is produced is represented in parrallel. It is the
+   * The 'mode' indicates how the value that is produced is represented in parallel. It is the
    * reponsibility of the Reporter object to get it to that state. The ReporterContext objects
    * are designed to help with this. The mode can be one of the following:
    *
    *     ReporterMode::ROOT Indicates that the value produced is complete/correct on the
    *                        root processor for the object.
-   *     ReporterMode::REPLICATED Indicates that the value produced is complate/correct on
+   *     ReporterMode::REPLICATED Indicates that the value produced is complete/correct on
    *                              all processors AND that the value is the same on all
    *                              processors
-   *     ReporterMode::DISTRIBUTED Indicates that the value produced is complate/correct on
+   *     ReporterMode::DISTRIBUTED Indicates that the value produced is complete/correct on
    *                               all processors AND that the value is NOT the same on all
    *                               processors
    *

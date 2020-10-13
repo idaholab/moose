@@ -1,10 +1,18 @@
 # IterationInfo
 
+A Reporter object for tracking iteration information, such as the number of linear and non-linear
+iterations. degrees-of-freedom. The [!param](/Reporters/IterationInfo/items) parameter controls the
+items computed.
 
-!syntax description /Postprocessors/IterationInfo
+## Example Input Syntax
 
-!syntax parameters /Postprocessors/IterationInfo
+The following input file snippet demonstrates the use of the `IterationInfo` object.
 
-!syntax inputs /Postprocessors/IterationInfo
+!listing iteration_info/iteration_info.i block=Reporters/iteration_info
 
-!syntax children /Postprocessors/IterationInfo
+
+!syntax parameters /Reporters/IterationInfo
+
+!syntax inputs /Reporters/IterationInfo
+
+!syntax children /Reporters/IterationInfo

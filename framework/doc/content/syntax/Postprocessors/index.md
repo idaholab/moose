@@ -8,6 +8,10 @@ other systems via the `getPostprocessorValue` method available in most MOOSE obj
 MOOSE includes a large number of postprocessors within the framework, the complete list is
 provided in [Available Objects list](#available-objects) section.
 
+!alert note Consider using a Reporter Object
+The [Reporters/index.md] is a newer, more flexible system for computing aggregate values. It is recommended
+that new objects for aggregate calculations use the Reporter system.
+
 ## Example Input File
 
 The following input file snippet demonstrates the use of the

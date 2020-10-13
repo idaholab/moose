@@ -18,6 +18,7 @@
 #include "libmesh/libmesh_config.h"
 #include "libmesh/node.h"
 
+// MooseDocs:to_json_start
 void
 to_json(nlohmann::json & json, const MooseApp & app)
 {
@@ -39,3 +40,4 @@ to_json(nlohmann::json & json, const MooseApp & app)
                           std::to_string(LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR);
 #endif
 }
+// MooseDocs:to_json_end

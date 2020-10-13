@@ -1,5 +1,5 @@
 [Tests]
-  issue = '#11323'
+  issues = '#11323'
   design = 'IterationInfo.md'
   [info]
     requirement = "The system shall include the ability to report mesh information:"

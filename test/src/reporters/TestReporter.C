@@ -23,18 +23,20 @@ TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _int(declareValue<int>("int", 1980)),
     _real(declareValue<Real>("real")),
-    _vector(declareValue<std::vector<Real>>("vector")),
+    _vector(declareValue<std::vector<Real>>("vector")), // MooseDocs:producer
     _string(declareValue<std::string>("string")),
     _bcast_value(declareValue<Real, ReporterBroadcastContext>("broadcast")),
     _scatter_value(
         declareValue<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
-    _gather_value(declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather"))
+    _gather_value(
+        declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather")) // MooseDocs:gather
 {
   if (processor_id() == 0)
     for (dof_id_type rank = 0; rank < n_processors(); ++rank)
       _values_to_scatter.push_back(rank);
 }
 
+// MooseDocs:execute_begin
 void
 TestDeclareReporter::execute()
 {
@@ -48,6 +50,7 @@ TestDeclareReporter::execute()
 
   _gather_value.resize(1, processor_id());
 }
+// MooseDocs:execute_end
 
 InputParameters
 TestGetReporter::validParams()
@@ -68,7 +71,7 @@ TestGetReporter::TestGetReporter(const InputParameters & parameters)
     _int(getReporterValue<int>("int_reporter")),
     _int_old(getReporterValue<int>("int_reporter", 1)),
     _real(getReporterValue<Real>("real_reporter")),
-    _vector(getReporterValue<std::vector<Real>>("vector_reporter")),
+    _vector(getReporterValue<std::vector<Real>>("vector_reporter")), // MooseDocs:consumer
     _string(getReporterValue<std::string>("string_reporter")),
     _bcast_value(getReporterValue<Real>("broadcast_reporter")),
     _scatter_value(getReporterValue<dof_id_type>("scatter_reporter")),

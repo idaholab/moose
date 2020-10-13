@@ -31,7 +31,7 @@
 
 class MooseApp;
 
-void to_json(nlohmann::json & json, const MooseApp & app);
+void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
 
 template <typename T>
 void storeHelper(nlohmann::json & json, const T & value, void * context = nullptr);

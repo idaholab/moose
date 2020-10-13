@@ -23,7 +23,7 @@ public:
 protected:
   int & _int;
   Real & _real;
-  std::vector<Real> & _vector;
+  std::vector<Real> & _vector; // MooseDocs:producer
   std::string & _string;
   Real & _bcast_value;
 
@@ -48,7 +48,7 @@ protected:
   const int & _int_old;
 
   const Real & _real;
-  const std::vector<Real> & _vector;
+  const std::vector<Real> & _vector; // MooseDocs:consumer
   const std::string & _string;
   const Real & _bcast_value;
   const dof_id_type & _scatter_value;

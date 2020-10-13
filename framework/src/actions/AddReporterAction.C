@@ -15,7 +15,9 @@ registerMooseAction("MooseApp", AddReporterAction, "add_reporter");
 InputParameters
 AddReporterAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Action for adding Reporter objects from the Reporters input block.");
+  return params;
 }
 
 AddReporterAction::AddReporterAction(InputParameters params) : MooseObjectAction(params) {}
