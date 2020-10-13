@@ -32,7 +32,7 @@ The names of blocks suggest what types of objects can be used within those block
 
 ## Execute an Input File id=execute
 
-There are a several ways to execute an input file -- a couple of which shall be explained here. From [Step 1](tutorial01_app_development/step01_moose_app.md), the reader should have already created an executable for their application, but, if not, be sure to run the following commands:
+There are a several ways to execute an input file---a couple of which shall be explained here. From [Step 1](tutorial01_app_development/step01_moose_app.md), the reader should have already created an executable for their application, but, if not, be sure to run the following commands:
 
 ```bash
 cd ~/projects/babbler
@@ -92,12 +92,12 @@ cd ~/projects/babbler
 mkdir problems
 ```
 
-Next, use a [text editor](getting_started/new_users.md#helpful-software) to create a file named `pressure_diffusion.i` in the `problems/` directory. This file is where the block-structured ([!ac](HIT)) format will be used to setup the inputs needed to solve the given [!ac](BVP).
+Next, use a [text editor](getting_started/new_users.md#helpful-software) to create a file named `pressure_diffusion.i` in the `problems` directory. This file is where the block-structured ([!ac](HIT)) format will be used to setup the inputs needed to solve the given [!ac](BVP).
 
 !alert note title=Input File Block Order
 The blocks need not be in any particular order within the input file.
 
-Recall that six basic blocks -- those which were mentioned in the [#inputs] section -- are required. For the `[Mesh]` block, the geometry of the pipe, whose dimensions were provided on the [tutorial01_app_development/problem_statement.md] page, shall be defined using the MOOSE standard rectilinear mesh generator object, [`GeneratedMesh`](source/mesh/GeneratedMesh.md):
+Recall that six basic blocks---those which were mentioned in the [#inputs] section---are required. For the `[Mesh]` block, the geometry of the pipe, whose dimensions were provided on the [tutorial01_app_development/problem_statement.md] page, shall be defined using the MOOSE standard rectilinear mesh generator object, [`GeneratedMesh`](source/mesh/GeneratedMesh.md):
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Mesh
@@ -127,7 +127,7 @@ The variables listed here are the variables to be solved for using the [!ac](FEM
          block=Kernels
          link=False
 
-Now that the domain, $\Omega$, the primary variable, $u$, and the [!ac](PDE) have been specified, the [!ac](BVP) must be enforced. The [`ADDirichletBC`](source/bcs/ADDirichletBC.md) class enforces a Dirichlet (essential) boundary condition, e.g., the pressures prescribed at the pipe inlet and outlet. For this problem, two separate `ADDirichletBC` objects are setup under the `[BCs]` block -- one for each end of the pipe:
+Now that the domain, $\Omega$, the primary variable, $u$, and the [!ac](PDE) have been specified, the [!ac](BVP) must be enforced. The [`ADDirichletBC`](source/bcs/ADDirichletBC.md) class enforces a Dirichlet (essential) boundary condition, e.g., the pressures prescribed at the pipe inlet and outlet. For this problem, two separate `ADDirichletBC` objects are setup under the `[BCs]` block---one for each end of the pipe:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=BCs
@@ -195,7 +195,7 @@ Untracked files:
 nothing added to commit but untracked files present (use "git add" to track)
 ```
 
-This indicates that a new directory, `problems/`, has not been staged, and that there may or may not be more unstaged files in that directory. Of course, in this case, there are. Proceed with the instructions provided in the output for adding the new files and then reinspect the status of the local repository:
+This indicates that a new directory, `problems`, has not been staged, and that there may or may not be more unstaged files in that directory. Of course, in this case, there are. Proceed with the instructions provided in the output for adding the new files and then reinspect the status of the local repository:
 
 ```bash
 git add problems
@@ -219,7 +219,7 @@ created an input file to solve diffusion problem
 # with '#' will be ignored, and an empty message aborts the commit.
 #
 # On branch master
-# Your branch is up to date with 'origin/master'.
+# Your branch is up to date with 'origin/main'.
 #
 # Changes to be committed:
 #       new file:   problems/pressure_diffusion.i
@@ -229,7 +229,7 @@ created an input file to solve diffusion problem
 After exiting the `git commit` prompt, simply enter `git push` to update the `origin` remote. The remote repository on `github.com/YourGitHubUserName/babbler` can be inspected to confirm that the changes have been published.
 
 !alert tip title=Interacting With Git
-As mentioned in [Step 1](tutorial01_app_development/step01_moose_app.md#repo), there are a lot of ways to interact with Git. There are even [!ac](GUI) applications for using Git -- the terminal is not the only way. It is important to become comfortable with this approach to software development, especially for MOOSE application development.
+As mentioned in [Step 1](tutorial01_app_development/step01_moose_app.md#repo), there are a lot of ways to interact with Git. There are even [!ac](GUI) applications for using Git---the terminal is not the only way. It is important to become comfortable with this approach to software development, especially for MOOSE application development.
 
 !content pagination previous=tutorial01_app_development/step01_moose_app.md
                     next=tutorial01_app_development/step03_moose_object.md

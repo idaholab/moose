@@ -1,8 +1,3 @@
-!!!
-I like this content, but I don't think that the preface to the training matrials is the right place. Can you
-put these in our FAQ.
-!!!
-
 # What is the Finite Element Method? id=FEM?
 
 The [!ac](FEM) is a means for solving ordinary or, more often,

@@ -13,7 +13,7 @@ To begin, please visit the [getting_started/installation/index.md] page to obtai
 
 To initialize a new application, a name must be selected. For MOOSE applications, this is usually the name of an animal, e.g., [BISON](https://mooseframework.org/bison/). Sometimes, the application name is also an acronym for a more descriptive title, e.g., [MASTODON](https://mooseframework.org/mastodon/) stands for "Multi-hazard Analysis for STOchastic time-DOmaiN phenomena."
 
-The name +Babbler+ was selected for the application referenced by demonstrations throughout this tutorial, but please feel free to choose another name. This tutorial application is designed to teach people the core concepts of MOOSE for creating custom applications. "Babbler" is a reference to [pied babblers](https://en.wikipedia.org/wiki/Southern_pied_babbler), an animal known to teach its young [(Thorton and Raihani, 2008)](https://doi.org/10.1016/j.anbehav.2007.12.014). A "babbler" is also defined as a ["a person who talks constantly"](https://www.merriam-webster.com/thesaurus/babbler), which, in context of the live training, is a fair description of MOOSE team members.
+The name +Babbler+ was selected for the application developed throughout this tutorial, but please feel free to choose another name. This tutorial application is designed to teach people the core concepts of MOOSE for creating custom applications. "Babbler" is a reference to [pied babblers](https://en.wikipedia.org/wiki/Southern_pied_babbler), an animal known to teach its young [(Thorton and Raihani, 2008)](https://doi.org/10.1016/j.anbehav.2007.12.014). A "babbler" is also defined as a ["a person who talks constantly"](https://www.merriam-webster.com/thesaurus/babbler), which, in context of the live training, is a fair description of MOOSE team members.
 
 !media tutorial01_app_development/pied_babblers.jpg
        style=width:60%;margin-left:auto;margin-right:auto;
@@ -38,7 +38,7 @@ cd ~/projects/babbler
 make -j4
 ```
 
-This will create an executable (binary) file called `babbler-opt` in the application root directory that can be used to run simulations. In addition to the application code, the above command will also compile code available from [`moose/framework/`](https://github.com/idaholab/moose/tree/master/framework). A MOOSE-based application always has the full power of MOOSE plus its own.
+This will create an executable (binary) file called `babbler-opt` in the application root directory that can be used to run simulations. In addition to the application code, the above command will also compile code available from [`moose/framework`](https://github.com/idaholab/moose/tree/master/framework). A MOOSE-based application always has the full power of MOOSE plus its own.
 
 !alert note title=Compiling C++ Code
 Each time a change is made to a C++ file, the application will need to be recompiled, by running `make`, for the changes to take effect.
@@ -84,7 +84,7 @@ The stork script initializes a new application with a single git commit whose me
 ```bash
 cd ~/projects/babbler
 git remote add origin https://github.com/YourGitHubUserName/babbler
-git push -u origin master
+git push -u origin main
 ```
 
 The terminal will prompt for GitHub account credentials before uploading the new repository. Once the data has been uploaded it can be viewed at `github.com/YourGitHubUserName/babbler`.

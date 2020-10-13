@@ -5,7 +5,9 @@ The first question to ask when presented with a [!ac](PDE) that governs a proble
 In this step, the relevance of the so-called "weak form" of a [!ac](PDE) as it pertains to creating an application and how to derive it from the equation's strong form will be discussed. The diffusion equation of the previous two steps shall be revisited. In addition, the reader shall begin to consider the next phase of the tutorial by deriving the weak form of Darcy's pressure equation, which was given on the [Problem Statement](tutorial01_app_development/problem_statement.md#equations) page.
 
 !alert warning title=This is not an introduction to the Finite Element Method
-For a complete introduction to the [!ac](FEM), please refer to the myriad of literature on it. Also, visit the [help/finite_element_concepts/index.md] page for more information about how it is applied to MOOSE.
+For a complete introduction to the [!ac](FEM), please refer to the myriad of literature on it.
+The information presented here introduces the concepts as simply as possible for the purpose of
+demonstrating the development of a MOOSE-base application. Please visit the [help/finite_element_concepts/index.md] page for more information.
 
 ## The Method of Weighted Residuals id=residuals
 
@@ -14,7 +16,7 @@ For a complete introduction to the [!ac](FEM), please refer to the myriad of lit
 !equation id=laplace-residual
 \psi (-\nabla \cdot \nabla u) = 0, \,\,\, \forall \, \psi
 
-The left-hand side of [laplace-residual] is called the *residual* and the coefficients, $\psi_{i}$, are arbitrary, except for requiring that $\psi$ satisfy homogeneous boundary conditions.
+The left-hand side of [laplace-residual] is called the *residual* and the coefficient, $\psi$, is arbitrary, except for requiring that $\psi$ satisfy homogeneous boundary conditions.
 
 There is a general procedure for expressing a residual as one that is readily solved with MOOSE. First, integrate with respect to the problem domain, $\Omega$, and apply the integrand sum rule, e.g.,
 
@@ -67,7 +69,7 @@ Consider the zero-gravity, divergence-free form of Darcy's Pressure law, as it w
 The [#procedure] shall now be applied to this equation. The result of each step will be provided here, but the reader should make their own attempt and then verify their conclusions.
 
 1. Write down the strong form: [darcy-strong]
-2. Rearrange terms: *omit*
+2. Rearrange terms: *done*
 3. Multiply the equation by $\psi$:
 
    !equation

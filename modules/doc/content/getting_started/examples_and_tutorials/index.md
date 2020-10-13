@@ -6,9 +6,9 @@ Before proceeding, please visit the [installation/index.md] page and the [gettin
 
 ## Examples
 
-The [!ac](MOOSE) repository has a directory named `examples/` with several subdirectories. Each subdirectory
+The [!ac](MOOSE) repository has a directory named `examples` with several subdirectories. Each subdirectory
 has code for a MOOSE-based application and input file(s) for running simulations. Each example can
-be used by running a binary that is first compiled by running `make` in the appliciable subdirectory.
+be used by running a binary that is first compiled by running `make` in the applicable subdirectory.
 The resulting application binary (named e.g. `ex01-opt`) is used to run input
 files.  A guide explaining what each example
 demonstrates and how to use it is provided here:

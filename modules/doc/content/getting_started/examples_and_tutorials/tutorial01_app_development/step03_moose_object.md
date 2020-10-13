@@ -25,7 +25,7 @@ This class can be used to demonstrate the form in which all objects created in a
 
 This line ensures that the compiler does not include the contents of this file more then once.
 
-Next, the base class that is being specialized is included. For the `ADDiffusion` object, the base class is `ADKernelGrad`:
+Next, the base class that is being inherited from is included. For the `ADDiffusion` object, the base class is `ADKernelGrad`:
 
 !listing framework/include/kernels/ADDiffusion.h line=#include link=False
 
@@ -42,6 +42,11 @@ Finally, the class being created is defined. This definition contains three main
 1. one or more methods that are overridden to provide the custom functionality desired for the application.
 
    !listing framework/include/kernels/ADDiffusion.h line=precomputeQpResidual() link=False
+
+   !alert note title=The method(s) overridden differ with each system.
+   Each system within MOOSE has one or more base class objects. These objects are specialized by
+   overriding one or more methods. The method required to be overridden varies with the base class.
+   Please refer to the documentation of each system for more information.
 
 The source (`.C`) file simply defines the functionality of these three components. As the tutorial progresses, the basic structure and syntax described here will be seen regularly and the purpose and use of methods, like `validParams()`, will become more clear.
 
