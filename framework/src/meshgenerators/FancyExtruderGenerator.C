@@ -562,5 +562,11 @@ FancyExtruderGenerator::generate()
     }
   }
 
+  // Find the neighbors for each element in the mesh.  (This is done
+  // automatically at the end of mesh generation by `prepare_for_use`, but it
+  // is helpful to fill the neighbor lists now in case this mesh is passed to a
+  // sideset generator that requires neighbor info.)
+  mesh->find_neighbors();
+
   return mesh;
 }
