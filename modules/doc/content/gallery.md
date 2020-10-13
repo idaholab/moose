@@ -84,4 +84,9 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 !style fontsize=80% fontweight=100
 *Credit:* Gary Hu, [Duke Computational Mechanics Lab](http://dcml.pratt.duke.edu/)
 !card-end!
+
+!card! contact/2d_indenter.mp4 title=Axisymmetric Spherical Indenter
+An elastic spherical indenter penetrates into a base material modeled with tensor-mechanics crystal plasticity.
+[contact/index.md].
+!card-end!
 !gallery-end!
