@@ -14,73 +14,73 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./parsed]
+  [parsed]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 0
     value = 1
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Bounds]
-  [./u_bounds]
+  [u_bounds]
     type = ParsedAux
     variable = parsed
     args = 'u v'
     function = '(u-0.5)^3*v'
-  [../]
+  []
 []
 
 [Executioner]
