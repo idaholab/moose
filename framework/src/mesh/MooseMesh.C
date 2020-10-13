@@ -257,6 +257,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
+
+  determineUseDistributedMesh();
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
@@ -2248,8 +2250,8 @@ MooseMesh::clone() const
   mooseError("MooseMesh::clone() is no longer supported, use MooseMesh::safeClone() instead.");
 }
 
-std::unique_ptr<MeshBase>
-MooseMesh::buildMeshBaseObject(ParallelType override_type)
+void
+MooseMesh::determineUseDistributedMesh()
 {
   switch (_parallel_type)
   {
@@ -2263,6 +2265,7 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
     case ParallelType::REPLICATED:
       if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
         _parallel_type_overridden = true;
+      _use_distributed_mesh = false;
       break;
     case ParallelType::DISTRIBUTED:
       _use_distributed_mesh = true;
@@ -2273,17 +2276,18 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
   // we must use DistributedMesh.
   if (_is_nemesis || _app.isUseSplit())
     _use_distributed_mesh = true;
+}
 
-  unsigned dim = getParam<MooseEnum>("dim");
+std::unique_ptr<MeshBase>
+MooseMesh::buildMeshBaseObject(unsigned int dim)
+{
+  if (dim == libMesh::invalid_uint)
+    dim = getParam<MooseEnum>("dim");
 
   std::unique_ptr<MeshBase> mesh;
   if (_use_distributed_mesh)
   {
-    if (override_type == ParallelType::REPLICATED)
-      mooseError("The requested override_type of \"Replicated\" may not be used when MOOSE is "
-                 "running with a DistributedMesh");
-
-    mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
+    mesh = buildTypedMesh<DistributedMesh>(dim);
     if (_partitioner_name != "default" && _partitioner_name != "parmetis")
     {
       _partitioner_name = "parmetis";
@@ -2291,16 +2295,7 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
     }
   }
   else
-  {
-    if (override_type == ParallelType::DISTRIBUTED)
-      mooseError("The requested override_type of \"Distributed\" may not be used when MOOSE is "
-                 "running with a ReplicatedMesh");
-
-    mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
-  }
-
-  if (!getParam<bool>("allow_renumbering"))
-    mesh->allow_renumbering(false);
+    mesh = buildTypedMesh<ReplicatedMesh>(dim);
 
   return mesh;
 }

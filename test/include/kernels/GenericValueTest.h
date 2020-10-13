@@ -22,6 +22,8 @@ public:
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+
+  usingGenericKernelMembers;
 };
 
 typedef GenericValueTestTempl<false> GenericValueTest;

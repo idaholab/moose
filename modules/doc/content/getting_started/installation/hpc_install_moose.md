@@ -14,26 +14,11 @@ What ever compiler you choose to use on your cluster (GCC/Clang, MPICH/OpenMPI),
 
 Your cluster will most likely have these two requirements available via some form of environment management software. If you are unfamiliar with how to manage your environment, please consult with your cluster administrators.
 
-## PREFIX Setup
-
-```bash
-export STACK_SRC=`mktemp -d /tmp/stack_temp.XXXXXX`
-export PACKAGES_DIR=$HOME/moose-compilers
-```
-
-!alert! note
-- The `$PACKAGES_DIR` directory must reside in a location where all the compute nodes can access.
-- We need the above two environment variables to exist throughout these instructions. Please use the one and only one, terminal you executed those two commands with.
-!alert-end!
-
-!include manual_petsc.md
-
 ## Create MOOSE Profile
 
 Use an editor to add the following contents to `$HOME/.moose_profile`
 
 !package! code max-height=400
-PACKAGES_DIR=$HOME/moose-compilers
 
 export CC=mpicc
 export CXX=mpicxx
@@ -41,7 +26,6 @@ export F90=mpif90
 export F77=mpif77
 export FC=mpif90
 
-export PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__
 !package-end!
 
 ## Source the MOOSE Profile
@@ -54,7 +38,5 @@ By sourcing the above file, you are now ready to begin MOOSE-based development.
 
 !alert note title=+Remember to source the profile!+
 You will need to perform the above (`source $HOME/.moose_profile`) for every new terminal session for which you perform work with MOOSE. If you want this to be automatic, add the above to your `~/.bash_profile` (or `~/.bashrc` or, which ever profile you use on your system)
-
-!include manual_cleanup.md
 
 !include getting_started/installation/install_moose.md

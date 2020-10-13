@@ -152,6 +152,7 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
   std::vector<dof_id_type> dof_indices;
   const std::vector<Real> & JxW = fe->get_JxW();
   const std::vector<std::vector<Real>> & phi = fe->get_phi();
+  auto & system_matrix = system.get_system_matrix();
 
   for (const auto & elem : to_mesh.active_local_element_ptr_range())
   {
@@ -186,7 +187,7 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
       dof_map.constrain_element_matrix_and_vector(Ke, Fe, dof_indices);
 
       if (_compute_matrix)
-        system.matrix->add_matrix(Ke, dof_indices);
+        system_matrix.add_matrix(Ke, dof_indices);
       system.rhs->add_vector(Fe, dof_indices);
     }
   }

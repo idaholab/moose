@@ -258,21 +258,26 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const = 0;
 
   /**
-   * Method to construct a libMesh::MeshBase object that is normally set and used by the MooseMesh
-   * object during the "init()" phase.
+   * Determine whether to use a distributed mesh. Should be called during construction
    */
-  std::unique_ptr<MeshBase> buildMeshBaseObject(ParallelType override_type = ParallelType::DEFAULT);
+  void determineUseDistributedMesh();
 
   /**
-   * Shortcut method to construct a libMesh mesh instance. The created derived-from-MeshBase object
-   * will have its \p allow_remote_element_removal flag set to whatever our value is. We will also
-   * attach any geometric \p RelationshipManagers that have been requested by our simulation objects
-   * to the \p MeshBase object. If the parameter \p dim is not provided, then its value will be
-   * taken from the input file mesh block. This API should be used by any \p MeshGenerator that
-   * needs to build a \p MeshBase object
+   * Method to construct a libMesh::MeshBase object that is normally set and used by the MooseMesh
+   * object during the "init()" phase. If the parameter \p dim is not
+   * provided, then its value will be taken from the input file mesh block.
+   */
+  std::unique_ptr<MeshBase> buildMeshBaseObject(unsigned int dim = libMesh::invalid_uint);
+
+  /**
+   * Shortcut method to construct a unique pointer to a libMesh mesh instance. The created
+   * derived-from-MeshBase object will have its \p allow_remote_element_removal flag set to whatever
+   * our value is. We will also attach any geometric \p RelationshipManagers that have been
+   * requested by our simulation objects to the \p MeshBase object. If the parameter \p dim is not
+   * provided, then its value will be taken from the input file mesh block.
    */
   template <typename T>
-  T buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
+  std::unique_ptr<T> buildTypedMesh(unsigned int dim = libMesh::invalid_uint);
 
   /**
    * Method to set the mesh_base object. If this method is NOT called prior to calling init(), a
@@ -1021,7 +1026,11 @@ public:
   /**
    *  Allow to change parallel type
    */
-  void setParallelType(ParallelType parallel_type) { _parallel_type = parallel_type; }
+  void setParallelType(ParallelType parallel_type)
+  {
+    _parallel_type = parallel_type;
+    determineUseDistributedMesh();
+  }
 
   /*
    * Set/Get the partitioner name
@@ -1514,6 +1523,21 @@ private:
 
   /// Build extra data for faster access to the information of extra element integers
   void buildElemIDInfo();
+
+  template <typename T>
+  struct MeshType;
+};
+
+template <>
+struct MooseMesh::MeshType<ReplicatedMesh>
+{
+  static const ParallelType value = ParallelType::REPLICATED;
+};
+
+template <>
+struct MooseMesh::MeshType<DistributedMesh>
+{
+  static const ParallelType value = ParallelType::DISTRIBUTED;
 };
 
 /**
@@ -1610,13 +1634,22 @@ typedef StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode *> ConstBn
 typedef StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement *> ConstBndElemRange;
 
 template <typename T>
-T
+std::unique_ptr<T>
 MooseMesh::buildTypedMesh(unsigned int dim)
 {
+  // If the requested mesh type to build doesn't match our current value for _use_distributed_mesh,
+  // then we need to make sure to make our state consistent because other objects, like the periodic
+  // boundary condition action, will be querying isDistributedMesh()
+  if (_use_distributed_mesh != std::is_same<T, DistributedMesh>::value)
+    setParallelType(MeshType<T>::value);
+
   if (dim == libMesh::invalid_uint)
     dim = getParam<MooseEnum>("dim");
 
-  T mesh(_communicator, dim);
+  auto mesh = libmesh_make_unique<T>(_communicator, dim);
+
+  if (!getParam<bool>("allow_renumbering"))
+    mesh->allow_renumbering(false);
 
   return mesh;
 }

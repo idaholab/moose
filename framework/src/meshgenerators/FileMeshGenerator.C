@@ -44,7 +44,7 @@ FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 FileMeshGenerator::generate()
 {
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
 
   bool exodus =
       _file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size();

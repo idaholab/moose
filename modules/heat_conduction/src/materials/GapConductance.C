@@ -166,8 +166,6 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  "Emissivities must have values between 0 and 1. You provided: ",
                  emissivity_primary);
   }
-  // Need this for backwards compatability with BISON
-  const_cast<InputParameters &>(_pars).set<Real>("emissivity_master") = emissivity_primary;
 
   Real emissivity_secondary = parameters.isParamSetByUser("emissivity_slave")
                                   ? getParam<Real>("emissivity_slave")
@@ -182,8 +180,6 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  "Emissivities must have values between 0 and 1. You provided: ",
                  emissivity_secondary);
   }
-  // Need this for backwards compatability with BISON
-  const_cast<InputParameters &>(_pars).set<Real>("emissivity_slave") = emissivity_secondary;
 
   _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
                     ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1

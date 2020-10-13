@@ -209,7 +209,7 @@ MeshGeneratorPD::generate()
   dof_id_type n_pd_bonds = pd_mesh.nPDBonds();
 
   // initialize an empty new mesh object
-  std::unique_ptr<MeshBase> new_mesh = _mesh->buildMeshBaseObject();
+  std::unique_ptr<MeshBase> new_mesh = buildMeshBaseObject();
   new_mesh->clear();
   // set new mesh dimension
   new_mesh->set_mesh_dimension(old_mesh->mesh_dimension());

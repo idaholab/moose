@@ -35,4 +35,7 @@ protected:
 
   /// A coefficient that is multiplied with the residual contribution
   const Real _coef;
+
+  /// Scale factor
+  const VariableValue & _scale_factor;
 };

@@ -2,6 +2,8 @@
 
 !include getting_started/installation/clone_moose.md
 
+!include getting_started/installation/manual_petsc.md
+
 !include getting_started/installation/build_libmesh.md
 
 !include getting_started/installation/test_moose.md

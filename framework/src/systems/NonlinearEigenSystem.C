@@ -50,9 +50,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     // We need to do an unnecessary assembly,
     // if you use PETSc that is older than 3.13.
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-    if (eigen_system.matrix_B)
-      p->computeJacobianTag(*eigen_system.current_local_solution.get(),
-                            *eigen_system.matrix_B,
+    if (eigen_system.has_matrix_B())
+      p->computeJacobianTag(*eigen_system.current_local_solution,
+                            eigen_system.get_matrix_B(),
                             eigen_nl.eigenMatrixTag());
 #endif
     return;
@@ -63,8 +63,8 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   // we only need to form a preconditioning matrix
   if (eigen_system.use_shell_matrices() && !eigen_system.use_shell_precond_matrix())
   {
-    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
-                          *eigen_system.precond_matrix,
+    p->computeJacobianTag(*eigen_system.current_local_solution,
+                          eigen_system.get_precond_matrix(),
                           eigen_nl.precondMatrixTag());
     return;
   }
@@ -73,22 +73,22 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   // we assemble A and B together
   if (eigen_system.generalized())
   {
-    p->computeJacobianAB(*eigen_system.current_local_solution.get(),
-                         *eigen_system.matrix_A,
-                         *eigen_system.matrix_B,
+    p->computeJacobianAB(*eigen_system.current_local_solution,
+                         eigen_system.get_matrix_A(),
+                         eigen_system.get_matrix_B(),
                          eigen_nl.nonEigenMatrixTag(),
                          eigen_nl.eigenMatrixTag());
 #if LIBMESH_HAVE_SLEPC
     if (p->negativeSignEigenKernel())
-      MatScale(static_cast<PetscMatrix<Number> &>(*eigen_system.matrix_B).mat(), -1.0);
+      MatScale(static_cast<PetscMatrix<Number> &>(eigen_system.get_matrix_B()).mat(), -1.0);
 #endif
     return;
   }
 
   // If it is a linear eigenvalue problem, we assemble matrix A
   {
-    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
-                          *eigen_system.matrix_A,
+    p->computeJacobianTag(*eigen_system.current_local_solution,
+                          eigen_system.get_matrix_A(),
                           eigen_nl.nonEigenMatrixTag());
 
     return;
@@ -236,8 +236,8 @@ NonlinearEigenSystem::solve()
 // When PETSc is older than 3.13, we always need to do an extra assembly,
 // so we do not do "close" here
 #if DEBUG && !PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  if (_eigen_problem.isGeneralizedEigenvalueProblem() && sys().matrix_B)
-    sys().matrix_B->close();
+  if (sys().has_matrix_B())
+    sys().get_matrix_B().close();
 #endif
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
@@ -269,43 +269,41 @@ NonlinearEigenSystem::solve()
 void
 NonlinearEigenSystem::attachSLEPcCallbacks()
 {
+  // Tell libmesh not close matrices before solve
+  _transient_sys.get_eigen_solver().set_close_matrix_before_solve(false);
+
   // Matrix A
-  if (_transient_sys.matrix_A)
+  if (_transient_sys.has_matrix_A())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.matrix_A).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_matrix_A()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
-
-    // Tell libmesh not close matrices before solve
-    _transient_sys.eigen_solver->set_close_matrix_before_solve(false);
   }
 
   // Matrix B
-  if (_transient_sys.matrix_B)
+  if (_transient_sys.has_matrix_B())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.matrix_B).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
 
   // Shell matrix A
-  if (_transient_sys.shell_matrix_A)
+  if (_transient_sys.has_shell_matrix_A())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_matrix_A).mat();
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_matrix_A()).mat();
 
     // Attach callbacks for nonlinear eigenvalue solver
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
 
     // Set MatMult operations for shell
     Moose::SlepcSupport::setOperationsForShellMat(_eigen_problem, mat, false);
-
-    _transient_sys.eigen_solver->set_close_matrix_before_solve(false);
   }
 
   // Shell matrix B
-  if (_transient_sys.shell_matrix_B)
+  if (_transient_sys.has_shell_matrix_B())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_matrix_B).mat();
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
 
@@ -314,17 +312,18 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   }
 
   // Preconditioning matrix
-  if (_transient_sys.precond_matrix)
+  if (_transient_sys.has_precond_matrix())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.precond_matrix).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
 
   // Shell preconditioning matrix
-  if (_transient_sys.shell_precond_matrix)
+  if (_transient_sys.has_shell_precond_matrix())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_precond_matrix).mat();
+    Mat mat =
+        static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }

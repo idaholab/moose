@@ -7,4 +7,12 @@
     exodiff = 'coupled_var_neumann_out.e'
     requirement = "MOOSE shall support coupled Neumann type boundary conditions."
   [../]
+
+  [./on_off]
+    type = 'Exodiff'
+    input = 'on_off.i'
+    exodiff = 'on_off_out.e'
+    requirement = 'The system shall enable scaling of the Neumann type boundary conditions.'
+    issues = '#15421'
+  [../]
 []

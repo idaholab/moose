@@ -132,7 +132,7 @@ FancyExtruderGenerator::generate()
   // Original copyright: Copyright (C) 2002-2019 Benjamin S. Kirk, John W. Peterson, Roy H. Stogner
   // Original license is LGPL so it can be used here.
 
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 

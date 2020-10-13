@@ -117,7 +117,7 @@ std::unique_ptr<MeshBase>
 GeneratedMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
-  auto mesh = _mesh->buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject();
 
   if (isParamValid("extra_element_integers"))
   {
