@@ -85,6 +85,8 @@ public:
   /// This is called once for each face after all face and boundary callbacks have been
   /// finished for that face.
   virtual void postFace(const FaceInfo & /*fi*/) {}
+  /// This is called once before all face-looping
+  virtual void pre() {}
   /// This is called once after all face-looping is finished.
   virtual void post() {}
 
@@ -172,6 +174,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       ParallelUniqueId puid;
       _tid = bypass_threading ? 0 : puid.id;
 
+      pre();
+
       _subdomain = Moose::INVALID_BLOCK_ID;
       _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
@@ -240,16 +244,19 @@ public:
 
   virtual void onFace(const FaceInfo & fi) override;
   virtual void postFace(const FaceInfo & fi) override;
+  virtual void pre() override;
   virtual void post() override;
 
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) override;
 
   virtual void subdomainChanged() override;
+  virtual void neighborSubdomainChanged() override;
 
 private:
   OnScopeExit reinitVariables(const FaceInfo & fi);
 
   std::set<MooseVariableFieldBase *> _needed_fv_vars;
+  std::set<unsigned int> _needed_mat_props;
   const bool _do_jacobian;
   unsigned int _num_cached = 0;
 
@@ -430,6 +437,71 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::subdomainChanged()
 {
+  ThreadedFaceLoop<RangeType>::subdomainChanged();
+
+  // With a subdomain change, the set of needed material properties and
+  // variables may have changed, so we recompute them here.
+
+  std::set<MooseVariableFieldBase *> needed_sub_fv_vars;
+  std::set<MooseVariableFieldBase *> needed_sub_fe_vars;
+  std::set<unsigned int> needed_sub_mat_props;
+
+  // TODO: do this for other relevant objects - like FV BCs, FV source term
+  // kernels, etc. - but we don't need to add them for other types of objects
+  // like FE or DG kernels because those kernels don't run in this loop. Do we
+  // really want to integrate fv source kernels into this loop?
+  std::vector<FVFluxKernel *> kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribSubdomains>(_subdomain)
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(kernels);
+
+  for (auto k : kernels)
+  {
+    // TODO: we need a better way to do this - especially when FE objects begin to
+    // couple to FV vars.  This code shoud be refactored out into one place
+    // where it is easy for users to say initialize all materials and
+    // variables needed by these objects for me.
+    const auto & deps = k->getMooseVariableDependencies();
+    for (auto var : deps)
+      if (var->isFV())
+        _needed_fv_vars.insert(var);
+      else
+        needed_fe_vars.insert(var);
+    const auto & mdeps = k->getMatPropDependencies();
+    needed_mat_props.insert(mdeps.begin(), mdeps.end());
+  }
+
+  // lindsayad: When a user is using an FVFluxKernel, then it's clear that when they couple any kind
+  // of variable in, then we should reinit it. However, with a Material, it's not clear whether a
+  // coupled variable needs to be computed for FE or FV calcs. For performance reasons, I am only
+  // going to request reinit for variables coupled into materials that are actually FV variables.
+  // Later, we may revisit this
+  std::set<MooseVariableFieldBase *> required_material_vars;
+  const auto & materials = _fe_problem.getMaterialWarehouse();
+  materials.updateBlockVariableDependency(_subdomain, required_material_vars, _tid);
+  // If we are on an internal interface we may need to reinit neighbor variables that don't exist on
+  // the "element" side
+  materials.updateBlockVariableDependency(_neighbor_subdomain, required_material_vars, _tid);
+
+  for (auto * const var : required_material_vars)
+    if (var->isFV())
+      _needed_fv_vars.insert(var);
+
+  _fe_problem.setActiveElementalMooseVariables(needed_fe_vars, _tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+  _fe_problem.prepareMaterials(_subdomain, _tid);
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::neighborSubdomainChanged()
+{
+  ThreadedFaceLoop<RangeType>::neighborSubdomainChanged();
+
   // With a subdomain change, the set of needed material properties and
   // variables may have changed, so we recompute them here.
 
@@ -474,6 +546,9 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   std::set<MooseVariableFieldBase *> required_material_vars;
   const auto & materials = _fe_problem.getMaterialWarehouse();
   materials.updateBlockVariableDependency(_subdomain, required_material_vars, _tid);
+  // If we are on an internal interface we may need to reinit neighbor variables that don't exist on
+  // the "element" side
+  materials.updateBlockVariableDependency(_neighbor_subdomain, required_material_vars, _tid);
 
   for (auto * const var : required_material_vars)
     if (var->isFV())
@@ -482,4 +557,12 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_fe_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::pre()
+{
+  _needed_fv_vars.clear();
+  _needed_mat_props.clear();
 }
