@@ -2,6 +2,32 @@
 
 Conda issues can be the root cause for just about any issue on this page. Scroll through this section, for what may look familiar, and follow those instructions:
 
+- #### 404 error, The channel is not accessible or is invalid.
+
+  If you are receiving this, you may be victim of us changing the channel name out from underneath you (Sorry!). Remove the offending channel(s):
+
+  ```bash
+  conda config --remove channels https://mooseframework.org/conda/moose
+  conda config --remove channels https://mooseframework.com/conda/moose
+  conda config --remove channels https://mooseframework.inl.gov/conda/moose
+  ```
+
+  If you receive errors about a channel not present (CondaKeyError), please ignore. You most likely will not have all three 'old' channels. Next, add the correct channel:
+
+  ```bash
+  conda config --add channels idaholab
+  ```
+
+  When you're finished, a `conda config --show channels` should resemble the following:
+
+  ```bash
+  $ conda config --show channels
+  channels:
+    - idaholab
+    - conda-forge
+    - defaults
+  ```
+
 - #### command not found: conda
 
   You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Miniconda3 installed to your home directory: `~/miniconda3`. Which requires you to set your PATH accordingly:
