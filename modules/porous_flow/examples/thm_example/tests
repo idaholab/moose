@@ -13,4 +13,17 @@
     design = 'thm_example.md'
     requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
   [../]
+  [./2D_c]
+    type = Exodiff
+    input = '2D_c.i'
+    exodiff = '2D_c_out.e'
+    cli_args = 'Mesh/nx=50 Mesh/bias_x=1.2 Executioner/end_time=100'
+    abs_zero = 1E-4
+    heavy = true
+    max_time = 1000
+    threading = '!pthreads'
+    issues = '#15922'
+    design = 'thm_c_example.md'
+    requirement = 'An example of a 2-phase THMC problem shall be demonstrated in PorousFlow'
+  [../]
 []
