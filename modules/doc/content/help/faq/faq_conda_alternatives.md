@@ -6,6 +6,8 @@ While we have no other means of providing 'pre-built' libraries, you are not lim
 
 [Spack](https://spack.readthedocs.io/en/latest/index.html) is another alternative, capable of building very optimized stacks for both Linux and MacOS. Spack however does not provide pre-built binaries. Spack instead supplies 'recipes' intended to be run by you, to build the stack.
 
+Perhaps our Advanced Instructions on our [Getting Started](getting_started/index.md) page would suffice?
+
 Lastly, there is always building everything from source if you're up to the challenge!
 
 !include sqa/minimum_requirements.md

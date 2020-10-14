@@ -3,7 +3,7 @@
 libMesh is supplied by our Conda installation. However, if you wish to build and use your own libMesh installation, you can use our
 `update_and_rebuild_libmesh.sh` script.
 
-Due to having moose-libmesh installed, Conda creates and sets an influential environment variable LIBMESH_DIR. One you would have to continually `unset`. It is therefor advisable to create a new Conda environment without moose-libmesh installed:
+Due to having moose-libmesh installed, Conda creates and sets an influential environment variable LIBMESH_DIR that you would have to continually `unset`. It is therefore advisable to create a new Conda environment without moose-libmesh installed:
 
 ```bash
 conda create --name custom-libmesh moose-petsc
