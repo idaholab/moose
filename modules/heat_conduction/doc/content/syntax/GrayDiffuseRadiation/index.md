@@ -2,8 +2,8 @@
 
 The `GrayDiffuseRadiation` syntax invokes the
 [RadiationTransferAction](/RadiationTransferAction.md) action. It simplifies setting up
-gray, diffuse radiative exchange problems. It requires the user to provide sideset IDs,
-emissivities on these sidesets, and the type of sideset.It allows to split the sidesets
+gray, diffuse radiative exchange problems. It requires the user to provide boundaries,
+emissivities on these boundaries, and the type of sideset. It allows to split the boundaries
 into radiation patches using the `n_patches` parameter.
 Refer to [RadiationTransferAction](/RadiationTransferAction.md) for details.
 
