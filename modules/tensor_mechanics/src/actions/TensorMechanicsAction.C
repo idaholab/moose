@@ -14,6 +14,7 @@
 #include "MooseObjectAction.h"
 #include "TensorMechanicsAction.h"
 #include "Material.h"
+#include "MaterialData.h"
 
 #include "BlockRestrictable.h"
 
@@ -71,6 +72,10 @@ TensorMechanicsAction::validParams()
       "cylindrical_axis_point2",
       "Ending point for direction of axis of rotation for cylindrical stress/strain.");
   params.addParam<Point>("direction", "Direction stress/strain is calculated in");
+  params.addParam<bool>("automatic_eigenstrain_passing",
+                        true,
+                        "Collects all material eigenstrains and passes to required strain "
+                        "calculator within TMA internally.");
 
   return params;
 }
@@ -91,7 +96,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
-    _direction_valid(params.isParamSetByUser("direction"))
+    _direction_valid(params.isParamSetByUser("direction")),
+    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_passing"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -250,7 +256,8 @@ TensorMechanicsAction::act()
   // Add Materials
   else if (_current_task == "add_master_action_material")
   {
-    actEigenstrainNames();
+    if (_auto_eigenstrain)
+      actEigenstrainNames();
 
     std::string type;
 
@@ -473,6 +480,7 @@ TensorMechanicsAction::actEigenstrainNames()
   // Copy the current  vector of eigenstrain names
   std::set<MaterialPropertyName> eigenstrain_names_copy(_eigenstrain_names.begin(),
                                                         _eigenstrain_names.end());
+
   std::set<MaterialPropertyName> verified_eigenstrain_names;
 
   std::map<std::string, std::string> remove_add_map;
@@ -483,12 +491,22 @@ TensorMechanicsAction::actEigenstrainNames()
   for (auto & mat : materials)
   {
     const InputParameters & mat_params = mat->parameters();
+    auto & mat_name = mat->type();
 
     // Check for eigenstrain names, only deal with those materials
     if (mat_params.isParamValid("eigenstrain_name"))
     {
       std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
       auto name = mat_params.get<std::string>("eigenstrain_name");
+
+      // Check for base_name prefix
+      if (mat_params.isParamValid("base_name"))
+      {
+        auto base_name = mat_params.get<std::string>("base_name");
+        name.insert(0, "_");
+        name.insert(0, base_name);
+      }
+
       // Check block restrictions
       if (blk)
       {
@@ -500,7 +518,7 @@ TensorMechanicsAction::actEigenstrainNames()
       }
     }
 
-    // Account for reduced eigenstrains
+    // Account for reduced eigenstrains and CompositeEigenstrains
     if (mat_params.isParamValid("input_eigenstrain_names"))
     {
       auto remove_list =
@@ -508,11 +526,21 @@ TensorMechanicsAction::actEigenstrainNames()
       for (auto i : remove_list)
         remove_reduced_set.insert(i);
     }
+    // Account for CompositeEigenstrains
+    if (mat_name == "CompositeEigenstrain")
+    {
+      auto remove_list = mat_params.get<std::vector<MaterialPropertyName>>("tensors");
+      for (auto i : remove_list)
+      {
+        remove_reduced_set.insert(i);
+        material_eigenstrain_map.erase(material_eigenstrain_map.find(i));
+      }
+    }
 
-    // Account for MaterialConverter, add or remove later
-    if (mat_params.isParamValid("RankTwoTensorMaterialConverter") ||
-        mat_params.isParamValid("RankFourTensorMaterialConverter") ||
-        mat_params.isParamValid("MaterialConverter"))
+    // Account for MaterialConverter , add or remove later
+
+    if (mat_name == "RankTwoTensorMaterialConverter" ||
+        mat_name == "RankFourTensorMaterialConverter" || mat_name == "MaterialConverter")
     {
       std::vector<std::string> remove_list;
       std::vector<std::string> add_list;
@@ -527,6 +555,7 @@ TensorMechanicsAction::actEigenstrainNames()
         remove_list = mat_params.get<std::vector<std::string>>("ad_props_in");
         add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
       }
+
       // These vectors are the same size as checked in MaterialConverter
       for (unsigned int index = 0; index < remove_list.size(); index++)
         remove_add_map.insert(std::make_pair(remove_list[index], add_list[index]));
@@ -550,8 +579,9 @@ TensorMechanicsAction::actEigenstrainNames()
       eigenstrain_set.insert(remove_add_index.second);
     }
   }
-  for (auto index : remove_reduced_set)
-    eigenstrain_set.erase(index);
+
+  for (auto index = remove_reduced_set.begin(); index != remove_reduced_set.end(); index++)
+    eigenstrain_set.erase(*index);
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
   // current subdomainID
@@ -560,6 +590,18 @@ TensorMechanicsAction::actEigenstrainNames()
                  eigenstrain_names_copy.begin(),
                  eigenstrain_names_copy.end(),
                  std::inserter(verified_eigenstrain_names, verified_eigenstrain_names.begin()));
+
+  // If is_ad, verify all eigenstrains are AD
+  // if (_use_ad)
+  // {
+  //   for (auto names : verified_eigenstrain_names)
+  //     MaterialData::getADProperty(names);
+  // }
+  // else
+  // {
+  //   for (auto names : verified_eigenstrain_names)
+  //     MaterialData::getProperty(names);
+  // }
 
   // Ensure the eigenstrain names previously passed include any missing names
   _eigenstrain_names.clear();
