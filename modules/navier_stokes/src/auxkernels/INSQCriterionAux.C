@@ -36,8 +36,8 @@ INSQCriterionAux::computeValue()
                          std::pow(_grad_velocity[_qp](0, 2) + _grad_velocity[_qp](2, 0), 2) +
                          std::pow(_grad_velocity[_qp](0, 1) + _grad_velocity[_qp](1, 0), 2) +
                          std::pow(_grad_velocity[_qp](1, 2) + _grad_velocity[_qp](2, 1), 2);
-  const Real antisymm_part = std::pow(_grad_velocity[_qp](0, 1) - _grad_velocity[_qp](1, 0), 2) +
-                             std::pow(_grad_velocity[_qp](1, 3) - _grad_velocity[_qp](3, 1), 2) +
-                             std::pow(_grad_velocity[_qp](2, 3) - _grad_velocity[_qp](3, 2), 2);
+  const Real antisymm_part = std::pow(_grad_velocity[_qp](0, 2) - _grad_velocity[_qp](2, 0), 2) +
+                             std::pow(_grad_velocity[_qp](0, 1) - _grad_velocity[_qp](1, 0), 2) +
+                             std::pow(_grad_velocity[_qp](1, 2) - _grad_velocity[_qp](2, 1), 2);
   return 0.5 * (antisymm_part - symm_part);
 }
