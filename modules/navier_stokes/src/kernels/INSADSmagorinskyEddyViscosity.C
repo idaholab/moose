@@ -24,8 +24,8 @@ INSADSmagorinskyEddyViscosity::validParams()
 
 INSADSmagorinskyEddyViscosity::INSADSmagorinskyEddyViscosity(const InputParameters & parameters)
   : ADVectorKernelGrad(parameters),
-  _rho(getADMaterialProperty<Real>("rho_name")),
-  _smagorinsky_constant(getParam<Real>("smagorinsky_constant"))
+    _rho(getADMaterialProperty<Real>("rho_name")),
+    _smagorinsky_constant(getParam<Real>("smagorinsky_constant"))
 {
 }
 
@@ -44,6 +44,6 @@ INSADSmagorinskyEddyViscosity::precomputeQpResidual()
   return strain_rate_tensor_mag *
          std::pow(_smagorinsky_constant * std::pow(_current_elem_volume, one_third) /
                       _current_elem->default_order(),
-                  2) * _rho[_qp] *
-         _grad_u[_qp];
+                  2) *
+         _rho[_qp] * _grad_u[_qp];
 }
