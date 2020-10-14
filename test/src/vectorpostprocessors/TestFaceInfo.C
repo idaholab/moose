@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-registerMooseObject("MooseApp", TestFaceInfo);
+registerMooseObject("MooseTestApp", TestFaceInfo);
 
 defineLegacyParams(TestFaceInfo);
 

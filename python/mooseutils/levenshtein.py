@@ -20,12 +20,9 @@ def levenshteinDistance(s1, possible, number=None):
     minimum = 1e9
     for i, s2 in enumerate(possible):
         d = levenshtein(s1, s2)
-        if d <= minimum:
-            results.insert(0, s2)
-            minimum = d
-        else:
-            results.append(s2)
+        results.append((s2, d))
 
+    results = [r for r, _ in sorted(results, key=lambda x: x[1])]
     if number is not None:
         return results[:number]
     return results

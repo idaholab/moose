@@ -9,7 +9,7 @@
 
 #include "ADMatAnisoDiffusion.h"
 
-registerMooseObject("MooseApp", ADMatAnisoDiffusion);
+registerMooseObject("PhaseFieldApp", ADMatAnisoDiffusion);
 
 InputParameters
 ADMatAnisoDiffusion::validParams()

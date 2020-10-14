@@ -1,1 +1,36 @@
-!template load file=stubs/moose_object.md.template name=ConstantFunction syntax=/Functions/ConstantFunction
+# ConstantFunction
+
+!alert! construction title=Undocumented Class
+The ConstantFunction has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+```markdown
+# ConstantFunction
+
+!syntax description /Functions/ConstantFunction
+
+## Overview
+
+!! Replace these lines with information regarding the ConstantFunction object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the ConstantFunction object.
+
+!syntax parameters /Functions/ConstantFunction
+
+!syntax inputs /Functions/ConstantFunction
+
+!syntax children /Functions/ConstantFunction
+```
+!alert-end!
+
+!syntax description /Functions/ConstantFunction
+
+!syntax parameters /Functions/ConstantFunction
+
+!syntax inputs /Functions/ConstantFunction
+
+!syntax children /Functions/ConstantFunction

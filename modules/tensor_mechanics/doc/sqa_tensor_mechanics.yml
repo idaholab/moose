@@ -5,3 +5,4 @@ specs:
 dependencies:
     - framework
 repo: moose
+reports: !include ${MOOSE_DIR}/modules/tensor_mechanics/doc/sqa_reports.yml

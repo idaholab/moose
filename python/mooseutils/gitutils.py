@@ -41,12 +41,15 @@ def git_merge_commits(working_dir=os.getcwd()):
     out = check_output(['git', 'log', '-1', '--merges', '--pretty=format:%P'], cwd=working_dir)
     return out.strip(' \n').split(' ')
 
-def git_ls_files(working_dir=os.getcwd()):
+def git_ls_files(working_dir=os.getcwd(), recurse_submodules=False):
     """
     Return a list of files via 'git ls-files'.
     """
+    cmd = ['git', 'ls-files']
+    if recurse_submodules:
+        cmd.append('--recurse-submodules')
     out = set()
-    for fname in check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
+    for fname in check_output(cmd, cwd=working_dir).split('\n'):
         out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 

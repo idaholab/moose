@@ -11,7 +11,7 @@
 #include "LineSegmentCutSetUserObject.h"
 #include "FEProblem.h"
 
-registerMooseObject("MooseApp", LineSegmentLevelSetAux);
+registerMooseObject("XFEMApp", LineSegmentLevelSetAux);
 
 InputParameters
 LineSegmentLevelSetAux::validParams()

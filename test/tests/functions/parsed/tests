@@ -12,7 +12,6 @@
     input = 'mms_transient_coupled.i'
     exodiff = 'mms_transient_coupled_out.e'
     requirement = "The ParsedFunction object shall be capable of defining function within the input file for use with the method of manufactured solutions."
-    verification = parsed_function_verification.md
     issues = '#1902'
   [../]
   [./vector]

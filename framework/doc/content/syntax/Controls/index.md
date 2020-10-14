@@ -21,8 +21,8 @@ controlled, this is done in the `validParams` function as in [declare_controllab
 be a single value or a space separated list of parameters.
 
 !listing framework/src/bcs/DirichletBC.C
-         start=template
-         end=DirichletBC::
+         start=InputParameters
+         end=DirichletBC::DirichletBC
          id=declare_controllable
          caption=Example `validParams` method that declares a parameter as controllable.
 

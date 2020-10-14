@@ -5,3 +5,5 @@
 - [!sqa!document category={{category}} suffix=rtm](Requirement Traceability Matrix (RTM))
 - [!sqa!document category={{category}} suffix=vvr](Verification and Validation Report (VVR))
 - [!sqa!document category={{category}} suffix=stp](Software Test Plan (STP))
+
+!sqa report category={{category}}

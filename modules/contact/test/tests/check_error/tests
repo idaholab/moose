@@ -1,5 +1,5 @@
 [Tests]
-  design = "/Contact.md"
+  design = "contact/index.md"
   issues = "#2816"
   requirement = "The system shall generate an error if contact is used without updated coordinates"
   [./contact_displacements]

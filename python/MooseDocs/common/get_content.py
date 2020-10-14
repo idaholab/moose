@@ -193,7 +193,7 @@ def get_content(items, in_ext):
             dir_key = os.path.join(*parts[:i])
             if dir_key not in nodes:
                 nodes[dir_key] = pages.Directory(dir_key,
-                                                                source=os.path.join(root, dir_key))
+                                                 source=os.path.join(root, dir_key))
 
         # Create the file node, if it doesn't already exist. This enforces that the first
         # item in the supplied content lists is the page that is rendered.

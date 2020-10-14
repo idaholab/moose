@@ -473,6 +473,10 @@ li{
     padding-left:15px;
 }
 
+.collapsible li{
+    padding-left:0;
+}
+
 .moose-chip{
     margin-left: 10px;
     bottom: 8px;
@@ -1139,17 +1143,23 @@ div.moose-mega-menu-content{
    border: 1px solid #000;
  }
  .collection .collection-item {
-   background-color: var(--darkmode-card);
+   background-color: var(--darkmode-back);
    border-bottom: 1px solid #000;
  }
  .collapsible-header {
-   background-color: var(--darkmode-card);
+   background-color: var(--darkmode-back);
    border-bottom: 1px solid #000;
  }
  .collapsible {
    border-top: 1px solid #000;
    border-right: 1px solid #000;
    border-left: 1px solid #000;
+ }
+ .collapsible-body {
+   border-bottom: 1px solid #000;
+ }
+ span.badge {
+     color: white;
  }
  a {
    color: var(--links-dark);

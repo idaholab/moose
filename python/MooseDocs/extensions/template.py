@@ -10,6 +10,7 @@ import re
 import codecs
 import logging
 import moosetree
+import mooseutils
 
 import MooseDocs
 from .. import common
@@ -53,6 +54,10 @@ class TemplateExtension(include.IncludeExtension):
 
         renderer.add('TemplateField', RenderTemplateField())
 
+    def initPage(self, page):
+        """Initialize page with Extension settings."""
+        self.initConfig(page, 'args')
+
     def postTokenize(self, page, ast):
 
         items = set()
@@ -68,28 +73,6 @@ class TemplateExtension(include.IncludeExtension):
         if unknown_items:
             msg = "Unknown template item(s): {}".format(', '.join(unknown_items))
             raise exceptions.MooseDocsException(msg)
-
-    def applyTemplateArguments(self, content, **kwargs):
-        """
-        Helper for applying template args (e.g., {{app}})
-        """
-        if not isinstance(content, (str, str)):
-            return content
-
-        template_args = self.get('args', dict())
-        template_args.update(**kwargs)
-
-        def sub(match):
-            key = match.group('key')
-            arg = template_args.get(key, None)
-            if key is None:
-                msg = "The template argument '{}' was not defined in the !template load command."
-                raise exceptions.MooseDocsException(msg, key)
-            return arg
-
-        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
-        return content
-
 
 class TemplateLoadCommand(command.CommandComponent):
     """
@@ -116,9 +99,12 @@ class TemplateLoadCommand(command.CommandComponent):
 
         location = self.translator.findPage(settings['file'])
         page['dependencies'].add(location.uid)
-        content = common.read(location.source)
 
-        content = self.extension.applyTemplateArguments(content, **t_args)
+        kwargs = self.extension.getConfig(page, 'args')
+        kwargs.update(t_args)
+
+        content = common.read(location.source)
+        content = mooseutils.apply_template_arguments(content, **kwargs)
         self.reader.tokenize(parent, content, page, line=info.line)
         return parent
 
@@ -149,7 +135,8 @@ class TemplateItemCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         item = TemplateItem(parent, key=self.settings['key'])
         group = MarkdownReader.INLINE if MarkdownReader.INLINE in info else MarkdownReader.BLOCK
-        content = self.extension.applyTemplateArguments(info[group])
+        kwargs = self.extension.getConfig(page, 'args')
+        content = mooseutils.apply_template_arguments(info[group], **kwargs)
         if content:
             self.reader.tokenize(item, content, page, line=info.line, group=group)
         return parent

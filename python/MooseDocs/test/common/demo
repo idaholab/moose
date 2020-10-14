@@ -45,7 +45,7 @@
   [group2]
     requirement = "Requirement Group Three"
     design = bibtex.md
-    validation = katex.md
+    validation = 'katex.md bibtex.md'
     [group2-a]
        detail = 5D
     []

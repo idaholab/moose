@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#6699 #12049'
+  design = 'python/index.md'
+  [base]
+    type = PythonUnitTest
+    input = test_nodes.py
+
+    requirement = "The system shall include the necessary components for building a syntax tree from application information."
+  []
+  [tree]
+    type = PythonUnitTest
+    input = test_get_moose_syntax_tree.py
+
+    requirement = "The system shall include a utility for generating a complete syntax tree from an application executable."
+  []
+[]

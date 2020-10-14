@@ -10,7 +10,7 @@
 #include "TangentialMortarLMMechanicalContact.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", TangentialMortarLMMechanicalContact);
+registerMooseObject("ContactApp", TangentialMortarLMMechanicalContact);
 
 InputParameters
 TangentialMortarLMMechanicalContact::validParams()

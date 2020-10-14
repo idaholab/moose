@@ -35,7 +35,6 @@ def colorText(string, color, **kwargs):
     """
     # Get the properties
     html = kwargs.pop('html', False)
-    code = kwargs.pop('code', True)
     colored = kwargs.pop('colored', True)
 
     # ANSI color codes for colored terminal output
@@ -55,20 +54,15 @@ def colorText(string, color, **kwargs):
                        LIGHT_MAGENTA='\033[95m',
                        LIGHT_CYAN='\033[96m',
                        LIGHT_GREY='\033[37m')
-    if code:
-        color_codes['GREEN'] = '\033[32m'
-        color_codes['CYAN']  = '\033[36m'
-        color_codes['MAGENTA'] = '\033[35m'
 
-    if colored and not ('BITTEN_NOCOLOR' in os.environ and os.environ['BITTEN_NOCOLOR'] == 'true'):
-        if html:
-            string = string.replace('<r>', color_codes['BOLD']+color_codes['RED'])
-            string = string.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
-            string = string.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
-            string = string.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
-            string = string.replace('<b>', color_codes['BOLD'])
-            string = re.sub(r'</[rcgyb]>', color_codes['RESET'], string)
-        else:
+    if colored and html:
+        string = string.replace('<r>', color_codes['BOLD']+color_codes['RED'])
+        string = string.replace('<c>', color_codes['BOLD']+color_codes['CYAN'])
+        string = string.replace('<g>', color_codes['BOLD']+color_codes['GREEN'])
+        string = string.replace('<y>', color_codes['BOLD']+color_codes['YELLOW'])
+        string = string.replace('<b>', color_codes['BOLD'])
+        string = re.sub(r'</[rcgyb]>', color_codes['RESET'], string)
+    elif colored and not html:
             string = color_codes[color] + string + color_codes['RESET']
     elif html:
         string = re.sub(r'</?[rcgyb]>', '', string)    # stringip all "html" tags
@@ -125,7 +119,7 @@ def find_moose_executable(loc, **kwargs):
 
     show_error = kwargs.pop('show_error', True)
 
-    # Handle 'combined' and 'tests'
+    # Handle 'tests'
     if os.path.isdir(loc):
         if name == 'test':
             name = 'moose_test'
@@ -175,8 +169,8 @@ def run_executable(app_path, args, mpi=None, suppress_output=False):
         cmd = [app_path]
     cmd += args
 
-    if suppress_output:
-        return subprocess.check_output(cmd)
+    if not suppress_output:
+        return subprocess.check_output(cmd, encoding='utf-8')
     else:
         return subprocess.call(cmd)
 

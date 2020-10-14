@@ -10,17 +10,13 @@
 
 import os
 import unittest
-import logging
-
-import MooseDocs
-from MooseDocs import common
-
-logging.basicConfig()
+from moosesqa import get_requirements
 
 class TestGetRequirements(unittest.TestCase):
     def testBasic(self):
-        loc = [os.path.join(MooseDocs.MOOSE_DIR, 'test', 'tests', 'markers')]
-        req = common.get_requirements(loc, ['tests'])
+        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        loc = [os.path.join(MOOSE_DIR, 'test', 'tests', 'markers')]
+        req = get_requirements(loc, ['tests'])
 
         r0 = req['box_marker'][0]
         r1 = req['box_marker'][1]
@@ -31,8 +27,8 @@ class TestGetRequirements(unittest.TestCase):
         self.assertEqual(r0.design, ['/Markers/index.md', '/BoxMarker.md'])
         self.assertEqual(r1.design, ['/Markers/index.md', '/BoxMarker.md'])
 
-        self.assertIn('create an aux', r0.text)
-        self.assertIn('within a rec', r1.text)
+        self.assertIn('create an aux', r0.requirement)
+        self.assertIn('within a rec', r1.requirement)
 
         self.assertEqual(r0.name, 'mark_only')
         self.assertEqual(r1.name, 'mark_and_adapt')
@@ -45,100 +41,94 @@ class TestGetRequirements(unittest.TestCase):
 
     def testRequirementWithDetails(self):
         loc = [os.getcwd()]
-        req = common.get_requirements(loc, ['demo'])
+        req = get_requirements(loc, ['test_get_requirements_spec0'])
 
         self.assertEqual(len(req), 1)
-        self.assertEqual(len(req['demo']), 8)
+        self.assertEqual(len(req['test_get_requirements_spec0']), 9)
 
-        r = req['demo'][0]
+        r = req['test_get_requirements_spec0'][0]
         self.assertEqual(r.issues, ['#1234'])
         self.assertEqual(r.design, ['core.md'])
-        self.assertEqual(r.text, "Requirement One")
+        self.assertEqual(r.requirement, "Requirement One")
 
-        r = req['demo'][1]
+        r = req['test_get_requirements_spec0'][1]
         self.assertEqual(r.issues, ['#3456'])
         self.assertEqual(r.design, ['core.md'])
-        self.assertEqual(r.text, "Requirement Two")
+        self.assertEqual(r.requirement, "Requirement Two")
 
-        r = req['demo'][2]
+        r = req['test_get_requirements_spec0'][2]
         self.assertEqual(r.issues, ['#1234'])
         self.assertEqual(r.design, ['bibtex.md'])
-        self.assertEqual(r.text, "Requirement Three")
+        self.assertEqual(r.requirement, "Requirement Three")
 
-        r = req['demo'][3]
+        r = req['test_get_requirements_spec0'][3]
         self.assertEqual(r.issues, ['#4567'])
         self.assertEqual(r.design, ['katex.md'])
-        self.assertEqual(r.text, "Requirement Four")
+        self.assertEqual(r.requirement, "Requirement Four")
 
-        r = req['demo'][4]
+        r = req['test_get_requirements_spec0'][4]
         self.assertEqual(r.issues, ['#1234'])
         self.assertEqual(r.design, ['core.md'])
-        self.assertEqual(r.text, "Requirement Group One")
+        self.assertEqual(r.requirement, "Requirement Group One")
         self.assertEqual(len(r.details), 2)
 
         d = r.details[0]
         self.assertEqual(d.name, 'group0-a')
-        self.assertEqual(d.text, '1D')
-        self.assertEqual(d.text_line, 27)
+        self.assertEqual(d.detail, '1D')
+        self.assertEqual(d.detail_line, 27)
 
         d = r.details[1]
         self.assertEqual(d.name, 'group0-b')
-        self.assertEqual(d.text, '2D')
-        self.assertEqual(d.text_line, 30)
+        self.assertEqual(d.detail, '2D')
+        self.assertEqual(d.detail_line, 30)
 
-        r = req['demo'][5]
+        r = req['test_get_requirements_spec0'][5]
         self.assertEqual(r.issues, ['#8910'])
         self.assertEqual(r.design, ['core.md'])
-        self.assertEqual(r.text, "Requirement Group Two")
+        self.assertEqual(r.requirement, "Requirement Group Two")
         self.assertEqual(len(r.details), 2)
 
         d = r.details[0]
         self.assertEqual(d.name, 'group1-a')
-        self.assertEqual(d.text, '3D')
-        self.assertEqual(d.text_line, 38)
+        self.assertEqual(d.detail, '3D')
+        self.assertEqual(d.detail_line, 38)
 
         d = r.details[1]
         self.assertEqual(d.name, 'group1-b')
-        self.assertEqual(d.text, '4D')
-        self.assertEqual(d.text_line, 41)
+        self.assertEqual(d.detail, '4D')
+        self.assertEqual(d.detail_line, 41)
 
-        r = req['demo'][6]
+        r = req['test_get_requirements_spec0'][6]
         self.assertEqual(r.issues, ['#1234'])
         self.assertEqual(r.design, ['bibtex.md'])
-        self.assertEqual(r.text, "Requirement Group Three")
+        self.assertEqual(r.requirement, "Requirement Group Three")
         self.assertEqual(len(r.details), 2)
 
         d = r.details[0]
         self.assertEqual(d.name, 'group2-a')
-        self.assertEqual(d.text, '5D')
-        self.assertEqual(d.text_line, 50)
+        self.assertEqual(d.detail, '5D')
+        self.assertEqual(d.detail_line, 50)
 
         d = r.details[1]
         self.assertEqual(d.name, 'group2-b')
-        self.assertEqual(d.text, '6D')
-        self.assertEqual(d.text_line, 53)
+        self.assertEqual(d.detail, '6D')
+        self.assertEqual(d.detail_line, 53)
 
-        r = req['demo'][7]
+        r = req['test_get_requirements_spec0'][7]
         self.assertEqual(r.issues, ['#4321'])
         self.assertEqual(r.design, ['katex.md'])
-        self.assertEqual(r.text, "Requirement Group Four")
+        self.assertEqual(r.requirement, "Requirement Group Four")
         self.assertEqual(len(r.details), 2)
 
         d = r.details[0]
         self.assertEqual(d.name, 'group3-a')
-        self.assertEqual(d.text, '7D')
-        self.assertEqual(d.text_line, 62)
+        self.assertEqual(d.detail, '7D')
+        self.assertEqual(d.detail_line, 62)
 
         d = r.details[1]
         self.assertEqual(d.name, 'group3-b')
-        self.assertEqual(d.text, '8D')
-        self.assertEqual(d.text_line, 65)
-
-    def testRequirementWithDeprecated(self):
-        loc = [os.getcwd()]
-        req = common.get_requirements(loc, ['demo2'])
-        self.assertEqual(len(req), 0)
-        # TODO: In python performing assert on log messages is possible, it is a pain in 2
+        self.assertEqual(d.detail, '8D')
+        self.assertEqual(d.detail_line, 65)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -9,7 +9,7 @@
 
 #include "EBCoupledVarTest.h"
 
-registerMooseObject("PhaseFieldApp", EBCoupledVarTest);
+registerMooseObject("PhaseFieldTestApp", EBCoupledVarTest);
 
 InputParameters
 EBCoupledVarTest::validParams()

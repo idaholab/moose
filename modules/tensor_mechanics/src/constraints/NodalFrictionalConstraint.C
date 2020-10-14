@@ -22,7 +22,7 @@
 // C++ includes
 #include <limits.h>
 
-registerMooseObject("MooseApp", NodalFrictionalConstraint);
+registerMooseObject("TensorMechanicsApp", NodalFrictionalConstraint);
 
 template <>
 InputParameters

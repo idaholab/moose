@@ -11,7 +11,7 @@
   []
 
   [error_report]
-    requirement = 'The system shall report an error when a requested parameter for reporting does not exist.'
+    requirement = 'The system shall report an error when a requested parameter for reporting does not exist'
 
     [bad_name_error]
       # Test Error when complete name is not provided
@@ -20,7 +20,7 @@
       cli_args = 'Postprocessors/coef_value/parameter=*/diff/coef'
       expect_err = "Unknown InputParameters object \*/diff"
 
-      detail = ''
+      detail = "with a wildcard in the name and"
     []
 
     [no_param_error]
@@ -30,7 +30,7 @@
       cli_args = 'Postprocessors/coef_value/parameter=Kernels/diff/coef2'
       expect_err = "Unable to locate the parameter: Kernels/diff/coef2."
 
-      detail = ''
+      detail = "a complete name/"
     []
   []
 []

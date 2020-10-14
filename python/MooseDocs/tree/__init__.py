@@ -12,6 +12,3 @@ from . import base
 from . import html
 from . import tokens
 from . import pages
-
-# TODO: move these to common
-from .app_syntax import app_syntax
