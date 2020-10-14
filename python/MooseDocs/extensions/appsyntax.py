@@ -818,7 +818,7 @@ def _insert_materialize_parameter(parent, name, param):
     cpp_type = param['cpp_type']
     p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
     html.Tag(p, 'span', string='C++ Type:')
-    html.String(p, content=cpp_type)
+    html.String(p, content=cpp_type, escape=True)
 
     if 'options' in param:
         p = html.Tag(body, 'p', class_='moose-parameter-description-options')
