@@ -1,5 +1,5 @@
 # this test is the same as frictionless_kinematic test but designed to test the gap offset capability
-# gap offsets with value of 0.01 were introduced to both master and slave sides in the initial mesh
+# gap offsets with value of 0.01 were introduced to both primary and secondary sides in the initial mesh
 # these values were accounted using the gap offset capability to produce the same result as if no gap offsets were introduced
 [Mesh]
   file = blocks_2d_gap_offset.e
@@ -174,8 +174,8 @@
 
 [Contact]
   [./leftright]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
     model = frictionless
     penalty = 1e+6
     secondary_gap_offset = secondary_gap_offset
