@@ -55,9 +55,9 @@ YouTube videos can also be displayed using the `!media youtube` syntax. The embe
 provided via the `youtube_embed_src` setting parameter. Similar to locally stored or hosted videos,
 extra settings are provided as listed in [video-settings].
 
-!media youtube youtube_embed_src=https://www.youtube.com/embed/2tJwBsYaLaI
-               id=training-webinar
-               caption=MOOSE training webinar given on June 9 - 10, 2020.
+!media https://www.youtube.com/embed/2tJwBsYaLaI
+       id=training-webinar
+       caption=MOOSE training webinar given on June 9--10, 2020.
 
 !devel settings module=MooseDocs.extensions.media
                 object=VideoCommand

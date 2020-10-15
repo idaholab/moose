@@ -18,40 +18,18 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
-Image = tokens.newToken('Image', src='', tex='')
-Video = tokens.newToken('Video', src='', tex='',
+Image = tokens.newToken('Image', src='', tex='', dark='')
+Video = tokens.newToken('Video', src='', tex='', youtube=False,
                         controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
-class MediaExtensionBase(command.CommandExtension):
-
-    def latexImage(self, parent, token, page, src):
-
-        args = []
-        style = latex.parse_style(token)
-        width = style.get('width', None)
-        if width:
-            if width.endswith('%'):
-                width = '{}\\textwidth'.format(int(width[:-1])/100.)
-            args.append(latex.Bracket(string='width={}'.format(width), escape=False))
-
-        if style.get('text-align', None) == 'center':
-            env = latex.Environment(parent, 'center')
-        else:
-            env = parent
-
-        node = self.translator.findPage(src)
-        fname = os.path.join(self.translator.destination, node.local)
-        img = latex.Command(env, 'includegraphics', string=fname, args=args, escape=False)
-        return img
-
-class MediaExtension(MediaExtensionBase):
+class MediaExtension(command.CommandExtension):
     """
     Extension for including images and movies, using the !media command.
     """
 
     @staticmethod
     def defaultConfig():
-        config = MediaExtensionBase.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         config['prefix'] = ('Figure', "The caption prefix (e.g., Fig.).")
         return config
 
@@ -74,14 +52,34 @@ class MediaExtension(MediaExtensionBase):
             renderer.addPackage('graphicx')
             renderer.addPackage('xcolor')
 
+    def latexImage(self, parent, token, page, src):
+        args = []
+        style = latex.parse_style(token)
+        width = style.get('width', None)
+        if width:
+            if width.endswith('%'):
+                width = '{}\\textwidth'.format(int(width[:-1])/100.)
+            args.append(latex.Bracket(string='width={}'.format(width), escape=False))
+
+        if style.get('text-align', None) == 'center':
+            env = latex.Environment(parent, 'center')
+        else:
+            env = parent
+
+        node = self.translator.findPage(src)
+        fname = os.path.join(self.translator.destination, node.local)
+        img = latex.Command(env, 'includegraphics', string=fname, args=args, escape=False)
+        return img
+
 class ImageCommand(command.CommandComponent):
     COMMAND = 'media'
-    SUBCOMMAND = ('jpg', 'jpeg', 'gif', 'png', 'svg', None)
+    SUBCOMMAND = ('jpg', 'jpeg', 'gif', 'png', 'svg')
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
+        settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings.update(floats.caption_settings())
         return settings
 
@@ -89,50 +87,44 @@ class ImageCommand(command.CommandComponent):
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True, **self.attributes)
-        img = Image(flt, src=info['subcommand'], tex=self.settings['latex_src'])
+        img = Image(flt, src=info['subcommand'], dark=self.settings['dark_src'],
+                    tex=self.settings['latex_src'])
         if flt is parent:
             img.attributes.update(**self.attributes)
         return parent
 
 class VideoCommand(command.CommandComponent):
     COMMAND = 'media'
-    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v', 'youtube')
+    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v', None)
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['youtube_embed_src'] = (None, "Youtube embed link, only recognized when the subcommand is 'youtube'.")
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
         settings['controls'] = (True, "Display the video player controls (not compatible with YouTube).")
         settings['loop'] = (False, "Automatically loop the video (not compatible with YouTube).")
         settings['autoplay'] = (False, "Automatically start playing the video (not compatible with YouTube).")
         settings['tstart'] = (None, "Time (sec) to start video.")
         settings['tstop'] = (None, "Time (sec) to stop video.")
+        settings['poster'] = (None, "Add a 'poster' image the the video")
         settings.update(floats.caption_settings())
         return settings
 
     def createToken(self, parent, info, page):
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  bottom=True, img=True)
+                                  bottom=True, img=True, **self.attributes)
 
-        if info['subcommand'] == "youtube":
-            vid = Video(flt,
-                        src=self.settings['youtube_embed_src'],
-                        youtube=True,
-                        tex=self.settings['latex_src'],
-                        tstart=self.settings['tstart'],
-                        tstop=self.settings['tstop'])
-        else:
-            vid = Video(flt,
-                        src=info['subcommand'],
-                        youtube=False,
-                        tex=self.settings['latex_src'],
-                        controls=self.settings['controls'],
-                        loop=self.settings['loop'],
-                        autoplay=self.settings['autoplay'],
-                        tstart=self.settings['tstart'],
-                        tstop=self.settings['tstop'])
+        vid = Video(flt,
+                    src=info['subcommand'],
+                    youtube='www.youtube.com' in info['subcommand'],
+                    tex=self.settings['latex_src'],
+                    controls=self.settings['controls'],
+                    poster=self.settings['poster'],
+                    loop=self.settings['loop'],
+                    autoplay=self.settings['autoplay'],
+                    tstart=self.settings['tstart'],
+                    tstop=self.settings['tstop'])
 
         if flt is parent:
             vid.attributes.update(**self.attributes)
@@ -149,7 +141,11 @@ class RenderImage(components.RenderComponent):
             node = self.translator.findPage(src)
             src = str(node.relativeSource(page))
 
-        return html.Tag(parent, 'img', token, src=src)
+        pic = html.Tag(parent, 'picture')
+        if token['dark']:
+            html.Tag(pic, 'source', srcset=token['dark'], media='(prefers-color-scheme: dark)')
+        html.Tag(pic, 'img', token, src=src)
+        return pic
 
     def createMaterialize(self, parent, token, page):
         tag = self.createHTML(parent, token, page)
@@ -211,7 +207,7 @@ class RenderVideo(components.RenderComponent):
             elif tstop:
                 src += '#t=0,{}'.format(tstop)
 
-            video = html.Tag(parent, 'video', token, src=src)
+            video = html.Tag(parent, 'video', token)
             _, ext = os.path.splitext(src)
             html.Tag(video, 'source', src=src, type_="video/{}".format(ext[1:]))
 
@@ -226,13 +222,14 @@ class RenderVideo(components.RenderComponent):
     def createLatex(self, parent, token, page):
 
         src = token['tex']
-        _, ext = os.path.splitext(src)
         if not src:
             msg = "Videos ({}) are not supported with LaTeX output, the 'latex_src' setting " \
                   "should be utilized to supply an image ('.jpg', '.png', or '.pdf')."
-            raise exceptions.MooseDocsException(msg, token['src'], ext)
-        elif ext not in ('.jpg', '.png', '.pdf'):
-            msg = "Images ({}) with the '{}' extension are not supported. The image " \
+            raise exceptions.MooseDocsException(msg, token['src'])
+
+        _, ext = os.path.splitext(src)
+        if ext not in ('.jpg', '.png', '.pdf'):
+            msg = "Videos ({}) with the '{}' extension are not supported. The image " \
                   "should be converted to a '.jpg', '.png', or '.pdf'."
             raise exceptions.MooseDocsException(msg, src, ext)
 
