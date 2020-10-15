@@ -742,17 +742,6 @@ public:
                                        bool execute_stateful = true);
 
   /**
-   * For finite volume bcs, we need to be able to initialize and compute
-   * materials on ghost elements (elements that don't exist on the mesh - on
-   * the outside side of a boundary face).  To be able to reinit materials
-   * under these circumstances without crashing, we provide a special function
-   * here that reinits the neighbor material properties using the elem element
-   * instead of the neighbor element.
-   */
-  virtual void
-  reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-
-  /**
    * reinit materials on a boundary
    * @param boundary_id The boundary on which to reinit corresponding materials
    * @param tid The thread id
@@ -775,12 +764,6 @@ public:
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
-  /**
-   * This is the special materials swap-back function to be paired with
-   * reinitMaterialsNeighborGhost.  Always use it (and only it) to swap back whenever you
-   * reinit with that function.
-   */
-  virtual void swapBackMaterialsNeighborGhost(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void addPostprocessor(const std::string & pp_name,

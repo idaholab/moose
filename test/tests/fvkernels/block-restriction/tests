@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15894'
+  design = 'fv_design.md'
+  [1d]
+    type = Exodiff
+    input = 1d.i
+    exodiff = 1d_out.e
+    requirement = 'The system shall support block restriction of finite volume variables and kernels, and shall properly handle material evaluation in block-restricted settings, in a one-dimensional example.'
+  []
+[]

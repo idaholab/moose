@@ -443,13 +443,16 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
     const Elem * const elem = lm_mesh.elem_ptr(elem_id);
     mooseAssert(elem, "If the elem ID exists, then the elem shouldn't be null");
 
-    const auto & elem_value = getElemValue(elem);
+    if (this->hasBlocks(elem->subdomain_id()))
+    {
+      const auto & elem_value = getElemValue(elem);
 
-    auto distance = (vertex - elem->centroid()).norm();
+      auto distance = (vertex - elem->centroid()).norm();
 
-    numerator += elem_value / distance;
+      numerator += elem_value / distance;
 
-    denominator += 1. / distance;
+      denominator += 1. / distance;
+    }
   }
 
   value = numerator / denominator;
@@ -484,7 +487,7 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
                                               const FaceInfo & fi,
                                               const ADReal & elem_value) const
 {
-  if (neighbor)
+  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
     return getElemValue(neighbor);
   else
   {
@@ -513,8 +516,8 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
                                           const FaceInfo & fi,
                                           const ADReal & elem_value) const
 {
-  // Are we on a boundary?
-  if (!neighbor)
+  // Are we on a boundary or an interface beyond which our variable doesn't exist?
+  if (!neighbor || !this->hasBlocks(neighbor->subdomain_id()))
   {
     const auto & pr = getDirichletBC(fi);
 
@@ -625,28 +628,30 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   if (it != _face_to_unc_grad.end())
     return it->second;
 
-  const VectorValue<ADReal> & elem_grad = adGradSln(&fi.elem());
+  auto pr = Moose::FV::determineElemOneAndTwo(fi, *this);
+  const Elem * const elem_one = pr.first;
+  const Elem * const elem_two = pr.second;
+
+  const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
 
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
-  auto emplace_ret = _face_to_unc_grad.emplace(&fi, elem_grad);
+  auto emplace_ret = _face_to_unc_grad.emplace(&fi, elem_one_grad);
 
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
   VectorValue<ADReal> & unc_face_grad = emplace_ret.first->second;
 
-  const Elem * const neighbor = fi.neighborPtr();
-
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // check for a Dirichlet BC. If we have a Dirichlet BC, then we will apply a zero Hessian
   // assumption. If we do not, then we know we are applying a zero gradient assumption elsehwere in
   // our calculations, so we should be consistent and apply a zero gradient assumption here as well
-  if (neighbor)
+  if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
-    const VectorValue<ADReal> & neighbor_grad = adGradSln(neighbor);
+    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two);
 
     // Uncorrected gradient value
-    unc_face_grad = Moose::FV::linearInterpolation(elem_grad, neighbor_grad, fi);
+    unc_face_grad = Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi);
   }
   else
   {
@@ -676,14 +681,19 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 
   VectorValue<ADReal> & face_grad = emplace_ret.first->second;
 
-  const Elem * const neighbor = fi.neighborPtr();
+  auto pr = Moose::FV::determineElemOneAndTwo(fi, *this);
+  const Elem * const elem_one = pr.first;
+  const Elem * const elem_two = pr.second;
+  bool elem_is_elem_one = elem_one == &fi.elem();
 
-  const ADReal elem_value = getElemValue(&fi.elem());
+  const ADReal elem_one_value = getElemValue(elem_one);
+  const ADReal elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
+  const ADReal & elem_value = elem_is_elem_one ? elem_one_value : elem_two_value;
+  const ADReal & neighbor_value = elem_is_elem_one ? elem_two_value : elem_one_value;
 
-  // perform the correction
-  face_grad += ((getNeighborValue(neighbor, fi, elem_value) - elem_value) / fi.dCFMag() -
-                face_grad * fi.eCF()) *
-               fi.eCF();
+  // perform the correction. Note that direction is important here because we have a minus sign.
+  // Neighbor has to neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic above
+  face_grad += ((neighbor_value - elem_value) / fi.dCFMag() - face_grad * fi.eCF()) * fi.eCF();
 
   return face_grad;
 }

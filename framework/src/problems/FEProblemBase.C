@@ -3165,35 +3165,6 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
 }
 
 void
-FEProblemBase::reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
-{
-  if (hasActiveMaterialProperties(tid))
-  {
-    // NOTE: this will not work with h-adaptivity
-    // The neighbor element doesn't exist, so use elem element as a stand-in.
-    auto && neighbor = _assembly[tid]->elem();
-
-    // The neighbor element doesn't actually exist - so use the current side
-    // elem side as a stand-in.
-    unsigned int neighbor_side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-    _neighbor_material_data[tid]->resize(n_points);
-
-    // Only swap if requested
-    if (swap_stateful)
-      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
-
-    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reset(
-          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-  }
-}
-
-void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
                                        THREAD_ID tid,
                                        bool swap_stateful,
@@ -3202,8 +3173,30 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
-    auto && neighbor = _assembly[tid]->neighbor();
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+    // lindsayad: why not?
+    const Elem * neighbor = _assembly[tid]->neighbor();
+    unsigned int neighbor_side =
+        neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
+
+    if (!neighbor)
+    {
+      if (haveFV())
+      {
+        // If neighbor is null, then we're on the neighbor side of a mesh boundary, e.g. we're off
+        // the mesh in ghost-land. If we're using the finite volume method, then variable values and
+        // consequently material properties have well-defined values in this ghost region outside of
+        // the mesh and we really do want to reinit our neighbor materials in this case. Since we're
+        // off in ghost land it's safe to do swaps with `MaterialPropertyStorage` using the elem and
+        // elem_side keys
+        neighbor = _assembly[tid]->elem();
+        neighbor_side = _assembly[tid]->side();
+        mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
+        blk_id = neighbor->subdomain_id();
+      }
+      else
+        mooseError("Called reinitMaterialsNeighbor with a nullptr for neighbor");
+    }
+
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
 
@@ -3283,22 +3276,31 @@ FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 }
 
 void
-FEProblemBase::swapBackMaterialsNeighborGhost(THREAD_ID tid)
-{
-  // NOTE: this will not work with h-adaptivity
-  // Since neighbor element doesn't actually exist, use elem element info
-  // instead.
-  auto && neighbor = _assembly[tid]->elem();
-  unsigned int neighbor_side = _assembly[tid]->side();
-  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
-}
-
-void
 FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
-  auto && neighbor = _assembly[tid]->neighbor();
-  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+  const Elem * neighbor = _assembly[tid]->neighbor();
+  unsigned int neighbor_side =
+      neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
+
+  if (!neighbor)
+  {
+    if (haveFV())
+    {
+      // If neighbor is null, then we're on the neighbor side of a mesh boundary, e.g. we're off
+      // the mesh in ghost-land. If we're using the finite volume method, then variable values and
+      // consequently material properties have well-defined values in this ghost region outside of
+      // the mesh and we really do want to reinit our neighbor materials in this case. Since we're
+      // off in ghost land it's safe to do swaps with `MaterialPropertyStorage` using the elem and
+      // elem_side keys
+      neighbor = _assembly[tid]->elem();
+      neighbor_side = _assembly[tid]->side();
+      mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
+    }
+    else
+      mooseError("neighbor is null in Assembly!");
+  }
+
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 

@@ -16,6 +16,7 @@
 
 #include <map>
 #include <set>
+#include <memory>
 
 class MooseMesh;
 namespace libMesh
@@ -93,6 +94,13 @@ public:
   ///@}
 
   ///@{
+  /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
+  /// an invalid ID is returned for the neighbor subdomain ID.
+  SubdomainID elemSubdomainID() const { return _elem_subdomain_id; }
+  SubdomainID neighborSubdomainID() const { return _neighbor_subdomain_id; }
+  ///@}
+
+  ///@{
   /// Returns the elem and neighbor centroids. If no neighbor element exists, then
   /// the maximum unsigned int is returned for the neighbor side ID.
   unsigned int elemSideID() const { return _elem_side_id; }
@@ -161,26 +169,51 @@ public:
   const std::vector<const Node *> & vertices() const { return _vertices; }
 
 private:
-  Real _face_area;
   Real _face_coord = 0;
-  Real _elem_volume;
-  Real _neighbor_volume;
   Point _normal;
 
+  const processor_id_type _processor_id;
+
   /// the elem and neighbor elems
-  const Elem * _elem;
-  const Elem * _neighbor;
+  const Elem * const _elem;
+  const Elem * const _neighbor;
 
-  /// the elem and neighbor local side ids
-  unsigned int _elem_side_id;
-  unsigned int _neighbor_side_id;
+  /// the elem subdomain id
+  const SubdomainID _elem_subdomain_id;
 
-  Point _elem_centroid;
-  Point _neighbor_centroid;
-  Point _face_centroid;
+  /// the elem local side id
+  const unsigned int _elem_side_id;
+
+  const Point _elem_centroid;
+  const Real _elem_volume;
+
+  /// A unique_ptr to the face element built from \p _elem and \p _elem_side_id
+  std::unique_ptr<Elem> _face;
+
+  const Real _face_area;
+  const Point _face_centroid;
+
+  /// Whether neighbor is non-null and non-remote
+  const bool _valid_neighbor;
+
+  /// the neighbor subdoman id
+  const SubdomainID _neighbor_subdomain_id;
+
+  /// the neighbor local side ide
+  const unsigned int _neighbor_side_id;
+
+  const Point _neighbor_centroid;
+  const Real _neighbor_volume;
 
   /// Geometric weighting factor
-  Real _gc;
+  const Real _gc;
+
+  /// the distance vector between neighbor and element centroids
+  const RealVectorValue _d_cf;
+  /// the distance norm between neighbor and element centroids
+  const Real _d_cf_mag;
+  /// The unit normal vector pointing from element center C to element center F
+  const RealVectorValue _e_cf;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible
@@ -193,11 +226,5 @@ private:
   /// the set of boundary ids that this face is associated with
   std::set<BoundaryID> _boundary_ids;
 
-  const processor_id_type _processor_id;
-
   std::vector<const Node *> _vertices;
-
-  RealVectorValue _d_cf;
-  Real _d_cf_mag;
-  RealVectorValue _e_cf;
 };
