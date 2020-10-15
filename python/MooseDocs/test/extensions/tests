@@ -1,13 +1,18 @@
 [Tests]
   [all]
     design = 'MooseDocs/index.md'
-    issues = '#6699 #9638 #12049 #13567 #13611 #15232'
+    issues = '#6699 #9638 #12049 #13567 #13611 #15232 #15927'
 
     requirement = "The system shall include documentation tools that provide support for"
     [core]
       type = PythonUnitTest
       input = test_core.py
       detail = "markdown-like syntax,"
+    []
+    [special]
+      type = PythonUnitTest
+      input = test_special.py
+      detail = "special characters,"
     []
     [comment]
       type = PythonUnitTest

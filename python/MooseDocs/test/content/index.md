@@ -30,3 +30,4 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/civet.md]
 1. [extensions/sqa.md]
 1. [extensions/acronym.md]
+1. [extensions/special.md]
