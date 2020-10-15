@@ -14,4 +14,10 @@
     exodiff = one-mat-two-eqn-sets_out.e
     requirement = 'The system shall be able to solve two different kernel sets within one material domain.'
   []
+  [two-mats-one-eqn-set]
+    type = Exodiff
+    input = two-mats-one-eqn-set.i
+    exodiff = two-mats-one-eqn-set_out.e
+    requirement = 'The system shall be able to solve one kernel set with two different material domains.'
+  []
 []
