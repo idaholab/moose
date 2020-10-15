@@ -491,7 +491,8 @@ moosePetscSNESFormMatrixTag(SNES /*snes*/, Vec x, Mat mat, void * ctx, TagID tag
   // Set the dof maps
   libmesh_mat.attach_dof_map(sys.get_dof_map());
 
-  libmesh_mat.zero();
+  if (!eigen_problem->constJacobian())
+    libmesh_mat.zero();
 
   eigen_problem->computeJacobianTag(*sys.current_local_solution.get(), libmesh_mat, tag);
 }
@@ -729,8 +730,11 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   sys.update();
   X_global.swap(X_sys);
 
-  AX.zero();
-  BX.zero();
+  if (!eigen_problem->constJacobian())
+  {
+    AX.zero();
+    BX.zero();
+  }
 
   eigen_problem->computeResidualAB(
       *sys.current_local_solution.get(), AX, BX, nl.nonEigenVectorTag(), nl.eigenVectorTag());
