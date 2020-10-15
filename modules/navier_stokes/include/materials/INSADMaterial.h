@@ -20,7 +20,7 @@ public:
 
   INSADMaterial(const InputParameters & parameters);
 
-  void initialSetup() override;
+  void subdomainSetup() override;
 
 protected:
   virtual void computeQpProperties() override;
@@ -83,7 +83,7 @@ protected:
 
   /// A user object that consumes information from INSAD residual objects and feeds it into this
   /// material
-  static const INSADObjectTracker * _object_tracker;
+  const INSADObjectTracker * _object_tracker;
 
   /// Whether the simulation is transient
   bool _has_transient;
