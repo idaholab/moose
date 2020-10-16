@@ -35,6 +35,11 @@ MultiAppConservativeTransfer::validParams()
   params.addParam<std::vector<PostprocessorName>>(
       "to_postprocessors_to_be_preserved",
       "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
+  params.addParam<bool>("allow_skipped_adjustment",
+                        false,
+                        "If set to true, the transfer skips adjustment when from or to "
+                        "postprocessor values are either zero or have different signs. If set to "
+                        "false, an error is thrown when encountering these conditions.");
   return params;
 }
 
@@ -47,7 +52,8 @@ MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters
         getParam<std::vector<PostprocessorName>>("from_postprocessors_to_be_preserved")),
     _to_postprocessors_to_be_preserved(
         getParam<std::vector<PostprocessorName>>("to_postprocessors_to_be_preserved")),
-    _use_nearestpoint_pps(false)
+    _use_nearestpoint_pps(false),
+    _allow_skipped_adjustment(getParam<bool>("allow_skipped_adjustment"))
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
@@ -236,10 +242,6 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       comm().min(from_adjuster_tmp);
       from_adjuster = from_adjuster_tmp;
     }
-
-    /* We should not have a zero value */
-    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
-      mooseError("from_adjuster must be nonzero");
   }
 
   PostprocessorValue to_adjuster = 0;
@@ -273,17 +275,15 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       if (_current_direction == FROM_MULTIAPP)
       {
         auto ii = pps.nearestPointIndex(*node);
-        if (ii != i)
+        if (ii != i || !performAdjustment(from_adjuster, pps.userObjectValue(i)))
           continue;
-        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
-          mooseError("to_adjuster must be nonzero");
 
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
-        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-          mooseError("to_adjuster must be nonzero");
+        if (!performAdjustment(pps.userObjectValue(i), to_adjuster))
+          continue;
 
         scale = pps.userObjectValue(i) / to_adjuster;
       }
@@ -305,18 +305,15 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       if (_current_direction == FROM_MULTIAPP)
       {
         unsigned int ii = pps.nearestPointIndex(elem->centroid());
-        if (ii != i)
+        if (ii != i || !performAdjustment(from_adjuster, pps.userObjectValue(i)))
           continue;
-
-        if (MooseUtils::absoluteFuzzyLessEqual(pps.userObjectValue(i), 0.))
-          mooseError("to_adjuster must be nonzero");
 
         scale = from_adjuster / pps.userObjectValue(i);
       }
       else
       {
-        if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-          mooseError("to_adjuster must be nonzero");
+        if (!performAdjustment(pps.userObjectValue(i), to_adjuster))
+          continue;
 
         scale = pps.userObjectValue(i) / to_adjuster;
       }
@@ -357,19 +354,17 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
       comm().min(from_adjuster_tmp);
       from_adjuster = from_adjuster_tmp;
     }
-
-    /* We should not have a zero value */
-    if (MooseUtils::absoluteFuzzyLessEqual(from_adjuster, 0.))
-      mooseError("from_adjuster must be nonzero");
   }
 
   // Compute to-postproessor to have the adjuster
   to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
 
   // Now we should have the right adjuster based on the transfered solution
-  const PostprocessorValue & to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
-  if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
-    mooseError("To postprocessor has a zero value ");
+  PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+
+  // decide if the adjustment should be performed
+  if (!performAdjustment(from_adjuster, to_adjuster))
+    return;
 
   auto & to_var = to_problem.getVariable(
       0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
@@ -460,4 +455,24 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
 
   // Compute again so that the post-processor has the value with the updated solution
   to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+}
+
+bool
+MultiAppConservativeTransfer::performAdjustment(const PostprocessorValue & from,
+                                                const PostprocessorValue & to) const
+{
+  if (from * to > 0)
+    return true;
+  else if (_allow_skipped_adjustment)
+  {
+    _console << COLOR_CYAN << "MultiApp '" << name()
+             << ", skipping adjustment in conservative transfer " << std::endl;
+    return false;
+  }
+  else
+    mooseError("Adjustment postprocessors from: ",
+               from,
+               " to: ",
+               to,
+               " must both have the same sign and be different from 0");
 }
