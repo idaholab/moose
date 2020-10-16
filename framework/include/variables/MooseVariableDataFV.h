@@ -32,6 +32,11 @@ class Assembly;
 template <typename>
 class MooseVariableFV;
 
+namespace libMesh
+{
+class QBase;
+}
+
 template <typename OutputType>
 class MooseVariableDataFV
 {
@@ -487,6 +492,9 @@ private:
 
   /// Whether this variable is being calculated on a displaced system
   const bool _displaced;
+
+  /// The quadrature rule
+  const QBase * _qrule;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////
