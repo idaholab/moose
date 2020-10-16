@@ -271,7 +271,7 @@ protected:
    */
   bool _has_older_prop;
 
-  /// mapping from property ID to property name
+  /// mapping from property ID to property name. This only holds *stateful* properties!
   std::map<unsigned int, std::string> _prop_names;
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
