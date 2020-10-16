@@ -182,6 +182,14 @@ public:
    */
   bool hasStatefulProperties() const { return _has_stateful_property; }
 
+  /**
+   * Whether this material supports ghosted computations. This is important for finite volume
+   * calculations in which variables have defined values on ghost cells/elements and for which these
+   * ghost values may need to flow through material calculations to be eventually consumed by FV
+   * flux kernels or boundary conditions
+   */
+  virtual bool ghostable() const { return false; }
+
 protected:
   /**
    * Users must override this method.

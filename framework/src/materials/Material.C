@@ -44,12 +44,42 @@ Material::Material(const InputParameters & parameters)
     _current_subdomain_id(_neighbor ? _assembly.currentNeighborSubdomainID()
                                     : _assembly.currentSubdomainID()),
     _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
-    _constant_option(computeConstantOption())
+    _constant_option(computeConstantOption()),
+    _ghostable(true)
 {
-  // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
+  // 1. Fill in the MooseVariable dependencies
+  // 2. For ghost calculations we need to check and see whether this has any finite element
+  // variables. If it does, then this material doesn't support ghost calculations
+  // 3. For the purpose of ghost calculations, we will error if this material couples in both finite
+  // element and finite volume variables.
+  const std::vector<MooseVariableFieldBase *> & coupled_vars = getCoupledMooseVars();
+  bool has_fe_vars = false;
+  bool has_fv_vars = false;
+  for (auto * const var : coupled_vars)
+  {
     addMooseVariableDependency(var);
+    if (var->isFV())
+      has_fv_vars = true;
+    else
+    {
+      has_fe_vars = true;
+      _ghostable = false;
+    }
+  }
+
+  // Note that this check will not catch a case in which a finite volume consumer needs a
+  // non-variable-based property ghosted, but that non-variable-based property is computed within a
+  // material that has finite element coupling (but not finite volume coupling)
+  if (has_fe_vars && has_fv_vars)
+    mooseError(
+        "Your material ",
+        this->name(),
+        " couples in both FE and FV vars. To support ghost calculations which some FV "
+        "consumers may need, multiphysics simulations should define separate materials for "
+        "coupling in finite element and finite volume variables because we do not have a user "
+        "friendly way of running DerivedMaterial::computeQpProperties and saying 'compute this "
+        "property because it doesn't depend on finite element variables' or 'don't compute this "
+        "property because it *does* depend on finite element variables'");
 }
 
 void

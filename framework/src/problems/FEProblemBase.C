@@ -3178,13 +3178,15 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
                                                                         tid);
 
         // Do this so we don't do more work than we need to and reinit materials that were already
-        // reinit'd above
+        // reinit'd above. Additionally remove any materials that cannot be computed in a ghosted
+        // context
         std::remove_if(other_face_mats.begin(),
                        other_face_mats.end(),
                        [&face_mats](std::shared_ptr<MaterialBase> other_mat) {
-                         return face_mats &&
-                                std::find(face_mats->begin(), face_mats->end(), other_mat) !=
-                                    face_mats->end();
+                         return !other_mat->ghostable() ||
+                                (face_mats &&
+                                 std::find(face_mats->begin(), face_mats->end(), other_mat) !=
+                                     face_mats->end());
                        });
 
         _bnd_material_data[tid]->reinit(other_face_mats, execute_stateful);
@@ -3265,13 +3267,15 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
             _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(elem->subdomain_id(),
                                                                             tid);
         // Do this so we don't do more work than we need to and reinit materials that were already
-        // reinit'd above
+        // reinit'd above. Additionally remove any materials that cannot be computed in a ghosted
+        // context
         std::remove_if(other_neighbor_mats.begin(),
                        other_neighbor_mats.end(),
                        [&neighbor_mats](std::shared_ptr<MaterialBase> other_mat) {
-                         return neighbor_mats && std::find(neighbor_mats->begin(),
-                                                           neighbor_mats->end(),
-                                                           other_mat) != neighbor_mats->end();
+                         return !other_mat->ghostable() ||
+                                (neighbor_mats && std::find(neighbor_mats->begin(),
+                                                            neighbor_mats->end(),
+                                                            other_mat) != neighbor_mats->end());
                        });
 
         _neighbor_material_data[tid]->reinit(other_neighbor_mats, execute_stateful);

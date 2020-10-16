@@ -99,6 +99,8 @@ public:
     SUBDOMAIN
   };
 
+  bool ghostable() const override final { return _ghostable; }
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -125,6 +127,12 @@ protected:
 
 private:
   ConstantTypeEnum computeConstantOption();
+
+  /// Whether this material can be computed in a ghosted context. If properties are constant or
+  /// depend only on finite volume variables, then this material can be computed in a ghosted
+  /// context. If properties depend on finite element variables, then this material cannot be
+  /// computed in a ghosted context
+  bool _ghostable;
 };
 
 template <typename T>
