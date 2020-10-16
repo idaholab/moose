@@ -5,7 +5,8 @@
     --gray: rgba(117, 117, 117, 1.0);
     /* darkmode */
     --darkmode-back: rgba(35, 35, 40, 1.0);
-    --darkmode-card: rgba(35, 35, 40, 1.0);
+    --darkmode-card: rgba(20, 20, 20, 1.0);
+    --darkmode-image-card: rgba(10, 10, 10, 1.0);
     --darkmode-fore: rgba(200, 200, 200, 1.0);
     --dark-navbar: rgba(39, 63, 99, 1.0);
     --darker-highlight: rgba(100, 100, 100, 1.0);
@@ -91,12 +92,7 @@ a {
 }
 
 .tabs .indicator {
-	background-color: var(--inl-blue);
-}
-
-
-.card .card-content{
-    padding:10px;
+    background-color: var(--inl-blue);
 }
 
 .card-content img{
@@ -790,42 +786,30 @@ li p {
   margin-bottom: 0;
 }
 
-.moose-card{
-    height:340px;
-    width:100%;
-    display:block;
-}
-
-.moose-card .card-image{
-    height:260px;
-}
-
-.moose-card .card-content{
-    height: auto;
-    width: auto;
-}
-
-.moose-card .card-image .material-placeholder .moose-image{
-    max-height:260px;
-    max-width:100%;
-    margin:auto;
-    width:auto;
-}
-
-/*
-.card{
-  display:table;
-}
-
-.card .card-image,
-.card .card-content{
-  display:table-row;
-}
-*/
-
 .moose-error,
 .moose-katex-error{
     color: red;
+}
+
+
+/*https://coderwall.com/p/ovxeha/fit-to-container-video-image-in-css-aspect-ratio-friendly*/
+.moose-card div.card-image{
+    height:420px;
+    text-align:center;
+}
+.moose-card div.card-image:before{
+    content:"";
+    width:1px;
+    height:100%;
+    display:inline-block;
+    vertical-align:middle;
+    margin-left:-1px;
+}
+.moose-card div.card-image video{
+    max-width:100%;
+    max-height:100%;
+    display:inline-block;
+    vertical-align:middle;
 }
 
 span.badge.new{
@@ -1131,6 +1115,16 @@ div.moose-mega-menu-content{
  .card .card-reveal {
    background-color: var(--darkmode-card);
    color: var(--darkmode-fore);
+ }
+ .moose-card div.card-image{
+    background-color:var(--darkmode-image-card);
+ }
+ .card .card-content{
+    padding:10px;
+    background-color: var(--darkmode-card);
+ }
+ .card-image{
+    background-color: var(--darkmode-card);
  }
  .collection.with-header .collection-header {
    color: white;

@@ -50,10 +50,9 @@ fashion as for [images](#images), but also includes some extra settings as liste
        caption=["Big Buck Bunny"](https://en.wikipedia.org/wiki/Big_Buck_Bunny) is an open-source
                animated short.
 
-YouTube videos can also be displayed using the `!media youtube` syntax. The embedded youtube URL
-(for the video in [training-webinar], this is `https://www.youtube.com/embed/2tJwBsYaLaI`) must be
-provided via the `youtube_embed_src` setting parameter. Similar to locally stored or hosted videos,
-extra settings are provided as listed in [video-settings].
+YouTube videos can also be displayed. The embedded youtube URL is simply provided as the media, this
+URL must contain 'www.youtube.com' and not end with an extension. Similar to locally stored or
+hosted videos, extra settings are provided as listed in [video-settings].
 
 !media https://www.youtube.com/embed/2tJwBsYaLaI
        id=training-webinar
