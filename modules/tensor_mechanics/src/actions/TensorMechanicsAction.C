@@ -14,7 +14,6 @@
 #include "MooseObjectAction.h"
 #include "TensorMechanicsAction.h"
 #include "Material.h"
-#include "MaterialData.h"
 
 #include "BlockRestrictable.h"
 
@@ -497,6 +496,7 @@ TensorMechanicsAction::actEigenstrainNames()
     if (mat_params.isParamValid("eigenstrain_name"))
     {
       std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
+      std::shared_ptr<MaterialData> mat_dat;
       auto name = mat_params.get<std::string>("eigenstrain_name");
 
       // Check for base_name prefix
@@ -533,7 +533,8 @@ TensorMechanicsAction::actEigenstrainNames()
       for (auto i : remove_list)
       {
         remove_reduced_set.insert(i);
-        material_eigenstrain_map.erase(material_eigenstrain_map.find(i));
+        if (material_eigenstrain_map.find(i) != material_eigenstrain_map.end())
+          material_eigenstrain_map.erase(i);
       }
     }
 
@@ -581,7 +582,10 @@ TensorMechanicsAction::actEigenstrainNames()
   }
 
   for (auto index = remove_reduced_set.begin(); index != remove_reduced_set.end(); index++)
-    eigenstrain_set.erase(*index);
+  {
+    if (eigenstrain_set.find(*index) != eigenstrain_set.end())
+      eigenstrain_set.erase(*index);
+  }
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
   // current subdomainID
@@ -590,18 +594,6 @@ TensorMechanicsAction::actEigenstrainNames()
                  eigenstrain_names_copy.begin(),
                  eigenstrain_names_copy.end(),
                  std::inserter(verified_eigenstrain_names, verified_eigenstrain_names.begin()));
-
-  // If is_ad, verify all eigenstrains are AD
-  // if (_use_ad)
-  // {
-  //   for (auto names : verified_eigenstrain_names)
-  //     MaterialData::getADProperty(names);
-  // }
-  // else
-  // {
-  //   for (auto names : verified_eigenstrain_names)
-  //     MaterialData::getProperty(names);
-  // }
 
   // Ensure the eigenstrain names previously passed include any missing names
   _eigenstrain_names.clear();
