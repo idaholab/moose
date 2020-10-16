@@ -36,9 +36,6 @@ protected:
   /// UserObject that manages nucleus insertin and deletion
   const DiscreteNucleationInserterBase & _inserter;
 
-  /// Nucleus radius
-  const Real _radius;
-
   /// Nucleus interface width
   const Real _int_width;
 

@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
-  xmax = 10
-  ymax = 10
+  nx = 100
+  ny = 100
+  xmax = 100
+  ymax = 100
 []
 
 [Variables]
@@ -30,13 +30,12 @@
 [UserObjects]
   [./inserter]
     type = DiscreteNucleationFromFile
-    hold_time = 1
-    file = nuclei.csv
-    radius = 2
+    hold_time = 2
+    file = nuclei2.csv
   [../]
   [./map]
     type = DiscreteNucleationMap
-    int_width = 1
+    int_width = 3
     inserter = inserter
   [../]
 []

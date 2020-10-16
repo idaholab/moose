@@ -89,10 +89,11 @@
 [UserObjects]
   [./inserter]
     # The inserter runs at the end of each time step to add nucleation events
-    # that happend during the timestep (if it converged) to the list of nuclei
+    # that happened during the timestep (if it converged) to the list of nuclei
     type = DiscreteNucleationInserter
     hold_time = 50
     probability = P
+    radius = 10
   [../]
   [./map]
     # The map UO runs at the beginning of a timestep and generates a per-element/qp
@@ -100,7 +101,6 @@
     # the list of nuclei was modified.
     # The map converts the nucleation points into finite area objects with a given radius.
     type = DiscreteNucleationMap
-    radius = 10
     periodic = c
     inserter = inserter
   [../]

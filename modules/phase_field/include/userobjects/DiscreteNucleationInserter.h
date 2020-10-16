@@ -13,9 +13,9 @@
 
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
- * domain it manages a list of nuclei with their insertion times and their center
- * positions. A DiscreteNucleationMap is needed to enable the DiscreteNucleation
- * material to look up if a nucleus is present at a given element/qp.
+ * domain it manages a list of nuclei with their insertion times, center
+ * positions and radius. A DiscreteNucleationMap is needed to enable the
+ * DiscreteNucleation material to look up if a nucleus is present at a given element/qp.
  */
 class DiscreteNucleationInserter : public DiscreteNucleationInserterBase
 {
@@ -32,6 +32,9 @@ public:
   const Real & getRate() const { return _nucleation_rate; }
 
 protected:
+  /// Adds a nucleus to the list containing nucleus information
+  virtual void addNucleus(unsigned int & qp);
+
   /// Nucleation rate density (should be a material property implementing nucleation theory)
   const MaterialProperty<Real> & _probability;
 
@@ -41,6 +44,15 @@ protected:
   /// the local nucleus list of nuclei centered in the domain of the current processor
   NucleusList & _local_nucleus_list;
 
-  /// total nucleation rate
+  /** Total nucleation rate.
+   * For time-dependent statistics, this is probability rate density,
+   * for time-independent statistics, it is probability density
+   */
   Real _nucleation_rate;
+
+  /// store the local nucleus radius
+  const MaterialProperty<Real> & _local_radius;
+
+  /// indicates whether time-dependent statistics are used or not
+  const bool _time_dep_stats;
 };
