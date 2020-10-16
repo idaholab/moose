@@ -120,4 +120,7 @@ protected:
 
   Point & _p1;
   Point & _p2;
+
+  /// if this vector is not empty the variables, kernels and materials are restricted to these subdomains
+  std::vector<SubdomainName> _subdomain_names;
 };

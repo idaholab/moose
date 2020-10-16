@@ -56,6 +56,7 @@
     secondary = 2
     emissivity_primary = 0
     emissivity_secondary = 0
+    gap_geometry_type = sphere
   [../]
 []
 
