@@ -74,6 +74,13 @@ class SQAMooseAppReport(SQAReport):
         if exe is None:
             raise OSError("An executable was not found in '{}' with a name '{}'.".format(exe_dir, self.exe_name))
 
+        # Determine the application type (e.g., MooseTestApp)
+        if self.app_types is None:
+            out = subprocess.check_output([exe, '--type'], encoding='utf-8')
+            match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
+            if match:
+                self.app_types = [match.group("type").replace('TestApp', 'App')]
+
         # Build syntax tree if not provided
         if self.app_syntax is None:
 
@@ -86,14 +93,8 @@ class SQAMooseAppReport(SQAReport):
             # Build the complete syntax tree
             self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
                                                                 alias=alias, unregister=unregister,
-                                                                allow_test_objects=self.allow_test_objects)
-
-        # Determine the application type (e.g., MooseTestApp)
-        if self.app_types is None:
-            out = subprocess.check_output([exe, '--type'], encoding='utf-8')
-            match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
-            if match:
-                self.app_types = [match.group("type").replace('TestApp', 'App')]
+                                                                allow_test_objects=self.allow_test_objects,
+                                                                app_types=self.app_types)
 
         # Perform the checks
         kwargs.setdefault('syntax_prefix', mooseutils.eval_path(self.syntax_prefix))

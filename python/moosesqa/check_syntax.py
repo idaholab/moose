@@ -27,8 +27,7 @@ def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_pre
     kwargs.setdefault('log_duplicate_files', logging.ERROR)
     logger = LogHelper(__name__, **kwargs)
 
-    func = lambda n: any([app_type in n.groups() for app_type in app_types]) and len(n.groups()) == 1
-    for node in moosetree.iterate(app_syntax, func=func):
+    for node in moosetree.iterate(app_syntax, func=lambda n: n.in_app):
         _check_node(node, file_cache, object_prefix, syntax_prefix, logger)
 
     return logger
@@ -48,7 +47,7 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     md_path = os.path.join(prefix, node.markdown)
     md_file = find_md_file(md_path, file_cache, logger)
     is_stub = file_is_stub(md_file)
-    is_missing_description = is_object and (node.description is None) and (not node.removed)
+    is_missing_description = is_object and (not node.description) and (not node.removed)
     is_missing = (md_file is None) and (not node.removed)
 
     # ERROR: object is hidden
@@ -80,12 +79,12 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
 
     # ERROR: object is hidden, but markdown is not a stub
     if (not node.removed) and (node.hidden and (md_file is not None) and (not is_stub)):
-        msg = "{} is hidden but the content is not a stub.".format(node.fullpath())
+        msg = "{} is hidden but the content is not a stub.\n{}".format(node.fullpath(), md_file)
         logger.log('log_hidden_non_stub', msg)
 
     # ERROR: markdown is a stub but not hidden
     if (not node.removed) and (md_file is not None) and (is_stub and (not node.hidden)):
-        msg = "{} has a stub markdown page and is not hidden.".format(node.fullpath())
+        msg = "{} has a stub markdown page and is not hidden.\n{}".format(node.fullpath(), md_file)
         logger.log('log_non_hidden_stub', msg)
 
     # Store attributes for stub page generation
@@ -120,6 +119,7 @@ def file_is_stub(filename):
         with open(filename, 'r') as fid:
             content = fid.read()
             if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content) or \
-               ('!! MOOSE Documentation Stub (remove this when content is added)' in content):
+               ('!! MOOSE Documentation Stub (remove this when content is added)' in content) or \
+               ('!alert! construction title=Undocumented' in content):
                 return True
     return False

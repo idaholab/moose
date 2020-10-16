@@ -12,10 +12,6 @@ Applications:
             - framework/doc/remove.yml
             - test/doc/remove.yml
         log_missing_description: WARNING
-        log_missing_markdown: WARNING
-        log_removed_and_hidden: WARNING
-        log_hidden_non_stub: WARNING
-        log_non_hidden_stub: WARNING
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
@@ -38,6 +34,7 @@ Applications:
         content_directory: modules/contact/doc/content
         hidden:
             - modules/contact/doc/hidden.yml
+        log_missing_description: WARNING
         log_hidden_syntax: WARNING
         log_missing_markdown: WARNING
         show_warning: false
@@ -64,6 +61,7 @@ Applications:
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     functional_expansion_tools:
@@ -81,8 +79,8 @@ Applications:
             - modules/heat_conduction/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_hidden_non_stub: WARNING
         log_non_hidden_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     level_set:
@@ -101,6 +99,7 @@ Applications:
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     navier_stokes:
@@ -117,7 +116,7 @@ Applications:
             - framework/doc/unregister.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     peridynamics:
@@ -129,7 +128,6 @@ Applications:
             - modules/peridynamics/doc/hidden.yml
         log_stub_files: WARNING
         log_hidden_syntax: WARNING
-        log_hidden_non_stub: WARNING
         show_warning: false
 
     phase_field:
@@ -145,7 +143,7 @@ Applications:
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
-        log_hidden_non_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     porous_flow:
@@ -159,7 +157,6 @@ Applications:
             - framework/doc/remove.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_hidden_non_stub: WARNING
         show_warning: false
 
     RDG:
@@ -193,8 +190,8 @@ Applications:
             - framework/doc/remove.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_hidden_non_stub: WARNING
         log_non_hidden_stub: WARNING
+        log_missing_description: WARNING
         show_warning: false
 
     XFEM:

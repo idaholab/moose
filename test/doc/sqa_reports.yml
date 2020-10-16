@@ -13,10 +13,6 @@ Applications:
             - framework/doc/remove.yml
             - test/doc/remove.yml
         log_missing_description: WARNING
-        log_missing_markdown: WARNING
-        log_removed_and_hidden: WARNING
-        log_hidden_non_stub: WARNING
-        log_non_hidden_stub: WARNING
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
