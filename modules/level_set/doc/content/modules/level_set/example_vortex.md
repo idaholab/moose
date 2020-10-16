@@ -20,18 +20,18 @@ solution quality of the reinitialization case (Figure [vortex_reinit_out]) is ob
 reasoning the solution is behaving in the manner is not fully understood, with respect to the level
 set module. This is an something that needs to be investigated further.
 
-!media level_set/vortex_out.gif
+!media level_set/vortex_out.mp4
        id=vortex_out
        style=width:32%;margin-right:2%;float:left;
        caption=Results from solving the vortex problem with the level set equation alone.
 
-!media level_set/vortex_out.gif
+!media level_set/vortex_out.mp4
        id=vortex_supg_out
        style=width:32%;margin-right:2%;float:left;
        caption=Results from solving the vortex problem with the level set equation using SUPG
                stabilization.
 
-!media level_set/vortex_reinit_out.gif
+!media level_set/vortex_reinit_out.mp4
        id=vortex_reinit_out
        style=width:32%;float:left;
        caption=Results from solving the vortex problem with the level set equation with

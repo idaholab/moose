@@ -34,6 +34,7 @@ Extensions:
             Getting Started: getting_started/index.md
             Documentation: documentation.menu.md
             Help: help.menu.md
+            Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
     MooseDocs.extensions.bibtex:
