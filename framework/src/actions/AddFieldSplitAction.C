@@ -20,6 +20,7 @@ InputParameters
 AddFieldSplitAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a Split object to the simulation.");
   params.addParam<std::string>("type", "Split", "Classname of the split object");
   params.addParam<std::vector<NonlinearVariableName>>("vars", "variables for this field");
   params.addParam<MultiMooseEnum>(

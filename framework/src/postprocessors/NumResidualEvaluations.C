@@ -21,6 +21,7 @@ InputParameters
 NumResidualEvaluations::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("The total number of Residual Evaluations performed.");
   return params;
 }
 

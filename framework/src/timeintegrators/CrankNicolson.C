@@ -19,7 +19,7 @@ InputParameters
 CrankNicolson::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription("Crank-Nicolson time integrator.");
   return params;
 }
 

@@ -18,6 +18,7 @@ InputParameters
 FunctionSideIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
+  params.addClassDescription("Computes the integral of a function over a boundary.");
   params.addParam<FunctionName>(
       "function",
       1.0,

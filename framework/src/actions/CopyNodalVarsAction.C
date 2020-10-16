@@ -30,6 +30,7 @@ InputParameters
 CopyNodalVarsAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Copies variable information from a file.");
   params.addParam<std::string>(
       "initial_from_file_timestep",
       "LATEST",

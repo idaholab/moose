@@ -17,6 +17,8 @@ InputParameters
 SelfAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Returns the specified variable as an auxiliary variable with the same value.");
   return params;
 }
 

@@ -18,7 +18,7 @@ InputParameters
 AddIndicatorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Action for adding Indicator object to a simulation.");
+  params.addClassDescription("Add an Indicator object to a simulation.");
   return params;
 }
 

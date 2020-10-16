@@ -17,7 +17,9 @@ defineLegacyParams(AddDamperAction);
 InputParameters
 AddDamperAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a Damper object to the simulation.");
+  return params;
 }
 
 AddDamperAction::AddDamperAction(InputParameters params) : MooseObjectAction(params) {}

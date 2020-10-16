@@ -48,4 +48,3 @@ protected:
 
   Real _integral_value;
 };
-

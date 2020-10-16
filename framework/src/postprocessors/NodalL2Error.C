@@ -18,6 +18,7 @@ InputParameters
 NodalL2Error::validParams()
 {
   InputParameters params = NodalVariablePostprocessor::validParams();
+  params.addClassDescription("The L2-norm computed at nodes.");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
 
   return params;

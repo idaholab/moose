@@ -17,6 +17,7 @@ InputParameters
 ConstantPointSource::validParams()
 {
   InputParameters params = DiracKernel::validParams();
+  params.addClassDescription("Residual contribution of a constant point source term.");
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   params.declareControllable("value");

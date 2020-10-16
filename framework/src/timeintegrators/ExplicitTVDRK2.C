@@ -20,7 +20,8 @@ InputParameters
 ExplicitTVDRK2::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription("Explicit TVD (total-variation-diminishing) second-order Runge-Kutta "
+                             "time integration method.");
   return params;
 }
 

@@ -18,8 +18,7 @@ InputParameters
 AddMultiAppAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription(
-      "MooseObjectAction for creating objects from sub-blocks within the MultiApps block.");
+  params.addClassDescription("Add a MultiApp object to the simulation.");
   return params;
 }
 

@@ -19,7 +19,10 @@ defineLegacyParams(AddBoundsVectorsAction);
 InputParameters
 AddBoundsVectorsAction::validParams()
 {
-  return Action::validParams();
+  InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Action to add vectors to nonlinear system when using the Bounds syntax.");
+  return params;
 }
 
 AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) : Action(params) {}

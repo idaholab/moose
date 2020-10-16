@@ -28,6 +28,9 @@ InputParameters
 NodalNormalsPreprocessor::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
+  params.addClassDescription(
+      "An object that prepares MOOSE for computing nodal normal vectors. This object is "
+      "automatically created via the [NodalNormals] input block.");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "surface_boundary", "The list of boundary IDs where nodal normals are computed");
   params.addParam<BoundaryName>("corner_boundary",

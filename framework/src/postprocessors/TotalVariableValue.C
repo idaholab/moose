@@ -17,6 +17,7 @@ InputParameters
 TotalVariableValue::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Integrate a Postprocessor value over time using trapezoidal rule.");
   params.addParam<PostprocessorName>("value", "The name of the postprocessor");
   return params;
 }

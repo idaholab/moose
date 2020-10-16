@@ -17,6 +17,8 @@ InputParameters
 GenericConstantMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Declares material properties based on names and values prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
   params.addRequiredParam<std::vector<Real>>("prop_values",

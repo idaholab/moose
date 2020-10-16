@@ -19,7 +19,7 @@ InputParameters
 ExplicitEuler::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription("Time integration using the explicit Euler method.");
   return params;
 }
 

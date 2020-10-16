@@ -21,6 +21,7 @@ InputParameters
 SolutionTimeAdaptiveDT::validParams()
 {
   InputParameters params = TimeStepper::validParams();
+  params.addClassDescription("Compute simulation timestep based on actual solution time.");
   params.addParam<Real>(
       "percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>(

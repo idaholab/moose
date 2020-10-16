@@ -20,6 +20,7 @@ InputParameters
 CreateProblemAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a Problem object to the simulation.");
   params.addParam<std::string>("type", "FEProblem", "Problem type");
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   return params;

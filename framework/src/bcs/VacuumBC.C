@@ -17,6 +17,7 @@ InputParameters
 VacuumBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params.addClassDescription("Vacuum boundary condition for neutron diffusion on the boundary.");
   params.addParam<Real>("alpha", 1, "No idea.");
   return params;
 }

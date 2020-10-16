@@ -17,6 +17,7 @@ InputParameters
 PostprocessorDT::validParams()
 {
   InputParameters params = TimeStepper::validParams();
+  params.addClassDescription("Computes timestep based on a Postprocessor value.");
   params.addRequiredParam<PostprocessorName>("postprocessor",
                                              "The name of the postprocessor that computes the dt");
   params.addParam<Real>("dt", "Initial value of dt");

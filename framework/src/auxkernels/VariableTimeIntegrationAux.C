@@ -17,6 +17,7 @@ InputParameters
 VariableTimeIntegrationAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Integrates a field variable in time.");
   params.addRequiredCoupledVar("variable_to_integrate", "The variable to be integrated");
   params.addParam<Real>("coefficient", 1.0, "A simple coefficient");
   params.addParam<unsigned int>(

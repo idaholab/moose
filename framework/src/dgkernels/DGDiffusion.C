@@ -22,6 +22,8 @@ InputParameters
 DGDiffusion::validParams()
 {
   InputParameters params = DGKernel::validParams();
+  params.addClassDescription("Computes residual contribution for the diffusion operator using "
+                             "discontinous Galerkin method.");
   // See header file for sigma and epsilon
   params.addRequiredParam<Real>("sigma", "sigma");
   params.addRequiredParam<Real>("epsilon", "epsilon");

@@ -22,6 +22,7 @@ InputParameters
 Eigenvalues::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params.addClassDescription("Returns the Eigen values from the nonlinear Eigen system.");
   return params;
 }
 

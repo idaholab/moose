@@ -17,6 +17,8 @@ InputParameters
 SplineFunction::validParams()
 {
   InputParameters params = Function::validParams();
+  params.addClassDescription(
+      "Define a spline function from interpolated data defined by input parameters.");
   MooseEnum component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>(
       "component", component, "The component of the geometry point to interpolate with");

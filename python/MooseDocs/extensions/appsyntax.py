@@ -98,7 +98,6 @@ class AppSyntaxExtension(command.CommandExtension):
         config['alias'] = (None, "Dictionary of syntax aliases.")
         config['unregister'] = ({"Postprocessor":"UserObject/*", "AuxKernel":"Bounds/*"},
                                 "Dictionary of syntax to unregister (key='moose_base', value='parent_syntax')")
-        config['allow-test-objects'] = (False, "Enable the test objects.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -145,8 +144,7 @@ class AppSyntaxExtension(command.CommandExtension):
                                                                      remove=self['remove'],
                                                                      hide=self['hide'],
                                                                      alias=self['alias'],
-                                                                     unregister=self['unregister'],
-                                                                     allow_test_objects=self['allow-test-objects'])
+                                                                     unregister=self['unregister'])
 
                 out = mooseutils.runExe(exe, ['--type'])
                 match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)

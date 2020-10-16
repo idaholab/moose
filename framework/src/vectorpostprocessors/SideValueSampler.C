@@ -22,9 +22,8 @@ InputParameters
 SideValueSampler::validParams()
 {
   InputParameters params = SideVectorPostprocessor::validParams();
-
   params += SamplerBase::validParams();
-
+  params.addClassDescription("Sample variable along a line associated with a boundary.");
   params.addRequiredCoupledVar(
       "variable", "The names of the variables that this VectorPostprocessor operates on");
 

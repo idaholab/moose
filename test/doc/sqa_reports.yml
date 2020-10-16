@@ -12,7 +12,6 @@ Applications:
         remove:
             - framework/doc/remove.yml
             - test/doc/remove.yml
-        log_missing_description: WARNING
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false

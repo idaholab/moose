@@ -22,6 +22,8 @@ InputParameters
 VolumeHistogram::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
+  params.addClassDescription(
+      "Compute a histogram of volume fractions binned according to variable values.");
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
   params.addCoupledVar("variable", "Variable to bin the volume of");
   params.addRequiredParam<Real>("min_value", "Minimum variable value");

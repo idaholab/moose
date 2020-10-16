@@ -35,6 +35,7 @@ InputParameters
 AddVariableAction::validParams()
 {
   auto params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a non-linear variable to the simulation.");
 
   // The user may specify a type in the Variables block, but if they don't we'll just use all the
   // parameters available from MooseVariableBase

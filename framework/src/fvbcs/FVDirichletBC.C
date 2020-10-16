@@ -15,6 +15,7 @@ InputParameters
 FVDirichletBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
+  params.addClassDescription("Defines a Dirichlet boundary condition for finite volume method.");
   params.addRequiredParam<Real>("value", "value to enforce at the boundary face");
   params.registerSystemAttributeName("FVDirichletBC");
   return params;
