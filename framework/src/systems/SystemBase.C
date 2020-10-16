@@ -813,7 +813,7 @@ SystemBase::addVariable(const std::string & var_type,
 
   unsigned int var_num;
 
-  if (var_type == "ArrayMooseVariable")
+  if (var_type == "ArrayMooseVariable" || var_type == "MooseVariableFVArray")
   {
     if (fe_type.family == NEDELEC_ONE || fe_type.family == LAGRANGE_VEC ||
         fe_type.family == MONOMIAL_VEC)
@@ -1277,9 +1277,11 @@ SystemBase::solve()
 void
 SystemBase::getStandardFieldVariableNames(std::vector<VariableName> & std_field_variables) const
 {
+  // this function builds a list of all variables relevant to FV residual calcs.
   std_field_variables.clear();
   for (auto & p : _vars[0].fieldVariables())
-    if (p->fieldType() == 0)
+    if (p->fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD ||
+        p->fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
       std_field_variables.push_back(p->name());
 }
 
@@ -1452,8 +1454,9 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
       mooseError("Variable ", v, " is a scalar variable");
 
     // now make sure this is a standard variable [not array/vector]
-    if (getVariable(0, v).fieldType() != 0)
-      mooseError("Variable ", v, " not a standard field variable [either VECTOR or ARRAY].");
+    if (getVariable(0, v).fieldType() != Moose::VarFieldType::VAR_FIELD_STANDARD &&
+        getVariable(0, v).fieldType() != Moose::VarFieldType::VAR_FIELD_ARRAY)
+      mooseError("Variable ", v, " not a supported field variable type with FV.");
     moose_vars.push_back(&getVariable(0, v));
   }
 

@@ -15,8 +15,8 @@ namespace Moose
 namespace FV
 {
 template <typename T, typename T2>
-ADReal
-gradUDotNormal(const T &
+typename ADType<T>::type
+gradUDotNormal(const typename ADType<T>::type &
 #ifndef MOOSE_GLOBAL_AD_INDEXING
                    elem_value
 #endif
@@ -27,7 +27,7 @@ gradUDotNormal(const T &
 #endif
                ,
                const FaceInfo & face_info,
-               const MooseVariableFV<Real> &
+               const MooseVariableFV<T> &
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                    fv_var
 #endif
@@ -38,10 +38,26 @@ gradUDotNormal(const T &
 #else
 
   // Orthogonal contribution
-  auto orthogonal = (neighbor_value - elem_value) / face_info.dCFMag();
+  auto orthogonal = (neighbor_value - elem_value) * (1 / face_info.dCFMag());
 
   return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
 #endif
+}
+
+template <>
+ADRealEigenVector
+gradUDotNormal(const ADRealEigenVector & elem_value,
+               const ADRealEigenVector & neighbor_value,
+               const FaceInfo & face_info,
+               const MooseVariableFV<RealEigenVector> & /*fv_var*/)
+{
+  // TODO: update this function to use fv gradient reconstruction once we add support for
+  // it for array variables.
+
+  // Orthogonal contribution
+  auto orthogonal = (neighbor_value - elem_value) * (1 / face_info.dCFMag());
+
+  return orthogonal; // TO-DO for local indexing: add non-orthogonal contribution
 }
 
 template ADReal

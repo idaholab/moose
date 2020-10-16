@@ -1776,9 +1776,6 @@ MooseVariableDataFV<OutputType>::fetchADDofValues()
   }
 }
 
-// Returns an index into the solution vector (also used as sparse AD
-// derivative ID) for the array variable entry associated with the given
-// "index" into _dof_indices and the given index into the array variable.
 template <typename OutputType>
 unsigned int
 MooseVariableDataFV<OutputType>::globalADOffset(const std::vector<dof_id_type> & dof_indices,
@@ -1788,8 +1785,6 @@ MooseVariableDataFV<OutputType>::globalADOffset(const std::vector<dof_id_type> &
   return Moose::globalADArrayOffset(dof_indices[index], dof_indices.size(), array_var_index);
 }
 
-// Returns an index into the (local) AD derivatives for the specified "index"
-// into _dof_indices.
 template <typename OutputType>
 unsigned int
 MooseVariableDataFV<OutputType>::localADOffset(const std::vector<dof_id_type> & /*dof_indices*/,
