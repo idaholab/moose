@@ -3157,10 +3157,39 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
+    const std::vector<std::shared_ptr<MaterialBase>> * face_mats = nullptr;
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _bnd_material_data[tid]->reinit(
-          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+    {
+      face_mats = &_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+      _bnd_material_data[tid]->reinit(*face_mats, execute_stateful);
+    }
+
+    if (haveFV())
+    {
+      // We need to reinit "ghost" materials that only exist on the neighbor side of the face
+      const Elem * const & neighbor = _assembly[tid]->neighbor();
+      if (neighbor && neighbor->subdomain_id() != blk_id &&
+          _materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
+                                                                      tid))
+      {
+        // copy on purpose
+        std::vector<std::shared_ptr<MaterialBase>> other_face_mats =
+            _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(neighbor->subdomain_id(),
+                                                                        tid);
+
+        // Do this so we don't do more work than we need to and reinit materials that were already
+        // reinit'd above
+        std::remove_if(other_face_mats.begin(),
+                       other_face_mats.end(),
+                       [&face_mats](std::shared_ptr<MaterialBase> other_mat) {
+                         return face_mats &&
+                                std::find(face_mats->begin(), face_mats->end(), other_mat) !=
+                                    face_mats->end();
+                       });
+
+        _bnd_material_data[tid]->reinit(other_face_mats, execute_stateful);
+      }
+    }
   }
 }
 
@@ -3178,6 +3207,7 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
     unsigned int neighbor_side =
         neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
 
+    bool neighbor_is_elem = false;
     if (!neighbor)
     {
       if (haveFV())
@@ -3192,10 +3222,16 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
         neighbor_side = _assembly[tid]->side();
         mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
         blk_id = neighbor->subdomain_id();
+        neighbor_is_elem = true;
       }
       else
         mooseError("Called reinitMaterialsNeighbor with a nullptr for neighbor");
     }
+
+    mooseAssert(neighbor, "neighbor should be non-null");
+    mooseAssert(blk_id == neighbor->subdomain_id(),
+                "The provided blk_id " << blk_id << " and neighbor subdomain ID "
+                                       << neighbor->subdomain_id() << " do not match.");
 
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
@@ -3208,10 +3244,39 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
+    const std::vector<std::shared_ptr<MaterialBase>> * neighbor_mats = nullptr;
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+    {
+      neighbor_mats = &_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+      _neighbor_material_data[tid]->reinit(*neighbor_mats, execute_stateful);
+    }
+
+    if (haveFV() && !neighbor_is_elem)
+    {
+      // We need to reinit "ghost" materials that only exist on the elem side of the face
+      const Elem * const & elem = _assembly[tid]->elem();
+      mooseAssert(elem, "We should always have an elem in assembly.");
+      if (elem->subdomain_id() != blk_id &&
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(elem->subdomain_id(),
+                                                                          tid))
+      {
+        // copy on purpose
+        std::vector<std::shared_ptr<MaterialBase>> other_neighbor_mats =
+            _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(elem->subdomain_id(),
+                                                                            tid);
+        // Do this so we don't do more work than we need to and reinit materials that were already
+        // reinit'd above
+        std::remove_if(other_neighbor_mats.begin(),
+                       other_neighbor_mats.end(),
+                       [&neighbor_mats](std::shared_ptr<MaterialBase> other_mat) {
+                         return neighbor_mats && std::find(neighbor_mats->begin(),
+                                                           neighbor_mats->end(),
+                                                           other_mat) != neighbor_mats->end();
+                       });
+
+        _neighbor_material_data[tid]->reinit(other_neighbor_mats, execute_stateful);
+      }
+    }
   }
 }
 
@@ -4834,8 +4899,8 @@ FEProblemBase::init()
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
-  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update all
-  // of our mesh information. We need to make sure that mesh information is up-to-date before
+  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update
+  // all of our mesh information. We need to make sure that mesh information is up-to-date before
   // EquationSystems::init because that will call through to updateGeomSearch (for sparsity
   // augmentation) and if we haven't added back boundary node information before that latter call,
   // then we're screwed. We'll get things like "Unable to find closest node!"

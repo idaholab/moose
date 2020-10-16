@@ -78,12 +78,6 @@ Material::computeProperties()
   if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
     return;
 
-  // If we are a neighbor material and the neighboring element (e.g. "elem") doesn't exist on the
-  // subdomains that we are restricted to, then we shouldn't be executing ourself. Neighbor
-  // materials were created for DGKernels and are meant to be executed on internal sides
-  if (_neighbor && !this->hasBlocks(_assembly.elem()->subdomain_id()))
-    return;
-
   // Reference to *all* the MaterialProperties in the MaterialData object, not
   // just the ones for this Material.
   MaterialProperties & props = _material_data->props();

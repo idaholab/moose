@@ -192,12 +192,13 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
           subdomainChanged();
 
         _old_neighbor_subdomain = _neighbor_subdomain;
-        _neighbor_subdomain = Elem::invalid_subdomain_id;
         if (const Elem * const neighbor = (*faceinfo)->neighborPtr())
         {
           _fe_problem.setNeighborSubdomainID(neighbor, _tid);
           _neighbor_subdomain = neighbor->subdomain_id();
         }
+        else
+          _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
