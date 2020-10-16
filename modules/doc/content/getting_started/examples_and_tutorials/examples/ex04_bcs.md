@@ -85,3 +85,7 @@ Here is a result using periodic BCs from running `periodic_bc.i`:
 - [examples/ex04_bcs/src/bcs/CoupledNeumannBC.C]
 - [examples/ex04_bcs/src/base/ExampleApp.C]
 - [examples/ex04_bcs/periodic_bc.i]
+
+!content pagination use_title=True
+                    previous=examples/ex03_coupling.md
+                    next=examples/ex05_amr.md
