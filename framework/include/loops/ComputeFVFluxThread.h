@@ -470,6 +470,9 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
     _needed_sub_mat_props.insert(mdeps.begin(), mdeps.end());
   }
 
+  // Ok we know what material properties our FVFluxKernels need. Let's determine the materials that
+  // compute those props
+
   // lindsayad: When a user is using an FVFluxKernel, then it's clear that when they couple any kind
   // of variable in, then we should reinit it. However, with a Material, it's not clear whether a
   // coupled variable needs to be computed for FE or FV calcs. For performance reasons, I am only

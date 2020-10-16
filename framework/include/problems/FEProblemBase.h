@@ -1863,6 +1863,20 @@ public:
 
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
 
+  /**
+   * Get the materials and variables needed to compute the requested material properties
+   * @param prop_ids The material property ids we want to compute
+   * @param block_id SubdomainID The subdomain id that we want to retrieve materials for
+   * @param materials The materials container that we will fill
+   * @param variables The variables container that we will fill
+   * @param tid The thread id
+   */
+  void getMatPropDependencies(const std::set<unsigned int> & prop_ids,
+                              SubdomainID block_id,
+                              std::set<std::string> & materials,
+                              std::set<MooseVariableFieldBase *> & variables,
+                              THREAD_ID tid);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();

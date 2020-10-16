@@ -6996,3 +6996,65 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                               weights,
                                               tid);
 }
+
+void
+FEProblemBase::getMatPropDependencies(const std::set<unsigned int> & prop_ids,
+                                      const SubdomainID block_id,
+                                      std::set<std::string> & materials,
+                                      std::set<MooseVariableFieldBase *> & variables,
+                                      const THREAD_ID tid)
+{
+  const auto prop_names = MaterialPropertyStorage::getPropNames(prop_ids);
+
+  std::set<std::string> mat_names;
+  auto block_to_props_it = _map_block_material_props.find(block_id);
+  mooseAssert(block_to_props_it != _mat_block_material_props.end(),
+              "Subdomain id " << block_id << " not found.");
+
+  const auto & prop_names_to_mat_names = block_to_props_it->second;
+
+  for (const auto & prop_name : prop_names)
+  {
+    auto prop_mat_pair_it = prop_names_to_mat_names.find(prop_name);
+    mooseAssert(prop_mat_pair_it != prop_names_to_mat_names.end(),
+                "No material found that computes " << prop_name << " on block id " << block_id);
+    mat_names.insert(prop_mat_pair_it->second);
+  }
+
+  std::set<std::shared_ptr<MaterialBase>> new_mats;
+  for (const auto & mat_name : mat_names)
+    new_mats.insert(_all_materials.getActiveObject(mat_name, tid));
+
+  std::set<unsigned int> new_needed_props;
+  for (auto new_mat : new_mats)
+  {
+    const auto & mv_deps = new_mat->getMooseVariableDependencies();
+    variables.insert(mv_deps.begin(), mv_deps.end());
+    const auto & mat_deps = new_mat->getMatPropDependencies();
+    new_needed_props.insert(mat_deps.begin(), mat_deps.end());
+  }
+
+#ifdef NDEBUG
+  set::set<unsigned int> intersection;
+  std::set_intersection(prop_ids.begin(),
+                        prop_ids.end(),
+                        new_needed_props.begin(),
+                        new_needed_props.end(),
+                        std::inserter(intersection, intersection.begin()));
+  if (!intersection.empty())
+    mooseError(
+        "We shouldn't have any set intersection, or else we're probably going to recurse forever.");
+#endif
+
+  std::for_each(
+      new_mats.begin(), new_mats.end(), [&materials](std::shared_ptr<MaterialBase> new_mat) {
+#ifndef NDEBUG
+        auto pr =
+#endif
+            materials.insert(new_mat->name());
+        mooseAssert(pr.second, "We should only be inserting new materials.");
+      });
+
+  if (!new_needed_props.empty())
+    getMatPropDependencies(new_needed_props, block_id, materials, variables, tid);
+}

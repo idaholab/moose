@@ -472,8 +472,11 @@ public:
    * is first registered.
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
+   * @param mat_name The name of the material registering the property
    */
-  virtual void storeSubdomainMatPropName(SubdomainID block_id, const std::string & name);
+  virtual void storeSubdomainMatPropName(SubdomainID block_id,
+                                         const std::string & name,
+                                         const std::string & mat_name);
 
   /**
    * Adds the given material property to a storage map based on boundary ids
@@ -732,7 +735,7 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
 
   /// Map of material properties (block_id -> list of properties)
-  std::map<SubdomainID, std::set<std::string>> _map_block_material_props;
+  std::map<SubdomainID, std::unordered_map<std::string, std::string>> _map_block_material_props;
 
   /// Map for boundary material properties (boundary_id -> list of properties)
   std::map<BoundaryID, std::set<std::string>> _map_boundary_material_props;

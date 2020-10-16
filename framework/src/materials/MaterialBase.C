@@ -148,7 +148,7 @@ MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State st
 
   // Store material properties for block ids
   for (const auto & block_id : blockIDs())
-    _fe_problem.storeSubdomainMatPropName(block_id, prop_name);
+    _fe_problem.storeSubdomainMatPropName(block_id, prop_name, this->name());
 
   // Store material properties for the boundary ids
   for (const auto & boundary_id : boundaryIDs())
