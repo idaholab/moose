@@ -82,8 +82,10 @@
   []
   [opt_results]
     type = OptimizationVectorPostprocessor
-    parameters = 'BCs/left/value BCs/right/value BCs/top/value'
-    intial_values = '1 2 3'
+    parameters = 'DiracKernels/pt0/value
+    DiracKernels/pt1/value
+    DiracKernels/pt2/value'
+    intial_values = '100 200 300'
     outputs = optout
   []
 []
