@@ -111,9 +111,7 @@ protected:
   Point _direction;
 
   /// automatically passes eigenstrain names to strain calculator
-  bool _auto_eigenstrain;
+  const bool _auto_eigenstrain;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
-
-  std::vector<MaterialPropertyName> _block_based_eigenstrain_names;
 };

@@ -10,6 +10,12 @@ This being the case, eigenstrains that affect the strain need to be of the same 
 
 This class accepts eigenstrains and computes a reduced order eigenstrain.  If the primary solution variable field is linear, the resulting eigenstrain will be constant in an element using volume weighting.  If the primary solution variable field is quadratic, the resulting eigenstrain will be linear in an element using a least squares procedure.
 
+!alert warning If the `ComputeReducedOrderEigenstrain` for eigenstrains, using
+the TensorMechanicsAction with automatic/_eigenstrain/_names = true, the input
+eigenstrain_names will not be included in the eigenstrain/_names list passed.
+Set the automatic/_eigenstrain/_names = false and populate this list manually if
+these components need to be included.
+
 ## Example Input File syntax
 
 !listing modules/tensor_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Materials/reduced_order_eigenstrain

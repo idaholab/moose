@@ -32,6 +32,17 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 
 Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](tensor_mechanics/StressDivergence.md) and the [Strain Formulations](tensor_mechanics/Strains.md) for more information.
 
+
+!alert warning If the using the TensorMechanicsAction with
+automatic/_eigenstrain/_names = true, the eigenstrain_names will be populated
+under restrictive conditions for classes such as
+[CompositeEigenstrain](CompositeEigenstrain.md),
+[ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
+[RankTwoTensorMaterialConverter](MaterialConvert.md).  The input components for
+these classes are not included in the eigenstrain_names passed to the
+`TensorMechanicsAction`.  Set the automatic/_eigenstrain/_names = false and
+populate this list manually if these components need to be included.
+
 ## Example Input File Syntax
 
 

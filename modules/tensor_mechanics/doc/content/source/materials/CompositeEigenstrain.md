@@ -14,6 +14,13 @@ may depend on simulation variables.
 \end{equation}
 where $\boldsymbol{T}$ is a Rank-2 tensor and $w$ is the weighting factor for each Rank-2 tensor.
 
+
+!alert warning If the `CompositeEigenstrain` for RankTwoTensor eigenstrains, using
+the TensorMechanicsAction with automatic/_eigenstrain/_names = true, the input
+tensors will not be included in the eigenstrain/_names list passed.
+Set the automatic/_eigenstrain/_names = false and populate this list manually if
+these components need to be included.
+
 ## Example Input File Syntax
 
 !listing modules/combined/test/tests/eigenstrain/composite.i block=Materials/eigenstrain

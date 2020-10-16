@@ -71,8 +71,8 @@ TensorMechanicsAction::validParams()
       "cylindrical_axis_point2",
       "Ending point for direction of axis of rotation for cylindrical stress/strain.");
   params.addParam<Point>("direction", "Direction stress/strain is calculated in");
-  params.addParam<bool>("automatic_eigenstrain_passing",
-                        true,
+  params.addParam<bool>("automatic_eigenstrain_names",
+                        false,
                         "Collects all material eigenstrains and passes to required strain "
                         "calculator within TMA internally.");
 
@@ -96,7 +96,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
     _direction_valid(params.isParamSetByUser("direction")),
-    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_passing"))
+    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -255,6 +255,7 @@ TensorMechanicsAction::act()
   // Add Materials
   else if (_current_task == "add_master_action_material")
   {
+    // Automatic eigenstrain names
     if (_auto_eigenstrain)
       actEigenstrainNames();
 
@@ -485,7 +486,7 @@ TensorMechanicsAction::actEigenstrainNames()
   std::map<std::string, std::string> remove_add_map;
   std::set<std::string> remove_reduced_set;
 
-  // Determine all the materials(eigenstrains) all ready created
+  // Loop over all the materials(eigenstrains) already created
   auto materials = _problem->getMaterialWarehouse().getObjects();
   for (auto & mat : materials)
   {
@@ -519,7 +520,7 @@ TensorMechanicsAction::actEigenstrainNames()
     }
 
     // Account for reduced eigenstrains and CompositeEigenstrains
-    if (mat_params.isParamValid("input_eigenstrain_names"))
+    if (mat_name == "ComputeReducedOrderEigenstrain")
     {
       auto remove_list =
           mat_params.get<std::vector<MaterialPropertyName>>("input_eigenstrain_names");
@@ -540,8 +541,7 @@ TensorMechanicsAction::actEigenstrainNames()
 
     // Account for MaterialConverter , add or remove later
 
-    if (mat_name == "RankTwoTensorMaterialConverter" ||
-        mat_name == "RankFourTensorMaterialConverter" || mat_name == "MaterialConverter")
+    if (mat_name == "RankTwoTensorMaterialConverter")
     {
       std::vector<std::string> remove_list;
       std::vector<std::string> add_list;
@@ -559,7 +559,7 @@ TensorMechanicsAction::actEigenstrainNames()
 
       // These vectors are the same size as checked in MaterialConverter
       for (unsigned int index = 0; index < remove_list.size(); index++)
-        remove_add_map.insert(std::make_pair(remove_list[index], add_list[index]));
+        remove_add_map.emplace(remove_list[index], add_list[index]);
     }
   }
   // All the materials have been accounted for, now remove or add parts
@@ -581,10 +581,10 @@ TensorMechanicsAction::actEigenstrainNames()
     }
   }
 
-  for (auto index = remove_reduced_set.begin(); index != remove_reduced_set.end(); index++)
+  for (auto index : remove_reduced_set)
   {
-    if (eigenstrain_set.find(*index) != eigenstrain_set.end())
-      eigenstrain_set.erase(*index);
+    if (eigenstrain_set.find(index) != eigenstrain_set.end())
+      eigenstrain_set.erase(index);
   }
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
@@ -601,6 +601,16 @@ TensorMechanicsAction::actEigenstrainNames()
   std::copy(verified_eigenstrain_names.begin(),
             verified_eigenstrain_names.end(),
             _eigenstrain_names.begin());
+
+  // Since the automatic eigenstrain names have been collected, return the list
+  std::string eigenstrain_string;
+  for (auto entry : _eigenstrain_names)
+  {
+    eigenstrain_string += entry;
+    eigenstrain_string += "  ";
+  }
+  mooseInfo("Eigenstrain names automatically passed to TensorMechanicsAction: \n",
+            eigenstrain_string);
 }
 
 void

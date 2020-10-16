@@ -40,9 +40,10 @@
 
 [Modules/TensorMechanics/Master]
   [./solid]
-    add_variables = true
     strain = SMALL
     incremental = true
+    add_variables = true
+
     generate_output = 'strain_xx strain_yy strain_zz'
   [../]
 []
@@ -52,7 +53,6 @@
     type = FunctionAux
     variable = temp
     function = temperature_load
-    use_displaced_mesh = false
   [../]
 []
 
