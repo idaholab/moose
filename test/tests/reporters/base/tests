@@ -1,8 +1,12 @@
 [Tests]
+  issues = '#11323'
+  design = 'Reporters/index.md'
   [base]
     type = RunApp
     input = base.i
     allow_test_objects = true
     min_parallel = 2
+
+    requirement = "The system shall have a system for computing and retrieving aggregate values of arbitrary type."
   []
 []
