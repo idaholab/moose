@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '0d86cfce0b83e2efaa0647d8e1f1ca5e755872fc'
   [./sinneumann_test]
     type = 'Exodiff'
     input = 'sin_neumann_test.i'

@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#665'
   design = 'source/constraints/TiedValueConstraint.md'
   [./test]
     type = 'Exodiff'

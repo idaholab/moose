@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#1394'
   design = 'source/auxkernels/QuotientAux.md'
   [./quotient_aux]
     type = 'Exodiff'

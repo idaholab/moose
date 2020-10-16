@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = 'fc620eb2a4580a2320e03e6e89ad092dd2f4123b'
   design = 'source/functions/SolutionFunction.md'
   [./test]
     # The XDA/XDR files for this test are created with test/tests/auxkernels/solution_aux/build.i

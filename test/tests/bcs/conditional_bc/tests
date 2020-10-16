@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/BCs/index.md'
-  issues = ''
+  issues = '#1771'
   [./test]
     type = 'Exodiff'
     input = 'conditional_bc_test.i'

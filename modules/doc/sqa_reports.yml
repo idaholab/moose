@@ -229,7 +229,6 @@ Requirements:
     moose_test:
         directories:
             - test/tests
-        log_empty_issues: WARNING
         log_testable: WARNING
         log_duplicate_requirement: WARNING
         show_warning: false

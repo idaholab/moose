@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83'
   [./bc_function_nodal_test]
     type = 'Exodiff'
     input = 'bc_function_preset.i'
