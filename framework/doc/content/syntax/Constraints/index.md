@@ -36,18 +36,18 @@ before they can use a `MortarConstraint` object. The easiest way to prepare
 the mesh is to assign boundary IDs to the secondary and primary sides of the
 interface when creating the mesh in their 3rd-party meshing software (e.g. Cubit
 or Gmsh). If these boundary IDs exist, then the lower dimensional blocks can be
-generated automatically using the `LowerDBlockFromSideset` mesh modifiers as
+generated automatically using the `LowerDBlockFromSidesetGenerator` mesh generator as
 shown in the below input file snippet:
 
 ```
-[MeshModifiers]
+[Mesh]
   [./primary]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
   [./secondary]
-    type = LowerDBlockFromSideset
+    type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
   [../]

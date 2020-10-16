@@ -481,7 +481,7 @@ public:
   /**
    * If this method is called, we will call libMesh's prepare_for_use method when we
    * call Moose's prepare method. This should only be set when the mesh structure is changed
-   * by MeshModifiers (i.e. Element deletion).
+   * by MeshGenerators (i.e. Element deletion).
    */
   void needsPrepareForUse();
 
