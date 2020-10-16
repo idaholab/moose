@@ -1,5 +1,5 @@
 #The two blocks were moved apart by the value of 0.005 in the y-direction, respectively.
-#This value was compensated by the gap offsets from both slave and master sides
+#This value was compensated by the gap offsets from both secondary and primary sides
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   temperature = temp
@@ -70,10 +70,10 @@
   [./thermal_contact]
     type = GapHeatTransfer
     variable = temp
-    master = 2
-    slave = 3
-    emissivity_master = 0
-    emissivity_slave = 0
+    primary = 2
+    secondary = 3
+    emissivity_primary = 0
+    emissivity_secondary = 0
     secondary_gap_offset = secondary_gap_offset
     mapped_primary_gap_offset = mapped_primary_gap_offset
   [../]
