@@ -2,6 +2,7 @@
 
 #include "MooseObject.h"
 
+#include "OptimizationVectorPostprocessor.h"
 #include "OptimizationResults.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -78,7 +79,8 @@ protected:
   const std::vector<Real> & _initial_condition;
 
   /// VPP to sent data to
-  OptimizationResults & _results_vpp;
+  OptimizationVectorPostprocessor & _results_vpp;
+  OptimizationResults & _results_vpp2;
 
   /// Number of parameters
   const dof_id_type _ndof;
