@@ -28,12 +28,15 @@ def get_active_filenames(basename, pattern=None):
         basename[str]: The base filename (e.g., file_out.e)
         pattern[str]: (Optional) Additional files to consider via glob pattern (e.g., file_out.e-s*)
     """
+    def file_number(fname):
+        idx = fname.find('.e-s')
+        return int(fname[idx+4:]) if idx > 0 else 0
 
     # List of all matching filenames
     filenames = [basename]
     if pattern:
         filenames += glob.glob(pattern)
-    filenames.sort()
+    filenames.sort(key=file_number)
 
     # Minimum filename modified time
     modified = os.path.getmtime(filenames[0]) if os.path.exists(filenames[0]) else 0
