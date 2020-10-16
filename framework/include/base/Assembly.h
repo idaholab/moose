@@ -1499,13 +1499,12 @@ public:
    * @param ntest The number of test functions
    * @param v The residual contribution on the current qp
    */
-  void saveLocalArrayResidual(DenseVector<Number> & re,
-                              unsigned int i,
-                              unsigned int ntest,
-                              const RealEigenVector & v)
+  template <typename T>
+  void
+  saveLocalArrayResidual(DenseVector<Number> & re, unsigned int i, unsigned int ntest, const T & v)
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
-      re(i) += v(j);
+      re(i) += MetaPhysicL::raw_value(v(j));
   }
 
   /**

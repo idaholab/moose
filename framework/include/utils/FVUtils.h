@@ -210,10 +210,16 @@ loopOverElemFaceInfo(const Elem & elem,
 /// diffusive terms.  If using any cross-diffusion corrections, etc. all
 /// those calculations should be handled appropriately by this function.
 template <typename T, typename T2>
-ADReal gradUDotNormal(const T & elem_value,
-                      const T2 & neighbor_value,
-                      const FaceInfo & face_info,
-                      const MooseVariableFV<Real> & fv_var);
+typename ADType<T>::type gradUDotNormal(const typename ADType<T>::type & elem_value,
+                                        const T2 & neighbor_value,
+                                        const FaceInfo & face_info,
+                                        const MooseVariableFV<T> & fv_var);
+
+template <>
+ADRealEigenVector gradUDotNormal(const ADRealEigenVector & elem_value,
+                                 const ADRealEigenVector & neighbor_value,
+                                 const FaceInfo & face_info,
+                                 const MooseVariableFV<RealEigenVector> & fv_var);
 
 template <typename OutputType>
 std::pair<const Elem *, const Elem *>
