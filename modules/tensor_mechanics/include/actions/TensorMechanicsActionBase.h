@@ -31,8 +31,8 @@ public:
       _rank_two_cylindrical_component_table;
   ///@}
 
-  static void addCartesianComponentOutput(const std::string & name);
-  static void addCartesianComponentOutput(const std::pair<std::string, std::string> & name);
+  static void addCartesianComponentOutput(const std::string & name,
+                                          const std::string & prop_name = "");
 
 protected:
   static std::map<std::string, std::string> _rank_two_cartesian_component_table;
