@@ -21,7 +21,6 @@ DiscreteNucleationMap::validParams()
   params.addClassDescription("Generates a spatial smoothed map of all nucleation sites with the "
                              "data of the DiscreteNucleationInserter for use by the "
                              "DiscreteNucleation material.");
-  params.addParam<Real>("radius", 0.0, "Radius for the inserted nuclei");
   params.addParam<Real>("int_width", 0.0, "Nucleus interface width for smooth nuclei");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
   params.addCoupledVar("periodic",
@@ -37,7 +36,6 @@ DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
     _mesh_changed(false),
     _inserter(getUserObject<DiscreteNucleationInserterBase>("inserter")),
     _periodic(isCoupled("periodic") ? coupled("periodic") : -1),
-    _radius(getParam<Real>("radius")),
     _int_width(getParam<Real>("int_width")),
     _nucleus_list(_inserter.getNucleusList())
 {
@@ -70,33 +68,36 @@ DiscreteNucleationMap::execute()
     unsigned int active_nuclei = 0;
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
-      Real r, rmin = std::numeric_limits<Real>::max();
+      Real r = std::numeric_limits<Real>::max();
 
       // find the distance to the closest nucleus
+      Real local_radius = 0.0;
       for (unsigned i = 0; i < _nucleus_list.size(); ++i)
       {
         // use a non-periodic or periodic distance
         r = _periodic < 0
-                ? (_q_point[qp] - _nucleus_list[i].second).norm()
-                : _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
-        if (r < rmin)
-          rmin = r;
-      }
+                ? (_q_point[qp] - _nucleus_list[i].center).norm()
+                : _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].center);
 
-      // compute intensity value with smooth interface
-      Real value = 0.0;
-      if (rmin <= _radius - _int_width / 2.0) // Inside circle
-      {
-        active_nuclei++;
-        value = 1.0;
+        // grab the radius of the nucleus that this qp is closest to
+        local_radius = _nucleus_list[i].radius;
+
+        // compute intensity value with smooth interface
+        Real value = 0.0;
+        if (r <= local_radius - _int_width / 2.0) // Inside circle
+        {
+          active_nuclei++;
+          value = 1.0;
+        }
+        else if (r < local_radius + _int_width / 2.0) // Smooth interface
+        {
+          Real int_pos = (r - local_radius + _int_width / 2.0) / _int_width;
+          active_nuclei++;
+          value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+        }
+        if (value > _elem_map[qp])
+          _elem_map[qp] = value;
       }
-      else if (rmin < _radius + _int_width / 2.0) // Smooth interface
-      {
-        Real int_pos = (rmin - _radius + _int_width / 2.0) / _int_width;
-        active_nuclei++;
-        value = (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
-      }
-      _elem_map[qp] = value;
     }
 
     // if the map is not empty insert it

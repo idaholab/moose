@@ -1,12 +1,4 @@
 [Tests]
-  [sqa_check]
-    type = PythonUnitTest
-    input = test_sqa_check.py
-    buffer = True
-    issues = '#9638'
-    design = 'MooseDocs/generate.md'
-    requirement = "The system shall include a utility for examining test specifications for SQA content."
-  []
   [git_commit_history]
     design = 'python/index.md'
     issues = '#5084'
@@ -32,7 +24,7 @@
     input = test_git_news.py
     buffer = True
     issues = '#11446'
-    design = 'newsletter/index.html'
+    design = 'newsletter/index.md'
     requirement = "The system shall include a utility for determining author contributions to the repository in the previous month.."
   []
 []

@@ -9,7 +9,7 @@
 
 #include "JouleHeatingHeatGeneratedAux.h"
 
-registerMooseObject("MooseApp", JouleHeatingHeatGeneratedAux);
+registerMooseObject("HeatConductionApp", JouleHeatingHeatGeneratedAux);
 
 InputParameters
 JouleHeatingHeatGeneratedAux::validParams()

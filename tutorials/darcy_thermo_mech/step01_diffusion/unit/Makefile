@@ -32,7 +32,6 @@ NAVIER_STOKES             := no
 PHASE_FIELD               := yes
 POROUS_FLOW               := no
 RICHARDS                  := no
-SOLID_MECHANICS           := no
 # tensor_mechanics is required by Steps 9-10.
 TENSOR_MECHANICS          := yes
 XFEM                      := no

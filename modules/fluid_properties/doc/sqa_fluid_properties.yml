@@ -5,3 +5,4 @@ specs:
 dependencies:
     - framework
 repo: moose
+reports: !include ${MOOSE_DIR}/modules/fluid_properties/doc/sqa_reports.yml

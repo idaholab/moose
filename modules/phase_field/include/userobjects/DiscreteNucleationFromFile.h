@@ -14,8 +14,10 @@
 
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
- * domain it manages a list of nuclei with their insertion times and their center
- * positions. A DiscreteNucleationMap is needed to enable the DiscreteNucleation
+ * domain. It manages a list of nuclei with their insertion times and their center
+ * positions. Optionally, nuclei with a fixed radius can be given or in the input
+ * file, or individual radii for each nucleus can also be supplied within the data
+ * file. A DiscreteNucleationMap is needed to enable the DiscreteNucleation
  * material to look up if a nucleus is present at a given element/qp.
  */
 class DiscreteNucleationFromFile : public DiscreteNucleationInserterBase
@@ -50,4 +52,10 @@ protected:
 
   /// total nucleation rate
   const Real _nucleation_rate;
+
+  /// Is a fixed radius or variable radius used?
+  bool _fixed_radius;
+
+  /// hold the radius of the nucleus
+  const Real _radius;
 };

@@ -1,0 +1,65 @@
+[Tests]
+  issues = '#12049'
+  design = 'python/index.md'
+
+  [Requirement]
+    type = PythonUnitTest
+    input = test_Requirement.py
+    requirement = "The system shall include data structures for reporting requirement information."
+  []
+
+  [check_syntax]
+    type = PythonUnitTest
+    input = test_check_syntax.py
+    requirement = "The system shall include a tool for checking application syntax for software quality documentation."
+  []
+
+  [get_requirements]
+    type = PythonUnitTest
+    input = test_check_syntax.py
+    requirement = "The system shall include a tool for gathering requirement information for software qualioty documentation."
+  []
+
+  [SQAReport]
+    type = PythonUnitTest
+    input = test_SQAReport.py
+    requirement = "The system shall have reporting tools for software quality."
+  []
+
+  [reports]
+    requirement = "The system shall have tools for reporting software quality status that includes reports for monitoring"
+    [SQADocumentReport]
+      type = PythonUnitTest
+      input = test_SQADocumentReport.py
+      detail = "files and websites;"
+    []
+    [SQARequirementReport]
+      type = PythonUnitTest
+      input = test_SQARequirementReport.py
+      detail = "tests and requirements; and"
+    []
+    [SQAMooseAppReport]
+      type = PythonUnitTest
+      input = test_SQAMooseAppReport.py
+      detail = "design content."
+    []
+  []
+
+  [get_reports]
+    type = PythonUnitTest
+    input = test_check_syntax.py
+    requirement = "The system shall include a tool for gathering multiple software quality reports."
+  []
+
+  [silent_logging]
+    type = PythonUnitTest
+    input = test_SilentRecordHandler.py
+    requirement = "The system shall include a utility to enable the recording of logging messages without display."
+  []
+
+  [LogHelper]
+    type = PythonUnitTest
+    input = test_LogHelper.py
+    requirement = "The system shall include a utility to enable control the of logging messages for software quality reports."
+  []
+[]

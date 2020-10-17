@@ -11,12 +11,12 @@ Main program for running MooseDocs. The moosedocs.py script that exists within t
 documentation directory for applications call this in similar fashion to
 MOOSE run_tests.
 """
+import os
 import argparse
 import logging
-import os
-from mooseutils import mooseutils
+import mooseutils
 
-from .commands import build, check, verify
+from .commands import build, verify, check
 from .common import log
 
 def command_line_options():
@@ -56,9 +56,10 @@ def run():
     elif options.command == 'verify':
         errno = verify.main(options)
 
-    critical = log.MooseDocsFormatter.COUNTS['CRITICAL'].value
-    errors = log.MooseDocsFormatter.COUNTS['ERROR'].value
-    warnings = log.MooseDocsFormatter.COUNTS['WARNING'].value
+    handler = logging.getLogger('MooseDocs').handlers[0]
+    critical = handler.getCount(logging.CRITICAL)
+    errors =   handler.getCount(logging.ERROR)
+    warnings = handler.getCount(logging.WARNING)
 
     print('CRITICAL:{} ERROR:{} WARNING:{}'.format(critical, errors, warnings))
     if critical or errors or (errno != 0):

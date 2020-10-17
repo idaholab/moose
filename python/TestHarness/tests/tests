@@ -24,7 +24,7 @@
   [./diff_gold]
     type = PythonUnitTest
     input = test_DiffGold.py
-    requirement = "TestHarness shall report a failure when encountering differential result"
+    requirement = "TestHarness shall report a failure when encountering differential result with a custom gold directory."
     issues = '#10647'
   [../]
   [./cyclic]

@@ -34,7 +34,8 @@ public:
   const std::vector<Real> & nuclei(const Elem *) const;
 
   const DiscreteNucleationInserterBase & getInserter() const { return _inserter; }
-  std::pair<Real, Real> getRadiusAndWidth() const { return std::make_pair(_radius, _int_width); }
+
+  Real getWidth() const { return _int_width; }
   Real getPeriodic() const { return _periodic; }
 
 protected:
@@ -55,9 +56,6 @@ protected:
 
   /// variable number to use for minPeriodicDistance calls (i.e. use the periodicity of this variable)
   int _periodic;
-
-  /// Nucleus radius
-  const Real _radius;
 
   /// Nucleus interface width
   const Real _int_width;

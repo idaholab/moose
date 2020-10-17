@@ -1,4 +1,5 @@
 [Tests]
+    design = 'InterfaceQpValueUserObject.md InterfaceValueUserObjectAux.md'
     [./interface_UO_QP_test]
       type = 'Exodiff'
       input = 'interface_value_user_object_QP.i'
@@ -17,21 +18,19 @@
                  "a material property value on the primary side of  10 "
                  "a material property value on the primary side of  4 "
       issues = '#11647'
-      design = 'InterfaceQpValueUserObject.md InterfaceValueUserObjectAux.md'
       max_threads = 1
     [../]
     [./interface_UO_get_material_test]
       type = 'RunApp'
       input = 'interface_userobject_material_value.i'
       expect_out = ' Solve Converged!'
-      requirement = "The InterfaceUseroObject system shall be able to "
+      requirement = "The InterfaceUserObject system shall be able to "
                     "get updated bulk, boundary and interface material property values."
                     "This test uses two specific test materials "
                     "(e.g. LinearNonLinearIterationMaterial and LinearNonLinearIterationInterfaceMaterial)"
                     " and one test userobject (e.g. InterfaceUserObjectTestGetMaterialProperty)."
                     "This test will produce an error if the computed an retrived material property are not the same."
       issues = '#14680'
-      design = ' '
       max_threads = 1
     [../]
     [./interface_Qp_rate_incremement_test]
@@ -39,9 +38,8 @@
       input = 'interface_value_rate_increment_user_object_QP.i'
       exodiff = 'interface_value_rate_increment_user_object_QP_out.e'
       requirement = "Testing the implementation of the InterfaceQpValueUserObject"
-      " when computing the variable rate or increment."
+                    " when computing the variable rate or increment."
       issues = '#14680'
-      design = 'InterfaceQpValueUserObject.md InterfaceValueUserObjectAux.md'
       max_threads = 1
     [../]
     [./interface_Qp_real_material]
@@ -50,7 +48,6 @@
       exodiff = 'interface_mp_real_user_object_QP_out.e'
       requirement = "Testing the implementation of the InterfaceQpMaterialPropertyRealUO."
       issues = '#14680'
-      design = 'InterfaceQpMaterialPropertyRealUO.md InterfaceValueUserObjectAux.md'
       max_threads = 1
     [../]
   []

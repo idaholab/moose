@@ -33,5 +33,5 @@ test_doc: all
 	@echo Testing MooseDocs for the framework and MooseTestApp
 	@echo ======================================================
 	@(ret_val=0; \
-	cd doc && ./moosedocs.py build --check --error --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
+	cd doc && ./moosedocs.py build --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
 	exit $$ret_val;)

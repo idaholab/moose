@@ -134,8 +134,17 @@
     type = 'Exodiff'
     input = 'file.i'
     exodiff = 'file_out.e'
-    requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file"
+    requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file. This test assigns fixed radius"
     design = 'userobjects/DiscreteNucleationFromFile.md'
     issues = '#12262'
+  [../]
+
+  [./file2]
+    type = 'Exodiff'
+    input = 'file2.i'
+    exodiff = 'file2_out.e'
+    requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file. This test assigns variable radius"
+    design = 'userobjects/DiscreteNucleationFromFile.md'
+    issues = '#14544'
   [../]
 []

@@ -6,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 from .mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration
 from .mooseutils import find_moose_executable_recursive, run_executable
 from .mooseutils import touch, unique_list, gold, make_chunks, camel_to_space
@@ -16,12 +15,16 @@ from .gitutils import is_git_repo, git_commit, git_commit_message, git_merge_com
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path
-from .sqa_check import sqa_check, check_requirement, sqa_check_requirement_duplicates
-from .AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
-from .compute_requirement_stats import compute_requirement_stats, SQAStats
+from .AutoPropertyMixin import AutoPropertyMixinBase, AutoPropertyMixin, Property, addProperty
 from .levenshtein import levenshtein, levenshteinDistance
 from .json_load import json_load, json_parse
 from .civet_results import get_civet_results
+from .template import apply_template_arguments
+
+try:
+    from .yaml_load import yaml_load
+except:
+    pass
 
 try:
     from .MooseDataFrame import MooseDataFrame

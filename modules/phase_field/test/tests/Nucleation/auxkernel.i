@@ -35,10 +35,10 @@
     hold_time = 0.4
     probability = 0.01
     seed = 12346
+    radius = 3.27
   [../]
   [./map]
     type = DiscreteNucleationMap
-    radius = 3.27
     int_width = 2
     periodic = c
     inserter = inserter

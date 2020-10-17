@@ -41,11 +41,6 @@
     input = test_database.py
     requirement = "MooseDocs shall include a database object for storing information regarding source files."
   []
-  [get_requirement]
-    type = PythonUnitTest
-    input = test_get_requirements.py
-    requirement = "MooseDocs shall include a tool for reading software quality assurance requirement information from test specifications."
-  []
   [get_pages]
     type = PythonUnitTest
     input = test_get_pages.py

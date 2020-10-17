@@ -1,23 +1,31 @@
 [Tests]
-  [./testcube_elem_id]
-    type = 'Exodiff'
-    input = 'testcube_elem_id.i'
-    cli_args = '--mesh-only'
-    exodiff = 'testcube_elem_id_in.e'
-    recover = false
-  [../]
-  [./testcube_elset_name]
-    type = 'Exodiff'
-    input = 'testcube_elset_name.i'
-    cli_args = '--mesh-only'
-    exodiff = 'testcube_elset_name_in.e'
-    recover = false
-  [../]
-  [./testcube_elset_name_ws]
-    type = 'Exodiff'
-    input = 'testcube_elset_name_ws.i'
-    cli_args = '--mesh-only'
-    exodiff = 'testcube_elset_name_ws_in.e'
-    recover = false
-  [../]  
+  issues = '#14302'
+  design = mesh/FileMesh.md
+  [abaqus]
+    requirement = "The system shall support importing mesh information from Abaqus that includes"
+    [testcube_elem_id]
+      type = 'Exodiff'
+      input = 'testcube_elem_id.i'
+      cli_args = '--mesh-only'
+      exodiff = 'testcube_elem_id_in.e'
+      recover = false
+      detail = "element identifiers,"
+    []
+    [testcube_elset_name]
+      type = 'Exodiff'
+      input = 'testcube_elset_name.i'
+      cli_args = '--mesh-only'
+      exodiff = 'testcube_elset_name_in.e'
+      recover = false
+      detail = "element sets, and"
+    []
+    [testcube_elset_name_ws]
+      type = 'Exodiff'
+      input = 'testcube_elset_name_ws.i'
+      cli_args = '--mesh-only'
+      exodiff = 'testcube_elset_name_ws_in.e'
+      recover = false
+      detail = "element sets with extra space in file."
+    []
+  []
 []

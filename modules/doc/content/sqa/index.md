@@ -36,3 +36,5 @@ this version of the documentation is available at the following links:
 !civet mergeresults
 
 +Releases+: [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
+
+!sqa report

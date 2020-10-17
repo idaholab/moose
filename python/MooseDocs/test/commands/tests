@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#12049'
+  design = 'python/index.md'
+  [check]
+    type = PythonUnitTest
+    input = test_check.py
+
+    requirement = "The system shall include a utility for reporting the status of software quality items."
+  []
+[]

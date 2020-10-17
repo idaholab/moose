@@ -1,0 +1,25 @@
+[Applications]
+  [framework]
+    exe_name = moose_test
+    exe_directory = test
+    content_directory = framework/doc/content
+    hidden = framework/doc/hidden.yml
+    remove = "framework/doc/remove.yml test/doc/remove.yml"
+    allow_missing_description = True
+    allow_missing_markdown = True
+  []
+[]
+
+[Documents]
+  [Initiation]
+    allow_missing = "safety_software_determination quality_level_determination "
+                    "enterprise_architecture_entry"
+  []
+[]
+
+[Requirements]
+  [moose_test]
+    directories = test/tests
+    allow_duplicates = true
+  []
+[]

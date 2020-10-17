@@ -247,25 +247,31 @@
     requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 2D using nodal normal based smoothing and second order elements."
   [../]
 
-  [./restart]
-    type = 'Exodiff'
-    input = 'restart.i'
-    exodiff = 'restart_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-    requirement = "The 'MOOSE_TEST_NAME' shall create the necessary files for testing restart of the PenetrationAux object."
-  [../]
+  [restart]
+    requirement = "The systems shall be capable of performing simulations with geometric penetration"
 
-  [./restart2]
-    type = 'Exodiff'
-    input = 'restart2.i'
-    exodiff = 'restart2_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    prereq = restart
-    recover = false # Turns out this isn't working in HEAD - we have more work to properly recover a restart test #5877
-    allow_warnings = true
-    requirement = "The PenetrationAux object shall be capable of restarting from a previous simulation."
-  [../]
+    [part1]
+      type = 'Exodiff'
+      input = 'restart.i'
+      exodiff = 'restart_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      allow_warnings = true
+
+      detail = "computed within one simulation"
+    []
+
+    [part2]
+      type = 'Exodiff'
+      input = 'restart2.i'
+      exodiff = 'restart2_out.e'
+      group = 'geometric'
+      custom_cmp = exclude_elem_id.cmp
+      prereq = restart/part1
+      recover = false # Turns out this isn't working in HEAD - we have more work to properly recover a restart test #5877
+      allow_warnings = true
+
+      detail = "that are restarted from a another."
+    []
+  []
 []

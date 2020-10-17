@@ -9,7 +9,7 @@
 
 #include "TangentialMortarMechanicalContact.h"
 
-registerMooseObject("MooseApp", TangentialMortarMechanicalContact);
+registerMooseObject("ContactApp", TangentialMortarMechanicalContact);
 
 InputParameters
 TangentialMortarMechanicalContact::validParams()

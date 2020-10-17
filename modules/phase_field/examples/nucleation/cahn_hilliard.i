@@ -93,6 +93,7 @@
     type = DiscreteNucleationInserter
     hold_time = 100
     probability = P
+    radius = 10
   [../]
   [./map]
     # The map UO runs at the beginning of a timestep and generates a per-element/qp
@@ -100,7 +101,6 @@
     # the list of nuclei was modified.
     # The map converts the nucleation points into finite area objects with a given radius.
     type = DiscreteNucleationMap
-    radius = 10
     periodic = c
     inserter = inserter
   [../]

@@ -22,7 +22,6 @@ public:
 
 public:
   ///@{ table data for output generation
-  static const std::map<std::string, std::string> _rank_two_cartesian_component_table;
   static const std::vector<char> _component_table;
   static const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
       _rank_two_invariant_table;
@@ -32,6 +31,11 @@ public:
       _rank_two_cylindrical_component_table;
   ///@}
 
+  static void addCartesianComponentOutput(const std::string & name);
+  static void addCartesianComponentOutput(const std::pair<std::string, std::string> & name);
+
 protected:
+  static std::map<std::string, std::string> _rank_two_cartesian_component_table;
+
   const bool _use_ad;
 };

@@ -6,3 +6,4 @@ dependencies:
 specs:
     - tests
 repo: moose
+reports: !include ${MOOSE_DIR}/modules/xfem/doc/sqa_reports.yml
