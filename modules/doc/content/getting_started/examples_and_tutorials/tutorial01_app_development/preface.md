@@ -23,10 +23,20 @@ Go to any section of the tutorial from the [tutorial01_app_development/index.md#
       style=width:61%;margin-left:auto;margin-right:auto;
 
 !!!
-TODOs:
-- decide if we even want to include this section - navigation may already be intuitive enough
-- need to keep these images updated so that they always show exactly what's actually on the website
-  - I got this part down to a science
+NOTE: These screenshots were captured with the Shutter application (shutter-project.org)
+
+The borders and shadow were then produced by running the following shell script:
+
+```
+convert -border 8 -bordercolor 'rgb(0,88,151)' $1 $2
+
+convert $2 \( +clone -background '#7A7777' -shadow 88x5+0+5 \) +swap \
+	-background none -layers merge +repage $2
+```
+
+The images were then scaled to the page width based on the widest image resolution (breadcrumbs.png)
+
+TODO: a nice border/shadow tool for MooseDocs media would be nice
 !!!
 
 ## Acronyms

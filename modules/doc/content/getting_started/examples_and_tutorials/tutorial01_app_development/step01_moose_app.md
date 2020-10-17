@@ -18,7 +18,6 @@ The name +Babbler+ was selected for the application developed throughout this tu
 !media tutorial01_app_development/pied_babblers.jpg
        style=width:60%;margin-left:auto;margin-right:auto;
        caption=Image of two Southern pied babblers. "Babbler" is used as a placeholder application name in demonstrations provided throughout this tutorial.
-<!--Probably will have to delete this, but I think this picture is adorable XD-->
 
 Once a name has been selected, execute the following command:
 

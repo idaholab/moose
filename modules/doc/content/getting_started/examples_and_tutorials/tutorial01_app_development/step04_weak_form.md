@@ -18,7 +18,7 @@ demonstrating the development of a MOOSE-base application. Please visit the [hel
 
 The left-hand side of [laplace-residual] is called the *residual* and the coefficient, $\psi$, is arbitrary, except for requiring that $\psi$ satisfy homogeneous boundary conditions.
 
-There is a general procedure for expressing a residual as one that is readily solved with MOOSE. First, integrate with respect to the problem domain, $\Omega$, and apply the integrand sum rule, e.g.,
+There is a general procedure for expressing a residual as one that is readily solved with MOOSE. First, integrate with respect to the problem domain, $\Omega$, e.g.,
 
 !equation id=laplace-sum
 -\int_\Omega \psi (\nabla \cdot \nabla u) = 0
@@ -33,7 +33,7 @@ Substituting the right-hand side of [laplace-product] results in integration by 
 !equation id=laplace-ibp
 \int_\Omega \nabla \psi \cdot \nabla u - \int_\Omega \nabla \cdot (\psi \nabla u) = 0
 
-Finally, notice that the second term in [laplace-ibp] is a volume integral whose integrand is the divergence of the field, $\psi \nabla u$. Therefore, it is possible to apply the divergence theorem and integrate the magnitude of this field along the volume's surface normal, $\hat{n}$, with respect to that surface's domain, $\Gamma = \partial \Omega$, i.e.,
+Finally, notice that the second term in [laplace-ibp] is a volume integral whose integrand is the divergence of the field, $\psi \nabla u$. Therefore, it is possible to apply the [divergence theorem](https://en.wikipedia.org/wiki/Divergence_theorem) and integrate the magnitude of this field along the volume's surface normal, $\hat{n}$, with respect to that surface's domain, $\Gamma = \partial \Omega$, i.e.,
 
 !equation id=laplace-weak
 \int_\Omega \nabla \psi \cdot \nabla u - \oint_\Gamma \psi \nabla u \cdot \hat{n} = 0
