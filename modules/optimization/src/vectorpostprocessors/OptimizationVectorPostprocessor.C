@@ -60,6 +60,12 @@ OptimizationVectorPostprocessor::getParameterValues()
   return dataVec;
 }
 
+dof_id_type
+OptimizationVectorPostprocessor::getNumberOfParameters()
+{
+  return _vpp_vectors.size();
+}
+
 void
 OptimizationVectorPostprocessor::setParameterValues(const std::vector<Real> & current)
 {

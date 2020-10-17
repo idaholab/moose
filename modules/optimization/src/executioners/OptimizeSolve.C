@@ -17,8 +17,7 @@ OptimizeSolve::validParams()
 }
 
 OptimizeSolve::OptimizeSolve(Executioner * ex)
-  : SolveObject(ex),
-    _solve_on(getParam<ExecFlagEnum>("solve_on"))
+  : SolveObject(ex), _solve_on(getParam<ExecFlagEnum>("solve_on"))
 {
 }
 
@@ -30,13 +29,11 @@ OptimizeSolve::solve()
 
   // Grab form function
   std::vector<FormFunction *> ffs;
-  _problem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("FormFunction")
-      .queryInto(ffs);
+  _problem.theWarehouse().query().condition<AttribSystem>("FormFunction").queryInto(ffs);
   if (ffs.empty())
     mooseError("No form function object found.");
   _form_function = ffs[0];
+  _form_function->initializePetscVectors();
 
   // Communicator used by form function
   MPI_Comm my_comm = _form_function->getComm().get();

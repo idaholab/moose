@@ -28,6 +28,7 @@ public:
 
   std::vector<std::string> getParameterNames();
   std::vector<Real> getParameterValues();
+  dof_id_type getNumberOfParameters();
   void setParameterValues(const VectorPostprocessorValue & current);
 
 private:

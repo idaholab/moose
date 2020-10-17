@@ -3,21 +3,16 @@
 
 [FormFunction]
   type = QuadraticMinimize
-  initial_condition = '5 8 1'
-  optimization_results = results
-  optimization_vpp = fixme_lynn_placeholder
+  optimization_vpp = results
   objective = 1.0
   solution = '1 2 3'
 []
 
 [VectorPostprocessors]
   [results]
-    type = OptimizationResults
-  []
-  [fixme_lynn_placeholder]
     type = OptimizationVectorPostprocessor
-    parameters = 'lynn1 lynn2 lynn3'
-    intial_values = '1 2 3'
+    parameters = 'param_0 param_1 param_2'
+    intial_values = '5 8 1'
   []
 []
 

@@ -3,7 +3,6 @@
 #include "MooseObject.h"
 
 #include "OptimizationVectorPostprocessor.h"
-#include "OptimizationResults.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
@@ -12,6 +11,11 @@ class FormFunction : public MooseObject
 public:
   static InputParameters validParams();
   FormFunction(const InputParameters & parameters);
+
+  /**
+   * Function to initialize petsc vectors from vpp data
+   */
+  void initializePetscVectors();
 
   /**
    * Function to set parameters.
@@ -75,15 +79,11 @@ protected:
   /// Communicator used for operations
   const libMesh::Parallel::Communicator _my_comm;
 
-  /// Initial conditions
-  const std::vector<Real> & _initial_condition;
-
   /// VPP to sent data to
   OptimizationVectorPostprocessor & _results_vpp;
-  OptimizationResults & _results_vpp2;
 
   /// Number of parameters
-  const dof_id_type _ndof;
+  dof_id_type _ndof;
 
   /// Parameters
   libMesh::PetscVector<Number> _parameters;

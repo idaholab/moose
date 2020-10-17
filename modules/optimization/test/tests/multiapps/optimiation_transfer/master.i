@@ -22,9 +22,7 @@
 
 [FormFunction]
   type = QuadraticMinimize
-  initial_condition = '5 8 1'
   optimization_vpp = 'opt_results'
-  optimization_results = 'fixme_lynn_want_to_use_other_vpp'
   objective = 1.0
   solution = '1 2 3'
 []
@@ -49,11 +47,8 @@
   [toSub]
     type = OptimizationTransfer
     multi_app = full_solve
-
     optimization_vpp = opt_results
     to_control = optimizationSamplerReceiver
-    # initial conditions?
-    #vector postprocessor to use    get ref to vector pp vector name and post processor name
   []
   [fromSub]
     type = MultiAppCopyTransfer
@@ -76,10 +71,6 @@
     outputs = none
   []
 
-  [fixme_lynn_want_to_use_other_vpp]
-    type = OptimizationResults
-    outputs = optout
-  []
   [opt_results]
     type = OptimizationVectorPostprocessor
     parameters = 'DiracKernels/pt0/value
