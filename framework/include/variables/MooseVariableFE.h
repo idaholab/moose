@@ -117,18 +117,7 @@ public:
    * Currently hardcoded to true because we always compute the value.
    */
   bool usesGradPhi() const { return true; }
-  /**
-   * Whether or not this variable is actually using the shape function value.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesPhiNeighbor() const { return true; }
-  /**
-   * Whether or not this variable is actually using the shape function gradient.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesGradPhiNeighbor() const { return true; }
+
   /**
    * Whether or not this variable is computing any second derivatives.
    */
@@ -138,17 +127,17 @@ public:
    * Whether or not this variable is actually using the shape function second derivative on a
    * neighbor.
    */
-  bool usesSecondPhiNeighbor() const;
+  bool usesSecondPhiNeighbor() const override final;
 
   /**
    * Whether or not this variable is computing any second derivatives.
    */
-  bool computingSecond() const { return usesSecondPhi(); }
+  bool computingSecond() const override final { return usesSecondPhi(); }
 
   /**
    * Whether or not this variable is computing the curl
    */
-  bool computingCurl() const;
+  bool computingCurl() const override final;
 
   const std::set<SubdomainID> & activeSubdomains() const override;
   bool activeOnSubdomain(SubdomainID subdomain) const override;
@@ -195,34 +184,46 @@ public:
   unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
 
   const FieldVariablePhiValue & phi() const override { return _element_data->phi(); }
-  const FieldVariablePhiGradient & gradPhi() const { return _element_data->gradPhi(); }
+  const FieldVariablePhiGradient & gradPhi() const override final
+  {
+    return _element_data->gradPhi();
+  }
   const MappedArrayVariablePhiGradient & arrayGradPhi() const
   {
     return _element_data->arrayGradPhi();
   }
-  const FieldVariablePhiSecond & secondPhi() const;
-  const FieldVariablePhiCurl & curlPhi() const;
+  const FieldVariablePhiSecond & secondPhi() const override final;
+  const FieldVariablePhiCurl & curlPhi() const override final;
 
-  const FieldVariablePhiValue & phiFace() const { return _element_data->phiFace(); }
-  const FieldVariablePhiGradient & gradPhiFace() const { return _element_data->gradPhiFace(); }
+  const FieldVariablePhiValue & phiFace() const override final { return _element_data->phiFace(); }
+  const FieldVariablePhiGradient & gradPhiFace() const override final
+  {
+    return _element_data->gradPhiFace();
+  }
   const MappedArrayVariablePhiGradient & arrayGradPhiFace() const
   {
     return _element_data->arrayGradPhiFace();
   }
-  const FieldVariablePhiSecond & secondPhiFace() const;
+  const FieldVariablePhiSecond & secondPhiFace() const override final;
   const FieldVariablePhiCurl & curlPhiFace() const;
 
-  const FieldVariablePhiValue & phiNeighbor() const { return _neighbor_data->phi(); }
-  const FieldVariablePhiGradient & gradPhiNeighbor() const { return _neighbor_data->gradPhi(); }
+  const FieldVariablePhiValue & phiNeighbor() const override final { return _neighbor_data->phi(); }
+  const FieldVariablePhiGradient & gradPhiNeighbor() const override final
+  {
+    return _neighbor_data->gradPhi();
+  }
   const MappedArrayVariablePhiGradient & arrayGradPhiNeighbor() const
   {
     return _neighbor_data->arrayGradPhi();
   }
-  const FieldVariablePhiSecond & secondPhiNeighbor() const;
+  const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiNeighbor() const;
 
-  const FieldVariablePhiValue & phiFaceNeighbor() const { return _neighbor_data->phiFace(); }
-  const FieldVariablePhiGradient & gradPhiFaceNeighbor() const
+  const FieldVariablePhiValue & phiFaceNeighbor() const override final
+  {
+    return _neighbor_data->phiFace();
+  }
+  const FieldVariablePhiGradient & gradPhiFaceNeighbor() const override final
   {
     return _neighbor_data->gradPhiFace();
   }
@@ -230,7 +231,7 @@ public:
   {
     return _neighbor_data->arrayGradPhiFace();
   }
-  const FieldVariablePhiSecond & secondPhiFaceNeighbor() const;
+  const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final;
   const FieldVariablePhiCurl & curlPhiFaceNeighbor() const;
 
   const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
@@ -573,21 +574,21 @@ public:
   /**
    * Return phi size
    */
-  virtual size_t phiSize() const final { return _element_data->phiSize(); }
+  virtual std::size_t phiSize() const final { return _element_data->phiSize(); }
   /**
    * Return phiFace size
    */
-  virtual size_t phiFaceSize() const final { return _element_data->phiFaceSize(); }
+  virtual std::size_t phiFaceSize() const final { return _element_data->phiFaceSize(); }
   /**
    * Return phiNeighbor size
    */
-  virtual size_t phiNeighborSize() const final { return _neighbor_data->phiSize(); }
+  virtual std::size_t phiNeighborSize() const final { return _neighbor_data->phiSize(); }
   /**
    * Return phiFaceNeighbor size
    */
-  virtual size_t phiFaceNeighborSize() const final { return _neighbor_data->phiFaceSize(); }
+  virtual std::size_t phiFaceNeighborSize() const final { return _neighbor_data->phiFaceSize(); }
 
-  size_t phiLowerSize() const final { return _lower_data->phiSize(); }
+  std::size_t phiLowerSize() const final { return _lower_data->phiSize(); }
 
   /**
    * Methods for retrieving values of variables at the nodes

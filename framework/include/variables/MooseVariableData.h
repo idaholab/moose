@@ -203,12 +203,12 @@ public:
   /**
    * Return phi size
    */
-  size_t phiSize() const { return _phi->size(); }
+  std::size_t phiSize() const { return _phi->size(); }
 
   /**
    * Return phiFace size
    */
-  size_t phiFaceSize() const { return _phi_face->size(); }
+  std::size_t phiFaceSize() const { return _phi_face->size(); }
 
   /**
    * Whether or not this variable is computing any second derivatives.

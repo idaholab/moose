@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 20
+    nx = 40
     xmax = 2
   []
 []
@@ -12,8 +12,10 @@
     family = MONOMIAL
     order = CONSTANT
     fv = true
+    initial_condition = 1
   []
   [fe]
+    initial_condition = 1
   []
 []
 
@@ -21,7 +23,7 @@
   [diff]
     type = FVDiffusion
     variable = fv
-    coeff = fv_prop
+    coeff = diffusivity
   []
   [coupled]
     type = FVCoupledForce
@@ -34,7 +36,7 @@
   [diff]
     type = ADMatDiffusion
     variable = fe
-    diffusivity = fe_prop
+    diffusivity = diffusivity
   []
   [coupled]
     type = CoupledForce
@@ -74,7 +76,7 @@
 []
 
 [Materials]
-  active = 'fe_mat fv_mat'
+  active = 'const_mat'
   [bad_mat]
     type = FEFVCouplingMaterial
     fe_var = fe
@@ -87,6 +89,11 @@
   [fv_mat]
     type = FEFVCouplingMaterial
     fv_var = fv
+  []
+  [const_mat]
+    type = ADGenericConstantMaterial
+    prop_names = 'diffusivity'
+    prop_values = '1'
   []
 []
 
@@ -104,4 +111,8 @@
 
 [Outputs]
   exodus = true
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []

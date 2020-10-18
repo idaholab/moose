@@ -71,6 +71,9 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
+  using FieldVariablePhiGradient =
+      typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
+  using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;
 
   static InputParameters validParams();
 
@@ -128,23 +131,14 @@ public:
   {
     mooseError("nodalDofIndexNeighbor not supported by MooseVariableFVBase");
   }
-  virtual size_t phiSize() const override final
+  virtual std::size_t phiSize() const override final { return _phi.size(); }
+  virtual std::size_t phiFaceSize() const override final { return _phi_face.size(); }
+  virtual std::size_t phiNeighborSize() const override final { return _phi_neighbor.size(); }
+  virtual std::size_t phiFaceNeighborSize() const override final
   {
-    mooseError("phiSize not supported by MooseVariableFVBase");
+    return _phi_face_neighbor.size();
   }
-  virtual size_t phiFaceSize() const override final
-  {
-    mooseError("phiFaceSize not supported by MooseVariableFVBase");
-  }
-  virtual size_t phiNeighborSize() const override final
-  {
-    mooseError("phiNeighborSize not supported by MooseVariableFVBase");
-  }
-  virtual size_t phiFaceNeighborSize() const override final
-  {
-    mooseError("phiFaceNeighborSize not supported by MooseVariableFVBase");
-  }
-  virtual size_t phiLowerSize() const override final
+  virtual std::size_t phiLowerSize() const override final
   {
     mooseError("phiLowerSize not supported by MooseVariableFVBase");
   }
@@ -466,7 +460,50 @@ public:
     mooseError("Finite volume variables do not have defined values at nodes.");
   }
 
-  const FieldVariablePhiValue & phi() const override { return *_phi; }
+  bool computingSecond() const override final { return false; }
+  bool computingCurl() const override final { return false; }
+  bool usesSecondPhiNeighbor() const override final { return false; }
+
+  const FieldVariablePhiValue & phi() const override final { return _phi; }
+  const FieldVariablePhiGradient & gradPhi() const override final { return _grad_phi; }
+  const FieldVariablePhiSecond & secondPhi() const override final
+  {
+    mooseError("We don't currently implement second derivatives for FV");
+  }
+  const FieldVariablePhiValue & curlPhi() const override final
+  {
+    mooseError("We don't currently implement curl for FV");
+  }
+
+  const FieldVariablePhiValue & phiFace() const override final { return _phi_face; }
+  const FieldVariablePhiGradient & gradPhiFace() const override final { return _grad_phi_face; }
+  const FieldVariablePhiSecond & secondPhiFace() const override final
+  {
+    mooseError("We don't currently implement second derivatives for FV");
+  }
+
+  const FieldVariablePhiValue & phiFaceNeighbor() const override final
+  {
+    return _phi_face_neighbor;
+  }
+  const FieldVariablePhiGradient & gradPhiFaceNeighbor() const override final
+  {
+    return _grad_phi_face_neighbor;
+  }
+  const FieldVariablePhiSecond & secondPhiFaceNeighbor() const override final
+  {
+    mooseError("We don't currently implement second derivatives for FV");
+  }
+
+  const FieldVariablePhiValue & phiNeighbor() const override final { return _phi_neighbor; }
+  const FieldVariablePhiGradient & gradPhiNeighbor() const override final
+  {
+    return _grad_phi_neighbor;
+  }
+  const FieldVariablePhiSecond & secondPhiNeighbor() const override final
+  {
+    mooseError("We don't currently implement second derivatives for FV");
+  }
 
 protected:
   /**
@@ -492,11 +529,20 @@ private:
    */
   void checkIndexingScalingCompatibility() const;
 
-  /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer because the solution might not exist at the time that this variable is constructed, so we cannot safely dereference at that time
+  /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
+  /// because the solution might not exist at the time that this variable is constructed, so we
+  /// cannot safely dereference at that time
   const NumericVector<Number> * const & _solution;
 
   /// Shape functions
-  const FieldVariablePhiValue * _phi;
+  const FieldVariablePhiValue & _phi;
+  const FieldVariablePhiGradient & _grad_phi;
+  const FieldVariablePhiValue & _phi_face;
+  const FieldVariablePhiGradient & _grad_phi_face;
+  const FieldVariablePhiValue & _phi_face_neighbor;
+  const FieldVariablePhiGradient & _grad_phi_face_neighbor;
+  const FieldVariablePhiValue & _phi_neighbor;
+  const FieldVariablePhiGradient & _grad_phi_neighbor;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   /// Whether we've already performed a scaling factor check for this variable

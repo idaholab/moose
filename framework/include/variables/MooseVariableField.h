@@ -178,14 +178,106 @@ public:
   virtual const FieldVariableGradient & gradSlnOldNeighbor() const = 0;
 
   /**
+   * Whether or not this variable is computing any second derivatives.
+   */
+  virtual bool computingSecond() const = 0;
+
+  /**
+   * Whether or not this variable is computing any curl quantities
+   */
+  virtual bool computingCurl() const = 0;
+
+  /**
    * Return the variable's elemental shape functions
    */
   virtual const FieldVariablePhiValue & phi() const = 0;
 
   /**
+   * Return the gradients of the variable's elemental shape functions
+   */
+  virtual const FieldVariablePhiGradient & gradPhi() const = 0;
+
+  /**
+   * Return the rank-2 tensor of second derivatives of the variable's elemental shape functions
+   */
+  virtual const FieldVariablePhiSecond & secondPhi() const = 0;
+
+  /**
+   * Curl of the shape functions
+   */
+  virtual const FieldVariablePhiValue & curlPhi() const = 0;
+
+  /**
+   * Return the variable's shape functions on an element face
+   */
+  virtual const FieldVariablePhiValue & phiFace() const = 0;
+
+  /**
+   * Return the gradients of the variable's shape functions on an element face
+   */
+  virtual const FieldVariablePhiGradient & gradPhiFace() const = 0;
+
+  /**
+   * Return the rank-2 tensor of second derivatives of the variable's shape functions on an element
+   * face
+   */
+  virtual const FieldVariablePhiSecond & secondPhiFace() const = 0;
+
+  /**
+   * Return the variable's shape functions on a neighboring element face
+   */
+  virtual const FieldVariablePhiValue & phiFaceNeighbor() const = 0;
+
+  /**
+   * Return the gradients of the variable's shape functions on a neighboring element face
+   */
+  virtual const FieldVariablePhiGradient & gradPhiFaceNeighbor() const = 0;
+
+  /**
+   * Return the rank-2 tensor of second derivatives of the variable's shape functions on a
+   * neighboring element face
+   */
+  virtual const FieldVariablePhiSecond & secondPhiFaceNeighbor() const = 0;
+
+  /**
+   * Return the variable's shape functions on a neighboring element
+   */
+  virtual const FieldVariablePhiValue & phiNeighbor() const = 0;
+
+  /**
+   * Return the gradients of the variable's shape functions on a neighboring element
+   */
+  virtual const FieldVariablePhiGradient & gradPhiNeighbor() const = 0;
+
+  /**
+   * Return the rank-2 tensor of second derivatives of the variable's shape functions on a
+   * neighboring element
+   */
+  virtual const FieldVariablePhiSecond & secondPhiNeighbor() const = 0;
+
+  /**
    * Set local DOF values and evaluate the values on quadrature points
    */
   virtual void setDofValues(const DenseVector<OutputData> & values) = 0;
+
+  /**
+   * Whether or not this variable is actually using the shape function value.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesPhiNeighbor() const { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function gradient.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesGradPhiNeighbor() const { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function second derivatives.
+   */
+  virtual bool usesSecondPhiNeighbor() const = 0;
 
   ///@{
   /**

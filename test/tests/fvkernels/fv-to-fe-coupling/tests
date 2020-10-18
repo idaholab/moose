@@ -8,4 +8,18 @@
     expect_err = "Your material bad_mat couples in both FE and FV vars"
     requirement = 'The system shall error if a user attempts to couple both finite volume and finite element variables into the same material.'
   []
+  [coupled-gold]
+    type = Exodiff
+    input = 1d.i
+    requirement = 'The system shall support coupling of a finite volume variable into a finite element calculation.'
+    exodiff = '1d_out.e'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = 1d.i
+    run_sim = True
+    requirement = 'The system shall compute a perfect Jacobian when coupling a finite volume variable into a finite element calculation.'
+    difference_tol = 1e-4
+    ratio_tol = 1e-7
+  []
 []

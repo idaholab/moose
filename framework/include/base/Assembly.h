@@ -699,15 +699,15 @@ public:
   void prepareOffDiagScalar();
 
   template <typename T>
-  void copyShapes(MooseVariableFE<T> & v);
+  void copyShapes(MooseVariableField<T> & v);
   void copyShapes(unsigned int var);
 
   template <typename T>
-  void copyFaceShapes(MooseVariableFE<T> & v);
+  void copyFaceShapes(MooseVariableField<T> & v);
   void copyFaceShapes(unsigned int var);
 
   template <typename T>
-  void copyNeighborShapes(MooseVariableFE<T> & v);
+  void copyNeighborShapes(MooseVariableField<T> & v);
   void copyNeighborShapes(unsigned int var);
 
   /**
@@ -1013,195 +1013,260 @@ public:
   {
     return _ad_grad_phi_data.at(v.feType());
   }
-  const VariablePhiValue & phi(const MooseVariable &) const { return _phi; }
+  const VariablePhiValue & phi(const MooseVariableField<Real> &) const { return _phi; }
   const VariablePhiGradient & gradPhi() const { return _grad_phi; }
-  const VariablePhiGradient & gradPhi(const MooseVariable &) const { return _grad_phi; }
+  const VariablePhiGradient & gradPhi(const MooseVariableField<Real> &) const { return _grad_phi; }
   const VariablePhiSecond & secondPhi() const { return _second_phi; }
-  const VariablePhiSecond & secondPhi(const MooseVariable &) const { return _second_phi; }
+  const VariablePhiSecond & secondPhi(const MooseVariableField<Real> &) const
+  {
+    return _second_phi;
+  }
 
   const VariablePhiValue & phiFace() const { return _phi_face; }
-  const VariablePhiValue & phiFace(const MooseVariable &) const { return _phi_face; }
+  const VariablePhiValue & phiFace(const MooseVariableField<Real> &) const { return _phi_face; }
   const VariablePhiGradient & gradPhiFace() const { return _grad_phi_face; }
-  const VariablePhiGradient & gradPhiFace(const MooseVariable &) const { return _grad_phi_face; }
-  const VariablePhiSecond & secondPhiFace(const MooseVariable &) const { return _second_phi_face; }
+  const VariablePhiGradient & gradPhiFace(const MooseVariableField<Real> &) const
+  {
+    return _grad_phi_face;
+  }
+  const VariablePhiSecond & secondPhiFace(const MooseVariableField<Real> &) const
+  {
+    return _second_phi_face;
+  }
 
-  const VariablePhiValue & phiNeighbor(const MooseVariable &) const { return _phi_neighbor; }
-  const VariablePhiGradient & gradPhiNeighbor(const MooseVariable &) const
+  const VariablePhiValue & phiNeighbor(const MooseVariableField<Real> &) const
+  {
+    return _phi_neighbor;
+  }
+  const VariablePhiGradient & gradPhiNeighbor(const MooseVariableField<Real> &) const
   {
     return _grad_phi_neighbor;
   }
-  const VariablePhiSecond & secondPhiNeighbor(const MooseVariable &) const
+  const VariablePhiSecond & secondPhiNeighbor(const MooseVariableField<Real> &) const
   {
     return _second_phi_neighbor;
   }
 
-  const VariablePhiValue & phiFaceNeighbor(const MooseVariable &) const
+  const VariablePhiValue & phiFaceNeighbor(const MooseVariableField<Real> &) const
   {
     return _phi_face_neighbor;
   }
-  const VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariable &) const
+  const VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariableField<Real> &) const
   {
     return _grad_phi_face_neighbor;
   }
-  const VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariable &) const
+  const VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariableField<Real> &) const
   {
     return _second_phi_face_neighbor;
   }
 
-  const VectorVariablePhiValue & phi(const VectorMooseVariable &) const { return _vector_phi; }
-  const VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) const
+  const VectorVariablePhiValue & phi(const MooseVariableField<RealVectorValue> &) const
+  {
+    return _vector_phi;
+  }
+  const VectorVariablePhiGradient & gradPhi(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_grad_phi;
   }
-  const VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhi(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_second_phi;
   }
-  const VectorVariablePhiCurl & curlPhi(const VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhi(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_curl_phi;
   }
 
-  const VectorVariablePhiValue & phiFace(const VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiFace(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_phi_face;
   }
-  const VectorVariablePhiGradient & gradPhiFace(const VectorMooseVariable &) const
+  const VectorVariablePhiGradient & gradPhiFace(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_grad_phi_face;
   }
-  const VectorVariablePhiSecond & secondPhiFace(const VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhiFace(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_second_phi_face;
   }
-  const VectorVariablePhiCurl & curlPhiFace(const VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhiFace(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_curl_phi_face;
   }
 
-  const VectorVariablePhiValue & phiNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_phi_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiGradient &
+  gradPhiNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_grad_phi_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiSecond &
+  secondPhiNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_second_phi_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhiNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_curl_phi_neighbor;
   }
 
-  const VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiFaceNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_phi_face_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiFaceNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiGradient &
+  gradPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_grad_phi_face_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiFaceNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiSecond &
+  secondPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_second_phi_face_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &) const
+  const VectorVariablePhiCurl &
+  curlPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &) const
   {
     return _vector_curl_phi_face_neighbor;
   }
 
   // Writeable references
-  VariablePhiValue & phi(const MooseVariable &) { return _phi; }
-  VariablePhiGradient & gradPhi(const MooseVariable &) { return _grad_phi; }
-  VariablePhiSecond & secondPhi(const MooseVariable &) { return _second_phi; }
+  VariablePhiValue & phi(const MooseVariableField<Real> &) { return _phi; }
+  VariablePhiGradient & gradPhi(const MooseVariableField<Real> &) { return _grad_phi; }
+  VariablePhiSecond & secondPhi(const MooseVariableField<Real> &) { return _second_phi; }
 
-  VariablePhiValue & phiFace(const MooseVariable &) { return _phi_face; }
-  VariablePhiGradient & gradPhiFace(const MooseVariable &) { return _grad_phi_face; }
-  VariablePhiSecond & secondPhiFace(const MooseVariable &) { return _second_phi_face; }
+  VariablePhiValue & phiFace(const MooseVariableField<Real> &) { return _phi_face; }
+  VariablePhiGradient & gradPhiFace(const MooseVariableField<Real> &) { return _grad_phi_face; }
+  VariablePhiSecond & secondPhiFace(const MooseVariableField<Real> &) { return _second_phi_face; }
 
-  VariablePhiValue & phiNeighbor(const MooseVariable &) { return _phi_neighbor; }
-  VariablePhiGradient & gradPhiNeighbor(const MooseVariable &) { return _grad_phi_neighbor; }
-  VariablePhiSecond & secondPhiNeighbor(const MooseVariable &) { return _second_phi_neighbor; }
+  VariablePhiValue & phiNeighbor(const MooseVariableField<Real> &) { return _phi_neighbor; }
+  VariablePhiGradient & gradPhiNeighbor(const MooseVariableField<Real> &)
+  {
+    return _grad_phi_neighbor;
+  }
+  VariablePhiSecond & secondPhiNeighbor(const MooseVariableField<Real> &)
+  {
+    return _second_phi_neighbor;
+  }
 
-  VariablePhiValue & phiFaceNeighbor(const MooseVariable &) { return _phi_face_neighbor; }
-  VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariable &)
+  VariablePhiValue & phiFaceNeighbor(const MooseVariableField<Real> &)
+  {
+    return _phi_face_neighbor;
+  }
+  VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariableField<Real> &)
   {
     return _grad_phi_face_neighbor;
   }
-  VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariable &)
+  VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariableField<Real> &)
   {
     return _second_phi_face_neighbor;
   }
 
   // Writeable references with vector variable
-  VectorVariablePhiValue & phi(const VectorMooseVariable &) { return _vector_phi; }
-  VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) { return _vector_grad_phi; }
-  VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) { return _vector_second_phi; }
-  VectorVariablePhiCurl & curlPhi(const VectorMooseVariable &) { return _vector_curl_phi; }
+  VectorVariablePhiValue & phi(const MooseVariableField<RealVectorValue> &) { return _vector_phi; }
+  VectorVariablePhiGradient & gradPhi(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_grad_phi;
+  }
+  VectorVariablePhiSecond & secondPhi(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_second_phi;
+  }
+  VectorVariablePhiCurl & curlPhi(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_curl_phi;
+  }
 
-  VectorVariablePhiValue & phiFace(const VectorMooseVariable &) { return _vector_phi_face; }
-  VectorVariablePhiGradient & gradPhiFace(const VectorMooseVariable &)
+  VectorVariablePhiValue & phiFace(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_phi_face;
+  }
+  VectorVariablePhiGradient & gradPhiFace(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_grad_phi_face;
   }
-  VectorVariablePhiSecond & secondPhiFace(const VectorMooseVariable &)
+  VectorVariablePhiSecond & secondPhiFace(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_second_phi_face;
   }
-  VectorVariablePhiCurl & curlPhiFace(const VectorMooseVariable &) { return _vector_curl_phi_face; }
+  VectorVariablePhiCurl & curlPhiFace(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_curl_phi_face;
+  }
 
-  VectorVariablePhiValue & phiNeighbor(const VectorMooseVariable &) { return _vector_phi_neighbor; }
-  VectorVariablePhiGradient & gradPhiNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiValue & phiNeighbor(const MooseVariableField<RealVectorValue> &)
+  {
+    return _vector_phi_neighbor;
+  }
+  VectorVariablePhiGradient & gradPhiNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_grad_phi_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiSecond & secondPhiNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_second_phi_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiCurl & curlPhiNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_curl_phi_neighbor;
   }
-  VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiValue & phiFaceNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_phi_face_neighbor;
   }
-  VectorVariablePhiGradient & gradPhiFaceNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiGradient & gradPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_grad_phi_face_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiFaceNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiSecond & secondPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_second_phi_face_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &)
+  VectorVariablePhiCurl & curlPhiFaceNeighbor(const MooseVariableField<RealVectorValue> &)
   {
     return _vector_curl_phi_face_neighbor;
   }
 
   // Writeable references with array variable
-  VariablePhiValue & phi(const ArrayMooseVariable &) { return _phi; }
-  VariablePhiGradient & gradPhi(const ArrayMooseVariable &) { return _grad_phi; }
-  VariablePhiSecond & secondPhi(const ArrayMooseVariable &) { return _second_phi; }
+  VariablePhiValue & phi(const MooseVariableField<RealEigenVector> &) { return _phi; }
+  VariablePhiGradient & gradPhi(const MooseVariableField<RealEigenVector> &) { return _grad_phi; }
+  VariablePhiSecond & secondPhi(const MooseVariableField<RealEigenVector> &) { return _second_phi; }
 
-  VariablePhiValue & phiFace(const ArrayMooseVariable &) { return _phi_face; }
-  VariablePhiGradient & gradPhiFace(const ArrayMooseVariable &) { return _grad_phi_face; }
-  VariablePhiSecond & secondPhiFace(const ArrayMooseVariable &) { return _second_phi_face; }
+  VariablePhiValue & phiFace(const MooseVariableField<RealEigenVector> &) { return _phi_face; }
+  VariablePhiGradient & gradPhiFace(const MooseVariableField<RealEigenVector> &)
+  {
+    return _grad_phi_face;
+  }
+  VariablePhiSecond & secondPhiFace(const MooseVariableField<RealEigenVector> &)
+  {
+    return _second_phi_face;
+  }
 
-  VariablePhiValue & phiNeighbor(const ArrayMooseVariable &) { return _phi_neighbor; }
-  VariablePhiGradient & gradPhiNeighbor(const ArrayMooseVariable &) { return _grad_phi_neighbor; }
-  VariablePhiSecond & secondPhiNeighbor(const ArrayMooseVariable &) { return _second_phi_neighbor; }
+  VariablePhiValue & phiNeighbor(const MooseVariableField<RealEigenVector> &)
+  {
+    return _phi_neighbor;
+  }
+  VariablePhiGradient & gradPhiNeighbor(const MooseVariableField<RealEigenVector> &)
+  {
+    return _grad_phi_neighbor;
+  }
+  VariablePhiSecond & secondPhiNeighbor(const MooseVariableField<RealEigenVector> &)
+  {
+    return _second_phi_neighbor;
+  }
 
-  VariablePhiValue & phiFaceNeighbor(const ArrayMooseVariable &) { return _phi_face_neighbor; }
-  VariablePhiGradient & gradPhiFaceNeighbor(const ArrayMooseVariable &)
+  VariablePhiValue & phiFaceNeighbor(const MooseVariableField<RealEigenVector> &)
+  {
+    return _phi_face_neighbor;
+  }
+  VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariableField<RealEigenVector> &)
   {
     return _grad_phi_face_neighbor;
   }
-  VariablePhiSecond & secondPhiFaceNeighbor(const ArrayMooseVariable &)
+  VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariableField<RealEigenVector> &)
   {
     return _second_phi_face_neighbor;
   }

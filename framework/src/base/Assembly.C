@@ -2809,7 +2809,7 @@ Assembly::prepareOffDiagScalar()
 
 template <typename T>
 void
-Assembly::copyShapes(MooseVariableFE<T> & v)
+Assembly::copyShapes(MooseVariableField<T> & v)
 {
   phi(v).shallowCopy(v.phi());
   gradPhi(v).shallowCopy(v.gradPhi());
@@ -2820,20 +2820,20 @@ Assembly::copyShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyShapes(unsigned int var)
 {
-  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  auto & v = _sys.getVariable(_tid, var);
   if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<Real>(_tid, var);
     copyShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealEigenVector>(_tid, var);
     copyShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
-    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealVectorValue>(_tid, var);
     copyShapes(v);
     if (v.computingCurl())
       curlPhi(v).shallowCopy(v.curlPhi());
@@ -2844,7 +2844,7 @@ Assembly::copyShapes(unsigned int var)
 
 template <typename T>
 void
-Assembly::copyFaceShapes(MooseVariableFE<T> & v)
+Assembly::copyFaceShapes(MooseVariableField<T> & v)
 {
   phiFace(v).shallowCopy(v.phiFace());
   gradPhiFace(v).shallowCopy(v.gradPhiFace());
@@ -2855,20 +2855,20 @@ Assembly::copyFaceShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyFaceShapes(unsigned int var)
 {
-  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  auto & v = _sys.getVariable(_tid, var);
   if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<Real>(_tid, var);
     copyFaceShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealEigenVector>(_tid, var);
     copyFaceShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
-    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealVectorValue>(_tid, var);
     copyFaceShapes(v);
     if (v.computingCurl())
       _vector_curl_phi_face.shallowCopy(v.curlPhi());
@@ -2879,7 +2879,7 @@ Assembly::copyFaceShapes(unsigned int var)
 
 template <typename T>
 void
-Assembly::copyNeighborShapes(MooseVariableFE<T> & v)
+Assembly::copyNeighborShapes(MooseVariableField<T> & v)
 {
   if (v.usesPhiNeighbor())
   {
@@ -2901,20 +2901,20 @@ Assembly::copyNeighborShapes(MooseVariableFE<T> & v)
 void
 Assembly::copyNeighborShapes(unsigned int var)
 {
-  MooseVariableFEBase & v = _sys.getVariable(_tid, var);
+  auto & v = _sys.getVariable(_tid, var);
   if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    MooseVariable & v = _sys.getFieldVariable<Real>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<Real>(_tid, var);
     copyNeighborShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    ArrayMooseVariable & v = _sys.getFieldVariable<RealEigenVector>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealEigenVector>(_tid, var);
     copyNeighborShapes(v);
   }
   else if (v.fieldType() == Moose::VarFieldType::VAR_FIELD_VECTOR)
   {
-    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
+    auto & v = _sys.getActualFieldVariable<RealVectorValue>(_tid, var);
     copyNeighborShapes(v);
   }
   else

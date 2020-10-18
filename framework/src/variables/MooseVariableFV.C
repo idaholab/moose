@@ -40,7 +40,17 @@ template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _solution(this->_sys.currentSolution()),
-    _phi(&_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL)))
+    _phi(_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi(_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face(_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face(_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face_neighbor(
+        _assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face_neighbor(
+        _assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_neighbor(_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_neighbor(
+        _assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 #ifdef MOOSE_GLOBAL_AD_INDEXING
     ,
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have this
