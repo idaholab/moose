@@ -76,22 +76,6 @@
     exodiff_opts = '-pedantic'
   [../]
 
-  [./hanging_nodes]
-    type = 'Exodiff'
-    input = 'hanging_nodes_parallel.i'
-    cli_args = '--mesh-only'
-    exodiff = 'hanging_nodes_parallel_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh in parallel'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15793'
-    mesh_mode = 'REPLICATED'
-    min_parallel = 4
-    max_parallel = 5
-    recover = false
-    method = 'dbg'
-    exodiff_opts = '-pedantic'
-  [../]
-
   [./block_restricted_split_transition_only]
     type = 'Exodiff'
     input = 'break_mesh_block_restricted.i'
