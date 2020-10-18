@@ -1864,18 +1864,26 @@ public:
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
 
   /**
-   * Get the materials and variables needed to compute the requested material properties
-   * @param prop_ids The material property ids we want to compute
+   * Get the materials and variables potentially needed for FV
    * @param block_id SubdomainID The subdomain id that we want to retrieve materials for
-   * @param materials The materials container that we will fill
-   * @param variables The variables container that we will fill
+   * @param face_materials The face materials container that we will fill
+   * @param neighbor_materials The neighbor materials container that we will fill
+   * @param variables The variables container that we will fill that our materials depend on
    * @param tid The thread id
    */
-  void getMatPropDependencies(const std::set<unsigned int> & prop_ids,
-                              SubdomainID block_id,
-                              std::set<std::string> & materials,
-                              std::set<MooseVariableFieldBase *> & variables,
-                              THREAD_ID tid);
+  void getFVMatsAndDependencies(SubdomainID block_id,
+                                std::vector<std::shared_ptr<MaterialBase>> & face_materials,
+                                std::vector<std::shared_ptr<MaterialBase>> & neighbor_materials,
+                                std::set<MooseVariableFieldBase *> & variables,
+                                THREAD_ID tid);
+
+  /**
+   * Resize material data
+   * @param data_type The type of material data to resize
+   * @param nqp The number of quadrature points to resize for
+   * @param tid The thread ID
+   */
+  void resizeMaterialData(Moose::MaterialDataType data_type, unsigned int nqp, THREAD_ID tid);
 
 protected:
   /// Create extra tagged vectors and matrices

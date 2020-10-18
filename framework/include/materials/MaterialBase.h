@@ -151,6 +151,12 @@ public:
    */
   virtual const std::set<std::string> & getSuppliedItems() override { return _supplied_props; }
 
+  /**
+   * Get the prop ids corresponding to \p declareProperty
+   * @return A reference to the set of properties with calls to \p declareProperty
+   */
+  const std::set<unsigned int> & getSuppliedPropIDs() { return _supplied_prop_ids; }
+
   void checkStatefulSanity() const;
 
   /**

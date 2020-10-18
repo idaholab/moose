@@ -6998,63 +6998,84 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
 }
 
 void
-FEProblemBase::getMatPropDependencies(const std::set<unsigned int> & prop_ids,
-                                      const SubdomainID block_id,
-                                      std::set<std::string> & materials,
-                                      std::set<MooseVariableFieldBase *> & variables,
-                                      const THREAD_ID tid)
+FEProblemBase::getFVMatsAndDependencies(
+    const SubdomainID blk_id,
+    std::vector<std::shared_ptr<MaterialBase>> & face_materials,
+    std::vector<std::shared_ptr<MaterialBase>> & neighbor_materials,
+    std::set<MooseVariableFieldBase *> & variables,
+    const THREAD_ID tid)
 {
-  const auto prop_names = MaterialPropertyStorage::getPropNames(prop_ids);
-
-  std::set<std::string> mat_names;
-  auto block_to_props_it = _map_block_material_props.find(block_id);
-  mooseAssert(block_to_props_it != _mat_block_material_props.end(),
-              "Subdomain id " << block_id << " not found.");
-
-  const auto & prop_names_to_mat_names = block_to_props_it->second;
-
-  for (const auto & prop_name : prop_names)
+  if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
-    auto prop_mat_pair_it = prop_names_to_mat_names.find(prop_name);
-    mooseAssert(prop_mat_pair_it != prop_names_to_mat_names.end(),
-                "No material found that computes " << prop_name << " on block id " << block_id);
-    mat_names.insert(prop_mat_pair_it->second);
+    auto & this_face_mats =
+        _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+    for (std::shared_ptr<MaterialBase> face_mat : this_face_mats)
+      if (face_mat->ghostable())
+      {
+        mooseAssert(!face_mat->hasStatefulProperties(),
+                    "Finite volume materials do not currently support stateful properties.");
+        face_materials.push_back(face_mat);
+        auto & var_deps = face_mat->getMooseVariableDependencies();
+        for (auto * var : var_deps)
+        {
+          mooseAssert(
+              var->isFV(),
+              "Ghostable materials should only have finite volume variables coupled into them.");
+          variables.insert(var);
+        }
+      }
   }
 
-  std::set<std::shared_ptr<MaterialBase>> new_mats;
-  for (const auto & mat_name : mat_names)
-    new_mats.insert(_all_materials.getActiveObject(mat_name, tid));
-
-  std::set<unsigned int> new_needed_props;
-  for (auto new_mat : new_mats)
+  if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
-    const auto & mv_deps = new_mat->getMooseVariableDependencies();
-    variables.insert(mv_deps.begin(), mv_deps.end());
-    const auto & mat_deps = new_mat->getMatPropDependencies();
-    new_needed_props.insert(mat_deps.begin(), mat_deps.end());
-  }
-
-#ifdef NDEBUG
-  set::set<unsigned int> intersection;
-  std::set_intersection(prop_ids.begin(),
-                        prop_ids.end(),
-                        new_needed_props.begin(),
-                        new_needed_props.end(),
-                        std::inserter(intersection, intersection.begin()));
-  if (!intersection.empty())
-    mooseError(
-        "We shouldn't have any set intersection, or else we're probably going to recurse forever.");
-#endif
-
-  std::for_each(
-      new_mats.begin(), new_mats.end(), [&materials](std::shared_ptr<MaterialBase> new_mat) {
+    auto & this_neighbor_mats =
+        _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+    for (std::shared_ptr<MaterialBase> neighbor_mat : this_neighbor_mats)
+      if (neighbor_mat->ghostable())
+      {
+        mooseAssert(!neighbor_mat->hasStatefulProperties(),
+                    "Finite volume materials do not currently support stateful properties.");
+        neighbor_materials.push_back(neighbor_mat);
 #ifndef NDEBUG
-        auto pr =
+        auto & var_deps = neighbor_mat->getMooseVariableDependencies();
+        for (auto * var : var_deps)
+        {
+          mooseAssert(
+              var->isFV(),
+              "Ghostable materials should only have finite volume variables coupled into them.");
+          auto pr = variables.insert(var);
+          mooseAssert(!pr.second,
+                      "We should not have inserted any new variables dependencies from our "
+                      "neighbor materials that didn't exist for our face materials");
+        }
 #endif
-            materials.insert(new_mat->name());
-        mooseAssert(pr.second, "We should only be inserting new materials.");
-      });
+      }
+  }
+}
 
-  if (!new_needed_props.empty())
-    getMatPropDependencies(new_needed_props, block_id, materials, variables, tid);
+void
+FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
+                                  const unsigned int nqp,
+                                  const THREAD_ID tid)
+{
+  switch (data_type)
+  {
+    case Moose::MaterialDataType::BLOCK_MATERIAL_DATA:
+      _material_data[tid]->resize(nqp);
+      break;
+
+    case Moose::MaterialDataType::BOUNDARY_MATERIAL_DATA:
+    case Moose::MaterialDataType::FACE_MATERIAL_DATA:
+    case Moose::MaterialDataType::INTERFACE_MATERIAL_DATA:
+      _bnd_material_data[tid]->resize(nqp);
+      break;
+
+    case Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA:
+      _neighbor_material_data[tid]->resize(nqp);
+      break;
+
+    default:
+      mooseError("Unrecognized material data type.");
+      break;
+  }
 }
