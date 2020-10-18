@@ -421,8 +421,8 @@ SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 
   for (const auto & it : _map_block_material_props)
   {
-    const auto & prop_names = it.second;
-    auto name_it = prop_names.find(prop_name);
+    const std::set<std::string> & prop_names = it.second;
+    std::set<std::string>::iterator name_it = prop_names.find(prop_name);
     if (name_it != prop_names.end())
       blocks.insert(it.first);
   }
@@ -530,23 +530,9 @@ SubProblem::hasBoundaryMaterialProperty(BoundaryID bid, const std::string & prop
 }
 
 void
-SubProblem::storeSubdomainMatPropName(SubdomainID block_id,
-                                      const std::string & name,
-                                      const std::string & mat_name)
+SubProblem::storeSubdomainMatPropName(SubdomainID block_id, const std::string & name)
 {
-  auto & all_props_on_sub = _map_block_material_props[block_id];
-  auto pr = all_props_on_sub.emplace(name, mat_name);
-
-  // If insertion didn't take place
-  if (!pr.second && pr.first->second != mat_name)
-    mooseError(pr.first->second,
-               " and ",
-               mat_name,
-               " both declared material property ",
-               name,
-               " on the same block ",
-               block_id,
-               ". Only one material can specify a material property per block.");
+  _map_block_material_props[block_id].insert(name);
 }
 
 void

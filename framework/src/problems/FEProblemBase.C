@@ -3157,43 +3157,10 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    const std::vector<std::shared_ptr<MaterialBase>> * face_mats = nullptr;
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-    {
-      face_mats = &_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
-      _bnd_material_data[tid]->reinit(*face_mats, execute_stateful);
-    }
-
-    if (haveFV())
-    {
-      // We need to reinit "ghost" materials that only exist on the neighbor side of the face
-      const Elem * const & neighbor = _assembly[tid]->neighbor();
-      if (neighbor && neighbor->subdomain_id() != blk_id &&
-          _materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
-                                                                      tid))
-      {
-        // copy on purpose
-        std::vector<std::shared_ptr<MaterialBase>> other_face_mats =
-            _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(neighbor->subdomain_id(),
-                                                                        tid);
-
-        // Do this so we don't do more work than we need to and reinit materials that were already
-        // reinit'd above. Additionally remove any materials that cannot be computed in a ghosted
-        // context
-        other_face_mats.erase(std::remove_if(other_face_mats.begin(),
-                                             other_face_mats.end(),
-                                             [&face_mats](std::shared_ptr<MaterialBase> other_mat) {
-                                               return !other_mat->ghostable() ||
-                                                      (face_mats &&
-                                                       std::find(face_mats->begin(),
-                                                                 face_mats->end(),
-                                                                 other_mat) != face_mats->end());
-                                             }),
-                              other_face_mats.end());
-
-        _bnd_material_data[tid]->reinit(other_face_mats, execute_stateful);
-      }
-    }
+      _bnd_material_data[tid]->reinit(
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
+          execute_stateful);
   }
 }
 
@@ -3208,37 +3175,12 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
     // NOTE: this will not work with h-adaptivity
     // lindsayad: why not?
     const Elem * neighbor = _assembly[tid]->neighbor();
-    unsigned int neighbor_side =
-        neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
-
-    bool neighbor_is_elem = false;
-    if (!neighbor)
-    {
-      if (haveFV())
-      {
-        // If neighbor is null, then we're on the neighbor side of a mesh boundary, e.g. we're off
-        // the mesh in ghost-land. If we're using the finite volume method, then variable values and
-        // consequently material properties have well-defined values in this ghost region outside of
-        // the mesh and we really do want to reinit our neighbor materials in this case. Since we're
-        // off in ghost land it's safe to do swaps with `MaterialPropertyStorage` using the elem and
-        // elem_side keys
-        neighbor = _assembly[tid]->elem();
-        neighbor_side = _assembly[tid]->side();
-        mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
-        blk_id = neighbor->subdomain_id();
-        neighbor_is_elem = true;
-      }
-      else
-        mooseError("Called reinitMaterialsNeighbor with a nullptr for neighbor");
-    }
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
 
     mooseAssert(neighbor, "neighbor should be non-null");
     mooseAssert(blk_id == neighbor->subdomain_id(),
                 "The provided blk_id " << blk_id << " and neighbor subdomain ID "
                                        << neighbor->subdomain_id() << " do not match.");
-    mooseAssert(!neighbor_is_elem || haveFV(),
-                "We should never have neighbor_is_elem == true for calculations in which we don't "
-                "have finite volumes");
 
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
@@ -3251,65 +3193,10 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    const std::vector<std::shared_ptr<MaterialBase>> * neighbor_mats = nullptr;
-    std::vector<std::shared_ptr<MaterialBase>> duplicate_helper;
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-    {
-      neighbor_mats = &_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
-      if (neighbor_is_elem)
-      {
-        mooseAssert(haveFV(),
-                    "Per above we should never be off the edge of the domain if we're not doing "
-                    "finite volume calcs");
-
-        // We need to make sure that we don't reinit material properties that are coupled to finite
-        // element variables for which we don't have ghost values
-        duplicate_helper = *neighbor_mats;
-        duplicate_helper.erase(std::remove_if(duplicate_helper.begin(),
-                                              duplicate_helper.end(),
-                                              [](std::shared_ptr<MaterialBase> dup_mat) {
-                                                return !dup_mat->ghostable();
-                                              }),
-                               duplicate_helper.end());
-        neighbor_mats = &duplicate_helper;
-      }
-      _neighbor_material_data[tid]->reinit(*neighbor_mats, execute_stateful);
-    }
-
-    if (haveFV() && !neighbor_is_elem)
-    {
-      mooseAssert(
-          duplicate_helper.empty(),
-          "The duplicate helper should be empty because we only populate it when neighbor_is_elem");
-
-      // We need to reinit "ghost" materials that only exist on the elem side of the face
-      const Elem * const & elem = _assembly[tid]->elem();
-      mooseAssert(elem, "We should always have an elem in assembly.");
-      if (elem->subdomain_id() != blk_id &&
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(elem->subdomain_id(),
-                                                                          tid))
-      {
-        // copy on purpose
-        std::vector<std::shared_ptr<MaterialBase>> other_neighbor_mats =
-            _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(elem->subdomain_id(),
-                                                                            tid);
-        // Do this so we don't do more work than we need to and reinit materials that were already
-        // reinit'd above. Additionally remove any materials that cannot be computed in a ghosted
-        // context
-        other_neighbor_mats.erase(
-            std::remove_if(other_neighbor_mats.begin(),
-                           other_neighbor_mats.end(),
-                           [&neighbor_mats](std::shared_ptr<MaterialBase> other_mat) {
-                             return !other_mat->ghostable() ||
-                                    (neighbor_mats && std::find(neighbor_mats->begin(),
-                                                                neighbor_mats->end(),
-                                                                other_mat) != neighbor_mats->end());
-                           }),
-            other_neighbor_mats.end());
-
-        _neighbor_material_data[tid]->reinit(other_neighbor_mats, execute_stateful);
-      }
-    }
+      _neighbor_material_data[tid]->reinit(
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
+          execute_stateful);
   }
 }
 

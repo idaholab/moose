@@ -425,10 +425,6 @@ MaterialPropertyStorage::getPropertyId(const std::string & prop_name)
 
   auto id = _prop_ids.size();
   _prop_ids[prop_name] = id;
-
-  mooseAssert(_prop_id_to_name.find(id) == _prop_id_to_name.end(),
-              "We should be adding a new id-name pair");
-  _prop_id_to_name.emplace(id, prop_name);
   return id;
 }
 
@@ -475,21 +471,4 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
     if (hasOlderProperties() && propsOlder(&elem, side)[i] == nullptr)
       propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
-}
-
-std::set<std::string>
-MaterialPropertyStorage::getPropNames(const std::set<unsigned int> & prop_ids)
-{
-  std::set<std::string> ret;
-  for (const auto id : prop_ids)
-  {
-    auto it = _prop_id_to_name.find(id);
-
-    mooseAssert(it != _prop_id_to_name.end(),
-                "No corresponding property name for the property id "
-                    << id << ". Please contact a MOOSE developer.");
-    ret.insert(it->second);
-  }
-
-  return ret;
 }

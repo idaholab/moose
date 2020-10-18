@@ -14,9 +14,6 @@
 #include "DataIO.h"
 #include "MaterialProperty.h"
 
-#include <unordered_map>
-#include <set>
-
 // Forward declarations
 class MaterialBase;
 class MaterialData;
@@ -241,11 +238,6 @@ public:
     return _prop_names.count(retrievePropertyId(prop_name)) > 0;
   }
 
-  /**
-   * Return the property names corresponding to the supplied property ids
-   */
-  static std::set<std::string> getPropNames(const std::set<unsigned int> & prop_ids);
-
 protected:
   /// Release all internal data structures
   void releaseProperties();
@@ -266,8 +258,6 @@ protected:
   /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from
   /// one FEPRoblem in another one - if we will ever do it)
   static std::map<std::string, unsigned int> _prop_ids;
-  /// inverse mapping
-  static std::unordered_map<unsigned int, std::string> _prop_id_to_name;
 
   /**
    * Whether or not we have stateful properties.  This will get automatically
@@ -281,7 +271,7 @@ protected:
    */
   bool _has_older_prop;
 
-  /// mapping from property ID to property name. This only holds *stateful* properties!
+  /// mapping from property ID to property name
   std::map<unsigned int, std::string> _prop_names;
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
