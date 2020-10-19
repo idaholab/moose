@@ -23,7 +23,7 @@
   [diff]
     type = FVDiffusion
     variable = fv
-    coeff = diffusivity
+    coeff = fv_prop
   []
   [coupled]
     type = FVCoupledForce
@@ -36,7 +36,7 @@
   [diff]
     type = ADMatDiffusion
     variable = fe
-    diffusivity = diffusivity
+    diffusivity = fe_prop
   []
   [coupled]
     type = CoupledForce
@@ -76,7 +76,7 @@
 []
 
 [Materials]
-  active = 'const_mat'
+  active = 'fe_mat fv_mat'
   [bad_mat]
     type = FEFVCouplingMaterial
     fe_var = fe
@@ -90,10 +90,15 @@
     type = FEFVCouplingMaterial
     fv_var = fv
   []
-  [const_mat]
-    type = ADGenericConstantMaterial
-    prop_names = 'diffusivity'
-    prop_values = '1'
+  [fe_mat_bad_dep]
+    type = FEFVCouplingMaterial
+    fe_var = fe
+    declared_prop_name = bad
+  []
+  [fv_mat_bad_dep]
+    type = FEFVCouplingMaterial
+    fv_var = fv
+    retrieved_prop_name = bad
   []
 []
 

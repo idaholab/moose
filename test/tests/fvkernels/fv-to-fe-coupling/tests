@@ -22,4 +22,12 @@
     difference_tol = 1e-4
     ratio_tol = 1e-7
   []
+  [deps-not-satisfied]
+    type = RunException
+    input = 1d.i
+    method = 'devel dbg'
+    cli_args = "Materials/active='fe_mat_bad_dep fv_mat_bad_dep'"
+    expect_err = 'All of the material properties we depend on should already be supplied/computed'
+    requirement = 'The system shall error in non-optimized modes if material dependencies for finite volume computations are not satisfied.'
+  []
 []

@@ -29,4 +29,6 @@ protected:
   const ADVariableValue & _fv_var;
   ADMaterialProperty<Real> * const _fe_prop;
   ADMaterialProperty<Real> * const _fv_prop;
+  ADMaterialProperty<Real> * const _declared_prop;
+  const ADMaterialProperty<Real> * const _retrieved_prop;
 };
