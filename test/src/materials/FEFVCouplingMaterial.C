@@ -20,6 +20,7 @@ FEFVCouplingMaterial::validParams()
   params.addParam<MaterialPropertyName>("declared_prop_name", "The name of the declared property.");
   params.addParam<MaterialPropertyName>("retrieved_prop_name",
                                         "The name of the retrieved property.");
+  params.addParam<MaterialPropertyName>("fv_prop_name", "The name of the fv property");
   return params;
 }
 
@@ -28,7 +29,11 @@ FEFVCouplingMaterial::FEFVCouplingMaterial(const InputParameters & parameters)
     _fe_var(adCoupledValue("fe_var")),
     _fv_var(adCoupledValue("fv_var")),
     _fe_prop(isCoupled("fe_var") ? &declareADProperty<Real>("fe_prop") : nullptr),
-    _fv_prop(isCoupled("fv_var") ? &declareADProperty<Real>("fv_prop") : nullptr),
+    _fv_prop(isCoupled("fv_var")
+                 ? &declareADProperty<Real>(isParamValid("fv_prop_name")
+                                                ? getParam<MaterialPropertyName>("fv_prop_name")
+                                                : "fv_prop")
+                 : nullptr),
     _declared_prop(
         isParamValid("declared_prop_name")
             ? &declareADProperty<Real>(getParam<MaterialPropertyName>("declared_prop_name"))
