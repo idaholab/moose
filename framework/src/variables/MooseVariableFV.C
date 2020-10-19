@@ -626,6 +626,17 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   grad /= volume;
 
+  const auto coord_system = _subproblem.getCoordSystem(elem->subdomain_id());
+  if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
+  {
+    const auto r_coord = _subproblem.getAxisymmetricRadialCoord();
+    grad(r_coord) -= elem_value / elem->centroid()(r_coord);
+  }
+
+  mooseAssert(coord_system != Moose::CoordinateSystemType::COORD_RSPHERICAL,
+              "We have not yet implemented the correct translation from gradient to divergence for "
+              "spherical coordinates yet.");
+
   return grad;
 }
 

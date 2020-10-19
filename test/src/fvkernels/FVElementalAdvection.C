@@ -29,7 +29,15 @@ FVElementalAdvection::FVElementalAdvection(const InputParameters & params)
 ADReal
 FVElementalAdvection::computeQpResidual()
 {
-  return _velocity * _var.adGradSln(_current_elem);
+  auto resid = _velocity * _var.adGradSln(_current_elem);
+
+  if (_subproblem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ)
+  {
+    const auto rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
+    resid += _velocity(rz_radial_coord) * _u[_qp] / _q_point[_qp](rz_radial_coord);
+  }
+
+  return resid;
 }
 
 #endif
