@@ -1,5 +1,3 @@
-# This test is provided as a check to ensure ADComputeMultiplePorousInelasticStress
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -30,7 +28,7 @@
 []
 
 [Materials]
-  active='elasticity_tensor porous_stress creep'
+  active='elasticity_tensor porous_stress porosity creep'
   [./elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
@@ -38,9 +36,8 @@
     base_name = 'total'
   [../]
   [./porous_stress]
-    type = ADComputeMultiplePorousInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = creep
-    initial_porosity = 0.1
     outputs = all
     base_name = 'total'
   [../]

@@ -42,10 +42,15 @@
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ADComputeMultiplePorousInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = 'one two'
-    initial_porosity = 0.1
     outputs = all
+  [../]
+  [./porosity]
+    type = ADPorosity
+    initial_porosity = 0.1
+    inelastic_strain = 'combined_inelastic_strain'
+    outputs = 'all'
   [../]
 
   [./one]

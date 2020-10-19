@@ -37,11 +37,16 @@
     base_name = 'total'
   [../]
   [./stress]
-    type = ADComputeMultiplePorousInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = gtn
-    initial_porosity = 0.1
     outputs = all
     base_name = 'total'
+  [../]
+  [./porosity]
+    type = ADPorosity
+    initial_porosity = 0.1
+    inelastic_strain = 'total_combined_inelastic_strain'
+    outputs = 'all'
   [../]
 
   [./gtn]

@@ -125,13 +125,17 @@
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ADComputeMultiplePorousInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = 'gtn lps_ten lps_five lps_three lps_two lps_onepointfive lps_one'
-    initial_porosity = 1e-3
     outputs = all
     extra_stress_names = extra_stress
   [../]
-
+  [./porosity]
+    type = ADPorosity
+    initial_porosity = 1e-3
+    inelastic_strain = 'combined_inelastic_strain'
+    outputs = 'all'
+  [../]
   [./gtn]
     type = ADViscoplasticityStressUpdate
     coefficient = 0
