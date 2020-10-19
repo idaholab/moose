@@ -1,6 +1,6 @@
 # FileMeshGenerator
 
-!syntax description /MeshGenerators/FileMeshGenerator
+!syntax description /Mesh/FileMeshGenerator
 
 ## Supported File Formats
 
@@ -30,8 +30,8 @@ The names of the extra element integers will be the same as the names of the ele
 
 ## Further FileMeshGenerator Documentation
 
-!syntax parameters /MeshGenerators/FileMeshGenerator
+!syntax parameters /Mesh/FileMeshGenerator
 
-!syntax inputs /MeshGenerators/FileMeshGenerator
+!syntax inputs /Mesh/FileMeshGenerator
 
-!syntax children /MeshGenerators/FileMeshGenerator
+!syntax children /Mesh/FileMeshGenerator

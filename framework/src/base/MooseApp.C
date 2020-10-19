@@ -1703,7 +1703,7 @@ MooseApp::getMeshGeneratorMesh(bool check_unique)
 
   if (_final_generated_meshes.empty())
     mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
-               "[MeshGenerators] block.");
+               "block.");
 
   auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
   _final_generated_meshes.pop_front();

@@ -1,6 +1,6 @@
 # ConcentricCircleMeshGenerator
 
-!syntax description /MeshGenerators/ConcentricCircleMeshGenerator
+!syntax description /Mesh/ConcentricCircleMeshGenerator
 
 ## Overview
 
@@ -41,8 +41,8 @@ If one needs to enhance `ConcentricCircleMeshGenerator,` Laplace smoothing has t
 
 !listing test/tests/meshgenerators/concentric_circle_mesh_generator/concentric_circle_mesh_generator.i block=Mesh
 
-!syntax parameters /MeshGenerators/ConcentricCircleMeshGenerator
+!syntax parameters /Mesh/ConcentricCircleMeshGenerator
 
-!syntax inputs /MeshGenerators/ConcentricCircleMeshGenerator
+!syntax inputs /Mesh/ConcentricCircleMeshGenerator
 
-!syntax children /MeshGenerators/ConcentricCircleMeshGenerator
+!syntax children /Mesh/ConcentricCircleMeshGenerator

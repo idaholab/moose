@@ -1,6 +1,6 @@
 # AnnularMeshGenerator
 
-!syntax description /MeshGenerators/AnnularMeshGenerator
+!syntax description /Mesh/AnnularMeshGenerator
 
 ## Overview
 
@@ -27,8 +27,8 @@ Sidesets are also created:
 - Sideset 2 is called "dmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
 - Sideset 3 is called "dmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
 
-!syntax parameters /MeshGenerators/AnnularMeshGenerator
+!syntax parameters /Mesh/AnnularMeshGenerator
 
-!syntax inputs /MeshGenerators/AnnularMeshGenerator
+!syntax inputs /Mesh/AnnularMeshGenerator
 
-!syntax children /MeshGenerators/AnnularMeshGenerator
+!syntax children /Mesh/AnnularMeshGenerator

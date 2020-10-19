@@ -1,6 +1,6 @@
 # PatternedMeshGenerator
 
-!syntax description /MeshGenerators/PatternedMeshGenerator
+!syntax description /Mesh/PatternedMeshGenerator
 
 ## Overview
 
@@ -18,8 +18,8 @@ file, as shown below, to create the pattern shown in Figure 3.
 
 !media media/mesh/patterned_mesh_in.png style=float:right;width:32%; caption=Fig 3: Resulting mesh created using PatternedMesh.
 
-!syntax parameters /MeshGenerators/PatternedMeshGenerator
+!syntax parameters /Mesh/PatternedMeshGenerator
 
-!syntax inputs /MeshGenerators/PatternedMeshGenerator
+!syntax inputs /Mesh/PatternedMeshGenerator
 
-!syntax children /MeshGenerators/PatternedMeshGenerator
+!syntax children /Mesh/PatternedMeshGenerator

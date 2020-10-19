@@ -1,6 +1,6 @@
 # BlockDeletionGenerator
 
-!syntax description /MeshGenerators/BlockDeletionGenerator
+!syntax description /Mesh/BlockDeletionGenerator
 
 ## Overview
 
@@ -9,8 +9,8 @@ user provided subdomain ID. While most mesh generation operations should be
 based on geometric operations, it is sometimes easier to remove discretized
 elements for certain problems.
 
-!syntax parameters /MeshGenerators/BlockDeletionGenerator
+!syntax parameters /Mesh/BlockDeletionGenerator
 
-!syntax inputs /MeshGenerators/BlockDeletionGenerator
+!syntax inputs /Mesh/BlockDeletionGenerator
 
-!syntax children /MeshGenerators/BlockDeletionGenerator
+!syntax children /Mesh/BlockDeletionGenerator

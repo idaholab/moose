@@ -50,7 +50,7 @@ provided to the `MooseMesh::buildTypedMesh` method.
 For instance, take a look at the following input file:
 
 ```
-[MeshGenerators]
+[Mesh]
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3

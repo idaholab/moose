@@ -1,9 +1,9 @@
 # ExtraNodesetGenerator
 
-!syntax description /MeshGenerators/ExtraNodesetGenerator
+!syntax description /Mesh/ExtraNodesetGenerator
 
-!syntax parameters /MeshGenerators/ExtraNodesetGenerator
+!syntax parameters /Mesh/ExtraNodesetGenerator
 
-!syntax inputs /MeshGenerators/ExtraNodesetGenerator
+!syntax inputs /Mesh/ExtraNodesetGenerator
 
-!syntax children /MeshGenerators/ExtraNodesetGenerator
+!syntax children /Mesh/ExtraNodesetGenerator

@@ -1,6 +1,6 @@
 # AllSideSetsByNormalsGenerator
 
-!syntax description /MeshGenerators/AllSideSetsByNormalsGenerator
+!syntax description /Mesh/AllSideSetsByNormalsGenerator
 
 ## Overview
 
@@ -16,8 +16,8 @@ The sideset number assignment is not predictable. This utility assigns sideset n
 unique normals seen while iterating over the mesh. Further enhancements could be made to more
 carefully control this assignment.
 
-!syntax parameters /MeshGenerators/AllSideSetsByNormalsGenerator
+!syntax parameters /Mesh/AllSideSetsByNormalsGenerator
 
-!syntax inputs /MeshGenerators/AllSideSetsByNormalsGenerator
+!syntax inputs /Mesh/AllSideSetsByNormalsGenerator
 
-!syntax children /MeshGenerators/AllSideSetsByNormalsGenerator
+!syntax children /Mesh/AllSideSetsByNormalsGenerator

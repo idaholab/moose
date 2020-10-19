@@ -1,6 +1,6 @@
 # SmoothMeshGenerator
 
-!syntax description /MeshGenerators/SmoothMeshGenerator
+!syntax description /Mesh/SmoothMeshGenerator
 
 ## Example
 
@@ -11,13 +11,13 @@ state": after just a few iterations the mesh will stop moving by much.
 
 As an example here is an original mesh going through 12 iterations of this smoother:
 
-!media media/mesh_modifiers/smooth.gif
+!media media/mesh/smooth.gif
        id=inl-logo
        caption=12 iterations of Laplacian smoothing.  Coloring is by element quality (higher is better).
        style=width:50%;padding:20px;
 
-!syntax parameters /MeshGenerators/SmoothMeshGenerator
+!syntax parameters /Mesh/SmoothMeshGenerator
 
-!syntax inputs /MeshGenerators/SmoothMeshGenerator
+!syntax inputs /Mesh/SmoothMeshGenerator
 
-!syntax children /MeshGenerators/SmoothMeshGenerator
+!syntax children /Mesh/SmoothMeshGenerator

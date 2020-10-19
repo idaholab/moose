@@ -1,6 +1,6 @@
 # CartesianMeshGenerator
 
-!syntax description /MeshGenerators/CartesianMeshGenerator
+!syntax description /Mesh/CartesianMeshGenerator
 
 ## Overview
 
@@ -20,8 +20,8 @@ Each linear subdivision in x, y, or z can be additionally subdivided into sub-el
 !listing moose/test/tests/meshgenerators/cartesian_mesh_generator/cartesian_mesh_3D.i
          block=Mesh
 
-!syntax parameters /MeshGenerators/CartesianMeshGenerator
+!syntax parameters /Mesh/CartesianMeshGenerator
 
-!syntax inputs /MeshGenerators/CartesianMeshGenerator
+!syntax inputs /Mesh/CartesianMeshGenerator
 
-!syntax children /MeshGenerators/CartesianMeshGenerator
+!syntax children /Mesh/CartesianMeshGenerator

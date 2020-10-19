@@ -113,7 +113,6 @@ Extensions:
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
-            meshgenerators: syntax/MeshGenerators/index.md
             meshmodifiers: syntax/MeshModifiers/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
