@@ -9,6 +9,7 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
             - application_usage/command_line_usage.md
+            - media/**
     fluid_properties:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
     misc:
@@ -37,13 +38,6 @@ Extensions:
         name: 'THM'
         repo: https://hpcgitlab.hpc.inl.gov/idaholab/thm
         home: https://hpcsc.inl.gov/ssl/THM/site/
-        menu:
-            Documentation:
-                Tutorial: thm_tutorial.md
-                Complete Syntax Listing: syntax/index.md
-            Status:
-                Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
-                Code Coverage: https://hpcsc.inl.gov/ssl/THM/coverage/
 
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
