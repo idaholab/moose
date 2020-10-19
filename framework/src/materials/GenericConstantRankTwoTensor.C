@@ -16,7 +16,6 @@ defineLegacyParams(GenericConstantRankTwoTensor);
 InputParameters
 GenericConstantRankTwoTensor::validParams()
 {
-
   InputParameters params = Material::validParams();
   params.addRequiredParam<std::vector<Real>>(
       "tensor_values", "Vector of values defining the constant rank two tensor");
