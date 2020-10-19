@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Porosity.h"
+#include "PorosityFromStrain.h"
 
-registerMooseObject("TensorMechanicsApp", Porosity);
-registerMooseObject("TensorMechanicsApp", ADPorosity);
+registerMooseObject("TensorMechanicsApp", PorosityFromStrain);
+registerMooseObject("TensorMechanicsApp", ADPorosityFromStrain);
 
 template <bool is_ad>
 InputParameters
-PorosityTempl<is_ad>::validParams()
+PorosityFromStrainTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
 
@@ -31,7 +31,7 @@ PorosityTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-PorosityTempl<is_ad>::PorosityTempl(const InputParameters & parameters)
+PorosityFromStrainTempl<is_ad>::PorosityFromStrainTempl(const InputParameters & parameters)
   : Material(parameters),
     _porosity(declareGenericProperty<Real, is_ad>(getParam<MaterialPropertyName>("porosity_name"))),
     _porosity_old(getMaterialPropertyOld<Real>("porosity_name")),
@@ -43,14 +43,14 @@ PorosityTempl<is_ad>::PorosityTempl(const InputParameters & parameters)
 
 template <bool is_ad>
 void
-PorosityTempl<is_ad>::initQpStatefulProperties()
+PorosityFromStrainTempl<is_ad>::initQpStatefulProperties()
 {
   _porosity[_qp] = _initial_porosity;
 }
 
 template <bool is_ad>
 void
-PorosityTempl<is_ad>::computeQpProperties()
+PorosityFromStrainTempl<is_ad>::computeQpProperties()
 {
   _porosity[_qp] =
       (1.0 - _porosity_old[_qp]) * (_inelastic_strain[_qp] - _inelastic_strain_old[_qp]).trace() +

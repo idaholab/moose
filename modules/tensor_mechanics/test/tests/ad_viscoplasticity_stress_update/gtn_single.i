@@ -43,7 +43,7 @@
     base_name = 'total'
   [../]
   [./porosity]
-    type = ADPorosity
+    type = ADPorosityFromStrain
     initial_porosity = 0.1
     inelastic_strain = 'total_combined_inelastic_strain'
     outputs = 'all'

@@ -15,12 +15,12 @@
  * Porosity calculation from the inelastic strain
  */
 template <bool is_ad>
-class PorosityTempl : public Material
+class PorosityFromStrainTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  PorosityTempl(const InputParameters & parameters);
+  PorosityFromStrainTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -42,5 +42,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
 };
 
-typedef PorosityTempl<false> Porosity;
-typedef PorosityTempl<true> ADPorosity;
+typedef PorosityFromStrainTempl<false> PorosityFromStrain;
+typedef PorosityFromStrainTempl<true> ADPorosityFromStrain;

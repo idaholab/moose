@@ -22,7 +22,7 @@
 
 [Materials]
   [porosity]
-    type = ADPorosity
+    type = ADPorosityFromStrain
     initial_porosity = 0
     inelastic_strain = strain
     outputs = all

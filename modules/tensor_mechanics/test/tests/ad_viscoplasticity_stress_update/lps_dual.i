@@ -64,7 +64,7 @@
     outputs = all
   [../]
   [./porosity]
-    type = ADPorosity
+    type = ADPorosityFromStrain
     initial_porosity = 0.1
     inelastic_strain = 'combined_inelastic_strain'
     outputs = 'all'
