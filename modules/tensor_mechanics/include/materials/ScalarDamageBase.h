@@ -41,7 +41,7 @@ public:
 
 protected:
   /// Name of the material property where the damage index is stored
-  const std::string _damage_index_name;
+  const MaterialPropertyName _damage_index_name;
 
   /// Update the damage index at the current qpoint
   virtual void updateQpDamageIndex() = 0;

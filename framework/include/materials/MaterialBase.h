@@ -101,13 +101,17 @@ public:
    * Declare the property named "name"
    */
   template <typename T>
-  MaterialProperty<T> & declareProperty(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyByName(const std::string & prop_name);
+  template <typename T>
+  MaterialProperty<T> & declareProperty(const std::string & name);
   template <typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
   template <typename T>
-  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
+  ADMaterialProperty<T> & declareADPropertyByName(const std::string & prop_name);
+  template <typename T>
+  ADMaterialProperty<T> & declareADProperty(const std::string & name);
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
   ADMaterialProperty<T> & declareGenericProperty(const std::string & prop_name)
   {
@@ -279,15 +283,22 @@ protected:
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declareProperty(const std::string & prop_name)
+MaterialBase::declareProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string name = prop_name;
-  if (_pars.have_parameter<MaterialPropertyName>(prop_name))
-    name = _pars.get<MaterialPropertyName>(prop_name);
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
 
-  registerPropName(name, false, MaterialBase::CURRENT);
-  return materialData().declareProperty<T>(name);
+  return declarePropertyByName<T>(prop_name);
+}
+
+template <typename T>
+MaterialProperty<T> &
+MaterialBase::declarePropertyByName(const std::string & prop_name)
+{
+  registerPropName(prop_name, false, MaterialBase::CURRENT);
+  return materialData().declareProperty<T>(prop_name);
 }
 
 template <typename T>
@@ -344,14 +355,21 @@ MaterialBase::getGenericZeroMaterialProperty(const std::string & prop_name)
 
 template <typename T>
 ADMaterialProperty<T> &
-MaterialBase::declareADProperty(const std::string & prop_name)
+MaterialBase::declareADProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
-  std::string name = prop_name;
-  if (_pars.have_parameter<MaterialPropertyName>(prop_name))
-    name = _pars.get<MaterialPropertyName>(prop_name);
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
 
+  return declareADPropertyByName<T>(prop_name);
+}
+
+template <typename T>
+ADMaterialProperty<T> &
+MaterialBase::declareADPropertyByName(const std::string & prop_name)
+{
   _fe_problem.usingADMatProps(true);
-  registerPropName(name, false, MaterialBase::CURRENT);
-  return materialData().declareADProperty<T>(name);
+  registerPropName(prop_name, false, MaterialBase::CURRENT);
+  return materialData().declareADProperty<T>(prop_name);
 }
