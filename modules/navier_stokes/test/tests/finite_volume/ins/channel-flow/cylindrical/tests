@@ -5,11 +5,17 @@
     exodiff = 2d-average-no-slip_out.e
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with no-slip boundary conditions on the wall in an axisymmetric coordinate system using an average interpolation scheme for the velocity.'
   []
+  [rc-no-slip]
+    type = 'Exodiff'
+    input = 2d-average-no-slip.i
+    cli_args = "velocity_interp_method='rc' Outputs/file_base=2d-rc-no-slip"
+    exodiff = 2d-rc-no-slip.e
+    requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with no-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
+  []
   [rc-free-slip]
     type = 'Exodiff'
     input = 2d-rc-slip.i
     exodiff = 2d-rc-slip_out.e
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with free-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
   []
-  # I will note here that 2d-average-no-slip.i run with the cli arg: velocity_interp_method='rc' (e.g. an RC run) demonstrates a very obnoxious phenomenon along the axis of symmetry where the radial velocity is negative (it should be zero). The effect of this phenomenon decreases with refinement, but still annoys me greatly. I have been unable to figure out why this happens. Kudos to whoever can solve this issue!
 []

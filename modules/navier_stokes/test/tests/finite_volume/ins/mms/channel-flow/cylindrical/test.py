@@ -27,10 +27,7 @@ class Test2DRC(unittest.TestCase):
         fig.save('2d-rc.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            if key == 'L2p':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
-            else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
 
 class Test2DAverageTemp(unittest.TestCase):
     def test(self):
@@ -57,10 +54,7 @@ class Test2DRCTemp(unittest.TestCase):
         fig.save('2d-rc-with-temp.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            if key == 'L2p':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1., .05))
-            else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
