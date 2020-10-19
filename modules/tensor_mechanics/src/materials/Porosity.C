@@ -23,7 +23,7 @@ PorosityTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>(
       "porosity_name", "porosity", "Name of porosity material property");
   params.addRequiredRangeCheckedParam<Real>(
-      "initial_porosity", "initial_porosity>0.0 & initial_porosity<1.0", "Initial porosity");
+      "initial_porosity", "initial_porosity>=0.0 & initial_porosity<1.0", "Initial porosity");
   params.addRequiredParam<MaterialPropertyName>("inelastic_strain",
                                                 "Name of the combined inelastic strain");
 

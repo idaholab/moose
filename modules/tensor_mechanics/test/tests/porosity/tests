@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#15974'
+  design = 'Porosity_tm.md ADPorosity_tm.md'
+  [p]
+    requirement = 'The system shall compute a Porosity material property from a strain tensor'
+    [reg]
+      type = CSVDiff
+      input = 'reg.i'
+      csvdiff = 'reg_out.csv'
+      detail = 'using traditional materials.'
+    []
+    [ad]
+      type = CSVDiff
+      input = 'ad.i'
+      csvdiff = 'ad_out.csv'
+      detail = 'using automatic differentiation materials.'
+    []
+  []
+[]
