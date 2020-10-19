@@ -82,6 +82,9 @@ protected:
   /// VPP to sent data to
   OptimizationVectorPostprocessor & _results_vpp;
 
+  /// VPP containing the measurement data
+  const VectorPostprocessorName _data_vpp_name;
+
   /// Number of parameters
   dof_id_type _ndof;
 

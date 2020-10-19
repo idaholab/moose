@@ -20,6 +20,6 @@ public:
 protected:
   /// Inputted objective function value
   const Real & _result;
-  /// Inputted solution
-  const std::vector<Real> & _solution;
+  /// Solution from vpp
+  std::vector<Real> _solution;
 };

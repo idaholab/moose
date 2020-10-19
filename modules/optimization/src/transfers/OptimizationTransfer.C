@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "OptimizationTransfer.h"
 #include "MultiApp.h"
-#include "SamplerReceiver.h"
+#include "ControlsReceiver.h"
 #include "OptimizationVectorPostprocessor.h"
 
 registerMooseObject("isopodApp", OptimizationTransfer);
@@ -17,12 +17,12 @@ InputParameters
 OptimizationTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
-  params.addClassDescription("Copies optimization data to a SamplerReceiver object.");
+  params.addClassDescription("Copies optimization data to a ControlsReceiver object.");
   params.addRequiredParam<VectorPostprocessorName>(
       "optimization_vpp",
       "The name of the OptimizationVectorPostprocessor VectorPostprocessor to get data from");
   params.addRequiredParam<std::string>("to_control",
-                                       "The name of the 'SamplerReceiver' on the sub application "
+                                       "The name of the 'ControlsReceiver' on the sub application "
                                        "to which the optimization parameters will be transferred.");
 
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
@@ -45,11 +45,11 @@ OptimizationTransfer::execute()
   std::vector<std::string> parameter_names(vpp.getParameterNames());
   std::vector<Real> parameter_values(vpp.getParameterValues());
 
-  SamplerReceiver * ptr = getReceiver(processor_id());
+  ControlsReceiver * ptr = getReceiver(processor_id());
   ptr->transfer(parameter_names, parameter_values);
 }
 
-SamplerReceiver *
+ControlsReceiver *
 OptimizationTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
@@ -62,14 +62,14 @@ OptimizationTransfer::getReceiver(unsigned int app_index)
                _receiver_name,
                "'.");
 
-  SamplerReceiver * ptr =
-      dynamic_cast<SamplerReceiver *>(control_wh.getActiveObject(_receiver_name).get());
+  ControlsReceiver * ptr =
+      dynamic_cast<ControlsReceiver *>(control_wh.getActiveObject(_receiver_name).get());
 
   if (!ptr)
     mooseError(
         "The sub-application (",
         _multi_app->name(),
-        ") Control object for the 'to_control' parameter must be of type 'SamplerReceiver'.");
+        ") Control object for the 'to_control' parameter must be of type 'ControlsReceiver'.");
 
   return ptr;
 }

@@ -6,7 +6,10 @@ FormFunction::validParams()
   InputParameters params = MooseObject::validParams();
 
   params.addRequiredParam<VectorPostprocessorName>(
-      "optimization_vpp", "OptimizationVectorPostprocessor vector postprocessor.");
+      "optimization_vpp",
+      "OptimizationVectorPostprocessor used for transferring data between simulation and "
+      "optimizer.");
+  params.addRequiredParam<VectorPostprocessorName>("data_vpp", "Vector of measured solution data.");
   params.registerBase("FormFunction");
   params.registerSystemAttributeName("FormFunction");
   return params;
@@ -18,6 +21,7 @@ FormFunction::FormFunction(const InputParameters & parameters)
     _results_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
                      ->getUserObject<OptimizationVectorPostprocessor>(
                          getParam<VectorPostprocessorName>("optimization_vpp"))),
+    _data_vpp_name(getParam<VectorPostprocessorName>("data_vpp")),
     _parameters(_my_comm),
     _gradient(_my_comm),
     _hessian(_my_comm)

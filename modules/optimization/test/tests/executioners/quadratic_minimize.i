@@ -3,9 +3,9 @@
 
 [FormFunction]
   type = QuadraticMinimize
-  optimization_vpp = results
+  optimization_vpp = 'results'
+  data_vpp = 'measurements'
   objective = 1.0
-  solution = '1 2 3'
 []
 
 [VectorPostprocessors]
@@ -13,6 +13,12 @@
     type = OptimizationVectorPostprocessor
     parameters = 'param_0 param_1 param_2'
     intial_values = '5 8 1'
+  []
+  [measurements]
+    type = ConstantVectorPostprocessor
+    value = '1 2 3'
+    outputs = none
+    vector_names = 'values'
   []
 []
 

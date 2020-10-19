@@ -7,15 +7,15 @@ QuadraticMinimize::validParams()
 {
   InputParameters params = FormFunction::validParams();
   params.addRequiredParam<Real>("objective", "Desired value of objective function.");
-  params.addRequiredParam<std::vector<Real>>("solution", "Desired solution of minimization.");
   return params;
 }
 
 QuadraticMinimize::QuadraticMinimize(const InputParameters & parameters)
-  : FormFunction(parameters),
-    _result(getParam<Real>("objective")),
-    _solution(getParam<std::vector<Real>>("solution"))
+  : FormFunction(parameters), _result(getParam<Real>("objective"))
 {
+  FEProblemBase * fe_base(parameters.get<FEProblemBase *>("_fe_problem_base"));
+
+  _solution = fe_base->getVectorPostprocessorValue(_data_vpp_name, "values");
 }
 
 Real
