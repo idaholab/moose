@@ -12,11 +12,11 @@
 #include "Function.h"
 
 registerMooseObject("MooseApp", GenericFunctionRankTwoTensor);
+registerMooseObject("MooseApp", ADGenericFunctionRankTwoTensor);
 
-defineLegacyParams(GenericFunctionRankTwoTensor);
-
+template <bool is_ad>
 InputParameters
-GenericFunctionRankTwoTensor::validParams()
+GenericFunctionRankTwoTensorTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredParam<std::vector<FunctionName>>(
@@ -26,9 +26,12 @@ GenericFunctionRankTwoTensor::validParams()
   return params;
 }
 
-GenericFunctionRankTwoTensor::GenericFunctionRankTwoTensor(const InputParameters & parameters)
+template <bool is_ad>
+GenericFunctionRankTwoTensorTempl<is_ad>::GenericFunctionRankTwoTensorTempl(
+    const InputParameters & parameters)
   : Material(parameters),
-    _prop(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
+    _prop(declareGenericProperty<RankTwoTensor, is_ad>(
+        getParam<MaterialPropertyName>("tensor_name"))),
     _function_names(getParam<std::vector<FunctionName>>("tensor_functions")),
     _num_functions(_function_names.size()),
     _functions(_num_functions)
@@ -37,10 +40,18 @@ GenericFunctionRankTwoTensor::GenericFunctionRankTwoTensor(const InputParameters
     _functions[i] = &getFunctionByName(_function_names[i]);
 }
 
+template <bool is_ad>
 void
-GenericFunctionRankTwoTensor::computeQpProperties()
+GenericFunctionRankTwoTensorTempl<is_ad>::initQpStatefulProperties()
 {
-  std::vector<Real> values(_num_functions);
+  GenericFunctionRankTwoTensorTempl<is_ad>::computeQpProperties();
+}
+
+template <bool is_ad>
+void
+GenericFunctionRankTwoTensorTempl<is_ad>::computeQpProperties()
+{
+  std::vector<GenericReal<is_ad>> values(_num_functions);
   for (unsigned int i = 0; i < _num_functions; i++)
     values[i] = (*_functions[i]).value(_t, _q_point[_qp]);
 

@@ -29,11 +29,23 @@
       csvdiff = 'generic_constant_rank_two_tensor_out.csv'
       detail = 'with constant values.'
     [../]
+    [./ad_constant]
+      type = 'CSVDiff'
+      input = 'ad_generic_constant_rank_two_tensor.i'
+      csvdiff = 'ad_generic_constant_rank_two_tensor_out.csv'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
     [./function]
       type = 'CSVDiff'
       input = 'generic_function_rank_two_tensor.i'
       csvdiff = 'generic_function_rank_two_tensor_out.csv'
       detail = 'with values determined by functions.'
+    [../]
+    [./ad_function]
+      type = 'CSVDiff'
+      input = 'ad_generic_function_rank_two_tensor.i'
+      csvdiff = 'ad_generic_function_rank_two_tensor_out.csv'
+      detail = 'with values determined by functions using automatic differentiation.'
     [../]
   [../]
 []

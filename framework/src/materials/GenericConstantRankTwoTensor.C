@@ -10,11 +10,11 @@
 #include "GenericConstantRankTwoTensor.h"
 
 registerMooseObject("MooseApp", GenericConstantRankTwoTensor);
+registerMooseObject("MooseApp", ADGenericConstantRankTwoTensor);
 
-defineLegacyParams(GenericConstantRankTwoTensor);
-
+template <bool is_ad>
 InputParameters
-GenericConstantRankTwoTensor::validParams()
+GenericConstantRankTwoTensorTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredParam<std::vector<Real>>(
@@ -25,15 +25,26 @@ GenericConstantRankTwoTensor::validParams()
   return params;
 }
 
-GenericConstantRankTwoTensor::GenericConstantRankTwoTensor(const InputParameters & parameters)
+template <bool is_ad>
+GenericConstantRankTwoTensorTempl<is_ad>::GenericConstantRankTwoTensorTempl(
+    const InputParameters & parameters)
   : Material(parameters),
-    _prop(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name")))
+    _prop(
+        declareGenericProperty<RankTwoTensor, is_ad>(getParam<MaterialPropertyName>("tensor_name")))
 {
   _tensor.fillFromInputVector(getParam<std::vector<Real>>("tensor_values"));
 }
 
+template <bool is_ad>
 void
-GenericConstantRankTwoTensor::computeQpProperties()
+GenericConstantRankTwoTensorTempl<is_ad>::initQpStatefulProperties()
+{
+  GenericConstantRankTwoTensorTempl<is_ad>::computeQpProperties();
+}
+
+template <bool is_ad>
+void
+GenericConstantRankTwoTensorTempl<is_ad>::computeQpProperties()
 {
   _prop[_qp] = _tensor;
 }
