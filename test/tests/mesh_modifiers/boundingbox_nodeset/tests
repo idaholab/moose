@@ -18,7 +18,7 @@
     type = 'RunException'
     input = 'boundingbox_nodeset_inside_test.i'
     expect_err = "No nodes found within the bounding box"
-    cli_args = 'MeshModifiers/middle_node/bottom_left="1.05 1.05 0"'
+    cli_args = 'Mesh/middle_node/bottom_left="1.05 1.05 0"'
     no_error_deprecated = true
   [../]
 
@@ -26,7 +26,7 @@
     type = 'RunException'
     input = 'boundingbox_nodeset_inside_test.i'
     expect_err = "Only one boundary ID can be assigned to a nodeset using a bounding box!"
-    cli_args = 'MeshModifiers/middle_node/new_boundary="middle_node bottom"'
+    cli_args = 'Mesh/middle_node/new_boundary="middle_node bottom"'
     no_error_deprecated = true
   [../]
 []

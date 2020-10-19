@@ -19,7 +19,7 @@
     type = 'RunException'
     input = 'extra_nodeset_coord_test.i'
     expect_err = "Unable to locate the following point within the domain"
-    cli_args = 'MeshModifiers/middle_node/coord="0.5 10"'
+    cli_args = 'Mesh/middle_node/coord="0.5 10"'
     no_error_deprecated = true
   [../]
 []

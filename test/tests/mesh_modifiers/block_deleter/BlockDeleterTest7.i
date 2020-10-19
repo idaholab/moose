@@ -1,58 +1,60 @@
 # 2D, removal of a union of disjoint pieces
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 4
-  ny = 4
-  xmin = 0
-  xmax = 4
-  ymin = 0
-  ymax = 4
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 4
+    ny = 4
+    xmin = 0
+    xmax = 4
+    ymin = 0
+    ymax = 4
+  []
 
-[MeshModifiers]
-  [./SubdomainBoundingBox1]
-    type = SubdomainBoundingBox
+  [SubdomainBoundingBox1]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '1 1 1'
-  [../]
-  [./SubdomainBoundingBox2]
-    type = SubdomainBoundingBox
+  []
+  [SubdomainBoundingBox2]
+    type = SubdomainBoundingBoxGenerator
+    input = SubdomainBoundingBox1
     block_id = 1
     bottom_left = '2 2 0'
     top_right = '3 3 1'
-  [../]
-  [./ed0]
-    type = BlockDeleter
+  []
+  [ed0]
+    type = BlockDeletionGenerator
+    input = SubdomainBoundingBox2
     block_id = 1
-    depends_on = 'SubdomainBoundingBox1 SubdomainBoundingBox2'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

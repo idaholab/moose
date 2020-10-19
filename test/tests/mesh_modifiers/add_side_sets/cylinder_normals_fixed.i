@@ -1,15 +1,13 @@
 [Mesh]
-  type = FileMesh
-  file = cylinder.e
-  # This MeshModifier currently only works with ReplicatedMesh.
-  # For more information, refer to #2129.
-  parallel_type = replicated
-[]
+  [file]
+    type = FileMeshGenerator
+    file = cylinder.e
+  []
 
-# Mesh Modifiers
-[MeshModifiers]
-  [./add_side_sets]
-    type = SideSetsFromNormals
+  # Mesh Modifiers
+  [add_side_sets]
+    type = SideSetsFromNormalsGenerator
+    input = file
     normals = '0  1  0
                0 -1  0'
     new_boundary = 'front back'
@@ -19,34 +17,34 @@
     fixed_normal = true
 
     variance = 0.5
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./front]
+  [front]
     type = DirichletBC
     variable = u
     boundary = front
     value = 0
-  [../]
-  [./back]
+  []
+  [back]
     type = DirichletBC
     variable = u
     boundary = back
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

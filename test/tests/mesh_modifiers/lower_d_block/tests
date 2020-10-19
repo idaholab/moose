@@ -11,7 +11,7 @@
     exodiff = 'lower_d_second_order_out.e'
     input = 'lower_d.i'
     cli_args = 'Mesh/second_order=true Outputs/file_base=lower_d_second_order_out GlobalParams/order=SECOND '
-               'Mesh/nx=5 Mesh/ny=5'
+               'Mesh/gen/nx=5 Mesh/gen/ny=5'
     no_error_deprecated = true
   [../]
 []

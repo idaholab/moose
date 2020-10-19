@@ -1,68 +1,70 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  xmax = 1
-  ymax = 1
   uniform_refine = 2
-[]
 
-[MeshModifiers]
-  [./subdomains]
-    type = SubdomainBoundingBox
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+    xmax = 1
+    ymax = 1
+  []
+
+  [subdomains]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     bottom_left = '0.1 0.1 0'
     block_id = 1
     top_right = '0.9 0.9 0'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatCoefDiffusion
     variable = u
     conductivity = 'k'
     block = '0 1'
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./outside]
+  [outside]
     type = GenericConstantMaterial
     block = 0
     prop_names = 'k'
     prop_values = 1
-  [../]
-  [./inside]
+  []
+  [inside]
     type = GenericConstantMaterial
     block = 1
     prop_names = 'k'
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Executioner]

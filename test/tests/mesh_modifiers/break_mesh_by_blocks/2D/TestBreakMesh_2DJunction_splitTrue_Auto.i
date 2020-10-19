@@ -1,13 +1,14 @@
 [Mesh]
-  file = 4ElementJunction.e
-  parallel_type = REPLICATED
-[]
+  [file]
+    type = FileMeshGenerator
+    file = 4ElementJunction.e
+  []
 
-[MeshModifiers]
-  [./breakmesh]
-    type = BreakMeshByBlock
+  [breakmesh]
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = true
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

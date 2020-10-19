@@ -6,19 +6,6 @@
 ## Furthermore, all the tests have the attribute 'mesh_mode = REPLICATED' because
 ## the distributed mesh option has not been implemented (it might take a while)
 
-### single interface tests
-[./3D3BlocksBreakMeshManual_test]
-  ###  compare manual mesh split to gold
-  type = 'Exodiff'
-  input = 'TestBreakMesh_3D_3Block_Manual.i'
-  cli_args = '--mesh-only TestBreakMesh_3D_3Block_Manual_in.e'
-  exodiff = 'TestBreakMesh_3D_3Block_Manual_in.e'
-  mesh_mode = REPLICATED
-  recover = false
-  allow_test_objects = true
-  no_error_deprecated = true
-[../]
-
 [./3D3BlocksBreakMeshAuto_test]
   ###  compare automatic mesh split to gold
   type = 'Exodiff'
@@ -38,19 +25,6 @@
   exodiff = 'TestBreakMesh_3D_3Block_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
-  no_error_deprecated = true
-[../]
-
-#### multiple interface tests
-[./3D3BlocksBreakMeshManualSplitInterface_test]
-  ###  compare manual mesh split to gold
-  type = 'Exodiff'
-  input = 'TestBreakMesh_3D_3Block_splitTrue_Manual.i'
-  cli_args = '--mesh-only TestBreakMesh_3D_3Block_splitTrue_Manual_in.e'
-  exodiff = 'TestBreakMesh_3D_3Block_splitTrue_Manual_in.e'
-  mesh_mode = REPLICATED
-  recover = false
-  allow_test_objects = true
   no_error_deprecated = true
 [../]
 

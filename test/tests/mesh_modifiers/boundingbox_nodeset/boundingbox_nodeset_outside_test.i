@@ -1,56 +1,54 @@
 [Mesh]
-  # This MeshModifier currently only works with ReplicatedMesh.
-  # For more information, refer to #2129.
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
-  parallel_type = replicated
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 2
+    ny = 2
+  []
 
-[MeshModifiers]
-  [./middle_node]
-    type = BoundingBoxNodeSet
+  [middle_node]
+    type = BoundingBoxNodeSetGenerator
+    input = gen
     new_boundary = middle_node
     top_right = '1.1 1.1 0'
     bottom_left = '0.51 0.51 0'
     location = OUTSIDE
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
-  [./middle]
+  []
+  [middle]
     type = DirichletBC
     variable = u
     boundary = middle_node
     value = -1
-  [../]
+  []
 []
 
 [Executioner]

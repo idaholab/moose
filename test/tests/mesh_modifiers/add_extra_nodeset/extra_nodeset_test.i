@@ -1,59 +1,58 @@
 [Mesh]
-  file = square.e
-  # This MeshModifier currently only works with ReplicatedMesh.
-  # For more information, refer to #2129.
-  parallel_type = replicated
-[]
+  [file]
+    type = FileMeshGenerator
+    file = square.e
+  []
 
-[MeshModifiers]
-  [./middle_node]
-    type = AddExtraNodeset
+  [middle_node]
+    type = ExtraNodesetGenerator
+    input = file
     new_boundary = 'middle_node'
     nodes = '2'
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right middle'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 
-  [./middle]
+  [middle]
     type = DirichletBC
     variable = u
     boundary = 'middle_node'
     value = -1
-  [../]
+  []
 []
 
 [Executioner]
