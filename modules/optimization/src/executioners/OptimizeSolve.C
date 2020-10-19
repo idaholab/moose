@@ -46,19 +46,20 @@ OptimizeSolve::solve()
   CHKERRQ(ierr);
 
   // Set solve type
-  ierr = TaoSetType(_tao, TAONTR);
+  ierr = TaoSetType(_tao, TAONM); // gradient free nelder mead simplex optimization
+  //  ierr = TaoSetType(_tao, TAONTR);
   CHKERRQ(ierr);
 
   // Set objective, gradient, and hessian functions
   ierr = TaoSetObjectiveRoutine(_tao, objectiveFunctionWrapper, this);
   CHKERRQ(ierr);
-  ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
+  //  ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
   CHKERRQ(ierr);
-  ierr = TaoSetHessianRoutine(_tao,
-                              _form_function->getHessian().mat(),
-                              _form_function->getHessian().mat(),
-                              hessianFunctionWrapper,
-                              this);
+  //  ierr = TaoSetHessianRoutine(_tao,
+  //                              _form_function->getHessian().mat(),
+  //                              _form_function->getHessian().mat(),
+  //                              hessianFunctionWrapper,
+  //                              this);
   CHKERRQ(ierr);
 
   // Set initial guess
