@@ -27,14 +27,24 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  subdomain_id_type blockRestricteElementSubdomainID(const Elem * elem);
+  /// This is a helper method to avoid recoding the same if everywhere.
+  /// If this mesh modifier is used in block restricted mode and the provide
+  /// element belongs to one of the provided blocks it returns the
+  /// element subdomain id, an invalid subdomain id otherwise.
+  /// If this mesh modifier is not block restricted, then the method always
+  /// returns the element subdomain id.
+  /// Notice that in block restricted mode, the invalid_subdomain_id is used
+  /// to lump toghether all the non-listed blocks to avoid splitting the mesh
+  /// where not necessary.
+  subdomain_id_type blockRestrictedElementSubdomainID(const Elem * elem);
 
   std::unique_ptr<MeshBase> & _input;
-  std::vector<SubdomainID> _block;
-  std::unordered_set<SubdomainID> _block_set;
+  const std::vector<SubdomainID> _block;
+  const std::unordered_set<SubdomainID> _block_set;
   const bool _block_restricted;
   const bool _add_transition_interface;
   const bool _split_transition_interface;
+  const BoundaryName _interface_transition_name;
 
 private:
   /// generate the new boundary interface

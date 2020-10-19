@@ -30,7 +30,7 @@ BreakMeshByBlockGenerator::validParams()
                              "this only works on REPLICATED mesh");
   params.addParam<std::vector<SubdomainID>>(
       "block",
-      "The list of subdomain names where neml mehcanisc should be used, "
+      "The list of subdomain names where the mesh should be split, "
       "default all blocks.");
   params.addParam<bool>("add_transition_interface",
                         true,
@@ -42,6 +42,10 @@ BreakMeshByBlockGenerator::validParams()
                         "If true (default) and block is not empty, a special boundary named "
                         "interface_transition is generate between listed blocks and other blocks. "
                         "The transition boundary will not be split if split_interface=true");
+  params.addParam<BoundaryName>(
+      "interface_transition_name",
+      "interface_transition",
+      "the name of the interface transition boundary created when blocks are provided");
   return params;
 }
 
@@ -49,17 +53,19 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
   : BreakMeshByBlockGeneratorBase(parameters),
     _input(getMesh("input")),
     _block(parameters.isParamSetByUser("block") ? getParam<std::vector<SubdomainID>>("block")
-                                                : std::vector<SubdomainID>(0)),
+                                                : std::vector<SubdomainID>()),
     _block_set(_block.begin(), _block.end()),
     _block_restricted(parameters.isParamSetByUser("block")),
     _add_transition_interface(getParam<bool>("add_transition_interface")),
-    _split_transition_interface(getParam<bool>("split_transition_interface"))
+    _split_transition_interface(getParam<bool>("split_transition_interface")),
+    _interface_transition_name(getParam<BoundaryName>("interface_transition_name"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
 
   if (!_add_transition_interface && _split_transition_interface)
-    mooseError("BreakMeshByBlockGenerator cannot split the transition interface becasue "
+    paramError("split_transition_interface",
+               "BreakMeshByBlockGenerator cannot split the transition interface becasue "
                "add_transition_interface is false");
 }
 
@@ -67,6 +73,13 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // check that a boundary named _interface_transition_name does not already exist in the mesh
+  if (_block_restricted && _add_transition_interface &&
+      mesh->boundary_info->get_id_by_name(_interface_transition_name) != Moose::INVALID_BOUNDARY_ID)
+    paramError("interface_transition_name",
+               "BreakMeshByBlockGenerator the specified  interface transition boundary name "
+               "already exits");
 
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
@@ -86,7 +99,7 @@ BreakMeshByBlockGenerator::generate()
       for (auto elem_id = node_it->second.begin(); elem_id != node_it->second.end(); elem_id++)
       {
         const Elem * current_elem = mesh->elem_ptr(*elem_id);
-        connected_blocks.insert(blockRestricteElementSubdomainID(current_elem));
+        connected_blocks.insert(blockRestrictedElementSubdomainID(current_elem));
       }
 
       unsigned int node_multiplicity = connected_blocks.size();
@@ -113,7 +126,7 @@ BreakMeshByBlockGenerator::generate()
             break;
 
           Elem * current_elem = mesh->elem_ptr(elem_id);
-          if (blockRestricteElementSubdomainID(current_elem) != reference_subdomain_id)
+          if (blockRestrictedElementSubdomainID(current_elem) != reference_subdomain_id)
           {
             // assign the newly added node to current_elem
             Node * new_node = nullptr;
@@ -171,9 +184,9 @@ BreakMeshByBlockGenerator::generate()
           {
             Elem * current_elem = mesh->elem_ptr(elem_id);
             Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
-            subdomain_id_type curr_elem_subid = blockRestricteElementSubdomainID(current_elem);
+            subdomain_id_type curr_elem_subid = blockRestrictedElementSubdomainID(current_elem);
             subdomain_id_type connected_elem_subid =
-                blockRestricteElementSubdomainID(connected_elem);
+                blockRestrictedElementSubdomainID(connected_elem);
 
             if (current_elem != connected_elem && curr_elem_subid < connected_elem_subid)
             {
@@ -219,11 +232,11 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  boundary_id_type boundaryID;
-  boundary_id_type boundaryID_interface = Moose::INVALID_BOUNDARY_ID;
-  boundary_id_type boundaryID_interface_transition = Moose::INVALID_BOUNDARY_ID;
+  boundary_id_type boundary_id;
+  boundary_id_type boundary_id_interface = Moose::INVALID_BOUNDARY_ID;
+  boundary_id_type boundary_id_interface_transition = Moose::INVALID_BOUNDARY_ID;
 
-  std::string boundaryName;
+  BoundaryName boundary_name;
 
   // loop over boundary sides
   for (auto & boundary_side_map : _new_boundary_sides_map)
@@ -236,17 +249,17 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
         findBoundaryNameAndInd(mesh,
                                boundary_side_map.first.first,
                                boundary_side_map.first.second,
-                               boundaryName,
-                               boundaryID,
+                               boundary_name,
+                               boundary_id,
                                boundary_info);
       else
       {
-        boundaryName = _interface_name;
-        boundaryID_interface = boundaryID_interface == Moose::INVALID_BOUNDARY_ID
-                                   ? findFreeBoundaryId(mesh)
-                                   : boundaryID_interface;
-        boundaryID = boundaryID_interface;
-        boundary_info.sideset_name(boundaryID_interface) = boundaryName;
+        boundary_name = _interface_name;
+        boundary_id_interface = boundary_id_interface == Moose::INVALID_BOUNDARY_ID
+                                    ? findFreeBoundaryId(mesh)
+                                    : boundary_id_interface;
+        boundary_id = boundary_id_interface;
+        boundary_info.sideset_name(boundary_id_interface) = boundary_name;
       }
     }
     else // block resticted with transition boundary
@@ -262,39 +275,38 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
         findBoundaryNameAndInd(mesh,
                                boundary_side_map.first.first,
                                boundary_side_map.first.second,
-                               boundaryName,
-                               boundaryID,
+                               boundary_name,
+                               boundary_id,
                                boundary_info);
       }
       else if (interior_boundary)
       {
-        boundaryName = _interface_name;
-        boundaryID_interface = boundaryID_interface == Moose::INVALID_BOUNDARY_ID
-                                   ? findFreeBoundaryId(mesh)
-                                   : boundaryID_interface;
+        boundary_name = _interface_name;
+        boundary_id_interface = boundary_id_interface == Moose::INVALID_BOUNDARY_ID
+                                    ? findFreeBoundaryId(mesh)
+                                    : boundary_id_interface;
 
-        boundaryID = boundaryID_interface;
-        boundary_info.sideset_name(boundaryID_interface) = boundaryName;
+        boundary_id = boundary_id_interface;
+        boundary_info.sideset_name(boundary_id_interface) = boundary_name;
       }
       else
       {
-        boundaryID_interface_transition =
-            boundaryID_interface_transition == Moose::INVALID_BOUNDARY_ID
+        boundary_id_interface_transition =
+            boundary_id_interface_transition == Moose::INVALID_BOUNDARY_ID
                 ? findFreeBoundaryId(mesh)
-                : boundaryID_interface_transition;
-        boundaryID = boundaryID_interface_transition;
-        boundaryName = "interface_transition";
-        boundary_info.sideset_name(boundaryID) = boundaryName;
+                : boundary_id_interface_transition;
+        boundary_id = boundary_id_interface_transition;
+        boundary_info.sideset_name(boundary_id) = _interface_transition_name;
       }
     }
     // loop over all the side belonging to each pair and add it to the proper interface
     for (auto & element_side : boundary_side_map.second)
-      boundary_info.add_side(element_side.first, element_side.second, boundaryID);
+      boundary_info.add_side(element_side.first, element_side.second, boundary_id);
   }
 }
 
 subdomain_id_type
-BreakMeshByBlockGenerator::blockRestricteElementSubdomainID(const Elem * elem)
+BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem)
 {
   subdomain_id_type elem_subdomain_id = elem->subdomain_id();
   if (_block_restricted && (_block_set.find(elem_subdomain_id) == _block_set.end()))
