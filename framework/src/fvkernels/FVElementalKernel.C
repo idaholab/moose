@@ -90,7 +90,7 @@ FVElementalKernel::computeOffDiagJacobian()
       MooseVariableFieldBase & jvariable = *(it.second);
 
       // We currently only support coupling to other FV variables
-      if (!jvariable.isFV())
+      if (!jvariable.isFV() || !jvariable.activeOnSubdomain(_current_elem->subdomain_id()))
         continue;
 
       unsigned int ivar = ivariable.number();

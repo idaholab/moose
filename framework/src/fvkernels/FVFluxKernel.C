@@ -127,6 +127,13 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
     if (!jvariable.isFV())
       continue;
 
+    if ((type == Moose::ElementElement || type == Moose::NeighborElement) &&
+        !jvariable.activeOnSubdomain(_face_info->elemSubdomainID()))
+      continue;
+    else if ((type == Moose::ElementNeighbor || type == Moose::NeighborNeighbor) &&
+             !jvariable.activeOnSubdomain(_face_info->neighborSubdomainID()))
+      continue;
+
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
 
@@ -146,7 +153,9 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
     mooseAssert(
         _local_ke.n() == 1,
         "We are currently only supporting constant monomials for finite volume calculations");
-    mooseAssert(jvariable.dofIndices().size() == 1,
+    mooseAssert((type == Moose::ElementElement || type == Moose::NeighborElement)
+                    ? jvariable.dofIndices().size() == 1
+                    : jvariable.dofIndicesNeighbor().size() == 1,
                 "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                 "for a number of dof indices equal to  1");
 
