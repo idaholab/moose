@@ -53,7 +53,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
   registerSyntax("MaterialVectorAuxKernelAction", "AuxKernels/MaterialVectorAuxKernel");
   registerSyntax("MaterialVectorGradAuxKernelAction", "AuxKernels/MaterialVectorGradAuxKernel");
-  registerSyntax("MortarPeriodicAction", "Modules/PhaseField/MortarPeriodicity/*");
   registerSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
   registerSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
   registerSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
