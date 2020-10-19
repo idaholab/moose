@@ -281,8 +281,13 @@ template <typename T>
 MaterialProperty<T> &
 MaterialBase::declareProperty(const std::string & prop_name)
 {
-  registerPropName(prop_name, false, MaterialBase::CURRENT);
-  return materialData().declareProperty<T>(prop_name);
+  // Check if the supplied parameter is a valid input parameter key
+  std::string name = prop_name;
+  if (_pars.have_parameter<MaterialPropertyName>(prop_name))
+    name = _pars.get<MaterialPropertyName>(prop_name);
+
+  registerPropName(name, false, MaterialBase::CURRENT);
+  return materialData().declareProperty<T>(name);
 }
 
 template <typename T>
@@ -341,7 +346,12 @@ template <typename T>
 ADMaterialProperty<T> &
 MaterialBase::declareADProperty(const std::string & prop_name)
 {
+  // Check if the supplied parameter is a valid input parameter key
+  std::string name = prop_name;
+  if (_pars.have_parameter<MaterialPropertyName>(prop_name))
+    name = _pars.get<MaterialPropertyName>(prop_name);
+
   _fe_problem.usingADMatProps(true);
-  registerPropName(prop_name, false, MaterialBase::CURRENT);
-  return materialData().declareADProperty<T>(prop_name);
+  registerPropName(name, false, MaterialBase::CURRENT);
+  return materialData().declareADProperty<T>(name);
 }
