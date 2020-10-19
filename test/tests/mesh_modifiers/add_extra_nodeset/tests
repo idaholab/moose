@@ -1,25 +1,36 @@
 [Tests]
-  deprecated = True
-  [./test]
-    type = 'Exodiff'
-    input = 'extra_nodeset_test.i'
-    exodiff = 'out.e'
-    no_error_deprecated = true
-  [../]
+  issues = '#13814'
+  design = Mesh/index.md
 
-  [./test_coord]
-    type = 'Exodiff'
-    input = 'extra_nodeset_coord_test.i'
-    exodiff = 'out.e'
-    prereq = 'test'
-    no_error_deprecated = true
-  [../]
+  [extra]
+    requirement = "The system shall support assigning boundary identifiers based on "
 
-  [./test_bad_coord]
-    type = 'RunException'
-    input = 'extra_nodeset_coord_test.i'
-    expect_err = "Unable to locate the following point within the domain"
-    cli_args = 'Mesh/middle_node/coord="0.5 10"'
-    no_error_deprecated = true
-  [../]
+    [test]
+      type = 'Exodiff'
+      input = 'extra_nodeset_test.i'
+      exodiff = 'out.e'
+      mesh_mode = REPLICATED
+
+      detail = "a nodal id,"
+    []
+
+    [test_coord]
+      type = 'Exodiff'
+      input = 'extra_nodeset_coord_test.i'
+      exodiff = 'out.e'
+      mesh_mode = REPLICATED
+
+      detail = "a spatial coordinate, and"
+    []
+
+    [test_bad_coord]
+      type = 'RunException'
+      input = 'extra_nodeset_coord_test.i'
+      expect_err = "Unable to locate the following point within the domain"
+      cli_args = 'Mesh/middle_node/coord="0.5 10"'
+      mesh_mode = REPLICATED
+
+      detail = "if the supplied location is outside of the domain."
+    []
+  []
 []

@@ -1,4 +1,5 @@
 [Mesh]
+  uniform_refine = 2
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -6,7 +7,6 @@
     ny = 10
     xmax = 1
     ymax = 1
-    uniform_refine = 2
   []
 
   [subdomains]
