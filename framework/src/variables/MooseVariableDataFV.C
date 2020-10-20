@@ -558,6 +558,14 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
   if (_need_ad_u_dot)
     _ad_u_dot.resize(nqp);
 
+  mooseAssert(
+      _need_ad_u_dot && !other_face._need_ad_u_dot
+          ? _element_type == Moose::ElementType::Element &&
+                other_face._element_type != Moose::ElementType::Element
+          : true,
+      "I only really understand having a time derivative for this and not having a time "
+      "derivative for the other if this is elemental data and the other is not elemental data.");
+
   if (_has_dirichlet_bc)
   {
     // extrapolate from the boundary element across the boundary face using
@@ -583,7 +591,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       assignForAllQps(u_ghost, _ad_u, nqp);
     assignForAllQps(u_ghost.value(), _u, nqp);
 
-    if (_need_ad_u_dot)
+    if (_need_ad_u_dot && other_face._need_ad_u_dot)
       // The partial derivative with respect to time is the same as for u_other except with a
       // negative sign. (See the u_ghost formula above)
       assignForAllQps(-other_face.adUDot()[0], _ad_u_dot, nqp);
@@ -606,7 +614,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       assignForAllQps(u_other, _ad_u, nqp);
     assignForAllQps(u_other.value(), _u, nqp);
 
-    if (_need_ad_u_dot)
+    if (_need_ad_u_dot && other_face._need_ad_u_dot)
       // Since we are simply tracking the other face's value, the time derivative is also the same
       assignForAllQps(other_face.adUDot()[0], _ad_u_dot, nqp);
   }
