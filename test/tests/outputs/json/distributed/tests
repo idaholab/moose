@@ -1,6 +1,6 @@
 [Tests]
   issues = '#11323'
-  design = 'IterationInfo.md'
+  design = 'JSONOutput.md'
   [info]
     requirement = "The system shall include the ability to output simulation data in JSON format:"
 

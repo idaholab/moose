@@ -57,14 +57,14 @@ please refer to [DataIO.md] for more information on these functions.
 
 ## Reporter Output id=reporter-output
 
-Reporter values are output in two forms comma [!ac](CSV) or [!ac](JSON) files. [!ac](CSV) output
+Reporter values are outputted in two forms [!ac](CSV) or [!ac](JSON) files. [!ac](CSV) output
 is limited to Reporter values with a type of `Real` or `std::vector<Real>`. [!ac](JSON) output will
 work for arbitrary types, if the type has a `to_json` function, see [JSONOutput.md] for more details.
 
 ## Reporter Context and Modes id=reporter-modes
 
 Reporter values use a context system for performing parallel operations automatically. The default
-context allows Reporter values may be produced and consumed in various modes. Depending on the mode
+context allows Reporter values to be produced and consumed in various modes. Depending on the mode
 produced/consumed parallel operations will be performed automatically. The following modes exist for
 the default context.
 
@@ -76,10 +76,10 @@ Values can be computed or consumed in any of the prescribed modes. When consumed
 production is checked against the mode consumption. [producer-consumer-modes] details the
 actions taken by the various possible modes of production and consumption for a Reporter value.
 
-!table caption=Actions that occur for Reporter values depending on the modes of production and
+!table caption=Default operations for the default context that occur for Reporter values depending on the modes of production and
                consumption. The prefix `REPORTER_MODE_` is omitted for clarity.
        id=producer-consumer-modes
-| Producer Mode | Consumer Mode | Action |
+| Producer Mode | Consumer Mode | Operation |
 | :- | :- | :- |
 | ROOT | ROOT | Do nothing |
 | REPLICATED | ROOT | Do nothing |

@@ -1,7 +1,7 @@
 # IterationInfo
 
 A Reporter object for tracking iteration information, such as the number of linear and non-linear
-iterations. degrees-of-freedom. The [!param](/Reporters/IterationInfo/items) parameter controls the
+iterations. The [!param](/Reporters/IterationInfo/items) parameter controls the
 items computed.
 
 ## Example Input Syntax
