@@ -4,7 +4,7 @@
 
 ## Overview
 
-`GenericConstantRankTwoTensor` creates a `RankTwoTensor` material property that
+`GenericConstantRankTwoTensor` creates a `RankTwoTensor` material property that use
 constant values to fill the tensor
 
 ## Example Input File Syntax
