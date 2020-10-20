@@ -69,12 +69,11 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
   _nz = _z_grid.size() - 1;
 
   // Resize the gap-to-channel and channel-to-gap maps.
-  unsigned int n_gaps = (_nx - 1) * _ny + (_ny - 1) * _nx;
-  _gap_to_chan_map.resize(n_gaps);
-  _gapnodes.resize(n_gaps);
-  _chan_to_gap_map.resize(_nx * _ny);
-  _sign_id_crossflow_map.resize(_nx * _ny);
-  _gij_map.resize(n_gaps);
+  _gap_to_chan_map.resize(_n_gaps);
+  _gapnodes.resize(_n_gaps);
+  _chan_to_gap_map.resize(_n_channels);
+  _sign_id_crossflow_map.resize(_n_channels);
+  _gij_map.resize(_n_gaps);
   double possitive_flow = 1.0;
   double negative_flow = -1.0;
 
