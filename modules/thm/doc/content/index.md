@@ -1,16 +1,52 @@
 !config navigation breadcrumbs=False scrollspy=False
 
-# THM
+# Thermal Hydraulics Module class=center style=font-size:300%
 
-THM stands for "Thermal Hydraulics Module" and is a common code base for 1-D thermal
-hydraulic applications based on the [MOOSE framework](https://mooseframework.inl.gov/).
+## The MOOSE-based framework for thermal hydraulics simulations class=center style=font-weight:200;font-size:175%
 
-- The [Components](syntax/Components/index.md) system, which provides a
-  higher-level interface to users for creating MOOSE object(s). This is useful
-  for assembling thermal-hydraulic network of components such as pipes, heat
-  structures, etc.
-- Components supporting 1-phase, variable-area, inviscid, compressible flow.
-- Components supporting 2-phase, variable-area, inviscid, compressible flow via
-  the "7-equation" model.
-- Components supporting 2-D (Cartesian or axisymmetric) heat conduction.
-- Various classes supporting THM-based applications.
+
+!row!
+!col! small=12 medium=7 large=7 icon=storage
+
+### Features class=center style=font-weight:400
+
+The basic capabilities include:
+
+- Component-based approach to build thermal-hydraulic simulations.
+- 1-phase, variable-area, inviscid, compressible flow model.
+- 2-phase, variable-area, inviscid, compressible flow via the "7-equation" model.
+
+  - with non-condensable vapor mixture.
+
+- 2-D (Cartesian or axisymmetric) heat conduction.
+- 3-D heat conduction (in progress).
+- Control logic system.
+- Extensibility:
+
+  - pluggable closure system
+  - pluggable models
+
+- and much more...
+
+!col-end!
+
+!col! small=12 medium=5 large=5 icon=school
+
+### Academy class=center style=font-weight:400
+
+Get started running your own THM simulations by exploring the introductory tutorial.
+Use the modeling guide to explore how to piece your models together:
+
+- [Getting Started](getting_started.md) -- how to install the code.
+- [Tutorial](tutorial/index.md) -- learn the basics.
+- [Modeling Guide](modeling_guide/index.md) -- learn how to build your models.
+- [Verification and Validation](v_n_v/index.md) -- verification and validation tests performed to date.
+- [Syntax Index](syntax/index.md) -- complete syntax listing.
+
+!col-end!
+
+!row-end!
+
+### Developed by class=center style=font-size:90%;margin-bottom:0.5em;font-weight:100
+
+!media media/inl_blue.png style=width:20%;display:block;margin-left:auto;margin-right:auto;
