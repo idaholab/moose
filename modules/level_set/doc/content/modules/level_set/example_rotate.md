@@ -71,18 +71,18 @@ looks similar to the SUPG result. However, if you consider the area conservation
 [Area Comparison](#area-comparison) section, the reinitialization scheme yields the superior solution
 for this problem.
 
-!media level_set/circle_rotate_out.gif
+!media level_set/circle_rotate_out.mp4
        id=circle_rotate_out
        style=width:32%;margin-right:2%;float:left;
        caption=Results from solving the rotating circle problem with the level set equation alone.
 
-!media level_set/circle_rotate_supg_out.gif
+!media level_set/circle_rotate_supg_out.mp4
        id=circle_rotate_supg_out
        style=width:32%;margin-right:2%;float:left;
        caption=Results from solving the rotating circle problem with the level set equation using
                SUPG stabilization.
 
-!media level_set/circle_rotate_master_out.gif
+!media level_set/circle_rotate_master_out.mp4
        id=circle_rotate_master_out
        style=width:32%;float:left;
        caption=Results from solving the rotating circle problem with the level set equation with

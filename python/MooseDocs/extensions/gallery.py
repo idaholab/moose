@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
+from ..common import exceptions
 from ..base import components, LatexRenderer
 from ..tree import tokens, html, latex
 from . import command, core, media
@@ -26,19 +27,20 @@ CARD_LATEX = """\\NewDocumentEnvironment{card}{mm}{ %
 """
 
 Card = tokens.newToken('Card')
-CardImage = tokens.newToken('CardImage', src='', media_source='')
-CardTitle = tokens.newToken('CardTitle')
+CardImage = tokens.newToken('CardImage')
 CardContent = tokens.newToken('CardContent')
+CardReveal = tokens.newToken('CardReveal')
+CardTitle = tokens.newToken('CardTitle', deactivator=False, activator=False)
 Gallery = tokens.newToken('Gallery', large=3, medium=6, small=12)
 
-class GalleryExtension(media.MediaExtensionBase):
+class GalleryExtension(command.CommandExtension):
     """
     Adds commands needed to create image galleries.
     """
 
     @staticmethod
     def defaultConfig():
-        config = media.MediaExtensionBase.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
@@ -47,8 +49,9 @@ class GalleryExtension(media.MediaExtensionBase):
         self.addCommand(reader, GalleryComponent())
         renderer.add('Card', RenderCard())
         renderer.add('CardImage', RenderCardImage())
-        renderer.add('CardTitle', RenderCardTitle())
         renderer.add('CardContent', RenderCardContent())
+        renderer.add('CardReveal', RenderCardReveal())
+        renderer.add('CardTitle', RenderCardTitle())
         renderer.add('Gallery', RenderGallery())
 
         if isinstance(renderer, LatexRenderer):
@@ -64,31 +67,45 @@ class CardComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['title'] = ('', "Title of the card.")
+        settings['title'] = (None, "Title of the card.")
         return settings
 
     def createToken(self, parent, info, page):
-
         card = Card(parent, **self.attributes)
 
+        # Insert image or movie
+        img = CardImage(card)
         src = info['subcommand']
-        if src.startswith('http'):
-            location = src
-            media_source = src
+        if src.endswith(('.ogg', '.webm', '.mp4')):
+            media.Video(img, src=src, class_='activator')
         else:
-            node = self.translator.findPage(src)
-            location = str(node.relativeSource(page))
-            media_source = node.source
-        CardImage(card, src=location, media_source=media_source)
+            media.Image(img, src=src, class_='activator')
 
-        if self.settings['title']:
-            card_title = CardTitle(card)
-            self.reader.tokenize(card_title, self.settings['title'], page, 'inline', line=info.line)
+        # A title is required
+        title = self.settings['title']
+        if title is None:
+            raise exceptions.MooseDocsException("The 'title' option is required.")
 
-        content = info['block'] if 'block' in info else info['inline']
-        if content:
-            card_content = CardContent(card)
-            self.reader.tokenize(card_content, content, page, line=info.line)
+        # Content (the title when the card is not showing the detailed content)
+        card_content = CardContent(card)
+        card_title = CardTitle(card_content)
+        self.reader.tokenize(card_title, title, page, 'inline', line=info.line)
+
+        # Detailed content
+        reveal = info['block'] if 'block' in info else info['inline']
+        if reveal:
+            card_reveal = CardReveal(card) # contains the detailed content
+
+            # Add the title to the detailed content, with a close (deactivator) button
+            reveal_title = card_title.copy()
+            reveal_title['deactivator'] = True
+            reveal_title.parent = card_reveal
+
+            # Tokenize the content within the card
+            self.reader.tokenize(card_reveal, reveal, page, line=info.line)
+
+            # The main title will activate the reveal
+            card_title['activator'] = True
 
         return parent
 
@@ -139,7 +156,7 @@ class RenderCard(components.RenderComponent):
         else:
             args.append(latex.Brace(string='\\textwidth', escape=False))
 
-        if (len(token.children) > 1) and (token.children[1].name == 'CardTitle'):
+        if (len(token.children) > 1) and (token.children[1].name == 'CardContent'):
             title = latex.Brace()
             self.translator.renderer.render(title, token.children[1], page)
             token.children[1].parent = None
@@ -148,46 +165,14 @@ class RenderCard(components.RenderComponent):
         return latex.Environment(latex.Environment(parent, 'center'), 'card', args=args)
 
 class RenderCardImage(components.RenderComponent):
-
     def createHTML(self, parent, token, page):
-        return None
-
-    def createMaterialize(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='card-image')
-        html.Tag(div, 'img', class_='materialboxed moose-image', src=token['src'])
-
-    def createLatex(self, parent, token, page):
-
-        fname = token['src']
-        if fname.startswith('http'):
-            fname, errcode = self.extension.getOnlineMedia(parent, fname)
-            if errcode:
-                return parent
-
-        else:
-            dest = os.path.join(os.path.dirname(page.destination), token['src'])
-            dest = os.path.dirname(os.path.abspath(dest))
-            fname, errcode = self.extension.convertImage(token['media_source'], '.png', dest)
-            if errcode:
-                return parent
-
-        img = self.extension.latexImage(latex.Environment(parent, 'center'), token, fname)
-        img['args'] = [latex.Bracket(string='width=\\textwidth', escape=False)]
         return parent
 
-class RenderCardTitle(components.RenderComponent):
+    def createMaterialize(self, parent, token, page):
+        return html.Tag(parent, 'div', class_='card-image')
+
     def createLatex(self, parent, token, page):
         return parent
-
-    def createHTML(self, parent, token, page):
-        return None
-
-    def createMaterialize(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='card-content')
-        span = html.Tag(div, 'span', class_='card-title activator grey-text text-darken-4')
-        if token.next:
-            html.Tag(span, 'i', class_='material-icons right', string='more_vert')
-        return span
 
 class RenderCardContent(components.RenderComponent):
     def createLatex(self, parent, token, page):
@@ -197,14 +182,35 @@ class RenderCardContent(components.RenderComponent):
         return None
 
     def createMaterialize(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='card-reveal')
-        title = div.previous
-        if title is not None:
-            title = title.copy()
-            title.parent = div
-            if title(0)(0)(0):
-                title(0)(0)(0)['content'] = 'close'
-        return div
+        return html.Tag(parent, 'div', class_='card-content')
+
+class RenderCardReveal(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createHTML(self, parent, token, page):
+        return None
+
+    def createMaterialize(self, parent, token, page):
+        return html.Tag(parent, 'div', class_='card-reveal')
+
+class RenderCardTitle(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createHTML(self, parent, token, page):
+        return None
+
+    def createMaterialize(self, parent, token, page):
+        span = html.Tag(parent, 'span', class_='card-title')
+        for child in token:
+            self.renderer.render(span, child, page)
+        if token['activator']:
+            span.addClass('activator')
+            html.Tag(span, 'i', class_='material-icons right', string='more_vert')
+        elif token['deactivator']:
+            html.Tag(span, 'i', class_='material-icons right', string='close')
+        return None
 
 class RenderGallery(components.RenderComponent):
     def createLatex(self, parent, token, page):
@@ -214,7 +220,6 @@ class RenderGallery(components.RenderComponent):
         return None
 
     def createMaterialize(self, parent, token, page):
-
         for child in token.children:
             if child.name != 'Card':
                 msg = "The 'gallery' command requires that all content be within cards (i.e., " \

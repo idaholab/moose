@@ -81,7 +81,7 @@ contains the mesh and field data for the simulation.
 
 ## Results
 
-!media level_set/example_circle_16.gif
+!media level_set/example_circle_16.mp4
        style=width:40%;margin-left:10px;float:right;
        id=example_circle_16
        caption=Results of executing [circle_16.i] showing the "phi" field variable and the 0.5
@@ -117,7 +117,7 @@ step to decrease because the timestep is a function of the element size (see
 timesteps and the increased problem size are noticeable but do not cause an intractable increase of
 run time.
 
-!media level_set/example_circle_64.gif
+!media level_set/example_circle_64.mp4
        style=width:40%;margin-left:10px;float:right;
        id=example_circle_64
        caption=Results of executing [circle_16.i], with two uniform refinement levels, showing the

@@ -4,7 +4,7 @@ Content:
         content:
             - media/framework/under-construction.png
             - large_media/testing/*
-            - large_media/level_set/vortex_out.gif
+            - large_media/level_set/vortex_out.mp4
             - bib/*
             - contrib/**
             - css/*

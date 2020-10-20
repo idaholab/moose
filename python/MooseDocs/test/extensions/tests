@@ -47,12 +47,22 @@
     [appsyntax]
       type = PythonUnitTest
       input = test_appsyntax.py
-      detail = "automatically retrieving application syntax, and"
+      detail = "automatically retrieving application syntax,"
     []
     [alert]
       type = PythonUnitTest
       input = test_alert.py
-      detail = "creating alert text boxes."
+      detail = "creating alert text boxes,"
+    []
+    [media]
+      type = PythonUnitTest
+      input = test_media.py
+      detail = "displaying images and videos, and"
+    []
+    [gallery]
+      type = PythonUnitTest
+      input = test_gallery.py
+      detail = "displaying image galleries."
     []
   []
 []
