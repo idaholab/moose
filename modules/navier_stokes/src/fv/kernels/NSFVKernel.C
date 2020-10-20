@@ -68,37 +68,49 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
     // Get uncorrected pressure gradient
     const VectorValue<ADReal> & unc_grad_p = _p_var->uncorrectedAdGradSln(*_face_info);
 
-    // Now we need to perform the computations of D
-    const ADReal & elem_a = _p_var->adCoeff(&_face_info->elem(), this, &::coeffCalculator);
-    ADReal face_a = elem_a;
+    auto pr = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
+    const Elem * const elem_one = pr.first;
+    const Elem * const elem_two = pr.second;
+    bool elem_is_elem_one = elem_one == &_face_info->elem();
+    const Point & elem_one_centroid =
+        elem_is_elem_one ? _face_info->elemCentroid() : _face_info->neighborCentroid();
+    const Point * const elem_two_centroid =
+        elem_two
+            ? (elem_is_elem_one ? &_face_info->neighborCentroid() : &_face_info->elemCentroid())
+            : nullptr;
+    Real elem_one_volume =
+        elem_is_elem_one ? _face_info->elemVolume() : _face_info->neighborVolume();
+    Real elem_two_volume =
+        elem_two ? (elem_is_elem_one ? _face_info->neighborVolume() : _face_info->elemVolume()) : 0;
 
-    mooseAssert(_face_info->neighborPtr()
-                    ? _subproblem.getCoordSystem(_face_info->elem().subdomain_id()) ==
-                          _subproblem.getCoordSystem(_face_info->neighborPtr()->subdomain_id())
-                    : true,
-                "Coordinate systems must be the same between element and neighbor");
+    // Now we need to perform the computations of D
+    const ADReal & elem_one_a = _p_var->adCoeff(elem_one, this, &::coeffCalculator);
+    ADReal face_a = elem_one_a;
+
+    mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
+                               _subproblem.getCoordSystem(elem_two->subdomain_id())
+                         : true,
+                "Coordinate systems must be the same between the two elements");
 
     Real coord;
-    coordTransformFactor(
-        _subproblem, _face_info->elem().subdomain_id(), _face_info->elemCentroid(), coord);
+    coordTransformFactor(_subproblem, elem_one->subdomain_id(), elem_one_centroid, coord);
 
-    Real elem_volume = _face_info->elemVolume() * coord;
-    Real face_volume = elem_volume;
+    elem_one_volume *= coord;
+    Real face_volume = elem_one_volume;
 
-    if (_face_info->neighborPtr())
+    if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
     {
-      const ADReal & neighbor_a =
-          _p_var->adCoeff(_face_info->neighborPtr(), this, &::coeffCalculator);
+      const ADReal & elem_two_a = _p_var->adCoeff(elem_two, this, &::coeffCalculator);
       Moose::FV::interpolate(
-          Moose::FV::InterpMethod::Average, face_a, elem_a, neighbor_a, *_face_info);
+          Moose::FV::InterpMethod::Average, face_a, elem_one_a, elem_two_a, *_face_info);
 
-      coordTransformFactor(_subproblem,
-                           _face_info->neighborPtr()->subdomain_id(),
-                           _face_info->neighborCentroid(),
-                           coord);
-      Real neighbor_volume = _face_info->neighborVolume() * coord;
-      Moose::FV::interpolate(
-          Moose::FV::InterpMethod::Average, face_volume, elem_volume, neighbor_volume, *_face_info);
+      coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
+      elem_two_volume *= coord;
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             face_volume,
+                             elem_one_volume,
+                             elem_two_volume,
+                             *_face_info);
     }
 
     const ADReal face_D = face_volume / face_a;
