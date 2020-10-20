@@ -25,12 +25,20 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-
 [AuxVariables]
   [./temp]
   [../]
+  [./c]
+  [../]
 []
 
+[ICs]
+  [./InitialCondition]
+    type = ConstantIC
+    value = 1
+    variable = c
+  [../]
+[]
 [Functions]
   [./temperature_load]
     type = ParsedFunction
@@ -99,6 +107,18 @@
     thermal_expansion_coeff = 0.3e-5
     temperature = temp
     eigenstrain_name = eigenstrain2
+  [../]
+  [./composite]
+    type = CompositeEigenstrain
+    tensors = ' eigenstrain1 eigenstrain2'
+    weights = 'weight1 weight2'
+    eigenstrain_name = 'eigenstrain'
+    args = c
+  [../]
+  [./weights]
+    type = GenericConstantMaterial
+    prop_names = 'weight1 weight2'
+    prop_values = '1.0 1.0'
   [../]
 []
 

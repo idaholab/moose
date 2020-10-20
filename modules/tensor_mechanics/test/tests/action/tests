@@ -72,12 +72,22 @@
     requirement = 'The TensorMechanics MasterAction shall error if an input file assigns the same TensorMechanics MasterAction block to mesh blocks with different coordinate systems.'
   [../]
 
+
+
   [./eigenstrain_no_defined_block]
     type = Exodiff
     input = 'action_eigenstrain.i'
     exodiff = 'action_eigenstrain_out.e'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+  [./eigenstrain_no_defined_block_names]
+    type = RunApp
+    input = 'action_eigenstrain.i'
+    expect_out = 'solid: eigenstrain1,eigenstrain2'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
 
   [./eigenstrain_two_blocks]
@@ -86,5 +96,63 @@
     csvdiff = 'action_multi_eigenstrain_out.csv'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+  [./eigenstrain_two_blocks_names]
+    type = RunApp
+    input = 'action_multi_eigenstrain.i'
+    expect_out = 'block1: eigenstrain1
+block2: eigenstrain2'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./ad_converter_eigenstrain_two_blocks]
+    type = CSVDiff
+    input = 'ad_converter_action_multi_eigenstrain.i'
+    csvdiff = 'ad_converter_action_multi_eigenstrain_out.csv'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+  [./ad_converter_eigenstrain_two_blocks_names]
+    type = RunApp
+    input = 'ad_converter_action_multi_eigenstrain.i'
+    expect_out = 'block1: eigenstrain1
+block2: eigenstrain2'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./reduced_eigenstrain_actions]
+    type = CSVDiff
+    input = 'reduced_eigenstrain_action.i'
+    csvdiff = 'reduced_eigenstrain_action_out_hydro_0001.csv'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+  [./reduced_eigenstrain_actions_names]
+    type = RunApp
+    input = 'reduced_eigenstrain_action.i'
+    expect_out = 'all: reduced_eigenstrain'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./composite_eigenstrain_actions]
+    type = Exodiff
+    input = 'composite_eigenstrain.i'
+    exodiff = 'composite_eigenstrain_out.e'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and input into the necessary strain class parameter.'
+  [../]
+  [./composite_eigenstrain_actions_names]
+    type = RunApp
+    input = 'composite_eigenstrain.i'
+    expect_out = 'solid: eigenstrain'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
 []

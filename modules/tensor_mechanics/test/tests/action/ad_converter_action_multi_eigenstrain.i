@@ -39,6 +39,7 @@
     add_variables = true
     automatic_eigenstrain_names = true
     generate_output = 'strain_xx strain_yy strain_zz'
+    use_automatic_differentiation = true
   [../]
   [./block2]
     block = 2
@@ -46,6 +47,7 @@
     add_variables = true
     automatic_eigenstrain_names = true
     generate_output = 'strain_xx strain_yy strain_zz'
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -83,12 +85,12 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   [../]
   [./thermal_expansion_strain1]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
@@ -97,10 +99,17 @@
     thermal_expansion_function_reference_temperature = 0.5
     stress_free_temperature = 0.0
     temperature = temp
-    eigenstrain_name = eigenstrain1
+    eigenstrain_name = reg_eigenstrain1
+  [../]
+  [./converter1]
+    type = RankTwoTensorMaterialConverter
+    block = 1
+    reg_props_in = 'reg_eigenstrain1'
+    ad_props_out = 'eigenstrain1'
+
   [../]
   [./thermal_expansion_strain2]
-    type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
+    type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
     block = 2
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0

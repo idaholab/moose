@@ -114,4 +114,5 @@ protected:
   const bool _auto_eigenstrain;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::string _eigenstrain_string;
 };

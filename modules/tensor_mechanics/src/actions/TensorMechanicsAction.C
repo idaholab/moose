@@ -540,7 +540,6 @@ TensorMechanicsAction::actEigenstrainNames()
     }
 
     // Account for MaterialConverter , add or remove later
-
     if (mat_name == "RankTwoTensorMaterialConverter")
     {
       std::vector<std::string> remove_list;
@@ -603,14 +602,17 @@ TensorMechanicsAction::actEigenstrainNames()
             _eigenstrain_names.begin());
 
   // Since the automatic eigenstrain names have been collected, return the list
-  std::string eigenstrain_string;
-  for (auto entry : _eigenstrain_names)
-  {
-    eigenstrain_string += entry;
-    eigenstrain_string += "  ";
-  }
-  mooseInfo("Eigenstrain names automatically passed to TensorMechanicsAction: \n",
-            eigenstrain_string);
+  auto list_subdomains = _problem->mesh().meshSubdomains();
+  // If no defined blocks
+  if (list_subdomains.size() == 1 && *list_subdomains.begin() == 0)
+    _console << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << COLOR_DEFAULT << std::endl;
+  // Only print once for multiple blocks
+  else
+    for (auto currentNum : _subdomain_ids)
+      if (currentNum == *list_subdomains.begin())
+        _console << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << COLOR_DEFAULT
+                 << std::endl;
+  _console << _name << ": " << Moose::stringify(_eigenstrain_names) << std::endl;
 }
 
 void
