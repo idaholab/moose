@@ -1,16 +1,16 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 40
-  ny = 4
-  xmax = 0.304 # Length of test chamber
-  ymax = 0.0257 # Test chamber radius
   uniform_refine = 3
-[]
-
-[MeshModifiers]
+  [generate]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 40
+    ny = 4
+    xmax = 0.304 # Length of test chamber
+    ymax = 0.0257 # Test chamber radius
+  []
   [bottom]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = generate
     location = inside
     bottom_left = '0 0 0'
     top_right = '0.304 0.01285 0'
