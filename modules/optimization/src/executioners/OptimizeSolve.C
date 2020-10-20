@@ -120,9 +120,13 @@ Real
 OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & x)
 {
   _form_function->setParameters(x);
-  _problem.execute(EXEC_OBJECTIVE);
-  _problem.execMultiApps(EXEC_OBJECTIVE);
-  if (_solve_on.contains(EXEC_OBJECTIVE))
+  // fixme lynn need to switch back to Zachs flags or something like them for adjoint and forward
+  //  _problem.execute(EXEC_OBJECTIVE);
+  //  _problem.execMultiApps(EXEC_OBJECTIVE);
+  //  if (_solve_on.contains(EXEC_OBJECTIVE))
+  _problem.execute(EXEC_NONLINEAR);
+  _problem.execMultiApps(EXEC_NONLINEAR);
+  if (_solve_on.contains(EXEC_NONLINEAR))
     _inner_solve->solve();
   return _form_function->computeObjective();
 }

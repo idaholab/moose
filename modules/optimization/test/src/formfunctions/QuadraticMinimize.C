@@ -13,9 +13,6 @@ QuadraticMinimize::validParams()
 QuadraticMinimize::QuadraticMinimize(const InputParameters & parameters)
   : FormFunction(parameters), _result(getParam<Real>("objective"))
 {
-  FEProblemBase * fe_base(parameters.get<FEProblemBase *>("_fe_problem_base"));
-
-  _solution = fe_base->getVectorPostprocessorValue(_data_vpp_name, "values");
 }
 
 Real
@@ -24,7 +21,7 @@ QuadraticMinimize::computeObjective()
   Real val = _result;
   for (dof_id_type i = 0; i < _ndof; ++i)
   {
-    Real tmp = _parameters(i) - _solution[i];
+    Real tmp = _parameters(i) - _measurement_vpp_values[i];
     val += tmp * tmp;
   }
 
@@ -35,7 +32,7 @@ void
 QuadraticMinimize::computeGradient()
 {
   for (dof_id_type i = 0; i < _ndof; ++i)
-    _gradient.set(i, 2.0 * (_parameters(i) - _solution[i]));
+    _gradient.set(i, 2.0 * (_parameters(i) - _measurement_vpp_values[i]));
   _gradient.close();
 }
 

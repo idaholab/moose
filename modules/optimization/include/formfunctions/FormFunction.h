@@ -6,7 +6,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class FormFunction : public MooseObject
+class FormFunction : public MooseObject, public VectorPostprocessorInterface
 {
 public:
   static InputParameters validParams();
@@ -83,7 +83,7 @@ protected:
   OptimizationVectorPostprocessor & _results_vpp;
 
   /// VPP containing the measurement data
-  const VectorPostprocessorName _data_vpp_name;
+  const VectorPostprocessorValue & _measurement_vpp_values;
 
   /// Number of parameters
   dof_id_type _ndof;

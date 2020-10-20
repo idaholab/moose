@@ -1,4 +1,5 @@
 #include "FormFunction.h"
+#include "VectorPostprocessorPointSource.h"
 
 InputParameters
 FormFunction::validParams()
@@ -9,7 +10,8 @@ FormFunction::validParams()
       "optimization_vpp",
       "OptimizationVectorPostprocessor used for transferring data between simulation and "
       "optimizer.");
-  params.addRequiredParam<VectorPostprocessorName>("data_vpp", "Vector of measured solution data.");
+  params.addRequiredParam<VectorPostprocessorName>("measurement_vpp",
+                                                   "Vector of measured solution data.");
   params.registerBase("FormFunction");
   params.registerSystemAttributeName("FormFunction");
   return params;
@@ -17,11 +19,13 @@ FormFunction::validParams()
 
 FormFunction::FormFunction(const InputParameters & parameters)
   : MooseObject(parameters),
+    VectorPostprocessorInterface(this),
     _my_comm(MPI_COMM_SELF),
     _results_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
                      ->getUserObject<OptimizationVectorPostprocessor>(
                          getParam<VectorPostprocessorName>("optimization_vpp"))),
-    _data_vpp_name(getParam<VectorPostprocessorName>("data_vpp")),
+    _measurement_vpp_values(getVectorPostprocessorValue(
+        "measurement_vpp", "values", false)), // fixme lynn values should not be hardcoded
     _parameters(_my_comm),
     _gradient(_my_comm),
     _hessian(_my_comm)

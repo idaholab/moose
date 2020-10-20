@@ -1,5 +1,11 @@
 
 [Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 20
+  xmax = 1
+  ymax = 2
 []
 
 [Variables]
@@ -84,13 +90,27 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[VectorPostprocessors]
+  [measure_pts]
+    type = PointValueSampler
+    variable = temperature
+    points = '0.3 0.3 0
+              0.4 1.0 0
+              0.8 0.5 0
+              0.8 0.6 0'
+    sort_by = id
+  []
+[]
+
+
 [Controls]
   [optimizationSamplerReceiver]
-    type = SamplerReceiver
+    type = ControlsReceiver
   []
 []
 
 
 [Outputs]
   console = true
+  exodus = true
 []

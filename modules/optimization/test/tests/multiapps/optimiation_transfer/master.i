@@ -1,3 +1,4 @@
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -13,7 +14,6 @@
 []
 
 [Kernels]
-  #user kernel coverage = no in PROBLEM
   [null_kernel]
     type = NullKernel
     variable = response
@@ -21,10 +21,10 @@
 []
 
 [FormFunction]
-  type = QuadraticMinimize
+  type = ObjectiveMinimize
   optimization_vpp = 'opt_results'
-  objective = 1.0
-  solution = '1 2 3'
+  subapp_vpp = 'vpp_receiver'
+  measurement_vpp='measurements'
 []
 
 [Executioner]
@@ -35,61 +35,58 @@
 []
 
 [MultiApps]
-  [full_solve]
+  [sub]
     type = FullSolveMultiApp
-    execute_on = timestep_begin
+    execute_on = nonlinear
     input_files = sub.i
-    clone_master_mesh = true
   []
 []
 
 [Transfers]
   [toSub]
     type = OptimizationTransfer
-    multi_app = full_solve
+    multi_app = sub
     optimization_vpp = opt_results
     to_control = optimizationSamplerReceiver
   []
   [fromSub]
-    type = MultiAppCopyTransfer
+    type = MultiAppVppToVppTransfer
+    vector_postprocessor_sub = 'measure_pts'
+    vector_postprocessor_master = 'vpp_receiver'
     direction = from_multiapp
+    multi_app = sub
+  []
+  [fullTransfer]
+    type = MultiAppCopyTransfer
     source_variable = temperature
     variable = response
-    multi_app = full_solve
+    direction = from_multiapp
+    multi_app = sub
   []
 []
 
 [VectorPostprocessors]
-  [computed_data]
-    type = PointValueSampler
-    variable = 'response'
-    points = '0.25 0.5 0
-              0.75 0.5 0
-              0.25 1.5 0
-              0.75 1.5 0'
-    sort_by = id
-    outputs = none
+  [measurements]
+    type = ConstantVectorPostprocessor
+    value = '100 204 320 216'
+    vector_names = 'values'
   []
-
   [opt_results]
     type = OptimizationVectorPostprocessor
     parameters = 'DiracKernels/pt0/value
-    DiracKernels/pt1/value
-    DiracKernels/pt2/value'
-    intial_values = '100 200 300'
-    outputs = optout
+                  DiracKernels/pt1/value
+                  DiracKernels/pt2/value'
+    intial_values = '0 0 0'
+  []
+  [vpp_receiver]
+    type=VectorPostprocessorReceiver
   []
 []
 
 [Outputs]
   console = true
-  [exodus]
-    file_base = 'zmaster/out'
-    type = Exodus
-  []
-  [optout]
-    type=CSV
-  []
+  csv=true
+  exodus = true
 []
 
 

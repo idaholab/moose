@@ -4,7 +4,7 @@
 [FormFunction]
   type = QuadraticMinimize
   optimization_vpp = 'results'
-  data_vpp = 'measurements'
+  measurement_vpp = 'measurements'
   objective = 1.0
 []
 
