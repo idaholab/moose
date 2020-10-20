@@ -6,6 +6,7 @@ classdef FORCEINVERSION < handle
     end
     
     methods
+%these all change depending on force or material inversion
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function obj=FORCEINVERSION(parameter,solver,objectiveFunction)
             obj.Parameter = parameter;
@@ -13,6 +14,7 @@ classdef FORCEINVERSION < handle
             obj.ObjectiveFunction = objectiveFunction;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%this in base
         function SetParameterForSolver(obj,parameterV)
             nodalForceV = obj.Parameter.NodalForceFromParameter(parameterV);
             obj.Solver.SetForce(nodalForceV);
@@ -30,6 +32,8 @@ classdef FORCEINVERSION < handle
             nodalForceV = obj.Solver.NodalDofFromState(stateV);
             parameterV = obj.Parameter.ParameterFromNodalForce(nodalForceV);
         end
+
+%below all stays the same
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function val = ObjectiveFunctionValue(obj,parameterV)
             obj.SetParameterForSolver(parameterV);
