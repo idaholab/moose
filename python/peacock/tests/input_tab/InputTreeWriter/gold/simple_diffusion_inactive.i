@@ -1,9 +1,11 @@
 inactive = 'Kernels BCs Executioner'
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  [generate]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+  []
 []
 
 [Variables]
