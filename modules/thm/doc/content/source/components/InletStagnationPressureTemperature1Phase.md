@@ -1,13 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # InletStagnationPressureTemperature1Phase
 
-!alert construction title=Undocumented Class
-The InletStagnationPressureTemperature1Phase has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This is a single-phase [1-D flow boundary component](component_groups/flow_boundary.md)
+in which the stagnation pressure and temperature are specified. This boundary is
+typically used when fluid is expected to flow from an infinitely large tank where the pressure
+and temperature are known.
 
-!syntax description /Components/InletStagnationPressureTemperature1Phase
+## Usage
+
+The user specifies the following parameters:
+
+- `p0`: the stagnation pressure, and
+- `T0`: the stagnation temperature.
+
+The formulation of this boundary condition assumes flow +entering+ the flow
+channel at this boundary.
+
++Reversible flow+: If +exit+ conditions are encountered,
+then the boundary condition is automatically changed to an outlet formulation.
+This behavior can be disabled by setting the `reversible` parameter to `false`.
 
 !syntax parameters /Components/InletStagnationPressureTemperature1Phase
 
@@ -15,4 +25,20 @@ ultimately determined by what is necessary to make the documentation clear for u
 
 !syntax children /Components/InletStagnationPressureTemperature1Phase
 
-!bibtex bibliography
+## Formulation
+
+This boundary condition uses a [ghost cell formulation](component_groups/flow_boundary.md#ghostcell_flux),
+where the ghost cell solution $\mathbf{U}_\text{ghost}$ is computed from the following
+quantities:
+
+- $p_{0,\text{ext}}$, the provided exterior stagnation pressure,
+- $T_{0,\text{ext}}$, the provided exterior stagnation temperature, and
+- $u_i$, the interior velocity.
+
+If the boundary is specified to be reversible (`reversible = true`) and
+the flow is +exiting+, the ghost cell is instead computed with the following
+quantities:
+
+- $p_{\text{ext}}$, the exterior pressure, assumed to be equal to the provided exterior stagnation pressure $p_{0,\text{ext}}$,
+- $\rho_i$, the interior density, and
+- $u_i$, the interior velocity.
