@@ -1,10 +1,14 @@
 #include "HeatRateDirectFlowChannel.h"
 #include "Function.h"
 
-registerMooseObject("THMApp", HeatRateDirectFlowChannel);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("THMApp", HeatRateDirectFlowChannel);
+registerMooseObject("THMApp", ADHeatRateDirectFlowChannel);
+
+template <bool is_ad>
 InputParameters
-HeatRateDirectFlowChannel::validParams()
+HeatRateDirectFlowChannelTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
 
@@ -17,16 +21,22 @@ HeatRateDirectFlowChannel::validParams()
   return params;
 }
 
-HeatRateDirectFlowChannel::HeatRateDirectFlowChannel(const InputParameters & parameters)
+template <bool is_ad>
+HeatRateDirectFlowChannelTempl<is_ad>::HeatRateDirectFlowChannelTempl(
+    const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
 
-    _q_wall(getMaterialProperty<Real>("q_wall_prop")),
+    _q_wall(getGenericMaterialProperty<Real, is_ad>("q_wall_prop")),
     _P_hf_fn(getFunction("P_hf"))
 {
 }
 
+template <bool is_ad>
 Real
-HeatRateDirectFlowChannel::computeQpIntegral()
+HeatRateDirectFlowChannelTempl<is_ad>::computeQpIntegral()
 {
-  return _q_wall[_qp] * _P_hf_fn.value(_t, _q_point[_qp]);
+  return MetaPhysicL::raw_value(_q_wall[_qp]) * _P_hf_fn.value(_t, _q_point[_qp]);
 }
+
+template class HeatRateDirectFlowChannelTempl<false>;
+template class HeatRateDirectFlowChannelTempl<true>;
