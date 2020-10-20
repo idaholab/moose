@@ -36,7 +36,6 @@ public:
   ///@{
   virtual void computeResidual();
   virtual void computeJacobian();
-  virtual void computeOffDiagJacobian();
   ///@}
 
 protected:
