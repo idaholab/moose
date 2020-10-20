@@ -139,7 +139,8 @@ ComputeFullJacobianThread::computeJacobian()
 
     for (auto fv_kernel : fv_kernels)
       if (fv_kernel->isImplicit())
-        fv_kernel->computeOffDiagJacobian();
+        // fv objects compute a full jacobian in the computeJacobian func.
+        fv_kernel->computeJacobian();
   }
 }
 

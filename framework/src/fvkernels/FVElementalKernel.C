@@ -65,24 +65,6 @@ FVElementalKernel::computeJacobian()
   mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
-    prepareMatrixTag(_assembly, _var.number(), _var.number());
-    auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
-    auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
-    _local_ke(0, 0) += residual.derivatives()[ad_offset];
-    accumulateTaggedLocalMatrix();
-  };
-
-  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
-}
-
-void
-FVElementalKernel::computeOffDiagJacobian()
-{
-  const auto r = computeQpResidual() * _assembly.elemVolume();
-
-  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
-
-  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
     auto & ce = _assembly.couplingEntries();
     for (const auto & it : ce)
     {
