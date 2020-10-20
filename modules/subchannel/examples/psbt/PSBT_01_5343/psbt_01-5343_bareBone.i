@@ -1,7 +1,7 @@
-T_in = 359.15
+T_in = 438.45
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
-P_out = 4.923e6 # Pa
+mass_flux_in = ${fparse 1e+6 * 5.03 / 3600.}
+P_out = 14739394.95 # Pa
 
 [Mesh]
   type = SubChannelMesh
@@ -72,7 +72,7 @@ P_out = 4.923e6 # Pa
   [q_prime_IC]
     type = PowerIC
     variable = q_prime
-    power = 3.44e6 # W
+    power = 1.25e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
   []
 
@@ -139,19 +139,26 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
-  [Temp_Out_CSV]
-    type = NormalSliceValuesCSV
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out.csv"
-    height = 3.658
-  []
   [Temp_Out_MATRIX]
     type = NormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
     height = 3.658
+  []
+  [mdot_Out_MATRIX]
+    type = NormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_Out.txt"
+    height = 3.658
+  []
+  [mdot_In_MATRIX]
+    type = NormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_In.txt"
+    height = 0.0
   []
 []
 

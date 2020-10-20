@@ -29,6 +29,8 @@ P_out = 4.923e6 # Pa
   []
   [P]
   []
+  [DP]
+  []
   [h]
   []
   [T]
@@ -88,6 +90,12 @@ P_out = 4.923e6 # Pa
     value = ${P_out}
   []
 
+  [DP_ic]
+  type = ConstantIC
+  variable = DP
+  value = 0.0
+  []
+
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
@@ -139,6 +147,28 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+
+  [Temp_Out_MATRIX]
+    type = NormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.txt"
+    height = 3.658
+  []
+  [mdot_Out_MATRIX]
+    type = NormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_Out.txt"
+    height = 3.658
+  []
+  [mdot_In_MATRIX]
+    type = NormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_In.txt"
+    height = 0.0
+  []
 []
 
 [Executioner]
@@ -201,6 +231,13 @@ P_out = 4.923e6 # Pa
     direction = to_multiapp
     source_variable = P
     variable = P
+  []
+  [xfer_DP]
+  type = MultiAppNearestNodeTransfer
+  multi_app = prettyMesh
+  direction = to_multiapp
+  source_variable = DP
+  variable = DP
   []
   [xfer_h]
     type = MultiAppNearestNodeTransfer

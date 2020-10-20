@@ -41,11 +41,11 @@ NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
   }
   else
   {
-    for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++)
+    for (unsigned int iz = 0; iz < _mesh._nz + 1; iz++)
     {
       if (_height > _mesh._z_grid[iz])
-        continue;
-      else if (_height == _mesh._z_grid[iz])
+        ;
+      else if (std::fabs(_height - _mesh._z_grid[iz]) < 1e-6)
       {
         for (unsigned int i_ch = 0; i_ch < _mesh._n_channels; i_ch++)
         {
@@ -54,6 +54,7 @@ NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
           unsigned int j = i_ch - i * _mesh._nx; // column
           _exitValue(i, j) = val_soln(node);
         }
+        break;
       }
       else
       {
@@ -67,6 +68,7 @@ NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
                                                      (_height - _mesh._z_grid[iz - 1]) /
                                                      (_mesh._z_grid[iz] - _mesh._z_grid[iz - 1]);
         }
+        break;
       }
     }
   }
