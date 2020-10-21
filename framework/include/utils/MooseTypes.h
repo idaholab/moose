@@ -14,7 +14,6 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankThreeTensorForward.h"
 #include "ADRankFourTensorForward.h"
-#include "ReporterName.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -928,3 +927,6 @@ DerivativeStringClass(MeshGeneratorName);
 
 /// Name of extra element IDs
 DerivativeStringClass(ExtraElementIDName);
+
+/// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
+DerivativeStringClass(ReporterValueName);

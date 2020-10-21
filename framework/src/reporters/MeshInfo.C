@@ -70,6 +70,6 @@ unsigned int &
 MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
 {
   return (!_items.isValid() || _items.contains(item_name))
-             ? declareValue<unsigned int>(item_name, mode)
+             ? declareValueByName<unsigned int>(item_name, mode)
              : _dummy_unsigned_int;
 }

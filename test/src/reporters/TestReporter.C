@@ -16,20 +16,21 @@ InputParameters
 TestDeclareReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
+  params.addParam<ReporterValueName>("int_name", "int", "The name of the interger data");
   return params;
 }
 
 TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _int(declareValue<int>("int", 1980)),
-    _real(declareValue<Real>("real")),
-    _vector(declareValue<std::vector<Real>>("vector")), // MooseDocs:producer
-    _string(declareValue<std::string>("string")),
-    _bcast_value(declareValue<Real, ReporterBroadcastContext>("broadcast")),
+    _int(declareValue<int>("int_name", 1980)),
+    _real(declareValueByName<Real>("real")),
+    _vector(declareValueByName<std::vector<Real>>("vector")), // MooseDocs:producer
+    _string(declareValueByName<std::string>("string")),
+    _bcast_value(declareValueByName<Real, ReporterBroadcastContext>("broadcast")),
     _scatter_value(
-        declareValue<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
-    _gather_value(
-        declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather")) // MooseDocs:gather
+        declareValueByName<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
+    _gather_value(declareValueByName<std::vector<dof_id_type>, ReporterGatherContext>(
+        "gather")) // MooseDocs:gather
 {
   if (processor_id() == 0)
     for (dof_id_type rank = 0; rank < n_processors(); ++rank)

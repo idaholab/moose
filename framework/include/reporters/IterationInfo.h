@@ -49,6 +49,6 @@ T &
 IterationInfo::declareHelper(const std::string & item_name, T & _dummy, bool extra_check)
 {
   return (extra_check && (!_items.isValid() || _items.contains(item_name)))
-             ? declareValue<T>(item_name, REPORTER_MODE_REPLICATED)
+             ? declareValueByName<T>(item_name, REPORTER_MODE_REPLICATED)
              : _dummy;
 }

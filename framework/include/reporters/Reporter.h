@@ -11,6 +11,7 @@
 
 #include "OutputInterface.h"
 #include "ReporterData.h"
+#include "InputParameters.h"
 class FEProblemBase;
 
 /**
@@ -85,12 +86,19 @@ protected:
    * on how the data system operates for Reporter values.
    */
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & value_name, Args &&... args0);
+  T & declareValue(const std::string & param_name, Args &&... args0);
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & value_name, ReporterMode mode, Args &&... args0);
+  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args0);
+  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, Args &&... args0);
+  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args0);
   ///@}
 
 private:
+  /// Ref. to MooseObject params
+  const InputParameters & _reporter_params;
+
   /// The name of the MooseObject, from "_object_name" param
   const std::string & _reporter_name;
 
@@ -103,14 +111,32 @@ private:
 
 template <typename T, template <typename> class S, typename... Args>
 T &
-Reporter::declareValue(const std::string & value_name, Args &&... args)
+Reporter::declareValue(const std::string & param_name, Args &&... args)
 {
-  return declareValue<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
+  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
-Reporter::declareValue(const std::string & value_name, ReporterMode mode, Args &&... args)
+Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
+{
+  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
+  return declareValueByName<T, S>(value_name, mode, args...);
+}
+
+template <typename T, template <typename> class S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... args)
+{
+  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+}
+
+template <typename T, template <typename> class S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name,
+                             ReporterMode mode,
+                             Args &&... args)
 {
   ReporterName state_name(_reporter_name, value_name);
   return _reporter_data.declareReporterValue<T, S>(state_name, mode, args...);

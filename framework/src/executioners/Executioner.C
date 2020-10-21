@@ -109,7 +109,7 @@ PostprocessorValue &
 Executioner::addAttributeReporter(const std::string & name, Real initial_value)
 {
   // Get a reference to the value
-  PostprocessorValue & value = declareValue<PostprocessorValue>(name, initial_value);
+  PostprocessorValue & value = declareValueByName<PostprocessorValue>(name, initial_value);
 
   // Create storage for the old/older values
   ReporterName r_name(this->name(), name);

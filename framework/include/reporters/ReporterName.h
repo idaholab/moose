@@ -11,8 +11,6 @@
 #include <iostream>
 #include "MooseTypes.h"
 
-class Parameter;
-
 /**
  * The Reporter system is comprised of objects that can contain any number of data values. This
  * class is a wrapper that severs two main purposes.
