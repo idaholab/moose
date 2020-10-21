@@ -40,17 +40,17 @@ template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _solution(this->_sys.currentSolution()),
-    _phi(_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _phi_face_neighbor(
-        _assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_face_neighbor(
-        _assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
-        _assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
+        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 #ifdef MOOSE_GLOBAL_AD_INDEXING
     ,
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have this
@@ -440,13 +440,13 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
 
   ADReal numerator = 0, denominator = 0;
 
-  const auto node_elem_it = _mesh.nodeToElemMap().find(vertex.id());
+  const auto node_elem_it = this->_mesh.nodeToElemMap().find(vertex.id());
 
-  mooseAssert(node_elem_it != _mesh.nodeToElemMap().end(), "Should have found the node");
+  mooseAssert(node_elem_it != this->_mesh.nodeToElemMap().end(), "Should have found the node");
 
   const auto & connected_elems = node_elem_it->second;
 
-  const MeshBase & lm_mesh = _mesh.getMesh();
+  const MeshBase & lm_mesh = this->_mesh.getMesh();
 
   for (const auto elem_id : connected_elems)
   {
@@ -475,7 +475,7 @@ ADReal
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
   mooseAssert(
       dof_indices.size() == 1,
@@ -590,46 +590,48 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   ADReal elem_value = getElemValue(elem);
 
-  auto action_functor = [&grad, &volume_set, &volume, &elem_value, this](
-                            const Elem & functor_elem,
-                            const Elem * const neighbor,
-                            const FaceInfo * const fi,
-                            const Point & surface_vector,
-                            Real coord,
-                            const bool elem_has_info) {
-    mooseAssert(fi, "We need a FaceInfo for this action_functor");
+  auto action_functor =
+      [&grad, &volume_set, &volume, &elem_value, this](const Elem & functor_elem,
+                                                       const Elem * const neighbor,
+                                                       const FaceInfo * const fi,
+                                                       const Point & surface_vector,
+                                                       Real coord,
+                                                       const bool elem_has_info) {
+        mooseAssert(fi, "We need a FaceInfo for this action_functor");
 
-    grad += getFaceValue(neighbor, *fi, elem_value) * surface_vector;
+        grad += getFaceValue(neighbor, *fi, elem_value) * surface_vector;
 
-    if (!volume_set)
-    {
-      // We use the FaceInfo volumes because those values have been pre-computed and cached. An
-      // explicit call to elem->volume() here would incur unnecessary expense
-      if (elem_has_info)
-      {
-        coordTransformFactor(_subproblem, functor_elem.subdomain_id(), fi->elemCentroid(), coord);
-        volume = fi->elemVolume() * coord;
-      }
-      else
-      {
-        coordTransformFactor(_subproblem, neighbor->subdomain_id(), fi->neighborCentroid(), coord);
-        volume = fi->neighborVolume() * coord;
-      }
+        if (!volume_set)
+        {
+          // We use the FaceInfo volumes because those values have been pre-computed and cached. An
+          // explicit call to elem->volume() here would incur unnecessary expense
+          if (elem_has_info)
+          {
+            coordTransformFactor(
+                this->_subproblem, functor_elem.subdomain_id(), fi->elemCentroid(), coord);
+            volume = fi->elemVolume() * coord;
+          }
+          else
+          {
+            coordTransformFactor(
+                this->_subproblem, neighbor->subdomain_id(), fi->neighborCentroid(), coord);
+            volume = fi->neighborVolume() * coord;
+          }
 
-      volume_set = true;
-    }
-  };
+          volume_set = true;
+        }
+      };
 
-  Moose::FV::loopOverElemFaceInfo(*elem, _mesh, _subproblem, action_functor);
+  Moose::FV::loopOverElemFaceInfo(*elem, this->_mesh, this->_subproblem, action_functor);
 
   mooseAssert(volume_set && volume > 0, "We should have set the volume");
 
   grad /= volume;
 
-  const auto coord_system = _subproblem.getCoordSystem(elem->subdomain_id());
+  const auto coord_system = this->_subproblem.getCoordSystem(elem->subdomain_id());
   if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
   {
-    const auto r_coord = _subproblem.getAxisymmetricRadialCoord();
+    const auto r_coord = this->_subproblem.getAxisymmetricRadialCoord();
     grad(r_coord) -= elem_value / elem->centroid()(r_coord);
   }
 
