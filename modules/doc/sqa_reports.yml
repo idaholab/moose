@@ -243,7 +243,7 @@ Requirements:
     tutorials:
         directories:
             - tutorials
-        log_duplicate_requirement: WARNING
+        log_duplicate_requirement: NONE # since the steps contain the same test this is expected
         show_warning: false
 
     scripts:
