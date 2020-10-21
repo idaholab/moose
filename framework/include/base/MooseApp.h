@@ -525,6 +525,15 @@ public:
                                                  bool read_only,
                                                  const RestartableDataMapName & metaname = "");
 
+  /*
+   * Check if a restartable meta data exists or not.
+   *
+   * @param name The full (unique) name.
+   * @param metaname The name to the meta data storage
+   */
+  bool hasRestartableMetaData(const std::string & name,
+                              const RestartableDataMapName & metaname) const;
+
   /**
    * Return reference to the restartable data object
    * @return A const reference to the restartable data object

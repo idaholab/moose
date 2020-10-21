@@ -1,0 +1,12 @@
+[Tests]
+  [./check_mesh_meta_data]
+    type = 'RunApp'
+    input = 'check_mesh_meta_data_test.i'
+    # Note: AllSideSetsByNormalsGenerator used by this test only works with replicated mesh
+    mesh_mode = REPLICATED
+    issues = '#15987'
+    design = '/MeshMetaDataInterface.md'
+    expect_out = 'Mesh meta data boundary_normals is provided by mesh generator normal'
+    requirement = "The system shall support the ability for actions to query the existence of a mesh attribute (meta data)."
+  [../]
+[]

@@ -47,7 +47,9 @@ SideSetsFromNormalsGenerator::validParams()
 SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
     _input(getMesh("input")),
-    _normals(getParam<std::vector<Point>>("normals"))
+    _normals(getParam<std::vector<Point>>("normals")),
+    _boundary_to_normal_map(
+        declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
@@ -100,7 +102,10 @@ SideSetsFromNormalsGenerator::generate()
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
+  {
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
+    _boundary_to_normal_map[boundary_ids[i]] = _normals[i];
+  }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

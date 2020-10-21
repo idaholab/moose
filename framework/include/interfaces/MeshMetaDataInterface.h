@@ -55,6 +55,11 @@ protected:
   template <typename T>
   const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
 
+  /**
+   * Whether or not a mesh meta-data exists.
+   */
+  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+
 private:
   /// Helper function for actually registering the restartable data.
   RestartableDataValue & registerMetaDataOnApp(const std::string & name,
