@@ -144,15 +144,15 @@ dotProduct(const W<T> & a, const W2<T2> & b)
   return a.contract(b);
 }
 
-template <typename T>
-T
-poly(std::vector<Real> c, const T x, const bool derivative = false)
+template <typename T1, typename T2>
+T2
+poly(T1 c, const T2 x, const bool derivative = false)
 {
   const unsigned int size = c.size();
   if (size == 0)
     return 0.0;
 
-  T value = c[0];
+  T2 value = c[0];
   if (derivative)
   {
     value *= size - 1;
