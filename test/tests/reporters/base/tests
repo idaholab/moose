@@ -9,4 +9,14 @@
 
     requirement = "The system shall have a system for computing and retrieving aggregate values of arbitrary type."
   []
+
+  [error]
+    type = RunException
+    input = base.i
+    allow_test_objects = true
+    cli_args = "Reporters/b/int_reporter=wrong"
+    expect_err = "The supplied name ReporterName 'Reporters/b/int_reporter' must contain the '/' delimiter."
+
+    requirement = "The system shall error if an invalid name is provided when retrieving aggregate value."
+   []
 []

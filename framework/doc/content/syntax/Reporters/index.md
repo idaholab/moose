@@ -48,6 +48,24 @@ The `getReporterValue` method automatically checks for an input parameter by the
 name specified in the parameter will be used. To retrieve a Reporter value directly by name use
 the `getReporterValueByName` method.
 
+The get methods accept a `ReporterName` object, which is simply the combination of the name
+of the producing Reporter object and the name of the reporter value. It is possible to request
+a `ReporterName` in the `validParams` function of the consumer. For example, in the `validParams`
+function a parameter with a type of `ReporterName` is specified.
+
+!listing test/src/reporters/TestReporter.C line=addRequiredParam<ReporterName>("int_reporter"
+
+Then in the initialization list a reference to the desired value is initialized by supplying the
+name of the parameter containing the `ReporterValue`.
+
+!listing test/src/reporters/TestReporter.C line=_int(getReporterValue<int>("int_reporter")
+
+In the input file, the ReporterName is provide as follows where "a" is the name of the
+producer Reporter object in the `[Reporters]` block of the input file that is producing data
+with the name "int", which is the name given to the data within the `declareValue` metho of that
+object.
+
+!listing reporters/base/base.i line=int_reporter
 
 ## Reporter Value Types id=reporter-value-types
 
@@ -76,8 +94,9 @@ Values can be computed or consumed in any of the prescribed modes. When consumed
 production is checked against the mode consumption. [producer-consumer-modes] details the
 actions taken by the various possible modes of production and consumption for a Reporter value.
 
-!table caption=Default operations for the default context that occur for Reporter values depending on the modes of production and
-               consumption. The prefix `REPORTER_MODE_` is omitted for clarity.
+!table caption=Default operations for the default context that occur for Reporter values depending
+               on the modes of production and consumption. The prefix `REPORTER_MODE_` is omitted
+               for clarity.
        id=producer-consumer-modes
 | Producer Mode | Consumer Mode | Operation |
 | :- | :- | :- |

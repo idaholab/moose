@@ -14,13 +14,13 @@
 [Reporters]
   [b]
     type = TestGetReporter
-    int_reporter = a::int
-    real_reporter = a::real
-    vector_reporter = a::vector
-    string_reporter = a::string
-    broadcast_reporter = a::broadcast
-    scatter_reporter = a::scatter
-    gather_reporter = a::gather
+    int_reporter = a/int
+    real_reporter = a/real
+    vector_reporter = a/vector
+    string_reporter = a/string
+    broadcast_reporter = a/broadcast
+    scatter_reporter = a/scatter
+    gather_reporter = a/gather
   []
   [a]
     type = TestDeclareReporter

@@ -23,6 +23,11 @@ class Parameter;
  * 2. Provide a means for defining special Parser syntax to allow for a single input parameter
  *    to define both the object and value name. This is the primary reason for this class, please
  *    refer to Parser.C for the specialization.
+ *
+ * Examples:
+ *   ReporterName("object", "data");
+ *   ReporterName("object/data");
+ *
  */
 class ReporterName
 {
@@ -44,7 +49,7 @@ public:
   const std::string & getValueName() const;
 
   /**
-   * Return the data name for the Reporter value.
+   * Return the name of the object and data as object_name/data_name
    */
   const std::string & getCombinedName() const;
 

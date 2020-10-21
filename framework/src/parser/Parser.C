@@ -2013,7 +2013,9 @@ Parser::setScalarParameter<ReporterName, std::string>(
     bool /*in_global*/,
     GlobalParamsAction * /*global_block*/)
 {
-  std::vector<std::string> names = MooseUtils::split(_root->param<std::string>(full_name), "::");
+  std::vector<std::string> names = MooseUtils::rsplit(_root->param<std::string>(full_name), "/", 2);
+  if (names.size() != 2)
+    mooseError("The supplied name ReporterName '", full_name, "' must contain the '/' delimiter.");
   param->set() = ReporterName(names[0], names[1]);
 }
 
