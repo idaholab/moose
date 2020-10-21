@@ -18,7 +18,7 @@ card command are listed in [card-settings].
 
 !devel! example id=gallery-example-card
                caption=Example use of the 'card' command.
-!card level_set/vortex_out.gif title=Vortex Benchmark style=width:50%;
+!card level_set/vortex_out.mp4 title=Vortex Benchmark style=width:50%;
 The level set equation is commonly used to for interface tracking, especially when the interface
 velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
 !devel-end!
@@ -39,11 +39,11 @@ are listed in [gallery-settings].
 !devel! example id=gallery-example-gallery
                caption=Example use of the 'gallery' command.
 !gallery!
-!card level_set/example_circle_64.gif title=Translation
+!card level_set/example_circle_64.mp4 title=Translation
 
-!card level_set/circle_rotate_master_out.gif title=Rotation
+!card level_set/circle_rotate_master_out.mp4 title=Rotation
 
-!card level_set/vortex_out.gif title=Vortex
+!card level_set/vortex_out.mp4 title=Vortex
 !gallery-end!
 !devel-end!
 

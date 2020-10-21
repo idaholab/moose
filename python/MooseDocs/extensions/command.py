@@ -153,7 +153,7 @@ class InlineCommand(CommandBase):
 
     RE = re.compile(r'\['                        # opening bracket "["
                     r'!(?P<command>\w+)'         # the primary command
-                    r'(?:!(?P<subcommand>\w+))?' # optional subcommand
+                    r'(?:!(?P<subcommand>\S+))?' # optional subcommand
                     r' *(?P<settings>\w+=.*?)?'  # optional settings
                     r'\]'                        # closing bracket "]"
                     r'(?:\((?P<inline>.*?)\))?', # optional inline content
