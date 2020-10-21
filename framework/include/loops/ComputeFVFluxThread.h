@@ -476,9 +476,11 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
       mooseAssert(pr.second,
                   "Multiple objects supply property ID "
                       << pr.second
-                      << ". Do you have materials on neighboring subdomains that define the same "
+                      << ". Do you have different block-restricted physics *and* different "
+                         "block-restricted materials "
+                         "on either side of an interface that define the same "
                          "property name? Unfortunately that is not supported in FV because we have "
-                         "to allow ghosting of material properties.");
+                         "to allow ghosting of material properties for block-restricted physics.");
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
@@ -505,37 +507,44 @@ ComputeFVFluxThread<RangeType>::finalizeContainers()
   //
   // Finalize our kernels
   //
-  std::set_union(_elem_sub_fv_flux_kernels.begin(),
-                 _elem_sub_fv_flux_kernels.end(),
-                 _neigh_sub_fv_flux_kernels.begin(),
-                 _neigh_sub_fv_flux_kernels.end(),
-                 std::inserter(_fv_flux_kernels, _fv_flux_kernels.begin()));
+  const bool same_kernels = _elem_sub_fv_flux_kernels == _neigh_sub_fv_flux_kernels;
+  if (same_kernels)
+    _fv_flux_kernels = _elem_sub_fv_flux_kernels;
+  else
+    std::set_union(_elem_sub_fv_flux_kernels.begin(),
+                   _elem_sub_fv_flux_kernels.end(),
+                   _neigh_sub_fv_flux_kernels.begin(),
+                   _neigh_sub_fv_flux_kernels.end(),
+                   std::inserter(_fv_flux_kernels, _fv_flux_kernels.begin()));
+  const bool need_ghosting = !same_kernels;
 
   //
   // Finalize our element face materials
   //
   _elem_face_mats = _elem_sub_elem_face_mats;
 
-  // Add any element face materials from the neighboring subdomain that do not exist on the
-  // element subdomain
-  for (std::shared_ptr<MaterialBase> neigh_sub_elem_face_mat : _neigh_sub_elem_face_mats)
-    if (std::find(_elem_sub_elem_face_mats.begin(),
-                  _elem_sub_elem_face_mats.end(),
-                  neigh_sub_elem_face_mat) == _elem_sub_elem_face_mats.end())
-      _elem_face_mats.push_back(neigh_sub_elem_face_mat);
+  if (need_ghosting)
+    // Add any element face materials from the neighboring subdomain that do not exist on the
+    // element subdomain
+    for (std::shared_ptr<MaterialBase> neigh_sub_elem_face_mat : _neigh_sub_elem_face_mats)
+      if (std::find(_elem_sub_elem_face_mats.begin(),
+                    _elem_sub_elem_face_mats.end(),
+                    neigh_sub_elem_face_mat) == _elem_sub_elem_face_mats.end())
+        _elem_face_mats.push_back(neigh_sub_elem_face_mat);
 
   //
   // Finalize our neighbor face materials
   //
-  _neigh_face_mats = _elem_sub_neigh_face_mats;
+  _neigh_face_mats = _neigh_sub_neigh_face_mats;
 
-  // Add any neighbor face materials from the neighboring subdomain that do not exist on the
-  // element subdomain
-  for (std::shared_ptr<MaterialBase> neigh_sub_neigh_face_mat : _neigh_sub_neigh_face_mats)
-    if (std::find(_elem_sub_neigh_face_mats.begin(),
-                  _elem_sub_neigh_face_mats.end(),
-                  neigh_sub_neigh_face_mat) == _elem_sub_neigh_face_mats.end())
-      _neigh_face_mats.push_back(neigh_sub_neigh_face_mat);
+  if (need_ghosting)
+    // Add any neighbor face materials from the element subdomain that do not exist on the
+    // neighbor subdomain
+    for (std::shared_ptr<MaterialBase> elem_sub_neigh_face_mat : _elem_sub_neigh_face_mats)
+      if (std::find(_neigh_sub_neigh_face_mats.begin(),
+                    _neigh_sub_neigh_face_mats.end(),
+                    elem_sub_neigh_face_mat) == _neigh_sub_neigh_face_mats.end())
+        _neigh_face_mats.push_back(elem_sub_neigh_face_mat);
 
   //
   // Check satisfaction of material property dependencies

@@ -179,6 +179,9 @@ AttribSubdomains::isMatch(const Attribute & other) const
   auto cond = a->_vals[0];
   if (cond == Moose::ANY_BLOCK_ID)
     return true;
+  else if (cond == Moose::INVALID_BLOCK_ID)
+    return false;
+
   for (auto id : _vals)
   {
     if (id == cond || id == Moose::ANY_BLOCK_ID)

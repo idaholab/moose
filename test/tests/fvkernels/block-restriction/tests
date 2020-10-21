@@ -12,7 +12,7 @@
     method = 'devel dbg'
     input = 'fv-and-fe-block-restriction.i'
     expect_err = 'Multiple objects supply property ID'
-    requirement = 'The system shall error in non-optimized modes if a user supplies material properties with the same name on neighboring subdomains when doing finite volume calculations. This is because we have to support ghosting of material properties.'
+    requirement = 'The system shall error in non-optimized modes if a user supplies a material property with the same name from different block-restricted materials on neighboring subdomains when there are different sets of finite volume flux kernels on those same neighboring subdomains. This is because we have to support ghosting of material properties for block restricted finite volume flux kernels.'
   []
   [distinct-mats]
     type = Exodiff
@@ -29,5 +29,19 @@
     difference_tol = 1e-4
     ratio_tol = 1e-7
     cli_args = "FVKernels/active='good_left_diff left_coupled good_right_diff right_coupled' Materials/active='fe_mat_left good_fv_mat_left fe_mat_right good_fv_mat_right'"
+  []
+  [just-mat-blk-restriction]
+    type = Exodiff
+    input = 'just-mat-blk-restriction.i'
+    exodiff = 'just-mat-blk-restriction_out.e'
+    requirement = 'The system shall allow different materials to define the same material property name on different sides of an interface when the finite volume physics is the same on both sides of the interface.'
+  []
+  [just-mat-blk-restriction-jac]
+    type = PetscJacobianTester
+    input = 'just-mat-blk-restriction.i'
+    run_sim = True
+    requirement = 'The system shall compute a perfect Jacobian when different materials define the same material property on different sides of a interface and the finite volume physics are the same on both sides of the interface.'
+    difference_tol = 1e-4
+    ratio_tol = 1e-7
   []
 []
