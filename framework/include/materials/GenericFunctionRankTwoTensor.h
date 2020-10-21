@@ -13,23 +13,25 @@
 #include "RankTwoTensor.h"
 
 /**
- * Declares a constant material property of type RankTwoTensor.
+ * Declares a function material property of type RankTwoTensor.
  */
 template <bool is_ad>
-class GenericConstantRankTwoTensorTempl : public Material
+class GenericFunctionRankTwoTensorTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericConstantRankTwoTensorTempl(const InputParameters & parameters);
+  GenericFunctionRankTwoTensorTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  RankTwoTensor _tensor;
   GenericMaterialProperty<RankTwoTensor, is_ad> & _prop;
+  const std::vector<FunctionName> _function_names;
+  const unsigned int _num_functions;
+  std::vector<const Function *> _functions;
 };
 
-typedef GenericConstantRankTwoTensorTempl<false> GenericConstantRankTwoTensor;
-typedef GenericConstantRankTwoTensorTempl<true> ADGenericConstantRankTwoTensor;
+typedef GenericFunctionRankTwoTensorTempl<false> GenericFunctionRankTwoTensor;
+typedef GenericFunctionRankTwoTensorTempl<true> ADGenericFunctionRankTwoTensor;
