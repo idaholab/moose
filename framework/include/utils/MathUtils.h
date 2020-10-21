@@ -19,10 +19,10 @@
 namespace MathUtils
 {
 
-Real poly1Log(Real x, Real tol, int deriv);
-Real poly2Log(Real x, Real tol, int deriv);
-Real poly3Log(Real x, Real tol, int order);
-Real poly4Log(Real x, Real tol, int order);
+Real poly1Log(Real x, Real tol, unsigned int derivative_order);
+Real poly2Log(Real x, Real tol, unsigned int derivative_order);
+Real poly3Log(Real x, Real tol, unsigned int derivative_order);
+Real poly4Log(Real x, Real tol, unsigned int derivative_order);
 Real taylorLog(Real x);
 
 template <typename T>
@@ -144,15 +144,17 @@ dotProduct(const W<T> & a, const W2<T2> & b)
   return a.contract(b);
 }
 
-template <typename T1, typename T2>
-T2
-poly(T1 c, const T2 x, const bool derivative = false)
+template <typename C,
+          typename T,
+          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+R
+poly(C c, const T x, const bool derivative = false)
 {
   const unsigned int size = c.size();
   if (size == 0)
     return 0.0;
 
-  T2 value = c[0];
+  R value = c[0];
   if (derivative)
   {
     value *= size - 1;
