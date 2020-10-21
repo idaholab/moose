@@ -63,7 +63,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./set_inlet_value_ctrl]
     type = SetRealValueControl
     component = inlet

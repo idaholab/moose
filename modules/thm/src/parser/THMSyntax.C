@@ -14,6 +14,7 @@ associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("THMCreateMeshAction", "Components");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
   syntax.registerActionSyntax("AddComponentAction", "Components/*/*", "THM:add_component");
+  syntax.registerActionSyntax("THMAddControlAction", "ControlLogic/*", "add_control");
   syntax.registerActionSyntax("AddIterationCountPostprocessorsAction", "Debug");
   syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
   syntax.registerActionSyntax("THMDebugAction", "Debug");
@@ -39,8 +40,6 @@ registerActions(Syntax & syntax)
 
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
-
-  syntax.replaceActionSyntax("THMAddControlAction", "Controls/*", "add_control");
 
   try
   {

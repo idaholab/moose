@@ -50,7 +50,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./p0_fn_ctrl]
     type = TimeFunctionControl
     component = inlet

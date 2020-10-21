@@ -7,8 +7,8 @@ The THMAddControlAction has not been documented. The content contained on this p
 typical automatic documentation associated with an Action; however, what is contained is ultimately
 determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/THMAddControlAction
+!syntax description /ControlLogic/THMAddControlAction
 
-!syntax parameters /Controls/THMAddControlAction
+!syntax parameters /ControlLogic/THMAddControlAction
 
 !bibtex bibliography

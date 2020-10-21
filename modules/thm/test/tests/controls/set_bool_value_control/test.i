@@ -82,7 +82,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./trip_ctrl]
     type = UnitTripControl
     condition = 'val > 1.5'

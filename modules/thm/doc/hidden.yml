@@ -131,19 +131,19 @@
 - /Constraints/MassBalanceConstraint
 - /Constraints/MassFreeConstraint
 
-- /Controls
-- /Controls/THMAddControlAction
-- /Controls/ControlData
-- /Controls/CopyPostprocessorValueControl
-- /Controls/DelayControl
-- /Controls/GetFunctionValueControl
-- /Controls/PIDControl
-- /Controls/SetBoolValueControl
-- /Controls/SetRealValueControl
-- /Controls/THMControl
-- /Controls/TerminateControl
-- /Controls/TimeFunctionControl
-- /Controls/UnitTripControl
+- /ControlLogic
+- /ControlLogic/THMAddControlAction
+- /ControlLogic/ControlData
+- /ControlLogic/CopyPostprocessorValueControl
+- /ControlLogic/DelayControl
+- /ControlLogic/GetFunctionValueControl
+- /ControlLogic/PIDControl
+- /ControlLogic/SetBoolValueControl
+- /ControlLogic/SetRealValueControl
+- /ControlLogic/THMControl
+- /ControlLogic/TerminateControl
+- /ControlLogic/TimeFunctionControl
+- /ControlLogic/UnitTripControl
 
 - /Debug/THMDebugAction
 - /Debug/THMPrintComponentLoopsAction

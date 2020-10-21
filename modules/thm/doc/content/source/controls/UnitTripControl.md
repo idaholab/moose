@@ -7,12 +7,12 @@ The UnitTripControl has not been documented. The content contained on this page 
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/UnitTripControl
+!syntax description /ControlLogic/UnitTripControl
 
-!syntax parameters /Controls/UnitTripControl
+!syntax parameters /ControlLogic/UnitTripControl
 
-!syntax inputs /Controls/UnitTripControl
+!syntax inputs /ControlLogic/UnitTripControl
 
-!syntax children /Controls/UnitTripControl
+!syntax children /ControlLogic/UnitTripControl
 
 !bibtex bibliography

@@ -81,7 +81,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./W_dot_ctrl]
     type = TimeFunctionControl
     component = turbine

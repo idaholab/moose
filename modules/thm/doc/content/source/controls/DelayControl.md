@@ -11,6 +11,6 @@ The formula used for computing the output value is:
 \mathrm{output}(t) = \mathrm{input}(t - \tau)
 \end{equation}
 
-!syntax parameters /Controls/DelayControl
+!syntax parameters /ControlLogic/DelayControl
 
-!syntax inputs /Controls/DelayControl
+!syntax inputs /ControlLogic/DelayControl

@@ -67,7 +67,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./inlet_rho_ctrl]
     type = TimeFunctionControl
     component = inlet

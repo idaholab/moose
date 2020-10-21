@@ -57,7 +57,7 @@
 [Components]
 []
 
-[Controls]
+[ControlLogic]
   [solve_on_off]
     type = THMSolvePostprocessorControl
     postprocessor = active

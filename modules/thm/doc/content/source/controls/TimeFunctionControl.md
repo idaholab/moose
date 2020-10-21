@@ -7,12 +7,12 @@ The TimeFunctionControl has not been documented. The content contained on this p
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/TimeFunctionControl
+!syntax description /ControlLogic/TimeFunctionControl
 
-!syntax parameters /Controls/TimeFunctionControl
+!syntax parameters /ControlLogic/TimeFunctionControl
 
-!syntax inputs /Controls/TimeFunctionControl
+!syntax inputs /ControlLogic/TimeFunctionControl
 
-!syntax children /Controls/TimeFunctionControl
+!syntax children /ControlLogic/TimeFunctionControl
 
 !bibtex bibliography

@@ -68,7 +68,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./inlet_m_dot_ctrl]
     type = TimeFunctionControl
     component = inlet

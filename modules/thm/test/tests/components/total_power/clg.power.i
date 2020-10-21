@@ -43,7 +43,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./reactor_power_control]
     type = TimeFunctionControl
     component = total_power
