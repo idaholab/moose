@@ -9,13 +9,13 @@
     type = 'CSVDiff'
     csvdiff = clg.test.torque.csv
     input = 'clg.test.i'
-    cli_args = 'Controls/motor_ctrl/parameter=torque Controls/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
+    cli_args = 'ControlLogic/motor_ctrl/parameter=torque ControlLogic/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
   []
 
   [clg_test_inertia]
     type = 'CSVDiff'
     csvdiff = clg.test.inertia.csv
     input = 'clg.test.i'
-    cli_args = 'Controls/motor_ctrl/parameter=inertia Controls/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
+    cli_args = 'ControlLogic/motor_ctrl/parameter=inertia ControlLogic/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
   []
 []

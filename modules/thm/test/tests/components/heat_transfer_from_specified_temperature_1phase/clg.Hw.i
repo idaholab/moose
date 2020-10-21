@@ -89,7 +89,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./pipe_Hw_ctrl]
     type = TimeFunctionControl
     component = ht_pipe1

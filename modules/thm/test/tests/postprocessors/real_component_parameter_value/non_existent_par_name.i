@@ -61,7 +61,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./outlet_p_fn]
     type = GetFunctionValueControl
     function = p_fn

@@ -60,7 +60,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./trip_ctrl]
     type = UnitTripControl
     condition = 'a > 0.6'

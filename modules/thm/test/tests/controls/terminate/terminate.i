@@ -46,7 +46,7 @@
 [Components]
 []
 
-[Controls]
+[ControlLogic]
   [./threshold]
     type = UnitTripControl
     condition = 'dt_pp > 3'

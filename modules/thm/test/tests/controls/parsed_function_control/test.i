@@ -86,7 +86,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./ctrl]
     type = GetFunctionValueControl
     function = 2

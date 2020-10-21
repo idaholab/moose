@@ -52,7 +52,7 @@
   []
 []
 
-[Controls]
+[ControlLogic]
   [motor_ctrl]
     type = TimeFunctionControl
     component = motor

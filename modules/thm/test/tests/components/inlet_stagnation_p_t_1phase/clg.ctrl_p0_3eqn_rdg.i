@@ -61,7 +61,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./set_inlet_value]
     type = TimeFunctionControl
     component = inlet
