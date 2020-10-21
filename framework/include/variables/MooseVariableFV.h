@@ -480,13 +480,6 @@ private:
   const ADReal & getVertexValue(const Node & vertex) const;
 
 public:
-  /**
-   * Get custom coefficients on a per-element basis. These should correspond to \p a
-   * coefficients in the notation of Moukallad's "Finite Volume Method in Computational Fluid
-   * Dynamics"
-   */
-  const ADReal &
-  adCoeff(const Elem * elem, void * context, ADReal (*fn)(const Elem * const, void *)) const;
 #endif
 
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -598,9 +591,6 @@ private:
 
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
-
-  /// A cache for storing FV \p a coefficients on elements
-  mutable std::unordered_map<const Elem *, ADReal> _elem_to_coeff;
 
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;

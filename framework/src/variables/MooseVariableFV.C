@@ -736,32 +736,9 @@ MooseVariableFV<OutputType>::clearCaches()
   _elem_to_grad.clear();
   _face_to_unc_grad.clear();
   _face_to_grad.clear();
-  _elem_to_coeff.clear();
   _vertex_to_value.clear();
 #endif
 }
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-template <typename OutputType>
-const ADReal &
-MooseVariableFV<OutputType>::adCoeff(const Elem * const elem,
-                                     void * context,
-                                     ADReal (*fn)(const Elem * const, void *)) const
-{
-  auto it = _elem_to_coeff.find(elem);
-
-  if (it != _elem_to_coeff.end())
-    return it->second;
-
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
-  // boolean denoting whether a new insertion took place
-  auto emplace_ret = _elem_to_coeff.emplace(elem, (*fn)(elem, context));
-
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-
-  return emplace_ret.first->second;
-}
-#endif
 
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
