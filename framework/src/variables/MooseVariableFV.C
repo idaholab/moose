@@ -433,19 +433,13 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
   auto emplace_ret = _vertex_to_value.emplace(&vertex, 0);
-
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-
   ADReal & value = emplace_ret.first->second;
-
   ADReal numerator = 0, denominator = 0;
 
   const auto node_elem_it = this->_mesh.nodeToElemMap().find(vertex.id());
-
   mooseAssert(node_elem_it != this->_mesh.nodeToElemMap().end(), "Should have found the node");
-
   const auto & connected_elems = node_elem_it->second;
-
   const MeshBase & lm_mesh = this->_mesh.getMesh();
 
   for (const auto elem_id : connected_elems)
@@ -456,11 +450,8 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
     if (this->hasBlocks(elem->subdomain_id()))
     {
       const auto & elem_value = getElemValue(elem);
-
       auto distance = (vertex - elem->centroid()).norm();
-
       numerator += elem_value / distance;
-
       denominator += 1. / distance;
     }
   }

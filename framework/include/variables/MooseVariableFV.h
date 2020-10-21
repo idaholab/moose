@@ -286,13 +286,21 @@ public:
   const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
 
   /**
-   * Retrieve (or potentially compute) the gradient on the provided face
-   * @param face The face for which to retrieve the gradient
+   * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
+   * "Correcting" the face gradient involves weighting the gradient stencil more heavily on the
+   * solution values on the face-neighbor cells than a linear interpolation between cell center
+   * gradients does
+   * @param face The face for which to retrieve the gradient.
    */
   const VectorValue<ADReal> & adGradSln(const FaceInfo & fi) const;
 
   /**
-   * Retrieve (or potentially compute) the uncorrected gradient on the provided face
+   * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
+   * uncorrected gradient is a simple linear interpolation between cell gradients computed at the
+   * centers of the two neighboring cells. "Correcting" the face gradient involves weighting the
+   * gradient stencil more heavily on the solution values on the face-neighbor cells than the linear
+   * interpolation process does. This is commonly known as a cross-diffusion correction. Correction
+   * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
   const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi) const;
@@ -429,15 +437,49 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
+  /**
+   * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
+   * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
+   * neighbor value based on any Dirichlet boundary conditions associated with the face information,
+   * or absent that we assume a zero gradient and simply return the \p elem_value
+   * @param neighbor The \p neighbor element that we want to retrieve the solution value for
+   * @param fi The face information object
+   * @param elem_value The solution value on the "element". This value may be used for computing the
+   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
+   * @return The neighbor solution value with derivative seeding according to the associated degree
+   * of freedom
+   */
   ADReal getNeighborValue(const Elem * const neighbor,
                           const FaceInfo & fi,
                           const ADReal & elem_value) const;
 
+private:
+  /**
+   * get the finite volume solution interpolated to the face associated with \p fi.  If the
+   * neighbor is null or this variable doesn't exist on the neighbor element's subdomain, then we
+   * compute a face value based on any Dirichlet boundary conditions associated with the face
+   * information, or absent that we assume a zero gradient and simply return the \p elem_value
+   * @param neighbor The \p neighbor element which will help us compute the face interpolation
+   * @param fi The face information object
+   * @param elem_value The solution value on the "element". This value will be returned as the face
+   * value if there is no associated neighbor value and there is no Dirichlet boundary condition on
+   * the face associated with \p fi. If there is an associated neighbor, then \p elem_value will be
+   * used as part of a linear interpolation
+   * @return The interpolated face value
+   */
   ADReal
   getFaceValue(const Elem * const neighbor, const FaceInfo & fi, const ADReal & elem_value) const;
 
+  /**
+   * Get the finite volume solution interpolated to \p vertex. This interpolation is done doing a
+   * distance-weighted average of neighboring cell center values
+   * @param vertex The mesh vertex we want to interpolate the finite volume solution to
+   * @return The interpolated vertex value with derivative information from the degrees of freedom
+   * associated with the neighboring cell centers
+   */
   const ADReal & getVertexValue(const Node & vertex) const;
 
+public:
   /**
    * Get custom coefficients on a per-element basis. These should correspond to \p a
    * coefficients in the notation of Moukallad's "Finite Volume Method in Computational Fluid
@@ -560,8 +602,13 @@ private:
   /// A cache for storing FV \p a coefficients on elements
   mutable std::unordered_map<const Elem *, ADReal> _elem_to_coeff;
 
+  /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 
+  /// Whether to use an extended stencil for interpolating the solution to face centers. If this is
+  /// true then the face center value is computed as a weighted average of connected vertices. If it
+  /// is false, then the face center value is simply a linear interpolation betweeh the two
+  /// neighboring cell center values
   const bool _use_extended_stencil;
 #endif
 };
