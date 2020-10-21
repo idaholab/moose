@@ -7,12 +7,12 @@ The CopyPostprocessorValueControl has not been documented. The content contained
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/CopyPostprocessorValueControl
+!syntax description /ControlLogic/CopyPostprocessorValueControl
 
-!syntax parameters /Controls/CopyPostprocessorValueControl
+!syntax parameters /ControlLogic/CopyPostprocessorValueControl
 
-!syntax inputs /Controls/CopyPostprocessorValueControl
+!syntax inputs /ControlLogic/CopyPostprocessorValueControl
 
-!syntax children /Controls/CopyPostprocessorValueControl
+!syntax children /ControlLogic/CopyPostprocessorValueControl
 
 !bibtex bibliography

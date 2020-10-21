@@ -7,12 +7,12 @@ The PIDControl has not been documented. The content contained on this page inclu
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/PIDControl
+!syntax description /ControlLogic/PIDControl
 
-!syntax parameters /Controls/PIDControl
+!syntax parameters /ControlLogic/PIDControl
 
-!syntax inputs /Controls/PIDControl
+!syntax inputs /ControlLogic/PIDControl
 
-!syntax children /Controls/PIDControl
+!syntax children /ControlLogic/PIDControl
 
 !bibtex bibliography

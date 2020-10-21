@@ -7,12 +7,12 @@ The GetFunctionValueControl has not been documented. The content contained on th
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/GetFunctionValueControl
+!syntax description /ControlLogic/GetFunctionValueControl
 
-!syntax parameters /Controls/GetFunctionValueControl
+!syntax parameters /ControlLogic/GetFunctionValueControl
 
-!syntax inputs /Controls/GetFunctionValueControl
+!syntax inputs /ControlLogic/GetFunctionValueControl
 
-!syntax children /Controls/GetFunctionValueControl
+!syntax children /ControlLogic/GetFunctionValueControl
 
 !bibtex bibliography

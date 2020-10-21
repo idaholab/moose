@@ -7,12 +7,12 @@ The SetBoolValueControl has not been documented. The content contained on this p
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/SetBoolValueControl
+!syntax description /ControlLogic/SetBoolValueControl
 
-!syntax parameters /Controls/SetBoolValueControl
+!syntax parameters /ControlLogic/SetBoolValueControl
 
-!syntax inputs /Controls/SetBoolValueControl
+!syntax inputs /ControlLogic/SetBoolValueControl
 
-!syntax children /Controls/SetBoolValueControl
+!syntax children /ControlLogic/SetBoolValueControl
 
 !bibtex bibliography
