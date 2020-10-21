@@ -131,7 +131,7 @@ template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -146,7 +146,7 @@ template <typename T>
 const ADMaterialProperty<T> &
 Material::getADMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -161,7 +161,7 @@ template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -176,7 +176,7 @@ template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.

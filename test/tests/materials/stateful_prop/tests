@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1927 #8278 #4268 #5658 #3277 #3414 #808 #8450 #13972'
+  issues = '#1927 #8278 #4268 #5658 #3277 #3414 #808 #8450 #13972 #15956'
   design = 'syntax/Materials/index.md'
 
   [stateful_old]
@@ -127,5 +127,33 @@
 
     requirement = 'The system shall not store any stateful material properties that are declared but '
                   'never used.'
+  []
+
+  [ad]
+    requirement = 'The system shall be able to correctly handle stateful materials'
+    [reg]
+      type = 'Exodiff'
+      input = 'stateful_reg.i'
+      exodiff = 'stateful_reg_out.e'
+      detail = 'when using a regular material property.'
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'stateful_ad.i'
+      exodiff = 'stateful_ad_out.e'
+      detail = 'when using an AD material property.'
+    []
+    [template_reg]
+      type = 'Exodiff'
+      input = 'stateful_reg_template.i'
+      exodiff = 'stateful_reg_template_out.e'
+      detail = 'when using a regular material property using templated methods.'
+    []
+    [template_ad]
+      type = 'Exodiff'
+      input = 'stateful_ad_template.i'
+      exodiff = 'stateful_ad_template_out.e'
+      detail = 'when using an AD material property using templated methods.'
+    []
   []
 []
