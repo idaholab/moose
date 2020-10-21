@@ -16,15 +16,16 @@ InputParameters
 TestDeclareReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addParam<ReporterValueName>("int_name", "int", "The name of the interger data");
+  params.addParam<ReporterValueName>(
+      "int_name", "int", "The name of the interger data"); // MooseDocs:data
   return params;
 }
 
 TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _int(declareValue<int>("int_name", 1980)),
+    _int(declareValue<int>("int_name", 1980)), // MooseDocs:producer
     _real(declareValueByName<Real>("real")),
-    _vector(declareValueByName<std::vector<Real>>("vector")), // MooseDocs:producer
+    _vector(declareValueByName<std::vector<Real>>("vector")),
     _string(declareValueByName<std::string>("string")),
     _bcast_value(declareValueByName<Real, ReporterBroadcastContext>("broadcast")),
     _scatter_value(

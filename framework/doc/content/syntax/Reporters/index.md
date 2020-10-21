@@ -21,11 +21,23 @@ Values to be computed are stored via a reference to the desired type, for exampl
 
 !listing test/include/reporters/TestReporter.h re=^\s*(?P<content>[^\n]*?)\s*// MooseDocs:producer
 
-The references are initialized using the `declareValue` method as follows. It is possible to
-indicate how the value is to be computed, with respect to parallelism, by setting the calculation
-mode, see [#reporter-modes] for more information.
+The references are initialized using the `declareValue` and `declareValueByName` methods.
+It is possible to indicate how the value is to be computed, with respect to parallelism, by setting
+the calculation mode, see [#reporter-modes] for more information. The `declareValue` method
+works in conjunction with the `validParams` function to allow the input file to dictate the
+name of the data being produced. To use this method first define an input parameter for the
+data name.
+
+!listing test/src/reporters/TestReporter.C re=^\s*(?P<content>[^\n]*?)\s*// MooseDocs:data
+
+Then initialize the previously created reference by providing the input parameter name. In this
+example the initial value is also supplied.
 
 !listing test/src/reporters/TestReporter.C re=^\s*(?P<content>[^\n]*?)\s*// MooseDocs:producer
+
+The `declareValueByName` method works in the same manner except it does not query the parameter
+system for the name, it uses the name supplied to specifying the name directly. As such, this name
+cannot be modified without recompiling .
 
 The calculation of the value(s) occurs by overriding the `execute` method and updating the values
 for references.
@@ -110,11 +122,13 @@ actions taken by the various possible modes of production and consumption for a 
 | DISTRIBUTED | ROOT | Error |
 | DISTRIBUTED | REPLICATED | Error |
 
-The `declareValue` method allows for non-default context to be defined. For example, the following
-line declares a Reporter value to use the gather context object. A list of available contexts
-follows the code snippet.
+The `declareValue` and `declareValueByName` methods allow for non-default context to be defined. For
+example, the following line declares a Reporter value to use the gather context object. A list of
+available contexts follows the code snippet.
 
-!listing test/src/reporters/TestReporter.C re=^\s*(?P<content>[^\n]*?)\s*// MooseDocs:gather
+!listing test/src/reporters/TestReporter.C re=^\s*(?P<content>_gather.*?)\s*// MooseDocs:gather
+                                           replace=["\n", "", " ", "", ",", ", "]
+
 
 `ReporterBroadcastContext`\\
 Automatically performs an MPI scatter of a specified value on the root processor to all processors.

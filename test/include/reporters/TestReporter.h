@@ -21,9 +21,9 @@ public:
   virtual void execute() override;
 
 protected:
-  int & _int;
+  int & _int; // MooseDocs:producer
   Real & _real;
-  std::vector<Real> & _vector; // MooseDocs:producer
+  std::vector<Real> & _vector;
   std::string & _string;
   Real & _bcast_value;
 
