@@ -7,12 +7,12 @@ The TerminateControl has not been documented. The content contained on this page
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/TerminateControl
+!syntax description /ControlLogic/TerminateControl
 
-!syntax parameters /Controls/TerminateControl
+!syntax parameters /ControlLogic/TerminateControl
 
-!syntax inputs /Controls/TerminateControl
+!syntax inputs /ControlLogic/TerminateControl
 
-!syntax children /Controls/TerminateControl
+!syntax children /ControlLogic/TerminateControl
 
 !bibtex bibliography

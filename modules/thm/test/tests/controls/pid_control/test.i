@@ -49,7 +49,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./T_set_point]
     type = GetFunctionValueControl
     function = 340

@@ -42,6 +42,10 @@ Extensions:
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         allow-test-objects: True
+        unregister:
+            framework: !include ${MOOSE_DIR}/framework/doc/unregister.yml
+            thm:
+                AddComponentAction: Components/*/*
         hide:
             framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
             fluid_properties: !include ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml

@@ -65,7 +65,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./outlet_p_ctrl]
     type = TimeFunctionControl
     component = outlet

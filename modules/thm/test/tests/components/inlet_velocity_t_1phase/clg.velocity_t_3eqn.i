@@ -63,7 +63,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./inlet_vel_ctrl]
     type = TimeFunctionControl
     component = inlet

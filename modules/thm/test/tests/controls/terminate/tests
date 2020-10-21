@@ -13,8 +13,8 @@
     type = 'RunException'
     input = 'terminate.i'
     cli_args = '
-      Controls/terminate/throw_error=true
-      Controls/terminate/termination_message="Custom error message"'
+      ControlLogic/terminate/throw_error=true
+      ControlLogic/terminate/termination_message="Custom error message"'
     expect_err = 'Custom error message'
 
     group = 'controls'

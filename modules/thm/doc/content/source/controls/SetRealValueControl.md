@@ -7,12 +7,12 @@ The SetRealValueControl has not been documented. The content contained on this p
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Controls/SetRealValueControl
+!syntax description /ControlLogic/SetRealValueControl
 
-!syntax parameters /Controls/SetRealValueControl
+!syntax parameters /ControlLogic/SetRealValueControl
 
-!syntax inputs /Controls/SetRealValueControl
+!syntax inputs /ControlLogic/SetRealValueControl
 
-!syntax children /Controls/SetRealValueControl
+!syntax children /ControlLogic/SetRealValueControl
 
 !bibtex bibliography

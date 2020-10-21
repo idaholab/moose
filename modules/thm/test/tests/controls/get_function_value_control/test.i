@@ -56,7 +56,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./T_inlet_fn]
     type = GetFunctionValueControl
     function = T0_fn

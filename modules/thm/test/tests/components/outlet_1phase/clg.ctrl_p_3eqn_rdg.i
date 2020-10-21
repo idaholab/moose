@@ -61,7 +61,7 @@
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./set_outlet_value]
     type = TimeFunctionControl
     component = outlet

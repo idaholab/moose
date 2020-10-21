@@ -145,7 +145,7 @@ delta_t_open = 0.1
   [../]
 []
 
-[Controls]
+[ControlLogic]
   [./pipe2_valve_control]
     type = TimeFunctionControl
     component = pipe2_valve

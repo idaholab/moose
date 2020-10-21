@@ -119,7 +119,7 @@ pout = 7e6
   []
 []
 
-[Controls]
+[ControlLogic]
   [set_core_inlet_pressure]
     type = SetRealValueControl
     component = core_top_bc
