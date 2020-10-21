@@ -19,7 +19,7 @@ The sub-apps can be solving for completely different physics from the main appli
 other MOOSE applications, or might represent external applications. A sub-app can, itself, have
 `MultiApps`, leading to multi-level solves, as shown below.
 
-!media tutorials/multiapp_hierarchy.png id=multiapps style=width:60%;margin-left:auto;margin-right:auto;
+!media multi_apps/multiapp_hierarchy.png id=multiapps style=width:60%;margin-left:auto;margin-right:auto;
        caption=Example multi-level MultiApp hierarchy.
 
 ## Input File Syntax

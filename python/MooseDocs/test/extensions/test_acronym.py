@@ -17,7 +17,7 @@ logging.basicConfig()
 
 class TestInlineAcronym(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = "[!ac!INL] and [!ac!INL]"
+    TEXT = "[!ac](INL) and [!ac](INL)"
 
     def setupExtension(self, ext):
         if ext == acronym:
@@ -80,7 +80,7 @@ class TestInlineAcronym(MooseDocsTestCase):
 
 class TestAcronymList(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, table, acronym]
-    TEXT = "!acronym list"
+    TEXT = "!acronym list complete=True"
 
     def setupExtension(self, ext):
         if ext == acronym:
@@ -133,13 +133,13 @@ class TestAcronymList(MooseDocsTestCase):
 
         self.assertHTMLTag(tbody, 'tbody', size=3)
         self.assertHTMLTag(tbody(1), 'tr', size=2)
-        self.assertHTMLTag(tbody(1)(0), 'td', style=';text-align:left', string='WSU')
-        self.assertHTMLTag(tbody(1)(1), 'td', style=';text-align:left', string='Washington State University')
+        self.assertHTMLTag(tbody(1)(0), 'td', style=';text-align:left', string='MTU')
+        self.assertHTMLTag(tbody(1)(1), 'td', style=';text-align:left', string='Michigan Technological University')
 
         self.assertHTMLTag(tbody, 'tbody', size=3)
         self.assertHTMLTag(tbody(2), 'tr', size=2)
-        self.assertHTMLTag(tbody(2)(0), 'td', style=';text-align:left', string='MTU')
-        self.assertHTMLTag(tbody(2)(1), 'td', style=';text-align:left', string='Michigan Technological University')
+        self.assertHTMLTag(tbody(2)(0), 'td', style=';text-align:left', string='WSU')
+        self.assertHTMLTag(tbody(2)(1), 'td', style=';text-align:left', string='Washington State University')
 
     def _assertAST(self, ast):
         self.assertEqual(len(ast), 1)

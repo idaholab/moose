@@ -74,7 +74,7 @@ cd problems
 ~/projects/moose/python/peacock/peacock -r step4_out.e
 ```
 
-!media step04_result.png
+!media darcy_thermo_mech/step04_result.png
 
 !---
 
@@ -87,4 +87,4 @@ cd problems
 ../darcy_thermo_mech-opt -i step4.i Executioner/nl_rel_tol=1e-12
 ```
 
-!media step04_result_tight.png
+!media darcy_thermo_mech/step04_result_tight.png

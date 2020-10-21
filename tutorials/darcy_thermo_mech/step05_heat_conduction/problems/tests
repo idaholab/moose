@@ -1,6 +1,6 @@
 [Tests]
   issues = '#4522'
-  design = 'tutorials/darcy_thermo_mech/index.md'
+  design = 'examples_and_tutorials/index.md'
   [step_a]
     type = RunApp
     input = 'step5a_steady.i'

@@ -116,4 +116,4 @@ cd ~/projects/moose/examples/ex14_pps
 
 !---
 
-!media ex14_mms.png
+!media darcy_thermo_mech/ex14_mms.png

@@ -81,7 +81,7 @@ These coefficients define the solution function:
 !equation
 f(x) = 8 - \frac{29}{6} x + \frac{5}{6} x^2
 
-!media fem_example.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_example.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
 
 !style halign=center fontsize=115%
 +The solution is the function, *not* the coefficients.+

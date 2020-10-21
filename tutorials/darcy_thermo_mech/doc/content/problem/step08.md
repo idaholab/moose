@@ -28,4 +28,4 @@ cd problems
 
 !---
 
-!media step08_result.mp4
+!media darcy_thermo_mech/step08_result.mp4

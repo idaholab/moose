@@ -41,18 +41,16 @@ ul.moose-a-to-z a{
 
 /* MOOSE Pagination (Next/Previous Buttons) Formatting */
 .moose-content-pagination{
-  display: inline-block;
-  width: 100%;
-  padding-top: 24px;
-  padding-bottom: 24px;
+    display: inline-block;
+    width: 100%;
+    padding-top: 24px;
+    padding-bottom: 24px;
 }
-
 .moose-content-next{
-  float: right;
+    float: right;
 }
-
 .moose-content-previous.btn, .moose-content-next.btn{
-  text-transform: none;
+    text-transform: none;
 }
 
 /* MOOSE Outline Counters
@@ -66,7 +64,17 @@ div.moose-outline li {
     display: block
 }
 div.moose-outline li:before {
-    content: counters(item, ".") ".   ";
+    content: counters(item, ".") ".";
     counter-increment: item;
-    padding-right:8px;
+    padding-right: 12px;
+}
+div.moose-outline li.moose-outline-no-prefix:before {
+    content: "";
+    padding-right: 0px;
+}
+div.moose-outline li.moose-outline-no-count:before,
+li.moose-outline-no-count li:before {
+    content: none;
+    counter-increment: none;
+    padding-right: 0px;
 }

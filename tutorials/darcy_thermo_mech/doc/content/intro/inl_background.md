@@ -19,7 +19,7 @@ www.inl.gov
 INL is the site where 52 nuclear reactors were designed and constructed, including the
 first reactor to generate usable amounts of electricity: Experimental Breeder Reactor I (ERB-1)
 
-!media inl_erb1.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_erb1.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -29,7 +29,7 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 
-!media inl_atr.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_atr.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -40,4 +40,4 @@ of fuels and materials to accident conditions
 
 High-intensity (+20 GW+), short-duration (+80 ms+) neutron pulses for severe accident testing
 
-!media inl_treat.png style=width:40%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_treat.png style=width:40%;margin-left:auto;margin-right:auto;display:block;

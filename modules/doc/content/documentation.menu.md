@@ -2,7 +2,6 @@
 !col! small=12 medium=6 large=4
 ## [Application Usage [!icon!link]](application_usage/index.md)
 
-- [Examples](examples/index.md)
 - [Command-line Options](command_line_usage.md)
 - [Peacock](peacock.md)
 - [Troubleshooting Solves](failed_solves.md)
@@ -18,7 +17,6 @@
 !col! small=12 medium=6 large=4
 ## [Application Development [!icon!link]](application_development/index.md)
 
-- [Workshop](https://mooseframework.org/workshop)
 - [Source Pages](source/index.md)
 - [Jacobian Definition](/jacobian_definition.md)
 - [Hypre/BoomerAMG Preconditioning](hypre.md)

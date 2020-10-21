@@ -7,7 +7,7 @@ First, consider the steady-state diffusion equation on the domain $\Omega$: find
 !equation
 -\nabla \cdot \nabla u = 0 \in \Omega,
 
-where $u = 0$ on the left, $u = 1$ on the right and with
+where $u = 4000$ on the left, $u = 0$ on the right and with
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
 The weak form of this equation, in inner-product notation, is given by:
@@ -75,4 +75,4 @@ cd problems
 ~/projects/moose/python/peacock/peacock -r step1_out.e
 ```
 
-!media step01_result.png
+!media darcy_thermo_mech/step01_result.png

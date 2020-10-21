@@ -33,7 +33,7 @@ def extractContentSettings():
     settings['line'] = (None, "A portion of text that unique identifies a single line to "
                         "include.")
     settings['re'] = (None, "Extract content via a regex, if the 'content' group exists it " \
-                      "is used as the desired content, otherwise group 0 is used.")
+                      "is used as the desired content; if 'remove' group exists it is extracted; otherwise group 0 is used for the content.")
     settings['re-flags'] = ('re.M|re.S|re.U', "Python re flags.")
     settings['start'] = (None, "A portion of text that unique identifies the starting "
                          "location for including text, if not provided the beginning "

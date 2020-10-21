@@ -2,8 +2,7 @@
 
 ## Install MOOSE
 
-The first step in using PorousFlow is to install MOOSE. For full details of installing MOOSE,
-see [getting started](getting_started/index.md optional=True).
+The first step in using PorousFlow is to install MOOSE. For full details, see [install MOOSE](getting_started/installation/index.md optional=True).
 
 ## Build PorousFlow
 

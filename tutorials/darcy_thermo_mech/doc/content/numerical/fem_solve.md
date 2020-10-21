@@ -23,7 +23,7 @@ where $\mathcal{J}_e$ is the Jacobian of the map from the physical element to th
 
 ## Reference Element (Quad9)
 
-!media fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

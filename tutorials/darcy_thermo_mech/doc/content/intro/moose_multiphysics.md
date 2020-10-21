@@ -105,7 +105,7 @@ VectorPostprocessors\\
 
 ## Finite-Element Reactor Fuel Simulation
 
-!media simulator.m4v style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/simulator.m4v style=width:70%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -131,4 +131,4 @@ Ray Tracing (work in progress)
 
 !---
 
-!media moose_herd_2019.png style=margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_herd_2019.png style=margin-left:auto;margin-right:auto;display:block;
