@@ -149,7 +149,7 @@ RadiationTransferAction::addRadiationObject() const
   // input parameter check
   std::vector<Real> emissivity = getParam<std::vector<Real>>("emissivity");
   if (emissivity.size() != _boundary_names.size())
-    mooseError("emissivity parameter needs to be the same size as the sidesets parameter.");
+    mooseError("emissivity parameter needs to be the same size as the boundary parameter.");
 
   // the action only sets up ViewFactorObjectSurfaceRadiation, because after splitting
   // faces auotmatically, it makes no sense to require view factor input by hand.
@@ -184,7 +184,7 @@ RadiationTransferAction::addRadiationObject() const
 
       // check if entry was found: it must be found or an error would occur later
       if (it == _boundary_names.end())
-        mooseError("Adiabatic sideset ", bnd_name, " not present in sidesets.");
+        mooseError("Adiabatic sideset ", bnd_name, " not present in boundary.");
 
       // this is the position in the _boundary_names vector; this is what
       // we are really after
@@ -226,7 +226,7 @@ RadiationTransferAction::addRadiationObject() const
 
       // check if entry was found: it must be found or an error would occur later
       if (it == _boundary_names.end())
-        mooseError("Fixed temperature sideset ", bnd_name, " not present in sidesets.");
+        mooseError("Fixed temperature sideset ", bnd_name, " not present in boundary.");
 
       // this is the position in the _boundary_names vector; this is what
       // we are really after
@@ -322,16 +322,16 @@ RadiationTransferAction::addMeshGenerator() const
 
   // check input parameters
   if (_boundary_names.size() != _n_patches.size())
-    mooseError("n_patches parameter must have same length as sidesets parameter.");
+    mooseError("n_patches parameter must have same length as boundary parameter.");
 
   if (_boundary_names.size() != partitioners.size())
-    mooseError("partitioners parameter must have same length as sidesets parameter.");
+    mooseError("partitioners parameter must have same length as boundary parameter.");
 
   for (unsigned int j = 0; j < partitioners.size(); ++j)
     if (partitioners[j] == "centroid" && direction.size() != _boundary_names.size())
       mooseError(
           "centroid partitioner is selected for at least one sideset. "
-          "centroid_partitioner_directions parameter must have same length as sidesets parameter.");
+          "centroid_partitioner_directions parameter must have same length as boundary parameter.");
 
   // check if mesh is a MeshGeneratorMesh
   std::shared_ptr<MeshGeneratorMesh> mg_mesh = std::dynamic_pointer_cast<MeshGeneratorMesh>(_mesh);
