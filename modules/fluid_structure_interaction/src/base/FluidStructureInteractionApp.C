@@ -3,6 +3,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "NavierStokesApp.h"
+#include "TensorMechanicsApp.h"
+
 InputParameters
 FluidStructureInteractionApp::validParams()
 {
@@ -23,13 +26,13 @@ FluidStructureInteractionApp::FluidStructureInteractionApp(InputParameters param
 FluidStructureInteractionApp::~FluidStructureInteractionApp() {}
 
 void
-FluidStructureInteractionApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+FluidStructureInteractionApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  /* ModulesApp::registerAll(f, af, s); */
   Registry::registerObjectsTo(f, {"FluidStructureInteractionApp"});
   Registry::registerActionsTo(af, {"FluidStructureInteractionApp"});
 
-  /* register custom execute flags, action syntax, etc. here */
+  NavierStokesApp::registerAll(f, af, s);
+  TensorMechanicsApp::registerAll(f, af, s);
 }
 
 void

@@ -1,0 +1,7 @@
+directories:
+    - ${MOOSE_DIR}/modules/fluid_structure_interaction/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
