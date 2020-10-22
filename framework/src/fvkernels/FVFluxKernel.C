@@ -24,6 +24,10 @@ FVFluxKernel::validParams()
   params.addParam<bool>("force_boundary_execution",
                         false,
                         "Whether to force execution of this object on the boundary.");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundaries_to_force",
+      std::vector<BoundaryName>(),
+      "The set of boundaries to force execution of this FVFluxKernel on.");
   return params;
 }
 
@@ -42,6 +46,16 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     _force_boundary_execution(getParam<bool>("force_boundary_execution"))
 {
   addMooseVariableDependency(&_var);
+
+  if (_force_boundary_execution && params.isParamSetByUser("boundaries_to_force"))
+    paramError(
+        "force_boundary_execution",
+        "You cannot set force_boundary_execution to true and set a value for 'boundaries_to_force' "
+        "because the former param implies that all boundaries should be forced.");
+
+  const auto & vec = getParam<std::vector<BoundaryName>>("boundaries_to_force");
+  for (const auto & name : vec)
+    _boundaries_to_force.insert(_mesh.getBoundaryID(name));
 }
 
 // Note the lack of quadrature point loops in the residual/jacobian compute
@@ -54,6 +68,10 @@ FVFluxKernel::skipForBoundary(const FaceInfo & fi)
 {
   if (!fi.isBoundary() || _force_boundary_execution)
     return false;
+
+  for (const auto bnd_to_force : _boundaries_to_force)
+    if (fi.boundaryIDs().find(bnd_to_force) != fi.boundaryIDs().end())
+      return false;
 
   // If we have flux bcs then we do skip
   const auto & flux_pr = _var.getFluxBCs(fi);
@@ -92,18 +110,14 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any residual contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::ELEM &&
-       (_force_boundary_execution || _var.hasDirichletBC())) ||
-      ft == FaceInfo::VarFaceNeighbors::BOTH)
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the elem element
     prepareVectorTag(_assembly, _var.number());
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR &&
-       (_force_boundary_execution || _var.hasDirichletBC())) ||
-      ft == FaceInfo::VarFaceNeighbors::BOTH)
+  if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the neighbor element
     prepareVectorTagNeighbor(_assembly, _var.number());
@@ -184,9 +198,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any jacobian contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::ELEM &&
-       (_force_boundary_execution || _var.hasDirichletBC())) ||
-      ft == FaceInfo::VarFaceNeighbors::BOTH)
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
@@ -212,9 +224,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, element_functor);
   }
 
-  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR &&
-       (_force_boundary_execution || _var.hasDirichletBC())) ||
-      ft == FaceInfo::VarFaceNeighbors::BOTH)
+  if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR) == (_var.dofIndices().size() == 0),
                 "If the variable is only defined on the neighbor hand side of the face, then that "
