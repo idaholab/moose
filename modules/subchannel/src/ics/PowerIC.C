@@ -12,12 +12,12 @@ PowerIC::validParams()
 {
   InputParameters params = SubChannelBaseIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
-  params.addParam<std::string>("filename",
-                               413.0,
-                               "name of power profile .txt file (should be a single column). It's "
-                               "a Radial Power Profile. [UnitLess]");
+  params.addRequiredParam<std::string>(
+      "filename",
+      "name of power profile .txt file (should be a single column). It's "
+      "a Radial Power Profile. [UnitLess]");
   params.addParam<FunctionName>("axial_heat_rate",
-                                1.0,
+                                "1.0",
                                 "user provided normalized function of axial heat rate [Unitless]. "
                                 "The integral over pin length should equal the heated length");
   return params;
