@@ -35,5 +35,6 @@ protected:
   std::vector<BoundaryName> _boundary_names;
 
   std::vector<Point> _normals;
-};
 
+  std::map<BoundaryID, RealVectorValue> & _boundary_to_normal_map;
+};

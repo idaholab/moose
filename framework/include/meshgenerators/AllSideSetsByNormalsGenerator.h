@@ -41,5 +41,7 @@ protected:
   std::set<boundary_id_type> _mesh_boundary_ids;
 
   std::unique_ptr<MeshBase> & _input;
-};
 
+  /// Mesh meta data for holding the map from boundary IDs to the normals of the corresponding bounrares
+  std::map<BoundaryID, RealVectorValue> & _boundary_to_normal_map;
+};

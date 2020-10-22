@@ -1206,6 +1206,20 @@ MooseApp::registerRestartableData(const std::string & name,
   return *insert_pair.first->second.value;
 }
 
+bool
+MooseApp::hasRestartableMetaData(const std::string & name,
+                                 const RestartableDataMapName & metaname) const
+{
+  auto it = _restartable_meta_data.find(metaname);
+  if (it == _restartable_meta_data.end())
+    return false;
+  else
+  {
+    auto & m = it->second.first;
+    return m.find(name) != m.end();
+  }
+}
+
 void
 MooseApp::dynamicAppRegistration(const std::string & app_name,
                                  std::string library_path,

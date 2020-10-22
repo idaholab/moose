@@ -37,6 +37,7 @@ SetupDebugAction::validParams()
       "show_material_props",
       false,
       "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
+  params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
 
   params.addClassDescription(
       "Adds various debugging type Output objects to the simulation system.");
@@ -76,5 +77,15 @@ SetupDebugAction::act()
     auto params = _factory.getValidParams(type);
     params.set<unsigned int>("num_residuals") = _pars.get<unsigned int>("show_top_residuals");
     _problem->addOutput(type, "_moose_top_residual_debug_output", params);
+  }
+
+  // Print full names of mesh meta data
+  if (getParam<bool>("show_mesh_meta_data"))
+  {
+    _console << "Mesh meta data:\n";
+    for (auto it = _app.getRestartableDataMapBegin(); it != _app.getRestartableDataMapEnd(); ++it)
+      if (it->first == MooseApp::MESH_META_DATA)
+        for (auto & pair : it->second.first)
+          _console << " " << pair.first << std::endl;
   }
 }
