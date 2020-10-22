@@ -367,7 +367,7 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
-  std::vector<FVFluxBC *> bcs;
+  std::vector<FVFluxBCBase *> bcs;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxBC")
