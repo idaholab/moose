@@ -15,10 +15,12 @@ may depend on simulation variables.
 where $\boldsymbol{T}$ is a Rank-2 tensor and $w$ is the weighting factor for each Rank-2 tensor.
 
 
-!alert warning If the `CompositeEigenstrain` for RankTwoTensor eigenstrains, using
-the TensorMechanicsAction with automatic/_eigenstrain/_names = true, the input
-tensors will not be included in the eigenstrain/_names list passed.
-Set the automatic/_eigenstrain/_names = false and populate this list manually if
+!alert warning When using the [`CompositeEigenstrain`](CompositeEigenstrain.md)
+object  for RankTwoTensor eigenstrains with the
+[TensorMechanicsAction](TensorMechanics/Master/index.md) setting
+`automatic_eigenstrain_names = true`, eigenstrains listed as MaterialConverter
+input  tensors will not be included in the `eigenstrain_names` list passed. Set
+the automatic/_eigenstrain/_names = false and populate this list manually if
 these components need to be included.
 
 ## Example Input File Syntax

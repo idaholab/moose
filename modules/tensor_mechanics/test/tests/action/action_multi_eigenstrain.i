@@ -32,6 +32,10 @@
   [../]
 []
 
+[Problem]
+  solve = false
+[]
+
 [Modules/TensorMechanics/Master]
   [./block1]
     block = 1

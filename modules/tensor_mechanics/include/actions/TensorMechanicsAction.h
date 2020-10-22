@@ -110,9 +110,8 @@ protected:
   Point _cylindrical_axis_point2;
   Point _direction;
 
-  /// automatically passes eigenstrain names to strain calculator
+  /// automatically gather names of eigenstrain tensors provided by simulation objects
   const bool _auto_eigenstrain;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
-  std::string _eigenstrain_string;
 };

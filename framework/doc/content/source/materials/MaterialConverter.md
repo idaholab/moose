@@ -3,10 +3,12 @@
 The `MaterialConverter` is used to explicitly convert regular material
 properties into AD material properties and visa versa.
 
-!alert warning If the `MaterialConverter` for RankTwoTensor eigenstrains, using
-the TensorMechanicsAction with automatic/_eigenstrain/_names = true, the input
-tensors/eigenstrains will not be included in the eigenstrain/_names list passed.
-Set the automatic/_eigenstrain/_names = false and populate this list manually if
+!alert warning When using the [`MaterialConverter`](MaterialConverter.md) object
+for RankTwoTensor eigenstrains with the
+`TensorMechanicsAction` setting
+`automatic_eigenstrain_names = true`, eigenstrains listed as MaterialConverter
+input  tensors will not be included in the `eigenstrain_names` list passed. Set
+the automatic/_eigenstrain/_names = false and populate this list manually if
 these components need to be included.
 
 ## Description and Syntax

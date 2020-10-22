@@ -32,6 +32,10 @@
   [../]
 []
 
+[Problem]
+  solve = false
+[]
+
 [ICs]
   [./InitialCondition]
     type = ConstantIC

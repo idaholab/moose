@@ -1,7 +1,7 @@
-# This tests the thermal expansion coefficient function using both
-# options to specify that function: mean and instantaneous.  There
-# two blocks, each containing a single element, and these use the
-# two variants of the function.
+# This tests a thermal expansion coefficient function using defined on both
+# blocks.  There two blocks, each containing a single element, and these use
+# automatic_eigenstrain_names function of the TensorMechanicsAction to ensure
+# the names are passed correctly.
 
 # In this test, the instantaneous CTE function has a constant value,
 # while the mean CTE function is an analytic function designed to
@@ -43,7 +43,6 @@
     add_variables = true
     automatic_eigenstrain_names = true
     generate_output = 'strain_xx strain_yy strain_zz'
-    use_automatic_differentiation = true
   [../]
   [./block2]
     block = 2
@@ -51,7 +50,6 @@
     add_variables = true
     automatic_eigenstrain_names = true
     generate_output = 'strain_xx strain_yy strain_zz'
-    use_automatic_differentiation = true
   [../]
 []
 
@@ -89,36 +87,21 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
   [./small_stress]
-    type = ADComputeFiniteStrainElasticStress
+    type = ComputeFiniteStrainElasticStress
   [../]
   [./thermal_expansion_strain1]
     type = ComputeMeanThermalExpansionFunctionEigenstrain
-    block = 1
+    block = '1 2'
     thermal_expansion_function = cte_func_mean
     thermal_expansion_function_reference_temperature = 0.5
     stress_free_temperature = 0.0
     temperature = temp
-    eigenstrain_name = reg_eigenstrain1
-  [../]
-  [./converter1]
-    type = RankTwoTensorMaterialConverter
-    block = 1
-    reg_props_in = 'reg_eigenstrain1'
-    ad_props_out = 'eigenstrain1'
-
-  [../]
-  [./thermal_expansion_strain2]
-    type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
-    block = 2
-    thermal_expansion_function = cte_func_inst
-    stress_free_temperature = 0.0
-    temperature = temp
-    eigenstrain_name = eigenstrain2
+    eigenstrain_name = eigenstrain
   [../]
 []
 

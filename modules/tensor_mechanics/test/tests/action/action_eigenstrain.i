@@ -25,6 +25,9 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
+[Problem]
+  solve = false
+[]
 
 [AuxVariables]
   [./temp]

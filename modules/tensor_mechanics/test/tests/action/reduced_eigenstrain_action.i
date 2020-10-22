@@ -25,6 +25,10 @@
   #second_order = true
 []
 
+[Problem]
+  solve = false
+[]
+
 [Functions]
   [./tempLinear]
     type = ParsedFunction

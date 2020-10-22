@@ -477,10 +477,6 @@ TensorMechanicsAction::actEigenstrainNames()
   std::map<std::string, std::set<SubdomainID>> material_eigenstrain_map;
   std::set<std::string> eigenstrain_set;
 
-  // Copy the current  vector of eigenstrain names
-  std::set<MaterialPropertyName> eigenstrain_names_copy(_eigenstrain_names.begin(),
-                                                        _eigenstrain_names.end());
-
   std::set<MaterialPropertyName> verified_eigenstrain_names;
 
   std::map<std::string, std::string> remove_add_map;
@@ -490,53 +486,46 @@ TensorMechanicsAction::actEigenstrainNames()
   auto materials = _problem->getMaterialWarehouse().getObjects();
   for (auto & mat : materials)
   {
+    std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
     const InputParameters & mat_params = mat->parameters();
     auto & mat_name = mat->type();
 
     // Check for eigenstrain names, only deal with those materials
     if (mat_params.isParamValid("eigenstrain_name"))
     {
-      std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
       std::shared_ptr<MaterialData> mat_dat;
       auto name = mat_params.get<std::string>("eigenstrain_name");
 
       // Check for base_name prefix
       if (mat_params.isParamValid("base_name"))
-      {
-        auto base_name = mat_params.get<std::string>("base_name");
-        name.insert(0, "_");
-        name.insert(0, base_name);
-      }
+        name = mat_params.get<std::string>("base_name") + '_' + name;
 
       // Check block restrictions
-      if (blk)
+      if (!blk)
+        mooseError("Internal error, Material object that does not inherit form BlockRestricted");
+      const std::set<SubdomainID> & blocks =
+          blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
+
+      if (std::includes(blocks.begin(), blocks.end(), _subdomain_ids.begin(), _subdomain_ids.end()))
       {
-        const std::set<SubdomainID> & blocks =
-            blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
-        // Don't add duplicate
-        if (eigenstrain_set.insert(name).second)
-          material_eigenstrain_map.insert(std::make_pair(name, blocks));
+        material_eigenstrain_map[name].insert(blocks.begin(), blocks.end());
+        eigenstrain_set.insert(name);
       }
     }
 
     // Account for reduced eigenstrains and CompositeEigenstrains
     if (mat_name == "ComputeReducedOrderEigenstrain")
     {
-      auto remove_list =
+      auto input_eigenstrain_names =
           mat_params.get<std::vector<MaterialPropertyName>>("input_eigenstrain_names");
-      for (auto i : remove_list)
-        remove_reduced_set.insert(i);
+      remove_reduced_set.insert(input_eigenstrain_names.begin(), input_eigenstrain_names.end());
     }
     // Account for CompositeEigenstrains
     if (mat_name == "CompositeEigenstrain")
     {
       auto remove_list = mat_params.get<std::vector<MaterialPropertyName>>("tensors");
       for (auto i : remove_list)
-      {
         remove_reduced_set.insert(i);
-        if (material_eigenstrain_map.find(i) != material_eigenstrain_map.end())
-          material_eigenstrain_map.erase(i);
-      }
     }
 
     // Account for MaterialConverter , add or remove later
@@ -545,12 +534,14 @@ TensorMechanicsAction::actEigenstrainNames()
       std::vector<std::string> remove_list;
       std::vector<std::string> add_list;
 
-      if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in"))
+      if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in") &&
+          _use_ad)
       {
         remove_list = mat_params.get<std::vector<std::string>>("reg_props_in");
         add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
       }
-      if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out"))
+      if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out") &&
+          !_use_ad)
       {
         remove_list = mat_params.get<std::vector<std::string>>("ad_props_in");
         add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
@@ -563,12 +554,6 @@ TensorMechanicsAction::actEigenstrainNames()
   }
   // All the materials have been accounted for, now remove or add parts
 
-  // Correlate BlockIDs with eigenstrain names (remove irrelevant subdomainIDs)
-  if (!_subdomain_ids.empty())
-    for (auto i : material_eigenstrain_map)
-      if (i.second != _subdomain_ids)
-        eigenstrain_set.erase(i.first);
-
   // Remove names which aren't eigenstrains (converter properties)
   for (auto remove_add_index : remove_add_map)
   {
@@ -579,7 +564,6 @@ TensorMechanicsAction::actEigenstrainNames()
       eigenstrain_set.insert(remove_add_index.second);
     }
   }
-
   for (auto index : remove_reduced_set)
   {
     if (eigenstrain_set.find(index) != eigenstrain_set.end())
@@ -590,12 +574,11 @@ TensorMechanicsAction::actEigenstrainNames()
   // current subdomainID
   std::set_union(eigenstrain_set.begin(),
                  eigenstrain_set.end(),
-                 eigenstrain_names_copy.begin(),
-                 eigenstrain_names_copy.end(),
+                 _eigenstrain_names.begin(),
+                 _eigenstrain_names.end(),
                  std::inserter(verified_eigenstrain_names, verified_eigenstrain_names.begin()));
 
   // Ensure the eigenstrain names previously passed include any missing names
-  _eigenstrain_names.clear();
   _eigenstrain_names.resize(verified_eigenstrain_names.size());
   std::copy(verified_eigenstrain_names.begin(),
             verified_eigenstrain_names.end(),
@@ -605,14 +588,18 @@ TensorMechanicsAction::actEigenstrainNames()
   auto list_subdomains = _problem->mesh().meshSubdomains();
   // If no defined blocks
   if (list_subdomains.size() == 1 && *list_subdomains.begin() == 0)
-    _console << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << COLOR_DEFAULT << std::endl;
+    Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***\n"
+               << _name << ": " << Moose::stringify(_eigenstrain_names) << COLOR_DEFAULT << "\n";
   // Only print once for multiple blocks
   else
     for (auto currentNum : _subdomain_ids)
+    {
       if (currentNum == *list_subdomains.begin())
-        _console << COLOR_CYAN << "*** Automatic Eigenstrain Names ***" << COLOR_DEFAULT
-                 << std::endl;
-  _console << _name << ": " << Moose::stringify(_eigenstrain_names) << std::endl;
+        Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***\n";
+      Moose::out << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n";
+      if (currentNum == *list_subdomains.rbegin())
+        Moose::out << COLOR_DEFAULT << "\n";
+    }
 }
 
 void
