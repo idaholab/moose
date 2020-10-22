@@ -23,7 +23,7 @@ def execute(infile, outfile, n_samples, processors, test_type):
 
         print('mpiexec -n {} {} {}'.format(n_procs, exe, ' '.join(exe_args)))
         t = time.time()
-        out = mooseutils.run_executable(exe, exe_args, mpi=n_procs, suppress_output=True)
+        out = mooseutils.run_executable(exe, *exe_args, mpi=n_procs, suppress_output=True)
         t = time.time() - t
 
         local = pandas.read_csv('{}.csv'.format(file_base))

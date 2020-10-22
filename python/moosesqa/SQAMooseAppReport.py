@@ -10,7 +10,7 @@
 import os
 import re
 import logging
-
+import subprocess
 import traceback
 import mooseutils
 import moosetree
@@ -90,7 +90,7 @@ class SQAMooseAppReport(SQAReport):
 
         # Determine the application type (e.g., MooseTestApp)
         if self.app_types is None:
-            out = mooseutils.run_executable(exe, ['--type'])
+            out = subprocess.check_output([exe, '--type'], encoding='utf-8')
             match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
             if match:
                 self.app_types = [match.group("type").replace('TestApp', 'App')]
