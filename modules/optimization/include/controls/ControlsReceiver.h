@@ -24,5 +24,5 @@ public:
 
 protected:
   // this is a copy of SamplerReciever with a new Friend
-  friend class OptimizationTransfer;
+  friend class OptimizationParameterTransfer;
 };

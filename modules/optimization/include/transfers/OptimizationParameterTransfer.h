@@ -14,12 +14,12 @@
 // Forward declarations
 class ControlsReceiver;
 
-class OptimizationTransfer : public MultiAppTransfer
+class OptimizationParameterTransfer : public MultiAppTransfer
 {
 public:
   static InputParameters validParams();
 
-  OptimizationTransfer(const InputParameters & parameters);
+  OptimizationParameterTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 

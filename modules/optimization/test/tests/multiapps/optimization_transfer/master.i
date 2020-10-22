@@ -3,9 +3,8 @@
 
 [FormFunction]
   type = ObjectiveMinimize
-  optimization_vpp = 'opt_results' # parameters : these are the parameters being controlled
-  subapp_vpp = 'vpp_receiver' # simulated_data :       measurement data from teh simulation
-  measurement_vpp='measurements'  # measured_data :   converged on measured data
+  parameter_vpp = 'parameter_results'
+  data_vpp = 'data_receiver'
 []
 
 [Executioner]
@@ -26,34 +25,29 @@
 
 [Transfers]
   [toSub]
-    type = OptimizationTransfer #parameterTransfer : this name could be better
+    type = OptimizationParameterTransfer
     multi_app = sub
-    optimization_vpp = opt_results #paramter_vpp :
-    to_control = optimizationReceiver #parameterReceiver
+    parameter_vpp = parameter_results 
+    to_control = parameterReceiver
   []
   [fromSub]
     type = MultiAppVppToVppTransfer
     vector_postprocessor_sub = 'measure_pts'
-    vector_postprocessor_master = 'vpp_receiver'
+    vector_postprocessor_master = 'data_receiver'
     direction = from_multiapp
     multi_app = sub
   []
 []
 
 [VectorPostprocessors]
-  [measurements]
-    type = ConstantVectorPostprocessor #optDataVectorPostprocessor
-    value = '100 204 320 216'
-    vector_names = 'values'
-  []
-  [opt_results]
-    type = OptimizationVectorPostprocessor  #optParameterVectorPostprocessor
+  [parameter_results]
+    type = OptimizationParameterVectorPostprocessor
     parameters = 'DiracKernels/pt0/value
                   DiracKernels/pt1/value
                   DiracKernels/pt2/value'
     intial_values = '-2458 7257 26335'
   []
-  [vpp_receiver]
+  [data_receiver]
     type=VectorPostprocessorReceiver
   []
 []

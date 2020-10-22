@@ -105,7 +105,7 @@
 
 
 [Controls]
-  [optimizationReceiver]
+  [parameterReceiver]
     type = ControlsReceiver
   []
 []

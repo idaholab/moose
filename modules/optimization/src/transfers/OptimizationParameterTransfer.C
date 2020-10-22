@@ -6,21 +6,22 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#include "OptimizationTransfer.h"
+#include "OptimizationParameterTransfer.h"
 #include "MultiApp.h"
 #include "ControlsReceiver.h"
-#include "OptimizationVectorPostprocessor.h"
+#include "OptimizationParameterVectorPostprocessor.h"
 
-registerMooseObject("isopodApp", OptimizationTransfer);
+registerMooseObject("isopodApp", OptimizationParameterTransfer);
 
 InputParameters
-OptimizationTransfer::validParams()
+OptimizationParameterTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Copies optimization data to a ControlsReceiver object.");
   params.addRequiredParam<VectorPostprocessorName>(
-      "optimization_vpp",
-      "The name of the OptimizationVectorPostprocessor VectorPostprocessor to get data from");
+      "parameter_vpp",
+      "The name of the OptimizationParameterVectorPostprocessor to get data "
+      "from");
   params.addRequiredParam<std::string>("to_control",
                                        "The name of the 'ControlsReceiver' on the sub application "
                                        "to which the optimization parameters will be transferred.");
@@ -31,17 +32,18 @@ OptimizationTransfer::validParams()
   return params;
 }
 
-OptimizationTransfer::OptimizationTransfer(const InputParameters & parameters)
+OptimizationParameterTransfer::OptimizationParameterTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    _vpp_name(getParam<VectorPostprocessorName>("optimization_vpp")),
+    _vpp_name(getParam<VectorPostprocessorName>("parameter_vpp")),
     _receiver_name(getParam<std::string>("to_control"))
 {
 }
 
 void
-OptimizationTransfer::execute()
+OptimizationParameterTransfer::execute()
 {
-  auto & vpp = _multi_app->problemBase().getUserObject<OptimizationVectorPostprocessor>(_vpp_name);
+  auto & vpp =
+      _multi_app->problemBase().getUserObject<OptimizationParameterVectorPostprocessor>(_vpp_name);
   std::vector<std::string> parameter_names(vpp.getParameterNames());
   std::vector<Real> parameter_values(vpp.getParameterValues());
 
@@ -50,7 +52,7 @@ OptimizationTransfer::execute()
 }
 
 ControlsReceiver *
-OptimizationTransfer::getReceiver(unsigned int app_index)
+OptimizationParameterTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
   FEProblemBase & to_problem = _multi_app->appProblemBase(app_index);

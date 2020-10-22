@@ -12,14 +12,14 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class OptimizationVectorPostprocessor;
+class OptimizationParameterVectorPostprocessor;
 
-class OptimizationVectorPostprocessor : public GeneralVectorPostprocessor
+class OptimizationParameterVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  OptimizationVectorPostprocessor(const InputParameters & parameters);
+  OptimizationParameterVectorPostprocessor(const InputParameters & parameters);
 
   virtual void initialSetup() override{};
   virtual void initialize() override{};

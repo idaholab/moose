@@ -11,6 +11,8 @@ public:
   virtual Real computeObjective() override;
 
 private:
-  /// VPP containing the subapp data
-  const VectorPostprocessorValue & _subapp_vpp_values;
+  /// vector of simulation data
+  const VectorPostprocessorValue & _simulation_values;
+  /// vector of measured data
+  const VectorPostprocessorValue & _measured_values;
 };

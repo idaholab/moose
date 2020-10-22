@@ -17,7 +17,10 @@ public:
   virtual void computeGradient() override;
   virtual void computeHessian() override;
 
-protected:
+private:
   /// Inputted objective function value
   const Real & _result;
+
+  /// VPP containing the measurement data
+  const VectorPostprocessorValue & _measured_values;
 };

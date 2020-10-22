@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "OptimizationVectorPostprocessor.h"
+#include "OptimizationParameterVectorPostprocessor.h"
 
-registerMooseObject("isopodApp", OptimizationVectorPostprocessor);
+registerMooseObject("isopodApp", OptimizationParameterVectorPostprocessor);
 
 InputParameters
-OptimizationVectorPostprocessor::validParams()
+OptimizationParameterVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription("Prints parameter results from optimization routine.");
@@ -27,7 +27,8 @@ OptimizationVectorPostprocessor::validParams()
   return params;
 }
 
-OptimizationVectorPostprocessor::OptimizationVectorPostprocessor(const InputParameters & parameters)
+OptimizationParameterVectorPostprocessor::OptimizationParameterVectorPostprocessor(
+    const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _control_names(getParam<std::vector<std::string>>("parameters"))
 {
@@ -44,13 +45,13 @@ OptimizationVectorPostprocessor::OptimizationVectorPostprocessor(const InputPara
 }
 
 std::vector<std::string>
-OptimizationVectorPostprocessor::getParameterNames()
+OptimizationParameterVectorPostprocessor::getParameterNames()
 {
   return _control_names;
 }
 
 std::vector<Real>
-OptimizationVectorPostprocessor::getParameterValues()
+OptimizationParameterVectorPostprocessor::getParameterValues()
 {
   std::vector<Real> dataVec(_vpp_vectors.size());
   for (std::size_t i = 0; i < _vpp_vectors.size(); ++i)
@@ -61,20 +62,21 @@ OptimizationVectorPostprocessor::getParameterValues()
 }
 
 dof_id_type
-OptimizationVectorPostprocessor::getNumberOfParameters()
+OptimizationParameterVectorPostprocessor::getNumberOfParameters()
 {
   return _vpp_vectors.size();
 }
 
 void
-OptimizationVectorPostprocessor::setParameterValues(const std::vector<Real> & current)
+OptimizationParameterVectorPostprocessor::setParameterValues(const std::vector<Real> & current)
 {
   mooseAssert(current.size() == _vpp_vectors.size(),
               "Receiving more values than declared columns in vpp");
   for (std::size_t i = 0; i < _vpp_vectors.size(); ++i)
   {
-    mooseAssert((*_vpp_vectors[i]).size() == 1,
-                "Each vector in OptimizationVectorPostprocessor vpp contains a single entry");
+    mooseAssert(
+        (*_vpp_vectors[i]).size() == 1,
+        "Each vector in OptimizationParameterVectorPostprocessor vpp contains a single entry");
     (*_vpp_vectors[i])[0] = current[i];
   }
 }
