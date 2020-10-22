@@ -18,4 +18,18 @@
     exodiff = 2d-rc-slip_out.e
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with free-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
   []
+  [rz-diverging-no-slip]
+    type = 'Exodiff'
+    input = diverging.i
+    exodiff = 'diverging-no-slip.e'
+    cli_args = "FVBCs/active='inlet-u inlet-v no-slip-wall-u no-slip-wall-v outlet-p' Outputs/file_base='diverging-no-slip' mass_boundaries_to_force='top bottom left right' momentum_boundaries_to_force='top bottom left right' -pc_type lu -pc_factor_shift_type NONZERO"
+    requirement = 'The system shall be able to solve a diverging channel problem in cylindrical coordinates with no slip boundary conditions.'
+  []
+  [rz-diverging-free-slip]
+    type = 'Exodiff'
+    input = diverging.i
+    exodiff = 'diverging-free-slip.e'
+    cli_args = "FVBCs/active='inlet-u inlet-v free-slip-wall-u free-slip-wall-v' Outputs/file_base='diverging-free-slip' -pc_type lu -pc_factor_shift_type NONZERO"
+    requirement = 'The system shall be able to solve a diverging channel problem in cylindrical coordinates with free slip boundary conditions.'
+  []
 []
