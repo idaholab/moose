@@ -140,10 +140,22 @@ ADComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
 
     // If the elasticity tensor values have changed and the tensor is isotropic,
     // use the old strain to calculate the old stress
-    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-      _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    if (_use_old_elasticity_tensor)
+    {
+      if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+        _stress[_qp] =
+            _elasticity_tensor_old[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor_old[_qp] * _strain_increment[_qp];
+    }
     else
-      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+    {
+      if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+        _stress[_qp] =
+            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+    }
   }
   else
   {
@@ -207,11 +219,22 @@ ADComputeMultipleInelasticStress::updateQpState(
           elastic_strain_increment -= inelastic_strain_increment[j_rmm];
 
       // form the trial stress, with the check for changed elasticity constants
-      if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-        _stress[_qp] =
-            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+      if (_use_old_elasticity_tensor)
+      {
+        if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+          _stress[_qp] =
+              _elasticity_tensor_old[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+        else
+          _stress[_qp] = _stress_old[_qp] + _elasticity_tensor_old[_qp] * elastic_strain_increment;
+      }
       else
-        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      {
+        if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+          _stress[_qp] =
+              _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+        else
+          _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      }
 
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
@@ -295,10 +318,22 @@ ADComputeMultipleInelasticStress::updateQpStateSingleModel(
 
   // If the elasticity tensor values have changed and the tensor is isotropic,
   // use the old strain to calculate the old stress
-  if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-    _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+  if (_use_old_elasticity_tensor)
+  {
+    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+      _stress[_qp] =
+          _elasticity_tensor_old[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor_old[_qp] * elastic_strain_increment;
+  }
   else
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  {
+    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+      _stress[_qp] =
+          _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  }
 
   computeAdmissibleState(
       model_number, elastic_strain_increment, combined_inelastic_strain_increment);
@@ -321,20 +356,20 @@ ADComputeMultipleInelasticStress::computeAdmissibleState(
   if (_models[model_number]->substeppingCapabilityEnabled() &&
       (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations))
   {
-    _models[model_number]->updateStateSubstep(elastic_strain_increment,
-                                              inelastic_strain_increment,
-                                              _rotation_increment[_qp],
-                                              _stress[_qp],
-                                              _stress_old[_qp],
-                                              _elasticity_tensor[_qp],
-                                              _elastic_strain_old[_qp]);
+    if (_use_old_elasticity_tensor)
+      _models[model_number]->updateState(elastic_strain_increment,
+                                         inelastic_strain_increment,
+                                         _rotation_increment[_qp],
+                                         _stress[_qp],
+                                         _stress_old[_qp],
+                                         _elasticity_tensor_old[_qp],
+                                         _elastic_strain_old[_qp]);
+    else
+      _models[model_number]->updateState(elastic_strain_increment,
+                                         inelastic_strain_increment,
+                                         _rotation_increment[_qp],
+                                         _stress[_qp],
+                                         _stress_old[_qp],
+                                         _elasticity_tensor[_qp],
+                                         _elastic_strain_old[_qp]);
   }
-  else
-    _models[model_number]->updateState(elastic_strain_increment,
-                                       inelastic_strain_increment,
-                                       _rotation_increment[_qp],
-                                       _stress[_qp],
-                                       _stress_old[_qp],
-                                       _elasticity_tensor[_qp],
-                                       _elastic_strain_old[_qp]);
-}

@@ -28,10 +28,14 @@ public:
 protected:
   virtual void computeQpStress() override;
 
+  /// Flag to use old elasticity tensor
+  const bool _use_old_elasticity_tensor;
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
   /// Elasticity tensor material property
   const ADMaterialProperty<RankFourTensor> & _elasticity_tensor;
+  /// Old elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor_old;
 
   const ADMaterialProperty<RankTwoTensor> & _strain_increment;
   const ADMaterialProperty<RankTwoTensor> & _rotation_increment;

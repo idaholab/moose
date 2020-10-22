@@ -145,4 +145,5 @@ protected:
 
   /// Debugging option to enable specifying instead of calculating strain
   const bool _apply_strain;
+  const bool _use_old_elasticity_tensor;
 };

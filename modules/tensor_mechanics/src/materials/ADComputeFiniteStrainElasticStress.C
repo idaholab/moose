@@ -16,6 +16,10 @@ ADComputeFiniteStrainElasticStress::validParams()
 {
   InputParameters params = ADComputeStressBase::validParams();
   params.addClassDescription("Compute stress using elasticity for finite strains");
+  params.addParam<bool>(
+      "use_old_elasticity_tensor",
+      false,
+      "Flag to optionally use the elasticity tensor computed at the previous timestep.");
   return params;
 }
 
@@ -23,8 +27,15 @@ ADComputeFiniteStrainElasticStress::ADComputeFiniteStrainElasticStress(
     const InputParameters & parameters)
   : ADComputeStressBase(parameters),
     GuaranteeConsumer(this),
+    _use_old_elasticity_tensor(getParam<bool>("use_old_elasticity_tensor")),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
+    _elasticity_tensor(
+        _use_old_elasticity_tensor
+            ? getGenericZeroMaterialProperty<RankFourTensor, true>("zero")
+            : getGenericMaterialProperty<RankFourTensor, true>(_elasticity_tensor_name)),
+    _elasticity_tensor_old(_use_old_elasticity_tensor
+                               ? getMaterialPropertyOld<RankFourTensor>(_elasticity_tensor_name)
+                               : getZeroMaterialProperty<RankFourTensor>("zero")),
     _strain_increment(getADMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getADMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
@@ -48,8 +59,12 @@ ADComputeFiniteStrainElasticStress::computeQpStress()
   // Calculate the stress in the intermediate configuration
   ADRankTwoTensor intermediate_stress;
 
-  intermediate_stress =
-      _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
+  if (_use_old_elasticity_tensor)
+    intermediate_stress =
+        _elasticity_tensor_old[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
+  else
+    intermediate_stress =
+        _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
 
   // Rotate the stress state to the current configuration
   _stress[_qp] =
