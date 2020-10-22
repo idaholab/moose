@@ -27,7 +27,8 @@ public:
   ComputeElasticityTensorBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
   virtual void computeQpElasticityTensor() = 0;
 
   /// Base name of the material system

@@ -55,5 +55,13 @@ ComputeElasticityTensorBaseTempl<is_ad>::computeQpProperties()
   }
 }
 
+template <bool is_ad>
+void
+ComputeElasticityTensorBaseTempl<is_ad>::initQpStatefulProperties()
+{
+  residualSetup();
+  computeQpElasticityTensor();
+}
+
 template class ComputeElasticityTensorBaseTempl<false>;
 template class ComputeElasticityTensorBaseTempl<true>;

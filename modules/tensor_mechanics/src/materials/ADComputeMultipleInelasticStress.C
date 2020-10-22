@@ -357,6 +357,25 @@ ADComputeMultipleInelasticStress::computeAdmissibleState(
       (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations))
   {
     if (_use_old_elasticity_tensor)
+      _models[model_number]->updateStateSubstep(elastic_strain_increment,
+                                                inelastic_strain_increment,
+                                                _rotation_increment[_qp],
+                                                _stress[_qp],
+                                                _stress_old[_qp],
+                                                _elasticity_tensor_old[_qp],
+                                                _elastic_strain_old[_qp]);
+    else
+      _models[model_number]->updateStateSubstep(elastic_strain_increment,
+                                                inelastic_strain_increment,
+                                                _rotation_increment[_qp],
+                                                _stress[_qp],
+                                                _stress_old[_qp],
+                                                _elasticity_tensor[_qp],
+                                                _elastic_strain_old[_qp]);
+  }
+  else
+  {
+    if (_use_old_elasticity_tensor)
       _models[model_number]->updateState(elastic_strain_increment,
                                          inelastic_strain_increment,
                                          _rotation_increment[_qp],
@@ -373,3 +392,4 @@ ADComputeMultipleInelasticStress::computeAdmissibleState(
                                          _elasticity_tensor[_qp],
                                          _elastic_strain_old[_qp]);
   }
+}
