@@ -115,7 +115,6 @@ class VectorPostprocessorReader(object):
 
         # The list of files from the supplied pattern
         last_modified = 0.0
-        self._frames = dict()
         for fname in sorted(glob.glob(self._pattern)):
             if fname.endswith('LATEST') or fname.endswith('FINAL') or (fname == self._timedata.filename):
                 continue
@@ -127,20 +126,20 @@ class VectorPostprocessorReader(object):
                                      peacock_index=True)
                 self._frames[idx] = mdf
 
-            if (mdf.modified < last_modified):
+        # Clean up old and empty data
+        for idx in list(self._frames.keys()):
+            mdf = self._frames[idx]
+            mdf.update()
+            if mdf.empty():
+                self._frames.pop(idx)
+            elif (mdf.modified < last_modified):
                 self._frames.pop(idx)
             elif mdf.filesize == 0:
                 self._frames.pop(idx)
             else:
                 last_modified = mdf.modified
 
-        # Clear the data if empty
-        if self._frames:
-            self.__updateCurrentIndex()
-
-            df = self._frames.get(self._index, None)
-            if df is not None:
-                return df.update()
+        self.__updateCurrentIndex()
 
     def repr(self):
         """
