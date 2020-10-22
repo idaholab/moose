@@ -77,7 +77,7 @@ ComputeResidualThread::subdomainChanged()
 
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> fv_kernels;
+    std::vector<FVElementalKernelBase *> fv_kernels;
     _fe_problem.theWarehouse()
         .query()
         .template condition<AttribSystem>("FVElementalKernel")
@@ -150,7 +150,7 @@ ComputeResidualThread::onElement(const Elem * elem)
   // anymore.
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> kernels;
+    std::vector<FVElementalKernelBase *> kernels;
     _fe_problem.theWarehouse()
         .query()
         .template condition<AttribSystem>("FVElementalKernel")
