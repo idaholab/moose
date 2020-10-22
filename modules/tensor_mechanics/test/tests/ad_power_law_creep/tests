@@ -1,0 +1,66 @@
+[Tests]
+  issues = "#8642"
+  design = 'ADPowerLawCreepStressUpdate.md'
+  [./coupled]
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
+                   creep using the AD formulation'
+    [./power_law_creep]
+      type = 'Exodiff'
+      input = 'power_law_creep.i'
+      exodiff = 'power_law_creep_out.e'
+      detail = 'with finite strain and match non-AD formulation results'
+    [../]
+    [./testRestart1]
+      type = 'RunApp'
+      input = 'power_law_creep_restart1.i'
+      recover = false
+      detail = 'with finite strain and match non-AD formulations using restart (precurser)'
+    [../]
+    [./testRestart2]
+      type = 'Exodiff'
+      input = 'power_law_creep_restart2.i'
+      prereq = 'testRestart1'
+      exodiff = 'power_law_creep_restart2_tm_out.e'
+      cli_args = 'Outputs/file_base=power_law_creep_restart2_tm_out'
+      exodiff_opts = '-TM'
+      detail = 'with finite strain and match non-AD formulations using restart'
+    [../]
+    [./small_strain]
+      type = Exodiff
+      input = 'power_law_creep_smallstrain.i'
+      exodiff = 'power_law_creep_smallstrain_out.e'
+      detail = 'with small strain match non-AD formulation results'
+    [../]
+    [./power_law_creep-jac]
+      type = 'PetscJacobianTester'
+      input = 'power_law_creep.i'
+      ratio_tol = 5e-6
+      difference_tol = 1e6
+      cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
+      run_sim = True
+      detail = 'with finite strain and calculate a perfect Jacobian'
+    [../]
+    [./small_strain-jac]
+      type = PetscJacobianTester
+      input = 'power_law_creep_smallstrain.i'
+      ratio_tol = 5e-6
+      difference_tol = 1e6
+      cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
+      run_sim = True
+      detail = 'with small strain and calculate a perfect Jacobian'
+    [../]
+  [../]
+  [./uncoupled]
+    requirement = 'The system shall be able to calculate a mechanics solve with power law
+                 creep and finite strain using the AD formulation'
+    [./power_law_creep_simple-jac]
+      type = 'PetscJacobianTester'
+      input = 'power_law_creep_simple.i'
+      ratio_tol = 5e-6
+      difference_tol = 1e6
+      cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-9'
+      run_sim = True
+      detail = 'calculate a perfect Jacobian'
+    [../]
+  [../]
+[]

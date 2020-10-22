@@ -1,4 +1,6 @@
-# 1x1x1 unit cube with uniform pressure on top face
+# 1x1x1 unit cube with uniform pressure on top face for the case of small strain.
+#  This test does not have a solid mechanics analog because there is not an equvialent
+#  small strain with rotations strain calculator material in solid mechanics
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -7,29 +9,48 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
-[AuxVariables]
+[Variables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 1000.0
   [../]
 []
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = FINITE
+    strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
     use_automatic_differentiation = true
   [../]
 []
+
+[Kernels]
+  [./heat]
+    type = ADMatDiffusion
+    variable = temp
+    diffusivity = 100
+  [../]
+  [./heat_ie]
+    type = ADTimeDerivative
+    variable = temp
+  [../]
+[]
+
 [BCs]
-  [./u_top_fix]
-    type = ADDirichletBC
+  [./u_top_pull]
+    type = ADPressure
     variable = disp_y
+    component = 1
     boundary = top
-    value = 1e-5
+    constant = -10.0e6
   [../]
   [./u_bottom_fix]
     type = ADDirichletBC
@@ -48,6 +69,12 @@
     variable = disp_z
     boundary = back
     value = 0.0
+  [../]
+  [./temp_fix]
+    type = DirichletBC
+    variable = temp
+    boundary = 'bottom top'
+    value = 1000.0
   [../]
 []
 
@@ -71,16 +98,9 @@
   [../]
 []
 
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
-  [../]
-[]
-
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = NEWTON
 
   num_steps = 10
   dt = 0.1

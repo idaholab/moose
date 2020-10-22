@@ -30,21 +30,14 @@
   [../]
 []
 
-[Functions]
-  [./top_pull]
-    type = PiecewiseLinear
-    x = '0 1'
-    y = '1 1'
-  [../]
-[]
-
 [Kernels]
   [./heat]
-    type = ADHeatConduction
+    type = ADMatDiffusion
     variable = temp
+    diffusivity = 100
   [../]
   [./heat_ie]
-    type = ADHeatConductionTimeDerivative
+    type = ADTimeDerivative
     variable = temp
   [../]
 []
@@ -56,7 +49,6 @@
     component = 1
     boundary = top
     constant = -10.0e6
-    function = top_pull
   [../]
   [./u_bottom_fix]
     type = ADDirichletBC
@@ -102,44 +94,22 @@
     activation_energy = 3.0e5
     temperature = temp
   [../]
-
-  [./thermal]
-    type = ADHeatConductionMaterial
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = ADDensity
-    density = 1.0
-  [../]
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = NEWTON
 
-  petsc_options = '-snes_ksp'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '101'
-
-  line_search = 'none'
-
-  l_max_its = 20
-  nl_max_its = 20
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-6
-  l_tol = 1e-5
-  start_time = 0.0
+  start_time = 0.6
   end_time = 1.0
-  num_steps = 6
   dt = 0.1
 []
 
 [Outputs]
+  file_base = power_law_creep_out
   exodus = true
-  csv = true
-  [./out]
-    type = Checkpoint
-    num_files = 1
-  [../]
+[]
+
+[Problem]
+  restart_file_base = power_law_creep_restart1_out_cp/0006
 []
