@@ -73,6 +73,9 @@ endif
 ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
         TENSOR_MECHANICS            := yes
         NAVIER_STOKES               := yes
+        FLUID_PROPERTIES            := yes
+        RDG                         := yes
+        HEAT_CONDUCTION             := yes
 endif
 
 # The master list of all moose modules
@@ -98,13 +101,6 @@ ifeq ($(FLUID_PROPERTIES),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_properties
   APPLICATION_NAME   := fluid_properties
   SUFFIX             := fp
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_structure_interaction
-  APPLICATION_NAME   := fluid_structure_interaction
-  SUFFIX             := fsi
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -245,6 +241,15 @@ ifeq ($(CONTACT),yes)
 	# Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := con
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_structure_interaction
+  APPLICATION_NAME   := fluid_structure_interaction
+
+  DEPEND_MODULES     := tensor_mechanics navier_stokes
+  SUFFIX             := fsi
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

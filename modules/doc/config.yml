@@ -6,6 +6,7 @@ Content:
     - modules/contact/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
+    - modules/fluid_structure_interaction/doc/content
     - modules/functional_expansion_tools/doc/content
     - modules/heat_conduction/doc/content
     - modules/level_set/doc/content

@@ -22,6 +22,9 @@
 #ifdef FLUID_PROPERTIES_ENABLED
 #include "FluidPropertiesApp.h"
 #endif
+#ifdef FLUID_STRUCTURE_INTERACTION_ENABLED
+#include "FluidStructureInteractionApp.h"
+#endif
 #ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
 #include "FunctionalExpansionToolsApp.h"
 #endif
@@ -337,6 +340,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef FLUID_PROPERTIES_ENABLED
   FluidPropertiesApp::registerAll(f, af, s);
+#endif
+
+#ifdef FLUID_STRUCTURE_INTERACTION_ENABLED
+  FluidStructureInteractionApp::registerAll(f, af, s);
 #endif
 
 #ifdef HEAT_CONDUCTION_ENABLED
