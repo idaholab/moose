@@ -18,6 +18,8 @@ def regex(pattern, content, flags=None):
     if match:
         if 'content' in match.groupdict():
             content = match.group('content')
+        elif 'remove' in match.groupdict():
+            content = content[:match.start('remove')] + content[match.end('remove'):]
         else:
             content = match.group()
     else:

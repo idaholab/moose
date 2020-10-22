@@ -1,9 +1,11 @@
 AD: automatic differentiation
 API: Application Programming Interface
+BVP: boundary value problem
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
 DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
 DOF: degree-of-freedom
+DOFs: degrees-of-freedom
 FE: Finite Element
 FEM: Finite Element Method
 GMRES: Gernalized Minimum Residual Method
@@ -15,6 +17,7 @@ INL: Idaho National Laboratory
 JFNK: Jacobian-Free Newton-Krylov
 LGPL: GNU Lesser General Public License
 MMS: Method of Manufactured Solutions
+MWR: Method of Mean Weighted Residuals
 MPI: Method Passing Interface
 MOOSE: Multiphysics Object Oriented Simulation Environment
 NE: Nuclear Energy

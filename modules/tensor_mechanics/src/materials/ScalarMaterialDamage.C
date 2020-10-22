@@ -25,9 +25,7 @@ ScalarMaterialDamage::validParams()
 }
 
 ScalarMaterialDamage::ScalarMaterialDamage(const InputParameters & parameters)
-  : ScalarDamageBase(parameters),
-    _damage_property(
-        getMaterialPropertyByName<Real>(getParam<MaterialPropertyName>("damage_index")))
+  : ScalarDamageBase(parameters), _damage_property(getMaterialProperty<Real>("damage_index"))
 {
 }
 

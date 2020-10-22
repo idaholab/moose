@@ -30,7 +30,7 @@ elements of the same type.
 !col-end!
 
 !col width=25%
-!media adaptivity_pattern.png
+!media darcy_thermo_mech/adaptivity_pattern.png
 !row-end!
 
 !---

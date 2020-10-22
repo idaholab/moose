@@ -30,7 +30,7 @@ Each sub-app can solve for different physics from the main application
 
 !---
 
-!media multiapp_hierarchy.png
+!media darcy_thermo_mech/multiapp_hierarchy.png
 
 !---
 

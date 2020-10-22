@@ -126,11 +126,11 @@ The engineering notation matrix in this case is shown by [eq:axisymmetric_rz_fil
 \label{eq:axisymmetric_rz_fill_method}
 C_{ijkl}^{axisymmetric} = \begin{bmatrix}
               C_{11} & C_{12} & C_{13} &      0 &      0 &      0 \\
-              C_{12} & C_{22} & C_{13} &      0 &      0 &      0 \\
+              C_{12} & C_{11} & C_{13} &      0 &      0 &      0 \\
               C_{13} & C_{13} & C_{33} &      0 &      0 &      0 \\
                    0 &      0 &      0 & C_{44} &      0 &      0 \\
                    0 &      0 &      0 &      0 & C_{44} &      0 \\
-                   0 &      0 &      0 &      0 &      0 & \frac{1}{2} \left( C_{11} - C_{22} \right)
+                   0 &      0 &      0 &      0 &      0 & \frac{1}{2} \left( C_{11} - C_{12} \right)
               \end{bmatrix}
 \end{equation}
 

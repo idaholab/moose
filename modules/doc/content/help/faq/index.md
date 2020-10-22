@@ -8,6 +8,7 @@
 - [How do I build my own libMesh?](faq/faq_build_libmesh.md)
 - [How do I build my own libMesh with VTK?](faq/faq_build_libmesh-vtk.md)
 - [How do I build my own PETSc?](faq/faq_build_petsc.md)
+- [Where is the stiffness matrix?](help/faq/what_is_fem.md)
 
 
 ### Mailing lists:

@@ -138,7 +138,7 @@ cd problems
 
 ## Step 6a: Results
 
-!media step06a_result.webm
+!media darcy_thermo_mech/step06a_result.webm
 
 !---
 
@@ -174,7 +174,7 @@ cd problems
 
 ## Step 6b: Results
 
-!media step06b_result.mp4
+!media darcy_thermo_mech/step06b_result.mp4
 
 !---
 

@@ -79,7 +79,13 @@ class NavigationExtension(Extension):
 
     def initPage(self, page):
         """Initialize page with Extension settings."""
-        self.initConfig(page, 'breadcrumbs', 'name', 'sections', 'scrollspy', 'google-cse', 'search')
+        self.initConfig(page, 'google-cse',
+                              'search',
+                              'name',
+                              'breadcrumbs',
+                              'sections',
+                              'scrollspy',
+                              'collapsible-sections')
         if page.local.endswith('.menu.md'):
             self.setConfig(page, 'breadcrumbs', False)
         page['search'] = list()
@@ -322,7 +328,7 @@ class NavigationExtension(Extension):
             collapsible[list]: A list with six entries indicating the sections to create as
                                collapsible.
         """
-        collapsible = self.get('collapsible-sections')
+        collapsible = self.getConfig(page, 'collapsible-sections')
         if isinstance(collapsible, str):
             collapsible = eval(collapsible)
 

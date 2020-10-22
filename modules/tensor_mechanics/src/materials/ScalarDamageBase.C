@@ -30,16 +30,17 @@ ScalarDamageBase::validParams()
       0.1,
       "maximum_damage_increment>0 & maximum_damage_increment<1",
       "maximum damage increment allowed for simulations with adaptive time step");
-  params.addParam<std::string>("damage_index_name",
-                               "damage_index",
-                               "name of the material property where the damage index is stored");
+  params.addParam<MaterialPropertyName>(
+      "damage_index_name",
+      "damage_index",
+      "name of the material property where the damage index is stored");
   return params;
 }
 
 ScalarDamageBase::ScalarDamageBase(const InputParameters & parameters)
   : DamageBase(parameters),
-    _damage_index_name(getParam<std::string>("damage_index_name")),
-    _damage_index(declareProperty<Real>(_base_name + _damage_index_name)),
+    _damage_index_name(getParam<MaterialPropertyName>("damage_index_name")),
+    _damage_index(declarePropertyByName<Real>(_base_name + _damage_index_name)),
     _damage_index_old(getMaterialPropertyOld<Real>(_base_name + _damage_index_name)),
     _damage_index_older(getMaterialPropertyOlder<Real>(_base_name + _damage_index_name)),
     _use_old_damage(getParam<bool>("use_old_damage")),

@@ -74,4 +74,4 @@ cd problems
 ~/projects/moose/python/peacock/peacock -r step2_out.e
 ```
 
-!media step02_result.png
+!media darcy_thermo_mech/step02_result.png

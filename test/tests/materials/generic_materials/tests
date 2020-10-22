@@ -1,0 +1,51 @@
+[Tests]
+  issues = '#8437'
+  design = 'syntax/Materials/index.md'
+  [./real]
+    requirement = 'The system shall be able to produce a valid Real material object on the fly for use in calculations requiring material properties'
+    [./all_qps]
+      type = 'Exodiff'
+      input = 'generic_constant_material.i'
+      exodiff = 'generic_constant_material_out.e'
+      detail = 'computed at each quadrature point.'
+    [../]
+    # Run this test after the main test, setting the constant_on_elem
+    # flag to true for one of the Materials.  There should be no
+    # difference between this version and the original gold file.
+    [./constant_on_elem]
+      type = 'Exodiff'
+      input = 'generic_constant_material.i'
+      exodiff = 'generic_constant_material_out.e'
+      prereq = real/all_qps
+      cli_args = 'Materials/dm1/constant_on=ELEMENT'
+      detail = 'with a single value per element for efficiency that is made available to all quadrature points in a coupled calculation.'
+    [../]
+  []
+  [./ranktwotensor]
+    requirement = 'The system shall shall be able to compute a RankTwoTensor material object'
+    [./constant]
+      type = 'CSVDiff'
+      input = 'generic_constant_rank_two_tensor.i'
+      csvdiff = 'generic_constant_rank_two_tensor_out.csv'
+      detail = 'with constant values.'
+    [../]
+    [./ad_constant]
+      type = 'CSVDiff'
+      input = 'ad_generic_constant_rank_two_tensor.i'
+      csvdiff = 'ad_generic_constant_rank_two_tensor_out.csv'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
+    [./function]
+      type = 'CSVDiff'
+      input = 'generic_function_rank_two_tensor.i'
+      csvdiff = 'generic_function_rank_two_tensor_out.csv'
+      detail = 'with values determined by functions.'
+    [../]
+    [./ad_function]
+      type = 'CSVDiff'
+      input = 'ad_generic_function_rank_two_tensor.i'
+      csvdiff = 'ad_generic_function_rank_two_tensor_out.csv'
+      detail = 'with values determined by functions using automatic differentiation.'
+    [../]
+  [../]
+[]

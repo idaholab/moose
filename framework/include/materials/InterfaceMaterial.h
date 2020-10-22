@@ -125,7 +125,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -140,7 +140,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getMaterialPropertyOld(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -155,7 +155,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getMaterialPropertyOlder(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -200,7 +200,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getNeighborMaterialProperty(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -227,7 +227,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getNeighborMaterialPropertyOld(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
@@ -242,7 +242,7 @@ template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getNeighborMaterialPropertyOlder(const std::string & name)
 {
-  // Check if the supplied parameter is a valid imput parameter key
+  // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.

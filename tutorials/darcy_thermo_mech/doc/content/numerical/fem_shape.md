@@ -12,7 +12,7 @@ element software more work is necessary.
 The weak form must be discretized using a set of "basis functions" amenable for manipulation by a
 computer.
 
-!media fem_hat_function.png style=width:100%;
+!media darcy_thermo_mech/fem_hat_function.png style=width:100%;
 
 !style fontsize=60%
 *Images copyright [!citet](becker1981finite)*
@@ -20,7 +20,7 @@ computer.
 !col-end!
 
 !col width=50%
-!media fem_basis_functions.png style=width:65%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_basis_functions.png style=width:65%;margin-left:auto;margin-right:auto;display:block;
 
 !row-end!
 
@@ -77,15 +77,15 @@ coefficients correspond to the values of the functions at the nodes.
 
 ## Example 1D Shape Functions
 
-!media fem_linear_lagrange.png style=width:49%;margin-left:1%;display:inline;
+!media darcy_thermo_mech/fem_linear_lagrange.png style=width:49%;margin-left:1%;display:inline;
 
-!media fem_quadratic_lagrange.png style=width:49%;display:inline;
+!media darcy_thermo_mech/fem_quadratic_lagrange.png style=width:49%;display:inline;
 
 !---
 
-!media fem_cubic_lagrange.png style=width:49%;margin-left:1%;display:inline;
+!media darcy_thermo_mech/fem_cubic_lagrange.png style=width:49%;margin-left:1%;display:inline;
 
-!media fem_cubic_hermite.png style=width:49%;display:inline;
+!media darcy_thermo_mech/fem_cubic_hermite.png style=width:49%;display:inline;
 
 !---
 
@@ -99,7 +99,7 @@ $\psi_8$ is associated to the "center" node, it is symmetric and $\geq 0$ on the
 
 !row!
 !col! width=33%
-!media fem_quad9_phi0.png style=width:100%
+!media darcy_thermo_mech/fem_quad9_phi0.png style=width:100%
 
 !style halign=center
 $\psi_0$
@@ -107,7 +107,7 @@ $\psi_0$
 
 !col! width=33%
 !col width=33%
-!media fem_quad9_phi4.png style=width:100%;
+!media darcy_thermo_mech/fem_quad9_phi4.png style=width:100%;
 
 !style halign=center
 $\psi_4$
@@ -115,7 +115,7 @@ $\psi_4$
 
 !col! width=33%
 !col width=33%
-!media fem_quad9_phi8.png style=width:100%;
+!media darcy_thermo_mech/fem_quad9_phi8.png style=width:100%;
 
 !style halign=center
 $\psi_8$

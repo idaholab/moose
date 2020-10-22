@@ -12,24 +12,24 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-class GenericConstantRankTwoTensor;
-
-template <>
-InputParameters validParams<GenericConstantRankTwoTensor>();
-
 /**
  * Declares a constant material property of type RankTwoTensor.
  */
-class GenericConstantRankTwoTensor : public Material
+template <bool is_ad>
+class GenericConstantRankTwoTensorTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericConstantRankTwoTensor(const InputParameters & parameters);
+  GenericConstantRankTwoTensorTempl(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
   RankTwoTensor _tensor;
-  MaterialProperty<RankTwoTensor> & _prop;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _prop;
 };
+
+typedef GenericConstantRankTwoTensorTempl<false> GenericConstantRankTwoTensor;
+typedef GenericConstantRankTwoTensorTempl<true> ADGenericConstantRankTwoTensor;

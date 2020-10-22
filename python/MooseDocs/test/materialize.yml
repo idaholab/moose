@@ -87,6 +87,7 @@ Extensions:
         acronyms:
             INL: Idaho National Laboratory
             MTU: Michigan Technological University
+            UNH: University of New Hampshire
     MooseDocs.extensions.common:
         active: True
         shortcuts:

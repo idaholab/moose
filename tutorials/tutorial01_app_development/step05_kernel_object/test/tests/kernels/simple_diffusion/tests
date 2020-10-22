@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15300'
+  design = 'examples_and_tutorials/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    requirement = "The system shall include a tutorial for application development that includes an introductory step with default testing."
+  []
+[]

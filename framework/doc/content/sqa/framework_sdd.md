@@ -95,7 +95,7 @@ software is open-source and many features and even bugs can be offloaded to deve
 levels of knowledge and direction from the main design team. The primary list of software dependencies
 is listed below. This list is not meant to be exhaustive. Individual operating systems may require
 specific packages to be installed prior to using MOOSE, which can be found on the
-[Getting Started](getting_started/index.md optional=True) pages.
+[Install MOOSE](getting_started/installation/index.md optional=True) pages.
 
 | Software Dependency | Description |
 | :- | :- |
