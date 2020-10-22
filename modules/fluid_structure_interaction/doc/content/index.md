@@ -1,3 +1,1 @@
-!config navigation breadcrumbs=False scrollspy=False
-
-# FluidStructureInteractionApp
+[modules/fluid_structure_interaction/index.md]

@@ -30,6 +30,7 @@ CHEMICAL_REACTIONS          := no
 CONTACT                     := no
 EXTERNAL_PETSC_SOLVER       := no
 FLUID_PROPERTIES            := no
+FLUID_STRUCTURE_INTERACTION := no
 FUNCTIONAL_EXPANSION_TOOLS  := no
 HEAT_CONDUCTION             := no
 LEVEL_SET                   := no
