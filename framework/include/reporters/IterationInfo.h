@@ -46,9 +46,9 @@ protected:
 
 template <typename T>
 T &
-IterationInfo::declareHelper(const std::string & item_name, T & _dummy, bool extra_check)
+IterationInfo::declareHelper(const std::string & item_name, T & dummy, bool extra_check)
 {
   return (extra_check && (!_items.isValid() || _items.contains(item_name)))
              ? declareValueByName<T>(item_name, REPORTER_MODE_REPLICATED)
-             : _dummy;
+             : dummy;
 }
