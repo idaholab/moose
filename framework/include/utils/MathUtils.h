@@ -144,13 +144,26 @@ dotProduct(const W<T> & a, const W2<T2> & b)
   return a.contract(b);
 }
 
+/**
+ * Evaluate a polynomial with the coefficients c at x. Note that the Polynomial
+ * form is
+ *   c[0]*x^s + c[1]*x^(s-1) + c[2]*x^(s-2) + ... + c[s-2]*x^2 + c[s-1]*x + c[s]
+ * where s = c.size()-1 , which is counter intuitive!
+ *
+ * This function will be DEPRECATED soon (10/22/2020)
+ *
+ * The coefficient container type can be any container that provides an index
+ * operator [] and a .size() method (e.g. std::vector, std::array). The return
+ * type is the supertype of the container value type and the argument x.
+ * The supertype is the type that can represent both number types.
+ */
 template <typename C,
           typename T,
           typename R = typename CompareTypes<typename C::value_type, T>::supertype>
 R
-poly(C c, const T x, const bool derivative = false)
+poly(const C & c, const T x, const bool derivative = false)
 {
-  const unsigned int size = c.size();
+  const auto size = c.size();
   if (size == 0)
     return 0.0;
 
@@ -158,14 +171,62 @@ poly(C c, const T x, const bool derivative = false)
   if (derivative)
   {
     value *= size - 1;
-    for (unsigned int i = 1; i < size - 1; i++)
+    for (std::size_t i = 1; i < size - 1; ++i)
       value = value * x + c[i] * (size - i - 1);
   }
   else
   {
-    for (unsigned int i = 1; i < size; i++)
+    for (std::size_t i = 1; i < size; ++i)
       value = value * x + c[i];
   }
+
+  return value;
+}
+
+/**
+ * Evaluate a polynomial with the coefficients c at x. Note that the Polynomial
+ * form is
+ *   c[0] + c[1] * x + c[2] * x^2 + ...
+ * The coefficient container type can be any container that provides an index
+ * operator [] and a .size() method (e.g. std::vector, std::array). The return
+ * type is the supertype of the container value type and the argument x.
+ * The supertype is the type that can represent both number types.
+ */
+template <typename C,
+          typename T,
+          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+R
+polynomial(const C & c, const T x)
+{
+  auto size = c.size();
+  if (size == 0)
+    return 0.0;
+
+  size--;
+  R value = c[size];
+  for (std::size_t i = 1; i <= size; ++i)
+    value = value * x + c[size - i];
+
+  return value;
+}
+
+/**
+ * Returns the derivative of polynomial(c, x) with respect to x
+ */
+template <typename C,
+          typename T,
+          typename R = typename CompareTypes<typename C::value_type, T>::supertype>
+R
+polynomialDerivative(const C & c, const T x)
+{
+  auto size = c.size();
+  if (size <= 1)
+    return 0.0;
+
+  size--;
+  R value = c[size] * size;
+  for (std::size_t i = 1; i < size; ++i)
+    value = value * x + c[size - i] * (size - i);
 
   return value;
 }
