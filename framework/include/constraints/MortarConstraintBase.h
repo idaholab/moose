@@ -152,15 +152,25 @@ protected:
   /// The locations of the quadrature points on the interior primary elements
   const MooseArray<Point> & _phys_points_primary;
 
-  /// The secondary face lower dimensional element (not the mortar element!)
+  /// The secondary face lower dimensional element (not the mortar element!). The mortar element
+  /// lives on the secondary side of the mortar interface and *may* correspond to \p
+  /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
+  /// of the mortar interface exactly project onto the secondary side of the mortar interface. In
+  /// general projection of primary nodes will split the face elements on the secondary side of the
+  /// interface. It is these split elements that are the mortar segment mesh elements
   Elem const * const & _lower_secondary_elem;
 
-  /// The primary face lower dimensional element
+  /// The primary face lower dimensional element (not the mortar element!). The mortar element
+  /// lives on the secondary side of the mortar interface and *may* correspond to \p
+  /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
+  /// of the mortar interface exactly project onto the secondary side of the mortar interface. In
+  /// general projection of primary nodes will split the face elements on the secondary side of the
+  /// interface. It is these split elements that are the mortar segment mesh elements
   Elem const * const & _lower_primary_elem;
 
   /// The secondary face lower dimensional element (not the mortar element!) volume
   const Real & _lower_secondary_volume;
 
-  /// The primary face lower dimensional element volume
+  /// The primary face lower dimensional element volume (not the mortar element!)
   const Real & _lower_primary_volume;
 };

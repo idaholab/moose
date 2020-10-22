@@ -863,7 +863,10 @@ public:
   /**
    * Add *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
    * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
-   * PrimaryPrimary for mortar-like objects
+   * PrimaryPrimary for mortar-like objects. Primary indicates the interior parent element on the
+   * primary side of the mortar interface. Secondary indicates the interior parent element on the
+   * secondary side of the interface. Lower denotes the lower-dimensional element living on the
+   * secondary side of the mortar interface; it's the boundary face of the \p Secondary element.
    */
   void addJacobianMortar();
 
@@ -963,7 +966,10 @@ public:
                                               TagID tag = 0);
 
   /**
-   * Returns the jacobian block for the given mortar Jacobian type
+   * Returns the jacobian block for the given mortar Jacobian type. This jacobian block can involve
+   * degrees of freedom from the secondary side interior parent, the primary side
+   * interior parent, or the lower-dimensional element (located on the secondary
+   * side)
    */
   DenseMatrix<Number> & jacobianBlockMortar(Moose::ConstraintJacobianType type,
                                             unsigned int ivar,
