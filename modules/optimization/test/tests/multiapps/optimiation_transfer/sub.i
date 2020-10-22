@@ -92,19 +92,20 @@
 
 [VectorPostprocessors]
   [measure_pts]
-    type = PointValueSampler
+    type = MeasuredDataPointSampler
     variable = temperature
     points = '0.3 0.3 0
               0.4 1.0 0
               0.8 0.5 0
               0.8 0.6 0'
     sort_by = id
+    measured_data = '100 204 320 216'
   []
 []
 
 
 [Controls]
-  [optimizationSamplerReceiver]
+  [optimizationReceiver]
     type = ControlsReceiver
   []
 []

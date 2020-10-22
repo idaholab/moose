@@ -40,8 +40,12 @@ protected:
   Tao _tao;
 
 private:
+  // output optimization iteration solve data
+  static PetscErrorCode monitor(Tao tao, void * ctx);
+
   ///@{
   /// Function wrappers for tao
+  ///
   static PetscErrorCode objectiveFunctionWrapper(Tao tao, Vec x, Real * objective, void * ctx);
   static PetscErrorCode gradientFunctionWrapper(Tao tao, Vec x, Vec gradient, void * ctx);
   static PetscErrorCode hessianFunctionWrapper(Tao tao, Vec x, Mat hessian, Mat pc, void * ctx);

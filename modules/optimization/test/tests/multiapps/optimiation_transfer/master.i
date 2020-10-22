@@ -1,30 +1,11 @@
-
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 20
-  xmax = 1
-  ymax = 2
-[]
-
-[Variables]
-  [response]
-  []
-[]
-
-[Kernels]
-  [null_kernel]
-    type = NullKernel
-    variable = response
-  []
+[StochasticTools]
 []
 
 [FormFunction]
   type = ObjectiveMinimize
-  optimization_vpp = 'opt_results'
-  subapp_vpp = 'vpp_receiver'
-  measurement_vpp='measurements'
+  optimization_vpp = 'opt_results' # parameters : these are the parameters being controlled
+  subapp_vpp = 'vpp_receiver' # simulated_data :       measurement data from teh simulation
+  measurement_vpp='measurements'  # measured_data :   converged on measured data
 []
 
 [Executioner]
@@ -32,22 +13,23 @@
   petsc_options_iname = '-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'
   petsc_options_value = '0 1e16 constant'
   solve_on = none
+  verbose = true
 []
 
 [MultiApps]
   [sub]
     type = FullSolveMultiApp
-    execute_on = nonlinear
+    execute_on = nonlinear # really important to make subapp execute every optimization step
     input_files = sub.i
   []
 []
 
 [Transfers]
   [toSub]
-    type = OptimizationTransfer
+    type = OptimizationTransfer #parameterTransfer : this name could be better
     multi_app = sub
-    optimization_vpp = opt_results
-    to_control = optimizationSamplerReceiver
+    optimization_vpp = opt_results #paramter_vpp :
+    to_control = optimizationReceiver #parameterReceiver
   []
   [fromSub]
     type = MultiAppVppToVppTransfer
@@ -56,27 +38,20 @@
     direction = from_multiapp
     multi_app = sub
   []
-  [fullTransfer]
-    type = MultiAppCopyTransfer
-    source_variable = temperature
-    variable = response
-    direction = from_multiapp
-    multi_app = sub
-  []
 []
 
 [VectorPostprocessors]
   [measurements]
-    type = ConstantVectorPostprocessor
+    type = ConstantVectorPostprocessor #optDataVectorPostprocessor
     value = '100 204 320 216'
     vector_names = 'values'
   []
   [opt_results]
-    type = OptimizationVectorPostprocessor
+    type = OptimizationVectorPostprocessor  #optParameterVectorPostprocessor
     parameters = 'DiracKernels/pt0/value
                   DiracKernels/pt1/value
                   DiracKernels/pt2/value'
-    intial_values = '0 0 0'
+    intial_values = '-2458 7257 26335'
   []
   [vpp_receiver]
     type=VectorPostprocessorReceiver
@@ -86,7 +61,6 @@
 [Outputs]
   console = true
   csv=true
-  exodus = true
 []
 
 

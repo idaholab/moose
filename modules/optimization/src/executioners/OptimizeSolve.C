@@ -45,6 +45,12 @@ OptimizeSolve::solve()
   ierr = TaoCreate(my_comm, &_tao);
   CHKERRQ(ierr);
 
+  // Print optimization data every step
+  if (getParam<bool>("verbose"))
+  {
+    TaoSetMonitor(_tao, monitor, nullptr, nullptr);
+  }
+
   // Set solve type
   ierr = TaoSetType(_tao, TAONM); // gradient free nelder mead simplex optimization
   //  ierr = TaoSetType(_tao, TAONTR);
@@ -85,6 +91,28 @@ OptimizeSolve::solve()
   CHKERRQ(ierr);
 
   return ierr == 0;
+}
+
+PetscErrorCode
+OptimizeSolve::monitor(Tao tao, void * /*ctx*/)
+{
+  PetscInt its;
+  PetscReal f, gnorm, cnorm, xdiff;
+  TaoConvergedReason reason;
+
+  TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
+  unsigned int print_nsteps = 1;
+  if (!(its % print_nsteps))
+  {
+    PetscPrintf(PETSC_COMM_WORLD,
+                "****** TAO SOLVER OUTPUT: iteration=%D\tf=%g\tgnorm=%g\tcnorm=%g\txdiff=%g\n",
+                its,
+                (double)f,
+                (double)gnorm,
+                (double)cnorm,
+                (double)xdiff);
+  }
+  return 0;
 }
 
 PetscErrorCode
