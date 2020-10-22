@@ -2,7 +2,7 @@
 !col! small=12 medium=4 large=4
 ## Questions
 
-- [MOOSE Users Mailing List](https://groups.google.com/forum/#!forum/moose-users)
+- [Q&A discussion forum](https://github.com/idaholab/moose/discussions)
 - [Frequently Asked Questions](help/faq/index.md)
 - [Contact Us](help/contact_us.md)
 

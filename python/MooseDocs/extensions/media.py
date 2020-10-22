@@ -19,7 +19,7 @@ def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
 Image = tokens.newToken('Image', src='', tex='', dark='')
-Video = tokens.newToken('Video', src='', tex='', youtube=False,
+Video = tokens.newToken('Video', src='', tex='', youtube=False, dark='',
                         controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
@@ -101,6 +101,7 @@ class VideoCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
+        settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings['controls'] = (True, "Display the video player controls (not compatible with YouTube).")
         settings['loop'] = (False, "Automatically loop the video (not compatible with YouTube).")
         settings['autoplay'] = (False, "Automatically start playing the video (not compatible with YouTube).")
@@ -117,6 +118,7 @@ class VideoCommand(command.CommandComponent):
 
         vid = Video(flt,
                     src=info['subcommand'],
+                    dark=self.settings['dark_src'],
                     youtube='www.youtube.com' in info['subcommand'],
                     tex=self.settings['latex_src'],
                     controls=self.settings['controls'],
@@ -176,16 +178,10 @@ class RenderImage(components.RenderComponent):
 class RenderVideo(components.RenderComponent):
     def createHTML(self, parent, token, page):
 
-        node = None
-        src = token['src']
-        if not src.startswith('http'):
-            node = self.translator.findPage(src)
-            src = str(node.relativeSource(page))
-
-        tstart = token['tstart']
-        tstop = token['tstop']
-
         if token['youtube']:
+            src = token['src']
+            tstart = token['tstart']
+            tstop = token['tstop']
             if tstart and tstop:
                 src += '?start={:.0f}&end={:.0f};'.format(tstart, tstop)
             elif tstart:
@@ -200,24 +196,43 @@ class RenderVideo(components.RenderComponent):
                              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture",
                              allowfullscreen="allowfullscreen")
         else:
-            if tstart and tstop:
-                src += '#t={},{}'.format(tstart, tstop)
-            elif tstart:
-                src += '#t={}'.format(tstart)
-            elif tstop:
-                src += '#t=0,{}'.format(tstop)
+            video_light = self.addVideoHelper(parent, 'src', token, page)
+            if token['dark']:
+                video_dark = self.addVideoHelper(parent, 'dark', token, page)
+                video_dark.addClass('moose-video-dark')
+                video_light.addClass('moose-video-light')
 
-            video = html.Tag(parent, 'video', token)
-            _, ext = os.path.splitext(src)
-            html.Tag(video, 'source', src=src, type_="video/{}".format(ext[1:]))
+    def addVideoHelper(self, parent, key, token, page):
+        src = token[key]
+        if not src.startswith('http'):
+            node = self.translator.findPage(src)
+            src = str(node.relativeSource(page))
 
-            video['width'] = '100%'
-            if token['controls']:
-                video['controls'] = 'controls'
-            if token['autoplay']:
-                video['autoplay'] = 'autoplay'
-            if token['loop']:
-                video['loop'] = 'loop'
+        tstart = token['tstart']
+        tstop = token['tstop']
+
+        if tstart and tstop:
+            src += '#t={},{}'.format(tstart, tstop)
+        elif tstart:
+            src += '#t={}'.format(tstart)
+        elif tstop:
+            src += '#t=0,{}'.format(tstop)
+
+        video = html.Tag(parent, 'video', token)
+        _, ext = os.path.splitext(src)
+        source = html.Tag(video, 'source', src=src)
+        source["type"] = "video/{}".format(ext[1:])
+
+        video['width'] = '100%'
+        if token['controls']:
+            video['controls'] = 'controls'
+        if token['autoplay']:
+            video['autoplay'] = 'autoplay'
+        if token['loop']:
+            video['loop'] = 'loop'
+
+        return video
+
 
     def createLatex(self, parent, token, page):
 

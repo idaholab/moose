@@ -1,5 +1,13 @@
 !gallery! large=6
 
+!card! gallery/twist_gallery.mp4 title=Wire Twist
+Mechanical modeling of two copper wires being twisted together to create a twisted pair
+using the [Tensor Mechanics](modules/tensor_mechanics/index.md) and [Contact](modules/contact/index.md) modules.
+
+!style fontsize=90% fontweight=100
+*Credit:*  [Materials Science and Scientific Computing Department at UKAEA](https://ccfe.ukaea.uk/research/)
+!card-end!
+
 !card! gallery/golem_app_reservoir_analysis.mp4 title=Faulted Geothermal Reservoirs
 Evolution of the 100C temperature during 30 years of injection/production for a complex doublet
 system into a fractured geothermal reservoir. Based on [GOLEM](https://github.com/ajacquey/golem),
@@ -22,7 +30,7 @@ Transient flow around corner using Euler equations with variable porosity,
 see [Pronghorn: Porous media thermal-hydraulics for reactor applications](https://escholarship.org/uc/item/61k9r05w).
 !card-end!
 
-!card! gallery/elder.mp4 title=Density Driven, Porous Flow with Adaptivity
+!card! gallery/elder.mp4 title=Density Driven Porous Flow
 Density driven, porous flow simulation of the Elder problem using [Falcon](https://github.com/idaholab/falcon).  Mesh adaptivity is used to accurately capture the moving fronts.
 
 !style fontsize=80% fontweight=100
