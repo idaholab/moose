@@ -46,7 +46,7 @@ CheckFVBCAction::act()
         continue;
 
       unsigned int var_num = var->number();
-      std::vector<FVFluxBC *> flux_bcs;
+      std::vector<FVFluxBCBase *> flux_bcs;
       std::vector<FVDirichletBC *> dirichlet_bcs;
       the_warehouse.query()
           .template condition<AttribSystem>("FVFluxBC")
