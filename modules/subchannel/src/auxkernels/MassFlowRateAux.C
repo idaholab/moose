@@ -7,7 +7,7 @@ MassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
-  params.addParam<Real>("mass_flux", "Specified mass flux [kg/s-m^2]");
+  params.addRequiredParam<Real>("mass_flux", "Specified mass flux [kg/s-m^2]");
   params.addClassDescription(
       "Computes mass float rate from specified mass flux and cross-sectional area");
   return params;
