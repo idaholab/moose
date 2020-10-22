@@ -277,7 +277,7 @@ NonlinearSystemBase::initialSetup()
 
       if (_fe_problem.haveFV())
       {
-        std::vector<FVElementalKernel *> fv_elemental_kernels;
+        std::vector<FVElementalKernelBase *> fv_elemental_kernels;
         _fe_problem.theWarehouse()
             .query()
             .template condition<AttribSystem>("FVElementalKernel")

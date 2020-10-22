@@ -128,7 +128,7 @@ ComputeFullJacobianThread::computeJacobian()
 
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> fv_kernels;
+    std::vector<FVElementalKernelBase *> fv_kernels;
     _fe_problem.theWarehouse()
         .query()
         .template condition<AttribSystem>("FVElementalKernel")
