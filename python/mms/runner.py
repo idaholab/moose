@@ -87,7 +87,7 @@ def _runner(input_file, num_refinements, *args, **kwargs):
                 fcsv = '{}.csv'.format(fbase)
 
         print('Running:', executable, ' '.join(a))
-        out = mooseutils.run_executable(executable, a, mpi=mpi, suppress_output=not console)
+        out = mooseutils.run_executable(executable, *a, mpi=mpi, suppress_output=not console)
 
         # Check that CSV file exists
         if not os.path.isfile(fcsv):

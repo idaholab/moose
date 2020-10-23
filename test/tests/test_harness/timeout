@@ -4,4 +4,8 @@
     input = long_running.i
     max_time = 8
   [../]
+  [./timeout_env]
+    type = RunApp
+    input = long_running.i
+  [../]
 []

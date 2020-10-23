@@ -158,7 +158,7 @@ def find_moose_executable_recursive(loc=os.getcwd(), **kwargs):
             break
     return executable
 
-def run_executable(app_path, args, mpi=None, suppress_output=False):
+def run_executable(app_path, *args, mpi=None, suppress_output=False):
     """
     A function for running an application.
     """
@@ -169,10 +169,11 @@ def run_executable(app_path, args, mpi=None, suppress_output=False):
         cmd = [app_path]
     cmd += args
 
-    if not suppress_output:
-        return subprocess.check_output(cmd, encoding='utf-8')
-    else:
-        return subprocess.call(cmd)
+    kwargs = dict(encoding='utf-8')
+    if suppress_output:
+        kwargs['stdout'] = subprocess.DEVNULL
+        kwargs['stderr'] = subprocess.DEVNULL
+    return subprocess.call(cmd, **kwargs)
 
 def runExe(app_path, args):
     """
