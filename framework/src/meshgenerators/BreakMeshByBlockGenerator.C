@@ -46,6 +46,12 @@ BreakMeshByBlockGenerator::validParams()
       "interface_transition_name",
       "interface_transition",
       "the name of the interface transition boundary created when blocks are provided");
+  params.addParam<bool>("write_fake_neighbor_list_to_file",
+                        false,
+                        "If true write the fake neighbor list to a text file");
+  params.addParam<FileName>("fake_neighbor_list_file_name",
+                            "FakeNeighborList.csv",
+                            "The file name where the fake neighbor list will be saved");
   return params;
 }
 
@@ -58,7 +64,9 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _block_restricted(parameters.isParamSetByUser("block")),
     _add_transition_interface(getParam<bool>("add_transition_interface")),
     _split_transition_interface(getParam<bool>("split_transition_interface")),
-    _interface_transition_name(getParam<BoundaryName>("interface_transition_name"))
+    _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
+    _write_fake_neighbor_list_to_file(getParam<bool>("write_fake_neighbor_list_to_file")),
+    _fake_neighbor_list_file_name(getParam<FileName>("fake_neighbor_list_file_name"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
@@ -80,12 +88,17 @@ BreakMeshByBlockGenerator::generate()
     paramError("interface_transition_name",
                "BreakMeshByBlockGenerator the specified  interface transition boundary name "
                "already exits");
+  mesh->add_elem_integer(_integer_name);
+  const unsigned int integer_id = mesh->get_elem_integer_index(_integer_name);
 
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
+  {
+    elem->set_extra_integer(integer_id, elem->id());
     for (unsigned int n = 0; n < elem->n_nodes(); n++)
       node_to_elem_map[elem->node_id(n)].push_back(elem->id());
+  }
 
   for (auto node_it = node_to_elem_map.begin(); node_it != node_to_elem_map.end(); ++node_it)
   {
@@ -224,6 +237,10 @@ BreakMeshByBlockGenerator::generate()
   }     // end nodeptr check
 
   addInterfaceBoundary(*mesh);
+
+  if (_write_fake_neighbor_list_to_file == true)
+    writeFakeNeighborListToFile(*mesh);
+  Partitioner::set_node_processor_ids(*mesh);
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
@@ -313,4 +330,34 @@ BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem)
     elem_subdomain_id = Elem::invalid_subdomain_id;
 
   return elem_subdomain_id;
+}
+
+void
+BreakMeshByBlockGenerator::writeFakeNeighborListToFile(MeshBase & mesh) const
+{
+  if (mesh.processor_id() == 0)
+  {
+    const unsigned int integer_id = mesh.get_elem_integer_index(_integer_name);
+
+    std::ofstream myfile(_fake_neighbor_list_file_name);
+
+    if (myfile.is_open())
+    {
+      myfile << "elem,side,neighbor,neighbor_side" << std::endl;
+      // loop over boundary sides
+      for (auto & boundary_side_map : _new_boundary_sides_map)
+        for (auto & element_side : boundary_side_map.second)
+        {
+          const Elem * elem = mesh.elem_ptr(element_side.first);
+          myfile << elem->get_extra_integer(integer_id) << "," << element_side.second << ",";
+          const Elem * neighbor = elem->neighbor_ptr(element_side.second);
+          myfile << neighbor->get_extra_integer(integer_id) << ","
+                 << neighbor->which_neighbor_am_i(elem) << std::endl;
+        }
+
+      myfile.close();
+    }
+    else
+      mooseError("BreakMeshByBlockGenerator: can't write fakeneighbor list ot file ");
+  }
 }

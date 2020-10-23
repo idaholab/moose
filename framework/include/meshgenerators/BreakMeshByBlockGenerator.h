@@ -45,13 +45,22 @@ protected:
   const bool _add_transition_interface;
   const bool _split_transition_interface;
   const BoundaryName _interface_transition_name;
+  const std::string _integer_name = "bmbb_element_id";
 
 private:
   /// generate the new boundary interface
   void addInterfaceBoundary(MeshBase & mesh);
+  /// method writing teh fake neighbor conectivity to file
+  void writeFakeNeighborListToFile(MeshBase & mesh) const;
 
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map;
+
+  /// flag allwoing to write the fake neighbor list to file
+  const bool _write_fake_neighbor_list_to_file;
+
+  /// the filename where the fake neighbor list will be saved
+  const FileName _fake_neighbor_list_file_name;
 };

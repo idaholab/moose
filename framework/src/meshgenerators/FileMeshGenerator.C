@@ -33,19 +33,41 @@ FileMeshGenerator::validParams()
                         false,
                         "True to indicate that the mesh file this generator is reading can be used "
                         "for restarting variables");
+  params.addParam<bool>(
+      "has_fake_neighbors", false, "True if reading a broken with fake neighbors");
+  params.addParam<FileName>("fake_neighbor_list_file_name",
+                            "The file name containing the fake neighbor list will be saved");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
 
 FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters), _file_name(getParam<MeshFileName>("file"))
+  : MeshGenerator(parameters),
+    _file_name(getParam<MeshFileName>("file")),
+    _has_fake_neighbors(getParam<bool>("has_fake_neighbors")),
+    _fake_neighbor_list_file_name(
+        _has_fake_neighbors ? getParam<FileName>("fake_neighbor_list_file_name") : "empty")
 {
+  if (_has_fake_neighbors && !parameters.isParamSetByUser("fake_neighbor_list_file_name"))
+    paramError("fake_neighbor_list_file_name",
+               "whe setting has_fake_neighbors=true, you als need to provide "
+               "fake_neighbor_list_file_name ");
+
+  if (_has_fake_neighbors)
+    readFakeNeighborListFromFile();
 }
 
 std::unique_ptr<MeshBase>
 FileMeshGenerator::generate()
 {
   auto mesh = buildMeshBaseObject();
+
+  if (_has_fake_neighbors)
+  {
+    // in this we need to do temporarly disable  paritioning and element removal
+    mesh->allow_remote_element_removal(false);
+    mesh->skip_partitioning(true);
+  }
 
   bool exodus =
       _file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size();
@@ -99,5 +121,126 @@ FileMeshGenerator::generate()
     }
   }
 
+  if (_has_fake_neighbors)
+  {
+    reassignFakeNeighbors(*mesh);
+    mesh->skip_partitioning(false);
+    // now we loop over all the elements and sides, search for fake neighbors and rrelink them
+    for (auto elem : mesh->active_element_ptr_range())
+    {
+      std::cerr << "working on element " << elem->get_extra_integer(_integer_id) << "\n";
+      for (unsigned int s = 0; s < elem->n_sides(); s++)
+      {
+        std::cerr << "  side  " << s << " elem ";
+        Elem * neighbor = elem->neighbor_ptr(s);
+        if (neighbor == nullptr)
+          std::cerr << "null_ptr   ";
+        else if (neighbor == remote_elem)
+          std::cerr << "remote_elem";
+        else
+          std::cerr << neighbor->get_extra_integer(_integer_id);
+        std::cerr << "\n";
+      }
+      std::cerr << "\n \n  ";
+    }
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+FileMeshGenerator::reassignFakeNeighbors(MeshBase & mesh)
+{
+  /// check if we have the proper element integer in teh mesh
+  const std::string _integer_name = "bmbb_element_id";
+  if (!mesh.has_elem_integer(_integer_name))
+    mooseError("FileMeshGenerator: Mesh does not have an element integer names as", _integer_name);
+  _integer_id = mesh.get_elem_integer_index(_integer_name);
+
+  // we start by generating a map between element integers and element ids
+  for (const auto & elem : mesh.active_element_ptr_range())
+    _uelemid_to_elemid[elem->get_extra_integer(_integer_id)] = elem->id();
+
+  // now we loop over all the elements and sides, search for fake neighbors and rrelink them
+  for (auto elem : mesh.active_element_ptr_range())
+  {
+    const unsigned int elem_integer = elem->get_extra_integer(_integer_id);
+    for (unsigned int s = 0; s < elem->n_sides(); s++)
+    {
+      std::pair<unsigned int, unsigned int> elem_side = std::make_pair(elem_integer, s);
+      bool neighbor_added = false;
+      neighbor_added = assignFakeNeighbors(mesh, *elem, elem_side, _fake_neighbor_map);
+      if (!neighbor_added)
+        neighbor_added = assignFakeNeighbors(mesh, *elem, elem_side, _fake_neighbor_map_inverted);
+    }
+  }
+
+  // and... we are done
+}
+
+bool
+FileMeshGenerator::assignFakeNeighbors(
+    MeshBase & mesh,
+    Elem & elem,
+    const std::pair<unsigned int, unsigned int> & elem_side,
+    const std::map<std::pair<dof_id_type, unsigned int>, std::pair<dof_id_type, unsigned int>> &
+        fake_neighbor_map) const
+{
+  bool neighbor_added = false;
+  const auto & it_check = fake_neighbor_map.find(elem_side);
+  if (it_check != fake_neighbor_map.end())
+  {
+    // if we are here we are going to add a neighbor one way or another
+    neighbor_added = true;
+    // let's get the neighbor from the map
+    const unsigned int neighbor_integer = it_check->second.first;
+    const dof_id_type neighbor_id = getRealIDFromInteger(neighbor_integer);
+    if (neighbor_id != DofObject::invalid_id)
+    {
+      // the id is in the map, means this is an active element
+      Elem * neighbor = mesh.elem_ptr(neighbor_id);
+      elem.set_neighbor(elem_side.second, neighbor);
+      neighbor->set_neighbor(it_check->second.second, &elem);
+    }
+    else // the neighbor is a remote element
+      elem.set_neighbor(elem_side.second, const_cast<RemoteElem *>(remote_elem));
+  }
+  return neighbor_added;
+}
+
+dof_id_type
+FileMeshGenerator::getRealIDFromInteger(const unsigned int elem_integer) const
+{
+  dof_id_type elem_id = DofObject::invalid_id;
+  const auto & map_it = _uelemid_to_elemid.find(elem_integer);
+  if (map_it != _uelemid_to_elemid.end())
+    elem_id = map_it->second;
+  return elem_id;
+}
+
+void
+FileMeshGenerator::readFakeNeighborListFromFile()
+{
+  // Read in teh fake neighbor list
+  std::ifstream inFile(_fake_neighbor_list_file_name.c_str());
+  if (!inFile)
+    mooseError("FileMeshGenerator can't open ", _fake_neighbor_list_file_name);
+
+  // Skip first line
+  for (unsigned int i = 0; i < 1; ++i)
+    inFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+  // Loop over fake neighbors
+  unsigned int e1, n1;
+  unsigned int se1, sn1;
+  char coma;
+
+  while (inFile >> e1 >> coma >> se1 >> coma >> n1 >> coma >> sn1)
+  {
+    std::pair<unsigned int, unsigned int> epair = std::make_pair(e1, se1);
+    std::pair<unsigned int, unsigned int> npair = std::make_pair(n1, sn1);
+
+    _fake_neighbor_map[epair] = npair;
+    _fake_neighbor_map_inverted[npair] = epair;
+  }
 }
