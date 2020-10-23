@@ -19,7 +19,9 @@ def check_filenames(filename):
     """
     filenames = project_find(filename)
     if len(filenames) == 0:
-        msg = "{} does not exist."
+        msg = "{} does not exist in the repository. The command 'git ls-files' is used for " \
+              "locating files, so the desired file must be committed or staged prior to " \
+              "running moosedocs.py"
         raise exceptions.MooseDocsException(msg, filename)
     elif len(filenames) > 1:
         msg = "Multiple files located with matching name '{}':\n".format(filename)

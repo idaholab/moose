@@ -46,4 +46,14 @@
     input = test_get_pages.py
     requirement = "MooseDocs shall include the ability to build a file tree from markdown files."
   []
+  [project_find]
+    type = PythonUnitTest
+    input = test_project_find.py
+    requirement = "MooseDocs shall include a utility for locating filenames using a fuzzy search."
+  []
+  [check_filenames]
+    type = PythonUnitTest
+    input = test_check_filenames.py
+    requirement = "MooseDocs shall include a utility to locate a filename using a fuzzy search and error if none or multiple are located."
+  []
 []

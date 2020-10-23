@@ -112,4 +112,4 @@ def main(opt):
     status = _print_reports('MooseApp', app_reports, 0)
     status = _print_reports('Document', doc_reports, status)
     status = _print_reports('Requirement', req_reports, status)
-    return status
+    return status > 1 # 0 - PASS; 1-WARNING; 2-ERROR (Only ERROR is a failure)

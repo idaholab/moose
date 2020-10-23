@@ -7,7 +7,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import os
 import glob
 import shutil
@@ -258,6 +257,21 @@ class TestVectorPostprocessorReader(unittest.TestCase):
 
         # Remove the script
         os.remove(script)
+
+    def testUpdateCall(self):
+        """
+        Test that MooseDataFrame is cached
+        """
+        self.copyfiles()
+        data = mooseutils.VectorPostprocessorReader('vpp_*.csv')
+        ids0 = [id(f) for f in data._frames.values()]
+        data.update()
+        ids1 = [id(f) for f in data._frames.values()]
+        self.assertEqual(ids0, ids1)
+        data.update()
+        ids2 = [id(f) for f in data._frames.values()]
+        self.assertEqual(ids0, ids2)
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

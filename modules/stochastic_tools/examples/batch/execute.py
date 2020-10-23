@@ -29,7 +29,7 @@ def runner(infile, outfile, n_start, n_stop, mode, mpi):
 
         print('{} {}'.format(exe, ' '.join(exe_args)))
         t = time.time()
-        out = mooseutils.run_executable(exe, exe_args, mpi=mpi, suppress_output=True)
+        out = mooseutils.run_executable(exe, *exe_args, mpi=mpi, suppress_output=True)
         t = time.time() - t
 
         local = pandas.read_csv('{}.csv'.format(mode))

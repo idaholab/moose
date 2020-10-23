@@ -26,7 +26,7 @@ class Tester(MooseObject):
 
         # Common Options
         params.addRequiredParam('type', "The type of test of Tester to create for this test.")
-        params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
+        params.addParam('max_time',   int(os.getenv('MOOSE_TEST_MAX_TIME', 300)), "The maximum in seconds that the test will be allowed to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
         params.addParam('unique_test_id', "The unique hash given to a test")

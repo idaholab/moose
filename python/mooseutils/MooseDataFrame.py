@@ -19,14 +19,12 @@ class MooseDataFrame(object):
     This utilizes a pandas.DataFrame for storing and accessing CSV data, while
     allowing for the file to exist/not-exist.
     """
-
     NOCHANGE = 0
     UPDATED = 1
     INVALID = 2
     OLDFILE = 3
 
     def __init__(self, filename, index=None, run_start_time=None, update=True, peacock_index=False):
-
         self._filename = filename
         self._data = pandas.DataFrame()
         self._modified = None
@@ -80,6 +78,12 @@ class MooseDataFrame(object):
         Return False if the data is empty.
         """
         return not self._data.empty
+
+    def empty(self):
+        """
+        Return True if the data is empty.
+        """
+        return self._data.empty
 
     def clear(self):
         """
