@@ -26,3 +26,11 @@ MeshMetaDataInterface::registerMetaDataOnApp(const std::string & name,
   return _meta_data_app.registerRestartableData(
       name, std::move(data), 0, true, MooseApp::MESH_META_DATA);
 }
+
+bool
+MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
+                                       const std::string & prefix) const
+{
+  std::string full_name = std::string(SYSTEM) + "/" + prefix + "/" + data_name;
+  return _meta_data_app.hasRestartableMetaData(full_name, MooseApp::MESH_META_DATA);
+}

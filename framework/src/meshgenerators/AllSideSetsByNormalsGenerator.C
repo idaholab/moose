@@ -38,7 +38,10 @@ AllSideSetsByNormalsGenerator::validParams()
 }
 
 AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters), _input(getMesh("input"))
+  : SideSetsGeneratorBase(parameters),
+    _input(getMesh("input")),
+    _boundary_to_normal_map(
+        declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
 {
 }
 
@@ -52,10 +55,6 @@ AllSideSetsByNormalsGenerator::generate()
 
   // Get the current list of boundaries so we can generate new ones that won't conflict
   _mesh_boundary_ids = mesh->get_boundary_info().get_boundary_ids();
-
-  // Create the map object that will be owned by MooseMesh
-  using map_type = std::map<boundary_id_type, RealVectorValue>;
-  std::unique_ptr<map_type> boundary_map = libmesh_make_unique<map_type>();
 
   _visited.clear();
 
@@ -72,8 +71,8 @@ AllSideSetsByNormalsGenerator::generate()
 
       {
         // See if we've seen this normal before (linear search)
-        const map_type::value_type * item = nullptr;
-        for (const auto & id_pair : *boundary_map)
+        const std::map<BoundaryID, RealVectorValue>::value_type * item = nullptr;
+        for (const auto & id_pair : _boundary_to_normal_map)
           if (std::abs(1.0 - id_pair.second * normals[0]) < 1e-5)
           {
             item = &id_pair;
@@ -85,7 +84,7 @@ AllSideSetsByNormalsGenerator::generate()
         else
         {
           boundary_id_type id = getNextBoundaryID();
-          (*boundary_map)[id] = normals[0];
+          _boundary_to_normal_map[id] = normals[0];
           flood(elem, normals[0], id, *mesh);
         }
       }
