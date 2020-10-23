@@ -1610,6 +1610,14 @@ public:
                           const std::set<TagID> & matrix_tags,
                           LocalFunctor & local_functor);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * signals this object that a vector containing variable scaling factors should be used when doing
+   * residual and matrix assembly
+   */
+  void hasScalingVector();
+#endif
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2352,6 +2360,11 @@ protected:
   mutable std::map<FEType, bool> _need_second_derivative;
   mutable std::map<FEType, bool> _need_second_derivative_neighbor;
   mutable std::map<FEType, bool> _need_curl;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /// The map from global index to variable scaling factor
+  const NumericVector<Real> * _scaling_vector = nullptr;
+#endif
 };
 
 template <typename OutputType>

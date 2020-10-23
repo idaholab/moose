@@ -1413,6 +1413,15 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   _mesh.computeFaceInfoFaceCoords(_subproblem);
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+SystemBase::addScalingVector()
+{
+  addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
+  _subproblem.hasScalingVector();
+}
+#endif
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

@@ -929,3 +929,12 @@ SubProblem::automaticScaling() const
 {
   return systemBaseNonlinear().automaticScaling();
 }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+SubProblem::hasScalingVector()
+{
+  for (const THREAD_ID tid : make_range(libMesh::n_threads()))
+    assembly(tid).hasScalingVector();
+}
+#endif

@@ -2362,6 +2362,16 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         _fe_problem.assembly(i).addCachedJacobian();
     }
 
+    if (_fe_problem.haveFV())
+    {
+      // the same loop works for both residual and jacobians because it keys
+      // off of FEProblem's _currently_computing_jacobian parameter
+      using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
+      ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+      FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
+      Threads::parallel_reduce(faces, fvj);
+    }
+
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
@@ -2391,17 +2401,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
 
-        if (_fe_problem.haveFV())
-        {
-          // the same loop works for both residual and jacobians because it keys
-          // off of FEProblem's _currently_computing_jacobian parameter
-          using FVRange =
-              StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
-          ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-          FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
-          Threads::parallel_reduce(faces, fvj);
-        }
-
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any Jacobian contributions still hanging around
@@ -2428,15 +2427,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeFullJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
-
-        if (_fe_problem.haveFV())
-        {
-          using FVRange =
-              StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
-          ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-          FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
-          Threads::parallel_reduce(faces, fvj);
-        }
 
         for (unsigned int i = 0; i < n_threads; i++)
           _fe_problem.addCachedJacobian(i);
@@ -3448,7 +3438,7 @@ NonlinearSystemBase::computeScaling()
 
   // We have to make sure that our scaling values are not zero
   for (auto & scaling_factor : inverse_scaling_factors)
-    if (scaling_factor < std::numeric_limits<Real>::epsilon())
+    if (scaling_factor == 0)
       scaling_factor = 1;
 
   // Now flatten the group scaling factors to the individual variable scaling factors
@@ -3466,3 +3456,50 @@ NonlinearSystemBase::computeScaling()
 
   _auto_scaling_initd = true;
 }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+NonlinearSystemBase::assembleScalingVector()
+{
+  if (!hasVector("scaling_factors"))
+    // No variables have indicated they need scaling
+    return;
+
+  auto & scaling_vector = getVector("scaling_factors");
+
+  const auto & lm_mesh = _mesh.getMesh();
+  const auto & dof_map = dofMap();
+
+  const auto & field_variables = _vars[0].fieldVariables();
+  const auto & scalar_variables = _vars[0].scalars();
+
+  std::vector<dof_id_type> dof_indices;
+
+  for (const Elem * const elem :
+       as_range(lm_mesh.active_local_elements_begin(), lm_mesh.active_local_elements_end()))
+    for (const auto * const field_var : field_variables)
+    {
+      mooseAssert(field_var->count() == 1,
+                  "Contact Robert Carlsen and tell him to make this work for array variables.");
+      dof_map.dof_indices(elem, dof_indices, field_var->number());
+      for (const auto dof : dof_indices)
+        scaling_vector.set(dof, field_var->scalingFactor());
+    }
+
+  for (const auto * const scalar_var : scalar_variables)
+  {
+    mooseAssert(scalar_var->count() == 1,
+                "Contact Robert Carlsen and tell him to make this work for array variables.");
+    dof_map.SCALAR_dof_indices(dof_indices, scalar_var->number());
+    for (const auto dof : dof_indices)
+      scaling_vector.set(dof, scalar_var->scalingFactor());
+  }
+
+  // Parallel assemble
+  scaling_vector.close();
+
+  if (auto * displaced_problem = _fe_problem.getDisplacedProblem().get())
+    // copy into the corresponding displaced system vector because they should be the exact same
+    displaced_problem->systemBaseNonlinear().getVector("scaling_factors") = scaling_vector;
+}
+#endif
