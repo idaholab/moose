@@ -28,13 +28,13 @@ public:
 
   PiecewiseLinearBase(const InputParameters & parameters);
 
-  void initialSetup() override;
-  Real value(Real t, const Point & p) const override;
-  Real timeDerivative(Real t, const Point &) const override;
-  RealGradient gradient(Real, const Point & p) const override;
-  Real integral() const override;
-  Real average() const override;
-  void setData(const std::vector<Real> & x, const std::vector<Real> & y) override;
+  virtual void initialSetup() override;
+  virtual Real value(Real t, const Point & p) const override;
+  virtual Real timeDerivative(Real t, const Point &) const override;
+  virtual RealGradient gradient(Real, const Point & p) const override;
+  virtual Real integral() const override;
+  virtual Real average() const override;
+  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y) override;
 
 protected:
   /// build the linear interpolation object from the x/y data
