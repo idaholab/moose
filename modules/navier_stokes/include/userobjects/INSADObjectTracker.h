@@ -17,6 +17,9 @@
 
 #include "libmesh/vector_value.h"
 
+#include <unordered_map>
+#include <set>
+
 template <typename>
 class ADMaterialProperty;
 template <typename>
@@ -46,29 +49,40 @@ public:
    * then we will error
    */
   template <typename T>
-  void set(const std::string & name, const T & value);
+  void set(const std::string & name, const T & value, SubdomainID sub_id);
 
   /**
    * Get the internal parameter \p name. This will check whether \p name has already
    * been set by the user. If it has not, then we will error
    */
   template <typename T>
-  const T & get(const std::string & name) const;
+  const T & get(const std::string & name, SubdomainID sub_id) const;
 
   virtual void initialize() final {}
   virtual void execute() final {}
   virtual void finalize() final {}
 
-  bool isTrackerParamValid(const std::string & name) const
-  {
-    return _tracker_params.isParamValid(name);
-  }
+  bool isTrackerParamValid(const std::string & name, SubdomainID sub_id) const;
+
+  /**
+   * Add additional block coverage to this
+   */
+  void addBlockIDs(const std::set<SubdomainID> & additional_block_ids);
 
 private:
   template <typename T>
   static bool notEqual(const T & val1, const T & val2);
 
-  InputParameters _tracker_params;
+  std::unordered_map<SubdomainID, InputParameters> _block_id_to_params;
+
+  static InputParameters validTrackerParams();
+
+  template <typename T>
+  static void set(const std::string & name, const T & value, InputParameters & params);
+
+  bool singleMaterialCoverage() const;
+
+  const InputParameters & getParams(SubdomainID sub_id) const;
 };
 
 template <typename T>
@@ -83,26 +97,43 @@ bool INSADObjectTracker::notEqual(const MooseEnum & val1, const MooseEnum & val2
 
 template <typename T>
 void
-INSADObjectTracker::set(const std::string & name, const T & value)
+INSADObjectTracker::set(const std::string & name, const T & value, InputParameters & params)
 {
-  if (_tracker_params.isParamSetByUser(name))
+  if (params.isParamSetByUser(name))
   {
-    const T & current_value = _tracker_params.get<T>(name);
+    const T & current_value = params.get<T>(name);
     if (INSADObjectTracker::notEqual(current_value, value))
-      mooseError("Two INSADObjects set different values for the parameter ", name);
+      ::mooseError("Two INSADObjects set different values for the parameter ", name);
   }
-  else if (!_tracker_params.have_parameter<T>(name))
-    mooseError("Attempting to set parameter ", name, " that is not a valid param");
+  else if (!params.have_parameter<T>(name))
+    ::mooseError("Attempting to set parameter ", name, " that is not a valid param");
   else
-    _tracker_params.set<T>(name) = value;
+    params.set<T>(name) = value;
+}
+
+template <typename T>
+void
+INSADObjectTracker::set(const std::string & name, const T & value, const SubdomainID sub_id)
+{
+  if (sub_id == Moose::ANY_BLOCK_ID)
+  {
+    for (auto & pr : _block_id_to_params)
+      INSADObjectTracker::set(name, value, pr.second);
+
+    return;
+  }
+
+  INSADObjectTracker::set(name, value, const_cast<InputParameters &>(getParams(sub_id)));
 }
 
 template <typename T>
 const T &
-INSADObjectTracker::get(const std::string & name) const
+INSADObjectTracker::get(const std::string & name, const SubdomainID sub_id) const
 {
-  if (!_tracker_params.isParamValid(name))
+  const InputParameters & params = getParams(sub_id);
+
+  if (!params.isParamValid(name))
     mooseError("The parameter ", name, " is being retrieved before being set");
 
-  return _tracker_params.get<T>(name);
+  return params.get<T>(name);
 }

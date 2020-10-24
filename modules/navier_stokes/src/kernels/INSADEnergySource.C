@@ -43,19 +43,21 @@ INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
     mooseError("Both the 'source_variable' or 'source_function' param are set for the "
                "'INSADMomentumCoupledForce' object. Please use one or the other.");
 
+  if (has_coupled && coupledComponents("source_variable") != 1)
+    paramError("source_variable", "Only expect one variable for the 'source_variable' parameter");
+
   // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.set("has_heat_source", true);
-  if (has_coupled)
+  for (const auto block_id : blockIDs())
   {
-    if (coupledComponents("source_variable") != 1)
-      paramError("source_variable", "Only expect one variable for the 'source_variable' parameter");
-    obj_tracker.set("heat_source_var", getVar("source_variable", 0)->name());
+    obj_tracker.set("has_heat_source", true, block_id);
+    if (has_coupled)
+      obj_tracker.set("heat_source_var", getVar("source_variable", 0)->name(), block_id);
+    else if (has_function)
+      obj_tracker.set("heat_source_function", getParam<FunctionName>("source_function"), block_id);
   }
-  else if (has_function)
-    obj_tracker.set("heat_source_function", getParam<FunctionName>("source_function"));
 }
 
 ADReal
