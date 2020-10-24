@@ -14,181 +14,146 @@ namespace MathUtils
 {
 
 Real
-poly1Log(Real x, Real tol, int deriv)
+plainLog(Real x, unsigned int derivative_order)
 {
-  Real c1 = 1.0 / tol;
-  Real c2 = std::log(tol) - 1.0;
+  switch (derivative_order)
+  {
+    case 0:
+      return std::log(x);
 
-  Real value = 0.0;
+    case 1:
+      return 1.0 / x;
 
-  if (deriv == 0)
-  {
-    if (x < tol)
-      value = c1 * x + c2;
-    else
-      value = std::log(x);
-  }
-  else if (deriv == 1)
-  {
-    if (x < tol)
-      value = c1;
-    else
-      value = 1.0 / x;
-  }
-  else if (deriv == 2)
-  {
-    if (x < tol)
-      value = 0.0;
-    else
-      value = -1.0 / (x * x);
-  }
-  else if (deriv == 3)
-  {
-    if (x < tol)
-      value = 0.0;
-    else
-      value = 2.0 / (x * x * x);
+    case 2:
+      return -1.0 / (x * x);
+
+    case 3:
+      return 2.0 / (x * x * x);
   }
 
-  return value;
+  mooseError("Unsupported derivative order ", derivative_order);
 }
 
 Real
-poly2Log(Real x, Real tol, int deriv)
+poly1Log(Real x, Real tol, unsigned int derivative_order)
 {
-  Real c1 = -0.5 / (tol * tol);
-  Real c2 = 2.0 / tol;
-  Real c3 = std::log(tol) - 3.0 / 2.0;
+  if (x >= tol)
+    return plainLog(x, derivative_order);
 
-  Real value = 0.0;
+  const auto c1 = [&]() { return 1.0 / tol; };
+  const auto c2 = [&]() { return std::log(tol) - 1.0; };
 
-  if (deriv == 0)
+  switch (derivative_order)
   {
-    if (x < tol)
-      value = c1 * x * x + c2 * x + c3;
-    else
-      value = std::log(x);
-  }
-  else if (deriv == 1)
-  {
-    if (x < tol)
-      value = 2.0 * c1 * x + c2;
-    else
-      value = 1.0 / x;
-  }
-  else if (deriv == 2)
-  {
-    if (x < tol)
-      value = 2.0 * c1;
-    else
-      value = -1.0 / (x * x);
-  }
-  else if (deriv == 3)
-  {
-    if (x < tol)
-      value = 0.0;
-    else
-      value = 2.0 / (x * x * x);
+    case 0:
+      return c1() * x + c2();
+
+    case 1:
+      return c1();
+
+    case 2:
+      return 0.0;
+
+    case 3:
+      return 0.0;
   }
 
-  return value;
+  mooseError("Unsupported derivative order ", derivative_order);
 }
 
 Real
-poly3Log(Real x, Real tol, int order)
+poly2Log(Real x, Real tol, unsigned int derivative_order)
 {
-  Real c1 = 1.0 / (3.0 * tol * tol * tol);
-  Real c2 = -3.0 / (2.0 * tol * tol);
-  Real c3 = 3.0 / tol;
-  Real c4 = std::log(tol) - 11.0 / 6.0;
+  if (x >= tol)
+    return plainLog(x, derivative_order);
 
-  Real value = 0.0;
+  const auto c1 = [&]() { return -0.5 / (tol * tol); };
+  const auto c2 = [&]() { return 2.0 / tol; };
+  const auto c3 = [&]() { return std::log(tol) - 3.0 / 2.0; };
 
-  if (order == 0)
+  switch (derivative_order)
   {
-    if (x < tol)
-      value = c1 * x * x * x + c2 * x * x + c3 * x + c4;
-    else
-      value = std::log(x);
+    case 0:
+      return c1() * x * x + c2() * x + c3();
+
+    case 1:
+      return 2.0 * c1() * x + c2();
+
+    case 2:
+      return 2.0 * c1();
+
+    case 3:
+      return 0.0;
   }
-  else if (order == 1)
-  {
-    if (x < tol)
-      value = 3.0 * c1 * x * x + 2.0 * c2 * x + c3;
-    else
-      value = 1.0 / x;
-  }
-  else if (order == 2)
-  {
-    if (x < tol)
-      value = 6.0 * c1 * x + 2.0 * c2;
-    else
-      value = -1.0 / (x * x);
-  }
-  else if (order == 3)
-  {
-    if (x < tol)
-      value = 6.0 * c1;
-    else
-      value = 2.0 / (x * x * x);
-  }
-  return value;
+
+  mooseError("Unsupported derivative order ", derivative_order);
 }
 
 Real
-poly4Log(Real x, Real tol, int order)
+poly3Log(Real x, Real tol, unsigned int derivative_order)
 {
-  Real value = 0.0;
+  if (x >= tol)
+    return plainLog(x, derivative_order);
 
-  if (order == 0)
+  const auto c1 = [&]() { return 1.0 / (3.0 * tol * tol * tol); };
+  const auto c2 = [&]() { return -3.0 / (2.0 * tol * tol); };
+  const auto c3 = [&]() { return 3.0 / tol; };
+  const auto c4 = [&]() { return std::log(tol) - 11.0 / 6.0; };
+
+  switch (derivative_order)
   {
-    if (x < tol)
-      value = std::log(tol) + (x - tol) / tol - (x - tol) * (x - tol) / (2.0 * tol * tol) +
-              (x - tol) * (x - tol) * (x - tol) / (3.0 * tol * tol * tol) -
-              (x - tol) * (x - tol) * (x - tol) * (x - tol) / (4.0 * tol * tol * tol * tol) +
-              (x - tol) * (x - tol) * (x - tol) * (x - tol) * (x - tol) /
-                  (5.0 * tol * tol * tol * tol * tol) -
-              (x - tol) * (x - tol) * (x - tol) * (x - tol) * (x - tol) * (x - tol) /
-                  (6.0 * tol * tol * tol * tol * tol * tol);
-    else
-      value = std::log(x);
+    case 0:
+      return c1() * x * x * x + c2() * x * x + c3() * x + c4();
+
+    case 1:
+      return 3.0 * c1() * x * x + 2.0 * c2() * x + c3();
+
+    case 2:
+      return 6.0 * c1() * x + 2.0 * c2();
+
+    case 3:
+      return 6.0 * c1();
   }
-  else if (order == 1)
+
+  mooseError("Unsupported derivative order ", derivative_order);
+}
+
+Real
+poly4Log(Real x, Real tol, unsigned int derivative_order)
+{
+  if (x >= tol)
+    return plainLog(x, derivative_order);
+
+  switch (derivative_order)
   {
-    if (x < tol)
-      value = 1.0 / tol - 2.0 * (x - tol) / (2.0 * tol * tol) +
-              3.0 * (x - tol) * (x - tol) / (3.0 * tol * tol * tol) -
-              4.0 * (x - tol) * (x - tol) * (x - tol) / (4.0 * tol * tol * tol * tol) +
-              5.0 * (x - tol) * (x - tol) * (x - tol) * (x - tol) /
-                  (5.0 * tol * tol * tol * tol * tol) -
-              6.0 * (x - tol) * (x - tol) * (x - tol) * (x - tol) * (x - tol) /
-                  (6.0 * tol * tol * tol * tol * tol * tol);
-    else
-      value = 1.0 / x;
+    case 0:
+      return std::log(tol) + (x - tol) / tol -
+             Utility::pow<2>(x - tol) / (2.0 * Utility::pow<2>(tol)) +
+             Utility::pow<3>(x - tol) / (3.0 * Utility::pow<3>(tol)) -
+             Utility::pow<4>(x - tol) / (4.0 * Utility::pow<4>(tol)) +
+             Utility::pow<5>(x - tol) / (5.0 * Utility::pow<5>(tol)) -
+             Utility::pow<6>(x - tol) / (6.0 * Utility::pow<6>(tol));
+
+    case 1:
+      return 1.0 / tol - (x - tol) / Utility::pow<2>(tol) +
+             Utility::pow<2>(x - tol) / Utility::pow<3>(tol) -
+             Utility::pow<3>(x - tol) / Utility::pow<4>(tol) +
+             Utility::pow<4>(x - tol) / Utility::pow<5>(tol) -
+             Utility::pow<5>(x - tol) / Utility::pow<6>(tol);
+
+    case 2:
+      return -1.0 / Utility::pow<2>(tol) + 2.0 * (x - tol) / Utility::pow<3>(tol) -
+             3.0 * Utility::pow<2>(x - tol) / Utility::pow<4>(tol) +
+             4.0 * Utility::pow<3>(x - tol) / Utility::pow<5>(tol) -
+             5.0 * Utility::pow<4>(x - tol) / Utility::pow<6>(tol);
+
+    case 3:
+      return 2.0 / Utility::pow<3>(tol) - 6.0 * (x - tol) / Utility::pow<4>(tol) +
+             12.0 * Utility::pow<2>(x - tol) / Utility::pow<5>(tol) -
+             20.0 * Utility::pow<3>(x - tol) / Utility::pow<6>(tol);
   }
-  else if (order == 2)
-  {
-    if (x < tol)
-      value = -2.0 * 1.0 / (2.0 * tol * tol) + 3.0 * 2.0 * (x - tol) / (3.0 * tol * tol * tol) -
-              4.0 * 3.0 * (x - tol) * (x - tol) / (4.0 * tol * tol * tol * tol) +
-              5.0 * 4.0 * (x - tol) * (x - tol) * (x - tol) / (5.0 * tol * tol * tol * tol * tol) -
-              6.0 * 5.0 * (x - tol) * (x - tol) * (x - tol) * (x - tol) /
-                  (6.0 * tol * tol * tol * tol * tol * tol);
-    else
-      value = -1.0 / (x * x);
-  }
-  else if (order == 3)
-  {
-    if (x < tol)
-      value = 3.0 * 2.0 * 1.0 / (3.0 * tol * tol * tol) -
-              4.0 * 3.0 * 2.0 * (x - tol) / (4.0 * tol * tol * tol * tol) +
-              5.0 * 4.0 * 3.0 * (x - tol) * (x - tol) / (5.0 * tol * tol * tol * tol * tol) -
-              6.0 * 5.0 * 4.0 * (x - tol) * (x - tol) * (x - tol) /
-                  (6.0 * tol * tol * tol * tol * tol * tol);
-    else
-      value = 2.0 / (x * x * x);
-  }
-  return value;
+
+  mooseError("Unsupported derivative order ", derivative_order);
 }
 
 /// \todo This can be done without std::pow!
