@@ -15,8 +15,6 @@
 
 registerMooseObject("NavierStokesApp", INSADMaterial);
 
-const INSADObjectTracker * INSADMaterial::_object_tracker = nullptr;
-
 InputParameters
 INSADMaterial::validParams()
 {
@@ -54,59 +52,78 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints())
 {
-  if (!_object_tracker)
+  if (!_fe_problem.hasUserObject("ins_ad_object_tracker"))
   {
     InputParameters tracker_params = INSADObjectTracker::validParams();
     tracker_params.addPrivateParam("_moose_app", &_app);
 
     _fe_problem.addUserObject("INSADObjectTracker", "ins_ad_object_tracker", tracker_params);
-
-    // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
-    // don't need
-    _object_tracker = &_fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker");
   }
+
+  // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
+  // don't need
+  _object_tracker = &_fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker");
+  const_cast<INSADObjectTracker *>(_object_tracker)->addBlockIDs(this->blockIDs());
 }
 
 void
-INSADMaterial::initialSetup()
+INSADMaterial::subdomainSetup()
 {
-  if ((_has_transient = _object_tracker->get<bool>("has_transient")))
+  if ((_has_transient = _object_tracker->get<bool>("has_transient", _current_subdomain_id)))
     _velocity_dot = &adCoupledVectorDot("velocity");
+  else
+    _velocity_dot = nullptr;
 
-  if ((_has_boussinesq = _object_tracker->get<bool>("has_boussinesq")))
+  if ((_has_boussinesq = _object_tracker->get<bool>("has_boussinesq", _current_subdomain_id)))
   {
     // Material property retrieval through MaterialPropertyInterface APIs can only happen during
     // object contruction because we're going to check for material property dependency resolution.
     // So we have to go through MaterialData here. We already performed the material property
     // requests through the MaterialPropertyInterface APIs in the INSAD kernels, so we should be
     // safe for dependencies
-    _boussinesq_alpha =
-        &_material_data->getADProperty<Real>(_object_tracker->get<MaterialPropertyName>("alpha"));
+    _boussinesq_alpha = &_material_data->getADProperty<Real>(
+        _object_tracker->get<MaterialPropertyName>("alpha", _current_subdomain_id));
     _temperature =
-        &_subproblem.getStandardVariable(_tid, _object_tracker->get<std::string>("temperature"))
+        &_subproblem
+             .getStandardVariable(
+                 _tid, _object_tracker->get<std::string>("temperature", _current_subdomain_id))
              .adSln();
-    _ref_temp =
-        &_material_data->getProperty<Real>(_object_tracker->get<MaterialPropertyName>("ref_temp"));
+    _ref_temp = &_material_data->getProperty<Real>(
+        _object_tracker->get<MaterialPropertyName>("ref_temp", _current_subdomain_id));
+  }
+  else
+  {
+    _boussinesq_alpha = nullptr;
+    _temperature = nullptr;
+    _ref_temp = nullptr;
   }
 
-  _has_gravity = _object_tracker->get<bool>("has_gravity");
+  _has_gravity = _object_tracker->get<bool>("has_gravity", _current_subdomain_id);
   if (_has_gravity || _has_boussinesq)
-    _gravity_vector = _object_tracker->get<RealVectorValue>("gravity");
+    _gravity_vector = _object_tracker->get<RealVectorValue>("gravity", _current_subdomain_id);
+  else
+    _gravity_vector = 0;
 
-  _viscous_form = static_cast<std::string>(_object_tracker->get<MooseEnum>("viscous_form"));
+  _viscous_form = static_cast<std::string>(
+      _object_tracker->get<MooseEnum>("viscous_form", _current_subdomain_id));
 
-  if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force")))
+  if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force", _current_subdomain_id)))
   {
-    if (_object_tracker->isTrackerParamValid("coupled_force_var"))
+    _coupled_force_var.clear();
+    _coupled_force_vector_function.clear();
+    if (_object_tracker->isTrackerParamValid("coupled_force_var", _current_subdomain_id))
     {
-      const auto & var_names = _object_tracker->get<std::vector<VariableName>>("coupled_force_var");
+      const auto & var_names = _object_tracker->get<std::vector<VariableName>>(
+          "coupled_force_var", _current_subdomain_id);
       for (const auto & var_name : var_names)
         _coupled_force_var.push_back(&_subproblem.getVectorVariable(_tid, var_name).adSln());
     }
-    if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
+
+    if (_object_tracker->isTrackerParamValid("coupled_force_vector_function",
+                                             _current_subdomain_id))
     {
-      const auto & func_names =
-          _object_tracker->get<std::vector<FunctionName>>("coupled_force_vector_function");
+      const auto & func_names = _object_tracker->get<std::vector<FunctionName>>(
+          "coupled_force_vector_function", _current_subdomain_id);
       for (const auto & func_name : func_names)
         _coupled_force_vector_function.push_back(&_fe_problem.getFunction(func_name, _tid));
     }

@@ -20,49 +20,52 @@ INSADObjectTracker::validParams()
   return params;
 }
 
-INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _tracker_params(emptyInputParameters())
+InputParameters
+INSADObjectTracker::validTrackerParams()
 {
-  _tracker_params.addParam<bool>("integrate_p_by_parts",
-                                 "Whether to integrate the pressure by parts");
+  InputParameters params = emptyInputParameters();
+  params.addParam<bool>("integrate_p_by_parts", "Whether to integrate the pressure by parts");
   MooseEnum viscous_form("traction laplace", "laplace");
-  _tracker_params.addParam<MooseEnum>(
-      "viscous_form",
-      viscous_form,
-      "The form of the viscous term. Options are 'traction' or 'laplace'");
-  _tracker_params.addParam<bool>(
+  params.addParam<MooseEnum>("viscous_form",
+                             viscous_form,
+                             "The form of the viscous term. Options are 'traction' or 'laplace'");
+  params.addParam<bool>(
       "has_boussinesq", false, "Whether the simulation has the boussinesq approximation");
-  _tracker_params.addParam<MaterialPropertyName>(
+  params.addParam<MaterialPropertyName>(
       "alpha", "The alpha material property for the boussinesq approximation");
-  _tracker_params.addParam<MaterialPropertyName>("ref_temp",
-                                                 "The reference temperature material property");
-  _tracker_params.addParam<std::string>("temperature", "The temperature variable");
-  _tracker_params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  _tracker_params.addParam<bool>(
+  params.addParam<MaterialPropertyName>("ref_temp", "The reference temperature material property");
+  params.addParam<std::string>("temperature", "The temperature variable");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  params.addParam<bool>(
       "has_gravity",
       false,
       "Whether the simulation has a gravity force imposed on the momentum equation");
-  _tracker_params.addParam<bool>("has_transient", false, "Whether the simulation is transient");
+  params.addParam<bool>("has_transient", false, "Whether the simulation is transient");
 
-  addAmbientConvectionParams(_tracker_params);
+  addAmbientConvectionParams(params);
 
-  _tracker_params.addParam<bool>(
+  params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
-  _tracker_params.addParam<FunctionName>("heat_source_function",
-                                         "The function describing the heat source");
-  _tracker_params.addParam<std::string>(
+  params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
+  params.addParam<std::string>(
       "heat_source_var",
       "Variable describing the volumetric heat source. Note that if this variable evaluates to a "
       "negative number, then this object will be an energy sink");
 
-  _tracker_params.addParam<bool>(
+  params.addParam<bool>(
       "has_coupled_force",
       false,
       "Whether the simulation has a force due to a coupled vector variable/vector function");
-  _tracker_params.addParam<std::vector<VariableName>>("coupled_force_var",
-                                                      "Variables imposing coupled forces");
-  _tracker_params.addParam<std::vector<FunctionName>>(
-      "coupled_force_vector_function", "The function(s) standing in as a coupled force(s)");
+  params.addParam<std::vector<VariableName>>("coupled_force_var",
+                                             "Variables imposing coupled forces");
+  params.addParam<std::vector<FunctionName>>("coupled_force_vector_function",
+                                             "The function(s) standing in as a coupled force(s)");
+  return params;
+}
+
+INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
+  : GeneralUserObject(parameters)
+{
 }
 
 void
@@ -83,4 +86,57 @@ bool
 INSADObjectTracker::notEqual(const MooseEnum & val1, const MooseEnum & val2)
 {
   return !val1.compareCurrent(val2);
+}
+
+void
+INSADObjectTracker::addBlockIDs(const std::set<SubdomainID> & additional_block_ids)
+{
+  for (const auto sub_id : additional_block_ids)
+    _block_id_to_params.emplace(sub_id, validTrackerParams());
+
+  if (_block_id_to_params.find(Moose::ANY_BLOCK_ID) != _block_id_to_params.end() &&
+      _block_id_to_params.size() > 1)
+    mooseError(
+        "If INSADObjectTracker::_block_id_to_params holds Moose::ANY_BLOCK_ID, then it cannot hold "
+        "any other other block ids. Do you have an INSADMaterial that's not block "
+        "restricted, and other INSADMaterials that are? If so, you have duplicate coverage, "
+        "and you should fix that in your input file.");
+}
+
+bool
+INSADObjectTracker::singleMaterialCoverage() const
+{
+  if (_block_id_to_params.find(Moose::ANY_BLOCK_ID) != _block_id_to_params.end())
+  {
+    mooseAssert(_block_id_to_params.size() == 1,
+                "If our _block_id_to_params container has a Moose::ANY_BLOCK_ID key, then its size "
+                "must be exactly one.");
+
+    return true;
+  }
+  else
+    return false;
+}
+
+bool
+INSADObjectTracker::isTrackerParamValid(const std::string & name, const SubdomainID sub_id) const
+{
+  return getParams(sub_id).isParamValid(name);
+}
+
+const InputParameters &
+INSADObjectTracker::getParams(const SubdomainID sub_id) const
+{
+  // Do we have a single unrestricted material that supplies all our material properties?
+  if (singleMaterialCoverage())
+    return _block_id_to_params.begin()->second;
+  else
+  {
+    auto map_it = _block_id_to_params.find(sub_id);
+    if (map_it == _block_id_to_params.end())
+      mooseError("The requested sub_id is not a key in INSADObjectTracker::_block_id_to_params. "
+                 "Please contact a Moose developer to fix this bug.");
+
+    return map_it->second;
+  }
 }

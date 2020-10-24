@@ -41,10 +41,19 @@ INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
     _mu(getADMaterialProperty<Real>("mu_name")),
     _form(getParam<MooseEnum>("viscous_form"))
 {
+  std::set<SubdomainID> connected_blocks;
+  for (const auto bnd_id : boundaryIDs())
+  {
+    const auto & these_blocks = _mesh.getBoundaryConnectedBlocks(bnd_id);
+    connected_blocks.insert(these_blocks.begin(), these_blocks.end());
+  }
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.set("viscous_form", _form);
-  obj_tracker.set("integrate_p_by_parts", _integrate_p_by_parts);
+  for (const auto block_id : connected_blocks)
+  {
+    obj_tracker.set("viscous_form", _form, block_id);
+    obj_tracker.set("integrate_p_by_parts", _integrate_p_by_parts, block_id);
+  }
 }
 
 ADReal

@@ -34,9 +34,12 @@ INSADEnergyAmbientConvection::INSADEnergyAmbientConvection(const InputParameters
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.set("has_ambient_convection", true);
-  obj_tracker.set("ambient_convection_alpha", getParam<Real>("alpha"));
-  obj_tracker.set("ambient_temperature", getParam<Real>("T_ambient"));
+  for (const auto block_id : blockIDs())
+  {
+    obj_tracker.set("has_ambient_convection", true, block_id);
+    obj_tracker.set("ambient_convection_alpha", getParam<Real>("alpha"), block_id);
+    obj_tracker.set("ambient_temperature", getParam<Real>("T_ambient"), block_id);
+  }
 }
 
 ADReal

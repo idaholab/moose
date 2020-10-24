@@ -47,12 +47,17 @@ INSADMomentumCoupledForce::INSADMomentumCoupledForce(const InputParameters & par
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.set("has_coupled_force", true);
-  if (has_coupled)
-    obj_tracker.set("coupled_force_var", getParam<std::vector<VariableName>>("coupled_vector_var"));
-  if (has_function)
-    obj_tracker.set("coupled_force_vector_function",
-                    getParam<std::vector<FunctionName>>("vector_function"));
+  for (const auto block_id : blockIDs())
+  {
+    obj_tracker.set("has_coupled_force", true, block_id);
+    if (has_coupled)
+      obj_tracker.set(
+          "coupled_force_var", getParam<std::vector<VariableName>>("coupled_vector_var"), block_id);
+    if (has_function)
+      obj_tracker.set("coupled_force_vector_function",
+                      getParam<std::vector<FunctionName>>("vector_function"),
+                      block_id);
+  }
 }
 
 ADRealVectorValue

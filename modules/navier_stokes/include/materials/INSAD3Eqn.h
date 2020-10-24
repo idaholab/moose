@@ -22,7 +22,7 @@ public:
 
   INSAD3Eqn(const InputParameters & parameters);
 
-  void initialSetup() override;
+  void subdomainSetup() override;
 
 protected:
   void computeQpProperties() override;

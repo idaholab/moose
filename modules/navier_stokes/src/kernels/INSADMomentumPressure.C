@@ -36,7 +36,8 @@ INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.set("integrate_p_by_parts", _integrate_p_by_parts);
+  for (const auto block_id : blockIDs())
+    obj_tracker.set("integrate_p_by_parts", _integrate_p_by_parts, block_id);
 }
 
 ADReal

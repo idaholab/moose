@@ -43,29 +43,44 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
 }
 
 void
-INSAD3Eqn::initialSetup()
+INSAD3Eqn::subdomainSetup()
 {
-  INSADMaterial::initialSetup();
+  INSADMaterial::subdomainSetup();
 
   if (_has_transient)
     _temperature_dot = &adCoupledDot("temperature");
+  else
+    _temperature_dot = nullptr;
 
-  if ((_has_ambient_convection = _object_tracker->get<bool>("has_ambient_convection")))
+  if ((_has_ambient_convection =
+           _object_tracker->get<bool>("has_ambient_convection", _current_subdomain_id)))
   {
-    _ambient_convection_alpha = _object_tracker->get<Real>("ambient_convection_alpha");
-    _ambient_temperature = _object_tracker->get<Real>("ambient_temperature");
+    _ambient_convection_alpha =
+        _object_tracker->get<Real>("ambient_convection_alpha", _current_subdomain_id);
+    _ambient_temperature = _object_tracker->get<Real>("ambient_temperature", _current_subdomain_id);
+  }
+  else
+  {
+    _ambient_convection_alpha = 0;
+    _ambient_temperature = 0;
   }
 
-  if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source")))
+  if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source", _current_subdomain_id)))
   {
-    if (_object_tracker->isTrackerParamValid("heat_source_var"))
-      _heat_source_var =
-          &_subproblem
-               .getStandardVariable(_tid, _object_tracker->get<std::string>("heat_source_var"))
-               .adSln();
-    else if (_object_tracker->isTrackerParamValid("heat_source_function"))
+    if (_object_tracker->isTrackerParamValid("heat_source_var", _current_subdomain_id))
+      _heat_source_var = &_subproblem
+                              .getStandardVariable(_tid,
+                                                   _object_tracker->get<std::string>(
+                                                       "heat_source_var", _current_subdomain_id))
+                              .adSln();
+    else if (_object_tracker->isTrackerParamValid("heat_source_function", _current_subdomain_id))
       _heat_source_function = &_fe_problem.getFunction(
-          _object_tracker->get<FunctionName>("heat_source_function"), _tid);
+          _object_tracker->get<FunctionName>("heat_source_function", _current_subdomain_id), _tid);
+  }
+  else
+  {
+    _heat_source_var = nullptr;
+    _heat_source_function = nullptr;
   }
 }
 
