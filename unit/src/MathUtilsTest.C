@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
+#include <vector>
+#include <array>
 
 #include "MathUtils.h"
 
@@ -109,4 +111,36 @@ TEST(MathUtilsTest, round)
 
   for (unsigned int i = 0; i < table.size(); ++i)
     EXPECT_NEAR(MathUtils::round(table[i][0]), table[i][1], 1.e-5);
+}
+
+TEST(MathUtilsTest, poly)
+{
+  std::vector<Real> table1 = {1, 2, 3, 4, 5};
+  std::array<Real, 5> table2 = {1, 2, 3, 4, 5};
+
+  EXPECT_NEAR(MathUtils::poly(table1, 1.5, false), 29.5625, 1e-5);
+  EXPECT_NEAR(MathUtils::poly(table1, 1.5, true), 40.0, 1e-5);
+  EXPECT_NEAR(MathUtils::poly(table2, 1.5, false), 29.5625, 1e-5);
+  EXPECT_NEAR(MathUtils::poly(table2, 1.5, true), 40.0, 1e-5);
+}
+
+TEST(MathUtilsTest, polynomial)
+{
+  std::vector<Real> table1a = {5, 4, 3, 2, 1};
+  std::array<Real, 5> table2a = {5, 4, 3, 2, 1};
+  std::vector<Real> table1b = {5, 4, 3, 2, 1, 0};
+  std::array<Real, 6> table2b = {5, 4, 3, 2, 1, 0};
+
+  // appending a zero coefficient to the list should not change the result
+  EXPECT_NEAR(MathUtils::polynomial(table1a, 1.5), MathUtils::polynomial(table1b, 1.5), 1e-5);
+  EXPECT_NEAR(MathUtils::polynomial(table2a, 1.5), MathUtils::polynomial(table2b, 1.5), 1e-5);
+  EXPECT_NEAR(MathUtils::polynomialDerivative(table1a, 1.5),
+              MathUtils::polynomialDerivative(table1b, 1.5),
+              1e-5);
+  EXPECT_NEAR(MathUtils::polynomialDerivative(table2a, 1.5),
+              MathUtils::polynomialDerivative(table2b, 1.5),
+              1e-5);
+
+  EXPECT_NEAR(MathUtils::polynomial(table1a, 1.5), 29.5625, 1e-5);
+  EXPECT_NEAR(MathUtils::polynomialDerivative(table1a, 1.5), 40.0, 1e-5);
 }
