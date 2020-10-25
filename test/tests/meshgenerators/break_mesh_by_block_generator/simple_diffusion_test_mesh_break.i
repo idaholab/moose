@@ -39,4 +39,9 @@
 
 [Outputs]
   exodus = true
+  [cp]
+    type = Checkpoint
+    binary = false
+  []
+  # checkpoint = true
 []

@@ -33,7 +33,7 @@ SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
   auto split_file_arg = _app.parameters().get<std::string>("split_file");
-
+  auto restartable_data_io = RestartableDataIO(RestartableDataIO(_app));
   if (mesh->getFileName() == "" && split_file_arg == "")
     mooseError("Output mesh file name must be specified (with --split-file) when splitting "
                "non-file-based meshes");

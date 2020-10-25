@@ -66,7 +66,11 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _split_transition_interface(getParam<bool>("split_transition_interface")),
     _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
     _write_fake_neighbor_list_to_file(getParam<bool>("write_fake_neighbor_list_to_file")),
-    _fake_neighbor_list_file_name(getParam<FileName>("fake_neighbor_list_file_name"))
+    _fake_neighbor_list_file_name(getParam<FileName>("fake_neighbor_list_file_name")),
+    _fake_neighbor_list(
+        declareMeshProperty<
+            std::map<std::pair<dof_id_type, unsigned int>, std::pair<dof_id_type, unsigned int>>>(
+            "fake_neighbor_list"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
@@ -333,7 +337,7 @@ BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem)
 }
 
 void
-BreakMeshByBlockGenerator::writeFakeNeighborListToFile(MeshBase & mesh) const
+BreakMeshByBlockGenerator::writeFakeNeighborListToFile(MeshBase & mesh)
 {
   if (mesh.processor_id() == 0)
   {
@@ -353,6 +357,11 @@ BreakMeshByBlockGenerator::writeFakeNeighborListToFile(MeshBase & mesh) const
           const Elem * neighbor = elem->neighbor_ptr(element_side.second);
           myfile << neighbor->get_extra_integer(integer_id) << ","
                  << neighbor->which_neighbor_am_i(elem) << std::endl;
+
+          _fake_neighbor_list[std::make_pair(elem->get_extra_integer(integer_id),
+                                             element_side.second)] =
+              std::make_pair(neighbor->get_extra_integer(integer_id),
+                             neighbor->which_neighbor_am_i(elem));
         }
 
       myfile.close();
