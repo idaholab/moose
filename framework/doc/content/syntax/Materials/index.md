@@ -199,6 +199,22 @@ table lists the types of properties that are available for automatic output.
 
 ## Advanced Topics
 
+### Evaluation of Material Properties on Element Faces
+
+MOOSE creates three copies of a *non-boundary restricted* material for evaluations on quadrature points of elements, element faces on both the current element side and the neighboring element side.
+The name of the element interior material is the material name from the input file, while the name of the element face material is the material name appended with `_face` and the name of the neighbor face material is the material name appended with `_neighbor`.
+The element material can be identified in a material with its member variable `_bnd=false`.
+The other two copies have `_bnd=true`.
+The element face material and neighbor face material differentiate with each other by the value of another member variable `_neighbor`.
+If a material declares multiple material properties and some of them are not needed on element faces, users can switch off their declaration and evaluation based on member variable `_bnd`.
+
+### Interface Material Objects
+
+MOOSE allows a material to be defined on an internal boundary of a mesh with a specific material type `InterfaceMaterial`.
+Material properties declared in interface materials are available on both sides of the boundary.
+Interface materials allows users to evaluate the properties on element faces based on quantities on both sides of the element face.
+Interface materials are often used along with [InterfaceKernel](syntax/InterfaceKernels/index.md).
+
 ### Discrete Material Objects
 
 A "[Discrete](http://www.dictionary.com/browse/discrete)" `Material` is an object that may be
