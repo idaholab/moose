@@ -114,20 +114,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
 
   // Write out the restartable mesh meta data if there is any (only on processor zero)
-  if (processor_id() == 0)
-  {
-    for (auto & map_pair :
-         libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
-    {
-      const RestartableDataMap & meta_data = map_pair.second.first;
-      const std::string & suffix = map_pair.second.second;
-      const std::string filename(current_file + suffix +
-                                 _restartable_data_io.getRestartableDataExt());
-
-      curr_file_struct.restart_meta_data.emplace(filename);
-      _restartable_data_io.writeRestartableData(filename, meta_data);
-    }
-  }
+  writeMeshMetaData(processor_id(), _app, current_file, curr_file_struct, _restartable_data_io);
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -192,6 +179,29 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       int ret = remove(file_name.c_str());
       if (ret != 0)
         mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
+    }
+  }
+}
+
+void
+Checkpoint::writeMeshMetaData(const processor_id_type pid,
+                              const MooseApp & app,
+                              const std::string & current_file,
+                              CheckpointFileNames & curr_file_struct,
+                              RestartableDataIO & restartable_data_io)
+{
+  if (pid == 0)
+  {
+    for (auto & map_pair :
+         libMesh::as_range(app.getRestartableDataMapBegin(), app.getRestartableDataMapEnd()))
+    {
+      const RestartableDataMap & meta_data = map_pair.second.first;
+      const std::string & suffix = map_pair.second.second;
+      const std::string filename(current_file + suffix +
+                                 restartable_data_io.getRestartableDataExt());
+
+      curr_file_struct.restart_meta_data.emplace(filename);
+      restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }
 }

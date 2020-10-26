@@ -54,6 +54,14 @@ public:
    */
   Checkpoint(const InputParameters & parameters);
 
+  /// Method writing MeshMetaData to file. This method is static public so it
+  /// can be called from other classes, thus avoding duplicated code.
+  static void writeMeshMetaData(const processor_id_type pid,
+                                const MooseApp & app,
+                                const std::string & current_file,
+                                CheckpointFileNames & curr_file_struct,
+                                RestartableDataIO & restartable_data_io);
+
   /**
    * Returns the base filename for the checkpoint files
    */
