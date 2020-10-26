@@ -192,3 +192,26 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     }
   }
 }
+
+void
+Checkpoint::writeMeshMetaData(const processor_id_type pid,
+                              const MooseApp & app,
+                              const std::string & current_file,
+                              CheckpointFileNames & curr_file_struct,
+                              RestartableDataIO & restartable_data_io)
+{
+  if (pid == 0)
+  {
+    for (auto & map_pair :
+         libMesh::as_range(app.getRestartableDataMapBegin(), app.getRestartableDataMapEnd()))
+    {
+      const RestartableDataMap & meta_data = map_pair.second.first;
+      const std::string & suffix = map_pair.second.second;
+      const std::string filename(current_file + suffix +
+                                 restartable_data_io.getRestartableDataExt());
+
+      curr_file_struct.restart_meta_data.emplace(filename);
+      restartable_data_io.writeRestartableData(filename, meta_data);
+    }
+  }
+}

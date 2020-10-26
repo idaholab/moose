@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SplitMeshAction.h"
-
+#include "Checkpoint.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
