@@ -9,9 +9,7 @@
 
 [Executioner]
   type = Optimize
-  petsc_options_iname = '-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'
-  petsc_options_value = '0 1e16 constant'
-  solve_on = none
+  tao_solver = TAONM
   verbose = true
 []
 
@@ -27,7 +25,7 @@
   [toSub]
     type = OptimizationParameterTransfer
     multi_app = sub
-    parameter_vpp = parameter_results 
+    parameter_vpp = parameter_results
     to_control = parameterReceiver
   []
   [fromSub]

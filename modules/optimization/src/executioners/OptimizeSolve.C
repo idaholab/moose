@@ -8,6 +8,9 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
+  MooseEnum tao_solver_enum("taontr taocg taonm");
+  params.addRequiredParam<MooseEnum>(
+      "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_NONE, EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN);
   exec_enum = {EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN};
@@ -17,7 +20,9 @@ OptimizeSolve::validParams()
 }
 
 OptimizeSolve::OptimizeSolve(Executioner * ex)
-  : SolveObject(ex), _solve_on(getParam<ExecFlagEnum>("solve_on"))
+  : SolveObject(ex),
+    _solve_on(getParam<ExecFlagEnum>("solve_on")),
+    _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>())
 {
 }
 
@@ -51,21 +56,33 @@ OptimizeSolve::solve()
     TaoSetMonitor(_tao, monitor, nullptr, nullptr);
   }
 
-  // Set solve type
-  ierr = TaoSetType(_tao, TAONM); // gradient free nelder mead simplex optimization
-  //  ierr = TaoSetType(_tao, TAONTR);
+  switch (_tao_solver_enum)
+  {
+    case TaoSolverEnum::NEWTON_TRUST_REGION:
+      ierr = TaoSetType(_tao, TAONTR);
+      break;
+    case TaoSolverEnum::CONJUGATE_GRADIENT:
+      ierr = TaoSetType(_tao, TAOCG);
+      break;
+    case TaoSolverEnum::NELDER_MEAD:
+      ierr = TaoSetType(_tao, TAONM);
+      break;
+    default:
+      mooseError("Invalid Tao solve type");
+  }
+
   CHKERRQ(ierr);
 
   // Set objective, gradient, and hessian functions
   ierr = TaoSetObjectiveRoutine(_tao, objectiveFunctionWrapper, this);
   CHKERRQ(ierr);
-  //  ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
+  ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
   CHKERRQ(ierr);
-  //  ierr = TaoSetHessianRoutine(_tao,
-  //                              _form_function->getHessian().mat(),
-  //                              _form_function->getHessian().mat(),
-  //                              hessianFunctionWrapper,
-  //                              this);
+  ierr = TaoSetHessianRoutine(_tao,
+                              _form_function->getHessian().mat(),
+                              _form_function->getHessian().mat(),
+                              hessianFunctionWrapper,
+                              this);
   CHKERRQ(ierr);
 
   // Set initial guess
