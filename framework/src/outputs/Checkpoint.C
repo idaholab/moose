@@ -200,6 +200,7 @@ Checkpoint::writeMeshMetaData(const processor_id_type pid,
       const std::string filename(current_file + suffix +
                                  restartable_data_io.getRestartableDataExt());
 
+      std::cerr << "writing stuff \n";
       curr_file_struct.restart_meta_data.emplace(filename);
       restartable_data_io.writeRestartableData(filename, meta_data);
     }

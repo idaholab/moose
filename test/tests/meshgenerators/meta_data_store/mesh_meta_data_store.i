@@ -1,4 +1,5 @@
 [Mesh]
+  active='gmg'
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
@@ -59,4 +60,8 @@
 [Outputs]
   exodus = true
   csv = true
+  [cp]
+    type =Checkpoint
+    binary = false
+  []
 []

@@ -33,4 +33,38 @@
     expect_err = "Unable to find RestartableDataMap object for the supplied name"
     requirement = "The system shall error if a invalid identifier is supplied when attempting to retrieve a restart meta data object."
   []
+
+  [meta_data_make_split]
+    type = 'RunApp'
+    input = 'mesh_meta_data_store.i'
+    cli_args = '--split-mesh 1,3 --split-file foo.cpa'
+    issues = '#16003'
+    requirement = "The system shall write meshMetaData to file when using the --split-mesh command."
+  []
+
+  [meta_data_use_split_fmg]
+    type = 'CSVDiff'
+    prereq='meta_data_make_split'
+    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv
+             mesh_meta_data_store_out_line_sampler_between_elems_0010.csv
+             mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
+    input = 'mesh_meta_data_store.i'
+    cli_args = 'Mesh/active=fmg Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=foo.cpa --distributed-mesh'
+    issues = '#16003'
+    min_parallel = 1
+    max_parallel = 1
+  []
+
+#  [meta_data_use_split]
+#    type = 'CSVDiff'
+#    prereq='meta_data_make_split'
+#    csvdiff = 'mesh_meta_data_store_out_line_sampler_between_elems_0000.csv
+#             mesh_meta_data_store_out_line_sampler_between_elems_0010.csv
+#             mesh_meta_data_store_out_line_sampler_between_elems_0020.csv'
+#    input = 'mesh_meta_data_store.i'
+#    cli_args = '--use-split --split-file foo.cpr'
+#    issue = '#16003'
+#    min_parallel = 3
+#    max_parallel = 3
+#  []
 []

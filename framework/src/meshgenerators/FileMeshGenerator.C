@@ -9,7 +9,7 @@
 
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
-
+#include "RestartableDataIO.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/exodusII_io.h"
@@ -83,5 +83,28 @@ FileMeshGenerator::generate()
     mesh->read(_file_name);
   }
 
+  if ((_file_name.rfind(".cpr") < _file_name.size() ||
+       _file_name.rfind(".cpa") < _file_name.size()) &&
+      processor_id() == 0)
+  {
+    RestartableDataIO restartable(_app);
+    for (auto map_iter = _app.getRestartableDataMapBegin();
+         map_iter != _app.getRestartableDataMapEnd();
+         ++map_iter)
+    {
+      const RestartableDataMap & meta_data = map_iter->second.first;
+      const std::string & suffix = map_iter->second.second;
+      std::cerr << "suffix " << suffix << "\n";
+      std::cerr << "map_iter " << map_iter->first << "\n";
+      for (auto const & key : meta_data)
+        std::cerr << key.first << "\n";
+      // if (map_iter->first == "MeshMetaData" && suffix == "_mesh" &&
+      // restartable.readRestartableDataHeader(false, suffix))
+      // {
+
+      // restartable.readRestartableData(meta_data, DataNames());
+      // }
+    }
+  }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

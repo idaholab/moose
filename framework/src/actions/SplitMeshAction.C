@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SplitMeshAction.h"
-
+#include "Checkpoint.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
@@ -31,7 +31,7 @@ SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
   auto split_file_arg = _app.parameters().get<std::string>("split_file");
-
+  auto restartable_data_io = RestartableDataIO(RestartableDataIO(_app));
   if (mesh->getFileName() == "" && split_file_arg == "")
     mooseError("Output mesh file name must be specified (with --split-file) when splitting "
                "non-file-based meshes");
@@ -72,6 +72,15 @@ SplitMeshAction::act()
                  ", must not end in a file extension other than .cpr or .cpa");
   }
 
+  // To name the split files, we start with the given mesh filename
+  // (if set) or the argument to --split-file, strip any existing
+  // extension, and then append either .cpr or .cpa depending on the
+  // checkpoint_binary_flag.
+  auto fname = mesh->getFileName();
+  if (fname == "")
+    fname = split_file_arg;
+  fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+
   for (std::size_t i = 0; i < splits.size(); i++)
   {
     processor_id_type n = splits[i];
@@ -81,15 +90,13 @@ SplitMeshAction::act()
     Moose::out << "    - writing " << cp->current_processor_ids().size() << " files per process..."
                << std::endl;
     cp->binary() = checkpoint_binary_flag;
-
-    // To name the split files, we start with the given mesh filename
-    // (if set) or the argument to --split-file, strip any existing
-    // extension, and then append either .cpr or .cpa depending on the
-    // checkpoint_binary_flag.
-    auto fname = mesh->getFileName();
-    if (fname == "")
-      fname = split_file_arg;
-    fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
     cp->write(fname);
   }
+
+  // Create checkpoint file structure
+  CheckpointFileNames curr_file_struct;
+
+  // Write out the restartable mesh meta data if there is any (only on processor zero)
+  Checkpoint::writeMeshMetaData(
+      processor_id(), _app, fname + "/", curr_file_struct, restartable_data_io);
 }
