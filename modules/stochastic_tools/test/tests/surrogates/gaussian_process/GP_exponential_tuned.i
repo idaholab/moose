@@ -61,14 +61,14 @@
     type = StochasticResults
   []
   [samp_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = test_sample
     output_samples = true
     execute_on = final
   []
   [train_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = train_sample
     output_samples = true
@@ -92,7 +92,7 @@
     sampler = train_sample
     results_vpp = results
     results_vector = data:avg
-    tao_options = '-tao_bncg_type kd'
+    tao_options = '-tao_bncg_type ssml_bfgs'
     tune_parameters = 'signal_variance length_factor'
     tuning_min = ' 1e-9 1e-9'
     tuning_max = ' 1e16  1e16'
@@ -109,7 +109,7 @@
 [Covariance]
   [covar]
     type=ExponentialCovariance
-    gamma = 1                                 #Define the exponential factor
+    gamma = 2                                 #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)

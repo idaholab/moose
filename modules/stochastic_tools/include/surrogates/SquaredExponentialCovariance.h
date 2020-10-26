@@ -43,5 +43,4 @@ public:
                            const std::vector<Real> & length_factor,
                            const Real sigma_f_squared,
                            const int ind);
-
 };

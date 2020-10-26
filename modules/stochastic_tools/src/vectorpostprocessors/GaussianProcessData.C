@@ -35,20 +35,21 @@ void
 GaussianProcessData::initialize()
 {
   const std::unordered_map<std::string, Real> & _hyperparam_map = _gp_uo.getHyperParamMap();
-  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =_gp_uo.getHyperParamVecMap();
+  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =
+      _gp_uo.getHyperParamVecMap();
 
-    for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
-     {
-         _hp_vector.push_back(&declareVector(iter->first));
-         _hp_vector.back()->push_back(iter->second);
-     }
-     for (auto iter = _hyperparam_vec_map.begin(); iter != _hyperparam_vec_map.end(); ++iter)
-      {
-          std::vector<Real> vec=iter->second;
-          for (unsigned int ii=0; ii<vec.size(); ++ii)
-          {
-              _hp_vector.push_back(&declareVector(iter->first + std::to_string(ii)));
-              _hp_vector.back()->push_back(vec[ii]);
-          }
-      }
+  for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
+  {
+    _hp_vector.push_back(&declareVector(iter->first));
+    _hp_vector.back()->push_back(iter->second);
+  }
+  for (auto iter = _hyperparam_vec_map.begin(); iter != _hyperparam_vec_map.end(); ++iter)
+  {
+    std::vector<Real> vec = iter->second;
+    for (unsigned int ii = 0; ii < vec.size(); ++ii)
+    {
+      _hp_vector.push_back(&declareVector(iter->first + std::to_string(ii)));
+      _hp_vector.back()->push_back(vec[ii]);
+    }
+  }
 }

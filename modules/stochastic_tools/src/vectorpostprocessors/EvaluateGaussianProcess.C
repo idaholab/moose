@@ -8,20 +8,21 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "GaussianProcessTester.h"
+#include "EvaluateGaussianProcess.h"
 
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsTestApp", GaussianProcessTester);
+registerMooseObject("StochasticToolsApp", EvaluateGaussianProcess);
 
 InputParameters
-GaussianProcessTester::validParams()
+EvaluateGaussianProcess::validParams()
 {
   InputParameters params = EvaluateSurrogate::validParams();
+  params.addClassDescription("Tool for sampling gaussian process surrogate models.");
   return params;
 }
 
-GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
+EvaluateGaussianProcess::EvaluateGaussianProcess(const InputParameters & parameters)
   : EvaluateSurrogate(parameters)
 {
   const auto & model_names = getParam<std::vector<UserObjectName>>("model");
@@ -35,7 +36,7 @@ GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
 }
 
 void
-GaussianProcessTester::initialize()
+EvaluateGaussianProcess::initialize()
 {
   EvaluateSurrogate::initialize();
   for (auto & vec : _std_vector)
@@ -43,7 +44,7 @@ GaussianProcessTester::initialize()
 }
 
 void
-GaussianProcessTester::execute()
+EvaluateGaussianProcess::execute()
 {
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
@@ -64,7 +65,7 @@ GaussianProcessTester::execute()
 }
 
 void
-GaussianProcessTester::finalize()
+EvaluateGaussianProcess::finalize()
 {
   EvaluateSurrogate::finalize();
   for (auto & vec : _std_vector)
