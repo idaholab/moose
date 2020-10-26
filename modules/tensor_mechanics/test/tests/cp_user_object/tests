@@ -84,4 +84,12 @@
     design = 'auxkernels/RankTwoAux.md'
     issues = '#12036'
   [../]
+  [./prop_block_read]
+    type = 'Exodiff'
+    input = 'prop_block_read.i'
+    exodiff = 'prop_block_read_out.e'
+    issues = '#4066'
+    requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh block IDs'
+    design = 'ElementPropertyReadFile.md'
+  [../]
 []
