@@ -390,7 +390,7 @@ bool
 AttribVar::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribVar *>(&other);
-  return a && (a->_val == _val);
+  return a && (a->_val == _val && _val != -1);
 }
 
 bool
