@@ -10,11 +10,13 @@
 #pragma once
 
 #include "FVBoundaryCondition.h"
+#include "MooseVariableInterface.h"
 
 /**
  * Base class for
  */
-class FVArrayDirichletBC : public FVBoundaryCondition
+class FVArrayDirichletBC : public FVBoundaryCondition,
+                           public MooseVariableInterface<RealEigenVector>
 {
 public:
   /**

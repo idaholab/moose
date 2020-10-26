@@ -22,7 +22,13 @@ FVDirichletBC::validParams()
 }
 
 FVDirichletBC::FVDirichletBC(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters), _val(getParam<Real>("value"))
+  : FVBoundaryCondition(parameters),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _val(getParam<Real>("value"))
 {
 }
 
