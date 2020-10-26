@@ -26,11 +26,23 @@
 []
 
 [DiracKernels]
-  [./point_source]
+  [./point_source1]
     type = ConstantPointSource
     variable = u
-    value = 1.0
-    point = '0.2 0.3 0.4'
+    value = 0.1
+    point = '0.2 0.3 0.0'
+  [../]
+  [./point_source2]
+    type = ConstantPointSource
+    variable = u
+    value = -0.1
+    point = '0.2 0.8 0.0'
+  [../]
+  [./point_source3]
+    type = ConstantPointSource
+    variable = u
+    value = -1.0
+    point = '0.8 0.5 0.8'
   [../]
 []
 
@@ -57,5 +69,6 @@
 []
 
 [Outputs]
+  file_base = 3d_out
   exodus = true
 []
