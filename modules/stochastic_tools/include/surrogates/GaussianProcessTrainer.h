@@ -30,6 +30,7 @@ public:
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
+#ifdef LIBMESH_HAVE_PETSC
   // Routine to perform hyperparameter tuning
   int hyperparamTuning();
 
@@ -50,6 +51,7 @@ public:
 
   // loads PetscVec to stored hyperparam_vecs
   void vecToMap(libMesh::PetscVector<Number> & theta);
+#endif
 
 private:
   /// Sampler from which the parameters were perturbed
@@ -94,15 +96,10 @@ private:
   /// Type of covariance function used for this surrogate
   std::string & _covar_type;
 
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
-
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
 
+#ifdef LIBMESH_HAVE_PETSC
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;
 
@@ -117,6 +114,13 @@ private:
 
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
+#endif
+
+  /// Scalar hyperparameters. Stored for use in surrogate
+  std::unordered_map<std::string, Real> & _hyperparam_map;
+
+  /// Vector hyperparameters. Stored for use in surrogate
+  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 };
 
 template <>

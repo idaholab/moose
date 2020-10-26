@@ -16,12 +16,12 @@
 /**
  * A tool for output Gaussian Process Surrogate data.
  */
-class GaussianProcessTester : public EvaluateSurrogate
+class EvaluateGaussianProcess : public EvaluateSurrogate
 {
 public:
   static InputParameters validParams();
 
-  GaussianProcessTester(const InputParameters & parameters);
+  EvaluateGaussianProcess(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;

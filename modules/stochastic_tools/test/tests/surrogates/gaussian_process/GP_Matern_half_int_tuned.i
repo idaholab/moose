@@ -61,14 +61,14 @@
     type = StochasticResults
   []
   [samp_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = test_sample
     output_samples = true
     execute_on = final
   []
   [train_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = train_sample
     output_samples = true

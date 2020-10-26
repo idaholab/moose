@@ -1,5 +1,7 @@
 # Gaussian Process Surrogate
 
+This example walks through the creation of a few gaussian process surrogates on a simple example system with an analytical solution for comparison. The first surrogate considers a single input parameter to be varied, which lends itself to a simple visual interpretation of the surrogate behavior. The next surrogate extends this idea to two input parameters being modeled. Lastly the full system is modeled with all input parameters, and compared to the analytical solution using sampling. It's recommended users be familiar with the basic surrogate framework, such as [examples/surrogate_creation.md], [examples/surrogate_training.md], and [examples/surrogate_evaluate.md]. 
+
 ## Problem Statement
 
  The full order model we wish to emulate with this surrogate is a one-dimensional heat conduction model with four input parameters $\lbrace k, q, L, T_{\infty} \rbrace$.
