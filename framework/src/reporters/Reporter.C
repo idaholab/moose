@@ -26,6 +26,6 @@ Reporter::Reporter(const InputParameters & parameters)
     _reporter_params(parameters),
     _reporter_name(parameters.get<std::string>("_object_name")),
     _reporter_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _reporter_data(_reporter_fe_problem.getReporterDataInternal())
+    _reporter_data(_reporter_fe_problem.getReporterData(ReporterData::WriteKey()))
 {
 }

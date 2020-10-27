@@ -153,6 +153,6 @@ PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorNam
                                                           std::size_t t_index) const
 {
   ReporterName r_name(name, "value");
-  return _pi_feproblem.getReporterDataInternal().getReporterValue<PostprocessorValue>(
-      r_name, name, REPORTER_MODE_ROOT, t_index);
+  return _pi_feproblem.getReporterData(ReporterData::WriteKey())
+      .getReporterValue<PostprocessorValue>(r_name, name, REPORTER_MODE_ROOT, t_index);
 }

@@ -44,6 +44,25 @@ class MooseApp;
 class ReporterData
 {
 public:
+  class WriteKey
+  {
+    /**
+     * An object that can be passed to FEProblemBase::getReporterData to provide non-const access
+     * the ReporterData object that is used to store reporter values.
+     *
+     * An attempt was made to limit access to the ReporterData as much as possible to encourage
+     * developers to use the Reporter and ReporterInterface. This key also prevents the need for
+     * FEProblemBase to give friend access to these classes, which gives complete access.
+     * Thanks for the idea @loganharbour
+     */
+    WriteKey() {} // private constructor
+    friend class Reporter;
+    friend class ReporterInterface;
+    friend class VectorPostprocessor;
+    friend class VectorPostprocessorInterface;
+    friend class PostprocessorInterface;
+  };
+
   ReporterData(MooseApp & moose_app);
 
   /**
