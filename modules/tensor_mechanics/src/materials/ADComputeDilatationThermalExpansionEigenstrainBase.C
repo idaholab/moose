@@ -24,6 +24,10 @@ ADComputeDilatationThermalExpansionEigenstrainBase::
 void
 ADComputeDilatationThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain)
 {
-  thermal_strain =
-      computeDilatation(_temperature[_qp]) - computeDilatation(_stress_free_temperature[_qp]);
+  if (_use_old_temperature)
+    thermal_strain =
+        computeDilatation(_temperature_old[_qp]) - computeDilatation(_stress_free_temperature[_qp]);
+  else
+    thermal_strain =
+        computeDilatation(_temperature[_qp]) - computeDilatation(_stress_free_temperature[_qp]);
 }

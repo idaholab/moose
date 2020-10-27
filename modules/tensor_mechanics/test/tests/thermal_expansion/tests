@@ -54,6 +54,16 @@
     design = 'ADComputeThermalExpansionEigenstrain.md'
     issues = '#13091'
   [../]
+  [./ad_constant_expansion_coeff_old]
+    type = 'Exodiff'
+    input = 'ad_constant_expansion_coeff.i'
+    exodiff = 'ad_constant_expansion_coeff_out.e'
+    requirement = 'The tensor mechanics module shall have the capability to '
+                  'calculate the eigenstrain tensor resulting from isotropic '
+                  'thermal expansion using the previous timestep.'
+    design = 'ADComputeThermalExpansionEigenstrain.md'
+    issues = '#13091'
+  [../]
   [./ad_constant_expansion_coeff-jac]
     type = 'PetscJacobianTester'
     input = 'ad_constant_expansion_coeff.i'
