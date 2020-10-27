@@ -82,6 +82,7 @@ public:
   ///@}
 
   using MaterialBase::getGenericZeroMaterialProperty;
+  using MaterialBase::getGenericZeroMaterialPropertyByName;
   using MaterialBase::getZeroMaterialProperty;
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }

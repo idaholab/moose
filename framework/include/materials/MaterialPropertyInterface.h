@@ -595,6 +595,26 @@ MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::strin
   return zero;
 }
 
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericZeroMaterialProperty()
+{
+  // static zero property storage
+  static GenericMaterialProperty<T, is_ad> zero;
+
+  // resize to accomodate maximum number of qpoints
+  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
+  unsigned int nqp = _mi_feproblem.getMaxQps();
+  if (nqp > zero.size())
+    zero.resize(nqp);
+
+  // set values for all qpoints to zero
+  for (unsigned int qp = 0; qp < nqp; ++qp)
+    MathUtils::mooseSetToZero(zero[qp]);
+
+  return zero;
+}
+
 template <typename T>
 bool
 MaterialPropertyInterface::hasADMaterialProperty(const std::string & name)
