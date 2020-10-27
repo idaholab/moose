@@ -196,14 +196,10 @@ class RenderVideo(components.RenderComponent):
                              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture",
                              allowfullscreen="allowfullscreen")
         else:
-            video_light = self.addVideoHelper(parent, 'src', token, page)
-            if token['dark']:
-                video_dark = self.addVideoHelper(parent, 'dark', token, page)
-                video_dark.addClass('moose-video-dark')
-                video_light.addClass('moose-video-light')
+            video = self.addVideoHelper(parent, token, page)
 
-    def addVideoHelper(self, parent, key, token, page):
-        src = token[key]
+    def addVideoHelper(self, parent, token, page):
+        src = token['src']
         if not src.startswith('http'):
             node = self.translator.findPage(src)
             src = str(node.relativeSource(page))
@@ -218,9 +214,16 @@ class RenderVideo(components.RenderComponent):
         elif tstop:
             src += '#t=0,{}'.format(tstop)
 
-        video = html.Tag(parent, 'video', token)
+        video = html.Tag(parent, 'video', token, class_='moose-video')
         _, ext = os.path.splitext(src)
         source = html.Tag(video, 'source', src=src)
+        if token['dark']:
+            src = token['dark']
+            if not src.startswith('http'):
+                node = self.translator.findPage(src)
+                src = str(node.relativeSource(page))
+            source['data-dark-src'] = src
+
         source["type"] = "video/{}".format(ext[1:])
 
         video['width'] = '100%'
