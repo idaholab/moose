@@ -216,14 +216,7 @@ void
 GapConductance::initialSetup()
 {
   /// set generated from the passed in vector of subdomain names
-  std::set<SubdomainID> subdomain_ids;
-
-  for (auto & name : _subdomain_names)
-    subdomain_ids.insert(_fe_problem.mesh().getSubdomainID(name));
-
-  // use either block restriction list or list of all subdomains in the mesh
-  const auto & check_subdomains =
-      subdomain_ids.empty() ? _fe_problem.mesh().meshSubdomains() : subdomain_ids;
+  const auto & check_subdomains = blockRestricted() ? blockIDs() : meshBlockIDs();
   if (check_subdomains.empty())
     mooseError("No subdomains found");
 
