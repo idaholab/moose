@@ -43,4 +43,7 @@ protected:
   bool _has_heat_source;
   const ADVariableValue * _heat_source_var;
   const Function * _heat_source_function;
+
+  /// Whether the energy equation is transient
+  bool _has_energy_transient;
 };

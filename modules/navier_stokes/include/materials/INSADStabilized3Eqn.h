@@ -50,4 +50,5 @@ protected:
   using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_source_strong_residual;
   using INSADTauMaterialTempl<INSAD3Eqn>::_has_ambient_convection;
   using INSADTauMaterialTempl<INSAD3Eqn>::_has_heat_source;
+  using INSADTauMaterialTempl<INSAD3Eqn>::_has_energy_transient;
 };

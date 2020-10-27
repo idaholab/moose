@@ -1,0 +1,22 @@
+[Tests]
+  design = 'modules/navier_stokes/index.md'
+  issues = '#16014'
+  [mixed]
+    # Note that the best test would be a MMS test which I usually setup with a PythonUnitTest but
+    # those are expensive and take some developer hours to get tuned
+    type = 'Exodiff'
+    input = mixed.i
+    exodiff = mixed_out.e
+    requirement = 'The system shall support solving a steady energy equation and transient momentum equations and apply the correct stabilization.'
+    rel_err = 7e-6
+  []
+  [jac]
+    type = PetscJacobianTester
+    run_sim = True
+    input = mixed.i
+    difference_tol = 1e-6
+    ratio_tol = 1e-7
+    requirement = 'The system shall support solving a steady energy equation and transient momentum equations with correct stabilization and compute a perfect Jacobian.'
+    cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
+  []
+[]
