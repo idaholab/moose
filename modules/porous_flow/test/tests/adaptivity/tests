@@ -7,6 +7,7 @@
     requirement = "The system shall work when using mesh adaptivity with TRI3 elements"
     issues = "#14428"
     design = 'mass_lumping.md'
+    max_threads = 1
   [../]
   [./quad]
     type = Exodiff
