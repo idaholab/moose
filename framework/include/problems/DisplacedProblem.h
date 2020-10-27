@@ -134,7 +134,8 @@ public:
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFEBase &
+  using SubProblem::getVariable;
+  virtual const MooseVariableFieldBase &
   getVariable(THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,

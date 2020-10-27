@@ -400,7 +400,7 @@ DisplacedProblem::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFEBase &
+const MooseVariableFieldBase &
 DisplacedProblem::getVariable(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
