@@ -120,7 +120,7 @@ ReporterState<T>::value(const std::size_t time_index)
   if (this->get().size() <= time_index)
     this->set().resize(time_index + 1, this->get().back());
 
-  return *(std::next(this->get().begin(), time_index));
+  return *(std::next(this->set().begin(), time_index));
 }
 
 template <typename T>

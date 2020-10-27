@@ -67,6 +67,7 @@
     input = test_find_moose_executable.py
     issues = "#15996"
     requirement = "The system shall include a utility running an executable."
+  []
   [jsondiff]
     type = PythonUnitTest
     input = test_jsondiff.py

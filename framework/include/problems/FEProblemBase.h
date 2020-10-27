@@ -793,6 +793,7 @@ public:
 
   /**
    * Add a Reporter object to the simulation.
+   * @param type C++ object type to construct
    * @param name A uniquely identifying object name
    * @param parameters Complete parameters for the object to be created.
    *

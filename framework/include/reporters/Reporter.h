@@ -103,7 +103,7 @@ private:
   const std::string & _reporter_name;
 
   /// Needed for access to FEProblemBase::getReporterData
-  FEProblemBase * _reporter_fe_problem;
+  FEProblemBase & _reporter_fe_problem;
 
   /// Data storage
   ReporterData & _reporter_data;

@@ -90,11 +90,15 @@ template <typename T>
 class ReporterContext : public ReporterContextBase
 {
 public:
+  /**
+   * Options for automatic parallel operations to perform by the default context
+   */
   enum class AutoOperation
   {
     NONE,
     BROADCAST
   };
+
   ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
   ReporterContext(const libMesh::ParallelObject & other,
                   ReporterState<T> & state,

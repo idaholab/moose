@@ -245,7 +245,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name, vo
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(
       registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid));
 
-  return restartable_data_ref.get();
+  return restartable_data_ref.set();
 }
 
 template <typename T>
@@ -265,7 +265,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
       registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid));
 
   restartable_data_ref.set() = init_value;
-  return restartable_data_ref.get();
+  return restartable_data_ref.set();
 }
 
 template <typename T>

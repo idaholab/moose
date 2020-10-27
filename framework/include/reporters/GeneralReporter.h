@@ -22,5 +22,5 @@ public:
   GeneralReporter(const InputParameters & parameters);
 
   // These objects are not threaded
-  virtual void threadJoin(const UserObject &) final {}
+  void threadJoin(const UserObject &) final {}
 };
