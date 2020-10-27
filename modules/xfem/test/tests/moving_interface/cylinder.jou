@@ -1,0 +1,22 @@
+reset
+
+create Cylinder height 0.2 radius 0.3
+move Volume 1  location 0.4 0.5  0.1 include_merged
+volume 1  size 0.05
+
+volume 1  scheme Tetmesh
+set tetmesher interior points on 
+set tetmesher optimize level 3  overconstrained  off sliver  off 
+set tetmesher boundary recovery  off 
+volume 1  tetmesh growth_factor 1
+
+mesh volume 1
+block 1 surface 1
+block 1  element type tri3
+#rotate Volume 1  angle 13  about Z include_merged
+
+undo group begin
+set large exodus file off
+export mesh "/Users/jianw/projects/moose1/modules/xfem/test/tests/moving_interface/cylinder.e" dimension 3 block 1 overwrite
+undo group end
+
