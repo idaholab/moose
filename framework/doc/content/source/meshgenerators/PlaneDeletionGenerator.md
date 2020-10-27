@@ -1,6 +1,6 @@
 # PlaneDeletionGenerator
 
-!syntax description /MeshGenerators/PlaneDeletionGenerator
+!syntax description /Mesh/PlaneDeletionGenerator
 
 ## Overview
 
@@ -11,7 +11,7 @@ An optional `new_boundary` parameter can also be specified which will make any n
 ## Example
 
 ```
-[MeshGenerators]
+[Mesh]
   [generated]
     type = GeneratedMeshGenerator
     dim = 3
@@ -38,8 +38,8 @@ An optional `new_boundary` parameter can also be specified which will make any n
        style=width:50%;padding:20px;
 
 
-!syntax parameters /MeshGenerators/PlaneDeletionGenerator
+!syntax parameters /Mesh/PlaneDeletionGenerator
 
-!syntax inputs /MeshGenerators/PlaneDeletionGenerator
+!syntax inputs /Mesh/PlaneDeletionGenerator
 
-!syntax children /MeshGenerators/PlaneDeletionGenerator
+!syntax children /Mesh/PlaneDeletionGenerator

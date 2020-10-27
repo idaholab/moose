@@ -10,8 +10,8 @@ attributes as well as retrieving those attributes.
 
 One of the most important features of the MeshMetaDataInterface is it's availablity during recover
 operations. Any system deriving from the interface will have access to attributes created during the initial setup
-phase of the simulation. This removes the need to retrieve [MeshGenerators](meshgenerators/MeshGenerator.md),
-[UserObjects](syntax/UserObjects/index.md), or [MooseMesh](syntax/Mesh/index.md) objects that might contain specifc
+phase of the simulation. This removes the need to retrieve [MeshGenerator](meshgenerators/MeshGenerator.md),
+[UserObject](syntax/UserObjects/index.md), or [MooseMesh](syntax/Mesh/index.md) objects that might contain specific
 APIs that store that same information.
 
 ## MeshGenerators

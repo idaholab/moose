@@ -1,11 +1,12 @@
 [Mesh]
-  type = FileMesh
-  file = multiblock.e
-[]
+  [file]
+    type = FileMeshGenerator
+    file = multiblock.e
+  []
 
-[MeshModifiers]
-  [./extrude]
-    type = MeshExtruder
+  [extrude]
+    type = MeshExtruderGenerator
+    input = file
     num_layers = 6
     extrusion_vector = '0 0 2'
     bottom_sideset = 'new_bottom'
@@ -17,37 +18,37 @@
     new_ids = '10 12 15
                30 32 35
                50 52 55'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 'new_bottom'
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 'new_top'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

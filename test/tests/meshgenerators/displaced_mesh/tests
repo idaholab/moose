@@ -7,7 +7,7 @@
     recover = false
 
     requirement = "The system shall support the generation of meshes for both reference and displaced mesh configurations."
-    design = 'MeshGenerators/index.md'
+    design = 'Mesh/index.md'
     issues = '#12712'
   [../]
 []

@@ -1,72 +1,74 @@
 # 2D, removal of a block containing a sideset inside it
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 5
-  xmin = 0
-  xmax = 5
-  ymin = 0
-  ymax = 5
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 5
+    ny = 5
+    xmin = 0
+    xmax = 5
+    ymin = 0
+    ymax = 5
+  []
 
-[MeshModifiers]
-  [./left]
-    type = SubdomainBoundingBox
+  [left]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     block_id = 1
     bottom_left = '2 2 0'
     top_right = '3 3 1'
-  [../]
-  [./right]
-    type = SubdomainBoundingBox
+  []
+  [right]
+    type = SubdomainBoundingBoxGenerator
+    input = left
     block_id = 2
     bottom_left = '3 2 0'
     top_right = '4 3 1'
-  [../]
-  [./interior_sideset]
-    type = SideSetsBetweenSubdomains
+  []
+  [interior_sideset]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = right
     primary_block = 1
     paired_block = 2
-    depends_on = 'left right'
     new_boundary = interior_ss
-  [../]
-  [./new_block_number]
-    type = SubdomainBoundingBox
+  []
+  [new_block_number]
+    type = SubdomainBoundingBoxGenerator
+    input = interior_sideset
     block_id = 3
     bottom_left = '0 0 0'
     top_right = '4 4 1'
-    depends_on = 'interior_sideset'
-  [../]
-  [./ed0]
-    type = BlockDeleter
+  []
+  [ed0]
+    type = BlockDeletionGenerator
+    input = new_block_number
     block_id = 3
-    depends_on = 'new_block_number'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

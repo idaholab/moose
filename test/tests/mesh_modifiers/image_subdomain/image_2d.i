@@ -1,27 +1,27 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 176
-  ny = 287
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 176
+    ny = 287
+  []
+  [image]
+    type = ImageSubdomainGenerator
+    input = gen
+    file = kitten.png #../../functions/image_function/stack/test
+    threshold = 100
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
-[]
-
-[MeshModifiers]
-  [./image]
-    type = ImageSubdomain
-    file = kitten.png #../../functions/image_function/stack/test
-    threshold = 100
-  [../]
+  [u]
+  []
 []
 
 [Problem]
   type = FEProblem
   solve = false
-[../]
+[]
 
 [Executioner]
   type = Steady

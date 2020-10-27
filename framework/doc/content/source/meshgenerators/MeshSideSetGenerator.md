@@ -1,6 +1,6 @@
 # MeshSideSetGenerator
 
-!syntax description /MeshGenerators/MeshSideSetGenerator
+!syntax description /Mesh/MeshSideSetGenerator
 
 ## Overview
 
@@ -24,8 +24,8 @@ variables exist on some nodes of the adjacent volume elements. The volume kernel
 will run on the volume quadrature points at which *tapered off* values from the
 adjacent edges can be found. Use at your own risk.
 
-!syntax parameters /MeshGenerators/MeshSideSetGenerator
+!syntax parameters /Mesh/MeshSideSetGenerator
 
-!syntax inputs /MeshGenerators/MeshSideSetGenerator
+!syntax inputs /Mesh/MeshSideSetGenerator
 
-!syntax children /MeshGenerators/MeshSideSetGenerator
+!syntax children /Mesh/MeshSideSetGenerator

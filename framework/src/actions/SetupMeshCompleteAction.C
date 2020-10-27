@@ -20,8 +20,6 @@ registerMooseAction("MooseApp",
                     SetupMeshCompleteAction,
                     "delete_remote_elements_after_late_geometric_ghosting");
 
-registerMooseAction("MooseApp", SetupMeshCompleteAction, "execute_mesh_modifiers");
-
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
@@ -48,10 +46,6 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
   if (!prepared)
     mesh->prepare();
 
-  // Clear the modifiers, they are not used again during the simulation after the mesh has been
-  // completed
-  _app.clearMeshModifiers();
-
   return prepared;
 }
 
@@ -61,17 +55,7 @@ SetupMeshCompleteAction::act()
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
-  if (_current_task == "execute_mesh_modifiers")
-  {
-    // we don't need to run mesh modifiers *again* after they ran already during the mesh
-    // splitting process
-    if (_app.isUseSplit())
-      return;
-    if (_app.masterMesh())
-      return;
-    _app.executeMeshModifiers();
-  }
-  else if (_current_task == "uniform_refine_mesh")
+  if (_current_task == "uniform_refine_mesh")
   {
     // we don't need to run mesh modifiers *again* after they ran already during the mesh
     // splitting process

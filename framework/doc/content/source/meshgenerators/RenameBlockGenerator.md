@@ -1,6 +1,6 @@
 # RenameBlockGenerator
 
-!syntax description /MeshGenerators/RenameBlockGenerator
+!syntax description /Mesh/RenameBlockGenerator
 
 ## Overview
 
@@ -52,8 +52,8 @@ Given all these potential problems, when merging blocks it is strongly recommend
 *one* `RenameBlock` that includes the names or IDs of *all* the blocks involved in the merging.
 This will make the new block IDs and new block names unequivocally obvious.
 
-!syntax parameters /MeshGenerators/RenameBlockGenerator
+!syntax parameters /Mesh/RenameBlockGenerator
 
-!syntax inputs /MeshGenerators/RenameBlockGenerator
+!syntax inputs /Mesh/RenameBlockGenerator
 
-!syntax children /MeshGenerators/RenameBlockGenerator
+!syntax children /Mesh/RenameBlockGenerator

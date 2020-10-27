@@ -1,50 +1,49 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 10
-  ny = 10
-  nz = 10
-  # This MeshModifier currently only works with ReplicatedMesh.
-  # For more information, refer to #2129.
-  parallel_type = replicated
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 10
+    ny = 10
+    nz = 10
+  []
 
-[MeshModifiers]
-  [./createNewSidesetOne]
-    type = AddSideSetsFromBoundingBox
+  [createNewSidesetOne]
+    type = SideSetsFromBoundingBoxGenerator
+    input = gen
+    block_id = 0
     boundary_id_old = 'bottom top'
     boundary_id_new = 11
     bottom_left = '-1.1 -1.1 -1.1'
     top_right = '1.1 1.1 1.1'
     boundary_id_overlap = true
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./BCone]
+  [BCone]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
-  [./BCtwo]
+  []
+  [BCtwo]
     type = DirichletBC
     variable = u
     boundary = 11
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -12,8 +12,8 @@ libmesh. The new sidesets are named `<old_side_name>_<id>`, where `<id>` is a nu
 
 !listing modules/heat_conduction/test/tests/generate_radiation_patch/generate_radiation_patch.i start=[patch] end=[] include-end=true
 
-!syntax parameters /MeshGenerators/PatchSidesetGenerator
+!syntax parameters /Mesh/PatchSidesetGenerator
 
-!syntax inputs /MeshGenerators/PatchSidesetGenerator
+!syntax inputs /Mesh/PatchSidesetGenerator
 
-!syntax children /MeshGenerators/PatchSidesetGenerator
+!syntax children /Mesh/PatchSidesetGenerator

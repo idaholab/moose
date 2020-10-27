@@ -60,17 +60,19 @@ class TestAddVariableAndBlock(Testing.PeacockAppImageTestCase):
         input_.InputFileEditorPlugin.blockChanged.emit(b0, input_.InputFileEditorPlugin.tree)
 
         # Add MeshModifier
-        b1 = input_.InputFileEditorPlugin.tree.getBlockInfo("/MeshModifiers")
+        b1 = input_.InputFileEditorPlugin.tree.getBlockInfo("/Mesh")
         b1.included = True
         input_.InputFileEditorPlugin.block_tree.copyBlock(b1)
-        b2 = list(b1.children.values())[0]
-        b2.setBlockType('SubdomainBoundingBox')
+        b2 = list(b1.children.values())[-1]
+        b2.setBlockType('SubdomainBoundingBoxGenerator')
         b2.addParameter(ParameterInfo(None, 'bottom_left'))
         b2.setParamValue('bottom_left', '0.25 0.25 0')
         b2.addParameter(ParameterInfo(None, 'top_right'))
         b2.setParamValue('top_right', '0.75 0.75 0')
         b2.addParameter(ParameterInfo(None, 'block_id'))
         b2.setParamValue('block_id', '1980')
+        b2.addParameter(ParameterInfo(None, 'input'))
+        b2.setParamValue('input', 'generate')
 
         input_.InputFileEditorPlugin.blockChanged.emit(b1, input_.InputFileEditorPlugin.tree)
 

@@ -100,7 +100,6 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
-  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
   registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
   registerMooseObjectTask("append_mesh_generator",        MeshGenerator,          false);
 
@@ -178,7 +177,6 @@ addActionTypes(Syntax & syntax)
   registerTask("add_variable", false);
   registerTask("add_mortar_variable", false);
 
-  registerTask("execute_mesh_modifiers", false);
   registerTask("execute_mesh_generators", true);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
@@ -260,8 +258,6 @@ addActionTypes(Syntax & syntax)
                            "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
-                           "(add_mesh_modifier)"
-                           "(execute_mesh_modifiers)"
                            "(add_mortar_interface)"
                            "(uniform_refine_mesh)"
                            "(setup_mesh_complete)"
@@ -419,15 +415,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("SetupMeshCompleteAction", "Mesh");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
-
-  registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
-
-  // Deprecated MeshGeneratorSyntax
-  registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
-  syntax.deprecateActionSyntax("MeshGenerators/*",
-                               "The top-level [MeshGenerators] syntax is deprecated, please nest "
-                               "your generators under [Mesh]");
-
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
 
   registerSyntax("AddFunctionAction", "Functions/*");

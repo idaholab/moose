@@ -1,7 +1,3 @@
-[MeshGenerators]
-
-[]
-
 [Mesh]
   type = PeridynamicsMesh
   horizon_number = 3

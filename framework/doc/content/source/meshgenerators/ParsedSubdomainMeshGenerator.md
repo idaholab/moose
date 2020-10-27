@@ -1,6 +1,6 @@
 # ParsedSubdomainMeshGenerator
 
-!syntax description /MeshGenerators/ParsedSubdomainMeshGenerator
+!syntax description /Mesh/ParsedSubdomainMeshGenerator
 
 ## Example
 
@@ -26,8 +26,8 @@ The final mesh output is:
 
 !media large_media/parsed_subdomain_mesh/parsed_subdomain_mesh.png style=width:75%;float:center
 
-!syntax parameters /MeshGenerators/ParsedSubdomainMeshGenerator
+!syntax parameters /Mesh/ParsedSubdomainMeshGenerator
 
-!syntax inputs /MeshGenerators/ParsedSubdomainMeshGenerator
+!syntax inputs /Mesh/ParsedSubdomainMeshGenerator
 
-!syntax children /MeshGenerators/ParsedSubdomainMeshGenerator
+!syntax children /Mesh/ParsedSubdomainMeshGenerator

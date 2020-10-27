@@ -1,11 +1,15 @@
 [Tests]
-  deprecated = True
-  [./parsed_subdomain_mm]
+  issues = '#13814'
+  design = Mesh/index.md
+
+  [parsed_subdomain_mm]
     type = 'Exodiff'
     input = 'parsed_subdomain_mm.i'
     exodiff = 'parsed_subdomain_mm_in.e'
     cli_args = '--mesh-only'
     recover = false
-    no_error_deprecated = true
-  [../]
+
+    requirement = "The system shall support the creation of subdomain identifiers based on a "
+                  "function provided in the input file."
+  []
 []

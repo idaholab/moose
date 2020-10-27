@@ -1,6 +1,6 @@
 # DistributedRectilinearMeshGenerator
 
-!syntax description /MeshGenerators/DistributedRectilinearMeshGenerator
+!syntax description /Mesh/DistributedRectilinearMeshGenerator
 
 ## Overview
 
@@ -27,8 +27,8 @@ Final steps include adding in "ghosted" elements and making sure that boundary c
 
 !listing distributed_rectilinear_mesh_generator.i block=Mesh
 
-!syntax parameters /MeshGenerators/DistributedRectilinearMeshGenerator
+!syntax parameters /Mesh/DistributedRectilinearMeshGenerator
 
-!syntax inputs /MeshGenerators/DistributedRectilinearMeshGenerator
+!syntax inputs /Mesh/DistributedRectilinearMeshGenerator
 
-!syntax children /MeshGenerators/DistributedRectilinearMeshGenerator
+!syntax children /Mesh/DistributedRectilinearMeshGenerator

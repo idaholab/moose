@@ -1,6 +1,6 @@
 # SpiralAnularMeshGenerator
 
-!syntax description /MeshGenerators/SpiralAnnularMeshGenerator
+!syntax description /Mesh/SpiralAnnularMeshGenerator
 
 ## Overview
 
@@ -28,8 +28,8 @@ The resulting mesh looks like this:
 !media large_media/spiral_annular_mesh/SpiralAnnularMesh_example.png
        style=width:50%;
 
-!syntax parameters /MeshGenerators/SpiralAnnularMeshGenerator
+!syntax parameters /Mesh/SpiralAnnularMeshGenerator
 
-!syntax inputs /MeshGenerators/SpiralAnnularMeshGenerator
+!syntax inputs /Mesh/SpiralAnnularMeshGenerator
 
-!syntax children /MeshGenerators/SpiralAnnularMeshGenerator
+!syntax children /Mesh/SpiralAnnularMeshGenerator

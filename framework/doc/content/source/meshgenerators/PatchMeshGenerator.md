@@ -11,10 +11,10 @@ these meshes.
 The resulting mesh has sidesets named left, right, top, and bottom, and if a 3D
 mesh, sidesets named front and back.
 
-!syntax parameters /MeshGenerators/PatchMeshGenerator
+!syntax parameters /Mesh/PatchMeshGenerator
 
-!syntax inputs /MeshGenerators/PatchMeshGenerator
+!syntax inputs /Mesh/PatchMeshGenerator
 
-!syntax children /MeshGenerators/PatchMeshGenerator
+!syntax children /Mesh/PatchMeshGenerator
 
 !bibtex bibliography

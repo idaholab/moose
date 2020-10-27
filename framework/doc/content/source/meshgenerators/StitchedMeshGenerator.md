@@ -1,6 +1,6 @@
 # StitchedMeshGenerator
 
-!syntax description /MeshGenerators/StitchedMeshGenerator
+!syntax description /Mesh/StitchedMeshGenerator
 
 ## Example
 
@@ -19,8 +19,8 @@ file snippet below, these three square meshes are joined into a single mesh as s
 
 !media media/mesh/stitched_mesh_out.png caption=Fig. 4: Resulting "stitched" mesh from combination of three square meshes.
 
-!syntax parameters /MeshGenerators/StitchedMeshGenerator
+!syntax parameters /Mesh/StitchedMeshGenerator
 
-!syntax inputs /MeshGenerators/StitchedMeshGenerator
+!syntax inputs /Mesh/StitchedMeshGenerator
 
-!syntax children /MeshGenerators/StitchedMeshGenerator
+!syntax children /Mesh/StitchedMeshGenerator

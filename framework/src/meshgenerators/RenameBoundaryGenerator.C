@@ -72,7 +72,7 @@ RenameBoundaryGenerator::RenameBoundaryGenerator(const InputParameters & paramet
   // error checking.  Must have exactly one of new_boundary_id or new_boundary_name
   // In principal we could have both (the old boundary would then be given a new ID and a new name)
   // but i feel that could lead to confusion for the user.  If the user wants to do that they
-  // should use two of these RenameBoundary MeshModifiers.
+  // should use two of these RenameBoundary MeshGenerator.
   if (isParamValid("new_boundary_id") && isParamValid("new_boundary_name"))
     mooseError("RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or "
                "new_boundary_name\n");

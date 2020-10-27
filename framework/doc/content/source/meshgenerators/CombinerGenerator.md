@@ -1,6 +1,6 @@
 # CombinerGenerator
 
-!syntax description /MeshGenerators/CombinerGenerator
+!syntax description /Mesh/CombinerGenerator
 
 ## Overview
 
@@ -47,8 +47,8 @@ Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner.png style=width:75%;
 
-!syntax parameters /MeshGenerators/CombinerGenerator
+!syntax parameters /Mesh/CombinerGenerator
 
-!syntax inputs /MeshGenerators/CombinerGenerator
+!syntax inputs /Mesh/CombinerGenerator
 
-!syntax children /MeshGenerators/CombinerGenerator
+!syntax children /Mesh/CombinerGenerator

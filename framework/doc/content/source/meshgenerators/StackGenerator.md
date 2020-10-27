@@ -1,6 +1,6 @@
 # StackGenerator
 
-!syntax description /MeshGenerators/StackGenerator
+!syntax description /Mesh/StackGenerator
 
 ## Overview
 
@@ -13,8 +13,8 @@ boundaries to be stitched, and the vertical height of the bottom of the final me
 
 ## Further StackGenerator Documentation
 
-!syntax parameters /MeshGenerators/StackGenerator
+!syntax parameters /Mesh/StackGenerator
 
-!syntax inputs /MeshGenerators/StackGenerator
+!syntax inputs /Mesh/StackGenerator
 
-!syntax children /MeshGenerators/StackGenerator
+!syntax children /Mesh/StackGenerator

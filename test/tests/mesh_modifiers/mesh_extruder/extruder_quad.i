@@ -1,46 +1,47 @@
 [Mesh]
-  type = FileMesh
-  file = chimney_quad.e
-[]
+  [file]
+    type = FileMeshGenerator
+    file = chimney_quad.e
+  []
 
-[MeshModifiers]
-  [./extrude]
-    type = MeshExtruder
+  [extrude]
+    type = MeshExtruderGenerator
+    input = file
     num_layers = 20
     extrusion_vector = '0 1e-2 0'
     bottom_sideset = 'new_bottom'
     top_sideset = 'new_top'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 'new_bottom'
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 'new_top'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

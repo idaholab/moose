@@ -1,6 +1,6 @@
 # LowerDBlockFromSidesetGenerator
 
-!syntax description /MeshGenerators/LowerDBlockFromSidesetGenerator
+!syntax description /Mesh/LowerDBlockFromSidesetGenerator
 
 ## Overview
 
@@ -9,8 +9,8 @@ block of elements along those sides. The order of the newly create lower
 dimensional element block will match the order of the parent elements
 (e.g. first order for first order parents, second order for second order parents).
 
-!syntax parameters /MeshGenerators/LowerDBlockFromSidesetGenerator
+!syntax parameters /Mesh/LowerDBlockFromSidesetGenerator
 
-!syntax inputs /MeshGenerators/LowerDBlockFromSidesetGenerator
+!syntax inputs /Mesh/LowerDBlockFromSidesetGenerator
 
-!syntax children /MeshGenerators/LowerDBlockFromSidesetGenerator
+!syntax children /Mesh/LowerDBlockFromSidesetGenerator

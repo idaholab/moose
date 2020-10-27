@@ -1,6 +1,6 @@
 # MeshCollectionGenerator
 
-!syntax description /MeshGenerators/MeshCollectionGenerator
+!syntax description /Mesh/MeshCollectionGenerator
 
 ## Overview
 
@@ -9,8 +9,8 @@ sub-meshes (provided in the `inputs` parameter). The sub-meshes are not linked i
 any way and interaction between them only occurs due to contact or other
 constraints.
 
-!syntax parameters /MeshGenerators/MeshCollectionGenerator
+!syntax parameters /Mesh/MeshCollectionGenerator
 
-!syntax inputs /MeshGenerators/MeshCollectionGenerator
+!syntax inputs /Mesh/MeshCollectionGenerator
 
-!syntax children /MeshGenerators/MeshCollectionGenerator
+!syntax children /Mesh/MeshCollectionGenerator

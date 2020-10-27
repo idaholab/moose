@@ -1,12 +1,12 @@
 [Mesh]
-  file = poly.msh
-  parallel_type = REPLICATED
-[]
+  [file]
+    type = FileMeshGenerator
+    file = poly.msh
+  []
 
-[MeshModifiers]
-  [./breakmesh]
-    type = BreakMeshByBlock
+  [breakmesh]
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = false
-  [../]
+  []
 []
-

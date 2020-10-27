@@ -1,6 +1,6 @@
 # ImageSubdomainGenerator
 
-!syntax description /MeshGenerators/ImageSubdomainGenerator
+!syntax description /Mesh/ImageSubdomainGenerator
 
 ## Example Syntax
 
@@ -19,8 +19,8 @@ In this example, the parameter `threshold` is used. This sets a color value abov
 
 !media media/framework/mesh_modifiers/kitten_out.png style=width:550px;float:center;margin-left:40px
 
-!syntax parameters /MeshGenerators/ImageSubdomainGenerator
+!syntax parameters /Mesh/ImageSubdomainGenerator
 
-!syntax inputs /MeshGenerators/ImageSubdomainGenerator
+!syntax inputs /Mesh/ImageSubdomainGenerator
 
-!syntax children /MeshGenerators/ImageSubdomainGenerator
+!syntax children /Mesh/ImageSubdomainGenerator

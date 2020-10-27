@@ -1,10 +1,10 @@
 # ParsedGenerateSideset
 
-!syntax description /MeshGenerators/ParsedGenerateSideset
+!syntax description /Mesh/ParsedGenerateSideset
 
-!syntax parameters /MeshGenerators/ParsedGenerateSideset
+!syntax parameters /Mesh/ParsedGenerateSideset
 
-!syntax inputs /MeshGenerators/ParsedGenerateSideset
+!syntax inputs /Mesh/ParsedGenerateSideset
 
-!syntax children /MeshGenerators/ParsedGenerateSideset
+!syntax children /Mesh/ParsedGenerateSideset
 

@@ -1,6 +1,13 @@
 [Mesh]
-  type = FileMesh
-  file = concentric_circle_mesh_in.e
+  [file]
+    type = FileMeshGenerator
+    file = concentric_circle_mesh_in.e
+  []
+  [smooth]
+    type = SmoothMeshGenerator
+    input = file
+    iterations = 5
+  []
 []
 
 [Variables]
@@ -39,11 +46,4 @@
 
 [Outputs]
   exodus = true
-[]
-
-[MeshModifiers]
-  [smooth]
-    type = SmoothMesh
-    iterations = 5
-  []
 []

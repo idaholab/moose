@@ -25,7 +25,6 @@
 #include "CommandLine.h"
 #include "InfixIterator.h"
 #include "MultiApp.h"
-#include "MeshModifier.h"
 #include "MeshGenerator.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
@@ -336,7 +335,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
     _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
     _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
-    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers", 1)),
     _execute_mesh_generators_timer(
         _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
@@ -1477,91 +1475,6 @@ MooseApp::header() const
 }
 
 void
-MooseApp::addMeshModifier(const std::string & modifier_name,
-                          const std::string & name,
-                          InputParameters parameters)
-{
-  std::shared_ptr<MeshModifier> mesh_modifier =
-      _factory.create<MeshModifier>(modifier_name, name, parameters);
-
-  _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
-}
-
-const MeshModifier &
-MooseApp::getMeshModifier(const std::string & name) const
-{
-  return *_mesh_modifiers.find(MooseUtils::shortName(name))->second.get();
-}
-
-std::vector<std::string>
-MooseApp::getMeshModifierNames() const
-{
-  std::vector<std::string> names;
-  for (auto & pair : _mesh_modifiers)
-    names.push_back(pair.first);
-  return names;
-}
-
-void
-MooseApp::executeMeshModifiers()
-{
-  if (!_mesh_modifiers.empty())
-  {
-    TIME_SECTION(_execute_mesh_modifiers_timer);
-
-    DependencyResolver<std::shared_ptr<MeshModifier>> resolver;
-
-    // Add all of the dependencies into the resolver and sort them
-    for (const auto & it : _mesh_modifiers)
-    {
-      // Make sure an item with no dependencies comes out too!
-      resolver.addItem(it.second);
-
-      std::vector<std::string> & modifiers = it.second->getDependencies();
-      for (const auto & depend_name : modifiers)
-      {
-        auto depend_it = _mesh_modifiers.find(depend_name);
-
-        if (depend_it == _mesh_modifiers.end())
-          mooseError("The MeshModifier \"",
-                     depend_name,
-                     "\" was not created, did you make a "
-                     "spelling mistake or forget to include it "
-                     "in your input file?");
-
-        resolver.insertDependency(it.second, depend_it->second);
-      }
-    }
-
-    const auto & ordered_modifiers = resolver.getSortedValues();
-
-    if (ordered_modifiers.size())
-    {
-      MooseMesh * mesh = _action_warehouse.mesh().get();
-      MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
-
-      // Run the MeshModifiers in the proper order
-      for (const auto & modifier : ordered_modifiers)
-        modifier->modifyMesh(mesh, displaced_mesh);
-
-      /**
-       * Set preparation flag after modifiers are run. The final preparation
-       * will be handled by the SetupMeshComplete Action.
-       */
-      mesh->prepared(false);
-      if (displaced_mesh)
-        displaced_mesh->prepared(false);
-    }
-  }
-}
-
-void
-MooseApp::clearMeshModifiers()
-{
-  _mesh_modifiers.clear();
-}
-
-void
 MooseApp::addMeshGenerator(const std::string & generator_name,
                            const std::string & name,
                            InputParameters parameters)
@@ -1793,7 +1706,7 @@ MooseApp::getMeshGeneratorMesh(bool check_unique)
 
   if (_final_generated_meshes.empty())
     mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
-               "[MeshGenerators] block.");
+               "block.");
 
   auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
   _final_generated_meshes.pop_front();
