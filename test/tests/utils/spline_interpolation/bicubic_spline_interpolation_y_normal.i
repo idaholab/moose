@@ -70,13 +70,13 @@
     type = FunctionDerivativeAux
     function = spline_fn
     variable = z_deriv
-    component = 3
+    component = z
   [../]
   [./deriv_2]
     type = FunctionDerivativeAux
     function = spline_fn
     variable = x_deriv
-    component = 1
+    component = x
   [../]
 []
 
