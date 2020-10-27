@@ -226,6 +226,9 @@ XFEM::updateHeal()
   mesh_changed = healMesh();
 
   if (mesh_changed)
+    buildEFAMesh();
+
+  if (mesh_changed)
   {
     _mesh->update_parallel_id_counts();
     MeshCommunication().make_elems_parallel_consistent(*_mesh);
@@ -986,7 +989,8 @@ XFEM::healMesh()
             {
               Node * e1node_displaced = elem1_displaced->node_ptr(in);
               Node * e2node_displaced = elem2_displaced->node_ptr(in);
-              if (!xfce->isPointPhysical(*elem1->node_ptr(in)))
+              if (!xfce->isPointPhysical(*elem1->node_ptr(in)) &&
+                  e1node_displaced != e2node_displaced)
               {
                 elem1_displaced->set_node(in) = e2node_displaced;
                 nodes_to_delete_displaced.insert(e1node_displaced);
@@ -1519,13 +1523,46 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
           for (auto const & mie : _geom_marker_id_elems[_geometric_cuts[i]->getInterfaceID()])
             if ((*sit)->getParent() != nullptr)
             {
-              if ((*sit)->getParent()->id() == mie)
-                _crack_tip_elems_to_be_healed.insert(crack_tip_elem);
+              if (_mesh->mesh_dimension() == 2)
+              {
+                EFAElement2D * efa_elem2d = dynamic_cast<EFAElement2D *>((*sit)->getParent());
+                if (!efa_elem2d)
+                  mooseError("EFAelem is not of EFAelement2D type");
+
+                for (unsigned int edge_id = 0; edge_id < efa_elem2d->numEdges(); ++edge_id)
+                {
+                  for (unsigned int en_iter = 0; en_iter < efa_elem2d->numEdgeNeighbors(edge_id);
+                       ++en_iter)
+                  {
+                    EFAElement2D * edge_neighbor = efa_elem2d->getEdgeNeighbor(edge_id, en_iter);
+                    if (edge_neighbor != nullptr && edge_neighbor->id() == mie)
+                      _crack_tip_elems_to_be_healed.insert(crack_tip_elem);
+                  }
+                }
+              }
+              else if (_mesh->mesh_dimension() == 3)
+              {
+                EFAElement3D * efa_elem3d = dynamic_cast<EFAElement3D *>((*sit)->getParent());
+                if (!efa_elem3d)
+                  mooseError("EFAelem is not of EFAelement3D type");
+
+                for (unsigned int face_id = 0; face_id < efa_elem3d->numFaces(); ++face_id)
+                {
+                  for (unsigned int fn_iter = 0; fn_iter < efa_elem3d->numFaceNeighbors(face_id);
+                       ++fn_iter)
+                  {
+                    EFAElement3D * face_neighbor = efa_elem3d->getFaceNeighbor(face_id, fn_iter);
+                    if (face_neighbor != nullptr && face_neighbor->id() == mie)
+                      _crack_tip_elems_to_be_healed.insert(crack_tip_elem);
+                  }
+                }
+              }
             }
         }
       }
     }
   }
+
   if (_debug_output_level > 0)
   {
     _console << "\nXFEM mesh cutting with element fragment algorithm complete\n";

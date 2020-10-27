@@ -12,7 +12,6 @@
 #include "GeometricCutUserObject.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
-#include "XFEMFuncs.h"
 
 XFEMCrackGrowthIncrement2DCut::XFEMCrackGrowthIncrement2DCut(
     Real x0, Real y0, Real x1, Real y1, Real t0, Real t1)

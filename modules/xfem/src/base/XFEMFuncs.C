@@ -814,4 +814,131 @@ crossProduct2D(const Point & point_a, const Point & point_b)
   return (point_a(0) * point_b(1) - point_b(0) * point_a(1));
 }
 
+Real
+pointSegmentDistance(const Point & x0, const Point & x1, const Point & x2, Point & xp)
+{
+  Point dx = x2 - x1;
+  Real m2 = dx * dx;
+  // find parameter value of closest point on segment
+  Real s12 = (x2 - x0) * dx / m2;
+  if (s12 < 0)
+    s12 = 0;
+  else if (s12 > 1)
+    s12 = 1;
+  // and find the distance
+  xp = s12 * x1 + (1 - s12) * x2;
+  return std::sqrt((x0 - xp) * (x0 - xp));
+}
+
+Real
+pointTriangleDistance(const Point & x0,
+                      const Point & x1,
+                      const Point & x2,
+                      const Point & x3,
+                      Point & xp,
+                      unsigned int & region)
+{
+  Point x13 = x1 - x3, x23 = x2 - x3, x03 = x0 - x3;
+  Real m13 = x13 * x13, m23 = x23 * x23, d = x13 * x23;
+  Real invdet = 1.0 / std::max(m13 * m23 - d * d, 1e-30);
+  Real a = x13 * x03, b = x23 * x03;
+
+  Real w23 = invdet * (m23 * a - d * b);
+  Real w31 = invdet * (m13 * b - d * a);
+  Real w12 = 1 - w23 - w31;
+  if (w23 >= 0 && w31 >= 0 && w12 >= 0)
+  { // if we're inside the triangle
+    region = 0;
+    xp = w23 * x1 + w31 * x2 + w12 * x3;
+    return std::sqrt((x0 - xp) * (x0 - xp));
+  }
+  else
+  {
+    if (w23 > 0) // this rules out edge 2-3 for us
+    {
+      Point xp1, xp2;
+      Real distance_12 = pointSegmentDistance(x0, x1, x2, xp1);
+      Real distance_13 = pointSegmentDistance(x0, x1, x3, xp2);
+      Real distance_1 = std::sqrt((x0 - x1) * (x0 - x1));
+      if (std::min(distance_12, distance_13) < distance_1)
+      {
+        if (distance_12 < distance_13)
+        {
+          region = 4;
+          xp = xp1;
+          return distance_12;
+        }
+        else
+        {
+          region = 6;
+          xp = xp2;
+          return distance_13;
+        }
+      }
+      else
+      {
+        region = 1;
+        xp = x1;
+        return distance_1;
+      }
+    }
+    else if (w31 > 0) // this rules out edge 1-3
+    {
+      Point xp1, xp2;
+      Real distance_12 = pointSegmentDistance(x0, x1, x2, xp1);
+      Real distance_23 = pointSegmentDistance(x0, x2, x3, xp2);
+      Real distance_2 = std::sqrt((x0 - x2) * (x0 - x2));
+      if (std::min(distance_12, distance_23) < distance_2)
+      {
+        if (distance_12 < distance_23)
+        {
+          region = 4;
+          xp = xp1;
+          return distance_12;
+        }
+        else
+        {
+          region = 5;
+          xp = xp2;
+          return distance_23;
+        }
+      }
+      else
+      {
+        region = 2;
+        xp = x2;
+        return distance_2;
+      }
+    }
+    else // w12 must be >0, ruling out edge 1-2
+    {
+      Point xp1, xp2;
+      Real distance_23 = pointSegmentDistance(x0, x2, x3, xp1);
+      Real distance_31 = pointSegmentDistance(x0, x3, x1, xp2);
+      Real distance_3 = std::sqrt((x0 - x3) * (x0 - x3));
+      if (std::min(distance_23, distance_31) < distance_3)
+      {
+        if (distance_23 < distance_31)
+        {
+          region = 5;
+          xp = xp1;
+          return distance_23;
+        }
+        else
+        {
+          region = 6;
+          xp = xp2;
+          return distance_31;
+        }
+      }
+      else
+      {
+        region = 3;
+        xp = x3;
+        return distance_3;
+      }
+    }
+  }
+}
+
 } // namespace XFEM
