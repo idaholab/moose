@@ -31,10 +31,18 @@ public:
 
   MooseGhostPointNeighbors(const InputParameters & parameters);
 
+  MooseGhostPointNeighbors(const MooseGhostPointNeighbors & other);
+
+  /**
+   * According to the base class docs, "We call mesh_reinit() whenever
+   * the relevant Mesh has changed, but before remote elements on a
+   * distributed mesh are deleted."
+   */
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
+
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
 protected:
-  virtual void internalInit() override;
+  virtual void internalInitWithMesh(const MeshBase & mesh) override;
 };
-

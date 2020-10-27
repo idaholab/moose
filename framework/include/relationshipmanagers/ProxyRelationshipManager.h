@@ -10,7 +10,6 @@
 #pragma once
 
 #include "RelationshipManager.h"
-
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
@@ -26,7 +25,7 @@ InputParameters validParams<ProxyRelationshipManager>();
 
 /**
  * Intermediate base class for RelationshipManagers that are simply built
- * using ghosting functors.  The functor should be built in internalInit()
+ * using ghosting functors.  The functor should be built in internalInitWithMesh()
  * and set as _functor
  */
 class ProxyRelationshipManager : public RelationshipManager
@@ -35,6 +34,8 @@ public:
   static InputParameters validParams();
 
   ProxyRelationshipManager(const InputParameters & parameters);
+
+  ProxyRelationshipManager(const ProxyRelationshipManager & other);
 
   virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
                           const MeshBase::const_element_iterator & /*range_end*/,
@@ -45,11 +46,17 @@ public:
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const override;
 
-protected:
-  virtual void internalInit() override{};
+  /**
+   * A clone() is needed because GhostingFunctor can not be shared between
+   * different meshes. The operations in  GhostingFunctor are mesh dependent.
+   */
+  virtual std::unique_ptr<GhostingFunctor> clone() const override
+  {
+    return libmesh_make_unique<ProxyRelationshipManager>(*this);
+  }
 
-  MeshBase * _this_mesh;
+protected:
+  virtual void internalInitWithMesh(const MeshBase &) override{};
 
   System * _other_system;
 };
-

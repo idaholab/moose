@@ -431,6 +431,11 @@ public:
                                      THREAD_ID tid = 0);
 
   /**
+   * reinitialize a neighboring lower dimensional element
+   */
+  void reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid = 0);
+
+  /**
    * Reinit a mortar element to obtain a valid JxW
    */
   void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);
@@ -671,6 +676,12 @@ public:
    * Add an algebraic ghosting functor to this problem's DofMaps
    */
   void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+
+  /**
+   * Add an algebraic ghosting functor to this problem's DofMaps
+   */
+  void addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf,
+                                   bool to_mesh = true);
 
   /**
    * Automatic scaling setter

@@ -42,6 +42,17 @@ ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & par
 {
 }
 
+ElementSideNeighborLayers::ElementSideNeighborLayers(const ElementSideNeighborLayers & other)
+  : FunctorRelationshipManager(other), _layers(other._layers)
+{
+}
+
+std::unique_ptr<GhostingFunctor>
+ElementSideNeighborLayers::clone() const
+{
+  return libmesh_make_unique<ElementSideNeighborLayers>(*this);
+}
+
 std::string
 ElementSideNeighborLayers::getInfo() const
 {
@@ -68,7 +79,7 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
 }
 
 void
-ElementSideNeighborLayers::internalInit()
+ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
   auto functor = libmesh_make_unique<DefaultCoupling>();
   functor->set_n_levels(_layers);
@@ -85,7 +96,6 @@ ElementSideNeighborLayers::internalInit()
 
     mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
 
-    functor->set_mesh(&_mesh.getMesh());
     functor->set_periodic_boundaries(periodic_boundaries_ptr);
   }
 

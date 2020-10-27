@@ -181,7 +181,7 @@ addActionTypes(Syntax & syntax)
   registerTask("execute_mesh_generators", true);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
-  registerTask("delete_remote_elements_post_equation_systems_init", false);
+  registerTask("delete_remote_elements_after_late_geometric_ghosting", false);
   registerTask("setup_mesh_complete", true); // calls prepare
   registerTask("add_geometric_rm", false);
   registerTask("attach_geometric_rm", true);
@@ -249,13 +249,13 @@ addActionTypes(Syntax & syntax)
                            "(setup_recover_file_base)"
                            "(check_copy_nodal_vars)"
                            "(setup_mesh)"
+                           "(add_geometric_rm)"
                            "(add_mesh_generator)"
                            "(append_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(recover_meta_data)"
                            "(set_mesh_base)"
                            "(add_partitioner)"
-                           "(add_geometric_rm)"
                            "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
@@ -305,8 +305,8 @@ addActionTypes(Syntax & syntax)
                            "(add_coupling_rm)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
+                           "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
-                           "(delete_remote_elements_post_equation_systems_init)"
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this

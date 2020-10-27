@@ -32,6 +32,8 @@ class AugmentSparsityOnInterface : public RelationshipManager
 public:
   AugmentSparsityOnInterface(const InputParameters &);
 
+  AugmentSparsityOnInterface(const AugmentSparsityOnInterface & others);
+
   static InputParameters validParams();
 
   /**
@@ -43,6 +45,15 @@ public:
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
                           map_type & coupled_elements) override;
+
+  /**
+   * A clone() is needed because GhostingFunctor can not be shared between
+   * different meshes. The operations in  GhostingFunctor are mesh dependent.
+   */
+  virtual std::unique_ptr<GhostingFunctor> clone() const override
+  {
+    return libmesh_make_unique<AugmentSparsityOnInterface>(*this);
+  }
 
   /**
    * According to the base class docs, "We call mesh_reinit() whenever
@@ -62,7 +73,7 @@ public:
   virtual bool operator==(const RelationshipManager & other) const override;
 
 protected:
-  virtual void internalInit() override;
+  virtual void internalInitWithMesh(const MeshBase &) override;
 
   /**
    * The Mesh we're calculating on
@@ -76,5 +87,7 @@ protected:
   SubdomainName _primary_subdomain_name;
   SubdomainName _secondary_subdomain_name;
 
-  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
+  /// Whether this relationship manager is called when coupling functors are called when building
+  /// the matrix sparsity pattern
+  const bool _is_coupling_functor;
 };

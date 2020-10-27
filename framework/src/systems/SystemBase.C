@@ -1009,6 +1009,14 @@ SystemBase::closeTaggedMatrices(const std::set<TagID> & tags)
 }
 
 void
+SystemBase::flushTaggedMatrices(const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (hasMatrix(tag))
+      getMatrix(tag).flush();
+}
+
+void
 SystemBase::associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag)
 {
   if (!_subproblem.matrixTagExists(tag))

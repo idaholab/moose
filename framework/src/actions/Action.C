@@ -95,7 +95,7 @@ Action::timedAct()
 
 void
 Action::addRelationshipManager(
-    Moose::RelationshipManagerType input_rm_type,
+    Moose::RelationshipManagerType /*input_rm_type*/,
     const InputParameters & moose_object_pars,
     std::string rm_name,
     Moose::RelationshipManagerType rm_type,
@@ -119,60 +119,9 @@ Action::addRelationshipManager(
     for_whom += "_aux";
   rm_params.set<std::string>("for_whom") = for_whom;
 
-  // Figure out if we shouldn't be adding this one yet
-  if (((rm_type & input_rm_type) != input_rm_type)
-
-      || // Or are we adding Geometric but this one needs to be delayed
-
-      (((input_rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-        Moose::RelationshipManagerType::GEOMETRIC) &&
-       ((rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-        Moose::RelationshipManagerType::GEOMETRIC) &&
-       !rm_params.template get<bool>("attach_geometric_early"))
-
-      || // Or is this an Algebraic/Coupling and Geometric one that we already added earlier?
-
-      (((input_rm_type != Moose::RelationshipManagerType::GEOMETRIC) &&
-        (rm_type != Moose::RelationshipManagerType::GEOMETRIC) &&
-        ((rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-         Moose::RelationshipManagerType::GEOMETRIC) &&
-        rm_params.template get<bool>("attach_geometric_early"))))
-    return;
-
   // If there is a callback for setting the RM parameters let's use it
   if (rm_input_parameter_func)
     rm_input_parameter_func(moose_object_pars, rm_params);
-
-  // If we're doing geometric but we can't build it early - then let's not build it yet
-  // (It will get built when we do algebraic)
-  if ((input_rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-          Moose::RelationshipManagerType::GEOMETRIC &&
-      !rm_params.get<bool>("attach_geometric_early"))
-  {
-    // We also need to tell the mesh not to delete remote elements yet
-    // Note this will get reset in AddRelationshipManager::act() when attaching Algebraic
-    _mesh->getMesh().allow_remote_element_removal(false);
-
-    if (_problem->getDisplacedProblem())
-      _problem->getDisplacedProblem()->mesh().getMesh().allow_remote_element_removal(false);
-
-    // Keep looking for more RMs
-    return;
-  }
-  // Ok the above block may have told the mesh not to allow remote element removal during the
-  // initial MeshBase::prepare_for_use, which is called after attaching geometric ghosting
-  // functors. If we did tell the mesh not to allow remote element removal **and** we're using a
-  // DistributedMesh, then we need to tell the mesh to allow remote element removal and ensure
-  // that the mesh will delete its remote elements after the EquationSystems init
-  else if (input_rm_type != Moose::RelationshipManagerType::GEOMETRIC &&
-           (rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-               Moose::RelationshipManagerType::GEOMETRIC &&
-           !rm_params.get<bool>("attach_geometric_early") && _mesh->isDistributedMesh())
-  {
-    _mesh->needsRemoteElemDeletion(true);
-    if (_displaced_mesh)
-      _displaced_mesh->needsRemoteElemDeletion(true);
-  }
 
   rm_params.set<MooseMesh *>("mesh") = _mesh.get();
 

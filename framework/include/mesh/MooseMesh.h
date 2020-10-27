@@ -16,6 +16,7 @@
 #include "MooseEnum.h"
 #include "PerfGraphInterface.h"
 #include "MooseHashing.h"
+#include "MooseApp.h"
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -699,6 +700,7 @@ public:
    */
   MeshBase & getMesh();
   const MeshBase & getMesh() const;
+  const MeshBase * getMeshPtr() const;
 
   /**
    * Calls print_info() on the underlying Mesh.
@@ -1099,6 +1101,21 @@ public:
    * Whether we need to delete remote elements
    */
   bool needsRemoteElemDeletion() const { return _need_delete; }
+
+  /**
+   * Set whether to allow remote element removal
+   */
+  void allowRemoteElementRemoval(bool allow_removal);
+
+  /**
+   * Whether we are allow remote element removal
+   */
+  bool allowRemoteElementRemoval() const { return _allow_remote_element_removal; }
+
+  /**
+   * Delete remote elements
+   */
+  void deleteRemoteElements();
 
   /**
    * Whether mesh base object was constructed or not
@@ -1503,6 +1520,9 @@ private:
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;
 
+  /// Whether to allow removal of remote elements
+  bool _allow_remote_element_removal;
+
   /// Set of elements ghosted by ghostGhostedBoundaries
   std::set<Elem *> _ghost_elems_from_ghost_boundaries;
 
@@ -1650,6 +1670,9 @@ MooseMesh::buildTypedMesh(unsigned int dim)
 
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
+
+  mesh->allow_remote_element_removal(_allow_remote_element_removal);
+  _app.attachRelationshipManagers(*mesh, *this);
 
   return mesh;
 }

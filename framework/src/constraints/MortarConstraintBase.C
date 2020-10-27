@@ -21,9 +21,27 @@ MortarConstraintBase::validParams()
   params += MortarInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
 
+  // On a displaced mesh this will geometrically and algebraically ghost the entire interface
   params.addRelationshipManager(
       "AugmentSparsityOnInterface",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+        rm_params.set<BoundaryName>("secondary_boundary") =
+            obj_params.get<BoundaryName>("secondary_boundary");
+        rm_params.set<BoundaryName>("primary_boundary") =
+            obj_params.get<BoundaryName>("primary_boundary");
+        rm_params.set<SubdomainName>("secondary_subdomain") =
+            obj_params.get<SubdomainName>("secondary_subdomain");
+        rm_params.set<SubdomainName>("primary_subdomain") =
+            obj_params.get<SubdomainName>("primary_subdomain");
+      });
+
+  // Whether on a displaced or undisplaced mesh, coupling ghosting will only happen for
+  // cross-interface elements
+  params.addRelationshipManager(
+      "AugmentSparsityOnInterface",
+      Moose::RelationshipManagerType::COUPLING,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
         rm_params.set<BoundaryName>("secondary_boundary") =
@@ -80,6 +98,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _test_dummy(),
     _use_dual(_var ? _var->useDual() : false),
     _normals(_assembly.normals()),
+    _normals_primary(_assembly.neighborNormals()),
     _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.mortarCoordTransformation()),
@@ -90,7 +109,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
     _phys_points_secondary(_assembly.qPointsFace()),
-    _phys_points_primary(_assembly.qPointsFaceNeighbor())
+    _phys_points_primary(_assembly.qPointsFaceNeighbor()),
+    _lower_secondary_elem(_assembly.lowerDElem()),
+    _lower_primary_elem(_assembly.neighborLowerDElem()),
+    _lower_secondary_volume(_assembly.lowerDElemVolume()),
+    _lower_primary_volume(_assembly.neighborLowerDElemVolume())
 {
 }
 

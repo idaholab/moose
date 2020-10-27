@@ -25,7 +25,8 @@
 FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
                                        std::vector<Number> & serialized_solution,
                                        unsigned int max_h_level,
-                                       const std::string & marker_name)
+                                       const std::string & marker_name,
+                                       bool is_serialized_solution)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _displaced_problem(_fe_problem.getDisplacedProblem()),
@@ -36,7 +37,8 @@ FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
         0, marker_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)),
     _field_var_number(_field_var.number()),
     _serialized_solution(serialized_solution),
-    _max_h_level(max_h_level)
+    _max_h_level(max_h_level),
+    _is_serialized_solution(is_serialized_solution)
 {
 }
 
@@ -51,7 +53,8 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
     _field_var(x._field_var),
     _field_var_number(x._field_var_number),
     _serialized_solution(x._serialized_solution),
-    _max_h_level(x._max_h_level)
+    _max_h_level(x._max_h_level),
+    _is_serialized_solution(x._is_serialized_solution)
 {
 }
 
@@ -66,12 +69,26 @@ FlagElementsThread::onElement(const Elem * elem)
   {
     dof_id_type dof_number = elem->dof_number(_system_number, _field_var_number, 0);
 
+    Number dof_value = 0.;
+    // If solution is serialized in the caller,
+    // we use the serialized solution
+    if (_is_serialized_solution)
+      dof_value = _serialized_solution[dof_number];
+    else // Otherwise, we look at the ghosted local solution
+    {
+      // Local ghosted solution
+      auto & current_local_solution = *_aux_sys.currentSolution();
+      // Libesh will convert a global dof number to a local one,
+      // then return the corresponding entry value
+      dof_value = current_local_solution(dof_number);
+    }
+
     // round() is a C99 function, it is not located in the std:: namespace.
-    marker_value = static_cast<Marker::MarkerValue>(round(_serialized_solution[dof_number]));
+    marker_value = static_cast<Marker::MarkerValue>(round(dof_value));
 
     // Make sure we aren't masking an issue in the Marker system by rounding its values.
-    if (std::abs(marker_value - _serialized_solution[dof_number]) > TOLERANCE * TOLERANCE)
-      mooseError("Invalid Marker value detected: ", _serialized_solution[dof_number]);
+    if (std::abs(marker_value - dof_value) > TOLERANCE * TOLERANCE)
+      mooseError("Invalid Marker value detected: ", dof_value);
   }
 
   // If no Markers cared about what happened to this element let's just leave it alone

@@ -5,21 +5,18 @@
     type = 'Exodiff'
     input = 'soln-continuity.i'
     exodiff = 'soln-continuity_out.e'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
   []
   [dual-soln-continuity]
     type = 'Exodiff'
     input = 'dual-soln-continuity.i'
     exodiff = 'dual-soln-continuity_out.e'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the first order dual basis.'
   []
   [dual-soln-continuity-2nd-order]
     type = 'Exodiff'
     input = 'dual-soln-continuity.i'
     exodiff = 'dual-soln-continuity-2nd-order_out.e'
-    mesh_mode = 'REPLICATED'
     cli_args = 'Mesh/second_order=true Variables/T/order=SECOND Variables/lambda/order=SECOND Outputs/file_base=dual-soln-continuity-2nd-order_out'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the second order dual basis.'
   []
@@ -28,7 +25,6 @@
     input = 'soln-continuity.i'
     exodiff = 'soln-continuity-fine_out.e'
     cli_args = 'Mesh/file/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=soln-continuity-fine_out'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to produce the expected result for a fine mesh solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
   []
   [soln-continuity-jac]
@@ -36,7 +32,6 @@
     input = 'soln-continuity.i'
     run_sim = True
     difference_tol = 1e-7
-    mesh_mode = 'REPLICATED'
     requirement = 'The Jacobian for the solution continuity test case shall be perfect'
     prereq = 'soln-continuity'
   []

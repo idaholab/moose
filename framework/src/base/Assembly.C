@@ -92,6 +92,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_side_volume_computed(false),
 
     _current_lower_d_elem(nullptr),
+    _current_neighbor_lower_d_elem(nullptr),
 
     _residual_vector_tags(_subproblem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL)),
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
@@ -2142,6 +2143,8 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(const_cast<std::vector<Point> &>(
       (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
+  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
+      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_normals()));
 }
 
 void
@@ -2149,6 +2152,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights)
 {
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitLowerDElemRef on a lower dimensional element");
+
   _current_lower_d_elem = elem;
 
   unsigned int elem_dim = elem->dim();
@@ -2200,6 +2206,27 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_dual_d2phi()));
     }
   }
+
+  mooseAssert(elem_dim == 1,
+              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
+              "anything with the coordinate transformation. We currently only support 2D mortar, "
+              "so if you hit this assertion there is a problem");
+  _current_lower_d_elem_volume = _current_lower_d_elem->volume();
+}
+
+void
+Assembly::reinitNeighborLowerDElem(const Elem * elem)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitNeighborLowerDElem on a lower dimensional element");
+
+  _current_neighbor_lower_d_elem = elem;
+
+  mooseAssert(elem->dim() == 1,
+              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
+              "anything with the coordinate transformation. We currently only support 2D mortar, "
+              "so if you hit this assertion there is a problem");
+  _current_neighbor_lower_d_elem_volume = _current_neighbor_lower_d_elem->volume();
 }
 
 void
@@ -2654,25 +2681,25 @@ Assembly::prepareLowerD()
       // (NeighborNeighbor). With these covered we only need to prepare the 5 remaining below
 
       // derivatives w.r.t. lower dimensional residuals
-      jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerLower, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jcount);
 
-      jacobianBlockLower(Moose::LowerSecondary, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerSecondary, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndices().size() * jvar.count());
 
-      jacobianBlockLower(Moose::LowerPrimary, vi, vj, tag)
+      jacobianBlockMortar(Moose::LowerPrimary, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jvar.count());
 
       // derivatives w.r.t. interior secondary residuals
-      jacobianBlockLower(Moose::SecondaryLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::SecondaryLower, vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
       // derivatives w.r.t. interior primary residuals
-      jacobianBlockLower(Moose::PrimaryLower, vi, vj, tag)
+      jacobianBlockMortar(Moose::PrimaryLower, vi, vj, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
@@ -2934,10 +2961,10 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
 }
 
 DenseMatrix<Number> &
-Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
-                             unsigned int ivar,
-                             unsigned int jvar,
-                             TagID tag)
+Assembly::jacobianBlockMortar(Moose::ConstraintJacobianType type,
+                              unsigned int ivar,
+                              unsigned int jvar,
+                              TagID tag)
 {
   _jacobian_block_lower_used[tag][ivar][jvar] = 1;
   if (_block_diagonal_matrix)
@@ -3693,7 +3720,7 @@ Assembly::addJacobianNeighbor()
 }
 
 void
-Assembly::addJacobianLower()
+Assembly::addJacobianMortar()
 {
   for (const auto & it : _cm_ff_entry)
   {
@@ -3706,39 +3733,67 @@ Assembly::addJacobianLower()
       if (_jacobian_block_lower_used[tag][i][j] && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerLower, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerSecondary, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerPrimary, i, j, tag),
+                         jacobianBlockMortar(Moose::LowerPrimary, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::SecondaryLower, i, j, tag),
+                         jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::PrimaryLower, i, j, tag),
+                         jacobianBlockMortar(Moose::SecondarySecondary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::SecondaryPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndicesNeighbor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),
                          jvar->dofIndicesLower());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::PrimarySecondary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::PrimaryPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesNeighbor());
       }
   }
 }

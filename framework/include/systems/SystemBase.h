@@ -389,6 +389,12 @@ public:
   void closeTaggedMatrices(const std::set<TagID> & tags);
 
   /**
+   * flushes all matrices associated to tags. Flush assembles the matrix but doesn't shrink memory
+   * allocation
+   */
+  void flushTaggedMatrices(const std::set<TagID> & tags);
+
+  /**
    * Associate a matrix to a tag
    */
   virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);

@@ -60,9 +60,10 @@ ComputeMortarFunctor::operator()()
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
   unsigned int num_cached = 0;
+
   for (MeshBase::const_element_iterator
-           el = _amg.mortar_segment_mesh.active_local_elements_begin(),
-           end_el = _amg.mortar_segment_mesh.active_local_elements_end();
+           el = _amg.mortar_segment_mesh->active_local_elements_begin(),
+           end_el = _amg.mortar_segment_mesh->active_local_elements_end();
        el != end_el;
        ++el)
   {
@@ -178,6 +179,12 @@ ComputeMortarFunctor::operator()()
     // secondary (element) and primary (neighbor)
     _subproblem.reinitLowerDElem(secondary_face_elem, /*tid=*/0, &custom_xi1_pts);
 
+    // All this does currently is sets the neighbor/primary lower dimensional elem in Assembly and
+    // computes its volume for potential use in the MortarConstraints. Solution continuity
+    // stabilization for example relies on being able to access the volume
+    if (_has_primary)
+      _subproblem.reinitNeighborLowerDElem(msinfo.primary_elem);
+
     // reinit higher-dimensional secondary face/boundary materials. Do this after we reinit lower-d
     // variables in case we want to pull the lower-d variable values into the secondary
     // face/boundary materials. Be careful not to execute stateful materials since conceptually they
@@ -208,29 +215,16 @@ ComputeMortarFunctor::operator()()
       for (auto && mc : _mortar_constraints)
         mc->computeJacobian(_has_primary);
 
-      // Cache SecondarySecondary
-      _assembly.cacheJacobian();
-
-      // It doesn't appears that we have caching functions for these yet, or at least it's not
-      // used in ComputeJacobianThread. I'll make sure to add/use them if these methods show up in
-      // profiling
-      //
-      // Add SecondaryPrimary, PrimarySecondary, PrimaryPrimary
-      _assembly.addJacobianNeighbor();
-
-      // Add LowerLower, LowerSecondary, LowerPrimary, SecondaryLower, PrimaryLower
-      _assembly.addJacobianLower();
-
-      num_cached++;
-
-      if (num_cached % 20 == 0)
-        _assembly.addCachedJacobian();
+      // No caching currently. Add caching if this shows up in profiling
+      _assembly.addJacobianMortar();
     }
   } // end for loop over elements
 
-  // Make sure any remaining cached residuals/Jacobians get added
+  // Make sure any remaining cached residuals get added
   if (!_fe_problem.currentlyComputingJacobian())
     _assembly.addCachedResiduals();
-  else
-    _assembly.addCachedJacobian();
+
+  // // Not currently caching Jacobians
+  // else
+  //   _assembly.addCachedJacobian();
 }

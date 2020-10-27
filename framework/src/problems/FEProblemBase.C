@@ -403,7 +403,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   }
 
   // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
-  // // well before our FEProblemBase is constructed. Historically, in MooseMesh we have a bunch of
+  // // well before our Problem(s) are constructed. Historically, in MooseMesh we have a bunch of
   // // needs_prepare type flags that make it so we never call prepare_for_use (and consequently
   // // delete_remote_elements) again. So the below line, historically, has had no impact. HOWEVER:
   // // I've added some code in SetupMeshCompleteAction for deleting remote elements post
@@ -4859,6 +4859,15 @@ FEProblemBase::init()
     mooseError("No variables specified in the FEProblemBase '", name(), "'.");
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
+
+  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update all
+  // of our mesh information. We need to make sure that mesh information is up-to-date before
+  // EquationSystems::init because that will call through to updateGeomSearch (for sparsity
+  // augmentation) and if we haven't added back boundary node information before that latter call,
+  // then we're screwed. We'll get things like "Unable to find closest node!"
+  _mesh.meshChanged();
+  if (_displaced_problem)
+    _displaced_mesh->meshChanged();
 
   // do not assemble system matrix for JFNK solve
   if (solverParams()._type == Moose::ST_JFNK)

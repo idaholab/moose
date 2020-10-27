@@ -342,7 +342,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _popped_final_mesh_generator(false)
+    _popped_final_mesh_generator(false),
+    _geometric_rms_attached(false)
 {
 #ifdef HAVE_GPERFTOOLS
   if (std::getenv("MOOSE_PROFILE_BASE"))
@@ -1980,27 +1981,71 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 }
 
 void
+MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
+{
+  for (auto & rm : _relationship_managers)
+  {
+    if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
+    {
+      if (rm->attachGeometricEarly())
+      {
+        rm->init(mesh);
+        mesh.add_ghosting_functor(*rm);
+      }
+      else
+      {
+        // If we have a geometric ghosting functor that can't be attached early, then we have to
+        // prevent the mesh from deleting remote elements
+        moose_mesh.allowRemoteElementRemoval(false);
+
+        if (const MeshBase * const moose_mesh_base = moose_mesh.getMeshPtr())
+        {
+          if (moose_mesh_base != &mesh)
+            mooseError("The MooseMesh MeshBase and the MeshBase we're trying to attach "
+                       "relationship managers to are different");
+        }
+        else
+          // The MeshBase isn't attached to the MooseMesh yet, so have to tell it not to remove
+          // remote elements independently
+          mesh.allow_remote_element_removal(false);
+      }
+    }
+  }
+
+  _geometric_rms_attached = true;
+}
+
+void
 MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 {
   for (auto & rm : _relationship_managers)
   {
     if (rm->isType(rm_type))
     {
-      // Will attach them later (during algebraic)
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !rm->attachGeometricEarly())
-        continue;
-
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !_geometric_rms_attached)
       {
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
-        auto & mesh = _action_warehouse.mesh();
+        MooseMesh * const mesh = _action_warehouse.mesh().get();
 
-        rm->init();
+        if (!rm->attachGeometricEarly())
+        {
+          // Will attach them later (during algebraic). But also, we need to tell the mesh that we
+          // shouldn't be deleting remote elements yet
+          if (!mesh->getMeshPtr())
+            mooseError("We should have attached a MeshBase object to the mesh by now");
 
-        if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+          mesh->allowRemoteElementRemoval(false);
+        }
         else
-          mesh->getMesh().add_ghosting_functor(*rm);
+        {
+          MeshBase & mesh_base = mesh->getMesh();
+          rm->init(mesh_base);
+          mesh_base.add_ghosting_functor(*rm);
+
+          if (_action_warehouse.displacedMesh())
+            mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
+                       "geometric relationship managers.");
+        }
       }
 
       if (rm_type != Moose::RelationshipManagerType::GEOMETRIC)
@@ -2009,15 +2054,24 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         auto & problem = _executioner->feProblem();
 
         // Ensure that the relationship manager is initialized
-        rm->init();
+        rm->init(problem.mesh().getMesh());
+
+        std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
+        if (_action_warehouse.displacedMesh())
+        {
+          clone_rm = rm->clone();
+          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+        }
 
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
-          if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
-          else
-            problem.mesh().getMesh().add_ghosting_functor(*rm);
+          // The reference and displaced meshes should have the same geometric RMs.
+          // It is necessary for keeping both meshes consistent.
+          if (_action_warehouse.displacedMesh())
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+
+          problem.mesh().getMesh().add_ghosting_functor(*rm);
         }
 
         if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
@@ -2038,7 +2092,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
+            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
+                                                                       /*to_mesh = */ false);
         }
         else // undisplaced
         {
@@ -2090,7 +2145,10 @@ MooseApp::getRelationshipManagerInfo() const
   const auto & mesh = _action_warehouse.getMesh();
   if (mesh)
   {
-    std::unordered_map<std::string, unsigned int> counts;
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
 
     for (auto & gf : as_range(mesh->getMesh().ghosting_functors_begin(),
                               mesh->getMesh().ghosting_functors_end()))
@@ -2104,6 +2162,32 @@ MooseApp::getRelationshipManagerInfo() const
     for (const auto pair : counts)
       info_strings.emplace_back(std::make_pair(
           "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
+  }
+
+  // List the libMesh GhostingFunctors - Not that in libMesh all of the algebraic and coupling
+  // Ghosting Functors are also attached to the mesh. This should catch them all.
+  const auto & d_mesh = _action_warehouse.getDisplacedMesh();
+  if (d_mesh)
+  {
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
+
+    for (auto & gf : as_range(d_mesh->getMesh().ghosting_functors_begin(),
+                              d_mesh->getMesh().ghosting_functors_end()))
+    {
+      const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
+      if (!gf_ptr)
+        // Count how many occurances of the same Ghosting Functor types we are encountering
+        counts[demangle(typeid(*gf).name())]++;
+    }
+
+    for (const auto pair : counts)
+      info_strings.emplace_back(
+          std::make_pair("Default",
+                         pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "") +
+                             " for DisplacedMesh"));
   }
 
   return info_strings;

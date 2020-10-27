@@ -208,7 +208,7 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &assembly.jacobianBlockLower(type, ivar, jvar, *mat_vector);
+    _ke_blocks[i] = &assembly.jacobianBlockMortar(type, ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
 }

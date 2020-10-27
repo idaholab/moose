@@ -888,7 +888,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 
   auto & jacobian = getMatrix(systemMatrixTag());
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
-  jacobian.close();
+
   if (_constraints.hasActiveNodalConstraints())
   {
     const auto & ncs = _constraints.getActiveNodalConstraints();
@@ -2443,7 +2443,14 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  closeTaggedMatrices(tags);
+  if (_fe_problem.hasMortarCoupling())
+    // don't shrink the memory allocation because our constraints may have additional sparsity
+    // pattern that hasn't been used up to this point. Note that some other types of constraints
+    // seem to rely on the matrix actually being closed, so we still close for any constraint types
+    // other mortar
+    flushTaggedMatrices(tags);
+  else
+    closeTaggedMatrices(tags);
 
   // Have no idea how to have constraints work
   // with the tag system
@@ -3296,11 +3303,17 @@ NonlinearSystemBase::computeScaling()
 
   if (jac_scaling)
   {
-    if (!_auto_scaling_initd)
+    // if (!_auto_scaling_initd)
+    // We need to reinit this when the number of dofs changes
+    // but there is no good way to track that
+    // In theory, it is the job of libmesh system to track this,
+    // but this special matrix is not owned by libMesh system
+    // Let us reinit eveytime since it is not expensive
     {
       auto init_vector = NumericVector<Number>::build(this->comm());
       init_vector->init(system().n_dofs(), system().n_local_dofs(), /*fast=*/false, PARALLEL);
 
+      _scaling_matrix.clear();
       _scaling_matrix.init(*init_vector);
     }
 

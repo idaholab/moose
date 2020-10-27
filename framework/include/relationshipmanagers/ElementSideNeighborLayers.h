@@ -32,13 +32,22 @@ public:
 
   ElementSideNeighborLayers(const InputParameters & parameters);
 
+  ElementSideNeighborLayers(const ElementSideNeighborLayers & other);
+
+  /**
+   * According to the base class docs, "We call mesh_reinit() whenever
+   * the relevant Mesh has changed, but before remote elements on a
+   * distributed mesh are deleted."
+   */
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
+
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
   void dofmap_reinit() override;
 
 protected:
-  virtual void internalInit() override;
+  virtual void internalInitWithMesh(const MeshBase &) override;
 
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.

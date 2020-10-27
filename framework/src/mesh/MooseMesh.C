@@ -252,6 +252,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(false),
+    _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
@@ -316,6 +317,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(other_mesh._need_delete),
+    _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
@@ -2304,6 +2306,7 @@ void
 MooseMesh::setMeshBase(std::unique_ptr<MeshBase> mesh_base)
 {
   _mesh = std::move(mesh_base);
+  _mesh->allow_remote_element_removal(_allow_remote_element_removal);
 }
 
 void
@@ -2820,6 +2823,12 @@ MooseMesh::operator libMesh::MeshBase &() { return getMesh(); }
 
 MooseMesh::operator const libMesh::MeshBase &() const { return getMesh(); }
 
+const MeshBase *
+MooseMesh::getMeshPtr() const
+{
+  return _mesh.get();
+}
+
 MeshBase &
 MooseMesh::getMesh()
 {
@@ -3196,4 +3205,30 @@ MooseMesh::partitioning()
   MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc",
                          "default");
   return partitioning;
+}
+
+void
+MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
+{
+  _allow_remote_element_removal = allow_remote_element_removal;
+  if (_mesh)
+    _mesh->allow_remote_element_removal(allow_remote_element_removal);
+
+  if (!allow_remote_element_removal)
+    // If we're not allowing remote element removal now, then we will need deletion later after late
+    // geoemetric ghosting functors have been added (late geometric ghosting functor addition
+    // happens when algebraic ghosting functors are added)
+    _need_delete = true;
+}
+
+void
+MooseMesh::deleteRemoteElements()
+{
+  _allow_remote_element_removal = true;
+  if (!_mesh)
+    mooseError("Cannot delete remote elements because we have not yet attached a MeshBase");
+
+  _mesh->allow_remote_element_removal(true);
+
+  _mesh->delete_remote_elements();
 }

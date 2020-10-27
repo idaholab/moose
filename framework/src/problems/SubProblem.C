@@ -887,6 +887,12 @@ SubProblem::reinitLowerDElem(const Elem * elem,
 }
 
 void
+SubProblem::reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid)
+{
+  assembly(tid).reinitNeighborLowerDElem(elem);
+}
+
+void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
   assembly(tid).reinitMortarElem(elem);
@@ -894,6 +900,16 @@ SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 
 void
 SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+{
+  EquationSystems & eq = es();
+  auto n_sys = eq.n_systems();
+
+  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
+    eq.get_system(i).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+}
+
+void
+SubProblem::addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
   auto n_sys = eq.n_systems();

@@ -743,6 +743,14 @@ public:
   void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
 
   /**
+   * Attach geometric relationship managers to the given \p MeshBase object. This API is designed to
+   * work with \p MeshGenerators which are executed at the very beginning of a simulation. No
+   * attempt will be made to add relationship managers to a displaced mesh, because it doesn't exist
+   * yet.
+   */
+  void attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh);
+
+  /**
    * Retrieve the relationship managers
    */
   const std::vector<std::shared_ptr<RelationshipManager>> & getReleationshipManagers();
@@ -1104,6 +1112,9 @@ private:
   /// Whether the mesh generator MeshBase has been popped off its storage container and is no
   /// longer accessible
   bool _popped_final_mesh_generator;
+
+  /// Whether geometric relationship managers were already attached
+  bool _geometric_rms_attached;
 
   bool _profiling = false;
 
