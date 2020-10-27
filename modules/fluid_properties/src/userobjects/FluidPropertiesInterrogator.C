@@ -86,7 +86,7 @@ FluidPropertiesInterrogator::execute()
 
     if (_json)
     {
-      moosecontrib::Json::Value json;
+      nlohmann::json json;
 
       auto & json_2phase = json["2-phase"];
       buildJSON2Phase(json_2phase, pars_2phase);
@@ -114,7 +114,7 @@ FluidPropertiesInterrogator::execute()
 
     if (_json)
     {
-      moosecontrib::Json::Value json;
+      nlohmann::json json;
 
       auto & json_2phase = json["2-phase"];
       buildJSON2Phase(json_2phase, pars_2phase);
@@ -147,7 +147,7 @@ FluidPropertiesInterrogator::execute()
     InputParameters pars_mixture = computeVaporMixture(true);
     if (_json)
     {
-      moosecontrib::Json::Value json;
+      nlohmann::json json;
       buildJSONVaporMixture(json, pars_mixture);
 
       Moose::out << "**START JSON DATA**\n";
@@ -163,7 +163,7 @@ FluidPropertiesInterrogator::execute()
 
     if (_json)
     {
-      moosecontrib::Json::Value json;
+      nlohmann::json json;
 
       buildJSON1Phase(json, pars_1phase);
 
@@ -480,8 +480,7 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
 }
 
 void
-FluidPropertiesInterrogator::buildJSON1Phase(moosecontrib::Json::Value & json,
-                                             const InputParameters & params)
+FluidPropertiesInterrogator::buildJSON1Phase(nlohmann::json & json, const InputParameters & params)
 {
   for (auto p : {"rho", "e", "p", "T", "v", "h", "s", "c", "mu", "cp", "cv", "k", "beta"})
     json["static"][p] = params.get<Real>(p);
@@ -505,8 +504,7 @@ FluidPropertiesInterrogator::buildJSON1Phase(moosecontrib::Json::Value & json,
 }
 
 void
-FluidPropertiesInterrogator::buildJSON2Phase(moosecontrib::Json::Value & json,
-                                             const InputParameters & params)
+FluidPropertiesInterrogator::buildJSON2Phase(nlohmann::json & json, const InputParameters & params)
 {
   json["p_critical"] = params.get<Real>("p_critical");
   for (auto p : {"T_sat", "p_sat", "h_lat", "sigma"})
@@ -515,7 +513,7 @@ FluidPropertiesInterrogator::buildJSON2Phase(moosecontrib::Json::Value & json,
 }
 
 void
-FluidPropertiesInterrogator::buildJSONVaporMixture(moosecontrib::Json::Value & json,
+FluidPropertiesInterrogator::buildJSONVaporMixture(nlohmann::json & json,
                                                    const InputParameters & params)
 {
   for (auto p : {"p", "T", "rho", "e", "v", "h", "c", "mu", "cp", "cv", "k"})

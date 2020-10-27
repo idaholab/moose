@@ -217,7 +217,7 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem && _current_direction == FROM_MULTIAPP)
-    from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
+    from_adjuster = from_problem->getPostprocessorValueByName(from_postprocessor);
   else
     from_adjuster = 0;
 
@@ -247,7 +247,7 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
   if (_current_direction == TO_MULTIAPP)
   {
     to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
-    to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+    to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
   }
 
   auto & to_var = to_problem.getVariable(
@@ -338,7 +338,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
 {
   PostprocessorValue from_adjuster = 0;
   if (from_problem)
-    from_adjuster = from_problem->getPostprocessorValue(from_postprocessor);
+    from_adjuster = from_problem->getPostprocessorValueByName(from_postprocessor);
   else
     from_adjuster = 0;
 
@@ -367,7 +367,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
 
   // Now we should have the right adjuster based on the transfered solution
-  PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
+  const PostprocessorValue & to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
   if (MooseUtils::absoluteFuzzyLessEqual(to_adjuster, 0.))
     mooseError("To postprocessor has a zero value ");
 

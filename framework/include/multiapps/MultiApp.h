@@ -17,6 +17,8 @@
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
 
+#include "nlohmann/json.h"
+
 class MultiApp;
 class UserObject;
 class FEProblemBase;

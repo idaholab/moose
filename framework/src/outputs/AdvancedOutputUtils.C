@@ -33,6 +33,9 @@ OutputOnWarehouse::OutputOnWarehouse(const ExecFlagEnum & execute_on,
   if (parameters.have_parameter<ExecFlagEnum>("execute_vector_postprocessors_on"))
     _map.insert(std::make_pair("vector_postprocessors", execute_on));
 
+  if (parameters.have_parameter<ExecFlagEnum>("execute_reporters_on"))
+    _map.insert(std::make_pair("reporters", execute_on));
+
   if (parameters.have_parameter<ExecFlagEnum>("execute_input_on"))
     _map.insert(std::make_pair("input", MooseUtils::getDefaultExecFlagEnum()));
 
@@ -53,4 +56,5 @@ OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>(), _ha
   _map["scalars"] = OutputData();
   _map["postprocessors"] = OutputData();
   _map["vector_postprocessors"] = OutputData();
+  _map["reporters"] = OutputData();
 }

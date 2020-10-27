@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "json/json.h"
+#include "nlohmann/json.h"
 #include "MooseTypes.h"
 
 /**
@@ -480,7 +480,7 @@ protected:
   /// Database filename
   const FileName _filename;
   /// JSON data
-  moosecontrib::Json::Value _root;
+  nlohmann::json _root;
   /// List of basis (primary) species names read from database
   std::vector<std::string> _bs_names;
   /// List of secondary equilibrium species to read from database
@@ -511,4 +511,6 @@ protected:
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients
   std::map<std::string, GeochemistryNeutralSpeciesActivity> _neutral_species_activity;
+  // Helper for converting json node to Real from string, if needed
+  static Real getReal(const nlohmann::json & node);
 };

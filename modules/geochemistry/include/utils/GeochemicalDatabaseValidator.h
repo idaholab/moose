@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "json/json.h"
+#include "nlohmann/json.h"
 #include "MooseTypes.h"
 
 /**
@@ -18,7 +18,7 @@
 class GeochemicalDatabaseValidator
 {
 public:
-  GeochemicalDatabaseValidator(const FileName filename, const moosecontrib::Json::Value & db);
+  GeochemicalDatabaseValidator(const FileName filename, const nlohmann::json & db);
 
   /**
    * Validate the thermodynamic database
@@ -31,14 +31,14 @@ protected:
    * @param array array of values
    * @return true/false if the value can/cannot be converted to a Real
    */
-  bool isValueReal(const moosecontrib::Json::Value & value) const;
+  bool isValueReal(const nlohmann::json & value) const;
 
   /**
    * Check Json::Value array is comprised of Reals
    * @param array array of values
    * @param field database field name
    */
-  void checkArrayValues(const moosecontrib::Json::Value & array, const std::string field) const;
+  void checkArrayValues(const nlohmann::json & array, const std::string field) const;
 
   /**
    * Check array array values can be converted to Real
@@ -55,7 +55,7 @@ protected:
    * @param array array of values
    * @param field database field name
    */
-  void checkArraySize(const moosecontrib::Json::Value & array, const std::string field) const;
+  void checkArraySize(const nlohmann::json & array, const std::string field) const;
 
   /**
    * Check array is the correct size
@@ -172,7 +172,7 @@ protected:
   /// Database filename
   const FileName _filename;
   /// JSON database
-  const moosecontrib::Json::Value & _root;
+  const nlohmann::json & _root;
   /// Number of temperature points
   unsigned int _temperature_size;
 };

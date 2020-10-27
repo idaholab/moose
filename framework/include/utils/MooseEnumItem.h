@@ -12,9 +12,6 @@
 // STL includes
 #include <string>
 
-// Forward declarations
-class MooseApp;
-
 /**
  * Class for containing MooseEnum item information.
  */
@@ -100,4 +97,3 @@ private:
   /// The numeric value for item
   int _id;
 };
-

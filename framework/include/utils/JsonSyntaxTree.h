@@ -11,7 +11,7 @@
 
 #include "InputParameters.h"
 #include "FileLineInfo.h"
-#include "json/json.h"
+#include "nlohmann/json.h"
 #include <string>
 #include <vector>
 #include <utility>
@@ -60,7 +60,7 @@ public:
    * Get the root of the tree.
    * @return The top level Json::Value holding the tree.
    */
-  const moosecontrib::Json::Value & getRoot() const { return _root; }
+  const nlohmann::json & getRoot() const { return _root; }
 
   /**
    * Add an associated type to a block
@@ -80,19 +80,17 @@ protected:
 
   std::string prettyCppType(const std::string & cpp_type);
   std::string basicCppType(const std::string & cpp_type);
-  size_t
-  setParams(InputParameters * params, bool search_match, moosecontrib::Json::Value & all_params);
+  size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
 
   std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
   static std::vector<std::string> splitPath(const std::string & path);
-  moosecontrib::Json::Value &
-  getJson(const std::string & parent, const std::string & path, bool is_type);
-  moosecontrib::Json::Value & getJson(const std::string & path);
+  nlohmann::json & getJson(const std::string & parent, const std::string & path, bool is_type);
+  nlohmann::json & getJson(const std::string & path);
   std::pair<std::string, std::string> getObjectLabel(const std::string & obj) const;
   std::pair<std::string, std::string> getActionLabel(const std::string & action) const;
 
-  moosecontrib::Json::Value _root;
+  nlohmann::json _root;
   std::string _search;
 
   ///@{
@@ -101,4 +99,3 @@ protected:
   std::map<std::string, std::pair<std::string, std::string>> _object_label_map;
   ///@}
 };
-

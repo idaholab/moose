@@ -761,16 +761,42 @@ linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type 
 }
 
 std::vector<std::string>
-split(const std::string & str, const std::string & delimiter)
+split(const std::string & str, const std::string & delimiter, std::size_t max_count)
 {
   std::vector<std::string> output;
+  std::size_t count = 0;
   size_t prev = 0, pos = 0;
   do
   {
     pos = str.find(delimiter, prev);
     output.push_back(str.substr(prev, pos - prev));
     prev = pos + delimiter.length();
-  } while (pos != std::string::npos);
+    count += 1;
+  } while (pos != std::string::npos && count < max_count);
+
+  if (pos != std::string::npos)
+    output.push_back(str.substr(prev));
+
+  return output;
+}
+
+std::vector<std::string>
+rsplit(const std::string & str, const std::string & delimiter, std::size_t max_count)
+{
+  std::vector<std::string> output;
+  std::size_t count = 0;
+  size_t prev = str.length(), pos = str.length();
+  do
+  {
+    pos = str.rfind(delimiter, prev);
+    output.insert(output.begin(), str.substr(pos + delimiter.length(), prev - pos));
+    prev = pos - delimiter.length();
+    count += 1;
+  } while (pos != std::string::npos && pos > 0 && count < max_count);
+
+  if (pos != std::string::npos)
+    output.insert(output.begin(), str.substr(0, pos));
+
   return output;
 }
 

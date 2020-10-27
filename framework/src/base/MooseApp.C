@@ -760,7 +760,7 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(search);
     _parser.buildJsonSyntaxTree(tree);
 
-    Moose::out << "**START JSON DATA**\n" << tree.getRoot() << "\n**END JSON DATA**\n";
+    Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
   else if (getParam<bool>("syntax"))
@@ -1185,6 +1185,9 @@ MooseApp::registerRestartableData(const std::string & name,
   auto & data_ref =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
+  // https://en.cppreference.com/w/cpp/container/unordered_map/emplace
+  // The element may be constructed even if there already is an element with the key in the
+  // container, in which case the newly constructed element will be destroyed immediately.
   auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
 
   // Does the storage for this data already exist?

@@ -50,7 +50,6 @@
   [./csv_reader]
     type = CSVReader
     csv_file = point_value_file.csv
-    execute_on = initial
   [../]
 []
 

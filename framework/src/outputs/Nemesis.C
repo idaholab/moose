@@ -88,7 +88,7 @@ Nemesis::outputPostprocessors()
   for (const auto & name : pps)
   {
     _global_names.push_back(name);
-    _global_values.push_back(_problem_ptr->getPostprocessorValue(name));
+    _global_values.push_back(_problem_ptr->getPostprocessorValueByName(name));
   }
 }
 

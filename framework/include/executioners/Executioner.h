@@ -16,6 +16,8 @@
 #include "PerfGraphInterface.h"
 #include "FEProblemSolve.h"
 #include "PicardSolve.h"
+#include "Reporter.h"
+#include "ReporterInterface.h"
 
 // System includes
 #include <string>
@@ -30,6 +32,8 @@ InputParameters validParams<Executioner>();
  * Executioners are objects that do the actual work of solving your problem.
  */
 class Executioner : public MooseObject,
+                    private Reporter,          // see addAttributeReporter
+                    private ReporterInterface, // see addAttributeReporter
                     public UserObjectInterface,
                     public PostprocessorInterface,
                     public Restartable,

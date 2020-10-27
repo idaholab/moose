@@ -3,6 +3,10 @@
 The VectorPostprocessors (VPP) System is designed to compute multiple related values each time it is executed.  It can be thought of as a Postprocessor that outputs multiple values. For example, if you'd like to sample a solution field across a line, a VPP is a good choice
 (See [PointValueSampler](PointValueSampler.md)).  In addition to outputting the values along the line a VPP can actually output multiple vectors simultaneously.  Each vector is given a name, which is the column name.  Together, all of the vectors a VPP outputs are output in one CSV file (usually per-timestep).
 
+!alert note Consider using a Reporter Object
+The [Reporters/index.md] is a newer, more flexible system for computing aggregate values. It is recommended
+that new objects for aggregate calculations use the Reporter system.
+
 ## Design
 
 The VPP system builds off from MOOSE's [UserObject](/UserObjects/index.md) system. Each VPP contains the full interface of a UserObject but
@@ -36,9 +40,9 @@ files for each invocation. The form of the output is as follows:
 ```
 
 In some cases however, a VPP may be accumulating information in time. For example, a user may wish to track values at several locations
-over time. The output might consist of the coordinates of those positions and the sampled value. In such a scenario, the default seperate
+over time. The output might consist of the coordinates of those positions and the sampled value. In such a scenario, the default separate
 file output may be cumbersome as each file would effectively have a single line so a script to aggregate the information from all of the
-seperate output files may need to be used. Instead, MOOSE supports an option, which may be of use in these cases:
+separate output files may need to be used. Instead, MOOSE supports an option, which may be of use in these cases:
 
 ```
 contains_complete_history = true

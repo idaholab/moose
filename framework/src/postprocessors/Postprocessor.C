@@ -9,6 +9,8 @@
 
 #include "Postprocessor.h"
 #include "UserObject.h"
+#include "ReporterName.h"
+#include "ReporterContext.h"
 
 defineLegacyParams(Postprocessor);
 

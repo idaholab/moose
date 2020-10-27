@@ -23,25 +23,20 @@ SteadyWithPicardCheck::validParams()
 }
 
 SteadyWithPicardCheck::SteadyWithPicardCheck(const InputParameters & parameters)
-  : Steady(parameters), _pp_step_tol(getParam<Real>("pp_step_tol"))
+  : Steady(parameters),
+    _pp_step_tol(getParam<Real>("pp_step_tol")),
+    _pp_value(getPostprocessorValue("pp_name"))
 {
-}
-
-void
-SteadyWithPicardCheck::init()
-{
-  _pp_value = &getPostprocessorValue("pp_name");
-  Steady::init();
 }
 
 bool
 SteadyWithPicardCheck::augmentedPicardConvergenceCheck() const
 {
-  Real rel_err = std::abs((*_pp_value - _pp_value_old) / *_pp_value);
+  Real rel_err = std::abs((_pp_value - _pp_value_old) / _pp_value);
 
   std::ostringstream os;
   os << std::setprecision(10);
-  os << " Old: " << _pp_value_old << " New: " << *_pp_value;
+  os << " Old: " << _pp_value_old << " New: " << _pp_value;
   os << std::scientific << std::setprecision(3) << " Error: " << rel_err;
   _console << COLOR_MAGENTA << os.str() << COLOR_DEFAULT << std::endl;
   if (rel_err < _pp_step_tol)
@@ -54,5 +49,5 @@ void
 SteadyWithPicardCheck::preSolve()
 {
   Steady::preSolve();
-  _pp_value_old = *_pp_value;
+  _pp_value_old = _pp_value;
 }

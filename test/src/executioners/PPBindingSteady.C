@@ -34,11 +34,12 @@ void
 PPBindingSteady::init()
 {
   Steady::init();
+  const PostprocessorName & pp_name = getParam<PostprocessorName>("postprocessor");
 
   // check if the references obtained during construction point to the right data late in init
-  if (((&_pp) != &getPostprocessorValue("postprocessor")) ||
-      ((&_pp_old) != &getPostprocessorValueOld("postprocessor")) ||
-      ((&_pp_older) != &getPostprocessorValueOlder("postprocessor")))
+  if (((&_pp) != &_problem.getPostprocessorValueByName(pp_name)) ||
+      ((&_pp_old) != &_problem.getPostprocessorValueByName(pp_name, 1)) ||
+      ((&_pp_older) != &_problem.getPostprocessorValueByName(pp_name, 2)))
     mooseError("Postprocessor binding in executioner is wrong");
   else
     _console << "Postprocessor binding is OK" << std::endl;

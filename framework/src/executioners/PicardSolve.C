@@ -114,10 +114,8 @@ PicardSolve::PicardSolve(Executioner * ex)
     _has_picard_norm(!getParam<bool>("disable_picard_residual_norm_check")),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
-    _picard_custom_pp(
-        isParamValid("picard_custom_pp")
-            ? &_problem.getPostprocessorValue(getParam<PostprocessorName>("picard_custom_pp"))
-            : nullptr),
+    _picard_custom_pp(isParamValid("picard_custom_pp") ? &getPostprocessorValue("picard_custom_pp")
+                                                       : nullptr),
     _custom_rel_tol(getParam<Real>("custom_rel_tol")),
     _custom_abs_tol(getParam<Real>("custom_abs_tol")),
     _picard_force_norms(getParam<bool>("picard_force_norms")),

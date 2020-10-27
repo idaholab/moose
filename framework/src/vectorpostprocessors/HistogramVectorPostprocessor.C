@@ -34,23 +34,16 @@ HistogramVectorPostprocessor::HistogramVectorPostprocessor(const InputParameters
     _vpp_name(getParam<VectorPostprocessorName>("vpp")),
     _num_bins(getParam<unsigned int>("num_bins"))
 {
+  const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
+  for (const auto & vec_name : vpp.getVectorNames())
+    _histogram_data[vec_name] = {&declareVector(vec_name + "_lower"),
+                                 &declareVector(vec_name + "_upper"),
+                                 &declareVector(vec_name)};
 }
 
 void
 HistogramVectorPostprocessor::initialize()
 {
-  const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
-
-  // Add vectors for each column, the reason for the extra logic here is that the columns a VPP
-  // produces can change
-  for (const auto & the_pair : vpp_vectors)
-  {
-    const auto & name = the_pair.first;
-
-    if (_histogram_data.find(name) == _histogram_data.end())
-      _histogram_data[name] = {
-          &declareVector(name + "_lower"), &declareVector(name + "_upper"), &declareVector(name)};
-  }
 }
 
 void
@@ -58,17 +51,13 @@ HistogramVectorPostprocessor::execute()
 {
   if (processor_id() == 0) // Only compute on processor 0
   {
-    const auto & vpp_vectors = _fe_problem.getVectorPostprocessorVectors(_vpp_name);
-
-    // For each value vector compute the histogram
-    for (auto & the_pair : vpp_vectors)
+    const VectorPostprocessor & vpp = getUserObjectByName<VectorPostprocessor>(_vpp_name);
+    for (const auto & vec_name : vpp.getVectorNames())
     {
-      const auto & name = the_pair.first;
-      const auto & values = *the_pair.second.current;
+      const auto & values = _fe_problem.getVectorPostprocessorValueByName(_vpp_name, vec_name);
 
-      mooseAssert(_histogram_data.count(name), "Error retrieving VPP vector");
-      auto & histo_data = _histogram_data.at(name);
-
+      mooseAssert(_histogram_data.count(vec_name), "Error retrieving VPP vector");
+      auto & histo_data = _histogram_data.at(vec_name);
       computeHistogram(values, histo_data);
     }
   }

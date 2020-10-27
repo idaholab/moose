@@ -34,7 +34,6 @@ class FunctionParserBase
 // Forward declarations
 class Action;
 class InputParameters;
-class MooseApp;
 class MooseEnum;
 class MooseObject;
 class MultiMooseEnum;
@@ -1551,6 +1550,7 @@ template <>
 void InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/,
                                                                 MaterialPropertyName & l_value,
                                                                 const int & r_value);
+
 template <>
 void InputParameters::setHelper<std::vector<PostprocessorName>>(const std::string & name);
 

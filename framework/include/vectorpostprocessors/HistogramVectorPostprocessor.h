@@ -32,7 +32,6 @@ public:
   static InputParameters validParams();
 
   HistogramVectorPostprocessor(const InputParameters & parameters);
-
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -70,4 +69,3 @@ protected:
   /// The VPP vectors that will hold the Histogram for each column
   std::map<std::string, HistoData> _histogram_data;
 };
-

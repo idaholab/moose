@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#11323'
+  design = 'JSONOutput.md'
+  [basic]
+    type = CheckFiles
+    input = json.i
+    check_files = json_out.json
+
+    requirement = "The system shall support JSON output for data."
+  []
+[]

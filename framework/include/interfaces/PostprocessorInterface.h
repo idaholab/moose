@@ -52,11 +52,11 @@ public:
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
   const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                   unsigned int index = 0);
+                                                   unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOld(const std::string & name,
-                                                      unsigned int index = 0);
+                                                      unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOlder(const std::string & name,
-                                                        unsigned int index = 0);
+                                                        unsigned int index = 0) const;
   // doco-normal-methods-end
 
   ///@}
@@ -74,9 +74,9 @@ public:
    *
    * see getPostprocessorValue getPostprocessorValueOld getPostprocessorValueOlder
    */
-  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
-  const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
-  const PostprocessorValue & getPostprocessorValueOlderByName(const PostprocessorName & name);
+  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name) const;
+  const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name) const;
+  const PostprocessorValue & getPostprocessorValueOlderByName(const PostprocessorName & name) const;
   ///@}
 
   ///@{
@@ -85,11 +85,11 @@ public:
    * @param name The name of the postprocessor parameter
    * @return A const reference to the default value
    */
-  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name);
+  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name) const;
   ///@}
 
   /**
-   * Determine if the Postprocessor exists
+   * Determine if the Postprocessor data exists
    * @param name The name of the Postprocessor parameter
    * @param index The index of the Postprocessor
    * @return True if the Postprocessor exists
@@ -99,13 +99,28 @@ public:
   bool hasPostprocessor(const std::string & name, unsigned int index = 0) const;
 
   /**
-   * Determine if the Postprocessor exists
+   * Determine if the Postprocessor data exists
    * @param name The name of the Postprocessor
    * @return True if the Postprocessor exists
    *
    * @see hasPostprocessor getPostprocessorValueByName
    */
-  bool hasPostprocessorByName(const PostprocessorName & name);
+  bool hasPostprocessorByName(const PostprocessorName & name) const;
+
+  /**
+   * Determine if the Postprocessor object exists
+   * @param name The name of the Postprocessor parameter
+   * @param index The index of the Postprocessor
+   * @return True if the Postprocessor exists
+   */
+  bool hasPostprocessorObject(const std::string & name, unsigned int index = 0) const;
+
+  /**
+   * Determine if the Postprocessor object exists
+   * @param name The name of the Postprocessor
+   * @return True if the Postprocessor exists
+   */
+  bool hasPostprocessorObjectByName(const PostprocessorName & name) const;
 
   /**
    * Returns number of Postprocessors coupled under parameter name
@@ -129,4 +144,13 @@ private:
 
   /// Reference the the FEProblemBase class
   FEProblemBase & _pi_feproblem;
+
+  /// Extract the value using parameter name
+  const PostprocessorValue & getPostprocessorValueHelper(const std::string & name,
+                                                         unsigned int index,
+                                                         std::size_t t_index) const;
+
+  /// Extract the value using stored name
+  const PostprocessorValue & getPostprocessorValueByNameHelper(const PostprocessorName & name,
+                                                               std::size_t t_index) const;
 };

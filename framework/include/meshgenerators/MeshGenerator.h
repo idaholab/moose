@@ -140,7 +140,7 @@ MeshGenerator::declareMeshProperty(const std::string & data_name)
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.registerRestartableData(
       full_name, std::move(data_ptr), 0, false, MooseApp::MESH_META_DATA));
 
-  return restartable_data_ref.get();
+  return restartable_data_ref.set();
 }
 
 template <typename T>

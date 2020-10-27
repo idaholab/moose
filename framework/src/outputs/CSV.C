@@ -119,6 +119,13 @@ CSV::outputVectorPostprocessors()
   _write_vector_table = true;
 }
 
+void
+CSV::outputReporters()
+{
+  TableOutput::outputReporters();
+  _write_all_table = true;
+}
+
 std::string
 CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
                                     bool include_time_step,
@@ -160,8 +167,6 @@ CSV::output(const ExecFlagType & type)
     _all_data_table.printCSV(filename(), 1, _align);
   }
 
-  const auto & vpp_data = _problem_ptr->getVectorPostprocessorData();
-
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table)
   {
@@ -180,8 +185,10 @@ CSV::output(const ExecFlagType & type)
       if (_sort_columns)
         it.second.sortColumns();
 
-      auto include_time_suffix = !vpp_data.containsCompleteHistory(vpp_name);
-      auto is_distributed = vpp_data.isDistributed(vpp_name);
+      const VectorPostprocessor & vpp_obj =
+          _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
+      auto include_time_suffix = !vpp_obj.containsCompleteHistory();
+      auto is_distributed = vpp_obj.isDistributed();
 
       if (is_distributed || processor_id() == 0)
       {

@@ -20,7 +20,7 @@ SONDefinitionFormatter::SONDefinitionFormatter() : _spaces(2), _level(0) {}
 // object then add root blocks recursively and return constructed stream's string //
 // ****************************************************************************** //
 std::string
-SONDefinitionFormatter::toString(const JsonVal & root)
+SONDefinitionFormatter::toString(const nlohmann::json & root)
 {
 
   const std::map<std::string, std::string> json_path_regex_replacement_map = {
@@ -30,20 +30,23 @@ SONDefinitionFormatter::toString(const JsonVal & root)
       {"/parameters/", "/"},
       {"/subblocks/", "/"}};
 
-  for (const auto & type : root["global"]["associated_types"].getMemberNames())
-    for (const auto & path_iter : root["global"]["associated_types"][type])
+  for (const auto & el : root["global"]["associated_types"].items())
+  {
+    const auto & type = el.key();
+    for (const auto & el_path : el.value().items())
     {
-      std::string path = path_iter.asString();
+      std::string path = el_path.value();
       for (const auto & map_iter : json_path_regex_replacement_map)
         pcrecpp::RE(map_iter.first).GlobalReplace(map_iter.second, &path);
       _assoc_types_map[type].push_back(path);
     }
+  }
 
   _global_params = root["global"]["parameters"];
   _stream.clear();
   _stream.str("");
-  for (const auto & name : root["blocks"].getMemberNames())
-    addBlock(name, root["blocks"][name]);
+  for (const auto & el : root["blocks"].items())
+    addBlock(el.key(), el.value());
   return _stream.str();
 }
 
@@ -62,13 +65,12 @@ SONDefinitionFormatter::addLine(const std::string & line)
 // ****************************************************************************** //
 void
 SONDefinitionFormatter::addBlock(const std::string & block_name,
-                                 const JsonVal & block,
+                                 const nlohmann::json & block,
                                  bool is_typeblock,
                                  const std::string & parent_name,
-                                 const JsonVal & parameters_in,
-                                 const JsonVal & subblocks_in)
+                                 const nlohmann::json & parameters_in,
+                                 const nlohmann::json & subblocks_in)
 {
-
   // open block with "_type" appended to the name if this is a TypeBlock because the
   // parser appends "_type" to the name of blocks with a "type=" parameter specified
   addLine("'" + block_name + (is_typeblock ? "_type" : "") + "'{");
@@ -99,7 +101,7 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
     addLine("InputDefault=\"insert_name_here\"");
 
   // add Description of block if it exists
-  std::string description = block["description"].asString();
+  std::string description = block.contains("description") ? block["description"] : "";
   pcrecpp::RE("\"").GlobalReplace("'", &description);
   pcrecpp::RE("[\r\n]").GlobalReplace(" ", &description);
   if (!description.empty())
@@ -139,31 +141,43 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // second : add or overwrite with any parameter inheritance
   // third  : add or overwrite with any local RegularParameters
   // fourth : add or overwrite with any local ActionParameters
-  JsonVal parameters = _global_params;
-  for (const auto & name : parameters_in.getMemberNames())
-    parameters[name] = parameters_in[name];
-  for (const auto & name : block["parameters"].getMemberNames())
-    parameters[name] = block["parameters"][name];
-  for (const auto & act : block["actions"].getMemberNames())
-    for (const auto & param : block["actions"][act]["parameters"].getMemberNames())
-      parameters[param] = block["actions"][act]["parameters"][param];
+  nlohmann::json parameters = _global_params;
+  for (const auto & el : parameters_in.items())
+    parameters[el.key()] = el.value();
+  if (block.contains("parameters"))
+  {
+    for (const auto & el : block["parameters"].items())
+      parameters[el.key()] = el.value();
+  }
+
+  if (block.contains("actions"))
+  {
+    for (const auto & el : block["actions"].items())
+      if (el.value().contains("parameters"))
+        for (const auto & param_el : el.value()["parameters"].items())
+          parameters[param_el.key()] = param_el.value();
+  }
 
   // store NormalBlock children ---
   // first  : start with any NormalBlock inheritance passed in as a base
   // second : add or overwrite these with any local NormalBlock children
   // third  : add star named child block if it exists
-  JsonVal subblocks = subblocks_in;
-  for (const auto & name : block["subblocks"].getMemberNames())
-    subblocks[name] = block["subblocks"][name];
-  if (block.isMember("star"))
+  nlohmann::json subblocks = subblocks_in;
+  if (block.contains("subblocks"))
+  {
+    for (const auto & el : block["subblocks"].items())
+      subblocks[el.key()] = el.value();
+  }
+  if (block.contains("star"))
     subblocks["*"] = block["star"];
 
   // store TypeBlock children ---
   // first  : start with ["types"] child block as a base
   // second : add ["subblock_types"] child block
-  JsonVal typeblocks = block["types"];
-  for (const auto & name : block["subblock_types"].getMemberNames())
-    typeblocks[name] = block["subblock_types"][name];
+  nlohmann::json typeblocks = block.contains("types") ? block["types"] : nlohmann::json();
+  if (block.contains("subblock_types"))
+    for (const auto & el : block["subblock_types"].items())
+      typeblocks[el.key()] = el.value();
 
   // add parameters ---
   // if this block has a "type=" parameter with a specified default "type=" name and
@@ -173,26 +187,36 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // second : add or overwrite with default ["types"] child block's ActionParameters
   // third  : add or overwrite with parameters that were stored above for this block
   // fourth : either add newly stored parameters or add previously stored parameters
-  if (parameters.isMember("type") && parameters["type"].isMember("default") &&
-      block["types"].isMember(parameters["type"]["default"].asString()))
+  if (parameters.contains("type") && parameters["type"].contains("default") &&
+      block.contains("types") &&
+      block["types"].contains(nlohmann::to_string(parameters["type"]["default"])))
   {
-    std::string type_default = parameters["type"]["default"].asString();
-    const JsonVal & default_block = block["types"][type_default];
-    JsonVal default_child_params = default_block["parameters"];
-    const JsonVal & default_actions = default_block["actions"];
-    for (const auto & act : default_actions.getMemberNames())
-      for (const auto & param : default_actions[act]["parameters"].getMemberNames())
-        default_child_params[param] = default_actions[act]["parameters"][param];
-    for (const auto & name : parameters.getMemberNames())
-      default_child_params[name] = parameters[name];
-    addParameters(default_child_params);
+    std::string type_default = nlohmann::to_string(parameters["type"]["default"]);
+    const nlohmann::json & default_block = block["types"][type_default];
+    if (default_block.contains("parameters"))
+    {
+      nlohmann::json default_child_params = default_block["parameters"];
+      if (default_block.contains("actions"))
+      {
+        const nlohmann::json & default_actions = default_block["actions"];
+        for (const auto & el : default_actions.items())
+        {
+          if (el.value().contains("parameters"))
+            for (const auto & param_el : el.value()["parameters"].items())
+              default_child_params[param_el.key()] = param_el.value();
+        }
+      }
+      for (const auto & el : parameters.items())
+        default_child_params[el.key()] = el.value();
+      addParameters(default_child_params);
+    }
   }
   else
     addParameters(parameters);
 
   // add previously stored NormalBlocks children recursively
-  for (const auto & name : subblocks.getMemberNames())
-    addBlock(name, subblocks[name]);
+  for (const auto & el : subblocks.items())
+    addBlock(el.key(), el.value());
 
   // close block now because the parser stores TypeBlock children at this same level
   _level--;
@@ -203,8 +227,8 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
   // children so that they may each also add them and pass in the name of this block
   // as well so that all TypeBlock children can add a rule ensuring that their block
   // [./declarator] is the name of this parent block unless this block is named star
-  for (const auto & name : typeblocks.getMemberNames())
-    addBlock(name, typeblocks[name], true, block_name, parameters, subblocks);
+  for (const auto & el : typeblocks.items())
+    addBlock(el.key(), el.value(), true, block_name, parameters, subblocks);
 }
 
 // ***************************** addParameters ********************************** //
@@ -226,13 +250,13 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 // - parameter's value :: add InputDefault
 // ****************************************************************************** //
 void
-SONDefinitionFormatter::addParameters(const JsonVal & params)
+SONDefinitionFormatter::addParameters(const nlohmann::json & params)
 {
 
-  for (const auto & name : params.getMemberNames())
+  for (const auto & el : params.items())
   {
-
-    JsonVal param = params[name];
+    auto & name = el.key();
+    auto & param = el.value();
 
     // lambda to calculate relative path from the current level to the document root
     auto backtrack = [](int level) {
@@ -243,8 +267,8 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     };
 
     // capture the cpp_type and basic_type and strip off any unnecessary information
-    std::string cpp_type = param["cpp_type"].asString();
-    std::string basic_type = param["basic_type"].asString();
+    std::string cpp_type = param["cpp_type"];
+    std::string basic_type = param["basic_type"];
     bool is_array = false;
     if (cpp_type == "FunctionExpression" || cpp_type == "FunctionName" ||
         basic_type.compare(0, 6, "Array:") == 0)
@@ -255,11 +279,18 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     // *** ChildAtLeastOne of parameter
     // if parameter is required and no default exists then outside its level specify
     //   ChildAtLeastOne = [ "backtrack/GlobalParams/name/value" "name/value" ]
-    bool required = param["required"].asBool();
-    std::string def = MooseUtils::trim(param["default"].asString());
-    if (required && def.empty())
-      addLine("ChildAtLeastOne=[ \"" + backtrack(_level) + "GlobalParams/" + name +
-              "/value\"   \"" + name + "/value\"" + " ]");
+    auto def_ptr = param.find("default");
+    std::string def;
+    if (def_ptr != param.end())
+      def = def_ptr->is_string() ? def_ptr->get<std::string>() : nlohmann::to_string(*def_ptr);
+    def = MooseUtils::trim(def);
+    if (param.contains("required"))
+    {
+      bool required = param["required"];
+      if (required && def.empty())
+        addLine("ChildAtLeastOne=[ \"" + backtrack(_level) + "GlobalParams/" + name +
+                "/value\"   \"" + name + "/value\"" + " ]");
+    }
 
     // *** open parameter
     addLine("'" + name + "'" + "{");
@@ -278,11 +309,14 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     addLine("InputName=\"" + name + "\"");
 
     // *** Description of parameter
-    std::string description = param["description"].asString();
-    pcrecpp::RE("\"").GlobalReplace("'", &description);
-    pcrecpp::RE("[\r\n]").GlobalReplace(" ", &description);
-    if (!description.empty())
-      addLine("Description=\"" + description + "\"");
+    if (param.contains("description"))
+    {
+      std::string description = param["description"];
+      pcrecpp::RE("\"").GlobalReplace("'", &description);
+      pcrecpp::RE("[\r\n]").GlobalReplace(" ", &description);
+      if (!description.empty())
+        addLine("Description=\"" + description + "\"");
+    }
 
     // *** MinOccurs / MaxOccurs of parameter
     addLine("MinOccurs=0");
@@ -309,11 +343,11 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
       addLine("ValEnums=[ true false 1 0 ]");
     else
     {
-      std::string options = param["options"].asString();
+      std::string options = param["options"];
       if (!options.empty())
       {
         pcrecpp::RE(" ").GlobalReplace("\" \"", &options);
-        if (!param["out_of_range_allowed"].asBool())
+        if (!param["out_of_range_allowed"])
           addLine("ValEnums=[ \"" + options + "\" ]");
         else
           addLine("InputChoices=[ \"" + options + "\" ]");
@@ -326,8 +360,12 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     // paths associated with the cpp_type in the map that was built before traversal
     // then add those paths relative to this node here as well
     std::string paths;
-    for (const auto & reserved : param["reserved_values"])
-      paths += "EXTRA:\"" + reserved.asString() + "\" ";
+    if (param.contains("reserved_values"))
+    {
+      for (const auto & reserved : param["reserved_values"])
+        paths += "EXTRA:" + nlohmann::to_string(reserved) + " ";
+    }
+
     if (cpp_type == "FunctionName")
       paths += "EXTRA:\"ExpressionsAreOkay\" ";
     for (const auto & path : _assoc_types_map[cpp_type])

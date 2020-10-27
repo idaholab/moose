@@ -240,7 +240,7 @@ const ScatterVectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
     const std::string & name, const std::string & vector_name)
 {
-  getUserObjectBaseByName(_pars.get<PostprocessorName>(name));
+  getUserObjectBaseByName(name);
   return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
 }
 

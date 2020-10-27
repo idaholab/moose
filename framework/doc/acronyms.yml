@@ -2,6 +2,7 @@ AD: automatic differentiation
 API: Application Programming Interface
 BVP: boundary value problem
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
+CSV: comma-separated values
 DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
 DOF: degree-of-freedom
@@ -15,6 +16,7 @@ HPC: High Performance Computing
 I/O: Input/Output
 INL: Idaho National Laboratory
 JFNK: Jacobian-Free Newton-Krylov
+JSON: JavaScript Object Notation
 LGPL: GNU Lesser General Public License
 MMS: Method of Manufactured Solutions
 MWR: Method of Mean Weighted Residuals

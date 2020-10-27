@@ -11,11 +11,15 @@
 
 // MOOSE includes
 #include "DataIO.h"
+#include "JsonIO.h"
 
 // C++ includes
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+
+// JSON object
+#include "nlohmann/json.h"
 
 // Forward declarations
 class RestartableDataValue;
@@ -60,6 +64,10 @@ public:
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 
+  // save/load to JSON object
+  virtual void toJSON(nlohmann::json & json) const = 0;
+  virtual void fromJSON(const nlohmann::json & json) = 0;
+
 protected:
   /// The full (unique) name of this particular piece of data.
   std::string _name;
@@ -89,8 +97,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  T & get() { return *_value_ptr; }
-  // const T & get() const { return *_value_ptr; } // TODO: This should be used; above deprecated
+  T & get()
+  {
+    mooseDeprecated("Use set() method for non-const access");
+    return *_value_ptr;
+  }
+  const T & get() const { return *_value_ptr; }
 
   /**
    * @returns a writable reference to the parameter value.
@@ -116,6 +128,16 @@ public:
    * Load the RestartableData from a binary stream
    */
   virtual void load(std::istream & stream) override;
+
+  /**
+   * Store the restartable data into a JSON object
+   */
+  virtual void toJSON(nlohmann::json & json) const override;
+
+  /**
+   * Load the restartable data into a JSON object
+   */
+  virtual void fromJSON(const nlohmann::json & json) override;
 
 private:
   /// Stored value.
@@ -152,6 +174,24 @@ inline void
 RestartableData<T>::load(std::istream & stream)
 {
   loadHelper(stream, *_value_ptr, _context);
+}
+
+template <typename T>
+inline void
+RestartableData<T>::toJSON(nlohmann::json & /*json*/) const
+{
+  // TODO: see JsonIO.h
+  // T & tmp = *_value_ptr;
+  // storeHelper(json, tmp, _context);
+}
+
+template <typename T>
+inline void
+RestartableData<T>::fromJSON(const nlohmann::json & /*json*/)
+{
+  // TODO: see JsonIO.h
+  // T & tmp = *_value_ptr;
+  // loadHelper(json, tmp, _context);
 }
 
 /**
