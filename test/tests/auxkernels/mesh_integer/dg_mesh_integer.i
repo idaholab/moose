@@ -31,7 +31,10 @@
 []
 
 [Variables]
-  [u][]
+  [u]
+    family = L2_LAGRANGE
+    order = FIRST
+  []
 []
 
 [Kernels]
@@ -48,6 +51,16 @@
     type = BodyForce
     variable = u
     function = 1
+  []
+[]
+
+[DGKernels]
+  [dg_diff]
+    type = DGDiffusion
+    variable = u
+    diff = dc
+    epsilon = -1
+    sigma = 6
   []
 []
 
