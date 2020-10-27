@@ -149,8 +149,7 @@ GapConductance::GapConductance(const InputParameters & parameters)
     _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
     _warnings(getParam<bool>("warnings")),
     _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
-    _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0))),
-    _subdomain_names(getParam<std::vector<SubdomainName>>("block"))
+    _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0)))
 {
   // set emissivity but allow legacy naming; legacy names are used if they
   // are present
