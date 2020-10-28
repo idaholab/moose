@@ -45,7 +45,7 @@ INSADStabilized3Eqn::computeQpProperties()
   INSADTauMaterialTempl<INSAD3Eqn>::computeQpProperties();
 
   auto dissipation_coefficient = _k[_qp] / (_rho[_qp] * _cp[_qp]);
-  auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
+  auto transient_part = _has_energy_transient ? 4. / (_dt * _dt) : 0.;
   _tau_energy[_qp] = _alpha / std::sqrt(transient_part +
                                         (2. * _velocity[_qp].norm() / _hmax) *
                                             (2. * _velocity[_qp].norm() / _hmax) +
@@ -60,7 +60,7 @@ INSADStabilized3Eqn::computeQpProperties()
   // advective
   _temperature_strong_residual[_qp] += _temperature_advective_strong_residual[_qp];
 
-  if (_has_transient)
+  if (_has_energy_transient)
     _temperature_strong_residual[_qp] += _temperature_td_strong_residual[_qp];
 
   if (_has_ambient_convection)

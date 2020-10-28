@@ -28,7 +28,6 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
   : INSADMaterial(parameters),
     _temperature(adCoupledValue("temperature")),
     _grad_temperature(adCoupledGradient("temperature")),
-    _temperature_dot(nullptr),
     _cp(getADMaterialProperty<Real>("cp_name")),
     _temperature_advective_strong_residual(
         declareADProperty<Real>("temperature_advective_strong_residual")),
@@ -36,9 +35,7 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
     _temperature_ambient_convection_strong_residual(
         declareADProperty<Real>("temperature_ambient_convection_strong_residual")),
     _temperature_source_strong_residual(
-        declareADProperty<Real>("temperature_source_strong_residual")),
-    _heat_source_var(nullptr),
-    _heat_source_function(nullptr)
+        declareADProperty<Real>("temperature_source_strong_residual"))
 {
 }
 
@@ -47,7 +44,8 @@ INSAD3Eqn::subdomainSetup()
 {
   INSADMaterial::subdomainSetup();
 
-  if (_has_transient)
+  if ((_has_energy_transient =
+           _object_tracker->get<bool>("has_energy_transient", _current_subdomain_id)))
     _temperature_dot = &adCoupledDot("temperature");
   else
     _temperature_dot = nullptr;
@@ -68,14 +66,20 @@ INSAD3Eqn::subdomainSetup()
   if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source", _current_subdomain_id)))
   {
     if (_object_tracker->isTrackerParamValid("heat_source_var", _current_subdomain_id))
+    {
       _heat_source_var = &_subproblem
                               .getStandardVariable(_tid,
                                                    _object_tracker->get<std::string>(
                                                        "heat_source_var", _current_subdomain_id))
                               .adSln();
+      _heat_source_function = nullptr;
+    }
     else if (_object_tracker->isTrackerParamValid("heat_source_function", _current_subdomain_id))
+    {
       _heat_source_function = &_fe_problem.getFunction(
           _object_tracker->get<FunctionName>("heat_source_function", _current_subdomain_id), _tid);
+      _heat_source_var = nullptr;
+    }
   }
   else
   {
@@ -98,7 +102,7 @@ INSAD3Eqn::computeQpProperties()
   _temperature_advective_strong_residual[_qp] =
       _rho[_qp] * _cp[_qp] * _velocity[_qp] * _grad_temperature[_qp];
 
-  if (_has_transient)
+  if (_has_energy_transient)
   {
     mooseAssert(_temperature_dot, "The temperature time derivative is null");
     _temperature_td_strong_residual[_qp] = _cp[_qp] * _rho[_qp] * (*_temperature_dot)[_qp];

@@ -40,7 +40,8 @@ INSADObjectTracker::validTrackerParams()
       "has_gravity",
       false,
       "Whether the simulation has a gravity force imposed on the momentum equation");
-  params.addParam<bool>("has_transient", false, "Whether the simulation is transient");
+  params.addParam<bool>("has_transient", false, "Whether the momentum equations are transient");
+  params.addParam<bool>("has_energy_transient", false, "Whether the energy equation is transient");
 
   addAmbientConvectionParams(params);
 

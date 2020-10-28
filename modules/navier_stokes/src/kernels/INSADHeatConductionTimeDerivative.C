@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSADHeatConductionTimeDerivative.h"
+#include "INSADObjectTracker.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", INSADHeatConductionTimeDerivative);
 
@@ -26,6 +28,12 @@ INSADHeatConductionTimeDerivative::INSADHeatConductionTimeDerivative(
   : ADTimeDerivative(parameters),
     _temperature_td_strong_residual(getADMaterialProperty<Real>("temperature_td_strong_residual"))
 {
+  // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
+  // don't need
+  auto & obj_tracker = const_cast<INSADObjectTracker &>(
+      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+  for (const auto block_id : blockIDs())
+    obj_tracker.set("has_energy_transient", true, block_id);
 }
 
 ADReal
