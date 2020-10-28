@@ -14,11 +14,11 @@
 | [Sedov blast wave](v_and_v/verification/sedov_blast_wave.md) | Sedov blast wave test problem |
 | [Sod shock tube](v_and_v/verification/sod_shock_tube.md) | Classic Sod shock tube test problem |
 | [Square wave](v_and_v/verification/square_wave.md) | Square wave problem |
-| [Stationary fluid](v_and_v/verification/stationary_fluid.md) | Steady-state solution is obtained under no-flow conditions |
+| [Stationary fluid](v_and_v/verification/stationary_fluid.md) | Steady-state solution obtained under no-flow conditions |
 | [Super sonic tube](v_and_v/verification/super_sonic_tube.md) | Super sonic tube |
 | [Water hammer](v_and_v/verification/water_hammer.md) | Water hammer test problem |
 | [Woodward-Colella blast wave](v_and_v/verification/woodward_colella_blast_wave.md) | Woodward-Colella blast wave problem |
 
 ## Validation Cases
 
-Validation cases are located in individual applications, because THM does not come with realistic fluid properties.
+Validation cases are located in individual applications because THM does not come with realistic fluid properties.
