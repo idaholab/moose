@@ -43,19 +43,21 @@ public:
    */
   virtual void computeElemNeighJacobian(Moose::DGJacobianType type) override;
 
+private:
   /**
    * Using the passed DGJacobian type, selects the correct test function and trial function spaces
    * and
    * jacobian block, and then calls computeQpOffDiagJacobian with the passed jvar
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               unsigned int jvar) override;
+                                               unsigned int jvar) override final;
 
+protected:
   /// Selects the correct Jacobian type and routine to call for the primary variable jacobian
-  virtual void computeElementOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeElementOffDiagJacobian(unsigned int jvar) override final;
 
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
-  virtual void computeNeighborOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeNeighborOffDiagJacobian(unsigned int jvar) override final;
 
   /// Computes the residual for the current side.
   virtual void computeResidual() override;

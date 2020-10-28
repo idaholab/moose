@@ -32,6 +32,11 @@ public:
 
 protected:
   /**
+   * compute the residuals for filling the Jacobian
+   */
+  virtual void computeResidualsForJacobian();
+
+  /**
    * Compute this IntegratedBC's contribution to the residual at the current quadrature point
    */
   virtual ADReal computeQpResidual() = 0;
@@ -65,6 +70,21 @@ protected:
 
   /// Whether this object is acting on the displaced mesh
   const bool _use_displaced_mesh;
+
+  /// Data members for holding residuals
+  ADReal _r;
+  std::vector<ADReal> _residuals;
+
+private:
+  /**
+   * Add the Jacobian contribution for the provided variable
+   */
+  void addJacobian(const MooseVariableFieldBase & jvar);
+
+  /**
+   * compute all the off-diagional Jacobian entries
+   */
+  void computeADOffDiagJacobian();
 };
 
 using ADIntegratedBC = ADIntegratedBCTempl<Real>;

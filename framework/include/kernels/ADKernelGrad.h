@@ -26,10 +26,10 @@ public:
   ADKernelGradTempl(const InputParameters & parameters);
 
   virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeADOffDiagJacobian() override;
 
 protected:
+  void computeResidualsForJacobian() override;
+
   /**
    * Called before forming the residual for an element
    */
@@ -63,4 +63,5 @@ protected:
   using ADKernelTempl<T>::_diag_save_in;
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
+  using ADKernelTempl<T>::_residuals;
 };

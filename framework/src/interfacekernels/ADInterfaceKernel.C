@@ -125,6 +125,8 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   const ADTemplateVariableTestValue<T> & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
 
+  std::vector<ADReal> residuals(test_space.size(), 0);
+
   unsigned int ivar, jvar;
 
   switch (type)
@@ -149,23 +151,34 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
       mooseError("Unknown DGJacobianType ", type);
   }
 
-  if (type == Moose::ElementElement)
-    prepareMatrixTag(_assembly, ivar, jvar);
-  else
-    prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
-
-  auto ad_offset =
-      Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
-
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-    {
-      DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
-      for (_j = 0; _j < loc_phi.size(); _j++)
-        _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-    }
+      residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
 
-  accumulateTaggedLocalMatrix();
+  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
+                           const std::vector<dof_id_type> &,
+                           const std::set<TagID> &) {
+    if (type == Moose::ElementElement)
+      prepareMatrixTag(_assembly, ivar, jvar);
+    else
+      prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
+
+    auto ad_offset =
+        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
+
+    for (_i = 0; _i < test_space.size(); _i++)
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
+
+    accumulateTaggedLocalMatrix();
+  };
+
+  _assembly.processDerivatives(residuals,
+                               (type == Moose::ElementElement || type == Moose::ElementNeighbor)
+                                   ? _var.dofIndices()
+                                   : _neighbor_var.dofIndicesNeighbor(),
+                               _matrix_tags,
+                               local_functor);
 }
 
 template <typename T>
@@ -194,14 +207,16 @@ void
 ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
                                                            unsigned int jvar)
 {
+  mooseAssert(type == Moose::ElementElement || type == Moose::NeighborNeighbor,
+              "With AD you should need one call per side");
+
   const ADTemplateVariableTestValue<T> & test_space =
-      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
-  const ADTemplateVariableTestValue<T> & loc_phi =
-      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+      type == Moose::ElementElement ? _test : _test_neighbor;
+  const ADTemplateVariableTestValue<T> & loc_phi = Moose::ElementElement ? _phi : _phi_neighbor;
 
   unsigned int ivar;
 
-  if (type == Moose::ElementElement || type == Moose::ElementNeighbor)
+  if (type == Moose::ElementElement)
   {
     ivar = _var.number();
     resid_type = Moose::Element;
@@ -212,25 +227,35 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
     resid_type = Moose::Neighbor;
   }
 
-  auto ad_offset =
-      Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
+  std::vector<ADReal> residuals(test_space.size(), 0);
 
-  if (type == Moose::ElementElement)
-    prepareMatrixTag(_assembly, ivar, jvar);
-  else
-    prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
 
-  // Prevent calling of Jacobian computation if jvar doesn't lie in the current block
-  if ((_local_ke.m() == test_space.size()) && (_local_ke.n() == loc_phi.size()))
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < test_space.size(); _i++)
-      {
-        DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
-        for (_j = 0; _j < loc_phi.size(); _j++)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
+  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
+                           const std::vector<dof_id_type> &,
+                           const std::set<TagID> &) {
+    if (type == Moose::ElementElement)
+      prepareMatrixTag(_assembly, ivar, jvar);
+    else
+      prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 
-  accumulateTaggedLocalMatrix();
+    auto ad_offset =
+        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
+
+    for (_i = 0; _i < test_space.size(); _i++)
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offset + _j];
+
+    accumulateTaggedLocalMatrix();
+  };
+
+  _assembly.processDerivatives(residuals,
+                               type == Moose::ElementElement ? _var.dofIndices()
+                                                             : _neighbor_var.dofIndicesNeighbor(),
+                               _matrix_tags,
+                               local_functor);
 }
 
 template <typename T>
@@ -250,23 +275,13 @@ ADInterfaceKernelTempl<T>::computeElementOffDiagJacobian(unsigned int jvar)
       !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
     return;
 
-  bool is_jvar_not_interface_var = true;
-  if (jvar == _var.number())
-  {
-    computeElemNeighJacobian(Moose::ElementElement);
-    is_jvar_not_interface_var = false;
-  }
-  if (jvar == _neighbor_var.number())
-  {
-    computeElemNeighJacobian(Moose::ElementNeighbor);
-    is_jvar_not_interface_var = false;
-  }
+  if (jvar != _var.number())
+    // We only need to do these computations a single time because AD computes all the derivatives
+    // at once
+    return;
 
-  if (is_jvar_not_interface_var)
-  {
-    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
-    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
-  }
+  // Again AD does Jacobians all at once so we only need to call with ElementElement
+  computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 }
 
 template <typename T>
@@ -286,23 +301,13 @@ ADInterfaceKernelTempl<T>::computeNeighborOffDiagJacobian(unsigned int jvar)
       !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
     return;
 
-  bool is_jvar_not_interface_var = true;
-  if (jvar == _var.number())
-  {
-    computeElemNeighJacobian(Moose::NeighborElement);
-    is_jvar_not_interface_var = false;
-  }
-  if (jvar == _neighbor_var.number())
-  {
-    computeElemNeighJacobian(Moose::NeighborNeighbor);
-    is_jvar_not_interface_var = false;
-  }
+  if (jvar != _neighbor_var.number())
+    // We only need to do these computations a single time because AD computes all the derivatives
+    // at once
+    return;
 
-  if (is_jvar_not_interface_var)
-  {
-    computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
-    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
-  }
+  // Again AD does Jacobians all at once so we only need to call with NeighborNeighbor
+  computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
 }
 
 // Explicitly instantiates the two versions of the ADInterfaceKernelTempl class

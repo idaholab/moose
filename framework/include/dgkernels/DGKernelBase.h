@@ -185,4 +185,6 @@ private:
 
   /// Check current element if it contains broken boundary
   bool excludeBoundary() const;
+
+  friend class ADDGKernel;
 };

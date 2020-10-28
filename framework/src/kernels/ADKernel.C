@@ -138,68 +138,7 @@ ADKernelTempl<T>::computeResidual()
 
 template <typename T>
 void
-ADKernelTempl<T>::computeJacobian()
-{
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
-
-  auto ad_offset =
-      Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
-
-  precalculateResidual();
-
-  if (_use_displaced_mesh)
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      {
-        DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
-        for (_j = 0; _j < _var.phiSize(); _j++)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
-  else
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      {
-        DualReal residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
-        for (_j = 0; _j < _var.phiSize(); _j++)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
-
-  accumulateTaggedLocalMatrix();
-
-  if (_has_diag_save_in && !_sys.computingScalingJacobian())
-  {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
-  }
-}
-
-template <typename T>
-void
-ADKernelTempl<T>::jacobianSetup()
-{
-  _my_elem = nullptr;
-}
-
-template <typename T>
-void
-ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
-{
-  if (_my_elem != _current_elem)
-  {
-    computeADOffDiagJacobian();
-    _my_elem = _current_elem;
-  }
-}
-
-template <typename T>
-void
-ADKernelTempl<T>::computeADOffDiagJacobian()
+ADKernelTempl<T>::computeResidualsForJacobian()
 {
   if (_residuals.size() != _test.size())
     _residuals.resize(_test.size(), 0);
@@ -219,34 +158,96 @@ ADKernelTempl<T>::computeADOffDiagJacobian()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test.size(); _i++)
         _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+}
 
-  auto & ce = _assembly.couplingEntries();
-  for (const auto & it : ce)
+template <typename T>
+void
+ADKernelTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
+{
+  unsigned int jvar = jvariable.number();
+
+  auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
+
+  prepareMatrixTag(_assembly, _var.number(), jvar);
+
+  for (_i = 0; _i < _test.size(); _i++)
+    for (_j = 0; _j < jvariable.phiSize(); _j++)
+      _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
+
+  accumulateTaggedLocalMatrix();
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::computeJacobian()
+{
+  computeResidualsForJacobian();
+
+  auto local_functor = [&](const std::vector<ADReal> &,
+                           const std::vector<dof_id_type> &,
+                           const std::set<TagID> &) { addJacobian(_var); };
+
+  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
-    MooseVariableFEBase & ivariable = *(it.first);
-    MooseVariableFEBase & jvariable = *(it.second);
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyways. Use "
+               "the tagging system instead.");
+#else
+    unsigned int rows = _local_ke.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+#endif
+  }
+}
 
-    // If ivar isn't this->_var, then continue
-    if (ivar != _var.number())
-      continue;
+template <typename T>
+void
+ADKernelTempl<T>::computeADOffDiagJacobian()
+{
+  computeResidualsForJacobian();
 
-    auto ad_offset =
-        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
+  auto local_functor =
+      [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &) {
+        auto & ce = _assembly.couplingEntries();
+        for (const auto & it : ce)
+        {
+          MooseVariableFEBase & ivariable = *(it.first);
+          MooseVariableFEBase & jvariable = *(it.second);
 
-    prepareMatrixTag(_assembly, ivar, jvar);
+          unsigned int ivar = ivariable.number();
 
-    if (_local_ke.m() != _test.size() || _local_ke.n() != jvariable.phiSize())
-      continue;
+          if (ivar != _var.number())
+            continue;
 
-    precalculateResidual();
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvariable.phiSize(); _j++)
-        _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
+          addJacobian(jvariable);
+        }
+      };
 
-    accumulateTaggedLocalMatrix();
+  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::jacobianSetup()
+{
+  _my_elem = nullptr;
+}
+
+template <typename T>
+void
+ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
+{
+  if (_my_elem != _current_elem)
+  {
+    computeADOffDiagJacobian();
+    _my_elem = _current_elem;
   }
 }
 

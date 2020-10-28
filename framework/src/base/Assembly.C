@@ -3626,15 +3626,9 @@ Assembly::addCachedJacobian()
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
     if (_sys.hasMatrix(i))
       for (MooseIndex(_cached_jacobian_rows[i]) j = 0; j < _cached_jacobian_rows[i].size(); j++)
-      {
-        const auto row = _cached_jacobian_rows[i][j];
-        auto value = _cached_jacobian_values[i][j];
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-        if (_scaling_vector)
-          value *= (*_scaling_vector)(row);
-#endif
-        _sys.getMatrix(i).add(row, _cached_jacobian_cols[i][j], value);
-      }
+        _sys.getMatrix(i).add(_cached_jacobian_rows[i][j],
+                              _cached_jacobian_cols[i][j],
+                              _cached_jacobian_values[i][j]);
 
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
   {

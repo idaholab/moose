@@ -87,7 +87,10 @@ template <typename T>
 void
 ADNodalBCTempl<T>::computeJacobian()
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = _var.number() * _sys.getMaxVarNDofsPerNode();
+#endif
+
   auto residual = computeQpResidual();
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
@@ -99,11 +102,17 @@ ADNodalBCTempl<T>::computeJacobian()
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
-          _fe_problem.assembly(0).cacheJacobian(
-              cached_rows[i],
-              cached_rows[i],
-              conversionHelper(residual, i).derivatives()[ad_offset + i],
-              tag);
+          _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
+                                                cached_rows[i],
+                                                conversionHelper(residual, i)
+                                                    .derivatives()[
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                                        cached_rows[i]
+#else
+                                                        ad_offset + i
+#endif
+          ],
+                                                tag);
 }
 
 template <typename T>
@@ -114,7 +123,9 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
     computeJacobian();
   else
   {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
     auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
+#endif
     auto residual = computeQpResidual();
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
@@ -129,11 +140,17 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
       if (_sys.hasMatrix(tag))
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
-            _fe_problem.assembly(0).cacheJacobian(
-                cached_rows[i],
-                cached_col,
-                conversionHelper(residual, i).derivatives()[ad_offset + i],
-                tag);
+            _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
+                                                  cached_col,
+                                                  conversionHelper(residual, i)
+                                                      .derivatives()[
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                                          cached_col
+#else
+                                                          ad_offset + i
+#endif
+            ],
+                                                  tag);
   }
 }
 
@@ -141,7 +158,9 @@ template <typename T>
 void
 ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
+#endif
   auto residual = computeQpResidual();
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
@@ -163,11 +182,17 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
-          _fe_problem.assembly(0).cacheJacobian(
-              cached_rows[i],
-              scalar_dof_indices[0],
-              conversionHelper(residual, i).derivatives()[ad_offset + i],
-              tag);
+          _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
+                                                scalar_dof_indices[0],
+                                                conversionHelper(residual, i)
+                                                    .derivatives()[
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                                        scalar_dof_indices[0]
+#else
+                                                        ad_offset + i
+#endif
+          ],
+                                                tag);
 }
 
 template class ADNodalBCTempl<Real>;

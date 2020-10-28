@@ -24,9 +24,15 @@ public:
 
   // See KernelBase base for documentation of these overridden methods
   virtual void computeElemNeighResidual(Moose::DGResidualType type) override;
-  virtual void computeElemNeighJacobian(Moose::DGJacobianType type) override;
+
+private:
+  virtual void computeElemNeighJacobian(Moose::DGJacobianType type) override final;
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               unsigned int jvar) override;
+                                               unsigned int jvar) override final;
+
+protected:
+  void computeJacobian() override final;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
 
   virtual MooseVariableFEBase & variable() override { return _var; }
 

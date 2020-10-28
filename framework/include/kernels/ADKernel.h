@@ -54,6 +54,11 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
+  /**
+   * compute the residuals for filling the Jacobian
+   */
+  virtual void computeResidualsForJacobian();
+
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariableFE<T> & _var;
 
@@ -97,5 +102,10 @@ protected:
   const bool _use_displaced_mesh;
 
 private:
+  /**
+   * Add the Jacobian contribution for the provided variable
+   */
+  void addJacobian(const MooseVariableFieldBase & jvariable);
+
   const Elem * _my_elem;
 };
