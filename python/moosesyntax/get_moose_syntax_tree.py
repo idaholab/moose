@@ -15,8 +15,7 @@ import moosetree
 import mooseutils
 from .nodes import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
 
-def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=None,
-                          allow_test_objects=False, app_types=None):
+def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable using --json.
 
@@ -69,10 +68,6 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
         if (node.fullpath() in removed) or ((node.parent is not None) and node.parent.removed):
             node.removed = True
 
-        # Remove 'Test' objects if not allowed
-        if (not allow_test_objects) and node.groups() and all(grp.endswith('TestApp') for grp in node.groups()):
-            node.removed =  True
-
         # Remove unregistered items
         for base, parent_syntax in unregister.items():
             if (node.name == base) and (node.get('action_path') == parent_syntax):
@@ -86,10 +81,9 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
             if node.fullpath() == name:
                 node.alias = str(alt)
 
-        # Limit to given app types
-        if ((node.parent is not None) and (not node.parent.in_app)) or \
-           ((app_types is not None) and not any([app_type in node.groups() for app_type in app_types])):
-            node.in_app = False
+        # Mark 'Test' objects
+        if node.groups() and all(grp.endswith('TestApp') for grp in node.groups()):
+            node.test =  True
 
     return root
 

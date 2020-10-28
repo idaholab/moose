@@ -92,13 +92,12 @@ class SQAMooseAppReport(SQAReport):
 
             # Build the complete syntax tree
             self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
-                                                                alias=alias, unregister=unregister,
-                                                                allow_test_objects=self.allow_test_objects,
-                                                                app_types=self.app_types)
+                                                                alias=alias, unregister=unregister)
 
         # Perform the checks
         kwargs.setdefault('syntax_prefix', mooseutils.eval_path(self.syntax_prefix))
         kwargs.setdefault('object_prefix', mooseutils.eval_path(self.object_prefix))
+        kwargs.setdefault('allow_test_objects', self.allow_test_objects)
         logger = check_syntax(self.app_syntax, self.app_types, file_cache, **kwargs)
 
         # Create stub pages

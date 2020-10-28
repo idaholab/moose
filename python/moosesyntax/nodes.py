@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 @mooseutils.addProperty('hidden', default=False, ptype=bool)
 @mooseutils.addProperty('removed', default=False, ptype=bool)
-@mooseutils.addProperty('in_app', default=True, ptype=bool)
+@mooseutils.addProperty('test', default=False, ptype=bool)
 @mooseutils.addProperty('alias', ptype=str)
 @mooseutils.addProperty('group', ptype=str)
 @mooseutils.addProperty('markdown', ptype=str)
@@ -51,21 +51,22 @@ class NodeBase(moosetree.Node, mooseutils.AutoPropertyMixinBase):
 
         msg = ''
         color = self.color
-        if self.removed or not self.in_app:
+        if self.removed:
             color = 'GREY'
+        elif self.test:
+            color = 'BLUE'
         elif not self.hidden:
             color = 'LIGHT_' + self.color
 
-
         msg0 = '{}: {}'.format(self.name, self.fullpath())
-        msg1 = 'hidden={} removed={} in_app={} group={} groups={} alias={}'.format(self.hidden,
-                                                                                   self.removed,
-                                                                                   self.in_app,
-                                                                                   self.group,
-                                                                                   self.groups(),
-                                                                                   self.alias)
+        msg1 = 'hidden={} removed={} group={} groups={} test={} alias={}'.format(self.hidden,
+                                                                                 self.removed,
+                                                                                 self.group,
+                                                                                 self.groups(),
+                                                                                 self.test,
+                                                                                 self.alias)
         msg0 = mooseutils.colorText(msg0, color)
-        msg1 = mooseutils.colorText(msg1, 'GREY' if not self.in_app or self.removed else 'LIGHT_GREY')
+        msg1 = mooseutils.colorText(msg1, 'GREY' if self.removed else 'LIGHT_GREY')
         return '{} {}'.format(msg0, msg1)
 
 class SyntaxNode(NodeBase):
@@ -88,6 +89,8 @@ class SyntaxNode(NodeBase):
         """
         out = set([self.group]) if self.group is not None else set()
         for node in self.actions():
+            out.update(node.groups())
+        for node in self.syntax():
             out.update(node.groups())
         return out
 

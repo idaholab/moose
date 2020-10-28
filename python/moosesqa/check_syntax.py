@@ -14,7 +14,7 @@ import moosetree
 import moosesyntax
 from .LogHelper import LogHelper
 
-def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_prefix='', **kwargs):
+def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_prefix='', allow_test_objects=False, **kwargs):
 
     kwargs.setdefault('log_hidden_syntax', logging.ERROR)
     kwargs.setdefault('log_stub_files', logging.ERROR)
@@ -27,10 +27,19 @@ def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_pre
     kwargs.setdefault('log_duplicate_files', logging.ERROR)
     logger = LogHelper(__name__, **kwargs)
 
-    for node in moosetree.iterate(app_syntax, func=lambda n: n.in_app):
-        _check_node(node, file_cache, object_prefix, syntax_prefix, logger)
+    for node in app_syntax.descendants:
+        # SyntaxNode objects must registered to all the desired app types
+        # Action/MooseObjects and the syntax they are attached must be registered to the desired type
+        # Action/MoosdObjects must not be tests, unless allowed
+        if (isinstance(node, moosesyntax.SyntaxNode) and set(app_types) == node.groups()) \
+           or (isinstance(node, moosesyntax.ObjectNodeBase) and is_app_type(node, app_types) and is_app_type(node.parent, app_types)) \
+           and (allow_test_objects or not node.test):
+            _check_node(node, file_cache, object_prefix, syntax_prefix, logger)
 
     return logger
+
+def is_app_type(node, app_types):
+    return any([app_type in node.groups() for app_type in app_types])
 
 def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     """Perform checks of a single Page node object"""

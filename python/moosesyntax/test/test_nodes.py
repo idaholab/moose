@@ -60,9 +60,9 @@ class TestNodeBase(unittest.TestCase):
     @mock.patch('mooseutils.colorText', side_effect=lambda t, c: '{}:{}'.format(c,t))
     def testRepr(self, *args):
         r = self._root
-        self.assertIn('LIGHT_RED:b: /b LIGHT_GREY:hidden=False removed=False group=None alias=None', repr(r(1)))
-        self.assertIn('GREY:ab: /a/ab GREY:hidden=False removed=True group=None alias=None', repr(r(0,1)))
-        self.assertIn('RED:aa: /a/aa LIGHT_GREY:hidden=True removed=False group=None alias=None', repr(r(0,0)))
+        self.assertIn('LIGHT_RED:b: /b LIGHT_GREY:hidden=False removed=False group=None groups=set() test=False alias=None', repr(r(1)))
+        self.assertIn('GREY:ab: /a/ab GREY:hidden=False removed=True group=None groups=set() test=False alias=None', repr(r(0,1)))
+        self.assertIn('RED:aa: /a/aa LIGHT_GREY:hidden=True removed=False group=None groups=set() test=False alias=None', repr(r(0,0)))
         self.assertIn('attrib', r(2,0))
 
 class TestSyntaxNode(unittest.TestCase):

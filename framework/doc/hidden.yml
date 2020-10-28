@@ -28,7 +28,6 @@
 - /AuxVariables/AddAuxVariableAction
 - /AuxVariables/CopyNodalVarsAction
 - /AuxVariables/MooseVariableFVReal
-- /AuxVariables/MultiAuxVariables/MooseVariableFVReal
 - /BCs
 - /BCs/AddBCAction
 - /BCs/DGFunctionDiffusionDirichletBC
