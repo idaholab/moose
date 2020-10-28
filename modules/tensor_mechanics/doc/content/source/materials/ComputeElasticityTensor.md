@@ -87,9 +87,7 @@ C_{ijkl}^{orthotropic} = \begin{bmatrix}
               \end{bmatrix}
 \end{equation}
 
-The user can also select the fill method `orthotropic`, which generates an elasticity tensor based directly on
-on material parameters. That is, the elasticity tensor is computed via moduli of elasticity, Poisson ratios, and shear stiffnesses, see [eq:orhotropic_fill_method]
-
+The user can also select the fill method `orthotropic`, which generates an elasticity tensor based directly on material parameters. That is, the elasticity tensor is computed via moduli of elasticity, Poisson ratios, and shear stiffnesses, see [eq:orhotropic_fill_method]
 \begin{equation}
 \label{eq:orhotropic_fill_method}
 C_{ijkl}^{orthotropic} = \begin{bmatrix}
@@ -101,10 +99,9 @@ C_{ijkl}^{orthotropic} = \begin{bmatrix}
                    0 &      0 &      0 &      0 &      0 & G_{23}
               \end{bmatrix}
 \end{equation}
-
-where $k = 1 - \nu_{12} \nu_{21} - \nu_{23} \nu_{32} - \nu_{31} \nu_{13} -
- \nu_{12} \nu_{23} \nu_{31} - \nu_{21} \nu_{32} \nu_{13}$.
+where $k = 1 - \nu_{12} \nu_{21} - \nu_{23} \nu_{32} - \nu_{31} \nu_{13} - \nu_{12} \nu_{23} \nu_{31} - \nu_{21} \nu_{32} \nu_{13}$.
  
+
 ### Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/elasticity_tensor
@@ -116,11 +113,12 @@ to enter an isotropic elasticity tensor.
 
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic_anisotropy/3d_bar_orthotropic_full_rotation.i block=Materials/elasticity_tensor
 
-For the `orthotropic` fill method, the material parameters need to be introduced in the following order, and referred to the global frame: $E_{11} E_{22} E_{33} G_{12} G_{23} G_{31} \nu_{21} \nu_{31} \nu_{32} \nu_{12} \nu_{13} \nu_{23}$.
+For the `orthotropic` fill method, the material parameters need to be referred to the global frame and introduced in the following order: $E_{11}\;E_{22}\;E_{33}\;G_{12}\;G_{23}\;G_{31}\;\nu_{21}\;\nu_{31}\;\nu_{32}\;\nu_{12}\;\nu_{13}\;\nu_{23}$.
  
+
 ## Linear Isotropic Symmetry
 
-The two constant istropic symmetry fill methods `symmetric_isotropic` and `symmetric_isotropic_E_nu`
+The two constant isotropic symmetry fill methods `symmetric_isotropic` and `symmetric_isotropic_E_nu`
 are used in the dedicated isotropic elasticity tensor
 [ComputeIsotropicElasticityTensor](/ComputeIsotropicElasticityTensor.md).  These two fill methods use
 the symmetries shown in [eq:symmetric_isotropic_fill_method] to build the elasticity tensor.

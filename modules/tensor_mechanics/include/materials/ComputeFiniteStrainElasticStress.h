@@ -16,42 +16,37 @@
  * ComputeFiniteStrainElasticStress computes the stress following elasticity
  * theory for finite strains
  */
-class ComputeFiniteStrainElasticStress: public ComputeStressBase,
-		public GuaranteeConsumer
+class ComputeFiniteStrainElasticStress : public ComputeStressBase, public GuaranteeConsumer
 {
 public:
-	static InputParameters
-	validParams();
+  static InputParameters validParams();
 
-	ComputeFiniteStrainElasticStress(const InputParameters &parameters);
+  ComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
-	void
-	initialSetup() override;
-	virtual void
-	initQpStatefulProperties() override;
+  void initialSetup() override;
+  virtual void initQpStatefulProperties() override;
 
 protected:
-	virtual void
-	computeQpStress() override;
+  virtual void computeQpStress() override;
 
-	/// Name of the elasticity tensor material property
-	const std::string _elasticity_tensor_name;
-	/// Elasticity tensor material property
-	const MaterialProperty<RankFourTensor> & _elasticity_tensor;
-	/// Rotation up to step "n" to compute non-isotropic elasticity tensor
-	MaterialProperty<RankTwoTensor> &_rotation_total;
-	/// Rotation up to step "n" to compute non-isotropic elasticity tensor from previous step
-	const MaterialProperty<RankTwoTensor> &_rotation_total_old;
-	/// Strain increment material property
-	const MaterialProperty<RankTwoTensor> &_strain_increment;
-	/// Rotation increment material property
-	const MaterialProperty<RankTwoTensor> &_rotation_increment;
-	/// Old state of the stress tensor material property
-	const MaterialProperty<RankTwoTensor> &_stress_old;
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  /// Rotation up to step "n" to compute non-isotropic elasticity tensor
+  MaterialProperty<RankTwoTensor> & _rotation_total;
+  /// Rotation up to step "n" to compute non-isotropic elasticity tensor from previous step
+  const MaterialProperty<RankTwoTensor> & _rotation_total_old;
+  /// Strain increment material property
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  /// Rotation increment material property
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+  /// Old state of the stress tensor material property
+  const MaterialProperty<RankTwoTensor> & _stress_old;
 
-	/**
-	 * The old elastic strain is used to calculate the old stress in the case
-	 * of variable elasticity tensors
-	 */
-	const MaterialProperty<RankTwoTensor> &_elastic_strain_old;
+  /**
+   * The old elastic strain is used to calculate the old stress in the case
+   * of variable elasticity tensors
+   */
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 };
