@@ -32,6 +32,11 @@ class Assembly;
 template <typename>
 class MooseVariableFV;
 
+namespace libMesh
+{
+class QBase;
+}
+
 template <typename OutputType>
 class MooseVariableDataFV
 {
@@ -201,7 +206,12 @@ public:
    */
   void setDofValues(const DenseVector<OutputData> & values);
 
+  ///@{
+  /**
+   * dof value setters
+   */
   void setDofValue(const OutputData & value, unsigned int index);
+  ///@}
 
   OutputData
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
@@ -482,6 +492,9 @@ private:
 
   /// Whether this variable is being calculated on a displaced system
   const bool _displaced;
+
+  /// The quadrature rule
+  const QBase * _qrule;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////

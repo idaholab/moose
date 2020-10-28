@@ -70,7 +70,7 @@ public:
    * Get a reference to the subproblem
    * @return Reference to SubProblem
    */
-  SubProblem & subProblem() { return _subproblem; }
+  const SubProblem & subProblem() const { return _subproblem; }
 
 protected:
   MooseVariableFV<Real> & _var;

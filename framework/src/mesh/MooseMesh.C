@@ -10,7 +10,6 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "CacheChangedListsThread.h"
-#include "Assembly.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "RelationshipManager.h"
@@ -18,6 +17,9 @@
 #include "TimedPrint.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
+#include "Assembly.h"
+#include "SubProblem.h"
+#include "MooseVariableBase.h"
 
 #include <utility>
 
@@ -58,46 +60,6 @@
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
-
-FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
-{
-  _elem = elem;
-  _neighbor = neighbor;
-
-  _elem_side_id = side;
-  _elem_centroid = elem->centroid();
-  _elem_volume = elem->volume();
-
-  std::unique_ptr<const Elem> face = elem->build_side_ptr(_elem_side_id);
-  _face_area = face->volume();
-  _face_centroid = face->centroid();
-
-  // 1. compute face centroid
-  // 2. compute an centroid face normal by using 1-point quadrature
-  //    meshes)
-  unsigned int dim = elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(elem->default_order())));
-  QGauss qface(dim - 1, CONSTANT);
-  fe->attach_quadrature_rule(&qface);
-  const std::vector<Point> & normals = fe->get_normals();
-  fe->reinit(elem, _elem_side_id);
-  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
-  _normal = normals[0];
-
-  // the neighbor info does not exist for domain boundaries
-  if (!_neighbor)
-  {
-    _neighbor_side_id = std::numeric_limits<unsigned int>::max();
-    _neighbor_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
-    _neighbor_volume = _elem_volume;
-  }
-  else
-  {
-    _neighbor_side_id = neighbor->which_neighbor_am_i(elem);
-    _neighbor_centroid = neighbor->centroid();
-    _neighbor_volume = neighbor->volume();
-  }
-}
 
 defineLegacyParams(MooseMesh);
 
@@ -253,7 +215,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(false),
     _allow_remote_element_removal(true),
-    _need_ghost_ghosted_boundaries(true)
+    _need_ghost_ghosted_boundaries(true),
+    _is_displaced(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -3127,14 +3090,15 @@ MooseMesh::buildFaceInfo()
   }
 
   _face_info.clear();
+  _all_face_info.clear();
+  _elem_side_to_face_info.clear();
 
-  // loop over all active, local elements. Note that by looping over just *local* elements and by
-  // performing the element ID comparison check in the below loop, we are ensuring that we never
+  // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
   // will contribute to both sides of the face residuals/Jacobians will be the process that owns the
   // element with the lower ID.
-  auto begin = getMesh().active_local_elements_begin();
-  auto end = getMesh().active_local_elements_end();
+  auto begin = getMesh().active_elements_begin();
+  auto end = getMesh().active_elements_end();
 
   for (auto it = begin; it != end; ++it)
   {
@@ -3162,9 +3126,11 @@ MooseMesh::buildFaceInfo()
       //       element and vise versa, we only create a face info object once
       //       instead of twice.
       //
-      //  * when the following two conditions are met:
+      //  * when the following two (CURRENTLY ONE ACTUALLY) conditions are met:
       //
-      //     - the neighbor is active - this means we aren't looking at a face
+      //     - WE AREN'T ACTULLY DOING THIS CHECK RIGHT NOW. SHOULD WE BE? WE DON'T
+      //       DO IT FOR DGKERNELS OR INTERFACE KERNELS
+      //       the neighbor is active - this means we aren't looking at a face
       //       between an active element and an inactive (pre-refined version)
       //       of a neighbor
       //
@@ -3180,8 +3146,9 @@ MooseMesh::buildFaceInfo()
            (elem_id < neighbor->id())) ||
           (neighbor->level() < elem->level()))
       {
-        _face_info.emplace_back(elem, side, neighbor);
-        auto & fi = _face_info.back();
+        _all_face_info.emplace_back(elem, side, neighbor);
+
+        auto & fi = _all_face_info.back();
 
         // get all the sidesets that this face is contained in and cache them
         // in the face info.
@@ -3200,6 +3167,58 @@ MooseMesh::buildFaceInfo()
         }
       }
     }
+  }
+
+  // Build the local face info and elem_side to face info maps. We need to do this after
+  // _all_face_info is finished being constructed because emplace_back invalidates all iterators and
+  // references if ever the new size exceeds capacity
+  for (auto & fi : _all_face_info)
+  {
+    const Elem * const elem = &fi.elem();
+    const auto side = fi.elemSideID();
+
+#ifndef NDEBUG
+    auto pair_it =
+#endif
+        _elem_side_to_face_info.emplace(std::make_pair(elem, side), &fi);
+    mooseAssert(pair_it.second, "We should be adding unique FaceInfo objects.");
+    if (fi.processor_id() == this->processor_id())
+      _face_info.push_back(&fi);
+  }
+}
+
+const FaceInfo *
+MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
+{
+  auto it = _elem_side_to_face_info.find(std::make_pair(elem, side));
+
+  if (it == _elem_side_to_face_info.end())
+    return nullptr;
+  else
+  {
+    mooseAssert(it->second, "For some reason, the FaceInfo object is NULL!");
+    return it->second;
+  }
+}
+
+void
+MooseMesh::computeFaceInfoFaceCoords(const SubProblem & subproblem)
+{
+  if (_face_info_dirty)
+    mooseError("Trying to compute face-info coords when the information is dirty");
+
+  for (auto & fi : _all_face_info)
+  {
+    // get elem & neighbor elements, and set subdomain ids
+    const Elem & elem_elem = fi.elem();
+    const Elem * neighbor_elem = fi.neighborPtr();
+    SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
+    SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
+    if (neighbor_elem)
+      neighbor_subdomain_id = neighbor_elem->subdomain_id();
+
+    coordTransformFactor(
+        subproblem, elem_subdomain_id, fi.faceCentroid(), fi.faceCoord(), neighbor_subdomain_id);
   }
 }
 
@@ -3235,4 +3254,83 @@ MooseMesh::deleteRemoteElements()
   _mesh->allow_remote_element_removal(true);
 
   _mesh->delete_remote_elements();
+}
+
+void
+MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars)
+{
+  if (_face_info_dirty)
+    buildFaceInfo();
+
+  for (FaceInfo & face : _all_face_info)
+  {
+    if (face.processor_id() != this->processor_id())
+      continue;
+
+    // get elem & neighbor elements, and set subdomain ids
+    const Elem & elem_elem = face.elem();
+    const Elem * const neighbor_elem = face.neighborPtr();
+    const SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
+    const SubdomainID neighbor_subdomain_id =
+        neighbor_elem ? neighbor_elem->subdomain_id() : Elem::invalid_subdomain_id;
+
+    // loop through vars
+    for (unsigned int j = 0; j < moose_vars.size(); ++j)
+    {
+      // get the variable, its name, and its domain of definition
+      const MooseVariableBase * const var = moose_vars[j];
+      const auto & var_name = var->name();
+      std::set<SubdomainID> var_subdomains = var->blockIDs();
+
+      // unfortunately, MOOSE is lazy and all subdomains has its own
+      // ID. If ANY_BLOCK_ID is in var_subdomains, inject all subdomains explicitly
+      if (var_subdomains.find(Moose::ANY_BLOCK_ID) != var_subdomains.end())
+        var_subdomains = this->meshSubdomains();
+
+      // first stash away DoF information; this is more difficult than you would
+      // think because var can be defined on the elem subdomain, the neighbor subdomain
+      // or both subdomains
+      // elem
+      std::vector<dof_id_type> elem_dof_indices;
+      if (var_subdomains.find(elem_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(&elem_elem, elem_dof_indices);
+      else
+        elem_dof_indices = {libMesh::DofObject::invalid_id};
+      face.elemDofIndices(var_name) = elem_dof_indices;
+      // neighbor
+      std::vector<dof_id_type> neighbor_dof_indices;
+      if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(neighbor_elem, neighbor_dof_indices);
+      else
+        neighbor_dof_indices = {libMesh::DofObject::invalid_id};
+      face.neighborDofIndices(var_name) = neighbor_dof_indices;
+
+      /**
+       * The following paragraph of code assigns the VarFaceNeighbors
+       * 1. The face is an internal face of this variable if it is defined on
+       *    the elem and neighbor subdomains
+       * 2. The face is an invalid face of this variable if it is neither defined
+       *    on the elem nor the neighbor subdomains
+       * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
+       *    applies
+       */
+      bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
+      bool var_defined_neighbor =
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
+      if (var_defined_elem && var_defined_neighbor)
+        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+      else if (!var_defined_elem && !var_defined_neighbor)
+        face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+      else
+      {
+        // this is a boundary face for this variable, set elem or neighbor
+        if (var_defined_elem)
+          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
+        else if (var_defined_neighbor)
+          face.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+        else
+          mooseError("Should never get here");
+      }
+    }
+  }
 }

@@ -181,6 +181,11 @@ FEProblemBase::validParams()
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>("fv_bcs_integrity_check",
+                        true,
+                        "Set to false to disable checking of overlapping Dirichlet and Flux BCs "
+                        "and/or multiple DirichletBCs per sideset");
+
   params.addParam<bool>(
       "material_dependency_check", true, "Set to false to disable material dependency check");
   params.addParam<bool>("parallel_barrier_messaging",
@@ -265,6 +270,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
     _material_coverage_check(getParam<bool>("material_coverage_check")),
+    _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
@@ -518,9 +524,9 @@ FEProblemBase::~FEProblemBase()
 }
 
 Moose::CoordinateSystemType
-FEProblemBase::getCoordSystem(SubdomainID sid)
+FEProblemBase::getCoordSystem(SubdomainID sid) const
 {
-  std::map<SubdomainID, Moose::CoordinateSystemType>::iterator it = _coord_sys.find(sid);
+  auto it = _coord_sys.find(sid);
   if (it != _coord_sys.end())
     return (*it).second;
   else
@@ -1518,22 +1524,14 @@ FEProblemBase::addCachedJacobian(THREAD_ID tid)
   _assembly[tid]->addCachedJacobian();
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(tid);
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  // global indexing uses a different cache Jacobian API in assembly that actually feeds values into
-  // different assembly data members. So we have to call a different addCached method in order to
-  // accumulate the values into the Jacobian
-  if (haveFV())
-    addCachedJacobianContributions(tid);
-#endif
 }
 
 void
 FEProblemBase::addCachedJacobianContributions(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobianContributions();
-  if (_displaced_problem)
-    _displaced_problem->addCachedJacobianContributions(tid);
+  mooseDeprecated("please use addCachedJacobian");
+
+  addCachedJacobian(tid);
 }
 
 void
@@ -2950,32 +2948,6 @@ FEProblemBase::getMaterial(std::string name,
   return material;
 }
 
-std::shared_ptr<MaterialBase>
-FEProblemBase::getInterfaceMaterial(std::string name,
-                                    Moose::MaterialDataType type,
-                                    THREAD_ID tid,
-                                    bool no_warn)
-{
-  switch (type)
-  {
-    case Moose::INTERFACE_MATERIAL_DATA:
-      name += "_interface";
-      break;
-    default:
-      break;
-  }
-
-  std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
-    mooseWarning("You are retrieving a Material object (",
-                 material->name(),
-                 "), but its compute flag is set to true. This indicates that MOOSE is "
-                 "computing this property which may not be desired and produce un-expected "
-                 "results.");
-
-  return material;
-}
-
 std::shared_ptr<MaterialData>
 FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
@@ -3193,35 +3165,6 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
 }
 
 void
-FEProblemBase::reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
-{
-  if (hasActiveMaterialProperties(tid))
-  {
-    // NOTE: this will not work with h-adaptivity
-    // The neighbor element doesn't exist, so use elem element as a stand-in.
-    auto && neighbor = _assembly[tid]->elem();
-
-    // The neighbor element doesn't actually exist - so use the current side
-    // elem side as a stand-in.
-    unsigned int neighbor_side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-    _neighbor_material_data[tid]->resize(n_points);
-
-    // Only swap if requested
-    if (swap_stateful)
-      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
-
-    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reset(
-          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-  }
-}
-
-void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
                                        THREAD_ID tid,
                                        bool swap_stateful,
@@ -3230,8 +3173,15 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
-    auto && neighbor = _assembly[tid]->neighbor();
+    // lindsayad: why not?
+    const Elem * neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+
+    mooseAssert(neighbor, "neighbor should be non-null");
+    mooseAssert(blk_id == neighbor->subdomain_id(),
+                "The provided blk_id " << blk_id << " and neighbor subdomain ID "
+                                       << neighbor->subdomain_id() << " do not match.");
+
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
 
@@ -3311,22 +3261,31 @@ FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
 }
 
 void
-FEProblemBase::swapBackMaterialsNeighborGhost(THREAD_ID tid)
-{
-  // NOTE: this will not work with h-adaptivity
-  // Since neighbor element doesn't actually exist, use elem element info
-  // instead.
-  auto && neighbor = _assembly[tid]->elem();
-  unsigned int neighbor_side = _assembly[tid]->side();
-  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
-}
-
-void
 FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
-  auto && neighbor = _assembly[tid]->neighbor();
-  unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+  const Elem * neighbor = _assembly[tid]->neighbor();
+  unsigned int neighbor_side =
+      neighbor ? neighbor->which_neighbor_am_i(_assembly[tid]->elem()) : libMesh::invalid_uint;
+
+  if (!neighbor)
+  {
+    if (haveFV())
+    {
+      // If neighbor is null, then we're on the neighbor side of a mesh boundary, e.g. we're off
+      // the mesh in ghost-land. If we're using the finite volume method, then variable values and
+      // consequently material properties have well-defined values in this ghost region outside of
+      // the mesh and we really do want to reinit our neighbor materials in this case. Since we're
+      // off in ghost land it's safe to do swaps with `MaterialPropertyStorage` using the elem and
+      // elem_side keys
+      neighbor = _assembly[tid]->elem();
+      neighbor_side = _assembly[tid]->side();
+      mooseAssert(neighbor, "We should have an appropriate value for elem coming from Assembly");
+    }
+    else
+      mooseError("neighbor is null in Assembly!");
+  }
+
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 
@@ -4525,11 +4484,11 @@ FEProblemBase::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFEBase &
+const MooseVariableFieldBase &
 FEProblemBase::getVariable(THREAD_ID tid,
                            const std::string & var_name,
                            Moose::VarKindType expected_var_type,
-                           Moose::VarFieldType expected_var_field_type)
+                           Moose::VarFieldType expected_var_field_type) const
 {
   return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, *_nl, *_aux);
 }
@@ -4914,8 +4873,8 @@ FEProblemBase::init()
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
-  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update all
-  // of our mesh information. We need to make sure that mesh information is up-to-date before
+  // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update
+  // all of our mesh information. We need to make sure that mesh information is up-to-date before
   // EquationSystems::init because that will call through to updateGeomSearch (for sparsity
   // augmentation) and if we haven't added back boundary node information before that latter call,
   // then we're screwed. We'll get things like "Unable to find closest node!"
@@ -5537,7 +5496,22 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     for (auto tag : tags)
       if (_nl->hasMatrix(tag))
-        _nl->getMatrix(tag).zero();
+      {
+        auto & matrix = _nl->getMatrix(tag);
+        matrix.zero();
+#ifdef LIBMESH_HAVE_PETSC
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        if (haveFV())
+          // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
+          // diagonal dependence. For finite volumes with global AD indexing we only add non-zero
+          // dependence, so PETSc will scream at us unless we artificially add the diagonals. We
+          // will have to remove the haveFV() check when we implement global indexing for finite
+          // elements
+          for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
+            matrix.add(index, index, 0);
+#endif
+#endif
+      }
 
     _nl->zeroVariablesForJacobian();
     _aux->zeroVariablesForJacobian();
@@ -6956,4 +6930,87 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                               pts,
                                               weights,
                                               tid);
+}
+
+void
+FEProblemBase::getFVMatsAndDependencies(
+    const SubdomainID blk_id,
+    std::vector<std::shared_ptr<MaterialBase>> & face_materials,
+    std::vector<std::shared_ptr<MaterialBase>> & neighbor_materials,
+    std::set<MooseVariableFieldBase *> & variables,
+    const THREAD_ID tid)
+{
+  if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+  {
+    auto & this_face_mats =
+        _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+    for (std::shared_ptr<MaterialBase> face_mat : this_face_mats)
+      if (face_mat->ghostable())
+      {
+        mooseAssert(!face_mat->hasStatefulProperties(),
+                    "Finite volume materials do not currently support stateful properties.");
+        face_materials.push_back(face_mat);
+        auto & var_deps = face_mat->getMooseVariableDependencies();
+        for (auto * var : var_deps)
+        {
+          mooseAssert(
+              var->isFV(),
+              "Ghostable materials should only have finite volume variables coupled into them.");
+          variables.insert(var);
+        }
+      }
+  }
+
+  if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+  {
+    auto & this_neighbor_mats =
+        _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid);
+    for (std::shared_ptr<MaterialBase> neighbor_mat : this_neighbor_mats)
+      if (neighbor_mat->ghostable())
+      {
+        mooseAssert(!neighbor_mat->hasStatefulProperties(),
+                    "Finite volume materials do not currently support stateful properties.");
+        neighbor_materials.push_back(neighbor_mat);
+#ifndef NDEBUG
+        auto & var_deps = neighbor_mat->getMooseVariableDependencies();
+        for (auto * var : var_deps)
+        {
+          mooseAssert(
+              var->isFV(),
+              "Ghostable materials should only have finite volume variables coupled into them.");
+          auto pr = variables.insert(var);
+          mooseAssert(!pr.second,
+                      "We should not have inserted any new variables dependencies from our "
+                      "neighbor materials that didn't exist for our face materials");
+        }
+#endif
+      }
+  }
+}
+
+void
+FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
+                                  const unsigned int nqp,
+                                  const THREAD_ID tid)
+{
+  switch (data_type)
+  {
+    case Moose::MaterialDataType::BLOCK_MATERIAL_DATA:
+      _material_data[tid]->resize(nqp);
+      break;
+
+    case Moose::MaterialDataType::BOUNDARY_MATERIAL_DATA:
+    case Moose::MaterialDataType::FACE_MATERIAL_DATA:
+    case Moose::MaterialDataType::INTERFACE_MATERIAL_DATA:
+      _bnd_material_data[tid]->resize(nqp);
+      break;
+
+    case Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA:
+      _neighbor_material_data[tid]->resize(nqp);
+      break;
+
+    default:
+      mooseError("Unrecognized material data type.");
+      break;
+  }
 }

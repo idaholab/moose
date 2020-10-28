@@ -311,6 +311,7 @@ SetupMeshAction::act()
       if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
       {
         _displaced_mesh = _mesh->safeClone();
+        _displaced_mesh->isDisplaced(true);
         _displaced_mesh->getMesh().allow_remote_element_removal(
             _mesh->getMesh().allow_remote_element_removal());
 

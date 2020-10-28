@@ -92,7 +92,7 @@ public:
    * Get a reference to a variable this kernel is action on
    * @return reference to a variable this kernel is action on
    */
-  MooseVariableFE<ComputeValueType> & variable() { return _var; }
+  MooseVariableField<ComputeValueType> & variable() { return _var; }
 
   const std::set<UserObjectName> & getDependObjects() const { return _depend_uo; }
 
@@ -173,7 +173,7 @@ protected:
   THREAD_ID _tid;
 
   /// This is a regular kernel so we cast to a regular MooseVariable
-  MooseVariableFE<ComputeValueType> & _var;
+  MooseVariableField<ComputeValueType> & _var;
 
   /// Flag indicating if the AuxKernel is nodal
   bool _nodal;
@@ -247,7 +247,17 @@ protected:
   /// for holding local mass matrix
   DenseMatrix<Number> _local_ke;
 
-  using MooseVariableInterface<ComputeValueType>::mooseVariable;
+  using MooseVariableInterface<ComputeValueType>::mooseVariableBase;
+
+private:
+  /**
+   * Currently only used when the auxiliary variable is a finite volume variable, this helps call
+   * through to the variable's \p setDofValue method. This helper is necessary because \p
+   * MooseVariableField::setDofValue expects a \p Real even when a variable is a vector variable, so
+   * we cannot simply pass through to that method with the result of \p computeValue when \p
+   * ComputeValueType is \p RealVectorValue
+   */
+  void setDofValueHelper(const ComputeValueType & dof_value);
 };
 
 template <typename ComputeValueType>

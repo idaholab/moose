@@ -146,8 +146,7 @@ ADKernelValueTempl<T>::computeADOffDiagJacobian()
     unsigned int jvar = jvariable.number();
 
     // If ivar isn't this->_var, then continue
-    // Also we don't currently support coupling with FV variables
-    if (ivar != _var.number() || jvariable.isFV())
+    if (ivar != _var.number())
       continue;
 
     auto ad_offset =

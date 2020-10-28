@@ -25,6 +25,7 @@
 #include "ShapeUserObject.h"
 #include "ShapeSideUserObject.h"
 #include "ShapeElementUserObject.h"
+#include "SystemBase.h"
 
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
@@ -178,6 +179,9 @@ AttribSubdomains::isMatch(const Attribute & other) const
   auto cond = a->_vals[0];
   if (cond == Moose::ANY_BLOCK_ID)
     return true;
+  else if (cond == Moose::INVALID_BLOCK_ID)
+    return false;
+
   for (auto id : _vals)
   {
     if (id == cond || id == Moose::ANY_BLOCK_ID)
@@ -259,6 +263,28 @@ AttribThread::isMatch(const Attribute & other) const
 }
 bool
 AttribThread::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribSysNum::initFrom(const MooseObject * obj)
+{
+  auto * sys = obj->getParam<SystemBase *>("_sys");
+
+  if (sys)
+    _val = sys->number();
+}
+
+bool
+AttribSysNum::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribSysNum *>(&other);
+  return a && (a->_val == _val);
+}
+
+bool
+AttribSysNum::isEqual(const Attribute & other) const
 {
   return isMatch(other);
 }

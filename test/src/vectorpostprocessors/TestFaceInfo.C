@@ -68,28 +68,28 @@ TestFaceInfo::execute()
   for (auto & p : _fe_problem.mesh().faceInfo())
   {
     _face_id.push_back(j);
-    _face_area.push_back(p.faceArea());
-    _elem_element_id.push_back(p.elem().id());
-    _elem_element_side.push_back(p.elemSideID());
+    _face_area.push_back(p->faceArea());
+    _elem_element_id.push_back(p->elem().id());
+    _elem_element_side.push_back(p->elemSideID());
     // the neighbor element might be a nullptr
-    if (p.neighborPtr())
-      _neighbor_element_id.push_back(p.neighbor().id());
+    if (p->neighborPtr())
+      _neighbor_element_id.push_back(p->neighbor().id());
     else
       _neighbor_element_id.push_back(-1);
 
-    Point normal = p.normal();
+    Point normal = p->normal();
     _nx.push_back(normal(0));
     _ny.push_back(normal(1));
     _nz.push_back(normal(2));
-    Point fc = p.faceCentroid();
+    Point fc = p->faceCentroid();
     _face_cx.push_back(fc(0));
     _face_cy.push_back(fc(1));
     _face_cz.push_back(fc(2));
-    Point lc = p.elemCentroid();
+    Point lc = p->elemCentroid();
     _elem_cx.push_back(lc(0));
     _elem_cy.push_back(lc(1));
     _elem_cz.push_back(lc(2));
-    Point rc = p.neighborCentroid();
+    Point rc = p->neighborCentroid();
     _neighbor_cx.push_back(rc(0));
     _neighbor_cy.push_back(rc(1));
     _neighbor_cz.push_back(rc(2));
@@ -98,9 +98,9 @@ TestFaceInfo::execute()
     {
       std::vector<dof_id_type> elemdofs;
       std::vector<dof_id_type> neighbordofs;
-      elemdofs = p.elemDofIndices(_vars[l]);
-      neighbordofs = p.neighborDofIndices(_vars[l]);
-      FaceInfo::VarFaceNeighbors vfn = p.faceType(_vars[l]);
+      elemdofs = p->elemDofIndices(_vars[l]);
+      neighbordofs = p->neighborDofIndices(_vars[l]);
+      FaceInfo::VarFaceNeighbors vfn = p->faceType(_vars[l]);
       Real x = 0;
       switch (vfn)
       {

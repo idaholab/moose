@@ -14,6 +14,7 @@
 #include "TransientInterface.h"
 #include "BlockRestrictable.h"
 #include "FunctionInterface.h"
+#include "SetupInterface.h"
 #include "PostprocessorInterface.h"
 #include "Assembly.h"
 
@@ -36,14 +37,19 @@ class FVKernel : public MooseObject,
                  public TransientInterface,
                  public BlockRestrictable,
                  public FunctionInterface,
-                 public PostprocessorInterface
+                 public PostprocessorInterface,
+                 public SetupInterface
 {
 public:
   static InputParameters validParams();
   FVKernel(const InputParameters & params);
 
+  const SubProblem & subProblem() const { return _subproblem; }
+
 protected:
   SubProblem & _subproblem;
+  const SystemBase & _sys;
   THREAD_ID _tid;
   Assembly & _assembly;
+  const MooseMesh & _mesh;
 };

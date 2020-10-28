@@ -101,21 +101,21 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
       auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<Real>>(object);
 
       if (mvi)
-        _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);
+        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
     }
 
     {
       auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealVectorValue>>(object);
 
       if (mvi)
-        _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);
+        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
     }
 
     {
       auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
 
       if (mvi)
-        _variable_objects[mvi->mooseVariable()->number()].addObject(object, tid, false);
+        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
     }
   }
 }

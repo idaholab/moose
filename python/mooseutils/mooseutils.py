@@ -408,3 +408,9 @@ def recursive_update(d, u):
     for k, v in u.items():
         d[k] = recursive_update(d.get(k, dict()), v) if isinstance(v, dict) else v
     return d
+
+def fuzzyEqual(test_value, true_value, tolerance):
+    return abs(test_value - true_value) / abs(true_value) < tolerance
+
+def fuzzyAbsoluteEqual(test_value, true_value, tolerance):
+    return abs(test_value - true_value) < tolerance

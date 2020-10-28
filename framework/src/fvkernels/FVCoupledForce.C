@@ -27,9 +27,6 @@ FVCoupledForce::validParams()
 FVCoupledForce::FVCoupledForce(const InputParameters & parameters)
   : FVElementalKernel(parameters), _v(adCoupledValue("v")), _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == coupled("v"))
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with FVCoupledForce, "
-               "consider using FVReaction or something similar");
 }
 
 ADReal

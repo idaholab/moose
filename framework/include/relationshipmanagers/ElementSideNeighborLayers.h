@@ -52,4 +52,6 @@ protected:
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
+
+  const bool _use_point_neighbors;
 };

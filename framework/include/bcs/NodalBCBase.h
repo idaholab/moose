@@ -47,6 +47,11 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
+  /**
+   * Whether to verify that this object is acting on a nodal variable
+   */
+  virtual bool checkNodalVar() const { return true; }
+
 protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;

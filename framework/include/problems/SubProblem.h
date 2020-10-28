@@ -198,11 +198,20 @@ public:
    * in question is not in the expected System or of the expected
    * type.
    */
+  virtual const MooseVariableFieldBase & getVariable(
+      THREAD_ID tid,
+      const std::string & var_name,
+      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) const = 0;
   virtual MooseVariableFieldBase &
   getVariable(THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
-              Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) = 0;
+              Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY)
+  {
+    return const_cast<MooseVariableFieldBase &>(const_cast<const SubProblem *>(this)->getVariable(
+        tid, var_name, expected_var_type, expected_var_field_type));
+  }
 
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -312,7 +321,7 @@ public:
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) = 0;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const = 0;
 
   /**
    * Returns the desired radial direction for RZ coordinate transformation
@@ -354,6 +363,9 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
   virtual void addCachedJacobian(THREAD_ID tid) = 0;
+  /**
+   * Deprecated method. Use addCachedJacobian
+   */
   virtual void addCachedJacobianContributions(THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
@@ -704,8 +716,8 @@ protected:
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,
-                                             SystemBase & nl,
-                                             SystemBase & aux);
+                                             const SystemBase & nl,
+                                             const SystemBase & aux) const;
 
   /**
    * Verify the integrity of _vector_tags and _typed_vector_tags

@@ -148,7 +148,7 @@ public:
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
 
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
                               const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
@@ -217,11 +217,13 @@ public:
                             const Real div_threshold);
 
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFEBase & getVariable(
-      THREAD_ID tid,
-      const std::string & var_name,
-      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
-      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) override;
+  using SubProblem::getVariable;
+  virtual const MooseVariableFieldBase &
+  getVariable(THREAD_ID tid,
+              const std::string & var_name,
+              Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+              Moose::VarFieldType expected_var_field_type =
+                  Moose::VarFieldType::VAR_FIELD_ANY) const override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -741,17 +743,6 @@ public:
                                        bool execute_stateful = true);
 
   /**
-   * For finite volume bcs, we need to be able to initialize and compute
-   * materials on ghost elements (elements that don't exist on the mesh - on
-   * the outside side of a boundary face).  To be able to reinit materials
-   * under these circumstances without crashing, we provide a special function
-   * here that reinits the neighbor material properties using the elem element
-   * instead of the neighbor element.
-   */
-  virtual void
-  reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-
-  /**
    * reinit materials on a boundary
    * @param boundary_id The boundary on which to reinit corresponding materials
    * @param tid The thread id
@@ -774,12 +765,6 @@ public:
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
-  /**
-   * This is the special materials swap-back function to be paired with
-   * reinitMaterialsNeighborGhost.  Always use it (and only it) to swap back whenever you
-   * reinit with that function.
-   */
-  virtual void swapBackMaterialsNeighborGhost(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void addPostprocessor(const std::string & pp_name,
@@ -1312,6 +1297,9 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
   virtual void addCachedJacobian(THREAD_ID tid) override;
+  /**
+   * Deprecated method. Use addCachedJacobian
+   */
   virtual void addCachedJacobianContributions(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
@@ -1536,11 +1524,6 @@ public:
                                             Moose::MaterialDataType type,
                                             THREAD_ID tid = 0,
                                             bool no_warn = false);
-
-  std::shared_ptr<MaterialBase> getInterfaceMaterial(std::string name,
-                                                     Moose::MaterialDataType type,
-                                                     THREAD_ID tid = 0,
-                                                     bool no_warn = false);
 
   /*
    * Return a pointer to the MaterialData
@@ -1857,6 +1840,30 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0) override;
 
+  bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
+  /**
+   * Get the materials and variables potentially needed for FV
+   * @param block_id SubdomainID The subdomain id that we want to retrieve materials for
+   * @param face_materials The face materials container that we will fill
+   * @param neighbor_materials The neighbor materials container that we will fill
+   * @param variables The variables container that we will fill that our materials depend on
+   * @param tid The thread id
+   */
+  void getFVMatsAndDependencies(SubdomainID block_id,
+                                std::vector<std::shared_ptr<MaterialBase>> & face_materials,
+                                std::vector<std::shared_ptr<MaterialBase>> & neighbor_materials,
+                                std::set<MooseVariableFieldBase *> & variables,
+                                THREAD_ID tid);
+
+  /**
+   * Resize material data
+   * @param data_type The type of material data to resize
+   * @param nqp The number of quadrature points to resize for
+   * @param tid The thread ID
+   */
+  void resizeMaterialData(Moose::MaterialDataType data_type, unsigned int nqp, THREAD_ID tid);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2067,6 +2074,9 @@ protected:
 
   /// Determines whether a check to verify an active material on every subdomain
   bool _material_coverage_check;
+
+  /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
+  const bool _fv_bcs_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;

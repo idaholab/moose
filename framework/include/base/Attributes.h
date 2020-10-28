@@ -229,6 +229,27 @@ private:
   THREAD_ID _val = 0;
 };
 
+/**
+ * Tracks the libmesh system number that a \p MooseObject is associated with
+ */
+class AttribSysNum : public Attribute
+{
+public:
+  typedef unsigned int Key;
+  void setFrom(Key k) { _val = k; }
+
+  AttribSysNum(TheWarehouse & w) : Attribute(w, "sys_num") {}
+  AttribSysNum(TheWarehouse & w, unsigned int t) : Attribute(w, "sys_num"), _val(t) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribSysNum);
+
+private:
+  unsigned int _val = libMesh::invalid_uint;
+};
+
 /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
 class AttribPreIC : public Attribute
 {

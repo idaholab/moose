@@ -370,6 +370,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
   _the_warehouse->registerAttribute<AttribVar>("variable", 0);
   _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
+  _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {

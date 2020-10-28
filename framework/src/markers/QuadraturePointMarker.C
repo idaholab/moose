@@ -46,13 +46,13 @@ QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
-    _u(mooseVariable()->sln()),
+    _u(mooseVariableField().sln()),
     _qrule(_assembly.qRule()),
     _q_point(_assembly.qPoints()),
     _qp(0),
     _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>())
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Marker::MarkerValue
