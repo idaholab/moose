@@ -104,3 +104,9 @@ Extensions:
 
     MooseDocs.extensions.bibtex:
         duplicate_warning: False
+
+    MooseDocs.extensions.template:
+        active: True
+
+    MooseDocs.extensions.sqa:
+        active: False
