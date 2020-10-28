@@ -24,7 +24,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_zz elastic_strain_zz creep_strain_zz'
-    use_automatic_differentiation = false
+    use_automatic_differentiation = true
   [../]
 []
 
@@ -66,16 +66,16 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2e11
     poissons_ratio = 0.3
   [../]
   [./radial_return_stress]
-    type = ComputeMultipleInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = 'power_law_creep'
   [../]
   [./power_law_creep]
-    type = PowerLawCreepStressUpdate
+    type = ADPowerLawCreepStressUpdate
     coefficient = 1.0e-15
     n_exponent = 4
     activation_energy = 0.0

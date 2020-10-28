@@ -32,6 +32,8 @@ public:
   computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & stress,
                                  const MaterialProperty<RankTwoTensor> & strain_rate) override;
 
+  virtual bool substeppingCapabilityEnabled() override;
+
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;

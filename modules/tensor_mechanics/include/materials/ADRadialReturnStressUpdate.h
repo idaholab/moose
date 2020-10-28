@@ -81,7 +81,7 @@ public:
   bool requiresIsotropicTensor() override { return true; }
 
   /**
-   * If substepping is enabled, calculated the number of substeps as a function
+   * If substepping is enabled, calculate the number of substeps as a function
    * of the elastic strain increment guess and the maximum inelastic strain increment
    * ratio based on a user-specified tolerance.
    * @param strain_increment    When called, this is the elastic strain guess
