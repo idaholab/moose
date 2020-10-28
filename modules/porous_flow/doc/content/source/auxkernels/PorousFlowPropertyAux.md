@@ -20,11 +20,13 @@ following properties are available using the `property` input parameter:
 - `mineral_reaction_rate` (m$^{3}$(secondary species).m$^{-3}$(porous material).s$^{-1}$))
 - `porosity`
 - `permeability`
+- `hystersis_order`
+- `hysteresis_saturation_turning_point`
 
 The fluid phase and fluid component are specified in the `phase` and
 `fluid_component` input parameters, respectively.  For properties
 related to chemical reactions, the `secondary_species` and
-`mineral_species` parameters are relevant.
+`mineral_species` parameters are relevant.  For `hysteresis_saturation_turning_point` the `hysteresis_turning_point` number is relevant.
 
 !alert note
 As this `AuxKernel` uses material properties, only elemental (`Monomial`) `AuxVariables`

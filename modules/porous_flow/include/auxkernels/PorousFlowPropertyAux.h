@@ -11,6 +11,7 @@
 
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
+#include "PorousFlowConstants.h"
 
 /**
  * Provides a simple interface to PorousFlow material properties.
@@ -71,6 +72,13 @@ private:
   /// Permeability of the media
   const MaterialProperty<RealTensorValue> * _permeability;
 
+  /// Hysteresis order
+  const MaterialProperty<unsigned> * _hys_order;
+
+  /// Hysteresis saturation turning points
+  const MaterialProperty<std::array<Real, PorousFlowConstants::MAX_HYSTERESIS_ORDER>> *
+      _hys_sat_tps;
+
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
@@ -90,7 +98,9 @@ private:
     MINERAL_CONCENTRATION,
     MINERAL_REACTION_RATE,
     POROSITY,
-    PERMEABILITY
+    PERMEABILITY,
+    HYSTERESIS_ORDER,
+    HYSTERESIS_SATURATION_TURNING_POINT
   } _property_enum;
 
   /// Phase index
@@ -110,6 +120,9 @@ private:
 
   /// Mineral species number
   const unsigned int _mineral_species;
+
+  /// Hysteresis turning point number
+  const unsigned int _hysteresis_turning_point;
 
   /// Permeability tensor row and column
   const unsigned int _k_row;

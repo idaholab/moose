@@ -19,7 +19,8 @@ PorousFlowPropertyAux::validParams()
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   MooseEnum property_enum("pressure saturation temperature density viscosity mass_fraction relperm "
                           "capillary_pressure enthalpy internal_energy secondary_concentration "
-                          "mineral_concentration mineral_reaction_rate porosity permeability");
+                          "mineral_concentration mineral_reaction_rate porosity permeability "
+                          "hysteresis_order hysteresis_saturation_turning_point");
   params.addRequiredParam<MooseEnum>(
       "property", property_enum, "The fluid property that this auxillary kernel is to calculate");
   params.addParam<unsigned int>("phase", 0, "The index of the phase this auxillary kernel acts on");
@@ -31,6 +32,8 @@ PorousFlowPropertyAux::validParams()
       "fluid_component", 0, "The index of the fluid component this auxillary kernel acts on");
   params.addParam<unsigned int>("secondary_species", 0, "The secondary chemical species number");
   params.addParam<unsigned int>("mineral_species", 0, "The mineral chemical species number");
+  params.addParam<unsigned int>(
+      "hysteresis_turning_point", 0, "The hysteresis turning point number");
   params.addRangeCheckedParam<unsigned int>(
       "row", 0, "row>=0 & row<=2", "Row of permeability tensor to output");
   params.addRangeCheckedParam<unsigned int>(
@@ -51,6 +54,7 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
     _fluid_component(getParam<unsigned int>("fluid_component")),
     _secondary_species(getParam<unsigned int>("secondary_species")),
     _mineral_species(getParam<unsigned int>("mineral_species")),
+    _hysteresis_turning_point(getParam<unsigned int>("hysteresis_turning_point")),
     _k_row(getParam<unsigned int>("row")),
     _k_col(getParam<unsigned int>("column"))
 {
@@ -96,6 +100,11 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
                "Mineral species number entered is greater than the number of aqueous "
                "precipitation-dissolution chemical reactions specified in the Dictator. Remember "
                "that indexing starts at 0");
+
+  if (_hysteresis_turning_point >= PorousFlowConstants::MAX_HYSTERESIS_ORDER)
+    paramError("hysteresis_turning_point",
+               "The maximum number of hysteresis turning points is ",
+               PorousFlowConstants::MAX_HYSTERESIS_ORDER);
 
   // Only get material properties required by this instance of the AuxKernel
   switch (_property_enum)
@@ -163,6 +172,16 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
 
     case PropertyEnum::PERMEABILITY:
       _permeability = &getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp");
+      break;
+
+    case PropertyEnum::HYSTERESIS_ORDER:
+      _hys_order = &getMaterialProperty<unsigned>("PorousFlow_hysteresis_order_qp");
+      break;
+
+    case PropertyEnum::HYSTERESIS_SATURATION_TURNING_POINT:
+      _hys_sat_tps =
+          &getMaterialProperty<std::array<Real, PorousFlowConstants::MAX_HYSTERESIS_ORDER>>(
+              "PorousFlow_hysteresis_saturation_tps_qp");
       break;
   }
 }
@@ -232,6 +251,14 @@ PorousFlowPropertyAux::computeValue()
 
     case PropertyEnum::PERMEABILITY:
       property = (*_permeability)[_qp](_k_row, _k_col);
+      break;
+
+    case PropertyEnum::HYSTERESIS_ORDER:
+      property = 1.0 * (*_hys_order)[_qp];
+      break;
+
+    case PropertyEnum::HYSTERESIS_SATURATION_TURNING_POINT:
+      property = (*_hys_sat_tps)[_qp].at(_hysteresis_turning_point);
       break;
   }
 
