@@ -1,5 +1,5 @@
 [Tests]
-  [objective_optim]
+  [objective_optim_vpp]
     type = CSVDiff
     rel_err = 1.0e-4
     input = master.i

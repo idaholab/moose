@@ -1,0 +1,8 @@
+[Tests]
+  [objective_optim_pp]
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    csvdiff = master_out.csv
+  []
+[]

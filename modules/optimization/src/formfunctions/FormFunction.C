@@ -18,6 +18,7 @@ FormFunction::validParams()
 FormFunction::FormFunction(const InputParameters & parameters)
   : MooseObject(parameters),
     VectorPostprocessorInterface(this),
+    PostprocessorInterface(this),
     _my_comm(MPI_COMM_SELF),
     _parameter_vpp(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
                        ->getUserObject<OptimizationParameterVectorPostprocessor>(

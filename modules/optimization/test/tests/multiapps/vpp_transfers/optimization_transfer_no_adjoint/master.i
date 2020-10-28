@@ -2,7 +2,7 @@
 []
 
 [FormFunction]
-  type = ObjectiveMinimize
+  type = ObjectiveVppMinimize
   parameter_vpp = 'parameter_results'
   data_vpp = 'data_receiver'
 []

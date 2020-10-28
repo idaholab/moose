@@ -12,7 +12,7 @@ public:
 
 private:
   /// vector of simulation data
-  const VectorPostprocessorValue & _simulation_values;
+  std::vector<const PostprocessorValue *> _pp_values;
   /// vector of measured data
-  const VectorPostprocessorValue & _measured_values;
+  const std::vector<Real> & _measured_values;
 };

@@ -6,7 +6,9 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class FormFunction : public MooseObject, public VectorPostprocessorInterface
+class FormFunction : public MooseObject,
+                     public VectorPostprocessorInterface,
+                     public PostprocessorInterface
 {
 public:
   static InputParameters validParams();
