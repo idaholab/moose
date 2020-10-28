@@ -1199,20 +1199,3 @@ div.moose-mega-menu-content{
    color:white;
  }
 }
-
-/* Enable different video for dark mode
-https://stackoverflow.com/questions/59967310/how-to-load-a-different-video-for-dark-mode
-*/
-.moose-video-dark{
-    display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-    .moose-video-dark{
-        display: block;
-    }
-
-    .moose-video-light{
-        display: none;
-    }
-}
