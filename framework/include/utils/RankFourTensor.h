@@ -91,7 +91,8 @@ public:
     antisymmetric_isotropic,
     axisymmetric_rz,
     general,
-    principal
+    principal,
+	orthotropic
   };
 
   template <template <typename> class Tensor, typename Scalar>
@@ -410,6 +411,15 @@ protected:
    */
 
   void fillPrincipalFromInputVector(const std::vector<T> & input);
+
+  /**
+   * fillGeneralOrhotropicFromInputVector takes 10  inputs to fill the Rank-4 tensor
+   * It defines a general orthotropic tensor for which some constraint among
+   * elastic parameters exist/
+   * @param input  Ea, Eb, Ec, Gab, Gbc, Gca, nuba, nuca, nucb, nuab, nuac, nubc
+   */
+  void fillGeneralOrthotropicFromInputVector(const std::vector<T> & input);
+
   template <class T2>
   friend void dataStore(std::ostream &, RankFourTensorTempl<T2> &, void *);
 
