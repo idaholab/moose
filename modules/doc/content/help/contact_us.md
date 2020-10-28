@@ -1,17 +1,15 @@
 # Contact Us
 
-## Mailing Lists
+## Help
 
-The best way to contact the MOOSE team is to utilize the mailing list:
+Please use the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) for all
+questions and inquires.
 
-- MOOSE Users for technical Q&A (moderate traffic): [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users)
-- MOOSE Announcements (very light traffic): [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
+## Announcements
 
-GMail Users: Just click the "Join group" button, everyone else must send an email to:
+In addition to the discussion forum, we also use a mailing list for
+announcements (very light traffic): [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
 
-- [moose-users+subscribe@googlegroups.com](mailto:moose-users+subscribe@googlegroups.com)
+Gmail Users: Just click the "Join group" button, everyone else must send an email to:
+
 - [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
-
-## Twitter
-
-If you use twitter you can use [#mooseframework](https://twitter.com/search?q=%23mooseframework&lang=en) to tell us about your work.
