@@ -24,11 +24,12 @@ ElementPropertyReadFile::validParams()
   params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>("ngrain", 0, "Number of grains");
-  params.addRequiredParam<MooseEnum>(
-      "read_type",
-      MooseEnum("element grain"),
-      "Type of property distribution: element:element by element property "
-      "variation; grain:voronoi grain structure");
+  params.addParam<unsigned int>("nblock", 0, "Number of blocks");
+  params.addParam<MooseEnum>("read_type",
+                             MooseEnum("element grain block"),
+                             "Type of property distribution: element:element by element property "
+                             "grain:voronoi grain structure "
+                             "block:by mesh block");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addParam<MooseEnum>(
       "rve_type",
@@ -40,9 +41,11 @@ ElementPropertyReadFile::validParams()
 ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _prop_file_name(getParam<FileName>("prop_file_name")),
+    _reader(_prop_file_name),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
-    _read_type(getParam<MooseEnum>("read_type")),
+    _nblock(getParam<unsigned int>("nblock")),
+    _read_type(getParam<MooseEnum>("read_type").getEnum<ReadType>()),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
     _mesh(_fe_problem.mesh())
@@ -61,53 +64,46 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     if (_range(i) > _max_range)
       _max_range = _range(i);
 
+  readData();
+}
+
+void
+ElementPropertyReadFile::readData()
+{
+  _reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+  _reader.read();
+
+  unsigned int nobjects = 0;
+
   switch (_read_type)
   {
-    case 0:
-      readElementData();
+    case ReadType::ELEMENT:
+      nobjects = _nelem;
       break;
 
-    case 1:
-      readGrainData();
+    case ReadType::GRAIN:
+      if (_ngrain <= 0)
+        paramError("ngrain", "Provide non-zero number of grains.");
+      nobjects = _ngrain;
+      break;
+
+    case ReadType::BLOCK:
+      if (_nblock <= 0)
+        paramError("nblock", "Provide non-zero number of blocks.");
+      nobjects = _nblock;
       break;
   }
-}
 
-void
-ElementPropertyReadFile::readElementData()
-{
-  _data.resize(_nprop * _nelem);
+  // make sure the data from file has enough rows and columns
+  if (_reader.getData().size() < nobjects)
+    mooseError(
+        "Data in ", _prop_file_name, " does not have enough rows for ", nobjects, " objects.");
+  for (unsigned int i = 0; i < nobjects; i++)
+    if (_reader.getData(i).size() < _nprop)
+      mooseError("Row ", i, " in ", _prop_file_name, " has number of data less than ", _nprop);
 
-  MooseUtils::checkFileReadable(_prop_file_name);
-
-  std::ifstream file_prop;
-  file_prop.open(_prop_file_name.c_str());
-
-  for (unsigned int i = 0; i < _nelem; i++)
-    for (unsigned int j = 0; j < _nprop; j++)
-      if (!(file_prop >> _data[i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
-
-  file_prop.close();
-}
-
-void
-ElementPropertyReadFile::readGrainData()
-{
-  mooseAssert(_ngrain > 0, "Error ElementPropertyReadFile: Provide non-zero number of grains");
-  _data.resize(_nprop * _ngrain);
-
-  MooseUtils::checkFileReadable(_prop_file_name);
-  std::ifstream file_prop;
-  file_prop.open(_prop_file_name.c_str());
-
-  for (unsigned int i = 0; i < _ngrain; i++)
-    for (unsigned int j = 0; j < _nprop; j++)
-      if (!(file_prop >> _data[i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
-
-  file_prop.close();
-  initGrainCenterPoints();
+  if (_read_type == ReadType::GRAIN)
+    initGrainCenterPoints();
 }
 
 void
@@ -123,38 +119,56 @@ ElementPropertyReadFile::initGrainCenterPoints()
 Real
 ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
 {
+  if (prop_num >= _nprop)
+    paramError("nprop",
+               "Property number ",
+               prop_num,
+               " greater than than total number of properties ",
+               _nprop);
+
+  Real data = 0.0;
   switch (_read_type)
   {
-    case 0:
-      return getElementData(elem, prop_num);
+    case ReadType::ELEMENT:
+      data = getElementData(elem, prop_num);
+      break;
 
-    case 1:
-      return getGrainData(elem, prop_num);
+    case ReadType::GRAIN:
+      data = getGrainData(elem, prop_num);
+      break;
+
+    case ReadType::BLOCK:
+      data = getBlockData(elem, prop_num);
+      break;
   }
-  mooseError("Error ElementPropertyReadFile: Provide valid read type");
+  return data;
 }
 
 Real
 ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
 {
   unsigned int jelem = elem->id();
-  mooseAssert(jelem < _nelem,
-              "Error ElementPropertyReadFile: Element "
-                  << jelem << " greater than than total number of element in mesh " << _nelem);
-  mooseAssert(prop_num < _nprop,
-              "Error ElementPropertyReadFile: Property number "
-                  << prop_num << " greater than than total number of properties " << _nprop);
-  return _data[jelem * _nprop + prop_num];
+  if (jelem >= _nelem)
+    mooseError("Element ID", jelem, " greater than than total number of element in mesh ", _nelem);
+  return _reader.getData(jelem)[prop_num];
+}
+
+Real
+ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
+{
+  unsigned int elem_subdomain_id = elem->subdomain_id();
+  if (elem_subdomain_id >= _nblock)
+    paramError("nblock",
+               "Element block id ",
+               elem_subdomain_id,
+               " greater than than total number of blocks in mesh ",
+               _nblock);
+  return _reader.getData(elem_subdomain_id)[prop_num];
 }
 
 Real
 ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) const
 {
-  mooseAssert(prop_num < _nprop,
-              "Error ElementPropertyReadFile: Property number "
-                  << prop_num << " greater than than total number of properties " << _nprop
-                  << "\n");
-
   Point centroid = elem->centroid();
   Real min_dist = _max_range;
   unsigned int igrain = 0;
@@ -183,8 +197,7 @@ ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) 
       igrain = i;
     }
   }
-
-  return _data[igrain * _nprop + prop_num];
+  return _reader.getData(igrain)[prop_num];
 }
 
 // TODO: this should probably use the built-in min periodic distance!

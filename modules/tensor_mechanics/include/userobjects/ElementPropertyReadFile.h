@@ -10,13 +10,16 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "MooseEnum.h"
+#include "DelimitedFileReader.h"
 
 /**
- * Read properties from file - grain or element
+ * Read properties from file - grain, element, or block
  * Input file syntax: prop1 prop2 etc. See test.
  * For grain level, voronoi tesellation with random grain centers are generated;
  * Element center points used for assigning properties
  * Usable for generated mesh
+ * For block type, elements inside one block are assigned identical material properties;
  */
 
 class ElementPropertyReadFile : public GeneralUserObject
@@ -32,14 +35,9 @@ public:
   virtual void finalize() {}
 
   /**
-   * This function  reads element data from file
+   * This function reads data from file
    */
-  void readElementData();
-
-  /**
-   * This function Read grain data from file
-   */
-  virtual void readGrainData();
+  void readData();
 
   /**
    * This function generates grain center point
@@ -64,6 +62,11 @@ public:
   Real getGrainData(const Elem *, unsigned int) const;
 
   /**
+   * This function assigns properties to elements read from file with block  based properties
+   */
+  Real getBlockData(const Elem *, unsigned int) const;
+
+  /**
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
    */
@@ -72,14 +75,16 @@ public:
 protected:
   ///Name of file containing property values
   std::string _prop_file_name;
-  ///Store property values read from file
-  std::vector<Real> _data;
+  ///Use DelimitedFileReader to read and store data from file
+  MooseUtils::DelimitedFileReader _reader;
   ///Number of properties in a row
   unsigned int _nprop;
   ///Number of grains (for property read based on grains)
   unsigned int _ngrain;
-  ///Type of read - element or grain
-  MooseEnum _read_type;
+  ///Number of blocks (for property read based on blocks)
+  unsigned int _nblock;
+  ///Type of read - element, grain, or block
+  const enum class ReadType { ELEMENT, GRAIN, BLOCK } _read_type;
   ///Random seed - used for generating grain centers
   unsigned int _rand_seed;
   ///Type of grain structure - non-periodic default
