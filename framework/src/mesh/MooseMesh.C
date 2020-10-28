@@ -1648,11 +1648,15 @@ MooseMesh::detectPairedSidesets()
     }
   }
 
-  // For a distributed mesh, boundaries may be distributed as well. We therefore
-  // collect information from everyone.
-  // If we already performed ghostGhostedBoundaries, all boundaries are gathered
-  // to every single processor, then we do not do gather boundary ids here
-  if (_use_distributed_mesh && !_need_ghost_ghosted_boundaries)
+  // For a distributed mesh, boundaries may be distributed as well. We therefore collect information
+  // from everyone. If the mesh is already serial, then there is no need to do an allgather. Note
+  // that this is just going to gather information about what the periodic bc ids are. We are not
+  // gathering any remote elements or anything like that. It's just that the GhostPointNeighbors
+  // ghosting functor currently relies on the fact that every process agrees on whether we have
+  // periodic boundaries; every process that thinks there are periodic boundaries will call
+  // MeshBase::sub_point_locator which makes a parallel_object_only() assertion (right or wrong). So
+  // we all need to go there (or not go there)
+  if (_use_distributed_mesh && !_mesh->is_serial())
   {
     // Pack all data together so that we send them via one communication
     // pair: boundary side --> boundary ids.
