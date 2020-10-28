@@ -40,6 +40,7 @@ STOCHASTIC_TOOLS    := no
 TENSOR_MECHANICS    := no
 XFEM                := no
 POROUS_FLOW         := no
+USE_TEST_LIBS       := yes
 
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
