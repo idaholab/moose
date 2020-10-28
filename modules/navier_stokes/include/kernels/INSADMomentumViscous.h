@@ -25,8 +25,7 @@ public:
 
 protected:
   void computeResidual() override;
-  void computeJacobian() override;
-  void computeADOffDiagJacobian() override;
+  void computeResidualsForJacobian() override;
   ADReal computeQpResidual() override;
 
   /**
