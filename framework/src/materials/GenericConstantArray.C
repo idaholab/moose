@@ -12,11 +12,11 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("MooseApp", GenericConstantArray);
+registerMooseObject("MooseApp", ADGenericConstantArray);
 
-defineLegacyParams(GenericConstantArray);
-
+template <bool is_ad>
 InputParameters
-GenericConstantArray::validParams()
+GenericConstantArrayTempl<is_ad>::validParams()
 {
 
   InputParameters params = Material::validParams();
@@ -31,22 +31,30 @@ GenericConstantArray::validParams()
   return params;
 }
 
-GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
+template <bool is_ad>
+GenericConstantArrayTempl<is_ad>::GenericConstantArrayTempl(const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealEigenVector>("prop_value")),
-    _property(declareProperty<RealEigenVector>(_prop_name))
+    _property(declareGenericProperty<RealEigenVector, is_ad>(_prop_name))
 {
 }
 
+template <bool is_ad>
 void
-GenericConstantArray::initQpStatefulProperties()
+GenericConstantArrayTempl<is_ad>::initQpStatefulProperties()
 {
   computeQpProperties();
 }
 
+template <bool is_ad>
 void
-GenericConstantArray::computeQpProperties()
+GenericConstantArrayTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] = _prop_value;
+  _property[_qp].resize(_prop_value.size());
+  for (int i = 0; i < _prop_value.size(); i++)
+    _property[_qp](i) = _prop_value(i);
 }
+
+template class GenericConstantArrayTempl<false>;
+template class GenericConstantArrayTempl<true>;

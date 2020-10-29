@@ -246,6 +246,18 @@ rawValueEqualityHelper(std::vector<T1> & out, const std::vector<T2> & in)
     out[i] = MetaPhysicL::raw_value(in[i]);
 }
 
+template <>
+void rawValueEqualityHelper(ADRealEigenVector & out, const RealEigenVector & in);
+
+template <>
+void rawValueEqualityHelper(RealEigenVector & out, const ADRealEigenVector & in);
+
+template <>
+void rawValueEqualityHelper(ADRealEigenMatrix & out, const RealEigenMatrix & in);
+
+template <>
+void rawValueEqualityHelper(RealEigenMatrix & out, const ADRealEigenMatrix & in);
+
 template <typename T1, typename T2>
 void
 rawValueEqualityHelper(std::vector<std::vector<T1>> & out, const std::vector<std::vector<T2>> & in)

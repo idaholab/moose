@@ -362,6 +362,10 @@ void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
 template <>
 void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
+void dataStore(std::ostream & stream, ADRealEigenVector & v, void * context);
+template <>
+void dataStore(std::ostream & stream, ADRealEigenMatrix & v, void * context);
+template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
 
 template <std::size_t N>
@@ -627,6 +631,10 @@ template <>
 void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
 template <>
 void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
+template <>
+void dataLoad(std::istream & stream, ADRealEigenVector & v, void * context);
+template <>
+void dataLoad(std::istream & stream, ADRealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
 
