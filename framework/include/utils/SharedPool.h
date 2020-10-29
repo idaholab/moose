@@ -67,7 +67,7 @@ private:
   };
 
 public:
-  using ptr_type = std::unique_ptr<T, ExternalDeleter>;
+  typedef typename std::unique_ptr<T, ExternalDeleter> PtrType;
 
   SharedPool() : _this_ptr(new SharedPool<T> *(this)) {}
   virtual ~SharedPool() {}
@@ -75,19 +75,19 @@ public:
   void add(std::unique_ptr<T> t) { _pool.push(std::move(t)); }
 
   template <typename... Args>
-  ptr_type acquire(Args &&... args)
+  PtrType acquire(Args &&... args)
   {
     // if the pool is empty - create one
     if (_pool.empty())
     {
       _num_created++;
-      return std::move(ptr_type(new T(std::forward<Args>(args)...),
-                                ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
+      return std::move(PtrType(new T(std::forward<Args>(args)...),
+                               ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
     }
     else
     {
-      ptr_type tmp(_pool.top().release(),
-                   ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
+      PtrType tmp(_pool.top().release(),
+                  ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
       _pool.pop();
 
       reset(1, *tmp, std::forward<Args>(args)...);
