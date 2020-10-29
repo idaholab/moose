@@ -31,5 +31,4 @@ protected:
 
   /// Vector of hyperparamater values
   std::vector<VectorPostprocessorValue *> _hp_vector;
-
 };

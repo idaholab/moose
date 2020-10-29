@@ -221,54 +221,54 @@ GaussianProcessTrainer::finalize()
 int
 GaussianProcessTrainer::hyperparamTuning()
 {
-PetscErrorCode ierr;
-Tao tao;
-GaussianProcessTrainer * GP_ptr = this;
+  PetscErrorCode ierr;
+  Tao tao;
+  GaussianProcessTrainer * GP_ptr = this;
 
-// Setup Tao optimization problem
-ierr = TaoCreate(MPI_COMM_WORLD, &tao);
-CHKERRQ(ierr);
-// ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
-ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
-CHKERRQ(ierr);
-ierr = TaoSetType(tao, TAOBNCG);
-CHKERRQ(ierr);
-ierr = TaoSetFromOptions(tao);
-CHKERRQ(ierr);
+  // Setup Tao optimization problem
+  ierr = TaoCreate(MPI_COMM_WORLD, &tao);
+  CHKERRQ(ierr);
+  // ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
+  ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
+  CHKERRQ(ierr);
+  ierr = TaoSetType(tao, TAOBNCG);
+  CHKERRQ(ierr);
+  ierr = TaoSetFromOptions(tao);
+  CHKERRQ(ierr);
 
-// Define petsc vetor to hold tunalbe hyper-params
-libMesh::PetscVector<Number> theta(_communicator, _num_tunable);
-ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta.vec());
-CHKERRQ(ierr);
-ierr = TaoSetInitialVector(tao, theta.vec());
-CHKERRQ(ierr);
+  // Define petsc vetor to hold tunalbe hyper-params
+  libMesh::PetscVector<Number> theta(_communicator, _num_tunable);
+  ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta.vec());
+  CHKERRQ(ierr);
+  ierr = TaoSetInitialVector(tao, theta.vec());
+  CHKERRQ(ierr);
 
-// Get Hyperparameter bounds.
-libMesh::PetscVector<Number> lower(_communicator, _num_tunable);
-libMesh::PetscVector<Number> upper(_communicator, _num_tunable);
-buildHyperParamBounds(lower, upper);
-CHKERRQ(ierr);
-ierr = TaoSetVariableBounds(tao, lower.vec(), upper.vec());
-CHKERRQ(ierr);
+  // Get Hyperparameter bounds.
+  libMesh::PetscVector<Number> lower(_communicator, _num_tunable);
+  libMesh::PetscVector<Number> upper(_communicator, _num_tunable);
+  buildHyperParamBounds(lower, upper);
+  CHKERRQ(ierr);
+  ierr = TaoSetVariableBounds(tao, lower.vec(), upper.vec());
+  CHKERRQ(ierr);
 
-// Set Objective and Graident Callback
-ierr = TaoSetObjectiveAndGradientRoutine(
-    tao, GaussianProcessTrainer::FormFunctionGradientWrapper, (void *)this);
-CHKERRQ(ierr);
+  // Set Objective and Graident Callback
+  ierr = TaoSetObjectiveAndGradientRoutine(
+      tao, GaussianProcessTrainer::FormFunctionGradientWrapper, (void *)this);
+  CHKERRQ(ierr);
 
-// Solve
-ierr = TaoSolve(tao);
-CHKERRQ(ierr);
-//
-if (_show_tao)
-{
-  ierr = TaoView(tao, PETSC_VIEWER_STDOUT_WORLD);
-  theta.print();
-}
+  // Solve
+  ierr = TaoSolve(tao);
+  CHKERRQ(ierr);
+  //
+  if (_show_tao)
+  {
+    ierr = TaoView(tao, PETSC_VIEWER_STDOUT_WORLD);
+    theta.print();
+  }
 
-_covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
-return 0;
+  return 0;
 }
 
 PetscErrorCode
