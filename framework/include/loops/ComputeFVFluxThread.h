@@ -267,9 +267,9 @@ private:
   std::set<MooseVariableFieldBase *> _neigh_sub_fv_vars;
 
   /// FVFluxKernels
-  std::set<FVFluxKernel *> _fv_flux_kernels;
-  std::set<FVFluxKernel *> _elem_sub_fv_flux_kernels;
-  std::set<FVFluxKernel *> _neigh_sub_fv_flux_kernels;
+  std::set<FVFluxKernelBase *> _fv_flux_kernels;
+  std::set<FVFluxKernelBase *> _elem_sub_fv_flux_kernels;
+  std::set<FVFluxKernelBase *> _neigh_sub_fv_flux_kernels;
 
   /// Element face materials
   std::vector<std::shared_ptr<MaterialBase>> _elem_face_mats;
@@ -579,7 +579,7 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   // kernels, etc. - but we don't need to add them for other types of objects
   // like FE or DG kernels because those kernels don't run in this loop. Do we
   // really want to integrate fv source kernels into this loop?
-  std::vector<FVFluxKernel *> kernels;
+  std::vector<FVFluxKernelBase *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxKernel")
@@ -588,7 +588,7 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
       .template condition<AttribVectorTags>(_tags)
       .queryInto(kernels);
 
-  _elem_sub_fv_flux_kernels = std::set<FVFluxKernel *>(kernels.begin(), kernels.end());
+  _elem_sub_fv_flux_kernels = std::set<FVFluxKernelBase *>(kernels.begin(), kernels.end());
 
   for (auto * k : _elem_sub_fv_flux_kernels)
   {
@@ -637,7 +637,7 @@ ComputeFVFluxThread<RangeType>::neighborSubdomainChanged()
   // kernels, etc. - but we don't need to add them for other types of objects
   // like FE or DG kernels because those kernels don't run in this loop. Do we
   // really want to integrate fv source kernels into this loop?
-  std::vector<FVFluxKernel *> kernels;
+  std::vector<FVFluxKernelBase *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxKernel")
@@ -646,7 +646,7 @@ ComputeFVFluxThread<RangeType>::neighborSubdomainChanged()
       .template condition<AttribVectorTags>(_tags)
       .queryInto(kernels);
 
-  _neigh_sub_fv_flux_kernels = std::set<FVFluxKernel *>(kernels.begin(), kernels.end());
+  _neigh_sub_fv_flux_kernels = std::set<FVFluxKernelBase *>(kernels.begin(), kernels.end());
 
   for (auto * k : _neigh_sub_fv_flux_kernels)
   {
