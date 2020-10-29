@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_in.e'
+    cli_args = '--mesh-only'
+    recover = False
+  [../]
+[]
