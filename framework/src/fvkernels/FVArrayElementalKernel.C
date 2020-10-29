@@ -29,7 +29,7 @@ FVArrayElementalKernel::FVArrayElementalKernel(const InputParameters & parameter
                            false,
                            "variable",
                            Moose::VarKindType::VAR_NONLINEAR,
-                           Moose::VarFieldType::VAR_FIELD_STANDARD),
+                           Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariableFV()),
     _u(_var.adSln())
 {

@@ -26,7 +26,7 @@ FVArrayFluxKernel::validParams()
 FVArrayFluxKernel::FVArrayFluxKernel(const InputParameters & params)
   : FVFluxKernelBase(params),
     NeighborMooseVariableInterface(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_ARRAY),
     _var(*mooseVariableFV()),
     _u_elem(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor()),

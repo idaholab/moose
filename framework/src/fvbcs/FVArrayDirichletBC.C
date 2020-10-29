@@ -26,8 +26,8 @@ FVArrayDirichletBC::FVArrayDirichletBC(const InputParameters & parameters)
                                             false,
                                             "variable",
                                             Moose::VarKindType::VAR_NONLINEAR,
-                                            Moose::VarFieldType::VAR_FIELD_STANDARD),
-  _val(getParam<RealEigenVector>("value"))
+                                            Moose::VarFieldType::VAR_FIELD_ARRAY),
+    _val(getParam<RealEigenVector>("value"))
 {
 }
 
