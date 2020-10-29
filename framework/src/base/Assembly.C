@@ -902,6 +902,10 @@ Assembly::computeAffineMapAD(const Elem * elem,
 {
   computeSinglePointMapAD(elem, qw, 0, fe);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto sys_num = _sys.number();
+#endif
+
   for (unsigned int p = 1; p < n_qp; p++)
   {
     // Compute xyz at all other quadrature points. Note that this map method call is only really
@@ -915,12 +919,18 @@ Assembly::computeAffineMapAD(const Elem * elem,
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
       {
         mooseAssert(elem_nodes[i], "The node is null!");
-        VectorValue<DualReal> elem_point = *elem_nodes[i];
+        const Node & node = *elem_nodes[i];
+        VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i
+#endif
+                                   ,
                                1.);
 
         _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
@@ -1004,6 +1014,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto sys_num = _sys.number();
+#endif
 
   switch (dim)
   {
@@ -1026,12 +1039,18 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       for (std::size_t i = 0; i < num_shapes; i++)
       {
         libmesh_assert(elem_nodes[i]);
-        libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
+        const Node & node = *elem_nodes[i];
+        libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i
+#endif
+                                   ,
                                1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
@@ -1076,12 +1095,18 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       for (std::size_t i = 0; i < num_shapes; i++)
       {
         libmesh_assert(elem_nodes[i]);
-        libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
+        const Node & node = *elem_nodes[i];
+        libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i
+#endif
+                                   ,
                                1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
@@ -1153,12 +1178,18 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
       for (std::size_t i = 0; i < num_shapes; i++)
       {
         libmesh_assert(elem_nodes[i]);
-        libMesh::VectorValue<DualReal> elem_point = *elem_nodes[i];
+        const Node & node = *elem_nodes[i];
+        libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + i,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + i
+#endif
+                                   ,
                                1.);
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
@@ -1300,13 +1331,19 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
   const auto n_qp = qw.size();
   const Elem * elem = side->parent();
+#ifndef MOOSE_GLOBAL_AD_INDEXING
   auto side_number = elem->which_side_am_i(side);
+#endif
   const auto & dpsidxi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsidxi();
   const auto & dpsideta_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsideta();
   const auto & psi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_psi();
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto sys_num = _sys.number();
+#endif
+
   if (_calculate_curvatures)
   {
     d2psidxi2_map = &(*_holder_fe_face_helper[dim])->get_fe_map().get_d2psidxi2();
@@ -1329,14 +1366,22 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       VectorValue<DualReal> side_point;
       if (_calculate_face_xyz)
       {
-        side_point = side->point(0);
+        const Node & node = side->node_ref(0);
+        side_point = node;
+#ifndef MOOSE_GLOBAL_AD_INDEXING
         auto element_node_number = elem->local_side_node(side_number, 0);
+#endif
 
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
+#endif
+                                   ,
                                1.);
       }
 
@@ -1375,14 +1420,22 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        VectorValue<DualReal> side_point = side->point(i);
+        const Node & node = side->node_ref(i);
+        VectorValue<DualReal> side_point = node;
+#ifndef MOOSE_GLOBAL_AD_INDEXING
         auto element_node_number = elem->local_side_node(side_number, i);
+#endif
 
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
+#endif
+                                   ,
                                1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
@@ -1443,14 +1496,22 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        VectorValue<DualReal> side_point = side->point(i);
+        const Node & node = side->node_ref(i);
+        VectorValue<DualReal> side_point = node;
+#ifndef MOOSE_GLOBAL_AD_INDEXING
         auto element_node_number = elem->local_side_node(side_number, i);
+#endif
 
         unsigned dimension = 0;
         if (_computing_jacobian)
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
-                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number,
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                               node.dof_number(sys_num, disp_num, 0)
+#else
+                               disp_num * _sys.getMaxVarNDofsPerElem() + element_node_number
+#endif
+                                   ,
                                1.);
 
         for (unsigned int p = 0; p < n_qp; p++)
