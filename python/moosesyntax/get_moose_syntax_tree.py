@@ -15,7 +15,7 @@ import moosetree
 import mooseutils
 from .nodes import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
 
-def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=None):
+def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable using --json.
 
@@ -23,8 +23,6 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
       ext[str|dict]: The executable to run or the parsed JSON tree structure
       remove[list|dict]: Syntax to mark as removed. The input data structure can be a single list or
                          a dict of lists.
-      hide[list|dict]: Syntax to mark as hidden. The input data structure can be a single list or
-                       a dict of lists.
       alias[dict]: A dict of alias information; the key is the actual syntax and the value is the
                    alias to be applied (e.g., {'/Kernels/Diffusion':'/Physics/Diffusion'}).
       unregister[dict]: A dict of classes with duplicate registration information; the key is the
@@ -46,8 +44,7 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
         node = SyntaxNode(root, key)
         __syntax_tree_helper(node, value)
 
-    # Build hide/remove sets
-    hidden = __build_set_from_yaml(hide)
+    # Build remove sets
     removed = __build_set_from_yaml(remove)
 
     # Initialize dict if not provided
@@ -57,12 +54,8 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
         if isinstance(unregister[key], dict):
             unregister.update(unregister.pop(key))
 
-    # Apply remove/hide/alias/unregister restrictions
+    # Apply remove/alias/unregister restrictions
     for node in moosetree.iterate(root):
-
-        # Hidden
-        if node.fullpath() in hidden:
-            node.hidden = True
 
         # Removed
         if (node.fullpath() in removed) or ((node.parent is not None) and node.parent.removed):

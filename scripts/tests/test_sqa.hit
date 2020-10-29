@@ -3,7 +3,6 @@
     exe_name = moose_test
     exe_directory = test
     content_directory = framework/doc/content
-    hidden = framework/doc/hidden.yml
     remove = "framework/doc/remove.yml test/doc/remove.yml"
     allow_missing_description = True
     allow_missing_markdown = True

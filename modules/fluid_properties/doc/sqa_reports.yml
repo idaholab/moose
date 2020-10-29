@@ -4,11 +4,10 @@ Applications:
         app_types:
             - FluidPropertiesApp
         content_directory: ${MOOSE_DIR}/modules/fluid_properties/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
-        log_hidden_syntax: WARNING
+        remove:
+            - modules/fluid_properties/doc/remove.yml
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
+        log_missing_markdown: WARNING
 
 Documents:
     software_requirements_specification: sqa/fluid_properties_srs.md

@@ -113,36 +113,6 @@ class TestSyntaxTree(unittest.TestCase):
         node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/ADDiffusion')
         self.assertTrue(node.removed)
 
-    def testHide(self):
-
-        # Test with flat list
-        root = moosesyntax.get_moose_syntax_tree(self.json, hide=['/Outputs', '/Kernels/Diffusion'])
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Outputs')
-        self.assertFalse(any([n.hidden for n in node])) # children should not be marked
-
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels')
-        self.assertFalse(node.hidden)
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/Diffusion')
-        self.assertTrue(node.hidden)
-
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/ADDiffusion')
-        self.assertFalse(node.hidden)
-
-        # Test with dict of lists
-        hide = dict(first=['/Outputs', '/Kernels/Diffusion'], second=['/Kernels/ADDiffusion'])
-        root = moosesyntax.get_moose_syntax_tree(self.json, hide=hide)
-
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Outputs')
-        self.assertFalse(any([n.hidden for n in node])) # children should not be marked
-
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels')
-        self.assertFalse(node.hidden)
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/Diffusion')
-        self.assertTrue(node.hidden)
-
-        node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/ADDiffusion')
-        self.assertTrue(node.hidden)
-
     def testAlias(self):
         root = moosesyntax.get_moose_syntax_tree(self.json, alias={'/Kernels/Diffusion':'/Physics/Diffusion'})
         node = moosetree.find(root, lambda n: n.fullpath() == '/Kernels/Diffusion')

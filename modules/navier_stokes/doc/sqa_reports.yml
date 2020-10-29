@@ -6,14 +6,9 @@ Applications:
         content_directory: ${MOOSE_DIR}/modules/navier_stokes/doc/content
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        hidden:
-            - ${MOOSE_DIR}/modules/navier_stokes/doc/hidden.yml
-            - ${MOOSE_DIR}/framework/doc/hidden.yml
         unregister:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
 
 Documents:
     log_software_requirements_specification: WARNING

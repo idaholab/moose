@@ -16,14 +16,10 @@ from .LogHelper import LogHelper
 
 def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_prefix='', allow_test_objects=False, **kwargs):
 
-    kwargs.setdefault('log_hidden_syntax', logging.ERROR)
     kwargs.setdefault('log_stub_files', logging.ERROR)
     kwargs.setdefault('log_duplicate_files', logging.ERROR)
-    kwargs.setdefault('log_removed_and_hidden', logging.ERROR)
     kwargs.setdefault('log_missing_description', logging.ERROR)
     kwargs.setdefault('log_missing_markdown', logging.ERROR)
-    kwargs.setdefault('log_hidden_non_stub', logging.ERROR)
-    kwargs.setdefault('log_non_hidden_stub', logging.ERROR)
     kwargs.setdefault('log_duplicate_files', logging.ERROR)
     logger = LogHelper(__name__, **kwargs)
 
@@ -55,24 +51,14 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     prefix = object_prefix if is_object else syntax_prefix
     md_path = os.path.join(prefix, node.markdown)
     md_file = find_md_file(md_path, file_cache, logger)
-    is_stub = file_is_stub(md_file)
     is_missing_description = is_object and (not node.description) and (not node.removed)
     is_missing = (md_file is None) and (not node.removed)
-
-    # ERROR: object is hidden
-    if node.hidden:
-        msg = "{} is marked as hidden, documentation is considered incomplete if objects are hidden.".format(node.fullpath())
-        logger.log('log_hidden_syntax', msg)
+    is_stub = file_is_stub(md_file) if (not is_missing) and (not node.removed) else False
 
     # ERROR: object is stub
     if is_stub:
         msg = "{} is a stub file, documentation is considered incomplete if pages are unmodified from stubs.".format(node.fullpath())
         logger.log('log_stub_files', msg)
-
-    # ERROR: object is hidden and removed
-    if node.removed and node.hidden:
-        msg = "{} is marked as both hidden and removed.".format(node.fullpath())
-        logger.log('log_removed_and_hidden', msg)
 
     # ERROR: object does not have a markdown file and is not removed
     if (not node.removed) and is_missing:
@@ -85,16 +71,6 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     if (not node.removed) and is_missing_description:
         msg = "{} is missing a class description.".format(node.fullpath())
         logger.log('log_missing_description', msg)
-
-    # ERROR: object is hidden, but markdown is not a stub
-    if (not node.removed) and (node.hidden and (md_file is not None) and (not is_stub)):
-        msg = "{} is hidden but the content is not a stub.\n{}".format(node.fullpath(), md_file)
-        logger.log('log_hidden_non_stub', msg)
-
-    # ERROR: markdown is a stub but not hidden
-    if (not node.removed) and (md_file is not None) and (is_stub and (not node.hidden)):
-        msg = "{} has a stub markdown page and is not hidden.\n{}".format(node.fullpath(), md_file)
-        logger.log('log_non_hidden_stub', msg)
 
     # Store attributes for stub page generation
     node['_md_file'] = md_file
@@ -124,11 +100,19 @@ def find_md_file(path, file_cache, logger):
 
 def file_is_stub(filename):
     """Helper for getting stub status for markdown file"""
-    if filename is not None:
-        with open(filename, 'r') as fid:
-            content = fid.read()
-            if content and re.search(r'(stubs\/moose_(object|action|system).md.template)', content) or \
-               ('!! MOOSE Documentation Stub (remove this when content is added)' in content) or \
-               ('!alert! construction title=Undocumented' in content):
-                return True
+    with open(filename, 'r') as fid:
+        content = fid.read()
+
+    # Empty is considered a stub
+    if not content:
+        return True
+    # Old template method
+    elif '.md.template' in content:
+        return True
+    # Even older comment method
+    elif '!! MOOSE Documentation Stub (remove this when content is added)' in content:
+        return True
+    # Current alert method
+    elif '!alert! construction title=Undocumented' in content:
+        return True
     return False

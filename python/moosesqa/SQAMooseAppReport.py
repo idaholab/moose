@@ -28,7 +28,6 @@ from .LogHelper import LogHelper
 @mooseutils.addProperty('content_directory', ptype=str)
 @mooseutils.addProperty('object_prefix', ptype=str)
 @mooseutils.addProperty('syntax_prefix', ptype=str)
-@mooseutils.addProperty('hidden', ptype=list)
 @mooseutils.addProperty('remove', ptype=list)
 @mooseutils.addProperty('alias', ptype=list)
 @mooseutils.addProperty('unregister', ptype=list)
@@ -84,14 +83,13 @@ class SQAMooseAppReport(SQAReport):
         # Build syntax tree if not provided
         if self.app_syntax is None:
 
-            # Get the hidden/removed/alias information
-            hide = self._loadYamlFiles(self.hidden)
+            # Get the removed/alias information
             remove = self._loadYamlFiles(self.remove)
             alias = self._loadYamlFiles(self.alias)
             unregister = self._loadYamlFiles(self.unregister)
 
             # Build the complete syntax tree
-            self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
+            self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, remove=remove,
                                                                 alias=alias, unregister=unregister)
 
         # Perform the checks
@@ -151,7 +149,7 @@ class SQAMooseAppReport(SQAReport):
         self._writeFile(filename, content)
 
     def _loadYamlFiles(self, filenames):
-        """Load the hidden/removed/alias yml files"""
+        """Load the removed/alias yml files"""
         content = dict()
         if filenames is not None:
             for fname in filenames:

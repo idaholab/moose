@@ -12,7 +12,6 @@ Extensions:
         home: /modules/level_set
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/level_set
-        hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

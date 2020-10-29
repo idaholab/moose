@@ -48,26 +48,6 @@ Extensions:
         executable: ${MOOSE_DIR}/modules/combined
         unregister:
             framework: !include framework/doc/unregister.yml
-        hide:
-            framework: !include framework/doc/hidden.yml
-            chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
-            #combined: !include modules/combined/doc/hidden.yml
-            contact: !include modules/contact/doc/hidden.yml
-            #geochemistry: !include modules/geochemistry/doc/hidden.yml
-            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
-            #functional_expansion_tools: !include modules/functional_expansion_tools/doc/hidden.yml
-            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
-            #level_set: !include modules/level_set/doc/hidden.yml
-            misc: !include modules/misc/doc/hidden.yml
-            navier_stokes: !include modules/navier_stokes/doc/hidden.yml
-            peridynamics: !include modules/peridynamics/doc/hidden.yml
-            phase_field: !include modules/phase_field/doc/hidden.yml
-            porous_flow: !include modules/porous_flow/doc/hidden.yml
-            #rdg: !include modules/rdg/doc/hidden.yml
-            #richards: !include modules/richards/doc/hidden.yml
-            stochastic_tools: !include modules/stochastic_tools/doc/hidden.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
-            #xfem: !include modules/xfem/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
             #chemical_reactions: !include modules/chemical_reactions/doc/remove.yml

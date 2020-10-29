@@ -13,10 +13,6 @@ Extensions:
         home: /modules/peridynamics
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/peridynamics
-        hide:
-            framework: !include framework/doc/hidden.yml
-            peridynamics: !include modules/peridynamics/doc/hidden.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
         includes:

@@ -6,12 +6,9 @@ Applications:
         content_directory: framework/doc/content
         unregister:
             - framework/doc/unregister.yml
-        hidden:
-            - framework/doc/hidden.yml
         remove:
             - framework/doc/remove.yml
             - test/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
 
@@ -20,9 +17,6 @@ Applications:
         app_types:
             - ChemicalReactionsApp
         content_directory: modules/chemical_reactions/doc/content
-        hidden:
-            - modules/chemical_reactions/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
 
@@ -31,10 +25,7 @@ Applications:
         app_types:
             - ContactApp
         content_directory: modules/contact/doc/content
-        hidden:
-            - modules/contact/doc/hidden.yml
         log_missing_description: WARNING
-        log_hidden_syntax: WARNING
         log_missing_markdown: WARNING
         show_warning: false
 
@@ -55,11 +46,7 @@ Applications:
         app_types:
             - FluidPropertiesApp
         content_directory: modules/fluid_properties/doc/content
-        hidden:
-            - modules/fluid_properties/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
         log_missing_description: WARNING
         show_warning: false
 
@@ -74,11 +61,7 @@ Applications:
         app_types:
             - HeatConductionApp
         content_directory: modules/heat_conduction/doc/content
-        hidden:
-            - modules/heat_conduction/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
         log_missing_description: WARNING
         show_warning: false
 
@@ -93,11 +76,7 @@ Applications:
         app_types:
             - MiscApp
         content_directory: modules/misc/doc/content
-        hidden:
-            - modules/misc/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
         log_missing_description: WARNING
         show_warning: false
 
@@ -108,12 +87,8 @@ Applications:
         content_directory: modules/navier_stokes/doc/content
         remove:
             - framework/doc/remove.yml
-        hidden:
-            - modules/navier_stokes/doc/hidden.yml
-            - framework/doc/hidden.yml
         unregister:
             - framework/doc/unregister.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_missing_description: WARNING
         show_warning: false
@@ -123,10 +98,7 @@ Applications:
         app_types:
             - PeridynamicsApp
         content_directory: modules/peridynamics/doc/content
-        hidden:
-            - modules/peridynamics/doc/hidden.yml
         log_stub_files: WARNING
-        log_hidden_syntax: WARNING
         show_warning: false
 
     phase_field:
@@ -134,14 +106,9 @@ Applications:
         app_types:
             - PhaseFieldApp
         content_directory: modules/phase_field/doc/content
-        hidden:
-            - modules/phase_field/doc/hidden.yml
-            - framework/doc/hidden.yml
         remove:
             - framework/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
         log_missing_description: WARNING
         show_warning: false
 
@@ -150,11 +117,8 @@ Applications:
         app_types:
             - PorousFlowApp
         content_directory: modules/porous_flow/doc/content
-        hidden:
-            - modules/porous_flow/doc/hidden.yml
         remove:
             - framework/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
 
@@ -169,11 +133,8 @@ Applications:
         app_types:
             - StochasticToolsApp
         content_directory: modules/stochastic_tools/doc/content
-        hidden:
-            - modules/stochastic_tools/doc/hidden.yml
         remove:
             - modules/stochastic_tools/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
 
@@ -182,14 +143,9 @@ Applications:
         app_types:
             - TensorMechanicsApp
         content_directory: modules/tensor_mechanics/doc/content
-        hidden:
-            - modules/tensor_mechanics/doc/hidden.yml
-            - framework/doc/hidden.yml
         remove:
             - framework/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
         log_missing_description: WARNING
         show_warning: false
 
@@ -198,7 +154,6 @@ Applications:
         app_types:
             - XFEMApp
         content_directory: modules/xfem/doc/content
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
         show_warning: false
 
