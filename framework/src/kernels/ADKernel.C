@@ -218,12 +218,12 @@ ADKernelTempl<T>::computeADOffDiagJacobian()
         auto & ce = _assembly.couplingEntries();
         for (const auto & it : ce)
         {
-          MooseVariableFEBase & ivariable = *(it.first);
-          MooseVariableFEBase & jvariable = *(it.second);
+          const MooseVariableFEBase & ivariable = *(it.first);
+          const MooseVariableFEBase & jvariable = *(it.second);
 
           unsigned int ivar = ivariable.number();
 
-          if (ivar != _var.number())
+          if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
             continue;
 
           addJacobian(jvariable);
