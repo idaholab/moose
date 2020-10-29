@@ -272,6 +272,13 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned
             (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
                 ? _phi
                 : _phi_neighbor;
+        const auto jsub =
+            (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
+                ? _current_elem->subdomain_id()
+                : _neighbor_elem->subdomain_id();
+
+        if (!jvariable.hasBlocks(jsub))
+          return;
 
         prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, nested_type);
 

@@ -201,7 +201,7 @@ ADIntegratedBCTempl<T>::computeADOffDiagJacobian()
 
           unsigned int ivar = ivariable.number();
 
-          if (ivar != _var.number())
+          if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
             continue;
 
           addJacobian(jvariable);
