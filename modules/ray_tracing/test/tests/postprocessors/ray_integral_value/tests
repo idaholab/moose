@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayIntegralValue.md'
+
+  [errors]
+    requirement = 'The system shall report an error when sampling the integrated value by a ray and'
+
+    [not_integral_ray_kernel]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'RayKernels/active=null Postprocessors/active=not_integral_ray_kernel'
+      expect_err = "RayIntegralValue 'not_integral_ray_kernel': The NullRayKernel 'null' is not derived from an IntegralRayKernel."
+
+      detail = 'the provided IntegralRayKernel is not an IntegralRayKernel '
+    []
+    [not_found]
+      type = RunException
+      input = 'ray_integral_value_errors.i'
+      cli_args = 'RayKernels/active=null Postprocessors/active=not_found'
+      expect_err = "RayIntegralValue 'not_found': The RayKernel by the name 'dummy' was not found."
+
+      detail = 'and when the provided IntegralRayKernel was not found.'
+    []
+  []
+[]

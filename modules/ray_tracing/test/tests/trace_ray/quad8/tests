@@ -1,0 +1,77 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [tests]
+    requirement = 'The system shall be able to trace rays within planar QUAD8 elements '
+    [vtv]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'vtv_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=quad8
+                  UserObjects/lots/vertex_to_vertex=true
+                  Outputs/file_base=vtv_out'
+      allow_test_objects = true
+      abs_zero = 1e-8
+      method = '!dbg'
+
+      detail = 'from boundary vertices on boundary sides in the direction of the vertices on the other side of the same boundary element, '
+    []
+
+    [ctv]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'ctv_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=quad8
+                  UserObjects/lots/centroid_to_vertex=true
+                  Outputs/file_base=ctv_out'
+      allow_test_objects = true
+      abs_zero = 1e-8
+      method = '!dbg'
+
+      detail = 'from the centroids of boundary sides in the direction of all other vertices in the same boundary element, '
+    []
+
+    [ctc]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'ctc_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=quad8
+                  UserObjects/lots/centroid_to_centroid=true
+                  Outputs/file_base=ctc_out'
+      allow_test_objects = true
+      abs_zero = 1e-8
+      method = '!dbg'
+
+      detail = 'from the centroids of all boundary sides to the centroids of all other boundary elements, '
+    []
+
+    [side_aq]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'side_aq_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=quad8
+                  UserObjects/lots/side_aq=true
+                  Outputs/file_base=side_aq_out'
+      allow_test_objects = true
+      abs_zero = 1e-8
+      method = '!dbg'
+
+      detail = 'from boundary sides centroids using an angular quadrature, '
+    []
+
+    [centroid_aq]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'centroid_aq_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=quad8
+                  UserObjects/lots/centroid_aq=true
+                  Outputs/file_base=centroid_aq_out'
+      allow_test_objects = true
+      abs_zero = 1e-8
+      method = '!dbg'
+
+      detail = 'and from boundary element centroids using an angular quadrature.'
+    []
+  []
+[]

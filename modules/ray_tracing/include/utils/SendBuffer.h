@@ -27,7 +27,7 @@ class SendBuffer : public ParallelObject
 {
 public:
   SendBuffer(const libMesh::Parallel::Communicator & comm,
-             const Context & context,
+             const Context * const context,
              const processor_id_type pid,
              const ParallelStudyMethod & method,
              const unsigned int min_buffer_size,
@@ -55,7 +55,7 @@ public:
   unsigned long int bufferPoolCreated() const { return _buffer_pool.num_created(); }
 
   /**
-   * Whether or not messges are currently being sent
+   * Whether or not messages are currently being sent
    */
   bool currentlySending() const { return _requests.size(); }
   /**
@@ -64,7 +64,7 @@ public:
   bool currentlyBuffered() const { return _buffer.size(); }
 
   /**
-   * Move a object to the buffer.  May cause the buffer to be communicated.
+   * Move an object to the buffer.  May cause the buffer to be communicated.
    *
    * This DOES call std::move on the object
    */
@@ -92,7 +92,7 @@ public:
 
 private:
   /// The context
-  const Context & _context;
+  const Context * const _context;
   /// The processor ID this buffer will send to
   const processor_id_type _pid;
 
@@ -103,7 +103,7 @@ private:
   /// Maximum size of the buffer (in objects)
   const unsigned int _max_buffer_size;
 
-  /// Multiplier for the buffer size for growin4g the buffer
+  /// Multiplier for the buffer size for growing the buffer
   const Real _buffer_growth_multiplier;
   /// Multiplier for the buffer size for shrinking the buffer
   const Real _buffer_shrink_multiplier;
@@ -118,6 +118,8 @@ private:
 
   /// The buffer
   std::vector<std::shared_ptr<Object>> _buffer;
+  /// The size of the objects in the buffer in bytes
+  std::size_t _buffer_size_bytes;
 
   /// List of Requests
   std::list<std::shared_ptr<Parallel::Request>> _requests;
@@ -135,7 +137,7 @@ private:
 
 template <typename Object, typename Context>
 SendBuffer<Object, Context>::SendBuffer(const libMesh::Parallel::Communicator & comm,
-                                        const Context & context,
+                                        const Context * const context,
                                         const processor_id_type pid,
                                         const ParallelStudyMethod & method,
                                         const unsigned int min_buffer_size,
@@ -154,6 +156,7 @@ SendBuffer<Object, Context>::SendBuffer(const libMesh::Parallel::Communicator & 
     _object_buffer_tag(object_buffer_tag),
     _current_buffer_size(_min_buffer_size),
     _current_buffer_size_real(_min_buffer_size),
+    _buffer_size_bytes(0),
     _objects_sent(0),
     _buffers_sent(0)
 {
@@ -171,12 +174,15 @@ template <typename Object, typename Context>
 void
 SendBuffer<Object, Context>::moveObject(std::shared_ptr<Object> & object)
 {
+  _buffer_size_bytes +=
+      Parallel::Packing<std::shared_ptr<Object>>::packable_size(object, _context) *
+      sizeof(typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type);
   _buffer.emplace_back(std::move(object));
 
-  // 2000 is a safety net to try to stay below 1MB
+  // Force a send with SMART if we find it appropriate
   if ((_method == ParallelStudyMethod::SMART &&
        (_buffer.size() >= _current_buffer_size || _buffer.size() == _max_buffer_size)) ||
-      (_buffer.size() > 200000))
+      (_buffer_size_bytes > 1048576)) // 1 MB
   {
     _current_buffer_size_real =
         std::min(_buffer_growth_multiplier * _current_buffer_size_real, (Real)_max_buffer_size);
@@ -198,6 +204,7 @@ SendBuffer<Object, Context>::forceSend(const bool shrink_current_buffer_size)
 
     _requests.push_back(req);
 
+    _buffer_size_bytes = 0;
     _objects_sent += _buffer.size();
     _buffers_sent++;
 
@@ -205,7 +212,7 @@ SendBuffer<Object, Context>::forceSend(const bool shrink_current_buffer_size)
         buffer = _buffer_pool.acquire();
 
     comm().nonblocking_send_packed_range(
-        _pid, &_context, _buffer.begin(), _buffer.end(), *req, buffer, _object_buffer_tag);
+        _pid, _context, _buffer.begin(), _buffer.end(), *req, buffer, _object_buffer_tag);
 
     _buffer.clear();
     _buffer.reserve(_max_buffer_size);

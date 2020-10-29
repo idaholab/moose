@@ -1,0 +1,19 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+  [test]
+    type = 'CSVDiff'
+    input = '../lots.i'
+    csvdiff = 'unset_incoming_side_out.csv'
+    cli_args = 'Mesh/gmg/elem_type=quad4
+                UserObjects/lots/vertex_to_vertex=true
+                UserObjects/lots/centroid_to_vertex=true
+                UserObjects/lots/centroid_to_centroid=true
+                UserObjects/lots/side_aq=true
+                UserObjects/lots/set_incoming_side=false
+                Outputs/file_base=unset_incoming_side_out'
+    allow_test_objects = true
+    abs_zero = 1e-8
+    requirement = 'The system shall support not setting the incoming side at the beginning of a trace.'
+  []
+[]

@@ -6861,6 +6861,14 @@ FEProblemBase::computingNonlinearResid(bool computing_nonlinear_residual)
 }
 
 void
+FEProblemBase::setCurrentlyComputingResidual(bool currently_computing_residual)
+{
+  if (_displaced_problem)
+    _displaced_problem->setCurrentlyComputingResidual(currently_computing_residual);
+  _currently_computing_residual = currently_computing_residual;
+}
+
+void
 FEProblemBase::uniformRefine()
 {
   // ResetDisplacedMeshThread::onNode looks up the reference mesh by ID, so we need to make sure

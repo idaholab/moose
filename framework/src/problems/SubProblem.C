@@ -50,6 +50,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _rz_coord_axis(1), // default to RZ rotation around y-axis
     _currently_computing_jacobian(false),
     _computing_nonlinear_residual(false),
+    _currently_computing_residual(false),
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),

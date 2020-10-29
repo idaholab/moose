@@ -34,14 +34,14 @@ struct BndElement
 struct ConstBndElement
 {
   ConstBndElement(const Elem * elem, unsigned short int side, BoundaryID bnd_id)
-    : _elem(elem), _side(side), _bnd_id(bnd_id)
+    : elem(elem), side(side), bnd_id(bnd_id)
   {
   }
 
   /// pointer to the element
-  const Elem * _elem;
+  const Elem * elem;
   /// side number
-  unsigned short int _side;
+  unsigned short int side;
   /// boundary id for the node
-  BoundaryID _bnd_id;
+  BoundaryID bnd_id;
 };

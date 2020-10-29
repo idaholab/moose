@@ -690,6 +690,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION(_compute_residual_tags_timer);
 
+  _fe_problem.setCurrentlyComputingResidual(true);
+
   bool required_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
 
   _n_residual_evaluations++;
@@ -773,6 +775,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 
   // not supposed to do anything on matrix
   activeAllMatrixTags();
+
+  _fe_problem.setCurrentlyComputingResidual(false);
 }
 
 void

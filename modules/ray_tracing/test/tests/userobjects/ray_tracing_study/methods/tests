@@ -1,0 +1,39 @@
+[Tests]
+  [tests]
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+    requirement = 'The system shall support the tracing of rays using '
+
+    [smart]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'lots_out.csv'
+      cli_args = 'UserObjects/lots/method=smart
+                  Outputs/file_base=lots_out'
+      allow_test_objects = true
+      detail = 'an asynchronous method, '
+    []
+
+    [bs]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'lots_out.csv'
+      cli_args = 'UserObjects/lots/method=bs
+                  UserObjects/lots/allow_new_work_during_execution=false
+                  Outputs/file_base=lots_out'
+      allow_test_objects = true
+      detail = 'a bulk-synchronous method, '
+    []
+
+    [harm]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'lots_out.csv'
+      cli_args = 'UserObjects/lots/method=harm
+                  UserObjects/lots/allow_new_work_during_execution=false
+                  Outputs/file_base=lots_out'
+      allow_test_objects = true
+      detail = 'and the harm method.'
+    []
+  []
+[]

@@ -65,7 +65,7 @@ HierarchicalGridPartitioner::HierarchicalGridPartitioner(const InputParameters &
     paramError("ny_nodes", "Required for ", dim, "D meshes");
   if (_nz_procs == 0 && dim == 3)
     paramError("nz_procs", "Required for 3D meshes");
-  if (_nz_procs == 0 && dim == 3)
+  if (_nz_nodes == 0 && dim == 3)
     paramError("nz_nodes", "Required for 3D meshes");
 }
 

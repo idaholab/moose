@@ -36,7 +36,7 @@ public:
   static InputParameters validParams();
 
   ParallelStudy(const libMesh::Parallel::Communicator & comm,
-                Context & context,
+                Context * const context,
                 const InputParameters & params,
                 const std::string & name);
 
@@ -96,7 +96,7 @@ public:
   const MooseUtils::Buffer<WorkType> & workBuffer() const { return *_work_buffer; }
 
   /**
-   * Gets tht total number of send buffer pools created.
+   * Gets the total number of send buffer pools created.
    */
   unsigned long long int sendBufferPoolCreated() const;
   /**
@@ -238,7 +238,7 @@ protected:
 
   /**
    * Moves work that is considered continuing for the purposes of the execution
-   * alrogithm into the buffer.
+   * algorithm into the buffer.
    */
   ///@{
   void moveContinuingWorkToBuffer(WorkType & Work);
@@ -252,7 +252,7 @@ protected:
   bool buffersAreEmpty() const;
 
   /// The context
-  Context & _context;
+  Context * const _context;
   /// This rank
   const processor_id_type _pid;
   /// Name for this object for use in error handling
@@ -284,7 +284,7 @@ private:
   void bsExecute();
 
   /**
-   * Reeive packets of parallel data from other processors and executes work
+   * Receive packets of parallel data from other processors and executes work
    */
   bool receiveAndExecute();
 
@@ -326,7 +326,7 @@ private:
 
   /// MessageTag for sending parallel data
   Parallel::MessageTag _parallel_data_buffer_tag;
-  /// Pools for re-using destructed parallel data objects (one for teach thread)
+  /// Pools for re-using destructed parallel data objects (one for each thread)
   std::vector<MooseUtils::SharedPool<ParallelDataType>> _parallel_data_pools;
   /// Threaded temprorary storage for work added while we're using the _work_buffer (one for each thread)
   std::vector<std::vector<WorkType>> _temp_threaded_work;
@@ -362,7 +362,7 @@ private:
 template <typename WorkType, typename ParallelDataType, typename Context>
 ParallelStudy<WorkType, ParallelDataType, Context>::ParallelStudy(
     const libMesh::Parallel::Communicator & comm,
-    Context & context,
+    Context * const context,
     const InputParameters & params,
     const std::string & name)
   : ParallelObject(comm),
@@ -477,6 +477,12 @@ ParallelStudy<WorkType, ParallelDataType, Context>::validParams()
   MooseEnum work_buffers("lifo circular", "circular");
   params.addParam<MooseEnum>("work_buffer_type", work_buffers, "The work buffer type to use");
 
+  params.addParamNamesToGroup(
+      "send_buffer_size chunk_size clicks_per_communication clicks_per_root_communication "
+      "clicks_per_receive min_buffer_size buffer_growth_multiplier buffer_shrink_multiplier method "
+      "work_buffer_type allow_new_work_during_execution",
+      "Advanced");
+
   return params;
 }
 
@@ -528,7 +534,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::executeAndBuffer(const std::
   if (_allow_new_work_during_execution)
   {
     // Amount of work that needs to be moved into the main working buffer from
-    // the temprorary working buffer
+    // the temporary working buffer
     std::size_t threaded_work_size = 0;
     for (const auto & work_objects : _temp_threaded_work)
       threaded_work_size += work_objects.size();
@@ -548,7 +554,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::executeAndBuffer(const std::
       }
 
       // Variable that must be set when adding work so that the algorithm can keep count
-      // of how many work still need to be executed
+      // of how much work still needs to be executed
       _local_work_started += threaded_work_size;
     }
   }
@@ -1080,7 +1086,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(WorkType & 
     ++_local_work_started; // must ALWAYS increment when adding new work to the working buffer
     _work_buffer->move(work);
   }
-  // Objects added during execution go into a temprorary threaded vector (is thread safe) to be
+  // Objects added during execution go into a temporary threaded vector (is thread safe) to be
   // moved into the working buffer when possible
   else
     _temp_threaded_work[tid].emplace_back(std::move(work));
@@ -1095,7 +1101,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(const work_
   // Error checks for moving work into the buffer at unallowed times
   canMoveWorkCheck(tid);
 
-  // Get work size before hand so we can resize
+  // Get work size beforehand so we can resize
   const auto size = std::distance(begin, end);
 
   // Can move directly into the work buffer on thread 0 when we're not executing work

@@ -28,7 +28,7 @@ class ReceiveBuffer : public ParallelObject
 {
 public:
   ReceiveBuffer(const libMesh::Parallel::Communicator & comm,
-                Context & context,
+                Context * const context,
                 const ParallelStudyMethod method,
                 const unsigned int clicks_per_receive,
                 const Parallel::MessageTag object_buffer_tag);
@@ -105,8 +105,8 @@ public:
 
 private:
   /// The context
-  Context & _context;
-  /// The buffer that finisihed requests are filled into
+  Context * const _context;
+  /// The buffer that finished requests are filled into
   MooseUtils::LIFOBuffer<std::shared_ptr<Object>> _buffer;
 
   /// The method
@@ -167,7 +167,7 @@ private:
         new libMesh::Parallel::PostWaitUnpackBuffer<std::vector<buffer_t>, C, OutputIter, T>(
             *buffer, context, out));
 
-    // Make the Request::wait() then handle deleting the buffer
+    // Make the Request::wait() handle deleting the buffer
     req.add_post_wait_work(
         new libMesh::Parallel::PostWaitDeleteBuffer<std::vector<buffer_t>>(buffer));
   }
@@ -175,7 +175,7 @@ private:
 
 template <typename Object, typename Context>
 ReceiveBuffer<Object, Context>::ReceiveBuffer(const libMesh::Parallel::Communicator & comm,
-                                              Context & context,
+                                              Context * const context,
                                               const ParallelStudyMethod method,
                                               const unsigned int clicks_per_receive,
                                               const Parallel::MessageTag object_buffer_tag)
@@ -227,7 +227,7 @@ ReceiveBuffer<Object, Context>::receive(const bool start_receives_only /* = fals
         if (_method == ParallelStudyMethod::HARM || _method == ParallelStudyMethod::BS)
           blocking_receive_packed_range(comm(),
                                         stat.source(),
-                                        &_context,
+                                        _context,
                                         std::back_inserter(*objects),
                                         (std::shared_ptr<Object> *)(libmesh_nullptr),
                                         *req,
@@ -241,7 +241,7 @@ ReceiveBuffer<Object, Context>::receive(const bool start_receives_only /* = fals
 
           _communicator.nonblocking_receive_packed_range(
               stat.source(),
-              &_context,
+              _context,
               std::back_inserter(*objects),
               (std::shared_ptr<Object> *)(libmesh_nullptr),
               *req,

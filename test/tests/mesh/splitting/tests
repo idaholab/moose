@@ -117,7 +117,7 @@
     max_parallel = 2
     issues = "#11944"
     design = 'Mesh/splitting.md'
-    requirement = 'Splitting meshes should work with custom partitioners.'
+    requirement = 'Splitting meshes from file should work with custom partitioners.'
     mesh_mode = REPLICATED
   []
 
@@ -131,7 +131,7 @@
     max_parallel = 2
     issues = "#11944"
     design = 'Mesh/splitting.md'
-    requirement = 'Splitting meshes should work with custom partitioners.'
+    requirement = 'Splitting meshes from a generated mesh should work with custom partitioners.'
     mesh_mode = REPLICATED
   []
 []
