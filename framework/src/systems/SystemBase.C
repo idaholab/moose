@@ -303,9 +303,45 @@ SystemBase::prepare(THREAD_ID tid)
     for (const auto & var : vars)
       var->clearDofIndices();
 
-    for (const auto & var : active_elemental_moose_variables)
-      if (&(var->sys()) == this)
-        var->prepare();
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+    // When we have a displaced problem and we have AD objects it's possible that you can have
+    // something like the following: A displaced displacement kernel uses a material property
+    // computed with an undisplaced material. That material property is a function of the
+    // temperature. However, the temperature doesn't have any displaced kernels acting on it nor has
+    // any displaced objects explicitly coupling it. In this case the displaced temperature would
+    // not register as an active_elemental_moose_variable, and if we only prepare
+    // active_elemental_moose_variables then in our ADKernel (when not using global AD indexing) we
+    // will either have to skip over variables who have no dof indices or we will attempt to index
+    // out of bounds into _local_ke. So we need to make sure here that we prepare all variables that
+    // are active *either* in the undisplaced or displaced system
+    if (_subproblem.haveADObjects() && _subproblem.haveDisplaced())
+    {
+      // If active_elemental_moose_variables contains both copies of an undisplaced and displaced
+      // variable, use this container to make sure we don't prepare said variable twice
+      std::set<unsigned int> vars_initd;
+      for (auto * const var : active_elemental_moose_variables)
+      {
+        // eliminate variables that are not of like nl/aux system
+        if (var->kind() != _var_kind)
+          continue;
+
+        const unsigned int var_num = var->number();
+        if (vars_initd.find(var_num) == vars_initd.end())
+        {
+          if (&var->sys() == this)
+            var->prepare();
+          else
+            this->getVariable(tid, var_num).prepare();
+
+          vars_initd.insert(var_num);
+        }
+      }
+    }
+    else
+#endif
+      for (const auto & var : active_elemental_moose_variables)
+        if (&(var->sys()) == this)
+          var->prepare();
   }
   else
   {
@@ -329,8 +365,20 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     const std::vector<MooseVariableFieldBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
     {
-      // If it wasn't in the active list, we need to prepare it
-      if (&(var->sys()) == this && !active_elemental_moose_variables.count(var))
+      mooseAssert(&var->sys() == this,
+                  "I will cry if we store variables in our warehouse that don't belong to us");
+
+      // If it wasn't in the active list, we need to prepare it. This has the potential to duplicate
+      // prepare if we have these conditions:
+      //
+      // 1. We have a displaced problem
+      // 2. We are using AD
+      // 3. We are not using global AD indexing
+      //
+      // But I think I would rather risk duplicate prepare than introduce an additional member set
+      // variable for tracking prepared variables. Set insertion is slow and some simulations have a
+      // ton of variables
+      if (!active_elemental_moose_variables.count(var))
       {
         var->prepare();
         newly_prepared_vars.push_back(var);

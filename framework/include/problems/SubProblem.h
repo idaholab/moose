@@ -714,6 +714,11 @@ public:
   void hasScalingVector();
 #endif
 
+  /**
+   * Whether we have a displaced problem in our simulation
+   */
+  virtual bool haveDisplaced() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
