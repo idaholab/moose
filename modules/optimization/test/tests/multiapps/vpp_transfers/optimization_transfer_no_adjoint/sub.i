@@ -24,23 +24,22 @@
   [./pt0]
     type = ConstantPointSource
     variable = temperature
-    value = 1.0
+    value = -2458
     point = '0.2 0.2'
   [../]
   [./pt1]
     type = ConstantPointSource
     variable = temperature
-    value = -0.5
+    value = 7257
     point = '0.2 0.8'
   [../]
   [./pt2]
     type = ConstantPointSource
     variable = temperature
-    value = -2
+    value = 26335
     point = '0.8 0.2'
   [../]
 []
-
 
 [BCs]
   [left]

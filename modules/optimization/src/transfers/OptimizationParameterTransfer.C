@@ -10,6 +10,7 @@
 #include "MultiApp.h"
 #include "ControlsReceiver.h"
 #include "OptimizationParameterVectorPostprocessor.h"
+#include "InputParameterWarehouse.h"
 
 registerMooseObject("isopodApp", OptimizationParameterTransfer);
 
@@ -37,6 +38,27 @@ OptimizationParameterTransfer::OptimizationParameterTransfer(const InputParamete
     _vpp_name(getParam<VectorPostprocessorName>("parameter_vpp")),
     _receiver_name(getParam<std::string>("to_control"))
 {
+}
+
+void
+OptimizationParameterTransfer::initialSetup()
+{
+  auto & vpp =
+      _multi_app->problemBase().getUserObject<OptimizationParameterVectorPostprocessor>(_vpp_name);
+
+  std::vector<std::string> parameter_names(vpp.getParameterNames());
+
+  InputParameterWarehouse & wh =
+      _multi_app->appProblemBase(processor_id()).getMooseApp().getInputParameterWarehouse();
+
+  std::vector<Real> sub_app_initial_values(parameter_names.size());
+  for (std::size_t i = 0; i < parameter_names.size(); ++i)
+  {
+    std::vector<Real> datas =
+        wh.getControllableParameterValues<Real>((MooseObjectParameterName)parameter_names[i]);
+    sub_app_initial_values[i] = datas[0];
+  }
+  vpp.setParameterValues(sub_app_initial_values);
 }
 
 void

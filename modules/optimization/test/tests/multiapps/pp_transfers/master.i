@@ -4,8 +4,8 @@
 [FormFunction]
   type = ObjectiveMinimize
   parameter_vpp = 'parameter_results'
-  data_postprocessors = 'data_rec_0 data_rec_1 data_rec_2 data_rec_3'
-  measured_data = '100 204 320 216'
+  data_computed = 'data_rec_0 data_rec_1 data_rec_2 data_rec_3'
+  data_target = '100 204 320 216'
 []
 
 [Executioner]
@@ -28,6 +28,8 @@
     multi_app = sub
     parameter_vpp = parameter_results
     to_control = parameterReceiver
+    # this will control the values directly, and get initial values and put them in vpp
+    # should use somekind of key value storage object  Need to ask Daniel for clarification this is some kind of userobject.
   []
   [pp_transfer_0]
     type = MultiAppPostprocessorTransfer
@@ -69,7 +71,6 @@
     parameters = 'DiracKernels/pt0/value
                   DiracKernels/pt1/value
                   DiracKernels/pt2/value'
-    intial_values = '-2458 7257 26335'
   []
 []
 

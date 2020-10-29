@@ -42,9 +42,7 @@
     type = OptimizationParameterVectorPostprocessor
     parameters = 'DiracKernels/pt0/value
                   DiracKernels/pt1/value
-                  DiracKernels/pt2/value'
-    intial_values = '-2458 7257 26335'
-  []
+                  DiracKernels/pt2/value'  []
   [data_receiver]
     type=VectorPostprocessorReceiver
   []

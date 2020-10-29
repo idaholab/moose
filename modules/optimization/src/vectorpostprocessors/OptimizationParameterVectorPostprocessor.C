@@ -21,8 +21,6 @@ OptimizationParameterVectorPostprocessor::validParams()
       "parameters",
       "A list of parameters (on the sub application) to control "
       "with the SamplerReceiver.");
-  params.addRequiredParam<std::vector<Real>>(
-      "intial_values", "A list of initial guesses for each controllable parameter.");
 
   return params;
 }
@@ -32,15 +30,12 @@ OptimizationParameterVectorPostprocessor::OptimizationParameterVectorPostprocess
   : GeneralVectorPostprocessor(parameters),
     _control_names(getParam<std::vector<std::string>>("parameters"))
 {
-  std::vector<Real> intial_values(getParam<std::vector<Real>>("intial_values"));
-  if (_control_names.size() != intial_values.size())
-    mooseError("The number parameters needs to match the number values");
 
   _vpp_vectors.resize(_control_names.size());
   for (std::size_t i = 0; i < _control_names.size(); ++i)
   {
     _vpp_vectors[i] = &declareVector(_control_names[i]);
-    (*_vpp_vectors[i]).push_back(intial_values[i]);
+    (*_vpp_vectors[i]).push_back(0);
   }
 }
 

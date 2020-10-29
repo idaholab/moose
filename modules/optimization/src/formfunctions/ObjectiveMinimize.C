@@ -8,30 +8,34 @@ ObjectiveMinimize::validParams()
 {
   InputParameters params = FormFunction::validParams();
   params.addRequiredParam<std::vector<PostprocessorName>>(
-      "data_postprocessors",
+      "data_computed",
       "List of names of postprocessors used to obtain measurement values from simulation.");
-  params.addRequiredParam<std::vector<Real>>("measured_data",
+  params.addRequiredParam<std::vector<Real>>("data_target",
                                              "Target measured value for each postprocessor.");
   return params;
 }
 
 ObjectiveMinimize::ObjectiveMinimize(const InputParameters & parameters)
   : FormFunction(parameters),
-    _pp_values(parameters.get<std::vector<PostprocessorName>>("data_postprocessors").size()),
-    _measured_values(getParam<std::vector<Real>>("measured_data"))
+    _data_computed(parameters.get<std::vector<PostprocessorName>>("data_computed").size()),
+    _data_target(getParam<std::vector<Real>>("data_target"))
 {
-  auto pp_names = parameters.get<std::vector<PostprocessorName>>("data_postprocessors");
+  if (_data_computed.size() != _data_target.size())
+    mooseError("The number of values in data_target must equal the number of postprocessors in "
+               "data_computed. ");
+
+  auto pp_names = parameters.get<std::vector<PostprocessorName>>("data_computed");
   for (std::size_t i = 0; i < pp_names.size(); ++i)
-    _pp_values[i] = &getPostprocessorValueByName(pp_names[i]);
+    _data_computed[i] = &getPostprocessorValueByName(pp_names[i]);
 }
 
 Real
 ObjectiveMinimize::computeObjective()
 {
   Real val = 0;
-  for (std::size_t i = 0; i < _pp_values.size(); ++i)
+  for (std::size_t i = 0; i < _data_computed.size(); ++i)
   {
-    Real tmp = (*_pp_values[i]) - _measured_values[i];
+    Real tmp = (*_data_computed[i]) - _data_target[i];
     val += tmp * tmp;
   }
 
