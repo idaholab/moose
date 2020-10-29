@@ -71,8 +71,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
           (_subproblem.hasVariable("nodal_normal_y")) &&
           (_subproblem.hasVariable("nodal_normal_z"))))
     {
-      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and "
-                 "nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
+      mooseError(
+          "To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and "
+          "nodal_normal_z variables must exist.  Are you missing the \\[NodalNormals\\] block?");
     }
   }
 }

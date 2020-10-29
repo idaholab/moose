@@ -178,7 +178,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._object_cache = dict()
         self._syntax_cache = dict()
         for node in moosetree.iterate(self._app_syntax):
-            if not node.removed:
+            if not (node.removed or node.test):
                 self._cache[node.fullpath()] = node
                 if node.alias:
                     self._cache[node.alias] = node
@@ -307,8 +307,7 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
         if obj.description is None:
             msg = "The class description is missing for %s, it can be added using the " \
                   "'addClassDescription' method from within the objects validParams function."
-            if not obj.hidden:
-                LOG.warning(msg, obj.fullpath())
+            LOG.warning(msg, obj.fullpath())
             core.Paragraph(parent, string=str(info[0]), class_='moose-error')
             return parent
 
@@ -509,7 +508,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
         count = 0
         for obj in objects:
-            if (group in obj.groups()) and (not obj.removed):
+            if (group in obj.groups()) and not (obj.removed or obj.test):
                 count += 1
                 item = SyntaxListItem(parent, group=group, syntax=obj.name)
                 if base:
@@ -548,7 +547,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
         groups = set(gs.split()) if gs else None
 
         for child in obj.syntax():
-            if child.removed:
+            if child.removed or child.test:
                 continue
 
             if (groups is None) or (child.group in groups):
