@@ -91,11 +91,11 @@
 
   [data]
     requirement = 'The sytem shall support the output of ray data when outputting rays in a mesh format using'
+    design = 'RayTracingMeshOutput.md'
     [exodus]
       type = 'Exodiff'
       input = 'ray_mesh_output_data.i'
       exodiff = 'ray_mesh_output_data_rays.e ray_mesh_output_data_rays_nodal.e'
-      design = 'RayTracingExodus.md RayTracingMeshOutput.md'
       detail = 'exodus and'
     []
     [nemesis]
@@ -103,7 +103,6 @@
       input = 'ray_mesh_output_data.i'
       cli_args = 'Outputs/rays/type=RayTracingNemesis Outputs/rays_nodal/type=RayTracingNemesis'
       # TODO: Make this test an exodiff; see #16320
-      design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
       detail = 'nemesis formats.'
     []
   []
