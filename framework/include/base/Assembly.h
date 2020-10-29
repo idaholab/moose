@@ -1645,6 +1645,16 @@ public:
   void hasScalingVector();
 #endif
 
+  /**
+   * Modify the weights when using the arbitrary quadrature rule. The intention is to use this when
+   * you wish to supply your own quadrature after calling reinit at physical points.
+   *
+   * You should only use this if the arbitrary quadrature is the current quadrature rule!
+   *
+   * @param weights The weights to fill into _current_JxW
+   */
+  void modifyArbitraryWeights(const std::vector<Real> & weights);
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
