@@ -105,6 +105,10 @@ Extensions:
     MooseDocs.extensions.bibtex:
         duplicate_warning: False
 
+    MooseDocs.extensions.katex:
+        macros:
+            !include ${ROOT_DIR}/doc/latex_macros.yml
+
     MooseDocs.extensions.template:
         active: True
 
