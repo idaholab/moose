@@ -70,7 +70,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(*mooseVariable()),
+    _var(mooseVariableField()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
@@ -87,7 +87,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _grad_u(_var.gradSln()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
@@ -449,7 +449,7 @@ DiracKernel::meshChanged()
   _reverse_point_cache.clear();
 }
 
-MooseVariable &
+MooseVariableField<Real> &
 DiracKernel::variable()
 {
   return _var;
