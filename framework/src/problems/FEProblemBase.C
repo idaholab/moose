@@ -2065,8 +2065,7 @@ FEProblemBase::addDistribution(const std::string & type,
                                InputParameters & parameters)
 {
   parameters.set<std::string>("type") = type;
-  std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters);
-  theWarehouse().add(dist);
+  addObject<Distribution>(type, name, parameters, /* threaded = */ false);
 }
 
 Distribution &
@@ -2088,12 +2087,9 @@ FEProblemBase::addSampler(const std::string & type,
                           const std::string & name,
                           InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    std::shared_ptr<Sampler> obj = _factory.create<Sampler>(type, name, parameters, tid);
-    obj->init();
-    theWarehouse().add(obj);
-  }
+  const auto samplers = addObject<Sampler>(type, name, parameters);
+  for (auto & sampler : samplers)
+    sampler->init();
 }
 
 Sampler &
@@ -2695,30 +2691,7 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
-  }
-  else
-  {
-
-    // TODO: this if clause was copied from DG Kernels - do we really need it for FV?
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
-  }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    std::shared_ptr<FVKernel> k = _factory.create<FVKernel>(fv_kernel_name, name, parameters, tid);
-    theWarehouse().add(k);
-  }
+  addObject<FVKernel>(fv_kernel_name, name, parameters);
 }
 
 void
@@ -2726,31 +2699,7 @@ FEProblemBase::addFVBC(const std::string & fv_bc_name,
                        const std::string & name,
                        InputParameters & parameters)
 {
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
-  }
-  else
-  {
-
-    // TODO: this if clause was copied from DG Kernels - do we really need it for FV?
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
-  }
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    std::shared_ptr<FVBoundaryCondition> bc =
-        _factory.create<FVBoundaryCondition>(fv_bc_name, name, parameters, tid);
-    theWarehouse().add(bc);
-  }
+  addObject<FVBoundaryCondition>(fv_bc_name, name, parameters);
 }
 
 // InterfaceKernels ////
@@ -3290,6 +3239,29 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 }
 
 void
+FEProblemBase::addObjectParamsHelper(InputParameters & parameters)
+{
+  if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
+      parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+  }
+  else
+  {
+    // The object requested use_displaced_mesh, but it was overridden
+    // due to there being no displacements variables in the [Mesh] block.
+    // If that happened, update the value of use_displaced_mesh appropriately.
+    if (!_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
+        parameters.get<bool>("use_displaced_mesh"))
+      parameters.set<bool>("use_displaced_mesh") = false;
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
+  }
+}
+
+void
 FEProblemBase::addPostprocessor(const std::string & pp_name,
                                 const std::string & name,
                                 InputParameters & parameters)
@@ -3335,22 +3307,8 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow UserObjects to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this UserObject.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-  }
+  // Add the _subproblem and _sys parameters depending on use_displaced_mesh
+  addObjectParamsHelper(parameters);
 
   UserObject * primary = nullptr;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)

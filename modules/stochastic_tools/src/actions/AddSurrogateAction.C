@@ -32,9 +32,5 @@ AddSurrogateAction::act()
   if (_current_task == "add_trainer")
     _problem->addUserObject(_type, _name, _moose_object_pars);
   else if (_current_task == "add_surrogate")
-  {
-    std::shared_ptr<SurrogateModel> model =
-        _factory.create<SurrogateModel>(_type, _name, _moose_object_pars);
-    _problem->theWarehouse().add(model);
-  }
+    _problem->addObject<SurrogateModel>(_type, _name, _moose_object_pars, /* threaded = */ false);
 }
