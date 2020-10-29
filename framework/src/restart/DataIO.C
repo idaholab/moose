@@ -198,6 +198,35 @@ dataStore(std::ostream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
+template <>
+void
+dataStore(std::ostream & stream, ADRealEigenVector & v, void * context)
+{
+  unsigned int m = v.size();
+  stream.write((char *)&m, sizeof(m));
+  for (unsigned int i = 0; i < v.size(); i++)
+  {
+    ADReal r = v(i);
+    dataStore(stream, r, context);
+  }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, ADRealEigenMatrix & v, void * context)
+{
+  unsigned int m = v.rows();
+  stream.write((char *)&m, sizeof(m));
+  unsigned int n = v.cols();
+  stream.write((char *)&n, sizeof(n));
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      ADReal r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
 template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
@@ -476,6 +505,39 @@ dataLoad(std::istream & stream, RealEigenMatrix & v, void * context)
     for (unsigned int j = 0; j < n; j++)
     {
       Real r = 0;
+      dataLoad(stream, r, context);
+      v(i, j) = r;
+    }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, ADRealEigenVector & v, void * context)
+{
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  v.resize(n);
+  for (unsigned int i = 0; i < n; i++)
+  {
+    ADReal r = 0;
+    dataLoad(stream, r, context);
+    v(i) = r;
+  }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, ADRealEigenMatrix & v, void * context)
+{
+  unsigned int m = 0;
+  stream.read((char *)&m, sizeof(m));
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  v.resize(m, n);
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      ADReal r = 0;
       dataLoad(stream, r, context);
       v(i, j) = r;
     }

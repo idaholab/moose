@@ -25,6 +25,18 @@ struct MooseADWrapperStruct<Real, true>
   typedef ADReal type;
 };
 
+template <>
+struct MooseADWrapperStruct<RealEigenVector, true>
+{
+  typedef ADRealEigenVector type;
+};
+
+template <>
+struct MooseADWrapperStruct<RealEigenMatrix, true>
+{
+  typedef ADRealEigenMatrix type;
+};
+
 template <template <typename> class W>
 struct MooseADWrapperStruct<W<Real>, true>
 {

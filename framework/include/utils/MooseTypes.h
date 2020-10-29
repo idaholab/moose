@@ -128,6 +128,7 @@ typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, LIBMESH_DIM, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
 typedef Eigen::Matrix<DualReal, Eigen::Dynamic, 1> ADRealEigenVector;
+typedef Eigen::Matrix<DualReal, Eigen::Dynamic, Eigen::Dynamic> ADRealEigenMatrix;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM * LIBMESH_DIM> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
@@ -402,6 +403,12 @@ template <>
 struct ADType<RealEigenVector>
 {
   typedef ADRealEigenVector type;
+};
+
+template <>
+struct ADType<RealEigenMatrix>
+{
+  typedef ADRealEigenMatrix type;
 };
 
 template <>

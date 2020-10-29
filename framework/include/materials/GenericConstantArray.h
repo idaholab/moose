@@ -11,18 +11,13 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class GenericConstantArray;
-
-template <>
-InputParameters validParams<GenericConstantArray>();
-
-class GenericConstantArray : public Material
+template <bool is_ad>
+class GenericConstantArrayTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericConstantArray(const InputParameters & parameters);
+  GenericConstantArrayTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -31,5 +26,8 @@ protected:
   std::string _prop_name;
   const RealEigenVector & _prop_value;
 
-  MaterialProperty<RealEigenVector> & _property;
+  GenericMaterialProperty<RealEigenVector, is_ad> & _property;
 };
+
+typedef GenericConstantArrayTempl<false> GenericConstantArray;
+typedef GenericConstantArrayTempl<true> ADGenericConstantArray;
