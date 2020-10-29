@@ -287,7 +287,7 @@ NonlinearSystemBase::initialSetup()
         for (auto * fv_kernel : fv_elemental_kernels)
           fv_kernel->initialSetup();
 
-        std::vector<FVFluxKernel *> fv_flux_kernels;
+        std::vector<FVFluxKernelBase *> fv_flux_kernels;
         _fe_problem.theWarehouse()
             .query()
             .template condition<AttribSystem>("FVFluxKernel")

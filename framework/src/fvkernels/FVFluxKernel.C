@@ -19,28 +19,19 @@
 InputParameters
 FVFluxKernel::validParams()
 {
-  InputParameters params = FVKernel::validParams();
-  params += TwoMaterialPropertyInterface::validParams();
-  params.registerSystemAttributeName("FVFluxKernel");
-  params.addParam<bool>("force_boundary_execution",
-                        false,
-                        "Whether to force execution of this object on the boundary.");
+  InputParameters params = FVFluxKernelBase::validParams();
   return params;
 }
 
 FVFluxKernel::FVFluxKernel(const InputParameters & params)
-  : FVKernel(params),
-    TwoMaterialPropertyInterface(this, blockIDs(), {}),
+  : FVFluxKernelBase(params),
     NeighborMooseVariableInterface(
         this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(
-        this, false, false, /*is_fv=*/true),
     _var(*mooseVariableFV()),
     _u_elem(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor()),
     _grad_u_elem(_var.adGradSln()),
-    _grad_u_neighbor(_var.adGradSlnNeighbor()),
-    _force_boundary_execution(getParam<bool>("force_boundary_execution"))
+    _grad_u_neighbor(_var.adGradSlnNeighbor())
 {
   addMooseVariableDependency(&_var);
 }
@@ -49,22 +40,6 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
 // functions. This is because finite volumes currently only works with
 // constant monomial elements. We only have one quadrature point regardless of
 // problem dimension and just multiply by the face area.
-
-bool
-FVFluxKernel::skipForBoundary(const FaceInfo & fi)
-{
-  if (!fi.isBoundary() || _force_boundary_execution)
-    return false;
-
-  // If we have flux bcs then we do skip
-  const auto & flux_pr = _var.getFluxBCs(fi);
-  if (flux_pr.first)
-    return true;
-
-  // If we don't have flux bcs *and* we do have dirichlet bcs then we don't skip. If we don't have
-  // either then we assume natural boundary condition and we should skip
-  return !_var.getDirichletBC(fi).first;
-}
 
 void
 FVFluxKernel::computeResidual(const FaceInfo & fi)
