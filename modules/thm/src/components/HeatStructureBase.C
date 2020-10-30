@@ -4,20 +4,23 @@
 #include "Enums.h"
 #include "THMMesh.h"
 
-const std::map<std::string, HeatStructureBase::SideType> HeatStructureBase::_side_type_to_enum{
-    {"INNER", INNER}, {"OUTER", OUTER}, {"START", START}, {"END", END}};
+const std::map<std::string, HeatStructureSideType> HeatStructureBase::_side_type_to_enum{
+    {"INNER", HeatStructureSideType::INNER},
+    {"OUTER", HeatStructureSideType::OUTER},
+    {"START", HeatStructureSideType::START},
+    {"END", HeatStructureSideType::END}};
 
 MooseEnum
 HeatStructureBase::getSideType(const std::string & name)
 {
-  return THM::getMooseEnum<SideType>(name, _side_type_to_enum);
+  return THM::getMooseEnum<HeatStructureSideType>(name, _side_type_to_enum);
 }
 
 template <>
-HeatStructureBase::SideType
+HeatStructureSideType
 THM::stringToEnum(const std::string & s)
 {
-  return stringToEnum<HeatStructureBase::SideType>(s, HeatStructureBase::_side_type_to_enum);
+  return stringToEnum<HeatStructureSideType>(s, HeatStructureBase::_side_type_to_enum);
 }
 
 InputParameters
@@ -465,17 +468,19 @@ HeatStructureBase::getEndBoundaryNames() const
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
-HeatStructureBase::getBoundaryInfo(const HeatStructureBase::SideType & side) const
+HeatStructureBase::getBoundaryInfo(const HeatStructureSideType & side) const
 {
   switch (side)
   {
-    case INNER:
+    case HeatStructureSideType::INNER:
       return _inner_bnd_info;
-    case OUTER:
+    case HeatStructureSideType::OUTER:
       return _outer_bnd_info;
-    case START:
+    case HeatStructureSideType::START:
       return _start_bnd_info;
-    case END:
+    case HeatStructureSideType::END:
       return _end_bnd_info;
   }
+
+  mooseError(name(), ": Unknown value of 'side' parameter.");
 }

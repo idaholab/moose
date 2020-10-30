@@ -23,17 +23,16 @@ HSBoundary::HSBoundary(const InputParameters & params)
 {
 }
 
-std::vector<HeatStructureBase::SideType>
+std::vector<HeatStructureSideType>
 HSBoundary::extractHeatStructureSides(const std::vector<BoundaryName> & boundary_names) const
 {
-  std::vector<HeatStructureBase::SideType> hs_sides;
+  std::vector<HeatStructureSideType> hs_sides;
 
   for (const auto & boundary_name : boundary_names)
   {
     const std::vector<std::string> fields = MooseUtils::split(boundary_name, ":");
     const std::string & hs_side_str = MooseUtils::toUpper(fields[fields.size() - 1]);
-    const HeatStructureBase::SideType hs_side =
-        THM::stringToEnum<HeatStructureBase::SideType>(hs_side_str);
+    const HeatStructureSideType hs_side = THM::stringToEnum<HeatStructureSideType>(hs_side_str);
     hs_sides.push_back(hs_side);
   }
 
@@ -52,7 +51,8 @@ HSBoundary::check() const
     // Check that no perimeter is zero; if so, there is not physically a boundary
     for (unsigned int i = 0; i < _boundary.size(); i++)
     {
-      if ((_hs_sides[i] == HeatStructureBase::INNER) || (_hs_sides[i] == HeatStructureBase::OUTER))
+      if ((_hs_sides[i] == HeatStructureSideType::INNER) ||
+          (_hs_sides[i] == HeatStructureSideType::OUTER))
       {
         if (MooseUtils::absoluteFuzzyEqual(hs.getUnitPerimeter(_hs_sides[i]), 0))
           logError("The heat structure side of the heat structure '",

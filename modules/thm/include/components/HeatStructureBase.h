@@ -3,19 +3,19 @@
 #include "GeometricalComponent.h"
 #include "HeatConductionModel.h"
 
+/// heat structure side
+enum class HeatStructureSideType
+{
+  INNER = 0,
+  OUTER = 1,
+  START = 2,
+  END = 3
+};
+
 class HeatStructureBase : public GeometricalComponent
 {
 public:
   HeatStructureBase(const InputParameters & params);
-
-  /// heat structure side
-  enum SideType
-  {
-    INNER = 0,
-    OUTER = 1,
-    START = 2,
-    END = 3
-  };
 
   virtual void buildMesh() override;
   virtual void addVariables() override;
@@ -53,7 +53,7 @@ public:
    * @param[in] side   Side of the heat structure corresponding to desired perimeter
    * @returns Perimeter of one unit of this heat structure on the specified side
    */
-  virtual Real getUnitPerimeter(const HeatStructureBase::SideType & side) const = 0;
+  virtual Real getUnitPerimeter(const HeatStructureSideType & side) const = 0;
 
   /**
    * Gets the number of units that heat structure represents
@@ -69,7 +69,7 @@ public:
    * @return The list of tuples (element id, local side id) that is associated with side `side`
    */
   const std::vector<std::tuple<dof_id_type, unsigned short int>> &
-  getBoundaryInfo(const HeatStructureBase::SideType & side) const;
+  getBoundaryInfo(const HeatStructureSideType & side) const;
 
 protected:
   virtual std::shared_ptr<HeatConductionModel> buildModel();
@@ -157,7 +157,7 @@ protected:
 
 public:
   /// map of heat structure side string to enum
-  static const std::map<std::string, SideType> _side_type_to_enum;
+  static const std::map<std::string, HeatStructureSideType> _side_type_to_enum;
 
   /**
    * Gets a MooseEnum for heat structure side
@@ -173,5 +173,5 @@ public:
 namespace THM
 {
 template <>
-HeatStructureBase::SideType stringToEnum(const std::string & s);
+HeatStructureSideType stringToEnum(const std::string & s);
 }

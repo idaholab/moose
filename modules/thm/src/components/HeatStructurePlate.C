@@ -30,16 +30,18 @@ HeatStructurePlate::addMooseObjects()
 }
 
 Real
-HeatStructurePlate::getUnitPerimeter(const HeatStructureBase::SideType & side) const
+HeatStructurePlate::getUnitPerimeter(const HeatStructureSideType & side) const
 {
   switch (side)
   {
-    case HeatStructureBase::OUTER:
-    case HeatStructureBase::INNER:
+    case HeatStructureSideType::OUTER:
+    case HeatStructureSideType::INNER:
       return _depth;
 
-    case HeatStructureBase::START:
-    case HeatStructureBase::END:
+    case HeatStructureSideType::START:
+    case HeatStructureSideType::END:
       return std::numeric_limits<Real>::quiet_NaN();
   }
+
+  mooseError(name(), ": Unknown value of 'side' parameter.");
 }
