@@ -798,7 +798,7 @@ MooseVariableDataFV<RealEigenVector>::computeGhostValuesFace(
   _subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVArrayDirichletBC")
+      .template condition<AttribSystem>("FVDirichletBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .template condition<AttribVar>(_var_num)

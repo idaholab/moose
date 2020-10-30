@@ -380,7 +380,7 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
 
   reinitVariables(fi);
 
-  for (const auto & bc : bcs)
+  for (const auto bc : bcs)
     if (_do_jacobian)
       bc->computeJacobian(fi);
     else

@@ -149,10 +149,10 @@ FVArrayFluxKernel::computeJacobian(const FaceInfo & fi)
 
     for (unsigned int v = 0; v < _var.count(); v++)
     {
-      auto dof = _var.dofIndices()[0];
+      auto dof = _var.dofIndicesNeighbor()[0];
       const unsigned int ndofs = 1;
       _assembly.processDerivatives(
-          neighbor_r(v), Moose::globalADArrayOffset(dof, ndofs), _matrix_tags, neighbor_functor);
+          neighbor_r(v), Moose::globalADArrayOffset(dof, ndofs, v), _matrix_tags, neighbor_functor);
     }
   }
 }

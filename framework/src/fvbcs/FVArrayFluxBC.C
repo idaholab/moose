@@ -97,6 +97,6 @@ FVArrayFluxBC::computeJacobian(const FaceInfo & fi)
     auto dof = _var.dofIndices()[0];
     const unsigned int ndofs = 1;
     _assembly.processDerivatives(
-        r(v), Moose::globalADArrayOffset(dof, ndofs), _matrix_tags, local_functor);
+        r(v), Moose::globalADArrayOffset(dof, ndofs, v), _matrix_tags, local_functor);
   }
 }
