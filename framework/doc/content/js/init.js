@@ -14,12 +14,4 @@
             alignment: 'left' // Displays dropdown with edge aligned to the left of button
         });
     }); // end of document ready
-
-    // Change video source for dark mode, see media.py RenderVideo
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        $('.moose-video source[data-dark-src]').each(function(){
-            var src = $(this).data('dark-src');
-            $(this).attr('src', src);
-        });
-    };
 })(jQuery); // end of jQuery name space

@@ -19,7 +19,7 @@ def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
 Image = tokens.newToken('Image', src='', tex='', dark='')
-Video = tokens.newToken('Video', src='', tex='', youtube=False, dark='',
+Video = tokens.newToken('Video', src='', tex='', youtube=False,
                         controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
@@ -101,7 +101,6 @@ class VideoCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
-        settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings['controls'] = (True, "Display the video player controls (not compatible with YouTube).")
         settings['loop'] = (False, "Automatically loop the video (not compatible with YouTube).")
         settings['autoplay'] = (False, "Automatically start playing the video (not compatible with YouTube).")
@@ -118,7 +117,6 @@ class VideoCommand(command.CommandComponent):
 
         vid = Video(flt,
                     src=info['subcommand'],
-                    dark=self.settings['dark_src'],
                     youtube='www.youtube.com' in info['subcommand'],
                     tex=self.settings['latex_src'],
                     controls=self.settings['controls'],
@@ -217,12 +215,6 @@ class RenderVideo(components.RenderComponent):
         video = html.Tag(parent, 'video', token, class_='moose-video')
         _, ext = os.path.splitext(src)
         source = html.Tag(video, 'source', src=src)
-        if token['dark']:
-            src = token['dark']
-            if not src.startswith('http'):
-                node = self.translator.findPage(src)
-                src = str(node.relativeSource(page))
-            source['data-dark-src'] = src
 
         source["type"] = "video/{}".format(ext[1:])
 
