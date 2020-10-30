@@ -42,6 +42,7 @@ class SQAMooseAppReport(SQAReport):
         super().__init__(**kwargs)
 
         # Default attributes
+        self.exe_directory = self.exe_directory or mooseutils.git_root_dir()
         self.exe_name = self.exe_name or os.path.basename(self.exe_directory)
         self.working_dir = self.working_dir or mooseutils.git_root_dir()
         self.content_directory = self.content_directory or os.path.join(self.exe_directory, 'doc', 'content')
