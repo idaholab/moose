@@ -16,7 +16,7 @@ def make_extension(**kwargs):
     return AlertExtension(**kwargs)
 
 AlertToken = tokens.newToken('AlertToken', brand='')
-AlertTitle = tokens.newToken('AlertTitle', brand='', prefix=True)
+AlertTitle = tokens.newToken('AlertTitle', brand='', prefix=True, center=False)
 AlertContent = tokens.newToken('AlertContent', brand='', icon=True)
 
 # LaTeX alert environment that uses tcolorbox package
@@ -78,6 +78,7 @@ class AlertCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['title'] = (None, "The optional alert title.")
+        settings['center-title'] = (False, "Center the title.")
         settings['prefix'] = (None, "Enable/disable the title being prefixed with the alert brand.")
         settings['icon'] = (True, "Enable/disable the icon.")
         return settings
@@ -92,7 +93,8 @@ class AlertCommand(command.CommandComponent):
             prefix = self.extension.get('use-title-prefix', True)
 
         alert_token = AlertToken(parent, brand=brand)
-        title_token = AlertTitle(alert_token, brand=brand, prefix=prefix)
+        title_token = AlertTitle(alert_token, brand=brand, prefix=prefix,
+                                 center=self.settings['center-title'])
 
         if title:
             self.reader.tokenize(title_token, title, page, MarkdownReader.INLINE)
@@ -183,6 +185,9 @@ class RenderAlertTitle(components.RenderComponent):
             prefix = html.Tag(title, 'span', string=brand, class_='moose-alert-title-brand')
             if token.children:
                 html.String(prefix, content=':')
+
+        if token.get('center'):
+            title.addClass('center')
 
         return title
 

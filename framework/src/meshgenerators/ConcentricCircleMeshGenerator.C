@@ -106,10 +106,6 @@ std::unique_ptr<MeshBase>
 ConcentricCircleMeshGenerator::generate()
 {
   auto mesh = buildReplicatedMesh(2);
-
-  // Set dimension of mesh
-  mesh->set_mesh_dimension(2);
-  mesh->set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Creating real mesh concentric circles

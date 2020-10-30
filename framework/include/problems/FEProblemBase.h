@@ -13,8 +13,7 @@
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
 #include "MortarData.h"
-#include "PostprocessorData.h"
-#include "VectorPostprocessorData.h"
+#include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
 #include "ScalarInitialConditionWarehouse.h"
@@ -78,6 +77,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
+class VectorPostprocessor;
 
 // libMesh forward declarations
 namespace libMesh
@@ -148,7 +148,7 @@ public:
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
 
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
                               const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
@@ -217,11 +217,13 @@ public:
                             const Real div_threshold);
 
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFEBase & getVariable(
-      THREAD_ID tid,
-      const std::string & var_name,
-      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
-      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) override;
+  using SubProblem::getVariable;
+  virtual const MooseVariableFieldBase &
+  getVariable(THREAD_ID tid,
+              const std::string & var_name,
+              Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+              Moose::VarFieldType expected_var_field_type =
+                  Moose::VarFieldType::VAR_FIELD_ANY) const override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -741,17 +743,6 @@ public:
                                        bool execute_stateful = true);
 
   /**
-   * For finite volume bcs, we need to be able to initialize and compute
-   * materials on ghost elements (elements that don't exist on the mesh - on
-   * the outside side of a boundary face).  To be able to reinit materials
-   * under these circumstances without crashing, we provide a special function
-   * here that reinits the neighbor material properties using the elem element
-   * instead of the neighbor element.
-   */
-  virtual void
-  reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-
-  /**
    * reinit materials on a boundary
    * @param boundary_id The boundary on which to reinit corresponding materials
    * @param tid The thread id
@@ -774,12 +765,6 @@ public:
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
-  /**
-   * This is the special materials swap-back function to be paired with
-   * reinitMaterialsNeighborGhost.  Always use it (and only it) to swap back whenever you
-   * reinit with that function.
-   */
-  virtual void swapBackMaterialsNeighborGhost(THREAD_ID tid);
 
   // Postprocessors /////
   virtual void addPostprocessor(const std::string & pp_name,
@@ -792,13 +777,31 @@ public:
                                       InputParameters & parameters);
 
   /**
-   * Initializes the postprocessor data
-   * @see SetupPostprocessorDataAction
+   * Add a Reporter object to the simulation.
+   * @param type C++ object type to construct
+   * @param name A uniquely identifying object name
+   * @param parameters Complete parameters for the object to be created.
+   *
+   * For an example use, refer to AddReporterAction.C/h
    */
-  void initPostprocessorData(const std::string & name);
+  virtual void
+  addReporter(const std::string & type, const std::string & name, InputParameters & parameters);
 
-  /// Initialize the VectorPostprocessor data
-  void initVectorPostprocessorData(const std::string & name);
+  /**
+   * Provides const access the ReporterData object.
+   *
+   * NOTE: There is a private non-const version of this function that uses a key object only
+   *       constructable by the correct interfaces. This was done by design to encourage the use of
+   *       the Reporter and ReporterInterface classes.
+   */
+  const ReporterData & getReporterData() const { return _reporter_data; }
+
+  /**
+   * Provides non-const access the ReporterData object that is used to store reporter values.
+   *
+   * see ReporterData.h
+   */
+  ReporterData & getReporterData(ReporterData::WriteKey /*key*/) { return _reporter_data; }
 
   // UserObjects /////
   virtual void addUserObject(const std::string & user_object_name,
@@ -822,7 +825,12 @@ public:
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
     std::vector<T *> objs;
-    theWarehouse().query().condition<AttribThread>(tid).condition<AttribName>(name).queryInto(objs);
+    theWarehouse()
+        .query()
+        .condition<AttribSystem>("UserObject")
+        .condition<AttribThread>(tid)
+        .condition<AttribName>(name)
+        .queryInto(objs);
     if (objs.empty())
       mooseError("Unable to find user object with name '" + name + "'");
     return *(objs[0]);
@@ -842,41 +850,110 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
-   * Check existence of the postprocessor.
-   * @param name The name of the post-processor
-   * @return true if it exists, otherwise false
+   * Initializes the postprocessor data
+   *
+   * This is needed to correctly handle the default values
+   * @see SetupPostprocessorDataAction, PostprocessorInterface
    */
-  bool hasPostprocessor(const std::string & name);
+  void initPostprocessorData(const std::string & name);
 
   /**
-   * Get a reference to the value associated with the postprocessor.
+   * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
-   * @return The reference to the old value
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @return The reference to the value at the given time index
    *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
+   * Note: This method is only for retrieving values that already exist, the Postprocessor and
+   *       PostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
    */
+  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name,
+                                                         std::size_t t_index = 0) const;
+
+  /**
+   * Set the value of a PostprocessorValue.
+   * @param name The name of the post-processor
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @return The reference to the value at the given time index
+   *
+   * Note: This method is only for setting values that already exist, the Postprocessor and
+   *       PostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
+   *
+   * WARNING!
+   * This method should be used with caution. It exists to allow Transfers and other
+   * similar objects to modify Postprocessor values. It is not intended for general use.
+   */
+  void setPostprocessorValueByName(const PostprocessorName & name,
+                                   const PostprocessorValue & value,
+                                   std::size_t t_index = 0);
+  ///@}
+
+  ///@{
+  /**
+   * Deprecated
+   */
+  bool hasPostprocessor(const std::string & name) const;
   PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
-
-  /**
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @return The reference to the old value
-   *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
-   */
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  ///@}
 
   /**
-   * Get the reference to the older value of a post-processor
-   * @param name The name of the post-processor
-   * @return The reference to the old value
+   * Get a read-only reference to the vector value associated with the VectorPostprocessor.
+   * @param object_name The name of the VPP object.
+   * @param vector_name The namve of the decalred vector within the object.
+   * @return Referent to the vector of data.
    *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
+   * Note: This method is only for retrieving values that already exist, the VectorPostprocessor and
+   *       VectorPostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
    */
-  PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const std::string & object_name,
+                                    const std::string & vector_name,
+                                    std::size_t t_index = 0) const;
+
+  /**
+   * Set the value of a VectorPostprocessor vector
+   * @param object_name The name of the VPP object
+   * @param vector_name The name of the declared vector
+   * @param value The data to apply to the vector
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   */
+  void setVectorPostprocessorValueByName(const std::string & object_name,
+                                         const std::string & vector_name,
+                                         const VectorPostprocessorValue & value,
+                                         std::size_t t_index = 0);
+
+  /**
+   * Return the VPP object given the name.
+   * @param object_name The name of the VPP object
+   * @return Desired VPP object
+   *
+   * This is used by various output objects as well as the scatter value handling.
+   * @see CSV.C, XMLOutput.C, VectorPostprocessorInterface.C
+   */
+  const VectorPostprocessor & getVectorPostprocessorObjectByName(const std::string & object_name,
+                                                                 THREAD_ID tid = 0) const;
+
+  ///@{
+  /**
+   * DEPRECATED
+   */
+  bool hasVectorPostprocessor(const std::string & name);
+  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
+                                                         const std::string & vector_name);
+  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
+                                                            const std::string & vector_name);
+  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
+                                                         const std::string & vector_name,
+                                                         bool needs_broadcast);
+  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
+                                                            const std::string & vector_name,
+                                                            bool needs_broadcast);
+  bool vectorPostprocessorHasVectors(const std::string & vpp_name);
+  ///@}
 
   ///@{
   /**
@@ -886,118 +963,6 @@ public:
   bool hasMultiApps(ExecFlagType type) const;
   bool hasMultiApp(const std::string & name) const;
   ///@}
-
-  /**
-   * Check existence of the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @return true if it exists, otherwise false
-   */
-  bool hasVectorPostprocessor(const std::string & name);
-
-  /**
-   * DEPRECATED: Use the new version where you need to specify whether or
-   * not the vector must be broadcast
-   *
-   * Get a reference to the value associated with the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the current value
-   */
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name);
-
-  /**
-   * DEPRECATED: Use the new version where you need to specify whether or
-   * not the vector must be broadcast
-   *
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the old value
-   */
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name);
-
-  /**
-   * Get a reference to the value associated with the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the current value
-   */
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
-                                                         const std::string & vector_name,
-                                                         bool needs_broadcast);
-
-  /**
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the old value
-   */
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                            const std::string & vector_name,
-                                                            bool needs_broadcast);
-
-  /**
-   * Return the scatter value for the post processor
-   *
-   * This is only valid when you expec the vector to be of lenghth "num_procs"
-   * In that case - this will return a reference to a value that will be _this_ processor's value
-   * from that vector
-   *
-   * @param vpp_name The name of the VectorPostprocessor
-   * @param vector_name The name of the vector
-   * @return The reference to the current scatter value
-   */
-  ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
-                                     const std::string & vector_name);
-
-  /**
-   * Return the scatter value for the post processor
-   *
-   * This is only valid when you expec the vector to be of lenghth "num_procs"
-   * In that case - this will return a reference to a value that will be _this_ processor's value
-   * from that vector
-   *
-   * @param vpp_name The name of the VectorPostprocessor
-   * @param vector_name The name of the vector
-   * @return The reference to the old scatter value
-   */
-  ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
-                                        const std::string & vector_name);
-
-  /**
-   * Declare a new VectorPostprocessor vector
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @param contains_complete_history True if the vector will naturally contain the complete time
-   * history of the values
-   * @param is_broadcast True if the vector will already be replicated by the VPP.  This prevents
-   * unnecessary broadcasting by MOOSE.
-   * @return The reference to the vector declared
-   */
-  VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                              const std::string & vector_name,
-                                                              bool contains_complete_history,
-                                                              bool is_broadcast,
-                                                              bool is_distributed);
-
-  /**
-   * Whether or not the specified VectorPostprocessor has declared any vectors
-   */
-  bool vectorPostprocessorHasVectors(const std::string & vpp_name)
-  {
-    return _vpps_data.hasVectors(vpp_name);
-  }
-
-  /**
-   * Get the vectors for a specific VectorPostprocessor.
-   * @param vpp_name The name of the VectorPostprocessor
-   */
-  const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
-  getVectorPostprocessorVectors(const std::string & vpp_name);
 
   // Dampers /////
   virtual void addDamper(const std::string & damper_name,
@@ -1332,6 +1297,9 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
   virtual void addCachedJacobian(THREAD_ID tid) override;
+  /**
+   * Deprecated method. Use addCachedJacobian
+   */
   virtual void addCachedJacobianContributions(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
@@ -1557,11 +1525,6 @@ public:
                                             THREAD_ID tid = 0,
                                             bool no_warn = false);
 
-  std::shared_ptr<MaterialBase> getInterfaceMaterial(std::string name,
-                                                     Moose::MaterialDataType type,
-                                                     THREAD_ID tid = 0,
-                                                     bool no_warn = false);
-
   /*
    * Return a pointer to the MaterialData
    */
@@ -1683,8 +1646,6 @@ public:
   void reportMooseObjectDependency(MooseObject * a, MooseObject * b);
 
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
-
-  const VectorPostprocessorData & getVectorPostprocessorData() const;
 
   /**
    * Returns _has_jacobian
@@ -1879,6 +1840,30 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0) override;
 
+  bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
+  /**
+   * Get the materials and variables potentially needed for FV
+   * @param block_id SubdomainID The subdomain id that we want to retrieve materials for
+   * @param face_materials The face materials container that we will fill
+   * @param neighbor_materials The neighbor materials container that we will fill
+   * @param variables The variables container that we will fill that our materials depend on
+   * @param tid The thread id
+   */
+  void getFVMatsAndDependencies(SubdomainID block_id,
+                                std::vector<std::shared_ptr<MaterialBase>> & face_materials,
+                                std::vector<std::shared_ptr<MaterialBase>> & neighbor_materials,
+                                std::set<MooseVariableFieldBase *> & variables,
+                                THREAD_ID tid);
+
+  /**
+   * Resize material data
+   * @param data_type The type of material data to resize
+   * @param nqp The number of quadrature points to resize for
+   * @param tid The thread ID
+   */
+  void resizeMaterialData(Moose::MaterialDataType data_type, unsigned int nqp, THREAD_ID tid);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1953,11 +1938,8 @@ protected:
   // Marker Warehouse
   MooseObjectWarehouse<Marker> _markers;
 
-  // postprocessors
-  PostprocessorData _pps_data;
-
-  // VectorPostprocessors
-  VectorPostprocessorData _vpps_data;
+  // Helper class to access Reporter object values
+  ReporterData _reporter_data;
 
   // TODO: delete this after apps have been updated to not call getUserObjects
   ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
@@ -2092,6 +2074,9 @@ protected:
 
   /// Determines whether a check to verify an active material on every subdomain
   bool _material_coverage_check;
+
+  /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
+  const bool _fv_bcs_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;

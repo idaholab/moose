@@ -18,9 +18,7 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
 registerMooseAction("MooseApp",
                     SetupMeshCompleteAction,
-                    "delete_remote_elements_post_equation_systems_init");
-
-registerMooseAction("MooseApp", SetupMeshCompleteAction, "execute_mesh_modifiers");
+                    "delete_remote_elements_after_late_geometric_ghosting");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
@@ -48,10 +46,6 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
   if (!prepared)
     mesh->prepare();
 
-  // Clear the modifiers, they are not used again during the simulation after the mesh has been
-  // completed
-  _app.clearMeshModifiers();
-
   return prepared;
 }
 
@@ -61,17 +55,7 @@ SetupMeshCompleteAction::act()
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
-  if (_current_task == "execute_mesh_modifiers")
-  {
-    // we don't need to run mesh modifiers *again* after they ran already during the mesh
-    // splitting process
-    if (_app.isUseSplit())
-      return;
-    if (_app.masterMesh())
-      return;
-    _app.executeMeshModifiers();
-  }
-  else if (_current_task == "uniform_refine_mesh")
+  if (_current_task == "uniform_refine_mesh")
   {
     // we don't need to run mesh modifiers *again* after they ran already during the mesh
     // splitting process
@@ -112,16 +96,20 @@ SetupMeshCompleteAction::act()
       }
     }
   }
-  else if (_current_task == "delete_remote_elements_post_equation_systems_init")
+  else if (_current_task == "delete_remote_elements_after_late_geometric_ghosting")
   {
+    if (_displaced_mesh &&
+        (_mesh->needsRemoteElemDeletion() != _displaced_mesh->needsRemoteElemDeletion()))
+      mooseError("Our reference and displaced meshes are not in sync with respect to whether we "
+                 "should delete remote elements.");
+
     // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
-    // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
-    // trigger this.
+    // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
-      _mesh->getMesh().delete_remote_elements();
+      _mesh->deleteRemoteElements();
       if (_displaced_mesh)
-        _displaced_mesh->getMesh().delete_remote_elements();
+        _displaced_mesh->deleteRemoteElements();
     }
   }
   else

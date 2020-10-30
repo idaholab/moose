@@ -1,10 +1,14 @@
 [Tests]
-  deprecated = True
-  [./test]
+  issues = '#13814'
+  design = Mesh/index.md
+
+  [test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
     mesh_mode = REPLICATED
-    no_error_deprecated = true
-  [../]
+
+    requirement = "The system shall support the creation of lower dimensional elements along the "
+                  "faces contained in a side."
+  []
 []

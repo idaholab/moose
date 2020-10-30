@@ -8,34 +8,22 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
-// MOOSE includes
 #include "Action.h"
-
-// Forward declerations
 class SetupPostprocessorDataAction;
 
 template <>
 InputParameters validParams<SetupPostprocessorDataAction>();
 
 /**
- * The PostprocessorInterface::hasPostprocessor method utilizes the PostprocessorData
- * to determine if a postprocessor exists. Since many objects (e.g., Functions) are created
- * prior to the creation of Postprocessors, the PostprocessorData must be populated much eariler
- * than the actual creation of the Postprocessors if the correct behavior of hasPostprocessor is
- * to be achieved. Hence, this action simply initializes the PostprocessorData.
+ * The PostprocessorInterface::getPostprocessorValue methods rely on
+ * FEProblemBase::hasPostprocessorByName to determine if the default (if supplied) should be used.
+ * As such all the PostprocessorValues must be declared prior to any calls to the get methods
+ * Hence, this action simply initializes the Postprocessor data prior to object construction.
  */
 class SetupPostprocessorDataAction : public Action
 {
 public:
-  /**
-   * Class constructor
-   * @param params Input parameters for the action
-   */
   static InputParameters validParams();
-
   SetupPostprocessorDataAction(InputParameters params);
-
   virtual void act() override;
 };
-

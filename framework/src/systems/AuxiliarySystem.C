@@ -198,7 +198,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||
         fe_type.family == MONOMIAL_VEC)
     {
-      VectorMooseVariable * var = _vars[tid].getFieldVariable<RealVectorValue>(name);
+      auto * var = _vars[tid].getActualFieldVariable<RealVectorValue>(name);
       if (var)
       {
         if (var->feType().family == LAGRANGE_VEC)
@@ -216,7 +216,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
     else
     {
-      MooseVariable * var = _vars[tid].getFieldVariable<Real>(name);
+      auto * var = _vars[tid].getActualFieldVariable<Real>(name);
 
       if (var)
       {

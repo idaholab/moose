@@ -38,7 +38,8 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _var(*mooseVariableFV()),
     _u(_var.adSln()),
-    _current_elem(_assembly.elem())
+    _current_elem(_assembly.elem()),
+    _q_point(_assembly.qPoints())
 {
   addMooseVariableDependency(&_var);
 }
@@ -89,7 +90,7 @@ FVElementalKernel::computeOffDiagJacobian()
       MooseVariableFieldBase & jvariable = *(it.second);
 
       // We currently only support coupling to other FV variables
-      if (!jvariable.isFV())
+      if (!jvariable.isFV() || !jvariable.activeOnSubdomain(_current_elem->subdomain_id()))
         continue;
 
       unsigned int ivar = ivariable.number();

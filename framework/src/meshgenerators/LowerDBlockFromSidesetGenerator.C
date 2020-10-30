@@ -82,10 +82,6 @@ LowerDBlockFromSidesetGenerator::generate()
     }
   }
 
-  bool distributed = false;
-  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    distributed = true;
-
   auto side_list = mesh->get_boundary_info().build_side_list();
   std::sort(side_list.begin(),
             side_list.end(),
@@ -115,16 +111,19 @@ LowerDBlockFromSidesetGenerator::generate()
       element_sides_on_boundary.push_back(
           ElemSideDouble(mesh->elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
 
+  // max_elem_id should be consistent across procs assuming we've prepared our mesh previously
+  mooseAssert(mesh->is_prepared(),
+              "We are assuming that the mesh has been prepared previously in order to avoid a "
+              "communication to determine the max elem id");
   dof_id_type max_elem_id = mesh->max_elem_id();
-  mesh->comm().max(max_elem_id);
-  auto max_elems_to_add = element_sides_on_boundary.size();
-  mesh->comm().max(max_elems_to_add);
+  unique_id_type max_unique_id = mesh->parallel_max_unique_id();
 
+  // Making an important assumption that at least our boundary elements are the same on all
+  // processes even in distributed mesh mode (this is reliant on the correct ghosting functors
+  // existing on the mesh)
   for (MooseIndex(element_sides_on_boundary) i = 0; i < element_sides_on_boundary.size(); ++i)
   {
     Elem * elem = element_sides_on_boundary[i].elem;
-    if (distributed && elem->processor_id() != processor_id())
-      continue;
 
     unsigned int side = element_sides_on_boundary[i].side;
 
@@ -141,9 +140,9 @@ LowerDBlockFromSidesetGenerator::generate()
     // easy to figure out the Elem we came from.
     side_elem->set_interior_parent(elem);
 
-    // Add id for distributed
-    if (distributed)
-      side_elem->set_id(max_elem_id + processor_id() * max_elems_to_add + i);
+    // Add id
+    side_elem->set_id(max_elem_id + i);
+    side_elem->set_unique_id(max_unique_id + i);
 
     // Finally, add the lower-dimensional element to the Mesh.
     mesh->add_elem(side_elem.release());
@@ -152,6 +151,11 @@ LowerDBlockFromSidesetGenerator::generate()
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
     mesh->subdomain_name(new_block_id) = getParam<SubdomainName>("new_block_name");
+
+  const bool skip_partitioning_old = mesh->skip_partitioning();
+  mesh->skip_partitioning(true);
+  mesh->prepare_for_use();
+  mesh->skip_partitioning(skip_partitioning_old);
 
   return mesh;
 }

@@ -21,8 +21,6 @@ public:
 
   SteadyWithPicardCheck(const InputParameters & parameters);
 
-  virtual void init() override;
-
   /**
    * Calls at the beginning of every Picard iterations
    */
@@ -41,5 +39,5 @@ private:
   PostprocessorValue _pp_value_old;
 
   /// Reference to the postprocessor value
-  const PostprocessorValue * _pp_value;
+  const PostprocessorValue & _pp_value;
 };

@@ -59,8 +59,10 @@ PolynomialChaosTrainer::initialSetup()
 
   // Results VPP
   _values_distributed = isVectorPostprocessorDistributed("results_vpp");
-  _values_ptr = &getVectorPostprocessorValue(
-      "results_vpp", getParam<std::string>("results_vector"), !_values_distributed);
+  const ReporterName r_name(getParam<VectorPostprocessorName>("results_vpp"),
+                            getParam<std::string>("results_vector"));
+  auto mode = _values_distributed ? REPORTER_MODE_DISTRIBUTED : REPORTER_MODE_REPLICATED;
+  _values_ptr = &getReporterValueByName<VectorPostprocessorValue>(r_name, mode);
 
   // Sampler
   _sampler = &getSamplerByName(getParam<SamplerName>("sampler"));

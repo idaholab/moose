@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#11323'
+  design = 'JSONOutput.md'
+  [info]
+    requirement = "The system shall include the ability to output simulation data in JSON format:"
+
+    [default]
+      type = CheckFiles
+      input = distributed.i
+      check_files = 'distributed_out.json distributed_out.json.1'
+      file_expect_out = '"part":'
+      min_parallel = 2
+      max_parallel = 9 # file names get padded with zero above this
+      detail = "that produces multiple files for parallel distributed data and"
+    []
+    [limit]
+      type = CheckFiles
+      input = distributed.i
+      check_files = 'limit_out.json'
+      check_not_exists = 'limit_out.json.1'
+
+      cli_args = 'Reporters/mesh_info/items="num_dofs" Outputs/file_base=limit_out'
+
+      detail = "for parallel replicated data in a single file."
+    []
+  []
+[]

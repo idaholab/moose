@@ -1,6 +1,6 @@
 # ElementGenerator
 
-!syntax description /MeshGenerators/ElementGenerator
+!syntax description /Mesh/ElementGenerator
 
 ## Overview
 
@@ -10,8 +10,8 @@ The user has to provide the positions of the nodes for his element, as well as t
 
 ## Further ElementGenerator Documentation
 
-!syntax parameters /MeshGenerators/ElementGenerator
+!syntax parameters /Mesh/ElementGenerator
 
-!syntax inputs /MeshGenerators/ElementGenerator
+!syntax inputs /Mesh/ElementGenerator
 
-!syntax children /MeshGenerators/ElementGenerator
+!syntax children /Mesh/ElementGenerator

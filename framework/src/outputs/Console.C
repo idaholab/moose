@@ -155,7 +155,8 @@ Console::validParams()
                            /*quiet_mode=*/true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.set<ExecFlagEnum>("execute_scalars_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
                                                                          EXEC_TIMESTEP_END};
-
+  params.set<ExecFlagEnum>("execute_reporters_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
+                                                                           EXEC_TIMESTEP_END};
   return params;
 }
 
@@ -358,12 +359,14 @@ Console::output(const ExecFlagType & type)
     writeVariableNorms();
   }
 
-  // Write Postprocessors and Scalars
   if (wantOutput("postprocessors", type))
     outputPostprocessors();
 
   if (wantOutput("scalars", type))
     outputScalarVariables();
+
+  if (wantOutput("reporters", type))
+    outputReporters();
 
   // Write the file
   writeStreamToFile();
@@ -574,6 +577,21 @@ Console::outputPostprocessors()
     oss << "\nPostprocessor Values:\n";
     _postprocessor_table.sortColumns();
     _postprocessor_table.printTable(oss, _max_rows, _fit_mode);
+    _console << oss.str() << '\n';
+  }
+}
+
+void
+Console::outputReporters()
+{
+  TableOutput::outputReporters();
+
+  if (!_reporter_table.empty())
+  {
+    std::stringstream oss;
+    oss << "\nReporter Values:\n";
+    _reporter_table.sortColumns();
+    _reporter_table.printTable(oss, _max_rows, _fit_mode);
     _console << oss.str() << '\n';
   }
 }

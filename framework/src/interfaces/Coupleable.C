@@ -220,14 +220,6 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
   // that inherit from the TaggingInterface
   if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
   {
-    // Are we attempting to couple to an FV var in a non-FV object?
-    if (var->isFV() && !_is_fv)
-      mooseError("Attempting to couple FV variable ",
-                 var->name(),
-                 " into a non-FV object ",
-                 _c_name,
-                 ". This is not currently supported");
-
     // Are we attempting to couple to a non-FV var in an FV object?
     if (!var->isFV() && _is_fv)
       mooseError("Attempting to couple non-FV variable ",
@@ -449,7 +441,7 @@ Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = getVar(var_name, comp);
+  const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1019,7 +1011,7 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) con
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = getVar(var_name, comp);
+  const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);

@@ -30,7 +30,9 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
-    _show_parser(false)
+    _show_parser(false),
+    _mesh(nullptr),
+    _displaced_mesh(nullptr)
 {
 }
 

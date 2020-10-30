@@ -45,8 +45,7 @@ ComputeFullJacobianThread::computeJacobian()
     MooseVariableFieldBase & ivariable = *(it.first);
     MooseVariableFieldBase & jvariable = *(it.second);
 
-    // We don't currently support coupling with FV variables
-    if (ivariable.isFV() || jvariable.isFV())
+    if (ivariable.isFV())
       continue;
 
     unsigned int ivar = ivariable.number();
@@ -76,8 +75,7 @@ ComputeFullJacobianThread::computeJacobian()
       MooseVariableFieldBase & ivariable = *(it.first);
       MooseVariableFieldBase & jvariable = *(it.second);
 
-      // We don't currently support coupling with FV variables
-      if (ivariable.isFV() || jvariable.isFV())
+      if (ivariable.isFV())
         continue;
 
       unsigned int ivar = ivariable.number();
@@ -182,8 +180,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       MooseVariableFieldBase & ivariable = *(it.first);
       MooseVariableFieldBase & jvariable = *(it.second);
 
-      // We don't currently support coupling with FV variables
-      if (ivariable.isFV() || jvariable.isFV())
+      if (ivariable.isFV())
         continue;
 
       unsigned int ivar = ivariable.number();
@@ -247,8 +244,7 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
       MooseVariableFieldBase & ivariable = *(it.first);
       MooseVariableFieldBase & jvariable = *(it.second);
 
-      // We don't currently support coupling with FV variables
-      if (ivariable.isFV() || jvariable.isFV())
+      if (ivariable.isFV())
         continue;
 
       unsigned int ivar = ivariable.number();
@@ -281,8 +277,7 @@ ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
       MooseVariableFieldBase & ivariable = *(it.first);
       MooseVariableFieldBase & jvariable = *(it.second);
 
-      // We don't currently support coupling with FV variables
-      if (ivariable.isFV() || jvariable.isFV())
+      if (ivariable.isFV())
         continue;
 
       unsigned int ivar = ivariable.number();

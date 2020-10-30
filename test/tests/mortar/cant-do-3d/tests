@@ -6,6 +6,5 @@
     issues = '#13080'
     design = 'Constraints/index.md'
     requirement = "We shall tell the user that mortar doesn't currently work in 3D"
-    mesh_mode = 'REPLICATED'
   []
 []

@@ -1,55 +1,57 @@
 # 3D, interior
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 4
-  ny = 4
-  nz = 1
-  xmin = 0
-  xmax = 4
-  ymin = 0
-  ymax = 4
-  zmin = 0
-  zmax = 1
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 4
+    ny = 4
+    nz = 1
+    xmin = 0
+    xmax = 4
+    ymin = 0
+    ymax = 4
+    zmin = 0
+    zmax = 1
+  []
 
-[MeshModifiers]
-  [./SubdomainBoundingBox]
-    type = SubdomainBoundingBox
+  [SubdomainBoundingBox]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     block_id = 1
     bottom_left = '1 1 0'
     top_right = '3 3 1'
-  [../]
-  [./ed0]
-    type = BlockDeleter
+  []
+  [ed0]
+    type = BlockDeletionGenerator
+    input = SubdomainBoundingBox
+
     block_id = 1
-    depends_on = SubdomainBoundingBox
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

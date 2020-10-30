@@ -25,6 +25,7 @@
 #include "libmesh/fourth_error_estimators.h"
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
+#include "libmesh/distributed_mesh.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -134,6 +135,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
   bool mesh_changed = false;
 
+  // If mesh adaptivity is carried out in a distributed (scalable) way
+  bool distributed_adaptivity = false;
+
   if (_use_new_system)
   {
     if (!marker_name.empty()) // Only flag if a marker variable name has been set
@@ -141,14 +145,55 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
       _mesh_refinement->clean_refinement_flags();
 
       std::vector<Number> serialized_solution;
-      _subproblem.getAuxiliarySystem().solution().close();
-      _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level, marker_name);
-      ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
-                               _subproblem.mesh().getMesh().active_elements_end(),
-                               1);
-      Threads::parallel_reduce(all_elems, fet);
+      auto distributed_mesh = dynamic_cast<DistributedMesh *>(&_subproblem.mesh().getMesh());
+
+      // Element range
+      std::unique_ptr<ConstElemRange> all_elems;
+      // If the mesh is distributed and we do not do "gather to zero" or "allgather".
+      // Then it is safe to not serialize solution.
+      // Some output idiom (Exodus) will do "gather to zero". That being said,
+      // if you have exodus output on, mesh adaptivty is not scalable.
+      if (distributed_mesh && !distributed_mesh->is_serial_on_zero())
+      {
+        // We update here to make sure local solution is up-to-date
+        _subproblem.getAuxiliarySystem().update();
+        distributed_adaptivity = true;
+
+        // We can not assume that geometric and algebraic ghosting functors cover
+        // the same set of elements/nodes. That being said, in general,
+        // we would expect G(e) > A(e). Here G(e) is the set of elements reserved
+        // by the geometric ghosting functors, and A(e) corresponds to
+        // the one covered by the algebraic ghosting functors.
+        // Therefore, we have to work only on local elements instead of
+        // ghosted + local elements. The ghosted solution might not be enough
+        // for ghosted+local elements. But it is always sufficient for local elements.
+        // After we set markers for all local elements, we will do a global
+        // communication to sync markers for ghosted elements from their owners.
+        all_elems = libmesh_make_unique<ConstElemRange>(
+            _subproblem.mesh().getMesh().active_local_elements_begin(),
+            _subproblem.mesh().getMesh().active_local_elements_end());
+      }
+      else // This is not scalable but it might be useful for small-size problems
+      {
+        _subproblem.getAuxiliarySystem().solution().close();
+        _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
+        distributed_adaptivity = false;
+
+        // For a replicated mesh or a serialized distributed mesh, the solution
+        // is serialized to everyone. Then we update markers for all active elements.
+        // In this case, we can avoid a global communication to update mesh.
+        // I do not know if it is a good idea, but it the old code behavior.
+        // We might not care about much since a replicated mesh
+        // or a serialized distributed mesh is not scalable anyway.
+        all_elems = libmesh_make_unique<ConstElemRange>(
+            _subproblem.mesh().getMesh().active_elements_begin(),
+            _subproblem.mesh().getMesh().active_elements_end());
+      }
+
+      FlagElementsThread fet(
+          _subproblem, serialized_solution, _max_h_level, marker_name, !distributed_adaptivity);
+      Threads::parallel_reduce(*all_elems, fet);
       _subproblem.getAuxiliarySystem().solution().close();
     }
   }
@@ -175,11 +220,20 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (_displaced_problem)
     _displaced_problem->undisplaceMesh();
 
+  // If markers are added to only local elements,
+  // we sync them here.
+  if (distributed_adaptivity)
+    _mesh_refinement->make_flags_parallel_consistent();
+
   // Perform refinement and coarsening
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
   if (_displaced_problem && mesh_changed)
   {
+    // If markers are added to only local elements,
+    // we sync them here.
+    if (distributed_adaptivity)
+      _displaced_mesh_refinement->make_flags_parallel_consistent();
 #ifndef NDEBUG
     bool displaced_mesh_changed =
 #endif

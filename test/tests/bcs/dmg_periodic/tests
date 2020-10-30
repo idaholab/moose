@@ -12,12 +12,9 @@
   [../]
 
   [./check_one_step]
-    type = 'Exodiff'
+    type = 'RunApp'
     input = 'dmg_periodic_bc.i'
-    exodiff = 'dmg_periodic_bc_out_one_step.e'
-    cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160 Outputs/hide="pid" Outputs/file_base=dmg_periodic_bc_out_one_step Executioner/num_steps=1'
-    abs_zero = 1e-6
-    rel_err = 1e-5
+    cli_args = '/UserObjects/uo/type=CheckGhostedBoundaries /UserObjects/uo/total_num_bdry_sides=160 Outputs/hide="pid" Outputs/exodus=false Executioner/num_steps=1'
     requirement = "The system shall make sure that boundaries are actually distributed."
     min_parallel = 2
   [../]
@@ -35,12 +32,9 @@
 
   [./3d]
     type = 'Exodiff'
-    input = 'dmg_periodic_bc.i'
-    exodiff = 'dmg_periodic_bc_out_3d.e'
+    input = 'dmg_simple_periodic_bc.i'
+    exodiff = 'dmg_simple_periodic_bc_out.e'
     min_parallel = 2
-    cli_args = 'Outputs/hide="pid" Outputs/file_base=dmg_periodic_bc_out_3d Mesh/dmg/dim=3 Mesh/dmg/nx=10 Mesh/dmg/ny=10 Mesh/dmg/nz=10 Mesh/dmg/zmax=40 BCs/Periodic/all/auto_direction="x y z" Kernels/forcing/x_center=6'
-    abs_zero = 1e-6
-    rel_err = 1e-5
     requirement = "The system shall support periodic boundary conditions in a parallel generated 3D mesh."
   [../]
 

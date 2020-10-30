@@ -203,12 +203,12 @@ public:
   /**
    * Return phi size
    */
-  size_t phiSize() const { return _phi->size(); }
+  std::size_t phiSize() const { return _phi->size(); }
 
   /**
    * Return phiFace size
    */
-  size_t phiFaceSize() const { return _phi_face->size(); }
+  std::size_t phiFaceSize() const { return _phi_face->size(); }
 
   /**
    * Whether or not this variable is computing any second derivatives.
@@ -360,7 +360,12 @@ public:
    */
   void setDofValues(const DenseVector<OutputData> & values);
 
+  ///@{
+  /**
+   * dof value setters
+   */
   void setDofValue(const OutputData & value, unsigned int index);
+  ///@}
 
   /**
    * Write a nodal value to the passed-in solution vector

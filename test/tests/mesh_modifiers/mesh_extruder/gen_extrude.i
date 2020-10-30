@@ -1,52 +1,53 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 6
-  ny = 6
-  nz = 0
-  zmin = 0
-  zmax = 0
-  elem_type = QUAD4
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 6
+    ny = 6
+    nz = 0
+    zmin = 0
+    zmax = 0
+    elem_type = QUAD4
+  []
 
-[MeshModifiers]
-  [./extrude]
-    type = MeshExtruder
+  [extrude]
+    type = MeshExtruderGenerator
+    input = gen
     num_layers = 6
     extrusion_vector = '1 0 1'
     bottom_sideset = '10'
     top_sideset = '20'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 10
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = 20
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

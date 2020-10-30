@@ -1,6 +1,6 @@
 # GeneratedMeshGenerator
 
-!syntax description /MeshGenerators/GeneratedMeshGenerator
+!syntax description /Mesh/GeneratedMeshGenerator
 
 ## Overview
 
@@ -14,8 +14,8 @@ prisms ("boxes"). The mesh automatically creates boundaries that are logically n
 The length, width, and height of the domain, as well as the number of elements in each direction can be specified
 independently.
 
-!syntax parameters /MeshGenerators/GeneratedMeshGenerator
+!syntax parameters /Mesh/GeneratedMeshGenerator
 
-!syntax inputs /MeshGenerators/GeneratedMeshGenerator
+!syntax inputs /Mesh/GeneratedMeshGenerator
 
-!syntax children /MeshGenerators/GeneratedMeshGenerator
+!syntax children /Mesh/GeneratedMeshGenerator

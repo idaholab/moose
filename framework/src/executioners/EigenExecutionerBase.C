@@ -181,7 +181,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   const PostprocessorValue * solution_diff = NULL;
   if (!xdiff.empty())
   {
-    solution_diff = &getPostprocessorValueByName(xdiff);
+    solution_diff = &_problem.getPostprocessorValueByName(xdiff);
     const ExecFlagEnum & xdiff_exec = _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
     if (!xdiff_exec.contains(EXEC_LINEAR))
       mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");

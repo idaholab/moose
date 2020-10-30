@@ -15,12 +15,12 @@
 JsonInputFileFormatter::JsonInputFileFormatter() : _spaces(2), _level(0) {}
 
 std::string
-JsonInputFileFormatter::toString(const moosecontrib::Json::Value & root)
+JsonInputFileFormatter::toString(const nlohmann::json & root)
 {
   _stream.clear();
   _stream.str("");
-  for (auto && name : root["blocks"].getMemberNames())
-    addBlock(name, root["blocks"][name], true);
+  for (auto && el : root["blocks"].items())
+    addBlock(el.key(), el.value(), true);
   return _stream.str();
 }
 
@@ -68,7 +68,7 @@ JsonInputFileFormatter::addLine(const std::string & line,
 
 void
 JsonInputFileFormatter::addBlock(const std::string & name,
-                                 const moosecontrib::Json::Value & block,
+                                 const nlohmann::json & block,
                                  bool toplevel)
 {
   addLine("");
@@ -78,38 +78,39 @@ JsonInputFileFormatter::addBlock(const std::string & name,
     addLine("[./" + name + "]");
 
   _level++;
-  if (block.isMember("description") && !block["description"].asString().empty())
-    addLine("", 0, block["description"].asString());
+  std::string desc = block.contains("description") ? nlohmann::to_string(block["description"]) : "";
+  if (!desc.empty())
+    addLine("", 0, desc);
 
-  if (block.isMember("parameters"))
+  if (block.contains("parameters"))
     addParameters(block["parameters"]);
 
-  if (block.isMember("actions"))
+  if (block.contains("actions"))
   {
     // there could be duplicate parameters across actions, last one wins
-    moosecontrib::Json::Value all_params;
+    nlohmann::json all_params;
     auto & actions = block["actions"];
-    for (auto && name : actions.getMemberNames())
+    for (auto && el : actions.items())
     {
-      auto & params = actions[name]["parameters"];
-      for (auto && param_name : params.getMemberNames())
-        all_params[param_name] = params[param_name];
+      auto & params = el.value()["parameters"];
+      for (auto && param_el : params.items())
+        all_params[param_el.key()] = param_el.value();
     }
     addParameters(all_params);
   }
 
-  if (block.isMember("star"))
+  if (block.contains("star"))
     addBlock("*", block["star"]);
 
   addTypes("subblock_types", block);
   addTypes("types", block);
 
-  if (block.isMember("subblocks"))
+  if (block.contains("subblocks"))
   {
     auto & subblocks = block["subblocks"];
-    if (!subblocks.isNull())
-      for (auto && name : subblocks.getMemberNames())
-        addBlock(name, subblocks[name]);
+    if (!subblocks.is_null())
+      for (auto && el : subblocks.items())
+        addBlock(el.key(), el.value());
   }
 
   _level--;
@@ -120,42 +121,46 @@ JsonInputFileFormatter::addBlock(const std::string & name,
 }
 
 void
-JsonInputFileFormatter::addTypes(const std::string & key, const moosecontrib::Json::Value & block)
+JsonInputFileFormatter::addTypes(const std::string & key, const nlohmann::json & block)
 {
-  if (!block.isMember(key))
+  if (!block.contains(key))
     return;
   auto & types = block[key];
-  if (types.isNull())
+  if (types.is_null())
     return;
 
   addLine("");
   addLine("[./<types>]");
   _level++;
-  for (auto && name : types.getMemberNames())
-    addBlock("<" + name + ">", types[name]);
+  for (auto && el : types.items())
+    addBlock("<" + el.key() + ">", el.value());
   _level--;
   addLine("[../]");
 }
 
 void
-JsonInputFileFormatter::addParameters(const moosecontrib::Json::Value & params)
+JsonInputFileFormatter::addParameters(const nlohmann::json & params)
 {
   size_t max_name = 0;
-  for (auto && name : params.getMemberNames())
-    if (name.size() > max_name)
-      max_name = name.size();
+  for (auto & el : params.items())
+    if (el.key().size() > max_name)
+      max_name = el.key().size();
 
   size_t max_len = 0;
   std::map<std::string, std::string> lines;
-  for (auto && name : params.getMemberNames())
+  for (auto && el : params.items())
   {
-    auto & param = params[name];
-    auto def = MooseUtils::trim(param["default"].asString());
+    auto & name = el.key();
+    auto & param = el.value();
+    auto def =
+        param.contains("default") ? MooseUtils::trim(nlohmann::to_string(param["default"])) : "";
+    if (!def.empty())
+      def = def.substr(1, def.size() - 2);
     if (def.find(' ') != std::string::npos)
       def = "'" + def + "'";
     std::string indent(max_name - name.size(), ' ');
     std::string required;
-    if (param["required"].asBool())
+    if (param["required"])
       required = "(required)";
     if (def.size() == 0 && required.size() == 0)
       def = "(no_default)";
@@ -164,15 +169,17 @@ JsonInputFileFormatter::addParameters(const moosecontrib::Json::Value & params)
       max_len = l.size();
     lines[name] = l;
   }
-  for (auto && name : params.getMemberNames())
+  for (auto & el : params.items())
   {
-    auto & param = params[name];
+    auto & name = el.key();
+    auto & param = el.value();
     auto & l = lines[name];
-    auto desc = param["description"].asString();
+    auto desc = nlohmann::to_string(param["description"]);
     addLine(l, max_len, desc);
 
-    auto group = param["group_name"].asString();
+    const auto group = nlohmann::to_string(param["group_name"]);
     if (!group.empty())
-      addLine("", max_len + 1, "Group: " + group); // a +1 to account for an empty line
+      addLine("", max_len + 1,
+              "Group: " + group); // a +1 to account for an empty line
   }
 }

@@ -1,50 +1,52 @@
 [Mesh]
-  file = cylinder.e
-[]
+  [file]
+    type = FileMeshGenerator
+    file = cylinder.e
+  []
 
-[MeshModifiers]
-  [./rotate]
-    type = Transform
+  [rotate]
+    type = TransformGenerator
+    input = file
     transform = ROTATE
     vector_value = '0 90 0'
-  [../]
+  []
 
-  [./scale]
-    type = Transform
+  [scale]
+    type = TransformGenerator
+    input = rotate
     transform = SCALE
     vector_value = '1e2 1e2 1e2'
-    depends_on = rotate
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

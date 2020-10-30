@@ -1,9 +1,12 @@
 [Tests]
-  deprecated = True
-  [./test]
+  issues = '#13814'
+  design = Mesh/index.md
+  [test]
     type = 'Exodiff'
     input = 'mesh_smoother.i'
     exodiff = 'mesh_smoother_out.e'
-    no_error_deprecated = true
-  [../]
+    mesh_mode = REPLICATED
+
+    requirement = "The system shall support the ability to apply smoothing to a mesh."
+  []
 []

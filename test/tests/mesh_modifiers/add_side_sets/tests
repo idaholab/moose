@@ -1,24 +1,37 @@
 [Tests]
-  deprecated = True
-  [./cylinder_points]
-    type = 'Exodiff'
-    input = 'cylinder_points.i'
-    exodiff = 'cylinder_points_out.e'
-    no_error_deprecated = true
-  [../]
+  issues = '#13814'
+  design = Mesh/index.md
 
-  [./cyliner_normal]
-    type = 'Exodiff'
-    input = 'cylinder_normals.i'
-    exodiff = 'cylinder_normals_out.e'
-    group = 'requirements'
-    no_error_deprecated = true
-  [../]
+  [cylinder]
+    requirement = "The system shall support assigning boundary identifiers based on the normal of a "
+                  "element face for "
 
-  [./cylinder_points_fixed]
-    type = 'Exodiff'
-    input = 'cylinder_normals_fixed.i'
-    exodiff = 'cylinder_normals_fixed_out.e'
-    no_error_deprecated = true
-  [../]
+    [points]
+      type = 'Exodiff'
+      input = 'cylinder_points.i'
+      exodiff = 'cylinder_points_out.e'
+      mesh_mode = REPLICATED
+
+      detail = 'specified points and '
+    []
+
+    [normal]
+      type = 'Exodiff'
+      input = 'cylinder_normals.i'
+      exodiff = 'cylinder_normals_out.e'
+      mesh_mode = REPLICATED
+
+      detail = 'specified directions with'
+
+    []
+
+    [points_fixed]
+      type = 'Exodiff'
+      input = 'cylinder_normals_fixed.i'
+      exodiff = 'cylinder_normals_fixed_out.e'
+      mesh_mode = REPLICATED
+
+      detail = 'fixed normal application.'
+    []
+  []
 []

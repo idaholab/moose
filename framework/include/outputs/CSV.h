@@ -72,6 +72,11 @@ protected:
   virtual void outputVectorPostprocessors() override;
 
   /**
+   * Sets the write flag and calls TableOutput::outputVectorPostprocessors()
+   */
+  virtual void outputReporters() override;
+
+  /**
    * Generates a filename pattern for Vectorpostprocessors
    * filebase + VPP name + time step + ".csv"
    */

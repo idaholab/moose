@@ -927,3 +927,6 @@ DerivativeStringClass(MeshGeneratorName);
 
 /// Name of extra element IDs
 DerivativeStringClass(ExtraElementIDName);
+
+/// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
+DerivativeStringClass(ReporterValueName);

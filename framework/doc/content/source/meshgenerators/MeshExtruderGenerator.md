@@ -1,6 +1,6 @@
 # MeshExtruderGenerator
 
-!syntax description /MeshGenerators/MeshExtruderGenerator
+!syntax description /Mesh/MeshExtruderGenerator
 
 ## Overview
 
@@ -18,8 +18,8 @@ in the extra sidesets resulting from increasing the dimensionality of the origin
 
 !media media/framework/mesh_modifiers/extrude_angle.png caption=Resulting mesh after extrusion along the vector (1, 1, 0).
 
-!syntax parameters /MeshGenerators/MeshExtruderGenerator
+!syntax parameters /Mesh/MeshExtruderGenerator
 
-!syntax inputs /MeshGenerators/MeshExtruderGenerator
+!syntax inputs /Mesh/MeshExtruderGenerator
 
-!syntax children /MeshGenerators/MeshExtruderGenerator
+!syntax children /Mesh/MeshExtruderGenerator

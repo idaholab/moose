@@ -1,6 +1,6 @@
 # SubdomainBoundingBoxGenerator
 
-!syntax description /MeshGenerators/SubdomainBoundingBoxGenerator
+!syntax description /Mesh/SubdomainBoundingBoxGenerator
 
 ## Overview
 
@@ -9,8 +9,8 @@ extreme coordinates (lower left and upper right), and changes subdomain IDs of
 all elements or elements with certain subdomain IDs  either inside or outside
 the box to the specified ID.
 
-!syntax parameters /MeshGenerators/SubdomainBoundingBoxGenerator
+!syntax parameters /Mesh/SubdomainBoundingBoxGenerator
 
-!syntax inputs /MeshGenerators/SubdomainBoundingBoxGenerator
+!syntax inputs /Mesh/SubdomainBoundingBoxGenerator
 
-!syntax children /MeshGenerators/SubdomainBoundingBoxGenerator
+!syntax children /Mesh/SubdomainBoundingBoxGenerator

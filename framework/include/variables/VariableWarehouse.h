@@ -82,14 +82,14 @@ public:
    * @param var_name The name of the variable to retrieve
    * @return The retrieved variable
    */
-  MooseVariableBase * getVariable(const std::string & var_name);
+  MooseVariableBase * getVariable(const std::string & var_name) const;
 
   /**
    * Get a variable from the warehouse
    * @param var_number The number of the variable to retrieve
    * @return The retrieved variable
    */
-  MooseVariableBase * getVariable(unsigned int var_number);
+  MooseVariableBase * getVariable(unsigned int var_number) const;
 
   /**
    * Get a finite element variable from the warehouse
@@ -153,6 +153,16 @@ public:
    * @return The list of scalar variables
    */
   const std::vector<MooseVariableScalar *> & scalars() const;
+
+  /**
+   * Call residualSetup for all variables
+   */
+  void residualSetup();
+
+  /**
+   * Call jacobianSetup for all variables
+   */
+  void jacobianSetup();
 
 protected:
   /// list of variable names

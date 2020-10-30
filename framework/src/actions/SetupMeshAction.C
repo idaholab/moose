@@ -282,11 +282,16 @@ SetupMeshAction::act()
       // We want to set the MeshBase object to that coming from mesh generators when the following
       // conditions are met:
       // 1. We have mesh generators
-      // 2. We are recovering/restarting AND we are not the master application, e.g. we are a
-      //    sub-application
+      // 2. We are not: recovering/restarting and we are the master application
       if (!_app.getMeshGeneratorNames().empty() &&
           !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
-        _mesh->setMeshBase(_app.getMeshGeneratorMesh());
+      {
+        auto mesh_base = _app.getMeshGeneratorMesh();
+        if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())
+          mooseError("The MooseMesh and libmesh::MeshBase object coming from mesh generators are "
+                     "out of sync with respect to whether remote elements can be deleted");
+        _mesh->setMeshBase(std::move(mesh_base));
+      }
       else
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     }
@@ -306,6 +311,7 @@ SetupMeshAction::act()
       if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
       {
         _displaced_mesh = _mesh->safeClone();
+        _displaced_mesh->isDisplaced(true);
         _displaced_mesh->getMesh().allow_remote_element_removal(
             _mesh->getMesh().allow_remote_element_removal());
 

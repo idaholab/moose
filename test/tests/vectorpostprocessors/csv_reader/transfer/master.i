@@ -54,7 +54,7 @@
 [VectorPostprocessors]
   [./data]
     type = CSVReader
-    csv_file = 'xsexample.csv'
+    csv_file = 'example.csv'
   [../]
 []
 

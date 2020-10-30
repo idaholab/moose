@@ -1,9 +1,9 @@
 # SideSetsBetweenSubdomainsGenerator
 
-!syntax description /MeshGenerators/SideSetsBetweenSubdomainsGenerator
+!syntax description /Mesh/SideSetsBetweenSubdomainsGenerator
 
-!syntax parameters /MeshGenerators/SideSetsBetweenSubdomainsGenerator
+!syntax parameters /Mesh/SideSetsBetweenSubdomainsGenerator
 
-!syntax inputs /MeshGenerators/SideSetsBetweenSubdomainsGenerator
+!syntax inputs /Mesh/SideSetsBetweenSubdomainsGenerator
 
-!syntax children /MeshGenerators/SideSetsBetweenSubdomainsGenerator
+!syntax children /Mesh/SideSetsBetweenSubdomainsGenerator

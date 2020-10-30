@@ -30,6 +30,53 @@ public:
 
   Material(const InputParameters & parameters);
 
+  /**
+   * Gets an element integer for the proper current element with a parameter of
+   * the object derived from this interface
+   * Note: This overrides the function in ElementIDInterface to assure derived materials
+   *       call the functions in ElementIDInterface properly.
+   */
+  virtual const dof_id_type & getElementID(const std::string & id_parameter_name,
+                                           unsigned int comp = 0) const override
+  {
+    return _neighbor ? ElementIDInterface::getElementIDNeighbor(id_parameter_name, comp)
+                     : ElementIDInterface::getElementID(id_parameter_name, comp);
+  }
+  /**
+   * Directly calling this function is not needed for materials because the same material has
+   * three copies for element interior, element side and neighbor side.
+   */
+  virtual const dof_id_type & getElementIDNeighbor(const std::string & id_parameter_name,
+                                                   unsigned int comp = 0) const override
+  {
+    mooseError("Directly calling 'getElementIDNeighbor' is not allowed for materials. Please call "
+               "'getElementID' instead");
+    return ElementIDInterface::getElementIDNeighbor(id_parameter_name, comp);
+  }
+
+  /**
+   * Gets an element integer for the proper current element with the element integer name
+   * Note: This overrides the function in ElementIDInterface to assure derived materials
+   *       call the functions in ElementIDInterface properly.
+   */
+  virtual const dof_id_type &
+  getElementIDByName(const std::string & id_parameter_name) const override
+  {
+    return _neighbor ? ElementIDInterface::getElementIDNeighborByName(id_parameter_name)
+                     : ElementIDInterface::getElementIDByName(id_parameter_name);
+  }
+  /**
+   * Directly calling this function is not needed for materials because the same material has
+   * three copies for element interior, element side and neighbor side.
+   */
+  virtual const dof_id_type &
+  getElementIDNeighborByName(const std::string & id_parameter_name) const override
+  {
+    mooseError("Directly calling 'getElementIDNeighborByName' is not allowed for materials. Please "
+               "call 'getElementIDByName' instead");
+    return ElementIDInterface::getElementIDNeighborByName(id_parameter_name);
+  }
+
   virtual void computeProperties() override;
 
   ///@{
@@ -99,6 +146,8 @@ public:
     SUBDOMAIN
   };
 
+  bool ghostable() const override final { return _ghostable; }
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -125,6 +174,12 @@ protected:
 
 private:
   ConstantTypeEnum computeConstantOption();
+
+  /// Whether this material can be computed in a ghosted context. If properties are constant or
+  /// depend only on finite volume variables, then this material can be computed in a ghosted
+  /// context. If properties depend on finite element variables, then this material cannot be
+  /// computed in a ghosted context
+  bool _ghostable;
 };
 
 template <typename T>

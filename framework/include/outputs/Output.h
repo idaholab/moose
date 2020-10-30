@@ -14,6 +14,9 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "SetupInterface.h"
+#include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
+#include "ReporterInterface.h"
 #include "AdvancedOutputUtils.h"
 #include "PerfGraphInterface.h"
 
@@ -42,6 +45,9 @@ class Output : public MooseObject,
                public Restartable,
                public MeshChangedInterface,
                public SetupInterface,
+               public PostprocessorInterface,
+               public VectorPostprocessorInterface,
+               public ReporterInterface,
                public PerfGraphInterface
 {
 public:
@@ -248,4 +254,3 @@ protected:
 
   friend class OutputWarehouse;
 };
-

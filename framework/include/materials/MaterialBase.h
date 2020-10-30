@@ -151,6 +151,12 @@ public:
    */
   virtual const std::set<std::string> & getSuppliedItems() override { return _supplied_props; }
 
+  /**
+   * Get the prop ids corresponding to \p declareProperty
+   * @return A reference to the set of properties with calls to \p declareProperty
+   */
+  const std::set<unsigned int> & getSuppliedPropIDs() { return _supplied_prop_ids; }
+
   void checkStatefulSanity() const;
 
   /**
@@ -181,6 +187,14 @@ public:
    * @return Whether this material has stateful properties
    */
   bool hasStatefulProperties() const { return _has_stateful_property; }
+
+  /**
+   * Whether this material supports ghosted computations. This is important for finite volume
+   * calculations in which variables have defined values on ghost cells/elements and for which these
+   * ghost values may need to flow through material calculations to be eventually consumed by FV
+   * flux kernels or boundary conditions
+   */
+  virtual bool ghostable() const { return false; }
 
 protected:
   /**

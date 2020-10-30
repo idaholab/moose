@@ -99,7 +99,7 @@ ADNodalBCTempl<T>::computeJacobian()
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
-          _fe_problem.assembly(0).cacheJacobianContribution(
+          _fe_problem.assembly(0).cacheJacobian(
               cached_rows[i],
               cached_rows[i],
               conversionHelper(residual, i).derivatives()[ad_offset + i],
@@ -129,7 +129,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
       if (_sys.hasMatrix(tag))
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
-            _fe_problem.assembly(0).cacheJacobianContribution(
+            _fe_problem.assembly(0).cacheJacobian(
                 cached_rows[i],
                 cached_col,
                 conversionHelper(residual, i).derivatives()[ad_offset + i],
@@ -163,7 +163,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
-          _fe_problem.assembly(0).cacheJacobianContribution(
+          _fe_problem.assembly(0).cacheJacobian(
               cached_rows[i],
               scalar_dof_indices[0],
               conversionHelper(residual, i).derivatives()[ad_offset + i],

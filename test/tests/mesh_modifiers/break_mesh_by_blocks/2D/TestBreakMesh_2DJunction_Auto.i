@@ -1,10 +1,11 @@
 [Mesh]
-  file = 4ElementJunction.e
-  parallel_type = REPLICATED
-[]
+  [file]
+    type = FileMeshGenerator
+    file = 4ElementJunction.e
+  []
 
-[MeshModifiers]
-  [./breakmesh]
-    type = BreakMeshByBlock
-  [../]
+  [breakmesh]
+    type = BreakMeshByBlockGenerator
+    input = file
+  []
 []

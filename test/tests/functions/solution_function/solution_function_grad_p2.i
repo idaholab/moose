@@ -30,15 +30,15 @@
 
 [AuxKernels]
   [./test_variable_x_aux]
-    type = FunctionGradAux
+    type = FunctionDerivativeAux
     variable = test_variable_x
-    dimension_index = x
+    component = x
     function = solution_function
   [../]
   [./test_variable_y_aux]
-    type = FunctionGradAux
+    type = FunctionDerivativeAux
     variable = test_variable_y
-    dimension_index = y
+    component = y
     function = solution_function
   [../]
 []

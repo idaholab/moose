@@ -38,5 +38,8 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
+  mooseAssert(_normal * _vel[_qp] >= 0,
+              "This boundary condition is for outflow but the flow is in the opposite direction of "
+              "the boundary normal");
   return _normal * _vel[_qp] * (*_adv_quant)[_qp];
 }

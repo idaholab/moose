@@ -10,7 +10,6 @@
     custom_cmp = 'one-variable-u.cmp'
     partial = True
     map = False
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable'
   [../]
   [./equalgradient]
@@ -22,7 +21,6 @@
     partial = True
     map = False
     custom_cmp = 'one-variable-u.cmp'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to enforce solution gradient continuity on a conforming mesh for one variable'
   [../]
 
@@ -35,7 +33,6 @@
     partial = True
     map = False
     custom_cmp = 'two-variable-uv.cmp'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for two variables'
   [../]
 
@@ -48,7 +45,6 @@
     partial = True
     map = False
     custom_cmp = 'one-variable-u.cmp'
-    mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable using second order shape functions for both primal and lagrange variables. Note that this may be a relatively unstable discretization'
   [../]
 []

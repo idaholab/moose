@@ -35,13 +35,18 @@ public:
 
   RelationshipManager(const InputParameters & parameters);
 
+  RelationshipManager(const RelationshipManager & other);
+
   /**
    * Called before this RM is attached.  Will only be called once.
    */
-  void init()
+  void init(const MeshBase & mesh)
   {
     if (!_inited)
-      internalInit();
+    {
+      internalInitWithMesh(mesh);
+      set_mesh(&mesh);
+    }
     _inited = true;
   }
 
@@ -109,13 +114,11 @@ protected:
   /**
    * Called before this RM is attached.  Only called once
    */
-  virtual void internalInit() = 0;
+  virtual void internalInitWithMesh(const MeshBase &) { internalInit(); }
+  virtual void internalInit() {}
 
   /// Whether or not this has been initialized
   bool _inited = false;
-
-  /// Reference to the Mesh object
-  MooseMesh & _mesh;
 
   /// Pointer to the \p MooseMesh object
   MooseMesh * const _moose_mesh;

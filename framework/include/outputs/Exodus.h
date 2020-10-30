@@ -131,6 +131,11 @@ protected:
   virtual void outputInput() override;
 
   /**
+   * Writes the Reporter values to the ExodusII output
+   */
+  virtual void outputReporters() override;
+
+  /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written

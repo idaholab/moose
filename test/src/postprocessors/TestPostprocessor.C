@@ -19,8 +19,8 @@ TestPostprocessor::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
   MooseEnum test_type("grow use_older_value report_old custom_execute_on");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
-  params.addParam<PostprocessorName>("report_name",
-                                     "The name of the postprocessor value to report");
+  params.addParam<PostprocessorName>(
+      "report_name", 0, "The name of the postprocessor value to report");
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
   exec.addAvailableFlags(EXEC_JUST_GO);
   params.setDocString("execute_on", exec.getDocString());
@@ -32,6 +32,7 @@ TestPostprocessor::TestPostprocessor(const InputParameters & parameters)
     _test_type(getParam<MooseEnum>("test_type")),
     _old_val(getPostprocessorValueOldByName(name())),
     _older_val(getPostprocessorValueOlderByName(name())),
+    _report_old(getPostprocessorValueOld("report_name")),
     _execute_count(declareRestartableData<unsigned int>("execute_count"))
 {
   if (_test_type == "report_old" && !isParamValid("report_name"))
@@ -59,7 +60,7 @@ TestPostprocessor::getValue()
   }
 
   else if (_test_type == "report_old")
-    return getPostprocessorValueOld("report_name");
+    return _report_old;
 
   else if (_test_type == "custom_execute_on")
   {

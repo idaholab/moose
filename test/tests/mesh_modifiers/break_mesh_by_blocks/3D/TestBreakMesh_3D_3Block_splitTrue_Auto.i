@@ -1,13 +1,14 @@
 [Mesh]
-  file = coh3D_3Blocks.e
-  parallel_type = REPLICATED
-[]
+  [file]
+    type = FileMeshGenerator
+    file = coh3D_3Blocks.e
+  []
 
-[MeshModifiers]
-  [./breakmesh]
-    type = BreakMeshByBlock
+  [breakmesh]
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = true
-  [../]
+  []
 []
 
 # This input file is intended to be run with the "--mesh-only" option so

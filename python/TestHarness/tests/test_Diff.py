@@ -21,6 +21,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
         self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.jsondiff.*?FAILED \(JSONDIFF\)')
         self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.exodiff.*?Running exodiff')
         self.assertRegexpMatches(e.output.decode('utf-8'), r'test_harness\.csvdiff.*?Running csvdiff')
 

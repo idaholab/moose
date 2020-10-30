@@ -24,4 +24,17 @@ public:
 
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
+
+  /// The stabilization parameter
+  const Real _delta;
+
+  /// The diffusion coefficient on the secondary side
+  const ADMaterialProperty<Real> & _diff_secondary;
+
+  /// The diffusion coefficient on the primary side
+  const ADMaterialProperty<Real> & _diff_primary;
+
+  /// whether to perform stabilization. We have this parameter to save computational cost in the
+  /// unstabilized case
+  const bool _stabilize;
 };

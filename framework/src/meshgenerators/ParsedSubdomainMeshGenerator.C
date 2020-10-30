@@ -72,7 +72,7 @@ ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters
   if (_func_F->Parse(_function, "x,y,z") >= 0)
     mooseError("Invalid function\n",
                _function,
-               "\nin ParsedSubdomainMeshModifier ",
+               "\nin ParsedSubdomainMeshGenerator ",
                name(),
                ".\n",
                _func_F->ErrorMsg());

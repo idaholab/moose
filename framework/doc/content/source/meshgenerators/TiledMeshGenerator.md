@@ -1,6 +1,6 @@
 # TiledMeshGenerator
 
-!syntax description /MeshGenerators/TiledMeshGenerator
+!syntax description /Mesh/TiledMeshGenerator
 
 ## Example
 
@@ -31,8 +31,8 @@ cd ~/projects/moose/test/tests/meshgenerators/tiled_mesh_generator/
 
 !listing test/tests/meshgenerators/tiled_mesh_generator/tiled_mesh_generator.i
 
-!syntax parameters /MeshGenerators/TiledMeshGenerator
+!syntax parameters /Mesh/TiledMeshGenerator
 
-!syntax inputs /MeshGenerators/TiledMeshGenerator
+!syntax inputs /Mesh/TiledMeshGenerator
 
-!syntax children /MeshGenerators/TiledMeshGenerator
+!syntax children /Mesh/TiledMeshGenerator

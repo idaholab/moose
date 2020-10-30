@@ -96,12 +96,17 @@ void escape(std::string & str);
 std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
 
 /**
- * Python like split function for strings.
+ * Python like split functions for strings.
  *
  * NOTE: This is similar to the tokenize function, but it maintains empty items, which tokenize does
  *       not. For example, "foo;bar;;" becomes {"foo", "bar", "", ""}.
  */
-std::vector<std::string> split(const std::string & str, const std::string & delimiter);
+std::vector<std::string> split(const std::string & str,
+                               const std::string & delimiter,
+                               std::size_t max_count = std::numeric_limits<std::size_t>::max());
+std::vector<std::string> rsplit(const std::string & str,
+                                const std::string & delimiter,
+                                std::size_t max_count = std::numeric_limits<std::size_t>::max());
 
 /**
  * Python like join function for strings.

@@ -68,7 +68,7 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   // error checking.  Must have exactly one of new_block_id or new_block_name
   // In principal we could have both (the old block would then be given a new ID and a new name)
   // but i feel that could lead to confusion for the user.  If the user wants to do that they
-  // should use two of these RenameBlock MeshModifiers.
+  // should use two of these RenameBlock MeshGenerator.
   if (isParamValid("new_block_id") && isParamValid("new_block_name"))
     mooseError(
         "RenameBlockGenerator: You must supply exactly one of new_block_id or new_block_name\n");
@@ -84,7 +84,7 @@ RenameBlockGenerator::generate()
 
   // grab the user input.  Can't do all this in the constructor as some things may not
   // have been put into the mesh yet, eg old_block_name might have been inserted by
-  // another MeshModifier
+  // another MeshGenerator
   if (isParamValid("old_block_id"))
   {
     // user must have supplied old_block_id

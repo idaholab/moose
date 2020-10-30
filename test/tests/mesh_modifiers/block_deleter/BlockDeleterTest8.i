@@ -1,58 +1,60 @@
 # 2D, removal of a block containing a nodeset inside it
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 5
-  ny = 5
-  xmin = 0
-  xmax = 5
-  ymin = 0
-  ymax = 5
-[]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 5
+    ny = 5
+    xmin = 0
+    xmax = 5
+    ymin = 0
+    ymax = 5
+  []
 
-[MeshModifiers]
-  [./SubdomainBoundingBox1]
-    type = SubdomainBoundingBox
+  [SubdomainBoundingBox1]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '4 4 1'
-  [../]
-  [./interior_nodeset]
-    type = BoundingBoxNodeSet
+  []
+  [interior_nodeset]
+    type = BoundingBoxNodeSetGenerator
+    input = SubdomainBoundingBox1
     new_boundary = interior_ns
     bottom_left = '2 2 0'
     top_right = '3 3 1'
-  [../]
-  [./ed0]
-    type = BlockDeleter
+  []
+  [ed0]
+    type = BlockDeletionGenerator
+    input = interior_nodeset
     block_id = 1
-    depends_on = 'SubdomainBoundingBox1 interior_nodeset'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

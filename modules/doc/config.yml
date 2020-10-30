@@ -105,6 +105,8 @@ Extensions:
             distributions: syntax/Distributions/index.md
             executioners: syntax/Executioner/index.md
             functions: syntax/Functions/index.md
+            fvbcs: syntax/FVBCs/index.md
+            fvkernels: syntax/FVKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
             interfacekernels: syntax/InterfaceKernels/index.md
@@ -113,7 +115,6 @@ Extensions:
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
-            meshgenerators: syntax/MeshGenerators/index.md
             meshmodifiers: syntax/MeshModifiers/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md

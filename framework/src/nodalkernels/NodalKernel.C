@@ -152,7 +152,7 @@ NodalKernel::computeResidual()
     _qp = 0;
     Real res = computeQpResidual();
     res *= _var.scalingFactor();
-    _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
+    _assembly.cacheResidual(dof_idx, res, _vector_tags);
 
     if (_has_save_in)
     {
@@ -174,7 +174,7 @@ NodalKernel::computeJacobian()
 
     cached_val *= _var.scalingFactor();
 
-    _assembly.cacheJacobianContribution(cached_row, cached_row, cached_val, _matrix_tags);
+    _assembly.cacheJacobian(cached_row, cached_row, cached_val, _matrix_tags);
 
     if (_has_diag_save_in)
     {
@@ -203,7 +203,7 @@ NodalKernel::computeOffDiagJacobian(unsigned int jvar)
 
       cached_val *= _var.scalingFactor();
 
-      _assembly.cacheJacobianContribution(cached_row, cached_col, cached_val, _matrix_tags);
+      _assembly.cacheJacobian(cached_row, cached_col, cached_val, _matrix_tags);
     }
   }
 }

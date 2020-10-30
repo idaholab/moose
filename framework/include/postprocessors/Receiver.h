@@ -58,4 +58,3 @@ private:
   /// Reference to the value being stored in the associated PostprocessorData class
   const PostprocessorValue & _my_value;
 };
-

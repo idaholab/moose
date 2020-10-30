@@ -95,7 +95,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         }
 
         if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblemBase(i).getPostprocessorValue(_postprocessor_name) = value;
+          _multi_app->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name, value);
       }
 
       break;

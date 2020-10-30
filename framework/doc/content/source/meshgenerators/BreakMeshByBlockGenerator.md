@@ -1,6 +1,6 @@
 # BreakMeshByBlockGenerator
 
-!syntax description /MeshGenerators/BreakMeshByBlockGenerator
+!syntax description /Mesh/BreakMeshByBlockGenerator
 
 ## Description
 
@@ -33,6 +33,6 @@ interface will be named `wood_Block2`.
 
 !listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_2DJunction_splittrue.i block=Mesh
 
-!syntax parameters /MeshGenerators/BreakMeshByBlockGenerator
+!syntax parameters /Mesh/BreakMeshByBlockGenerator
 
-!syntax inputs /MeshGenerators/BreakMeshByBlockGenerator
+!syntax inputs /Mesh/BreakMeshByBlockGenerator

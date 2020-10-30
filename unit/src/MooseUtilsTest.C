@@ -302,6 +302,30 @@ TEST(MooseUtils, split)
 
   out = MooseUtils::split("foo;bar;;", ";");
   EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "", ""}));
+
+  out = MooseUtils::split("a/b/c/d", "/", 2);
+  EXPECT_EQ(out, std::vector<std::string>({"a", "b", "c/d"}));
+}
+
+TEST(MooseUtils, rsplit)
+{
+  std::vector<std::string> out = MooseUtils::rsplit("foo;bar;foobar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "foobar"}));
+
+  out = MooseUtils::rsplit(";foo;bar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"", "foo", "bar"}));
+
+  out = MooseUtils::rsplit("foo;;bar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "", "bar"}));
+
+  out = MooseUtils::rsplit("foo;bar;", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", ""}));
+
+  out = MooseUtils::rsplit("foo;bar;;", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "", ""}));
+
+  out = MooseUtils::rsplit("a/b/c/d", "/", 2);
+  EXPECT_EQ(out, std::vector<std::string>({"a/b", "c", "d"}));
 }
 
 TEST(MooseUtils, join)

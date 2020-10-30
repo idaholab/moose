@@ -15,6 +15,8 @@
 class Assembly;
 class MooseObject;
 template <typename T>
+class MooseVariableField;
+template <typename T>
 class MooseVariableFE;
 template <typename T>
 class MooseVariableFV;
@@ -44,6 +46,11 @@ public:
    * @return The variable this object is using.
    */
   MooseVariableBase * mooseVariableBase() const { return _var; };
+
+  /**
+   * Return the \p MooseVariableField<T> object that this interface acts on
+   */
+  MooseVariableField<T> & mooseVariableField();
 
   MooseVariableFE<T> * mooseVariable() const;
 

@@ -85,7 +85,7 @@ protected:
   /// material
   const INSADObjectTracker * _object_tracker;
 
-  /// Whether the simulation is transient
+  /// Whether the momentum equations are transient
   bool _has_transient;
 
   /// Whether there is a gravity force in the momentum equation

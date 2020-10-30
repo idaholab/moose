@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "json/json.h"
+#include "nlohmann/json.h"
 
 class FluidProperties;
 class SinglePhaseFluidProperties;
@@ -79,17 +79,17 @@ protected:
   /**
    * Build 1-phase fluid properties in JSON format
    */
-  void buildJSON1Phase(moosecontrib::Json::Value & json, const InputParameters & params);
+  void buildJSON1Phase(nlohmann::json & json, const InputParameters & params);
 
   /**
    * Build 2-phase fluid properties in JSON format
    */
-  void buildJSON2Phase(moosecontrib::Json::Value & json, const InputParameters & params);
+  void buildJSON2Phase(nlohmann::json & json, const InputParameters & params);
 
   /**
    * Build vapor mixture fluid properties in JSON format
    */
-  void buildJSONVaporMixture(moosecontrib::Json::Value & json, const InputParameters & params);
+  void buildJSONVaporMixture(nlohmann::json & json, const InputParameters & params);
 
   /**
    * Output 1-phase fluid properties in plain text format

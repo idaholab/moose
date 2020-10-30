@@ -43,7 +43,8 @@ CSVReader::validParams()
       "ignore_empty_lines", true, "When true new empty lines in the file are ignored.");
   params.set<bool>("contains_complete_history") = true;
   params.suppressParameter<bool>("contains_complete_history");
-  params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
+  params.set<ExecFlagEnum>("execute_on", true) = EXEC_NONE;
+  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   // The value from this VPP is naturally already on every processor
   // TODO: Make this not the case!  See #11415
@@ -52,37 +53,24 @@ CSVReader::validParams()
   return params;
 }
 
-CSVReader::CSVReader(const InputParameters & params)
-  : GeneralVectorPostprocessor(params), _csv_reader(getParam<FileName>("csv_file"), &_communicator)
+CSVReader::CSVReader(const InputParameters & params) : GeneralVectorPostprocessor(params)
 {
-  _csv_reader.setIgnoreEmptyLines(getParam<bool>("ignore_empty_lines"));
+  /// The MOOSE delimited file reader.
+  MooseUtils::DelimitedFileReader csv_reader(getParam<FileName>("csv_file"), &_communicator);
+  csv_reader.setIgnoreEmptyLines(getParam<bool>("ignore_empty_lines"));
   if (isParamValid("header"))
-    _csv_reader.setHeaderFlag(getParam<bool>("header")
-                                  ? MooseUtils::DelimitedFileReader::HeaderFlag::ON
-                                  : MooseUtils::DelimitedFileReader::HeaderFlag::OFF);
+    csv_reader.setHeaderFlag(getParam<bool>("header")
+                                 ? MooseUtils::DelimitedFileReader::HeaderFlag::ON
+                                 : MooseUtils::DelimitedFileReader::HeaderFlag::OFF);
   if (isParamValid("delimiter"))
-    _csv_reader.setDelimiter(getParam<std::string>("delimiter"));
-}
+    csv_reader.setDelimiter(getParam<std::string>("delimiter"));
 
-void
-CSVReader::initialize()
-{
-  // read file declare the vectors, also prevent user from reading the same file multiple times
-  if (_column_data.empty())
+  csv_reader.read();
+  const std::vector<std::string> & names = csv_reader.getNames();
+  const std::vector<std::vector<double>> & data = csv_reader.getData();
+  for (std::size_t i = 0; i < data.size(); ++i)
   {
-    _csv_reader.read();
-    for (auto & name : _csv_reader.getNames())
-      _column_data[name] = &declareVector(name);
-  }
-  else
-    mooseError("Error in " + name() + ". CSVReader cannot execute more than once per file.");
-}
-
-void
-CSVReader::execute()
-{
-  const std::vector<std::string> & names = _csv_reader.getNames();
-  const std::vector<std::vector<double>> & data = _csv_reader.getData();
-  for (std::size_t i = 0; i < _column_data.size(); ++i)
+    _column_data[names[i]] = &declareVector(names[i]);
     _column_data[names[i]]->assign(data[i].begin(), data[i].end());
+  }
 }

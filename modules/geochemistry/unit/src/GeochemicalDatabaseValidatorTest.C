@@ -17,7 +17,7 @@ testExceptionMessage(const FileName filename, const std::string msg)
 {
   // Read the faulty JSON database
   std::ifstream jsondata(filename);
-  moosecontrib::Json::Value root;
+  nlohmann::json root;
   jsondata >> root;
 
   GeochemicalDatabaseValidator database(filename, root);
@@ -39,7 +39,7 @@ TEST(GeochemicalDatabaseValidatorTest, validateTestDB)
   // Read the JSON database
   FileName filename = "database/moose_testdb.json";
   std::ifstream jsondata(filename);
-  moosecontrib::Json::Value root;
+  nlohmann::json root;
   jsondata >> root;
 
   // This database should have valid entries for all species and sections,

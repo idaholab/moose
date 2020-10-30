@@ -1,6 +1,6 @@
 # RinglebMeshGenerator
 
-!syntax description /MeshGenerators/RinglebMeshGenerator
+!syntax description /Mesh/RinglebMeshGenerator
 
 ## Overview
 
@@ -29,7 +29,7 @@ y(q,k) = \pm \frac{1}{k \rho q} \sqrt{1-\frac{q^2}{k^2}}
 For example, let's consider the following input file:
 
 ```
-[MeshGenerators]
+[Mesh]
   [./ringleb]
     type = RinglebMeshGenerator
     kmin = 0.7
@@ -48,8 +48,8 @@ The corresponding mesh looks like this:
 !media large_media/ringleb_mesh/ringleb_mesh.png
        style=width:50%;
 
-!syntax parameters /MeshGenerators/RinglebMeshGenerator
+!syntax parameters /Mesh/RinglebMeshGenerator
 
-!syntax inputs /MeshGenerators/RinglebMeshGenerator
+!syntax inputs /Mesh/RinglebMeshGenerator
 
-!syntax children /MeshGenerators/RinglebMeshGenerator
+!syntax children /Mesh/RinglebMeshGenerator

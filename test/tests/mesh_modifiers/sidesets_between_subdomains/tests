@@ -1,29 +1,37 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'between.i'
-    cli_args = '--mesh-only'
-    exodiff = 'between_in.e'
-    recover = false
-    no_error_deprecated = true
-    deprecated = true
-  [../]
-  [./vector_test]
-    type = 'Exodiff'
-    input = 'sidesets_between_vectors_of_subdomains.i'
-    cli_args = '--mesh-only'
-    exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
-    recover = false
-    no_error_deprecated = true
-    deprecated = true
-  [../]
-  [./between_created_subdomain]
-    type = 'Exodiff'
-    input = 'between_created_subdomain.i'
-    cli_args = '--mesh-only'
-    exodiff = 'between_created_subdomain_in.e'
-    recover = false
-    no_error_deprecated = true
-    deprecated = true
-  [../]
+
+  issues = '#13814'
+  design = Mesh/index.md
+
+  [subdomains]
+    requirement = "The system shall support the creating of side identifiers"
+
+    [test]
+      type = 'Exodiff'
+      input = 'between.i'
+      cli_args = '--mesh-only'
+      exodiff = 'between_in.e'
+      recover = false
+
+      detail = "between subdomains;"
+    []
+    [vector_test]
+      type = 'Exodiff'
+      input = 'sidesets_between_vectors_of_subdomains.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
+      recover = false
+
+      detail = "between multiple subdomains; and"
+    []
+    [between_created_subdomain]
+      type = 'Exodiff'
+      input = 'between_created_subdomain.i'
+      cli_args = '--mesh-only'
+      exodiff = 'between_created_subdomain_in.e'
+      recover = false
+
+      detail = "between generated subdomains."
+    []
+  []
 []

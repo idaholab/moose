@@ -25,7 +25,6 @@
 #include "CommandLine.h"
 #include "InfixIterator.h"
 #include "MultiApp.h"
-#include "MeshModifier.h"
 #include "MeshGenerator.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
@@ -336,13 +335,13 @@ MooseApp::MooseApp(InputParameters parameters)
     _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
     _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
     _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
-    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers", 1)),
     _execute_mesh_generators_timer(
         _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1)),
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _popped_final_mesh_generator(false)
+    _popped_final_mesh_generator(false),
+    _geometric_rms_attached(false)
 {
 #ifdef HAVE_GPERFTOOLS
   if (std::getenv("MOOSE_PROFILE_BASE"))
@@ -371,6 +370,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
   _the_warehouse->registerAttribute<AttribVar>("variable", 0);
   _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
+  _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -759,7 +759,7 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(search);
     _parser.buildJsonSyntaxTree(tree);
 
-    Moose::out << "**START JSON DATA**\n" << tree.getRoot() << "\n**END JSON DATA**\n";
+    Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
   else if (getParam<bool>("syntax"))
@@ -1184,6 +1184,9 @@ MooseApp::registerRestartableData(const std::string & name,
   auto & data_ref =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
+  // https://en.cppreference.com/w/cpp/container/unordered_map/emplace
+  // The element may be constructed even if there already is an element with the key in the
+  // container, in which case the newly constructed element will be destroyed immediately.
   auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
 
   // Does the storage for this data already exist?
@@ -1473,91 +1476,6 @@ MooseApp::header() const
 }
 
 void
-MooseApp::addMeshModifier(const std::string & modifier_name,
-                          const std::string & name,
-                          InputParameters parameters)
-{
-  std::shared_ptr<MeshModifier> mesh_modifier =
-      _factory.create<MeshModifier>(modifier_name, name, parameters);
-
-  _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
-}
-
-const MeshModifier &
-MooseApp::getMeshModifier(const std::string & name) const
-{
-  return *_mesh_modifiers.find(MooseUtils::shortName(name))->second.get();
-}
-
-std::vector<std::string>
-MooseApp::getMeshModifierNames() const
-{
-  std::vector<std::string> names;
-  for (auto & pair : _mesh_modifiers)
-    names.push_back(pair.first);
-  return names;
-}
-
-void
-MooseApp::executeMeshModifiers()
-{
-  if (!_mesh_modifiers.empty())
-  {
-    TIME_SECTION(_execute_mesh_modifiers_timer);
-
-    DependencyResolver<std::shared_ptr<MeshModifier>> resolver;
-
-    // Add all of the dependencies into the resolver and sort them
-    for (const auto & it : _mesh_modifiers)
-    {
-      // Make sure an item with no dependencies comes out too!
-      resolver.addItem(it.second);
-
-      std::vector<std::string> & modifiers = it.second->getDependencies();
-      for (const auto & depend_name : modifiers)
-      {
-        auto depend_it = _mesh_modifiers.find(depend_name);
-
-        if (depend_it == _mesh_modifiers.end())
-          mooseError("The MeshModifier \"",
-                     depend_name,
-                     "\" was not created, did you make a "
-                     "spelling mistake or forget to include it "
-                     "in your input file?");
-
-        resolver.insertDependency(it.second, depend_it->second);
-      }
-    }
-
-    const auto & ordered_modifiers = resolver.getSortedValues();
-
-    if (ordered_modifiers.size())
-    {
-      MooseMesh * mesh = _action_warehouse.mesh().get();
-      MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
-
-      // Run the MeshModifiers in the proper order
-      for (const auto & modifier : ordered_modifiers)
-        modifier->modifyMesh(mesh, displaced_mesh);
-
-      /**
-       * Set preparation flag after modifiers are run. The final preparation
-       * will be handled by the SetupMeshComplete Action.
-       */
-      mesh->prepared(false);
-      if (displaced_mesh)
-        displaced_mesh->prepared(false);
-    }
-  }
-}
-
-void
-MooseApp::clearMeshModifiers()
-{
-  _mesh_modifiers.clear();
-}
-
-void
 MooseApp::addMeshGenerator(const std::string & generator_name,
                            const std::string & name,
                            InputParameters parameters)
@@ -1789,7 +1707,7 @@ MooseApp::getMeshGeneratorMesh(bool check_unique)
 
   if (_final_generated_meshes.empty())
     mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
-               "[MeshGenerators] block.");
+               "block.");
 
   auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
   _final_generated_meshes.pop_front();
@@ -1980,27 +1898,71 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 }
 
 void
+MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
+{
+  for (auto & rm : _relationship_managers)
+  {
+    if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
+    {
+      if (rm->attachGeometricEarly())
+      {
+        rm->init(mesh);
+        mesh.add_ghosting_functor(*rm);
+      }
+      else
+      {
+        // If we have a geometric ghosting functor that can't be attached early, then we have to
+        // prevent the mesh from deleting remote elements
+        moose_mesh.allowRemoteElementRemoval(false);
+
+        if (const MeshBase * const moose_mesh_base = moose_mesh.getMeshPtr())
+        {
+          if (moose_mesh_base != &mesh)
+            mooseError("The MooseMesh MeshBase and the MeshBase we're trying to attach "
+                       "relationship managers to are different");
+        }
+        else
+          // The MeshBase isn't attached to the MooseMesh yet, so have to tell it not to remove
+          // remote elements independently
+          mesh.allow_remote_element_removal(false);
+      }
+    }
+  }
+
+  _geometric_rms_attached = true;
+}
+
+void
 MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 {
   for (auto & rm : _relationship_managers)
   {
     if (rm->isType(rm_type))
     {
-      // Will attach them later (during algebraic)
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !rm->attachGeometricEarly())
-        continue;
-
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !_geometric_rms_attached)
       {
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
-        auto & mesh = _action_warehouse.mesh();
+        MooseMesh * const mesh = _action_warehouse.mesh().get();
 
-        rm->init();
+        if (!rm->attachGeometricEarly())
+        {
+          // Will attach them later (during algebraic). But also, we need to tell the mesh that we
+          // shouldn't be deleting remote elements yet
+          if (!mesh->getMeshPtr())
+            mooseError("We should have attached a MeshBase object to the mesh by now");
 
-        if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+          mesh->allowRemoteElementRemoval(false);
+        }
         else
-          mesh->getMesh().add_ghosting_functor(*rm);
+        {
+          MeshBase & mesh_base = mesh->getMesh();
+          rm->init(mesh_base);
+          mesh_base.add_ghosting_functor(*rm);
+
+          if (_action_warehouse.displacedMesh())
+            mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
+                       "geometric relationship managers.");
+        }
       }
 
       if (rm_type != Moose::RelationshipManagerType::GEOMETRIC)
@@ -2009,15 +1971,24 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         auto & problem = _executioner->feProblem();
 
         // Ensure that the relationship manager is initialized
-        rm->init();
+        rm->init(problem.mesh().getMesh());
+
+        std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
+        if (_action_warehouse.displacedMesh())
+        {
+          clone_rm = rm->clone();
+          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+        }
 
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
-          if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
-          else
-            problem.mesh().getMesh().add_ghosting_functor(*rm);
+          // The reference and displaced meshes should have the same geometric RMs.
+          // It is necessary for keeping both meshes consistent.
+          if (_action_warehouse.displacedMesh())
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+
+          problem.mesh().getMesh().add_ghosting_functor(*rm);
         }
 
         if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
@@ -2038,7 +2009,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           // a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
-            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(*rm, /*to_mesh = */ false);
+            problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
+                                                                       /*to_mesh = */ false);
         }
         else // undisplaced
         {
@@ -2090,7 +2062,10 @@ MooseApp::getRelationshipManagerInfo() const
   const auto & mesh = _action_warehouse.getMesh();
   if (mesh)
   {
-    std::unordered_map<std::string, unsigned int> counts;
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
 
     for (auto & gf : as_range(mesh->getMesh().ghosting_functors_begin(),
                               mesh->getMesh().ghosting_functors_end()))
@@ -2104,6 +2079,32 @@ MooseApp::getRelationshipManagerInfo() const
     for (const auto pair : counts)
       info_strings.emplace_back(std::make_pair(
           "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
+  }
+
+  // List the libMesh GhostingFunctors - Not that in libMesh all of the algebraic and coupling
+  // Ghosting Functors are also attached to the mesh. This should catch them all.
+  const auto & d_mesh = _action_warehouse.getDisplacedMesh();
+  if (d_mesh)
+  {
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
+
+    for (auto & gf : as_range(d_mesh->getMesh().ghosting_functors_begin(),
+                              d_mesh->getMesh().ghosting_functors_end()))
+    {
+      const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
+      if (!gf_ptr)
+        // Count how many occurances of the same Ghosting Functor types we are encountering
+        counts[demangle(typeid(*gf).name())]++;
+    }
+
+    for (const auto pair : counts)
+      info_strings.emplace_back(
+          std::make_pair("Default",
+                         pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "") +
+                             " for DisplacedMesh"));
   }
 
   return info_strings;

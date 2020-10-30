@@ -57,6 +57,11 @@ protected:
   virtual void outputPostprocessors() override;
 
   /**
+   * Populates the tables with Reporter values
+   */
+  virtual void outputReporters() override;
+
+  /**
    * Populates the tables with VectorPostprocessor values
    */
   virtual void outputVectorPostprocessors() override;
@@ -76,7 +81,10 @@ protected:
   /// Table containing scalar aux variables
   FormattedTable & _scalar_table;
 
-  /// Table containing postprocessor values and scalar aux variables
+  /// Table containing Real Reporter values
+  FormattedTable & _reporter_table;
+
+  /// Table containing postprocessor values, scalar aux variables, and Real Reporters
   FormattedTable & _all_data_table;
 
   /// Tolerance used when deciding whether or not to add a new row to the table
@@ -88,4 +96,3 @@ protected:
   /// Enable/disable output of time column for Postprocessors
   const bool _time_column;
 };
-

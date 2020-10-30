@@ -63,8 +63,7 @@ ArrayNodalBC::computeJacobian()
     for (auto tag : _matrix_tags)
       if (_sys.hasMatrix(tag))
         for (unsigned int i = 0; i < _var.count(); ++i)
-          _fe_problem.assembly(0).cacheJacobianContribution(
-              cached_row + i, cached_row + i, cached_val(i), tag);
+          _fe_problem.assembly(0).cacheJacobian(cached_row + i, cached_row + i, cached_val(i), tag);
   }
 }
 
@@ -84,7 +83,7 @@ ArrayNodalBC::computeOffDiagJacobian(unsigned int jvar)
     if (_sys.hasMatrix(tag))
       for (unsigned int i = 0; i < _var.count(); ++i)
         for (unsigned int j = 0; j < jv.count(); ++j)
-          _fe_problem.assembly(0).cacheJacobianContribution(
+          _fe_problem.assembly(0).cacheJacobian(
               cached_row + i, cached_col + j, cached_val(i, j), tag);
 }
 

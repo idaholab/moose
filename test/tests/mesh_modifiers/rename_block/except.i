@@ -1,78 +1,78 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
-  xmin = -1
-  xmax = 1
-  ymin = -1
-  ymax = 1
-  zmin = -1
-  zmax = 1
-[]
+  active = 'gen sbb0'
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 2
+    ny = 2
+    nz = 2
+    xmin = -1
+    xmax = 1
+    ymin = -1
+    ymax = 1
+    zmin = -1
+    zmax = 1
+  []
 
-# Mesh Modifiers
-[MeshModifiers]
-  active = 'sbb0'
-  [./sbb0]
-    type = SubdomainBoundingBox
+  # Mesh Modifiers
+  [sbb0]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
     block_id = 1
     bottom_left = '-1 -1 -1'
     top_right = '0 0 0'
-  [../]
+  []
 
-  [./too_many_new_id]
-    type = RenameBlock
+  [too_many_new_id]
+    type = RenameBlockGenerator
+    input = sbb0
     old_block_id = '0'
     new_block_id = '2 3'
-    depends_on = sbb0
-  [../]
-  [./old_id_and_name]
-    type = RenameBlock
+  []
+  [old_id_and_name]
+    type = RenameBlockGenerator
+    input = sbb0
     old_block_id = '0 1'
     old_block_name = 'zero one'
     new_block_id = '2 3'
-    depends_on = sbb0
-  [../]
-  [./no_old_id]
-    type = RenameBlock
+  []
+  [no_old_id]
+    type = RenameBlockGenerator
+    input = sbb0
     new_block_id = '2 3'
-    depends_on = sbb0
-  [../]
-  [./too_many_old]
-    type = RenameBlock
+  []
+  [too_many_old]
+    type = RenameBlockGenerator
+    input = sbb0
     old_block_id = '1 2 3'
     new_block_name = 'two three'
-    depends_on = sbb0
-  [../]
-  [./new_id_and_name]
-    type = RenameBlock
+  []
+  [new_id_and_name]
+    type = RenameBlockGenerator
+    input = sbb0
     old_block_id = '1 2 3'
     new_block_id = '5 6 7'
     new_block_name = 'five six seven'
-    depends_on = sbb0
-  [../]
-  [./no_new]
-    type = RenameBlock
+  []
+  [no_new]
+    type = RenameBlockGenerator
+    input = sbb0
     old_block_id = '1 2 3'
-    depends_on = sbb0
-  [../]
+  []
 
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
-
 
 [Executioner]
   type = Steady

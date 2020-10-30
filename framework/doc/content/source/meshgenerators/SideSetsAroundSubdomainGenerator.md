@@ -1,6 +1,6 @@
 # SideSetsAroundSubdomainGenerator
 
-!syntax description /MeshGenerators/SideSetsAroundSubdomainGenerator
+!syntax description /Mesh/SideSetsAroundSubdomainGenerator
 
 ## Overview
 
@@ -16,8 +16,8 @@ Optional parameters allow more specific behavior:
 
 - `fixed_normal` is a boolean parameter inherited from `SideSetsGeneratorBase` that sets whether a sideset defined on a qualifying face is to be "painted" onto adjacent faces (default = False). This allows sidesets for slightly curved boundaries to be more easily defined. Fixing the normal (setting `fixed_normal = True`) disables this behavior.
 
-!syntax parameters /MeshGenerators/SideSetsAroundSubdomainGenerator
+!syntax parameters /Mesh/SideSetsAroundSubdomainGenerator
 
-!syntax inputs /MeshGenerators/SideSetsAroundSubdomainGenerator
+!syntax inputs /Mesh/SideSetsAroundSubdomainGenerator
 
-!syntax children /MeshGenerators/SideSetsAroundSubdomainGenerator
+!syntax children /Mesh/SideSetsAroundSubdomainGenerator

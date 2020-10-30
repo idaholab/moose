@@ -20,11 +20,20 @@ EqualValueConstraint::validParams()
   params.addClassDescription(
       "EqualValueConstraint enforces solution continuity between secondary and "
       "primary sides of a mortar interface using lagrange multipliers");
+  params.addRangeCheckedParam<Real>(
+      "delta", 0, "0<=delta<=1", "The coefficient for stabilizing terms");
+  params.addParam<MaterialPropertyName>(
+      "diff_secondary", 1, "The diffusivity on the secondary side");
+  params.addParam<MaterialPropertyName>("diff_primary", 1, "The diffusivity on the primary side");
   return params;
 }
 
 EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
-  : ADMortarConstraint(parameters)
+  : ADMortarConstraint(parameters),
+    _delta(getParam<Real>("delta")),
+    _diff_secondary(getADMaterialProperty<Real>("diff_secondary")),
+    _diff_primary(getADMaterialProperty<Real>("diff_primary")),
+    _stabilize(_delta > TOLERANCE * TOLERANCE)
 {
 }
 
@@ -34,11 +43,61 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case Moose::MortarType::Secondary:
-      return -_lambda[_qp] * _test_secondary[_i][_qp];
+    {
+      // The sign choice here makes it so that for the true solution: lambda = normals_secondary *
+      // diff_secondary * grad_u_secondary
+      auto residual = -_lambda[_qp] * _test_secondary[_i][_qp];
+
+      if (_stabilize)
+        residual += _delta * _lower_secondary_volume *
+                    (_diff_secondary[_qp] * _grad_test_secondary[_i][_qp] * _normals[_qp]) *
+                    (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
+
+      return residual;
+    }
+
     case Moose::MortarType::Primary:
-      return _lambda[_qp] * _test_primary[_i][_qp];
+    {
+      // The sign choice here makes it so that for the true solution: lambda = -normals_primary *
+      // diff_primary * grad_u_primary
+      auto residual = _lambda[_qp] * _test_primary[_i][_qp];
+
+      if (_stabilize)
+        residual +=
+            _delta * _lower_primary_volume *
+            (_diff_primary[_qp] * _grad_test_primary[_i][_qp] * _normals_primary[_qp]) *
+            (-_lambda[_qp] - _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
+
+      return residual;
+    }
+
     case Moose::MortarType::Lower:
-      return (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
+    {
+      if (_has_primary)
+      {
+        auto residual = (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
+
+        if (_stabilize)
+        {
+          // secondary
+          residual -=
+              _delta * _lower_secondary_volume * _test[_i][_qp] *
+              (_lambda[_qp] - _diff_secondary[_qp] * _grad_u_secondary[_qp] * _normals[_qp]);
+
+          // primary
+          residual -=
+              _delta * _lower_primary_volume * _test[_i][_qp] *
+              (_lambda[_qp] + _diff_primary[_qp] * _grad_u_primary[_qp] * _normals_primary[_qp]);
+        }
+
+        return residual;
+      }
+
+      else
+        // There's no primary so let's just set the flux to zero
+        return _lambda[_qp];
+    }
+
     default:
       return 0;
   }

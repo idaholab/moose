@@ -1,6 +1,6 @@
 # SphereSurfaceMeshGenerator
 
-!syntax description /MeshGenerators/SphereSurfaceMeshGenerator
+!syntax description /Mesh/SphereSurfaceMeshGenerator
 
 This object generates a 2D mesh approximating the surface of a sphere in 3D space
 using TRI3 triangle elements. Both center and radius of the sphere may be specified.
@@ -13,10 +13,10 @@ for a number of steps specified using the `depth` parameter. After each refineme
 all nodes are snapped to the sphere surface defined by `radius` and `center`.
 Each refinement step multiplies the number of mesh elements by a factor of four.
 
-!syntax parameters /MeshGenerators/SphereSurfaceMeshGenerator
+!syntax parameters /Mesh/SphereSurfaceMeshGenerator
 
-!syntax inputs /MeshGenerators/SphereSurfaceMeshGenerator
+!syntax inputs /Mesh/SphereSurfaceMeshGenerator
 
-!syntax children /MeshGenerators/SphereSurfaceMeshGenerator
+!syntax children /Mesh/SphereSurfaceMeshGenerator
 
 !bibtex bibliography

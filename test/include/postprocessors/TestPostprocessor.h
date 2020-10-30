@@ -50,6 +50,7 @@ private:
   /// Reference to the old/older value
   const PostprocessorValue & _old_val;
   const PostprocessorValue & _older_val;
+  const PostprocessorValue & _report_old;
   ///@}
 
   /// A test counter

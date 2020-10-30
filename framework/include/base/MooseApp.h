@@ -37,7 +37,6 @@ class Executioner;
 class MooseApp;
 class Backup;
 class FEProblemBase;
-class MeshModifier;
 class MeshGenerator;
 class InputParameterWarehouse;
 class SystemInfo;
@@ -614,37 +613,6 @@ public:
   const MooseMesh * masterDisplacedMesh() const { return _master_displaced_mesh; }
 
   /**
-   * Add a mesh modifier that will act on the meshes in the system
-   */
-  void addMeshModifier(const std::string & modifier_name,
-                       const std::string & name,
-                       InputParameters parameters);
-
-  /**
-   * Get a mesh modifier with its name
-   */
-  const MeshModifier & getMeshModifier(const std::string & name) const;
-
-  /**
-   * Get names of all mesh modifiers
-   * Note: This function should be called after all mesh modifiers are added with the
-   * 'add_mesh_modifier' task. The returned value will be undefined and depends on the ordering that
-   * mesh modifiers are added by MOOSE if the function is called during the 'add_mesh_modifier'
-   * task.
-   */
-  std::vector<std::string> getMeshModifierNames() const;
-
-  /**
-   * Clear all mesh modifers
-   */
-  void clearMeshModifiers();
-
-  /**
-   * Execute and clear the Mesh Modifiers data structure
-   */
-  void executeMeshModifiers();
-
-  /**
    * Set final mesh generator name
    */
   void setFinalMeshGeneratorName(const std::string & generator_name);
@@ -741,6 +709,14 @@ public:
    * will be attached when Algebraic are attached.
    */
   void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+
+  /**
+   * Attach geometric relationship managers to the given \p MeshBase object. This API is designed to
+   * work with \p MeshGenerators which are executed at the very beginning of a simulation. No
+   * attempt will be made to add relationship managers to a displaced mesh, because it doesn't exist
+   * yet.
+   */
+  void attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh);
 
   /**
    * Retrieve the relationship managers
@@ -1061,9 +1037,6 @@ private:
   /// The displaced mesh from master app
   const MooseMesh * const _master_displaced_mesh;
 
-  /// Holds the mesh modifiers until they have completed, then this structure is cleared
-  std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
-
   /// Holds the mesh generators until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
 
@@ -1093,7 +1066,6 @@ private:
   const PerfID _execute_executioner_timer;
   const PerfID _restore_timer;
   const PerfID _run_timer;
-  const PerfID _execute_mesh_modifiers_timer;
   const PerfID _execute_mesh_generators_timer;
   const PerfID _restore_cached_backup_timer;
   const PerfID _create_minimal_app_timer;
@@ -1104,6 +1076,9 @@ private:
   /// Whether the mesh generator MeshBase has been popped off its storage container and is no
   /// longer accessible
   bool _popped_final_mesh_generator;
+
+  /// Whether geometric relationship managers were already attached
+  bool _geometric_rms_attached;
 
   bool _profiling = false;
 

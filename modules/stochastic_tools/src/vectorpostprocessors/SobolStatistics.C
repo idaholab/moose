@@ -45,14 +45,13 @@ void
 SobolStatistics::initialSetup()
 {
   const VectorPostprocessorName & vpp_name = getParam<VectorPostprocessorName>("results");
-  const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
-      vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);
-  for (const auto & the_pair : vpp_vectors)
+  const VectorPostprocessor & vpp_object = _fe_problem.getVectorPostprocessorObjectByName(vpp_name);
+  const std::set<std::string> & vpp_vectors = vpp_object.getVectorNames();
+  for (const auto & vec_name : vpp_vectors)
   {
-    _result_vectors.push_back(
-        std::make_pair(&getVectorPostprocessorValueByName(vpp_name, the_pair.first),
-                       the_pair.second.is_distributed));
-    _sobol_stat_vectors.push_back(&declareVector(vpp_name + "_" + the_pair.first));
+    _result_vectors.push_back(std::make_pair(&getVectorPostprocessorValueByName(vpp_name, vec_name),
+                                             vpp_object.isDistributed()));
+    _sobol_stat_vectors.push_back(&declareVector(vpp_name + "_" + vec_name));
   }
 }
 

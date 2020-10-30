@@ -1,9 +1,9 @@
 # ElementSubdomainIDGenerator
 
-!syntax description /MeshGenerators/ElementSubdomainIDGenerator
+!syntax description /Mesh/ElementSubdomainIDGenerator
 
-!syntax parameters /MeshGenerators/ElementSubdomainIDGenerator
+!syntax parameters /Mesh/ElementSubdomainIDGenerator
 
-!syntax inputs /MeshGenerators/ElementSubdomainIDGenerator
+!syntax inputs /Mesh/ElementSubdomainIDGenerator
 
-!syntax children /MeshGenerators/ElementSubdomainIDGenerator
+!syntax children /Mesh/ElementSubdomainIDGenerator

@@ -44,14 +44,10 @@ SystemInfo::getInfo() const
   oss << std::setw(25) << "Current Time: " << getTimeStamp() << "\n";
 
   // Executable Timestamp
-  std::string executable(_argv[0]);
-  size_t last_slash = executable.find_last_of("/");
-  if (last_slash != std::string::npos)
-    executable = executable.substr(last_slash + 1);
-  std::string executable_path(Moose::getExecutablePath() + executable);
-  struct stat attrib;
-  if (!stat(executable_path.c_str(), &attrib))
-    oss << std::setw(25) << "Executable Timestamp: " << getTimeStamp(&(attrib.st_mtime)) << "\n";
+  std::string executable_path = getExecutable();
+  std::string executable_time = getExecutableTimeStamp(executable_path);
+  if (!executable_time.empty())
+    oss << std::setw(25) << "Executable Timestamp: " << executable_time << "\n";
 
   oss << std::endl;
   return oss.str();
@@ -129,4 +125,31 @@ SystemInfo::getTimeStamp(std::time_t * time_stamp) const
   }
 
 #endif // LIBMESH_HAVE_LOCALE
+}
+
+std::string
+SystemInfo::getExecutable() const
+{
+  std::string executable(_argv[0]);
+  size_t last_slash = executable.find_last_of("/");
+  if (last_slash != std::string::npos)
+    executable = executable.substr(last_slash + 1);
+  std::string exe(Moose::getExecutablePath() + executable);
+  return exe;
+}
+
+std::string
+SystemInfo::getExecutableTimeStamp() const
+{
+  const std::string exe = getExecutable();
+  return getExecutableTimeStamp(exe);
+}
+
+std::string
+SystemInfo::getExecutableTimeStamp(const std::string & exe) const
+{
+  struct stat attrib;
+  if (!stat(exe.c_str(), &attrib))
+    return getTimeStamp(&(attrib.st_mtime));
+  return "";
 }

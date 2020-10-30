@@ -1,6 +1,6 @@
 # RenameBoundaryGenerator
 
-!syntax description /MeshGenerators/RenameBoundaryGenerator
+!syntax description /Mesh/RenameBoundaryGenerator
 
 ## Overview
 
@@ -52,8 +52,8 @@ Given all these potential problems, when merging boundaries it is strongly recom
 *one* `RenameBoundaryGenerator` that includes the names or IDs of *all* the boundaries involved in the merging.
 This will make the new boundary IDs and new boundary names unequivocally obvious.
 
-!syntax parameters /MeshGenerators/RenameBoundaryGenerator
+!syntax parameters /Mesh/RenameBoundaryGenerator
 
-!syntax inputs /MeshGenerators/RenameBoundaryGenerator
+!syntax inputs /Mesh/RenameBoundaryGenerator
 
-!syntax children /MeshGenerators/RenameBoundaryGenerator
+!syntax children /Mesh/RenameBoundaryGenerator

@@ -67,4 +67,13 @@
     exodiff = '1d_dirichlet_out.e'
     requirement = 'The system shall be able solve a one-dimensional diffusion problem using the finite volume method.'
   []
+
+  [unstructured-rz]
+    type = 'Exodiff'
+    input = 'unstructured-rz.i'
+    exodiff = 'unstructured-rz_out.e'
+    issues = '#15063'
+    requirement = 'The system shall correctly account for differences between gradient and divergence operators in cylindrical coordinates.'
+    ad_indexing_type = 'global'
+  []
 []

@@ -100,7 +100,6 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
-  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
   registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
   registerMooseObjectTask("append_mesh_generator",        MeshGenerator,          false);
 
@@ -151,6 +150,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
+  registerMooseObjectTask("add_reporter",                 Reporter,               false);
 
   registerMooseObjectTask("add_indicator",                Indicator,              false);
   registerMooseObjectTask("add_marker",                   Marker,                 false);
@@ -177,11 +177,10 @@ addActionTypes(Syntax & syntax)
   registerTask("add_variable", false);
   registerTask("add_mortar_variable", false);
 
-  registerTask("execute_mesh_modifiers", false);
   registerTask("execute_mesh_generators", true);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
-  registerTask("delete_remote_elements_post_equation_systems_init", false);
+  registerTask("delete_remote_elements_after_late_geometric_ghosting", false);
   registerTask("setup_mesh_complete", true); // calls prepare
   registerTask("add_geometric_rm", false);
   registerTask("attach_geometric_rm", true);
@@ -249,18 +248,16 @@ addActionTypes(Syntax & syntax)
                            "(setup_recover_file_base)"
                            "(check_copy_nodal_vars)"
                            "(setup_mesh)"
+                           "(add_geometric_rm)"
                            "(add_mesh_generator)"
                            "(append_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(recover_meta_data)"
                            "(set_mesh_base)"
                            "(add_partitioner)"
-                           "(add_geometric_rm)"
                            "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
-                           "(add_mesh_modifier)"
-                           "(execute_mesh_modifiers)"
                            "(add_mortar_interface)"
                            "(uniform_refine_mesh)"
                            "(setup_mesh_complete)"
@@ -305,12 +302,13 @@ addActionTypes(Syntax & syntax)
                            "(add_coupling_rm)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
+                           "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
-                           "(delete_remote_elements_post_equation_systems_init)"
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
+                           "(add_reporter)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
                            " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
@@ -417,15 +415,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("SetupMeshCompleteAction", "Mesh");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
-
-  registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
-
-  // Deprecated MeshGeneratorSyntax
-  registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
-  syntax.deprecateActionSyntax("MeshGenerators/*",
-                               "The top-level [MeshGenerators] syntax is deprecated, please nest "
-                               "your generators under [Mesh]");
-
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
 
   registerSyntax("AddFunctionAction", "Functions/*");
@@ -466,6 +455,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddVectorPostprocessorAction", "VectorPostprocessors/*");
   syntax.registerSyntaxType("VectorPostprocessors/*", "VectorPostprocessorName");
+
+  registerSyntax("AddReporterAction", "Reporters/*");
+  syntax.registerSyntaxType("Reporters/*", "ReporterName");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 
