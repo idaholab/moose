@@ -139,3 +139,4 @@ ComputeElemAuxVarsThread<AuxKernelType>::join(const ComputeElemAuxVarsThread & /
 
 template class ComputeElemAuxVarsThread<AuxKernel>;
 template class ComputeElemAuxVarsThread<VectorAuxKernel>;
+template class ComputeElemAuxVarsThread<ArrayAuxKernel>;

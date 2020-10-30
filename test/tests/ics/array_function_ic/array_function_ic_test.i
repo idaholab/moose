@@ -20,6 +20,12 @@
   []
 []
 
+[AuxVariables]
+  [v]
+    components = 2
+  []
+[]
+
 [Functions]
   [sinx]
     type = ParsedFunction
@@ -47,6 +53,11 @@
     variable = u1
     function = siny
   []
+  [vic]
+    type = ArrayFunctionIC
+    variable = v
+    function = 'sinx siny'
+  []
 []
 
 [Postprocessors]
@@ -67,6 +78,16 @@
   [u1int]
     type = ElementIntegralVariablePostprocessor
     variable = u1
+  []
+  [vint0]
+    type = ElementIntegralArrayVariablePostprocessor
+    variable = v
+    component = 0
+  []
+  [vint1]
+    type = ElementIntegralArrayVariablePostprocessor
+    variable = v
+    component = 1
   []
 []
 

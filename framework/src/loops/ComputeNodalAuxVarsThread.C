@@ -126,3 +126,4 @@ ComputeNodalAuxVarsThread<AuxKernelType>::join(const ComputeNodalAuxVarsThread &
 
 template class ComputeNodalAuxVarsThread<AuxKernel>;
 template class ComputeNodalAuxVarsThread<VectorAuxKernel>;
+template class ComputeNodalAuxVarsThread<ArrayAuxKernel>;
