@@ -44,6 +44,7 @@
     allow_test_objects = true
     csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
     petsc_version = '>=3.5.0'
+    rel_err = 1e-3
     detail = 'then testing hyperparameter tuning for the squared exponential kernel, '
   []
   [GP_exponential_tuned]
@@ -52,6 +53,7 @@
     allow_test_objects = true
     csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
     petsc_version = '>=3.5.0'
+    rel_err = 1e-3
     detail = 'exponential kernel, '
   []
   [GP_Matern_half_int_tuned]
@@ -60,6 +62,7 @@
     allow_test_objects = true
     csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
     petsc_version = '>=3.5.0'
+    rel_err = 1e-3
     detail = 'and Matern half integer kernel.'
   []
 []
