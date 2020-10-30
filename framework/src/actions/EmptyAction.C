@@ -15,8 +15,6 @@ registerMooseAction("MooseApp", EmptyAction, "ready_to_init");
 
 registerMooseAction("MooseApp", EmptyAction, "finish_input_file_output");
 
-registerMooseAction("MooseApp", EmptyAction, "add_master_action_material");
-
 defineLegacyParams(EmptyAction);
 
 InputParameters

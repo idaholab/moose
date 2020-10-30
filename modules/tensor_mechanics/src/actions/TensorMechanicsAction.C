@@ -565,10 +565,7 @@ TensorMechanicsAction::actEigenstrainNames()
     }
   }
   for (auto index : remove_reduced_set)
-  {
-    if (eigenstrain_set.find(index) != eigenstrain_set.end())
-      eigenstrain_set.erase(index);
-  }
+    eigenstrain_set.erase(index);
 
   // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
   // current subdomainID
@@ -584,22 +581,10 @@ TensorMechanicsAction::actEigenstrainNames()
             verified_eigenstrain_names.end(),
             _eigenstrain_names.begin());
 
-  // Since the automatic eigenstrain names have been collected, return the list
-  auto list_subdomains = _problem->mesh().meshSubdomains();
-  // If no defined blocks
-  if (list_subdomains.size() == 1 && *list_subdomains.begin() == 0)
-    Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***\n"
-               << _name << ": " << Moose::stringify(_eigenstrain_names) << COLOR_DEFAULT << "\n";
-  // Only print once for multiple blocks
-  else
-    for (auto currentNum : _subdomain_ids)
-    {
-      if (currentNum == *list_subdomains.begin())
-        Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***\n";
-      Moose::out << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n";
-      if (currentNum == *list_subdomains.rbegin())
-        Moose::out << COLOR_DEFAULT << "\n";
-    }
+  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***"
+             << "\n"
+             << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
+             << COLOR_DEFAULT;
 }
 
 void

@@ -87,9 +87,7 @@
   [./eigenstrain_two_blocks_names]
     type = RunApp
     input = 'action_multi_eigenstrain.i'
-    expect_out = 'block1: eigenstrain1
-block2: eigenstrain2'
-    match_literal = true
+    expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
@@ -97,9 +95,7 @@ block2: eigenstrain2'
   [./eigenstrain_two_blocks_one_eigenstrain]
     type = RunApp
     input = 'action_multi_eigenstrain_same_conditions.i'
-    expect_out = 'block1: eigenstrain
-block2: eigenstrain'
-    match_literal = true
+    expect_out = 'block1: eigenstrain\n.*\nblock2: eigenstrain\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
@@ -107,9 +103,7 @@ block2: eigenstrain'
   [./ad_converter_eigenstrain_two_blocks_names]
     type = RunApp
     input = 'ad_converter_action_multi_eigenstrain.i'
-    expect_out = 'block1: eigenstrain1
-block2: eigenstrain2'
-    match_literal = true
+    expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
