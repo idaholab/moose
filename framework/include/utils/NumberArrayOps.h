@@ -17,7 +17,7 @@ namespace Moose
 {
 template <std::size_t N>
 inline void
-derivInsert(NumberArray<N, Real> & derivs, unsigned int index, Real value)
+derivInsert(NumberArray<N, Real> & derivs, dof_id_type index, Real value)
 {
   mooseAssert(index < MOOSE_AD_MAX_DOFS_PER_ELEM,
               "The requested derivative index "

@@ -43,4 +43,11 @@
     cli_args = '-snes_test_jacobian_view'
     requirement = 'The SMP Jacobian shall be perfect for the hanging-node problem'
   [../]
+  [test_ad_smp_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_simple_diffusion.i'
+    run_sim = True
+    requirement = 'The system shall compute a perfect Jacobian via automatic differentiation for a hanging-node problem.'
+    issues = 'libmesh#1985 #15732'
+  []
 []
