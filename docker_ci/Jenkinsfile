@@ -12,7 +12,7 @@ and Amazon Linux.
 */
 
 pipeline {
-    agent any
+    agent {label 'jenkins_node || master'}
 
     environment {
         SLACK_SFX = "MOOSE rev ${GIT_COMMIT} on ${DISTRO_NAME} (<${BUILD_URL}|log>)"
