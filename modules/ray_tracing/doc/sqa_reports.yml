@@ -1,0 +1,33 @@
+Applications:
+    ray_tracing:
+        exe_directory: ${MOOSE_DIR}/modules/ray_tracing
+        app_types:
+            - RayTracingApp
+        content_directory: ${MOOSE_DIR}/modules/ray_tracing/doc/content
+
+Documents:
+    software_requirements_specification: sqa/ray_tracing_srs.md
+    software_design_description: sqa/ray_tracing_sdd.md
+    software_test_plan: sqa/ray_tracing_stp.md
+    requirements_traceablity_matrix: sqa/ray_tracing_rtm.md
+    verification_validation_plan: sqa/ray_tracing_vvr.md
+    log_safety_software_determination: WARNING
+    log_quality_level_determination: WARNING
+    log_enterprise_architecture_entry: WARNING
+    log_project_management_plan: WARNING
+    log_software_quality_plan: WARNING
+    log_configuration_management_plan: WARNING
+    log_asset_management_plan: WARNING
+    log_verification_validation_plan: WARNING
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+    log_software_requirements_specification: WARNING
+    log_software_design_description: WARNING
+    log_software_test_plan: WARNING
+    log_requirements_traceablity_matrix: WARNING
+
+Requirements:
+    ray_tracing:
+        directories:
+            - ${MOOSE_DIR}/modules/ray_tracing
+        log_testable: WARNING

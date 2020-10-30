@@ -122,6 +122,13 @@ Applications:
         log_stub_files: WARNING
         show_warning: false
 
+    ray_tracing:
+        exe_directory: modules/combined
+        app_types:
+            - RayTracingApp
+        content_directory: modules/ray_tracing/doc/content
+        show_warning: false
+
     RDG:
         exe_directory: modules/combined
         content_directory: modules/rdg/doc/content
@@ -315,6 +322,11 @@ Requirements:
         log_missing: WARNING
         log_design_files: WARNING
         log_testable: WARNING
+        show_warning: false
+
+    ray_tracing:
+        directories:
+            - modules/ray_tracing
         show_warning: false
 
     rdg:
