@@ -527,8 +527,8 @@ TransientMultiApp::incrementTStep(Real target_time)
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
       // Only increment the step if we are after (target_time) the
-      // start_time (app_time_offset) of this sub_app.
-      if (app_time_offset < target_time)
+      // start_time (added to app_time_offset) of this sub_app.
+      if (_apps[i]->getStartTime() + app_time_offset < target_time)
         ex->incrementStepOrReject();
     }
   }
