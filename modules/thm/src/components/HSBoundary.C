@@ -59,7 +59,8 @@ HSBoundary::check() const
                    _hs_name,
                    "' corresponding to the boundary name '",
                    _boundary[i],
-                   "' has a zero perimeter.");
+                   "' has a zero perimeter. This can be caused by applying the boundary on the "
+                   "axis of symmetry of a cylindrical heat structure.");
       }
     }
   }
