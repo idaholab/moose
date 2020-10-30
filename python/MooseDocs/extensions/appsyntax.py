@@ -91,6 +91,7 @@ class AppSyntaxExtension(command.CommandExtension):
                               "List of include directories to investigate for class information.")
         config['inputs'] = ([],
                             "List of directories to interrogate for input files using an object.")
+        config['allow-test-objects'] = (False, "Enable documentation for test objects.");
         config['hide'] = (None, "DEPRECATED")
         config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
         config['visible'] = (['required', 'optional'],
@@ -162,6 +163,12 @@ class AppSyntaxExtension(command.CommandExtension):
                       "application syntax is being disabled:\n%s"
                 self.setActive(False)
                 LOG.error(msg, exe, e)
+
+        # Enable test objects by removing the test flag (i.e., don't consider them test objects)
+        if self['allow-test-objects']:
+            for node in moosetree.iterate(self._app_syntax):
+                node.test = False
+
         LOG.info("MOOSE application syntax complete [%s sec.]", time.time() - start)
 
     def __initClassDatabase(self):
