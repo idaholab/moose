@@ -56,9 +56,8 @@ LoadCovarianceDataAction::load(GaussianProcess & model)
   for (auto & p : vec_map)
     covar_params.set<std::vector<Real>>(p.first) = p.second;
 
-  std::shared_ptr<CovarianceFunctionBase> covar_model =
-      _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
-  _problem->theWarehouse().add(covar_model);
+  _problem->addObject<CovarianceFunctionBase>(
+      covar_type, covar_name, covar_params, /* threaded = */ false);
 
   model.setupCovariance(covar_name);
 }
