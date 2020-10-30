@@ -97,11 +97,6 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  T & get()
-  {
-    mooseDeprecated("Use set() method for non-const access");
-    return *_value_ptr;
-  }
   const T & get() const { return *_value_ptr; }
 
   /**
