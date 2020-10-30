@@ -56,7 +56,7 @@ T &
 SurrogateTrainer::declareModelData(const std::string & data_name)
 {
   RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
-  return data_ref.get();
+  return data_ref.set();
 }
 
 template <typename T>
@@ -65,7 +65,7 @@ SurrogateTrainer::declareModelData(const std::string & data_name, const T & valu
 {
   RestartableData<T> & data_ref = declareModelDataHelper<T>(data_name);
   data_ref.set() = value;
-  return data_ref.get();
+  return data_ref.set();
 }
 
 template <typename T>
