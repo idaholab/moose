@@ -72,6 +72,7 @@ temp_print_trace.*
 *.pvtu
 .depend
 *.png
+*.svg
 *.gif
 *.tif
 *.jpg
