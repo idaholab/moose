@@ -11,7 +11,9 @@
 
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ADComputeMultiplePorousInelasticStress);
+registerMooseObjectDeprecated("TensorMechanicsApp",
+                              ADComputeMultiplePorousInelasticStress,
+                              "01/30/2021 24:00");
 
 InputParameters
 ADComputeMultiplePorousInelasticStress::validParams()
