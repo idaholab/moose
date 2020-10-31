@@ -23,6 +23,8 @@ public:
 
   ComputeIsotropicElasticityTensorTempl(const InputParameters & parameters);
 
+  virtual void initialSetup() override { residualSetup(); }
+
   virtual void residualSetup() override;
 
 protected:
