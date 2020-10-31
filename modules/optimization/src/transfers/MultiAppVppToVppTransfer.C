@@ -9,6 +9,7 @@
 
 #include "MultiAppVppToVppTransfer.h"
 #include "VectorPostprocessorReceiver.h"
+#include "VectorPostprocessor.h"
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -97,18 +98,19 @@ void
 MultiAppVppToVppTransfer::copyVectorPostprocessors(FEProblemBase & fe_base,
                                                    const VectorPostprocessorName & vpp_name)
 {
-  const auto & vpp_vector = fe_base.getVectorPostprocessorVectors(vpp_name);
+  const auto & vpp_vector_names =
+      fe_base.getUserObject<VectorPostprocessor>(vpp_name).getVectorNames();
 
-  mooseAssert(_receiver_vpps.size() == vpp_vector.size(),
+  mooseAssert(_receiver_vpps.size() == vpp_vector_names.size(),
               "MultiAppVppToVppTransfer::executeToMultiapp(): mismatched number of columns "
               "in receiver and sender");
-
-  for (size_t j = 0; j < _receiver_vpps.size(); ++j)
+  unsigned int index = 0;
+  for (auto & name : vpp_vector_names)
   {
-    std::string vector_name = vpp_vector[j].first;
     const VectorPostprocessorValue & vpp_value =
-        fe_base.getVectorPostprocessorValue(vpp_name, vector_name, false);
-    (*_receiver_vpps[j]) = vpp_value;
+        fe_base.getVectorPostprocessorValue(vpp_name, name, false);
+    (*_receiver_vpps[index]) = vpp_value;
+    ++index;
   }
 }
 
@@ -128,14 +130,15 @@ MultiAppVppToVppTransfer::initialSetupFromMultiapp()
   {
     if (_multi_app->hasLocalApp(i))
     {
-      const auto & sub_vpp_vectors =
-          _multi_app->appProblemBase(i).getVectorPostprocessorVectors(_sub_vpp_name);
+      const auto & sub_vpp_vector_names = _multi_app->appProblemBase(i)
+                                              .getUserObject<VectorPostprocessor>(_sub_vpp_name)
+                                              .getVectorNames();
 
-      _receiver_vpps.resize(sub_vpp_vectors.size());
+      _receiver_vpps.resize(sub_vpp_vector_names.size());
       unsigned int index = 0;
-      for (const auto & sub_vpp_vector : sub_vpp_vectors)
+      for (const auto & name : sub_vpp_vector_names)
       {
-        _receiver_vpps[index] = &(master_vpp.addVector(sub_vpp_vector.first));
+        _receiver_vpps[index] = &(master_vpp.addVector(name));
         ++index;
       }
     }
@@ -149,8 +152,9 @@ MultiAppVppToVppTransfer::initialSetupToMultiapp()
 
   std::cout << "initialSetupToMultiapp numGlobalApps= " << _multi_app->numGlobalApps() << std::endl;
 
-  const auto & master_vpp_vectors =
-      _multi_app->problemBase().getVectorPostprocessorVectors(_master_vpp_name);
+  const auto & master_vpp_vector_names = _multi_app->problemBase()
+                                             .getUserObject<VectorPostprocessor>(_master_vpp_name)
+                                             .getVectorNames();
 
   _receiver_vpps.clear();
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
@@ -160,11 +164,11 @@ MultiAppVppToVppTransfer::initialSetupToMultiapp()
       auto & sub_vpp =
           _multi_app->appProblemBase(i).getUserObject<VectorPostprocessorReceiver>(_sub_vpp_name);
 
-      _receiver_vpps.resize(master_vpp_vectors.size());
+      _receiver_vpps.resize(master_vpp_vector_names.size());
       unsigned int index = 0;
-      for (const auto & master_vpp_vector : master_vpp_vectors)
+      for (const auto & name : master_vpp_vector_names)
       {
-        _receiver_vpps[index] = &(sub_vpp.addVector(master_vpp_vector.first));
+        _receiver_vpps[index] = &(sub_vpp.addVector(name));
         ++index;
       }
     }

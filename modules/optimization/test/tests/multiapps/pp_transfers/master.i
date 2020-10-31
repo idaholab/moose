@@ -28,6 +28,10 @@
     multi_app = sub
     parameter_vpp = parameter_results
     to_control = parameterReceiver
+
+    #get reference from form function get parameter_names.  Push them into control receiver.
+
+
     # this will control the values directly, and get initial values and put them in vpp
     # should use somekind of key value storage object  Need to ask Daniel for clarification this is some kind of userobject.
   []

@@ -91,7 +91,6 @@
   [csv_reader]
     type = CSVReader
     csv_file = 'zForwardInput/inputForces.csv'
-    execute_on = initial
   []
 []
 
