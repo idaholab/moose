@@ -57,6 +57,16 @@ public:
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
 
+  virtual void updateStateSubstep(RankTwoTensor & strain_increment,
+                                  RankTwoTensor & inelastic_strain_increment,
+                                  const RankTwoTensor & rotation_increment,
+                                  RankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const RankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  bool compute_full_tangent_operator,
+                                  RankFourTensor & tangent_operator) override;
+
   virtual Real computeReferenceResidual(const Real effective_trial_stress,
                                         const Real scalar_effective_inelastic_strain) override;
 
@@ -77,6 +87,15 @@ public:
    * Does the model require the elasticity tensor to be isotropic?
    */
   bool requiresIsotropicTensor() override { return true; }
+
+  /**
+   * If substepping is enabled, calculate the number of substeps as a function
+   * of the elastic strain increment guess and the maximum inelastic strain increment
+   * ratio based on a user-specified tolerance.
+   * @param strain_increment    When called, this is the elastic strain guess
+   * @return                    The number of substeps required
+   */
+  virtual int calculateNumberSubsteps(const RankTwoTensor & strain_increment) override;
 
   /**
    * Radial return mapped models should be isotropic by default!
@@ -125,12 +144,35 @@ protected:
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
+  /**
+   * Calculate the tangent_operator.
+   */
+  void computeTangentOperator(Real effective_trial_stress,
+                              RankTwoTensor & stress_new,
+                              bool compute_full_tangent_operator,
+                              RankFourTensor & tangent_operator);
+
   /// 3 * shear modulus
   Real _three_shear_modulus;
 
   MaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
+
+  /// Stores the scalar effective inelastic strain increment from Newton iteration
+  Real _scalar_effective_inelastic_strain;
+
+  /**
+   * Maximum allowable scalar inelastic strain increment, used to control the
+   * timestep size in conjunction with a user object
+   */
   Real _max_inelastic_increment;
+
+  /**
+   * Used to calculate the number of substeps taken in the radial return algorithm,
+   * when substepping is enabled, based on the elastic strain increment ratio
+   * to the maximum inelastic increment
+   */
+  const Real _substep_tolerance;
 
   /**
    * Rank two identity tensor

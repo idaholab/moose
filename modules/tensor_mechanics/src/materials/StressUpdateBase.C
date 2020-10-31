@@ -55,3 +55,18 @@ StressUpdateBase::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
 }
+
+void
+StressUpdateBase::updateStateSubstep(RankTwoTensor & /*strain_increment*/,
+                                     RankTwoTensor & /*inelastic_strain_increment*/,
+                                     const RankTwoTensor & /*rotation_increment*/,
+                                     RankTwoTensor & /*stress_new*/,
+                                     const RankTwoTensor & /*stress_old*/,
+                                     const RankFourTensor & /*elasticity_tensor*/,
+                                     const RankTwoTensor & /*elastic_strain_old*/,
+                                     bool /*compute_full_tangent_operator*/,
+                                     RankFourTensor & /*tangent_operator*/)
+{
+  paramError("use_substep",
+             "updateStateSubstep called: it needs to be implemented by your inelastic model");
+}
