@@ -214,6 +214,7 @@ addActionTypes(Syntax & syntax)
   registerTask("set_adaptivity_options", false);
   registerTask("add_mortar_interface", false);
   registerTask("coupling_functor_check", true);
+  registerTask("add_master_action_material", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -298,6 +299,7 @@ addActionTypes(Syntax & syntax)
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
+                           "(add_master_action_material)"
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(add_coupling_rm)"
