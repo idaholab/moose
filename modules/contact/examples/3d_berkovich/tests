@@ -1,8 +1,0 @@
-[Tests]
-  [./indenter_berkovich_friction]
-    type = RunApp
-    input = 'indenter_berkovich_friction.i'
-    check_input = True
-    method = 'OPT'
-  [../]
-[]
