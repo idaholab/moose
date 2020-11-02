@@ -15,17 +15,17 @@
 []
 
 [MultiApps]
-  [sub]
+  [forward]
     type = OptimizeFullSolveMultiApp
-    input_files = sub.i
-    execute_on = FORWARD
+    input_files = forward.i
+    execute_on = "FORWARD"
   []
 []
 
 [Transfers]
-  [toSub]
+  [toforward]
     type = OptimizationParameterTransfer
-    multi_app = sub
+    multi_app = forward
     parameter_vpp = parameter_results
     to_control = parameterReceiver
 
@@ -38,7 +38,7 @@
   [pp_transfer_0]
     type = MultiAppPostprocessorTransfer
     direction = from_multiapp
-    multi_app = sub
+    multi_app = forward
     from_postprocessor = data_pt_0
     to_postprocessor = data_rec_0
     reduction_type = average
@@ -46,7 +46,7 @@
   [pp_transfer_1]
     type = MultiAppPostprocessorTransfer
     direction = from_multiapp
-    multi_app = sub
+    multi_app = forward
     from_postprocessor = data_pt_1
     to_postprocessor = data_rec_1
     reduction_type = average
@@ -54,7 +54,7 @@
   [pp_transfer_2]
     type = MultiAppPostprocessorTransfer
     direction = from_multiapp
-    multi_app = sub
+    multi_app = forward
     from_postprocessor = data_pt_2
     to_postprocessor = data_rec_2
     reduction_type = average
@@ -62,7 +62,7 @@
   [pp_transfer_3]
     type = MultiAppPostprocessorTransfer
     direction = from_multiapp
-    multi_app = sub
+    multi_app = forward
     from_postprocessor = data_pt_3
     to_postprocessor = data_rec_3
     reduction_type = average
@@ -99,7 +99,7 @@
   csv=true
 []
 
-
+#action for optimization
 # [Postprocessors]
 #   # [objective]
 #   #   type = VectorPostprocessorDifferenceMeasure

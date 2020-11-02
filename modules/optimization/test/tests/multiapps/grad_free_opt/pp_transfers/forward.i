@@ -124,4 +124,5 @@
 [Outputs]
   console = true
   exodus = true
+  file_base = 'forward'
 []
