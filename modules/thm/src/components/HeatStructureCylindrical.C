@@ -38,17 +38,20 @@ HeatStructureCylindrical::addMooseObjects()
 }
 
 Real
-HeatStructureCylindrical::getUnitPerimeter(const HeatStructureBase::SideType & side) const
+HeatStructureCylindrical::getUnitPerimeter(const HeatStructureSideType & side) const
 {
   switch (side)
   {
-    case HeatStructureBase::OUTER:
+    case HeatStructureSideType::OUTER:
       return 2 * M_PI * (_inner_radius + _total_width);
 
-    case HeatStructureBase::INNER:
+    case HeatStructureSideType::INNER:
       return 2 * M_PI * _inner_radius;
 
-    default:
-      mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+    case HeatStructureSideType::START:
+    case HeatStructureSideType::END:
+      return std::numeric_limits<Real>::quiet_NaN();
   }
+
+  mooseError(name(), ": Unknown value of 'side' parameter.");
 }

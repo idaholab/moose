@@ -1,0 +1,7 @@
+[Tests]
+  [err:no_bnd]
+    type = RunException
+    input = 'err.no_bnd.i'
+    expect_err = "hs_boundary\: The heat structure side of the heat structure \'hs\' corresponding to the boundary name \'hs:inner\' has a zero perimeter\. This can be caused by applying the boundary on the axis of symmetry of a cylindrical heat structure\."
+  []
+[]

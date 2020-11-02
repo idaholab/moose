@@ -265,10 +265,7 @@ Simulation::printComponentLoops() const
 }
 
 void
-Simulation::addSimVariable(bool nl,
-                           const VariableName & name,
-                           FEType type,
-                           Real scaling_factor)
+Simulation::addSimVariable(bool nl, const VariableName & name, FEType type, Real scaling_factor)
 {
   if (_vars.find(name) == _vars.end())
   {
@@ -675,7 +672,9 @@ Simulation::integrityCheck() const
                << std::endl;
     _log.print();
     Moose::err << std::endl;
-    MOOSE_ABORT;
+
+    MPI_Finalize();
+    exit(1);
   }
 
   if (_log.getNumberOfWarnings() > 0)

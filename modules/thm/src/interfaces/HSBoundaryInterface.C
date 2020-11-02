@@ -17,9 +17,10 @@ HSBoundaryInterface::validParams()
 HSBoundaryInterface::HSBoundaryInterface(const Component * const component)
   : _hs_name(component->getParam<std::string>("hs")),
     _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
-    _hs_side(THM::stringToEnum<HeatStructureBase::SideType>(_hs_side_enum))
+    _hs_side(THM::stringToEnum<HeatStructureSideType>(_hs_side_enum))
 {
-  if (_hs_side == HeatStructureBase::OUTER || _hs_side == HeatStructureBase::INNER)
+  if (_hs_side == HeatStructureSideType::OUTER || _hs_side == HeatStructureSideType::INNER ||
+      _hs_side == HeatStructureSideType::START || _hs_side == HeatStructureSideType::END)
     _hs_side_valid = true;
   else
     _hs_side_valid = false;
@@ -49,6 +50,12 @@ HSBoundaryInterface::check(const Component * const component) const
                             "', but this side of the heat structure '",
                             _hs_name,
                             "' has radius of zero.");
+
+      if (std::isnan(P_hs))
+        component->logError("Invalid side '",
+                            _hs_side_enum,
+                            "'. This side does not have unit perimeter. You probably want to use "
+                            "'INNER' or 'OUTER' side instead.");
     }
   }
 }
@@ -60,19 +67,30 @@ HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
 
   switch (_hs_side)
   {
-    case HeatStructureBase::OUTER:
+    case HeatStructureSideType::OUTER:
       if (hs.getOuterBoundaryNames().size() > 0)
         return hs.getOuterBoundaryNames()[0];
       else
         return THMMesh::INVALID_BOUNDARY_ID;
 
-    case HeatStructureBase::INNER:
+    case HeatStructureSideType::INNER:
       if (hs.getInnerBoundaryNames().size() > 0)
         return hs.getInnerBoundaryNames()[0];
       else
         return THMMesh::INVALID_BOUNDARY_ID;
 
-    default:
-      mooseError(component->cname(), ": Unknown side specified in the 'hs_side' parameter.");
+    case HeatStructureSideType::START:
+      if (hs.getStartBoundaryNames().size() > 0)
+        return hs.getStartBoundaryNames()[0];
+      else
+        return THMMesh::INVALID_BOUNDARY_ID;
+
+    case HeatStructureSideType::END:
+      if (hs.getEndBoundaryNames().size() > 0)
+        return hs.getEndBoundaryNames()[0];
+      else
+        return THMMesh::INVALID_BOUNDARY_ID;
   }
+
+  mooseError(component->name(), ": Unknown value of 'hs_side' parameter.");
 }

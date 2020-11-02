@@ -1,0 +1,7 @@
+[Tests]
+  [./phy:test]
+    type = Exodiff
+    input = 'phy.test.i'
+    exodiff = 'phy.test_out.e'
+  [../]
+[]
