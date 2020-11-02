@@ -19,7 +19,7 @@ protected:
    *
    * @param[in] boundary_names   Boundary names
    */
-  std::vector<HeatStructureBase::SideType>
+  std::vector<HeatStructureSideType>
   extractHeatStructureSides(const std::vector<BoundaryName> & boundary_names) const;
 
   /// Boundary names for which the boundary component applies
@@ -29,7 +29,7 @@ protected:
   const std::string & _hs_name;
 
   /// Heat structure sides for each boundary
-  const std::vector<HeatStructureBase::SideType> _hs_sides;
+  const std::vector<HeatStructureSideType> _hs_sides;
 
 public:
   static InputParameters validParams();

@@ -29,7 +29,7 @@ protected:
   /// Heat structure side enum
   const MooseEnum & _hs_side_enum;
   /// Heat structure side
-  const HeatStructureBase::SideType _hs_side;
+  const HeatStructureSideType _hs_side;
   /// True of valid heat structure side was provided
   bool _hs_side_valid;
 

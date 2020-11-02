@@ -18,4 +18,10 @@
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
   [../]
+
+  [./err:no_phf]
+    type = RunException
+    input = 'err.no_phf.i'
+    expect_err = "hx\: Invalid side \'START\'\. This side does not have unit perimeter\. You probably want to use \'INNER\' or \'OUTER\' side instead\."
+  [../]
 []
