@@ -46,12 +46,7 @@ Extensions:
             framework: !include ${MOOSE_DIR}/framework/doc/unregister.yml
             thm:
                 AddComponentAction: Components/*/*
-        hide:
-            framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
-            fluid_properties: !include ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
-            heat_conduction: !include ${MOOSE_DIR}/modules/heat_conduction/doc/hidden.yml
-            misc: !include ${MOOSE_DIR}/modules/misc/doc/hidden.yml
-            thm: !include ${ROOT_DIR}/doc/hidden.yml
+                Component: Components/*/*
         remove:
             framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
             heat_conduction:
