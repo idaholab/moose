@@ -20,7 +20,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseVariableFE.h"
+#include "MooseVariableField.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "MooseVariableInterface.h"
@@ -85,7 +85,7 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  MooseVariable & variable();
+  MooseVariableField<Real> & variable();
 
   /**
    * Return a reference to the subproblem.
@@ -161,7 +161,7 @@ protected:
   Assembly & _assembly;
 
   /// Variable this kernel acts on
-  MooseVariable & _var;
+  MooseVariableField<Real> & _var;
 
   /// Mesh this kernels acts on
   MooseMesh & _mesh;
@@ -241,4 +241,3 @@ private:
   /// id != invalid_uint.
   const Elem * addPointWithValidId(Point p, unsigned id);
 };
-
