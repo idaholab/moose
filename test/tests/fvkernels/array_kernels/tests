@@ -5,7 +5,13 @@
     type = 'Exodiff'
     input = 'diffusion.i'
     exodiff = 'diffusion_out.e'
-    requirement = 'MOOSE shall provide array diffusion kernels on an array variable.'
+    requirement = 'MOOSE shall provide finite volume array diffusion kernels on an array variable.'
+  [../]
+  [./transient]
+    type = 'Exodiff'
+    input = 'transient.i'
+    exodiff = 'transient_out.e'
+    requirement = 'MOOSE shall provide finite volume array time kernels on an array variable.'
   [../]
   #[./diffusion_reaction]
   #  type = 'Exodiff'
