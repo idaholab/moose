@@ -16,9 +16,9 @@
 
 [MultiApps]
   [sub]
-    type = FullSolveMultiApp
-    execute_on = nonlinear # really important to make subapp execute every optimization step
+    type = OptimizeFullSolveMultiApp
     input_files = sub.i
+    execute_on = FORWARD
   []
 []
 

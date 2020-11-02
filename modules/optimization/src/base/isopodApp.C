@@ -36,8 +36,8 @@ isopodApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   auto & factory = f;
 
   // Optimization execution flags
-  registerExecFlag(EXEC_OBJECTIVE);
-  registerExecFlag(EXEC_GRADIENT);
+  registerExecFlag(EXEC_FORWARD);
+  registerExecFlag(EXEC_ADJOINT);
   registerExecFlag(EXEC_HESSIAN);
 
   // Form Function actions

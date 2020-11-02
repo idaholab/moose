@@ -12,8 +12,8 @@ OptimizeSolve::validParams()
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_NONE, EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN);
-  exec_enum = {EXEC_OBJECTIVE, EXEC_GRADIENT, EXEC_HESSIAN};
+  exec_enum.addAvailableFlags(EXEC_NONE, EXEC_FORWARD, EXEC_ADJOINT, EXEC_HESSIAN);
+  exec_enum = {EXEC_FORWARD, EXEC_ADJOINT, EXEC_HESSIAN};
   params.addParam<ExecFlagEnum>(
       "solve_on", exec_enum, "List of flags indicating when inner system solve should occur.");
   return params;
@@ -165,13 +165,9 @@ Real
 OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & x)
 {
   _form_function->setParameters(x);
-  // fixme lynn need to switch back to Zachs flags or something like them for adjoint and forward
-  //  _problem.execute(EXEC_OBJECTIVE);
-  //  _problem.execMultiApps(EXEC_OBJECTIVE);
-  //  if (_solve_on.contains(EXEC_OBJECTIVE))
-  _problem.execute(EXEC_NONLINEAR);
-  _problem.execMultiApps(EXEC_NONLINEAR);
-  if (_solve_on.contains(EXEC_NONLINEAR))
+  _problem.execute(EXEC_FORWARD);
+  _problem.execMultiApps(EXEC_FORWARD);
+  if (_solve_on.contains(EXEC_FORWARD))
     _inner_solve->solve();
   return _form_function->computeObjective();
 }
@@ -181,9 +177,9 @@ OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & x,
                                 libMesh::PetscVector<Number> & gradient)
 {
   _form_function->setParameters(x);
-  _problem.execute(EXEC_GRADIENT);
-  _problem.execMultiApps(EXEC_GRADIENT);
-  if (_solve_on.contains(EXEC_GRADIENT))
+  _problem.execute(EXEC_ADJOINT);
+  _problem.execMultiApps(EXEC_ADJOINT);
+  if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
   _form_function->computeGradient();
   gradient = _form_function->getGradient();
