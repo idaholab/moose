@@ -19,7 +19,7 @@
 InputParameters
 FVArrayElementalKernel::validParams()
 {
-  InputParameters params = FVKernel::validParams();
+  InputParameters params = FVElementalKernelBase::validParams();
   return params;
 }
 
