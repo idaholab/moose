@@ -340,8 +340,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _popped_final_mesh_generator(false),
-    _geometric_rms_attached(false)
+    _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
   if (std::getenv("MOOSE_PROFILE_BASE"))
@@ -1928,8 +1927,6 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
       }
     }
   }
-
-  _geometric_rms_attached = true;
 }
 
 void
@@ -1939,7 +1936,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
   {
     if (rm->isType(rm_type))
     {
-      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !_geometric_rms_attached)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       {
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
         MooseMesh * const mesh = _action_warehouse.mesh().get();
