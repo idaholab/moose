@@ -39,13 +39,13 @@
     type = ConstantPointSource
     variable = u
     value = 1.0
-    point = '0.2 0 0'
+    point = '0.15 0 0'
   []
   [point_source2]
     type = ConstantPointSource
     variable = u
     value = -0.5
-    point = '0.7 0 0'
+    point = '0.65 0 0'
   []
 []
 
