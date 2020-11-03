@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
+import mooseutils
 from ..common import exceptions
 from ..base import components, Extension, LatexRenderer
 from ..tree import tokens, html, latex
@@ -111,7 +112,6 @@ class VideoCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True, img=True, **self.attributes)
 
@@ -219,12 +219,21 @@ class RenderVideo(components.RenderComponent):
         source["type"] = "video/{}".format(ext[1:])
 
         video['width'] = '100%'
-        if token['controls']:
-            video['controls'] = 'controls'
-        if token['autoplay']:
-            video['autoplay'] = 'autoplay'
-        if token['loop']:
-            video['loop'] = 'loop'
+
+        # Ensure that bool flags are boolean
+        for key in ['controls', 'loop', 'autoplay']:
+            value = token[key]
+            if isinstance(value, str):
+                token[key] = mooseutils.str2bool(value)
+
+        video['loop'] = token['loop']
+        video['autoplay'] = token['autoplay']
+        video['controls'] = token['controls']
+
+        #https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
+        #In some browsers (e.g. Chrome 70.0) autoplay doesn't work if no muted attribute is present."
+        if video['autoplay']:
+            video['muted'] = True
 
         return video
 

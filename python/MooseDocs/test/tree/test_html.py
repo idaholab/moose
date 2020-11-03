@@ -32,5 +32,16 @@ class TestHTML(unittest.TestCase):
         html.String(content='foo', parent=tag)
         self.assertEqual(tag.write(), '<h1>foo</h1>')
 
+    def testBool(self):
+        tag = html.Tag(None, 'video', autoplay=True)
+        self.assertEqual(tag.write(), '<video autoplay></video>')
+
+        tag['controls'] = False
+        self.assertEqual(tag.write(), '<video autoplay></video>')
+
+        tag['controls'] = True
+        self.assertEqual(tag.write(), '<video autoplay controls></video>')
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

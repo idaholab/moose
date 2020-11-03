@@ -64,7 +64,11 @@ class Tag(NodeBase):
         skip_list = ('close', 'string')
         for key, value in self.items():
             if value and (key not in skip_list):
-                attr_list.append('{}="{}"'.format(key, str(value).strip()))
+                if isinstance(value, bool):
+                    if value:
+                        attr_list.append('{}'.format(key))
+                else:
+                    attr_list.append('{}="{}"'.format(key, str(value).strip()))
 
         attr = ' '.join(attr_list)
         if attr:
