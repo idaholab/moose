@@ -27,14 +27,10 @@ class Tag(NodeBase):
     def __init__(self, parent=None, name=None, token=None, **kwargs):
         kwargs.setdefault('close', True)
         kwargs.setdefault('string', None)
-        if token is not None:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', '')))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', '')))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', '')))
-        else:
-            kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', ''))
-            kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', ''))
-            kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', ''))
+        token = token or dict()
+        kwargs['class'] = kwargs.pop('class_', kwargs.pop('class', token.get('class', '')))
+        kwargs['style'] = kwargs.pop('style_', kwargs.pop('style', token.get('style', '')))
+        kwargs['id'] = kwargs.pop('id_', kwargs.pop('id', token.get('id', '')))
         super(Tag, self).__init__(name=name, parent=parent, **kwargs)
 
         string = self.attributes.pop('string', None)

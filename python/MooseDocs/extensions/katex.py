@@ -162,8 +162,8 @@ class RenderLatexEquation(components.RenderComponent):
     def createHTML(self, parent, token, page):
 
         if token.name == 'LatexInlineEquation':
-            div = html.Tag(parent, 'span', class_='moose-katex-inline-equation',
-                           id_=token['bookmark'], **token.attributes)
+            div = html.Tag(parent, 'span', token, class_='moose-katex-inline-equation',
+                           id_=token['bookmark'])
             display = 'false'
 
         else:
@@ -172,9 +172,8 @@ class RenderLatexEquation(components.RenderComponent):
             display = 'true'
 
             # Create equation content and number (if it is valid)
-            html.Tag(div, 'span', class_='moose-katex-equation table-cell',
-                     id_=token['bookmark'],
-                     **token.attributes)
+            html.Tag(div, 'span', token, class_='moose-katex-equation table-cell',
+                     id_=token['bookmark'])
             if token['label'] is not None:
                 num = html.Tag(div, 'span', class_='moose-katex-equation-number')
                 html.String(num, content='({})'.format(token['number']))
