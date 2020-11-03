@@ -12,8 +12,10 @@
 []
 
 [Mesh]
-  type = EBSDMesh
-  filename = Renumbered.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = Renumbered.txt
+  []
 []
 
 [GlobalParams]
@@ -22,46 +24,46 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     phase = 1
     output_adjacency_matrix = true
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./GRAIN]
+  [GRAIN]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./grain_aux]
+  [grain_aux]
     type = EBSDReaderPointDataAux
     variable = GRAIN
     ebsd_reader = ebsd_reader
     data_name = 'feature_id'
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [Executioner]

@@ -4,8 +4,10 @@
 #
 
 [Mesh]
-  type = EBSDMesh
-  filename = IN100_001_28x28_Marmot.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = IN100_001_28x28_Marmot.txt
+  []
 []
 
 [GlobalParams]
@@ -14,66 +16,66 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     output_adjacency_matrix = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     polycrystal_ic_uo = ebsd
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxVariables]
-  [./feature]
+  [feature]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./bnds]
-  [../]
+  []
+  [bnds]
+  []
 []
 
 [AuxKernels]
-  [./feature]
+  [feature]
     type = EBSDReaderAvgDataAux
     variable = feature
     ebsd_reader = ebsd_reader
     grain_tracker = grain_tracker
     data_name = feature_id
     execute_on = 'initial timestep_end'
-  [../]
-  [./bnds]
+  []
+  [bnds]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     block = 0 # Block ID (only one block in this problem)
@@ -85,7 +87,7 @@
     #outputs = exodus
     length_scale = 1e-06
     time_scale = 1e-6
-  [../]
+  []
 []
 
 [Executioner]
