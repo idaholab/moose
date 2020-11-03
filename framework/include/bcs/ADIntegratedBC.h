@@ -23,16 +23,22 @@ public:
 
   ADIntegratedBCTempl(const InputParameters & parameters);
 
-  virtual MooseVariableFE<T> & variable() override { return _var; }
+  MooseVariableFE<T> & variable() override { return _var; }
 
-  void computeResidual() override;
-  void computeJacobian() override;
-  void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  void computeJacobianBlockScalar(unsigned int jvar) override;
+private:
+  void computeJacobian() override final;
+  void computeJacobianBlock(MooseVariableFEBase & jvar) override final;
+  void computeJacobianBlockScalar(unsigned int jvar) override final;
 
 protected:
+  void computeResidual() override;
+
   /**
-   * compute the residuals for filling the Jacobian
+   * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
+   * up-front when doing loal derivative indexing because we can use those residuals to fill \p
+   * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
+   * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
+   * \p _residuals directly to \p Assembly::processDerivatives
    */
   virtual void computeResidualsForJacobian();
 
@@ -82,9 +88,12 @@ private:
   void addJacobian(const MooseVariableFieldBase & jvar);
 
   /**
-   * compute all the off-diagional Jacobian entries
+   * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
+   * entries specified by \p coupling_entries
    */
-  void computeADOffDiagJacobian();
+  void computeADJacobian(
+      const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+          coupling_entries);
 };
 
 using ADIntegratedBC = ADIntegratedBCTempl<Real>;

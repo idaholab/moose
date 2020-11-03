@@ -30,16 +30,26 @@ public:
 
   void jacobianSetup() override;
 
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase &) override final;
-  virtual void computeADOffDiagJacobian() override;
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  MooseVariableFE<T> & variable() override { return _var; }
 
-  virtual MooseVariableFE<T> & variable() override { return _var; }
+private:
+  void computeJacobian() override final;
+  void computeOffDiagJacobian(MooseVariableFEBase &) override final;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
 protected:
+  // See KernelBase base for documentation of these overridden methods
+  void computeResidual() override;
+
+  /**
+   * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
+   * up-front when doing loal derivative indexing because we can use those residuals to fill \p
+   * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
+   * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
+   * \p _residuals directly to \p Assembly::processDerivatives
+   */
+  virtual void computeResidualsForJacobian();
+
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADReal computeQpResidual() = 0;
 
@@ -53,11 +63,6 @@ protected:
    * component.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
-
-  /**
-   * compute the residuals for filling the Jacobian
-   */
-  virtual void computeResidualsForJacobian();
 
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariableFE<T> & _var;
@@ -106,6 +111,14 @@ private:
    * Add the Jacobian contribution for the provided variable
    */
   void addJacobian(const MooseVariableFieldBase & jvariable);
+
+  /**
+   * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
+   * entries specified by \p coupling_entries
+   */
+  void computeADJacobian(
+      const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+          coupling_entries);
 
   const Elem * _my_elem;
 };

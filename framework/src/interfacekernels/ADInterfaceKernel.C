@@ -159,7 +159,7 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
                            const std::set<TagID> &) {
-    auto i_heard_you_liked_lambdas = [&](const Moose::DGJacobianType nested_type) {
+    auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type) {
       const ADTemplateVariableTestValue<T> & loc_phi =
           (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
               ? _phi
@@ -178,13 +178,13 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
 
     if (type == Moose::ElementElement)
     {
-      i_heard_you_liked_lambdas(Moose::ElementElement);
-      i_heard_you_liked_lambdas(Moose::ElementNeighbor);
+      compute_jacobian_type(Moose::ElementElement);
+      compute_jacobian_type(Moose::ElementNeighbor);
     }
     else
     {
-      i_heard_you_liked_lambdas(Moose::NeighborElement);
-      i_heard_you_liked_lambdas(Moose::NeighborNeighbor);
+      compute_jacobian_type(Moose::NeighborElement);
+      compute_jacobian_type(Moose::NeighborNeighbor);
     }
   };
 
@@ -261,7 +261,7 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
       if (ivar != current_ivar)
         continue;
 
-      auto i_heard_you_liked_lambdas = [&](const Moose::DGJacobianType nested_type) {
+      auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type) {
         const ADTemplateVariableTestValue<T> & loc_phi =
             (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
                 ? _phi
@@ -288,13 +288,13 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
 
       if (type == Moose::ElementElement)
       {
-        i_heard_you_liked_lambdas(Moose::ElementElement);
-        i_heard_you_liked_lambdas(Moose::ElementNeighbor);
+        compute_jacobian_type(Moose::ElementElement);
+        compute_jacobian_type(Moose::ElementNeighbor);
       }
       else
       {
-        i_heard_you_liked_lambdas(Moose::NeighborElement);
-        i_heard_you_liked_lambdas(Moose::NeighborNeighbor);
+        compute_jacobian_type(Moose::NeighborElement);
+        compute_jacobian_type(Moose::NeighborNeighbor);
       }
     }
   };

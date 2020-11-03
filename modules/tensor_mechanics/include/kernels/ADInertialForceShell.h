@@ -36,11 +36,9 @@ protected:
   virtual ADReal computeQpResidual() override { return 0.0; };
 
   virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeADOffDiagJacobian() override;
+  virtual void computeResidualsForJacobian() override;
   virtual void computeShellInertialForces(const MooseArray<ADReal> & _ad_coord,
                                           const MooseArray<ADReal> & _ad_JxW);
-  virtual void computeResidualForJacobian(ADDenseVector & residual);
 
 private:
   /// Number of coupled rotational variables

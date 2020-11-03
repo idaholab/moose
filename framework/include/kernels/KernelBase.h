@@ -75,11 +75,6 @@ public:
   /// Computes d-residual / d-jvar... storing the result in Ke.
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) = 0;
 
-  virtual void computeADOffDiagJacobian()
-  {
-    mooseError("The computeADOffDiagJacobian method should only be called on ADKernel objects");
-  }
-
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable

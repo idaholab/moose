@@ -88,7 +88,7 @@ void
 ADNodalBCTempl<T>::computeJacobian()
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  auto ad_offset = _var.number() * _sys.getMaxVarNDofsPerNode();
+  auto ad_offset = Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerNode());
 #endif
 
   auto residual = computeQpResidual();
@@ -124,7 +124,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
   else
   {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-    auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
+    auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerNode());
 #endif
     auto residual = computeQpResidual();
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();

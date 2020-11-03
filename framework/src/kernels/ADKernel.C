@@ -181,18 +181,14 @@ template <typename T>
 void
 ADKernelTempl<T>::computeJacobian()
 {
-  computeResidualsForJacobian();
-
-  auto local_functor = [&](const std::vector<ADReal> &,
-                           const std::vector<dof_id_type> &,
-                           const std::set<TagID> &) { addJacobian(_var); };
-
-  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>>
+      var_var_coupling = {std::make_pair(&_var, &_var)};
+  computeADJacobian(var_var_coupling);
 
   if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-    mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyways. Use "
+    mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
                "the tagging system instead.");
 #else
     unsigned int rows = _local_ke.m();
@@ -209,14 +205,15 @@ ADKernelTempl<T>::computeJacobian()
 
 template <typename T>
 void
-ADKernelTempl<T>::computeADOffDiagJacobian()
+ADKernelTempl<T>::computeADJacobian(
+    const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+        coupling_entries)
 {
   computeResidualsForJacobian();
 
   auto local_functor =
       [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &) {
-        auto & ce = _assembly.couplingEntries();
-        for (const auto & it : ce)
+        for (const auto & it : coupling_entries)
         {
           const MooseVariableFEBase & ivariable = *(it.first);
           const MooseVariableFEBase & jvariable = *(it.second);
@@ -246,7 +243,7 @@ ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
 {
   if (_my_elem != _current_elem)
   {
-    computeADOffDiagJacobian();
+    computeADJacobian(_assembly.couplingEntries());
     _my_elem = _current_elem;
   }
 }

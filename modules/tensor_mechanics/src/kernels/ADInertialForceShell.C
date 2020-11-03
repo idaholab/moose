@@ -165,8 +165,20 @@ ADInertialForceShell::computeResidual()
 }
 
 void
-ADInertialForceShell::computeResidualForJacobian(ADDenseVector & residual)
+ADInertialForceShell::computeResidualsForJacobian()
 {
+  if (_residuals.size() != _test.size())
+    _residuals.resize(_test.size(), 0);
+  for (auto & r : _residuals)
+    r = 0;
+
+  precalculateResidual();
+
+  mooseAssert(_residuals.size() >= 4,
+              "This is hard coded to index from 0 to 3, so we must have at least four spots in our "
+              "container. I'd prefer to assert that the size == 4, but I don't know what the "
+              "tensor mechanics folks expect.");
+
   if (_dt != 0.0)
   {
     computeShellInertialForces(_ad_coord, _ad_JxW);
@@ -178,10 +190,10 @@ ADInertialForceShell::computeResidualForJacobian(ADDenseVector & residual)
       _global_force[2] = _thickness * _original_local_config.transpose() * _local_force[2];
       _global_force[3] = _thickness * _original_local_config.transpose() * _local_force[3];
 
-      residual(0) = _global_force[0](_component);
-      residual(1) = _global_force[1](_component);
-      residual(2) = _global_force[2](_component);
-      residual(3) = _global_force[3](_component);
+      _residuals[0] = _global_force[0](_component);
+      _residuals[1] = _global_force[1](_component);
+      _residuals[2] = _global_force[2](_component);
+      _residuals[3] = _global_force[3](_component);
     }
     else
     {
@@ -190,10 +202,10 @@ ADInertialForceShell::computeResidualForJacobian(ADDenseVector & residual)
       _global_moment[2] = _original_local_config.transpose() * _local_moment[2];
       _global_moment[3] = _original_local_config.transpose() * _local_moment[3];
 
-      residual(0) = _global_moment[0](_component - 3);
-      residual(1) = _global_moment[1](_component - 3);
-      residual(2) = _global_moment[2](_component - 3);
-      residual(3) = _global_moment[3](_component - 3);
+      _residuals[0] = _global_moment[0](_component - 3);
+      _residuals[1] = _global_moment[1](_component - 3);
+      _residuals[2] = _global_moment[2](_component - 3);
+      _residuals[3] = _global_moment[3](_component - 3);
     }
   }
 }
@@ -676,89 +688,5 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     _local_moment[3](1) += factor_qxy * rot_thickness *
                            (G1T(1, 0) * momentInertia(0) + G1T(1, 1) * momentInertia(1) +
                             G4T(1, 2) * momentInertia(2));
-  }
-}
-
-void
-ADInertialForceShell::computeJacobian()
-{
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
-
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
-  precalculateResidual();
-
-  ADDenseVector residual(_test.size());
-  computeResidualForJacobian(residual);
-
-  if (_use_displaced_mesh)
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _var.phiSize(); _j++)
-        _local_ke(_i, _j) = residual(_i).derivatives()[ad_offset + _j];
-  else
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _var.phiSize(); _j++)
-        _local_ke(_i, _j) = residual(_i).derivatives()[ad_offset + _j];
-
-  accumulateTaggedLocalMatrix();
-
-  if (_has_diag_save_in && !_sys.computingScalingJacobian())
-  {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
-  }
-}
-
-void
-ADInertialForceShell::computeADOffDiagJacobian()
-{
-  if (_residuals.size() != _test.size())
-    _residuals.resize(_test.size(), 0);
-
-  for (auto & r : _residuals)
-    r = 0;
-
-  ADDenseVector residual(_test.size());
-  precalculateResidual();
-  computeResidualForJacobian(residual);
-
-  if (_use_displaced_mesh)
-    for (_i = 0; _i < _test.size(); _i++)
-      _residuals[_i] = residual(_i);
-  else
-    for (_i = 0; _i < _test.size(); _i++)
-      _residuals[_i] = residual(_i);
-
-  // Print out residual values
-  auto & ce = _assembly.couplingEntries();
-  for (const auto & it : ce)
-  {
-    MooseVariableFEBase & ivariable = *(it.first);
-    MooseVariableFEBase & jvariable = *(it.second);
-
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
-
-    if (ivar != _var.number())
-      continue;
-
-    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
-
-    prepareMatrixTag(_assembly, ivar, jvar);
-
-    if (_local_ke.m() != _test.size() || _local_ke.n() != jvariable.phiSize())
-      continue;
-
-    precalculateResidual();
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < jvariable.phiSize(); _j++)
-        _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
-
-    accumulateTaggedLocalMatrix();
   }
 }

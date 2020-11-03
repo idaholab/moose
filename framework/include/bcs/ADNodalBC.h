@@ -23,12 +23,13 @@ public:
 
   ADNodalBCTempl(const InputParameters & parameters);
 
-  virtual MooseVariableFE<T> & variable() override { return _var; }
+  MooseVariableFE<T> & variable() override { return _var; }
 
-  void computeResidual() override;
-  void computeJacobian() override;
-  void computeOffDiagJacobian(unsigned int jvar) override;
-  void computeOffDiagJacobianScalar(unsigned int jvar) override;
+private:
+  void computeResidual() override final;
+  void computeJacobian() override final;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
 protected:
   /**
