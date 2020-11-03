@@ -1,0 +1,23 @@
+[Tests]
+  [glued_multimaterial]
+    type = Exodiff
+    input = glued_multimaterials_2d.i
+    exodiff = 'glued_multimaterials_2d_out.e glued_multimaterials_2d_out.e-s002'
+    map = false
+    requirement = 'The XFEM module shall have the capability to switch among multiple materials '
+                  'separated by multiple levelset functions'
+    issues = '#16046'
+    design = 'XFEM/index.md'
+  []
+  [glued_ad_multimaterial]
+    type = Exodiff
+    input = glued_multimaterials_2d.i
+    exodiff = 'glued_multimaterials_2d_out.e glued_multimaterials_2d_out.e-s002'
+    prereq = 'glued_multimaterial'
+    map = false
+    requirement = 'The XFEM module shall have the capability to switch among multiple AD materials '
+                  'separated by multiple levelset functions'
+    issues = '#16046'
+    design = 'XFEM/index.md'
+  []
+[]

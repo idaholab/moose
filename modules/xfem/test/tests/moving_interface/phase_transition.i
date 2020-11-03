@@ -21,114 +21,114 @@
 []
 
 [UserObjects]
-  [./velocity]
+  [velocity]
     type = XFEMPhaseTransitionMovingInterfaceVelocity
     diffusivity_at_positive_level_set = 5
     diffusivity_at_negative_level_set = 1
     equilibrium_concentration_jump = 1
     value_at_interface_uo = value_uo
-  [../]
-  [./value_uo]
+  []
+  [value_uo]
     type = PointValueAtXFEMInterface
     variable = 'u'
     geometric_cut_userobject = 'moving_line_segments'
     execute_on = 'nonlinear'
     level_set_var = ls
-  [../]
-  [./moving_line_segments]
+  []
+  [moving_line_segments]
     type = MovingLineSegmentCutSetUserObject
     cut_data = '0.5 0 0.5 1.0 0 0'
     heal_always = true
     interface_velocity = velocity
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./ic_u]
+  [ic_u]
     type = FunctionIC
     variable = u
     function = 'if(x<0.51, 2, 1)'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./ls]
+  [ls]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Constraints]
-  [./u_constraint]
+  [u_constraint]
     type = XFEMEqualValueAtInterface
     geometric_cut_userobject = 'moving_line_segments'
     use_displaced_mesh = false
     variable = u
     value = 2
     alpha = 1e5
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = u
     diffusivity = diffusion_coefficient
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./ls]
+  [ls]
     type = LineSegmentLevelSetAux
     line_segment_cut_set_user_object = 'moving_line_segments'
     variable = ls
-  [../]
+  []
 []
 
 [Materials]
-  [./diffusivity_A]
+  [diffusivity_A]
     type = GenericConstantMaterial
     prop_names = A_diffusion_coefficient
     prop_values = 5
-  [../]
-  [./diffusivity_B]
+  []
+  [diffusivity_B]
     type = GenericConstantMaterial
     prop_names = B_diffusion_coefficient
     prop_values = 1
-  [../]
-  [./diff_combined]
-    type = LevelSetBiMaterialReal
-    levelset_positive_base = 'A'
-    levelset_negative_base = 'B'
-    level_set_var = ls
+  []
+  [diff_combined]
+    type = LevelSetMultiRealMaterial
+    level_set_vars = 'ls'
+    base_name_keys = '+ -'
+    base_name_vals = 'A B'
     prop_name = diffusion_coefficient
-  [../]
+  []
 []
 
 [BCs]
-# Define boundary conditions
-  [./left_u]
+  # Define boundary conditions
+  [left_u]
     type = DirichletBC
     variable = u
     value = 2
     boundary = 3
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = NeumannBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -149,14 +149,13 @@
   max_xfem_update = 1
 []
 
-
 [Outputs]
   execute_on = timestep_end
   exodus = true
   perf_graph = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
   csv = true
 []

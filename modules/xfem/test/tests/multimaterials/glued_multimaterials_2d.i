@@ -1,17 +1,17 @@
-[GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-[]
-
 [XFEM]
   qrule = volfrac
   output_cut_plane = true
 []
 
 [UserObjects]
-  [level_set_cut_uo]
+  [cut1]
     type = LevelSetCutUserObject
-    level_set_var = ls
+    level_set_var = ls1
+    heal_always = true
+  []
+  [cut2]
+    type = LevelSetCutUserObject
+    level_set_var = ls2
     heal_always = true
   []
 []
@@ -20,38 +20,34 @@
   type = GeneratedMesh
   dim = 2
   nx = 5
-  ny = 3
-  xmin = 0.0
-  xmax = 1
-  ymin = 0.0
-  ymax = 1
+  ny = 5
+  xmax = 5
+  ymax = 5
   elem_type = QUAD4
 []
 
 [AuxVariables]
-  [ls]
-    order = FIRST
-    family = LAGRANGE
+  [ls1]
+  []
+  [ls2]
   []
 []
 
 [AuxKernels]
-  [ls_function]
+  [ls1]
     type = FunctionAux
-    variable = ls
-    function = ls_func
+    variable = ls1
+    function = 'x-1.5'
+  []
+  [ls2]
+    type = FunctionAux
+    variable = ls2
+    function = 'x-3.5'
   []
 []
 
 [Variables]
   [u]
-  []
-[]
-
-[Functions]
-  [ls_func]
-    type = ParsedFunction
-    value = 'x-0.76+0.21*t'
   []
 []
 
@@ -61,21 +57,24 @@
     variable = u
     diffusivity = diffusion_coefficient
   []
-  [time_deriv]
-    type = TimeDerivative
-    variable = u
-  []
 []
 
 [Constraints]
-  [u_constraint]
+  [constraint1]
     type = XFEMSingleVariableConstraint
-    use_displaced_mesh = false
     variable = u
-    jump = 0
+    use_displaced_mesh = false
     use_penalty = true
     alpha = 1e5
-    geometric_cut_userobject = 'level_set_cut_uo'
+    geometric_cut_userobject = 'cut1'
+  []
+  [constraint2]
+    type = XFEMSingleVariableConstraint
+    variable = u
+    use_displaced_mesh = false
+    use_penalty = true
+    alpha = 1e5
+    geometric_cut_userobject = 'cut2'
   []
 []
 
@@ -98,51 +97,49 @@
   [diffusivity_A]
     type = GenericConstantMaterial
     prop_names = A_diffusion_coefficient
-    prop_values = 5
+    prop_values = 1
   []
-
   [diffusivity_B]
     type = GenericConstantMaterial
     prop_names = B_diffusion_coefficient
-    prop_values = 0.5
+    prop_values = 2
+  []
+  [diffusivity_C]
+    type = GenericConstantMaterial
+    prop_names = C_diffusion_coefficient
+    prop_values = 3
   []
 
   [diff_combined]
     type = LevelSetMultiRealMaterial
-    level_set_vars = 'ls'
-    base_name_keys = '+ -'
-    base_name_vals = 'A B'
+    level_set_vars = 'ls1 ls2'
+    base_name_keys = '-- +- ++'
+    base_name_vals = 'A  B  C'
     prop_name = diffusion_coefficient
+    outputs = exodus
   []
 []
 
 [Executioner]
   type = Transient
 
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      8'
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
-  l_max_its = 20
-  l_tol = 1e-3
-  nl_max_its = 15
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-5
+  automatic_scaling = true
 
-  start_time = 0.0
-  dt = 1
-  end_time = 2
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-14
+
+  num_steps = 1
 
   max_xfem_update = 1
+
+  abort_on_solve_fail = true
 []
 
 [Outputs]
   exodus = true
-  execute_on = timestep_end
   csv = true
-  perf_graph = true
-  [console]
-    type = Console
-    output_linear = true
-  []
 []
