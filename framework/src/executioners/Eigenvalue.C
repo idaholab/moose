@@ -14,6 +14,7 @@
 #include "MooseApp.h"
 #include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"
+#include "UserObject.h"
 
 registerMooseObject("MooseApp", Eigenvalue);
 
