@@ -57,7 +57,7 @@ The elasticity tensor is then rotated with [eq:cp_elasticity_tensor_rotation]
 \label{eq:cp_elasticity_tensor_rotation}
   C'_{ijkl} = R^T_{im} R^T_{jn} R^T_{ko} R^T_{lp} C_{mnop}
 \end{equation}
-at the beginning of each material timestep calculation.  
+at the beginning of each material timestep calculation.
 
 The crystal plasticity materials, including `ComputeElasticityTensorCP` employ an active rotation:
 the crystal system is rotated into the sample (loading) coordinate system. Generally the Bunge Euler
@@ -67,7 +67,7 @@ tensor given in [eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotati
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/cp_user_object/test.i block=Materials/elasticity_tensor
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/user_object_based/test.i block=Materials/elasticity_tensor
 
 !syntax parameters /Materials/ComputeElasticityTensorCP
 
