@@ -1,0 +1,131 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "TransverselyIsotropicCreepStressUpdate.h"
+
+registerMooseObject("TensorMechanicsApp", TransverselyIsotropicCreepStressUpdate);
+
+InputParameters
+TransverselyIsotropicCreepStressUpdate::validParams()
+{
+  InputParameters params = AnisotropicReturnCreepStressUpdateBase::validParams();
+  params.addClassDescription(
+      "This class uses the stress update material in a radial return isotropic power law creep "
+      "model.  This class can be used in conjunction with other creep and plasticity materials for "
+      "more complex simulations.");
+
+  // Linear strain hardening parameters
+  params.addCoupledVar("temperature", "Coupled temperature");
+  params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
+  params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
+  params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
+  params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
+  params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
+  params.addRequiredParam<std::vector<Real>>("hill_constants",
+                                             "Hill material constants in order: F, "
+                                             "G, H, L, M, N");
+
+  return params;
+}
+
+TransverselyIsotropicCreepStressUpdate::TransverselyIsotropicCreepStressUpdate(
+    const InputParameters & parameters)
+  : AnisotropicReturnCreepStressUpdateBase(parameters),
+    _has_temp(isParamValid("temperature")),
+    _temperature(_has_temp ? coupledValue("temperature") : _zero),
+    _coefficient(getParam<Real>("coefficient")),
+    _n_exponent(getParam<Real>("n_exponent")),
+    _m_exponent(getParam<Real>("m_exponent")),
+    _activation_energy(getParam<Real>("activation_energy")),
+    _gas_constant(getParam<Real>("gas_constant")),
+    _start_time(getParam<Real>("start_time")),
+    _exponential(1.0),
+    _exp_time(1.0),
+    _hill_constants(6)
+{
+  if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
+    paramError("start_time",
+               "Start time must be equal to or greater than the Executioner start_time if a "
+               "non-integer m_exponent is used");
+
+  _hill_constants = getParam<std::vector<Real>>("hill_tensors");
+}
+
+void
+TransverselyIsotropicCreepStressUpdate::computeStressInitialize(
+    const RankTwoTensor /*effective_trial_stress*/, const RankFourTensor & /*elasticity_tensor*/)
+{
+  if (_has_temp)
+    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
+
+  _exp_time = std::pow(_t - _start_time, _m_exponent);
+}
+
+Real
+TransverselyIsotropicCreepStressUpdate::computeResidual(const RankTwoTensor effective_trial_stress,
+                                                        const Real scalar)
+{
+  // Hill constants, some constraints apply
+  const Real F = _hill_constants[0];
+  const Real G = _hill_constants[1];
+  const Real H = _hill_constants[2];
+  const Real L = _hill_constants[3];
+  const Real M = _hill_constants[4];
+  const Real N = _hill_constants[5];
+
+  // Revisit isotropy assumptions here
+  const Real stress_delta = effective_trial_stress.L2norm() - _three_shear_modulus * scalar;
+
+  // Equivalent deviatoric stress function.
+  Real qsigma_square = F * (effective_trial_stress(1, 1) - effective_trial_stress(2, 2)) *
+                       (effective_trial_stress(1, 1) - effective_trial_stress(2, 2));
+  qsigma_square += G * (effective_trial_stress(2, 2) - effective_trial_stress(0, 0)) *
+                   (effective_trial_stress(2, 2) - effective_trial_stress(0, 0));
+  qsigma_square += H * (effective_trial_stress(0, 0) - effective_trial_stress(1, 1)) *
+                   (effective_trial_stress(0, 0) - effective_trial_stress(1, 1));
+  qsigma_square += 2 * L * effective_trial_stress(1, 2) * effective_trial_stress(1, 2);
+  qsigma_square += 2 * M * effective_trial_stress(0, 2) * effective_trial_stress(0, 2);
+  qsigma_square += 2 * N * effective_trial_stress(0, 1) * effective_trial_stress(0, 1);
+
+  // moose assert > 0
+  qsigma_square = std::sqrt(qsigma_square);
+
+  const Real creep_rate =
+      _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
+
+  // Return iteration difference between creep strain and inelastic strain multiplier
+  return creep_rate * _dt - scalar;
+}
+
+Real
+TransverselyIsotropicCreepStressUpdate::computeDerivative(
+    const RankTwoTensor effective_trial_stress, const Real scalar)
+{
+  const Real stress_delta = effective_trial_stress.L2norm() - _three_shear_modulus * scalar;
+  const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *
+                                     std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
+                                     _exp_time;
+  return creep_rate_derivative * _dt - 1.0;
+}
+
+Real
+TransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
+    const MaterialProperty<RankTwoTensor> & stress,
+    const MaterialProperty<RankTwoTensor> & strain_rate)
+{
+  //  if (_n_exponent <= 1)
+  //    return 0.0;
+  //
+  //  Real creep_factor = _n_exponent / (_n_exponent + 1);
+  //
+  //  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+
+  return 0.0;
+}
