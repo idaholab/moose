@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "libmesh/libmesh_config.h"
+
+#ifdef LIBMESH_HAVE_SLEPC
+
 #include "SlepcEigenSolverConfiguration.h"
 #include "SlepcSupport.h"
 
@@ -60,3 +64,5 @@ SlepcEigenSolverConfiguration::configure_solver()
     LIBMESH_CHKERR(ierr);
   }
 }
+
+#endif

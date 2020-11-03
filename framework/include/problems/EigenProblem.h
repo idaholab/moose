@@ -30,6 +30,7 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
+#if LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
   virtual void init() override;
@@ -68,7 +69,45 @@ public:
    */
   void needInitializeEigenVector(bool need) { _auto_initilize_eigen_vector = need; }
 
-#if LIBMESH_HAVE_SLEPC
+  /**
+   * Set postprocessor and normalization factor
+   * 'Postprocessor' is often used to compute an integral of physics variables
+   */
+  void setNormalization(const PostprocessorName pp,
+                        const Real value = std::numeric_limits<Real>::max());
+
+  /**
+   * Whether or not we do free power iteration. It is used in convergence check.
+   * We need to mark the solver as "converged" when doing free power to retrieve
+   * the final solution from SLPEc
+   */
+  bool doFreePowerIteration() { return _do_free_power_iteration; }
+
+  /**
+   * Set a flag to indicate whether or not we do free power iteration.
+   */
+  void doFreePowerIteration(bool do_power) { _do_free_power_iteration = do_power; }
+
+  /**
+   * Eigenvector need to be scaled back if it was scaled in an ealier stage
+   * Scaling eigen vector does not affect solution (eigenvaue, eigenvector),
+   * but it does affect the convergence rate. To have a optimal converge rate,
+   * We pre scale eigen vector using the same factor as that computed in
+   * "postScaleEigenVector"
+   */
+  void preScaleEigenVector();
+
+  /**
+   * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
+   * This might be useful when couple to other physics
+   */
+  void postScaleEigenVector();
+
+  /**
+   * Scale eigenvector. Scaling_factor is often computed based on physics.
+   */
+  void scaleEigenvector(const Real scaling_factor);
+
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
   virtual Real computeResidualL2Norm() override;
@@ -117,27 +156,10 @@ public:
                                  TagID tagB);
 
   /**
-   * Scale eigenvector. Scaling_factor is often computed based on physics.
-   */
-  void scaleEigenvector(const Real scaling_factor);
-
-  /**
    * For nonlinear eigen solver, a good initial value can help convergence.
    * Should set initial values for only eigen variables.
    */
   void initEigenvector(const Real initial_value);
-
-  /**
-   * Whether or not we do free power iteration. It is used in convergence check.
-   * We need to mark the solver as "converged" when doing free power to retrieve
-   * the final solution from SLPEc
-   */
-  bool doFreePowerIteration() { return _do_free_power_iteration; }
-
-  /**
-   * Set a flag to indicate whether or not we do free power iteration.
-   */
-  void doFreePowerIteration(bool do_power) { _do_free_power_iteration = do_power; }
 
   /**
    * Which eigenvalue is active
@@ -164,29 +186,6 @@ public:
    * Set a flag to indicate whether or not to output eigenvalue inverse.
    */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
-
-  /**
-   * Set postprocessor and normalization factor
-   * 'Postprocessor' is often used to compute an integral of physics variables
-   */
-  void setNormalization(const PostprocessorName pp,
-                        const Real value = std::numeric_limits<Real>::max());
-
-  /**
-   * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
-   * This might be useful when couple to other physics
-   */
-  void postScaleEigenVector();
-
-  /**
-   * Eigenvector need to be scaled back if it was scaled in an ealier stage
-   * Scaling eigen vector does not affect solution (eigenvaue, eigenvector),
-   * but it does affect the convergence rate. To have a optimal converge rate,
-   * We pre scale eigen vector using the same factor as that computed in
-   * "postScaleEigenVector"
-   */
-  void preScaleEigenVector();
-
 #endif
 
 protected:

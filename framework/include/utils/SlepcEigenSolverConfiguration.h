@@ -7,6 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
+#include "libmesh/libmesh_config.h"
+
+#ifdef LIBMESH_HAVE_SLEPC
+
 #include "EigenProblem.h"
 
 #include "libmesh/solver_configuration.h"
@@ -36,3 +42,5 @@ private:
    */
   libMesh::SlepcEigenSolver<libMesh::Number> & _slepc_solver;
 };
+
+#endif

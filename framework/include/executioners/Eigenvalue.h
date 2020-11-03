@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "libmesh/libmesh_config.h"
+
 #include "Steady.h"
 
 class InputParameters;
@@ -42,9 +44,12 @@ public:
 
   Eigenvalue(const InputParameters & parameters);
 
-  virtual void init() override;
-
   virtual void execute() override;
+
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
+#ifdef LIBMESH_HAVE_SLEPC
+  virtual void init() override;
 
   /*
    * Prepare right petsc options
@@ -56,8 +61,6 @@ public:
    */
   virtual void checkIntegrity();
 
-  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
-
   /**
    *  There are two ways to output eigenvalue. "inverse" corresponds to k-eigenvalue
    */
@@ -65,7 +68,9 @@ public:
 
 private:
   void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+
   void clearFreeNonlinearPowerIterations();
+#endif
 
 protected:
   EigenProblem & _eigen_problem;

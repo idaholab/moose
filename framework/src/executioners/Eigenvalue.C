@@ -101,7 +101,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   // It is useful for neutron calculations. The inverse of the eigenvalue is the multiplication
   // factor.
   _eigen_problem.outputInverseEigenvalue(getParam<bool>("output_inverse_eigenvalue"));
-#endif
 
   if (!isParamValid("normalization") && isParamValid("normal_factor"))
     paramError("normal_factor",
@@ -119,8 +118,13 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     else
       _eigen_problem.setNormalization(normpp);
   }
+#else
+  mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
+             "PETSc configuration'");
+#endif
 }
 
+#if LIBMESH_HAVE_SLEPC
 void
 Eigenvalue::init()
 {
@@ -130,11 +134,9 @@ Eigenvalue::init()
     return;
   }
 
-#ifdef LIBMESH_HAVE_SLEPC
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
-#endif
 
   if (isParamValid("normalization"))
   {
@@ -149,8 +151,6 @@ Eigenvalue::init()
   // Some setup
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _eigen_problem.initialSetup();
-
-#ifdef LIBMESH_HAVE_SLEPC
 
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();
@@ -186,12 +186,86 @@ Eigenvalue::init()
 
     _eigen_problem.doFreePowerIteration(false);
   }
+}
+
+void
+Eigenvalue::prepareSolverOptions()
+{
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Make sure the SLEPc options are setup for this app
+  Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+#else
+  // Options need to be setup once only
+  if (!_eigen_problem.petscOptionsInserted())
+  {
+    // Master app has the default data base
+    if (!_app.isUltimateMaster())
+      PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+
+    Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
+
+    if (!_app.isUltimateMaster())
+      PetscOptionsPop();
+
+    _eigen_problem.petscOptionsInserted() = true;
+  }
 #endif
 }
 
 void
+Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+#endif
+
+  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+}
+
+void
+Eigenvalue::clearFreeNonlinearPowerIterations()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+#endif
+
+  Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+}
+
+void
+Eigenvalue::checkIntegrity()
+{
+  // check to make sure that we don't have any time kernels in eigenvaue simulation
+  if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
+    mooseError("You have specified time kernels in your eigenvaue simulation");
+}
+
+void
+Eigenvalue::outputInverseEigenvalue(bool inverse)
+{
+  _eigen_problem.outputInverseEigenvalue(inverse);
+}
+
+#endif
+
+void
 Eigenvalue::execute()
 {
+#if LIBMESH_HAVE_SLEPC
   // Recovering makes sense for only transient simulations since the solution from
   // the previous time steps is required.
   if (_app.isRecovering())
@@ -293,82 +367,9 @@ Eigenvalue::execute()
   }
 
   postExecute();
-}
 
-void
-Eigenvalue::prepareSolverOptions()
-{
-#ifdef LIBMESH_HAVE_SLEPC
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Make sure the SLEPc options are setup for this app
-  Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
 #else
-  // Options need to be setup once only
-  if (!_eigen_problem.petscOptionsInserted())
-  {
-    // Master app has the default data base
-    if (!_app.isUltimateMaster())
-      PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-
-    Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
-
-    if (!_app.isUltimateMaster())
-      PetscOptionsPop();
-
-    _eigen_problem.petscOptionsInserted() = true;
-  }
+  mooseError("SLEPc is required for eigenvaue executioner, please use --download-slepc when "
+             "configuring PETSc ");
 #endif
-#endif
-}
-
-void
-Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
-{
-#ifdef LIBMESH_HAVE_SLEPC
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-#endif
-
-  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
-#endif
-}
-
-void
-Eigenvalue::clearFreeNonlinearPowerIterations()
-{
-#ifdef LIBMESH_HAVE_SLEPC
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-#endif
-
-  Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
-#endif
-}
-
-void
-Eigenvalue::checkIntegrity()
-{
-  // check to make sure that we don't have any time kernels in eigenvaue simulation
-  if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
-    mooseError("You have specified time kernels in your eigenvaue simulation");
-}
-
-void
-Eigenvalue::outputInverseEigenvalue(bool inverse)
-{
-  _eigen_problem.outputInverseEigenvalue(inverse);
 }
