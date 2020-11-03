@@ -1,0 +1,56 @@
+[Tests]
+  design = MultiAppDirectVectorPostprocessorTransfer.md
+  issues = '#16055'
+  [transfer]
+    requirement = "The system shall support the ability to transfer vector data"
+
+    [to_all_from_main]
+      type = CSVDiff
+      input = main.i
+      cli_args = "VectorPostprocessors/active=from_main Transfers/active=send"
+      csvdiff = 'main_out_sub0_to_sub_0001.csv main_out_sub1_to_sub_0001.csv'
+
+      detail = "from the main application to all sub-applications;"
+    []
+
+    [to_one_from_main]
+      type = CSVDiff
+      input = main.i
+      cli_args = "VectorPostprocessors/active=from_main Transfers/active=send Transfers/send/subapp_index=1 Outputs/file_base=main_out2"
+      csvdiff = 'main_out2_sub0_to_sub_0001.csv main_out2_sub1_to_sub_0001.csv'
+
+      detail = "from the main application to a single sub-applications; and"
+    []
+
+    [from_one_sub_to_main]
+      type = CSVDiff
+      input = main.i
+      cli_args = "VectorPostprocessors/active=to_main Transfers/active=receive"
+      csvdiff = 'main_out_to_main_0001.csv'
+
+      detail = "from a sub-application to the main application."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall support the ability to transfer vector data and error if an invalid sub-application number is supplied when transferring data"
+    [to_main]
+      type = RunException
+      input = main.i
+      match_literal = True
+      cli_args = "VectorPostprocessors/active=from_main Transfers/active=send Transfers/send/subapp_index=2013"
+      expect_err = "The supplied sub-application index (2013) is greater than the number of sub-applications"
+
+      detail = "to a sub-application and"
+   []
+    [from_main]
+      type = RunException
+      input = main.i
+      match_literal = True
+      cli_args = "VectorPostprocessors/active=to_main Transfers/active=receive Transfers/receive/subapp_index=2011"
+      expect_err = "The supplied sub-application index (2011) is greater than the number of sub-applications"
+
+      detail = "from a sub-application."
+   []
+ []
+[]
