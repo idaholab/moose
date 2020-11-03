@@ -1,6 +1,8 @@
 [Mesh]
-  type = EBSDMesh
-  filename = 'test.txt'
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = 'test.txt'
+  []
 []
 
 [GlobalParams]
@@ -9,16 +11,16 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     output_adjacency_matrix = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     threshold = 0.2
     connecting_threshold = 0.08
@@ -26,130 +28,130 @@
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = ebsd
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
-  [./unique_grains]
+  [bnds]
+  []
+  [unique_grains]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./ebsd_grains]
+  []
+  [ebsd_grains]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./phi1]
+  []
+  [phi1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./halo0]
+  []
+  [halo0]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./halo1]
+  []
+  [halo1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./halo2]
+  []
+  [halo2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./halo3]
+  []
+  [halo3]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
-  [./grain_aux]
+  []
+  [grain_aux]
     type = EBSDReaderPointDataAux
     variable = ebsd_grains
     ebsd_reader = ebsd_reader
     data_name = 'feature_id'
     execute_on = 'initial timestep_end'
-  [../]
-  [./phi1]
+  []
+  [phi1]
     type = OutputEulerAngles
     euler_angle_provider = ebsd_reader
     output_euler_angle = phi1
     grain_tracker = grain_tracker
     variable = phi1
-  [../]
-    [./halo0]
+  []
+  [halo0]
     type = FeatureFloodCountAux
     variable = halo0
     map_index = 0
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo1]
+  []
+  [halo1]
     type = FeatureFloodCountAux
     variable = halo1
     map_index = 1
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo2]
+  []
+  [halo2]
     type = FeatureFloodCountAux
     variable = halo2
     map_index = 2
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
-  [./halo3]
+  []
+  [halo3]
     type = FeatureFloodCountAux
     variable = halo3
     map_index = 3
     field_display = HALOS
     flood_counter = grain_tracker
-  [../]
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     type = GBEvolution
     T = 500 #K
     wGB = 0.75 #micron
@@ -160,18 +162,18 @@
     Q = 0.23
     GBenergy = 0.708
     molar_volume = 7.11e-6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./n_nodes]
+  [n_nodes]
     type = NumNodes
     execute_on = timestep_end
-  [../]
+  []
 
-  [./DOFs]
+  [DOFs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Executioner]
@@ -180,7 +182,8 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
+                        '-pc_hypre_boomeramg_strong_threshold'
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
   l_max_its = 20

@@ -9,25 +9,23 @@
 
 #pragma once
 
-#include "GeneratedMesh.h"
-#include "EBSDMeshGenerator.h"
+#include "GeneratedMeshGenerator.h"
 
 #include <array>
 
 /**
  * Mesh generated from parameters
  */
-class EBSDMesh : public GeneratedMesh
+class EBSDMeshGenerator : public GeneratedMeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  EBSDMesh(const InputParameters & parameters);
-  virtual ~EBSDMesh();
+  EBSDMeshGenerator(const InputParameters & parameters);
 
-  virtual void buildMesh();
+  std::unique_ptr<MeshBase> generate() override;
 
-  struct EBSDMeshGeometry
+  struct Geometry
   {
     // grid spacing
     std::array<Real, 3> d;
@@ -40,7 +38,7 @@ public:
   };
 
   // Interface functions for the EBSDReader
-  const EBSDMeshGenerator::Geometry & getEBSDGeometry() const { return _geometry; }
+  const Geometry & getEBSDGeometry() const { return _geometry; }
   const std::string & getEBSDFilename() const { return _filename; }
 
 protected:
@@ -51,5 +49,5 @@ protected:
   std::string _filename;
 
   /// EBSD data file mesh information
-  EBSDMeshGenerator::Geometry _geometry;
+  Geometry _geometry;
 };
