@@ -1,0 +1,171 @@
+# Hysteresis in PorousFlow
+
+Hysteretic capillary pressure and relative permeability functions are implemented in PorousFlow.  Hysteresis means that capillary pressure and relative permeability depend on the *history* as well as the current state.
+
+The implementation of hysteresis in PorousFlow closely follows the TOUGH implementation as described in [!citet](doughty2007) and [!citet](doughty2008).  Some other pertinent material may be found in [!citet](jaynes1984), [!citet](niemi1988) and [!citet](finsterle1998).  In this implementation, capillary pressure at any point in the finite-element mesh is described by one of four "curves" (or functions), and relative permeability at any point is described by one of two "curves".  The capillary-pressure curves are illustrated in [histeretic_order_fig], which shall now be qualitatively described.
+
+!media media/porous_flow/hysteretic_order.png caption=Illustration of a hysteretic capillary pressure function.  id=histeretic_order_fig
+
+Assume that the point in question starts at full liquid saturation, $S_{l} = 1$.  Its history then proceeds as follows.
+
+1. The liquid saturation is gradually reduced.  This is called "drying" or "draining".  The capillary pressure follows the *order zero* curve or *zeroth-order drying* curve, which is also termed the "primary drying" curve.
+2. At some time, the liquid saturation begins to increase.  At this time, the liquid saturation $S_{l} = \mathrm{TP}_{0}$ in the figure ("TP" stands for "turning point", where $\partial S_{l}/\partial t = 0$).  Increasing liquid saturation is called "wetting" or "imbibing".  The capillary pressure follows the *order one* or *first-order wetting* curve.  This curve is an mixture of the primary drying curve and a modified version of the "primary wetting" curve.  The mathematical description of the mixture is described below.
+3. At some later time, the liquid saturation begins to decrease again.  At this time, the liquid saturation $S_{l} = \mathrm{TP}_{1}$ in the figure.  The capillary pressure follows the *order two* or *second-order drying* curve.
+4. At some later time, the liquid saturation beings to increase again.  The capillary pressure follows the *order three* or *third-order* curve.
+5. At later times, the liquid saturation can decrease and increase, and provided the saturation obeys $\mathrm{TP}_{2} < S_{l} < \mathrm{TP}_{1}$, the capillary pressure follows the third-order curve.
+
+The saturation history just described means that the order increases.  However, the order may also decrease, as illustrated in [histeretic_order_012_fig].
+
+- The second-order wetting curve becomes the zeroth-order drying curve if $S_{l} \leq \mathrm{TP}_{0}$.
+- The third-order curve becomes the second-order drying curve if $S_{l} \leq \mathrm{TP}_{2}$.
+- The third-order curve becomes the first-order wetting curve if $S_{l} \geq \mathrm{TP}_{1}$.
+
+!media media/porous_flow/hysteretic_order_012.png caption=Hysteretic capillary pressure curves.  This history is: (a) drying to $S_{l}$ $0.6$; (b) wetting to $S_{l}$ $0.9$; (c) drying to $S_{l}$ $0.3$, where the second-order drying curve is followed to $S_{l}$ $0.6$ and then the zeroth-order drying curve is followed; (d) wetting to $S_{l}$ $0.7$; (e) drying to $S_{l}$ $0.2$, where the second-order drying curve is followed to $S_{l}$ $0.3$ and then the zeroth-order drying curve is followed; (f) wetting to $S_{l}$ $0.4$; (g) drying to $S_{l}$ $0.1$ where the second-order drying curve is followed to $S_{l}$ $0.2$ and then the zeroth-order drying curve is followed.  id=histeretic_order_012_fig
+
+## Capillary curves
+
+All capillary curves are based on the [van-Genuchten](capillary_pressure.md) curve
+\begin{equation}
+\label{vg.cap.eqn}
+P_{c}(S_{l}) = \frac{1}{\alpha} \left( S_{\mathrm{eff}}^{n/(1-n)} - 1\right)^{1/n} \ ,
+\end{equation}
+where
+\begin{equation}
+S_{\mathrm{eff}} = \frac{S_{l} - S_{l,min}}{1 - S_{gr}^{\Delta} - S_{l,min}} \ .
+\end{equation}
+In these formulae:
+
+- $P_{c}$ is the capillary pressure, with SI units Pa.  It obeys $P_{c}\geq 0$.
+- $S_{l}$ is the liquid saturation, which is dimensionless.
+- $\alpha$ is a van-Genuchten parameter, with SI units Pa$^{-1}$.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve --- and both obey $\alpha > 0$.
+- $n$ is a van-Genuchten parameter, which is dimensionless.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve -- and both obey $n>1$.
+- $S_{l,min}$ is the minimum saturation for which the van-Genuchten expression is valid.  It is a dimensionless user-input and obeys $0\leq S_{l,min} < 1$.  Because $n/(1-n) < 0$, $P_{c}$ behaves like $P_{c}\rightarrow\infty$ as $S_{l} \rightarrow S_{l,min}^{+}$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}<S_{l,min}$, which is discussed below.  Two extensions are shown in [histeretic_cap_extensions_fig]
+- $S_{gr}^{\Delta}$ is the residual gas saturation, and $1-S_{gr}^{\Delta}$ is the maximum saturation for which the van-Genuchten expression is valid.  It is dimensionless but it is not a user input (see more details below).  It obeys $S_{gr}^{\Delta} \geq 0$ and $1-S_{gr}^{\Delta} > S_{l,min}$.  As $S_{l}\rightarrow 1-S_{gr}^{\Delta}-$, $P_{c} \rightarrow 0$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}> 1-S_{gr}^{\Delta}$ as described below, as shown in [histeretic_cap_extensions_fig].
+
+The primary drying curve uses
+\begin{equation}
+S_{gr}^{\Delta} = 0 \ .
+\end{equation}
+The primary wetting curve uses
+\begin{equation}
+S_{gr}^{\Delta} = S_{gr}^{max} \ ,
+\end{equation}
+where $0 \leq S_{gr}^{max} < 1 - S_{l,min}$ is a user input.  The other curves use other values of $S_{gr}^{\Delta}$ as described below.
+
+!media media/porous_flow/hysteretic_cap_extensions.png caption=Various extensions of the hysteretic capillary pressure curve available in PorousFlow.  The primary wetting curve is shown, which has the property that $P_{c}\rightarrow 0$ as $S\rightarrow 1- S_{gr}^{max}$ (recall that the primary wetting curve uses the user-inputted $S_{gr}^{max}$ for $S_{gr}^{\Delta}$).  id=histeretic_cap_extensions_fig
+
+### Lower extensions
+
+Two types of lower (small $S_{l}$) extensions are available [!citep](doughty2008).  They are based on the user inputting the value
+\begin{equation}
+P_{c}^{\mathrm{max}} > 0 \ ,
+\end{equation}
+which is the value at which extension commences (that is, all $P_{c} > P_{c}^{\mathrm{max}}$ will use the extension, not the original van-Genuchten expression [vg.cap.eqn]).  [histeretic_cap_extensions_fig] shows examples for $P_{c}^{\mathrm{max}} = 1.1$.  Both extensions are designed so that the resulting curve is continuous and its derivative is continuous.
+
+- Quadratic: $P_{c}$ is a quadratic in $S_{l}$ that satisfies $\mathrm{d}P_{c}/\mathrm{d}S_{l} = 0$ at $S_{l} = 0$.
+- Exponential: $P_{c}$ is an exponential in $S_{l}$.
+
+Lower extensions could be necessary because the model could be heated to evaporate the water, or chemical reactions could occur to reduce $S_{l}$ below $S_{l,min}$.  They could also be necessary because the region $S \leq S_{l,min}$ might be explored as the MOOSE solver converges towards a solution.
+
+### Upper extensions
+
+One type of upper extension (large $S_{l}$) is available [!citep](doughty2008).  It is based on the user inputting a value
+\begin{equation}
+0 < \mathrm{UpperRatio} < 1 \ .
+\end{equation}
+When $S_{l} > \mathrm{UpperRatio} \times (1 - S_{gr}^{\Delta})$ then the upper extension is used:
+\begin{equation}
+P_{c} \propto \left (\frac{1 - S_{l}}{1 - \mathrm{UpperRatio}\times ( 1- S_{gr}^{\Delta})} \right)^{\beta} \ ,
+\end{equation}
+where the coefficient of proportionality and $\beta$ are chosen to ensure the result is C1-continuous.  [histeretic_cap_extensions_fig] shows an example for $\mathrm{UpperRatio} = 0.9$.  This type of extension has the property that $P_{c}(1) = 0$.  This type of extension is not necessary for the primary drying curve.
+
+Upper extensions could be necessary to help the MOOSE solver converge towards a solution.
+
+### Zeroth-order drying curve
+
+This is defined by [vg.cap.eqn] (along with an optional lower extension) with $S_{gr}^{\Delta} = 0$.
+
+### First-order wetting curve
+
+The idea here is to use a wetting curve (with nonzero $S_{gr}^{\Delta}$ and the wetting $\alpha$ and $n$ parameters) but with a value of liquid saturation that ensures continuity.
+
+The first-order wetting curve uses a non-zero value for the quantity $S_{gr}^{\Delta}$ in [vg.cap.eqn].
+This is [!citep](doughty2007)
+\begin{equation}
+\label{eqn.land.1}
+S_{gr}^{\Delta} = \frac{1 - \mathrm{TP}_{0}}{1 + (\frac{1}{S_{gr}^{max}} - \frac{1}{1 - S_{l,r}})(1 - \mathrm{TP}_{0})} \ .
+\end{equation}
+This is the so-called "Land" expression.  It depends on $S_{l,r}$, which obeys $0 \leq S_{l,r} < 1$ and is the "liquid residual saturation" defined to be the saturation at which the liquid relative permeability tends to zero.  The following may be noticed:
+
+- if $S_{l} = 1 - S_{gr}^{\Delta}$ then $P_{c} = 0$ (assuming no upper extension).  So $S_{l} = 1 - S_{gr}^{\Delta}$ is the saturation point at which the curves on [histeretic_order_fig] tend to zero.
+- if $\mathrm{TP}_{0}$ is close to 0, then $S_{gr}^{\Delta}$ is close to 1.  This means that the first-order wetting curve will be quite close to the zeroth-order drying curve.
+- if $\mathrm{TP}_{0}$ is close to $S_{l,min}$ then $S_{gr}^{\Delta}$ is close to $S_{gr}^{max}$.  This means that the first-order wetting curve will be quite close to the primary wetting curve.
+
+These points are illustrated in [histeretic_different_tps_fig].
+
+!media media/porous_flow/hysteretic_different_tps.png caption=Various first-order curves resulting from different turning points.  Notice the different values of $S_{gr}^{\Delta}$ which depend on the turning-point saturation.  id=histeretic_different_tps_fig
+
+However, if [vg.cap.eqn] is used with $S_{gr}^{\Delta}$, the result will be discontinuous at the turning point.  This may be seen in [histeretic_order1_fig]: the result would jump from the red drying curve to the blue wetting curve.
+
+!media media/porous_flow/hysteretic_order1.png caption=Construction of the first-order curve.  id=histeretic_order1_fig
+
+To ensure continuity, define (see [histeretic_order1_fig]):
+
+- $P_{c}^{\Delta}$, which is the value of $P_{c}$ at $\mathrm{TP}_{0}$, using the primary drying curve.
+- $S_{l,wet}^{\Delta}$, which is the value of $S_{l}$ at the capillary pressure $P_{c}^{\Delta}$ defined using [vg.cap.eqn] using the wetting $\alpha$ and $n$ parameters and $S_{gr}^{\Delta}$
+
+Armed with these quantities, the first-order wetting curve is defined by [vg.cap.eqn] using the following:
+
+- the $\alpha$ and $n$ parameters for the primary wetting curve
+- $S_{gr}^{\Delta}$ defined by the Land expression [eqn.land.1]
+- $\tilde{S}_{l}$ instead of $S_{l}$, to ensure continuity of the result.  Here
+
+\begin{equation}
+\label{eqn.1st.order.sl}
+\tilde{S}_{l} = S_{l,wet}^{\Delta} + (S_{l} - \mathrm{TP}_{0}) \frac{1 - S_{gr}^{\Delta} - S_{l,wet}^{\Delta}}{1 - S_{gr}^{\Delta} - \mathrm{TP}_{0}} \ .
+\end{equation}
+This is designed so that
+
+- when $S_{l} = \mathrm{TP}_{0}$ then $\tilde{S}_{l} = S_{l,wet}^{\Delta}$ and
+- when $S_{l} = 1 - S_{gr}^{\Delta}$ then $\tilde{S}_{l} = 1 - S_{gr}^{\Delta}$.
+
+The result is the green curve in [histeretic_order1_fig] which smoothly transitions from the red drying curve and the blue wetting curve.
+
+
+### Second-order drying
+
+This is drawn from Eqn(3) of [!citet](niemi1988) and Eqn(5) of [!citet](finsterle1998) but may be slightly different because their explanations are a little opaque.  The idea is similar to the first-order case: use the drying curve, but with a different saturation, $\tilde{S}_{l}$, to ensure continuity of the result.
+
+Define
+
+- $S_{d}$ to be the saturation on the primary drying curve corresponding to $P_{c}$ at $\mathrm{TP}_{1}$
+- $\tilde{S}_{l}$ to smoothly interpolate between $\mathrm{TP}_{0}$ when $S_{l} = \mathrm{TP}_{0}$, and $S_{d}$ when $S_{l} = \mathrm{TP}_{1}$, ie
+
+\begin{equation}
+\label{eqn.2nd.order.sl}
+\tilde{S}_{l} = \mathrm{TP}_{0} + (S_{l} - \mathrm{TP}_{0}) \frac{S_{d} - \mathrm{TP}_{0}}{\mathrm{TP}_{1} - \mathrm{TP}_{0}} \ .
+\end{equation}
+
+The second-order drying curve uses:
+
+- the $\alpha$ and $n$ parameters of the primary drying curve
+- $S_{gr}^{\Delta} = 0$
+- $\tilde{S}_{l}$ instead of $S_{l}$, as defined by [eqn.2nd.order.sl]
+
+### Third-order curves
+
+The approach here is to take an appropriate average of the first-order wetting curve and the second-order drying curve, which is probably the same as [!citet](niemi1988), [!citet](finsterle1998) and [!citet](doughty2007), although details are sparse in those references.
+
+Define
+
+- $P_{c}^{w}$ is the first-order wetting capillary pressure using $\tilde{S}_{l}$ defined by [eqn.1st.order.sl]
+- $P_{c}^{d}$ is the second-order drying capillary pressure using $\tilde{S}_{l}$ defined by [eqn.2nd.order.sl]
+
+Then, the third-order capillary pressure is defined by
+\begin{equation}
+\log P_{c} = \log P_{c}^{w} + (s - \mathrm{TP}_{1}) \frac{\log P_{c}^{d} - \log P_{c}^{w}}{\mathrm{TP}_{0} - \mathrm{TP}_{1}} \ .
+\end{equation}
+
+This produces continuous capillary-pressure functions as shown in [histeretic_order_fig].
+
+
