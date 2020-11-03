@@ -153,6 +153,13 @@ Eigenvalue::init()
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _eigen_problem.initialSetup();
 
+  // Outputs initial conditions set by users
+  // It is consistent with Steady
+  _time_step = 0;
+  _time = _time_step;
+  _eigen_problem.outputStep(EXEC_INITIAL);
+  _time = _system_time;
+
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();
 
@@ -271,12 +278,6 @@ Eigenvalue::execute()
   // the previous time steps is required.
   if (_app.isRecovering())
     return;
-
-  // Several lines of code are needed to make the output system work (copy from "Steady")
-  _time_step = 0;
-  _time = _time_step;
-  _eigen_problem.outputStep(EXEC_INITIAL);
-  _time = _system_time;
 
   preExecute();
 
