@@ -468,8 +468,11 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     def createTokenFromSyntax(self, parent, info, page, obj):
 
         primary = SyntaxList(None, **self.attributes)
+        if self.settings['groups']:
+            groups = self.settings['groups'].split()
+        else:
+            groups = list(set([child.group for child in obj if child.group is not None]))
 
-        groups = self.settings['groups'].split() if self.settings['groups'] else list(obj.groups())
         if 'MooseApp' in groups:
             groups.remove('MooseApp')
             groups.insert(0, 'MooseApp')
