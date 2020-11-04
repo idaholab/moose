@@ -123,13 +123,12 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
              "PETSc configuration'");
 #endif
-  // We will enable this warning once the integration is done
-  // Griffin will not work when this warning is on
   // SLEPc older than 3.13.0 can not take initial guess from moose
-  //#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  //  mooseWarning("Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad
-  //  convergence");
-  //#endif
+  // It may generate converge issues
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  mooseDeprecated(
+      "Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad convergence");
+#endif
 }
 
 #if LIBMESH_HAVE_SLEPC
