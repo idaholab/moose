@@ -1,5 +1,4 @@
 #include "FormFunction.h"
-#include "VectorPostprocessorPointSource.h"
 
 InputParameters
 FormFunction::validParams()

@@ -37,6 +37,8 @@ OptimizeSolve::solve()
   _problem.theWarehouse().query().condition<AttribSystem>("FormFunction").queryInto(ffs);
   if (ffs.empty())
     mooseError("No form function object found.");
+  else if (ffs.size() > 1)
+    mooseError("Only one form function per problem because of how its queried");
   _form_function = ffs[0];
   _form_function->initializePetscVectors();
 
@@ -181,6 +183,7 @@ OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & x,
   _problem.execMultiApps(EXEC_ADJOINT);
   if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
+
   _form_function->computeGradient();
   gradient = _form_function->getGradient();
 }
