@@ -90,8 +90,8 @@ public:
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor) { _scaling_factor.assign(_count, factor); }
-  void scalingFactor(const std::vector<Real> & factor) { _scaling_factor = factor; }
+  void scalingFactor(Real factor);
+  void scalingFactor(const std::vector<Real> & factor);
 
   /**
    * Get the scaling factor for this variable

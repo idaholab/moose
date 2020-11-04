@@ -215,16 +215,19 @@ ComputeMortarFunctor::operator()()
       for (auto && mc : _mortar_constraints)
         mc->computeJacobian(_has_primary);
 
-      // No caching currently. Add caching if this shows up in profiling
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+      // No caching for local AD indexing currently. Add caching if this shows up in profiling
       _assembly.addJacobianMortar();
+#endif
     }
   } // end for loop over elements
 
   // Make sure any remaining cached residuals get added
   if (!_fe_problem.currentlyComputingJacobian())
     _assembly.addCachedResiduals();
-
-  // // Not currently caching Jacobians
-  // else
-  //   _assembly.addCachedJacobian();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // We do cache Jacobians when doing global AD indexing
+  else
+    _assembly.addCachedJacobian();
+#endif
 }

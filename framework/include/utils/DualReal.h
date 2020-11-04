@@ -40,11 +40,13 @@ using MetaPhysicL::SemiDynamicSparseNumberArray;
 
 #ifdef MOOSE_SPARSE_AD
 
-typedef SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<MOOSE_AD_MAX_DOFS_PER_ELEM>>
+typedef SemiDynamicSparseNumberArray<Real,
+                                     libMesh::dof_id_type,
+                                     NWrapper<MOOSE_AD_MAX_DOFS_PER_ELEM>>
     DNDerivativeType;
 
 template <std::size_t N>
-using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>>;
+using DNDerivativeSize = SemiDynamicSparseNumberArray<Real, libMesh::dof_id_type, NWrapper<N>>;
 
 #else
 

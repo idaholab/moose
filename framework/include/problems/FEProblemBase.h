@@ -35,6 +35,7 @@
 #include "libmesh/equation_systems.h"
 
 #include <unordered_map>
+#include <memory>
 
 // Forward declarations
 class AuxiliarySystem;
@@ -1879,6 +1880,8 @@ public:
    * @param tid The thread ID
    */
   void resizeMaterialData(Moose::MaterialDataType data_type, unsigned int nqp, THREAD_ID tid);
+
+  bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
 protected:
   /// Create extra tagged vectors and matrices

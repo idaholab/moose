@@ -324,6 +324,8 @@ public:
 
   const CouplingMatrix * couplingMatrix() const override;
 
+  bool haveDisplaced() const override final { return true; }
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

@@ -1314,6 +1314,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_u_dot.resize(nqp);
   }
 
+#ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = Moose::adOffset(
       _var_num, _sys.getMaxVarNDofsPerElem(), _element_type, _sys.system().n_vars());
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
@@ -1327,6 +1328,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
                MOOSE_AD_MAX_DOFS_PER_ELEM,
                ". You can run `configure --with-derivative-size=<n>` to request a larger "
                "derivative container.");
+#endif
 #endif
 
   for (unsigned int qp = 0; qp < nqp; qp++)
@@ -1350,7 +1352,11 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     // NOTE!  You have to do this AFTER setting the value!
     if (_var.kind() == Moose::VAR_NONLINEAR && _subproblem.currentlyComputingJacobian())
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
+#else
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
+#endif
 
     if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
     {
@@ -2339,13 +2345,19 @@ MooseVariableData<OutputType>::fetchADDoFValues()
   auto n = _dof_indices.size();
   libmesh_assert(n);
   _ad_dof_values.resize(n);
+#ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
+#endif
 
   for (decltype(n) i = 0; i < n; ++i)
   {
     _ad_dof_values[i] = _dof_values[i];
     if (_var.kind() == Moose::VAR_NONLINEAR && _subproblem.currentlyComputingJacobian())
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
+#else
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
+#endif
     assignADNodalValue(_ad_dof_values[i], i);
   }
 }

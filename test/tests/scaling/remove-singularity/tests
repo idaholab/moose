@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#15732'
+  design = 'NonlinearSystemBase.md'
+  [automatic]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    expect_out = ' 0 of 242 singular values'
+    # 198 = number of dofs not on Dirichlet nodes
+    absent_out = '198 of 242 singular values'
+    requirement = 'The system shall be able to automatically scale variables and produce a good condition number from a naturally ill-conditioned system'
+  []
+  [manual]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'manual.e'
+    expect_out = ' 0 of 242 singular values'
+    # 198 = number of dofs not on Dirichlet nodes
+    absent_out = '198 of 242 singular values'
+    cli_args = 'Variables/v/scaling=3.75e19 Variables/w/scaling=3.75e39 Executioner/automatic_scaling=false Outputs/file_base=manual'
+    requirement = 'The system shall be able to automatically scale variables and produce a good condition number from a naturally ill-conditioned system'
+  []
+  [bad]
+    type = 'RunApp'
+    input = 'test.i'
+    expect_out = '198 of 242 singular values'
+    absent_out = ' 0 of 242 singular values'
+    cli_args = 'Outputs/exodus=false Executioner/automatic_scaling=false -snes_max_it 1 -ksp_max_it 1'
+    requirement = 'The system shall display a very poor condition number for an ill-conditioned system.'
+  []
+[]
