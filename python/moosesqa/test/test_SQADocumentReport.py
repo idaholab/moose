@@ -12,8 +12,10 @@ import mock
 import logging
 
 import MooseDocs
+import mooseutils
 from moosesqa import SQAReport, SQADocumentReport, LogHelper
 
+@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestSQADocumentReport(unittest.TestCase):
     def setUp(self):
         SQADocumentReport.FILE_CACHE = MooseDocs.PROJECT_FILES

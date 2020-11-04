@@ -72,5 +72,18 @@ class Test(unittest.TestCase):
         status_func.assert_called_with(root)
         call_func.assert_called_with(['git', 'submodule', 'update', '--init', 'test'], cwd=root)
 
+    def testGitVersion(self):
+        ver = mooseutils.git_version()
+        self.assertEqual(len(ver), 3)
+        self.assertIsInstance(ver[0], int)
+        self.assertIsInstance(ver[1], int)
+        self.assertIsInstance(ver[2], int)
+
+    @mock.patch('re.search')
+    def testGitVersion2(self, re_func):
+        re_func.return_value = None
+        with self.assertRaises(SystemError):
+            ver = mooseutils.git_version()
+
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

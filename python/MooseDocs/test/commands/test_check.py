@@ -16,6 +16,7 @@ import mooseutils
 import moosesqa
 from MooseDocs.commands import check
 
+@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestCheckScript(unittest.TestCase):
     def testCheck(self, *args):
         cmd = ['python', 'moosedocs.py', 'check', '--config', 'sqa_test_reports.yml']
@@ -24,7 +25,7 @@ class TestCheckScript(unittest.TestCase):
         self.assertIn('moose_test', out)
         self.assertIn('OK', out)
 
-
+@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestCheck(unittest.TestCase):
     def setUp(self):
         # Change to the test/doc directory
