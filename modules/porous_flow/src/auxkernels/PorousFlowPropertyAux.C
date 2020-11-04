@@ -254,7 +254,7 @@ PorousFlowPropertyAux::computeValue()
       break;
 
     case PropertyEnum::HYSTERESIS_ORDER:
-      property = 1.0 * (*_hys_order)[_qp];
+      property = (*_hys_order)[_qp];
       break;
 
     case PropertyEnum::HYSTERESIS_SATURATION_TURNING_POINT:
