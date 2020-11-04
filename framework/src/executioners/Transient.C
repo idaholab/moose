@@ -186,7 +186,7 @@ Transient::Transient(const InputParameters & parameters)
   // is (in case anyone else is interested.
   if (_app.hasStartTime())
     _start_time = _app.getStartTime();
-  else if (parameters.isParamSetByUser("start_time") && !_app.isRecovering())
+  else if (parameters.isParamSetByUser("start_time"))
     _app.setStartTime(_start_time);
 
   _time = _time_old = _start_time;
