@@ -190,6 +190,11 @@ protected:
    */
   const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0) const;
 
+  const ADArrayVariableValue & adCoupledArrayValue(const std::string & var_name,
+                                                   unsigned int comp = 0) const;
+  const ADArrayVariableGradient & adCoupledArrayGradient(const std::string & var_name,
+                                                         unsigned int comp = 0) const;
+
   /**
    * Returns the values for all of a coupled variable's components for use in Automatic
    * Differentation
@@ -1043,7 +1048,7 @@ protected:
       _default_value;
 
   /// Will hold the default value for optional coupled variables for automatic differentiation.
-  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<DualReal>>> _ad_default_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<ADVariableValue>> _ad_default_value;
 
   /// Will hold the default value for optional vector coupled variables.
   mutable std::unordered_map<std::string, std::unique_ptr<VectorVariableValue>>
@@ -1052,8 +1057,10 @@ protected:
   /// Will hold the default value for optional array coupled variables.
   mutable std::map<std::string, ArrayVariableValue *> _default_array_value;
 
+  mutable std::map<std::string, ADArrayVariableValue *> _ad_default_array_value;
+
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
-  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
+  mutable std::unordered_map<std::string, std::unique_ptr<ADVectorVariableValue>>
       _ad_default_vector_value;
 
   /**
@@ -1066,10 +1073,12 @@ protected:
   VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealVectorValue> _ad_default_gradient;
+  ADVariableGradient _ad_default_gradient;
 
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
-  MooseArray<ADRealTensorValue> _ad_default_vector_gradient;
+  ADVectorVariableGradient _ad_default_vector_gradient;
+
+  ADArrayVariableGradient _ad_default_array_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
@@ -1270,6 +1279,8 @@ public:
    */
   const ADVectorVariableValue * getADDefaultVectorValue(const std::string & var_name) const;
 
+  const ADArrayVariableValue * getADDefaultArrayValue(const std::string & var_name) const;
+
   /**
    * Helper method to return (and insert if necessary) the default gradient for Automatic
    * Differentiation for an uncoupled variable.
@@ -1285,6 +1296,8 @@ public:
    * @return VariableGradient * a pointer to the associated VectorVariableGradient.
    */
   const ADVectorVariableGradient & getADDefaultVectorGradient() const;
+
+  const ADArrayVariableGradient & getADDefaultArrayGradient() const;
 
   /**
    * Helper method to return (and insert if necessary) the default second derivatives for Automatic

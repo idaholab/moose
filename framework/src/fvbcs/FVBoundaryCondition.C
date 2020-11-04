@@ -51,12 +51,6 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
-    MooseVariableInterface<Real>(this,
-                                 false,
-                                 "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
@@ -65,7 +59,6 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     _mesh(_subproblem.mesh())
 {
   _subproblem.haveADObjects(true);
-  addMooseVariableDependency(&_var);
 
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");

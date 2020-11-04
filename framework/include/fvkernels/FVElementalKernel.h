@@ -9,11 +9,9 @@
 
 #pragma once
 
-#include "FVKernel.h"
+#include "FVElementalKernelBase.h"
 #include "MooseVariableFV.h"
 #include "MooseVariableInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MaterialPropertyInterface.h"
 
 /// FVElemental is used for calculating residual contributions from volume
 /// integral terms of a PDE where the divergence theorem is not applied (e.g.
@@ -22,10 +20,7 @@
 /// the _qp member.  Note that all interfaces for finite volume kernels are
 /// AD-based - be sure to use AD material properties and other AD values to
 /// maintain good jacobian/derivative quality.
-class FVElementalKernel : public FVKernel,
-                          public MooseVariableInterface<Real>,
-                          public CoupleableMooseVariableDependencyIntermediateInterface,
-                          public MaterialPropertyInterface
+class FVElementalKernel : public FVElementalKernelBase, public MooseVariableInterface<Real>
 {
 public:
   static InputParameters validParams();
@@ -34,9 +29,8 @@ public:
   /// Usually you should not override these functions - they have some
   /// tricky stuff in them that you don't want to mess up!
   ///@{
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian();
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
   ///@}
 
 protected:
@@ -49,9 +43,4 @@ protected:
 
   MooseVariableFV<Real> & _var;
   const ADVariableValue & _u;
-  const unsigned int _qp = 0;
-  const Elem * const & _current_elem;
-
-  /// The physical location of the element's quadrature Points, indexed by _qp
-  const MooseArray<Point> & _q_point;
 };

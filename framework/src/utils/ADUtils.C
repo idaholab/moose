@@ -73,4 +73,9 @@ globalDofIndexToDerivative(const ADReal & ad_real,
   return ret_val;
 }
 
+unsigned int
+globalADArrayOffset(dof_id_type dof, unsigned int ndofs, unsigned int array_var_index)
+{
+  return dof + array_var_index * ndofs;
+}
 }

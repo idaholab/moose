@@ -240,6 +240,38 @@ NeighborCoupleable::coupledArrayNeighborGradient(const std::string & var_name,
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
+const ADArrayVariableValue &
+NeighborCoupleable::adCoupledArrayNeighborValue(const std::string & var_name,
+                                                unsigned int comp) const
+{
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+  if (_c_nodal)
+    mooseError("AD support for nodal Array variables not implemented");
+
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return *getADDefaultArrayValue(var_name);
+
+  return var->adSlnNeighbor();
+}
+
+const ADArrayVariableGradient &
+NeighborCoupleable::adCoupledArrayNeighborGradient(const std::string & var_name,
+                                                   unsigned int comp) const
+{
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+  if (_c_nodal)
+    mooseError("AD support for nodal Array variables not implemented");
+
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayGradient();
+
+  return var->adGradSlnNeighbor();
+}
+
 const ArrayVariableGradient &
 NeighborCoupleable::coupledArrayNeighborGradientOld(const std::string & var_name,
                                                     unsigned int comp) const

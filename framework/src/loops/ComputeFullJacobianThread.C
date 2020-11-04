@@ -128,7 +128,7 @@ ComputeFullJacobianThread::computeJacobian()
 
   if (_fe_problem.haveFV())
   {
-    std::vector<FVElementalKernel *> fv_kernels;
+    std::vector<FVElementalKernelBase *> fv_kernels;
     _fe_problem.theWarehouse()
         .query()
         .template condition<AttribSystem>("FVElementalKernel")
@@ -139,7 +139,8 @@ ComputeFullJacobianThread::computeJacobian()
 
     for (auto fv_kernel : fv_kernels)
       if (fv_kernel->isImplicit())
-        fv_kernel->computeOffDiagJacobian();
+        // fv objects compute a full jacobian in the computeJacobian func.
+        fv_kernel->computeJacobian();
   }
 }
 

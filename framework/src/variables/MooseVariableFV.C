@@ -22,6 +22,7 @@
 #include "libmesh/numeric_vector.h"
 
 registerMooseObject("MooseApp", MooseVariableFVReal);
+registerMooseObject("MooseApp", MooseVariableFVArray);
 
 template <typename OutputType>
 InputParameters
@@ -327,8 +328,9 @@ MooseVariableFV<OutputType>::getValue(const Elem * elem) const
   std::vector<dof_id_type> dof_indices;
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
   mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-  OutputType value = (*this->_sys.currentSolution())(dof_indices[0]);
-  return value;
+  DoFValue value;
+  _element_data->buildDofValues(dof_indices, *_sys.currentSolution(), value);
+  return value[0];
 }
 
 template <typename OutputType>
@@ -367,10 +369,31 @@ MooseVariableFV<OutputType>::isVector() const
 }
 
 template <typename OutputType>
-std::pair<bool, const FVDirichletBC *>
+bool
+MooseVariableFV<OutputType>::hasDirichletBC(const FaceInfo & fi) const
+{
+  std::vector<FVBoundaryCondition *> bcs;
+
+  this->_subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVDirichletBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribBoundaries>(fi.boundaryIDs())
+      .template condition<AttribVar>(_var_num)
+      .template condition<AttribSysNum>(this->_sys.number())
+      .queryInto(bcs);
+  mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
+
+  bool has_dirichlet_bc = bcs.size() > 0;
+  return has_dirichlet_bc;
+}
+
+template <typename OutputType>
+std::pair<bool, const typename Moose::FVDirichletBCType<OutputType>::type *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
-  std::vector<FVDirichletBC *> bcs;
+  std::vector<typename Moose::FVDirichletBCType<OutputType>::type *> bcs;
 
   this->_subproblem.getMooseApp()
       .theWarehouse()
@@ -422,7 +445,7 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
 template <typename OutputType>
-const ADReal &
+const typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type &
 MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
 {
   auto it = _vertex_to_value.find(&vertex);
@@ -432,10 +455,11 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
 
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
-  auto emplace_ret = _vertex_to_value.emplace(&vertex, 0);
+  auto emplace_ret = _vertex_to_value.emplace(&vertex, typename Moose::ADType<OutputData>::type{});
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-  ADReal & value = emplace_ret.first->second;
-  ADReal numerator = 0, denominator = 0;
+  auto & value = emplace_ret.first->second;
+  typename Moose::ADType<OutputData>::type numerator = {};
+  ADReal denominator = 0;
 
   const auto node_elem_it = this->_mesh.nodeToElemMap().find(vertex.id());
   mooseAssert(node_elem_it != this->_mesh.nodeToElemMap().end(), "Should have found the node");
@@ -451,18 +475,18 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
     {
       const auto & elem_value = getElemValue(elem);
       auto distance = (vertex - elem->centroid()).norm();
-      numerator += elem_value / distance;
+      numerator += elem_value * (1.0 / distance);
       denominator += 1. / distance;
     }
   }
 
-  value = numerator / denominator;
+  value = numerator * (1.0 / denominator);
 
   return value;
 }
 
 template <typename OutputType>
-ADReal
+typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
   std::vector<dof_id_type> dof_indices;
@@ -472,21 +496,17 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
       dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  dof_id_type index = dof_indices[0];
-
-  ADReal value = (*_solution)(index);
-
-  if (ADReal::do_derivatives)
-    Moose::derivInsert(value.derivatives(), index, 1.);
-
-  return value;
+  ADDoFValue vals;
+  _element_data->buildADDofValues(dof_indices, *_solution, vals);
+  return vals[0];
 }
 
 template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
-                                              const FaceInfo & fi,
-                                              const ADReal & elem_value) const
+typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type
+MooseVariableFV<OutputType>::getNeighborValue(
+    const Elem * const neighbor,
+    const FaceInfo & fi,
+    const typename Moose::ADType<OutputData>::type & elem_value) const
 {
   if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
     return getElemValue(neighbor);
@@ -499,7 +519,7 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
     {
       mooseAssert(pr.second, "The FVDirichletBC is null!");
 
-      const FVDirichletBC & bc = *pr.second;
+      const auto & bc = *pr.second;
 
       // Linear interpolation: face_value = (elem_value + neighbor_value) / 2
       return 2. * bc.boundaryValue(fi) - elem_value;
@@ -512,10 +532,11 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
 }
 
 template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
-                                          const FaceInfo & fi,
-                                          const ADReal & elem_value) const
+typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type
+MooseVariableFV<OutputType>::getFaceValue(
+    const Elem * const neighbor,
+    const FaceInfo & fi,
+    const typename Moose::ADType<OutputData>::type & elem_value) const
 {
   // Are we on a boundary or an interface beyond which our variable doesn't exist?
   if (!neighbor || !this->hasBlocks(neighbor->subdomain_id()))
@@ -524,9 +545,8 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
 
     if (pr.first)
     {
-      const FVDirichletBC & bc = *pr.second;
-
-      return ADReal(bc.boundaryValue(fi));
+      const auto & bc = *pr.second;
+      return bc.boundaryValue(fi);
     }
     else
     {
@@ -538,29 +558,30 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
 
   if (_use_extended_stencil)
   {
-    ADReal numerator = 0, denominator = 0;
+    typename Moose::ADType<OutputData>::type numerator = {};
+    ADReal denominator = 0;
 
     for (const Node * const vertex : fi.vertices())
     {
       auto distance = (*vertex - fi.faceCentroid()).norm();
 
-      numerator += getVertexValue(*vertex) / distance;
+      numerator += getVertexValue(*vertex) * (1.0 / distance);
       denominator += 1. / distance;
     }
 
-    return numerator / denominator;
+    return numerator * (1.0 / denominator);
   }
   else
   {
     // Compact stencil
-    ADReal neighbor_value = getElemValue(neighbor);
+    auto neighbor_value = getElemValue(neighbor);
 
     return Moose::FV::linearInterpolation(elem_value, neighbor_value, fi);
   }
 }
 
 template <typename OutputType>
-const VectorValue<ADReal> &
+const VectorValue<typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type> &
 MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 {
   auto it = _elem_to_grad.find(elem);
@@ -574,12 +595,12 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-  VectorValue<ADReal> & grad = emplace_ret.first->second;
+  auto & grad = emplace_ret.first->second;
 
   bool volume_set = false;
   Real volume = 0;
 
-  ADReal elem_value = getElemValue(elem);
+  auto elem_value = getElemValue(elem);
 
   auto action_functor =
       [&grad, &volume_set, &volume, &elem_value, this](const Elem & functor_elem,
@@ -617,7 +638,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   mooseAssert(volume_set && volume > 0, "We should have set the volume");
 
-  grad /= volume;
+  grad *= 1.0 / volume;
 
   const auto coord_system = this->_subproblem.getCoordSystem(elem->subdomain_id());
   if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
@@ -634,7 +655,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 }
 
 template <typename OutputType>
-const VectorValue<ADReal> &
+const VectorValue<typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type> &
 MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 {
   auto it = _face_to_unc_grad.find(&fi);
@@ -646,7 +667,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   const Elem * const elem_one = pr.first;
   const Elem * const elem_two = pr.second;
 
-  const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
+  const auto & elem_one_grad = adGradSln(elem_one);
 
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
@@ -654,7 +675,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-  VectorValue<ADReal> & unc_face_grad = emplace_ret.first->second;
+  auto & unc_face_grad = emplace_ret.first->second;
 
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // check for a Dirichlet BC. If we have a Dirichlet BC, then we will apply a zero Hessian
@@ -662,7 +683,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   // our calculations, so we should be consistent and apply a zero gradient assumption here as well
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
-    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two);
+    const auto & elem_two_grad = adGradSln(elem_two);
 
     // Uncorrected gradient value
     unc_face_grad = Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi);
@@ -679,7 +700,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
-const VectorValue<ADReal> &
+const VectorValue<typename Moose::ADType<typename MooseVariableFV<OutputType>::OutputData>::type> &
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 {
   auto it = _face_to_grad.find(&fi);
@@ -693,23 +714,77 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-  VectorValue<ADReal> & face_grad = emplace_ret.first->second;
+  auto & face_grad = emplace_ret.first->second;
 
   auto pr = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem_one = pr.first;
   const Elem * const elem_two = pr.second;
   bool elem_is_elem_one = elem_one == &fi.elem();
 
-  const ADReal elem_one_value = getElemValue(elem_one);
-  const ADReal elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
-  const ADReal & elem_value = elem_is_elem_one ? elem_one_value : elem_two_value;
-  const ADReal & neighbor_value = elem_is_elem_one ? elem_two_value : elem_one_value;
+  const auto elem_one_value = getElemValue(elem_one);
+  const auto elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
+  const auto & elem_value = elem_is_elem_one ? elem_one_value : elem_two_value;
+  const auto & neighbor_value = elem_is_elem_one ? elem_two_value : elem_one_value;
 
   // perform the correction. Note that direction is important here because we have a minus sign.
   // Neighbor has to neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic above
-  face_grad += ((neighbor_value - elem_value) / fi.dCFMag() - face_grad * fi.eCF()) * fi.eCF();
+  face_grad +=
+      ((neighbor_value - elem_value) * (1.0 / fi.dCFMag()) - face_grad * fi.eCF()) * fi.eCF();
 
   return face_grad;
+}
+
+template <>
+const ADRealEigenVector &
+MooseVariableFV<RealEigenVector>::getVertexValue(const Node & /*vertex*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+ADRealEigenVector
+MooseVariableFV<RealEigenVector>::getElemValue(const Elem * const /*elem*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+ADRealEigenVector
+MooseVariableFV<RealEigenVector>::getNeighborValue(const Elem * const /*neighbor*/,
+                                                   const FaceInfo & /*fi*/,
+                                                   const ADRealEigenVector & /*elem_value*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+ADRealEigenVector
+MooseVariableFV<RealEigenVector>::getFaceValue(const Elem * const /*neighbor*/,
+                                               const FaceInfo & /*fi*/,
+                                               const ADRealEigenVector & /*elem_value*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::adGradSln(const Elem * const /*elem*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::uncorrectedAdGradSln(const FaceInfo & /*fi*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
+}
+
+template <>
+const VectorValue<ADRealEigenVector> &
+MooseVariableFV<RealEigenVector>::adGradSln(const FaceInfo & /*fi*/) const
+{
+  mooseError("not implemented yet - we accept pull requests");
 }
 
 #endif
@@ -741,6 +816,7 @@ MooseVariableFV<OutputType>::clearCaches()
 }
 
 template class MooseVariableFV<Real>;
+template class MooseVariableFV<RealEigenVector>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable
 // classes. And then you will need to uncomment out the line below:

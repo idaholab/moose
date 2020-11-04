@@ -107,6 +107,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   _ad_default_gradient.resize(_coupleable_max_qps);
   _ad_default_second.resize(_coupleable_max_qps);
   _ad_default_vector_gradient.resize(_coupleable_max_qps);
+  _ad_default_array_gradient.resize(_coupleable_max_qps);
 }
 
 bool
@@ -370,6 +371,27 @@ Coupleable::getDefaultArrayValue(const std::string & var_name) const
         (*value)[qp](i) = _c_parameters.defaultCoupledValue(var_name, i);
     }
     default_value_it = _default_array_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
+
+const ADArrayVariableValue *
+Coupleable::getADDefaultArrayValue(const std::string & var_name) const
+{
+  std::map<std::string, ADArrayVariableValue *>::iterator default_value_it =
+      _ad_default_array_value.find(var_name);
+  if (default_value_it == _ad_default_array_value.end())
+  {
+    ADArrayVariableValue * value = new ADArrayVariableValue(_coupleable_max_qps);
+    for (unsigned int qp = 0; qp < _coupleable_max_qps; ++qp)
+    {
+      auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+      (*value)[qp].resize(n);
+      for (unsigned int i = 0; i < n; ++i)
+        (*value)[qp](i) = _c_parameters.defaultCoupledValue(var_name, i);
+    }
+    default_value_it = _ad_default_array_value.insert(std::make_pair(var_name, value)).first;
   }
 
   return default_value_it->second;
@@ -1462,6 +1484,42 @@ Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
   return var->adNodalValue();
 }
 
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayValue(const std::string & var_name, unsigned int comp) const
+{
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+  if (_c_nodal)
+    mooseError("AD support for nodal Array variables not implemented");
+
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return *getADDefaultArrayValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->adSln();
+  return var->adSlnNeighbor();
+}
+
+const ADArrayVariableGradient &
+Coupleable::adCoupledArrayGradient(const std::string & var_name, unsigned int comp) const
+{
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+  if (_c_nodal)
+    mooseError("AD support for nodal Array variables not implemented");
+
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayGradient();
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return var->adGradSln();
+  return var->adGradSlnNeighbor();
+}
+
 const ADVariableValue &
 Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) const
 {
@@ -1644,6 +1702,12 @@ const ADVariableGradient &
 Coupleable::getADDefaultGradient() const
 {
   return _ad_default_gradient;
+}
+
+const ADArrayVariableGradient &
+Coupleable::getADDefaultArrayGradient() const
+{
+  return _ad_default_array_gradient;
 }
 
 const ADVectorVariableGradient &

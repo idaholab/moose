@@ -52,9 +52,7 @@ class FVBoundaryCondition : public MooseObject,
                             public GeometricSearchInterface,
                             public Restartable,
                             public MeshChangedInterface,
-                            public TaggingInterface,
-                            public MooseVariableInterface<Real>,
-                            public MooseVariableDependencyInterface
+                            public TaggingInterface
 {
 public:
   /**
@@ -73,8 +71,6 @@ public:
   const SubProblem & subProblem() const { return _subproblem; }
 
 protected:
-  MooseVariableFV<Real> & _var;
-
   /// Reference to SubProblem
   SubProblem & _subproblem;
 

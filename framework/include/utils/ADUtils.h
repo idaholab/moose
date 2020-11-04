@@ -138,4 +138,9 @@ globalDofIndexToDerivative(const T & ad_real_container,
   return ret_val;
 }
 
+/// Returns an index into the solution vector (also used as sparse AD
+/// derivative ID) for the variable entry associated with the given
+/// dof among the set of ndofs local dofs and the given index into the array variable.
+unsigned int
+globalADArrayOffset(dof_id_type dof, unsigned int ndofs, unsigned int array_var_index = 0);
 }

@@ -16,22 +16,21 @@
 InputParameters
 FVFluxBC::validParams()
 {
-  InputParameters params = FVBoundaryCondition::validParams();
-  params += MaterialPropertyInterface::validParams();
-  params.registerSystemAttributeName("FVFluxBC");
-
-  // FVFluxBCs always rely on Boundary MaterialData
-  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
-
+  InputParameters params = FVFluxBCBase::validParams();
   return params;
 }
 
 FVFluxBC::FVFluxBC(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, /*nodal=*/false, /*is_fv=*/true),
-    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+  : FVFluxBCBase(parameters),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariableFV()),
     _u(_var.adSln())
 {
+  addMooseVariableDependency(&_var);
 }
 
 void

@@ -76,6 +76,7 @@ public:
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
   typedef MooseArray<OutputData> DoFValue;
+  typedef MooseArray<typename Moose::ADType<OutputData>::type> ADDoFValue;
 
   MooseVariableField(const InputParameters & parameters);
 
@@ -133,7 +134,7 @@ public:
   /**
    * Return the AD dof values
    */
-  virtual const MooseArray<ADReal> & adDofValues() const = 0;
+  virtual const ADDoFValue & adDofValues() const = 0;
 
   ///@{
   /**
