@@ -1,6 +1,6 @@
 # Hysteresis in PorousFlow
 
-Hysteretic capillary pressure and relative permeability functions are implemented in PorousFlow.  Hysteresis means that capillary pressure and relative permeability depend on the *history* as well as the current state.
+Hysteretic capillary pressure and relative permeability functions are implemented in PorousFlow.  Hysteresis means that capillary pressure and relative permeability depend on the *saturation history* as well as the current state.
 
 The implementation of hysteresis in PorousFlow closely follows the TOUGH implementation as described in [!citet](doughty2007) and [!citet](doughty2008).  Some other pertinent material may be found in [!citet](jaynes1984), [!citet](niemi1988) and [!citet](finsterle1998).  In this implementation, capillary pressure at any point in the finite-element mesh is described by one of four "curves" (or functions), and relative permeability at any point is described by one of two "curves".  The capillary-pressure curves are illustrated in [histeretic_order_fig], which shall now be qualitatively described.
 
@@ -50,7 +50,7 @@ The primary wetting curve uses
 \begin{equation}
 S_{gr}^{\Delta} = S_{gr}^{max} \ ,
 \end{equation}
-where $0 \leq S_{gr}^{max} < 1 - S_{l,min}$ is a user input.  The other curves use other values of $S_{gr}^{\Delta}$ as described below.
+where $0 \leq S_{gr}^{max} < 1 - S_{l,min}$ is a user input (as noted below $S_{gr}^{max}$ must be stricly positive for the cubic-spline modification of the water wetting relative permeability to be well-defined).  The other curves use other values of $S_{gr}^{\Delta}$ as described below.
 
 !media media/porous_flow/hysteretic_cap_extensions.png caption=Various extensions of the hysteretic capillary pressure curve available in PorousFlow.  The primary wetting curve is shown, which has the property that $P_{c}\rightarrow 0$ as $S\rightarrow 1- S_{gr}^{max}$ (recall that the primary wetting curve uses the user-inputted $S_{gr}^{max}$ for $S_{gr}^{\Delta}$).  id=histeretic_cap_extensions_fig
 
@@ -169,3 +169,76 @@ Then, the third-order capillary pressure is defined by
 This produces continuous capillary-pressure functions as shown in [histeretic_order_fig].
 
 
+## Relative permeabilities
+
+Hysteresis is defined for two-phase systems only.  The water and gas relative permeability functions are both hysteretic.  Only the drying and first-order wetting curves are defined.  This means that if the system dries (following the drying curve) and then wets (following the first-order wetting curve) and then subsequently dries, the system will move along the first-order wetting curve until the turning point is reached, when it will move along the drying durve.
+
+The starting point for the relative permeability functions for liquid ($k_{r,l}$) and gas ($k_{r,g}$) are of the [van Genuchten](relative_permeability.md) form [!citet](doughty2007)
+\begin{equation}
+\begin{aligned}
+\label{relperm.eqns}
+k_{r,l}(S_{l}) & = \sqrt{\bar{S}_{l}} \left[1 - \left(1 - \frac{\bar{S}_{gt}}{1 - \bar{S}_{l}^{\Delta}}\right) \left( 1- (\bar{S}_{l} + \bar{S}_{gt})^{1/m} \right)^{m} - \frac{\bar{S}_{gt}}{1 - \bar{S}_{l}^{\Delta}} \left(1 - (\bar{S}_{l}^{\Delta})^{1/m} \right)^{m} \right]^{2} \ , \\
+k_{r,g}(S_{l}) & = k_{r,g}^{max} \left(1 - \bar{S}_{l} - \bar{S}_{gt}\right)^{\gamma} \left(1 - (\bar{S}_{l} + \bar{S}_{gt})^{1/m} \right)^{2m} \ .
+\end{aligned}
+\end{equation}
+In these expressions
+\begin{equation}
+\begin{aligned}
+\bar{S}_{l} & = \frac{S_{l} - S_{l, r}}{1 - S_{l, r}} \ , \\
+\bar{S}_{l}^{\Delta} & = \frac{\mathrm{TP}_{0} - S_{l, r}}{1 - S_{l, r}} \ , \\
+\bar{S}_{gt} & = \frac{S_{gr}^{\Delta} (S_{l} - \mathrm{TP}_{0})}{(1 - S_{l, r})(1 - \mathrm{TP}_{0} + S_{gr}^{\Delta})} \ .
+\end{aligned}
+\end{equation}
+Here
+
+- $S_{l, r}$ is the residual liquid saturation, which marks the point at which the liquid relative permeability becomes zero.  It is a dimensionless user-input, which satisfies $S_{l,min} \leq S_{l, r} < 1$.
+- $k_{r,g}^{max}$ is the maximum gas relative permeability, which occurs on the drying curve for $S_{l} \leq S_{l, r}$.  It is a dimensionless user-input, which satisfies $0 < k_{r, g}^{max} \leq 1$.  Most frequently $k_{r, g}^{max} = 1$ is chosen.
+- $\gamma$ is a dimensionless index, inputted by the user, which satisfies $\gamma > 0$.  Most frequently $\gamma \approx 1/3$ is chosen.
+- $m$ is a dimensionless index, inputted by the user, which satisfies $m>0$.
+
+### Extending and modifying the functions
+
+An immediate problem with the functions given in [relperm.eqns] is that they are not defined for $S_{l} < S_{l, r}$ (meaning that $\bar{S}_{l} < 0$).  The wetting curve for water also has an infinite derivative.  These behaviors are obviously undesirable in a numerical implementation, and are probably unphysical, so the functions need to be extended and modified.
+
+For reference, the zeroth-order (drying) are given by [relperm.eqns] but because $S_{gr}^{\Delta} = 0$ in this case, $\bar{S}_{gt} = 0$, and the functions reduce to
+\begin{equation}
+\begin{aligned}
+\label{relperm.eqns.0}
+k_{r,l}(S_{l}) & = \sqrt{\bar{S}_{l}} \left[1 - \left( 1- \bar{S}_{l}^{1/m} \right)^{m}\right]^{2} \ , \\
+k_{r,g}(S_{l}) & = k_{r,g}^{max} \left(1 - \bar{S}_{l}\right)^{\gamma} \left(1 - \bar{S}_{l}^{1/m} \right)^{2m} \ .
+\end{aligned}
+\end{equation}
+
+Assuming the relative-permeability values are constant outside the well-defined domain results in curves of the form shown in [histeretic_krel_unextended_fig].
+
+!media media/porous_flow/hysteretic_krel_unextended.png caption=The basic, unextended relative permeability curves.  id=histeretic_krel_unextended_fig
+
+[!citet](doughty2008) recommends extending and modifying the curves in the following ways.
+
+1. There is no hysteresis in the region $S_{l} < S_{l, r}$: the drying curves equal the wetting curves in this region, and if $\mathrm{TP}_{0} < S_{l, r}$ then $\mathrm{TP}_{0} = S_{l, r}$ is used in the wetting curves. 
+
+2. The gas relative permeability is extended to the region $S_{l} < S_{l, r}$ so that $k_{r, g}(0) = 1$.   Two types of extension are possible in MOOSE:
+
+   - A "linear" extension, where $k_{r, g}$ is linear in the low-saturation region.  This results in a continuous curve that has a discontinuous derivative at $S_{l} = S_{l, r}$.
+   - A "cubic" extension, where $k_{r, g}$ is a cubic whose value and derivative match the main curve at $S_{l} = S_{l, r}$, and whose derivative is zero at $S_{l} = 0$.
+
+3. The water wetting curve is modified around the point $1 - S_{gr}^{\Delta}$, which is the point of infinite derivative.  Firstly, it is assumed that $S_{gr}^{max} > 0$.  If this is not the case then the following modification will not work, but may be unecessary anyway.  Two points are defined
+
+   - $S_{\mathrm{small}} = r(1 - S_{gr}^{\Delta})$, where $r$ is a (dimensionless) user-input satisfying $0 < r < 1$, and optimally $r$ should be close to 1, for example $r=0.9$.
+   - $S_{\mathrm{big}} = 1 - S_{gr}^{\Delta} / 2$.  Note that [!citet](doughty2008) defines $S_{\mathrm{big}} = (2 - r)(1 - S_{gr}^{\Delta})$, but this can be greater than 1 and can result in a poor modification.
+
+ Then:
+
+   - for $S<S_{\mathrm{small}}$ the liquid wetting curve, given in [relperm.eqns], is used
+   - for $S>S_{\mathrm{big}}$ the liquid drying curve, given in [relperm.eqns.0], is used
+   - otherwise, a cubic spline interpolates between these two, with parameters chosen so that the final result is continuous and has a continuous derivative.
+
+The result is illustrated in [histeretic_krel_extended_fig], using a cubic extension for the gas relative-permeability curve, and $r = 0.9$.
+
+!media media/porous_flow/hysteretic_krel_extended.png caption=Extended and modified relative permeability curves, using a cubic extension for the gas relative-permeability curve, and $r$ being 0.9.  id=histeretic_krel_extended_fig
+
+### Examples
+
+!media media/porous_flow/hysteretic_krel_example_1.png caption=Example hysteretic relative-permeability functions.  The system initialises at full saturation, dries to saturation 0.5 (greater than $S_{l, r}$) and then wets back to saturation 1.  id=histeretic_krel_example_1
+
+!media media/porous_flow/hysteretic_krel_example_2.png caption=Example hysteretic relative-permeability functions.  The system initialises at full saturation, dries to saturation 0.1 (less than $S_{l, r}$) and then wets back to saturation 1.  In the extended region ($S_{l} \leq S_{l, r}$), the drying curve equals the wetting curve.  id=histeretic_krel_example_2
