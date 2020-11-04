@@ -147,11 +147,6 @@ public:
   void checkSetupStatus(const EComponentSetupStatus & status) const;
 
   /**
-   * Gets gravity magnitude
-   */
-  Real getGravityMagnitude() const { return _gravity_magnitude; }
-
-  /**
    * Checks that a component exists
    *
    * @param[in] comp_name   name of the component
@@ -396,15 +391,6 @@ protected:
    */
   void logSpatialDiscretizationNotImplementedError(
       const FlowModel::ESpatialDiscretizationType & spatial_discretization) const;
-
-  /// Gravitational acceleration vector
-  const RealVectorValue & _gravity_vector;
-  /// Gravitational acceleration magnitude
-  const Real _gravity_magnitude;
-  /// Gravitational acceleration magnitude is zero?
-  const bool _gravity_is_zero;
-  /// Gravitational acceleration unit direction
-  const RealVectorValue _gravity_direction;
 
   /// Pointer to a parent component (used in composed components)
   Component * _parent;

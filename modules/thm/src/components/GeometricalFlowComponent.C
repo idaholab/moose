@@ -6,6 +6,7 @@ InputParameters
 GeometricalFlowComponent::validParams()
 {
   InputParameters params = GeometricalComponent::validParams();
+  params += GravityInterface::validParams();
 
   params.addClassDescription("Base class for geometrical components that have fluid flow");
 
@@ -20,6 +21,11 @@ GeometricalFlowComponent::validParams()
 
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
+    GravityInterface(parameters),
+    _gravity_angle(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
+                       ? 0.0
+                       : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
+                             180 / M_PI),
     _spatial_discretization(_sim.getSpatialDiscretization()),
     _fp_name(getParam<UserObjectName>("fp")),
     _numerical_flux_name(genName(name(), "numerical_flux")),
