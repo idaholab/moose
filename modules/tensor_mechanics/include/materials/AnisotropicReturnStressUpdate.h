@@ -58,16 +58,16 @@ public:
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) override;
 
-  virtual Real computeReferenceResidual(const RankTwoTensor effective_trial_stress,
+  virtual Real computeReferenceResidual(const RankTwoTensor & effective_trial_stress,
                                         const Real scalar_effective_inelastic_strain) override;
 
   virtual Real
-  minimumPermissibleValue(const RankTwoTensor /*effective_trial_stress*/) const override
+  minimumPermissibleValue(const RankTwoTensor & /*effective_trial_stress*/) const override
   {
     return 0.0;
   }
 
-  virtual Real maximumPermissibleValue(const RankTwoTensor effective_trial_stress) const override;
+  virtual Real maximumPermissibleValue(const RankTwoTensor & effective_trial_stress) const override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -103,7 +103,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
-  virtual void computeStressInitialize(const RankTwoTensor /*effective_trial_stress*/,
+  virtual void computeStressInitialize(const RankTwoTensor & /*effective_trial_stress*/,
                                        const RankFourTensor & /*elasticity_tensor*/)
   {
   }
@@ -113,7 +113,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeStressDerivative(const RankTwoTensor /*effective_trial_stress*/,
+  virtual Real computeStressDerivative(const RankTwoTensor & /*effective_trial_stress*/,
                                        const Real /*scalar*/)
   {
     return 0.0;

@@ -31,7 +31,7 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    * @param console                Console output
    */
-  void returnMappingSolve(const RankTwoTensor effective_trial_stress,
+  void returnMappingSolve(const RankTwoTensor & effective_trial_stress,
                           Real & scalar,
                           const ConsoleStream & console);
 
@@ -40,14 +40,14 @@ protected:
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real minimumPermissibleValue(const RankTwoTensor effective_trial_stress) const;
+  virtual Real minimumPermissibleValue(const RankTwoTensor & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real maximumPermissibleValue(const RankTwoTensor effective_trial_stress) const;
+  virtual Real maximumPermissibleValue(const RankTwoTensor & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -56,7 +56,7 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real initialGuess(const RankTwoTensor /*effective_trial_stress*/) { return 0.0; }
+  virtual Real initialGuess(const RankTwoTensor & /*effective_trial_stress*/) { return 0.0; }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -64,7 +64,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeResidual(const RankTwoTensor effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeResidual(const RankTwoTensor & effective_trial_stress, const Real scalar) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -72,7 +72,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeDerivative(const RankTwoTensor effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeDerivative(const RankTwoTensor & effective_trial_stress,
+                                 const Real scalar) = 0;
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should
@@ -80,7 +81,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeReferenceResidual(const RankTwoTensor effective_trial_stress,
+  virtual Real computeReferenceResidual(const RankTwoTensor & effective_trial_stress,
                                         const Real scalar) = 0;
 
   /**
@@ -177,7 +178,7 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  SolveState internalSolve(const RankTwoTensor effective_trial_stress,
+  SolveState internalSolve(const RankTwoTensor & effective_trial_stress,
                            Real & scalar,
                            std::stringstream * iter_output = nullptr);
 

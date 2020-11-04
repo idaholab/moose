@@ -60,7 +60,7 @@ TransverselyIsotropicCreepStressUpdate::TransverselyIsotropicCreepStressUpdate(
 
 void
 TransverselyIsotropicCreepStressUpdate::computeStressInitialize(
-    const RankTwoTensor /*effective_trial_stress*/, const RankFourTensor & /*elasticity_tensor*/)
+    const RankTwoTensor & /*effective_trial_stress*/, const RankFourTensor & /*elasticity_tensor*/)
 {
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
@@ -69,8 +69,8 @@ TransverselyIsotropicCreepStressUpdate::computeStressInitialize(
 }
 
 Real
-TransverselyIsotropicCreepStressUpdate::computeResidual(const RankTwoTensor effective_trial_stress,
-                                                        const Real scalar)
+TransverselyIsotropicCreepStressUpdate::computeResidual(
+    const RankTwoTensor & effective_trial_stress, const Real scalar)
 {
   // Hill constants, some constraints apply
   const Real F = _hill_constants[0];
@@ -106,7 +106,7 @@ TransverselyIsotropicCreepStressUpdate::computeResidual(const RankTwoTensor effe
 
 Real
 TransverselyIsotropicCreepStressUpdate::computeDerivative(
-    const RankTwoTensor effective_trial_stress, const Real scalar)
+    const RankTwoTensor & effective_trial_stress, const Real scalar)
 {
   const Real stress_delta = effective_trial_stress.L2norm() - _three_shear_modulus * scalar;
   const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *

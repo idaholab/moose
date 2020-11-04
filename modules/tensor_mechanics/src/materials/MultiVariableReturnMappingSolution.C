@@ -78,20 +78,20 @@ MultiVariableReturnMappingSolution::MultiVariableReturnMappingSolution(
 
 Real
 MultiVariableReturnMappingSolution::minimumPermissibleValue(
-    const RankTwoTensor /*effective_trial_stress*/) const
+    const RankTwoTensor & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::lowest();
 }
 
 Real
 MultiVariableReturnMappingSolution::maximumPermissibleValue(
-    const RankTwoTensor /*effective_trial_stress*/) const
+    const RankTwoTensor & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::max();
 }
 
 void
-MultiVariableReturnMappingSolution::returnMappingSolve(const RankTwoTensor effective_trial_stress,
+MultiVariableReturnMappingSolution::returnMappingSolve(const RankTwoTensor & effective_trial_stress,
                                                        Real & scalar,
                                                        const ConsoleStream & console)
 {
@@ -152,7 +152,7 @@ MultiVariableReturnMappingSolution::returnMappingSolve(const RankTwoTensor effec
 }
 
 MultiVariableReturnMappingSolution::SolveState
-MultiVariableReturnMappingSolution::internalSolve(const RankTwoTensor effective_trial_stress,
+MultiVariableReturnMappingSolution::internalSolve(const RankTwoTensor & effective_trial_stress,
                                                   Real & scalar,
                                                   std::stringstream * iter_output)
 {

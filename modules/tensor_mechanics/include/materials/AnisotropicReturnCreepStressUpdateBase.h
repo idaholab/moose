@@ -46,7 +46,7 @@ protected:
    * assumes the stress delta (von mises stress used to determine the creep rate) is calculated as:
    * effective_trial_stress - _three_shear_modulus * scalar
    */
-  virtual Real computeStressDerivative(const RankTwoTensor effective_trial_stress,
+  virtual Real computeStressDerivative(const RankTwoTensor & effective_trial_stress,
                                        const Real scalar) override;
 
   /*

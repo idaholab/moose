@@ -178,7 +178,7 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
 Real
 AnisotropicReturnStressUpdate::computeReferenceResidual(
-    const RankTwoTensor effective_trial_stress, const Real scalar_effective_inelastic_strain)
+    const RankTwoTensor & effective_trial_stress, const Real scalar_effective_inelastic_strain)
 {
   // FIXME: Convert to tensor form
   return effective_trial_stress.L2norm() / _three_shear_modulus - scalar_effective_inelastic_strain;
@@ -186,7 +186,7 @@ AnisotropicReturnStressUpdate::computeReferenceResidual(
 
 Real
 AnisotropicReturnStressUpdate::maximumPermissibleValue(
-    const RankTwoTensor effective_trial_stress) const
+    const RankTwoTensor & effective_trial_stress) const
 {
   // FIXME: Convert to tensor form
   return effective_trial_stress.L2norm() / _three_shear_modulus;
