@@ -38,7 +38,11 @@ Get started running your own THM simulations by exploring the introductory tutor
 Use the modeling guide to explore how to piece your models together:
 
 - [Getting Started](getting_started.md) -- how to install the code.
-- [Tutorial](tutorial/index.md) -- learn the basics.
+- Tutorials
+
+  - [Basics](tutorials/basics/index.md) -- learn the basics.
+  - [Single-phase flow](tutorials/single_phase_flow/index.md) -- learn about single-phase flow.
+
 - [Modeling Guide](modeling_guide/index.md) -- learn how to build your models.
 - [Verification and Validation](v_and_v/index.md) -- verification and validation tests performed to date.
 - [Syntax Index](syntax/index.md) -- complete syntax listing.
