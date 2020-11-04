@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#7555'
+  issues = '#7555 #15871'
   [./two_block_base_name]
     type = Exodiff
     input = 'two_block_base_name.i'
@@ -70,5 +70,59 @@
     prereq = 'two_coord'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an input file assigns the same TensorMechanics MasterAction block to mesh blocks with different coordinate systems.'
+  [../]
+
+
+
+
+  [./eigenstrain_no_defined_block_names]
+    type = RunApp
+    input = 'action_eigenstrain.i'
+    expect_out = 'solid: eigenstrain1,eigenstrain2'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./eigenstrain_two_blocks_names]
+    type = RunApp
+    input = 'action_multi_eigenstrain.i'
+    expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./eigenstrain_two_blocks_one_eigenstrain]
+    type = RunApp
+    input = 'action_multi_eigenstrain_same_conditions.i'
+    expect_out = 'block1: eigenstrain\n.*\nblock2: eigenstrain\n'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./ad_converter_eigenstrain_two_blocks_names]
+    type = RunApp
+    input = 'ad_converter_action_multi_eigenstrain.i'
+    expect_out = 'block1: eigenstrain1\n.*\nblock2: eigenstrain2\n'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./reduced_eigenstrain_actions_names]
+    type = RunApp
+    input = 'reduced_eigenstrain_action.i'
+    expect_out = 'all: reduced_eigenstrain'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
+  [../]
+
+  [./composite_eigenstrain_actions_names]
+    type = RunApp
+    input = 'composite_eigenstrain.i'
+    expect_out = 'solid: eigenstrain'
+    match_literal = true
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
 []

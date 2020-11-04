@@ -13,6 +13,9 @@
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
 #include "TensorMechanicsAction.h"
+#include "Material.h"
+
+#include "BlockRestrictable.h"
 
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
@@ -32,6 +35,8 @@ registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_kernel");
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_kernel");
 
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material");
+
+registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_master_action_material");
 
 InputParameters
 TensorMechanicsAction::validParams()
@@ -66,6 +71,10 @@ TensorMechanicsAction::validParams()
       "cylindrical_axis_point2",
       "Ending point for direction of axis of rotation for cylindrical stress/strain.");
   params.addParam<Point>("direction", "Direction stress/strain is calculated in");
+  params.addParam<bool>("automatic_eigenstrain_names",
+                        false,
+                        "Collects all material eigenstrains and passes to required strain "
+                        "calculator within TMA internally.");
 
   return params;
 }
@@ -86,7 +95,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
-    _direction_valid(params.isParamSetByUser("direction"))
+    _direction_valid(params.isParamSetByUser("direction")),
+    _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -175,6 +185,9 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   // Get direction for tensor component if set by user
   if (_direction_valid)
     _direction = getParam<Point>("direction");
+
+  // Get eigenstrain names if passed by user
+  _eigenstrain_names = getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
 }
 
 void
@@ -240,8 +253,12 @@ TensorMechanicsAction::act()
   }
 
   // Add Materials
-  else if (_current_task == "add_material")
+  else if (_current_task == "add_master_action_material")
   {
+    // Automatic eigenstrain names
+    if (_auto_eigenstrain)
+      actEigenstrainNames();
+
     std::string type;
 
     // no plane strain
@@ -321,6 +338,8 @@ TensorMechanicsAction::act()
     if (isParamValid("out_of_plane_strain"))
       params.set<std::vector<VariableName>>("out_of_plane_strain") = {
           getParam<VariableName>("out_of_plane_strain")};
+
+    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
 
     _problem->addMaterial(ad_prepend + type, name() + "_strain", params);
   }
@@ -439,7 +458,7 @@ TensorMechanicsAction::actOutputGeneration()
     for (auto out : _generate_output)
     {
       InputParameters params = emptyInputParameters();
-      ;
+
       params = _factory.getValidParams(ad_prepend + "MaterialRealAux");
       params.applyParameters(parameters());
       params.set<MaterialPropertyName>("property") = _base_name + out;
@@ -449,6 +468,123 @@ TensorMechanicsAction::actOutputGeneration()
           ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
     }
   }
+}
+
+void
+TensorMechanicsAction::actEigenstrainNames()
+{
+  // Create containers for collecting blockIDs and eigenstrain names from materials
+  std::map<std::string, std::set<SubdomainID>> material_eigenstrain_map;
+  std::set<std::string> eigenstrain_set;
+
+  std::set<MaterialPropertyName> verified_eigenstrain_names;
+
+  std::map<std::string, std::string> remove_add_map;
+  std::set<std::string> remove_reduced_set;
+
+  // Loop over all the materials(eigenstrains) already created
+  auto materials = _problem->getMaterialWarehouse().getObjects();
+  for (auto & mat : materials)
+  {
+    std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(mat);
+    const InputParameters & mat_params = mat->parameters();
+    auto & mat_name = mat->type();
+
+    // Check for eigenstrain names, only deal with those materials
+    if (mat_params.isParamValid("eigenstrain_name"))
+    {
+      std::shared_ptr<MaterialData> mat_dat;
+      auto name = mat_params.get<std::string>("eigenstrain_name");
+
+      // Check for base_name prefix
+      if (mat_params.isParamValid("base_name"))
+        name = mat_params.get<std::string>("base_name") + '_' + name;
+
+      // Check block restrictions
+      if (!blk)
+        mooseError("Internal error, Material object that does not inherit form BlockRestricted");
+      const std::set<SubdomainID> & blocks =
+          blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
+
+      if (std::includes(blocks.begin(), blocks.end(), _subdomain_ids.begin(), _subdomain_ids.end()))
+      {
+        material_eigenstrain_map[name].insert(blocks.begin(), blocks.end());
+        eigenstrain_set.insert(name);
+      }
+    }
+
+    // Account for reduced eigenstrains and CompositeEigenstrains
+    if (mat_name == "ComputeReducedOrderEigenstrain")
+    {
+      auto input_eigenstrain_names =
+          mat_params.get<std::vector<MaterialPropertyName>>("input_eigenstrain_names");
+      remove_reduced_set.insert(input_eigenstrain_names.begin(), input_eigenstrain_names.end());
+    }
+    // Account for CompositeEigenstrains
+    if (mat_name == "CompositeEigenstrain")
+    {
+      auto remove_list = mat_params.get<std::vector<MaterialPropertyName>>("tensors");
+      for (auto i : remove_list)
+        remove_reduced_set.insert(i);
+    }
+
+    // Account for MaterialConverter , add or remove later
+    if (mat_name == "RankTwoTensorMaterialConverter")
+    {
+      std::vector<std::string> remove_list;
+      std::vector<std::string> add_list;
+
+      if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in") &&
+          _use_ad)
+      {
+        remove_list = mat_params.get<std::vector<std::string>>("reg_props_in");
+        add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
+      }
+      if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out") &&
+          !_use_ad)
+      {
+        remove_list = mat_params.get<std::vector<std::string>>("ad_props_in");
+        add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
+      }
+
+      // These vectors are the same size as checked in MaterialConverter
+      for (unsigned int index = 0; index < remove_list.size(); index++)
+        remove_add_map.emplace(remove_list[index], add_list[index]);
+    }
+  }
+  // All the materials have been accounted for, now remove or add parts
+
+  // Remove names which aren't eigenstrains (converter properties)
+  for (auto remove_add_index : remove_add_map)
+  {
+    const bool is_in = eigenstrain_set.find(remove_add_index.first) != eigenstrain_set.end();
+    if (is_in)
+    {
+      eigenstrain_set.erase(remove_add_index.first);
+      eigenstrain_set.insert(remove_add_index.second);
+    }
+  }
+  for (auto index : remove_reduced_set)
+    eigenstrain_set.erase(index);
+
+  // Compare the blockIDs set of eigenstrain names with the vector of _eigenstrain_names for the
+  // current subdomainID
+  std::set_union(eigenstrain_set.begin(),
+                 eigenstrain_set.end(),
+                 _eigenstrain_names.begin(),
+                 _eigenstrain_names.end(),
+                 std::inserter(verified_eigenstrain_names, verified_eigenstrain_names.begin()));
+
+  // Ensure the eigenstrain names previously passed include any missing names
+  _eigenstrain_names.resize(verified_eigenstrain_names.size());
+  std::copy(verified_eigenstrain_names.begin(),
+            verified_eigenstrain_names.end(),
+            _eigenstrain_names.begin());
+
+  Moose::out << COLOR_CYAN << "*** Automatic Eigenstrain Names ***"
+             << "\n"
+             << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
+             << COLOR_DEFAULT;
 }
 
 void

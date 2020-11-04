@@ -32,6 +32,8 @@ public:
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
                                  const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
 
+  virtual bool substeppingCapabilityEnabled() override;
+
 protected:
   virtual void computeStressInitialize(const ADReal & effective_trial_stress,
                                        const ADRankFourTensor & elasticity_tensor) override;

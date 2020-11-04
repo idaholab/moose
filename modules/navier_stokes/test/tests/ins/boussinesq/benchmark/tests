@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#15099'
+  design = 'INSADBoussinesqBodyForce.md'
+  [1e3]
+    type = Exodiff
+    input = benchmark.i
+    exodiff = 1e3.e
+    cli_args = 'rayleigh=1e3 Outputs/file_base=1e3'
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e3.'
+    valgrind = 'none'
+    heavy = True
+  []
+  [1e4]
+    type = Exodiff
+    input = benchmark.i
+    exodiff = 1e4.e
+    cli_args = 'rayleigh=1e4 Outputs/file_base=1e4'
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e4.'
+    valgrind = 'none'
+    heavy = True
+  []
+  [1e5]
+    type = Exodiff
+    input = benchmark.i
+    exodiff = 1e5.e
+    cli_args = 'rayleigh=1e5 Outputs/file_base=1e5'
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e5.'
+    valgrind = 'none'
+    heavy = True
+  []
+  [1e6]
+    type = Exodiff
+    input = benchmark.i
+    exodiff = 1e6.e
+    cli_args = 'rayleigh=1e6 Outputs/file_base=1e6'
+    requirement = 'The system shall be able to reproduce benchmark results for a Rayleigh number of 1e6.'
+    abs_zero = 1e-9
+    valgrind = 'none'
+    heavy = True
+  []
+[]

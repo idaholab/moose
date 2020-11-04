@@ -9,3 +9,8 @@ for MGR in "${MGR_ARY[@]}"; do
         ./${MGR}_installs.sh
     fi
 done
+
+# Do pip3 installs
+pip3 install \
+    python-consul \
+    python-nomad

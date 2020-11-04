@@ -92,3 +92,9 @@ PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
 
   return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
 }
+
+bool
+PowerLawCreepStressUpdate::substeppingCapabilityEnabled()
+{
+  return getParam<bool>("use_substep");
+}

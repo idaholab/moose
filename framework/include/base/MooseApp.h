@@ -794,6 +794,13 @@ public:
   }
   ///@}
 
+  /**
+   * Whether this application should by default error on Jacobian nonzero reallocations. The
+   * application level setting can always be overridden by setting the \p
+   * error_on_jacobian_nonzero_reallocation parameter in the \p Problem block of the input file
+   */
+  virtual bool errorOnJacobianNonzeroReallocation() const { return false; }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -1076,9 +1083,6 @@ private:
   /// Whether the mesh generator MeshBase has been popped off its storage container and is no
   /// longer accessible
   bool _popped_final_mesh_generator;
-
-  /// Whether geometric relationship managers were already attached
-  bool _geometric_rms_attached;
 
   bool _profiling = false;
 

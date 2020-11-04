@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "NavierStokesApp.h"
 
-class NavierStokesTestApp : public MooseApp
+class NavierStokesTestApp : public NavierStokesApp
 {
 public:
   static InputParameters validParams();

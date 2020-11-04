@@ -29,7 +29,8 @@ apt-get install -y \
   bison \
   flex \
   libboost-all-dev \
-  emacs
+  emacs \
+  libgtest-dev
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*

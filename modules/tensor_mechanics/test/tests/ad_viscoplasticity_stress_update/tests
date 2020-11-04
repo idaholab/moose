@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13494'
-  design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultiplePorousInelasticStress.md'
+  design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
   [./regular_creep]
     type = CSVDiff
     input = creep.i
@@ -26,7 +26,7 @@
     input = creep.i
     csvdiff = creep_out.csv
     prereq = regular_creep-jac
-    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultiplePorousInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress.'
+    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress.'
   [../]
   [./porous_creep-jac]
     type = 'PetscJacobianTester'

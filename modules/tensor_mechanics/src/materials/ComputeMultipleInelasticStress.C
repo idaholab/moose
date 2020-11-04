@@ -477,6 +477,17 @@ ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number,
                                        _elastic_strain_old[_qp],
                                        (jac && _tangent_computation_flag[model_number]),
                                        consistent_tangent_operator);
+  else if (_models[model_number]->substeppingCapabilityEnabled() &&
+           (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations))
+    _models[model_number]->updateStateSubstep(elastic_strain_increment,
+                                              inelastic_strain_increment,
+                                              _rotation_increment[_qp],
+                                              _stress[_qp],
+                                              _stress_old[_qp],
+                                              _elasticity_tensor[_qp],
+                                              _elastic_strain_old[_qp],
+                                              (jac && _tangent_computation_flag[model_number]),
+                                              consistent_tangent_operator);
   else
     _models[model_number]->updateState(elastic_strain_increment,
                                        inelastic_strain_increment,

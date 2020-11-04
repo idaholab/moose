@@ -22,6 +22,7 @@ template <typename ComputeValueType>
 class AuxKernelTempl;
 typedef AuxKernelTempl<Real> AuxKernel;
 typedef AuxKernelTempl<RealVectorValue> VectorAuxKernel;
+typedef AuxKernelTempl<RealEigenVector> ArrayAuxKernel;
 class FEProblemBase;
 class TimeIntegrator;
 class AuxScalarKernel;
@@ -165,8 +166,10 @@ protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeNodalVecVars(ExecFlagType type);
+  void computeNodalArrayVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
   void computeElementalVecVars(ExecFlagType type);
+  void computeElementalArrayVars(ExecFlagType type);
 
   template <typename AuxKernelType>
   void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse,
@@ -208,6 +211,7 @@ protected:
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_vars;
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_std_vars;
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_vec_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _nodal_array_vars;
 
   ///@{
   /**
@@ -216,6 +220,7 @@ protected:
   std::vector<std::vector<MooseVariableFieldBase *>> _elem_vars;
   std::vector<std::vector<MooseVariableFieldBase *>> _elem_std_vars;
   std::vector<std::vector<MooseVariableFieldBase *>> _elem_vec_vars;
+  std::vector<std::vector<MooseVariableFieldBase *>> _elem_array_vars;
   ///@}
 
   // Storage for AuxScalarKernel objects
@@ -229,12 +234,18 @@ protected:
   ExecuteMooseObjectWarehouse<VectorAuxKernel> _nodal_vec_aux_storage;
   ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
 
+  // Storage for ArrayAuxKernel objects
+  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _nodal_array_aux_storage;
+  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _elemental_array_aux_storage;
+
   /// Timers
   const PerfID _compute_scalar_vars_timer;
   const PerfID _compute_nodal_vars_timer;
   const PerfID _compute_nodal_vec_vars_timer;
+  const PerfID _compute_nodal_array_vars_timer;
   const PerfID _compute_elemental_vars_timer;
   const PerfID _compute_elemental_vec_vars_timer;
+  const PerfID _compute_elemental_array_vars_timer;
 
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;

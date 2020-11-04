@@ -24,6 +24,7 @@ public:
 protected:
   void actSubdomainChecks();
   void actOutputGeneration();
+  void actEigenstrainNames();
   void actOutputMatProp();
   void actGatherActionParameters();
 
@@ -108,4 +109,9 @@ protected:
   Point _cylindrical_axis_point1;
   Point _cylindrical_axis_point2;
   Point _direction;
+
+  /// automatically gather names of eigenstrain tensors provided by simulation objects
+  const bool _auto_eigenstrain;
+
+  std::vector<MaterialPropertyName> _eigenstrain_names;
 };

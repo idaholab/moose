@@ -88,6 +88,19 @@ public:
                            bool compute_full_tangent_operator,
                            RankFourTensor & tangent_operator) = 0;
 
+  /**
+   * Similar to the updateState function, this method updates the strain and stress for one substep
+   */
+  virtual void updateStateSubstep(RankTwoTensor & strain_increment,
+                                  RankTwoTensor & inelastic_strain_increment,
+                                  const RankTwoTensor & rotation_increment,
+                                  RankTwoTensor & stress_new,
+                                  const RankTwoTensor & stress_old,
+                                  const RankFourTensor & elasticity_tensor,
+                                  const RankTwoTensor & elastic_strain_old,
+                                  bool compute_full_tangent_operator,
+                                  RankFourTensor & tangent_operator);
+
   /// Sets the value of the global variable _qp for inheriting classes
   void setQp(unsigned int qp);
 
@@ -118,6 +131,27 @@ public:
   void resetQpProperties() final {}
   void resetProperties() final {}
   ///@}
+
+  /**
+   * Does the model include the infrastructure for substep decomposition of the
+   * elastic strain initially used to calculate the trial stress guess
+   * Inheriting classes which wish to use the substepping capability should
+   * overwrite this method and set it to return true.
+   */
+  virtual bool substeppingCapabilityEnabled() { return false; }
+
+  /**
+   * Given the elastic strain increment compute the number of substeps required
+   * to bring a substepped trial stress guess distance from the yield surface
+   * into the tolerance specified in the individual child class.
+   */
+  virtual int calculateNumberSubsteps(const RankTwoTensor & /*strain_increment*/) { return 1; }
+
+  /**
+   * Properly set up the incremental calculation storage of the stateful material
+   * properties in the inheriting classes
+   */
+  virtual void storeIncrementalMaterialProperties(){};
 
 protected:
   /// Name used as a prefix for all material properties related to the stress update model.

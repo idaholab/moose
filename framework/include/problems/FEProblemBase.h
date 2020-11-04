@@ -766,6 +766,22 @@ public:
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
 
+  /**
+   * Method for creating an adding an object to the warehouse.
+   *
+   * @tparam T The base object type (registered in the Factory)
+   * @param type String type of the object (registered in the Factory)
+   * @param name Name for the object to be created
+   * @param parameters InputParameters for the object
+   * @param threaded Whether or not to create n_threads copies of the object
+   * @return A vector of shared_ptrs to the added objects
+   */
+  template <typename T>
+  std::vector<std::shared_ptr<T>> addObject(const std::string & type,
+                                            const std::string & name,
+                                            InputParameters & parameters,
+                                            const bool threaded = true);
+
   // Postprocessors /////
   virtual void addPostprocessor(const std::string & pp_name,
                                 const std::string & name,
@@ -2011,6 +2027,14 @@ protected:
    */
   void reinitBecauseOfGhostingOrNewGeomObjects();
 
+  /**
+   * Helper for setting the "_subproblem" and "_sys" parameters in addObject() and
+   * in addUserObject().
+   *
+   * This is needed due to header includes/forward declaration issues
+   */
+  void addObjectParamsHelper(InputParameters & params);
+
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
   unsigned int _cycles_completed;
@@ -2269,4 +2293,26 @@ FEProblemBase::objectExecuteHelper(const std::vector<T *> & objects)
 {
   for (T * obj_ptr : objects)
     obj_ptr->execute();
+}
+
+template <typename T>
+std::vector<std::shared_ptr<T>>
+FEProblemBase::addObject(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters,
+                         const bool threaded)
+{
+  // Add the _subproblem and _sys parameters depending on use_displaced_mesh
+  addObjectParamsHelper(parameters);
+
+  const auto n_threads = threaded ? libMesh::n_threads() : 1;
+  std::vector<std::shared_ptr<T>> objects(n_threads);
+  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+  {
+    std::shared_ptr<T> obj = _factory.create<T>(type, name, parameters, tid);
+    theWarehouse().add(obj);
+    objects[tid] = std::move(obj);
+  }
+
+  return objects;
 }
