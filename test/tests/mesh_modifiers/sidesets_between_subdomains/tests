@@ -4,7 +4,7 @@
   design = Mesh/index.md
 
   [subdomains]
-    requirement = "The system shall support the creating of side identifiers"
+    requirement = "The system shall support the creating of side identifiers between"
 
     [test]
       type = 'Exodiff'
@@ -13,7 +13,7 @@
       exodiff = 'between_in.e'
       recover = false
 
-      detail = "between subdomains;"
+      detail = "subdomains;"
     []
     [vector_test]
       type = 'Exodiff'
@@ -22,7 +22,7 @@
       exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
       recover = false
 
-      detail = "between multiple subdomains; and"
+      detail = "multiple subdomains; and"
     []
     [between_created_subdomain]
       type = 'Exodiff'
@@ -31,7 +31,7 @@
       exodiff = 'between_created_subdomain_in.e'
       recover = false
 
-      detail = "between generated subdomains."
+      detail = "generated subdomains."
     []
   []
 []

@@ -143,7 +143,7 @@
       cli_args = 'Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=l_stable_dirk3'
       max_parallel = 1
 
-      detail = "four stage, L-stable DIRK;"
+      detail = "three stage, L-stable DIRK;"
     []
     [l_stable_dirk4]
       type = 'CSVDiff'

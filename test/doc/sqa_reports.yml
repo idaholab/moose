@@ -37,5 +37,4 @@ Requirements:
         directories:
             - test/tests
         log_testable: WARNING
-        log_duplicate_requirement: WARNING
         show_warning: false

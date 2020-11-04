@@ -1,25 +1,27 @@
 [Tests]
   design = "Restartable.md DataIO.md"
-  [steady]
-    type = 'Exodiff'
-    input = 'steady.i'
-    exodiff = 'steady_out.e'
-    recover = false
+  issues = "#563 #13438"
+  [tests]
+    requirement = "The system shall support executing a"
 
-    issues = "#563 #13438"
-    requirement = "The system shall support outputting a mesh with refinement to Exodus format for restart testing."
+    [steady]
+      type = 'Exodiff'
+      input = 'steady.i'
+      exodiff = 'steady_out.e'
+      recover = false
+
+      detail = "a steady-state problem"
+    []
+
+    [restart_trans_from_steady]
+      type = 'Exodiff'
+      input = 'restart_from_steady.i'
+      exodiff = 'restart_from_steady_out.e'
+      prereq = 'tests/steady'
+
+      detail = "and restarting a transient simulation from the previous solution."
+    []
   []
-
-  [restart_trans_from_steady]
-    type = 'Exodiff'
-    input = 'restart_from_steady.i'
-    exodiff = 'restart_from_steady_out.e'
-    prereq = 'steady'
-
-    issues = "#563 #13438"
-    requirement = "The system shall support restarting a transient simulation from a steady solution file."
-  []
-
   [steady_with_sub]
     type = 'Exodiff'
     input = 'steady_with_sub.i'
@@ -27,7 +29,8 @@
     recover = false
 
     issues = "#13438"
-    requirement = "The system shall support generating checkpoint files for restart testing with sub apps."
+    requirement = "The system shall support generating checkpoint files for restart testing with sub "
+                  "apps."
   []
 
   [restart_trans_from_steady_with_sub]
@@ -37,7 +40,8 @@
     prereq = 'steady_with_sub'
 
     issues = "#13438"
-    requirement = "The system shall support restarting a transient simulation from a steady solution file with sub apps."
+    requirement = "The system shall support restarting a transient simulation from a steady solution "
+                  "file with sub apps."
   []
 
   [steady_with_2subs]
@@ -47,16 +51,19 @@
     recover = false
 
     issues = "#15287"
-    requirement = "The system shall support generating checkpoint files for restart testing with multiple sub apps."
+    requirement = "The system shall support generating checkpoint files for restart testing with "
+                  "multiple sub apps."
   []
 
   [restart_trans_from_steady_with_2subs]
     type = 'Exodiff'
     input = 'restart_trans_with_2subs.i'
-    exodiff = 'restart_trans_with_2subs_out.e restart_trans_with_2subs_out_sub0.e restart_trans_with_2subs_out_sub1.e'
+    exodiff = 'restart_trans_with_2subs_out.e restart_trans_with_2subs_out_sub0.e '
+              'restart_trans_with_2subs_out_sub1.e'
     prereq = 'steady_with_2subs'
 
     issues = "#15287"
-    requirement = "The system shall support restarting a transient simulation from a steady solution file with multiple sub apps."
+    requirement = "The system shall support restarting a transient simulation from a steady solution "
+                  "file with multiple sub apps."
   []
 []

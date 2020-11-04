@@ -3,7 +3,7 @@
   design = Mesh/index.md
 
   [subdomains]
-    requirement = "The system shall support the creating of side identifiers"
+    requirement = "The system shall support the creating of side identifiers surrounding"
 
     [around]
       type = 'Exodiff'
@@ -12,7 +12,7 @@
       exodiff = 'around_in.e'
       recover = false
 
-      detail = "surrounding a subdomain;"
+      detail = "a subdomain;"
     []
 
     [around_normals]
@@ -22,7 +22,7 @@
       exodiff = 'around_normals_in.e'
       recover = false
 
-      detail = "surrounding a subdomain given a direction;"
+      detail = "a subdomain given a direction;"
     []
 
     [around_created_subdomain]
@@ -32,7 +32,7 @@
       exodiff = 'around_created_subdomain_in.e'
       recover = false
 
-      detail = "surrounding a generated subdomain; and"
+      detail = "a generated subdomain; and"
     []
 
     [around_multi_created_subdomain]
@@ -42,7 +42,7 @@
       exodiff = 'around_multi_created_subdomain_in.e'
       recover = false
 
-      detail = "surrounding a multiple generated subdomains"
+      detail = "a multiple generated subdomains"
     []
   []
 []

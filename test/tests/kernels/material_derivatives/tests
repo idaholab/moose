@@ -7,6 +7,6 @@
 
     issues = '#8377'
     design = 'syntax/Kernels/index.md'
-    requirement = 'The system shall have the ability to verify individual Jacobian contributions before they are scaled by other finite element factors in the system.'
+    requirement = 'The system shall have the ability to declare the derivatives of material properties.'
   [../]
 []

@@ -31,28 +31,30 @@
     issues = '#4964'
   []
 
-  [two_coupled_default_1]
-    type = 'Exodiff'
-    input = 'optionally_coupled_twovar.i'
-    exodiff = 'two_coupled_default_1.e'
-    cli_args = 'Outputs/file_base=two_coupled_default_1'
+  [two_coupled]
     requirement = "Coupleable shall provide an interface that allows providing default values for a "
-                  "vector of coupled variables"
+                  "variables that operates"
     design = 'Coupleable.md'
     issues = '#11920'
-  []
 
-  [two_coupled_default_2]
-    type = 'Exodiff'
-    input = 'optionally_coupled_twovar.i'
-    exodiff = 'two_coupled_default_2.e'
-    cli_args = 'Kernels/optional_coupling/v="3 5" Outputs/file_base=two_coupled_default_2'
-    requirement = "Coupleable shall provide an interface that allows providing default values for a "
-                  "vector of coupled variables"
-    design = 'Coupleable.md'
-    issues = '#11920'
-  []
+    [default_1]
+      type = 'Exodiff'
+      input = 'optionally_coupled_twovar.i'
+      exodiff = 'two_coupled_default_1.e'
+      cli_args = 'Outputs/file_base=two_coupled_default_1'
 
+      detail = "with defaults or"
+    []
+
+    [default_2]
+      type = 'Exodiff'
+      input = 'optionally_coupled_twovar.i'
+      exodiff = 'two_coupled_default_2.e'
+      cli_args = 'Kernels/optional_coupling/v="3 5" Outputs/file_base=two_coupled_default_2'
+
+      detail = "a vector of coupled variables."
+    []
+  []
   [two_coupled_default_fail_mixed_input]
     type = 'RunException'
     input = 'optionally_coupled_twovar.i'
@@ -65,26 +67,29 @@
     issues = '#11920'
   []
 
-  [catch_out_of_bound_default_access_coupledValue]
-    type = 'RunException'
-    input = 'optionally_coupled.i'
-    cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u'
-    expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
+  [catch_out_of_bound_default_access]
     requirement = "The system shall report an error when requested default vector value is out of "
-                  "range."
+                  "range and"
     design = 'Coupleable.md'
     issues = '#11920'
-  []
 
-  [catch_out_of_bound_default_access_coupled]
-    type = 'RunException'
-    input = 'optionally_coupled.i'
-    cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u '
-               'Kernels/wrong_index/access_value=false'
-    expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
-    requirement = "The system shall report an error when requested default vector value is out of "
-                  "range."
-    design = 'Coupleable.md'
-    issues = '#11920'
+    [coupledValue]
+      type = 'RunException'
+      input = 'optionally_coupled.i'
+      cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u'
+      expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
+
+      detail = "accessed by name or"
+    []
+
+    [coupled]
+      type = 'RunException'
+      input = 'optionally_coupled.i'
+      cli_args = 'Kernels/wrong_index/type=CoupledForceWrongIndex Kernels/wrong_index/variable=u '
+                 'Kernels/wrong_index/access_value=false'
+      expect_err = 'v: component 2 is out of range for this variable \(max 1\)'
+
+      detail = "accessed by index."
+    []
   []
 []

@@ -1,39 +1,39 @@
 [Tests]
-  [./face_info_quad]
-    type = 'CSVDiff'
-    input = 'face_info_quads.i'
-    max_parallel = 1
-    csvdiff = 'face_info_quads_out_face_info_0001.csv'
-    recover = false
-
-    requirement = 'The system shall compute and store internal face data on request.'
+  [face_info]
+    requirement = 'The system shall compute and store internal face data on request for'
     issues = '#14549'
-    design = 'MooseMesh.md'
-  [../]
+    design = 'Mesh/index.md'
 
-  [./face_info_tri]
-    type = 'CSVDiff'
-    input = 'face_info_tri.i'
-    max_parallel = 1
-    csvdiff = 'face_info_tri_out_face_info_0001.csv'
-    recover = false
+    [quad]
+      type = 'CSVDiff'
+      input = 'face_info_quads.i'
+      max_parallel = 1
+      csvdiff = 'face_info_quads_out_face_info_0001.csv'
+      recover = false
 
-    requirement = 'The system shall compute and store internal face data on request.'
-    issues = '#14549'
-    design = 'MooseMesh.md'
-  [../]
+      detail = "quadrilateral elements,"
+    []
 
-  [./face_info_two_region_quads]
-    type = 'CSVDiff'
-    input = 'face_info_two_region_quads.i'
-    max_parallel = 1
-    csvdiff = 'face_info_two_region_quads_out_face_info_1_0001.csv
-               face_info_two_region_quads_out_face_info_2_0001.csv
-               face_info_two_region_quads_out_face_info_3_0001.csv'
-    recover = false
+    [tri]
+      type = 'CSVDiff'
+      input = 'face_info_tri.i'
+      max_parallel = 1
+      csvdiff = 'face_info_tri_out_face_info_0001.csv'
+      recover = false
 
-    requirement = 'The system shall compute and store internal face data on request.'
-    issues = '#14549'
-    design = 'MooseMesh.md'
-  [../]
+      detail = "triangular elements, and"
+    []
+
+    [two_region_quads]
+      type = 'CSVDiff'
+      input = 'face_info_two_region_quads.i'
+      max_parallel = 1
+      csvdiff = 'face_info_two_region_quads_out_face_info_1_0001.csv '
+                'face_info_two_region_quads_out_face_info_2_0001.csv '
+                'face_info_two_region_quads_out_face_info_3_0001.csv'
+      recover = false
+
+      detail = "quadrilateral elements in multiple regions."
+    []
+  []
 []
