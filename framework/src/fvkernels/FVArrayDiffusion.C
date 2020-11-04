@@ -16,11 +16,12 @@ FVArrayDiffusion::validParams()
 {
   InputParameters params = FVArrayFluxKernel::validParams();
   params.addParam<MaterialPropertyName>("coeff",
-                                        "The name of the diffusivity, "
-                                        "can be scalar, vector, or matrix.");
+                                        "The name of the diffusivity. "
+                                        "Can be scalar, vector, or matrix.");
   params.addClassDescription(
-      "The array Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
-      "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+      "The array Laplacian operator ($-\\nabla \\cdot k \\nabla u$), with the weak "
+      "form of $\\int k \\nabla u \\cdot \\vec{n} dA$. operating on a vector-form \"u\" and "
+      "\"k\".");
   return params;
 }
 

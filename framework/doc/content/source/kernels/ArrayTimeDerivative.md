@@ -8,11 +8,11 @@ This array kernel implements the following piece of a weak form:
 \end{equation}
 where $\vec{u}^\ast$ is the test function, $\dot{\vec{u}}$ is time derivative of the array of finite element solutions ($\dot{\vec{u}} = \left[\frac{\partial u_1}{\partial t},\frac{\partial u_2}{\partial t},...\right]^T$), and $\mathbf{T}$ is a matrix of the time derivative coefficients ($(\mathbf{T})_{n,m} = T_{n,m}$).
 
-Similarly as showed in [ArrayDiffusion.md], we can rearrange it into
+Similarly as showed in [/ArrayDiffusion.md], we can rearrange it into
 \begin{equation}
 (\vec{u}^\ast, \mathbf{T} \dot{\vec{u}}) = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p\vec{u}_i^\ast \underline{\mathbf{T}_{\text{qp}} \dot{\vec{u}}_{\text{qp}} b_{i,\text{qp}}},
 \end{equation}
-where the underlined term is the vector provided by [ArrayTimeDerivative::computeQpResidual](ArrayTimeDerivative.C).
+where the underlined term is the vector provided by [ArrayTimeDerivative::computeQpResidual](/ArrayTimeDerivative.C).
 Detailed explanations on the notations can be found in [ArrayDiffusion.md].
 
 In general, the reaction coefficient $\mathbf{T}$ is a square matrix with the size of the number of components.
@@ -25,7 +25,7 @@ The local Jacobian can be found in the following equation:
 \begin{equation}
 J_{n,m,i,j} = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{j=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p u_{n,i}^\ast \underline{T_{n,m,\text{qp}} b_{j,\text{qp}} b_{i,\text{qp}} \frac{\partial \dot{u}_{m,j}}{\partial u_{m,j}}},
 \end{equation}
-where $n$ and $m$ are the component row and column, respectively. The underlined part is the local Jacobian evaluated by [ArrayTimeDerivative::computeQpJacobian](ArrayTimeDerivative.C) and [ArrayTimeDerivative::computeQpOffDiagJacobian](ArrayTimeDerivative.C).
+where $n$ and $m$ are the component row and column, respectively. The underlined part is the local Jacobian evaluated by [ArrayTimeDerivative::computeQpJacobian](/ArrayTimeDerivative.C) and [ArrayTimeDerivative::computeQpOffDiagJacobian](/ArrayTimeDerivative.C).
 
 ## Example Input Syntax
 

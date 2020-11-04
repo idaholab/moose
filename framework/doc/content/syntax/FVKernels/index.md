@@ -11,10 +11,6 @@ For the finite volume method (FVM), `FVKernels` are the base class for `FVFluxKe
   derivative so that Gauss' theorem cannot be applied. These terms include
   time derivatives, externally imposed source terms, and reaction terms.
 
-Note: Currently, the `FVElementalKernel` category only contains kernels
-(subclasses) representing time derivatives. Kernels representing externally
-imposed sources or reaction terms will be added in the near future.
-
 !alert note
 In the documentation that follows, we will use '-' and '+' to represent
 different sides of a face. This is purely notation. In the MOOSE code base, the
@@ -206,3 +202,74 @@ This kernel implements the term:
 
 The implementation is identical to the implementation of FEM kernels except that
 the FVM does not require multiplication by the test function.
+
+## FV Array Kernels
+
+Support for array variables/kernels has been implemented patterned after this
+feature as implemented in the FE systems (see [ArrayMooseVariable.md]).  Array
+variables/kernels are just a convenient way to represent a set of several
+"homogenous" variables/equations together as a single variable and set of
+kernels instead of having to create a separate variable for each of, say,
+several diffusing species.  Corresponding kernels and boundary conditions are
+provided including the following base classes:
+
+* FVArrayTimeKernel
+* FVArrayFluxKernel
+* FVArrayElementalKernel
+* FVArrayFluxBC
+* FVArrayDirichletBC
+
+A few other basic FV array kernels are provided including:
+
+* [FVArrayDiffusion.md]
+* [FVArrayReaction.md]
+
+We can use array kernels to solve a simple equation like this:
+
+\begin{equation}
+  \nabla \cdot \vec{k} \nabla \vec{u} = 0
+\end{equation}
+
+With corresponding (vector) dirichlet BCs.  Let `u` (the dependent variable)
+and `k` (a diffusion coefficient) be vectors with 2 components.  This is equivalent to the equations:
+
+\begin{equation}
+  \nabla \cdot \vec{k_1} \nabla \vec{u_1} = 0
+  \nabla \cdot \vec{k_2} \nabla \vec{u_2} = 0
+\end{equation}
+
+The input file representing these equations would have the following variables section:
+
+!listing test/tests/fvkernels/array_kernels/diffusion.i
+         block=Variables
+         id=array1
+         caption=FV array problem variables block.
+
+Note the `components=2` - this is what triggers the variable to become and
+array variable.  The diffusion kernel for both equations would be represented
+by the following object:
+
+!listing test/tests/fvkernels/array_kernels/diffusion.i
+         block=FVKernels
+         id=array2
+         caption=FV array problem kernels block.
+
+Note that the diffusion coefficient can be either a scalar, array, or matrix -
+to represent equivalent diffusion, independent diffusion coefficients for each
+(sub) variable, or full cross-diffusion between the (sub) variables.  Here it
+is just a vector for independent coefficients for each of the two variables:
+
+!listing test/tests/fvkernels/array_kernels/diffusion.i
+         block=Materials
+         id=array3
+         caption=FV array problem materials block.
+
+Note that the number of coefficient values provided here corresponds exactly
+with the number of variable components (2).  The same is true for the BCs.
+The BC on each side is represented by a single object as well:
+
+!listing test/tests/fvkernels/array_kernels/diffusion.i
+         block=FVBCs
+         id=array4
+         caption=FV array problem BCs block.
+
