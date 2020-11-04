@@ -46,7 +46,7 @@ protected:
   void readEBSDHeader();
 
   /// Name of the file containing the EBSD data
-  std::string _filename;
+  const FileName & _filename;
 
   /// EBSD data file mesh information
   Geometry _geometry;

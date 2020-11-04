@@ -55,7 +55,7 @@ EBSDMeshGenerator::readEBSDHeader()
     paramError("filename", "Can't open EBSD file: ", _filename);
 
   // Labels to look for in the header
-  std::vector<std::string> labels = {
+  const std::vector<std::string> labels = {
       "x_step", "x_dim", "y_step", "y_dim", "z_step", "z_dim", "x_min", "y_min", "z_min"};
 
   // Dimension variables to store once they are found in the header
