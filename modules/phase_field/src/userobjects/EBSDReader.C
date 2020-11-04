@@ -28,6 +28,9 @@ EBSDReader::validParams()
       "custom_columns", 0, "Number of additional custom data columns to read from the EBSD file");
   params.addParam<unsigned int>("bins", 20, "Number of bins to segregate quaternions");
   params.addParam<Real>("L_norm", 1, "Specifies the type of average the user intends to perform");
+  params.addParam<std::string>("ebsd_meshgenerator",
+                               "Specify the name of the EBSDMeshGenerator. The EBSDReader can "
+                               "autodetect this, if only one such MeshGenerator exists.");
   return params;
 }
 
@@ -61,33 +64,76 @@ EBSDReader::readFile()
   if (_app.isRecovering())
     return;
 
-  // Fetch and check mesh
-  EBSDMesh * mesh = dynamic_cast<EBSDMesh *>(&_mesh);
-  if (mesh == NULL)
-    mooseError("Please use an EBSDMesh in your simulation.");
-  std::ifstream stream_in(mesh->getEBSDFilename().c_str());
-  if (!stream_in)
-    mooseError("Can't open EBSD file: ", mesh->getEBSDFilename());
+  std::string ebsd_filename;
+  EBSDMeshGenerator::Geometry geometry;
 
-  const EBSDMesh::EBSDMeshGeometry & g = mesh->getEBSDGeometry();
+  // Fetch and check mesh or meshgenerators
+  EBSDMesh * mesh = dynamic_cast<EBSDMesh *>(&_mesh);
+  if (mesh != NULL)
+  {
+    ebsd_filename = mesh->getEBSDFilename();
+    geometry = mesh->getEBSDGeometry();
+  }
+  else
+  {
+    std::string ebsd_meshgenerator_name;
+    if (isParamValid("ebsd_meshgenerator"))
+      ebsd_meshgenerator_name = getParam<std::string>("ebsd_meshgenerator");
+    else
+    {
+      auto meshgenerator_names = _app.getMeshGeneratorNames();
+      for (auto & mgn : meshgenerator_names)
+      {
+        const EBSDMeshGenerator * emg =
+            dynamic_cast<const EBSDMeshGenerator *>(&_app.getMeshGenerator(mgn));
+        if (emg)
+        {
+          if (!ebsd_meshgenerator_name.empty())
+            mooseError("Found multiple EBSDMeshGenerator objects (",
+                       ebsd_meshgenerator_name,
+                       " and ",
+                       mgn,
+                       "). Use the 'ebsd_meshgenerator' parameter to specify which one to use.");
+          ebsd_meshgenerator_name = mgn;
+        }
+      }
+
+      if (ebsd_meshgenerator_name.empty())
+        mooseError("Failed to autodetect an EBSDMeshGenerator (or a deprecated EBSDMesh object).");
+    }
+
+    // get the selected or detected mesh generator
+    const EBSDMeshGenerator * emg =
+        dynamic_cast<const EBSDMeshGenerator *>(&_app.getMeshGenerator(ebsd_meshgenerator_name));
+    if (!emg)
+      paramError("ebsd_meshgenerator", "No valid EBSDMeshGenerator object found.");
+
+    ebsd_filename = emg->getEBSDFilename();
+    geometry = emg->getEBSDGeometry();
+  }
+
+  std::ifstream stream_in(ebsd_filename.c_str());
+  if (!stream_in)
+    mooseError("Can't open EBSD file: ", ebsd_filename);
+
   // Copy file header data from the EBSDMesh
-  _dx = g.d[0];
-  _nx = g.n[0];
-  _minx = g.min[0];
+  _dx = geometry.d[0];
+  _nx = geometry.n[0];
+  _minx = geometry.min[0];
   _maxx = _minx + _dx * _nx;
 
-  _dy = g.d[1];
-  _ny = g.n[1];
-  _miny = g.min[1];
+  _dy = geometry.d[1];
+  _ny = geometry.n[1];
+  _miny = geometry.min[1];
   _maxy = _miny + _dy * _ny;
 
-  _dz = g.d[2];
-  _nz = g.n[2];
-  _minz = g.min[2];
+  _dz = geometry.d[2];
+  _nz = geometry.n[2];
+  _minz = geometry.min[2];
   _maxz = _minz + _dz * _nz;
 
   // Resize the _data array
-  unsigned total_size = g.dim < 3 ? _nx * _ny : _nx * _ny * _nz;
+  unsigned total_size = geometry.dim < 3 ? _nx * _ny : _nx * _ny * _nz;
   _data.resize(total_size);
 
   std::string line;
@@ -115,7 +161,7 @@ EBSDReader::readFile()
           mooseError("Unable to read in EBSD custom data column #", i);
 
       if (x < _minx || y < _miny || x > _maxx || y > _maxy ||
-          (g.dim == 3 && (z < _minz || z > _maxz)))
+          (geometry.dim == 3 && (z < _minz || z > _maxz)))
         mooseError("EBSD Data ouside of the domain declared in the header ([",
                    _minx,
                    ':',
@@ -129,7 +175,7 @@ EBSDReader::readFile()
                    ':',
                    _maxz,
                    "]) dim=",
-                   g.dim,
+                   geometry.dim,
                    "\n",
                    line);
 

@@ -10,8 +10,10 @@
 []
 
 [Mesh]
-  type = EBSDMesh
-  filename = ebsd_40x40_2_phase.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = ebsd_40x40_2_phase.txt
+  []
 []
 
 [GlobalParams]
@@ -20,50 +22,50 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     phase = 2
     output_adjacency_matrix = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     polycrystal_ic_uo = ebsd
     remap_grains = false
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./var_indices]
+  [var_indices]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./var_indices]
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [Executioner]

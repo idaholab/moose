@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "EBSDMesh.h"
+#include "EBSDMeshGenerator.h"
 #include "MooseApp.h"
 
 #include <fstream>
 
-registerMooseObject("PhaseFieldApp", EBSDMesh);
+registerMooseObject("PhaseFieldApp", EBSDMeshGenerator);
 
 InputParameters
-EBSDMesh::validParams()
+EBSDMeshGenerator::validParams()
 {
-  InputParameters params = GeneratedMesh::validParams();
+  InputParameters params = GeneratedMeshGenerator::validParams();
   params.addClassDescription("Mesh generated from a specified DREAM.3D EBSD data file.");
   params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
   params.addParam<unsigned int>(
@@ -39,22 +39,15 @@ EBSDMesh::validParams()
   return params;
 }
 
-EBSDMesh::EBSDMesh(const InputParameters & parameters)
-  : GeneratedMesh(parameters), _filename(getParam<FileName>("filename"))
+EBSDMeshGenerator::EBSDMeshGenerator(const InputParameters & parameters)
+  : GeneratedMeshGenerator(parameters), _filename(getParam<FileName>("filename"))
 {
-  mooseDeprecated(
-      "EBSDMesh is deprecated, please use the EBSDMeshGenerator instead. For example:\n\n[Mesh]\n  "
-      "type = EBDSMesh\n  filename = my_ebsd_data.dat\n[]\n\nbecomes\n\n[Mesh]\n  [ebsd_mesh]\n    "
-      "type = EBDSMeshGenerator\n    filename = my_ebsd_data.dat\n  []\n[]");
-
   if (_nx != 1 || _ny != 1 || _nz != 1)
     mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
 }
 
-EBSDMesh::~EBSDMesh() {}
-
 void
-EBSDMesh::readEBSDHeader()
+EBSDMeshGenerator::readEBSDHeader()
 {
   std::ifstream stream_in(_filename.c_str());
 
@@ -62,7 +55,7 @@ EBSDMesh::readEBSDHeader()
     paramError("filename", "Can't open EBSD file: ", _filename);
 
   // Labels to look for in the header
-  std::vector<std::string> labels = {
+  const std::vector<std::string> labels = {
       "x_step", "x_dim", "y_step", "y_dim", "z_step", "z_dim", "x_min", "y_min", "z_min"};
 
   // Dimension variables to store once they are found in the header
@@ -133,8 +126,8 @@ EBSDMesh::readEBSDHeader()
   _geometry.dim = dim;
 }
 
-void
-EBSDMesh::buildMesh()
+std::unique_ptr<MeshBase>
+EBSDMeshGenerator::generate()
 {
   readEBSDHeader();
 
@@ -159,7 +152,7 @@ EBSDMesh::buildMesh()
     for (unsigned int j = 0; j < _geometry.dim; ++j)
     {
       if (nr[j] % 2 != 0)
-        mooseError("EBSDMesh error. Requested uniform_refine levels not possible.");
+        mooseError("EBSDMeshGenerator error. Requested uniform_refine levels not possible.");
       nr[j] /= 2;
     }
 
@@ -167,5 +160,5 @@ EBSDMesh::buildMesh()
   _ny = nr[1];
   _nz = nr[2];
 
-  GeneratedMesh::buildMesh();
+  return GeneratedMeshGenerator::generate();
 }

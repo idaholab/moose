@@ -1,6 +1,8 @@
 [Mesh]
-  type = EBSDMesh
-  filename = EBSD_split_grain.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = EBSD_split_grain.txt
+  []
 []
 
 [GlobalParams]
@@ -9,147 +11,147 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     enable_var_coloring = true
     output_adjacency_matrix = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     flood_entity_type = ELEMENTAL
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = ebsd
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
-  [./unique_grains]
+  [bnds]
+  []
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ghost_elements]
+  []
+  [ghost_elements]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./halos]
+  []
+  [halos]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./ebsd_grains]
+  []
+  [ebsd_grains]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
-  [./ghost_elements]
+  []
+  [ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
-  [./halos]
+  []
+  [halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
-  [./grain_aux]
+  []
+  [grain_aux]
     type = EBSDReaderPointDataAux
     variable = ebsd_grains
     ebsd_reader = ebsd_reader
     data_name = 'feature_id'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Modules]
-  [./PhaseField]
-    [./EulerAngles2RGB]
+  [PhaseField]
+    [EulerAngles2RGB]
       crystal_structure = cubic
       euler_angle_provider = ebsd_reader
       grain_tracker = grain_tracker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     # T = 500 # K
     type = GBEvolution
     T = 500
-    wGB = 0.6               # um
-    GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997
-    Q = 0.23                # Migration energy in eV
-    GBenergy = 0.708        # GB energy in J/m^2
-    molar_volume = 7.11e-6  # Molar volume in m^3/mol
+    wGB = 0.6 # um
+    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
+    Q = 0.23 # Migration energy in eV
+    GBenergy = 0.708 # GB energy in J/m^2
+    molar_volume = 7.11e-6 # Molar volume in m^3/mol
     length_scale = 1.0e-6
     time_scale = 1.0e-6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./n_elements]
+  [n_elements]
     type = NumElems
     execute_on = 'initial timestep_end'
-  [../]
-  [./n_nodes]
+  []
+  [n_nodes]
     type = NumNodes
     execute_on = 'initial timestep_end'
-  [../]
-  [./DOFs]
+  []
+  [DOFs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Executioner]
@@ -168,13 +170,13 @@
   start_time = 0.0
   num_steps = 2
 
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     cutback_factor = 0.9
     dt = 10.0
     growth_factor = 1.1
     optimal_iterations = 7
-  [../]
+  []
 []
 
 [Outputs]
