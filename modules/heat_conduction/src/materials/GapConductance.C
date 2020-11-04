@@ -215,7 +215,8 @@ void
 GapConductance::initialSetup()
 {
   /// set generated from the passed in vector of subdomain names
-  const auto & check_subdomains = blockRestricted() ? blockIDs() : meshBlockIDs();
+  const auto & check_subdomains =
+      blockRestricted() && !blockIDs().empty() ? blockIDs() : meshBlockIDs();
   if (check_subdomains.empty())
     mooseError("No subdomains found");
 
