@@ -79,6 +79,7 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
         raise ValueError(msg)
     elif file_list is None:
         root = mooseutils.git_root_dir()
+        ver = mooseutils.git_version()
         file_list = mooseutils.git_ls_files(root, recurse_submodules=True)
 
     # Storage container for duplicate detection
