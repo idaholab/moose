@@ -78,22 +78,21 @@ MultiVariableReturnMappingSolution::MultiVariableReturnMappingSolution(
 
 Real
 MultiVariableReturnMappingSolution::minimumPermissibleValue(
-    const RankTwoTensor & /*effective_trial_stress*/) const
+    const DenseVector<Real> & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::lowest();
 }
 
 Real
 MultiVariableReturnMappingSolution::maximumPermissibleValue(
-    const RankTwoTensor & /*effective_trial_stress*/) const
+    const DenseVector<Real> & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::max();
 }
 
 void
-MultiVariableReturnMappingSolution::returnMappingSolve(const RankTwoTensor & effective_trial_stress,
-                                                       Real & scalar,
-                                                       const ConsoleStream & console)
+MultiVariableReturnMappingSolution::returnMappingSolve(
+    const DenseVector<Real> & effective_trial_stress, Real & scalar, const ConsoleStream & console)
 {
   // construct the stringstream here only if the debug level is set to ALL
   std::unique_ptr<std::stringstream> iter_output =
@@ -152,7 +151,7 @@ MultiVariableReturnMappingSolution::returnMappingSolve(const RankTwoTensor & eff
 }
 
 MultiVariableReturnMappingSolution::SolveState
-MultiVariableReturnMappingSolution::internalSolve(const RankTwoTensor & effective_trial_stress,
+MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effective_trial_stress,
                                                   Real & scalar,
                                                   std::stringstream * iter_output)
 {
@@ -323,12 +322,13 @@ MultiVariableReturnMappingSolution::convergedAcceptable(const unsigned int it,
 }
 
 void
-MultiVariableReturnMappingSolution::outputIterationStep(std::stringstream * iter_output,
-                                                        const unsigned int it,
-                                                        const RankTwoTensor effective_trial_stress,
-                                                        const Real scalar,
-                                                        const Real residual,
-                                                        const Real reference_residual)
+MultiVariableReturnMappingSolution::outputIterationStep(
+    std::stringstream * iter_output,
+    const unsigned int it,
+    const DenseVector<Real> effective_trial_stress,
+    const Real scalar,
+    const Real residual,
+    const Real reference_residual)
 {
   if (iter_output)
   {

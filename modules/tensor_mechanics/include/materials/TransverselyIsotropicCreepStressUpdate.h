@@ -39,11 +39,11 @@ public:
                                  const MaterialProperty<RankTwoTensor> & strain_rate) override;
 
 protected:
-  virtual void computeStressInitialize(const RankTwoTensor & effective_trial_stress,
+  virtual void computeStressInitialize(const DenseVector<Real> & effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
-  virtual Real computeResidual(const RankTwoTensor & effective_trial_stress,
+  virtual Real computeResidual(const DenseVector<Real> & effective_trial_stress,
                                const Real scalar) override;
-  virtual Real computeDerivative(const RankTwoTensor & effective_trial_stress,
+  virtual Real computeDerivative(const DenseVector<Real> & effective_trial_stress,
                                  const Real scalar) override;
 
   /// Flag to determine if temperature is supplied by the user

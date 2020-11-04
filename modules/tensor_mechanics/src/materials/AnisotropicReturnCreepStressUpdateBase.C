@@ -52,7 +52,7 @@ AnisotropicReturnCreepStressUpdateBase::propagateQpStatefulProperties()
 
 Real
 AnisotropicReturnCreepStressUpdateBase::computeStressDerivative(
-    const RankTwoTensor & effective_trial_stress, const Real scalar)
+    const DenseVector<Real> & effective_trial_stress, const Real scalar)
 {
   return -(computeDerivative(effective_trial_stress, scalar) + 1.0) / _three_shear_modulus;
 }

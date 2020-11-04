@@ -97,34 +97,35 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
                                            bool compute_full_tangent_operator,
                                            RankFourTensor & tangent_operator)
 {
-  // compute the deviatoric trial stress and trial strain from the current intermediate
-  // configuration
+  // Prepare initial trial stress for generalized return mapping
   RankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
 
-  // compute the effective trial stress
-  Real dev_trial_stress_squared =
-      deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+  DenseVector<Real> stress_dev(6);
+  stress_dev(0) = deviatoric_trial_stress(0, 0);
+  stress_dev(1) = deviatoric_trial_stress(1, 1);
+  stress_dev(2) = deviatoric_trial_stress(2, 2);
+  stress_dev(3) = deviatoric_trial_stress(0, 1);
+  stress_dev(4) = deviatoric_trial_stress(1, 2);
+  stress_dev(5) = deviatoric_trial_stress(0, 2);
 
-  // TODO FIXME: What's the effective trial stress tensor?
-  // Trial stress is simply the deviatoric part of current stress (stress_new)
-  RankTwoTensor effective_trial_stress = stress_new.deviatoric();
+  DenseMatrix<Real> rotation_matrix_transpose(6, 6);
+  _eigenvectors_hill.get_transpose(rotation_matrix_transpose);
 
-  // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
+  DenseVector<Real> stress_dev_hat(6);
+  rotation_matrix_transpose.vector_mult(stress_dev_hat, stress_dev);
 
-  computeStressInitialize(effective_trial_stress, elasticity_tensor);
+  computeStressInitialize(stress_dev_hat, elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   Real scalar_effective_inelastic_strain = 0.0;
-  RankTwoTensor zero_tensor(RankTwoTensor::initNone);
 
-  if (!(effective_trial_stress == zero_tensor)) // There was a fuzzy equal here FIXME
+  if (!(stress_dev_hat.l2_norm() == 0.0)) // There was a fuzzy equal here FIXME
   {
-    returnMappingSolve(effective_trial_stress, scalar_effective_inelastic_strain, _console);
+    returnMappingSolve(stress_dev_hat, scalar_effective_inelastic_strain, _console);
     if (scalar_effective_inelastic_strain != 0.0)
       inelastic_strain_increment =
           deviatoric_trial_stress *
-          (1.5 * scalar_effective_inelastic_strain / effective_trial_stress.L2norm()); // FIXME
+          (1.5 * scalar_effective_inelastic_strain / stress_dev_hat.l2_norm()); // FIXME
     else
       inelastic_strain_increment.zero();
   }
@@ -165,8 +166,7 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
       const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
       const RankFourTensor flow_direction_dyad = flow_direction.outerProduct(flow_direction);
-      const Real deriv =
-          computeStressDerivative(effective_trial_stress, scalar_effective_inelastic_strain);
+      const Real deriv = computeStressDerivative(stress_dev_hat, scalar_effective_inelastic_strain);
       const Real scalar_one = _three_shear_modulus * scalar_effective_inelastic_strain /
                               std::sqrt(1.5) / norm_dev_stress;
 
@@ -178,18 +178,19 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
 Real
 AnisotropicReturnStressUpdate::computeReferenceResidual(
-    const RankTwoTensor & effective_trial_stress, const Real scalar_effective_inelastic_strain)
+    const DenseVector<Real> & effective_trial_stress, const Real scalar_effective_inelastic_strain)
 {
   // FIXME: Convert to tensor form
-  return effective_trial_stress.L2norm() / _three_shear_modulus - scalar_effective_inelastic_strain;
+  return effective_trial_stress.l2_norm() / _three_shear_modulus -
+         scalar_effective_inelastic_strain;
 }
 
 Real
 AnisotropicReturnStressUpdate::maximumPermissibleValue(
-    const RankTwoTensor & effective_trial_stress) const
+    const DenseVector<Real> & effective_trial_stress) const
 {
   // FIXME: Convert to tensor form
-  return effective_trial_stress.L2norm() / _three_shear_modulus;
+  return effective_trial_stress.l2_norm() / _three_shear_modulus;
 }
 
 Real
