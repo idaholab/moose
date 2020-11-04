@@ -3,11 +3,12 @@
 #include "GeometricalComponent.h"
 #include "FlowModel.h"
 #include "FlowConnection.h"
+#include "GravityInterface.h"
 
 /**
  * Base class for geometrical components that have fluid flow
  */
-class GeometricalFlowComponent : public GeometricalComponent
+class GeometricalFlowComponent : public GeometricalComponent, public GravityInterface
 {
 public:
   GeometricalFlowComponent(const InputParameters & parameters);
@@ -29,6 +30,13 @@ public:
     {
     }
   };
+
+  /**
+   * Gets the gravity angle for this component
+   *
+   * @return gravity angle for this component
+   */
+  virtual const Real & getGravityAngle() const { return _gravity_angle; }
 
   /**
    * Gets the vector of connections of an end type for this component
@@ -67,6 +75,9 @@ public:
 
 protected:
   virtual bool usingSecondOrderMesh() const override;
+
+  /// Angle between orientation vector and gravity vector, in degrees
+  const Real _gravity_angle;
 
   /// Spatial discretization
   const FlowModel::ESpatialDiscretizationType & _spatial_discretization;

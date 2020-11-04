@@ -32,13 +32,6 @@ public:
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
 
-  /**
-   * Gets the gravity angle for this component
-   *
-   * @return gravity angle for this component
-   */
-  virtual const Real & getGravityAngle() const { return _gravity_angle; }
-
   const std::vector<dof_id_type> & getNodeIDs() const;
 
   const std::vector<dof_id_type> & getElementIDs() const;
@@ -91,9 +84,6 @@ protected:
 
   /// Direction this flow channel is going to
   const RealVectorValue & _dir;
-
-  /// Angle between orientation vector and gravity vector, in degrees
-  const Real _gravity_angle;
 
   /// Rotation of the component around x-axis in non-displaced space
   const Real & _rotation;

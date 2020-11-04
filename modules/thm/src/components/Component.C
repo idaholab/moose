@@ -8,8 +8,6 @@ InputParameters
 Component::validParams()
 {
   InputParameters params = THMObject::validParams();
-  params.addParam<RealVectorValue>(
-      "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector [m/s^2]");
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
@@ -27,11 +25,6 @@ Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
     LoggingInterface(getCheckedPointerParam<THMProblem *>("_thm_problem")->log()),
     NamingInterface(),
-
-    _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
-    _gravity_magnitude(_gravity_vector.norm()),
-    _gravity_is_zero(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)),
-    _gravity_direction(_gravity_is_zero ? RealVectorValue(0.0, 0.0, 0.0) : _gravity_vector.unit()),
 
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
