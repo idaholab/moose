@@ -31,7 +31,7 @@ protected:
   /// Liquid phase number
   const unsigned _liquid_ph_num;
 
-  /// Stringified liquidphase number
+  /// Stringified liquid phase number
   const std::string _liquid_phase;
 
   /// Initial order

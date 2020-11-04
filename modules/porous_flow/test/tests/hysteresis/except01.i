@@ -1,8 +1,10 @@
 # Exception testing of PorousFlowHysteresisOrder
 # Incorrect:     liquid_phase = 1
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]

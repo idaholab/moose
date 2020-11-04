@@ -4,8 +4,10 @@
 # Then, water is removed from the system (so order = 2)
 # More water is removed from the system so that the saturation < S0 (so order = 0)
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]

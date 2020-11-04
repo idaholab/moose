@@ -1,8 +1,10 @@
 # Exception testing of PorousFlowPropertyAux
 # hystresis_turning_point too large
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]

@@ -7,8 +7,10 @@
 # Then, water is added to the system (so order = 1) until saturation = 1
 # Then, water is added to the system (so order = 0)
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]

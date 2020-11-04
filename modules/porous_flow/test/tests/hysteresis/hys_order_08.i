@@ -5,8 +5,10 @@
 # Then, water is added to the system (order = 1, with turning point = 0.58) until saturation = 0.67
 # Then, a large amount of water is removed from the system so order becomes 0
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]

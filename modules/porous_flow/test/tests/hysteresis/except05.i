@@ -1,8 +1,10 @@
 # Exception testing of PorousFlowHysteresisOrder
 # Incorrect: previous_turning_points not in the range [0, 1]
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+  [../]
 []
 
 [GlobalParams]
