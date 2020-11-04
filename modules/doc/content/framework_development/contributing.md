@@ -98,6 +98,16 @@ In addition: [our own slides](https://mooseframework.org/static/media/uploads/do
 
 The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to the `next` branch.
 
+## Pull Request Assignee
+
+In most cases a PR will be assigned to MOOSE developer. The assignee is designated to help ensure
+that the request is reviewed and merged (or canceled); they are not necessarily the reviewer. The aim
+is to make sure every PR is being addressed and monitored. They should also serve as a point of
+contact for the PR creator.
+
+!alert note
+MOOSE developers should expect to be assigned to their own PRs, as they should know who would be best to review the content.
+
 ## What Now?
 
 The next phase is covered in [How a Patch Becomes Code](framework_development/patch_to_code.md)... that will take you through the process of a PR ultimately making it's way into the `master` branch in MOOSE...

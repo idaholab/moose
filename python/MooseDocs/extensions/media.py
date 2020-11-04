@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
+import mooseutils
 from ..common import exceptions
 from ..base import components, Extension, LatexRenderer
 from ..tree import tokens, html, latex
@@ -19,7 +20,7 @@ def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
 Image = tokens.newToken('Image', src='', tex='', dark='')
-Video = tokens.newToken('Video', src='', tex='', youtube=False, dark='',
+Video = tokens.newToken('Video', src='', tex='', youtube=False,
                         controls=True, autoplay=True, loop=True, tstart=None, tstop=None)
 
 class MediaExtension(command.CommandExtension):
@@ -101,7 +102,6 @@ class VideoCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
-        settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings['controls'] = (True, "Display the video player controls (not compatible with YouTube).")
         settings['loop'] = (False, "Automatically loop the video (not compatible with YouTube).")
         settings['autoplay'] = (False, "Automatically start playing the video (not compatible with YouTube).")
@@ -112,13 +112,11 @@ class VideoCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True, img=True, **self.attributes)
 
         vid = Video(flt,
                     src=info['subcommand'],
-                    dark=self.settings['dark_src'],
                     youtube='www.youtube.com' in info['subcommand'],
                     tex=self.settings['latex_src'],
                     controls=self.settings['controls'],
@@ -217,22 +215,25 @@ class RenderVideo(components.RenderComponent):
         video = html.Tag(parent, 'video', token, class_='moose-video')
         _, ext = os.path.splitext(src)
         source = html.Tag(video, 'source', src=src)
-        if token['dark']:
-            src = token['dark']
-            if not src.startswith('http'):
-                node = self.translator.findPage(src)
-                src = str(node.relativeSource(page))
-            source['data-dark-src'] = src
 
         source["type"] = "video/{}".format(ext[1:])
 
         video['width'] = '100%'
-        if token['controls']:
-            video['controls'] = 'controls'
-        if token['autoplay']:
-            video['autoplay'] = 'autoplay'
-        if token['loop']:
-            video['loop'] = 'loop'
+
+        # Ensure that bool flags are boolean
+        for key in ['controls', 'loop', 'autoplay']:
+            value = token[key]
+            if isinstance(value, str):
+                token[key] = mooseutils.str2bool(value)
+
+        video['loop'] = token['loop']
+        video['autoplay'] = token['autoplay']
+        video['controls'] = token['controls']
+
+        #https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
+        #In some browsers (e.g. Chrome 70.0) autoplay doesn't work if no muted attribute is present."
+        if video['autoplay']:
+            video['muted'] = True
 
         return video
 

@@ -1,1 +1,1 @@
-[Contributing to MOOSE](http://mooseframework.org/wiki/Contributing/)
+[Contributing to MOOSE](https://mooseframework.inl.gov/framework_development/contributing.html)
