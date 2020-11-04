@@ -227,7 +227,7 @@ ADKernelTempl<T>::computeADJacobian(
         }
       };
 
-  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+  _assembly.processDerivatives(_residuals, dofIndices(), _matrix_tags, local_functor);
 }
 
 template <typename T>

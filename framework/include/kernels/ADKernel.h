@@ -37,6 +37,17 @@ private:
   void computeOffDiagJacobian(MooseVariableFEBase &) override final;
   void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
+  /**
+   * Just as we allow someone deriving from this to modify the
+   * \p _residuals data member in their \p computeResidualsForJacobian
+   * overrides, we must also potentially allow them to modify the dof
+   * indices. For example a user could have something like an \p LMKernel which sums computed
+   * strong residuals into both primal and LM residuals. That user needs to be
+   * able to feed dof indices from both the primal and LM variable into
+   * \p Assembly::processDerivatives
+   */
+  virtual const std::vector<dof_id_type> & dofIndices() const { return _var.dofIndices(); }
+
 protected:
   // See KernelBase base for documentation of these overridden methods
   void computeResidual() override;
