@@ -1081,22 +1081,32 @@ mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
 }
 
 PetscErrorCode
-mooseSlepcEPSMonitor(EPS /*eps*/,
+mooseSlepcEPSMonitor(EPS eps,
                      int its,
                      int /*nconv*/,
                      PetscScalar * eigr,
-                     PetscScalar * /*eigi*/,
+                     PetscScalar * eigi,
                      PetscReal * /*errest*/,
                      int /*nest*/,
                      void * mctx)
 {
+  ST st;
+  PetscErrorCode ierr = 0;
+  PetscScalar eigenr, eigeni;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(mctx);
   auto & console = eigen_problem->console();
 
   auto inverse = eigen_problem->outputInverseEigenvalue();
+  ierr = EPSGetST(eps, &st);
+  LIBMESH_CHKERR(ierr);
+  eigenr = eigr[0];
+  eigeni = eigi[0];
+  // Make the eigenvalue consistent with shift type
+  ierr = STBackTransform(st, 1, &eigenr, &eigeni);
+  LIBMESH_CHKERR(ierr);
 
-  auto eigenvalue = inverse ? 1.0 / (*eigr) : (*eigr);
+  auto eigenvalue = inverse ? 1.0 / eigenr : eigenr;
 
   // The term "k-eigenvalue" is adopted from the neutronics community.
   console << " Iteration " << its << std::setprecision(10)

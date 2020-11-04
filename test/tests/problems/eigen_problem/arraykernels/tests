@@ -28,7 +28,12 @@
     prereq = 'two_variables'
     expect_out = '6 Linear |R|'
     slepc = true
-    slepc_version = '>=3.11.0'
+    # Include B into the preconditioning matrix in general is a bad idea
+    # If there is no good guess, free power iteration may converge a different mode
+    # For SLEPc 3.13.0 or newer, we can set initial guess from moose side with right
+    # boundary conditions etc. So it still converge to the fundamental mode.
+    # SLEPc older than 3.13 can not take initial guess from moose
+    slepc_version = '>=3.13.0'
     requirement = "Eigenvalue system should be able to handle multiple variables"
   [../]
 []

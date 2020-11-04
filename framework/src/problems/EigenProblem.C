@@ -78,6 +78,13 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
 
+  // We will enable this warning once the integration is done
+  // Griffin will not work when this warning is on
+  // SLEPc older than 3.13.0 can not take initial guess from moose
+  //#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  //   mooseWarning("Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad
+  //   convergence");
+  //#endif
   // Create extra vectors and matrices if any
   createTagVectors();
 }
