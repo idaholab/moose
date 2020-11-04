@@ -69,6 +69,7 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
     kwargs.setdefault('log_verification_files', log_default)
     kwargs.setdefault('log_testable', log_default)
     kwargs.setdefault('log_duplicate_requirement', log_default)
+    kwargs.setdefault('log_duplicate_detail', log_default)
 
     logger = RequirementLogHelper(__name__, **kwargs)
     RequirementLogHelper.COLOR_TEXT = color_text
@@ -88,8 +89,12 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
     # Check each Requirement object for deficiencies
     for req in requirements:
         _check_requirement(req, logger, file_list)
-        if req.requirement:
-            requirement_dict[req.requirement].add(req)
+        if req.requirement is not None:
+            key = [req.requirement]
+            for detail in req.details:
+                if detail.detail is not None:
+                    key.append(detail.detail)
+            requirement_dict['\n'.join(key)].add(req)
 
     # Duplicate checking
     for txt, value in requirement_dict.items():
@@ -99,6 +104,7 @@ def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
             for r in value:
                 r.duplicate = True
                 msg += RequirementLogHelper._colorTestInfo(r, None, None, None)
+
             LogHelper.log(logger, 'log_duplicate_requirement', msg.strip('\n'))
 
     return logger
@@ -220,6 +226,19 @@ def _check_requirement(req, logger, file_list):
         if not req.testable:
             msg = "Test will not execute because it is marked as skipped or deleted"
             logger.log('log_testable', req, msg)
+
+        # Test for duplicate details
+        details_dict = collections.defaultdict(set)
+        for detail in req.details:
+            details_dict[detail.detail].add(detail)
+        for txt, value in details_dict.items():
+            if len(value) > 1:
+                msg = 'Duplicate details found:'
+                msg += '\n{}\n'.format(mooseutils.colorText(txt, 'GREY'))
+                for r in value:
+                    r.duplicate = True
+                    msg += RequirementLogHelper._colorTestInfo(r, None, None, None)
+                LogHelper.log(logger, 'log_duplicate_detail', msg.strip('\n'))
 
 def _has_file(filename, file_list):
     """Test if the filename is located in the list"""

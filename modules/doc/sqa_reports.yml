@@ -338,6 +338,7 @@ Requirements:
         log_missing_requirement: WARNING
         log_top_level_detail: WARNING
         log_testable: WARNING
+        log_duplicate_detail: WARNING
         show_warning: false
 
     tensor_mechanics:
