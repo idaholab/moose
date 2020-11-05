@@ -55,6 +55,7 @@ Applications:
         app_types:
             - FunctionalExpansionToolsApp
         content_directory: modules/functional_expansion_tools/doc/content
+        show_warning: false
 
     heat_conduction:
         exe_directory: modules/combined
@@ -163,6 +164,12 @@ Applications:
         content_directory: modules/xfem/doc/content
         log_stub_files: WARNING
         show_warning: false
+
+    fluid_structure_interaction:
+        exe_directory: modules/combined
+        app_types:
+            - FluidStructureInteractionApp
+        content_directory: modules/fluid_structure_interaction/doc/content
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -364,3 +371,9 @@ Requirements:
     xfem:
         directories:
             - modules/xfem
+
+    fluid_structure_interaction:
+        directories:
+            - modules/fluid_structure_interaction
+        log_missing: WARNING
+        show_warning: false
