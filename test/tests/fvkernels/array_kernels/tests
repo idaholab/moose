@@ -19,4 +19,10 @@
     exodiff = 'diffusion_reaction_out.e'
     requirement = 'MOOSE shall provide finite volume array reaction kernels on an array variable.'
   [../]
+  [./diffusion_reaction_coupling]
+    type = 'Exodiff'
+    input = 'diffusion_reaction_coupling.i'
+    exodiff = 'diffusion_reaction_coupling_out.e'
+    requirement = 'MOOSE shall provide two-way coupling between finite volume regular and array variables.'
+  [../]
 []
