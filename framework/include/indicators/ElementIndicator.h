@@ -52,7 +52,7 @@ protected:
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
-  MooseVariable & _var;
+  // MooseVariable & _var;
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
