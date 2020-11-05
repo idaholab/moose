@@ -34,6 +34,8 @@ InputParameters
 AdaptivityAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Add libMesh based adaptation schemes via the Executioner/Adaptivity input syntax.");
   MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator",
                        "KellyErrorEstimator");
 

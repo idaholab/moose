@@ -26,7 +26,7 @@ InputParameters
 SetupPreconditionerAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
+  params.addClassDescription("Add a Preconditioner object to the simulation.");
   return params;
 }
 

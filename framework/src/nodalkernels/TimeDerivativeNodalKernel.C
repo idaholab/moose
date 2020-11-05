@@ -17,6 +17,8 @@ InputParameters
 TimeDerivativeNodalKernel::validParams()
 {
   InputParameters params = TimeNodalKernel::validParams();
+  params.addClassDescription(
+      "Residual contribution to an ODE form the time derivative acting at nodes.");
   return params;
 }
 

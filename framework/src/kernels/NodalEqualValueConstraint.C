@@ -21,6 +21,7 @@ InputParameters
 NodalEqualValueConstraint::validParams()
 {
   InputParameters params = NodalScalarKernel::validParams();
+  params.addClassDescription("Constrain two nodes to have identical values.");
   params.addRequiredCoupledVar("var", "Variable(s) to put the constraint on");
   return params;
 }

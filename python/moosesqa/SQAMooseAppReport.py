@@ -28,7 +28,6 @@ from .LogHelper import LogHelper
 @mooseutils.addProperty('content_directory', ptype=str)
 @mooseutils.addProperty('object_prefix', ptype=str)
 @mooseutils.addProperty('syntax_prefix', ptype=str)
-@mooseutils.addProperty('hidden', ptype=list)
 @mooseutils.addProperty('remove', ptype=list)
 @mooseutils.addProperty('alias', ptype=list)
 @mooseutils.addProperty('unregister', ptype=list)
@@ -43,6 +42,7 @@ class SQAMooseAppReport(SQAReport):
         super().__init__(**kwargs)
 
         # Default attributes
+        self.exe_directory = self.exe_directory or mooseutils.git_root_dir()
         self.exe_name = self.exe_name or os.path.basename(self.exe_directory)
         self.working_dir = self.working_dir or mooseutils.git_root_dir()
         self.content_directory = self.content_directory or os.path.join(self.exe_directory, 'doc', 'content')
@@ -74,20 +74,6 @@ class SQAMooseAppReport(SQAReport):
         if exe is None:
             raise OSError("An executable was not found in '{}' with a name '{}'.".format(exe_dir, self.exe_name))
 
-        # Build syntax tree if not provided
-        if self.app_syntax is None:
-
-            # Get the hidden/removed/alias information
-            hide = self._loadYamlFiles(self.hidden)
-            remove = self._loadYamlFiles(self.remove)
-            alias = self._loadYamlFiles(self.alias)
-            unregister = self._loadYamlFiles(self.unregister)
-
-            # Build the complete syntax tree
-            self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
-                                                                alias=alias, unregister=unregister,
-                                                                allow_test_objects=self.allow_test_objects)
-
         # Determine the application type (e.g., MooseTestApp)
         if self.app_types is None:
             out = subprocess.check_output([exe, '--type'], encoding='utf-8')
@@ -95,9 +81,22 @@ class SQAMooseAppReport(SQAReport):
             if match:
                 self.app_types = [match.group("type").replace('TestApp', 'App')]
 
+        # Build syntax tree if not provided
+        if self.app_syntax is None:
+
+            # Get the removed/alias information
+            remove = self._loadYamlFiles(self.remove)
+            alias = self._loadYamlFiles(self.alias)
+            unregister = self._loadYamlFiles(self.unregister)
+
+            # Build the complete syntax tree
+            self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, remove=remove,
+                                                                alias=alias, unregister=unregister)
+
         # Perform the checks
         kwargs.setdefault('syntax_prefix', mooseutils.eval_path(self.syntax_prefix))
         kwargs.setdefault('object_prefix', mooseutils.eval_path(self.object_prefix))
+        kwargs.setdefault('allow_test_objects', self.allow_test_objects)
         logger = check_syntax(self.app_syntax, self.app_types, file_cache, **kwargs)
 
         # Create stub pages
@@ -151,7 +150,7 @@ class SQAMooseAppReport(SQAReport):
         self._writeFile(filename, content)
 
     def _loadYamlFiles(self, filenames):
-        """Load the hidden/removed/alias yml files"""
+        """Load the removed/alias yml files"""
         content = dict()
         if filenames is not None:
             for fname in filenames:

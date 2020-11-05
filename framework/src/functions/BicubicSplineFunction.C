@@ -17,6 +17,9 @@ InputParameters
 BicubicSplineFunction::validParams()
 {
   InputParameters params = Function::validParams();
+  params.addClassDescription(
+      "Define a bicubic spline function from interpolated data defined by input parameters.");
+
   MooseEnum normal_component("x=0 y=1 z=2", "z");
   params.addParam<MooseEnum>(
       "normal_component",

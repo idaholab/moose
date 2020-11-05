@@ -17,7 +17,8 @@ InputParameters
 LayeredSideAverage::validParams()
 {
   InputParameters params = LayeredSideIntegral::validParams();
-
+  params.addClassDescription("Computes side averages of a variable storing partial sums for the "
+                             "specified number of intervals in a direction (x,y,z).");
   return params;
 }
 

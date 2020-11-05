@@ -26,6 +26,7 @@ InputParameters
 NodalNormalsCorner::validParams()
 {
   InputParameters params = SideUserObject::validParams();
+  params.addClassDescription("Computes nodal normals at boundary corners.");
   params.addRequiredParam<BoundaryName>(
       "corner_boundary", "Node set ID which contains the nodes that are in 'corners'.");
   return params;

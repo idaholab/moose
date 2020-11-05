@@ -17,6 +17,8 @@ InputParameters
 CoupledODETimeDerivative::validParams()
 {
   InputParameters params = ODETimeKernel::validParams();
+  params.addClassDescription(
+      "Residual contribution of ODE from the time derivative of a coupled variable.");
   params.addRequiredCoupledVar("v", "Coupled variable.");
   return params;
 }

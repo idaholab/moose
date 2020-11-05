@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = 'f792fc7ff9f8d8dfa8b3272117745fc422295ca1'
   design = 'source/ics/FunctionIC.md'
   [./test]
     type = 'Exodiff'

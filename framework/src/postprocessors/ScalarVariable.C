@@ -23,6 +23,7 @@ InputParameters
 ScalarVariable::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Returns the value of a scalar variable as a postprocessor value.");
   params.addRequiredParam<VariableName>("variable", "Name of the variable");
   params.addParam<unsigned int>("component", 0, "Component to output for this variable");
   return params;

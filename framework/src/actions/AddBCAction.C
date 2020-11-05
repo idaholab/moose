@@ -20,6 +20,7 @@ AddBCAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params += BoundaryCondition::validParams();
+  params.addClassDescription("Add a BoundaryCondition object to the simulation.");
   return params;
 }
 

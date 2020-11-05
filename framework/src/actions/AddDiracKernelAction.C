@@ -18,6 +18,7 @@ InputParameters
 AddDiracKernelAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a DiracKernel object to the simulation.");
   return params;
 }
 

@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#1927'
   design = 'syntax/Outputs/index.md'
   [./test]
     type = 'Exodiff'

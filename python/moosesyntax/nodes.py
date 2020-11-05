@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 
 @mooseutils.addProperty('hidden', default=False, ptype=bool)
 @mooseutils.addProperty('removed', default=False, ptype=bool)
+@mooseutils.addProperty('test', default=False, ptype=bool)
 @mooseutils.addProperty('alias', ptype=str)
 @mooseutils.addProperty('group', ptype=str)
 @mooseutils.addProperty('markdown', ptype=str)
@@ -52,15 +53,18 @@ class NodeBase(moosetree.Node, mooseutils.AutoPropertyMixinBase):
         color = self.color
         if self.removed:
             color = 'GREY'
+        elif self.test:
+            color = 'BLUE'
         elif not self.hidden:
             color = 'LIGHT_' + self.color
 
-
         msg0 = '{}: {}'.format(self.name, self.fullpath())
-        msg1 = 'hidden={} removed={} group={} alias={}'.format(self.hidden,
-                                                               self.removed,
-                                                               self.group,
-                                                               self.alias)
+        msg1 = 'hidden={} removed={} group={} groups={} test={} alias={}'.format(self.hidden,
+                                                                                 self.removed,
+                                                                                 self.group,
+                                                                                 self.groups(),
+                                                                                 self.test,
+                                                                                 self.alias)
         msg0 = mooseutils.colorText(msg0, color)
         msg1 = mooseutils.colorText(msg1, 'GREY' if self.removed else 'LIGHT_GREY')
         return '{} {}'.format(msg0, msg1)
@@ -84,13 +88,10 @@ class SyntaxNode(NodeBase):
         Return groups associated with this Actions (i.e., where the syntax is defined).
         """
         out = set([self.group]) if self.group is not None else set()
-        for node in self.descendants:
-            if isinstance(node, (SyntaxNode, ActionNode)):
-                out.update(node.groups())
-        #for node in self.actions():
-        #    out.update(node.groups())
-        #for node in self.syntax():
-        #    out.update(node.groups())
+        for node in self.actions():
+            out.update(node.groups())
+        for node in self.syntax():
+            out.update(node.groups())
         return out
 
     def parameters(self):

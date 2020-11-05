@@ -20,6 +20,8 @@ InputParameters
 AdamsPredictor::validParams()
 {
   InputParameters params = Predictor::validParams();
+  params.addClassDescription(
+      "Implements an explicit Adams predictor based on two old solution vectors.");
   params.addParam<int>("order", 2, "The maximum reachable order of the Adams-Bashforth Predictor");
   return params;
 }

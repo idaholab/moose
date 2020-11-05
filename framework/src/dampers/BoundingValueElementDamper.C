@@ -17,6 +17,8 @@ InputParameters
 BoundingValueElementDamper::validParams()
 {
   InputParameters params = ElementDamper::validParams();
+  params.addClassDescription("This class implements a damper that limits the value of a variable "
+                             "to be within user-specified bounds.");
   params.addParam<Real>("max_value",
                         std::numeric_limits<Real>::max(),
                         "The maximum permissible iterative value for the variable.");

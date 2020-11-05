@@ -18,7 +18,8 @@ InputParameters
 BDF2::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription(
+      "Second order backward differentiation formula time integration scheme.");
   return params;
 }
 

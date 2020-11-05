@@ -21,6 +21,8 @@ InputParameters
 NodalProxyMaxValue::validParams()
 {
   InputParameters params = NodalVariablePostprocessor::validParams();
+  params.addClassDescription(
+      "Computes the max value at a node and broadcasts it to all processors.");
   return params;
 }
 

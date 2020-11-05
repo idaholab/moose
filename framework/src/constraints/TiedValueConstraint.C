@@ -23,6 +23,8 @@ InputParameters
 TiedValueConstraint::validParams()
 {
   InputParameters params = NodeFaceConstraint::validParams();
+  params.addClassDescription("Constraint that forces the value of a variable to be the same on "
+                             "both sides of an interface.");
   params.addParam<Real>("scaling", 1, "scaling factor to be applied to constraint equations");
   params.set<bool>("use_displaced_mesh") = true;
   return params;

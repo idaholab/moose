@@ -4,9 +4,6 @@ Applications:
         app_types:
             - ChemicalReactionsApp
         content_directory: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/chemical_reactions/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
 
 Documents:

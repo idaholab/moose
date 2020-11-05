@@ -18,7 +18,7 @@ InputParameters
 ImplicitEuler::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription("Time integration using the implicit Euler method.");
   return params;
 }
 

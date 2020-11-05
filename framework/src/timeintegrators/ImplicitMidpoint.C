@@ -20,7 +20,7 @@ InputParameters
 ImplicitMidpoint::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
-
+  params.addClassDescription("Second-order Runge-Kutta (implicit midpoint) time integration.");
   return params;
 }
 

@@ -17,6 +17,8 @@ InputParameters
 ODETimeDerivative::validParams()
 {
   InputParameters params = ODETimeKernel::validParams();
+  params.addClassDescription(
+      "Returns the time derivative contribution to the residual for a scalar variable.");
   return params;
 }
 

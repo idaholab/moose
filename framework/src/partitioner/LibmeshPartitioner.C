@@ -26,6 +26,7 @@ InputParameters
 LibmeshPartitioner::validParams()
 {
   InputParameters params = MoosePartitioner::validParams();
+  params.addClassDescription("Mesh partitioning using capabilities defined in libMesh.");
   MooseEnum partitioning(
       "metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc subdomain_partitioner");
   params.addRequiredParam<MooseEnum>(

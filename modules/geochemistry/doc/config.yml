@@ -11,9 +11,6 @@ Extensions:
         home: /modules/geochemistry
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/geochemistry
-        hide:
-            framework: !include framework/doc/hidden.yml
-            #geochemistry: !include modules/geochemistry/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

@@ -20,6 +20,7 @@ InputParameters
 VerifyNodalUniqueID::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
+  params.addClassDescription("Verifies that all node ids are unique.");
   return params;
 }
 

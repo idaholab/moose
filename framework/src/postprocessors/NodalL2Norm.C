@@ -17,6 +17,9 @@ InputParameters
 NodalL2Norm::validParams()
 {
   InputParameters params = NodalVariablePostprocessor::validParams();
+  params.addClassDescription(
+      "Computes the nodal L2-norm of the coupled variable, which is defined by summing the square "
+      "of its value at every node and taking the square root.");
   params.set<bool>("unique_node_execute") = true;
   return params;
 }

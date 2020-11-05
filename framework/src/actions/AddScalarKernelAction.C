@@ -19,7 +19,9 @@ defineLegacyParams(AddScalarKernelAction);
 InputParameters
 AddScalarKernelAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a AuxScalarKernel object to the simulation.");
+  return params;
 }
 
 AddScalarKernelAction::AddScalarKernelAction(InputParameters params) : MooseObjectAction(params) {}

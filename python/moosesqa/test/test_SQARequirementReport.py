@@ -11,9 +11,11 @@ import unittest
 import mock
 import logging
 import pyhit
+import mooseutils
 from moosesqa import SQAReport, SQARequirementReport
 
 
+@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestSQARequirementReport(unittest.TestCase):
 
     @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: t)

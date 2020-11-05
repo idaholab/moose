@@ -18,7 +18,6 @@ class TestSQAMooseAppReport(unittest.TestCase):
         kwargs = dict(exe_name='wrong',
                       exe_directory='test',
                       content_directory='framework/doc/content',
-                      hidden=['framework/doc/hidden.yml'],
                       remove=['framework/doc/remove.yml', 'test/doc/remove.yml'])
 
         reporter = SQAMooseAppReport(**kwargs)

@@ -13,10 +13,6 @@ Extensions:
         home: /modules/contact
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/contact
-        hide:
-            framework: !include framework/doc/hidden.yml
-            contact: !include modules/contact/doc/hidden.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
         includes:

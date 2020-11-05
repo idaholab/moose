@@ -12,10 +12,9 @@ Extensions:
         home: /modules/fluid_properties
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fluid_properties
-        hide:
-            framework: !include framework/doc/hidden.yml
-            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
-        remove: !include framework/doc/remove.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+            fluid_properties: !include modules/fluid_properties/doc/remove.yml
         includes:
             - framework/include
             - modules/fluid_properties/include

@@ -20,6 +20,7 @@ InputParameters
 NumLinearIterations::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Compute the number of non-linear iterations.");
   return params;
 }
 

@@ -26,6 +26,7 @@ InputParameters
 SetupMeshAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add or create Mesh object to the simulation.");
 
   // Here we are setting the default type of the mesh to construct to "FileMesh". This is to support
   // the very long-running legacy syntax where only a file parameter is required to determine the

@@ -4,13 +4,9 @@ Applications:
         app_types:
             - PorousFlowApp
         content_directory: ${MOOSE_DIR}/modules/porous_flow/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/porous_flow/doc/hidden.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_hidden_non_stub: WARNING
 
 Documents:
     log_software_requirements_specification: WARNING

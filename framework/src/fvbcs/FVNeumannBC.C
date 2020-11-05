@@ -15,6 +15,7 @@ InputParameters
 FVNeumannBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription("Neumann boundary condition for finite volume method.");
   params.addParam<Real>("value", 0.0, "The value of the flux crossing the boundary.");
   return params;
 }

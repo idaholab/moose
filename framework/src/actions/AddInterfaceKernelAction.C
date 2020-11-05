@@ -18,7 +18,9 @@ defineLegacyParams(AddInterfaceKernelAction);
 InputParameters
 AddInterfaceKernelAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add an InterfaceKernel object to the simulation.");
+  return params;
 }
 
 AddInterfaceKernelAction::AddInterfaceKernelAction(InputParameters params)

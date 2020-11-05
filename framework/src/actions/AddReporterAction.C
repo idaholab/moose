@@ -16,7 +16,7 @@ InputParameters
 AddReporterAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Action for adding Reporter objects from the Reporters input block.");
+  params.addClassDescription("Add a Reporter object to the simulation.");
   return params;
 }
 

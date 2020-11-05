@@ -32,6 +32,7 @@ InputParameters
 EigenProblem::validParams()
 {
   InputParameters params = FEProblemBase::validParams();
+  params.addClassDescription("Problem object for solving Eigen value problem.");
   params.addParam<bool>("negative_sign_eigen_kernel",
                         true,
                         "Whether or not to use a negative sign for eigenvalue kernels. "

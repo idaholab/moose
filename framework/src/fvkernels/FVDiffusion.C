@@ -15,6 +15,7 @@ InputParameters
 FVDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;

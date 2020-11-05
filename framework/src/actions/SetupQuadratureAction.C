@@ -26,7 +26,7 @@ SetupQuadratureAction::validParams()
                   "AUTO");
 
   InputParameters params = Action::validParams();
-
+  params.addClassDescription("Sets the quadrature type for the simulation.");
   params.addParam<MooseEnum>("type", types, "Type of the quadrature rule");
   params.addParam<MooseEnum>("order", order, "Order of the quadrature");
   params.addParam<MooseEnum>("element_order", order, "Order of the quadrature for elements");

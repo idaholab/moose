@@ -17,6 +17,7 @@ InputParameters
 QuotientScalarAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
+  params.addClassDescription("Compute the ratio of two scalar variables.");
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
   params.addCoupledVar("denominator", "The downstairs of the quotient variable");
 

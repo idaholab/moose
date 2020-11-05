@@ -17,7 +17,9 @@ defineLegacyParams(AddDistributionAction);
 InputParameters
 AddDistributionAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a Distribution object to the simulation.");
+  return params;
 }
 
 AddDistributionAction::AddDistributionAction(InputParameters params) : MooseObjectAction(params) {}

@@ -26,6 +26,7 @@ InputParameters
 CreateDisplacedProblemAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Create a Problem object that utilizes displacements.");
   params.addParam<std::vector<std::string>>(
       "displacements",
       "The variables corresponding to the x y z displacements of the mesh.  If "

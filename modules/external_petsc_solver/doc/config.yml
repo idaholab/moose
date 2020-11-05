@@ -17,8 +17,6 @@ Extensions:
         home: /modules/external_petsc_solver
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/external_petsc_solver
-        hide:
-            framework: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

@@ -18,6 +18,8 @@ InputParameters
 SpatialUserObjectAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Populates an auxiliary variable with a spatial value returned from a "
+                             "UserObject spatialValue method.");
   params.addRequiredParam<UserObjectName>(
       "user_object",
       "The UserObject UserObject to get values from.  Note that the UserObject "

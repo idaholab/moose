@@ -17,7 +17,7 @@ InputParameters
 DeprecatedBlockAction::validParams()
 {
   InputParameters params = Action::validParams();
-
+  params.addClassDescription("Tool for marking input syntax as deprecated.");
   params.addParam<bool>("DEPRECATED", "*** WARNING: This block is deprecated - DO NOT USE ***");
   return params;
 }

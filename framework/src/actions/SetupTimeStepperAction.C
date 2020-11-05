@@ -20,7 +20,7 @@ InputParameters
 SetupTimeStepperAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
+  params.addClassDescription("Add and initialize a TimeStepper object to the simulation.");
   return params;
 }
 

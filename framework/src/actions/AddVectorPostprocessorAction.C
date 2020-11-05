@@ -19,6 +19,7 @@ InputParameters
 AddVectorPostprocessorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a VectorPostprocessor object to the simulation.");
   return params;
 }
 

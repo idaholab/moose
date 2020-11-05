@@ -14,11 +14,6 @@ Extensions:
         home: /modules/navier_stokes
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/navier_stokes
-        hide:
-            framework: !include framework/doc/hidden.yml
-            navier_stokes: !include modules/navier_stokes/doc/hidden.yml
-            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
-            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
         includes:

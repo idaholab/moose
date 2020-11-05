@@ -12,7 +12,6 @@ Extensions:
         home: /modules/rdg
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/rdg
-        hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

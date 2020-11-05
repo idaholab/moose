@@ -24,6 +24,8 @@ NodalExtremeValue::validParams()
 
   // Define the parameters
   InputParameters params = NodalVariablePostprocessor::validParams();
+  params.addClassDescription("Reports the minimum or maximum value of a variable.");
+
   params.addParam<MooseEnum>("value_type",
                              type_options,
                              "Type of extreme value to return. 'max' "

@@ -17,8 +17,6 @@ Extensions:
         name: Babbler
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
-        hide:
-            framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
         remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
         includes:
             - include

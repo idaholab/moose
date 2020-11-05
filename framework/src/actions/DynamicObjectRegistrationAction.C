@@ -20,7 +20,7 @@ InputParameters
 DynamicObjectRegistrationAction::validParams()
 {
   InputParameters params = Action::validParams();
-
+  params.addClassDescription("Register MooseObjects from other applications dynamically.");
   params.addParam<std::vector<std::string>>("register_objects_from",
                                             "The names of other applications from which objects "
                                             "will be registered from (dynamic registration).");

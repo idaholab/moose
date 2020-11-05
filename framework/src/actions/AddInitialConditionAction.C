@@ -18,6 +18,7 @@ InputParameters
 AddInitialConditionAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add an InitialCondition object to the simulation.");
   return params;
 }
 

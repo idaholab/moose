@@ -20,6 +20,8 @@ InputParameters
 LStableDirk4::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
+  params.addClassDescription(
+      "Fourth-order diagonally implicit Runge Kutta method (Dirk) with five stages.");
   return params;
 }
 

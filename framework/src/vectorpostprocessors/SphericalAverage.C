@@ -19,6 +19,8 @@ InputParameters
 SphericalAverage::validParams()
 {
   InputParameters params = SpatialAverageBase::validParams();
+  params.addClassDescription("Compute a spherical average of a variable as a function of radius "
+                             "throughout the simulation domain.");
   return params;
 }
 
