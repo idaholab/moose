@@ -1,5 +1,9 @@
+# Partly, the purpose of this test is to test the vector variable magnitude kernel.
+# For the most part, this test is here to test that nodal auxkernels work on
+# LAGRANGE_VEC variables, which was not always the case.
 [Tests]
   issues = '#16076'
+  design = 'VectorVariableMagnitudeAux.md'
   [./test]
     type = 'Exodiff'
     input = 'vector_variable_nodal.i'

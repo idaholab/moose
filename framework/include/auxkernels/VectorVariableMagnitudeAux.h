@@ -9,13 +9,13 @@
 
 #pragma once
 
-// MOOSE includes
 #include "AuxKernel.h"
 
 /**
- * Extract a component from a vector variable
+ * Compute the magnitude of a vector variable
  */
-class VectorVariableMagnitudeAux : public AuxKernel {
+class VectorVariableMagnitudeAux : public AuxKernel
+{
 public:
   static InputParameters validParams();
 
@@ -23,12 +23,12 @@ public:
    * Class constructor
    * @param parameters Input parameters for the object
    */
-  VectorVariableMagnitudeAux(const InputParameters &parameters);
+  VectorVariableMagnitudeAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
 private:
-  /// Pointer to elemental variable value
-  const VectorVariableValue &_variable_value;
+  /// Reference to vector variable value
+  const VectorVariableValue & _variable_value;
 };

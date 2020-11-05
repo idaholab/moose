@@ -11,22 +11,25 @@
 
 registerMooseObject("MooseApp", VectorVariableMagnitudeAux);
 
-InputParameters VectorVariableMagnitudeAux::validParams() {
+InputParameters
+VectorVariableMagnitudeAux::validParams()
+{
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Creates a field consisting of the magnitude of a "
                              "coupled vector variable.");
-  params.addRequiredCoupledVar(
-      "vector_variable", "The variable from which to compute the component");
+  params.addRequiredCoupledVar("vector_variable",
+                               "The variable from which to compute the component");
   return params;
 }
 
-VectorVariableMagnitudeAux::VectorVariableMagnitudeAux(
-    const InputParameters &parameters)
-    : AuxKernel(parameters),
-      _variable_value(coupledVectorValue("vector_variable")) {}
+VectorVariableMagnitudeAux::VectorVariableMagnitudeAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _variable_value(coupledVectorValue("vector_variable"))
+{
+}
 
-Real VectorVariableMagnitudeAux::computeValue() {
-  return std::sqrt(std::pow(_variable_value[_qp](0), 2) +
-                   std::pow(_variable_value[_qp](1), 2) +
+Real
+VectorVariableMagnitudeAux::computeValue()
+{
+  return std::sqrt(std::pow(_variable_value[_qp](0), 2) + std::pow(_variable_value[_qp](1), 2) +
                    std::pow(_variable_value[_qp](2), 2));
 }

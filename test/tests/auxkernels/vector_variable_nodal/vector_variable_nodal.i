@@ -49,8 +49,8 @@
 [AuxKernels]
   [./calc_u_mag]
     type = VectorVariableMagnitudeAux
-    variable = u_mag
-    vector_variable = u
+    variable = u_mag # the auxvariable to compute
+    vector_variable = u # vector variable to compute from
   [../]
 []
 
