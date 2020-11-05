@@ -19,4 +19,11 @@ public:
 
 protected:
   ADRealEigenVector computeQpResidual() override;
+
+  /// scalar diffusion coefficient
+  const ADMaterialProperty<Real> * const _r;
+  /// array diffusion coefficient
+  const ADMaterialProperty<RealEigenVector> * const _r_array;
+  /// matrix diffusion coefficient
+  const ADMaterialProperty<RealEigenMatrix> * const _r_2d_array;
 };
