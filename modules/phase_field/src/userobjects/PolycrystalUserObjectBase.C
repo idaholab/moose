@@ -328,6 +328,7 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
          * of active neighbors
          */
         neighbor_ancestor = elem->neighbor_ptr(i);
+
         if (neighbor_ancestor)
           neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
         else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)
