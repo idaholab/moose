@@ -58,7 +58,7 @@ MultiVariableReturnMappingSolution::MultiVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _check_range(false),
     _line_search(true),
-    _bracket_solution(true),
+    _bracket_solution(false),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
     _max_its(1000), // Far larger than ever expected to be needed
@@ -92,7 +92,10 @@ MultiVariableReturnMappingSolution::maximumPermissibleValue(
 
 void
 MultiVariableReturnMappingSolution::returnMappingSolve(
-    const DenseVector<Real> & effective_trial_stress, Real & scalar, const ConsoleStream & console)
+    const DenseVector<Real> & effective_trial_stress,
+    const DenseVector<Real> & stress_new,
+    Real & scalar,
+    const ConsoleStream & console)
 {
   // construct the stringstream here only if the debug level is set to ALL
   std::unique_ptr<std::stringstream> iter_output =
@@ -104,8 +107,10 @@ MultiVariableReturnMappingSolution::returnMappingSolve(
   // iff full history output is requested regardless of whether the solve failed or succeeded
   auto solve_state =
       internalSolve(effective_trial_stress,
+                    stress_new,
                     scalar,
                     _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
+
   if (solve_state != SolveState::SUCCESS &&
       _internal_solve_output_on != InternalSolveOutput::ALWAYS)
   {
@@ -135,7 +140,7 @@ MultiVariableReturnMappingSolution::returnMappingSolve(
     // if full history output is only requested for failed solves we have to repeat
     // the solve a second time
     if (_internal_solve_full_iteration_history)
-      internalSolve(effective_trial_stress, scalar, iter_output.get());
+      internalSolve(effective_trial_stress, stress_new, scalar, iter_output.get());
 
     // Append summary and throw exception
     outputIterationSummary(iter_output.get(), _iteration);
@@ -152,11 +157,12 @@ MultiVariableReturnMappingSolution::returnMappingSolve(
 
 MultiVariableReturnMappingSolution::SolveState
 MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effective_trial_stress,
-                                                  Real & scalar,
+                                                  const DenseVector<Real> & stress_new,
+                                                  Real & delta_gamma,
                                                   std::stringstream * iter_output)
 {
-  scalar = initialGuess(effective_trial_stress);
-  Real scalar_old = scalar;
+  delta_gamma = initialGuess(effective_trial_stress);
+  Real scalar_old = delta_gamma;
   Real scalar_increment = 0.0;
   const Real min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
   const Real max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
@@ -164,17 +170,22 @@ MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effe
   Real scalar_lower_bound = min_permissible_scalar;
   _iteration = 0;
 
-  _initial_residual = _residual = computeResidual(effective_trial_stress, scalar);
+  _initial_residual = _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
 
   Real residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(_residual);
-  Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
+  Real reference_residual =
+      computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
 
   if (converged(_residual, reference_residual))
   {
-    iterationFinalize(scalar);
-    outputIterationStep(
-        iter_output, _iteration, effective_trial_stress, scalar, _residual, reference_residual);
+    iterationFinalize(delta_gamma);
+    outputIterationStep(iter_output,
+                        _iteration,
+                        effective_trial_stress,
+                        delta_gamma,
+                        _residual,
+                        reference_residual);
     return SolveState::SUCCESS;
   }
 
@@ -184,29 +195,39 @@ MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effe
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, _residual, reference_residual))
   {
-    scalar_increment = -_residual / computeDerivative(effective_trial_stress, scalar);
-    scalar = scalar_old + scalar_increment;
+    scalar_increment =
+        -_residual / computeDerivative(effective_trial_stress, stress_new, delta_gamma);
+    delta_gamma = scalar_old + scalar_increment;
 
     if (_check_range)
-      checkPermissibleRange(scalar,
+      checkPermissibleRange(delta_gamma,
                             scalar_increment,
                             scalar_old,
                             min_permissible_scalar,
                             max_permissible_scalar,
                             iter_output);
 
-    _residual = computeResidual(effective_trial_stress, scalar);
-    reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
-    iterationFinalize(scalar);
+    _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
+    reference_residual =
+        computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
+    iterationFinalize(delta_gamma);
 
     if (_bracket_solution)
-      updateBounds(
-          scalar, _residual, init_resid_sign, scalar_upper_bound, scalar_lower_bound, iter_output);
+      updateBounds(delta_gamma,
+                   _residual,
+                   init_resid_sign,
+                   scalar_upper_bound,
+                   scalar_lower_bound,
+                   iter_output);
 
     if (converged(_residual, reference_residual))
     {
-      outputIterationStep(
-          iter_output, _iteration, effective_trial_stress, scalar, _residual, reference_residual);
+      outputIterationStep(iter_output,
+                          _iteration,
+                          effective_trial_stress,
+                          delta_gamma,
+                          _residual,
+                          reference_residual);
       break;
     }
     else
@@ -258,13 +279,14 @@ MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effe
       // modified the increment
       if (modified_increment)
       {
-        scalar = scalar_old + scalar_increment;
-        _residual = computeResidual(effective_trial_stress, scalar);
-        reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
-        iterationFinalize(scalar);
+        delta_gamma = scalar_old + scalar_increment;
+        _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
+        reference_residual =
+            computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
+        iterationFinalize(delta_gamma);
 
         if (_bracket_solution)
-          updateBounds(scalar,
+          updateBounds(delta_gamma,
                        _residual,
                        init_resid_sign,
                        scalar_upper_bound,
@@ -273,12 +295,16 @@ MultiVariableReturnMappingSolution::internalSolve(const DenseVector<Real> & effe
       }
     }
 
-    outputIterationStep(
-        iter_output, _iteration, effective_trial_stress, scalar, _residual, reference_residual);
+    outputIterationStep(iter_output,
+                        _iteration,
+                        effective_trial_stress,
+                        delta_gamma,
+                        _residual,
+                        reference_residual);
 
     ++_iteration;
     residual_old = _residual;
-    scalar_old = scalar;
+    scalar_old = delta_gamma;
     _residual_history[_iteration % _num_resids] = _residual;
   }
 

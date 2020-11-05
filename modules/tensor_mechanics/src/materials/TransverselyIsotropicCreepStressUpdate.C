@@ -71,7 +71,9 @@ TransverselyIsotropicCreepStressUpdate::computeStressInitialize(
 
 Real
 TransverselyIsotropicCreepStressUpdate::computeResidual(
-    const DenseVector<Real> & effective_trial_stress, const Real scalar)
+    const DenseVector<Real> & /*effective_trial_stress*/,
+    const DenseVector<Real> & stress_new,
+    const Real delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real F = _hill_constants[0];
@@ -81,19 +83,33 @@ TransverselyIsotropicCreepStressUpdate::computeResidual(
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
-  // Revisit isotropy assumptions here
-  // const Real stress_delta = effective_trial_stress.L2norm() - _three_shear_modulus * scalar;
+  DenseVector<Real> dev_np1(6);
+  DenseMatrix<Real> inv_matrix(6, 6);
+  inv_matrix(0, 0) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(0));
+  inv_matrix(1, 1) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(1));
+  inv_matrix(2, 2) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(2));
+  inv_matrix(3, 3) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(3));
+  inv_matrix(4, 4) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(4));
+  inv_matrix(5, 5) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(5));
+
+  DenseMatrix<Real> transform_to_np1(6, 6);
+  DenseMatrix<Real> eigenvectors_hill_transpose(6, 6);
+  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
+  DenseMatrix<Real> eigenvectors_hill_copy(_eigenvectors_hill);
+  inv_matrix.right_multiply(eigenvectors_hill_transpose);
+  eigenvectors_hill_copy.right_multiply(inv_matrix);
+  transform_to_np1 = eigenvectors_hill_copy;
+
+  DenseVector<Real> stress_np1(6);
+  transform_to_np1.vector_mult(stress_np1, stress_new);
 
   // Equivalent deviatoric stress function.
-  Real qsigma_square = F * (effective_trial_stress(1) - effective_trial_stress(2)) *
-                       (effective_trial_stress(1) - effective_trial_stress(2));
-  qsigma_square += G * (effective_trial_stress(2) - effective_trial_stress(0)) *
-                   (effective_trial_stress(2) - effective_trial_stress(0));
-  qsigma_square += H * (effective_trial_stress(0) - effective_trial_stress(1)) *
-                   (effective_trial_stress(0) - effective_trial_stress(1));
-  qsigma_square += 2 * L * effective_trial_stress(3) * effective_trial_stress(3);
-  qsigma_square += 2 * M * effective_trial_stress(4) * effective_trial_stress(4);
-  qsigma_square += 2 * N * effective_trial_stress(5) * effective_trial_stress(5);
+  Real qsigma_square = F * (stress_np1(1) - stress_np1(2)) * (stress_np1(1) - stress_np1(2));
+  qsigma_square += G * (stress_np1(2) - stress_np1(0)) * (stress_np1(2) - stress_np1(0));
+  qsigma_square += H * (stress_np1(0) - stress_np1(1)) * (stress_np1(0) - stress_np1(1));
+  qsigma_square += 2 * L * stress_np1(3) * stress_np1(3);
+  qsigma_square += 2 * M * stress_np1(4) * stress_np1(4);
+  qsigma_square += 2 * N * stress_np1(5) * stress_np1(5);
 
   // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
@@ -101,31 +117,74 @@ TransverselyIsotropicCreepStressUpdate::computeResidual(
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
 
   // Return iteration difference between creep strain and inelastic strain multiplier
-  return creep_rate * _dt - scalar;
+  return creep_rate * _dt - delta_gamma;
+}
+Real
+TransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
+    const DenseVector<Real> & /*effective_trial_stress*/,
+    const DenseVector<Real> & /*stress_new*/,
+    const Real residual,
+    const Real /*scalar_effective_inelastic_strain*/)
+{
+  // Since here residual is a strain. Let's avoid scaling for now.
+  return residual;
 }
 
 Real
 TransverselyIsotropicCreepStressUpdate::computeDerivative(
-    const DenseVector<Real> & effective_trial_stress, const Real scalar)
+    const DenseVector<Real> & /*effective_trial_stress*/,
+    const DenseVector<Real> & stress_new,
+    const Real delta_gamma)
 {
-  const Real stress_delta = effective_trial_stress.l2_norm() - _three_shear_modulus * scalar;
+  // Hill constants, some constraints apply
+  const Real F = _hill_constants[0];
+  const Real G = _hill_constants[1];
+  const Real H = _hill_constants[2];
+  const Real L = _hill_constants[3];
+  const Real M = _hill_constants[4];
+  const Real N = _hill_constants[5];
+
+  DenseVector<Real> dev_np1(6);
+  DenseMatrix<Real> inv_matrix(6, 6);
+  inv_matrix(0, 0) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(0));
+  inv_matrix(1, 1) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(1));
+  inv_matrix(2, 2) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(2));
+  inv_matrix(3, 3) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(3));
+  inv_matrix(4, 4) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(4));
+  inv_matrix(5, 5) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(5));
+
+  DenseMatrix<Real> transform_to_np1(6, 6);
+  DenseMatrix<Real> eigenvectors_hill_transpose(6, 6);
+  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
+  DenseMatrix<Real> eigenvectors_hill_copy(_eigenvectors_hill);
+  inv_matrix.right_multiply(eigenvectors_hill_transpose);
+  eigenvectors_hill_copy.right_multiply(inv_matrix);
+  transform_to_np1 = eigenvectors_hill_copy;
+
+  DenseVector<Real> stress_np1(6);
+  transform_to_np1.vector_mult(stress_np1, stress_new);
+
+  // Equivalent deviatoric stress function.
+  Real qsigma_square = F * (stress_np1(1) - stress_np1(2)) * (stress_np1(1) - stress_np1(2));
+  qsigma_square += G * (stress_np1(2) - stress_np1(0)) * (stress_np1(2) - stress_np1(0));
+  qsigma_square += H * (stress_np1(0) - stress_np1(1)) * (stress_np1(0) - stress_np1(1));
+  qsigma_square += 2 * L * stress_np1(3) * stress_np1(3);
+  qsigma_square += 2 * M * stress_np1(4) * stress_np1(4);
+  qsigma_square += 2 * N * stress_np1(5) * stress_np1(5);
+
+  // moose assert > 0
+  qsigma_square = std::sqrt(qsigma_square);
+
   const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *
-                                     std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
+                                     std::pow(qsigma_square, _n_exponent - 1.0) * _exponential *
                                      _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
 
 Real
 TransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
-    const MaterialProperty<RankTwoTensor> & stress,
-    const MaterialProperty<RankTwoTensor> & strain_rate)
+    const MaterialProperty<RankTwoTensor> & /*stress*/,
+    const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
 {
-  //  if (_n_exponent <= 1)
-  //    return 0.0;
-  //
-  //  Real creep_factor = _n_exponent / (_n_exponent + 1);
-  //
-  //  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
-
   return 0.0;
 }

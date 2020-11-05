@@ -32,6 +32,7 @@ protected:
    * @param console                Console output
    */
   void returnMappingSolve(const DenseVector<Real> & effective_trial_stress,
+                          const DenseVector<Real> & stress_new,
                           Real & scalar,
                           const ConsoleStream & console);
 
@@ -65,6 +66,7 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual Real computeResidual(const DenseVector<Real> & effective_trial_stress,
+                               const DenseVector<Real> & stress_new,
                                const Real scalar) = 0;
 
   /**
@@ -74,6 +76,7 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual Real computeDerivative(const DenseVector<Real> & effective_trial_stress,
+                                 const DenseVector<Real> & stress_new,
                                  const Real scalar) = 0;
 
   /**
@@ -83,6 +86,8 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual Real computeReferenceResidual(const DenseVector<Real> & effective_trial_stress,
+                                        const DenseVector<Real> & stress_new,
+                                        const Real residual,
                                         const Real scalar) = 0;
 
   /**
@@ -180,6 +185,7 @@ private:
    * @return Whether the solution was successful
    */
   SolveState internalSolve(const DenseVector<Real> & effective_trial_stress,
+                           const DenseVector<Real> & stress_new,
                            Real & scalar,
                            std::stringstream * iter_output = nullptr);
 

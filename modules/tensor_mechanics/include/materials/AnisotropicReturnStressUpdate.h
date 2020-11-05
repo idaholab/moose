@@ -59,7 +59,12 @@ public:
                            RankFourTensor & tangent_operator) override;
 
   virtual Real computeReferenceResidual(const DenseVector<Real> & effective_trial_stress,
-                                        const Real scalar_effective_inelastic_strain) override;
+                                        const DenseVector<Real> & stress_new,
+                                        const Real residual,
+                                        const Real scalar_effective_inelastic_strain) override
+  {
+    mooseError("computeReferenceResidual needs to be implemented in child class.");
+  }
 
   virtual Real
   minimumPermissibleValue(const DenseVector<Real> & /*effective_trial_stress*/) const override
@@ -115,6 +120,7 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual Real computeStressDerivative(const DenseVector<Real> & /*effective_trial_stress*/,
+                                       const DenseVector<Real> & /*stress_new*/,
                                        const Real /*scalar*/)
   {
     return 0.0;

@@ -100,6 +100,14 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
   // Prepare initial trial stress for generalized return mapping
   RankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
 
+  DenseVector<Real> stress_new_vector(6);
+  stress_new_vector(0) = stress_new(0, 0);
+  stress_new_vector(1) = stress_new(1, 1);
+  stress_new_vector(2) = stress_new(2, 2);
+  stress_new_vector(3) = stress_new(0, 1);
+  stress_new_vector(4) = stress_new(1, 2);
+  stress_new_vector(5) = stress_new(0, 2);
+
   DenseVector<Real> stress_dev(6);
   stress_dev(0) = deviatoric_trial_stress(0, 0);
   stress_dev(1) = deviatoric_trial_stress(1, 1);
@@ -116,25 +124,27 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   computeStressInitialize(stress_dev_hat, elasticity_tensor);
 
-  // Use Newton iteration to determine the scalar effective inelastic strain increment
-  Real scalar_effective_inelastic_strain = 0.0;
+  // Use Newton iteration to determine a plastic multiplier variable
+  Real delta_gamma = 0.0;
 
-  if (!(stress_dev_hat.l2_norm() == 0.0)) // There was a fuzzy equal here FIXME
+  if (!(MooseUtils::absoluteFuzzyEqual(stress_dev_hat.l2_norm(), 0.0)))
   {
-    returnMappingSolve(stress_dev_hat, scalar_effective_inelastic_strain, _console);
-    if (scalar_effective_inelastic_strain != 0.0)
-      inelastic_strain_increment =
-          deviatoric_trial_stress *
-          (1.5 * scalar_effective_inelastic_strain / stress_dev_hat.l2_norm()); // FIXME
-    else
-      inelastic_strain_increment.zero();
+    // Call "Multi" variable return mapping (and therefore its material models)
+    returnMappingSolve(stress_dev_hat, stress_new_vector, delta_gamma, _console);
+
+    // What are we doing here? Not sure if we need this
+    //    if (delta_gamma != 0.0)
+    //      inelastic_strain_increment =
+    //          deviatoric_trial_stress *
+    //          (1.5 * delta_gamma / stress_dev_hat.l2_norm());
+    //    else
+    //      inelastic_strain_increment.zero();
   }
-  else
-    inelastic_strain_increment.zero();
 
   strain_increment -= inelastic_strain_increment;
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
+
+  // For creep update, delta_gamma is a creep inelastic strain increment
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + delta_gamma;
 
   // Use the old elastic strain here because we require tensors used by this class
   // to be isotropic and this method natively allows for changing in time
@@ -143,54 +153,44 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   computeStressFinalize(inelastic_strain_increment);
 
-  if (compute_full_tangent_operator &&
-      getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
-  {
-    if (MooseUtils::absoluteFuzzyEqual(scalar_effective_inelastic_strain, 0.0))
-      tangent_operator.zero();
-    else
-    {
-      // mu = _three_shear_modulus / 3.0;
-      // norm_dev_stress = ||s_n+1||
-      // effective_trial_stress = von mises trial stress = std::sqrt(3.0 / 2.0) * ||s_n+1^trial||
-      // scalar_effective_inelastic_strain = Delta epsilon^cr_n+1
-      // deriv = derivative of scalar_effective_inelastic_strain w.r.t. von mises stress
-      // deriv = std::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
-
-      mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
-
-      const RankTwoTensor deviatoric_stress = stress_new.deviatoric();
-      const Real norm_dev_stress =
-          std::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
-      mooseAssert(norm_dev_stress != 0.0, "Norm of the deviatoric is zero");
-
-      const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
-      const RankFourTensor flow_direction_dyad = flow_direction.outerProduct(flow_direction);
-      const Real deriv = computeStressDerivative(stress_dev_hat, scalar_effective_inelastic_strain);
-      const Real scalar_one = _three_shear_modulus * scalar_effective_inelastic_strain /
-                              std::sqrt(1.5) / norm_dev_stress;
-
-      tangent_operator = scalar_one * _deviatoric_projection_four +
-                         (_three_shear_modulus * deriv - scalar_one) * flow_direction_dyad;
-    }
-  }
-}
-
-Real
-AnisotropicReturnStressUpdate::computeReferenceResidual(
-    const DenseVector<Real> & effective_trial_stress, const Real scalar_effective_inelastic_strain)
-{
-  // FIXME: Convert to tensor form
-  return effective_trial_stress.l2_norm() / _three_shear_modulus -
-         scalar_effective_inelastic_strain;
+  //  if (compute_full_tangent_operator &&
+  //      getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
+  //  {
+  //    if (MooseUtils::absoluteFuzzyEqual(delta_gamma, 0.0))
+  //      tangent_operator.zero();
+  //    else
+  //    {
+  //      // mu = _three_shear_modulus / 3.0;
+  //      // norm_dev_stress = ||s_n+1||
+  //      // effective_trial_stress = von mises trial stress = std::sqrt(3.0 / 2.0) * ||s_n+1^trial||
+  //      // scalar_effective_inelastic_strain = Delta epsilon^cr_n+1
+  //      // deriv = derivative of scalar_effective_inelastic_strain w.r.t. von mises stress
+  //      // deriv = std::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
+  //
+  //      mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
+  //
+  //      const RankTwoTensor deviatoric_stress = stress_new.deviatoric();
+  //      const Real norm_dev_stress =
+  //          std::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
+  //      mooseAssert(norm_dev_stress != 0.0, "Norm of the deviatoric is zero");
+  //
+  //      const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
+  //      const RankFourTensor flow_direction_dyad = flow_direction.outerProduct(flow_direction);
+  //      const Real deriv = computeStressDerivative(stress_dev_hat, stress_new_vector,
+  //      delta_gamma); const Real scalar_one = _three_shear_modulus * delta_gamma / std::sqrt(1.5)
+  //      / norm_dev_stress;
+  //
+  //      tangent_operator = scalar_one * _deviatoric_projection_four +
+  //                         (_three_shear_modulus * deriv - scalar_one) * flow_direction_dyad;
+  //    }
+  //  }
 }
 
 Real
 AnisotropicReturnStressUpdate::maximumPermissibleValue(
-    const DenseVector<Real> & effective_trial_stress) const
+    const DenseVector<Real> & /*effective_trial_stress*/) const
 {
-  // FIXME: Convert to tensor form
-  return effective_trial_stress.l2_norm() / _three_shear_modulus;
+  return std::numeric_limits<Real>::max();
 }
 
 Real

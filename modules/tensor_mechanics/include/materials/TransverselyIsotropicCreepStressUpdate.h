@@ -42,9 +42,16 @@ protected:
   virtual void computeStressInitialize(const DenseVector<Real> & effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
   virtual Real computeResidual(const DenseVector<Real> & effective_trial_stress,
+                               const DenseVector<Real> & stress_new,
                                const Real scalar) override;
   virtual Real computeDerivative(const DenseVector<Real> & effective_trial_stress,
+                                 const DenseVector<Real> & stress_new,
                                  const Real scalar) override;
+
+  virtual Real computeReferenceResidual(const DenseVector<Real> & effective_trial_stress,
+                                        const DenseVector<Real> & stress_new,
+                                        const Real residual,
+                                        const Real scalar_effective_inelastic_strain) override;
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;

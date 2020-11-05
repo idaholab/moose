@@ -47,6 +47,7 @@ protected:
    * effective_trial_stress - _three_shear_modulus * scalar
    */
   virtual Real computeStressDerivative(const DenseVector<Real> & effective_trial_stress,
+                                       const DenseVector<Real> & stress_new,
                                        const Real scalar) override;
 
   /*
