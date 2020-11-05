@@ -22,10 +22,10 @@
     type = RunException
     input = master_wrong_control.i
     expect_err = "The sub-application \(sub\) Control object for the 'to_control' parameter must be "
-                 "of type 'SamplerReceiver'."
+                 "of type 'ParameterReceiver'."
     design = 'SamplerTransientMultiApp.md'
     requirement = "MOOSE shall produce an error if the sampler sub-application does not have a "
-                  "correct Control object with 'to_control' parameter being 'SamplerReceiver' type."
+                  "correct Control object with 'to_control' parameter being 'ParameterReceiver' type."
   []
   [num_pararameters_wrong]
     type = RunException

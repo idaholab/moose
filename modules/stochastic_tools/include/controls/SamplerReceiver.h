@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "Control.h"
+#include "ParameterReceiver.h"
 
 // Forward declarations
 class Function;
@@ -18,27 +18,9 @@ class Function;
 /**
  * A Control object for receiving data from a master application Sampler object.
  */
-class SamplerReceiver : public Control
+class SamplerReceiver : public ParameterReceiver
 {
 public:
   static InputParameters validParams();
-
   SamplerReceiver(const InputParameters & parameters);
-  virtual void execute() override;
-
-protected:
-  /**
-   * Update the parameter names and associated values.
-   */
-  void transfer(const std::vector<std::string> & names, const std::vector<Real> & values);
-
-  /// Parameter names to modify
-  std::vector<std::string> _parameters;
-
-  /// Values to use when modifying parameters
-  std::vector<Real> _values;
-
-  /// Allows the SamplerParameterTransfer to call the transfer method, which
-  /// should only be called by that object so making it public is dangerous.
-  friend class SamplerParameterTransfer;
 };

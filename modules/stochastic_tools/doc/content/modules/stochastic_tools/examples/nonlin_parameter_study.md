@@ -70,7 +70,7 @@ The objects in the `Transfers` block are responsible for the communication betwe
 master and sub-applications. It streams parameter samples to sub-applications and
 receives the corresponding values for the selected QoIs.
 It is visible that in this example the type of the parameter transfer object is
-[SamplerParameterTransfer.md] which streams the parameter samples to a [SamplerReceiver.md]
+[SamplerParameterTransfer.md] which streams the parameter samples to a [ParameterReceiver.md]
 object (in `Controls` block) in the sub-application. This object then plugs the
 new parameter values into kernels, materials or boundary conditions.
 Unfortunately, this requires the parameters to be controllable in the sub-application,

@@ -22,7 +22,7 @@
     type = RunException
     input = master_wrong_control.i
     expect_err = "The sub-application \(sub\) Control object for the 'to_control' parameter must be "
-                 "of type 'SamplerReceiver'."
+                 "of type 'ParameterReceiver'."
     design = 'SamplerTransientMultiApp.md'
     requirement = "The system produce an error if the sampler sub-application does not have a "
                   "correct object for receiving stochastic data."

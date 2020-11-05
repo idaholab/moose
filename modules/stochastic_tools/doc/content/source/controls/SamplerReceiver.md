@@ -2,8 +2,7 @@
 
 !syntax description /Controls/SamplerReceiver
 
-The use of this object is explained in detail in stochastic_tools module
-example: [Monte Carlo Example](stochastic_tools/examples/monte_carlo.md).
+This object has been deprecated, use ParameterReceive
 
 !syntax parameters /Controls/SamplerReceiver
 

@@ -198,7 +198,7 @@ fulla = 20
 
 [Controls]
   [stochastic]
-    type = SamplerReceiver
+    type = ParameterReceiver
   []
 []
 

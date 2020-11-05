@@ -73,7 +73,7 @@
 
 [Controls]
   [stochastic]
-    type = SamplerReceiver
+    type = ParameterReceiver
   []
 []
 

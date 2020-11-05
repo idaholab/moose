@@ -22,7 +22,7 @@ with $a$ and $b$ defining the lower and upper limits of the distribution, respec
 The problem defined above, with respect to the [MultiApps] system, is a sub-application. The
 complete input file for the problem is provided in [monte-carlo-sub]. The only item required
 to enable the stochastic analysis is the [Controls] block, which contains a
-[SamplerReceiver](/SamplerReceiver.md) object, the use of which will be explained
+[ParameterReceiver](/ParameterReceiver.md) object, the use of which will be explained
 in the following section.
 
 !listing modules/stochastic_tools/test/tests/transfers/monte_carlo/sub.i
@@ -55,7 +55,7 @@ creates and runs a sub-application for each sample provided by the sampler objec
 Finally, the [SamplerParameterTransfer](/SamplerParameterTransfer.md) is utilized to communicate the
 sampler data to the sub-application. The 'parameters' input lists the parameters on the
 sub-applications to perturb and the 'to_control' specifies the
-[SamplerReceiver](/SamplerReceiver.md) object in the sub-application.
+[ParameterReceiver](/ParameterReceiver.md) object in the sub-application.
 
 !listing modules/stochastic_tools/test/tests/transfers/monte_carlo/monte_carlo.i block=Transfers
 

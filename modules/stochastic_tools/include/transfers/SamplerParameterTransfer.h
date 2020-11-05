@@ -11,14 +11,15 @@
 
 // MOOSE includes
 #include "StochasticToolsTransfer.h"
+#include "ParameterReceiverInterface.h"
 
 // Forward declarations
-class SamplerReceiver;
+class ParameterReceiver;
 
 /**
- * Copy each row from each DenseMatrix to the sub-applications SamplerReceiver object.
+ * Copy each row from each DenseMatrix to the sub-applications ParameterReceiver object.
  */
-class SamplerParameterTransfer : public StochasticToolsTransfer
+class SamplerParameterTransfer : public StochasticToolsTransfer, public ParameterReceiverInterface
 {
 public:
   static InputParameters validParams();
@@ -40,15 +41,15 @@ public:
 
 protected:
   /**
-   * Return the SamplerReceiver object and perform error checking.
+   * Return the ParameterReceiver object and perform error checking.
    * @param app_index The global sup-app index
    */
-  SamplerReceiver * getReceiver(unsigned int app_index);
+  ParameterReceiver * getReceiver(unsigned int app_index);
 
   /// Storage for the list of parameters to control
   const std::vector<std::string> & _parameter_names;
 
-  /// The name of the SamplerReceiver Control object on the sub-application
+  /// The name of the ParameterReceiver Control object on the sub-application
   const std::string & _receiver_name;
 
   /// Current global index for batch execution

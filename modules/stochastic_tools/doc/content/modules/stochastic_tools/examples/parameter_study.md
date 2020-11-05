@@ -32,7 +32,7 @@ $s=1$, $T_0=-10$, and $q_0=-100$.
 
 The complete input file for this problem is provided in [diffusion]. The only item
 that is atypical from a MOOSE simulation input file is the existence of the `Controls` block, which
-here simply creates a [SamplerReceiver.md] object. This block is required for the parameter study,
+here simply creates a [ParameterReceiver.md] object. This block is required for the parameter study,
 but shall be discussed in [parameter_study.md#transfers] section.
 
 !listing parameter_study/diffusion.i id=diffusion

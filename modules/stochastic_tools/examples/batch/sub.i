@@ -53,7 +53,7 @@
 
 [Controls]
   [receiver]
-    type = SamplerReceiver
+    type = ParameterReceiver
   []
 []
 

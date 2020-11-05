@@ -13,7 +13,7 @@
 #include "StochasticToolsTransfer.h"
 
 // Forward declarations
-class SamplerReceiver;
+class ParameterReceiver;
 class SamplerFullSolveMultiApp;
 class StochasticResults;
 

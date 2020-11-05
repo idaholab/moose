@@ -11,7 +11,7 @@
 #include "SamplerPostprocessorTransfer.h"
 #include "SamplerFullSolveMultiApp.h"
 #include "SamplerTransientMultiApp.h"
-#include "SamplerReceiver.h"
+#include "ParameterReceiver.h"
 #include "StochasticResults.h"
 #include "Sampler.h"
 

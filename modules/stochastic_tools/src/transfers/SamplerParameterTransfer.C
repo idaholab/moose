@@ -11,7 +11,7 @@
 #include "SamplerParameterTransfer.h"
 #include "SamplerTransientMultiApp.h"
 #include "SamplerFullSolveMultiApp.h"
-#include "SamplerReceiver.h"
+#include "ParameterReceiver.h"
 #include "Sampler.h"
 
 registerMooseObjectRenamed("StochasticToolsApp",
@@ -24,7 +24,7 @@ InputParameters
 SamplerParameterTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
-  params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
+  params.addClassDescription("Copies Sampler data to a ParameterReceiver object.");
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   params.addParam<std::vector<std::string>>(
@@ -33,13 +33,14 @@ SamplerParameterTransfer::validParams()
       "with the Sampler data. The order of the parameters listed "
       "here should match the order of the items in the Sampler.");
   params.addRequiredParam<std::string>("to_control",
-                                       "The name of the 'SamplerReceiver' on the sub application "
+                                       "The name of the 'ParameterReceiver' on the sub application "
                                        "to which the Sampler data will be transferred.");
   return params;
 }
 
 SamplerParameterTransfer::SamplerParameterTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
+    ParameterReceiverInterface(),
     _parameter_names(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
@@ -60,14 +61,14 @@ SamplerParameterTransfer::execute()
     mooseAssert(_multi_app->hasLocalApp(row_index),
                 "The current sample row index is not a valid global MultiApp index.");
 
-    // Get the sub-app SamplerReceiver object and perform error checking
-    SamplerReceiver * ptr = getReceiver(row_index);
+    // Get the sub-app ParameterReceiver object and perform error checking
+    ParameterReceiver * ptr = getReceiver(row_index);
 
     // Populate the row of data to transfer
     std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
     // Perform the transfer
-    ptr->transfer(_parameter_names, row);
+    transferParameters(*ptr, _parameter_names, row);
   }
 }
 
@@ -80,11 +81,12 @@ SamplerParameterTransfer::initializeToMultiapp()
 void
 SamplerParameterTransfer::executeToMultiapp()
 {
-  SamplerReceiver * ptr = getReceiver(processor_id());
+  ParameterReceiver * ptr = getReceiver(processor_id());
 
   std::vector<Real> row = _sampler_ptr->getNextLocalRow();
 
-  ptr->transfer(_parameter_names, row);
+  // Perform the transfer
+  transferParameters(*ptr, _parameter_names, row);
 
   _global_index++;
 }
@@ -94,7 +96,7 @@ SamplerParameterTransfer::finalizeToMultiapp()
 {
 }
 
-SamplerReceiver *
+ParameterReceiver *
 SamplerParameterTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
@@ -107,14 +109,14 @@ SamplerParameterTransfer::getReceiver(unsigned int app_index)
                _receiver_name,
                "'.");
 
-  SamplerReceiver * ptr =
-      dynamic_cast<SamplerReceiver *>(control_wh.getActiveObject(_receiver_name).get());
+  ParameterReceiver * ptr =
+      dynamic_cast<ParameterReceiver *>(control_wh.getActiveObject(_receiver_name).get());
 
   if (!ptr)
     mooseError(
         "The sub-application (",
         _multi_app->name(),
-        ") Control object for the 'to_control' parameter must be of type 'SamplerReceiver'.");
+        ") Control object for the 'to_control' parameter must be of type 'ParameterReceiver'.");
 
   return ptr;
 }
