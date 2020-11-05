@@ -1,6 +1,8 @@
 [Mesh]
-  type = EBSDMesh
-  filename = ebsd_scan.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = ebsd_scan.txt
+  []
 []
 
 [GlobalParams]
@@ -9,95 +11,95 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
     bins = 40
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = jp
     ebsd_reader = ebsd_reader
     enable_var_coloring = true
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     flood_entity_type = ELEMENTAL
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = ebsd
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
+  [bnds]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Modules]
-  [./PhaseField]
-    [./EulerAngles2RGB]
+  [PhaseField]
+    [EulerAngles2RGB]
       crystal_structure = cubic
       euler_angle_provider = ebsd_reader
       grain_tracker = grain_tracker
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     # T = 500 # K
     type = GBEvolution
     T = 500
-    wGB = 0.6               # um
-    GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997
-    Q = 0.23                # Migration energy in eV
-    GBenergy = 0.708        # GB energy in J/m^2
-    molar_volume = 7.11e-6  # Molar volume in m^3/mol
+    wGB = 0.6 # um
+    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
+    Q = 0.23 # Migration energy in eV
+    GBenergy = 0.708 # GB energy in J/m^2
+    molar_volume = 7.11e-6 # Molar volume in m^3/mol
     length_scale = 1.0e-6
     time_scale = 1.0e-6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
-  [./n_elements]
+  []
+  [n_elements]
     type = NumElems
     execute_on = 'initial timestep_end'
-  [../]
-  [./n_nodes]
+  []
+  [n_nodes]
     type = NumNodes
     execute_on = 'initial timestep_end'
-  [../]
-  [./DOFs]
+  []
+  [DOFs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Executioner]

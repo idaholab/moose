@@ -10,6 +10,9 @@ by the PETSc solvers.
 - [#linear_methods]
 - [#augmenting_sparsity]
 
+You may find some additional documentation relevant to both `NonlinearSystem`
+and `NonlinearEigenSystem` in [NonlinearSystemBase.md].
+
 ## Solving Non-linear Systems id=newtons_method
 
 Application of the finite element method converts PDE(s) into a system of

@@ -730,6 +730,14 @@ protected:
    */
   virtual void computeScalingResidual() = 0;
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Assemble the numeric vector of scaling factors such that it can be used during assembly of the
+   * system matrix
+   */
+  void assembleScalingVector();
+#endif
+
 protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 

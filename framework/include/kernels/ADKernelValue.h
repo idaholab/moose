@@ -27,10 +27,10 @@ public:
 
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeADOffDiagJacobian() override;
 
 protected:
+  void computeResidualsForJacobian() override;
+
   /**
    * Called before forming the residual for an element
    */
@@ -65,4 +65,5 @@ protected:
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
   using ADKernelTempl<T>::_test;
+  using ADKernelTempl<T>::_residuals;
 };

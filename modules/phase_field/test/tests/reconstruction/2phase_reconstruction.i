@@ -15,94 +15,96 @@
 
 [Mesh]
   # Create a mesh representing the EBSD data
-  type = EBSDMesh
-  filename = 'Ti_2Phase_28x28_ebsd.txt'
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = 'Ti_2Phase_28x28_ebsd.txt'
+  []
 []
 
 [UserObjects]
-  [./ebsd]
+  [ebsd]
     # Read in the EBSD data. Uses the filename given in the mesh block.
     type = EBSDReader
-  [../]
+  []
 []
 
 [Variables]
   # Creates the two variables being initialized
-  [./c1]
-  [../]
-  [./c2]
-  [../]
+  [c1]
+  []
+  [c2]
+  []
 []
 
 [ICs]
-  [./phase1_recon]
+  [phase1_recon]
     # Initializes the variable info from the ebsd data
     type = ReconPhaseVarIC
     ebsd_reader = ebsd
     phase = 1
     variable = c1
-  [../]
-  [./phase2_recon]
+  []
+  [phase2_recon]
     type = ReconPhaseVarIC
     ebsd_reader = ebsd
     phase = 2
     variable = c2
-  [../]
+  []
 []
 #ENDDOC - End of the file section that is included in the documentation. Do not change this line!
 
 [AuxVariables]
-  [./PHI1]
+  [PHI1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./PHI]
+  []
+  [PHI]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./APHI2]
+  []
+  [APHI2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./PHI2]
+  []
+  [PHI2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./PHASE]
+  []
+  [PHASE]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./phi1_aux]
+  [phi1_aux]
     type = EBSDReaderPointDataAux
     variable = PHI1
     ebsd_reader = ebsd
     data_name = 'phi1'
     execute_on = 'initial'
-  [../]
-  [./phi_aux]
+  []
+  [phi_aux]
     type = EBSDReaderPointDataAux
     variable = PHI
     ebsd_reader = ebsd
     data_name = 'phi'
     execute_on = 'initial'
-  [../]
-  [./phi2_aux]
+  []
+  [phi2_aux]
     type = EBSDReaderPointDataAux
     variable = PHI2
     ebsd_reader = ebsd
     data_name = 'phi2'
     execute_on = 'initial'
-  [../]
-  [./phase_aux]
+  []
+  [phase_aux]
     type = EBSDReaderPointDataAux
     variable = PHASE
     ebsd_reader = ebsd
     data_name = 'phase'
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Executioner]

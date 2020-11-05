@@ -17,8 +17,8 @@ namespace Moose
 {
 template <std::size_t N>
 inline void
-derivInsert(SemiDynamicSparseNumberArray<Real, unsigned int, NWrapper<N>> & derivs,
-            unsigned int index,
+derivInsert(SemiDynamicSparseNumberArray<Real, libMesh::dof_id_type, NWrapper<N>> & derivs,
+            libMesh::dof_id_type index,
             Real value)
 {
 #ifndef NDEBUG

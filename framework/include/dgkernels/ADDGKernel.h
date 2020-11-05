@@ -20,17 +20,17 @@ public:
 
   ADDGKernel(const InputParameters & parameters);
 
-  virtual ~ADDGKernel();
-
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeElemNeighResidual(Moose::DGResidualType type) override;
-  virtual void computeElemNeighJacobian(Moose::DGJacobianType type) override;
-  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               unsigned int jvar) override;
-
-  virtual MooseVariableFEBase & variable() override { return _var; }
+private:
+  void computeElemNeighResidual(Moose::DGResidualType type) override final;
+  void computeElemNeighJacobian(Moose::DGJacobianType type) override final;
+  void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                       unsigned int jvar) override final;
+  void computeJacobian() override final;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
 
 protected:
+  MooseVariableFEBase & variable() override { return _var; }
+
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;
 

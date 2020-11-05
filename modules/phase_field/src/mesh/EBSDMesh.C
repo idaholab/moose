@@ -42,6 +42,11 @@ EBSDMesh::validParams()
 EBSDMesh::EBSDMesh(const InputParameters & parameters)
   : GeneratedMesh(parameters), _filename(getParam<FileName>("filename"))
 {
+  mooseDeprecated(
+      "EBSDMesh is deprecated, please use the EBSDMeshGenerator instead. For example:\n\n[Mesh]\n  "
+      "type = EBDSMesh\n  filename = my_ebsd_data.dat\n[]\n\nbecomes\n\n[Mesh]\n  [ebsd_mesh]\n    "
+      "type = EBDSMeshGenerator\n    filename = my_ebsd_data.dat\n  []\n[]");
+
   if (_nx != 1 || _ny != 1 || _nz != 1)
     mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
 }

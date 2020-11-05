@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneratedMesh.h"
+#include "EBSDMeshGenerator.h"
 
 #include <array>
 
@@ -39,7 +40,7 @@ public:
   };
 
   // Interface functions for the EBSDReader
-  const EBSDMeshGeometry & getEBSDGeometry() const { return _geometry; }
+  const EBSDMeshGenerator::Geometry & getEBSDGeometry() const { return _geometry; }
   const std::string & getEBSDFilename() const { return _filename; }
 
 protected:
@@ -50,5 +51,5 @@ protected:
   std::string _filename;
 
   /// EBSD data file mesh information
-  EBSDMeshGeometry _geometry;
+  EBSDMeshGenerator::Geometry _geometry;
 };

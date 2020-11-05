@@ -20,6 +20,7 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/point.h"
 #include "libmesh/fe_base.h"
+#include "libmesh/numeric_vector.h"
 
 #include "DualRealOps.h"
 
@@ -1598,17 +1599,40 @@ public:
 
   /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
-   * simply caches the derivative values for the corresponding column indices for the provided \p
-   * matrix_tags. If not using global indexing, then the user must provide a functor which takes
-   * three arguments: the <tt>ADReal residual</tt> that contains the derivatives to be processed,
-   * the \p row_index corresponding to the row index of the matrices that values should be added to,
-   * and the \p matrix_tags specifying the matrices that will  be added into
+   * simply caches the derivative values for the corresponding column indices for the provided
+   * \p matrix_tags. If not using global indexing, then the user must provide a functor which
+   * takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives to be
+   * processed, the \p row_index corresponding to the row index of the matrices that values
+   * should be added to, and the \p matrix_tags specifying the matrices that will  be added into
    */
   template <typename LocalFunctor>
   void processDerivatives(const ADReal & residual,
                           dof_id_type dof_index,
                           const std::set<TagID> & matrix_tags,
                           LocalFunctor & local_functor);
+
+  /**
+   * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
+   * method simply caches the derivative values for the corresponding column indices for the
+   * provided \p matrix_tags. If not using global indexing, then the user must provide a functor
+   * which takes three arguments: the <tt>std::vector<ADReal> residuals</tt> that contains the
+   * derivatives to be processed, the <tt>std::vector<dof_id_type>row_indices</tt> corresponding to
+   * the row indices of the matrices that values should be added to, and the \p matrix_tags
+   * specifying the matrices that will  be added into
+   */
+  template <typename LocalFunctor>
+  void processDerivatives(const std::vector<ADReal> & residuals,
+                          const std::vector<dof_id_type> & row_indices,
+                          const std::set<TagID> & matrix_tags,
+                          LocalFunctor & local_functor);
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * signals this object that a vector containing variable scaling factors should be used when doing
+   * residual and matrix assembly
+   */
+  void hasScalingVector();
+#endif
 
 protected:
   /**
@@ -2352,6 +2376,11 @@ protected:
   mutable std::map<FEType, bool> _need_second_derivative;
   mutable std::map<FEType, bool> _need_second_derivative_neighbor;
   mutable std::map<FEType, bool> _need_curl;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /// The map from global index to variable scaling factor
+  const NumericVector<Real> * _scaling_vector = nullptr;
+#endif
 };
 
 template <typename OutputType>
@@ -2490,7 +2519,7 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
 template <typename LocalFunctor>
 void
 Assembly::processDerivatives(const ADReal & residual,
-                             dof_id_type row_index,
+                             const dof_id_type row_index,
                              const std::set<TagID> & matrix_tags,
                              LocalFunctor &
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -2506,9 +2535,68 @@ Assembly::processDerivatives(const ADReal & residual,
 
   mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
 
+  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+
   for (std::size_t i = 0; i < column_indices.size(); ++i)
-    cacheJacobian(row_index, column_indices[i], values[i], matrix_tags);
+    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
+
 #else
   local_functor(residual, row_index, matrix_tags);
+#endif
+}
+
+template <typename LocalFunctor>
+void
+Assembly::processDerivatives(const std::vector<ADReal> & residuals,
+                             const std::vector<dof_id_type> & input_row_indices,
+                             const std::set<TagID> & matrix_tags,
+                             LocalFunctor &
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+                                 local_functor
+#endif
+)
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // Need to make a copy because we might modify this in constrain_element_matrix
+  std::vector<dof_id_type> row_indices = input_row_indices;
+
+  mooseAssert(residuals.size() == row_indices.size(),
+              "The number of residuals should match the number of dof indices");
+  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
+
+  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
+#ifndef NDEBUG
+  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  for (auto resid_it = residuals.begin() + 1; resid_it != residuals.end(); ++resid_it)
+  {
+    auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
+                                                  resid_it->derivatives().nude_indices().end());
+    mooseAssert(compare_dofs_set == current_dofs_set,
+                "We're going to see whether the dof sets are the same");
+  }
+#endif
+  auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
+
+  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
+  for (const auto i : index_range(row_indices))
+  {
+    const auto row_index = row_indices[i];
+    const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+
+    const auto & sparse_derivatives = residuals[i].derivatives();
+
+    for (const auto j : index_range(column_indices))
+      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scalar;
+  }
+
+  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
+
+  for (const auto i : index_range(row_indices))
+    for (const auto j : index_range(column_indices))
+      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
+
+#else
+  local_functor(residuals, input_row_indices, matrix_tags);
 #endif
 }

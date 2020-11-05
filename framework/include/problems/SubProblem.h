@@ -707,6 +707,18 @@ public:
    */
   bool automaticScaling() const;
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Tells this problem that assembly involves a scaling vector
+   */
+  void hasScalingVector();
+#endif
+
+  /**
+   * Whether we have a displaced problem in our simulation
+   */
+  virtual bool haveDisplaced() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

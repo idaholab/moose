@@ -72,84 +72,95 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
+  std::vector<dof_id_type> dof_indices;
 
   switch (mortar_type)
   {
     case MType::Secondary:
-      test_space_size = _secondary_var.dofIndices().size();
+      dof_indices = _secondary_var.dofIndices();
       jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
       break;
 
     case MType::Primary:
-      test_space_size = _primary_var.dofIndicesNeighbor().size();
+      dof_indices = _primary_var.dofIndicesNeighbor();
       jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
       break;
 
     case MType::Lower:
-      test_space_size = _var ? _var->dofIndicesLower().size() : 0;
+      if (_var)
+        dof_indices = _var->dofIndicesLower();
       jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
       break;
   }
+  test_space_size = dof_indices.size();
 
   residuals.resize(test_space_size, 0);
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     for (_i = 0; _i < test_space_size; _i++)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
-  auto & ce = _assembly.couplingEntries();
-  for (const auto & it : ce)
-  {
-    MooseVariableFEBase & ivariable = *(it.first);
-    MooseVariableFEBase & jvariable = *(it.second);
-
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
-
-    switch (mortar_type)
+  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
+                           const std::vector<dof_id_type> &,
+                           const std::set<TagID> &) {
+    auto & ce = _assembly.couplingEntries();
+    for (const auto & it : ce)
     {
-      case MType::Secondary:
-        if (ivar != _secondary_var.number())
-          continue;
-        break;
+      MooseVariableFEBase & ivariable = *(it.first);
+      MooseVariableFEBase & jvariable = *(it.second);
 
-      case MType::Primary:
-        if (ivar != _primary_var.number())
-          continue;
-        break;
+      unsigned int ivar = ivariable.number();
+      unsigned int jvar = jvariable.number();
 
-      case MType::Lower:
-        if (!_var || _var->number() != ivar)
+      switch (mortar_type)
+      {
+        case MType::Secondary:
+          if (ivar != _secondary_var.number())
+            continue;
+          break;
+
+        case MType::Primary:
+          if (ivar != _primary_var.number())
+            continue;
+          break;
+
+        case MType::Lower:
+          if (!_var || _var->number() != ivar)
+            continue;
+          break;
+      }
+
+      // Derivatives are offset by the variable number
+      std::vector<size_t> ad_offsets{
+          Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
+          Moose::adOffset(jvar,
+                          _sys.getMaxVarNDofsPerElem(),
+                          Moose::ElementType::Neighbor,
+                          _sys.system().n_vars()),
+          Moose::adOffset(jvar,
+                          _sys.getMaxVarNDofsPerElem(),
+                          Moose::ElementType::Lower,
+                          _sys.system().n_vars())};
+      std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
+                                            jvariable.dofIndicesNeighbor().size(),
+                                            jvariable.dofIndicesLower().size()};
+
+      for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
+      {
+        // If we don't have a primary element, then we shouldn't be considering derivatives with
+        // respect to primary dofs. More practically speaking, the local K matrix will be improperly
+        // sized whenever we don't have a primary element because we won't be calling
+        // FEProblemBase::reinitNeighborFaceRef from withing ComputeMortarFunctor::operator()
+        if (type_index == 1 && !_has_primary)
           continue;
-        break;
+
+        prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_types[type_index]);
+        for (_i = 0; _i < test_space_size; _i++)
+          for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
+            _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offsets[type_index] + _j];
+        accumulateTaggedLocalMatrix();
+      }
     }
+  };
 
-    // Derivatives are offset by the variable number
-    std::vector<size_t> ad_offsets{
-        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
-        Moose::adOffset(jvar,
-                        _sys.getMaxVarNDofsPerElem(),
-                        Moose::ElementType::Neighbor,
-                        _sys.system().n_vars()),
-        Moose::adOffset(
-            jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Lower, _sys.system().n_vars())};
-    std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
-                                          jvariable.dofIndicesNeighbor().size(),
-                                          jvariable.dofIndicesLower().size()};
-
-    for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
-    {
-      // If we don't have a primary element, then we shouldn't be considering derivatives with
-      // respect to primary dofs. More practically speaking, the local K matrix will be improperly
-      // sized whenever we don't have a primary element because we won't be calling
-      // FEProblemBase::reinitNeighborFaceRef from withing ComputeMortarFunctor::operator()
-      if (type_index == 1 && !_has_primary)
-        continue;
-
-      prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_types[type_index]);
-      for (_i = 0; _i < test_space_size; _i++)
-        for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
-          _local_ke(_i, _j) += residuals[_i].derivatives()[ad_offsets[type_index] + _j];
-      accumulateTaggedLocalMatrix();
-    }
-  }
+  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
 }

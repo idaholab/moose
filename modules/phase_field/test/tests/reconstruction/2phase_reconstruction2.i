@@ -13,8 +13,10 @@
 # moose/docs/content/modules/phase_field/ICs/EBSD.md
 
 [Mesh]
-  type = EBSDMesh
-  filename = Ti_2Phase_28x28_ebsd.txt
+  [ebsd_mesh]
+    type = EBSDMeshGenerator
+    filename = Ti_2Phase_28x28_ebsd.txt
+  []
 []
 
 [GlobalParams]
@@ -23,30 +25,30 @@
 []
 
 [UserObjects]
-  [./ebsd_reader]
+  [ebsd_reader]
     type = EBSDReader
-  [../]
-  [./ebsd]
+  []
+  [ebsd]
     type = PolycrystalEBSD
     coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     phase = 1
     output_adjacency_matrix = true
-  [../]
+  []
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       # select only data for phase 1 from the EBSD file
       polycrystal_ic_uo = ebsd
-    [../]
-  [../]
+    []
+  []
 []
 #ENDDOC - End of the file section that is included in the documentation. Do not change this line!
 

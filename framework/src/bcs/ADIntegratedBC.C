@@ -117,37 +117,59 @@ ADIntegratedBCTempl<T>::computeResidual()
 
 template <typename T>
 void
-ADIntegratedBCTempl<T>::computeJacobian()
+ADIntegratedBCTempl<T>::computeResidualsForJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
-
-  auto ad_offset =
-      Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
+  if (_residuals.size() != _test.size())
+    _residuals.resize(_test.size(), 0);
+  for (auto & r : _residuals)
+    r = 0;
 
   if (_use_displaced_mesh)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      _r = _ad_JxW[_qp];
+      _r *= _ad_coord[_qp];
       for (_i = 0; _i < _test.size(); _i++)
-      {
-        DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
-        for (_j = 0; _j < _var.phiSize(); ++_j)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
+        _residuals[_i] += _r * computeQpResidual();
+    }
   else
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test.size(); _i++)
-      {
-        DualReal residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
-        for (_j = 0; _j < _var.phiSize(); ++_j)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
+        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+}
 
-  ke += _local_ke;
+template <typename T>
+void
+ADIntegratedBCTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
+{
+  unsigned int jvar = jvariable.number();
 
-  if (_has_diag_save_in)
+  auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
+
+  prepareMatrixTag(_assembly, _var.number(), jvar);
+
+  for (_i = 0; _i < _test.size(); _i++)
+    for (_j = 0; _j < jvariable.phiSize(); _j++)
+      _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
+
+  accumulateTaggedLocalMatrix();
+}
+
+template <typename T>
+void
+ADIntegratedBCTempl<T>::computeJacobian()
+{
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>>
+      var_var_coupling = {std::make_pair(&_var, &_var)};
+  computeADJacobian(var_var_coupling);
+
+  if (_has_diag_save_in && !_sys.computingScalingJacobian())
   {
-    unsigned int rows = ke.m();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
+               "the tagging system instead.");
+#else
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
@@ -155,47 +177,44 @@ ADIntegratedBCTempl<T>::computeJacobian()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+#endif
   }
 }
 
 template <typename T>
 void
-ADIntegratedBCTempl<T>::computeJacobianBlock(MooseVariableFEBase & jvar)
+ADIntegratedBCTempl<T>::computeADJacobian(
+    const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+        coupling_entries)
 {
-  auto jvar_num = jvar.number();
-  auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+  computeResidualsForJacobian();
 
-  if (jvar_num == _var.number())
-    computeJacobian();
-  else
-  {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
-    mooseAssert(
-        phi_size == ke.n(),
-        "The size of the phi container does not match the number of local Jacobian columns");
-
-    auto ad_offset =
-        Moose::adOffset(jvar_num, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
-
-    if (_use_displaced_mesh)
-      for (_i = 0; _i < _test.size(); _i++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  auto local_functor =
+      [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &) {
+        for (const auto & it : coupling_entries)
         {
-          DualReal residual = _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual();
+          MooseVariableFEBase & ivariable = *(it.first);
+          MooseVariableFEBase & jvariable = *(it.second);
 
-          for (_j = 0; _j < phi_size; _j++)
-            ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-        }
-    else
-      for (_i = 0; _i < _test.size(); _i++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        {
-          DualReal residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
+          unsigned int ivar = ivariable.number();
 
-          for (_j = 0; _j < phi_size; _j++)
-            ke(_i, _j) += residual.derivatives()[ad_offset + _j];
+          if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
+            continue;
+
+          addJacobian(jvariable);
         }
-  }
+      };
+
+  _assembly.processDerivatives(_residuals, _var.dofIndices(), _matrix_tags, local_functor);
+}
+
+template <typename T>
+void
+ADIntegratedBCTempl<T>::computeJacobianBlock(MooseVariableFieldBase & jvar)
+{
+  // Only need to do this once because AD does all the derivatives at once
+  if (jvar.number() == _var.number())
+    computeADJacobian(_assembly.couplingEntries());
 }
 
 template <typename T>

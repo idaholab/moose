@@ -133,6 +133,11 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
     Real cached_val = 0.0;
     cached_val = computeQpOffDiagJacobian(jvar);
 
+    if (cached_val == 0.)
+      // there's no reason to cache this if it's zero, and it can even lead to new nonzero
+      // allocations
+      return;
+
     dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);

@@ -164,14 +164,14 @@ class TestVideo(MooseDocsTestCase):
         # no float
         _, res = self.execute("!media http://clips.vorwaerts-gmbh.de/VfE.webm")
         self.assertHTMLTag(res, 'body', size=1)
-        self.assertHTMLTag(res(0), 'video', size=1, width='100%', controls='controls')
+        self.assertHTMLTag(res(0), 'video', size=1, width='100%', controls=True)
         self.assertHTMLTag(res(0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
 
         # in float
         _, res = self.execute("!media http://clips.vorwaerts-gmbh.de/VfE.webm caption=test id=idaho")
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'div', size=2, class_='moose-float-div', id_='idaho')
-        self.assertHTMLTag(res(0,0), 'video', size=1, width='100%', controls='controls')
+        self.assertHTMLTag(res(0,0), 'video', size=1, width='100%', controls=True)
         self.assertHTMLTag(res(0,0,0), 'source', src="http://clips.vorwaerts-gmbh.de/VfE.webm")
         self.assertHTMLTag(res(0,1), 'p', size=2, class_='moose-caption')
         self.assertHTMLTag(res(0,1,0), 'span', size=1, class_='moose-caption-heading', string='Figure 1: ')

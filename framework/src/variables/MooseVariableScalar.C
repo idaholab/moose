@@ -296,10 +296,16 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
 }
 
 void
-MooseVariableScalar::computeAD(bool nodal_ordering)
+MooseVariableScalar::computeAD(bool
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+                                   nodal_ordering)
 {
   auto ad_offset =
       _var_num * (nodal_ordering ? _sys.getMaxVarNDofsPerNode() : _sys.getMaxVarNDofsPerElem());
+#else
+)
+{
+#endif
   auto n_dofs = _dof_indices.size();
 
   if (_need_dual_u)
@@ -308,7 +314,11 @@ MooseVariableScalar::computeAD(bool nodal_ordering)
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _dual_u[i] = _u[i];
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+      Moose::derivInsert(_dual_u[i].derivatives(), _dof_indices[i], 1.);
+#else
       Moose::derivInsert(_dual_u[i].derivatives(), ad_offset + i, 1.);
+#endif
     }
   }
 }

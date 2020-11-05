@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#15732'
+  design = 'NonlinearSystemBase.md'
+  [bad]
+    type = RunApp
+    expect_out = '20 of 40 singular values'
+    absent_out = ' 0 of 40 singular values'
+    input = auto-scaling.i
+    cli_args = 'Executioner/automatic_scaling=false'
+    requirement = 'The system shall be able to identify and show when a matrix is ill conditioned.'
+  []
+  [good]
+    type = Exodiff
+    exodiff = 'auto-scaling_out.e'
+    expect_out = ' 0 of 40 singular values'
+    absent_out = '20 of 40 singular values'
+    input = auto-scaling.i
+    requirement = 'The system shall be able to condition a system automatically through variable scaling factors.'
+  []
+[]
