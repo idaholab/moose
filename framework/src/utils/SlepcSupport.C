@@ -167,7 +167,7 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameter
 }
 
 void
-storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params)
+setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters & params)
 {
   const std::string & eigen_problem_type = params.get<MooseEnum>("eigen_problem_type");
   if (!eigen_problem_type.empty())
@@ -220,7 +220,7 @@ storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameter
 }
 
 void
-storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params)
+storeSolveType(FEProblemBase & fe_problem, const InputParameters & params)
 {
   if (!(dynamic_cast<EigenProblem *>(&fe_problem)))
     return;
@@ -267,13 +267,6 @@ setEigenProblemOptions(SolverParams & solver_params)
     default:
       mooseError("Unknown eigen solver type \n");
   }
-}
-
-void
-setSlepcOutputOptions()
-{
-  Moose::PetscSupport::setSinglePetscOption("-eps_monitor_conv");
-  Moose::PetscSupport::setSinglePetscOption("-eps_monitor");
 }
 
 void
@@ -333,7 +326,11 @@ void
 setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
-  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "2");
+  // During each power iteration, we want solver converged unless linear solver does not
+  // work. We here use a really loose tolerance for this purpose.
+  // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
 }
 
@@ -344,6 +341,8 @@ clearFreeNonlinearPowerIterations(const InputParameters & params)
   Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
   Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
                                             stringify(params.get<unsigned int>("nl_max_its")));
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
+                                            stringify(params.get<Real>("nl_rel_tol")));
 }
 
 void
@@ -463,7 +462,6 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
   setSlepcEigenSolverTolerances(eigen_problem, params);
-  setSlepcOutputOptions();
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 

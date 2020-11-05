@@ -28,6 +28,9 @@ Eigenvalue::validParams()
   params.addClassDescription(
       "Eigenvalue solves a standard/generalized linear or nonlinear eigenvaue problem");
 
+  // matrix_free will be an invalid for griffin once the integration is done.
+  // In this PR, we can not change it. It will still be a valid option when users
+  // use non-Newton algorithms
   params.addParam<bool>(
       "matrix_free",
       false,
@@ -89,10 +92,10 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _final_timer(registerTimedSection("final", 1))
 {
 // Extract and store SLEPc options
-#if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::storeSlepcOptions(_eigen_problem, parameters);
+#ifdef LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::storeSolveType(_eigen_problem, parameters);
 
-  Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
+  Moose::SlepcSupport::setEigenProblemSolverParams(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
 
   // If need to initialize eigen vector
@@ -113,7 +116,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 
   if (isParamValid("normalization"))
   {
-    auto normpp = getParam<PostprocessorName>("normalization");
+    const auto & normpp = getParam<PostprocessorName>("normalization");
     if (isParamValid("normal_factor"))
       _eigen_problem.setNormalization(normpp, getParam<Real>("normal_factor"));
     else
@@ -131,7 +134,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 #endif
 }
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 void
 Eigenvalue::init()
 {
@@ -147,7 +150,7 @@ Eigenvalue::init()
 
   if (isParamValid("normalization"))
   {
-    auto normpp = getParam<PostprocessorName>("normalization");
+    const auto & normpp = getParam<PostprocessorName>("normalization");
     const auto & exec = _eigen_problem.getUserObject<UserObject>(normpp).getExecuteOnEnum();
     if (!exec.contains(EXEC_LINEAR))
       mooseError("Normalization postprocessor ", normpp, " requires execute_on = 'linear'");
@@ -279,7 +282,7 @@ Eigenvalue::outputInverseEigenvalue(bool inverse)
 void
 Eigenvalue::execute()
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   // Recovering makes sense for only transient simulations since the solution from
   // the previous time steps is required.
   if (_app.isRecovering())
@@ -298,8 +301,8 @@ Eigenvalue::execute()
 #ifdef LIBMESH_ENABLE_AMR
 
   // Define the refinement loop
-  unsigned int steps = _eigen_problem.adaptivity().getSteps();
-  for (unsigned int r_step = 0; r_step <= steps; r_step++)
+  auto steps = _eigen_problem.adaptivity().getSteps();
+  for (const auto r_step : make_range(steps + 1))
   {
 #endif // LIBMESH_ENABLE_AMR
     _eigen_problem.timestepSetup();

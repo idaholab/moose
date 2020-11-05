@@ -30,20 +30,20 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
   virtual void init() override;
 
   virtual bool converged() override;
 
-  virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
-  virtual void setNEigenPairsRequired(unsigned int n_eigen_pairs)
+  unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
+  void setNEigenPairsRequired(unsigned int n_eigen_pairs)
   {
     _n_eigen_pairs_required = n_eigen_pairs;
   }
-  virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
-  virtual bool isNonlinearEigenvalueSolver();
+  bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
+  bool isNonlinearEigenvalueSolver() const;
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
@@ -62,18 +62,18 @@ public:
    * If we need to initialize eigen vector. We initialize the eigen vector
    * only when "auto_initialization" is on and nonlinear eigen solver is selected.
    */
-  bool needInitializeEigenVector();
+  bool needInitializeEigenVector() const;
 
   /*
    * Specify whether or not to initialize eigenvector automatically
    */
-  void needInitializeEigenVector(bool need) { _auto_initilize_eigen_vector = need; }
+  void needInitializeEigenVector(bool need) { _auto_initialize_eigen_vector = need; }
 
   /**
    * Set postprocessor and normalization factor
    * 'Postprocessor' is often used to compute an integral of physics variables
    */
-  void setNormalization(const PostprocessorName pp,
+  void setNormalization(const PostprocessorName & pp,
                         const Real value = std::numeric_limits<Real>::max());
 
   /**
@@ -81,7 +81,7 @@ public:
    * We need to mark the solver as "converged" when doing free power to retrieve
    * the final solution from SLPEc
    */
-  bool doFreePowerIteration() { return _do_free_power_iteration; }
+  bool doFreePowerIteration() const { return _do_free_power_iteration; }
 
   /**
    * Set a flag to indicate whether or not we do free power iteration.
@@ -108,8 +108,15 @@ public:
    */
   void scaleEigenvector(const Real scaling_factor);
 
+  /**
+   * Set eigen problem type. Don't need to use this if we use Newton eigenvaue solver.
+   */
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
+  /**
+   * Compute the residual of Ax - \lambda Bx. If there is no \lambda yet, "1" will
+   * be used.
+   */
   virtual Real computeResidualL2Norm() override;
 
   /**
@@ -130,11 +137,11 @@ public:
    * Form two Jacobian matrices, whre each is associateed with one tag, through one
    * element-loop.
    */
-  virtual void computeJacobianAB(const NumericVector<Number> & soln,
-                                 SparseMatrix<Number> & jacobianA,
-                                 SparseMatrix<Number> & jacobianB,
-                                 TagID tagA,
-                                 TagID tagB);
+  void computeJacobianAB(const NumericVector<Number> & soln,
+                         SparseMatrix<Number> & jacobianA,
+                         SparseMatrix<Number> & jacobianB,
+                         TagID tagA,
+                         TagID tagB);
 
   virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks) override;
 
@@ -149,11 +156,11 @@ public:
    * Form two vetors, whre each is associateed with one tag, through one
    * element-loop.
    */
-  virtual void computeResidualAB(const NumericVector<Number> & soln,
-                                 NumericVector<Number> & residualA,
-                                 NumericVector<Number> & residualB,
-                                 TagID tagA,
-                                 TagID tagB);
+  void computeResidualAB(const NumericVector<Number> & soln,
+                         NumericVector<Number> & residualA,
+                         NumericVector<Number> & residualB,
+                         TagID tagA,
+                         TagID tagB);
 
   /**
    * For nonlinear eigen solver, a good initial value can help convergence.
@@ -164,12 +171,12 @@ public:
   /**
    * Which eigenvalue is active
    */
-  unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
+  unsigned int activeEigenvalueIndex() const { return _active_eigen_index; }
 
   /**
    * Return console handle, and we use that in EPSMonitor to print out eigenvalue
    */
-  const ConsoleStream & console() { return _console; }
+  const ConsoleStream & console() const { return _console; }
 
   /**
    * Hook up monitors for SNES and KSP
@@ -197,7 +204,7 @@ protected:
 
   unsigned int _active_eigen_index;
 
-  bool _auto_initilize_eigen_vector;
+  bool _auto_initialize_eigen_vector;
   bool _do_free_power_iteration;
   bool _output_inverse_eigenvalue;
 
@@ -209,10 +216,14 @@ protected:
   PerfID _solve_timer;
   PerfID _compute_jacobian_blocks_timer;
 
+  /// Whether or not we normalize eigenvector
   bool _has_normalization;
+  /// Postprocessor used to compute a factor from eigenvector
   PostprocessorName _normalization;
+  /// Postprocessor target value. The value of postprocessor should equal to
+  /// '_normal_factor' by adjusting eigenvector
   Real _normal_factor;
-  // Pre scale factor
+  /// Pre scale factor
   Real _pre_scale_factor;
   bool _has_pre_scale;
 };

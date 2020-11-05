@@ -197,6 +197,11 @@ public:
   /**
    * Calls the timestepSetup function for each of the output objects
    * @see FEProblemBase::solve()
+   * timestepSetup is too early for solver setup where we try to hook up monitor,
+   * change prefix, etc. SLEPc solver does not exist yet when we call timestepSetup.
+   * Moved this method from the private region to the public region so we can call
+   * this function from EigenProblem with no need to make EigenProblem as friend
+   * of OutputWarehouse.
    */
   void solveSetup();
 

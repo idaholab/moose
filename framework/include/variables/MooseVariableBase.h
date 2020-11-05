@@ -147,12 +147,12 @@ public:
   /**
    * Whether or not this variable operates on an eigen kernel
    */
-  virtual bool eigen() const { return _is_eigen; }
+  bool eigen() const { return _is_eigen; }
 
   /**
    * Mark this variable as an eigen var or non-eigen var
    */
-  virtual void eigen(bool eigen) { _is_eigen = eigen; }
+  void eigen(bool eigen) { _is_eigen = eigen; }
 
 protected:
   /// System this variable is part of

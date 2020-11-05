@@ -65,7 +65,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _pre_scale_factor(1.0),
     _has_pre_scale(false)
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
@@ -87,7 +87,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   createTagVectors();
 }
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 void
 EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 {
@@ -367,7 +367,7 @@ EigenProblem::initEigenvector(const Real initial_value)
   // Count how many dofs we have
   for (auto & vn : var_names)
   {
-    auto & var = getVariable(0, vn);
+    const auto & var = getVariable(0, vn);
     if (var.eigen())
     {
       std::set<dof_id_type> var_indices;
@@ -391,7 +391,7 @@ EigenProblem::initEigenvector(const Real initial_value)
   // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
-    MooseVariableFEBase & var = getVariable(0, vn);
+    const auto & var = getVariable(0, vn);
     // We set values for only eigen variables
     if (var.eigen())
     {
@@ -521,7 +521,7 @@ EigenProblem::solve()
 }
 
 void
-EigenProblem::setNormalization(const PostprocessorName pp, const Real value)
+EigenProblem::setNormalization(const PostprocessorName & pp, const Real value)
 {
   _has_normalization = true;
   _normalization = pp;
@@ -548,7 +548,7 @@ EigenProblem::converged()
 }
 
 bool
-EigenProblem::isNonlinearEigenvalueSolver()
+EigenProblem::isNonlinearEigenvalueSolver() const
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
@@ -557,9 +557,9 @@ EigenProblem::isNonlinearEigenvalueSolver()
 }
 
 bool
-EigenProblem::needInitializeEigenVector()
+EigenProblem::needInitializeEigenVector() const
 {
-  return _auto_initilize_eigen_vector && isNonlinearEigenvalueSolver();
+  return _auto_initialize_eigen_vector && isNonlinearEigenvalueSolver();
 }
 
 void

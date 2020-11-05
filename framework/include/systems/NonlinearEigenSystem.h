@@ -21,7 +21,7 @@
 class EigenProblem;
 class KernelBase;
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 
 /**
  * Nonlinear eigenvalue system to be solved
@@ -65,24 +65,6 @@ public:
    */
   NumericVector<Number> & residualVectorBX();
 
-  /**
-   * Add the eigen tag to the right kernels
-   */
-  template <typename T>
-  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Add the precond tag to eigen kernels
-   */
-  template <typename T>
-  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Mark a variable an eigen variable if it operates on eigen kernels
-   */
-  template <typename T>
-  void markEigenVariables(MooseObjectTagWarehouse<T> & warehouse);
-
   virtual void initialSetup() override;
 
   void attachSLEPcCallbacks();
@@ -92,10 +74,7 @@ public:
    *
    * @return The number of converged eigenvalues
    */
-  virtual unsigned int getNumConvergedEigenvalues() const
-  {
-    return _transient_sys.get_n_converged();
-  };
+  unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
@@ -105,7 +84,7 @@ public:
    */
   virtual SNES getSNES() override;
 
-  virtual TransientEigenSystem & sys() { return _transient_sys; }
+  TransientEigenSystem & sys() { return _transient_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -121,7 +100,7 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n) const;
+  std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n) const;
 
   /**
    * Return the Nth converged eigenvalue and copies the respective eigen vector to the solution
@@ -131,14 +110,14 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual std::pair<Real, Real> getConvergedEigenpair(dof_id_type n) const;
+  std::pair<Real, Real> getConvergedEigenpair(dof_id_type n) const;
 
   /**
    * Get the number of converged eigenvalues
    *
    * @return all converged eigenvalues as complex numbers
    */
-  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues() const
+  const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues() const
   {
     return _eigen_values;
   }
@@ -183,6 +162,25 @@ public:
   Preconditioner<Number> * preconditioner() const { return _preconditioner; }
 
   virtual void turnOffJacobian() override;
+
+private:
+  /**
+   * Add the eigen tag to the right kernels
+   */
+  template <typename T>
+  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
+
+  /**
+   * Add the precond tag to eigen kernels
+   */
+  template <typename T>
+  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
+
+  /**
+   * Mark a variable an eigen variable if it operates on eigen kernels
+   */
+  template <typename T>
+  void markEigenVariables(MooseObjectTagWarehouse<T> & warehouse);
 
 protected:
   NumericVector<Number> & solutionOldInternal() const override

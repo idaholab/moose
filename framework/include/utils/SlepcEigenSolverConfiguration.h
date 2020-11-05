@@ -27,11 +27,6 @@ public:
   SlepcEigenSolverConfiguration(EigenProblem & eigen_problem,
                                 libMesh::SlepcEigenSolver<libMesh::Number> & slepc_eigen_solver);
 
-  /**
-   * empty destructor
-   */
-  ~SlepcEigenSolverConfiguration() {}
-
   virtual void configure_solver() override;
 
 private:

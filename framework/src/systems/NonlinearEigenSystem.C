@@ -30,7 +30,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_shell_matrix.h"
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 
 namespace Moose
 {
@@ -110,7 +110,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   sys().attach_assemble_function(Moose::assemble_matrix);
 
   SlepcEigenSolver<Number> * solver =
-      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_transient_sys.eigen_solver));
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(_transient_sys.eigen_solver.get());
 
   if (!solver)
     mooseError("A slepc eigen solver is required");

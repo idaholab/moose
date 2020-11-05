@@ -1393,6 +1393,11 @@ public:
    */
   SolverParams & solverParams();
 
+  /**
+   * const version
+   */
+  const SolverParams & solverParams() const;
+
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
