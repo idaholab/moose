@@ -166,3 +166,474 @@ TEST(PorousFlowVanGenuchten, d2relpermNW)
        eps;
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeabilityNW(0.8, 0.65), 1.0E-5);
 }
+
+/// Test the hysteretic capillary pressure
+TEST(PorousFlowVanGenuchten, caphys)
+{
+  // first define some extensions that do not actually induce any extension, so the non-extended Pc
+  // can be checked
+  PorousFlowVanGenuchten::LowCapillaryPressureExtension low_ext;
+  low_ext.S = -1.0;
+  low_ext.Pc = 123.0;
+  PorousFlowVanGenuchten::HighCapillaryPressureExtension high_ext;
+  high_ext.S = 2.0;
+
+  EXPECT_NEAR(
+      0.0,
+      PorousFlowVanGenuchten::capillaryPressureHys(1.1, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      0.0,
+      PorousFlowVanGenuchten::capillaryPressureHys(0.75, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      123.0,
+      PorousFlowVanGenuchten::capillaryPressureHys(-1.0, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      123.0,
+      PorousFlowVanGenuchten::capillaryPressureHys(0.05, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      0.7233512030263158,
+      PorousFlowVanGenuchten::capillaryPressureHys(0.2, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      0.18806139488299345,
+      PorousFlowVanGenuchten::capillaryPressureHys(0.4, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+  EXPECT_NEAR(
+      0.06716785873826017,
+      PorousFlowVanGenuchten::capillaryPressureHys(0.6, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+      1.0E-5);
+
+  // define a sensible lower extension
+  low_ext.Pc = 1.5;
+  low_ext.S =
+      PorousFlowVanGenuchten::saturationHys(low_ext.Pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      low_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::EXPONENTIAL;
+  EXPECT_NEAR(0.15229665668299805, low_ext.S, 1.0E-5);
+  EXPECT_NEAR(-32.05516428734052, low_ext.dPc, 1.0E-5);
+
+  // define a sensible upper extension
+  const Real ratio = 0.9;
+  high_ext.S = ratio * (1.0 - 0.3);
+  high_ext.Pc = PorousFlowVanGenuchten::capillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::POWER;
+  EXPECT_NEAR(0.05300654102157442, high_ext.Pc, 1.0E-5);
+  EXPECT_NEAR(-0.48230528124844047, high_ext.dPc, 1.0E-5);
+
+  const std::vector<Real> sats{0.01, 0.1, 0.15, 0.2, 0.5, 0.63, 0.8, 0.99, 1.0};
+  std::vector<Real> pc;
+  pc = {31.385947046636815,
+        4.5861935551774735,
+        1.5754562501536364,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(pc[i],
+                PorousFlowVanGenuchten::capillaryPressureHys(
+                    sats[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::QUADRATIC;
+  pc = {3.9304232526771696,
+        2.8885549236001244,
+        1.5730646091089062,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(pc[i],
+                PorousFlowVanGenuchten::capillaryPressureHys(
+                    sats[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::NONE;
+  pc = {1.5,
+        1.5,
+        1.5,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(pc[i],
+                PorousFlowVanGenuchten::capillaryPressureHys(
+                    sats[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+
+  // different upper extension
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::NONE;
+  pc = {1.5, 1.5, 1.5, 0.7233512030263158, 0.11727884570711045, 0.05300654102157442, 0.0, 0.0, 0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(pc[i],
+                PorousFlowVanGenuchten::capillaryPressureHys(
+                    sats[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+}
+
+/// Test the hysteretic saturation
+TEST(PorousFlowVanGenuchten, sathys)
+{
+  // first define some extensions that do not actually induce any extension, so the non-extended Pc
+  // can be checked
+  PorousFlowVanGenuchten::LowCapillaryPressureExtension low_ext;
+  low_ext.S = -1.0;
+  low_ext.Pc = 123.0;
+  PorousFlowVanGenuchten::HighCapillaryPressureExtension high_ext;
+  high_ext.S = 2.0;
+
+  EXPECT_NEAR(1.0,
+              PorousFlowVanGenuchten::saturationHys(-1.1, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+              1.0E-5);
+  EXPECT_NEAR(-1.0,
+              PorousFlowVanGenuchten::saturationHys(1234.0, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+              1.0E-5);
+  EXPECT_NEAR(0.2,
+              PorousFlowVanGenuchten::saturationHys(
+                  0.7233512030263158, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+              1.0E-5);
+  EXPECT_NEAR(0.4,
+              PorousFlowVanGenuchten::saturationHys(
+                  0.18806139488299345, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+              1.0E-5);
+  EXPECT_NEAR(0.6,
+              PorousFlowVanGenuchten::saturationHys(
+                  0.06716785873826017, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+              1.0E-5);
+
+  // define a sensible lower extension
+  low_ext.Pc = 1.5;
+  low_ext.S =
+      PorousFlowVanGenuchten::saturationHys(low_ext.Pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      low_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::EXPONENTIAL;
+
+  // define a sensible upper extension
+  const Real ratio = 0.9;
+  high_ext.S = ratio * (1.0 - 0.3);
+  high_ext.Pc = PorousFlowVanGenuchten::capillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::POWER;
+
+  std::vector<Real> sats{0.01, 0.1, 0.15, 0.2, 0.5, 0.63, 0.8, 0.99, 1.0};
+  std::vector<Real> pc;
+  pc = {31.385947046636815,
+        4.5861935551774735,
+        1.5754562501536364,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(
+        sats[i],
+        PorousFlowVanGenuchten::saturationHys(pc[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::QUADRATIC;
+  pc = {3.9304232526771696,
+        2.8885549236001244,
+        1.5730646091089062,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(
+        sats[i],
+        PorousFlowVanGenuchten::saturationHys(pc[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::NONE;
+  sats = {low_ext.S, low_ext.S, 0.2, 0.5, 0.63, 0.8, 0.99, 1.0};
+  pc = {2.5,
+        1.5,
+        0.7233512030263158,
+        0.11727884570711045,
+        0.05300654102157442,
+        0.006681337544884095,
+        2.7847615834816514e-07,
+        0.0};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(
+        sats[i],
+        PorousFlowVanGenuchten::saturationHys(pc[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+
+  // different upper extension
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::NONE;
+  high_ext.S = 0.8;
+  pc = {2.5, 1.5, 0.7233512030263158, 0.11727884570711045, 0.05300654102157442, 1E-10};
+  sats = {low_ext.S, low_ext.S, 0.2, 0.5, 0.63, 0.8};
+  for (unsigned i = 0; i < sats.size(); ++i)
+    EXPECT_NEAR(
+        sats[i],
+        PorousFlowVanGenuchten::saturationHys(pc[i], 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+}
+
+/// Test the first derivative of the hysteretic capillary pressure
+TEST(PorousFlowVanGenuchten, dcaphys)
+{
+  const Real eps = 1.0E-9;
+
+  // first define some extensions that do not actually induce any extension, so the non-extended
+  // Pc can be checked
+  PorousFlowVanGenuchten::LowCapillaryPressureExtension low_ext;
+  low_ext.S = -1.0;
+  low_ext.Pc = 123.0;
+  PorousFlowVanGenuchten::HighCapillaryPressureExtension high_ext;
+  high_ext.S = 2.0;
+
+  std::vector<Real> sats{1.1, 0.75, -1.0, 0.05};
+  for (const auto & sat : sats)
+    EXPECT_NEAR(
+        0.0,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+
+  sats = {0.2, 0.4, 0.6};
+  for (const auto & sat : sats)
+  {
+    const Real fd = 0.5 *
+                    (PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+                     PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+                    eps;
+    EXPECT_NEAR(
+        fd,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+  };
+
+  // define a sensible lower extension
+  low_ext.Pc = 1.5;
+  low_ext.S =
+      PorousFlowVanGenuchten::saturationHys(low_ext.Pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      low_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::EXPONENTIAL;
+
+  // define a sensible upper extension
+  const Real ratio = 0.9;
+  high_ext.S = ratio * (1.0 - 0.3);
+  high_ext.Pc = PorousFlowVanGenuchten::capillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::POWER;
+
+  sats = {0.01, 0.1, 0.15, 0.2, 0.5, 0.63, 0.8, 0.99, 1.0};
+
+  for (const auto & sat : sats)
+  {
+    const Real fd = 0.5 *
+                    (PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+                     PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+                    eps;
+    EXPECT_NEAR(
+        fd,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+  };
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::QUADRATIC;
+  for (const auto & sat : sats)
+  {
+    const Real fd = 0.5 *
+                    (PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+                     PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+                    eps;
+    EXPECT_NEAR(
+        fd,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+  };
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::NONE;
+  for (const auto & sat : sats)
+  {
+    const Real fd = 0.5 *
+                    (PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+                     PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+                    eps;
+    EXPECT_NEAR(
+        fd,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+  };
+
+  // different upper extension (cannot evaluate derivative at s = 0.63)
+  sats = {0.01, 0.1, 0.15, 0.2, 0.5, 0.8, 0.99, 1.0};
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::NONE;
+  for (const auto & sat : sats)
+  {
+    const Real fd = 0.5 *
+                    (PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+                     PorousFlowVanGenuchten::capillaryPressureHys(
+                         sat - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+                    eps;
+    EXPECT_NEAR(
+        fd,
+        PorousFlowVanGenuchten::dcapillaryPressureHys(sat, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+        1.0E-5);
+  };
+}
+
+/// Test the derivative of the hysteretic saturation
+TEST(PorousFlowVanGenuchten, dsathys)
+{
+  const Real eps = 1E-9;
+
+  // first define some extensions that do not actually induce any extension, so the non-extended Pc
+  // can be checked
+  PorousFlowVanGenuchten::LowCapillaryPressureExtension low_ext;
+  low_ext.S = -1.0;
+  low_ext.Pc = 123.0;
+  PorousFlowVanGenuchten::HighCapillaryPressureExtension high_ext;
+  high_ext.S = 2.0;
+
+  std::vector<Real> pcs{-1.1, 1234.0};
+  for (const auto & pc : pcs)
+    EXPECT_NEAR(0.0,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+
+  pcs = {0.7, 0.2, 0.07};
+  for (const auto & pc : pcs)
+  {
+    const Real fd =
+        0.5 *
+        (PorousFlowVanGenuchten::saturationHys(pc + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+         PorousFlowVanGenuchten::saturationHys(pc - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+        eps;
+    EXPECT_NEAR(fd,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+  }
+
+  // define a sensible lower extension
+  low_ext.Pc = 1.5;
+  low_ext.S =
+      PorousFlowVanGenuchten::saturationHys(low_ext.Pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      low_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::EXPONENTIAL;
+
+  // define a sensible upper extension
+  const Real ratio = 0.9;
+  high_ext.S = ratio * (1.0 - 0.3);
+  high_ext.Pc = PorousFlowVanGenuchten::capillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.dPc = PorousFlowVanGenuchten::dcapillaryPressureHys(
+      high_ext.S, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext);
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::POWER;
+
+  pcs = {31.385947046636815,
+         4.5861935551774735,
+         1.5754562501536364,
+         0.7233512030263158,
+         0.11727884570711045,
+         0.05300654102157442,
+         0.006681337544884095};
+  for (const auto & pc : pcs)
+  {
+    const Real fd =
+        0.5 *
+        (PorousFlowVanGenuchten::saturationHys(pc + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+         PorousFlowVanGenuchten::saturationHys(pc - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+        eps;
+    EXPECT_NEAR(fd,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+  }
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::QUADRATIC;
+  pcs = {3.9304232526771696,
+         2.8885549236001244,
+         1.5730646091089062,
+         0.7233512030263158,
+         0.11727884570711045,
+         0.05300654102157442,
+         0.006681337544884095};
+  for (const auto & pc : pcs)
+  {
+    const Real fd =
+        0.5 *
+        (PorousFlowVanGenuchten::saturationHys(pc + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+         PorousFlowVanGenuchten::saturationHys(pc - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+        eps;
+    EXPECT_NEAR(fd,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+  }
+
+  // different lower extension
+  low_ext.strategy = PorousFlowVanGenuchten::LowCapillaryPressureExtension::NONE;
+  pcs = {2.5, 0.7233512030263158, 0.11727884570711045, 0.05300654102157442, 0.006681337544884095};
+  for (const auto & pc : pcs)
+  {
+    const Real fd =
+        0.5 *
+        (PorousFlowVanGenuchten::saturationHys(pc + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+         PorousFlowVanGenuchten::saturationHys(pc - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+        eps;
+    EXPECT_NEAR(fd,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+  }
+
+  // different upper extension
+  high_ext.strategy = PorousFlowVanGenuchten::HighCapillaryPressureExtension::NONE;
+  high_ext.S = 0.8;
+  pcs = {2.5, 0.7233512030263158, 0.11727884570711045, 0.05, 0.04};
+  for (const auto & pc : pcs)
+  {
+    const Real fd =
+        0.5 *
+        (PorousFlowVanGenuchten::saturationHys(pc + eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext) -
+         PorousFlowVanGenuchten::saturationHys(pc - eps, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext)) /
+        eps;
+    EXPECT_NEAR(fd,
+                PorousFlowVanGenuchten::dsaturationHys(pc, 0.1, 0.3, 10.0, 1.9, low_ext, high_ext),
+                1.0E-5);
+  }
+}
