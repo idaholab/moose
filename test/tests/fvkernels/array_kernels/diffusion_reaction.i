@@ -23,6 +23,7 @@
   [reaction]
     type = FVArrayReaction
     variable = u
+    coeff = rc
   []
 []
 
@@ -46,6 +47,11 @@
     type = ADGenericConstantArray
     prop_name = dc
     prop_value = '.1 .1'
+  []
+  [rc]
+    type = ADGenericConstantArray
+    prop_name = rc
+    prop_value = '1 1'
   []
 []
 
