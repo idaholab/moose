@@ -352,6 +352,8 @@ MooseApp::MooseApp(InputParameters parameters)
   }
 #endif
 
+  ADReal::do_derivatives = false;
+
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 

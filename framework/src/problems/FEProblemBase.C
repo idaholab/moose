@@ -349,11 +349,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
 {
-  //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
-  //  things that we setup early in the simulation actually get their derivative vectors initalized.
-  //  We will toggle this to false when doing residual evaluations
-  ADReal::do_derivatives = true;
-
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -5156,12 +5151,7 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
                                   NumericVector<Number> & residual)
 {
   TIME_SECTION(_compute_residual_sys_timer);
-
-  ADReal::do_derivatives = false;
-
   computeResidual(soln, residual);
-
-  ADReal::do_derivatives = true;
 }
 
 void
@@ -5449,6 +5439,8 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 void
 FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
+  ADReal::do_derivatives = true;
+
   if (!_has_jacobian || !_const_jacobian)
   {
     TIME_SECTION(_compute_jacobian_tags_timer);
@@ -5538,6 +5530,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
       _displaced_problem->setCurrentlyComputingJacobian(false);
     _safe_access_tagged_matrices = true;
   }
+
+  ADReal::do_derivatives = false;
 }
 
 void
