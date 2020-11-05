@@ -73,8 +73,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
             _coupled_vector_moose_vars.push_back(tmp_var);
           else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(moose_var))
             _coupled_array_moose_vars.push_back(tmp_var);
-          else if (auto * tmp_var = dynamic_cast<MooseVariableFV<Real> *>(moose_var))
+          else if (auto * tmp_var = dynamic_cast<MooseVariableFVReal *>(moose_var))
             _coupled_standard_fv_moose_vars.push_back(tmp_var);
+          else if (auto * tmp_var = dynamic_cast<MooseVariableFVArray *>(moose_var))
+            _coupled_array_fv_moose_vars.push_back(tmp_var);
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
         }
@@ -270,10 +272,17 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
   return const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
 }
 
-ArrayMooseVariable *
+MooseVariableField<RealEigenVector> *
 Coupleable::getArrayVar(const std::string & var_name, unsigned int comp)
 {
-  return const_cast<ArrayMooseVariable *>(getVarHelper<ArrayMooseVariable>(var_name, comp));
+  return const_cast<MooseVariableField<RealEigenVector> *>(
+      getVarHelper<MooseVariableField<RealEigenVector>>(var_name, comp));
+}
+
+const MooseVariableField<RealEigenVector> *
+Coupleable::getArrayVar(const std::string & var_name, unsigned int comp) const
+{
+  return getVarHelper<MooseVariableField<RealEigenVector>>(var_name, comp);
 }
 
 const MooseVariable *
@@ -292,12 +301,6 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp) const
                "variables"
                "with nodal compute objects.");
   return getVarHelper<VectorMooseVariable>(var_name, comp);
-}
-
-const ArrayMooseVariable *
-Coupleable::getArrayVar(const std::string & var_name, unsigned int comp) const
-{
-  return getVarHelper<ArrayMooseVariable>(var_name, comp);
 }
 
 const VariableValue *

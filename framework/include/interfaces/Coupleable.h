@@ -1028,8 +1028,11 @@ protected:
   /// Vector of array coupled variables
   std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
 
-  /// Vector of standard finite volume oupled variables
-  std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
+  /// Vector of standard finite volume coupled variables
+  std::vector<MooseVariableFVReal *> _coupled_standard_fv_moose_vars;
+
+  /// Vector of array finite volume coupled variables
+  std::vector<MooseVariableFVArray *> _coupled_array_fv_moose_vars;
 
   /// map from new to deprecated variable names
   const std::unordered_map<std::string, std::string> & _new_to_deprecated_coupled_vars;
@@ -1215,7 +1218,17 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp);
+  MooseVariableField<RealEigenVector> * getArrayVar(const std::string & var_name,
+                                                    unsigned int comp);
+
+  /**
+   * Extract pointer to a coupled array variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  const MooseVariableField<RealEigenVector> * getArrayVar(const std::string & var_name,
+                                                          unsigned int comp) const;
 
   /**
    * Extract pointer to a coupled variable
@@ -1232,14 +1245,6 @@ protected:
    * @return Pointer to the desired variable
    */
   const VectorMooseVariable * getVectorVar(const std::string & var_name, unsigned int comp) const;
-
-  /**
-   * Extract pointer to a coupled array variable
-   * @param var_name Name of parameter desired
-   * @param comp Component number of multiple coupled variables
-   * @return Pointer to the desired variable
-   */
-  const ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
@@ -1402,6 +1407,10 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
       if (var->name() == name_to_use)
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_standard_fv_moose_vars)
+      if (var->name() == name_to_use)
+        mooseError("The named variable is an FV variable, try a "
+                   "'adCoupled[Value/Gradient/Dot/etc]...' function instead");
     mooseError(
         "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
   }

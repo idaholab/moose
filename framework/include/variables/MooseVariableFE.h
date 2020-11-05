@@ -284,7 +284,7 @@ public:
   {
     return _element_data->gradSln(Moose::Old);
   }
-  const FieldVariableGradient & gradSlnOlder() const
+  const FieldVariableGradient & gradSlnOlder() const override
   {
     return _element_data->gradSln(Moose::Older);
   }
@@ -351,10 +351,10 @@ public:
   }
 
   /// element dots
-  const FieldVariableValue & uDot() const { return _element_data->uDot(); }
-  const FieldVariableValue & uDotDot() const { return _element_data->uDotDot(); }
-  const FieldVariableValue & uDotOld() const { return _element_data->uDotOld(); }
-  const FieldVariableValue & uDotDotOld() const { return _element_data->uDotDotOld(); }
+  const FieldVariableValue & uDot() const override { return _element_data->uDot(); }
+  const FieldVariableValue & uDotDot() const override { return _element_data->uDotDot(); }
+  const FieldVariableValue & uDotOld() const override { return _element_data->uDotOld(); }
+  const FieldVariableValue & uDotDotOld() const override { return _element_data->uDotDotOld(); }
   const VariableValue & duDotDu() const { return _element_data->duDotDu(); }
   const VariableValue & duDotDotDu() const { return _element_data->duDotDotDu(); }
 
@@ -367,7 +367,10 @@ public:
   {
     return _neighbor_data->sln(Moose::Old);
   }
-  const FieldVariableValue & slnOlderNeighbor() const { return _neighbor_data->sln(Moose::Older); }
+  const FieldVariableValue & slnOlderNeighbor() const override
+  {
+    return _neighbor_data->sln(Moose::Older);
+  }
   const FieldVariableValue & slnPreviousNLNeighbor() const
   {
     return _neighbor_data->sln(Moose::PreviousNL);
@@ -382,7 +385,7 @@ public:
   {
     return _neighbor_data->gradSln(Moose::Old);
   }
-  const FieldVariableGradient & gradSlnOlderNeighbor() const
+  const FieldVariableGradient & gradSlnOlderNeighbor() const override
   {
     return _neighbor_data->gradSln(Moose::Older);
   }
@@ -431,10 +434,13 @@ public:
   }
 
   /// neighbor dots
-  const FieldVariableValue & uDotNeighbor() const { return _neighbor_data->uDot(); }
-  const FieldVariableValue & uDotDotNeighbor() const { return _neighbor_data->uDotDot(); }
-  const FieldVariableValue & uDotOldNeighbor() const { return _neighbor_data->uDotOld(); }
-  const FieldVariableValue & uDotDotOldNeighbor() const { return _neighbor_data->uDotDotOld(); }
+  const FieldVariableValue & uDotNeighbor() const override { return _neighbor_data->uDot(); }
+  const FieldVariableValue & uDotDotNeighbor() const override { return _neighbor_data->uDotDot(); }
+  const FieldVariableValue & uDotOldNeighbor() const override { return _neighbor_data->uDotOld(); }
+  const FieldVariableValue & uDotDotOldNeighbor() const override
+  {
+    return _neighbor_data->uDotDotOld();
+  }
   const VariableValue & duDotDuNeighbor() const { return _neighbor_data->duDotDu(); }
   const VariableValue & duDotDotDuNeighbor() const { return _neighbor_data->duDotDotDu(); }
 

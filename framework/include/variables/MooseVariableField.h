@@ -154,6 +154,10 @@ public:
    * @return the old elemental solution, e.g. that of the previous timestep
    */
   virtual const FieldVariableValue & slnOld() const = 0;
+  /**
+   * @return the older elemental solution, e.g. that of two timesteps ago
+   */
+  virtual const FieldVariableValue & slnOlder() const = 0;
 
   /**
    * @return the current neighbor solution
@@ -166,17 +170,29 @@ public:
   virtual const FieldVariableValue & slnOldNeighbor() const = 0;
 
   /**
-   * @return the older elemental solution, e.g. that of two timesteps ago
+   * @return the old neighbor solution, e.g. that of the previous timestep
    */
-  virtual const FieldVariableValue & slnOlder() const = 0;
+  virtual const FieldVariableValue & slnOlderNeighbor() const = 0;
 
   /// element gradients
   virtual const FieldVariableGradient & gradSln() const = 0;
   virtual const FieldVariableGradient & gradSlnOld() const = 0;
+  virtual const FieldVariableGradient & gradSlnOlder() const = 0;
 
   /// neighbor solution gradients
   virtual const FieldVariableGradient & gradSlnNeighbor() const = 0;
   virtual const FieldVariableGradient & gradSlnOldNeighbor() const = 0;
+  virtual const FieldVariableGradient & gradSlnOlderNeighbor() const = 0;
+
+  virtual const FieldVariableValue & uDot() const = 0;
+  virtual const FieldVariableValue & uDotDot() const = 0;
+  virtual const FieldVariableValue & uDotOld() const = 0;
+  virtual const FieldVariableValue & uDotDotOld() const = 0;
+
+  virtual const FieldVariableValue & uDotNeighbor() const = 0;
+  virtual const FieldVariableValue & uDotDotNeighbor() const = 0;
+  virtual const FieldVariableValue & uDotOldNeighbor() const = 0;
+  virtual const FieldVariableValue & uDotDotOldNeighbor() const = 0;
 
   /**
    * Whether or not this variable is computing any second derivatives.
