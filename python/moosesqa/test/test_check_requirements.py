@@ -13,13 +13,15 @@ import unittest
 import mock
 import logging
 import moosesqa
+import mooseutils
 
 logging.basicConfig()
 
+@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestCheckRequirements(unittest.TestCase):
 
     def setUp(self):
-        self._patcher = mock.patch('mooseutils.colorText', side_effect=lambda t, c: t)
+        self._patcher = mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: t)
         self._patcher.start()
 
     def testDeprecated(self):

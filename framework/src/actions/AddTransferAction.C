@@ -18,7 +18,7 @@ InputParameters
 AddTransferAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Action for creating Transfer objects.");
+  params.addClassDescription("Add a Transfer object to the simulation.");
   return params;
 }
 

@@ -19,6 +19,7 @@ InputParameters
 EmptyPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("A postprocessor object that returns a value of zero.");
   return params;
 }
 

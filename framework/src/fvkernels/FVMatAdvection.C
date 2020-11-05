@@ -15,6 +15,7 @@ InputParameters
 FVMatAdvection::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params.addClassDescription("Computes the residual of advective term using finite volume method.");
   params.addRequiredParam<MaterialPropertyName>("vel", "advection velocity");
   params.addParam<MaterialPropertyName>(
       "advected_quantity",

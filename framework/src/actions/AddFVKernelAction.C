@@ -16,7 +16,9 @@ registerMooseAction("MooseApp", AddFVKernelAction, "add_fv_kernel");
 InputParameters
 AddFVKernelAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a FVKernel object to the simulation.");
+  return params;
 }
 
 AddFVKernelAction::AddFVKernelAction(InputParameters params) : MooseObjectAction(params) {}

@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
-  issues = ''
+  issues = '#12772'
   [./test_steady_time]
     type = 'Exodiff'
     input = 'steady_time.i'

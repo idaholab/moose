@@ -16,7 +16,9 @@ registerMooseAction("MooseApp", AddFVBCAction, "add_fv_bc");
 InputParameters
 AddFVBCAction::validParams()
 {
-  return MooseObjectAction::validParams();
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a FVBoundaryCondition object to the simulation.");
+  return params;
 }
 
 AddFVBCAction::AddFVBCAction(InputParameters params) : MooseObjectAction(params) {}

@@ -21,6 +21,8 @@ GenericFunctionMaterialTempl<is_ad>::validParams()
 {
 
   InputParameters params = Material::validParams();
+  params.addClassDescription("Material object for declaring properties that are populated by "
+                             "evaluation of Function object.");
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
   params.addParam<std::vector<FunctionName>>("prop_values",

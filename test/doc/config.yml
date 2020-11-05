@@ -9,8 +9,6 @@ Extensions:
         active: False
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/test
-        hide:
-            framework: !include framework/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
             moose_test: !include test/doc/remove.yml

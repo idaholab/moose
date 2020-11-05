@@ -15,6 +15,8 @@ InputParameters
 FVAdvection::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params.addClassDescription(
+      "Residual contribution from advection operator for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   MooseEnum advected_interp_method("average upwind", "upwind");
 

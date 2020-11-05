@@ -20,6 +20,7 @@ InputParameters
 NumPicardIterations::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Returns the number of Picard iterations taken by the executioner.");
   return params;
 }
 

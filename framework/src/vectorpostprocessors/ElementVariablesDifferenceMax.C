@@ -22,7 +22,7 @@ InputParameters
 ElementVariablesDifferenceMax::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
-
+  params.addClassDescription("Computes the largest difference between two variable fields.");
   params.addRequiredCoupledVar(
       "compare_a",
       "The first variable to evaluate the difference with, performed as \"compare_a - compare_b\"");

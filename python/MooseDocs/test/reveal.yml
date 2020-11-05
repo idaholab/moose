@@ -63,7 +63,6 @@ Extensions:
 #            libMesh: https://libmesh.github.io/
 #    MooseDocs.extensions.appsyntax:
 #        executable: ${MOOSE_DIR}/test
-#        hide: !include framework/doc/hidden.yml
 #        remove: !include framework/doc/remove.yml
 #        includes:
 #            - framework/include

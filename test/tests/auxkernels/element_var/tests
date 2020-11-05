@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/AuxKernels/index.md'
-  issues = ''
+  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83 #238'
   [./test]
     type = 'Exodiff'
     input = 'element_var_test.i'

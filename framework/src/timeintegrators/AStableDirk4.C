@@ -22,6 +22,8 @@ InputParameters
 AStableDirk4::validParams()
 {
   InputParameters params = TimeIntegrator::validParams();
+  params.addClassDescription("Fourth-order diagonally implicit Runge Kutta method (Dirk) with "
+                             "three stages plus an update.");
   params.addParam<bool>("safe_start", true, "If true, use LStableDirk4 to bootstrap this method.");
   return params;
 }

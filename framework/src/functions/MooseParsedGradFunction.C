@@ -18,6 +18,7 @@ InputParameters
 MooseParsedGradFunction::validParams()
 {
   InputParameters params = Function::validParams();
+  params.addClassDescription("Defines a function and its gradient using input file parameters.");
   params += MooseParsedFunctionBase::validParams();
   params.addParam<std::string>("value", "0", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial with respect to x.");

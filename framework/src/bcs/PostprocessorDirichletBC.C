@@ -18,6 +18,8 @@ InputParameters
 PostprocessorDirichletBC::validParams()
 {
   InputParameters params = NodalBC::validParams();
+  params.addClassDescription(
+      "Dirichlet boundary condition with value prescribed by a Postprocessor value.");
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "The postprocessor to set the value to on the boundary.");
   return params;

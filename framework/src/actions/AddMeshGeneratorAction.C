@@ -21,7 +21,7 @@ InputParameters
 AddMeshGeneratorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Action for adding mesh generator objects");
+  params.addClassDescription("Add a MeshGenerator object to the simulation.");
   return params;
 }
 

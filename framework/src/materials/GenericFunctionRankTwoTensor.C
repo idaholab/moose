@@ -19,6 +19,8 @@ InputParameters
 GenericFunctionRankTwoTensorTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Material object for defining rank two tensor properties using functions.");
   params.addRequiredParam<std::vector<FunctionName>>(
       "tensor_functions", "Vector of Function names defining the rank two tensor");
   params.addRequiredParam<MaterialPropertyName>(

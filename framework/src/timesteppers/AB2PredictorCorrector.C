@@ -33,6 +33,8 @@ InputParameters
 AB2PredictorCorrector::validParams()
 {
   InputParameters params = TimeStepper::validParams();
+  params.addClassDescription(
+      "Implements second order Adams-Bashforth method for timestep calculation.");
   params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
   params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");
   params.addRequiredParam<Real>("dt", "Initial time step size");

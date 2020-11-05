@@ -18,7 +18,7 @@ InputParameters
 AddMarkerAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Action for adding Marker object to a simulation.");
+  params.addClassDescription("Add a Marker object to a simulation.");
   return params;
 }
 

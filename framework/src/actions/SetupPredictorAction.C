@@ -22,7 +22,7 @@ InputParameters
 SetupPredictorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-
+  params.addClassDescription("Add a Predictor object to the simulation.");
   return params;
 }
 

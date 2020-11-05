@@ -4,15 +4,9 @@ Applications:
         app_types:
             - PhaseFieldApp
         content_directory: ${MOOSE_DIR}/modules/phase_field/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/phase_field/doc/hidden.yml
-            - ${MOOSE_DIR}/framework/doc/hidden.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
-        log_hidden_non_stub: WARNING
 
 Documents:
     software_requirements_specification: sqa/phase_field_srs.md

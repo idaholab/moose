@@ -17,6 +17,7 @@ InputParameters
 ConstantRate::validParams()
 {
   InputParameters params = NodalKernel::validParams();
+  params.addClassDescription("Computes residual or the rate in a simple ODE of du/dt = rate.");
   params.addRequiredParam<Real>("rate", "The constant rate in 'du/dt = rate'");
   params.declareControllable("rate");
   return params;

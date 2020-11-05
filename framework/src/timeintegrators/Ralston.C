@@ -17,7 +17,7 @@ InputParameters
 Ralston::validParams()
 {
   InputParameters params = ExplicitRK2::validParams();
-
+  params.addClassDescription("Ralston's time integration method.");
   return params;
 }
 

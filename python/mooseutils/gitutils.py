@@ -83,3 +83,13 @@ def git_init_submodule(path, working_dir=os.getcwd()):
         if (submodule == path) and (status == '-'):
             subprocess.call(['git', 'submodule', 'update', '--init', path], cwd=working_dir)
             break
+
+def git_version():
+    """
+    Return the version number as a tuple (major, minor, patch)
+    """
+    out = check_output(['git', '--version'], encoding='utf-8')
+    match = re.search(r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)', out)
+    if match is None:
+        raise SystemError("git --version failed to return correctly formatted version number")
+    return (int(match.group('major')), int(match.group('minor')), int(match.group('patch')))

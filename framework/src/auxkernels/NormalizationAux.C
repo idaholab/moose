@@ -17,6 +17,7 @@ InputParameters
 NormalizationAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Normalizes a variable based on a Postprocessor value.");
   params.addRequiredCoupledVar("source_variable", "The variable to be normalized");
   params.addParam<PostprocessorName>("normalization", "The postprocessor on the source");
   params.addParam<PostprocessorName>("shift", "The postprocessor to shift the source");

@@ -4,10 +4,6 @@ Applications:
         app_types:
             - PeridynamicsApp
         content_directory: ${MOOSE_DIR}/modules/peridynamics/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/peridynamics/doc/hidden.yml
-        log_hidden_syntax: WARNING
-        log_hidden_non_stub: WARNING
 
 Documents:
     log_software_requirements_specification: WARNING

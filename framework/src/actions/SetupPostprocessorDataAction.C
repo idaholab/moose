@@ -19,6 +19,7 @@ InputParameters
 SetupPostprocessorDataAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Method for initializing the storage for Postprocessors.");
   return params;
 }
 

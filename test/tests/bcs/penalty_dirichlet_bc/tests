@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#5268'
   design = 'source/bcs/PenaltyDirichletBC.md'
   [./test_penalty_dirichlet_bc]
     type = 'Exodiff'

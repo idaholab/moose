@@ -8,8 +8,6 @@ Applications:
         content_directory: test/doc/content
         unregister:
             - framework/doc/unregister.yml
-        hidden:
-            - framework/doc/hidden.yml
         remove:
             - framework/doc/remove.yml
             - test/doc/remove.yml

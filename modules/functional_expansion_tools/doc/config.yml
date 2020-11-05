@@ -11,7 +11,6 @@ Extensions:
         home: /modules/functional_expansion_tools
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/functional_expansion_tools
-        hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

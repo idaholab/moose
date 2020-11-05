@@ -32,6 +32,9 @@ InputParameters
 DT2::validParams()
 {
   InputParameters params = TimeStepper::validParams();
+  params.addClassDescription(
+      "An adaptive timestepper that compares the solution obtained from a single step of size dt "
+      "with two steps of size dt/2 and adjusts the next timestep accordingly.");
   params.addParam<Real>("dt", 1., "The initial time step size.");
   params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
   params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");

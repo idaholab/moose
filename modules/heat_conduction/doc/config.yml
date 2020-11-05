@@ -12,9 +12,6 @@ Extensions:
         home: /modules/functional_expansion_tools
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/heat_conduction
-        hide:
-            framework: !include framework/doc/hidden.yml
-            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

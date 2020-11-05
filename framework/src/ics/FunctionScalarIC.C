@@ -21,6 +21,7 @@ InputParameters
 FunctionScalarIC::validParams()
 {
   InputParameters params = ScalarInitialCondition::validParams();
+  params.addClassDescription("Initializes a scalar variable using a function.");
   params.addRequiredParam<std::vector<FunctionName>>("function", "The initial condition function.");
   return params;
 }

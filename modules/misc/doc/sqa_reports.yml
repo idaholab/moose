@@ -4,11 +4,7 @@ Applications:
         app_types:
             - MiscApp
         content_directory: ${MOOSE_DIR}/modules/misc/doc/content
-        hidden:
-            - ${MOOSE_DIR}/modules/misc/doc/hidden.yml
-        log_hidden_syntax: WARNING
         log_stub_files: WARNING
-        log_non_hidden_stub: WARNING
 Documents:
     software_requirements_specification: sqa/misc_srs.md
     software_design_description: sqa/misc_sdd.md

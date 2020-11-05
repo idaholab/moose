@@ -9,7 +9,7 @@
 
 #include "TestSetupPostprocessorDataActionFunction.h"
 
-registerMooseObject("MooseApp", TestSetupPostprocessorDataActionFunction);
+registerMooseObject("MooseTestApp", TestSetupPostprocessorDataActionFunction);
 
 defineLegacyParams(TestSetupPostprocessorDataActionFunction);
 

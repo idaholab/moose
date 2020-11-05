@@ -24,6 +24,8 @@ InputParameters
 MaterialVectorPostprocessor::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
+  params.addClassDescription("Records all scalar material properties of a material object on "
+                             "elements at the indicated execution points.");
   params.addRequiredParam<MaterialName>("material",
                                         "Material for which all properties will be recorded.");
   params.addRequiredParam<std::vector<unsigned int>>(

@@ -24,6 +24,7 @@ InputParameters
 CreateExecutionerAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add an Executioner object to the simulation.");
   params.addParam<bool>(
       "auto_preconditioning",
       true,

@@ -26,6 +26,8 @@ GapValueAux::validParams()
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Return the nearest value of a variable on a boundary from across a gap.");
   params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary",
                                         "The boundary on the other side of a gap.");

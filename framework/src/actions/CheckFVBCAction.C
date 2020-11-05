@@ -18,7 +18,10 @@ registerMooseAction("MooseApp", CheckFVBCAction, "check_integrity");
 InputParameters
 CheckFVBCAction::validParams()
 {
-  return Action::validParams();
+  InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Check that boundary conditions are defined correctly for finite volume problems.");
+  return params;
 }
 
 CheckFVBCAction::CheckFVBCAction(InputParameters params) : Action(params) {}

@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#1199'
   design = 'syntax/Postprocessors/index.md'
   [./test_pp_function_test]
     type = 'Exodiff'

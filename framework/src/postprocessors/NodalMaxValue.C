@@ -20,6 +20,7 @@ InputParameters
 NodalMaxValue::validParams()
 {
   InputParameters params = NodalVariablePostprocessor::validParams();
+  params.addClassDescription("Computes the maximum (over all the nodal values) of a variable.");
   return params;
 }
 

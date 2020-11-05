@@ -23,6 +23,7 @@ InputParameters
 Split::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params.addClassDescription("Field split based preconditioner for nonlinear solver.");
   params.addParam<std::vector<NonlinearVariableName>>(
       "vars", "Variables Split operates on (omitting this implies \"all variables\"");
   params.addParam<std::vector<SubdomainName>>(

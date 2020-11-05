@@ -22,6 +22,7 @@ InputParameters
 ScalarL2Error::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
+  params.addClassDescription("Compute L2 error of a scalar variable using analytic function.");
   params.addRequiredParam<VariableName>("variable", "The name of the scalar variable");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;

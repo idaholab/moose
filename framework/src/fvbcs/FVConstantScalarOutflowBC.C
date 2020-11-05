@@ -15,6 +15,8 @@ InputParameters
 FVConstantScalarOutflowBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription(
+      "Constant velocity scalar advection boundary conditions for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   return params;
 }

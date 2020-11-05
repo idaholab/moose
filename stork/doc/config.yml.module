@@ -11,8 +11,6 @@ Extensions:
         home: /modules/stork
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/stork
-        hide:
-            framework: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include

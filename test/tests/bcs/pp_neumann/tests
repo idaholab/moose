@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#5680'
   design = 'source/bcs/PostprocessorNeumannBC.md'
   [./test]
     type = 'Exodiff'

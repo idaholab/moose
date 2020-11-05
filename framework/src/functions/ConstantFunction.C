@@ -17,6 +17,8 @@ InputParameters
 ConstantFunction::validParams()
 {
   InputParameters params = Function::validParams();
+  params.addClassDescription(
+      "A function that returns a constant value as defined by an input parameter.");
   params.addParam<Real>("value", 0.0, "The constant value");
   params.declareControllable("value");
   return params;

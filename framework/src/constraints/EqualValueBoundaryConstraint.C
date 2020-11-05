@@ -54,6 +54,8 @@ InputParameters
 EqualValueBoundaryConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
+  params.addClassDescription(
+      "Constraint for enforcing that variables on each side of a boundary are equivalent.");
   params.addParam<unsigned int>(
       "primary",
       std::numeric_limits<unsigned int>::max(),

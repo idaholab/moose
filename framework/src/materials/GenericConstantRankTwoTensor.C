@@ -17,6 +17,8 @@ InputParameters
 GenericConstantRankTwoTensorTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription(
+      "Object for declaring a constant rank two tensor as a material property.");
   params.addRequiredParam<std::vector<Real>>(
       "tensor_values", "Vector of values defining the constant rank two tensor");
   params.addRequiredParam<MaterialPropertyName>(

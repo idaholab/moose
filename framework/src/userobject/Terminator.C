@@ -23,6 +23,8 @@ InputParameters
 Terminator::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addClassDescription("Requests termination of the current solve based on the values of "
+                             "Postprocessor value(s) via a logical expression.");
   params.addRequiredCustomTypeParam<std::string>(
       "expression",
       "FunctionExpression",

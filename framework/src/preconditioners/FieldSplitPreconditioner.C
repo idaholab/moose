@@ -30,7 +30,7 @@ InputParameters
 FieldSplitPreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
-
+  params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
   params.addParam<std::vector<std::string>>(
       "off_diag_row",
       "The off diagonal row you want to add into the matrix, it will be associated "

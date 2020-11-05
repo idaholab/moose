@@ -1,5 +1,5 @@
 [Tests]
-  issues = ''
+  issues = '#2713'
   design = 'source/auxkernels/PenetrationAux.md source/auxkernels/GapValueAux.md'
   [./test]
     type = 'Exodiff'

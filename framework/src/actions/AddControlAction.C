@@ -21,6 +21,7 @@ InputParameters
 AddControlAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Add a Control object to the simulation.");
   return params;
 }
 

@@ -23,6 +23,8 @@ InputParameters
 NodalNormalsEvaluator::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
+  params.addClassDescription(
+      "Helper object to compute nodal normal values via the NodalNormals input block.");
   params.set<bool>("_dual_restrictable") = true;
   params.set<std::vector<SubdomainName>>("block") = {"ANY_BLOCK_ID"};
   return params;

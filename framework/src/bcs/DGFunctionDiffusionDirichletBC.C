@@ -27,6 +27,8 @@ InputParameters
 DGFunctionDiffusionDirichletBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params.addClassDescription(
+      "Diffusion Dirichlet boundary condition for discontinuous Gelerkin method.");
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<Real>("epsilon", "Epsilon");

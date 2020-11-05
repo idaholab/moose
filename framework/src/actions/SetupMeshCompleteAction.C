@@ -30,6 +30,7 @@ InputParameters
 SetupMeshCompleteAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Perform operations on the mesh in preparation for a simulation.");
   return params;
 }
 

@@ -21,6 +21,8 @@ InputParameters
 MaterialRealVectorValueAuxTempl<is_ad>::validParams()
 {
   InputParameters params = MaterialAuxBaseTempl<RealVectorValue, is_ad>::validParams();
+  params.addClassDescription(
+      "Capture a component of a vector material property in an auxiliary variable.");
   params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
 
   return params;
