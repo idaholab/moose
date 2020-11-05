@@ -260,6 +260,9 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("porosity_qp", "temperature_qp");
   //_deps.insertDependency("porosity_qp", "volumetric_strain_qp");
 
+  _deps.insertDependency("hysteresis_order_nodal", "pressure_saturation_nodal");
+  _deps.insertDependency("hysteresis_order_qp", "pressure_saturation_qp");
+
   // Postprocessor dependencies
   _deps.insertDependency("PorousFlowFluidMass", "porosity_nodal");
   _deps.insertDependency("PorousFlowFluidMass", "density_nodal");
