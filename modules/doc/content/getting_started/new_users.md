@@ -82,16 +82,15 @@ A graphical post-processor, particularly one that can read [ExodusII](https://pr
 
 ## Join the Community id=join
 
-Join one of our mailing lists:
+- Join our mailing list for announcements: [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
 
-- [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) - Technical Q&A (moderate traffic)
-- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
+  - Gmail users: Just click the "Join Group" button,
+  - otherwise, send an email to:\\
+    [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
 
-GMail users can just click the "Join group" button.
-Everyone else can join by sending an email to:
 
-- moose-users+subscribe@googlegroups.com
-- moose-announce+subscribe@googlegroups.com
+- If you haven't already, please sign up for GitHub: [github.com/join](https://github.com/join).
+- Visit the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) on GitHub for technical Q&A.
 
 ## Customizing MOOSE Configuration id=configure
 
