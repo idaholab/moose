@@ -281,6 +281,8 @@ PorousFlowBrineCO2::liquidProperties(const DualReal & pressure,
   // The liquid density
   const DualReal co2_partial_density = partialDensityCO2(temperature);
 
+  mooseAssert(co2_partial_density > 0.0, "CO2 partial density must be greater than zero");
+  mooseAssert(brine_density > 0.0, "Brine density must be greater than zero");
   const DualReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
 
   // Assume that liquid viscosity is just the brine viscosity
@@ -334,6 +336,8 @@ PorousFlowBrineCO2::saturation(const DualReal & pressure,
   // The liquid density
   const DualReal co2_partial_density = partialDensityCO2(temperature);
 
+  mooseAssert(co2_partial_density > 0.0, "CO2 partial density must be greater than zero");
+  mooseAssert(brine_density > 0.0, "Brine density must be greater than zero");
   const DualReal liquid_density = 1.0 / (Xco2 / co2_partial_density + (1.0 - Xco2) / brine_density);
 
   const DualReal Yco2 = gas.mass_fraction[_gas_fluid_component];
@@ -390,6 +394,7 @@ PorousFlowBrineCO2::equilibriumMassFractions(const DualReal & pressure,
   const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // The molality of CO2 in 1kg of H2O
+  mooseAssert(xco2 < 1.0, "CO2 mole fraction must be less than one");
   const DualReal mco2 = xco2 * (2.0 * mnacl + _invMh2o) / (1.0 - xco2);
   // The mass fraction of CO2 in brine is then
   const DualReal denominator = (1.0 + mnacl * _Mnacl + mco2 * _Mco2);
@@ -412,6 +417,7 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const DualReal & pressure,
   const DualReal pbar = pressure * 1.0e-5;
 
   // Molar volume in cm^3/mol
+  mooseAssert(co2_density > 0.0, "CO2 density must be greater than zero");
   const DualReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
@@ -464,6 +470,7 @@ PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const DualReal & pressure,
   // Need pressure in bar
   const DualReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
+  mooseAssert(co2_density > 0.0, "CO2 density must be greater than zero");
   const DualReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
@@ -510,6 +517,7 @@ PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(const DualReal & pressure,
   // Need pressure in bar
   const DualReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
+  mooseAssert(co2_density > 0.0, "CO2 density must be greater than zero");
   const DualReal V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
@@ -586,8 +594,10 @@ PorousFlowBrineCO2::activityCoefficient(const DualReal & pressure,
   // Need pressure in bar
   const DualReal pbar = pressure * 1.0e-5;
   // Need NaCl molality (mol/kg)
+  mooseAssert(Xnacl < 1.0, "Xnacl must be less than one");
   const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
+  mooseAssert(temperature > 0.0, "Temperature must be greater than zero");
   const DualReal lambda = -0.411370585 + 6.07632013e-4 * temperature + 97.5347708 / temperature -
                           0.0237622469 * pbar / temperature +
                           0.0170656236 * pbar / (630.0 - temperature) +
@@ -605,11 +615,13 @@ PorousFlowBrineCO2::activityCoefficientHighTemp(const DualReal & temperature,
                                                 const DualReal & Xnacl) const
 {
   // Need NaCl molality (mol/kg)
+  mooseAssert(Xnacl < 1.0, "Xnacl must be less than one");
   const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   const DualReal T2 = temperature * temperature;
   const DualReal T3 = temperature * T2;
 
+  mooseAssert(temperature > 0.0, "Temperature must be greater than zero");
   const DualReal lambda = 2.217e-4 * temperature + 1.074 / temperature + 2648.0 / T2;
   const DualReal xi = 1.3e-5 * temperature - 20.12 / temperature + 5259.0 / T2;
 
@@ -814,12 +826,14 @@ PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(const DualReal & pressure,
   const DualReal xco2w = B * (1.0 - yh2ow);
 
   // Molality of CO2 in pure water
+  mooseAssert(xco2w < 1.0, "xco2w must be less than one");
   const DualReal mco2w = xco2w * _invMh2o / (1.0 - xco2w);
   // Molality of CO2 in brine is then calculated using gamma
   const DualReal gamma = activityCoefficient(pressure, temperature, Xnacl);
   const DualReal mco2 = mco2w / gamma;
 
   // Need NaCl molality (mol/kg)
+  mooseAssert(Xnacl < 1.0, "Xnacl must be less than one");
   const DualReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // Mole fractions of CO2 and H2O in liquid and gas phases
@@ -964,6 +978,7 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
   Real x = 0.009;
 
   // Need salt mass fraction in molality
+  mooseAssert(Xnacl < 1.0, "Xnacl must be less than one");
   const Real mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // If y > 1, then just use y = 1, x = 0 (only a gas phase)
@@ -1092,6 +1107,7 @@ PorousFlowBrineCO2::henryConstant(const DualReal & temperature, const DualReal &
     kb += b[i] * std::pow(Tc, i);
 
   // Need salt mass fraction in molality
+  mooseAssert(Xnacl < 1.0, "Xnacl must be less than one");
   const DualReal xmol = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // Henry's constant and its derivative wrt temperature and salt mass fraction
