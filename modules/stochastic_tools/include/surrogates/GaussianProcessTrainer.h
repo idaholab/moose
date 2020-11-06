@@ -109,6 +109,9 @@ private:
   /// Flag to toggle printing of TAO output
   bool _show_tao;
 
+  /// Tao Communicator
+  Parallel::Communicator _tao_comm;
+
   /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 

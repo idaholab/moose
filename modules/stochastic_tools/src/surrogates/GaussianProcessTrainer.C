@@ -72,6 +72,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _do_tuning(isParamValid("tune_parameters")),
     _tao_options(getParam<std::string>("tao_options")),
     _show_tao(getParam<bool>("show_tao")),
+    _tao_comm(MPI_COMM_SELF),
 #endif
     _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
@@ -237,15 +238,15 @@ GaussianProcessTrainer::hyperparamTuning()
   CHKERRQ(ierr);
 
   // Define petsc vetor to hold tunalbe hyper-params
-  libMesh::PetscVector<Number> theta(_communicator, _num_tunable);
+  libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
   ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta.vec());
   CHKERRQ(ierr);
   ierr = TaoSetInitialVector(tao, theta.vec());
   CHKERRQ(ierr);
 
   // Get Hyperparameter bounds.
-  libMesh::PetscVector<Number> lower(_communicator, _num_tunable);
-  libMesh::PetscVector<Number> upper(_communicator, _num_tunable);
+  libMesh::PetscVector<Number> lower(_tao_comm, _num_tunable);
+  libMesh::PetscVector<Number> upper(_tao_comm, _num_tunable);
   buildHyperParamBounds(lower, upper);
   CHKERRQ(ierr);
   ierr = TaoSetVariableBounds(tao, lower.vec(), upper.vec());
@@ -274,7 +275,7 @@ GaussianProcessTrainer::hyperparamTuning()
 PetscErrorCode
 GaussianProcessTrainer::FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta_vec)
 {
-  libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_communicator);
+  libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_tao_comm);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   mapToVec(theta);
   return 0;
@@ -295,8 +296,8 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
                                              PetscReal * f,
                                              Vec grad_vec)
 {
-  libMesh::PetscVector<Number> theta(theta_vec, _communicator);
-  libMesh::PetscVector<Number> grad(grad_vec, _communicator);
+  libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
+  libMesh::PetscVector<Number> grad(grad_vec, _tao_comm);
 
   vecToMap(theta);
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
