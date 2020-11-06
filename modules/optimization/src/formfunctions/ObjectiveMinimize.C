@@ -38,6 +38,7 @@ ObjectiveMinimize::computeObjective()
     Real tmp = (*_data_computed[i]) - _data_target[i];
     val += tmp * tmp;
   }
+  val = 0.5 * val;
 
   return val;
 }

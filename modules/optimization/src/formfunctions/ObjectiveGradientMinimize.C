@@ -58,6 +58,8 @@ ObjectiveGradientMinimize::computeObjective()
   for (auto & misfit : _data_misfit)
     val += misfit * misfit;
 
+  val = 0.5 * val;
+
   return val;
 }
 
