@@ -132,6 +132,17 @@ protected:
    */
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
 
+  /**
+   * Perform any necessary steps to finalize strain increment after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
+  virtual void computeStrainFinalize(RankTwoTensor & /*inelasticStrainIncrement*/,
+                                     const RankTwoTensor & /*stress*/,
+                                     const Real /*delta_gamma*/)
+  {
+    mooseError("computeStrainFinalize needs to be implemented by a child class.");
+  }
+
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 

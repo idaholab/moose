@@ -42,6 +42,17 @@ protected:
   virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
 
   /**
+   * Perform any necessary steps to finalize strain increment after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
+  virtual void computeStrainFinalize(RankTwoTensor & /*inelasticStrainIncrement*/,
+                                     const RankTwoTensor & /*stress*/,
+                                     const Real /*delta_gamma*/) override
+  {
+    mooseError("computeStrainFinalize needs to be implemented by a child class.");
+  }
+
+  /**
    * This method returns the derivative of the creep strain with respect to the von mises stress. It
    * assumes the stress delta (von mises stress used to determine the creep rate) is calculated as:
    * effective_trial_stress - _three_shear_modulus * scalar

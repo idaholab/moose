@@ -133,12 +133,10 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
     returnMappingSolve(stress_dev_hat, stress_new_vector, delta_gamma, _console);
 
     // What are we doing here? Not sure if we need this
-    //    if (delta_gamma != 0.0)
-    //      inelastic_strain_increment =
-    //          deviatoric_trial_stress *
-    //          (1.5 * delta_gamma / stress_dev_hat.l2_norm());
-    //    else
-    //      inelastic_strain_increment.zero();
+    if (delta_gamma != 0.0)
+      computeStrainFinalize(inelastic_strain_increment, stress_new, delta_gamma);
+    else
+      inelastic_strain_increment.zero();
   }
 
   strain_increment -= inelastic_strain_increment;
@@ -149,6 +147,7 @@ AnisotropicReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
   // Use the old elastic strain here because we require tensors used by this class
   // to be isotropic and this method natively allows for changing in time
   // elasticity tensors
+  // TODO: ROTATE ELASTICITY TENSOR PROPERLY. FIXME
   stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
 
   computeStressFinalize(inelastic_strain_increment);

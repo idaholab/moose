@@ -53,6 +53,14 @@ protected:
                                         const Real residual,
                                         const Real scalar_effective_inelastic_strain) override;
 
+  /**
+   * Perform any necessary steps to finalize strain increment after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
+  virtual void computeStrainFinalize(RankTwoTensor & /*inelasticStrainIncrement*/,
+                                     const RankTwoTensor & /*stress*/,
+                                     const Real /*delta_gamma*/) override;
+
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;
 
@@ -85,4 +93,7 @@ protected:
 
   /// Hill constants for orthotropic creep
   std::vector<Real> _hill_constants;
+
+  /// Square of the q function for orthotropy
+  Real _qsigma;
 };

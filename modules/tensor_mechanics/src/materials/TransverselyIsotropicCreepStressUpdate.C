@@ -48,7 +48,8 @@ TransverselyIsotropicCreepStressUpdate::TransverselyIsotropicCreepStressUpdate(
     _start_time(getParam<Real>("start_time")),
     _exponential(1.0),
     _exp_time(1.0),
-    _hill_constants(6)
+    _hill_constants(6),
+    _qsigma(0.0)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
@@ -174,6 +175,7 @@ TransverselyIsotropicCreepStressUpdate::computeDerivative(
 
   // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
+  _qsigma = qsigma_square;
 
   const Real creep_rate_derivative = -1.0 * _coefficient * _three_shear_modulus * _n_exponent *
                                      std::pow(qsigma_square, _n_exponent - 1.0) * _exponential *
@@ -181,6 +183,31 @@ TransverselyIsotropicCreepStressUpdate::computeDerivative(
   return creep_rate_derivative * _dt - 1.0;
 }
 
+void
+TransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
+    RankTwoTensor & inelasticStrainIncrement, const RankTwoTensor & stress, const Real delta_gamma)
+{
+  // Hill constants, some constraints apply
+  const Real F = _hill_constants[0];
+  const Real G = _hill_constants[1];
+  const Real H = _hill_constants[2];
+  const Real L = _hill_constants[3];
+  const Real M = _hill_constants[4];
+  const Real N = _hill_constants[5];
+
+  const Real prefactor = delta_gamma / _qsigma;
+
+  inelasticStrainIncrement(0, 0) =
+      prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
+  inelasticStrainIncrement(1, 1) =
+      prefactor * (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
+  inelasticStrainIncrement(2, 2) =
+      prefactor * (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
+
+  inelasticStrainIncrement(0, 1) = prefactor * 2.0 * N * stress(0, 1);
+  inelasticStrainIncrement(0, 2) = prefactor * 2.0 * M * stress(0, 2);
+  inelasticStrainIncrement(1, 2) = prefactor * 2.0 * L * stress(1, 2);
+}
 Real
 TransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
     const MaterialProperty<RankTwoTensor> & /*stress*/,
