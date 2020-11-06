@@ -1,8 +1,26 @@
 [Tests]
-  [objective_optim_pp]
+  [nedlerMead]
     type = CSVDiff
     rel_err = 0.01
     input = master.i
+    csvdiff = master_out.csv
+  []
+  [fd_grad]
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    cli_args = "Executioner/tao_solver=TAOCG"
+    " Executioner/petsc_options_iname='-tao_fd_gradient -tao_fd_delta -tao_gatol'"
+    " Executioner/petsc_options_value='true 0.0001 0.001'"
+    csvdiff = master_out.csv
+  []
+  [fd_grad_hess]
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    cli_args = "Executioner/tao_solver=TAONTR"
+    " Executioner/petsc_options_iname='-tao_fd_gradient -tao_fd_hessian -tao_fd_delta -tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type -tao_gatol'"
+    " Executioner/petsc_options_value='true true 0.0001 0 1e16 constant 0.001'"
     csvdiff = master_out.csv
   []
 []
