@@ -29,6 +29,8 @@ public:
    */
   bool requiresIsotropicTensor() override { return true; }
 
+  using ADStressUpdateBase::updateState;
+
 protected:
   virtual void initQpStatefulProperties() override;
 

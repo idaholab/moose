@@ -40,7 +40,7 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(const Real effective_trial_stress,
+  virtual void computeStressInitialize(const Real & effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
   virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) override;
   virtual Real computeDerivative(const Real effective_trial_stress, const Real scalar) override;

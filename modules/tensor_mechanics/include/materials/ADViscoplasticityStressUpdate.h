@@ -20,6 +20,8 @@ public:
 
   ADViscoplasticityStressUpdate(const InputParameters & parameters);
 
+  using ADViscoplasticityStressUpdateBase::updateState;
+
   virtual void updateState(ADRankTwoTensor & strain_increment,
                            ADRankTwoTensor & inelastic_strain_increment,
                            const ADRankTwoTensor & rotation_increment,

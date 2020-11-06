@@ -11,8 +11,7 @@
 
 #include "Conversion.h"
 #include "InputParameters.h"
-#include "ADMaterial.h"
-
+#include "Material.h"
 
 /**
  * TangentCalculationMethod is an enum that determines the calculation method for the tangent
@@ -42,18 +41,18 @@ enum class TangentCalculationMethod
  * All materials inheriting from this class must be called by a separate material,
  * such as ComputeMultipleInelasticStress
  */
-template<bool is_ad>
-class StressUpdateBaseTempl: public Material
+template <bool is_ad>
+class StressUpdateBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
   StressUpdateBaseTempl(const InputParameters & parameters);
 
-  using Material::_qp;
+  using Material::_current_elem;
   using Material::_dt;
   using Material::_q_point;
-  using Material::_current_elem;
+  using Material::_qp;
 
   /**
    * Given a strain increment that results in a trial stress, perform some
@@ -139,10 +138,7 @@ public:
 
   virtual Real computeTimeStepLimit();
 
-  virtual TangentCalculationMethod getTangentCalculationMethod()
-  {
-    return TangentCalculationMethod::ELASTIC;
-  }
+  virtual TangentCalculationMethod getTangentCalculationMethod();
 
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
@@ -162,7 +158,10 @@ public:
    * to bring a substepped trial stress guess distance from the yield surface
    * into the tolerance specified in the individual child class.
    */
-  virtual int calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & /*strain_increment*/) { return 1; }
+  virtual int calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & /*strain_increment*/)
+  {
+    return 1;
+  }
 
   /**
    * Properly set up the incremental calculation storage of the stateful material
@@ -174,16 +173,6 @@ protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
 };
-
-
-template<>
-TangentCalculationMethod
-StressUpdateBaseTempl<true>::getTangentCalculationMethod()
-{
-  mooseError("getTangentCalculationMethod called: no tangent calculationg is needed while using AD");
-  return TangentCalculationMethod::ELASTIC;
-}
-
 
 typedef StressUpdateBaseTempl<false> StressUpdateBase;
 typedef StressUpdateBaseTempl<true> ADStressUpdateBase;

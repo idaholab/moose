@@ -32,21 +32,23 @@ StressUpdateBaseTempl<is_ad>::validParams()
   return params;
 }
 
-template<bool is_ad>
+template <bool is_ad>
 StressUpdateBaseTempl<is_ad>::StressUpdateBaseTempl(const InputParameters & parameters)
   : Material(parameters),
-    _base_name(this->isParamValid("base_name") ? this->template getParam<std::string>("base_name") + "_" : "")
+    _base_name(this->isParamValid("base_name")
+                   ? this->template getParam<std::string>("base_name") + "_"
+                   : "")
 {
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
 {
@@ -54,69 +56,87 @@ StressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
       "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }
 
-template<bool is_ad>
+template <bool is_ad>
 Real
 StressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::updateState(RankTwoTensor & /*strain_increment*/,
-                                     RankTwoTensor & /*inelastic_strain_increment*/,
-                                     const RankTwoTensor & /*rotation_increment*/,
-                                     RankTwoTensor & /*stress_new*/,
-                                     const RankTwoTensor & /*stress_old*/,
-                                     const RankFourTensor & /*elasticity_tensor*/,
-                                     const RankTwoTensor & /*elastic_strain_old*/,
-                                     bool /*compute_full_tangent_operator*/,
-                                     RankFourTensor & /*tangent_operator*/)
+                                          RankTwoTensor & /*inelastic_strain_increment*/,
+                                          const RankTwoTensor & /*rotation_increment*/,
+                                          RankTwoTensor & /*stress_new*/,
+                                          const RankTwoTensor & /*stress_old*/,
+                                          const RankFourTensor & /*elasticity_tensor*/,
+                                          const RankTwoTensor & /*elastic_strain_old*/,
+                                          bool /*compute_full_tangent_operator*/,
+                                          RankFourTensor & /*tangent_operator*/)
 {
   mooseError("updateState called: it needs to be implemented by your inelastic model");
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::updateState(ADRankTwoTensor & /*strain_increment*/,
-                                       ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                       const ADRankTwoTensor & /*rotation_increment*/,
-                                       ADRankTwoTensor & /*stress_new*/,
-                                       const RankTwoTensor & /*stress_old*/,
-                                       const ADRankFourTensor & /*elasticity_tensor*/,
-                                       const RankTwoTensor & /*elastic_strain_old*/)
+                                          ADRankTwoTensor & /*inelastic_strain_increment*/,
+                                          const ADRankTwoTensor & /*rotation_increment*/,
+                                          ADRankTwoTensor & /*stress_new*/,
+                                          const RankTwoTensor & /*stress_old*/,
+                                          const ADRankFourTensor & /*elasticity_tensor*/,
+                                          const RankTwoTensor & /*elastic_strain_old*/)
 {
   mooseError("updateState called: it needs to be implemented by your inelastic model");
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::updateStateSubstep(RankTwoTensor & /*strain_increment*/,
-                                     RankTwoTensor & /*inelastic_strain_increment*/,
-                                     const RankTwoTensor & /*rotation_increment*/,
-                                     RankTwoTensor & /*stress_new*/,
-                                     const RankTwoTensor & /*stress_old*/,
-                                     const RankFourTensor & /*elasticity_tensor*/,
-                                     const RankTwoTensor & /*elastic_strain_old*/,
-                                     bool /*compute_full_tangent_operator*/,
-                                     RankFourTensor & /*tangent_operator*/)
+                                                 RankTwoTensor & /*inelastic_strain_increment*/,
+                                                 const RankTwoTensor & /*rotation_increment*/,
+                                                 RankTwoTensor & /*stress_new*/,
+                                                 const RankTwoTensor & /*stress_old*/,
+                                                 const RankFourTensor & /*elasticity_tensor*/,
+                                                 const RankTwoTensor & /*elastic_strain_old*/,
+                                                 bool /*compute_full_tangent_operator*/,
+                                                 RankFourTensor & /*tangent_operator*/)
 {
-  this->template paramError("use_substep",
-             "updateStateSubstep called: it needs to be implemented by your inelastic model");
+  this->template paramError(
+      "use_substep",
+      "updateStateSubstep called: it needs to be implemented by your inelastic model");
 }
 
-template<bool is_ad>
+template <bool is_ad>
 void
 StressUpdateBaseTempl<is_ad>::updateStateSubstep(ADRankTwoTensor & /*strain_increment*/,
-                                       ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                       const ADRankTwoTensor & /*rotation_increment*/,
-                                       ADRankTwoTensor & /*stress_new*/,
-                                       const RankTwoTensor & /*stress_old*/,
-                                       const ADRankFourTensor & /*elasticity_tensor*/,
-                                       const RankTwoTensor & /*elastic_strain_old*/)
+                                                 ADRankTwoTensor & /*inelastic_strain_increment*/,
+                                                 const ADRankTwoTensor & /*rotation_increment*/,
+                                                 ADRankTwoTensor & /*stress_new*/,
+                                                 const RankTwoTensor & /*stress_old*/,
+                                                 const ADRankFourTensor & /*elasticity_tensor*/,
+                                                 const RankTwoTensor & /*elastic_strain_old*/)
 {
-  this->template paramError("use_substep",
-             "updateStateSubstep called: it needs to be implemented by your inelastic model");
+  this->template paramError(
+      "use_substep",
+      "updateStateSubstep called: it needs to be implemented by your inelastic model");
+}
+
+template <bool is_ad>
+TangentCalculationMethod
+StressUpdateBaseTempl<is_ad>::getTangentCalculationMethod()
+{
+  return TangentCalculationMethod::ELASTIC;
+}
+
+template <>
+TangentCalculationMethod
+StressUpdateBaseTempl<true>::getTangentCalculationMethod()
+{
+  mooseError(
+      "getTangentCalculationMethod called: no tangent calculationg is needed while using AD");
+  return TangentCalculationMethod::ELASTIC;
 }
 
 template class StressUpdateBaseTempl<false>;

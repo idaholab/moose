@@ -49,7 +49,7 @@ IsotropicPowerLawHardeningStressUpdate::IsotropicPowerLawHardeningStressUpdate(
 
 void
 IsotropicPowerLawHardeningStressUpdate::computeStressInitialize(
-    const Real effective_trial_stress, const RankFourTensor & elasticity_tensor)
+    const Real & effective_trial_stress, const RankFourTensor & elasticity_tensor)
 {
   computeYieldStress(elasticity_tensor);
 
