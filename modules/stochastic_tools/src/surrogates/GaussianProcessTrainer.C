@@ -226,7 +226,7 @@ GaussianProcessTrainer::hyperparamTuning()
   GaussianProcessTrainer * GP_ptr = this;
 
   // Setup Tao optimization problem
-  ierr = TaoCreate(MPI_COMM_WORLD, &tao);
+  ierr = TaoCreate(MPI_COMM_SELF, &tao);
   CHKERRQ(ierr);
   // ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
   ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
