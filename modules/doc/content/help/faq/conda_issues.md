@@ -114,4 +114,4 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   conda create moose moose-libmesh moose-tools
   ```
 
-  If the above re-install method ultimately failed, it is time to submit your errors to the [mailing list](faq/mailing_list.md).
+  If the above re-install method ultimately failed, it is time to submit your errors to the [discussion forum](faq/discussion_forum.md).

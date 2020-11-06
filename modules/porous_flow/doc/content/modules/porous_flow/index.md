@@ -65,8 +65,8 @@ and geomechanics.
 ## Become a developer
 
 The PorousFlow module is being developed by users at national laboratories
-and universities around the world. The developers can be contacted through the
-[moose-users email list](help/contact_us.md optional=True).
+and universities around the world. Learn how to get in touch with the developers
+on the [help/contact_us.md optional=True] page.
 
 All users of PorousFlow are encouraged to assist in the development of this module. There are
 a large number of possible enhancements that can be implemented, and better documentation that could

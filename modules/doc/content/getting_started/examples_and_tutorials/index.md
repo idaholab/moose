@@ -47,7 +47,7 @@ The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live workshop
 - [Workshop Slideshow](https://www.mooseframework.org/workshop)
 - [MOOSE Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
 
-MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join one of the [mailing lists](new_users.md#join) for further updates!
+MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
 
 ## C++ Programming References id=programming
 
