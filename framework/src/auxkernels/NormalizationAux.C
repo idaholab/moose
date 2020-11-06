@@ -38,6 +38,7 @@ Real
 NormalizationAux::computeValue()
 {
   Real denominator = _pp_on_source ? *_pp_on_source : 1.0;
+  mooseAssert(denominator != 0., "postprocessor value is zero");
   Real shift = _shift ? *_shift : 0.0;
   return _src[_qp] * _normal_factor / denominator - shift;
 }

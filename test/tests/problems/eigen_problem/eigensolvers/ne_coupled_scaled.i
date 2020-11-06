@@ -14,8 +14,6 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    # Make sure that system knows this is part of the eigenvector to be scaled
-    eigen = true
   [../]
 
   [./T]

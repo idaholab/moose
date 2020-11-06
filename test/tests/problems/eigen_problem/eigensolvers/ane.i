@@ -55,7 +55,6 @@
   type = Eigenvalue
   matrix_free = false
   solve_type = NEWTON
-  eigen_problem_type = GEN_NON_HERMITIAN
 []
 
 [VectorPostprocessors]

@@ -62,6 +62,8 @@ public:
     return _transient_sys.nonlinear_solver.get();
   }
 
+  virtual SNES getSNES() override;
+
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
   virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;

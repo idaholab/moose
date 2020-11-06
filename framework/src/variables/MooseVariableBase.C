@@ -88,6 +88,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
     _var_num(getParam<unsigned int>("_var_num")),
+    _is_eigen(getParam<bool>("eigen")),
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
     _subproblem(_sys.subproblem()),
     _variable(_sys.system().variable(_var_num)),

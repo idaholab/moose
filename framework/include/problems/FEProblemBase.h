@@ -529,7 +529,7 @@ public:
   /**
    * Reinitialize petsc output for proper linear/nonlinear iteration display
    */
-  void initPetscOutput();
+  virtual void initPetscOutput();
 
 #ifdef LIBMESH_HAVE_PETSC
   /**
@@ -1393,6 +1393,11 @@ public:
    * Get the solver parameters
    */
   SolverParams & solverParams();
+
+  /**
+   * const version
+   */
+  const SolverParams & solverParams() const;
 
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////

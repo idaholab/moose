@@ -107,8 +107,8 @@
   solve_type = NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
   automatic_scaling = true
-  petsc_options = '-eps_power_pc_svd_monitor'
-  petsc_options_iname = '-eps_power_pc_type'
+  petsc_options = '-pc_svd_monitor'
+  petsc_options_iname = '-pc_type'
   petsc_options_value = 'svd'
   verbose = true
   resid_vs_jac_scaling_param = 1

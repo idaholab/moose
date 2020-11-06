@@ -22,6 +22,7 @@
 #include "SlepcSupport.h"
 #include "DGKernelBase.h"
 #include "ScalarKernel.h"
+#include "MooseVariableScalar.h"
 
 #include "libmesh/eigen_system.h"
 #include "libmesh/libmesh_config.h"
@@ -29,7 +30,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_shell_matrix.h"
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 
 namespace Moose
 {
@@ -101,11 +102,24 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
         eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _eigen_problem(eigen_problem),
+    _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
     _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
     _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL))
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
+
+  SlepcEigenSolver<Number> * solver =
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(_transient_sys.eigen_solver.get());
+
+  if (!solver)
+    mooseError("A slepc eigen solver is required");
+
+  // setup of our class @SlepcSolverConfiguration
+  _solver_configuration =
+      libmesh_make_unique<SlepcEigenSolverConfiguration>(eigen_problem, *solver);
+
+  solver->set_solver_configuration(*_solver_configuration);
 
   _Ax_tag = eigen_problem.addVectorTag("Ax_tag");
 
@@ -155,6 +169,11 @@ NonlinearEigenSystem::initialSetup()
     // IntegratedBCs
     addPrecondTagToMooseObjects(_integrated_bcs);
   }
+
+  // Mark a variable an eigen variable if it operates on eigen kernels
+  markEigenVariables(_dg_kernels);
+  markEigenVariables(_kernels);
+  markEigenVariables(_scalar_kernels);
 }
 
 template <typename T>
@@ -169,6 +188,26 @@ NonlinearEigenSystem::addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & w
     // Assign precond tag to all objects
     for (auto & object : objects)
       object->useMatrixTag(_precond_tag);
+  }
+}
+
+template <typename T>
+void
+NonlinearEigenSystem::markEigenVariables(MooseObjectTagWarehouse<T> & warehouse)
+{
+  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  {
+    // Get all objects out from the warehouse
+    auto & objects = warehouse.getObjects(tid);
+
+    for (auto & object : objects)
+    {
+      auto & vtags = object->getVectorTags();
+      auto & mtags = object->getMatrixTags();
+      // If it is an eigen kernel, mark its variable as eigen
+      if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
+        object->variable().eigen(true);
+    }
   }
 }
 
@@ -244,6 +283,11 @@ NonlinearEigenSystem::solve()
   if (sys().has_matrix_B())
     sys().get_matrix_B().close();
 #endif
+
+  // We apply initial guess for only nonlinear solver
+  if (_eigen_problem.isNonlinearEigenvalueSolver())
+    _transient_sys.set_initial_space(solution());
+
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
   if (_time_integrator)
@@ -264,7 +308,15 @@ NonlinearEigenSystem::solve()
 
   _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
-    _eigen_values[n] = getConvergedEigenvalue(n);
+  {
+    auto eigenvalue0 = getConvergedEigenvalue(n);
+    // Inverse eigen value if necessary
+    _eigen_values[n].first =
+        (_eigen_problem.isNonlinearEigenvalueSolver() && _eigen_problem.outputInverseEigenvalue())
+            ? 1. / eigenvalue0.first
+            : eigenvalue0.first;
+    _eigen_values[n].second = eigenvalue0.second;
+  }
 
   // Update the active eigenvector to the solution vector
   if (n_converged_eigenvalues)
@@ -384,6 +436,26 @@ NonlinearEigenSystem::nonlinearSolver()
   return NULL;
 }
 
+SNES
+NonlinearEigenSystem::getSNES()
+{
+  SlepcEigenSolver<Number> * solver =
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_transient_sys.eigen_solver));
+
+  if (!solver)
+    mooseError("There is no a eigen solver");
+
+  if (_eigen_problem.isNonlinearEigenvalueSolver())
+  {
+    EPS eps = solver->eps();
+    SNES snes = nullptr;
+    Moose::SlepcSupport::mooseSlepcEPSGetSNES(eps, &snes);
+    return snes;
+  }
+  else
+    mooseError("There is no SNES in linear eigen solver");
+}
+
 void
 NonlinearEigenSystem::checkIntegrity()
 {
@@ -435,8 +507,10 @@ std::pair<Real, Real>
 NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n) const
 {
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
+
   return _transient_sys.get_eigenpair(n);
 }
 
