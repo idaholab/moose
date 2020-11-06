@@ -117,6 +117,10 @@ k_{\mathrm{r}} = (m + 1)S_{\mathrm{eff}}^{m} - m S_{\mathrm{eff}}^{m + 1}.
 This has the distinct advantage over the Corey formulation that its
 derivative is continuous at $S_{\mathrm{eff}}=1$.
 
+## Hysteresis
+
+Hysteretic relative permeability functions are available in PorousFlow.  They are documented [here](hysteresis.md).
+
 
 !bibtex bibliography
 

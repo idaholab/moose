@@ -205,4 +205,8 @@ the Brooks-Corey capillary pressure.  For these figures, $S_{\mathrm{l,res}}=0.1
        caption=Logarithmic extension to Brooks-Corey capillary pressure curve below residual
                saturation.
 
+## Hysteresis
+
+Hysteretic capillary pressure functions are available in PorousFlow.  They are documented [here](hysteresis.md).
+
 !bibtex bibliography
