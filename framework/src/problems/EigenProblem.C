@@ -398,7 +398,7 @@ EigenProblem::initEigenvector(const Real initial_value)
   // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
-    // There is nothing we need to scale. We do not need to return here, we need
+    // There is nothing we need to scale. We cannot return here, we need
     // to go through 'close'.
     if (!n_dofs)
       break;
