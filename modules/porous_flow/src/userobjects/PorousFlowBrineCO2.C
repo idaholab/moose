@@ -383,7 +383,7 @@ PorousFlowBrineCO2::equilibriumMassFractions(const DualReal & pressure,
                                              DualReal & Yh2o) const
 {
   // Mole fractions at equilibrium
-  DualReal xco2, yh2o;
+  DualReal xco2 = 0.0, yh2o = 0.0;
   equilibriumMoleFractions(pressure, temperature, Xnacl, xco2, yh2o);
 
   // The mass fraction of H2O in gas (assume no salt in gas phase) and derivatives
@@ -708,13 +708,13 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
     const Real dyh2o_dT_lower = yh2o_lower.derivatives()[_Tidx];
 
     // Equilibrium mole fractions and derivatives at the upper temperature
-    Real xco2_upper, yh2o_upper;
+    Real xco2_upper = 0.0, yh2o_upper = 0.0;
     Real co2_density_upper = _co2_fp.rho_from_p_T(pressure.value(), _Tupper);
 
     solveEquilibriumMoleFractionHighTemp(
         pressure.value(), _Tupper, Xnacl.value(), co2_density_upper, xco2_upper, yh2o_upper);
 
-    Real A, dA_dp, dA_dT, B, dB_dp, dB_dT, dB_dX;
+    Real A = 0.0, dA_dp = 0.0, dA_dT = 0.0, B = 0.0, dB_dp = 0.0, dB_dT = 0.0, dB_dX = 0.0;
     funcABHighTemp(pressure.value(),
                    _Tupper,
                    Xnacl.value(),
@@ -761,7 +761,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const DualReal & pressure,
         pressure.value(), temperature.value(), Xnacl.value(), co2_density, xco2r, yh2or);
 
     // Can use these in funcABHighTemp() to get derivatives analytically rather than by iteration
-    Real A, dA_dp, dA_dT, B, dB_dp, dB_dT, dB_dX;
+    Real A = 0.0, dA_dp = 0.0, dA_dT = 0.0, B = 0.0, dB_dp = 0.0, dB_dT = 0.0, dB_dX = 0.0;
     funcABHighTemp(pressure.value(),
                    temperature.value(),
                    Xnacl.value(),
@@ -815,7 +815,7 @@ PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(const DualReal & pressure,
   const DualReal co2_density = _co2_fp.rho_from_p_T(pressure, temperature);
 
   // Assume infinite dilution (yh20 = 0 and xco2 = 0) in low temperature regime
-  DualReal A, B;
+  DualReal A = 0.0, B = 0.0;
   funcABLowTemp(pressure, temperature, co2_density, A, B);
 
   // As the activity coefficient for CO2 in brine used in this regime isn't a 'true'
@@ -956,7 +956,7 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
   const Real dT = 1.0e-6;
   const Real dX = 1.0e-8;
 
-  Real A2, B2;
+  Real A2 = 0.0, B2 = 0.0;
   funcABHighTemp(pressure + dp, temperature, Xnacl, co2_density, xco2, yh2o, A2, B2);
   dA_dp = (A2 - A) / dp;
   dB_dp = (B2 - B) / dp;
@@ -1004,8 +1004,8 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
                  denominator;
     };
 
-    Real A, B;
-    Real dA, dB;
+    Real A = 0.0, B = 0.0;
+    Real dA = 0.0, dB = 0.0;
     const Real dy = 1.0e-8;
 
     // Solve for yh2o using Newton-Raphson method
@@ -1065,7 +1065,7 @@ PorousFlowBrineCO2::totalMassFraction(
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // Calculate equilibrium mass fractions in the two-phase state
-  DualReal Xco2, Yh2o;
+  DualReal Xco2 = 0.0, Yh2o = 0.0;
   equilibriumMassFractions(p, T, X, Xco2, Yh2o);
 
   // Save the mass fractions in the FluidStateMassFractions object
