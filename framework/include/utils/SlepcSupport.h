@@ -134,12 +134,12 @@ PetscErrorCode mooseSlepcEPSGetSNES(EPS eps, SNES * snes);
  * A customized solver monitor to print out eigenvalue
  */
 PetscErrorCode mooseSlepcEPSMonitor(EPS eps,
-                                    int its,
-                                    int nconv,
+                                    PetscInt its,
+                                    PetscInt nconv,
                                     PetscScalar * eigr,
                                     PetscScalar * eigi,
                                     PetscReal * errest,
-                                    int nest,
+                                    PetscInt nest,
                                     void * mctx);
 
 /**
