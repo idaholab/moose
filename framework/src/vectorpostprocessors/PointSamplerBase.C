@@ -44,7 +44,7 @@ PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _pp_value(getPostprocessorValue("scaling"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());
 

@@ -33,7 +33,7 @@ ElementIntegralArrayVariablePostprocessor::ElementIntegralArrayVariablePostproce
     _grad_u(coupledArrayGradient("variable")),
     _component(getParam<unsigned int>("component"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real

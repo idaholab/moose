@@ -30,7 +30,7 @@ SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParame
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real
