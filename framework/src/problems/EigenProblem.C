@@ -382,8 +382,11 @@ EigenProblem::initEigenvector(const Real initial_value)
   }
 
   // We do not need to setup
-  if (!n_dofs)
-    return;
+  // We can not return here because some MPI ranks might have zero dofs but others
+  // might have something. If we return here, we might hit MPI deadlock when 'close'
+  // is called at the end of this function
+  // if (!n_dofs)
+  //  return;
 
   // Yaqi's note: the following code will set a flat solution for lagrange and
   // constant monomial variables. For the first or higher order variables,
@@ -392,6 +395,11 @@ EigenProblem::initEigenvector(const Real initial_value)
   // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
+    // There is nothing we need to scale. We do not need to return here, we need
+    // to go through 'close'.
+    if (!n_dofs)
+      break;
+
     const auto & var = getVariable(0, vn);
     // We set values for only eigen variables
     if (var.eigen())
