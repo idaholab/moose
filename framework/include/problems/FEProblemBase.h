@@ -972,6 +972,36 @@ public:
   bool vectorPostprocessorHasVectors(const std::string & vpp_name);
   ///@}
 
+  /**
+   * Get a read-only reference to a reporterv alue.
+   * @param reporter_name The name of the reporter value (object_name/value_name).
+   * @return Reference to the data.
+   *
+   * Note: This method is only for retrieving values that already exist, the Reporter and
+   *       ReporterInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
+   */
+  template <typename T>
+  const T & getReporterValueByName(const ReporterName & reporter_name,
+                                   std::size_t t_index = 0) const
+  {
+    return _reporter_data.getReporterValue<T>(reporter_name, t_index);
+  }
+
+  /**
+   * Set the value of a reporter value
+   * @param reporter_name The name of the reporter value (object_name/value_name).
+   * @param value The data to apply to the value
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   */
+  template <typename T>
+  void setReporterValueByName(const ReporterName & reporter_name,
+                              const T & value,
+                              std::size_t t_index = 0)
+  {
+    _reporter_data.setReporterValue<T>(reporter_name, value, t_index);
+  }
+
   ///@{
   /**
    * Returns whether or not the current simulation has any multiapps

@@ -9,12 +9,12 @@
 []
 
 [VectorPostprocessors]
-  [to_sub]
+  [to_sub_vpp]
     type = ConstantVectorPostprocessor
     vector_names = 'a b'
     value = '11 11 11 ; 21 21 21'
   []
-  [from_sub]
+  [from_sub_vpp]
     type = ConstantVectorPostprocessor
     vector_names = 'a b'
     value = '31 31 31; 41 41 41'
@@ -27,5 +27,9 @@
 []
 
 [Outputs]
-  csv = true
+  [out]
+    type = JSON
+    execute_system_information_on = NONE
+  []
+  execute_on = timestep_end
 []

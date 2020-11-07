@@ -1,0 +1,50 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "from_sub_vpp",
+                    "type": "std::vector<double>",
+                    "value": [
+                        31.0,
+                        31.0,
+                        31.0
+                    ],
+                    "value_name": "a"
+                },
+                {
+                    "object_name": "from_sub_vpp",
+                    "type": "std::vector<double>",
+                    "value": [
+                        41.0,
+                        41.0,
+                        41.0
+                    ],
+                    "value_name": "b"
+                },
+                {
+                    "object_name": "to_sub_vpp",
+                    "type": "std::vector<double>",
+                    "value": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "value_name": "a"
+                },
+                {
+                    "object_name": "to_sub_vpp",
+                    "type": "std::vector<double>",
+                    "value": [
+                        2.0,
+                        2.0,
+                        2.0
+                    ],
+                    "value_name": "b"
+                }
+            ],
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

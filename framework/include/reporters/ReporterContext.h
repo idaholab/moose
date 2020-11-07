@@ -18,6 +18,7 @@
 #include "ReporterMode.h"
 #include "ReporterState.h"
 #include "nlohmann/json.h"
+#include "JsonSyntaxTree.h"
 
 class ReporterData;
 
@@ -242,7 +243,7 @@ template <typename T>
 std::string
 ReporterContext<T>::type() const
 {
-  return demangle(typeid(T).name());
+  return JsonSyntaxTree::prettyCppType(demangle(typeid(T).name()));
 }
 
 /**

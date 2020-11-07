@@ -1,0 +1,65 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": 1,
+                    "value_name": "int_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": 3,
+                    "value_name": "int_2"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": -7,
+                    "value_name": "int_3"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "double",
+                    "value": 4.0,
+                    "value_name": "num_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "double",
+                    "value": 5.0,
+                    "value_name": "num_2"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::string",
+                    "value": "two",
+                    "value_name": "str"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<double>",
+                    "value": [
+                        6.0,
+                        60.0,
+                        600.0
+                    ],
+                    "value_name": "vec_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<double>",
+                    "value": [
+                        8.0,
+                        80.0
+                    ],
+                    "value_name": "vec_2"
+                }
+            ],
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

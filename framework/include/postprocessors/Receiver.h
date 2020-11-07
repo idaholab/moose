@@ -46,11 +46,6 @@ public:
    */
   virtual Real getValue() override;
 
-  /**
-   * Initial setup function for applying the default value
-   */
-  virtual void initialSetup() override;
-
 private:
   /// Flag for initializing the old value
   bool _initialize_old;
