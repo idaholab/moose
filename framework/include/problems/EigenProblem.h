@@ -59,17 +59,6 @@ public:
   bool negativeSignEigenKernel() const { return _negative_sign_eigen_kernel; }
 
   /**
-   * If we need to initialize eigen vector. We initialize the eigen vector
-   * only when "auto_initialization" is on and nonlinear eigen solver is selected.
-   */
-  bool needInitializeEigenVector() const;
-
-  /*
-   * Specify whether or not to initialize eigenvector automatically
-   */
-  void needInitializeEigenVector(bool need) { _auto_initialize_eigen_vector = need; }
-
-  /**
    * Set postprocessor and normalization factor
    * 'Postprocessor' is often used to compute an integral of physics variables
    */
@@ -196,6 +185,16 @@ public:
 #endif
 
 protected:
+  /**
+   * Set SLEPc/PETSc options to trigger free power iteration
+   */
+  void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+
+  /**
+   * Clear SLEPc/PETSc options to turn the eigen-solver back to a regular Newton solver
+   */
+  void clearFreeNonlinearPowerIterations();
+
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
@@ -205,8 +204,6 @@ protected:
   /// Which eigenvalue is used to compute residual. By default the zeroth eigenvalue
   /// is used.
   unsigned int _active_eigen_index;
-  /// Whether or not initialize eigen vector. Initialize eigen vector by default.
-  bool _auto_initialize_eigen_vector;
   /// Whether or not we are doing free power iteration. Free power iteration is
   /// often used to compute initial guess for Newton eigen solver. It is automatically
   /// triggered by Eigenvalue Executioner
@@ -228,7 +225,6 @@ protected:
   /// Postprocessor target value. The value of postprocessor should equal to
   /// '_normal_factor' by adjusting eigenvector
   Real _normal_factor;
-  /// Pre scale factor
-  Real _pre_scale_factor;
-  bool _has_pre_scale;
+  /// A flag to indicate if it is the first time of calling solve
+  bool & _first_solve;
 };

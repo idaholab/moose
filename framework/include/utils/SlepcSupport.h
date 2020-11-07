@@ -68,16 +68,6 @@ void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & param
 void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
 
 /**
- * Set SLEPc/PETSc options to trigger free power iteration
- */
-void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
-
-/*
- * Set SLEPc/PETSc options to turn the eigen-solver back to a regular Newton solver
- */
-void clearFreeNonlinearPowerIterations(const InputParameters & params);
-
-/**
  * Form matrix according to tag
  */
 void moosePetscSNESFormMatrixTag(SNES snes, Vec x, Mat mat, void * ctx, TagID tag);

@@ -18,6 +18,7 @@
 #include "RandomData.h"
 #include "OutputWarehouse.h"
 #include "Function.h"
+#include "MooseVariableScalar.h"
 
 // libMesh includes
 #include "libmesh/system.h"
@@ -55,7 +56,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
     _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
-    _auto_initialize_eigen_vector(true),
     _do_free_power_iteration(false),
     _output_inverse_eigenvalue(false),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
@@ -66,8 +66,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
     _has_normalization(false),
     _normal_factor(1.0),
-    _pre_scale_factor(1.0),
-    _has_pre_scale(false)
+    _first_solve(declareRestartableData<bool>("first_solve", true))
 {
 #ifdef LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -347,12 +346,16 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
   std::vector<VariableName> var_names = getVariableNames();
   for (auto & vn : var_names)
   {
-    MooseVariableFEBase & var = getVariable(0, vn);
-    if (var.eigen())
-      for (unsigned int vc = 0; vc < var.count(); ++vc)
+    MooseVariableBase * var = nullptr;
+    if (hasScalarVariable(vn))
+      var = &getScalarVariable(0, vn);
+    else
+      var = &getVariable(0, vn);
+    if (var->eigen())
+      for (unsigned int vc = 0; vc < var->count(); ++vc)
       {
         std::set<dof_id_type> var_indices;
-        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
         for (const auto & dof : var_indices)
           _nl_eigen->solution().set(dof, _nl_eigen->solution()(dof) * scaling_factor);
       }
@@ -384,15 +387,11 @@ EigenProblem::initEigenvector(const Real initial_value)
     }
   }
 
-  // We do not need to setup
-  // We can not return here because some MPI ranks might have zero dofs but others
-  // might have something. If we return here, we might hit MPI deadlock when 'close'
-  // is called at the end of this function
-  // if (!n_dofs)
-  //  return;
+  // Note that even n_dofs is equal to zero, we can not return here because we might
+  // hit MPI deadlock when 'close' is called at the end of this function
 
   // Yaqi's note: the following code will set a flat solution for lagrange and
-  // constant monomial variables. For the first or higher order variables,
+  // constant monomial variables. For the first or higher order elemental variables,
   // the solution is not flat. Fortunately, the initial guess does not affect
   // the final solution as long as it is not perpendicular to the true solution.
   // We, in general, do not need to worry about that.
@@ -413,8 +412,7 @@ EigenProblem::initEigenvector(const Real initial_value)
         var_indices.clear();
         _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
         for (const auto & dof : var_indices)
-          // Davidson by n_dofs is a simple way to nondimensionalize eigen vectors
-          _nl_eigen->solution().set(dof, initial_value / n_dofs);
+          _nl_eigen->solution().set(dof, initial_value);
       }
     }
   }
@@ -426,10 +424,16 @@ EigenProblem::initEigenvector(const Real initial_value)
 void
 EigenProblem::preScaleEigenVector()
 {
-  if (_has_pre_scale)
-    scaleEigenvector(_pre_scale_factor);
-
-  _has_pre_scale = false;
+  // pre-scale the solution to make sure ||Bx||_2 is equal to inverse of eigenvalue
+  computeResidualTag(
+      *_nl_eigen->currentSolution(), _nl_eigen->residualVectorBX(), _nl_eigen->eigenVectorTag());
+  std::pair<Real, Real> eig(1, 0);
+  if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
+    eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
+  Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
+  Real factor = 1 / v / _nl_eigen->residualVectorBX().l2_norm();
+  if (!MooseUtils::absoluteFuzzyEqual(factor, 1))
+    scaleEigenvector(factor);
 }
 
 void
@@ -454,13 +458,11 @@ EigenProblem::postScaleEigenVector()
     else
       v = _normal_factor;
 
-    Real c = getPostprocessorValue(_normalization);
+    Real c = getPostprocessorValueByName(_normalization);
 
     // We scale SLEPc eigen vector here, so we need to scale it back for optimal
     // convergence if we call EPS solver again
-    _has_pre_scale = true;
     mooseAssert(v != 0., "normal factor can not be zero");
-    _pre_scale_factor = c / v;
 
     unsigned int itr = 0;
 
@@ -480,7 +482,7 @@ EigenProblem::postScaleEigenVector()
       for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
         execute(flag);
 
-      c = getPostprocessorValue(_normalization);
+      c = getPostprocessorValueByName(_normalization);
 
       itr++;
     }
@@ -495,18 +497,58 @@ EigenProblem::checkProblemIntegrity()
 }
 
 void
+EigenProblem::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(petscOptionsDatabase());
+#endif
+
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "2");
+  // During each power iteration, we want solver converged unless linear solver does not
+  // work. We here use a really loose tolerance for this purpose.
+  // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", Moose::stringify(free_power_iterations));
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+}
+
+void
+EigenProblem::clearFreeNonlinearPowerIterations()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(petscOptionsDatabase());
+#endif
+
+  auto nl_max_its = es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
+  auto nl_rel_tol = es().parameters.set<Real>("nonlinear solver relative residual tolerance");
+
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", Moose::stringify(nl_max_its));
+  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", Moose::stringify(nl_rel_tol));
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+}
+
+void
 EigenProblem::solve()
 {
   // Set necessary slepc callbacks
   // We delay this call as much as possible because libmesh
   // could rebuild matrices due to mesh changes or something else.
   _nl_eigen->attachSLEPcCallbacks();
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master has the default database
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(_petsc_option_data_base);
-#endif
 
   if (_solve)
   {
@@ -515,8 +557,69 @@ EigenProblem::solve()
     // Scale eigen vector if necessary
     preScaleEigenVector();
 
+    // Let do an initial solve if a nonlinear eigen solver but not power is used.
+    // The initial solver is a Inverse Power, and it is used to compute a good initial
+    // guess for Newton
+    if (_first_solve && solverParams()._free_power_iterations && isNonlinearEigenvalueSolver() &&
+        solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+    {
+      doFreePowerIteration(true);
+      // Set free power iterations
+      setFreeNonlinearPowerIterations(solverParams()._free_power_iterations);
+
+      _console << " Free power iteration starts" << std::endl;
+
+      // Call solver
+      _nl->solve();
+      _nl->update();
+
+      // Clear free power iterations
+      clearFreeNonlinearPowerIterations();
+
+      doFreePowerIteration(false);
+
+      _first_solve = false;
+    }
+
+    // Let us do extra power iterations here if necessary
+    if (solverParams()._extra_power_iterations && isNonlinearEigenvalueSolver() &&
+        solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+    {
+      // SlepcSupport needs to know we are doing free power iterations
+      doFreePowerIteration(true);
+      // Set free power iterations
+      setFreeNonlinearPowerIterations(solverParams()._extra_power_iterations);
+
+      _console << " Extra Free power iteration starts" << std::endl;
+
+      // Call solver
+      _nl->solve();
+      _nl->update();
+
+      // Clear free power iterations
+      clearFreeNonlinearPowerIterations();
+
+      doFreePowerIteration(false);
+    }
+
+    if (solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+      _console << " Nonlinear Newton iteration starts" << std::endl;
+    else
+      _console << " Nonlinear power iteration starts" << std::endl;
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+    // Master has the default database
+    if (!_app.isUltimateMaster())
+      PetscOptionsPush(_petsc_option_data_base);
+#endif
+
     _nl->solve();
     _nl->update();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+    if (!_app.isUltimateMaster())
+      PetscOptionsPop();
+#endif
 
     // Scale eigen vector if users ask
     postScaleEigenVector();
@@ -525,11 +628,6 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
 }
 
 void
@@ -566,12 +664,6 @@ EigenProblem::isNonlinearEigenvalueSolver() const
          solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
          solverParams()._eigen_solve_type == Moose::EST_JFNK;
-}
-
-bool
-EigenProblem::needInitializeEigenVector() const
-{
-  return _auto_initialize_eigen_vector && isNonlinearEigenvalueSolver();
 }
 
 void

@@ -27,4 +27,6 @@ public:
   bool _eigen_matrix_free;
   bool _customized_pc_for_eigen;
   bool _precond_matrix_free;
+  unsigned int _free_power_iterations;
+  unsigned int _extra_power_iterations;
 };

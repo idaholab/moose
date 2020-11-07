@@ -323,29 +323,6 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
 }
 
 void
-setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
-{
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
-  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "2");
-  // During each power iteration, we want solver converged unless linear solver does not
-  // work. We here use a really loose tolerance for this purpose.
-  // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
-  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", stringify(free_power_iterations));
-}
-
-void
-clearFreeNonlinearPowerIterations(const InputParameters & params)
-{
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
-  Moose::PetscSupport::setSinglePetscOption("-snes_max_it",
-                                            stringify(params.get<unsigned int>("nl_max_its")));
-  Moose::PetscSupport::setSinglePetscOption("-snes_rtol",
-                                            stringify(params.get<Real>("nl_rel_tol")));
-}
-
-void
 setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & params)
 {
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
