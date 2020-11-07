@@ -37,12 +37,12 @@ public:
 
   virtual bool converged() override;
 
-  unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
+  unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
   {
     _n_eigen_pairs_required = n_eigen_pairs;
   }
-  bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
+  bool isGeneralizedEigenvalueProblem() const { return _generalized_eigenvalue_problem; }
   bool isNonlinearEigenvalueSolver() const;
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
@@ -56,7 +56,7 @@ public:
    * If the negative sign is used, eigen kernels are consistent in nonlinear solver.
    * In nonlinear solver, RHS kernels always have a negative sign.
    */
-  bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
+  bool negativeSignEigenKernel() const { return _negative_sign_eigen_kernel; }
 
   /**
    * If we need to initialize eigen vector. We initialize the eigen vector
@@ -187,7 +187,7 @@ public:
    * Whether or not to output eigenvalue inverse. The inverse is useful for
    * neutronics community
    */
-  bool outputInverseEigenvalue() { return _output_inverse_eigenvalue; }
+  bool outputInverseEigenvalue() const { return _output_inverse_eigenvalue; }
 
   /**
    * Set a flag to indicate whether or not to output eigenvalue inverse.
@@ -199,15 +199,20 @@ protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
-
+  /// Whether or not use negative sign for Bx. Use negative sign by default to
+  /// make the eigen system consistent with nonlinear system
   bool _negative_sign_eigen_kernel;
-
+  /// Which eigenvalue is used to compute residual. By default the zeroth eigenvalue
+  /// is used.
   unsigned int _active_eigen_index;
-
+  /// Whether or not initialize eigen vector. Initialize eigen vector by default.
   bool _auto_initialize_eigen_vector;
+  /// Whether or not we are doing free power iteration. Free power iteration is
+  /// often used to compute initial guess for Newton eigen solver. It is automatically
+  /// triggered by Eigenvalue Executioner
   bool _do_free_power_iteration;
+  /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvaue.
   bool _output_inverse_eigenvalue;
-
   /// Timers
   PerfID _compute_jacobian_tag_timer;
   PerfID _compute_jacobian_ab_timer;

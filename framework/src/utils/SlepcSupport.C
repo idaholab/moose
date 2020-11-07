@@ -1080,12 +1080,12 @@ mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
 
 PetscErrorCode
 mooseSlepcEPSMonitor(EPS eps,
-                     int its,
-                     int /*nconv*/,
+                     PetscInt its,
+                     PetscInt /*nconv*/,
                      PetscScalar * eigr,
                      PetscScalar * eigi,
                      PetscReal * /*errest*/,
-                     int /*nest*/,
+                     PetscInt /*nest*/,
                      void * mctx)
 {
   ST st;

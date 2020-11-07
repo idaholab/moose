@@ -55,6 +55,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
     _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
+    _auto_initialize_eigen_vector(true),
+    _do_free_power_iteration(false),
+    _output_inverse_eigenvalue(false),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
@@ -382,8 +385,11 @@ EigenProblem::initEigenvector(const Real initial_value)
   }
 
   // We do not need to setup
-  if (!n_dofs)
-    return;
+  // We can not return here because some MPI ranks might have zero dofs but others
+  // might have something. If we return here, we might hit MPI deadlock when 'close'
+  // is called at the end of this function
+  // if (!n_dofs)
+  //  return;
 
   // Yaqi's note: the following code will set a flat solution for lagrange and
   // constant monomial variables. For the first or higher order variables,
@@ -392,6 +398,11 @@ EigenProblem::initEigenvector(const Real initial_value)
   // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
+    // There is nothing we need to scale. We cannot return here, we need
+    // to go through 'close'.
+    if (!n_dofs)
+      break;
+
     const auto & var = getVariable(0, vn);
     // We set values for only eigen variables
     if (var.eigen())
