@@ -161,16 +161,6 @@ Eigenvalue::init()
 
   // Does not allow time kernels
   checkIntegrity();
-  // Some setup
-  _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _eigen_problem.initialSetup();
-
-  // Outputs initial conditions set by users
-  // It is consistent with Steady
-  _time_step = 0;
-  _time = _time_step;
-  _eigen_problem.outputStep(EXEC_INITIAL);
-  _time = _system_time;
 
   // Provide vector of ones to solver
   // "auto_initialization" is on by default and we init the vector values associated
@@ -181,6 +171,10 @@ Eigenvalue::init()
   // that we have to initialize  ONLY eigen variables in multiphysics simulation.
   if (getParam<bool>("auto_initialization") && _eigen_problem.isNonlinearEigenvalueSolver())
     _eigen_problem.initEigenvector(1.0);
+
+  // Some setup
+  _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _eigen_problem.initialSetup();
 
     // Make sure all PETSc options are setup correctly
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
@@ -228,6 +222,13 @@ Eigenvalue::execute()
   // the previous time steps is required.
   if (_app.isRecovering())
     return;
+
+  // Outputs initial conditions set by users
+  // It is consistent with Steady
+  _time_step = 0;
+  _time = _time_step;
+  _eigen_problem.outputStep(EXEC_INITIAL);
+  _time = _system_time;
 
   preExecute();
 
