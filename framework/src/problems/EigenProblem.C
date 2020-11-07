@@ -374,14 +374,18 @@ EigenProblem::initEigenvector(const Real initial_value)
   // Count how many dofs we have
   for (auto & vn : var_names)
   {
-    const auto & var = getVariable(0, vn);
-    if (var.eigen())
+    MooseVariableBase * var = nullptr;
+    if (hasScalarVariable(vn))
+      var = &getScalarVariable(0, vn);
+    else
+      var = &getVariable(0, vn);
+    if (var->eigen())
     {
       std::set<dof_id_type> var_indices;
-      for (unsigned int vc = 0; vc < var.count(); ++vc)
+      for (unsigned int vc = 0; vc < var->count(); ++vc)
       {
         var_indices.clear();
-        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
         n_dofs += var_indices.size();
       }
     }
@@ -402,15 +406,19 @@ EigenProblem::initEigenvector(const Real initial_value)
     if (!n_dofs)
       break;
 
-    const auto & var = getVariable(0, vn);
+    MooseVariableBase * var = nullptr;
+    if (hasScalarVariable(vn))
+      var = &getScalarVariable(0, vn);
+    else
+      var = &getVariable(0, vn);
     // We set values for only eigen variables
-    if (var.eigen())
+    if (var->eigen())
     {
       std::set<dof_id_type> var_indices;
-      for (unsigned int vc = 0; vc < var.count(); ++vc)
+      for (unsigned int vc = 0; vc < var->count(); ++vc)
       {
         var_indices.clear();
-        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
         for (const auto & dof : var_indices)
           _nl_eigen->solution().set(dof, initial_value);
       }
@@ -544,14 +552,14 @@ EigenProblem::clearFreeNonlinearPowerIterations()
 void
 EigenProblem::solve()
 {
-  // Set necessary slepc callbacks
-  // We delay this call as much as possible because libmesh
-  // could rebuild matrices due to mesh changes or something else.
-  _nl_eigen->attachSLEPcCallbacks();
-
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
+
+    // Set necessary slepc callbacks
+    // We delay this call as much as possible because libmesh
+    // could rebuild matrices due to mesh changes or something else.
+    _nl_eigen->attachSLEPcCallbacks();
 
     // Scale eigen vector if necessary
     preScaleEigenVector();

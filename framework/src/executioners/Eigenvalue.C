@@ -169,14 +169,15 @@ Eigenvalue::init()
   // and users does not provide an initial guess, slepc will automatically generate
   // a random vector as the initial guess. The motivation to offer this option is
   // that we have to initialize  ONLY eigen variables in multiphysics simulation.
-  if (getParam<bool>("auto_initialization") && _eigen_problem.isNonlinearEigenvalueSolver())
+  // auto_initialization can be overriden by initial conditions.
+  if (getParam<bool>("auto_initialization"))
     _eigen_problem.initEigenvector(1.0);
 
   // Some setup
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _eigen_problem.initialSetup();
 
-    // Make sure all PETSc options are setup correctly
+  // Make sure all PETSc options are setup correctly
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
