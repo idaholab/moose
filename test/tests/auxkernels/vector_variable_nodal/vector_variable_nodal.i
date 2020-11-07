@@ -51,6 +51,7 @@
     type = VectorVariableMagnitudeAux
     variable = u_mag # the auxvariable to compute
     vector_variable = u # vector variable to compute from
+    execute_on = 'initial timestep_end'
   [../]
 []
 

@@ -540,8 +540,20 @@ Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp) 
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
-    return (_c_is_implicit) ? var->sln() : var->slnOld();
-  return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
+  {
+    if (_c_nodal)
+      return _c_is_implicit ? var->nodalValueArray() : var->nodalValueOldArray();
+    else
+      return _c_is_implicit ? var->sln() : var->slnOld();
+  }
+  else
+  {
+    if (_c_nodal)
+      // Since this is at a node, I don't feel like there should be any "neighbor" logic
+      return _c_is_implicit ? var->nodalValueArray() : var->nodalValueOldArray();
+    else
+      return _c_is_implicit ? var->slnNeighbor() : var->slnOldNeighbor();
+  }
 }
 
 const ArrayVariableValue &
