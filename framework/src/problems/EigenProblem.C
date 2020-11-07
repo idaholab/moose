@@ -478,9 +478,8 @@ EigenProblem::postScaleEigenVector()
 
       scaleEigenvector(v / c);
 
-      // update all aux variables and user objects
-      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
-        execute(flag);
+      // update all aux variables and user objects on linear
+      execute(EXEC_LINEAR);
 
       c = getPostprocessorValueByName(_normalization);
 
