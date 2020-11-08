@@ -576,9 +576,20 @@ EigenProblem::solve()
 
       _console << " Free power iteration starts" << std::endl;
 
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+      // Master has the default database
+      if (!_app.isUltimateMaster())
+        PetscOptionsPush(_petsc_option_data_base);
+#endif
+
       // Call solver
       _nl->solve();
       _nl->update();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+      if (!_app.isUltimateMaster())
+        PetscOptionsPop();
+#endif
 
       // Clear free power iterations
       clearFreeNonlinearPowerIterations();
@@ -599,9 +610,20 @@ EigenProblem::solve()
 
       _console << " Extra Free power iteration starts" << std::endl;
 
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+      // Master has the default database
+      if (!_app.isUltimateMaster())
+        PetscOptionsPush(_petsc_option_data_base);
+#endif
+
       // Call solver
       _nl->solve();
       _nl->update();
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+      if (!_app.isUltimateMaster())
+        PetscOptionsPop();
+#endif
 
       // Clear free power iterations
       clearFreeNonlinearPowerIterations();
