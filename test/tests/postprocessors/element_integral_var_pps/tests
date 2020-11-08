@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1405'
+  issues = '#1405 #16099'
   design = 'ElementIntegralVariablePostprocessor.md'
 
   [element_integral]
@@ -18,7 +18,15 @@
       input = 'pps_old_value.i'
       exodiff = 'pps_old_value_out.e'
 
-      detail = 'at the end of each time step.'
+      detail = 'at the end of each time step, for both FE and'
+    []
+
+    [pps_old_test_fv]
+      type = 'Exodiff'
+      input = 'pps_old_value_fv.i'
+      exodiff = 'pps_old_value_fv_out.e'
+
+      detail = 'FV variables.'
     []
   []
 []
