@@ -225,8 +225,7 @@ public:
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
               Moose::VarFieldType expected_var_field_type =
                   Moose::VarFieldType::VAR_FIELD_ANY) const override;
-  MooseVariableField<Real> &
-  getActualFieldVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableField<Real> & getActualFieldVariable(THREAD_ID tid, const std::string & var_name);
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
