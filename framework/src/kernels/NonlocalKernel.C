@@ -87,7 +87,7 @@ NonlocalKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       getUserObjectJacobian(jvar_num, jvar.dofIndices()[_j]);
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
     }
   }
 }

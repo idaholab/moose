@@ -26,7 +26,7 @@ public:
   virtual void reinit(){};
   virtual void computeResidual();
   virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/);
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & /*jvar*/);
 
 protected:
   virtual void assignComponentIndices(Order var_order);

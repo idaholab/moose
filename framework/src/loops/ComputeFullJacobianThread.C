@@ -259,7 +259,7 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
         {
           dg->subProblem().prepareFaceShapes(jvar, _tid);
           dg->subProblem().prepareNeighborShapes(jvar, _tid);
-          dg->computeOffDiagJacobian(jvar);
+          dg->computeOffDiagJacobian(jvariable);
         }
       }
     }

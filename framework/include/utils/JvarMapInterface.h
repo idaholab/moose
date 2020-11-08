@@ -32,7 +32,6 @@ class JvarMapKernelInterface : public JvarMapInterfaceBase<T>
 public:
   JvarMapKernelInterface(const InputParameters & parameters);
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using T::computeOffDiagJacobian;
 };
 
 /**

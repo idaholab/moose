@@ -58,6 +58,11 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
+  /**
+   * Method for computing an off-diagonal jacobian component from a scalar var.
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
+
   VectorMooseVariable & _var;
 
   /// normals at quadrature points

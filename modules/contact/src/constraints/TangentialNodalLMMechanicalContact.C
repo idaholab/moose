@@ -94,22 +94,21 @@ TangentialNodalLMMechanicalContact::computeJacobian()
 }
 
 void
-TangentialNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
+TangentialNodalLMMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
   {
     computeJacobian();
     return;
   }
 
-  MooseVariableFEBase & var = _sys.getVariable(0, jvar);
   _connected_dof_indices.clear();
-  _connected_dof_indices.push_back(var.nodalDofIndex());
+  _connected_dof_indices.push_back(jvar.nodalDofIndex());
 
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar.number());
 }
 
 Real TangentialNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
@@ -193,7 +192,7 @@ Real TangentialNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJaco
 
 Real
 TangentialNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/,
-                                                             unsigned jvar)
+                                                             unsigned int jvar)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());

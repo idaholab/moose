@@ -27,17 +27,17 @@ protected:
   /**
    * Compute the correct diffusion residual with an arbitrary prefactor applied
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * Compute the correct diffusion on-diagonal Jacobian with an arbitrary prefactor applied
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /**
    * Set a constant off-diagonal Jacobian
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int);
+  virtual Real computeQpOffDiagJacobian(unsigned int) override;
 
 private:
   /// prefactor of the Residual

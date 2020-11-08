@@ -27,11 +27,6 @@ public:
   ScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() = 0;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
-  {
-    computeOffDiagJacobian(jvar.number());
-  }
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
 
   /**
    * The variable that this kernel operates on.

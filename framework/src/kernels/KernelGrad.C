@@ -95,7 +95,7 @@ KernelGrad::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     for (_j = 0; _j < phi_size; _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         for (_i = 0; _i < _test.size(); _i++)
-          Ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          Ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
   }
 }
 

@@ -67,16 +67,16 @@ VectorNodalBC::computeJacobian()
 }
 
 void
-VectorNodalBC::computeOffDiagJacobian(unsigned int jvar)
+VectorNodalBC::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
     computeJacobian();
   else
   {
-    Real cached_val = computeQpOffDiagJacobian(jvar);
+    Real cached_val = computeQpOffDiagJacobian(jvar.number());
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
     // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)

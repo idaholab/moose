@@ -75,16 +75,13 @@ public:
   /**
    * Computes the element-element off-diagonal Jacobian
    */
-  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar) = 0;
+  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                               MooseVariableFEBase & jvar) = 0;
 
   /**
    * Computes d-residual / d-jvar...
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
-  {
-    computeOffDiagJacobian(jvar.number());
-  }
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 protected:
   /// Current element

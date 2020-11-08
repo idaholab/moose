@@ -93,28 +93,27 @@ NormalNodalLMMechanicalContact::computeJacobian()
 }
 
 void
-NormalNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
+NormalNodalLMMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
   {
     computeJacobian();
     return;
   }
 
-  MooseVariableFEBase & var = _sys.getVariable(0, jvar);
   _connected_dof_indices.clear();
-  _connected_dof_indices.push_back(var.nodalDofIndex());
+  _connected_dof_indices.push_back(jvar.nodalDofIndex());
 
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar.number());
 
   DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar.number());
 
   for (_j = 0; _j < _phi_primary.size(); ++_j)
-    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
+    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar.number());
 }
 
 Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
@@ -171,7 +170,7 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
 
 Real
 NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                         unsigned jvar)
+                                                         unsigned int jvar)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());

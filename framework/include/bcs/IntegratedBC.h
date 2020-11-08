@@ -37,10 +37,6 @@ public:
    */
   virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
   /**
-   * Deprecated method
-   */
-  virtual void computeJacobianBlock(unsigned jvar);
-  /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable
    */
@@ -61,6 +57,11 @@ protected:
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * Method for computing an off-diagonal jacobian component from a scalar var.
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
 
   MooseVariable & _var;
 

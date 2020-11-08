@@ -71,11 +71,7 @@ public:
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpOffDiagJacobian()
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
-  {
-    computeOffDiagJacobian(jvar.number());
-  }
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 protected:
   /**

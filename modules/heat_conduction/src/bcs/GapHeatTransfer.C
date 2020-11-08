@@ -246,19 +246,19 @@ GapHeatTransfer::computeJacobian()
 }
 
 void
-GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
+GapHeatTransfer::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
   {
     computeJacobian();
     return;
   }
 
-  prepareMatrixTag(_assembly, _var.number(), jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar.number());
 
   // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
   // on the displaced mesh
-  auto phi_size = _sys.getVariable(_tid, jvar).dofIndices().size();
+  auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -267,14 +267,14 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
 
     // Ok now do the contribution from the secondary side
     if (_quadrature && _has_info)
     {
       std::vector<dof_id_type> secondary_side_dof_indices;
 
-      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, jvar);
+      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, jvar.number());
 
       DenseMatrix<Number> K_secondary(_var.dofIndices().size(), secondary_side_dof_indices.size());
 
@@ -287,7 +287,7 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
              _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) +=
-              _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar);
+              _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar.number());
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
           K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());

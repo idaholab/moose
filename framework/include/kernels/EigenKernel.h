@@ -38,8 +38,6 @@ public:
   EigenKernel(const InputParameters & parameters);
   virtual bool enabled() const override;
 
-  using Kernel::computeOffDiagJacobian;
-
 protected:
   /// flag for as an eigen kernel or a normal kernel
   bool _eigen;
@@ -53,4 +51,3 @@ protected:
    */
   const Real * _eigenvalue;
 };
-

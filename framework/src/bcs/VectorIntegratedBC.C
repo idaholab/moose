@@ -86,7 +86,7 @@ VectorIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
         if (_var.number() == jvar_num)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         else
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
       }
 
   accumulateTaggedLocalMatrix();
@@ -101,7 +101,7 @@ VectorIntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jv.order(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
 
   accumulateTaggedLocalMatrix();
 }

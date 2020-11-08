@@ -149,20 +149,20 @@ NodalKernel::computeJacobian()
 }
 
 void
-NodalKernel::computeOffDiagJacobian(unsigned int jvar)
+NodalKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   if (_var.isNodalDefined())
   {
-    if (jvar == _var.number())
+    if (jvar.number() == _var.number())
       computeJacobian();
     else
     {
       _qp = 0;
-      Real cached_val = computeQpOffDiagJacobian(jvar);
+      Real cached_val = computeQpOffDiagJacobian(jvar.number());
       dof_id_type cached_row = _var.nodalDofIndex();
 
       // Note: this only works for equal order Lagrange variables...
-      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
       cached_val *= _var.scalingFactor();
 

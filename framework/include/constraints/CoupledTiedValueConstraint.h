@@ -41,4 +41,3 @@ protected:
   const Real _scaling;
   NumericVector<Number> & _residual_copy;
 };
-

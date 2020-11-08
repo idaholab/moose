@@ -152,11 +152,11 @@ DGKernelBase::computeJacobian()
 }
 
 void
-DGKernelBase::computeOffDiagJacobian(unsigned int jvar)
+DGKernelBase::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   if (!excludeBoundary())
   {
-    if (jvar == variable().number())
+    if (jvar.number() == variable().number())
       computeJacobian();
     else
     {

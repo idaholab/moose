@@ -60,11 +60,7 @@ public:
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
-  {
-    computeOffDiagJacobian(jvar.number());
-  }
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   virtual const MooseVariableField<Real> & variable() const override { return _var; }
 

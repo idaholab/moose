@@ -27,8 +27,7 @@ public:
   virtual void initialSetup() override;
   void computeJacobian() override;
 
-  using IntegratedBC::computeJacobianBlock;
-  void computeJacobianBlock(unsigned int jvar) override;
+  void computeJacobianBlock(MooseVariableFEBase & jvar) override;
 
 protected:
   virtual Real computeQpResidual() override;

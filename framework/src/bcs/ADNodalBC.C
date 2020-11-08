@@ -117,14 +117,14 @@ ADNodalBCTempl<T>::computeJacobian()
 
 template <typename T>
 void
-ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
+ADNodalBCTempl<T>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
     computeJacobian();
   else
   {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-    auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerNode());
+    auto ad_offset = Moose::adOffset(jvar.number(), _sys.getMaxVarNDofsPerNode());
 #endif
     auto residual = computeQpResidual();
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
@@ -133,7 +133,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(unsigned int jvar)
                 "The number of dof indices must be less than the number of settable components");
 
     // Note: this only works for Lagrange variables...
-    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+    dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)

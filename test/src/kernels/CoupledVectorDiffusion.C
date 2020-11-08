@@ -48,7 +48,7 @@ CoupledVectorDiffusion::computeQpJacobian()
 }
 
 Real
-CoupledVectorDiffusion::computeQpOffDiagJacobian(unsigned jvar)
+CoupledVectorDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_id && _state == "current")
     return -_grad_phi[_j][_qp].contract(_grad_test[_i][_qp]);

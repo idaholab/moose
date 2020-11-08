@@ -40,7 +40,6 @@ public:
    */
   virtual void computeJacobian() override;
   virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  using IntegratedBC::computeJacobianBlock;
 
   /**
    * computeNonlocalJacobian and computeNonlocalOffDiagJacobian methods are

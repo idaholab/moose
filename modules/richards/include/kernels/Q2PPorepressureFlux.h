@@ -59,7 +59,6 @@ protected:
 
   /// this simply calls upwind
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
 
   /// this simply calls upwind
   virtual void computeJacobian() override;

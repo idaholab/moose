@@ -34,11 +34,6 @@ public:
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   /**
-   * Deprecated method
-   */
-  virtual void computeOffDiagJacobian(unsigned jvar);
-
-  /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable
    */
@@ -58,10 +53,14 @@ protected:
   virtual Real computeQpJacobian() { return 0; }
 
   /**
-   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
-   * component.
+   * For coupling standard variables
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * For coupling scalar variables
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
 
   /**
    * For coupling array variables

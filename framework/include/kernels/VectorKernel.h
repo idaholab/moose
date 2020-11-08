@@ -58,6 +58,11 @@ protected:
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 
+  /**
+   * For coupling scalar variables
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
+
   /// This is a regular kernel so we cast to a regular MooseVariable
   VectorMooseVariable & _var;
 

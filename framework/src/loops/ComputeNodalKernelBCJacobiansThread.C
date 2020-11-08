@@ -120,7 +120,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         {
           _fe_problem.reinitNodeFace(node, boundary_id, _tid);
           for (const auto & nodal_kernel : active_involved_kernels)
-            nodal_kernel->computeOffDiagJacobian(jvar);
+            nodal_kernel->computeOffDiagJacobian(jvariable);
 
           _num_cached++;
         }

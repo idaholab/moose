@@ -40,7 +40,6 @@ public:
    */
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
 
   /**
    * computeNonlocalJacobian and computeNonlocalOffDiagJacobian methods are
@@ -71,4 +70,3 @@ protected:
 
   unsigned int _k;
 };
-

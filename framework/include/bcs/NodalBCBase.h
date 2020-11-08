@@ -37,17 +37,6 @@ public:
 
   NodalBCBase(const InputParameters & parameters);
 
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
-  {
-    computeOffDiagJacobian(jvar.number());
-  }
-  virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
-
-  /**
-   * Compute the off-diagonal contributions from scalar variables
-   */
-  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override {}
-
   /**
    * Whether to verify that this object is acting on a nodal variable
    */

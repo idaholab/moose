@@ -73,7 +73,7 @@ GlobalStrain::computeJacobian()
 }
 
 void
-GlobalStrain::computeOffDiagJacobian(unsigned int /*jvar*/)
+GlobalStrain::computeOffDiagJacobian(MooseVariableFEBase & /*jvar*/)
 {
 }
 

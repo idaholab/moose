@@ -134,7 +134,7 @@ ComputeDiracThread::onElement(const Elem * elem)
           (jvariable->numberOfDofs() > 0))
       {
         dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
-        dirac_kernel->computeOffDiagJacobian(jvariable->number());
+        dirac_kernel->computeOffDiagJacobian(*jvariable);
       }
     }
   }

@@ -130,15 +130,15 @@ DiracKernel::computeJacobian()
 }
 
 void
-DiracKernel::computeOffDiagJacobian(unsigned int jvar)
+DiracKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  if (jvar.number() == _var.number())
   {
     computeJacobian();
   }
   else
   {
-    prepareMatrixTag(_assembly, _var.number(), jvar);
+    prepareMatrixTag(_assembly, _var.number(), jvar.number());
 
     const std::vector<unsigned int> * multiplicities =
         _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
@@ -155,7 +155,7 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
+            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar.number());
       }
     }
 

@@ -223,11 +223,11 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 }
 
 void
-ADDGKernel::computeOffDiagJacobian(unsigned int jvar)
+ADDGKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   // AD only needs to do one computation for one variable because it does the derivatives all at
   // once
-  if (!excludeBoundary() && jvar == _var.number())
+  if (!excludeBoundary() && jvar.number() == _var.number())
   {
     computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
     computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
@@ -235,7 +235,7 @@ ADDGKernel::computeOffDiagJacobian(unsigned int jvar)
 }
 
 void
-ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int)
+ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, MooseVariableFEBase &)
 {
   mooseAssert(type == Moose::ElementElement || type == Moose::NeighborNeighbor,
               "With AD you should need one call per side");

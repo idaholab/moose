@@ -23,7 +23,6 @@ public:
   MechanicsBasePD(const InputParameters & parameters);
 
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
 
   /**
    * Function to compute local contribution to the off-diagonal Jacobian at the current nodes

@@ -1941,7 +1941,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
                   nfc->subProblem().prepareNeighborShapes(jvar->number(), 0);
 
-                  nfc->computeOffDiagJacobian(jvar->number());
+                  nfc->computeOffDiagJacobian(*jvar);
 
                   // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(
@@ -2187,7 +2187,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nec->subProblem().prepareShapes(nec->variable().number(), 0);
                   nec->subProblem().prepareNeighborShapes(jvar->number(), 0);
 
-                  nec->computeOffDiagJacobian(jvar->number());
+                  nec->computeOffDiagJacobian(*jvar);
 
                   // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
@@ -2583,7 +2583,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
             // 2.) jvar is "involved" with the BC (including jvar==ivar), and
             // 3.) the BC should apply.
             if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
-              bc->computeOffDiagJacobian(jvar);
+              bc->computeOffDiagJacobian(*it.second);
           }
 
           const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();

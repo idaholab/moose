@@ -22,14 +22,15 @@ public:
   NormalNodalMechanicalContact(const InputParameters & parameters);
 
   void computeJacobian() override;
-  void computeOffDiagJacobian(unsigned int jvar) override;
+  void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 protected:
   virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar) override;
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar) override;
 
   const Real & _lambda;
   const unsigned _lambda_id;
