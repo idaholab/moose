@@ -28,7 +28,7 @@ public:
 
   IntegratedBC(const InputParameters & parameters);
 
-  virtual MooseVariable & variable() override { return _var; }
+  virtual const MooseVariable & variable() const override { return _var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

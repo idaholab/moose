@@ -45,12 +45,16 @@ public:
   void computeSecondaryValue(NumericVector<Number> & current_solution);
 
   /// Computes the residual Nodal residual.
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
   /// Computes the jacobian for the current element.
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar...
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
+  {
+    computeOffDiagJacobian(jvar.number());
+  }
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /// Gets the indices for all dofs connected to the constraint
@@ -85,7 +89,7 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  MooseVariable & variable() { return _var; }
+  const MooseVariable & variable() const override { return _var; }
 
 protected:
   /// prepare the _secondary_to_primary_map

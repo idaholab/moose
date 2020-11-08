@@ -47,8 +47,6 @@ NodeFaceConstraint::validParams()
 
   params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
   params.addDeprecatedCoupledVar("master_variable", "primary_variable", "September 1st, 2020");
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
 
   return params;
 }

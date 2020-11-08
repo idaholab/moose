@@ -28,8 +28,6 @@ NodeElemConstraint::validParams()
   params.addRequiredParam<SubdomainName>("primary", "primary block id");
   params.addRequiredCoupledVar("primary_variable",
                                "The variable on the primary side of the domain");
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
 
   return params;
 }

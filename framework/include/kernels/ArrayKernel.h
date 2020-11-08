@@ -40,7 +40,7 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual ArrayMooseVariable & variable() override { return _var; }
+  virtual const ArrayMooseVariable & variable() const override { return _var; }
 
 protected:
   /**

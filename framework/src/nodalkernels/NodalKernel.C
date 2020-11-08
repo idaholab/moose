@@ -19,15 +19,9 @@ defineLegacyParams(NodalKernel);
 InputParameters
 NodalKernel::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
+  InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
-  params += RandomInterface::validParams();
-  params += TaggingInterface::validParams();
-
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this boundary condition applies to");
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
@@ -50,43 +44,24 @@ NodalKernel::validParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.declareControllable("enable");
-
   params.registerBase("NodalKernel");
 
   return params;
 }
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
-  : MooseObject(parameters),
+  : ResidualObject(parameters, true),
     BlockRestrictable(this),
     BoundaryRestrictable(this, true), // true for applying to nodesets
-    SetupInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
-    PostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "BCs"),
-    MeshChangedInterface(parameters),
-    RandomInterface(parameters,
-                    *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
-                    parameters.get<THREAD_ID>("_tid"),
-                    true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     MooseVariableInterface<Real>(this,
                                  true,
                                  "variable",
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
-    TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _var(*mooseVariable()),
-    _mesh(_subproblem.mesh()),
     _current_node(_var.node()),
     _u(_var.dofValues()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
@@ -129,18 +104,6 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
-}
-
-MooseVariable &
-NodalKernel::variable()
-{
-  return _var;
-}
-
-SubProblem &
-NodalKernel::subProblem()
-{
-  return _subproblem;
 }
 
 void

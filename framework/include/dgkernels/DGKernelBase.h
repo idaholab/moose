@@ -11,26 +11,16 @@
 
 // local includes
 #include "MooseArray.h"
-#include "MooseObject.h"
+#include "ResidualObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
-#include "SetupInterface.h"
-#include "TransientInterface.h"
-#include "UserObjectInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
-#include "TaggingInterface.h"
 #include "ElementIDInterface.h"
 
 #include "Assembly.h"
 
 // Forward Declarations
-class MooseMesh;
-class SubProblem;
-
 class DGKernelBase;
 
 #define usingDGKernelBaseMembers                                                                   \
@@ -45,18 +35,11 @@ InputParameters validParams<DGKernelBase>();
 /**
  * Serves as a base class for DGKernel and ADDGKernel
  */
-class DGKernelBase : public MooseObject,
+class DGKernelBase : public ResidualObject,
                      public BlockRestrictable,
                      public BoundaryRestrictable,
-                     public SetupInterface,
-                     public TransientInterface,
-                     public FunctionInterface,
-                     public UserObjectInterface,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                      public TwoMaterialPropertyInterface,
-                     public Restartable,
-                     public MeshChangedInterface,
-                     public TaggingInterface,
                      public ElementIDInterface
 {
 public:
@@ -69,18 +52,6 @@ public:
 
   DGKernelBase(const InputParameters & parameters);
 
-  virtual ~DGKernelBase();
-
-  /**
-   * The variable this kernel operating on.
-   */
-  virtual MooseVariableFEBase & variable() = 0;
-
-  /**
-   * Return a reference to the subproblem.
-   */
-  SubProblem & subProblem() { return _subproblem; }
-
   /**
    * Computes the residual for this element or the neighbor
    */
@@ -89,7 +60,7 @@ public:
   /**
    * Computes the residual for the current side.
    */
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
   /**
    * Computes the element/neighbor-element/neighbor Jacobian
@@ -99,7 +70,7 @@ public:
   /**
    * Computes the jacobian for the current side.
    */
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /**
    * Computes the element-element off-diagonal Jacobian
@@ -109,17 +80,14 @@ public:
   /**
    * Computes d-residual / d-jvar...
    */
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
+  {
+    computeOffDiagJacobian(jvar.number());
+  }
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-  MooseMesh & _mesh;
-
+  /// Current element
   const Elem * const & _current_elem;
 
   /// The volume (or length) of the current element

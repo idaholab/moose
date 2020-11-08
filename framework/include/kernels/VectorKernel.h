@@ -39,7 +39,7 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual VectorMooseVariable & variable() override { return _var; }
+  virtual const VectorMooseVariable & variable() const override { return _var; }
 
 protected:
   /**

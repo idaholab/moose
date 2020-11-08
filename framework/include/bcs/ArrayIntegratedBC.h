@@ -29,7 +29,7 @@ public:
 
   ArrayIntegratedBC(const InputParameters & parameters);
 
-  virtual ArrayMooseVariable & variable() override { return _var; }
+  virtual const ArrayMooseVariable & variable() const override { return _var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

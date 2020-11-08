@@ -8,22 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryCondition.h"
-#include "Problem.h"
-#include "SystemBase.h"
-#include "MooseVariableFE.h"
 
 defineLegacyParams(BoundaryCondition);
 
 InputParameters
 BoundaryCondition::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
+  InputParameters params = ResidualObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
-  params += TaggingInterface::validParams();
 
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -34,31 +27,15 @@ BoundaryCondition::validParams()
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
-  params.declareControllable("enable");
   params.registerBase("BoundaryCondition");
 
   return params;
 }
 
 BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal)
-  : MooseObject(parameters),
+  : ResidualObject(parameters, nodal),
     BoundaryRestrictableRequired(this, nodal),
-    SetupInterface(this),
-    FunctionInterface(this),
     DistributionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
-    PostprocessorInterface(this),
-    VectorPostprocessorInterface(this),
-    GeometricSearchInterface(this),
-    Restartable(this, "BCs"),
-    MeshChangedInterface(parameters),
-    TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _mesh(_subproblem.mesh())
+    GeometricSearchInterface(this)
 {
 }

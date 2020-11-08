@@ -188,7 +188,7 @@ SystemBase::getActualFieldVariable(THREAD_ID tid, unsigned int var_number)
 }
 
 MooseVariableScalar &
-SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
+SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name) const
 {
   MooseVariableScalar * var = dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_name));
   if (!var)
@@ -197,7 +197,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 MooseVariableScalar &
-SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
+SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number) const
 {
   MooseVariableScalar * var =
       dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_number));

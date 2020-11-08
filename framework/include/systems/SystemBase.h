@@ -529,7 +529,8 @@ public:
    * @param var_name A string which is the name of the variable to get.
    * @return reference the variable (class)
    */
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
+                                                  const std::string & var_name) const;
 
   /**
    * Gets a reference to a variable with specified number
@@ -538,7 +539,7 @@ public:
    * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, unsigned int var_number);
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, unsigned int var_number) const;
 
   /**
    * Get the block where a variable of this system is defined

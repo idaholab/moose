@@ -468,7 +468,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
-  _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
+  auto bc_var = dynamic_cast<const MooseVariableFieldBase *>(&bc->variable());
+  _vars[tid].addBoundaryVar(boundary_ids, bc_var);
 
   // Cast to the various types of BCs
   std::shared_ptr<NodalBCBase> nbc = std::dynamic_pointer_cast<NodalBCBase>(bc);
@@ -520,7 +521,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
       // Active BoundaryIDs for the object
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
-      _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
+      _vars[tid].addBoundaryVar(boundary_ids, bc_var);
 
       ibc = std::static_pointer_cast<IntegratedBCBase>(bc);
 
@@ -588,7 +589,8 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
         _factory.create<InterfaceKernelBase>(interface_kernel_name, name, parameters, tid);
 
     const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
-    _vars[tid].addBoundaryVar(boundary_ids, &interface_kernel->variable());
+    auto ik_var = dynamic_cast<const MooseVariableFieldBase *>(&interface_kernel->variable());
+    _vars[tid].addBoundaryVar(boundary_ids, ik_var);
 
     _interface_kernels.addObject(interface_kernel, tid);
     _vars[tid].addBoundaryVars(boundary_ids, interface_kernel->getCoupledVars());

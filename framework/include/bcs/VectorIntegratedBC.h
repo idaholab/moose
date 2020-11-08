@@ -28,7 +28,7 @@ public:
 
   VectorIntegratedBC(const InputParameters & parameters);
 
-  virtual VectorMooseVariable & variable() override { return _var; }
+  virtual const VectorMooseVariable & variable() const override { return _var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

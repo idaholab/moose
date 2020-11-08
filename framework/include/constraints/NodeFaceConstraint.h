@@ -53,16 +53,20 @@ public:
   /**
    * Computes the residual Nodal residual.
    */
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
   /**
    * Computes the jacobian for the current element.
    */
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /**
    * Computes d-residual / d-jvar...
    */
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override
+  {
+    computeOffDiagJacobian(jvar.number());
+  }
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
   /**
@@ -101,7 +105,7 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  MooseVariable & variable() { return _var; }
+  const MooseVariable & variable() const override { return _var; }
 
   // TODO: Make this protected or add an accessor
   // Do the same for all the other public members

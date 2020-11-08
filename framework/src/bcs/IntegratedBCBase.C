@@ -16,7 +16,6 @@ InputParameters
 IntegratedBCBase::validParams()
 {
   InputParameters params = BoundaryCondition::validParams();
-  params += RandomInterface::validParams();
   params += MaterialPropertyInterface::validParams();
 
   params.addParam<std::vector<AuxVariableName>>(
@@ -40,7 +39,6 @@ IntegratedBCBase::validParams()
 
 IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
   : BoundaryCondition(parameters, false), // False is because this is NOT nodal
-    RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _current_elem(_assembly.elem()),
@@ -57,5 +55,3 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
 }
-
-IntegratedBCBase::~IntegratedBCBase() {}
