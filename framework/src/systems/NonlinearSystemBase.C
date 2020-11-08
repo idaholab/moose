@@ -417,6 +417,7 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
     std::shared_ptr<KernelBase> kernel =
         _factory.create<KernelBase>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
+    postAddResidualObject(*kernel);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -436,6 +437,7 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
     std::shared_ptr<NodalKernel> kernel =
         _factory.create<NodalKernel>(kernel_name, name, parameters, tid);
     _nodal_kernels.addObject(kernel, tid);
+    postAddResidualObject(*kernel);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -451,6 +453,7 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
 {
   std::shared_ptr<ScalarKernel> kernel =
       _factory.create<ScalarKernel>(kernel_name, name, parameters);
+  postAddResidualObject(*kernel);
   _scalar_kernels.addObject(kernel);
 }
 
@@ -465,6 +468,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
   // Create the object
   std::shared_ptr<BoundaryCondition> bc =
       _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
+  postAddResidualObject(*bc);
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
@@ -541,6 +545,7 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
 {
   std::shared_ptr<Constraint> constraint = _factory.create<Constraint>(c_name, name, parameters);
   _constraints.addObject(constraint);
+  postAddResidualObject(*constraint);
 
   if (constraint && constraint->addCouplingEntriesToJacobian())
     addImplicitGeometricCouplingEntriesToJacobian(true);
@@ -555,6 +560,7 @@ NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
   {
     std::shared_ptr<DiracKernel> kernel =
         _factory.create<DiracKernel>(kernel_name, name, parameters, tid);
+    postAddResidualObject(*kernel);
     _dirac_kernels.addObject(kernel, tid);
   }
 }
@@ -568,6 +574,7 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
   {
     auto dg_kernel = _factory.create<DGKernelBase>(dg_kernel_name, name, parameters, tid);
     _dg_kernels.addObject(dg_kernel, tid);
+    postAddResidualObject(*dg_kernel);
   }
 
   _doing_dg = true;
@@ -587,6 +594,7 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
   {
     std::shared_ptr<InterfaceKernelBase> interface_kernel =
         _factory.create<InterfaceKernelBase>(interface_kernel_name, name, parameters, tid);
+    postAddResidualObject(*interface_kernel);
 
     const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
     auto ik_var = dynamic_cast<const MooseVariableFieldBase *>(&interface_kernel->variable());

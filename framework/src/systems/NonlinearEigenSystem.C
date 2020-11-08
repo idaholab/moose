@@ -141,114 +141,41 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 }
 
 void
-NonlinearEigenSystem::initialSetup()
+NonlinearEigenSystem::postAddResidualObject(ResidualObject & object) const
 {
-  NonlinearSystemBase::initialSetup();
-  // DG kernels
-  addEigenTagToMooseObjects(_dg_kernels);
-  // Regular kernels
-  addEigenTagToMooseObjects(_kernels);
-  // Nodal BCs (we do not care about IBCs)
-  addEigenTagToMooseObjects(_nodal_bcs);
-  // Scalar kernels
-  addEigenTagToMooseObjects(_scalar_kernels);
-  // IntegratedBCs
-  addEigenTagToMooseObjects(_integrated_bcs);
-  // If the precond matrix needs to include eigen kernels,
-  // we assign precond tag to all objects except nodal BCs.
-  // Mathematically speaking, we can not add eigen nodal BCs
-  // since they will overwrite non-eigen nodal BCs contributions.
   if (_precond_matrix_includes_eigen)
+    object.useMatrixTag(_precond_tag);
+
+  auto & vtags = object.getVectorTags();
+  auto & mtags = object.getMatrixTags();
+  // If it is an eigen kernel, mark its variable as eigen
+  if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
   {
-    // DG kernels
-    addPrecondTagToMooseObjects(_dg_kernels);
-    // Regular kernels
-    addPrecondTagToMooseObjects(_kernels);
-    // Scalar kernels
-    addPrecondTagToMooseObjects(_scalar_kernels);
-    // IntegratedBCs
-    addPrecondTagToMooseObjects(_integrated_bcs);
+    auto vname = object.variable().name();
+    if (hasScalarVariable(vname))
+      getScalarVariable(0, vname).eigen(true);
+    else
+      getVariable(0, vname).eigen(true);
   }
 
-  // Mark a variable an eigen variable if it operates on eigen kernels
-  markEigenVariables(_dg_kernels);
-  markEigenVariables(_kernels);
-  markEigenVariables(_scalar_kernels);
-}
-
-template <typename T>
-void
-NonlinearEigenSystem::addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse)
-{
-  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  // If this is not an eigen kernel
+  if (vtags.find(_Bx_tag) == vtags.end())
   {
-    // Get all objects out from the warehouse
-    auto & objects = warehouse.getObjects(tid);
-
-    // Assign precond tag to all objects
-    for (auto & object : objects)
-      object->useMatrixTag(_precond_tag);
+    object.useVectorTag(_Ax_tag);
+    // Noneigen Kernels
+    object.useMatrixTag(_precond_tag);
   }
-}
+  else // also associate eigen matrix tag if this is a eigen kernel
+    object.useMatrixTag(_B_tag);
 
-template <typename T>
-void
-NonlinearEigenSystem::markEigenVariables(MooseObjectTagWarehouse<T> & warehouse)
-{
-  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  if (mtags.find(_B_tag) == mtags.end())
   {
-    // Get all objects out from the warehouse
-    auto & objects = warehouse.getObjects(tid);
-
-    for (auto & object : objects)
-    {
-      auto & vtags = object->getVectorTags();
-      auto & mtags = object->getMatrixTags();
-      // If it is an eigen kernel, mark its variable as eigen
-      if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
-      {
-        auto vname = object->variable().name();
-        if (hasScalarVariable(vname))
-          getScalarVariable(0, vname).eigen(true);
-        else
-          getVariable(0, vname).eigen(true);
-      }
-    }
+    object.useMatrixTag(_A_tag);
+    // Noneigen Kernels
+    object.useMatrixTag(_precond_tag);
   }
-}
-
-template <typename T>
-void
-NonlinearEigenSystem::addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse)
-{
-  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
-  {
-    auto & objects = warehouse.getObjects(tid);
-
-    for (auto & object : objects)
-    {
-      auto & vtags = object->getVectorTags();
-      // If this is not an eigen kernel
-      if (vtags.find(_Bx_tag) == vtags.end())
-      {
-        object->useVectorTag(_Ax_tag);
-        // Noneigen Kernels
-        object->useMatrixTag(_precond_tag);
-      }
-      else // also associate eigen matrix tag if this is a eigen kernel
-        object->useMatrixTag(_B_tag);
-
-      auto & mtags = object->getMatrixTags();
-      if (mtags.find(_B_tag) == mtags.end())
-      {
-        object->useMatrixTag(_A_tag);
-        // Noneigen Kernels
-        object->useMatrixTag(_precond_tag);
-      }
-      else
-        object->useVectorTag(_Bx_tag);
-    }
-  }
+  else
+    object.useVectorTag(_Bx_tag);
 }
 
 void

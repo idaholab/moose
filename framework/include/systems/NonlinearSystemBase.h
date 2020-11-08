@@ -44,6 +44,7 @@ class NodalKernel;
 class Split;
 class KernelBase;
 class BoundaryCondition;
+class ResidualObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -739,6 +740,8 @@ protected:
    */
   void assembleScalingVector();
 #endif
+
+  virtual void postAddResidualObject(ResidualObject &) const {}
 
 protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
