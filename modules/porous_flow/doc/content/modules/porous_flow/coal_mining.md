@@ -245,14 +245,34 @@ Some of interesting features are:
 
 - Most of the high Darcy fluid velocities occur around the periphery of the mining panel.
 
-!table id=long_results caption=Results contoured on a vertical section along the centre-line of the panel.  The excavation is shown as a black line.  Top left Mohr-Coulomb shear plastic strain.  Top right Mohr-Coulomb shear tensile strain.  Middle left Weak-plane shear plastic strain.  Middle right Weak plane tensile plastic strain.  Bottom left Vertical permeability.  Bottom right Porepressure (color) and Darcy flow vectors.
-| !media media/porous_flow/long_mc_shear.png style=width:90%; | !media media/porous_flow/long_mc_tensile.png style=width:90%; |
-| - | - |
-| !media media/porous_flow/long_wp_shear.png style=width:90%; | !media media/porous_flow/long_wp_tensile.png style=width:90%; |
-| !media media/porous_flow/long_perm_zz.png style=width:90%;  | !media media/porous_flow/long_pp.png style=width:90%; |
+### Results along the centre-line of the panel.
 
-!table id=cross_results caption=Results contoured on a vertical section across the half-panel that is modelled.  The excavation is shown as a black line.  Top left: Mohr-Coulomb shear plastic strain.  Top right: Mohr-Coulomb shear tensile strain.  Middle left: Weak-plane shear plastic strain.  Middle right: Weak plane tensile plastic strain.  Bottom left: Vertical permeability.  Bottom right: Porepressure (color) and Darcy flow vectors.
-| !media media/porous_flow/cross_mc_shear.png style=width:90%; | !media media/porous_flow/cross_mc_tensile.png style=width:90%; |
-| - | - |
-| !media media/porous_flow/cross_wp_shear.png style=width:90%; | !media media/porous_flow/cross_wp_tensile.png style=width:90%; |
-| !media media/porous_flow/cross_perm_zz.png style=width:90%;  | !media media/porous_flow/cross_pp.png style=width:90%; |
+The figures below show results contoured on a vertical section along the centre-line of the panel, after excavation has completed.  The excavation is shown as a black line.
+
+!media media/porous_flow/long_mc_shear.png style=width:90%; caption=Mohr-Coulomb shear plastic strain on a vertical section along the centre-line of the panel
+
+!media media/porous_flow/long_mc_tensile.png style=width:90%; caption=Mohr-Coulomb tensile plastic strain on a vertical section along the centre-line of the panel
+
+!media media/porous_flow/long_wp_shear.png style=width:90%; caption=Weak-plane shear plastic strain on a vertical section along the centre-line of the panel
+
+!media media/porous_flow/long_wp_tensile.png style=width:90%; caption=Weak-plane tensile plastic strain on a vertical section along the centre-line of the panel
+
+!media media/porous_flow/long_perm_zz.png style=width:90%; caption=Vertical permeability on a vertical section along the centre-line of the panel
+
+!media media/porous_flow/long_pp.png style=width:90%; caption=Porepressure (color) and Darcy flow vectors on a vertical section along the centre-line of the panel
+
+### Results across the panel.
+
+The figures below show results contoured on a vertical section across the half-panel that is modelled, after excavation has completed.  The excavation is shown as a black line.
+
+!media media/porous_flow/cross_mc_shear.png style=width:90%; caption=Mohr-Coulomb shear plastic strain on a vertical section across the panel
+
+!media media/porous_flow/cross_mc_tensile.png style=width:90%; caption=Mohr-Coulomb tensile plastic strain on a vertical section across the panel
+
+!media media/porous_flow/cross_wp_shear.png style=width:90%; caption=Weak-plane shear plastic strain on a vertical section across the panel
+
+!media media/porous_flow/cross_wp_tensile.png style=width:90%; caption=Weak-plane tensile plastic strain on a vertical section across the panel
+
+!media media/porous_flow/cross_perm_zz.png style=width:90%; caption=Vertical permeability on a vertical section across the panel
+
+!media media/porous_flow/cross_pp.png style=width:90%; caption=Porepressure (color) and Darcy flow vectors on a vertical section across the panel
