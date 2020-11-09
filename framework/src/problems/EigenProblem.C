@@ -512,13 +512,7 @@ EigenProblem::setFreeNonlinearPowerIterations(unsigned int free_power_iterations
     PetscOptionsPush(petscOptionsDatabase());
 #endif
 
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
-  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", "2");
-  // During each power iteration, we want solver converged unless linear solver does not
-  // work. We here use a really loose tolerance for this purpose.
-  // -snes_no_convergence_test is a perfect option, but it was removed from PETSc
-  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", "0.99999999999");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", Moose::stringify(free_power_iterations));
+  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
@@ -535,13 +529,11 @@ EigenProblem::clearFreeNonlinearPowerIterations()
     PetscOptionsPush(petscOptionsDatabase());
 #endif
 
-  auto nl_max_its = es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
-  auto nl_rel_tol = es().parameters.set<Real>("nonlinear solver relative residual tolerance");
-
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
-  Moose::PetscSupport::setSinglePetscOption("-snes_max_it", Moose::stringify(nl_max_its));
-  Moose::PetscSupport::setSinglePetscOption("-snes_rtol", Moose::stringify(nl_rel_tol));
+  auto executioner = getMooseApp().getExecutioner();
+  if (executioner)
+    Moose::SlepcSupport::clearFreeNonlinearPowerIterations(executioner->parameters());
+  else
+    mooseError("There is no executioner for this moose app");
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())

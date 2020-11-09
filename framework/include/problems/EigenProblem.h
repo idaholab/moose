@@ -184,7 +184,7 @@ public:
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
 #endif
 
-protected:
+private:
   /**
    * Set SLEPc/PETSc options to trigger free power iteration
    */
@@ -195,6 +195,7 @@ protected:
    */
   void clearFreeNonlinearPowerIterations();
 
+protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
