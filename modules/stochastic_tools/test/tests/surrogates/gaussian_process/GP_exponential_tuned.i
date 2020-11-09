@@ -109,7 +109,7 @@
 [Covariance]
   [covar]
     type=ExponentialCovariance
-    gamma = 1                                 #Define the exponential factor
+    gamma = 2                                 #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)

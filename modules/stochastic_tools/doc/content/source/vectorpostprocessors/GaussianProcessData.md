@@ -1,1 +1,17 @@
-!template load file=stubs/moose_object.md.template name=GaussianProcessData syntax=/VectorPostprocessors/GaussianProcessData
+# GaussianProcessData
+
+!syntax description /VectorPostprocessors/GaussianProcessData
+
+## Overview
+
+
+
+## Example Input File Syntax
+
+
+
+!syntax parameters /VectorPostprocessors/GaussianProcessData
+
+!syntax inputs /VectorPostprocessors/GaussianProcessData
+
+!syntax children /VectorPostprocessors/GaussianProcessData

@@ -18,6 +18,7 @@ InputParameters
 EvaluateGaussianProcess::validParams()
 {
   InputParameters params = EvaluateSurrogate::validParams();
+  params.addClassDescription("Tool for sampling gaussian process surrogate models.");
   return params;
 }
 
