@@ -382,8 +382,11 @@ AttribSystem::isEqual(const Attribute & other) const
 void
 AttribVar::initFrom(const MooseObject * obj)
 {
-  auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj);
-  if (vi)
+  if (auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj))
+    _val = static_cast<int>(vi->mooseVariableBase()->number());
+  else if (auto vi = dynamic_cast<const MooseVariableInterface<RealVectorValue> *>(obj))
+    _val = static_cast<int>(vi->mooseVariableBase()->number());
+  else if (auto vi = dynamic_cast<const MooseVariableInterface<RealEigenVector> *>(obj))
     _val = static_cast<int>(vi->mooseVariableBase()->number());
 }
 bool

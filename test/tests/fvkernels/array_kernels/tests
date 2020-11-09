@@ -23,6 +23,6 @@
     type = 'Exodiff'
     input = 'diffusion_reaction_coupling.i'
     exodiff = 'diffusion_reaction_coupling_out.e'
-    requirement = 'MOOSE shall provide two-way coupling between finite volume regular and array variables.'
+    requirement = 'MOOSE shall provide two-way coupling between finite volume regular and array variables that can run parallel to (uncoupled) FE equations.'
   [../]
 []

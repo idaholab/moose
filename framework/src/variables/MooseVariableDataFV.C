@@ -526,7 +526,8 @@ MooseVariableDataFV<RealEigenVector>::initializeSolnVars()
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
   auto && active_coupleable_matrix_tags =
       _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
-  unsigned int nqp = 1;
+  mooseAssert(_qrule, "We should have a non-null qrule");
+  const auto nqp = _qrule->n_points();
 
   _u.resize(nqp);
   _u[0].setZero(_count);
