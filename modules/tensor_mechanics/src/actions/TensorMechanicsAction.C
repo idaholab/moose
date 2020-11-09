@@ -464,8 +464,11 @@ TensorMechanicsAction::actOutputGeneration()
       params.set<MaterialPropertyName>("property") = _base_name + out;
       params.set<AuxVariableName>("variable") = _base_name + out;
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      _problem->addAuxKernel(
-          ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
+      if (out != "effective_creep_strain" && out != "effective_plastic_strain")
+      {
+        _problem->addAuxKernel(
+            ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
+      }
     }
   }
 }

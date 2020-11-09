@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#7555 #15871'
+  issues = '#7555 #15871 #16121'
   [./two_block_base_name]
     type = Exodiff
     input = 'two_block_base_name.i'
@@ -125,4 +125,14 @@
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall extract eigenstrain names from material classes and correctly output these names to the console.'
   [../]
+
+  [./tma_output_exception]
+    type = CSVDiff
+    input = effective_creep_tma.i
+    csvdiff = effective_creep_tma_out.csv
+    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep'"
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanicsAction shall create effective_creep_strain and effective_plastic_strain outputs without creating an AuxKernel and resulting error.'
+  [../]
+
 []
