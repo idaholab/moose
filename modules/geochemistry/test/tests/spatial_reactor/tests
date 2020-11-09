@@ -139,6 +139,45 @@
 #    issues = '#15693'
 #    design = 'GeochemistrySpatialReactor.md'
 #  [../]    
+  [./explore_threading_problem]
+    type = CSVDiff
+    input = explore_threading_problem.i
+    csvdiff = 'explore_threading_problem_out_bulk_Cl_0001.csv explore_threading_problem_out_bulk_Cl_0002.csv'
+    requirement = 'Sources of species may be spatially-dependent'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]    
+  [./explore_threading_problem_threads]
+    type = CSVDiff
+    input = explore_threading_problem.i
+    csvdiff = 'explore_threading_problem_out_bulk_Cl_0001.csv explore_threading_problem_out_bulk_Cl_0002.csv'
+    min_threads = 2
+    prereq = explore_threading_problem
+    requirement = 'Spatially-dependent reaction systems may be multi-threaded'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]    
+  [./explore_threading_problem_mpi]
+    type = CSVDiff
+    input = explore_threading_problem.i
+    csvdiff = 'explore_threading_problem_out_bulk_Cl_0001.csv explore_threading_problem_out_bulk_Cl_0002.csv'
+    min_parallel = 2
+    prereq = explore_threading_problem_threads
+    requirement = 'Spatially-dependent reaction systems may use MPI'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]    
+  [./explore_threading_problem_threads_mpi]
+    type = CSVDiff
+    input = explore_threading_problem.i
+    csvdiff = 'explore_threading_problem_out_bulk_Cl_0001.csv explore_threading_problem_out_bulk_Cl_0002.csv'
+    min_threads = 2
+    min_parallel = 2
+    prereq = explore_threading_problem_mpi
+    requirement = 'Spatially-dependent reaction systems may use MPI and threads'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
+  [../]    
   [./spatial_5]
     type = CSVDiff
     input = spatial_5.i
