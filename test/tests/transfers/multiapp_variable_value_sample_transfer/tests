@@ -30,7 +30,7 @@
 
       detail = "from a constant monomial source variable and"
     []
-    [finite volume]
+    [finite_volume]
       type = 'Exodiff'
       input = 'master_fv.i'
       exodiff = 'master_fv_out_sub0.e master_fv_out_sub1.e '

@@ -4463,7 +4463,7 @@ FEProblemBase::getStandardVariable(THREAD_ID tid, const std::string & var_name)
   return _aux->getFieldVariable<Real>(tid, var_name);
 }
 
-MooseVariableField<Real> &
+MooseVariableFieldBase &
 FEProblemBase::getActualFieldVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl->hasVariable(var_name))
