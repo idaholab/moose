@@ -229,10 +229,9 @@ GaussianProcessTrainer::hyperparamTuning()
   // Setup Tao optimization problem
   ierr = TaoCreate(MPI_COMM_SELF, &tao);
   CHKERRQ(ierr);
-  // ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
-  ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
+  ierr = PetscOptionsSetValue(NULL, "-tao_type", "bncg");
   CHKERRQ(ierr);
-  ierr = TaoSetType(tao, TAOBNCG);
+  ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
   CHKERRQ(ierr);
   ierr = TaoSetFromOptions(tao);
   CHKERRQ(ierr);
