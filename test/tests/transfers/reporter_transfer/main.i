@@ -24,20 +24,24 @@
 [Reporters]
   [from_main_rep]
     type = ConstantReporter
-    names = 'int num vec str'
-    value_types = 'integer real vector string'
+    integer_names = int
     integer_values = 1
+    real_names = num
     real_values = 2.0
-    vector_values = '3 4'
+    real_vector_names = vec
+    real_vector_values = '3 4'
+    string_names = str
     string_values = 'five'
   []
   [to_main_rep]
     type = ConstantReporter
-    names = 'int num vec str'
-    value_types = 'integer real vector string'
+    integer_names = int
     integer_values = 0
+    real_names = num
     real_values = 0.0
-    vector_values = '0'
+    real_vector_names = vec
+    real_vector_values = '0'
+    string_names = str
     string_values = 'foo'
   []
 []

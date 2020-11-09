@@ -7,118 +7,38 @@
     input = 'constant_reporter.i'
     jsondiff = 'constant_reporter_out.json'
 
-    requirement = 'The system shall be able to produce arbitrary integer, real number, vector, and string values for use in other calculations.'
+    requirement = 'The system shall be able to produce arbitrary integer, real number, and string scalar/vector values for use in other calculations.'
   []
 
   [errors]
     requirement = 'The system shall throw an error when producing constant reporter values if '
-    [wrong_names]
+    [no_values]
       type = RunException
       input = 'constant_reporter.i'
-      cli_args = 'Reporters/active=error Reporters/error/names=wrong'
-      expect_err = 'names and value_types must be the same size.'
+      cli_args = 'Reporters/active=error Reporters/error/integer_names=wrong'
+      expect_err = 'Must specify values using integer_values'
       match_literal = true
 
       detail = 'names and value_types are not the same length, '
     []
-    [no_int]
+    [no_names]
       type = RunException
       input = 'constant_reporter.i'
-      cli_args = 'Reporters/active=error'
-      expect_err = 'Must specify integer_values when creating integer reporter.'
+      cli_args = 'Reporters/active=error Reporters/error/integer_values=1'
+      expect_err = 'Use integer_names to specify reporter names.'
       match_literal = true
 
       detail = 'no integer value is specified, '
     []
-    [no_real]
+    [mismatch]
       type = RunException
       input = 'constant_reporter.i'
-      cli_args = 'Reporters/active=error Reporters/error/integer_values=1'
-      expect_err = 'Must specify real_values when creating real reporter.'
+      cli_args = "Reporters/active=error
+                  Reporters/error/integer_values='1 2' Reporters/error/integer_names=wrong"
+      expect_err = 'Number of names specified in integer_names must match number of values specified in integer_values'
       match_literal = true
 
       detail = 'no real number value is specified, '
-    []
-    [no_vec]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = 'Reporters/active=error Reporters/error/integer_values=1 Reporters/error/real_values=1'
-      expect_err = 'Must specify vector_values when creating vector reporter.'
-      match_literal = true
-
-      detail = 'no vector value is specified, '
-    []
-    [no_string]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = 'Reporters/active=error Reporters/error/integer_values=1 Reporters/error/real_values=1 Reporters/error/vector_values=1'
-      expect_err = 'Must specify string_values when creating string reporter.'
-      match_literal = true
-
-      detail = 'no string value is specified, '
-    []
-    [too_little_int]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/integer_values=1"
-      expect_err = 'Not enough values provided.'
-      match_literal = true
-
-      detail = 'not enough integer values are specified, '
-    []
-    [too_little_real]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/real_values=1"
-      expect_err = 'Not enough values provided.'
-      match_literal = true
-
-      detail = 'not enough real number values are specified, '
-    []
-    [too_little_vector]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/vector_values=1"
-      expect_err = 'Not enough values provided.'
-      match_literal = true
-
-      detail = 'not enough vector values are specified, '
-    []
-    [too_many_int]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/integer_values='1 2 3 4'"
-      expect_err = 'Unused values.'
-      match_literal = true
-
-      detail = 'too many integer values are specified, '
-    []
-    [too_many_real]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/real_values='1 2 3 4'"
-      expect_err = 'Unused values.'
-      match_literal = true
-
-      detail = 'too many real number values are specified, '
-    []
-    [too_many_vector]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/vector_values='1; 2; 3; 4'"
-      expect_err = 'Unused values.'
-      match_literal = true
-
-      detail = 'too many vector values are specified, '
-    []
-    [too_many_string]
-      type = RunException
-      input = 'constant_reporter.i'
-      cli_args = "Reporters/constant/string_values='1 2 3 4'"
-      expect_err = 'Unused values.'
-      match_literal = true
-
-      detail = 'too many string values are specified, '
     []
   []
 []

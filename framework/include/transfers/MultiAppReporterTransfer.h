@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
+#include "MultiAppReporterTransferBase.h"
 
 template <typename ReporterType>
 class MultiAppReporterTransfer;
@@ -20,7 +20,7 @@ typedef MultiAppReporterTransfer<std::vector<Real>> MultiAppVectorReporterTransf
 typedef MultiAppReporterTransfer<std::string> MultiAppStringReporterTransfer;
 
 template <typename ReporterType>
-class MultiAppReporterTransfer : public MultiAppTransfer
+class MultiAppReporterTransfer : public MultiAppReporterTransferBase
 {
 public:
   static InputParameters validParams();

@@ -61,6 +61,7 @@ public:
     friend class VectorPostprocessor;
     friend class VectorPostprocessorInterface;
     friend class PostprocessorInterface;
+    friend class MultiAppReporterTransferBase;
   };
 
   ReporterData(MooseApp & moose_app);

@@ -12,17 +12,27 @@
   active = constant
   [constant]
     type = ConstantReporter
-    names          = 'int_1   str    int_2   num_1 num_2 vec_1  int_3   vec_2'
-    value_types    = 'integer string integer real  real  vector integer vector'
-    integer_values = '1 3 -7'
-    real_values    = '4.0 5.0'
-    vector_values  = '6.0 60.0 600.0; 8.0 80.0'
-    string_values  = 'two'
+
+    integer_names  = 'int_1 int_2 int_3'
+    integer_values = '1     2     -3'
+
+    real_names  = 'num_1 num_2'
+    real_values = '4.0   5.0'
+
+    string_names  = 'str'
+    string_values = 'six'
+
+    integer_vector_names  = 'int_vec'
+    integer_vector_values = '7 8'
+
+    real_vector_names  = 'vec_1           vec_2'
+    real_vector_values = '8.0 80.0 800.0; 9.0 90.0'
+
+    string_vector_names  = 'str_vec'
+    string_vector_values = 'ten eleven twelve thirteen'
   []
   [error]
     type = ConstantReporter
-    names = 'int num vec str'
-    value_types = 'integer real vector string'
   []
 []
 

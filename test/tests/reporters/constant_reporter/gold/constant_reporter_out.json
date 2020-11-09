@@ -11,14 +11,23 @@
                 {
                     "object_name": "constant",
                     "type": "int",
-                    "value": 3,
+                    "value": 2,
                     "value_name": "int_2"
                 },
                 {
                     "object_name": "constant",
                     "type": "int",
-                    "value": -7,
+                    "value": -3,
                     "value_name": "int_3"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<int>",
+                    "value": [
+                        7,
+                        8
+                    ],
+                    "value_name": "int_vec"
                 },
                 {
                     "object_name": "constant",
@@ -35,16 +44,27 @@
                 {
                     "object_name": "constant",
                     "type": "std::string",
-                    "value": "two",
+                    "value": "six",
                     "value_name": "str"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<std::string>",
+                    "value": [
+                        "ten",
+                        "eleven",
+                        "twelve",
+                        "thirteen"
+                    ],
+                    "value_name": "str_vec"
                 },
                 {
                     "object_name": "constant",
                     "type": "std::vector<double>",
                     "value": [
-                        6.0,
-                        60.0,
-                        600.0
+                        8.0,
+                        80.0,
+                        800.0
                     ],
                     "value_name": "vec_1"
                 },
@@ -52,8 +72,8 @@
                     "object_name": "constant",
                     "type": "std::vector<double>",
                     "value": [
-                        8.0,
-                        80.0
+                        9.0,
+                        90.0
                     ],
                     "value_name": "vec_2"
                 }

@@ -18,7 +18,7 @@ template <typename ReporterType>
 InputParameters
 MultiAppReporterTransfer<ReporterType>::validParams()
 {
-  InputParameters params = MultiAppTransfer::validParams();
+  InputParameters params = MultiAppReporterTransferBase::validParams();
   params.addClassDescription(
       "Transfers reporter data between the master application and sub-application(s).");
   params.addRequiredParam<std::vector<ReporterName>>(
@@ -39,7 +39,7 @@ MultiAppReporterTransfer<ReporterType>::validParams()
 
 template <typename ReporterType>
 MultiAppReporterTransfer<ReporterType>::MultiAppReporterTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
+  : MultiAppReporterTransferBase(parameters),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_reporter_names(getParam<std::vector<ReporterName>>("to_reporters")),
     _subapp_index(getParam<unsigned int>("subapp_index"))
@@ -54,21 +54,18 @@ MultiAppReporterTransfer<ReporterType>::executeToMultiapp()
 {
   for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
   {
-    const ReporterType & value =
-        _multi_app->problemBase().template getReporterValueByName<ReporterType>(
-            _from_reporter_names[n]);
+    const ReporterName & fn = _from_reporter_names[n];
+    const ReporterName & tn = _to_reporter_names[n];
 
     if (_subapp_index == std::numeric_limits<unsigned int>::max())
     {
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
         if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblemBase(i).template setReporterValueByName<ReporterType>(
-              _to_reporter_names[n], value);
+          this->transferToMultiApp<ReporterType>(fn, tn, i);
     }
 
     else if (_multi_app->hasLocalApp(_subapp_index))
-      _multi_app->appProblemBase(_subapp_index)
-          .template setReporterValueByName<ReporterType>(_to_reporter_names[n], value);
+      this->transferToMultiApp<ReporterType>(fn, tn, _subapp_index);
 
     else if (_subapp_index >= _multi_app->numGlobalApps())
       paramError(
@@ -89,15 +86,11 @@ MultiAppReporterTransfer<ReporterType>::executeFromMultiapp()
         "subapp_index",
         "The supplied sub-application index is greater than the number of sub-applications.");
 
-  for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-  {
-    const ReporterType & value =
-        _multi_app->appProblemBase(_subapp_index)
-            .template getReporterValueByName<ReporterType>(_from_reporter_names[n]);
+  unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
 
-    _multi_app->problemBase().template setReporterValueByName<ReporterType>(_to_reporter_names[n],
-                                                                            value);
-  }
+  if (_multi_app->hasLocalApp(ind))
+    for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+      this->transferFromMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], ind);
 }
 
 template <typename ReporterType>

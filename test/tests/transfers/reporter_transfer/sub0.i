@@ -34,17 +34,16 @@
 [Reporters]
   [to_sub_rep]
     type = ConstantReporter
-    names = 'int str'
-    value_types = 'integer string'
+    integer_names = int
     integer_values = 0
+    string_names = str
     string_values = 'foo'
-
   []
   [from_sub_rep]
     type = ConstantReporter
-    names = 'int str'
-    value_types = 'integer string'
+    integer_names = int
     integer_values = 10
+    string_names = str
     string_values = 'twenty'
   []
 []
