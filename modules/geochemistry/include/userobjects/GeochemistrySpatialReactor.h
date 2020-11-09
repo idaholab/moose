@@ -25,6 +25,7 @@ public:
   GeochemistrySpatialReactor(const InputParameters & parameters);
   virtual void initialize() override;
 
+  /// the main-thread information is used to set the other-thread information in finalize()
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
 
@@ -48,7 +49,7 @@ protected:
   const unsigned _num_kin;
   /// ModelGeochemicalDatabase at each node.
   std::vector<ModelGeochemicalDatabase> _mgd_at_node;
-  /// ModelGeochemicalDatabase at each node
+  /// GeochemicalSystem at each node
   std::vector<GeochemicalSystem> _egs_at_node;
   /// GeochemicalSystem into which the nodal GeochemicalSystem is copied to enable recovery during adaptive timestepping
   GeochemicalSystem _egs_copy;
@@ -70,7 +71,7 @@ protected:
   const std::vector<Real> _remove_fixed_activity_time;
   /// Number of elements in the vector _remove_fixed_activity_name;
   const unsigned _num_removed_fixed;
-  /// Whether the activity or activity constraint has been removed
+  /// Whether the activity or activity constraint has been removed at each node
   std::vector<std::vector<bool>> _removed_fixed_activity;
   /// Names of the species with controlled activity or fugacity
   const std::vector<std::string> _controlled_activity_species_names;
@@ -98,6 +99,8 @@ protected:
   const Real _dt_dec;
   /// value to multiply dt my in the case of a successful solve
   const Real _dt_inc;
+  /// number of threads used to execute this UserObject
+  unsigned _nthreads;
 
   /// Build the _my_node_number map
   void buildMyNodeNumber();
