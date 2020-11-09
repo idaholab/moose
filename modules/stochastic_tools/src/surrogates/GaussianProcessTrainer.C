@@ -230,7 +230,7 @@ GaussianProcessTrainer::hyperparamTuning()
   ierr = TaoCreate(MPI_COMM_SELF, &tao);
   CHKERRQ(ierr);
   ierr = PetscOptionsSetValue(NULL, "-tao_type", "bncg");
-  CHKERRQ(ierr); 
+  CHKERRQ(ierr);
   ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
   CHKERRQ(ierr);
   ierr = TaoSetFromOptions(tao);
