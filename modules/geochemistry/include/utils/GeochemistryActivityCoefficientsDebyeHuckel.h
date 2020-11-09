@@ -41,6 +41,14 @@ struct DebyeHuckelParameters
       d_neutral(0.0)
   {
   }
+
+  bool operator==(const DebyeHuckelParameters & rhs) const
+  {
+    return (A == rhs.A) && (B == rhs.B) && (Bdot == rhs.Bdot) && (a_water == rhs.a_water) &&
+           (b_water == rhs.b_water) && (c_water == rhs.c_water) && (d_water == rhs.d_water) &&
+           (a_neutral == rhs.a_neutral) && (b_neutral == rhs.b_neutral) &&
+           (c_neutral == rhs.c_neutral) && (d_neutral == rhs.d_neutral);
+  };
 };
 
 /**

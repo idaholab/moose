@@ -18,4 +18,8 @@ The `geochemistry` module is designed to solve reactive transport in geochemical
 
 - [Transport in the `geochemistry` module](transport.md)
 
+## Computational aspects
+
+- [Memory and computational efficiencies in reactive-transport simulations](compute_efficiencies.md)
+
 !bibtex bibliography

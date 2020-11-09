@@ -1,0 +1,269 @@
+{
+  "Header": {
+    "title": "Very small MOOSE thermodynamic database",
+    "original": "moose/modules/geochemistry/python/original_dbs/gwb_llnl.dat",
+    "date": "09:14 18-08-2020",
+    "original format": "gwb",
+    "activity model": "debye-huckel",
+    "fugacity model": "tsonopoulos",
+    "logk model": "fourth-order",
+    "logk model (functional form)": "a0 + a1 T + a2 T^2 + a3 T^3 + a4 T^4",
+    "temperatures": [
+      0.0,
+      25.0,
+      60.0,
+      100.0,
+      150.0,
+      200.0,
+      250.0,
+      300.0
+    ],
+    "pressures": [
+      1.0134,
+      1.0134,
+      1.0134,
+      1.0134,
+      4.76,
+      15.549,
+      39.776,
+      85.927
+    ],
+    "adh": [
+      0.4913,
+      0.5092,
+      0.545,
+      0.5998,
+      0.6898,
+      0.8099,
+      0.9785,
+      1.2555
+    ],
+    "bdh": [
+      0.3247,
+      0.3283,
+      0.3343,
+      0.3422,
+      0.3533,
+      0.3655,
+      0.3792,
+      0.3965
+    ],
+    "bdot": [
+      0.0174,
+      0.041,
+      0.044,
+      0.046,
+      0.047,
+      0.047,
+      0.034,
+      0.0
+    ],
+    "neutral species": {
+      "co2": {
+        "a": [
+          0.1224,
+          0.1127,
+          0.09341,
+          0.08018,
+          0.08427,
+          0.09892,
+          0.1371,
+          0.1967
+        ],
+        "b": [
+          -0.004679,
+          -0.01049,
+          -0.0036,
+          -0.001503,
+          -0.01184,
+          -0.0104,
+          -0.007086,
+          -0.01809
+        ],
+        "c": [
+          -0.0004114,
+          0.001545,
+          9.609e-05,
+          0.0005009,
+          0.003118,
+          0.001386,
+          -0.002887,
+          -0.002497
+        ],
+        "d": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "h2o": {
+        "a": [
+          1.4203,
+          1.45397,
+          1.5012,
+          1.5551,
+          1.6225,
+          1.6899,
+          1.7573,
+          1.8247
+        ],
+        "note": "Missing array values in original database have been filled using a linear fit. Original values are [500.0000, -.0005362, 500.0000, -.0007132, -.0008312, 500.0000, 500.0000, 500.0000]",
+        "b": [
+          0.0177,
+          0.022357,
+          0.0289,
+          0.036478,
+          0.045891,
+          0.0553,
+          0.0647,
+          0.0741
+        ],
+        "c": [
+          0.0103,
+          0.0093804,
+          0.008,
+          0.0064366,
+          0.0045221,
+          0.0026,
+          0.0006,
+          -0.0013
+        ],
+        "d": [
+          -0.0005,
+          -0.0005362,
+          -0.0006,
+          -0.0007132,
+          -0.0008312,
+          -0.0009,
+          -0.0011,
+          -0.0012
+        ]
+      }
+    }
+  },
+  "elements": {
+    "Cl": {
+      "name": "Chlorine",
+      "molecular weight": 35.453
+    },
+    "H": {
+      "name": "Hydrogen",
+      "molecular weight": 1.0079
+    },
+    "Na": {
+      "name": "Sodium",
+      "molecular weight": 22.9898
+    },
+    "O": {
+      "name": "Oxygen",
+      "molecular weight": 15.9994
+    },
+    "Si": {
+      "name": "Silicon",
+      "molecular weight": 28.085
+    }
+  },
+  "basis species": {
+    "H2O": {
+      "elements": {
+        "H": 2.0,
+        "O": 1.0
+      },
+      "radius": 0.0,
+      "charge": 0.0,
+      "molecular weight": 18.0152
+    },
+    "Cl-": {
+      "elements": {
+        "Cl": 1.0
+      },
+      "radius": 3.0,
+      "charge": -1.0,
+      "molecular weight": 35.453
+    },
+    "Na+": {
+      "elements": {
+        "Na": 1.0
+      },
+      "radius": 4.0,
+      "charge": 1.0,
+      "molecular weight": 22.9898
+    },
+    "SiO2(aq)": {
+      "elements": {
+        "O": 2.0,
+        "Si": 1.0
+      },
+      "radius": -0.5,
+      "charge": 0.0,
+      "molecular weight": 60.0843
+    }
+  },
+  "secondary species": {
+    "NaCl": {
+      "species": {
+        "Na+": 1.0,
+        "Cl-": 1.0
+      },
+      "charge": 0.0,
+      "radius": 4.0,
+      "molecular weight": 58.4428,
+      "logk": [
+        1.855,
+        1.5994,
+        1.2945,
+        0.9856,
+        0.635,
+        0.2935,
+        -0.0407,
+        -0.3487
+      ],
+      "note": "Missing array values in original database have been filled using a fourth-order fit. Original values are [1.8550, 1.5994, 1.2945, .9856, .6350, .2935, 500.0000, 500.0000]"
+    }
+  },
+  "free electron": {
+    "e-": {
+      "species": {
+        "H2O": 0.5,
+        "O2(g)": -0.25,
+        "H+": -1.0
+      },
+      "charge": -1.0,
+      "radius": 0.0,
+      "molecular weight": 0.0,
+      "logk": [
+        22.76135,
+        20.7757,
+        18.513025,
+        16.4658,
+        14.473225,
+        12.92125,
+        11.68165,
+        10.67105
+      ]
+    }
+  },
+  "mineral species": {
+    "QuartzLike": {
+      "species": {
+        "SiO2(aq)": 1.0
+      },
+      "molar volume": 22.688,
+      "molecular weight": 60.0843,
+      "logk": [-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0]
+    },
+    "QuartzUnlike": {
+      "species": {
+        "SiO2(aq)": 1.0
+      },
+      "molar volume": 22.688,
+      "molecular weight": 60.0843,
+      "logk": [-1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0]
+    }
+  }
+}

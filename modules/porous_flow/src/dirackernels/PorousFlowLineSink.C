@@ -44,6 +44,7 @@ PorousFlowLineSink::validParams()
   params.addParam<bool>("use_enthalpy", false, "Multiply the flux by the fluid enthalpy");
   params.addParam<bool>(
       "use_internal_energy", false, "Multiply the flux by the fluid internal energy");
+  params.addCoupledVar("multiplying_var", 1.0, "Fluxes will be moultiplied by this variable");
   params.addClassDescription("Approximates a line sink in the mesh by a sequence of weighted Dirac "
                              "points whose positions are read from a file");
   return params;
@@ -154,7 +155,8 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
     _dinternal_energy_dvar(_has_internal_energy
                                ? &getMaterialPropertyByName<std::vector<std::vector<Real>>>(
                                      "dPorousFlow_fluid_phase_internal_energy_nodal_dvar")
-                               : nullptr)
+                               : nullptr),
+    _multiplying_var(coupledValue("multiplying_var"))
 {
   // zero the outflow mass
   _total_outflow_mass.zero();
@@ -231,6 +233,8 @@ PorousFlowLineSink::computeQpResidual()
   if (outflow == 0.0)
     return 0.0;
 
+  outflow *= _multiplying_var[_qp];
+
   if (_use_relative_permeability)
     outflow *= (*_relative_permeability)[_i][_ph];
 
@@ -278,6 +282,9 @@ PorousFlowLineSink::jac(unsigned int jvar)
   computeQpBaseOutflowJacobian(jvar, current_dirac_ptid, outflow, outflowp);
   if (outflow == 0.0 && outflowp == 0.0)
     return 0.0;
+
+  outflow *= _multiplying_var[_qp];
+  outflowp *= _multiplying_var[_qp];
 
   if (_use_relative_permeability)
   {

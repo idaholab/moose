@@ -691,6 +691,16 @@ GeochemicalDatabaseReader::printReactions(
 }
 
 std::vector<std::string>
+GeochemicalDatabaseReader::mineralSpeciesNames() const
+{
+  std::vector<std::string> names;
+  if (_root.contains("mineral species"))
+    for (auto & item : _root["mineral species"].items())
+      names.push_back(item.key());
+  return names;
+}
+
+std::vector<std::string>
 GeochemicalDatabaseReader::secondarySpeciesNames() const
 {
   std::vector<std::string> names;

@@ -32,8 +32,8 @@ GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
          getParam<Real>("min_initial_molality"),
          {},
          {}),
-    _solver(_mgd,
-            _egs,
+    _solver(_mgd.basis_species_name.size(),
+            _mgd.kin_species_name.size(),
             _is,
             getParam<Real>("abs_tol"),
             getParam<Real>("rel_tol"),
@@ -69,55 +69,48 @@ GeochemistryTimeIndependentReactor::execute()
 void
 GeochemistryTimeIndependentReactor::initialSetup()
 {
+  if (_num_my_nodes == 0)
+    return; // rather peculiar case where user has used many processors
   DenseMatrix<Real> dmole_additions(_num_basis, _num_basis);
-  _solver.solveSystem(
-      _solver_output, _tot_iter, _abs_residual, 0.0, _mole_additions, dmole_additions);
+  _solver.solveSystem(_egs,
+                      _solver_output[0],
+                      _tot_iter[0],
+                      _abs_residual[0],
+                      0.0,
+                      _mole_additions,
+                      dmole_additions);
 }
 
 const GeochemicalSystem &
-GeochemistryTimeIndependentReactor::getGeochemicalSystem(const Point & /*point*/) const
-{
-  return _egs;
-}
-
-const GeochemicalSystem &
-GeochemistryTimeIndependentReactor::getGeochemicalSystem(unsigned /*node_id*/) const
+    GeochemistryTimeIndependentReactor::getGeochemicalSystem(dof_id_type /*node_id*/) const
 {
   return _egs;
 }
 
 const std::stringstream &
-GeochemistryTimeIndependentReactor::getSolverOutput(const Point & /*point*/) const
+    GeochemistryTimeIndependentReactor::getSolverOutput(dof_id_type /*node_id*/) const
 {
-  return _solver_output;
+  return _solver_output[0];
 }
 
-unsigned
-GeochemistryTimeIndependentReactor::getSolverIterations(const Point & /*point*/) const
+unsigned GeochemistryTimeIndependentReactor::getSolverIterations(dof_id_type /*node_id*/) const
 {
-  return _tot_iter;
+  return _tot_iter[0];
 }
 
-Real
-GeochemistryTimeIndependentReactor::getSolverResidual(const Point & /*point*/) const
+Real GeochemistryTimeIndependentReactor::getSolverResidual(dof_id_type /*node_id*/) const
 {
-  return _abs_residual;
-}
-
-const DenseVector<Real> &
-GeochemistryTimeIndependentReactor::getMoleAdditions(unsigned /*node_id*/) const
-{
-  return _mole_additions;
+  return _abs_residual[0];
 }
 
 const DenseVector<Real> &
-GeochemistryTimeIndependentReactor::getMoleAdditions(const Point & /*point*/) const
+    GeochemistryTimeIndependentReactor::getMoleAdditions(dof_id_type /*node_id*/) const
 {
   return _mole_additions;
 }
 
 Real
-GeochemistryTimeIndependentReactor::getMolesDumped(unsigned /*node_id*/,
+GeochemistryTimeIndependentReactor::getMolesDumped(dof_id_type /*node_id*/,
                                                    const std::string & /*species*/) const
 {
   return 0.0;

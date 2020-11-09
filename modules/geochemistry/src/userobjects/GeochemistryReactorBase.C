@@ -141,7 +141,10 @@ GeochemistryReactorBase::validParams()
 
 GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & parameters)
   : NodalUserObject(parameters),
+    _num_my_nodes(_subproblem.mesh().getMesh().n_local_nodes()),
     _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
+    _pgs(getUserObject<GeochemicalModelDefinition>("model_definition")
+             .getPertinentGeochemicalSystem()),
     _num_basis(_mgd.basis_species_name.size()),
     _num_eqm(_mgd.eqm_species_name.size()),
     _initial_max_ionic_str(getParam<Real>("max_ionic_strength") /
@@ -155,9 +158,9 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _max_swaps_allowed(getParam<unsigned>("max_swaps_allowed")),
     _swapper(_num_basis, getParam<Real>("stoichiometry_tolerance")),
     _small_molality(getParam<Real>("swap_threshold") * getParam<Real>("abs_tol")),
-    _solver_output(),
-    _tot_iter(0),
-    _abs_residual(0.0)
+    _solver_output(_num_my_nodes),
+    _tot_iter(_num_my_nodes, 0),
+    _abs_residual(_num_my_nodes, 0.0)
 {
 }
 

@@ -4725,3 +4725,374 @@ TEST(GeochemicalSystemTest, setKineticRates)
     EXPECT_EQ(dmole_additions(6, j), 2 * ch4deriv[j]);
   }
 }
+
+/// Check getBulkOldInOriginalBasis
+TEST(GeochemicalSystemTest, getBulkOldInOriginalBasis)
+{
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+
+  GeochemicalSystem egs_no_swaps(mgd_kinetic_calcite,
+                                 ac3,
+                                 is3,
+                                 swapper4,
+                                 {},
+                                 {},
+                                 "H+",
+                                 {"H2O", "H+", "HCO3-", "Ca++"},
+                                 {1.75, 1.0, 5.0, 2.0},
+                                 cm,
+                                 25,
+                                 0,
+                                 1E-20,
+                                 {"Calcite"},
+                                 {1.1});
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(0), 1.75); // H2O
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(1), 1.0);  // H+
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(2), 5.0);  // HCO3-
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(3), 2.0);  // Ca++
+
+  ModelGeochemicalDatabase my_mgd_calcite = mgd_calcite;
+  GeochemicalSystem egs(my_mgd_calcite,
+                        ac3,
+                        is3,
+                        swapper4,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+", "HCO3-", "Calcite"},
+                        {-0.5, 2.5, 1.0, 3.5},
+                        cm,
+                        25,
+                        0,
+                        1E-20,
+                        {},
+                        {});
+  // In current basis, bulk(H2O) = -0.5, bulk(H+) = 1.0 (charge neutrality), bulk(HCO3-) = 1.0,
+  // bulk(Calcite) = 3.5.  So, in orig basis (Calcite = Ca++ + HCO3- - H+):
+  EXPECT_EQ(egs.getBulkOldInOriginalBasis()(0), -0.5); // H2O
+  EXPECT_EQ(egs.getBulkOldInOriginalBasis()(1), -2.5); // H+
+  EXPECT_EQ(egs.getBulkOldInOriginalBasis()(2), 4.5);  // HCO3-
+  EXPECT_EQ(egs.getBulkOldInOriginalBasis()(3), 3.5);  // Ca++
+
+  // perform some swaps
+  egs.performSwap(2, 0); // CO2(aq) and HCO3-
+  egs.performSwap(3, 3); // Calcite and CaOH+
+
+  // bulk in original basis should not have changed (apart from some roundoff error)
+  EXPECT_NEAR(egs.getBulkOldInOriginalBasis()(0), -0.5, 1.0E-6); // H2O
+  EXPECT_NEAR(egs.getBulkOldInOriginalBasis()(1), -2.5, 1.0E-6); // H+
+  EXPECT_NEAR(egs.getBulkOldInOriginalBasis()(2), 4.5, 1.0E-6);  // HCO3-
+  EXPECT_NEAR(egs.getBulkOldInOriginalBasis()(3), 3.5, 1.0E-6);  // Ca++
+}
+
+/// Check TransportedBulk and also in original basis
+TEST(GeochemicalSystemTest, getTransportedBulkMoles)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  const std::vector<std::string> original_basis = {
+      "H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"};
+  PertinentGeochemicalSystem model(database,
+                                   original_basis,
+                                   {"Fe(OH)3(ppd)"},
+                                   {},
+                                   {"Something", "Fe(OH)3(ppd)fake"}, // non transporting
+                                   {},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  GeochemicalSystem egs(mgd,
+                        ac3,
+                        is3,
+                        swapper6,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
+                        {1.75, 1.0, 2.0, 3.0, 0.5, 1.0},
+                        cm,
+                        40,
+                        0,
+                        1E-20,
+                        {"Something", "Fe(OH)3(ppd)fake"},
+                        {4.4, 5.5});
+
+  std::vector<Real> basis_mol = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  // equilibrium species are (in this order):
+  // [0] CO2(aq) = -H2O + H+ + HCO3-
+  // [1] CO3-- = HCO3- - H+
+  // [2] OH- = H2O - H+
+  // [3] >(s)FeO- = >(s)FeOH - H+.  This is not transporting
+  // [4] Fe(OH)3(ppd) = 3H2O - 3H+ + Fe+++.  This is not transporting
+  std::vector<Real> eqm_mol = egs.getEquilibriumMolality();
+
+  std::vector<Real> original_trans_bulk;
+  egs.computeTransportedBulkFromMolalities(original_trans_bulk);
+
+  std::vector<Real> gold_trans_bulk(6);
+  // H2O
+  gold_trans_bulk[0] = 1.75 * (GeochemistryConstants::MOLES_PER_KG_WATER - eqm_mol[0] + eqm_mol[2]);
+  // "H+"
+  gold_trans_bulk[1] = 1.75 * (basis_mol[1] + eqm_mol[0] - eqm_mol[1] - eqm_mol[2]);
+  // ">(s)FeOH".  Non transporting and all equilibrium species involving it aren't transporting
+  gold_trans_bulk[2] = 0.0;
+  // ">(w)FeOH".  Non transporting, and there are no equilibrium species involving it
+  gold_trans_bulk[3] = 0.0;
+  // "Fe+++".  Equilibrium species Fe(OH)3(ppd) is not transporting
+  gold_trans_bulk[4] = 1.75 * basis_mol[4];
+  // "HCO3-"
+  gold_trans_bulk[5] = 1.75 * (basis_mol[5] + eqm_mol[0] + eqm_mol[1]);
+
+  const Real eps = 1E-6;
+
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (std::abs(gold_trans_bulk[i]) <= eps)
+      EXPECT_LE(std::abs(original_trans_bulk[i]), eps);
+    else
+      EXPECT_NEAR(original_trans_bulk[i] / gold_trans_bulk[i], 1.0, eps);
+  }
+
+  EXPECT_EQ(model.originalBasisNames(), original_basis);
+
+  // swap out Fe+++ and replace with Fe(OH)3(ppd)
+  egs.performSwap(4, 4);
+
+  // compare the gold and computed transporting bulk
+  basis_mol = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  // equilibrium species are (in this order):
+  // [0] CO2(aq) = -H2O + H+ + HCO3-
+  // [1] CO3-- = HCO3- - H+
+  // [2] OH- = H2O - H+
+  // [3] >(s)FeO- = >(s)FeOH - H+.  This is not transporting
+  // [4] Fe+++ = Fe(OH)3(ppd) - 3H2O + 3H+
+  eqm_mol = egs.getEquilibriumMolality();
+  gold_trans_bulk[0] =
+      1.75 * (GeochemistryConstants::MOLES_PER_KG_WATER - eqm_mol[0] + eqm_mol[2] - 3 * eqm_mol[4]);
+  gold_trans_bulk[1] =
+      1.75 * (basis_mol[1] + eqm_mol[0] - eqm_mol[1] - eqm_mol[2] + 3 * eqm_mol[4]);
+  gold_trans_bulk[2] = 0.0;
+  gold_trans_bulk[3] = 0.0;
+  // "Fe(OH)3(ppd)".  Only contribution is from Fe+++
+  gold_trans_bulk[4] = 1.75 * eqm_mol[4];
+  gold_trans_bulk[5] = 1.75 * (basis_mol[5] + eqm_mol[0] + eqm_mol[1]);
+
+  std::vector<Real> new_trans_bulk;
+  egs.computeTransportedBulkFromMolalities(new_trans_bulk);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (std::abs(gold_trans_bulk[i]) <= eps)
+      EXPECT_LE(std::abs(new_trans_bulk[i]), eps);
+    else
+      EXPECT_NEAR(new_trans_bulk[i] / gold_trans_bulk[i], 1.0, eps);
+  }
+
+  // now in the original basis:
+  std::vector<Real> gold_trans_bulk_orig(6);
+  gold_trans_bulk_orig[0] =
+      1.75 * (GeochemistryConstants::MOLES_PER_KG_WATER - eqm_mol[0] + eqm_mol[2]);
+  gold_trans_bulk_orig[1] = 1.75 * (basis_mol[1] + eqm_mol[0] - eqm_mol[1] - eqm_mol[2]);
+  gold_trans_bulk_orig[2] = 0.0;
+  gold_trans_bulk_orig[3] = 0.0;
+  gold_trans_bulk_orig[4] = 1.75 * eqm_mol[4];
+  gold_trans_bulk_orig[5] = 1.75 * (basis_mol[5] + eqm_mol[0] + eqm_mol[1]);
+
+  DenseVector<Real> trans_bulk_original_basis = egs.getTransportedBulkInOriginalBasis();
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (std::abs(gold_trans_bulk_orig[i]) <= eps)
+      EXPECT_LE(std::abs(trans_bulk_original_basis(i)), eps);
+    else
+      EXPECT_NEAR(trans_bulk_original_basis(i) / gold_trans_bulk_orig[i], 1.0, eps);
+  }
+
+  EXPECT_EQ(model.originalBasisNames(), original_basis);
+
+  // now set mineral-related moles and there should be no change since these are non-transporting
+  egs.setMineralRelatedFreeMoles(123.0);
+  egs.computeTransportedBulkFromMolalities(new_trans_bulk);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (std::abs(gold_trans_bulk[i]) <= eps)
+      EXPECT_LE(std::abs(new_trans_bulk[i]), eps);
+    else
+      EXPECT_NEAR(new_trans_bulk[i] / gold_trans_bulk[i], 1.0, eps);
+  }
+  trans_bulk_original_basis = egs.getTransportedBulkInOriginalBasis();
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (std::abs(gold_trans_bulk_orig[i]) <= eps)
+      EXPECT_LE(std::abs(trans_bulk_original_basis(i)), eps);
+    else
+      EXPECT_NEAR(trans_bulk_original_basis(i) / gold_trans_bulk_orig[i], 1.0, eps);
+  }
+}
+
+/// Check TransportedBulk for case including kinetic redox
+TEST(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database,
+      {"H2O", "H+", "Fe++", "O2(aq)"},
+      {},
+      {},
+      {},
+      {"Fe+++"}, // is transporting, but should not be reported in transportedMoles
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  GeochemicalSystem egs(mgd,
+                        ac3,
+                        is3,
+                        swapper4,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+", "Fe++", "O2(aq)"},
+                        {1.75, -2.0, 1.0, 1.0},
+                        cm,
+                        40,
+                        0,
+                        1E-20,
+                        {"Fe+++"},
+                        {4.4});
+
+  std::vector<Real> basis_mol = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  // equilibrium species are only OH- = H2O - H+
+  std::vector<Real> eqm_mol = egs.getEquilibriumMolality();
+
+  std::vector<Real> trans_bulk;
+  egs.computeTransportedBulkFromMolalities(trans_bulk);
+  std::vector<Real> gold_trans_bulk(4);
+  // H2O
+  gold_trans_bulk[0] = 1.75 * (GeochemistryConstants::MOLES_PER_KG_WATER + eqm_mol[0]);
+  // "H+"
+  gold_trans_bulk[1] = 1.75 * (basis_mol[1] - eqm_mol[0]);
+  // "Fe++"
+  gold_trans_bulk[2] = 1.75 * (basis_mol[2]);
+  // "O2(aq)"
+  gold_trans_bulk[3] = 1.75 * (basis_mol[3]);
+
+  const Real eps = 1E-6;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_NEAR(trans_bulk[i] / gold_trans_bulk[i], 1.0, eps);
+}
+
+/// Check copy assignment constructor exceptions: the copy assignment is further checked in GeochmicalSolverTest for a nontrivial situation
+TEST(GeochemicalSystemTest, copyAssignmentExcept)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  GeochemicalSystem dest(mgd,
+                         ac3,
+                         is3,
+                         swapper3,
+                         {},
+                         {},
+                         "H+",
+                         {"H2O", "H+", "HCO3-"},
+                         {1.75, 1.0, 2.0},
+                         cm,
+                         40,
+                         0,
+                         1E-20,
+                         {},
+                         {});
+
+  try
+  {
+    dest = egs_calcite; // wrong number of basis species
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("GeochemicalSystem: copy assigment operator called with inconsistent "
+                         "fundamental properties") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  GeochemicalSystem dest2(mgd,
+                          ac3,
+                          is3,
+                          swapper3,
+                          {},
+                          {},
+                          "HCO3-",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.75, 1.0, 2.0},
+                          cm,
+                          40,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+  try
+  {
+    dest2 = dest; // incorrect original charge-balance species
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("GeochemicalSystem: copy assigment operator called with inconsistent "
+                         "fundamental properties") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  const PertinentGeochemicalSystem model_no_kinetic_calcite(
+      db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd_no_kinetic_calcite =
+      model_no_kinetic_calcite.modelGeochemicalDatabase();
+  GeochemicalSystem egs_no_kinetic_calcite(mgd_no_kinetic_calcite,
+                                           ac3,
+                                           is3,
+                                           swapper4,
+                                           {},
+                                           {},
+                                           "H+",
+                                           {"H2O", "Ca++", "H+", "HCO3-"},
+                                           {1.75, 3.0, 2.0, 1.0},
+                                           cm_calcite,
+                                           25,
+                                           0,
+                                           1E-20,
+                                           {},
+                                           {});
+  try
+  {
+    egs_no_kinetic_calcite = egs_kinetic_calcite; // wrong number of kinetic species
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("GeochemicalSystem: copy assigment operator called with inconsistent "
+                         "fundamental properties") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}

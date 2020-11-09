@@ -1,0 +1,4 @@
+time,cumulative_moles_precipitated_quartz,mass_heated_this_timestep,production_temperature
+0,0,0,0
+100000,23.310108544907,99998596.072176,50
+200000,45.363586550326,99998674.934646,50.063218906558

@@ -36,6 +36,14 @@ public:
                             bool use_only_basis_molality,
                             bool use_only_Cl_molality);
 
+  bool operator==(const GeochemistryIonicStrength & rhs) const
+  {
+    return (_max_ionic_strength == rhs._max_ionic_strength) &&
+           (_max_stoichiometric_ionic_strength == rhs._max_stoichiometric_ionic_strength) &&
+           (_use_only_basis_molality == rhs._use_only_basis_molality) &&
+           (_use_only_Cl_molality == rhs._use_only_Cl_molality);
+  };
+
   /**
    * Compute ionic strength
    * @param mgd the Model Geochemical database

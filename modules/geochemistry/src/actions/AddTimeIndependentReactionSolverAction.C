@@ -16,6 +16,7 @@ registerMooseAction("GeochemistryApp", AddTimeIndependentReactionSolverAction, "
 registerMooseAction("GeochemistryApp", AddTimeIndependentReactionSolverAction, "create_problem");
 registerMooseAction("GeochemistryApp", AddTimeIndependentReactionSolverAction, "setup_executioner");
 registerMooseAction("GeochemistryApp", AddTimeIndependentReactionSolverAction, "add_output");
+registerMooseAction("GeochemistryApp", AddTimeIndependentReactionSolverAction, "add_user_object");
 registerMooseAction("GeochemistryApp",
                     AddTimeIndependentReactionSolverAction,
                     "add_geochemistry_molality_aux");
@@ -63,16 +64,16 @@ AddTimeIndependentReactionSolverAction::act()
   {
     _mesh->init();
   }
-  // Create a "solve=false" FEProblem
+  // Create a "solve=false" FEProblem, if appropriate
   else if (_current_task == "create_problem")
   {
     const std::string class_name = "FEProblem";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<MooseMesh *>("mesh") = _mesh.get();
     params.set<bool>("use_nonlinear") = true;
-    params.set<bool>("solve") = false;
+    params.set<bool>("solve") = getParam<bool>("include_moose_solve");
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(false);
+    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve"));
   }
   // Set up an arbitrary steady executioner
   else if (_current_task == "setup_executioner")
@@ -90,6 +91,12 @@ AddTimeIndependentReactionSolverAction::act()
     const std::string class_name = "GeochemistryTimeIndependentReactor";
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
+    if (isParamValid("block"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
+    if (isParamValid("boundary"))
+      params.set<std::vector<BoundaryName>>("boundary") =
+          getParam<std::vector<BoundaryName>>("boundary");
     params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
     if (isParamValid("swap_out_of_basis"))
       params.set<std::vector<std::string>>("swap_out_of_basis") =
