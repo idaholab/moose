@@ -4,6 +4,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/dense_vector.h"
 
+#include "ADReal.h"
+
 using namespace libMesh;
 
 namespace THM
@@ -99,6 +101,7 @@ DenseVector<Real> applyQuotientRule(const Real & num,
  * @param mu The viscosity of the phase
  */
 Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real mu);
+ADReal Reynolds(ADReal volume_fraction, ADReal rho, ADReal vel, ADReal D_h, ADReal mu);
 
 /**
  * Compute Prandtl number
@@ -108,6 +111,7 @@ Real Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real mu);
  * @return
  */
 Real Prandtl(Real cp, Real mu, Real k);
+ADReal Prandtl(ADReal cp, ADReal mu, ADReal k);
 
 /**
  * Compute Grashof number
@@ -122,6 +126,12 @@ Real Prandtl(Real cp, Real mu, Real k);
  * @return Grashof number
  */
 Real Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real gravity_magnitude);
+ADReal Grashof(ADReal beta,
+               ADReal dT,
+               ADReal D_h,
+               ADReal rho_liquid,
+               ADReal mu_liquid,
+               ADReal gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)
@@ -133,6 +143,7 @@ Real Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real
  * @return Laplace number
  */
 Real Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude);
+ADReal Laplace(ADReal surf_tension, ADReal delta_rho, ADReal gravity_magnitude);
 
 /**
  * Compute viscosity number (or coefficient)
@@ -147,6 +158,11 @@ Real Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude);
  */
 Real viscosityNumber(
     Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real gravity_magnitude);
+ADReal viscosityNumber(ADReal viscosity,
+                       ADReal surf_tension,
+                       ADReal rho_k,
+                       ADReal delta_rho,
+                       ADReal gravity_magnitude);
 
 /**
  * Compute wall heat transfer coefficient
@@ -156,6 +172,7 @@ Real viscosityNumber(
  * @return the wall heat transfer coefficient
  */
 Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
+ADReal wallHeatTransferCoefficient(ADReal Nu, ADReal k, ADReal D_h);
 
 /**
  * Compute Dean number
