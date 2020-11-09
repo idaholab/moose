@@ -329,7 +329,7 @@ MooseVariableFV<OutputType>::getValue(const Elem * elem) const
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
   mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
   DoFValue value;
-  _element_data->buildDofValues(dof_indices, *_sys.currentSolution(), value);
+  _element_data->buildDofValues(dof_indices, *(_sys.currentSolution()), value);
   return value[0];
 }
 
