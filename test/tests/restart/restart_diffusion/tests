@@ -1,95 +1,104 @@
 [Tests]
   design = "Restartable.md DataIO.md"
-  [./uniform_refine_test_1]
-    type = 'Exodiff'
-    input = 'exodus_refined_restart_1_test.i'
-    exodiff = 'exodus_refined_restart_1.e'
-    recover = false
+  issues = "#563"
 
-    issues = "#563"
-    requirement = "The system shall support outputting a mesh with refinement to Exodus format for restart testing."
-  [../]
+  [uniform_refine]
+    requirement = "The system shall support outputting a mesh from a simulation"
 
-  [./uniform_refine_test_2]
-    type = 'Exodiff'
-    input = 'exodus_refined_restart_2_test.i'
-    exodiff = 'exodus_refined_restart_2.e'
-    prereq = 'uniform_refine_test_1'
+    [test_1]
+      type = 'Exodiff'
+      input = 'exodus_refined_restart_1_test.i'
+      exodiff = 'exodus_refined_restart_1.e'
+      recover = false
 
-    # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
-    issues = "#563"
-    requirement = "The system shall support reading solution information from an Exodus file."
-  [../]
+      detail = "with uniform refinement to ExodusII format,"
 
-  [./uniform_refine_refine_test_2]
-    type = 'Exodiff'
-    input = 'exodus_refined_refined_restart_2_test.i'
-    exodiff = 'exodus_refined_refined_restart_2.e'
-    prereq = 'uniform_refine_test_1'
+    []
 
-    # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
-    issues = "#563"
-    requirement = "The system shall support reading solution information from an Exodus file with initial uniform refinement."
-  [../]
+    [test_2]
+      type = 'Exodiff'
+      input = 'exodus_refined_restart_2_test.i'
+      exodiff = 'exodus_refined_restart_2.e'
+      prereq = 'uniform_refine/test_1'
 
-  [./steady_1]
+      # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
+      detail = "start a new simulation that adds additional refinement,"
+    []
+
+    [test_3]
+      type = 'Exodiff'
+      input = 'exodus_refined_refined_restart_2_test.i'
+      exodiff = 'exodus_refined_refined_restart_2.e'
+      prereq = 'uniform_refine/test_2'
+
+      # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
+      detail = "which can be used in an third simulation."
+    []
+  []
+
+  [steady_1]
     type = 'Exodiff'
     input = 'restart_diffusion_test_steady.i'
     exodiff = 'steady_out.e'
 
-    issues = "#563"
-    requirement = "The system shall support outputting a mesh to checkpoint format for restart testing."
-  [../]
+    requirement = "The system shall support outputting a mesh to checkpoint format for restart "
+                  "testing."
+  []
 
-  [./trans_from_steady]
+  [trans_from_steady]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient.i'
     exodiff = 'out.e'
     prereq = 'steady_1'
 
     # Note: This test is not strictly a "restart" capability. However reading solution information is related to restart.
-    issues = "#563"
-    requirement = "The system shall support starting a transient simulation from a steady simulation result."
-  [../]
+    requirement = "The system shall support starting a transient simulation from a steady simulation "
+                  "result."
+  []
 
-  [./restart_with_variable_rename]
+  [restart_with_variable_rename]
     type = 'Exodiff'
     input = 'restart_diffusion_test_transient_new_name.i'
     exodiff = 'restart_diffusion_test_transient_new_name_out.e'
     prereq = 'steady_1'
 
     issues = "#4965"
-    requirement = "The system shall support renaming a variable read from a solution file upon restart."
-  [../]
+    requirement = "The system shall support renaming a variable read from a solution file upon "
+                  "restart."
+  []
 
   # Restart using "LAST"
-  [./restart_use_end_part1]
+  [restart_use_end_part1]
     type = 'RunApp'
     input = 'restart_diffusion_from_end_part1.i'
 
     issues = "#5748"
-    requirement = "The system shall support writing out several timesteps to a solution file to test reading from a specific point."
-  [../]
+    requirement = "The system shall support writing out several timesteps to a solution file to test "
+                  "reading from a specific point."
+  []
 
-  [./restart_use_end_part2]
+  [restart_use_end_part2]
     type = 'Exodiff'
     input = 'restart_diffusion_from_end_part2.i'
     exodiff = 'restart_diffusion_from_end_part2_out.e'
     prereq = 'restart_use_end_part1'
 
     issues = "#5748"
-    requirement = "The system shall support restarting from the last timestep using the keyword \"LATEST\"."
-  [../]
+    requirement = "The system shall support restarting from the last timestep using the keyword "
+                  "\"LATEST\"."
+  []
 
-  [./restart_use_end_error_check]
+  [restart_use_end_error_check]
     type = 'RunException'
     input = 'restart_diffusion_from_end_part2.i'
-    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid integer between \d+ and \d+ inclusive, received \d+'
+    expect_err = 'Invalid value passed as "initial_from_file_timestep". Expected "LATEST" or a valid '
+                 'integer between \d+ and \d+ inclusive, received \d+'
 
     cli_args = 'Variables/u/initial_from_file_timestep=8'
     prereq = 'restart_use_end_part2'
 
     issues = "#5748"
-    requirement = "The system shall issue a useful error message stating the valid options when a user requests an invalid time step number or keyword."
-  [../]
+    requirement = "The system shall issue a useful error message stating the valid options when a "
+                  "user requests an invalid time step number or keyword."
+  []
 []

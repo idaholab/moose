@@ -1,41 +1,51 @@
 [Tests]
-  [./ad_transient_diffusion]
-    type = 'Exodiff'
-    input = 'ad_transient_diffusion.i'
-    exodiff = 'ad_transient_diffusion_out.e'
-    requirement = 'We shall be able to reproduce the simple_transient_diffusion results with ADTimeDerivative'
+  [transient_diffusion]
+    requirement = 'The system shall be able to solve a transient diffusion problem with'
     issues = '#5658 #12633'
     design = 'ADTimeDerivative.md'
-  [../]
-  [./jac_ad_transient_diffusion]
-    type = 'PetscJacobianTester'
-    input = 'ad_transient_diffusion.i'
-    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3 Executioner/num_steps=3'
-    run_sim = True
-    ratio_tol = 1e-7
-    difference_tol = 1e-6
-    requirement = 'The Jacobian from ADTimeDerivative shall be perfect'
-    issues = '#5658 #12633'
-    design = 'ADTimeDerivative.md'
-  [../]
 
-  [./ad_transient_vector_diffusion]
-    type = 'Exodiff'
-    input = 'ad_transient_vector_diffusion.i'
-    exodiff = 'ad_transient_vector_diffusion_out.e'
-    requirement = 'We shall be able to reproduce the simple_transient_diffusion results with ADTimeDerivative'
+    [ad]
+      type = 'Exodiff'
+      input = 'ad_transient_diffusion.i'
+      exodiff = 'ad_transient_diffusion_out.e'
+
+      detail = "automatic differentiation and"
+    []
+    [jac_ad_transient_diffusion]
+      type = 'PetscJacobianTester'
+      input = 'ad_transient_diffusion.i'
+      cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3 Executioner/num_steps=3'
+      run_sim = True
+      ratio_tol = 1e-7
+      difference_tol = 1e-6
+
+      detail = "compute the correct Jacobian matrix."
+    []
+  []
+
+  [transient_vector_diffusion]
+    requirement = 'The system shall be able to solve a transient diffusion problem with vector '
+                  'variables'
     issues = '#13017'
     design = 'ADVectorTimeDerivative.md'
-  [../]
-  [./jac_ad_transient_vector_diffusion]
-    type = 'PetscJacobianTester'
-    input = 'ad_transient_vector_diffusion.i'
-    cli_args = 'Outputs/exodus=false Mesh/generator/nx=4 Mesh/generator/ny=4 Executioner/num_steps=3'
-    run_sim = True
-    ratio_tol = 1e-7
-    difference_tol = 1e-6
-    requirement = 'The Jacobian from ADVectorTimeDerivative shall be perfect'
-    issues = '#13017'
-    design = 'ADVectorTimeDerivative.md'
-  [../]
+
+    [ad]
+      type = 'Exodiff'
+      input = 'ad_transient_vector_diffusion.i'
+      exodiff = 'ad_transient_vector_diffusion_out.e'
+
+      detail = "automatic differentiation and"
+    []
+    [jac_ad]
+      type = 'PetscJacobianTester'
+      input = 'ad_transient_vector_diffusion.i'
+      cli_args = 'Outputs/exodus=false Mesh/generator/nx=4 Mesh/generator/ny=4 '
+                 'Executioner/num_steps=3'
+      run_sim = True
+      ratio_tol = 1e-7
+      difference_tol = 1e-6
+
+      detail = "compute the correct Jacobian matrix."
+    []
+  []
 []

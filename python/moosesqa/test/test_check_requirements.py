@@ -69,9 +69,13 @@ class TestCheckRequirements(unittest.TestCase):
             moosesqa.check_requirements([req0, req1], duplicate_requirement=logging.WARNING)
         self.assertIn('Duplicate requirements found', cm.output[0])
 
-        with self.assertRaises(AssertionError):
-            with self.assertLogs() as cm:
-                moosesqa.check_requirements([req0, req1], duplicate_requirement=None)
+    def testDuplicateDetails(self):
+        det0 = moosesqa.Requirement(name='det0', detail='detail')
+        det1 = moosesqa.Requirement(name='det1', detail='detail')
+        req0 = moosesqa.Requirement(name='req0', requirement='requirement', design=['Diffusion.md'], issues=['#1234'], details=[det0, det1])
+        with self.assertLogs(level='WARNING') as cm:
+            moosesqa.check_requirements([req0], duplicate_detail=logging.WARNING)
+        self.assertIn('Duplicate details found', cm.output[0])
 
     def testMissing(self):
         req0 = moosesqa.Requirement(name='req0', requirement='requirement', design=['Diffusion.md'], issues=['#1234'])

@@ -3,10 +3,11 @@
     type = 'Exodiff'
     input = 'mesh_side_set_generator.i'
     exodiff = 'mesh_side_set_generator_out.e'
-    requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/MeshSideSetGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = "The system shall support the generation of side sets between subdomains of a finite element mesh."
+    design = 'meshgenerators/MeshSideSetGenerator.md'
+    issues = '#11640'
   [../]
 []

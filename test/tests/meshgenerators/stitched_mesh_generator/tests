@@ -1,24 +1,29 @@
 [Tests]
-  [./stitched_mesh_generator_test]
-    type = 'Exodiff'
-    input = 'stitched_mesh_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'stitched_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+  [stitched_mesh_generator]
     design = 'meshgenerators/StitchedMeshGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    requirement = "The system shall support the creation of a finite element mesh from existing "
+                  "meshes"
 
-  [./stitched_mesh_generator2_test]
-    type = 'Exodiff'
-    input = 'stitched_mesh_generator2.i'
-    exodiff = 'stitched_mesh_generator2_out.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/StitchedMeshGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [mesh_only]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'stitched_mesh_generator_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "by 'stitching' them together and"
+    []
+
+    [simulation]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator2.i'
+      exodiff = 'stitched_mesh_generator2_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "be able to utilize the resulting mesh in a simulation."
+    []
+  []
 []

@@ -4,10 +4,11 @@
     input = 'tiled_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'tiled_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/TiledMeshGenerator.md'
-    issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+
+    requirement = "The system shall include the ability to create a finite element mesh by tiling existing meshes."
+    design = 'meshgenerators/TiledMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

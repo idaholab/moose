@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'rotate_and_scale.i'
     exodiff = 'rotate_and_scale_out.e'
-    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    requirement = "The system shall include the ability to rotate and scale a finite element mesh."
     design = 'meshgenerators/TransformGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'

@@ -1,29 +1,32 @@
 [Tests]
-  [./perf_with_multi]
-    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
+  [perf]
+    requirement = "The system shall output a performance log information for sub-applications"
     design = 'PerfGraphOutput.md'
     issues = '#11551 #11453 #12186'
-    type = 'RunApp'
-    input = 'master.i'
-    expect_out = 'MooseTestApp (sub_app0)'
-    match_literal = true
-  [../]
-  [./perf_with_sub_cycle]
-    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
-    design = 'PerfGraphOutput.md'
-    issues = '#11551 #11453 #12186'
-    type = 'RunApp'
-    input = 'master_sub_cycle.i'
-    expect_out = 'MooseTestApp (sub_app0)'
-    match_literal = true
-  [../]
-  [./perf_with_full]
-    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
-    design = 'PerfGraphOutput.md'
-    issues = '#11551 #11453 #12186'
-    type = 'RunApp'
-    input = 'master_full.i'
-    expect_out = 'MooseTestApp (full_solve0)'
-    match_literal = true
-  [../]
+
+    [with_multi]
+      type = 'RunApp'
+      input = 'master.i'
+      expect_out = 'MooseTestApp (sub_app0)'
+      match_literal = true
+
+      detail = "that are transient,"
+    []
+    [with_sub_cycle]
+      type = 'RunApp'
+      input = 'master_sub_cycle.i'
+      expect_out = 'MooseTestApp (sub_app0)'
+      match_literal = true
+
+      detail = 'use differing time steps from the main, and'
+    []
+    [with_full]
+      type = 'RunApp'
+      input = 'master_full.i'
+      expect_out = 'MooseTestApp (full_solve0)'
+      match_literal = true
+
+      detail = 'execute an entire simulation.'
+    []
+  []
 []

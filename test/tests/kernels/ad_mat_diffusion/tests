@@ -1,51 +1,60 @@
 [Tests]
   design = 'ADMatDiffusion.md'
-  [./1D_transient]
-    type = 'Exodiff'
-    input = '1D_transient.i'
-    exodiff = '1D_transient_out.e'
-    requirement = "Diffusion with a material property diffusivity shall match the answer from an analytical solution"
-    issues = "#2582"
-  [../]
-  [./ad_1D_transient]
-    type = 'Exodiff'
-    input = 'ad_1D_transient.i'
-    exodiff = 'ad_1D_transient_out.e'
-    requirement = "Diffusion with a material property diffusivity from an AD kernel shall get the same answer as a traditional kernel"
-    issues = "#5658 #12633 #13632"
-  [../]
-  [./ad_1D_transient_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_1D_transient.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    cli_args = 'Executioner/num_steps=5'
-    requirement = 'AD Diffusion with a material property diffusivity and the Jacobian shall be beautiful'
-    issues = "#5658 #12633 #13632"
-  [../]
+  [1D]
+    requirement = "The system shall solve a one-dimensional Diffusion problem with a material "
+                  "property diffusivity and match a known solution."
+    issues = "#2582 #5658 #12633 #13632"
 
-  [./2D_steady_state]
-    type = 'Exodiff'
-    input = '2d_steady_state.i'
-    exodiff = '2d_steady_state_out.e'
-    requirement = "Diffusion with a material property diffusivity shall match the answer from an analytical solution"
-    issues = "#2582"
-  [../]
-  [./ad_2D_steady_state]
-    type = 'Exodiff'
-    input = 'ad_2d_steady_state.i'
-    exodiff = 'ad_2d_steady_state_out.e'
-    requirement = "Diffusion with a material property diffusivity from an AD kernel shall get the same answer as a traditional kernel"
-    issues = "#5658 #12633 #13632"
-  [../]
-  [./ad_2D_steady_state_jacobian]
-    type = 'PetscJacobianTester'
-    input = 'ad_2d_steady_state.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-5
-    run_sim = True
-    requirement = 'AD Diffusion with a material property diffusivity shall have a perfect Jacobian'
-    issues = "#5658 #12633 #13632"
-  [../]
+    [1D_transient]
+      type = 'Exodiff'
+      input = '1D_transient.i'
+      exodiff = '1D_transient_out.e'
+
+      detail = "without and"
+    []
+    [ad_1D_transient]
+      type = 'Exodiff'
+      input = 'ad_1D_transient.i'
+      exodiff = 'ad_1D_transient_out.e'
+
+      detail = "with automatic differentiation including"
+    []
+    [ad_1D_transient_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_1D_transient.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-5
+      run_sim = True
+      cli_args = 'Executioner/num_steps=5'
+      detail = "the correct Jacobian matrix."
+    []
+  []
+  [2D]
+    requirement = "The system shall solve a two-dimenional Diffusion problem with a material "
+                  "property diffusivity and match a known solution."
+    issues = "#2582 #5658 #12633 #13632"
+
+    [2D_steady_state]
+      type = 'Exodiff'
+      input = '2d_steady_state.i'
+      exodiff = '2d_steady_state_out.e'
+
+      detail = "without and"
+    []
+    [ad_2D_steady_state]
+      type = 'Exodiff'
+      input = 'ad_2d_steady_state.i'
+      exodiff = 'ad_2d_steady_state_out.e'
+
+      detail = "with automatic differentiation including"
+    []
+    [ad_2D_steady_state_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_2d_steady_state.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-5
+      run_sim = True
+      detail = "the correct Jacobian matrix."
+    []
+  []
 []

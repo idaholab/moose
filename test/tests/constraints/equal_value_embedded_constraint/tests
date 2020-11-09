@@ -1,103 +1,126 @@
 [Tests]
   issues = '#11722'
   design = 'source/constraints/EqualValueEmbeddedConstraint.md'
-  [1D_2D_kinematic]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=kinematic Outputs/file_base=1D_2D_kinematic_out'
-    exodiff = '1D_2D_kinematic_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a kinematic formulation."
+  [kinematic]
+    requirement = "The system shall support embedded constraints between using a kinematic "
+                  "formulation between"
+
+    [1D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=kinematic '
+                 'Outputs/file_base=1D_2D_kinematic_out'
+      exodiff = '1D_2D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "1D and 2D;"
+    []
+
+    [1D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=kinematic '
+                 'Outputs/file_base=1D_3D_kinematic_out'
+      exodiff = '1D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "1D and 3D;"
+    []
+    [2D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=kinematic '
+                 'Outputs/file_base=2D_2D_kinematic_out'
+      exodiff = '2D_2D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "2D;"
+    []
+    [2D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=kinematic '
+                 'Outputs/file_base=2D_3D_kinematic_out'
+      exodiff = '2D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "2D and 3D; and"
+    []
+    [3D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=kinematic '
+                 'Outputs/file_base=3D_3D_kinematic_out'
+      exodiff = '3D_3D_kinematic_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "3D subdomains."
+    []
   []
-  [1D_2D_penalty]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=penalty Outputs/file_base=1D_2D_penalty_out'
-    exodiff = '1D_2D_penalty_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '1D_2D_kinematic'
-    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a penalty formulation."
-  []
-  [1D_3D_kinematic]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=1D_3D_kinematic_out'
-    exodiff = '1D_3D_kinematic_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '1D_2D_penalty'
-    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a kinematic formulation."
-  []
-  [1D_3D_penalty]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=1D_3D_penalty_out'
-    exodiff = '1D_3D_penalty_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '1D_3D_kinematic'
-    requirement = "MOOSE shall support embedded constraints between a 1D and 3D subdomain, using a penalty formulation."
-  []
-  [2D_2D_kinematic]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=kinematic Outputs/file_base=2D_2D_kinematic_out'
-    exodiff = '2D_2D_kinematic_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '1D_3D_penalty'
-    requirement = "MOOSE shall support embedded constraints between 2D subdomains, using a kinematic formulation."
-  []
-  [2D_2D_penalty]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=penalty Outputs/file_base=2D_2D_penalty_out'
-    exodiff = '2D_2D_penalty_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '2D_2D_kinematic'
-    requirement = "MOOSE shall support embedded constraints between 2D subdomains, using a penalty formulation."
-  []
-  [2D_3D_kinematic]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=2D_3D_kinematic_out'
-    exodiff = '2D_3D_kinematic_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '2D_2D_penalty'
-    requirement = "MOOSE shall support embedded constraints between a 2D and 3D subdomain, using a kinematic formulation."
-  []
-  [2D_3D_penalty]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=2D_3D_penalty_out'
-    exodiff = '2D_3D_penalty_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '2D_3D_kinematic'
-    requirement = "MOOSE shall support embedded constraints between a 2D and 3D subdomain, using a penalty formulation."
-  []
-  [3D_3D_kinematic]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=3D_3D_kinematic_out'
-    exodiff = '3D_3D_kinematic_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '2D_3D_penalty'
-    requirement = "MOOSE shall support embedded constraints between 3D subdomains, using a kinematic formulation."
-  []
-  [3D_3D_penalty]
-    type = 'Exodiff'
-    input = 'embedded_constraint.i'
-    cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=3D_3D_penalty_out'
-    exodiff = '3D_3D_penalty_out.e'
-    abs_zero = 1e-9
-    mesh_mode = REPLICATED
-    prereq = '3D_3D_kinematic'
-    requirement = "MOOSE shall support embedded constraints between 3D subdomains, using a penalty formulation."
+
+  [penalty]
+    requirement = "The system shall support embedded constraints between using a penalty formulation "
+                  "between"
+
+    [1D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=penalty '
+                 'Outputs/file_base=1D_2D_penalty_out'
+      exodiff = '1D_2D_penalty_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "1D and 2D;"
+    []
+    [1D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=penalty '
+                 'Outputs/file_base=1D_3D_penalty_out'
+      exodiff = '1D_3D_penalty_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "1D and 3D;"
+    []
+    [2D_2D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=penalty '
+                 'Outputs/file_base=2D_2D_penalty_out'
+      exodiff = '2D_2D_penalty_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "2D;"
+    []
+    [2D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=penalty '
+                 'Outputs/file_base=2D_3D_penalty_out'
+      exodiff = '2D_3D_penalty_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "2D and 3D; and"
+    []
+    [3D_3D]
+      type = 'Exodiff'
+      input = 'embedded_constraint.i'
+      cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=penalty '
+                 'Outputs/file_base=3D_3D_penalty_out'
+      exodiff = '3D_3D_penalty_out.e'
+      abs_zero = 1e-9
+      mesh_mode = REPLICATED
+
+      detail = "3D subdomains."
+    []
   []
 []
