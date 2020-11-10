@@ -72,7 +72,7 @@ PertinentGeochemicalSystem::getIndexOfOriginalBasisSpecies(const std::string & n
   {
     return _basis_index.at(name);
   }
-  catch (std::out_of_range)
+  catch (const std::out_of_range &)
   {
     mooseError("species ", name, " is not in the original basis");
   }

@@ -174,6 +174,11 @@ public:
     return *this;
   };
 
+  /**
+   * Copy constructor.
+   */
+  GeochemicalSystem(const GeochemicalSystem & src) = default;
+
   bool operator==(const GeochemicalSystem & rhs) const
   {
     return (_mgd == rhs._mgd) && (_num_basis == rhs._num_basis) && (_num_eqm == rhs._num_eqm) &&
