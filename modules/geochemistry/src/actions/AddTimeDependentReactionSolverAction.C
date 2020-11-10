@@ -15,6 +15,7 @@ registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "se
 registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "init_mesh");
 registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "create_problem");
 registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "add_output");
+registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "add_user_object");
 registerMooseAction("GeochemistryApp",
                     AddTimeDependentReactionSolverAction,
                     "add_geochemistry_molality_aux");
@@ -59,22 +60,28 @@ AddTimeDependentReactionSolverAction::act()
   {
     _mesh->init();
   }
-  // Create a "solve=false" FEProblem
+  // Create a "solve=false" FEProblem, if appropriate
   else if (_current_task == "create_problem")
   {
     const std::string class_name = "FEProblem";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<MooseMesh *>("mesh") = _mesh.get();
     params.set<bool>("use_nonlinear") = true;
-    params.set<bool>("solve") = false;
+    params.set<bool>("solve") = getParam<bool>("include_moose_solve");
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(false);
+    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve"));
   }
   else if (_current_task == "add_geochemistry_reactor")
   {
     const std::string class_name = "GeochemistryTimeDependentReactor";
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
+    if (isParamValid("block"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
+    if (isParamValid("boundary"))
+      params.set<std::vector<BoundaryName>>("boundary") =
+          getParam<std::vector<BoundaryName>>("boundary");
     params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
     if (isParamValid("swap_out_of_basis"))
       params.set<std::vector<std::string>>("swap_out_of_basis") =
@@ -92,6 +99,8 @@ AddTimeDependentReactionSolverAction::act()
     params.set<unsigned>("extra_iterations_to_make_consistent") =
         getParam<unsigned>("extra_iterations_to_make_consistent");
     params.applySpecificParameters(parameters(), {"temperature"});
+    params.applySpecificParameters(parameters(), {"cold_temperature"});
+    params.set<unsigned>("heating_increments") = getParam<unsigned>("heating_increments");
     params.set<Real>("stoichiometry_tolerance") = getParam<Real>("stoichiometry_tolerance");
     params.set<std::string>("charge_balance_species") =
         getParam<std::string>("charge_balance_species");

@@ -14,7 +14,7 @@
 
 GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      GeochemistryActivityCoefficients & gac,
-                                     const GeochemistryIonicStrength & is,
+                                     GeochemistryIonicStrength & is,
                                      GeochemistrySpeciesSwapper & swapper,
                                      const std::vector<std::string> & swap_out_of_basis,
                                      const std::vector<std::string> & swap_into_basis,
@@ -77,7 +77,7 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
 
 GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      GeochemistryActivityCoefficients & gac,
-                                     const GeochemistryIonicStrength & is,
+                                     GeochemistryIonicStrength & is,
                                      GeochemistrySpeciesSwapper & swapper,
                                      const std::vector<std::string> & swap_out_of_basis,
                                      const std::vector<std::string> & swap_into_basis,
@@ -665,6 +665,28 @@ GeochemicalSystem::getBulkMolesOld() const
   return _bulk_moles_old;
 }
 
+DenseVector<Real>
+GeochemicalSystem::getBulkOldInOriginalBasis() const
+{
+  DenseVector<Real> result(_bulk_moles_old);
+  if (_mgd.swap_to_original_basis.n() == 0)
+    return result; // no swaps have been performed
+  _mgd.swap_to_original_basis.vector_mult_transpose(result, _bulk_moles_old);
+  return result;
+}
+
+DenseVector<Real>
+GeochemicalSystem::getTransportedBulkInOriginalBasis() const
+{
+  std::vector<Real> trans_bulk;
+  computeTransportedBulkFromMolalities(trans_bulk);
+  DenseVector<Real> result(trans_bulk);
+  if (_mgd.swap_to_original_basis.n() == 0)
+    return result; // no swaps have been performed
+  _mgd.swap_to_original_basis.vector_mult_transpose(result, trans_bulk);
+  return result;
+}
+
 const std::vector<Real> &
 GeochemicalSystem::getSolventMassAndFreeMolalityAndMineralMoles() const
 {
@@ -984,6 +1006,32 @@ GeochemicalSystem::computeBulkFromMolalities(unsigned basis_ind) const
   for (unsigned kin = 0; kin < _num_kin; ++kin)
     bulk += _mgd.kin_stoichiometry(kin, basis_ind) * _kin_moles[kin];
   return bulk;
+}
+
+void
+GeochemicalSystem::computeTransportedBulkFromMolalities(std::vector<Real> & transported_bulk) const
+{
+  transported_bulk.resize(_num_basis);
+  const Real nw = _basis_molality[0];
+  for (unsigned i = 0; i < _num_basis; ++i)
+  {
+    transported_bulk[i] = 0.0;
+    if (i == 0)
+      transported_bulk[i] = GeochemistryConstants::MOLES_PER_KG_WATER;
+    else if (_mgd.basis_species_transported[i])
+    {
+      if (_mgd.basis_species_mineral[i])
+        transported_bulk[i] = _basis_molality[i] / nw; // because of multiplication by nw, below
+      else
+        transported_bulk[i] = _basis_molality[i];
+    }
+    else
+      transported_bulk[i] = 0.0;
+    for (unsigned j = 0; j < _num_eqm; ++j)
+      if (_mgd.eqm_species_transported[j])
+        transported_bulk[i] += _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
+    transported_bulk[i] *= nw;
+  }
 }
 
 Real
@@ -1422,18 +1470,18 @@ void
 GeochemicalSystem::performSwap(unsigned swap_out_of_basis, unsigned swap_into_basis)
 {
   if (swap_out_of_basis == 0)
-    mooseError("GeochemicalSystem: attempting to swap out water and replace it by ",
-               _mgd.eqm_species_name[swap_into_basis],
-               ".  This could be because the algorithm would like to "
-               "swap out the charge-balance species, in which case you should choose a "
-               "different charge-balance species");
+    mooseException("GeochemicalSystem: attempting to swap out water and replace it by ",
+                   _mgd.eqm_species_name[swap_into_basis],
+                   ".  This could be because the algorithm would like to "
+                   "swap out the charge-balance species, in which case you should choose a "
+                   "different charge-balance species");
   if (swap_out_of_basis == _charge_balance_basis_index)
-    mooseError("GeochemicalSystem: attempting to swap the charge-balance species out of "
-               "the basis");
+    mooseException("GeochemicalSystem: attempting to swap the charge-balance species out of "
+                   "the basis");
   if (_mgd.basis_species_gas[swap_out_of_basis])
-    mooseError("GeochemicalSystem: attempting to swap a gas out of the basis");
+    mooseException("GeochemicalSystem: attempting to swap a gas out of the basis");
   if (_mgd.eqm_species_gas[swap_into_basis])
-    mooseError("GeochemicalSystem: attempting to swap a gas into the basis");
+    mooseException("GeochemicalSystem: attempting to swap a gas into the basis");
   // perform the swap
   performSwapNoCheck(swap_out_of_basis, swap_into_basis);
 }

@@ -87,7 +87,7 @@ public:
    */
   GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                     GeochemistryActivityCoefficients & gac,
-                    const GeochemistryIonicStrength & is,
+                    GeochemistryIonicStrength & is,
                     GeochemistrySpeciesSwapper & swapper,
                     const std::vector<std::string> & swap_out_of_basis,
                     const std::vector<std::string> & swap_into_basis,
@@ -103,7 +103,7 @@ public:
 
   GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                     GeochemistryActivityCoefficients & gac,
-                    const GeochemistryIonicStrength & is,
+                    GeochemistryIonicStrength & is,
                     GeochemistrySpeciesSwapper & swapper,
                     const std::vector<std::string> & swap_out_of_basis,
                     const std::vector<std::string> & swap_into_basis,
@@ -116,6 +116,100 @@ public:
                     Real min_initial_molality,
                     const std::vector<std::string> & kin_name,
                     const std::vector<Real> & kin_initial_moles);
+
+  /**
+   * Copy assignment operator.  Almost all of the following is trivial.  The most important
+   * non-trivial feature is copying src._mgd into our _mgd.  Note this method gets called when
+   * dest = src
+   * and dest is already constructed.  (Code such as GeochemicalSystem dest = src uses the copy
+   * constructor which simply sets the _mgd reference in dest equal to the _mgd reference in src,
+   * and does not make a copy of the data within src._mgd)
+   */
+  GeochemicalSystem & operator=(const GeochemicalSystem & src)
+  {
+    if (this == &src) // trivial a=a situation
+      return *this;
+    // check for bad assignment situations.  Other "const" things that
+    // needn't be the same (but probably actually are) include: _swap_out and _swap_in
+    if (_num_basis != src._num_basis || _num_eqm != src._num_eqm || _num_redox != src._num_redox ||
+        _num_surface_pot != src._num_surface_pot || _num_kin != src._num_kin ||
+        _original_charge_balance_species != src._original_charge_balance_species)
+      mooseError("GeochemicalSystem: copy assigment operator called with inconsistent fundamental "
+                 "properties");
+    // actually do the copying
+    _mgd = src._mgd;
+    _swapper = src._swapper;
+    _gac = src._gac;
+    _is = src._is;
+    _charge_balance_species = src._charge_balance_species;
+    _charge_balance_basis_index = src._charge_balance_basis_index;
+    _constrained_species = src._constrained_species;
+    _constraint_value = src._constraint_value;
+    _original_constraint_value = src._original_constraint_value;
+    _constraint_meaning = src._constraint_meaning;
+    _eqm_log10K = src._eqm_log10K;
+    _redox_log10K = src._redox_log10K;
+    _kin_log10K = src._kin_log10K;
+    _num_basis_in_algebraic_system = src._num_basis_in_algebraic_system;
+    _num_in_algebraic_system = src._num_in_algebraic_system;
+    _in_algebraic_system = src._in_algebraic_system;
+    _algebraic_index = src._algebraic_index;
+    _basis_index = src._basis_index;
+    _bulk_moles_old = src._bulk_moles_old;
+    _basis_molality = src._basis_molality;
+    _basis_activity_known = src._basis_activity_known;
+    _basis_activity = src._basis_activity;
+    _eqm_molality = src._eqm_molality;
+    _basis_activity_coef = src._basis_activity_coef;
+    _eqm_activity_coef = src._eqm_activity_coef;
+    _eqm_activity = src._eqm_activity;
+    _surface_pot_expr = src._surface_pot_expr;
+    _sorbing_surface_area = src._sorbing_surface_area;
+    _kin_moles = src._kin_moles;
+    _kin_moles_old = src._kin_moles_old;
+    _iters_to_make_consistent = src._iters_to_make_consistent;
+    _temperature = src._temperature;
+    _min_initial_molality = src._min_initial_molality;
+    _original_redox_lhs = src._original_redox_lhs;
+    return *this;
+  };
+
+  /**
+   * Copy constructor.
+   */
+  GeochemicalSystem(const GeochemicalSystem & src) = default;
+
+  bool operator==(const GeochemicalSystem & rhs) const
+  {
+    return (_mgd == rhs._mgd) && (_num_basis == rhs._num_basis) && (_num_eqm == rhs._num_eqm) &&
+           (_num_redox == rhs._num_redox) && (_num_surface_pot == rhs._num_surface_pot) &&
+           (_num_kin == rhs._num_kin) && (_swapper == rhs._swapper) &&
+           (_swap_out == rhs._swap_out) && (_swap_in == rhs._swap_in) && (_gac == rhs._gac) &&
+           (_is == rhs._is) && (_charge_balance_species == rhs._charge_balance_species) &&
+           (_original_charge_balance_species == rhs._original_charge_balance_species) &&
+           (_charge_balance_basis_index == rhs._charge_balance_basis_index) &&
+           (_constrained_species == rhs._constrained_species) &&
+           (_constraint_value == rhs._constraint_value) &&
+           (_original_constraint_value == rhs._original_constraint_value) &&
+           (_constraint_meaning == rhs._constraint_meaning) && (_eqm_log10K == rhs._eqm_log10K) &&
+           (_redox_log10K == rhs._redox_log10K) && (_kin_log10K == rhs._kin_log10K) &&
+           (_num_basis_in_algebraic_system == rhs._num_basis_in_algebraic_system) &&
+           (_num_in_algebraic_system == rhs._num_in_algebraic_system) &&
+           (_in_algebraic_system == rhs._in_algebraic_system) &&
+           (_algebraic_index == rhs._algebraic_index) && (_basis_index == rhs._basis_index) &&
+           (_bulk_moles_old == rhs._bulk_moles_old) && (_basis_molality == rhs._basis_molality) &&
+           (_basis_activity_known == rhs._basis_activity_known) &&
+           (_basis_activity == rhs._basis_activity) && (_eqm_molality == rhs._eqm_molality) &&
+           (_basis_activity_coef == rhs._basis_activity_coef) &&
+           (_eqm_activity_coef == rhs._eqm_activity_coef) && (_eqm_activity == rhs._eqm_activity) &&
+           (_surface_pot_expr == rhs._surface_pot_expr) &&
+           (_sorbing_surface_area == rhs._sorbing_surface_area) && (_kin_moles == rhs._kin_moles) &&
+           (_kin_moles_old == rhs._kin_moles_old) &&
+           (_iters_to_make_consistent == rhs._iters_to_make_consistent) &&
+           (_temperature == rhs._temperature) &&
+           (_min_initial_molality == rhs._min_initial_molality) &&
+           (_original_redox_lhs == rhs._original_redox_lhs);
+  }
 
   /// returns the number of species in the basis
   unsigned getNumInBasis() const;
@@ -280,6 +374,30 @@ public:
    * species, in contrast to the Bethke approach.
    */
   const std::vector<Real> & getBulkMolesOld() const;
+
+  /**
+   * @return the number of bulk-composition moles in the original basis.  Note this will typically
+   * be the "old" number of bulk moles (from the previous time-step) unless addtoBulkMoles or
+   * updateOldWithCurrent or other similar methods have just been called.  Note that this contains
+   * contributions from kinetic species, in contrast to the Bethke approach.
+   */
+  DenseVector<Real> getBulkOldInOriginalBasis() const;
+
+  /**
+   * @return the number of bulk-composition moles that are transported in reactive-transport,
+   * expressed in the original basis.  Note this is computed using the existing molalities, so the
+   * result might be junk if the system is inconsistent, but will be OK if, for instance, a solve
+   * has just converged.  Also note that this does not include contributions from kinetic species
+   */
+  DenseVector<Real> getTransportedBulkInOriginalBasis() const;
+
+  /**
+   * Computes the value of transported bulk moles for all basis species using the existing
+   * molalities.  Note that this is probably gives rubbish results unless the system is consistent
+   * (eg, the solve has converged).  Also note that this does not include contributions from kinetic
+   * species
+   */
+  void computeTransportedBulkFromMolalities(std::vector<Real> & transported_bulk) const;
 
   /**
    * @return vector v, where v[i] = mass of solvent water (i=0), or v[i] = molality of the basis
@@ -703,7 +821,7 @@ private:
   /// Object to compute the activity coefficients and activity of water
   GeochemistryActivityCoefficients & _gac;
   /// Object that provides the ionic strengths
-  const GeochemistryIonicStrength & _is;
+  GeochemistryIonicStrength & _is;
   /// The species used to enforce charge balance
   std::string _charge_balance_species;
   /// The species used to enforce charge balance, as provided in the constructor
@@ -781,11 +899,11 @@ private:
    * default is iters_to_make_consistent=0), because solving the algebraic system includes so many
    * approximations anyway.
    */
-  const unsigned _iters_to_make_consistent;
+  unsigned _iters_to_make_consistent;
   /// The temperature in degC
   Real _temperature;
   /// Minimum molality ever used in an initial guess
-  const Real _min_initial_molality;
+  Real _min_initial_molality;
   /// The left-hand-side of the redox equations in _mgd after initial swaps
   std::string _original_redox_lhs;
 
@@ -918,8 +1036,7 @@ private:
    * @return the number of bulk moles of the species basis_ind.  This depends on the current
    * molality of the basis_ind species, as well as the current molalities of the equilibrium species
    * that depend on this basis species, and, in contrast to the Bethke approach, the current mole
-   * number of kinetic species that depend on this basis species. If the constraint on basis_ind is
-   * of BULK type then the constraint_value is returned.
+   * number of kinetic species that depend on this basis species.
    */
   Real computeBulkFromMolalities(unsigned basis_ind) const;
 

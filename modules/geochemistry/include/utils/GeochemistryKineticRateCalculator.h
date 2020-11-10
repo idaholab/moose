@@ -63,6 +63,17 @@ struct KineticRateUserDescription
         check_for_repeats[name] = 1;
   };
 
+  bool operator==(const KineticRateUserDescription & rhs) const
+  {
+    return (kinetic_species_name == rhs.kinetic_species_name) &&
+           (intrinsic_rate_constant == rhs.intrinsic_rate_constant) &&
+           (area_quantity == rhs.area_quantity) && (multiply_by_mass == rhs.multiply_by_mass) &&
+           (promoting_species == rhs.promoting_species) &&
+           (promoting_indices == rhs.promoting_indices) && (theta == rhs.theta) &&
+           (eta == rhs.eta) && (activation_energy == rhs.activation_energy) &&
+           (one_over_T0 == rhs.one_over_T0);
+  };
+
   std::string kinetic_species_name;
   Real intrinsic_rate_constant;
   Real area_quantity;

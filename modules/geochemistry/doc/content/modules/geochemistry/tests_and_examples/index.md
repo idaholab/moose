@@ -55,5 +55,10 @@ Many of the tests and examples are drawn from the popular textbook [!cite](bethk
 - [Dissolution of albite into an acidic solution](kinetic_albite.md)
 - [Quartz deposition in a fracture](kinetic_quartz_arrhenius.md)
 
+## Reactive transport
+
+- [A 2D GeoTES simulation](geotes_2D.md)
+- [A GeoTES simulation involving the Weber-Tensleep formation](geotes_weber_tensleep.md)
+- [A geothermal simulation involving 2D flow](forge.md)
 
 !bibtex bibliography

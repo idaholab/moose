@@ -7,6 +7,7 @@ provided below.
 
 ## 2020
 
+- [November, 2020](2020_11.md)
 - [October, 2020](2020_10.md)
 - [September, 2020](2020_09.md)
 - [August, 2020](2020_08.md)

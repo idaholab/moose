@@ -42,8 +42,10 @@ GeochemistryConsoleOutput::validParams()
                                     "stoichiometry_tolerance >= 0.0",
                                     "if abs(any stoichiometric coefficient) < stoi_tol then it is "
                                     "set to zero, and so will not appear in the output");
-  params.addRequiredParam<Point>("point",
-                                 "The physical point at which to query the GeochemistryReactor");
+  params.addRequiredParam<UserObjectName>(
+      "nearest_node_number_UO",
+      "The NearestNodeNumber UserObject that defines the physical point at which to query the "
+      "GeochemistryReactor");
   params.addClassDescription("Outputs results from a GeochemistryReactor at a particular point");
   return params;
 }
@@ -52,7 +54,7 @@ GeochemistryConsoleOutput::GeochemistryConsoleOutput(const InputParameters & par
   : Output(parameters),
     UserObjectInterface(this),
     _reactor(getUserObject<GeochemistryReactorBase>("geochemistry_reactor")),
-    _point(getParam<Point>("point")),
+    _nnn(getUserObject<NearestNodeNumberUO>("nearest_node_number_UO")),
     _precision(getParam<unsigned int>("precision")),
     _stoi_tol(getParam<Real>("stoichiometry_tolerance")),
     _solver_info(getParam<bool>("solver_info")),
@@ -65,12 +67,16 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
 {
   if (!shouldOutput(type))
     return;
+  const Node * closest_node = _nnn.getClosestNode();
+  if (!closest_node)
+    return;
+  const dof_id_type closest_id = closest_node->id();
 
   if (_solver_info)
-    _console << _reactor.getSolverOutput(_point).str();
+    _console << _reactor.getSolverOutput(closest_id).str();
 
   // retrieve information
-  const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(_point);
+  const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(closest_id);
   const unsigned num_basis = egs.getNumInBasis();
   const unsigned num_eqm = egs.getNumInEquilibrium();
   const unsigned num_kin = egs.getNumKinetic();
@@ -88,9 +94,9 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
 
   _console << "\nSummary:\n";
 
-  _console << "Total number of iterations required = " << _reactor.getSolverIterations(_point)
+  _console << "Total number of iterations required = " << _reactor.getSolverIterations(closest_id)
            << "\n";
-  _console << "Error in calculation = " << _reactor.getSolverResidual(_point) << "mol\n";
+  _console << "Error in calculation = " << _reactor.getSolverResidual(closest_id) << "mol\n";
   _console << "Charge of solution = " << egs.getTotalChargeOld() << "mol";
   _console << " (charge-balance species = "
            << mgd.basis_species_name[egs.getChargeBalanceBasisIndex()] << ")\n";
@@ -231,7 +237,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
                     mgd.kin_stoichiometry, k, mgd.basis_species_name, _stoi_tol, _precision)
              << ";  log10(Q) = " << egs.log10KineticActivityProduct(k)
              << ";  log10K = " << egs.getKineticLog10K(k)
-             << ";  dissolution_rate*dt = " << -_reactor.getMoleAdditions(_point)(num_basis + k)
+             << ";  dissolution_rate*dt = " << -_reactor.getMoleAdditions(closest_id)(num_basis + k)
              << "\n";
   }
 
@@ -260,6 +266,15 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
                << "m^2; specific charge = " << egs.getSurfaceCharge(sp)
                << "C/m^2; surface potential = " << egs.getSurfacePotential(sp) << "V\n";
   }
+
+  DenseVector<Real> bulk_in_original_basis = egs.getBulkOldInOriginalBasis();
+  DenseVector<Real> transported_bulk_in_original_basis = egs.getTransportedBulkInOriginalBasis();
+  std::vector<std::string> original_basis_names =
+      _reactor.getPertinentGeochemicalSystem().originalBasisNames();
+  _console << "\nIn original basis:\n";
+  for (unsigned i = 0; i < num_basis; ++i)
+    _console << original_basis_names[i] << ";  total_bulk_moles = " << bulk_in_original_basis(i)
+             << ";  transported_bulk_moles = " << transported_bulk_in_original_basis(i) << "\n";
 }
 
 void

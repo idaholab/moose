@@ -41,6 +41,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddTimeIndependentReactionSolverAction", "TimeIndependentReactionSolver");
   registerSyntax("AddTimeDependentReactionSolverAction", "TimeDependentReactionSolver");
+  registerSyntax("AddSpatialReactionSolverAction", "SpatialReactionSolver");
 
   registerMooseObjectTask("add_geochemistry_reactor", AddGeochemistrySolverAction, false);
   addTaskDependency("add_geochemistry_reactor",

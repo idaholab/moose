@@ -229,6 +229,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
@@ -244,6 +245,14 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
     ASSERT_EQ(mgd.basis_species_gas[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+
+  for (const auto & species : mgd.basis_species_index)
+    ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    if (species.first == "Calcite")
+      ASSERT_EQ(mgd.eqm_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "Calcite"})
@@ -381,6 +390,17 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], ca_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], calcite_posn);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
+  DenseMatrix<Real> gold_swap_matrix(4, 4);
+  for (unsigned i = 0; i < 4; ++i)
+    gold_swap_matrix(i, i) = 1.0;
+  gold_swap_matrix(ca_posn, 0) = 0.0;  // H2O
+  gold_swap_matrix(ca_posn, 1) = 1.0;  // Ca++
+  gold_swap_matrix(ca_posn, 2) = 1.0;  // HCO3-
+  gold_swap_matrix(ca_posn, 3) = -1.0; // H+
+  for (unsigned i = 0; i < 4; ++i)
+    for (unsigned j = 0; j < 4; ++j)
+      EXPECT_EQ(mgd.swap_to_original_basis(i, j), gold_swap_matrix(i, j));
 
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
@@ -420,6 +440,15 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
     ASSERT_EQ(mgd.basis_species_gas[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+
+  // check isTransported information has swapped correctly
+  for (const auto & species : mgd.basis_species_index)
+    if (species.first == "Calcite")
+      ASSERT_EQ(mgd.basis_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
   // check stoichiometry
   stoi_gold = std::map<std::string, DenseMatrix<Real>>();
@@ -503,6 +532,16 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_NEAR(bulk_composition(1), 1.0, eps);
   ASSERT_NEAR(bulk_composition(2), 1.5, eps);
   ASSERT_NEAR(bulk_composition(3), 4.0, eps);
+
+  // swap back, and check that swap_to_original_basis is the identity
+  swapper.performSwap(mgd, bulk_composition, "Calcite", "Ca++");
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
+  for (unsigned i = 0; i < 4; ++i)
+    for (unsigned j = 0; j < 4; ++j)
+      if (i == j)
+        EXPECT_NEAR(mgd.swap_to_original_basis(i, j), 1.0, 1.0E-6);
+      else
+        EXPECT_NEAR(mgd.swap_to_original_basis(i, j), 0.0, 1.0E-6);
 }
 
 /// Check a complicated swap involving redox and complicated stoichiometric coefficients
@@ -531,6 +570,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
@@ -538,6 +578,11 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_mineral[species.second], false);
+
+  for (const auto & species : mgd.basis_species_index)
+    ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 5);
   for (const auto & sp : {"OH-", "CO2(aq)", "CO3--", "StoiCheckRedox", "StoiCheckGas"})
@@ -663,6 +708,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   ASSERT_EQ(mgd.eqm_species_index["StoiCheckBasis"], sc_gas_posn);
 
   // check the swap is recorded correctly
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], sc_basis_posn);
@@ -706,6 +752,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
       ASSERT_EQ(mgd.basis_species_gas[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+
+  // check isTransported information has swapped correctly
+  for (const auto & species : mgd.basis_species_index)
+    ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
   // check stoichiometry
   stoi_gold = std::map<std::string, DenseMatrix<Real>>();
@@ -857,6 +909,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
 
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
@@ -877,6 +930,20 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
       ASSERT_EQ(mgd.eqm_species_gas[species.second], true);
     else
       ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+
+  for (const auto & species : mgd.basis_species_index)
+    if (species.first == ">(s)FeOH" || species.first == ">(w)FeOH")
+      ASSERT_EQ(mgd.basis_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
+  for (const auto & species : mgd.kin_species_index)
+    if (species.first == "Fe(OH)3(ppd)" || species.first == "Fe(OH)3(ppd)fake" ||
+        species.first == ">(s)FeO-")
+      ASSERT_EQ(mgd.kin_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.kin_species_transported[species.second], true);
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
@@ -1108,6 +1175,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     ASSERT_EQ(mgd.kin_species_index.count(sp), 1);
 
   // check the swap is recorded correctly
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 7);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], o2aq_posn);
@@ -1162,6 +1230,21 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
       ASSERT_EQ(mgd.eqm_species_gas[species.second], true);
     else
       ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+
+  // check isTransported information has swapped correctly
+  for (const auto & species : mgd.basis_species_index)
+    if (species.first == ">(s)FeOH" || species.first == ">(w)FeOH")
+      ASSERT_EQ(mgd.basis_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
+  for (const auto & species : mgd.kin_species_index)
+    if (species.first == "Fe(OH)3(ppd)" || species.first == "Fe(OH)3(ppd)fake" ||
+        species.first == ">(s)FeO-")
+      ASSERT_EQ(mgd.kin_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd.kin_species_transported[species.second], true);
 
   // check stoichiometry
   for (const auto & sp : {"CO2(aq)",
@@ -1297,6 +1380,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   DenseMatrix<Real> orig_stoi = mgd.redox_stoichiometry;
   DenseMatrix<Real> orig_log10K = mgd.redox_log10K;
 
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
   ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
@@ -1310,6 +1394,18 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], hco3_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], co3_posn);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 7);
+  DenseMatrix<Real> gold_swap_matrix(7, 7);
+  for (unsigned i = 0; i < 7; ++i)
+  {
+    gold_swap_matrix(i, i) = 1.0;
+    gold_swap_matrix(hco3_posn, i) = 0.0;
+  }
+  gold_swap_matrix(hco3_posn, 1) = -1.0; // H+
+  gold_swap_matrix(hco3_posn, 4) = 1.0;  // HCO3-
+  for (unsigned i = 0; i < 7; ++i)
+    for (unsigned j = 0; j < 7; ++j)
+      EXPECT_EQ(mgd.swap_to_original_basis(i, j), gold_swap_matrix(i, j));
 
   EXPECT_EQ(mgd.redox_lhs, "e-");
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 3);

@@ -432,6 +432,9 @@ public:
   /// returns True iff name is the name of a sorbing mineral
   bool isSorbingMineral(const std::string & name) const;
 
+  /// Returns a list of all the names of the "mineral species" in the database
+  std::vector<std::string> mineralSpeciesNames() const;
+
   /// Returns a list of all the names of the "secondary species" and "free electron" in the database
   std::vector<std::string> secondarySpeciesNames() const;
 

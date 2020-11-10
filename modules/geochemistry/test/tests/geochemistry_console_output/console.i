@@ -20,6 +20,10 @@
     basis_species = "H2O H+ Cl- Fe+++"
     kinetic_minerals = "Fe(OH)3(ppd)_nosorb"
   [../]
+  [./nearest_node]
+    type = NearestNodeNumberUO
+    point = '0 0 0' # in this case there is no spatial dependence, so the point is rather irrelevant
+  [../]
 []
 
 [Executioner]
@@ -33,7 +37,7 @@
     precision = 8 # 8 digits of precision
     mol_cutoff = 1E-8 # species with molality or mole-number lower than this are not outputted
     solver_info = true
-    point = '1 0 0' # point at which the info is extracted: in this case the simulation is spatially-independent so the 'point' specification actually makes no difference
+    nearest_node_number_UO = nearest_node
     execute_on = 'final' # just output at the end of the simulation
   [../]
 []

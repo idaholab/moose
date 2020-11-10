@@ -12,6 +12,7 @@
 GeochemistrySpeciesSwapper::GeochemistrySpeciesSwapper(unsigned basis_size, Real stoi_tol)
   : _stoi_tol(stoi_tol),
     _swap_matrix(basis_size, basis_size),
+    _true_swap_matrix(basis_size, basis_size),
     _inv_swap_matrix(basis_size, basis_size),
     _swap_sigma(basis_size),
     _swap_U(basis_size, basis_size),
@@ -85,6 +86,8 @@ GeochemistrySpeciesSwapper::constructInverseMatrix(const ModelGeochemicalDatabas
     _swap_matrix(i, i) = 1.0;
   for (unsigned i = 0; i < num_cols; ++i)
     _swap_matrix(basis_index_to_replace, i) = mgd.eqm_stoichiometry(eqm_index_to_insert, i);
+
+  _true_swap_matrix = _swap_matrix;
 
   // In order to invert _swap_matrix, perform the SVD: A = U * D * VT
   try
@@ -210,6 +213,10 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
   }
 
   // record that the swap has occurred
+  if (mgd.swap_to_original_basis.n() == 0)
+    mgd.swap_to_original_basis = _true_swap_matrix;
+  else
+    mgd.swap_to_original_basis.left_multiply(_true_swap_matrix);
   mgd.have_swapped_out_of_basis.push_back(basis_index_to_replace);
   mgd.have_swapped_into_basis.push_back(eqm_index_to_insert);
 
@@ -270,6 +277,12 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
   const bool basis_was_gas = mgd.basis_species_gas[basis_index_to_replace];
   mgd.basis_species_gas[basis_index_to_replace] = mgd.eqm_species_gas[eqm_index_to_insert];
   mgd.eqm_species_gas[eqm_index_to_insert] = basis_was_gas;
+
+  // swap the "is transported" information
+  const bool basis_was_transported = mgd.basis_species_transported[basis_index_to_replace];
+  mgd.basis_species_transported[basis_index_to_replace] =
+      mgd.eqm_species_transported[eqm_index_to_insert];
+  mgd.eqm_species_transported[eqm_index_to_insert] = basis_was_transported;
 
   // swap the "charge" information
   const Real basis_charge = mgd.basis_species_charge[basis_index_to_replace];

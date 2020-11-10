@@ -12,6 +12,7 @@
 #include "GeochemistryReactorBase.h"
 #include "Output.h"
 #include "UserObjectInterface.h"
+#include "NearestNodeNumberUO.h"
 
 /**
  * Outputs information (to the console) from a GeochemistryReactorBase at a point
@@ -31,8 +32,8 @@ protected:
 
   /// the Reactor from which to extract info
   const GeochemistryReactorBase & _reactor;
-  /// point of interest
-  const Point & _point;
+  /// UserObject defining the node of interest
+  const NearestNodeNumberUO & _nnn;
   /// precision of output
   const unsigned _precision;
   /// Tolerance on stoichiometric coefficients before they are deemed to be zero

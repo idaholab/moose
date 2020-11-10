@@ -234,9 +234,9 @@
     type = PointValue
     variable = 'kg_solvent_H2O'
   [../]
-  [./mg_per_kg_Cl-]
+  [./molal_Cl-]
     type = PointValue
-    variable = 'mg_per_kg_Cl-'
+    variable = 'molal_Cl-'
   [../]
   [./mg_per_kg_HCl]
     type = PointValue
@@ -295,13 +295,18 @@
     source_species_names = 'HCl'
     source_species_rates = '1E-4'
   [../]
+  [./nnn]
+    type = NearestNodeNumberUO
+  [../]
 []
 
 [Outputs]
   csv = true
+  file_base = simple_out
   [./console_output]
     type = GeochemistryConsoleOutput
     geochemistry_reactor = reactor
+    nearest_node_number_UO = nnn
     solver_info = true
     execute_on = 'final'
   [../]

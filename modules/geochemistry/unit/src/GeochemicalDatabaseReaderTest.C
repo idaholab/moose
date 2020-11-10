@@ -640,6 +640,22 @@ TEST(GeochemicalDatabaseReaderTest, isSurfaceSpecies)
   EXPECT_FALSE(database.isSurfaceSpecies("e-"));
 }
 
+TEST(GeochemicalDatabaseReaderTest, mineralSpeciesNames)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  std::vector<std::string> names = database.mineralSpeciesNames();
+  for (const auto & n : {"Calcite",
+                         "Calcite_asdf",
+                         "Fe(OH)3(ppd)",
+                         "Fe(OH)3(ppd)fake",
+                         "Goethite",
+                         "Something",
+                         "problematic_sorber"})
+    EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
+  EXPECT_EQ(names.size(), 7);
+}
+
 TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
@@ -675,8 +691,8 @@ TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::string data = database.getSpeciesData("Ca++");
-  std::string gold = "Ca++:\n{\n    \"charge\" : 2,\n    \"elements\" : \n    {\n        \"Ca\" : "
-                     "1.0\n    },\n    \"molecular weight\" : 40.08,\n    \"radius\" : 6.0\n}";
+  std::string gold = "Ca++:\n{\n    \"charge\": 2,\n    \"elements\": {\n        \"Ca\": 1.0\n    "
+                     "},\n    \"molecular weight\": 40.08,\n    \"radius\": 6.0\n}";
   EXPECT_EQ(data, gold);
 }
 

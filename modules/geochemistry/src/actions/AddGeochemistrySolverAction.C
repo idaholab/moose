@@ -10,9 +10,13 @@
 #include "AddGeochemistrySolverAction.h"
 #include "GeochemicalModelDefinition.h"
 #include "GeochemistryReactorBase.h"
+#include "NearestNodeNumber.h"
 #include "GeochemistryConsoleOutput.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_output");
+registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_user_object");
 registerMooseAction("GeochemistryApp",
                     AddGeochemistrySolverAction,
                     "add_geochemistry_molality_aux");
@@ -25,11 +29,19 @@ AddGeochemistrySolverAction::validParams()
       "geochemistry_reactor_name",
       "geochemistry_reactor",
       "The name that will be given to the GeochemistryReactor UserObject built by this action");
+  params.addParam<bool>("include_moose_solve",
+                        false,
+                        "Include a usual MOOSE solve involving Variables and Kernels.  In pure "
+                        "reaction systems (without transport) include_moose_solve = false is "
+                        "appropriate, but with transport 'true' must be used");
 
   params.addRequiredParam<UserObjectName>("model_definition",
                                           "The name of the GeochemicalModelDefinition user object "
                                           "(you must create this UserObject yourself)");
   params += GeochemistryReactorBase::sharedParams();
+
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addRangeCheckedParam<Real>(
       "stoichiometry_tolerance",
@@ -46,6 +58,10 @@ AddGeochemistrySolverAction::validParams()
   exec_enum = {EXEC_INITIAL, EXEC_FINAL};
   params.addParam<ExecFlagEnum>(
       "execute_console_output_on", exec_enum, "When to execute the geochemistry console output");
+  params.addParam<Point>("point",
+                         Point(0.0, 0.0, 0.0),
+                         "The geochemistry console output will be regarding the aqueous "
+                         "solution at node that is closest to this point");
 
   // following are the Aux possibilities
   params.addParam<bool>(
@@ -120,7 +136,21 @@ AddGeochemistrySolverAction::AddGeochemistrySolverAction(InputParameters params)
 void
 AddGeochemistrySolverAction::act()
 {
-  if (_current_task == "add_output" && isParamValid("execute_console_output_on"))
+  if (_current_task == "add_user_object" && isParamValid("execute_console_output_on"))
+  {
+    const std::string class_name = "NearestNodeNumberUO";
+    auto params = _factory.getValidParams(class_name);
+    params.set<Point>("point") = getParam<Point>("point");
+    if (isParamValid("block"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
+    if (isParamValid("boundary"))
+      params.set<std::vector<BoundaryName>>("boundary") =
+          getParam<std::vector<BoundaryName>>("boundary");
+    params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL; // NOTE: adaptivity not active yet
+    _problem->addUserObject(class_name, "geochemistry_nearest_node_number", params);
+  }
+  else if (_current_task == "add_output" && isParamValid("execute_console_output_on"))
   {
     const std::string class_name = "GeochemistryConsoleOutput";
     auto params = _factory.getValidParams(class_name);
@@ -130,7 +160,7 @@ AddGeochemistrySolverAction::act()
     params.set<Real>("mol_cutoff") = getParam<Real>("mol_cutoff");
     params.set<Real>("stoichiometry_tolerance") = getParam<Real>("stoichiometry_tolerance");
     params.set<bool>("solver_info") = getParam<bool>("solver_info");
-    params.set<Point>("point") = Point(0.0, 0.0, 0.0);
+    params.set<UserObjectName>("nearest_node_number_UO") = "geochemistry_nearest_node_number";
     params.set<ExecFlagEnum>("execute_on") = getParam<ExecFlagEnum>("execute_console_output_on");
     _problem->addOutput(class_name, "geochemistry_console_output", params);
   }

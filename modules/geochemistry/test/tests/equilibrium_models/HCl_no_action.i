@@ -7,6 +7,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
+  nx= 1
 []
 
 [Variables]
@@ -268,6 +269,9 @@
     ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
     abs_tol = 1E-15
   [../]
+  [./nnn]
+    type = NearestNodeNumberUO
+  [../]
 []
 
 [Outputs]
@@ -275,6 +279,7 @@
   [./console_output]
     type = GeochemistryConsoleOutput
     geochemistry_reactor = reactor
+    nearest_node_number_UO = nnn
     solver_info = true
     execute_on = initial
   [../]

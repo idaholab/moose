@@ -28,6 +28,11 @@ public:
    */
   GeochemistrySpeciesSwapper(unsigned basis_size, Real stoi_tol);
 
+  bool operator==(const GeochemistrySpeciesSwapper & rhs) const
+  {
+    return (_stoi_tol == rhs._stoi_tol) && (_swap_matrix.m() == rhs._swap_matrix.m());
+  };
+
   /**
    * Check that replacing the named basis species with the named equilibrium species is valid.  In
    * performing this check, the "swap" matrix is inverted, so the check is somewhat expensive.
@@ -199,6 +204,13 @@ private:
 
   /// swap matrix
   DenseMatrix<Real> _swap_matrix;
+
+  /**
+   * Before _swap_matrix.svd (a non-const method) is called, we copy _true_swap_matrix =
+   * _swap_matrix. It is necessary to record _swap_matrix in this fashion so that
+   * mgd.swap_to_original_basis can be modified using it
+   */
+  DenseMatrix<Real> _true_swap_matrix;
 
   /// inverse of swap matrix
   DenseMatrix<Real> _inv_swap_matrix;
