@@ -34,16 +34,8 @@ and geomechanics.
 
 - [Getting started](porous_flow/getting_started_with_pf.md)
 - [PorousFlow tutorial](porous_flow/tutorial_00.md)
-- [Flow in fractures](porous_flow/flow_through_fractured_media.md)
-- [Underground mining](porous_flow/coal_mining.md)
-- [CO$_2$ storage benchmark problems](porous_flow/co2_intercomparison.md)
-- [Convective mixing](porous_flow/lava_lamp.md)
-- [Two-phase THM injection benchmark example](porous_flow/thm_example.md) and a [THMC problem](porous_flow/thmc_example.md)
-- [Tidal impacts on porepressure](porous_flow/tidal.md)
-- [Restarting from previous simulation](porous_flow/restart.md)
-- [Heterogeneous models](porous_flow/heterogeneous_models.md)
-- [Groundwater models](porous_flow/groundwater_models.md)
-- [QA tests](porous_flow/tests.md)
+
+!include modules/porous_flow/porous_flow_examples.md
 
 !col-end!
 

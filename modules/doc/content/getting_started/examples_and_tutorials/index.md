@@ -43,9 +43,7 @@ Example problems are provided for some of the individual [modules/index.md]. A c
 
 ###### Contact
 
-- [modules/contact/TwoDimensionalSphericalIndenterMortar.md]
-- [modules/contact/TwoDimensionalSphericalIndenterNodeFace.md]
-- [modules/contact/BerkovichIndenterNodeFace.md]
+!include modules/contact/contact_examples.md
 
 ###### Geochemistry
 
@@ -53,22 +51,11 @@ Example problems are provided for some of the individual [modules/index.md]. A c
 
 ###### Level Set
 
-- [modules/level_set/example_circle.md]
-- [modules/level_set/example_rotate.md]
-- [modules/level_set/example_vortex.md]
+!include modules/level_set/level_set_examples.md
 
 ###### Porous Flow
 
-- [modules/porous_flow/flow_through_fractured_media.md]
-- [modules/porous_flow/coal_mining.md]
-- [modules/porous_flow/co2_intercomparison.md]
-- [modules/porous_flow/lava_lamp.md]
-- [modules/porous_flow/thm_example.md]
-- [modules/porous_flow/thmc_example.md]
-- [modules/porous_flow/tidal.md]
-- [modules/porous_flow/restart.md]
-- [modules/porous_flow/heterogeneous_models.md]
-- [modules/porous_flow/tests.md]
+!include modules/porous_flow/porous_flow_examples.md
 
 ###### Reconstructed Discontinuous Galerkin
 
@@ -76,24 +63,9 @@ Example problems are provided for some of the individual [modules/index.md]. A c
 
 ###### Stochastic Tools
 
-- Parameter Studies, Statistics, and Sensitivity Analysis
+!include modules/stochastic_tools/stochastic_tools_examples.md
 
-  - [modules/stochastic_tools/examples/monte_carlo.md]
-  - [modules/stochastic_tools/examples/parameter_study.md]
-  - [modules/stochastic_tools/examples/nonlin_parameter_study.md]
-  - [modules/stochastic_tools/examples/sobol.md]
-
-- Surrogate Models
-
-  - [modules/stochastic_tools/examples/surrogate_creation.md]
-  - [modules/stochastic_tools/examples/surrogate_training.md]
-  - [modules/stochastic_tools/examples/surrogate_evaluate.md]
-  - [modules/stochastic_tools/examples/poly_chaos_surrogate.md]
-  - [modules/stochastic_tools/examples/poly_regression_surrogate.md]
-  - [modules/stochastic_tools/examples/pod_rb_surrogate.md]
-  - [modules/stochastic_tools/examples/combined_example_2d_trans_diff.md]
-
-### <!--empty header for breaking out of the collapsed section-->
+#### <!--empty header for breaking out of the collapsed section-->
 
 The following example combines the Heat Conduction, Tensor Mechanics, and Stochastic Tools modules and demonstrates one of the core purposes of MOOSE---solving multiphysics problems: [modules/combined/examples/stm_thermomechanics.md]
 
@@ -116,7 +88,7 @@ Learn how to develop a MOOSE-based application to solve coupled systems of diffe
 
 !col! small=11 medium=11 large=11
 [Porous Flow Tutorial](modules/porous_flow/tutorial_00.md)\\
-This tutorial guides the user through some commonly-used aspects of PorousFlow. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
+This tutorial guides the user through some commonly-used aspects of the [Porous Flow](modules/porous_flow/index.md) module. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
 !col-end!
 
 ## Workshop id=workshop
