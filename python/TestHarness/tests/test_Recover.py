@@ -34,4 +34,4 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         output = e.output.decode('utf-8')
-        self.assertRegexpMatches(output, r'test_harness.*?part1.*?FAILED \(CRASH\)')
+        self.assertRegex(output, r'test_harness.*?part1.*?FAILED \(CRASH\)')

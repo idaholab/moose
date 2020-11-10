@@ -17,15 +17,15 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Subject a normally passing test to impossible cpu allocations
         output = self.runTests('--no-color', '-i', 'always_ok', '-p', '2', '-j', '1')
-        self.assertRegexpMatches(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
 
         # Subject a normally passing test to impossible thread allocations
         output = self.runTests('--no-color', '-i', 'always_ok', '--n-threads', '2', '-j', '1')
-        self.assertRegexpMatches(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
 
         # A combination of threads*cpus with too low a hard limit (3*3= -j9)
         output = self.runTests('--no-color', '-i', 'allocation_test', '--n-threads', '3', '-p', '3', '-j', '8')
-        self.assertRegexpMatches(output.decode('utf-8'), 'tests/test_harness.allocation_test.*? \[INSUFFICIENT SLOTS\] SKIP')
+        self.assertRegex(output.decode('utf-8'), 'tests/test_harness.allocation_test.*? \[INSUFFICIENT SLOTS\] SKIP')
 
     def testOversizedCaveat(self):
         """
@@ -100,4 +100,4 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertNotIn('MIN_CPUS', output)
         self.assertNotIn('MAX_CPUS', output)
         self.assertNotIn('OVERSIZED', output)
-        self.assertRegexpMatches(output, 'tests/test_harness.allocation_test.*OK')
+        self.assertRegex(output, 'tests/test_harness.allocation_test.*OK')
