@@ -19,7 +19,7 @@
       expect_err = 'Must specify values using integer_values'
       match_literal = true
 
-      detail = 'names and value_types are not the same length, '
+      detail = 'no values are specified, '
     []
     [no_names]
       type = RunException
@@ -28,7 +28,7 @@
       expect_err = 'Use integer_names to specify reporter names.'
       match_literal = true
 
-      detail = 'no integer value is specified, '
+      detail = 'no names are specified, '
     []
     [mismatch]
       type = RunException
@@ -38,7 +38,7 @@
       expect_err = 'Number of names specified in integer_names must match number of values specified in integer_values'
       match_literal = true
 
-      detail = 'no real number value is specified, '
+      detail = 'or the number of values and names are not equal.'
     []
   []
 []

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MultiAppTransfer.h"
-
 #include "ReporterData.h"
 
 /*
@@ -27,6 +26,15 @@ class MultiAppReporterTransferBase : public MultiAppTransfer
 public:
   static InputParameters validParams();
   MultiAppReporterTransferBase(const InputParameters & parameters);
+  virtual void execute() final;
+
+  ///@{
+  /**
+   * Override these methods to perform the correct operations to/from a MultiApp object
+   */
+  virtual void executeToMultiapp() = 0;
+  virtual void executeFromMultiapp() = 0;
+  ///@}
 
 protected:
   /*
@@ -40,11 +48,10 @@ protected:
    * @subapp_index index of the app holds the data (default is main application)
    * @time_index time index of the data (advanced use)
    */
-  template <typename ReporterType>
-  void addReporterTransferMode(const ReporterName & name,
-                               const ReporterMode & mode,
-                               unsigned int subapp_index = std::numeric_limits<unsigned int>::max(),
-                               unsigned int time_index = 0);
+  void
+  addReporterTransferMode(const ReporterName & name,
+                          const ReporterMode & mode,
+                          unsigned int subapp_index = std::numeric_limits<unsigned int>::max());
 
   /*
    * Transferring reporter value to a multiapp
@@ -54,7 +61,7 @@ protected:
    * @param subapp_index the index of the sub app to transfer to
    * @param time_index time index of transfer (default is lastest data)
    */
-  template <typename ReporterType>
+
   void transferToMultiApp(const ReporterName & from_reporter,
                           const ReporterName & to_reporter,
                           unsigned int subapp_index,
@@ -68,68 +75,8 @@ protected:
    * @param subapp_index the index of the sub app to transfer from
    * @param time_index time index of transfer (default is lastest data)
    */
-  template <typename ReporterType>
   void transferFromMultiApp(const ReporterName & from_reporter,
                             const ReporterName & to_reporter,
                             unsigned int subapp_index,
                             unsigned int time_index = 0);
 };
-
-template <typename ReporterType>
-void
-MultiAppReporterTransferBase::addReporterTransferMode(const ReporterName & name,
-                                                      const ReporterMode & mode,
-                                                      unsigned int subapp_index,
-                                                      unsigned int time_index)
-{
-  // For convenience
-  FEProblemBase * problem;
-  if (subapp_index == std::numeric_limits<unsigned int>::max())
-    problem = &_multi_app->problemBase();
-  else if (_multi_app->hasLocalApp(subapp_index))
-    problem = &_multi_app->appProblemBase(subapp_index);
-  else
-    return;
-
-  problem->getReporterData(ReporterData::WriteKey())
-      .template getReporterValue<ReporterType>(name, this->name(), mode, time_index);
-}
-
-template <typename ReporterType>
-void
-MultiAppReporterTransferBase::transferToMultiApp(const ReporterName & from_reporter,
-                                                 const ReporterName & to_reporter,
-                                                 unsigned int subapp_index,
-                                                 unsigned int time_index)
-{
-  if (!_multi_app->hasLocalApp(subapp_index))
-    return;
-
-  const ReporterType & value =
-      _multi_app->problemBase().getReporterData().template getReporterValue<ReporterType>(
-          from_reporter, time_index);
-
-  _multi_app->appProblemBase(subapp_index)
-      .getReporterData(ReporterData::WriteKey())
-      .template setReporterValue<ReporterType>(to_reporter, value, time_index);
-}
-
-template <typename ReporterType>
-void
-MultiAppReporterTransferBase::transferFromMultiApp(const ReporterName & from_reporter,
-                                                   const ReporterName & to_reporter,
-                                                   unsigned int subapp_index,
-                                                   unsigned int time_index)
-{
-  if (!_multi_app->hasLocalApp(subapp_index))
-    return;
-
-  const ReporterType & value =
-      _multi_app->appProblemBase(subapp_index)
-          .getReporterData()
-          .template getReporterValue<ReporterType>(from_reporter, time_index);
-
-  _multi_app->problemBase()
-      .getReporterData(ReporterData::WriteKey())
-      .template setReporterValue<ReporterType>(to_reporter, value, time_index);
-}

@@ -8,19 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiAppReporterTransfer.h"
+#include "MultiApp.h"
 
-registerMooseObject("MooseApp", MultiAppIntegerReporterTransfer);
-registerMooseObject("MooseApp", MultiAppRealReporterTransfer);
-registerMooseObject("MooseApp", MultiAppVectorReporterTransfer);
-registerMooseObject("MooseApp", MultiAppStringReporterTransfer);
+registerMooseObject("MooseApp", MultiAppReporterTransfer);
 
-template <typename ReporterType>
 InputParameters
-MultiAppReporterTransfer<ReporterType>::validParams()
+MultiAppReporterTransfer::validParams()
 {
   InputParameters params = MultiAppReporterTransferBase::validParams();
   params.addClassDescription(
-      "Transfers reporter data between the master application and sub-application(s).");
+      "Transfers reporter data between the main application and sub-application(s).");
   params.addRequiredParam<std::vector<ReporterName>>(
       "from_reporters",
       "List of the reporter names (object_name/value_name) to transfer the value from.");
@@ -37,8 +34,7 @@ MultiAppReporterTransfer<ReporterType>::validParams()
   return params;
 }
 
-template <typename ReporterType>
-MultiAppReporterTransfer<ReporterType>::MultiAppReporterTransfer(const InputParameters & parameters)
+MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & parameters)
   : MultiAppReporterTransferBase(parameters),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_reporter_names(getParam<std::vector<ReporterName>>("to_reporters")),
@@ -62,9 +58,8 @@ MultiAppReporterTransfer<ReporterType>::MultiAppReporterTransfer(const InputPara
     paramError("multi_app", "subapp_index must be provided when more than one subapp is present.");
 }
 
-template <typename ReporterType>
 void
-MultiAppReporterTransfer<ReporterType>::initialSetup()
+MultiAppReporterTransfer::initialSetup()
 {
   // We need to get a reference to the data now so we can tell ReporterData
   // that we consume a replicated version.
@@ -78,44 +73,29 @@ MultiAppReporterTransfer<ReporterType>::initialSetup()
     ind = _subapp_index;
   // Tell ReporterData to consume with replicated
   for (const auto & fn : _from_reporter_names)
-    this->addReporterTransferMode<ReporterType>(fn, REPORTER_MODE_REPLICATED, ind);
+    addReporterTransferMode(fn, REPORTER_MODE_REPLICATED, ind);
 }
 
-template <typename ReporterType>
 void
-MultiAppReporterTransfer<ReporterType>::executeToMultiapp()
+MultiAppReporterTransfer::executeToMultiapp()
 {
   for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
   {
     if (_subapp_index == std::numeric_limits<unsigned int>::max())
     {
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
-        this->transferToMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], i);
+        this->transferToMultiApp(_from_reporter_names[n], _to_reporter_names[n], i);
     }
 
     else
-      this->transferToMultiApp<ReporterType>(
-          _from_reporter_names[n], _to_reporter_names[n], _subapp_index);
+      this->transferToMultiApp(_from_reporter_names[n], _to_reporter_names[n], _subapp_index);
   }
 }
 
-template <typename ReporterType>
 void
-MultiAppReporterTransfer<ReporterType>::executeFromMultiapp()
+MultiAppReporterTransfer::executeFromMultiapp()
 {
   unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
   for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-    this->transferFromMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], ind);
-}
-
-template <typename ReporterType>
-void
-MultiAppReporterTransfer<ReporterType>::execute()
-{
-  _console << "Beginning " << type() << " " << name() << std::endl;
-  if (_current_direction == FROM_MULTIAPP)
-    executeFromMultiapp();
-  else
-    executeToMultiapp();
-  _console << "Finished " << type() << " " << name() << std::endl;
+    this->transferFromMultiApp(_from_reporter_names[n], _to_reporter_names[n], ind);
 }

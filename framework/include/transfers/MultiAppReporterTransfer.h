@@ -8,31 +8,22 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
 #include "MultiAppReporterTransferBase.h"
 
-template <typename ReporterType>
-class MultiAppReporterTransfer;
-
-typedef MultiAppReporterTransfer<int> MultiAppIntegerReporterTransfer;
-typedef MultiAppReporterTransfer<Real> MultiAppRealReporterTransfer;
-typedef MultiAppReporterTransfer<std::vector<Real>> MultiAppVectorReporterTransfer;
-typedef MultiAppReporterTransfer<std::string> MultiAppStringReporterTransfer;
-
-template <typename ReporterType>
+/**
+ * Transfer for migrating reporter values between the main and sub-application(s).
+ */
 class MultiAppReporterTransfer : public MultiAppReporterTransferBase
 {
 public:
   static InputParameters validParams();
 
   MultiAppReporterTransfer(const InputParameters & parameters);
-
   virtual void initialSetup() override;
-  virtual void execute() override;
 
 protected:
-  virtual void executeToMultiapp();
-  virtual void executeFromMultiapp();
+  virtual void executeToMultiapp() override;
+  virtual void executeFromMultiapp() override;
 
   const std::vector<ReporterName> & _from_reporter_names;
   const std::vector<ReporterName> & _to_reporter_names;

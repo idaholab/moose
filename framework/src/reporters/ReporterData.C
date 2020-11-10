@@ -121,3 +121,24 @@ ReporterData::hasReporterWithMode(const ReporterMode & mode) const
   }
   return false;
 }
+
+void
+ReporterData::transfer(const ReporterName & from_name,
+                       const ReporterName & to_name,
+                       ReporterData & to_data,
+                       unsigned int to_index) const
+{
+  const ReporterContextBase * ptr = getReporterContextBaseHelper(from_name);
+  if (ptr == nullptr)
+    mooseError("Unable to locate Reporter with name:", from_name);
+  ptr->transfer(to_data, to_name, to_index);
+}
+
+void
+ReporterData::addConsumerMode(ReporterMode mode, const std::string & object_name)
+{
+  const ReporterContextBase * ptr = getReporterContextBaseHelper(object_name);
+  if (ptr == nullptr)
+    mooseError("Unable to locate Reporter with name:", object_name);
+  const_cast<ReporterContextBase *>(ptr)->addConsumerMode(mode, object_name);
+}
