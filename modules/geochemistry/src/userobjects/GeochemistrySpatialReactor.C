@@ -426,8 +426,12 @@ GeochemistrySpatialReactor::threadJoin(const UserObject & uo)
   {
     if (!_execute_done[i] && gsr._execute_done[i])
     {
-      _console << "execute_done by exactly one thread, good, " << i << '\n' << std::endl;
+      _console << "execute_done by exactly one other thread, good, " << i << '\n' << std::endl;
       _egs_at_node[i] = gsr._egs_at_node[i];
+    }
+    if (_execute_done[i] && !gsr._execute_done[i])
+    {
+      _console << "execute_done by only main thread, good, " << i << '\n' << std::endl;
     }
     if (!_execute_done[i] && !gsr._execute_done[i])
       mooseError("Execute not done by either thread for node ", i);
