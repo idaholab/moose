@@ -1,7 +1,7 @@
 [Tests]
   design = 'batch_mode.md'
   issues = '#13320'
-  requirement = "The sytem shall test syntax for running batch-restore examples with sub-application running "
+  requirement = "The system shall test syntax for running batch-restore examples with sub-application running "
 
   [full_solve]
     type = RunApp

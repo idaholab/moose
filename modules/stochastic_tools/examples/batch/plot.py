@@ -8,17 +8,24 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from __future__ import print_function
+import os
 import argparse
 import pandas
 import matplotlib.pyplot as plt
 import multiprocessing
 import mooseutils
 
-GOLD = True # When True the files from the gold directory are used, which should contain the
-            # data that is used in the documentation
+# Use this for updating documentation plots, after running execute.py
+LOCATION = os.path.join('..', '..', '..', '..', 'large_media', 'stochastic_tools')
+EXT = 'svg'
+GOLD = True
 
-def plotter(prefix, outfile, modes, names, labels, ylabel):
+# Use this for re-creating plots for paper
+#LOCATION = '.'
+#EXT = 'pdf'
+#GOLD = True
+
+def plotter(prefix, outdir, suffix, ext, modes, names, labels, ylabel):
     """Show matplotlib plot of memory data"""
 
     fig = plt.figure(figsize=[9,4], dpi=600)
@@ -38,32 +45,33 @@ def plotter(prefix, outfile, modes, names, labels, ylabel):
     ax.grid(True, color=[0.7]*3)
     ax.legend()
 
+    outfile = os.path.join(outdir, '{}{}.{}'.format(prefix, '_' + suffix if suffix else '' , ext))
     fig.savefig(outfile)
 
 if __name__ == '__main__':
 
     # Full Solve
-    plotter('full_solve_memory_serial', '../../doc/content/media/full_solve_time_serial.svg',
+    plotter('full_solve_memory_serial', LOCATION, 'time', EXT,
             ['normal', 'batch-restore', 'batch-reset'], ['time'], ['Time'], 'Time (sec.)')
 
-    plotter('full_solve_memory_mpi', '../../doc/content/media/full_solve_memory_mpi.svg',
-            ['normal', 'batch-restore', 'batch-reset'], ['total', 'max_proc'], ['Total', 'Max'], 'Memory (MiB)')
-
-    plotter('full_solve_memory_serial', '../../doc/content/media/full_solve_memory_serial.svg',
+    plotter('full_solve_memory_serial', LOCATION, '', EXT,
             ['normal', 'batch-restore', 'batch-reset'], ['total'], ['Total'], 'Memory (MiB)')
 
-    plotter('full_solve_memory_mpi', '../../doc/content/media/full_solve_time_mpi.svg',
+    plotter('full_solve_memory_mpi', LOCATION, 'time', EXT,
             ['normal', 'batch-restore', 'batch-reset'], ['time'], ['Time'], 'Time (sec.)')
 
+    plotter('full_solve_memory_mpi', LOCATION, '', EXT,
+            ['normal', 'batch-restore', 'batch-reset'], ['total', 'max_proc'], ['Total', 'Max'], 'Memory (MiB)')
+
     # Transient
-    plotter('transient_memory_serial', '../../doc/content/media/transient_serial_time.svg',
+    plotter('transient_memory_serial', LOCATION, 'time', EXT,
             ['normal', 'batch-restore'], ['time'], ['Time'], 'Time (sec.)')
 
-    plotter('transient_memory_serial', '../../doc/content/media/transient_memory_serial.svg',
+    plotter('transient_memory_serial', LOCATION, '', EXT,
             ['normal', 'batch-restore'], ['total'], ['Total'], 'Memory (MiB)')
 
-    plotter('transient_memory_mpi', '../../doc/content/media/transient_mpi_time.svg',
+    plotter('transient_memory_mpi', LOCATION, 'time', EXT,
             ['normal', 'batch-restore'], ['time'], ['Time'], 'Time (sec.)')
 
-    plotter('transient_memory_mpi', '../../doc/content/media/transient_memory_mpi.svg',
+    plotter('transient_memory_mpi', LOCATION, '', EXT,
             ['normal', 'batch-restore'], ['total', 'max_proc'], ['Total', 'Max'], 'Memory (MiB)')

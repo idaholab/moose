@@ -58,7 +58,7 @@ respectively.
 !media full_solve_memory_mpi.svg id=full-mpi-memory
        caption=Total memory and maximum memory per processor at the end of the simulation using a
                SamplerFullSolveMultiApp with increasing number of Monte Carlo samples for the three
-               available modes of operation running on 32 processors.
+               available modes of operation running on 56 processors.
 
 An important feature of the various modes of operation is that run-time is not negatively
 impacted by changing the mode, in some cases using a batch mode can actually decrease total
@@ -76,14 +76,14 @@ lowest run-time. For this example, the solve portion is minimal as such the sub-
 creation time plays a large role. As the solve time increases time gains can be expected to be
 minimal.
 
-!media full_solve_time_serial.svg id=full-serial-time
+!media full_solve_memory_serial_time.svg id=full-serial-time
        caption=Total execution time of a simulation using SamplerFullSolveMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on a single
                processor.
 
-!media full_solve_time_mpi.svg id=full-mpi-time
+!media full_solve_memory_mpi_time.svg id=full-mpi-time
        caption=Total execution time of a simulation using SamplerFullSolveMultiApp with increasing
-               number of Monte Carlo samples for the available modes of operation on 32
+               number of Monte Carlo samples for the available modes of operation on 56
                processors.
 
 ## Example 2: Transient Sub-Application
@@ -110,7 +110,7 @@ available in the SamplerTransientMultiApp.
 !media transient_memory_mpi.svg id=transient-mpi-memory
        caption=Total memory and maximum memory per processor at the end of the simulation using a
                SamplerTransientMultiApp with increasing number of Monte Carlo samples for the two
-               available modes of operation running on 32 processors.
+               available modes of operation running on 56 processors.
 
 Again, an important feature of the various modes of operation is that run-time is not negatively
 impacted by changing the mode as seen in [transient-serial-time] and [transient-mpi-time]. The
@@ -118,12 +118,12 @@ solve portion of this example is significantly longer than the steady-state exam
 differences in execution time due to the instantiating of objects is diminished and both modes behave
 similarly.
 
-!media transient_serial_time.svg id=transient-serial-time
+!media transient_memory_serial_time.svg id=transient-serial-time
        caption=Total execution time of a simulation using SamplerTransientMultiApp with increasing
                number of Monte Carlo samples for the available modes of operation on a single
                processor.
 
-!media transient_mpi_time.svg id=transient-mpi-time
+!media transient_memory_mpi_time.svg id=transient-mpi-time
        caption=Total execution time of a simulation using SamplerTransientMultiApp with increasing
-               number of Monte Carlo samples for the available modes of operation on 32
+               number of Monte Carlo samples for the available modes of operation on 56
                processors.
