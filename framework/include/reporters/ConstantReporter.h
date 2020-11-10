@@ -21,6 +21,10 @@ public:
   virtual void execute() override {}
 
 protected:
+  /// This will add another type of reporter to the params
+  template <typename T>
+  static InputParameters addReporterTypeParams(const std::string & prefix, bool add_vector = true);
+
   ///@{
   /// Helper for declaring constant reporter values
   template <typename T>
@@ -42,6 +46,26 @@ protected:
   /// Vector of strings reporter data
   std::vector<std::vector<std::string> *> _string_vec;
 };
+
+template <typename T>
+InputParameters
+ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vector)
+{
+  InputParameters params = emptyInputParameters();
+
+  params.addParam<std::vector<ReporterValueName>>(prefix + "_names",
+                                                  "Names for each " + prefix + " value.");
+  params.addParam<std::vector<T>>(prefix + "_values", "Values for " + prefix + "s.");
+  if (add_vector)
+  {
+    params.addParam<std::vector<ReporterValueName>>(
+        prefix + "_vector_names", "Names for each vector of " + prefix + "s value.");
+    params.addParam<std::vector<std::vector<T>>>(prefix + "_vector_values",
+                                                 "Values for vectors of " + prefix + "s.");
+  }
+
+  return params;
+}
 
 template <typename T>
 std::vector<T *>
