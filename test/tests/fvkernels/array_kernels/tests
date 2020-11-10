@@ -1,28 +1,32 @@
 [Tests]
-  issues = '#6881 #14057'
-  design = '/variables/ArrayMooseVariable.md'
+  issues = '#16074 #14850'
+  design = '/variables/MooseVariableFVArray.md'
   [./diffusion]
     type = 'Exodiff'
     input = 'diffusion.i'
     exodiff = 'diffusion_out.e'
     requirement = 'MOOSE shall provide finite volume array diffusion kernels on an array variable.'
+    ad_indexing_type=global
   [../]
   [./transient]
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'transient_out.e'
     requirement = 'MOOSE shall provide finite volume array time kernels on an array variable.'
+    ad_indexing_type=global
   [../]
   [./diffusion_reaction]
     type = 'Exodiff'
     input = 'diffusion_reaction.i'
     exodiff = 'diffusion_reaction_out.e'
     requirement = 'MOOSE shall provide finite volume array reaction kernels on an array variable.'
+    ad_indexing_type=global
   [../]
   [./diffusion_reaction_coupling]
     type = 'Exodiff'
     input = 'diffusion_reaction_coupling.i'
     exodiff = 'diffusion_reaction_coupling_out.e'
     requirement = 'MOOSE shall provide two-way coupling between finite volume regular and array variables that can run parallel to (uncoupled) FE equations.'
+    ad_indexing_type=global
   [../]
 []
