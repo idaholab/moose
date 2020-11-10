@@ -34,7 +34,7 @@ public:
 
 private:
   void computeJacobian() override final;
-  void computeOffDiagJacobian(MooseVariableFEBase &) override final;
+  void computeOffDiagJacobian(unsigned int) override final;
   void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
   /**

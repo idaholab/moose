@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "ResidualObject.h"
+#include "NeighborResidualObject.h"
 #include "GeometricSearchInterface.h"
 
 // Forward Declarations
@@ -22,7 +22,7 @@ InputParameters validParams<Constraint>();
 /**
  * Base class for all Constraint types
  */
-class Constraint : public ResidualObject, protected GeometricSearchInterface
+class Constraint : public NeighborResidualObject, protected GeometricSearchInterface
 {
 public:
   static InputParameters validParams();

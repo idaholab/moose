@@ -21,7 +21,7 @@ defineLegacyParams(InterfaceKernelBase);
 InputParameters
 InterfaceKernelBase::validParams()
 {
-  InputParameters params = ResidualObject::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
   params += BoundaryRestrictable::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
@@ -75,7 +75,7 @@ Threads::spin_mutex InterfaceKernelBase::_resid_vars_mutex;
 Threads::spin_mutex InterfaceKernelBase::_jacoby_vars_mutex;
 
 InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
-  : ResidualObject(parameters),
+  : NeighborResidualObject(parameters),
     BoundaryRestrictable(this, false), // false for _not_ nodal
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
@@ -104,4 +104,10 @@ const Real &
 InterfaceKernelBase::getNeighborElemVolume()
 {
   return _assembly.neighborVolume();
+}
+
+void
+InterfaceKernelBase::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareFaceShapes(var_num, _tid);
 }

@@ -8,16 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ResidualObject.h"
-#include "Assembly.h"
-#include "MooseVariableFE.h"
-#include "Problem.h"
 #include "SubProblem.h"
-#include "SystemBase.h"
-#include "NonlinearSystem.h"
-
-#include "libmesh/threads.h"
-
-defineLegacyParams(ResidualObject);
+#include "InputParameters.h"
 
 InputParameters
 ResidualObject::validParams()
@@ -61,4 +53,10 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
+}
+
+void
+ResidualObject::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareShapes(var_num, _tid);
 }

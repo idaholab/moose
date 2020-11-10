@@ -46,7 +46,7 @@ ArrayCoupledForce::computeQpResidual()
 }
 
 RealEigenMatrix
-ArrayCoupledForce::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayCoupledForce::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _v_var)
     return _coef * (-_phi[_j][_qp] * _test[_i][_qp]);

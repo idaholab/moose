@@ -149,8 +149,10 @@ NodalKernel::computeJacobian()
 }
 
 void
-NodalKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+NodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
+  const auto & jvar = getVariable(jvar_num);
+
   if (_var.isNodalDefined())
   {
     if (jvar.number() == _var.number())

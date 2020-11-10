@@ -117,7 +117,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       _fe_problem.reinitNode(node, _tid);
 
       for (const auto & nodal_kernel : active_involved_kernels)
-        nodal_kernel->computeOffDiagJacobian(jvariable);
+        nodal_kernel->computeOffDiagJacobian(jvar);
 
       _num_cached++;
 

@@ -68,13 +68,15 @@ ArrayNodalBC::computeJacobian()
 }
 
 void
-ArrayNodalBC::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  RealEigenMatrix cached_val = computeQpOffDiagJacobian(jvar);
+  const auto & jvar = getVariable(jvar_num);
+
+  RealEigenMatrix cached_val = computeQpOffDiagJacobian(const_cast<MooseVariableFieldBase &>(jvar));
 
   dof_id_type cached_row = _var.nodalDofIndex();
   // Note: this only works for Lagrange variables...
-  dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
+  dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
   // Cache the user's computeQpJacobian() value for later use.
   for (auto tag : _matrix_tags)

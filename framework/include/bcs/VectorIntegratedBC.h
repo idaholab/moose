@@ -35,12 +35,12 @@ public:
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable
    */
-  void computeJacobianBlockScalar(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /**

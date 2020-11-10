@@ -51,7 +51,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar...
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /// Gets the indices for all dofs connected to the constraint
   virtual void getConnectedDofIndices(unsigned int var_num);

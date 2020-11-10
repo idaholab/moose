@@ -209,8 +209,10 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 }
 
 void
-ArrayDGKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayDGKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
+  const auto & jvar = getVariable(jvar_num);
+
   // Compute element-element Jacobian
   computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
@@ -226,7 +228,7 @@ ArrayDGKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
 void
 ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               MooseVariableFEBase & jvar)
+                                               const MooseVariableFEBase & jvar)
 {
   const ArrayVariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
@@ -238,7 +240,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    auto & jv0 = static_cast<MooseVariable &>(jvar);
+    const auto & jv0 = static_cast<const MooseVariable &>(jvar);
     const VariableTestValue & loc_phi =
         (type == Moose::ElementElement || type == Moose::NeighborElement) ? jv0.phiFace()
                                                                           : jv0.phiFaceNeighbor();
@@ -263,7 +265,7 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
   }
   else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
   {
-    auto & jv1 = static_cast<ArrayMooseVariable &>(jvar);
+    const auto & jv1 = static_cast<const ArrayMooseVariable &>(jvar);
     const ArrayVariableTestValue & loc_phi =
         (type == Moose::ElementElement || type == Moose::NeighborElement) ? jv1.phiFace()
                                                                           : jv1.phiFaceNeighbor();

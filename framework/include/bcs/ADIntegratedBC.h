@@ -27,8 +27,8 @@ public:
 
 private:
   void computeJacobian() override final;
-  void computeJacobianBlock(MooseVariableFEBase & jvar) override final;
-  void computeJacobianBlockScalar(unsigned int jvar) override final;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
 protected:
   void computeResidual() override;

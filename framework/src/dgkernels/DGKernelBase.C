@@ -27,7 +27,7 @@ defineLegacyParams(DGKernelBase);
 InputParameters
 DGKernelBase::validParams()
 {
-  InputParameters params = ResidualObject::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
   params += TwoMaterialPropertyInterface::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
@@ -70,7 +70,7 @@ Threads::spin_mutex DGKernelBase::_resid_vars_mutex;
 Threads::spin_mutex DGKernelBase::_jacoby_vars_mutex;
 
 DGKernelBase::DGKernelBase(const InputParameters & parameters)
-  : ResidualObject(parameters),
+  : NeighborResidualObject(parameters),
     BlockRestrictable(this),
     BoundaryRestrictable(this, false), // false for _not_ nodal
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
@@ -152,11 +152,13 @@ DGKernelBase::computeJacobian()
 }
 
 void
-DGKernelBase::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+DGKernelBase::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   if (!excludeBoundary())
   {
-    if (jvar.number() == variable().number())
+    const auto & jvar = getVariable(jvar_num);
+
+    if (jvar_num == variable().number())
       computeJacobian();
     else
     {
@@ -194,4 +196,10 @@ DGKernelBase::excludeBoundary() const
       return true;
 
   return false;
+}
+
+void
+DGKernelBase::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareFaceShapes(var_num, _tid);
 }

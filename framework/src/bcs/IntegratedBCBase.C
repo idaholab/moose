@@ -55,3 +55,9 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
 }
+
+void
+IntegratedBCBase::prepareShapes(const unsigned int var_num)
+{
+  _subproblem.prepareFaceShapes(var_num, _tid);
+}

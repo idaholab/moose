@@ -1272,8 +1272,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
-          ec->subProblem().prepareShapes(ec->variable().number(), tid);
-          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+          ec->prepareShapes(ec->variable().number());
+          ec->prepareNeighborShapes(ec->variable().number());
 
           ec->reinit(info);
           ec->computeResidual();
@@ -1875,8 +1875,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
               {
                 constraints_applied = true;
 
-                nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-                nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
+                nfc->prepareShapes(nfc->variable().number());
+                nfc->prepareNeighborShapes(nfc->variable().number());
 
                 nfc->computeJacobian();
 
@@ -1938,10 +1938,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Need to zero out the matrices first
                   _fe_problem.prepareAssembly(0);
 
-                  nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-                  nfc->subProblem().prepareNeighborShapes(jvar->number(), 0);
+                  nfc->prepareShapes(nfc->variable().number());
+                  nfc->prepareNeighborShapes(jvar->number());
 
-                  nfc->computeOffDiagJacobian(*jvar);
+                  nfc->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(
@@ -2082,8 +2082,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
           _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
-          ec->subProblem().prepareShapes(ec->variable().number(), tid);
-          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+          ec->prepareShapes(ec->variable().number());
+          ec->prepareNeighborShapes(ec->variable().number());
 
           ec->reinit(info);
           ec->computeJacobian();
@@ -2138,8 +2138,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 constraints_applied = true;
 
                 nec->_jacobian = &jacobian;
-                nec->subProblem().prepareShapes(nec->variable().number(), 0);
-                nec->subProblem().prepareNeighborShapes(nec->variable().number(), 0);
+                nec->prepareShapes(nec->variable().number());
+                nec->prepareNeighborShapes(nec->variable().number());
 
                 nec->computeJacobian();
 
@@ -2184,10 +2184,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Need to zero out the matrices first
                   _fe_problem.prepareAssembly(0);
 
-                  nec->subProblem().prepareShapes(nec->variable().number(), 0);
-                  nec->subProblem().prepareNeighborShapes(jvar->number(), 0);
+                  nec->prepareShapes(nec->variable().number());
+                  nec->prepareNeighborShapes(jvar->number());
 
-                  nec->computeOffDiagJacobian(*jvar);
+                  nec->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
@@ -2583,7 +2583,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
             // 2.) jvar is "involved" with the BC (including jvar==ivar), and
             // 3.) the BC should apply.
             if ((bc->variable().number() == ivar) && var_set.count(jvar) && bc->shouldApply())
-              bc->computeOffDiagJacobian(*it.second);
+              bc->computeOffDiagJacobian(jvar);
           }
 
           const auto & coupled_scalar_vars = bc->getCoupledMooseScalarVars();

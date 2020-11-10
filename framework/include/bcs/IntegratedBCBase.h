@@ -31,15 +31,7 @@ public:
 
   IntegratedBCBase(const InputParameters & parameters);
 
-  /**
-   * Computes d-ivar-residual / d-jvar...
-   */
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) = 0;
-  /**
-   * Computes jacobian block with respect to a scalar variable
-   * @param jvar The number of the scalar variable
-   */
-  virtual void computeJacobianBlockScalar(unsigned int jvar) = 0;
+  void prepareShapes(unsigned int var_num) override final;
 
 protected:
   /// current element

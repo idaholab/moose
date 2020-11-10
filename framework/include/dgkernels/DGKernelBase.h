@@ -11,7 +11,7 @@
 
 // local includes
 #include "MooseArray.h"
-#include "ResidualObject.h"
+#include "NeighborResidualObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
@@ -35,7 +35,7 @@ InputParameters validParams<DGKernelBase>();
 /**
  * Serves as a base class for DGKernel and ADDGKernel
  */
-class DGKernelBase : public ResidualObject,
+class DGKernelBase : public NeighborResidualObject,
                      public BlockRestrictable,
                      public BoundaryRestrictable,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -76,12 +76,14 @@ public:
    * Computes the element-element off-diagonal Jacobian
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               MooseVariableFEBase & jvar) = 0;
+                                               const MooseVariableFEBase & jvar) = 0;
 
   /**
    * Computes d-residual / d-jvar...
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+
+  void prepareShapes(unsigned int var_num) override final;
 
 protected:
   /// Current element

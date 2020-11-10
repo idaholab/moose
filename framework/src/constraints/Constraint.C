@@ -9,14 +9,14 @@
 
 #include "Constraint.h"
 
-#include "SystemBase.h"
+#include "SubProblem.h"
 
 defineLegacyParams(Constraint);
 
 InputParameters
 Constraint::validParams()
 {
-  InputParameters params = ResidualObject::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -33,6 +33,6 @@ Constraint::validParams()
 }
 
 Constraint::Constraint(const InputParameters & parameters)
-  : ResidualObject(parameters), GeometricSearchInterface(this)
+  : NeighborResidualObject(parameters), GeometricSearchInterface(this)
 {
 }

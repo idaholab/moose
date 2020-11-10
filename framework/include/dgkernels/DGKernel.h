@@ -53,7 +53,7 @@ public:
    * Computes the element-element off-diagonal Jacobian
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               MooseVariableFEBase & jvar) override;
+                                               const MooseVariableFEBase & jvar) override;
 
 protected:
   /**

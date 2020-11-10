@@ -24,9 +24,9 @@ private:
   void computeElemNeighResidual(Moose::DGResidualType type) override final;
   void computeElemNeighJacobian(Moose::DGJacobianType type) override final;
   void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                       MooseVariableFEBase & jvar) override final;
+                                       const MooseVariableFEBase & jvar) override final;
   void computeJacobian() override final;
-  void computeOffDiagJacobian(MooseVariableFEBase & jvar) override final;
+  void computeOffDiagJacobian(unsigned int jvar) override final;
 
 protected:
   const MooseVariableFEBase & variable() const override { return _var; }

@@ -31,7 +31,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -65,7 +65,7 @@ protected:
   /**
    * For coupling array variables
    */
-  virtual RealEigenVector computeQpOffDiagJacobianArray(ArrayMooseVariable & jvar)
+  virtual RealEigenVector computeQpOffDiagJacobianArray(const ArrayMooseVariable & jvar)
   {
     return RealEigenVector::Zero(jvar.count());
   }

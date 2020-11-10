@@ -21,16 +21,15 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
+#include "SystemBase.h"
 
+class FEProblemBase;
 class MooseMesh;
 class SubProblem;
-class KernelBase;
 class Assembly;
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
+class MooseVariableBase;
+class MooseVariableFieldBase;
+class InputParameters;
 
 /**
  * This is the common base class for objects that give residual contributions.
@@ -64,10 +63,14 @@ public:
   virtual void computeJacobian() = 0;
 
   /**
-   * Computes Jacobian block of the variable of this object with respect to a field variable
-   * @param jvar The field variable
+   * Computes this object's contribution to off-diagonal blocks of the system Jacobian matrix
+   * @param jvar The number of the coupled variable. We pass the number of the coupled variable
+   * instead of an actual variable object because we can query our system and obtain the variable
+   * object associated with it. E.g. we need to make sure we are getting undisplaced variables if we
+   * are working on the undisplaced mesh, and displaced variables if we are working on the displaced
+   * mesh
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & /*jvar*/) {}
+  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -94,12 +97,26 @@ public:
   /**
    * Returns a reference to the SubProblem for which this Kernel is active
    */
-  SubProblem & subProblem() { return _subproblem; }
+  const SubProblem & subProblem() const { return _subproblem; }
+
+  /**
+   * Prepare shape functions
+   * @param var_num The variable number whose shape functions should be prepared
+   */
+  virtual void prepareShapes(unsigned int var_num);
 
 protected:
   virtual void precalculateResidual() {}
   virtual void precalculateJacobian() {}
   virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
+
+  /**
+   * Retrieve the variable object from our system associated with \p jvar_num
+   */
+  const MooseVariableFieldBase & getVariable(unsigned int jvar_num) const
+  {
+    return _sys.getVariable(_tid, jvar_num);
+  }
 
 protected:
   /// Reference to this kernel's SubProblem

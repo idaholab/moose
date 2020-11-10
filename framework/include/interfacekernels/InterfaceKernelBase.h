@@ -11,7 +11,7 @@
 
 // local includes
 #include "MooseArray.h"
-#include "ResidualObject.h"
+#include "NeighborResidualObject.h"
 #include "BoundaryRestrictable.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
@@ -27,7 +27,7 @@ InputParameters validParams<InterfaceKernelBase>();
  * InterfaceKernelBase is the base class for all InterfaceKernel type classes.
  */
 
-class InterfaceKernelBase : public ResidualObject,
+class InterfaceKernelBase : public NeighborResidualObject,
                             public BoundaryRestrictable,
                             public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                             public TwoMaterialPropertyInterface,
@@ -66,6 +66,8 @@ public:
 
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
   virtual void computeNeighborOffDiagJacobian(unsigned int jvar) = 0;
+
+  void prepareShapes(unsigned int var_num) override final;
 
 protected:
   /// Compute jacobians at quadrature points

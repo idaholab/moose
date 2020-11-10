@@ -182,7 +182,8 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 }
 
 void
-DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, MooseVariableFEBase & jvar)
+DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                          const MooseVariableFEBase & jvar)
 {
   const VariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;

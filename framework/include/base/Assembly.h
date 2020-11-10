@@ -1001,6 +1001,11 @@ public:
   {
     return _cm_ff_entry;
   }
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+  couplingEntries() const
+  {
+    return _cm_ff_entry;
+  }
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries()
   {
