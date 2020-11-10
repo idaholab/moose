@@ -107,7 +107,7 @@ def git_authors(loc=None):
     if not os.path.exists(loc):
         raise OSError("The supplied location must be a file or directory: {}".format(loc))
     loc = loc or os.getcwd()
-    out = check_output(['git', 'shortlog', '-n', '-c', '-s', '--', loc])
+    out = check_output(['git', 'shortlog', '-n', '-c', '-s', '--', loc], encoding='utf-8')
     names = list()
     for match in re.finditer(r'^\s*\d+\s*(?P<name>.*?)$', out, flags=re.MULTILINE):
         names.append(match.group('name'))
