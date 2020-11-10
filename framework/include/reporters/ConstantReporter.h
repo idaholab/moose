@@ -21,10 +21,13 @@ public:
   virtual void execute() override {}
 
 protected:
+  ///@{
   /// Helper for declaring constant reporter values
   template <typename T>
-  std::vector<T *> declareConstantReporterValues(const std::string & names_param,
-                                                 const std::string & values_param);
+  std::vector<T *> declareConstantReporterValues(const std::string & prefix);
+  template <typename T>
+  std::vector<std::vector<T> *> declareConstantVectorReporterValues(const std::string & prefix);
+  ///@}
 
   /// Integer reporter data
   std::vector<int *> _int;
@@ -42,9 +45,10 @@ protected:
 
 template <typename T>
 std::vector<T *>
-ConstantReporter::declareConstantReporterValues(const std::string & names_param,
-                                                const std::string & values_param)
+ConstantReporter::declareConstantReporterValues(const std::string & prefix)
 {
+  std::string names_param(prefix + "_names");
+  std::string values_param(prefix + "_values");
   std::vector<T *> data;
 
   if (isParamValid(names_param) && !isParamValid(values_param))
@@ -67,4 +71,11 @@ ConstantReporter::declareConstantReporterValues(const std::string & names_param,
     data.push_back(&this->declareValueByName<T>(names[i], values[i]));
 
   return data;
+}
+
+template <typename T>
+std::vector<std::vector<T> *>
+ConstantReporter::declareConstantVectorReporterValues(const std::string & prefix)
+{
+  return this->declareConstantReporterValues<std::vector<T>>(prefix + "_vector");
 }

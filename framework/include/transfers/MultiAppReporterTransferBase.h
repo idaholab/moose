@@ -19,7 +19,7 @@
  *
  * The undelying purpose fo this class is to avoid using non-const access to ReporterData
  * through FEProblemBase to set reporter data. Instead, we simply have this class
- * as a friend to ReporterData and provide these protected functions for derived
+ * as a friend to ReporterData::WriteKey and provide these protected functions for derived
  * classes. This avoids any ol' object modifying reporter data.
  */
 class MultiAppReporterTransferBase : public MultiAppTransfer
