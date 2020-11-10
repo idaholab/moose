@@ -268,6 +268,7 @@ Requirements:
         log_missing_issues: WARNING
         log_duplicate_requirement: WARNING
         log_design_files: WARNING
+        log_testable: WARNING
         show_warning: false
 
     level_set:

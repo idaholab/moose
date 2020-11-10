@@ -116,6 +116,7 @@
     requirement = 'Spatially-dependent reaction systems may be multi-threaded'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
+    skip = '#16100'
   [../]    
   [./spatial_4_mpi]
     type = CSVDiff
@@ -126,19 +127,19 @@
     requirement = 'Spatially-dependent reaction systems may use MPI'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
+  [../]
+  [./spatial_4_threads_mpi]
+    type = CSVDiff
+    input = spatial_4.i
+    csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
+    min_threads = 2
+    min_parallel = 2
+    prereq = spatial_4_mpi
+    skip = '#16100'
+    requirement = 'Spatially-dependent reaction systems may use MPI and threads'
+    issues = '#15693'
+    design = 'GeochemistrySpatialReactor.md'
   [../]    
-#  [./spatial_4_threads_mpi]
-#    type = CSVDiff
-#    input = spatial_4.i
-#    csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
-#    min_threads = 2
-#    min_parallel = 2
-#    prereq = spatial_4_mpi
-#    skip = 'This test fails on minimum clang, but no other recipes, so it is skipped for now.  This bug must be fixed.  Refs #16100'
-#    requirement = 'Spatially-dependent reaction systems may use MPI and threads'
-#    issues = '#15693'
-#    design = 'GeochemistrySpatialReactor.md'
-#  [../]    
   [./spatial_5]
     type = CSVDiff
     input = spatial_5.i
