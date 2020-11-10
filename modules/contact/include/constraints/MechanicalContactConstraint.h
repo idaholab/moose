@@ -52,7 +52,7 @@ public:
    * Compute off-diagonal Jacobian entries
    * @param jvar The index of the coupled variable
    */
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 

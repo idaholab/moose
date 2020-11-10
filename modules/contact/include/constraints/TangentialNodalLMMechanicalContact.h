@@ -26,7 +26,7 @@ protected:
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;

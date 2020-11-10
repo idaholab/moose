@@ -143,9 +143,9 @@ PorousFlowDarcyBase::computeJacobian()
 }
 
 void
-PorousFlowDarcyBase::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+PorousFlowDarcyBase::computeOffDiagJacobian(const unsigned int jvar)
 {
-  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar.number());
+  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
 }
 
 void

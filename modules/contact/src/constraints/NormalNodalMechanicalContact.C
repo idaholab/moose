@@ -52,12 +52,14 @@ NormalNodalMechanicalContact::computeJacobian()
 }
 
 void
-NormalNodalMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+NormalNodalMechanicalContact::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   // Our residual only strongly depends on the lagrange multiplier (the normal vector does indeed
   // depend on displacements but it's complicated and shouldn't be too strong of a dependence)
-  if (jvar.number() != _lambda_id)
+  if (jvar_num != _lambda_id)
     return;
+
+  const auto & jvar = getVariable(jvar_num);
 
   _connected_dof_indices.clear();
   _connected_dof_indices.push_back(jvar.nodalDofIndex());
@@ -65,12 +67,12 @@ NormalNodalMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar.number());
+  _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 
   _Kne.resize(_test_primary.size(), 1);
 
   for (_i = 0; _i < _test_primary.size(); ++_i)
-    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar.number());
+    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar_num);
 }
 
 Real

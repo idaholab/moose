@@ -73,11 +73,6 @@ GlobalStrain::computeJacobian()
 }
 
 void
-GlobalStrain::computeOffDiagJacobian(MooseVariableFEBase & /*jvar*/)
-{
-}
-
-void
 GlobalStrain::assignComponentIndices(Order order)
 {
   switch (order)

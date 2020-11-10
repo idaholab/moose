@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /// The Darcy part of the flux (this is the non-upwinded part)
   virtual Real darcyQp(unsigned int ph) const;

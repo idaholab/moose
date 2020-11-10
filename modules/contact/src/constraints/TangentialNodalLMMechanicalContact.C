@@ -94,21 +94,22 @@ TangentialNodalLMMechanicalContact::computeJacobian()
 }
 
 void
-TangentialNodalLMMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+TangentialNodalLMMechanicalContact::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (jvar.number() == _var.number())
+  if (jvar_num == _var.number())
   {
     computeJacobian();
     return;
   }
 
+  const auto & jvar = getVariable(jvar_num);
   _connected_dof_indices.clear();
   _connected_dof_indices.push_back(jvar.nodalDofIndex());
 
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar.number());
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 }
 
 Real TangentialNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)

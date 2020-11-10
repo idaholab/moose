@@ -93,13 +93,15 @@ NormalNodalLMMechanicalContact::computeJacobian()
 }
 
 void
-NormalNodalLMMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+NormalNodalLMMechanicalContact::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (jvar.number() == _var.number())
+  if (jvar_num == _var.number())
   {
     computeJacobian();
     return;
   }
+
+  const auto & jvar = getVariable(jvar_num);
 
   _connected_dof_indices.clear();
   _connected_dof_indices.push_back(jvar.nodalDofIndex());
@@ -107,13 +109,13 @@ NormalNodalLMMechanicalContact::computeOffDiagJacobian(MooseVariableFEBase & jva
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar.number());
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 
   DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar.number());
+      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
 
   for (_j = 0; _j < _phi_primary.size(); ++_j)
-    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar.number());
+    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
 }
 
 Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
