@@ -37,10 +37,10 @@
   [reporter]
     type = JSONDiff
     input = main.i
-    jsondiff = 'main_out.json main_out_sub0_out.json main_out_sub1_out.json'
+    jsondiff = 'main_out.json main_out_sub0_out.json'
     skip_keys = 'part number_of_parts'
 
-    requirement = "The system shall support the ability to transfer integer, real, vector, and string reporter data "
+    requirement = "The system shall support the ability to transfer integer, real, vector, and string reporter data."
   []
 
   [errors]

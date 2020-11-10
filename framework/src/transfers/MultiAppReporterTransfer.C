@@ -46,6 +46,39 @@ MultiAppReporterTransfer<ReporterType>::MultiAppReporterTransfer(const InputPara
 {
   if (_from_reporter_names.size() != _to_reporter_names.size())
     paramError("to_reporters", "from_reporters and to_reporters must be the same size.");
+
+  if (_directions.size() > 1)
+    paramError("direction", "This transfer only supports a single direction.");
+
+  // Errors for sub app index.
+  if (_subapp_index != std::numeric_limits<unsigned int>::max() &&
+      _subapp_index >= _multi_app->numGlobalApps())
+    paramError(
+        "subapp_index",
+        "The supplied sub-application index is greater than the number of sub-applications.");
+  else if (_directions.contains(FROM_MULTIAPP) &&
+           _subapp_index == std::numeric_limits<unsigned int>::max() &&
+           _multi_app->numGlobalApps() > 1)
+    paramError("multi_app", "subapp_index must be provided when more than one subapp is present.");
+}
+
+template <typename ReporterType>
+void
+MultiAppReporterTransfer<ReporterType>::initialSetup()
+{
+  // We need to get a reference to the data now so we can tell ReporterData
+  // that we consume a replicated version.
+  // Find proper index
+  int ind;
+  if (_directions.contains(TO_MULTIAPP))
+    ind = std::numeric_limits<unsigned int>::max();
+  else if (_subapp_index == std::numeric_limits<unsigned int>::max())
+    ind = 0;
+  else
+    ind = _subapp_index;
+  // Tell ReporterData to consume with replicated
+  for (const auto & fn : _from_reporter_names)
+    this->addReporterTransferMode<ReporterType>(fn, REPORTER_MODE_REPLICATED, ind);
 }
 
 template <typename ReporterType>
@@ -54,23 +87,15 @@ MultiAppReporterTransfer<ReporterType>::executeToMultiapp()
 {
   for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
   {
-    const ReporterName & fn = _from_reporter_names[n];
-    const ReporterName & tn = _to_reporter_names[n];
-
     if (_subapp_index == std::numeric_limits<unsigned int>::max())
     {
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
-        if (_multi_app->hasLocalApp(i))
-          this->transferToMultiApp<ReporterType>(fn, tn, i);
+        this->transferToMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], i);
     }
 
-    else if (_multi_app->hasLocalApp(_subapp_index))
-      this->transferToMultiApp<ReporterType>(fn, tn, _subapp_index);
-
-    else if (_subapp_index >= _multi_app->numGlobalApps())
-      paramError(
-          "subapp_index",
-          "The supplied sub-application index is greater than the number of sub-applications.");
+    else
+      this->transferToMultiApp<ReporterType>(
+          _from_reporter_names[n], _to_reporter_names[n], _subapp_index);
   }
 }
 
@@ -78,19 +103,9 @@ template <typename ReporterType>
 void
 MultiAppReporterTransfer<ReporterType>::executeFromMultiapp()
 {
-  if (_multi_app->numGlobalApps() > 1 && _subapp_index == std::numeric_limits<unsigned int>::max())
-    paramError("multi_app", "subapp_index must be provided when more than one subapp is present.");
-  else if (_subapp_index != std::numeric_limits<unsigned int>::max() &&
-           _subapp_index >= _multi_app->numGlobalApps())
-    paramError(
-        "subapp_index",
-        "The supplied sub-application index is greater than the number of sub-applications.");
-
   unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
-
-  if (_multi_app->hasLocalApp(ind))
-    for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-      this->transferFromMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], ind);
+  for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+    this->transferFromMultiApp<ReporterType>(_from_reporter_names[n], _to_reporter_names[n], ind);
 }
 
 template <typename ReporterType>

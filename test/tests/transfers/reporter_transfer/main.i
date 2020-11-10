@@ -13,6 +13,7 @@
     type = ConstantVectorPostprocessor
     vector_names = 'a b c'
     value = '1 1 1; 2 2 2; 3 3 3'
+    execute_on = initial
   []
   [to_main_vpp]
     type = ConstantVectorPostprocessor
