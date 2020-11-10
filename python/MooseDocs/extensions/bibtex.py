@@ -13,6 +13,7 @@ import logging
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
+from pybtex.errors import set_strict_mode
 from pylatexenc.latex2text import LatexNodes2Text
 
 import moosetree
@@ -53,6 +54,7 @@ class BibtexExtension(command.CommandExtension):
     def preExecute(self):
 
         duplicates = self.get('duplicates', list())
+        set_strict_mode(False)
         self.__database = BibliographyData()
 
         self.__bib_files = []
