@@ -27,7 +27,7 @@
 
 [UserObjects]
   [./voronoi]
-    type = PolycrystalVoronoi
+    type = FauxPolycrystalVoronoi
     rand_seed = 105
     grain_num = 4
     coloring_algorithm = bt

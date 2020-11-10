@@ -528,31 +528,31 @@ void DistributedRectilinearMeshGenerator::getIndices<Hex8>(const dof_id_type nx,
                                                            dof_id_type & k);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type nz,
-                                                              const MeshBase & mesh,
-                                                              const std::set<dof_id_type> & current_elems,
-                                                              std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type nz,
-                                                              const MeshBase & mesh,
-                                                              const std::set<dof_id_type> & current_elems,
-                                                              std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(const dof_id_type nx,
-                                                             const dof_id_type ny,
-                                                             const dof_id_type nz,
-                                                             const MeshBase & mesh,
-                                                             const std::set<dof_id_type> & current_elems,
-                                                             std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
 void DistributedRectilinearMeshGenerator::scaleNodalPositions<Edge2>(dof_id_type nx,

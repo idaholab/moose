@@ -1973,7 +1973,7 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
   // The motivation here is that mesh parallel type might not be set yet for distributed mesh
   // generator, and for the default parallel type "isDistributedMesh()" is false. All geometric
   // RMs are just ignored for distributed mesh generator
-  //if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
+  // if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
   //    (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
   //     !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
   //       relationship_manager->isType(Moose::RelationshipManagerType::COUPLING))))
@@ -2077,7 +2077,8 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
 }
 
 void
-MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type, bool attach_geometric_rm_final)
+MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
+                                     bool attach_geometric_rm_final)
 {
   for (auto & rm : _relationship_managers)
   {
@@ -2105,7 +2106,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type, boo
           rm->init(mesh_base);
           mesh_base.add_ghosting_functor(*rm);
 
-          if (_action_warehouse.displacedMesh())
+          // In the final stage, displaced mesh should be already there if there is a displaced mesh
+          if (_action_warehouse.displacedMesh() && !attach_geometric_rm_final)
             mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
                        "geometric relationship managers.");
         }

@@ -55,23 +55,24 @@ DistributedRectilinearMeshGenerator::validParams()
       "num_cores_for_partition", 0, "Number of cores for partitioning the graph");
 
   params.addParam<unsigned>(
-          "num_side_layers", 2, "Number of layers of off-processor side neighbors is reserved during mesh generation");
+      "num_side_layers",
+      2,
+      "Number of layers of off-processor side neighbors is reserved during mesh generation");
 
   params.addRelationshipManager(
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         // Let this RM safeguard users specified ghosted layers
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers");
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers") + 1;
         // We can not attach geometric early here because some simulation related info, such as,
         // periodic BCs is not available yet during an early stage. Periodic BCs will be passed
         // into ghosting functor during initFunctor of ElementSideNeighborLayers. There is no hurt
         // to attach geometric late for general simulations that do not have extra requirements on
-        // ghosting elements. That is especially true distributed generated meshes since there is not
-        // much redundant info.
+        // ghosting elements. That is especially true distributed generated meshes since there is
+        // not much redundant info.
         rm_params.set<bool>("attach_geometric_early") = false;
-      }
-  );
+      });
 
   params.addParam<bool>("linear_partition",
                         false,
@@ -200,12 +201,13 @@ DistributedRectilinearMeshGenerator::getIndices<Edge2>(const dof_id_type /*nx*/,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(const dof_id_type nx,
-                                                              const dof_id_type /*ny*/,
-                                                              const dof_id_type /*nz*/,
-                                                              const MeshBase & mesh,
-                                                              const std::set<dof_id_type> & current_elems,
-                                                              std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(
+    const dof_id_type nx,
+    const dof_id_type /*ny*/,
+    const dof_id_type /*nz*/,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   std::vector<dof_id_type> neighbors(2);
 
@@ -407,12 +409,13 @@ DistributedRectilinearMeshGenerator::getIndices<Quad4>(const dof_id_type nx,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type /*nz*/,
-                                                              const MeshBase & mesh,
-                                                              const std::set<dof_id_type> & current_elems,
-                                                              std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type /*nz*/,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   dof_id_type i, j, k;
 
@@ -789,12 +792,13 @@ DistributedRectilinearMeshGenerator::getIndices<Hex8>(const dof_id_type nx,
 
 template <>
 void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(const dof_id_type nx,
-                                                             const dof_id_type ny,
-                                                             const dof_id_type nz,
-                                                             const MeshBase & mesh,
-                                                             const std::set<dof_id_type> & current_elems,
-                                                             std::set<dof_id_type> & ghost_elems)
+DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems)
 {
   dof_id_type i, j, k;
 
@@ -992,7 +996,7 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
     current_elems.insert(elem_ptr->id());
 
   // Grow domain layer by layer
-  for (unsigned layer=0; layer < _num_side_layers; layer++)
+  for (unsigned layer = 0; layer < _num_side_layers; layer++)
   {
     // getGhostNeighbors produces one layer of side neighbors
     getGhostNeighbors<T>(nx, ny, nz, mesh, current_elems, ghost_elems);

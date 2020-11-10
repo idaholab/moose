@@ -114,6 +114,18 @@
     issues = '#15348'
   [../]
 
+  [./mesh_adaptivity_voronoi]
+    type = 'Exodiff'
+    input = 'voronoi_adaptivity.i'
+    exodiff = 'voronoi_adaptivity_out.e'
+    min_parallel = 2
+    prereq = 'mesh_adaptivity'
+    cli_args ='UserObjects/voronoi/type=PolycrystalVoronoi'
+    requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations using PolycrystalVoronoi UO on a mesh generated in parallel.'
+    design = 'DistributedRectilinearMeshGenerator.md'
+    issues = '#15348'
+  [../]
+
   [./voronoi_columnar_3D]
     type = 'Exodiff'
     input = 'voronoi_columnar_3D.i'

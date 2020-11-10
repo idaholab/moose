@@ -33,8 +33,8 @@ void
 AddRelationshipManager::act()
 {
   Moose::RelationshipManagerType rm_type;
-  if (_current_task == "attach_geometric_rm" || _current_task == "add_geometric_rm"
-     || _current_task =="attach_geometric_rm_final")
+  if (_current_task == "attach_geometric_rm" || _current_task == "add_geometric_rm" ||
+      _current_task == "attach_geometric_rm_final")
     rm_type = Moose::RelationshipManagerType::GEOMETRIC;
   else if (_current_task == "attach_algebraic_rm" || _current_task == "add_algebraic_rm")
     rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
