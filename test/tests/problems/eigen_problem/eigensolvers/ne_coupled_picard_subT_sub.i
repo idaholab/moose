@@ -6,8 +6,8 @@
   ymin = 0
   ymax = 10
   elem_type = QUAD4
-  nx = 8
-  ny = 8
+  nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -37,8 +37,9 @@
   [../]
 
   [./rhs]
-    type = Reaction
+    type = CoefReaction
     variable = u
+    coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
 []
@@ -81,9 +82,9 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = true
-  solve_type = NEWTON
-  eigen_problem_type = GEN_NON_HERMITIAN
+  solve_type = PJFNK
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-6
 []
 
 [Postprocessors]
@@ -108,5 +109,6 @@
 
 [Outputs]
   csv = true
+  exodus = true
   execute_on = 'timestep_end'
 []

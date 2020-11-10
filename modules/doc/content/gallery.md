@@ -79,10 +79,10 @@ velocity is known. MOOSE contains a level set module, for more information see [
 
 !card! gallery/soil.mp4 title=Soil Desiccation Simulation
 A 3D soil desiccation simulation using phase-field for cohesive fracture model, see
-[A phase-field formulation for dynamic cohesive fracture](https://arxiv.org/abs/1809.09691).
+[A phase-field model of fracture with frictionless contact and random fracture properties: Application to thin-film fracture and soil desiccation](https://doi.org/10.1016/j.cma.2020.113106).
 
 !style fontsize=80% fontweight=100
-*Credit:* Gary Hu, [Duke Computational Mechanics Lab](http://dcml.pratt.duke.edu/)
+*Credit:* Gary Hu, [Dolbow Research Group](http://dolbow.pratt.duke.edu/)
 !card-end!
 
 !card! contact/2d_indenter.mp4 title=Axisymmetric Spherical Indenter

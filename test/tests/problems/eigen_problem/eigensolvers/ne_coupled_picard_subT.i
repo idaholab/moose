@@ -48,13 +48,17 @@
 
 [Executioner]
   type = Steady
-  picard_max_its = 30
+  solve_type = PJFNK
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-6
+  picard_max_its = 20
   picard_rel_tol = 1e-6
 []
 
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
+    keep_solution_during_restore = true
     input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
   [../]
@@ -62,7 +66,7 @@
 
 [Transfers]
   [./T_to_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = T
@@ -70,11 +74,17 @@
     execute_on = timestep_end
   [../]
   [./power_from_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = power
     variable = power
     execute_on = timestep_end
   [../]
+[]
+
+[Outputs]
+  csv = true
+  exodus =true
+  execute_on = 'timestep_end'
 []

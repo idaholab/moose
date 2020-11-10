@@ -134,6 +134,16 @@ void setSinglePetscOption(const std::string & name, const std::string & value = 
 void addPetscOptionsFromCommandline();
 
 /**
+ * Setup which side we want to apply preconditioner
+ */
+void petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp);
+
+/**
+ * Set norm type
+ */
+void petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp);
+
+/**
  * This method takes an adjacency matrix, and a desired number of colors and applies
  * a graph coloring algorithm to produce a coloring. The coloring is returned as a vector
  * of unsigned integers indicating which color or group each vextex in the adjacency matrix

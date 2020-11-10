@@ -1,70 +1,68 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'piecewise_linear_interpolation_material.i'
-    exodiff = 'piecewise_linear_interpolation_material_out.e'
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation of a variable'
-  [../]
-  [./test_scale_factor]
-    type = 'Exodiff'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test
-    cli_args = "Materials/m2/scale_factor='2.0' Materials/m2/y='0 0.5'"
-    exodiff = 'piecewise_linear_interpolation_material_out.e'
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation of a variable and perform approriate scaling'
-  [../]
-  [./test_extrapolation]
-    type = 'Exodiff'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test
-    cli_args = "Materials/m2/x='0.4 0.6' Materials/m2/y='0.4 0.6'  Materials/m2/extrapolation=true"
-    exodiff = 'piecewise_linear_interpolation_material_out.e'
-    issues = "#15379"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation and extrapolation of a variable'
-  [../]
-  [./test_err1]
-    type = 'RunException'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test_scale_factor
-    cli_args = "Materials/m2/xy_data='1 2'"
-    expect_err = "Cannot specify 'x', 'y', and 'xy_data' together."
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall throw an error if x, y, and xy_data are all specified'
-  [../]
-  [./test_err2]
-    type = 'RunException'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test_err1
-    cli_args = "Materials/m1/x='1 2 3'"
-    expect_err = "Both 'x' and 'y' must be specified if either one is specified."
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall throw an error if x and xy_data are both specified'
-  [../]
-  [./test_err3]
-    type = 'RunException'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test_err2
-    cli_args = "Materials/m2/x='1 2 3'"
-    expect_err = "Vectors are not the same length"
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall throw an error if x and y vectors are different lengths'
-  [../]
-  [./test_err4]
-    type = 'RunException'
-    input = 'piecewise_linear_interpolation_material.i'
-    prereq = test_err3
-    cli_args = "Materials/m1/xy_data='1 2 3'"
-    expect_err = "Length of data provided in 'xy_data' must be a multiple of 2."
-    issues = "#13224"
-    design = "PiecewiseLinearInterpolationMaterial.md"
-    requirement = 'PiecewiseLinearInterpolationMaterial shall throw an error if xy_data vector is not a multiple of two'
-  [../]
+  issues = "#13224"
+  design = "PiecewiseLinearInterpolationMaterial.md"
+  [linear]
+    requirement = "The system shall support the calculation of a material property with a"
+
+    [interpolation]
+      type = 'Exodiff'
+      input = 'piecewise_linear_interpolation_material.i'
+      exodiff = 'piecewise_linear_interpolation_material_out.e'
+
+      detail = "linear interpolation of a variable,"
+    []
+    [scale_factor]
+      type = 'Exodiff'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m2/scale_factor='2.0' Materials/m2/y='0 0.5'"
+      exodiff = 'piecewise_linear_interpolation_material_out.e'
+
+      detail = "with a scaling factor, and"
+    []
+    [extrapolation]
+      type = 'Exodiff'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m2/x='0.4 0.6' Materials/m2/y='0.4 0.6'  Materials/m2/extrapolation=true"
+      exodiff = 'piecewise_linear_interpolation_material_out.e'
+
+      detail = "extrapolation."
+    []
+  []
+  [errors]
+    requirement = "The system shall support the calculation of a material property with a linear "
+                  "interpolation and error if"
+
+    [err1]
+      type = 'RunException'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m2/xy_data='1 2'"
+      expect_err = "Cannot specify 'x', 'y', and 'xy_data' together."
+
+      detail = "x, y, and xy_data are all specified;"
+    []
+    [err2]
+      type = 'RunException'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m1/x='1 2 3'"
+      expect_err = "Both 'x' and 'y' must be specified if either one is specified."
+
+      detail = "x and xy_data are both specified;"
+    []
+    [err3]
+      type = 'RunException'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m2/x='1 2 3'"
+      expect_err = "Vectors are not the same length"
+
+      detail = "the x and y vectors are different lengths; and"
+    []
+    [err4]
+      type = 'RunException'
+      input = 'piecewise_linear_interpolation_material.i'
+      cli_args = "Materials/m1/xy_data='1 2 3'"
+      expect_err = "Length of data provided in 'xy_data' must be a multiple of 2."
+
+      detail = "the xy_data vector length is not a multiple of two."
+    []
+  []
 []

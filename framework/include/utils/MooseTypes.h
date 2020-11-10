@@ -422,33 +422,24 @@ using ADVariablePhiGradient = ADTemplateVariablePhiGradient<Real>;
 // Templated typed to support is_ad templated classes
 namespace Moose
 {
-
 template <typename T, bool is_ad>
-struct GenericStruct
-{
-  typedef T type;
-};
-template <typename T>
-struct GenericStruct<T, true>
-{
-  typedef typename ADType<T>::type type;
-};
-
+using GenericType = typename std::conditional<is_ad, typename ADType<T>::type, T>::type;
 } // namespace Moose
+
 template <bool is_ad>
-using GenericReal = typename Moose::GenericStruct<Real, is_ad>::type;
+using GenericReal = typename Moose::GenericType<Real, is_ad>;
 template <bool is_ad>
-using GenericRankTwoTensor = typename Moose::GenericStruct<RankTwoTensor, is_ad>::type;
+using GenericRankTwoTensor = typename Moose::GenericType<RankTwoTensor, is_ad>;
 template <bool is_ad>
-using GenericRankThreeTensor = typename Moose::GenericStruct<RankThreeTensor, is_ad>::type;
+using GenericRankThreeTensor = typename Moose::GenericType<RankThreeTensor, is_ad>;
 template <bool is_ad>
-using GenericRankFourTensor = typename Moose::GenericStruct<RankFourTensor, is_ad>::type;
+using GenericRankFourTensor = typename Moose::GenericType<RankFourTensor, is_ad>;
 template <bool is_ad>
-using GenericVariableValue = typename Moose::GenericStruct<VariableValue, is_ad>::type;
+using GenericVariableValue = typename Moose::GenericType<VariableValue, is_ad>;
 template <bool is_ad>
-using GenericVariableGradient = typename Moose::GenericStruct<VariableGradient, is_ad>::type;
+using GenericVariableGradient = typename Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
-using GenericVariableSecond = typename Moose::GenericStruct<VariableSecond, is_ad>::type;
+using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>;
 
 #define declareADValidParams(ADObjectType)                                                         \
   template <>                                                                                      \
@@ -677,7 +668,9 @@ enum EigenSolveType
   EST_KRYLOVSCHUR,     ///< Krylov-Schur
   EST_JACOBI_DAVIDSON, ///< Jacobi-Davidson
   EST_NONLINEAR_POWER, ///< Nonlinear inverse power
-  EST_NEWTON,          ///< Newton-based eigen solver
+  EST_NEWTON, ///< Newton-based eigensolver with an assembled Jacobian matrix (fully coupled by default)
+  EST_PJFNK, ///< Preconditioned Jacobian-free Newton Krylov
+  EST_JFNK   ///< Jacobian-free Newton Krylov
 };
 
 /**

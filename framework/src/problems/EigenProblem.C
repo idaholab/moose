@@ -55,14 +55,21 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
     _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
+    _auto_initialize_eigen_vector(true),
+    _do_free_power_iteration(false),
+    _output_inverse_eigenvalue(false),
     _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
     _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
     _solve_timer(registerTimedSection("solve", 1)),
-    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3))
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
+    _has_normalization(false),
+    _normal_factor(1.0),
+    _pre_scale_factor(1.0),
+    _has_pre_scale(false)
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
@@ -75,11 +82,16 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
 
+  // SLEPc older than 3.13.0 can not take initial guess from moose
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  mooseDeprecated(
+      "Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad convergence");
+#endif
   // Create extra vectors and matrices if any
   createTagVectors();
 }
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 void
 EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 {
@@ -336,7 +348,7 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
   for (auto & vn : var_names)
   {
     MooseVariableFEBase & var = getVariable(0, vn);
-    if (var.parameters().get<bool>("eigen"))
+    if (var.eigen())
       for (unsigned int vc = 0; vc < var.count(); ++vc)
       {
         std::set<dof_id_type> var_indices;
@@ -349,7 +361,131 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
   _nl_eigen->update();
 }
 
-#endif
+void
+EigenProblem::initEigenvector(const Real initial_value)
+{
+  dof_id_type n_dofs = 0;
+
+  std::vector<VariableName> var_names = getVariableNames();
+
+  // Count how many dofs we have
+  for (auto & vn : var_names)
+  {
+    const auto & var = getVariable(0, vn);
+    if (var.eigen())
+    {
+      std::set<dof_id_type> var_indices;
+      for (unsigned int vc = 0; vc < var.count(); ++vc)
+      {
+        var_indices.clear();
+        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        n_dofs += var_indices.size();
+      }
+    }
+  }
+
+  // We do not need to setup
+  // We can not return here because some MPI ranks might have zero dofs but others
+  // might have something. If we return here, we might hit MPI deadlock when 'close'
+  // is called at the end of this function
+  // if (!n_dofs)
+  //  return;
+
+  // Yaqi's note: the following code will set a flat solution for lagrange and
+  // constant monomial variables. For the first or higher order variables,
+  // the solution is not flat. Fortunately, the initial guess does not affect
+  // the final solution as long as it is not perpendicular to the true solution.
+  // We, in general, do not need to worry about that.
+  for (auto & vn : var_names)
+  {
+    // There is nothing we need to scale. We cannot return here, we need
+    // to go through 'close'.
+    if (!n_dofs)
+      break;
+
+    const auto & var = getVariable(0, vn);
+    // We set values for only eigen variables
+    if (var.eigen())
+    {
+      std::set<dof_id_type> var_indices;
+      for (unsigned int vc = 0; vc < var.count(); ++vc)
+      {
+        var_indices.clear();
+        _nl_eigen->system().local_dof_indices(var.number() + vc, var_indices);
+        for (const auto & dof : var_indices)
+          // Davidson by n_dofs is a simple way to nondimensionalize eigen vectors
+          _nl_eigen->solution().set(dof, initial_value / n_dofs);
+      }
+    }
+  }
+
+  _nl_eigen->solution().close();
+  _nl_eigen->update();
+}
+
+void
+EigenProblem::preScaleEigenVector()
+{
+  if (_has_pre_scale)
+    scaleEigenvector(_pre_scale_factor);
+
+  _has_pre_scale = false;
+}
+
+void
+EigenProblem::postScaleEigenVector()
+{
+  if (_has_normalization)
+  {
+    Real v;
+    if (_normal_factor == std::numeric_limits<Real>::max())
+    {
+      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+        mooseError("Number of converged eigenvalues ",
+                   _nl_eigen->getNumConvergedEigenvalues(),
+                   " but you required eigenvaue ",
+                   _active_eigen_index);
+
+      // when normal factor is not provided, we use the inverse of the norm of
+      // the active eigenvalue for normalization
+      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
+      v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+    }
+    else
+      v = _normal_factor;
+
+    Real c = getPostprocessorValue(_normalization);
+
+    // We scale SLEPc eigen vector here, so we need to scale it back for optimal
+    // convergence if we call EPS solver again
+    _has_pre_scale = true;
+    mooseAssert(v != 0., "normal factor can not be zero");
+    _pre_scale_factor = c / v;
+
+    unsigned int itr = 0;
+
+    while (!MooseUtils::absoluteFuzzyEqual(v, c))
+    {
+      // If postprocessor is not defined on eigen variables, scaling might not work
+      if (itr > 10)
+        mooseError("Can not scale eigenvector to the required factor ",
+                   v,
+                   " please check if postprocessor is defined on only eigen variables");
+
+      mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
+
+      scaleEigenvector(v / c);
+
+      // update all aux variables and user objects
+      for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
+        execute(flag);
+
+      c = getPostprocessorValue(_normalization);
+
+      itr++;
+    }
+  }
+}
 
 void
 EigenProblem::checkProblemIntegrity()
@@ -361,12 +497,10 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
-#if LIBMESH_HAVE_SLEPC
   // Set necessary slepc callbacks
   // We delay this call as much as possible because libmesh
   // could rebuild matrices due to mesh changes or something else.
   _nl_eigen->attachSLEPcCallbacks();
-#endif
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
@@ -377,8 +511,15 @@ EigenProblem::solve()
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
+
+    // Scale eigen vector if necessary
+    preScaleEigenVector();
+
     _nl->solve();
     _nl->update();
+
+    // Scale eigen vector if users ask
+    postScaleEigenVector();
   }
 
   // sync solutions in displaced problem
@@ -392,9 +533,17 @@ EigenProblem::solve()
 }
 
 void
+EigenProblem::setNormalization(const PostprocessorName & pp, const Real value)
+{
+  _has_normalization = true;
+  _normalization = pp;
+  _normal_factor = value;
+}
+
+void
 EigenProblem::init()
 {
-#if !PETSC_RELEASE_LESS_THAN(3, 13, 0) && LIBMESH_HAVE_SLEPC
+#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If matrix_free=true, this tells Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
   // We need to tell libMesh if we are using a shell preconditioning matrix
@@ -411,8 +560,24 @@ EigenProblem::converged()
 }
 
 bool
-EigenProblem::isNonlinearEigenvalueSolver()
+EigenProblem::isNonlinearEigenvalueSolver() const
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_NEWTON;
+         solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
+         solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
+         solverParams()._eigen_solve_type == Moose::EST_JFNK;
 }
+
+bool
+EigenProblem::needInitializeEigenVector() const
+{
+  return _auto_initialize_eigen_vector && isNonlinearEigenvalueSolver();
+}
+
+void
+EigenProblem::initPetscOutput()
+{
+  _app.getOutputWarehouse().solveSetup();
+}
+
+#endif

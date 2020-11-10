@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'generated_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,82 +10,96 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./offset]
+  [offset]
     type = 'Exodiff'
     input = 'offset.i'
     cli_args = '--mesh-only'
     exodiff = 'offset_in.e'
     exodiff_opts = '-pedantic'
-    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and shift node/sideset ids by a constant offset.'
+    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and shift node/sideset '
+                  'ids by a constant offset.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./prefix_id]
-    type = 'Exodiff'
-    input = 'prefix.i'
-    cli_args = '--mesh-only'
-    exodiff = 'prefix_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and allow adding a name prefix to the node/sideset names.'
-    design = 'meshgenerators/GeneratedMeshGenerator.md'
+  [prefix]
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./prefix_name]
-    prereq = prefix_id
-    type = 'Exodiff'
-    input = 'prefix.i'
-    cli_args = '--mesh-only'
-    exodiff = 'prefix_in.e'
-    exodiff_opts = '-pedantic -match_by_name'
-    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and allow adding a name prefix to the node/sideset names.'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    requirement = 'The system shall include mesh generation tools and allow adding a name prefix to '
+                  'the node/sideset names and maintain the'
 
-  [./both_id]
-    type = 'Exodiff'
-    input = 'both.i'
-    cli_args = '--mesh-only'
-    exodiff = 'both_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and shift node/sideset ids by a constant offset while also adding a name prefix to them.'
-    design = 'meshgenerators/GeneratedMeshGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
-  [./both_name]
-    prereq = both_id
-    type = 'Exodiff'
-    input = 'both.i'
-    cli_args = '--mesh-only'
-    exodiff = 'both_in.e'
-    exodiff_opts = '-pedantic -match_by_name'
-    requirement = 'MOOSE shall be able to use libmesh mesh generation tools and shift node/sideset ids by a constant offset while also adding a name prefix to them.'
-    design = 'meshgenerators/GeneratedMeshGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [id]
+      type = 'Exodiff'
+      input = 'prefix.i'
+      cli_args = '--mesh-only'
+      exodiff = 'prefix_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
 
-  [./type_test]
+      detail = "id and"
+    []
+    [name]
+      prereq = prefix/id
+      type = 'Exodiff'
+      input = 'prefix.i'
+      cli_args = '--mesh-only'
+      exodiff = 'prefix_in.e'
+      exodiff_opts = '-pedantic -match_by_name'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "include the added name."
+    []
+  []
+
+  [both]
+    issues = '#11640'
+    design = 'meshgenerators/GeneratedMeshGenerator.md'
+    requirement = 'The system shall include mesh generation tools and shift node/sideset ids by a '
+                  'constant offset while also adding a name prefix to them and maintain the'
+
+    [id]
+      type = 'Exodiff'
+      input = 'both.i'
+      cli_args = '--mesh-only'
+      exodiff = 'both_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "the shifted id and"
+
+    []
+    [name]
+      prereq = both/id
+      type = 'Exodiff'
+      input = 'both.i'
+      cli_args = '--mesh-only'
+      exodiff = 'both_in.e'
+      exodiff_opts = '-pedantic -match_by_name'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "include the added name."
+
+    []
+  []
+  [type_test]
     prereq = test
     type = 'RunException'
     input = 'generated_mesh_generator.i'
     cli_args = '--mesh-only Mesh/type=GeneratedMesh'
-    expect_err = 'Mesh Generators present but the \[Mesh\] block is set to construct a "GeneratedMesh" mesh, which does not use Mesh Generators in constructing the mesh.'
-    requirement = 'MOOSE shall generate a warning if Mesh Generators are used with a mesh type that does not accept them'
+    expect_err = 'Mesh Generators present but the \[Mesh\] block is set to construct a '
+                 '"GeneratedMesh" mesh, which does not use Mesh Generators in constructing the mesh.'
+    requirement = 'MOOSE shall generate a warning if Mesh Generators are used with a mesh type that '
+                  'does not accept them'
     design = 'meshgenerators/GeneratedMeshGenerator.md'
     issues = '#13959'
     mesh_mode = 'REPLICATED'
-  [../]
+  []
 []

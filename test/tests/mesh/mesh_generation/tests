@@ -1,169 +1,182 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'mesh_generation_test.i'
     exodiff = 'out.e'
     requirement = 'MOOSE shall generate a structured mesh on a Cartesian domain.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#760'
-  [../]
+  []
 
-  [./mesh_bias]
+  [mesh_bias]
     type = 'Exodiff'
     input = 'mesh_bias.i'
     cli_args = '--mesh-only'
     exodiff = 'mesh_bias_in.e'
     recover = false
-    requirement = 'MOOSE shall generate first-order, structured meshes with biasing in the x, y, and z directions.'
+    requirement = 'MOOSE shall generate first-order, structured meshes with biasing in the x, y, and '
+                  'z directions.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#6129'
-  [../]
+  []
 
-  [./mesh_bias_quadratic]
+  [mesh_bias_quadratic]
     type = 'Exodiff'
     input = 'mesh_bias.i'
     cli_args = 'Mesh/elem_type=HEX27 --mesh-only mesh_bias_quadratic_in.e'
     exodiff = 'mesh_bias_quadratic_in.e'
     recover = false
-    requirement = 'MOOSE shall generate second-order, structured meshes with biasing in the x, y, and z directions.'
+    requirement = 'MOOSE shall generate second-order, structured meshes with biasing in the x, y, '
+                  'and z directions.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#6129'
-  [../]
+  []
 
-  [./annular]
+  [annular_errors]
     issues = '#8432'
-    design = 'mesh/AnnularMesh.md'
-    requirement = 'MOOSEs annular mesh generator'
-    [./annular_except1]
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    requirement = 'The system shall include the ability to generate an annular mesh that errors when'
+    [annular_except1]
       type = RunException
       input = annular_except1.i
       expect_err = 'rmax must be greater than rmin'
-      detail = 'shall throw an error if the min radius is larger than the max radius.'
-    [../]
-    [./annular_except2]
+      detail = 'the min radius is larger than the max radius;'
+    []
+    [annular_except2]
       type = RunException
       input = annular_except2.i
       expect_err = 'dmax must be greater than dmin'
-      detail = 'shall throw an error if the min angle is greater than or equal to the max angle.'
-    [../]
-    [./annular_except3]
+      detail = 'the min angle is greater than or equal to the max angle;'
+    []
+    [annular_except3]
       type = RunException
       input = annular_except3.i
       expect_err = 'dmax - dmin must be <= 360'
-      detail = 'shall throw an error if the angle separation is larger than 360 degrees.'
-    [../]
-    [./annular_except4]
+      detail = 'the angle separation is larger than 360 degrees;'
+    []
+    [annular_except4]
       type = RunException
       input = annular_except4.i
-      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
-      detail = 'shall throw an error if the number of elements in the angular direction is too small.'
-    [../]
+      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted '
+                   'elements'
+      detail = 'the number of elements in the angular direction is too small due to the number of '
+               'elements; and'
+    []
 
-    [./annular_except5]
+    [annular_except5]
       type = RunException
       input = annular_except5.i
-      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
-      detail = 'shall throw an error if the number of elements in the angular direction is too small.'
-    [../]
-    [./annular_except6]
+      expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted '
+                   'elements'
+      detail = 'the number of elements in the angular direction is too small due to the maximum '
+               'angle.'
+    []
+    [annular_except6]
       type = RunException
       input = annular_except6.i
       expect_err = 'quad_subdomain_id must not equal tri_subdomain_id'
       detail = 'shall throw an error if the quadrilateral and triangular subdomain ids are the same.'
-    [../]
+    []
+  []
+  [annular]
+    issues = '#8432'
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    requirement = 'The system shall include the ability to create'
 
-    [./annulus]
+    [annulus]
       type = Exodiff
       input = annulus.i
       exodiff = 'annulus_out.e'
-      detail = 'shall create an annulus using quad elements.'
-    [../]
+      detail = 'an annulus using quad elements;'
+    []
 
-    [./annulus_sector]
+    [annulus_sector]
       type = Exodiff
       input = annulus_sector.i
       exodiff = 'annulus_sector_out.e'
-      detail = 'shall create an annulus sector using quad elements.'
-    [../]
-    [./disc]
+      detail = 'an annulus sector using quad elements;'
+    []
+    [disc]
       type = Exodiff
       input = disc.i
       exodiff = 'disc_out.e'
-      detail = 'shall create a circular disk using quad elements.'
-    [../]
+      detail = 'a circular disk using quad elements; and'
+    []
 
-    [./disc_sector]
+    [disc_sector]
       type = Exodiff
       input = disc_sector.i
       exodiff = 'disc_sector_out.e'
-      detail = 'shall create a circular disk sector using quad elements.'
-    [../]
+      detail = 'circular disk sector using quad elements.'
+    []
   []
 
-  [./spiral_annular_mesh]
+  [spiral_annular_mesh]
     type = 'Exodiff'
     input = 'spiral_mesh.i'
     cli_args = '--mesh-only'
     exodiff = 'spiral_mesh_in.e'
     recover = false
-    requirement = 'MOOSE shall have an algorithm for meshing an annular region with triangular elements.'
+    requirement = 'MOOSE shall have an algorithm for meshing an annular region with triangular '
+                  'elements.'
     design = 'mesh/SpiralAnnularMesh.md'
     issues = '#12205'
-  [../]
+  []
 
-  [./ringleb_mesh]
+  [ringleb_mesh]
     type = 'Exodiff'
     input = 'ringleb_mesh.i'
     cli_args = '--mesh-only'
     exodiff = 'ringleb_mesh_in.e'
     recover = false
     design = 'mesh/RinglebMesh.md'
-    requirement = 'MOOSE shall have an algorithm for generating triangular and quadrilateral meshes for the Ringleb problem.'
+    requirement = 'MOOSE shall have an algorithm for generating triangular and quadrilateral meshes '
+                  'for the Ringleb problem.'
     issues = '#12246'
-  [../]
+  []
 
-  [./annular_except1_deprecated]
+  [annular_except1_deprecated]
     type = RunException
     input = annular_except1_deprecated.i
     expect_err = 'rmax must be greater than rmin'
     no_error_deprecated = true
     deprecated = true
-  [../]
-  [./annular_except2_deprecated]
+  []
+  [annular_except2_deprecated]
     type = RunException
     input = annular_except2_deprecated.i
     expect_err = 'dmax must be greater than dmin'
     no_error_deprecated = true
     deprecated = true
-  [../]
-  [./annular_except3_deprecated]
+  []
+  [annular_except3_deprecated]
     type = RunException
     input = annular_except3_deprecated.i
     expect_err = 'dmax - dmin must be <= 360'
     no_error_deprecated = true
     deprecated = true
-  [../]
-  [./annular_except5_deprecated]
+  []
+  [annular_except5_deprecated]
     type = RunException
     input = annular_except5_deprecated.i
     expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
     no_error_deprecated = true
     deprecated = true
-  [../]
-  [./annulus_sector_deprecated]
+  []
+  [annulus_sector_deprecated]
     type = Exodiff
     input = annulus_sector_deprecated.i
     exodiff = 'annulus_sector_deprecated_out.e'
     prereq = annular/annulus_sector
     no_error_deprecated = true
     deprecated = true
-  [../]
-  [./disc_sector_deprecated]
+  []
+  [disc_sector_deprecated]
     type = Exodiff
     input = disc_sector_deprecated.i
     exodiff = 'disc_sector_deprecated_out.e'
     prereq = annular/disc_sector
     no_error_deprecated = true
     deprecated = true
-  [../]
+  []
 []

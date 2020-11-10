@@ -429,3 +429,15 @@ NonlinearSystem::computeScalingResidual()
 {
   _fe_problem.computeResidualSys(_transient_sys, *_current_solution, RHS());
 }
+
+SNES
+NonlinearSystem::getSNES()
+{
+  PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinearSolver());
+
+  if (petsc_solver)
+    return petsc_solver->snes();
+  else
+    mooseError("It is not a petsc nonlinear solver");
+}

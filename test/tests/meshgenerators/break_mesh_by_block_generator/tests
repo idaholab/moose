@@ -1,144 +1,152 @@
 [Tests]
-  [./break_mesh_by_blocks_generator_3d_auto_test]
-    type = 'Exodiff'
-    input = 'break_mesh_3D_auto.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_3D_auto_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
+  [break_mesh_by_blocks_generator]
+    requirement = 'MOOSE shall be able to create separate blocks in a mesh'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    exodiff_opts = '-pedantic'
-  [../]
 
-  [./break_mesh_by_blocks_generator_3d_split_test]
-    type = 'Exodiff'
-    input = 'break_mesh_3D_splittrue.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_3D_splittrue_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    exodiff_opts = '-pedantic'
-  [../]
+    [3d_auto_test]
+      type = 'Exodiff'
+      input = 'break_mesh_3D_auto.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_3D_auto_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff_opts = '-pedantic'
 
-  [./break_mesh_by_blocks_generator_3d_polycrystal_test]
-    type = 'Exodiff'
-    input = 'break_mesh_3D_polycrystal.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_3D_polycrystal_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    exodiff_opts = '-pedantic'
-  [../]
+      detail = "without a split interface in 3D;"
+    []
 
-  [./break_mesh_by_blocks_generator_2d_auto_test]
-    type = 'Exodiff'
-    input = 'break_mesh_2DJunction_auto.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_2DJunction_auto_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [3d_split_test]
+      type = 'Exodiff'
+      input = 'break_mesh_3D_splittrue.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_3D_splittrue_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff_opts = '-pedantic'
 
-  [./break_mesh_by_blocks_generator_2d_splittrue_test]
-    type = 'Exodiff'
-    input = 'break_mesh_2DJunction_splittrue.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_2DJunction_splittrue_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    exodiff_opts = '-pedantic'
-  [../]
+      detail = "with a split interface in 3D;"
+    []
 
-  [./break_mesh_by_blocks_generator_2d_polycrystal_test]
-    type = 'Exodiff'
-    input = 'break_mesh_2DJunction_polycrystal.i'
-    cli_args = '--mesh-only'
-    exodiff = 'break_mesh_2DJunction_polycrystal_in.e'
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    exodiff_opts = '-pedantic'
-  [../]
+    [3d_polycrystal_test]
+      type = 'Exodiff'
+      input = 'break_mesh_3D_polycrystal.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_3D_polycrystal_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff_opts = '-pedantic'
 
-  [./block_restricted_split_transition_only]
-    type = 'Exodiff'
-    input = 'break_mesh_block_restricted.i'
-    cli_args = 'Mesh/split/split_interface=false Mesh/split/split_transition_interface=true --mesh-only block_restricted_split_transition_only_in.e'
-    exodiff = 'block_restricted_split_transition_only_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to break teh mesh only between listed blocks without creating a transition boundary'
+      detail = "with a polycrystal based mesh in 3D;"
+    []
+
+    [2d_auto_test]
+      type = 'Exodiff'
+      input = 'break_mesh_2DJunction_auto.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_2DJunction_auto_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "without a split interface in 2D;"
+    []
+
+    [2d_splittrue_test]
+      type = 'Exodiff'
+      input = 'break_mesh_2DJunction_splittrue.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_2DJunction_splittrue_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff_opts = '-pedantic'
+
+      detail = "with a split interface in 2D; and"
+    []
+
+    [polycrystal_test]
+      type = 'Exodiff'
+      input = 'break_mesh_2DJunction_polycrystal.i'
+      cli_args = '--mesh-only'
+      exodiff = 'break_mesh_2DJunction_polycrystal_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      exodiff_opts = '-pedantic'
+
+      detail = "with a polycrystal based mesh in 2D."
+    []
+  []
+
+  [block_restricted]
+    requirement = 'The system shall be able to break the mesh between listed blocks:'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#15895'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
 
-  [./block_restricted_split_interface_only]
-    type = 'Exodiff'
-    input = 'break_mesh_block_restricted.i'
-    cli_args = 'Mesh/split/split_interface=true --mesh-only block_restricted_split_interface_only_in.e'
-    exodiff = 'block_restricted_split_interface_only_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to break teh mesh only between listed blocks without creating a transition boundary'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [split_transition_only]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted.i'
+      cli_args = 'Mesh/split/split_interface=false Mesh/split/split_transition_interface=true '
+                 '--mesh-only block_restricted_split_transition_only_in.e'
+      exodiff = 'block_restricted_split_transition_only_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
 
-  [./block_restricted_split_all]
-    type = 'Exodiff'
-    input = 'break_mesh_block_restricted.i'
-    cli_args = 'Mesh/split/split_interface=true Mesh/split/split_transition_interface=true --mesh-only block_restricted_split_all_in.e'
-    exodiff = 'block_restricted_split_all_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to break teh mesh only between listed blocks without creating a transition boundary'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+      detail = 'without splitting the interface and with splitting the transition interface;'
+    []
 
-  [./block_restricted_no_transition]
-    type = 'Exodiff'
-    input = 'break_mesh_block_restricted.i'
-    cli_args = 'Mesh/split/add_transition_interface=false --mesh-only block_restricted_no_transition_in.e'
-    exodiff = 'block_restricted_no_transition_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to break teh mesh only between listed blocks without creating a transition boundary'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+    [split_interface_only]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted.i'
+      cli_args = 'Mesh/split/split_interface=true --mesh-only '
+                 'block_restricted_split_interface_only_in.e'
+      exodiff = 'block_restricted_split_interface_only_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
 
-  [./block_restricted_no_transition_split]
-    type = 'Exodiff'
-    input = 'break_mesh_block_restricted.i'
-    cli_args = 'Mesh/split/add_transition_interface=false Mesh/split/split_interface=true --mesh-only block_restricted_no_transition_split_in.e'
-    exodiff = 'block_restricted_no_transition_split_in.e'
-    exodiff_opts = '-pedantic'
-    requirement = 'The system shall be able to break teh mesh only between listed blocks without creating a transition boundary'
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#15895'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
+      detail = 'with a split interface and without splitting the transition interface;'
+    []
 
+    [split_all]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted.i'
+      cli_args = 'Mesh/split/split_interface=true Mesh/split/split_transition_interface=true '
+                 '--mesh-only block_restricted_split_all_in.e'
+      exodiff = 'block_restricted_split_all_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'with a split interface and splitting the transition interface;'
+    []
+
+    [no_transition]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted.i'
+      cli_args = 'Mesh/split/add_transition_interface=false --mesh-only '
+                 'block_restricted_no_transition_in.e'
+      exodiff = 'block_restricted_no_transition_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'with a split interface, without splitting the transition interface, and without a '
+               'transition interface;'
+
+    []
+
+    [transition_split]
+      type = 'Exodiff'
+      input = 'break_mesh_block_restricted.i'
+      cli_args = 'Mesh/split/add_transition_interface=false Mesh/split/split_interface=true '
+                 '--mesh-only block_restricted_no_transition_split_in.e'
+      exodiff = 'block_restricted_no_transition_split_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'without a split interface, splitting the transition interface, or a transition '
+               'interface;'
+    []
+  []
 []

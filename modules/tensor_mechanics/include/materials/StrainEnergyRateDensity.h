@@ -16,21 +16,12 @@
 #include "ADRadialReturnCreepStressUpdateBase.h"
 #include "MooseTypes.h"
 
-// Create GenericRadialReturn interface to call (AD)RadialReturnCreepStressUpdateBase.
-namespace Moose
-{
-template <typename T>
-struct ADType;
-template <>
-struct ADType<RadialReturnCreepStressUpdateBase>
-{
-  typedef ADRadialReturnCreepStressUpdateBase type;
-};
-}
-
+// select the appropriate class based on the is_ad boolean parameter
 template <bool is_ad>
 using GenericRadialReturnCreepStressUpdateBase =
-    typename Moose::GenericStruct<RadialReturnCreepStressUpdateBase, is_ad>::type;
+    typename std::conditional<is_ad,
+                              ADRadialReturnCreepStressUpdateBase,
+                              RadialReturnCreepStressUpdateBase>::type;
 
 /**
  * StrainEnergyRateDensity calculates the strain energy rate density.

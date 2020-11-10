@@ -1,16 +1,17 @@
 [Tests]
-  [./make_split]
+  [make_split]
     type = 'CheckFiles'
     input = 'simple_diffusion.i'
     cli_args = '--split-mesh 3 --split-file foo Mesh/parallel_type=replicated'
-    check_files = 'foo.cpr/3/header.cpr foo.cpr/3/split-3-0.cpr foo.cpr/3/split-3-1.cpr foo.cpr/3/split-3-2.cpr'
+    check_files = 'foo.cpr/3/header.cpr foo.cpr/3/split-3-0.cpr foo.cpr/3/split-3-1.cpr '
+                  'foo.cpr/3/split-3-2.cpr'
     recover = false
 
     issues = '#10623'
     design = 'Mesh/splitting.md'
     requirement = 'A mesh can be split into a specified number of files using command line options.'
-  [../]
-  [./use_split]
+  []
+  [use_split]
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
@@ -21,38 +22,44 @@
 
     issues = '#10623'
     design = 'Mesh/splitting.md'
-    requirement = 'A mesh can be pre-split properly and used to generate equivalent results to running a simulation with the unsplit mesh.'
-  [../]
+    requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
+                  'running a simulation with the unsplit mesh.'
+  []
 
-  [./check_pre_split]
-    type = 'RunApp'
-    input = 'simple_diffusion.i'
-    cli_args = '--use-split --split-file foo UserObjects/splittester/type=SplitTester Outputs/exodus=false'
-    expect_out = 'Parallel Type:\s+distributed \(pre-split\)'
-    prereq = 'make_split'
-    min_parallel = 3
-    max_parallel = 3
-
+  [check]
     issues = '#11825'
     design = 'Mesh/splitting.md'
-    requirement = 'Console output should include an indicator that a pre-split mesh is being used when using --split-mesh in distributed = auto mode'
-  [../]
+    requirement = 'Console output should include an indicator that a pre-split mesh is being used '
+                  'when using --split-mesh in distributed = auto mode'
 
-  [./check_forced_pre_split]
-    type = 'RunApp'
-    input = 'simple_diffusion.i'
-    cli_args = '--use-split --split-file foo Mesh/parallel_type=replicated UserObjects/splittester/type=SplitTester Outputs/exodus=false'
-    expect_out = 'Parallel Type:\s+distributed \(forced, pre-split\)'
-    prereq = 'make_split'
-    min_parallel = 3
-    max_parallel = 3
+    [pre_split]
+      type = 'RunApp'
+      input = 'simple_diffusion.i'
+      cli_args = '--use-split --split-file foo UserObjects/splittester/type=SplitTester '
+                 'Outputs/exodus=false'
+      expect_out = 'Parallel Type:\s+distributed \(pre-split\)'
+      prereq = 'make_split'
+      min_parallel = 3
+      max_parallel = 3
 
-    issues = '#11825'
-    design = 'Mesh/splitting.md'
-    requirement = 'Console output should include an indicator that a pre-split mesh is being used when using --split-mesh in distributed = auto mode'
-  [../]
+      detail = "without and"
+    []
 
-  [./split_with_distributed_error]
+    [forced_pre_split]
+      type = 'RunApp'
+      input = 'simple_diffusion.i'
+      cli_args = '--use-split --split-file foo Mesh/parallel_type=replicated '
+                 'UserObjects/splittester/type=SplitTester Outputs/exodus=false'
+      expect_out = 'Parallel Type:\s+distributed \(forced, pre-split\)'
+      prereq = 'make_split'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "with the forced option."
+    []
+  []
+
+  [split_with_distributed_error]
     type = 'RunException'
     input = 'simple_diffusion.i'
     cli_args = '--split-mesh 3 --split-file foo'
@@ -61,14 +68,16 @@
 
     issues = '#11434'
     design = 'Mesh/splitting.md'
-    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
-  [../]
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a '
+                  '"DistributedMesh".'
+  []
 
-  [./split_with_RM_part1]
+  [split_with_RM_part1]
     type = 'CheckFiles'
     input = 'geometric_neighbors.i'
     cli_args = '--split-mesh 2 --split-file geometric_neighbors Mesh/parallel_type=replicated'
-    check_files = 'geometric_neighbors.cpr/2/header.cpr geometric_neighbors.cpr/2/split-2-0.cpr geometric_neighbors.cpr/2/split-2-1.cpr'
+    check_files = 'geometric_neighbors.cpr/2/header.cpr geometric_neighbors.cpr/2/split-2-0.cpr '
+                  'geometric_neighbors.cpr/2/split-2-1.cpr'
     recover = false
     compiler = '!INTEL'
     petsc_version = '>=3.8.0'
@@ -76,12 +85,13 @@
     issues = '#11434'
     design = 'Mesh/splitting.md'
     requirement = 'The mesh splitter capability will honor geometric RelationshipManager objects.'
-  [../]
+  []
 
-  [./split_with_RM_part2]
+  [split_with_RM_part2]
     type = 'Exodiff'
     input = 'geometric_neighbors.i'
-    cli_args = '--use-split --split-file geometric_neighbors Outputs/file_base=geometric_edge_two_2D_out'
+    cli_args = '--use-split --split-file geometric_neighbors '
+               'Outputs/file_base=geometric_edge_two_2D_out'
     exodiff = 'geometric_edge_two_2D_out.e'
     recover = false
     compiler = '!INTEL'
@@ -93,6 +103,7 @@
 
     issues = '#11434'
     design = 'Mesh/splitting.md'
-    requirement = 'Meshes that are pre-split with active RelationshipManager objects work the same as if using an online DistributedMesh.'
-  [../]
+    requirement = 'Meshes that are pre-split with active RelationshipManager objects work the same '
+                  'as if using an online DistributedMesh.'
+  []
 []

@@ -26,7 +26,7 @@
     input = 'console.i'
     expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
 
-    requirement = 'The system shall output Scalar Variables on the console in a table.'
+    requirement = 'The system shall output Scalar Variables on the console in a table to the screen.'
     issues = '#1927'
   [../]
   [./warning]
@@ -62,7 +62,7 @@
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
     recover = false
 
-    requirement = 'The system shall output Scalar Variables on the console in a table.'
+    requirement = 'The system shall output Scalar Variables on the console in a table to a file.'
     issues = '#1927'
   [../]
   [./file_scalar_aux]

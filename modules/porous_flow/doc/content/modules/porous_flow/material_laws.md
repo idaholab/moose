@@ -8,3 +8,5 @@ Detailed descriptions of these are provided in the following:
 - [Permeability](porous_flow/permeability.md)
 - [Porosity](porosity.md)
 - [Diffusivity](diffusivity.md)
+- [Hysteretic capillary pressure and relative permeability](hysteresis.md)
+

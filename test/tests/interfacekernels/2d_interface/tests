@@ -71,7 +71,7 @@
     input = 'coupled_value_coupled_flux.i'
     cli_args = 'Executioner/automatic_scaling=true Outputs/exodus=false -snes_view'
     absent_out = 'MatSetValues calls =[1-9]'
-    requirement = 'We shall not do any mallocs in MatSetValues because of automatic scaling'
+    requirement = 'The system shall not perform memory allocation for automatic scaling when computing values.'
     issues = '#12601'
     design = 'FEProblemSolve.md'
     petsc_version = '>=3.9.0'

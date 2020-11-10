@@ -44,7 +44,7 @@ Eigenvalues::initialize()
 void
 Eigenvalues::execute()
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   const std::vector<std::pair<Real, Real>> & eigenvalues = _nl_eigen->getAllConvergedEigenvalues();
   unsigned int n_converged_eigenvalues = eigenvalues.size();
   _eigen_values_real.resize(n_converged_eigenvalues);

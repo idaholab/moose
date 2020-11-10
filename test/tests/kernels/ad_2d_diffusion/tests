@@ -1,58 +1,72 @@
 [Tests]
-  [./testdirichlet]
-    type = 'Exodiff'
-    input = '2d_diffusion_test.i'
-    exodiff = 'out.e'
-    scale_refine = 5
-    group = 'requirements'
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions using AD and match non-AD methods.'
-    issues = '#13260'
-    design = '/DirichletBC.md'
-  [../]
-  [./testdirichlet-jac]
-    type = 'PetscJacobianTester'
-    input = '2d_diffusion_test.i'
-    scale_refine = 5
-    difference_tol = 1e-7
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and compute a perfect jacobian.'
-    issues = '#13260'
-    design = '/DirichletBC.md'
-  [../]
+  issues = '#13260'
 
-  [./testneumann]
-    type = 'Exodiff'
-    input = '2d_diffusion_neumannbc_test.i'
-    exodiff = 'neumannbc_out.e'
-    scale_refine = 5
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem using AD with Neumann boundary conditions.'
+  [dirichlet]
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet '
+                  'boundary conditions using'
+    design = '/ADDirichletBC.md'
+
+    [ad]
+      type = 'Exodiff'
+      input = '2d_diffusion_test.i'
+      exodiff = 'out.e'
+      scale_refine = 5
+
+      detail = "automatic differentiation and"
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = '2d_diffusion_test.i'
+      scale_refine = 5
+      difference_tol = 1e-7
+
+      detail = "compute the correct Jacobian matrix."
+    []
+  []
+
+  [neumann]
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem Neumann boundary '
+                  'conditions using'
     issues = '#12903'
     design = '/ADNeumannBC.md'
-  [../]
-  [./testneumann-jac]
-    type = 'PetscJacobianTester'
-    input = '2d_diffusion_neumannbc_test.i'
-    scale_refine = 5
-    difference_tol = 1e-7
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem using AD with Neumann boundary conditions and compute a perfect jacobian.'
-    issues = '#13260'
-    design = '/ADNeumannBC.md'
-  [../]
+    [ad]
+      type = 'Exodiff'
+      input = '2d_diffusion_neumannbc_test.i'
+      exodiff = 'neumannbc_out.e'
+      scale_refine = 5
 
-  [./testbodyforce]
-    type = 'Exodiff'
-    input = '2d_diffusion_bodyforce_test.i'
-    exodiff = 'bodyforce_out.e'
-    scale_refine = 5
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and match non-AD methods.'
+      detail = "automatic differentiation and"
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = '2d_diffusion_neumannbc_test.i'
+      scale_refine = 5
+      difference_tol = 1e-7
+
+      detail = "compute the correct Jacobian matrix."
+    []
+  []
+  [bodyforce]
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a '
+                  'volumetric source term using'
     issues = '#13260'
     design = '/ADBodyForce.md'
-  [../]
-  [./testbodyforce-jac]
-    type = 'PetscJacobianTester'
-    input = '2d_diffusion_bodyforce_test.i'
-    scale_refine = 5
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and compute a perfect jacobian.'
-    issues = '#13260'
-    design = '/ADBodyForce.md'
-  [../]
+
+    [ad]
+      type = 'Exodiff'
+      input = '2d_diffusion_bodyforce_test.i'
+      exodiff = 'bodyforce_out.e'
+      scale_refine = 5
+
+      detail = "automatic differentiation and"
+
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = '2d_diffusion_bodyforce_test.i'
+      scale_refine = 5
+
+      detail = "compute the correct Jacobian matrix."
+    []
+  []
 []

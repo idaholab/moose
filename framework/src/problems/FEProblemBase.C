@@ -6620,6 +6620,12 @@ FEProblemBase::solverParams()
   return _solver_params;
 }
 
+const SolverParams &
+FEProblemBase::solverParams() const
+{
+  return _solver_params;
+}
+
 void
 FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
