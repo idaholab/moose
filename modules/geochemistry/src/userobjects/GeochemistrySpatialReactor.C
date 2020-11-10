@@ -423,8 +423,14 @@ GeochemistrySpatialReactor::threadJoin(const UserObject & uo)
 {
   const GeochemistrySpatialReactor & gsr = static_cast<const GeochemistrySpatialReactor &>(uo);
   for (unsigned i = 0; i < _num_my_nodes; ++i)
+  {
     if (!_execute_done[i] && gsr._execute_done[i])
       _egs_at_node[i] = gsr._egs_at_node[i];
+    if (!_execute_done[i] && !gsr._execute_done[i])
+      mooseError("Execute not done by either thread for node ", i);
+    if (_execute_done[i] && gsr._execute_done[i])
+      mooseError("Execute done by both threads for node ", i);
+  }
 }
 
 void
