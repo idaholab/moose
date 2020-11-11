@@ -106,7 +106,9 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
     _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
-    _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL))
+    _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL)),
+    _precond_matrix_includes_eigen(false),
+    _preconditioner(nullptr)
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
 
@@ -160,23 +162,24 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
   }
 
   // If this is not an eigen kernel
-  if (vtags.find(_Bx_tag) == vtags.end())
+  // If there is no vector eigen tag and no matrix eigen tag,
+  // then we consider this as noneigen kernel
+  if (vtags.find(_Bx_tag) == vtags.end() && mtags.find(_B_tag) == mtags.end())
   {
+    // Vector tag
     object.useVectorTag(_Ax_tag);
-    // Noneigen Kernels
-    object.useMatrixTag(_precond_tag);
-  }
-  else // also associate eigen matrix tag if this is a eigen kernel
-    object.useMatrixTag(_B_tag);
-
-  if (mtags.find(_B_tag) == mtags.end())
-  {
+    // Matrix tag
     object.useMatrixTag(_A_tag);
     // Noneigen Kernels
     object.useMatrixTag(_precond_tag);
   }
   else
+  {
+    // Associate the eigen matrix tag and the vector tag
+    // if this is a eigen kernel
+    object.useMatrixTag(_B_tag);
     object.useVectorTag(_Bx_tag);
+  }
 }
 
 void
