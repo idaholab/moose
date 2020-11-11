@@ -79,9 +79,3 @@ ODEKernel::computeQpJacobian()
 {
   return 0.;
 }
-
-Real
-ODEKernel::computeQpOffDiagJacobianScalar(unsigned int /*jvar*/)
-{
-  return 0.;
-}

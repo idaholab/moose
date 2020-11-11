@@ -35,5 +35,11 @@ public:
 protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar)
+  {
+    // Backwards compatibility
+    return computeQpOffDiagJacobian(jvar);
+  }
+
+  virtual Real computeQpOffDiagJacobian(unsigned int) { return 0; }
 };

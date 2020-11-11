@@ -61,7 +61,11 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component from a scalar var.
    */
-  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar)
+  {
+    // Backwards compatibility
+    return computeQpOffDiagJacobian(jvar);
+  }
 
   MooseVariable & _var;
 
