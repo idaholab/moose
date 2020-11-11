@@ -356,6 +356,7 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
     {
       diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] -
                       _state_vars_prev[i][j]); // Calculate increment size
+
       if (std::abs(_state_vars_old_stored[i][j]) < _zero_tol && diff > _zero_tol)
         return true;
       if (std::abs(_state_vars_old_stored[i][j]) > _zero_tol &&
@@ -409,6 +410,7 @@ FiniteStrainUObasedCP::solveStress()
     // Calculate stress increment
     dpk2 = -_jac.invSymm() * _resid;
     _pk2[_qp] = _pk2[_qp] + dpk2;
+
     calcResidJacob();
 
     if (_err_tol)
