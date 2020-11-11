@@ -46,6 +46,7 @@
                "a material property value on the primary side of 4 "
     design = 'InterfaceAverageVariableValuePostprocessor.md'
     issues = '#11647 #16099'
+    skip = '#16149'
     max_threads = 2
   [../]
   [./interface_integral_variable_value_postprocessor_fv_test]
@@ -63,6 +64,7 @@
                "a material integral property value on the primary side of 12 "
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
     issues = '#11647 #16099'
+    skip = '#16149'
     max_threads = 2
   [../]
 []

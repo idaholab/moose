@@ -44,7 +44,6 @@
   [../]
 []
 
-
 [FVKernels]
   [./diff]
     type = FVDiffusion
@@ -69,11 +68,12 @@
 []
 
 [Materials]
-  [./stateful1]
-    type = StatefulMaterial
+  [mat_1]
+    type = ADGenericConstantMaterial
+    prop_names = 'diffusivity'
+    prop_values = '1'
     block = 0
-    initial_diffusivity = 5
-  [../]
+  []
   [./stateful2]
     type = StatefulMaterial
     block = 1
@@ -104,8 +104,6 @@
     order = CONSTANT
   []
 []
-
-
 
 [Postprocessors]
   [./diffusivity_average]

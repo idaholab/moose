@@ -44,7 +44,6 @@
   [../]
 []
 
-
 [FVKernels]
   [./diff]
     type = FVDiffusion
@@ -104,8 +103,6 @@
     order = CONSTANT
   []
 []
-
-
 
 [Postprocessors]
   [./diffusivity_average]
