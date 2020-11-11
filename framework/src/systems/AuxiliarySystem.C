@@ -236,7 +236,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
     {
       MooseVariableBase * var_base = _vars[tid].getVariable(name);
 
-      MooseVariable * var = dynamic_cast<MooseVariable *>(var_base);
+      auto * const var = dynamic_cast<MooseVariableField<Real> *>(var_base);
 
       if (var)
       {
@@ -252,7 +252,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
         }
       }
 
-      ArrayMooseVariable * avar = dynamic_cast<ArrayMooseVariable *>(var_base);
+      auto * const avar = dynamic_cast<MooseVariableField<RealEigenVector> *>(var_base);
 
       if (avar)
       {
