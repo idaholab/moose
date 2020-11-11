@@ -32,7 +32,6 @@ from .LogHelper import LogHelper
 @mooseutils.addProperty('alias', ptype=list)
 @mooseutils.addProperty('unregister', ptype=list)
 @mooseutils.addProperty('allow_test_objects', ptype=bool, default=False)
-@mooseutils.addProperty('dump_syntax', ptype=bool, default=False)
 class SQAMooseAppReport(SQAReport):
     """
     Report of MooseObject and MOOSE syntax markdown pages.
@@ -97,10 +96,6 @@ class SQAMooseAppReport(SQAReport):
         kwargs.setdefault('object_prefix', mooseutils.eval_path(self.object_prefix))
         kwargs.setdefault('allow_test_objects', self.allow_test_objects)
         logger = check_syntax(self.app_syntax, self.app_types, file_cache, **kwargs)
-
-        # Dump
-        if self.dump_syntax:
-            print(self.app_syntax)
 
         return logger
 

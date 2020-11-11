@@ -44,14 +44,6 @@ class TestCheck(unittest.TestCase):
                                     app_reports=None, req_reports=None,
                                     generate=['MooseTestApp'], show_warnings=False)
 
-        # --dump
-        opt.dump = ['moose_test']
-        opt.generate = None
-        with mock.patch('sys.stdout', new=io.StringIO()) as stdout:
-            status = check.main(opt)
-        self.assertIn('/Kernels/Diffusion', stdout.getvalue())
-        self.assertEqual(status, 0)
-
         # --reports
         opt.reports = ['app']
         opt.config = 'sqa_reports.yml'

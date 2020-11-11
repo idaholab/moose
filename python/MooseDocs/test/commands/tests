@@ -14,4 +14,11 @@
 
     requirement = "The system shall include a utility for generating documentation stub pages."
   []
+  [syntax]
+    type = PythonUnitTest
+    input = test_syntax.py
+    issues = '#16155'
+
+    requirement = "The system shall include a utility for displaying the application syntax tree."
+  []
 []
