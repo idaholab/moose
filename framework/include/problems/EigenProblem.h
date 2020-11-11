@@ -186,14 +186,9 @@ public:
 
 private:
   /**
-   * Set SLEPc/PETSc options to trigger free power iteration
+   * Do some free/extra power iterations
    */
-  void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
-
-  /**
-   * Clear SLEPc/PETSc options to turn the eigen-solver back to a regular Newton solver
-   */
-  void clearFreeNonlinearPowerIterations();
+  void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
 
 protected:
   unsigned int _n_eigen_pairs_required;

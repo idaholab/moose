@@ -20,6 +20,7 @@
 // forward declarations
 class EigenProblem;
 class KernelBase;
+class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -162,7 +163,7 @@ public:
   virtual void turnOffJacobian() override;
 
 protected:
-  virtual void postAddResidualObject(ResidualObject & object) const override;
+  virtual void postAddResidualObject(ResidualObject & object) override;
 
   NumericVector<Number> & solutionOldInternal() const override
   {

@@ -741,7 +741,7 @@ protected:
   void assembleScalingVector();
 #endif
 
-  virtual void postAddResidualObject(ResidualObject &) const {}
+  virtual void postAddResidualObject(ResidualObject &) {}
 
 protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }

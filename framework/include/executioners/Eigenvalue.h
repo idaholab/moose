@@ -62,6 +62,10 @@ public:
   virtual void outputInverseEigenvalue(bool inverse);
 
 private:
+  /**
+   * Prepare right petsc options
+   */
+  void prepareSolverOptions();
 #endif
 
 protected:

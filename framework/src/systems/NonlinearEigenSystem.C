@@ -23,6 +23,7 @@
 #include "DGKernelBase.h"
 #include "ScalarKernel.h"
 #include "MooseVariableScalar.h"
+#include "ResidualObject.h"
 
 #include "libmesh/eigen_system.h"
 #include "libmesh/libmesh_config.h"
@@ -141,7 +142,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 }
 
 void
-NonlinearEigenSystem::postAddResidualObject(ResidualObject & object) const
+NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 {
   if (_precond_matrix_includes_eigen)
     object.useMatrixTag(_precond_tag);

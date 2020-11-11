@@ -178,6 +178,12 @@ Eigenvalue::init()
   _eigen_problem.initialSetup();
 
   // Make sure all PETSc options are setup correctly
+  prepareSolverOptions();
+}
+
+void
+Eigenvalue::prepareSolverOptions()
+{
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
@@ -188,12 +194,9 @@ Eigenvalue::init()
     // Master app has the default data base
     if (!_app.isUltimateMaster())
       PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-
     Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
-
     if (!_app.isUltimateMaster())
       PetscOptionsPop();
-
     _eigen_problem.petscOptionsInserted() = true;
   }
 #endif

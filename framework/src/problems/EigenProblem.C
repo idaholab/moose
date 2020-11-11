@@ -504,46 +504,35 @@ EigenProblem::checkProblemIntegrity()
 }
 
 void
-EigenProblem::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(petscOptionsDatabase());
-#endif
-
+  doFreePowerIteration(true);
+  // Set free power iterations
   Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
-}
+  // Call solver
+  _nl->solve();
+  _nl->update();
 
-void
-EigenProblem::clearFreeNonlinearPowerIterations()
-{
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(petscOptionsDatabase());
-#endif
-
+  // Clear free power iterations
   auto executioner = getMooseApp().getExecutioner();
   if (executioner)
     Moose::SlepcSupport::clearFreeNonlinearPowerIterations(executioner->parameters());
   else
     mooseError("There is no executioner for this moose app");
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
+  doFreePowerIteration(false);
 }
 
 void
 EigenProblem::solve()
 {
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master has the default database
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_petsc_option_data_base);
+#endif
+
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
@@ -556,95 +545,47 @@ EigenProblem::solve()
     // Scale eigen vector if necessary
     preScaleEigenVector();
 
-    // Let do an initial solve if a nonlinear eigen solver but not power is used.
-    // The initial solver is a Inverse Power, and it is used to compute a good initial
-    // guess for Newton
-    if (_first_solve && solverParams()._free_power_iterations && isNonlinearEigenvalueSolver() &&
+    if (isNonlinearEigenvalueSolver() &&
         solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
     {
-      doFreePowerIteration(true);
-      // Set free power iterations
-      setFreeNonlinearPowerIterations(solverParams()._free_power_iterations);
+      // Let do an initial solve if a nonlinear eigen solver but not power is used.
+      // The initial solver is a Inverse Power, and it is used to compute a good initial
+      // guess for Newton
+      if (solverParams()._free_power_iterations && _first_solve)
+      {
+        _console << " Free power iteration starts" << std::endl;
+        doFreeNonlinearPowerIterations(solverParams()._free_power_iterations);
+        _first_solve = false;
+      }
 
-      _console << " Free power iteration starts" << std::endl;
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-      // Master has the default database
-      if (!_app.isUltimateMaster())
-        PetscOptionsPush(_petsc_option_data_base);
-#endif
-
-      // Call solver
-      _nl->solve();
-      _nl->update();
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-      if (!_app.isUltimateMaster())
-        PetscOptionsPop();
-#endif
-
-      // Clear free power iterations
-      clearFreeNonlinearPowerIterations();
-
-      doFreePowerIteration(false);
-
-      _first_solve = false;
+      // Let us do extra power iterations here if necessary
+      if (solverParams()._extra_power_iterations)
+      {
+        _console << " Extra Free power iteration starts" << std::endl;
+        doFreeNonlinearPowerIterations(solverParams()._extra_power_iterations);
+      }
     }
 
-    // Let us do extra power iterations here if necessary
-    if (solverParams()._extra_power_iterations && isNonlinearEigenvalueSolver() &&
-        solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+    // We print this for only nonlinear solver
+    if (isNonlinearEigenvalueSolver())
     {
-      // SlepcSupport needs to know we are doing free power iterations
-      doFreePowerIteration(true);
-      // Set free power iterations
-      setFreeNonlinearPowerIterations(solverParams()._extra_power_iterations);
-
-      _console << " Extra Free power iteration starts" << std::endl;
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-      // Master has the default database
-      if (!_app.isUltimateMaster())
-        PetscOptionsPush(_petsc_option_data_base);
-#endif
-
-      // Call solver
-      _nl->solve();
-      _nl->update();
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-      if (!_app.isUltimateMaster())
-        PetscOptionsPop();
-#endif
-
-      // Clear free power iterations
-      clearFreeNonlinearPowerIterations();
-
-      doFreePowerIteration(false);
+      if (solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+        _console << " Nonlinear Newton iteration starts" << std::endl;
+      else
+        _console << " Nonlinear power iteration starts" << std::endl;
     }
-
-    if (solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
-      _console << " Nonlinear Newton iteration starts" << std::endl;
-    else
-      _console << " Nonlinear power iteration starts" << std::endl;
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-    // Master has the default database
-    if (!_app.isUltimateMaster())
-      PetscOptionsPush(_petsc_option_data_base);
-#endif
 
     _nl->solve();
     _nl->update();
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-    if (!_app.isUltimateMaster())
-      PetscOptionsPop();
-#endif
-
     // Scale eigen vector if users ask
     postScaleEigenVector();
   }
+
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
 
   // sync solutions in displaced problem
   if (_displaced_problem)
