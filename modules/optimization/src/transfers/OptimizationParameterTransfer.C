@@ -48,17 +48,23 @@ OptimizationParameterTransfer::initialSetup()
 
   std::vector<std::string> parameter_names(vpp.getParameterNames());
 
-  InputParameterWarehouse & wh =
-      _multi_app->appProblemBase(processor_id()).getMooseApp().getInputParameterWarehouse();
-
-  std::vector<Real> sub_app_initial_values(parameter_names.size());
-  for (std::size_t i = 0; i < parameter_names.size(); ++i)
+  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
   {
-    std::vector<Real> datas =
-        wh.getControllableParameterValues<Real>((MooseObjectParameterName)parameter_names[i]);
-    sub_app_initial_values[i] = datas[0];
+    if (_multi_app->hasLocalApp(i))
+    {
+      InputParameterWarehouse & wh =
+          _multi_app->appProblemBase(i).getMooseApp().getInputParameterWarehouse();
+
+      std::vector<Real> sub_app_initial_values(parameter_names.size());
+      for (std::size_t j = 0; j < parameter_names.size(); ++j)
+      {
+        std::vector<Real> datas =
+            wh.getControllableParameterValues<Real>((MooseObjectParameterName)parameter_names[j]);
+        sub_app_initial_values[j] = datas[0];
+      }
+      vpp.setParameterValues(sub_app_initial_values);
+    }
   }
-  vpp.setParameterValues(sub_app_initial_values);
 }
 
 void
@@ -68,9 +74,14 @@ OptimizationParameterTransfer::execute()
       _multi_app->problemBase().getUserObject<OptimizationParameterVectorPostprocessor>(_vpp_name);
   std::vector<std::string> parameter_names(vpp.getParameterNames());
   std::vector<Real> parameter_values(vpp.getParameterValues());
-
-  ControlsReceiver * ptr = getReceiver(processor_id());
-  ptr->transfer(parameter_names, parameter_values);
+  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
+  {
+    if (_multi_app->hasLocalApp(i))
+    {
+      ControlsReceiver * ptr = getReceiver(i);
+      ptr->transfer(parameter_names, parameter_values);
+    }
+  }
 }
 
 ControlsReceiver *
