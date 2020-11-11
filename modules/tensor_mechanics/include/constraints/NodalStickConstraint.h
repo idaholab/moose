@@ -20,6 +20,8 @@ public:
 
   virtual void computeResidual(NumericVector<Number> & residual) override;
   virtual void computeJacobian(SparseMatrix<Number> & jacobian) override;
+  using NodalConstraint::computeJacobian;
+  using NodalConstraint::computeResidual;
 
 protected:
   /**

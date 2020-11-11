@@ -127,36 +127,34 @@ IntegratedBC::computeJacobian()
 }
 
 void
-IntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
+IntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  computeJacobianBlock(jvar.number());
-}
+  const auto & jvar = getVariable(jvar_num);
 
-void
-IntegratedBC::computeJacobianBlock(unsigned int jvar)
-{
-  if (jvar == _var.number())
+  if (jvar_num == _var.number())
   {
     computeJacobian();
     return;
   }
 
-  prepareMatrixTag(_assembly, _var.number(), jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
   // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
-  // on the displaced mesh
-  auto phi_size = _sys.getVariable(_tid, jvar).dofIndices().size();
+  // on the displaced mesh, so we obtain the variable on the proper system
+  auto phi_size = jvar.dofIndices().size();
+  mooseAssert(phi_size * jvar.count() == _local_ke.n(),
+              "The size of the phi container does not match the number of local Jacobian columns");
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
 
   accumulateTaggedLocalMatrix();
 }
 
 void
-IntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
+IntegratedBC::computeOffDiagJacobianScalar(const unsigned int jvar)
 {
   prepareMatrixTag(_assembly, _var.number(), jvar);
 
@@ -164,7 +162,7 @@ IntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jv.order(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
 
   accumulateTaggedLocalMatrix();
 }

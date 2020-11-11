@@ -11,26 +11,15 @@
 
 // MOOSE includes
 #include "DiracKernelInfo.h"
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "ResidualObject.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
 #include "MaterialPropertyInterface.h"
-#include "TransientInterface.h"
-#include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseVariableField.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
 #include "MooseVariableInterface.h"
-#include "TaggingInterface.h"
 
 // Forward Declarations
-class Assembly;
 class DiracKernel;
-class SubProblem;
-class MooseMesh;
 
 template <>
 InputParameters validParams<DiracKernel>();
@@ -42,35 +31,26 @@ InputParameters validParams<DiracKernel>();
  *
  * This is common in point sources / sinks and various other algorithms.
  */
-class DiracKernel : public MooseObject,
-                    public SetupInterface,
+class DiracKernel : public ResidualObject,
                     public CoupleableMooseVariableDependencyIntermediateInterface,
                     public MooseVariableInterface<Real>,
-                    public FunctionInterface,
-                    public UserObjectInterface,
-                    public TransientInterface,
                     public MaterialPropertyInterface,
-                    public PostprocessorInterface,
-                    protected GeometricSearchInterface,
-                    public Restartable,
-                    public MeshChangedInterface,
-                    public TaggingInterface
+                    protected GeometricSearchInterface
 {
 public:
   static InputParameters validParams();
 
   DiracKernel(const InputParameters & parameters);
-  virtual ~DiracKernel() {}
 
   /**
    * Computes the residual for the current element.
    */
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
   /**
    * Computes the jacobian for the current element.
    */
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
@@ -80,17 +60,9 @@ public:
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
    */
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
-  /**
-   * The variable number that this kernel operates on.
-   */
-  MooseVariableField<Real> & variable();
-
-  /**
-   * Return a reference to the subproblem.
-   */
-  SubProblem & subProblem();
+  virtual const MooseVariableField<Real> & variable() const override { return _var; }
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
@@ -153,18 +125,8 @@ protected:
    */
   unsigned currentPointCachedID();
 
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-
   /// Variable this kernel acts on
   MooseVariableField<Real> & _var;
-
-  /// Mesh this kernels acts on
-  MooseMesh & _mesh;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

@@ -28,23 +28,19 @@ public:
 
   IntegratedBC(const InputParameters & parameters);
 
-  virtual MooseVariable & variable() override { return _var; }
+  virtual const MooseVariable & variable() const override { return _var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  /**
-   * Deprecated method
-   */
-  virtual void computeJacobianBlock(unsigned jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable
    */
-  void computeJacobianBlockScalar(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /**
@@ -61,6 +57,15 @@ protected:
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * Method for computing an off-diagonal jacobian component from a scalar var.
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar)
+  {
+    // Backwards compatibility
+    return computeQpOffDiagJacobian(jvar);
+  }
 
   MooseVariable & _var;
 

@@ -19,15 +19,9 @@ defineLegacyParams(NodalKernel);
 InputParameters
 NodalKernel::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
+  InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
-  params += RandomInterface::validParams();
-  params += TaggingInterface::validParams();
-
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this boundary condition applies to");
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
@@ -50,43 +44,24 @@ NodalKernel::validParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.declareControllable("enable");
-
   params.registerBase("NodalKernel");
 
   return params;
 }
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
-  : MooseObject(parameters),
+  : ResidualObject(parameters, true),
     BlockRestrictable(this),
     BoundaryRestrictable(this, true), // true for applying to nodesets
-    SetupInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
-    PostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "BCs"),
-    MeshChangedInterface(parameters),
-    RandomInterface(parameters,
-                    *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
-                    parameters.get<THREAD_ID>("_tid"),
-                    true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     MooseVariableInterface<Real>(this,
                                  true,
                                  "variable",
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
-    TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _var(*mooseVariable()),
-    _mesh(_subproblem.mesh()),
     _current_node(_var.node()),
     _u(_var.dofValues()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
@@ -129,18 +104,6 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
-}
-
-MooseVariable &
-NodalKernel::variable()
-{
-  return _var;
-}
-
-SubProblem &
-NodalKernel::subProblem()
-{
-  return _subproblem;
 }
 
 void
@@ -186,20 +149,22 @@ NodalKernel::computeJacobian()
 }
 
 void
-NodalKernel::computeOffDiagJacobian(unsigned int jvar)
+NodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
+  const auto & jvar = getVariable(jvar_num);
+
   if (_var.isNodalDefined())
   {
-    if (jvar == _var.number())
+    if (jvar.number() == _var.number())
       computeJacobian();
     else
     {
       _qp = 0;
-      Real cached_val = computeQpOffDiagJacobian(jvar);
+      Real cached_val = computeQpOffDiagJacobian(jvar.number());
       dof_id_type cached_row = _var.nodalDofIndex();
 
       // Note: this only works for equal order Lagrange variables...
-      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
+      dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
 
       cached_val *= _var.scalingFactor();
 

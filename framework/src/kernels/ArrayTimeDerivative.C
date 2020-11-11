@@ -81,7 +81,7 @@ ArrayTimeDerivative::computeQpJacobian()
 }
 
 RealEigenMatrix
-ArrayTimeDerivative::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayTimeDerivative::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _coeff_2d_array)
     return _phi[_j][_qp] * _test[_i][_qp] * _du_dot_du[_qp] * (*_coeff_2d_array)[_qp];

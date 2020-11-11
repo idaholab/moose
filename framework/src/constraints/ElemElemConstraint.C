@@ -26,8 +26,6 @@ ElemElemConstraint::validParams()
 {
   InputParameters params = Constraint::validParams();
   params.addParam<unsigned int>("interface_id", 0, "The id of the interface.");
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
   return params;
 }
 

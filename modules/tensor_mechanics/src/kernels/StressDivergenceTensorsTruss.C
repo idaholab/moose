@@ -116,16 +116,17 @@ StressDivergenceTensorsTruss::computeJacobian()
 }
 
 void
-StressDivergenceTensorsTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+StressDivergenceTensorsTruss::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
   else
   {
+    const auto & jvar = getVariable(jvar_num);
+
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+    auto phi_size = jvar.dofIndices().size();
 
     unsigned int coupled_component = 0;
     bool disp_coupled = false;

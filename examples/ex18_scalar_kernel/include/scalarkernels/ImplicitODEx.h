@@ -62,7 +62,7 @@ protected:
    * Note that this can be an approximation or linearization.  In this case it's
    * not because the Jacobian of this operator is easy to calculate.
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
   /**
    * Needed for computing off-diagonal terms in Jacobian
@@ -74,4 +74,3 @@ protected:
    */
   const VariableValue & _y;
 };
-

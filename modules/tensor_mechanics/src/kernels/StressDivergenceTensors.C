@@ -188,7 +188,7 @@ StressDivergenceTensors::computeJacobian()
 }
 
 void
-StressDivergenceTensors::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
 {
   if (_volumetric_locking_correction)
   {

@@ -10,25 +10,11 @@
 #pragma once
 
 // MOOSE includes
-#include "MooseObject.h"
-#include "SetupInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "TransientInterface.h"
+#include "NeighborResidualObject.h"
 #include "GeometricSearchInterface.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
-#include "TaggingInterface.h"
 
 // Forward Declarations
-class Assembly;
 class Constraint;
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-class SubProblem;
-class MooseMesh;
 
 template <>
 InputParameters validParams<Constraint>();
@@ -36,27 +22,12 @@ InputParameters validParams<Constraint>();
 /**
  * Base class for all Constraint types
  */
-class Constraint : public MooseObject,
-                   public SetupInterface,
-                   public FunctionInterface,
-                   public UserObjectInterface,
-                   public TransientInterface,
-                   protected GeometricSearchInterface,
-                   public Restartable,
-                   public MeshChangedInterface,
-                   public TaggingInterface
+class Constraint : public NeighborResidualObject, protected GeometricSearchInterface
 {
 public:
   static InputParameters validParams();
 
   Constraint(const InputParameters & parameters);
-  virtual ~Constraint();
-
-  /**
-   * Subproblem this constraint is part of
-   * @return The reference to the subproblem
-   */
-  SubProblem & subProblem() { return _subproblem; }
 
   virtual bool addCouplingEntriesToJacobian() { return true; }
   virtual void subdomainSetup() override final
@@ -67,13 +38,6 @@ public:
   virtual void residualEnd() {}
 
 protected:
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-  MooseMesh & _mesh;
-
   unsigned int _i, _j;
   unsigned int _qp;
 };

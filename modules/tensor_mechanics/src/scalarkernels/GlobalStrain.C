@@ -73,11 +73,6 @@ GlobalStrain::computeJacobian()
 }
 
 void
-GlobalStrain::computeOffDiagJacobian(unsigned int /*jvar*/)
-{
-}
-
-void
 GlobalStrain::assignComponentIndices(Order order)
 {
   switch (order)

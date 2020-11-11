@@ -468,7 +468,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
-  _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
+  auto bc_var = dynamic_cast<const MooseVariableFieldBase *>(&bc->variable());
+  _vars[tid].addBoundaryVar(boundary_ids, bc_var);
 
   // Cast to the various types of BCs
   std::shared_ptr<NodalBCBase> nbc = std::dynamic_pointer_cast<NodalBCBase>(bc);
@@ -520,7 +521,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
       // Active BoundaryIDs for the object
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
-      _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
+      _vars[tid].addBoundaryVar(boundary_ids, bc_var);
 
       ibc = std::static_pointer_cast<IntegratedBCBase>(bc);
 
@@ -588,7 +589,8 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
         _factory.create<InterfaceKernelBase>(interface_kernel_name, name, parameters, tid);
 
     const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
-    _vars[tid].addBoundaryVar(boundary_ids, &interface_kernel->variable());
+    auto ik_var = dynamic_cast<const MooseVariableFieldBase *>(&interface_kernel->variable());
+    _vars[tid].addBoundaryVar(boundary_ids, ik_var);
 
     _interface_kernels.addObject(interface_kernel, tid);
     _vars[tid].addBoundaryVars(boundary_ids, interface_kernel->getCoupledVars());
@@ -1270,8 +1272,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
-          ec->subProblem().prepareShapes(ec->variable().number(), tid);
-          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+          ec->prepareShapes(ec->variable().number());
+          ec->prepareNeighborShapes(ec->variable().number());
 
           ec->reinit(info);
           ec->computeResidual();
@@ -1873,8 +1875,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
               {
                 constraints_applied = true;
 
-                nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-                nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
+                nfc->prepareShapes(nfc->variable().number());
+                nfc->prepareNeighborShapes(nfc->variable().number());
 
                 nfc->computeJacobian();
 
@@ -1936,8 +1938,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Need to zero out the matrices first
                   _fe_problem.prepareAssembly(0);
 
-                  nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
-                  nfc->subProblem().prepareNeighborShapes(jvar->number(), 0);
+                  nfc->prepareShapes(nfc->variable().number());
+                  nfc->prepareNeighborShapes(jvar->number());
 
                   nfc->computeOffDiagJacobian(jvar->number());
 
@@ -2080,8 +2082,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
           _fe_problem.setNeighborSubdomainID(elem2, tid);
           _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
-          ec->subProblem().prepareShapes(ec->variable().number(), tid);
-          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+          ec->prepareShapes(ec->variable().number());
+          ec->prepareNeighborShapes(ec->variable().number());
 
           ec->reinit(info);
           ec->computeJacobian();
@@ -2136,8 +2138,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 constraints_applied = true;
 
                 nec->_jacobian = &jacobian;
-                nec->subProblem().prepareShapes(nec->variable().number(), 0);
-                nec->subProblem().prepareNeighborShapes(nec->variable().number(), 0);
+                nec->prepareShapes(nec->variable().number());
+                nec->prepareNeighborShapes(nec->variable().number());
 
                 nec->computeJacobian();
 
@@ -2182,8 +2184,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Need to zero out the matrices first
                   _fe_problem.prepareAssembly(0);
 
-                  nec->subProblem().prepareShapes(nec->variable().number(), 0);
-                  nec->subProblem().prepareNeighborShapes(jvar->number(), 0);
+                  nec->prepareShapes(nec->variable().number());
+                  nec->prepareNeighborShapes(jvar->number());
 
                   nec->computeOffDiagJacobian(jvar->number());
 

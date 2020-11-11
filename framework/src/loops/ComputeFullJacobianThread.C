@@ -60,8 +60,8 @@ ComputeFullJacobianThread::computeJacobian()
       for (const auto & kernel : kernels)
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
-          kernel->subProblem().prepareShapes(jvar, _tid);
-          kernel->computeOffDiagJacobian(jvariable);
+          kernel->prepareShapes(jvar);
+          kernel->computeOffDiagJacobian(jvar);
         }
     }
   }
@@ -92,7 +92,7 @@ ComputeFullJacobianThread::computeJacobian()
           if (nonlocal_kernel)
             if ((kernel->variable().number() == ivar) && kernel->isImplicit())
             {
-              kernel->subProblem().prepareShapes(jvar, _tid);
+              kernel->prepareShapes(jvar);
               kernel->computeNonlocalOffDiagJacobian(jvar);
             }
         }
@@ -156,6 +156,9 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     if (ivariable.isFV() || jvariable.isFV())
       continue;
 
+    const auto ivar = ivariable.number();
+    const auto jvar = jvariable.number();
+
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
         _ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
     {
@@ -163,10 +166,10 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       // any)
       const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & bc : bcs)
-        if (bc->shouldApply() && bc->variable().number() == ivariable.number() && bc->isImplicit())
+        if (bc->shouldApply() && bc->variable().number() == ivar && bc->isImplicit())
         {
-          bc->subProblem().prepareFaceShapes(jvariable.number(), _tid);
-          bc->computeJacobianBlock(jvariable);
+          bc->prepareShapes(jvar);
+          bc->computeOffDiagJacobian(jvar);
         }
     }
   }
@@ -198,7 +201,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
           if (nonlocal_integrated_bc)
             if ((integrated_bc->variable().number() == ivar) && integrated_bc->isImplicit())
             {
-              integrated_bc->subProblem().prepareFaceShapes(jvar, _tid);
+              integrated_bc->prepareShapes(jvar);
               integrated_bc->computeNonlocalOffDiagJacobian(jvar);
             }
         }
@@ -227,7 +230,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
             // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
             for (const auto & jvar : coupled_scalar_vars)
               if (_nl.hasScalarVariable(jvar->name()))
-                bc->computeJacobianBlockScalar(jvar->number());
+                bc->computeOffDiagJacobianScalar(jvar->number());
           }
       }
   }
@@ -257,8 +260,8 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
         if (dg->variable().number() == ivar && dg->isImplicit() &&
             dg->hasBlocks(neighbor->subdomain_id()) && jvariable.activeOnSubdomain(_subdomain))
         {
-          dg->subProblem().prepareFaceShapes(jvar, _tid);
-          dg->subProblem().prepareNeighborShapes(jvar, _tid);
+          dg->prepareShapes(jvar);
+          dg->prepareNeighborShapes(jvar);
           dg->computeOffDiagJacobian(jvar);
         }
       }
@@ -290,8 +293,8 @@ ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
         if (!interface_kernel->isImplicit())
           continue;
 
-        interface_kernel->subProblem().prepareFaceShapes(jvar, _tid);
-        interface_kernel->subProblem().prepareNeighborShapes(jvar, _tid);
+        interface_kernel->prepareShapes(jvar);
+        interface_kernel->prepareNeighborShapes(jvar);
 
         if (interface_kernel->variable().number() == ivar)
           interface_kernel->computeElementOffDiagJacobian(jvar);

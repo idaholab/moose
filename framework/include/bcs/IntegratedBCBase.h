@@ -10,16 +10,11 @@
 #pragma once
 
 #include "BoundaryCondition.h"
-#include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
 
 // Forward declarations
 class IntegratedBCBase;
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<IntegratedBCBase>();
@@ -28,7 +23,6 @@ InputParameters validParams<IntegratedBCBase>();
  * Base class for deriving any boundary condition of a integrated type
  */
 class IntegratedBCBase : public BoundaryCondition,
-                         public RandomInterface,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
                          public MaterialPropertyInterface
 {
@@ -37,31 +31,7 @@ public:
 
   IntegratedBCBase(const InputParameters & parameters);
 
-  virtual ~IntegratedBCBase();
-
-  virtual void computeResidual() = 0;
-  virtual void computeJacobian() = 0;
-  /**
-   * Computes d-ivar-residual / d-jvar...
-   */
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) = 0;
-  /**
-   * Computes jacobian block with respect to a scalar variable
-   * @param jvar The number of the scalar variable
-   */
-  virtual void computeJacobianBlockScalar(unsigned int jvar) = 0;
-
-  /**
-   * Compute this IntegratedBCBase's contribution to the diagonal Jacobian entries
-   * corresponding to nonlocal dofs of the variable
-   */
-  virtual void computeNonlocalJacobian() {}
-
-  /**
-   * Computes d-residual / d-jvar... corresponding to nonlocal dofs of the jvar
-   * and stores the result in nonlocal ke
-   */
-  virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
+  void prepareShapes(unsigned int var_num) override final;
 
 protected:
   /// current element

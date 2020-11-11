@@ -84,7 +84,7 @@ ArrayDiffusion::computeQpJacobian()
 }
 
 RealEigenMatrix
-ArrayDiffusion::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayDiffusion::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _d_2d_array)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp] * (*_d_2d_array)[_qp];

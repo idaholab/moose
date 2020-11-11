@@ -21,7 +21,7 @@
 
 ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
   : _obj_parameters(moose_object->parameters()),
-    _mesh(moose_object->getMooseApp().actionWarehouse().mesh())
+    _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh())
 {
 }
 
@@ -39,10 +39,10 @@ ElementIDInterface::getElementIDIndex(const std::string & id_parameter_name,
 unsigned int
 ElementIDInterface::getElementIDIndexByName(const std::string & id_name) const
 {
-  if (!_mesh.get())
+  if (!_id_mesh.get())
     mooseError("Mesh is not available for getting element integers");
 
-  auto & mesh_base = _mesh->getMesh();
+  auto & mesh_base = _id_mesh->getMesh();
 
   if (id_name == "subdomain_id")
   {

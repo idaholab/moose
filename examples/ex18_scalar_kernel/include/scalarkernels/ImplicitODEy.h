@@ -61,7 +61,7 @@ protected:
    * This is essentially the partial derivative of the residual with respect to
    * the variable that is coupled into this kernel.
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
   /**
    * Needed for computing off-diagonal terms in Jacobian
@@ -73,4 +73,3 @@ protected:
    */
   const VariableValue & _x;
 };
-

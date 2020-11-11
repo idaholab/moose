@@ -59,14 +59,15 @@ public:
    * @param bnd The boundary id where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(BoundaryID bnd, MooseVariableFieldBase * var);
+  void addBoundaryVar(BoundaryID bnd, const MooseVariableFieldBase * var);
 
   /**
    * Add a variable to a set of boundaries
    * @param boundary_ids The boundary ids where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariableFieldBase * var);
+  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids,
+                      const MooseVariableFieldBase * var);
 
   /**
    * Add a map of variables to a set of boundaries
@@ -146,7 +147,7 @@ public:
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  const std::set<MooseVariableFieldBase *> & boundaryVars(BoundaryID bnd) const;
+  const std::set<const MooseVariableFieldBase *> & boundaryVars(BoundaryID bnd) const;
 
   /**
    * Get the list of scalar variables
@@ -199,7 +200,7 @@ protected:
   std::map<std::string, MooseVariableBase *> _var_name;
 
   /// Map to variables that need to be evaluated on a boundary
-  std::map<BoundaryID, std::set<MooseVariableFieldBase *>> _boundary_vars;
+  std::map<BoundaryID, std::set<const MooseVariableFieldBase *>> _boundary_vars;
 
   /// list of all scalar, non-finite element variables
   std::vector<MooseVariableScalar *> _scalar_vars;

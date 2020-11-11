@@ -132,9 +132,10 @@ Kernel::computeJacobian()
 }
 
 void
-Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  auto jvar_num = jvar.number();
+  const auto & jvar = getVariable(jvar_num);
+
   if (jvar_num == _var.number())
     computeJacobian();
   else
@@ -143,7 +144,7 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+    auto phi_size = jvar.dofIndices().size();
     mooseAssert(
         phi_size * jvar.count() == _local_ke.n(),
         "The size of the phi container does not match the number of local Jacobian columns");
@@ -157,7 +158,7 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-            _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+            _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar.number());
     }
     else
     {
@@ -166,9 +167,9 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         for (_j = 0; _j < n; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
-            RealEigenVector v =
-                _JxW[_qp] * _coord[_qp] *
-                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(jvar));
+            RealEigenVector v = _JxW[_qp] * _coord[_qp] *
+                                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(
+                                    const_cast<MooseVariableFieldBase &>(jvar)));
             for (unsigned int k = 0; k < v.size(); ++k)
               _local_ke(_i, _j + k * n) += v(k);
           }
@@ -179,28 +180,7 @@ Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 }
 
 void
-Kernel::computeOffDiagJacobian(unsigned int jvar)
-{
-  mooseDeprecated("The computeOffDiagJacobian method signature has changed. Developers, please "
-                  "pass in a MooseVariableFEBase reference instead of the variable number");
-  if (jvar == _var.number())
-    computeJacobian();
-  else
-  {
-    prepareMatrixTag(_assembly, _var.number(), jvar);
-
-    precalculateOffDiagJacobian(jvar);
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-
-    accumulateTaggedLocalMatrix();
-  }
-}
-
-void
-Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
+Kernel::computeOffDiagJacobianScalar(const unsigned int jvar)
 {
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
   prepareMatrixTag(_assembly, _var.number(), jvar);
@@ -208,7 +188,7 @@ Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar);
 
   accumulateTaggedLocalMatrix();
 }

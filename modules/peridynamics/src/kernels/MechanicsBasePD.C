@@ -66,11 +66,11 @@ MechanicsBasePD::prepare()
 }
 
 void
-MechanicsBasePD::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+MechanicsBasePD::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   prepare();
 
-  if (jvar.number() == _var.number())
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
@@ -78,19 +78,19 @@ MechanicsBasePD::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     bool active = false;
 
     for (unsigned int i = 0; i < _dim; ++i)
-      if (jvar.number() == _disp_var[i]->number())
+      if (jvar_num == _disp_var[i]->number())
       {
         coupled_component = i;
         active = true;
       }
 
-    if (_temp_coupled && jvar.number() == _temp_var->number())
+    if (_temp_coupled && jvar_num == _temp_var->number())
     {
       coupled_component = 3;
       active = true;
     }
 
-    if (_out_of_plane_strain_coupled && jvar.number() == _out_of_plane_strain_var->number())
+    if (_out_of_plane_strain_coupled && jvar_num == _out_of_plane_strain_var->number())
     {
       coupled_component = 4;
       active = true;
@@ -98,7 +98,7 @@ MechanicsBasePD::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
     if (active)
     {
-      DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar.number());
+      DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
       _local_ke.resize(ke.m(), ke.n());
       _local_ke.zero();
 
@@ -107,7 +107,7 @@ MechanicsBasePD::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       ke += _local_ke;
 
       if (_use_full_jacobian)
-        computePDNonlocalOffDiagJacobian(jvar.number(), coupled_component);
+        computePDNonlocalOffDiagJacobian(jvar_num, coupled_component);
     }
   }
 }

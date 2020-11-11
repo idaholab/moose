@@ -49,7 +49,7 @@ OneDEqualValueConstraintBC::computeQpJacobian()
 }
 
 Real
-OneDEqualValueConstraintBC::computeQpOffDiagJacobian(unsigned jvar)
+OneDEqualValueConstraintBC::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _lambda_var_number)
   {

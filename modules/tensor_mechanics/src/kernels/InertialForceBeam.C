@@ -474,7 +474,7 @@ InertialForceBeam::computeJacobian()
 }
 
 void
-InertialForceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+InertialForceBeam::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
 
@@ -484,7 +484,6 @@ InertialForceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   else
     factor = (*_du_dotdot_du)[0] + _eta[0] * (1.0 + _alpha) * (*_du_dot_du)[0];
 
-  size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
   else

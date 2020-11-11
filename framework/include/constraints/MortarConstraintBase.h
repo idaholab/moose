@@ -50,6 +50,15 @@ public:
 
   MortarConstraintBase(const InputParameters & parameters);
 
+  virtual void computeResidual() override final
+  {
+    mooseError("MortarConstraintBase do not need computeResidual()");
+  }
+  virtual void computeJacobian() override final
+  {
+    mooseError("MortarConstraintBase do not need computeJacobian()");
+  }
+
   /**
    * Method for computing the residual
    * @param has_primary Whether the mortar segment element projects onto the primary face
@@ -75,7 +84,7 @@ public:
   /**
    * The variable number that this object operates on.
    */
-  const MooseVariable * variable() const { return _var; }
+  const MooseVariable & variable() const override { return *_var; }
 
   /**
    * Whether to use dual mortar

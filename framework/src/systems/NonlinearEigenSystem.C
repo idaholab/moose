@@ -206,7 +206,13 @@ NonlinearEigenSystem::markEigenVariables(MooseObjectTagWarehouse<T> & warehouse)
       auto & mtags = object->getMatrixTags();
       // If it is an eigen kernel, mark its variable as eigen
       if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
-        object->variable().eigen(true);
+      {
+        auto vname = object->variable().name();
+        if (hasScalarVariable(vname))
+          getScalarVariable(0, vname).eigen(true);
+        else
+          getVariable(0, vname).eigen(true);
+      }
     }
   }
 }

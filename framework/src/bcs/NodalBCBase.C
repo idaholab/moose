@@ -15,7 +15,6 @@ InputParameters
 NodalBCBase::validParams()
 {
   InputParameters params = BoundaryCondition::validParams();
-  params += RandomInterface::validParams();
   params.addParam<std::vector<AuxVariableName>>(
       "save_in",
       "The name of auxiliary variables to save this BC's residual contributions to.  "
@@ -36,7 +35,6 @@ NodalBCBase::validParams()
 
 NodalBCBase::NodalBCBase(const InputParameters & parameters)
   : BoundaryCondition(parameters, true), // true is for being Nodal
-    RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))

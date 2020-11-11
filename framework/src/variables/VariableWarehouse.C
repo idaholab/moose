@@ -56,14 +56,14 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
 }
 
 void
-VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariableFEBase * var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, const MooseVariableFEBase * var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
 VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids,
-                                  MooseVariableFEBase * var)
+                                  const MooseVariableFEBase * var)
 {
   for (const auto & bid : boundary_ids)
     addBoundaryVar(bid, var);
@@ -118,7 +118,7 @@ VariableWarehouse::scalars() const
   return _scalar_vars;
 }
 
-const std::set<MooseVariableFEBase *> &
+const std::set<const MooseVariableFEBase *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd) const
 {
   return _boundary_vars.find(bnd)->second;

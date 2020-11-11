@@ -116,13 +116,13 @@ ComputeDiracThread::onElement(const Elem * elem)
     }
 
     // Get a list of coupled variables from the SubProblem
-    auto & coupling_entries = dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+    const auto & coupling_entries = dirac_kernel->subProblem().assembly(_tid).couplingEntries();
 
     // Loop over the list of coupled variable pairs
-    for (auto & it : coupling_entries)
+    for (const auto & it : coupling_entries)
     {
-      MooseVariableFEBase * ivariable = it.first;
-      MooseVariableFEBase * jvariable = it.second;
+      const MooseVariableFEBase * const ivariable = it.first;
+      const MooseVariableFEBase * const jvariable = it.second;
 
       // A variant of the check that is in
       // ComputeFullJacobianThread::computeJacobian().  We
@@ -133,7 +133,7 @@ ComputeDiracThread::onElement(const Elem * elem)
           ivariable->activeOnSubdomain(_subdomain) && jvariable->activeOnSubdomain(_subdomain) &&
           (jvariable->numberOfDofs() > 0))
       {
-        dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
+        dirac_kernel->prepareShapes(jvariable->number());
         dirac_kernel->computeOffDiagJacobian(jvariable->number());
       }
     }
