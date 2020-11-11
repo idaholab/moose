@@ -152,7 +152,7 @@ public:
   /**
    * Perform type specific transfer
    *
-   * NOTE: These is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
    *       know of a better solution, if you have one please implement it.
    */
   virtual void transfer(ReporterData & r_data,

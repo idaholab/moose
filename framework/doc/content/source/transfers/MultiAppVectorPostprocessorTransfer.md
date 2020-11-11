@@ -8,7 +8,7 @@ sends/receives the n-th entry of the VectorPostprocessor to/from the n-th sub-ap
 !syntax description /Transfers/MultiAppVectorPostprocessorTransfer
 
 !alert note
-For direct VectorPostprocessor-to-VectorPostprocessor transfers see [MultiAppVectorReporterTransfer](MultiAppReporterTransfer.md#vector_transfer).
+For direct VectorPostprocessor-to-VectorPostprocessor transfers see [MultiAppReporterTransfer](MultiAppReporterTransfer.md#vector_transfer).
 
 !syntax parameters /Transfers/MultiAppVectorPostprocessorTransfer
 

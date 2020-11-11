@@ -4,11 +4,11 @@
 
 ## Overview
 
-This MultiAppReporterTransfer provides a method to transfer a reporter value (see [reporters](/Reporters/index.md)) of any type between the main application and the sub-applications.  This includes vectors of real numbers from [vectorpostprocessors](/VectorPostprocessors/index.md) as well as real numbers from [postprocessors](/Postprocessors/index.md).
+This MultiAppReporterTransfer provides a method to transfer a reporter value (see [reporters](/Reporters/index.md)) of any type between the main application and the sub-application(s).  This includes vectors of real numbers from [vectorpostprocessors](/VectorPostprocessors/index.md) as well as real numbers from [postprocessors](/Postprocessors/index.md).
 
 [!param](/Transfers/MultiAppReporterTransfer/from_reporters) specifies where the data is coming from, and [!param](/Transfers/MultiAppReporterTransfer/to_reporters) specifies where the data going to. These are a list of reporter names that must be the same length, as they directly correspond to each other. For [vectorpostprocessors](/VectorPostprocessors/index.md) the syntax is "vpp_name"/"vector_name" and for [reporters](/Reporters/index.md) the syntax is "reporter_name"/"value_name".
 
-When transferring data from the main application the data from the main is copied to each of the sub-applications. If the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) is used then data is only transferred to the specified sub-application. When transferring data to the main application the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) must be supplied if there is more than one sub-application.
+When transferring data from the main application the data from the main is copied to each sub-application. If the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) is used then data is only transferred to the specified sub-application. When transferring data to the main application the [!param](/Transfers/MultiAppReporterTransfer/subapp_index) must be supplied if there is more than one sub-application.
 
 ## Example Input File Syntax
 
