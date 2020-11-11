@@ -23,8 +23,7 @@ public:
   virtual void initialSetup() override;
 
   virtual void computeJacobian() override;
-  virtual void computeJacobianBlock(unsigned jvar) override;
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned jvar) override;
 
 protected:
   /**
