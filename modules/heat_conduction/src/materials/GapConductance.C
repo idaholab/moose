@@ -214,8 +214,21 @@ GapConductance::GapConductance(const InputParameters & parameters)
 void
 GapConductance::initialSetup()
 {
+  /// set generated from the passed in vector of subdomain names
+  const auto & check_subdomains =
+      blockRestricted() && !blockIDs().empty() ? blockIDs() : meshBlockIDs();
+  if (check_subdomains.empty())
+    mooseError("No subdomains found");
+
+  // make sure all subdomains are using the same coordinate system
+  Moose::CoordinateSystemType coord_system = _fe_problem.getCoordSystem(*check_subdomains.begin());
+  for (auto subdomain : check_subdomains)
+    if (_fe_problem.getCoordSystem(subdomain) != coord_system)
+      mooseError(
+          "The GapConductance model requires all subdomains to have the same coordinate system.");
+
   setGapGeometryParameters(
-      _pars, _coord_sys, _fe_problem.getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
+      _pars, coord_system, _fe_problem.getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
 }
 
 void
