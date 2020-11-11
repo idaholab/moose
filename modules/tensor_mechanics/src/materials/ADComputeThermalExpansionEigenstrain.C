@@ -31,5 +31,9 @@ ADComputeThermalExpansionEigenstrain::ADComputeThermalExpansionEigenstrain(
 void
 ADComputeThermalExpansionEigenstrain::computeThermalStrain(ADReal & thermal_strain)
 {
-  thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
+  if (_use_old_temperature)
+    thermal_strain =
+        _thermal_expansion_coeff * (_temperature_old[_qp] - _stress_free_temperature[_qp]);
+  else
+    thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);
 }
