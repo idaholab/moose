@@ -27,4 +27,11 @@
     design = 'newsletter/index.md'
     requirement = "The system shall include a utility for determining author contributions to the repository in the previous month.."
   []
+  [authors]
+    type = PythonUnitTest
+    input = test_authors.py
+    issues = '#16137'
+    design = 'python/index.md'
+    requirement = "The system shall include a utility for counting the number of lines for unique contributor."
+  []
 []

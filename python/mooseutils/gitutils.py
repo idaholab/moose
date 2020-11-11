@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import logging
+import collections
 from .mooseutils import check_output
 
 def is_git_repo(working_dir=os.getcwd()):
@@ -41,13 +42,15 @@ def git_merge_commits(working_dir=os.getcwd()):
     out = check_output(['git', 'log', '-1', '--merges', '--pretty=format:%P'], cwd=working_dir)
     return out.strip(' \n').split(' ')
 
-def git_ls_files(working_dir=os.getcwd(), recurse_submodules=False):
+def git_ls_files(working_dir=os.getcwd(), recurse_submodules=False, exclude=None):
     """
     Return a list of files via 'git ls-files'.
     """
     cmd = ['git', 'ls-files']
     if recurse_submodules:
         cmd.append('--recurse-submodules')
+    if exclude is not None:
+        cmd += ['--exclude', exclude]
     out = set()
     for fname in check_output(cmd, cwd=working_dir).split('\n'):
         out.add(os.path.abspath(os.path.join(working_dir, fname)))
@@ -93,3 +96,37 @@ def git_version():
     if match is None:
         raise SystemError("git --version failed to return correctly formatted version number")
     return (int(match.group('major')), int(match.group('minor')), int(match.group('patch')))
+
+def git_authors(loc=None):
+    """
+    Return a complete list of authors for the given location.
+
+    Inputs:
+      loc: File/directory to consider
+    """
+    if not os.path.exists(loc):
+        raise OSError("The supplied location must be a file or directory: {}".format(loc))
+    loc = loc or os.getcwd()
+    out = check_output(['git', 'shortlog', '-n', '-c', '-s', '--', loc], encoding='utf-8')
+    names = list()
+    for match in re.finditer(r'^\s*\d+\s*(?P<name>.*?)$', out, flags=re.MULTILINE):
+        names.append(match.group('name'))
+    return names
+
+def git_lines(filename, blank=False):
+    """
+    Return the number of lines per author for the given filename
+    Inputs:
+      filename: Filename to consider
+      blank[bool]: Include/exclude blank lindes
+    """
+    if not os.path.isfile(filename):
+        raise OSError("File does not exist: {}".format(filename))
+    regex = re.compile(r'^.*?\((?P<name>.*?)\s+\d{4}-\d{2}-\d{2}.*?\)\s+(?P<content>.*?)$', flags=re.MULTILINE)
+    counts = collections.defaultdict(int)
+    blame = check_output(['git', 'blame', '--', filename], encoding='utf-8')
+    for line in blame.splitlines():
+        match = regex.search(line)
+        if blank or len(match.group('content')) > 0:
+            counts[match.group('name')] += 1
+    return counts
