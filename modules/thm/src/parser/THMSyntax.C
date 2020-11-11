@@ -19,6 +19,7 @@ associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
   syntax.registerActionSyntax("THMDebugAction", "Debug");
   syntax.registerActionSyntax("THMPrintComponentLoopsAction", "Debug");
+  syntax.registerActionSyntax("THMOutputVectorVelocityAction", "Outputs");
 }
 
 void
@@ -38,6 +39,7 @@ registerActions(Syntax & syntax)
   registerTask("THM:setup_quadrature", true);
   registerTask("THM:debug_action", false);
   registerTask("THM:print_component_loops", false);
+  registerTask("THM:output_vector_velocity", true);
 
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
@@ -45,7 +47,8 @@ registerActions(Syntax & syntax)
   try
   {
     syntax.addDependency("THM:add_heat_structure_material", "add_function");
-    syntax.addDependency("THM:add_component", "setup_mesh");
+    syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
+    syntax.addDependency("THM:add_component", "THM:output_vector_velocity");
     syntax.addDependency("THM:debug_action", "setup_mesh");
     syntax.addDependency("THM:init_simulation", "THM:add_component");
     syntax.addDependency("add_mesh_generator", "THM:add_component");

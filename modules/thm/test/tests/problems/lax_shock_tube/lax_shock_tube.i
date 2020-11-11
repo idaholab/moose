@@ -108,6 +108,7 @@
 
 [Outputs]
   file_base = 'lax_shock_tube'
+  velocity_as_vector = false
   execute_on = 'initial timestep_end'
   [out]
     type = Exodus

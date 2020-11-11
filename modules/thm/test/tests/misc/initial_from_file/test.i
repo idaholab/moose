@@ -148,4 +148,5 @@
 [Outputs]
   exodus = true
   execute_on = 'initial'
+  velocity_as_vector = false
 []

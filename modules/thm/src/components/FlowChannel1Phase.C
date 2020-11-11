@@ -43,6 +43,7 @@ FlowChannel1Phase::buildFlowModel()
   pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
+  pars.set<bool>("output_vector_velocity") = _sim.getVectorValuedVelocity();
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
 

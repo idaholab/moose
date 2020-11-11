@@ -187,4 +187,5 @@ delta_t_open = 0.1
 [Outputs]
   exodus = true
   show = 'p T vel'
+  velocity_as_vector = false
 []

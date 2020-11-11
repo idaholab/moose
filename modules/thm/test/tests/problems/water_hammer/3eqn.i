@@ -86,6 +86,7 @@
 []
 
 [Outputs]
+  velocity_as_vector = false
   [out]
     type = Exodus
   []
