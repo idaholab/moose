@@ -40,6 +40,7 @@
 #include "JsonInputFileFormatter.h"
 #include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
+#include "ProxyRelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
@@ -2082,10 +2083,21 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
 {
   for (auto & rm : _relationship_managers)
   {
+    // RM is already attached, and we do not need to handle this on the final stage
+    if (rm->attachGeometricEarly() && attach_geometric_rm_final)
+      continue;
+
     if (rm->isType(rm_type))
     {
       if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       {
+        // We do not need to attach geometric ProxyRelationshipManager since
+        // all regular relationship managers are added to both undisplaced meshes
+        // and displaced mesh. BTW, geometric ProxyRelationshipManager was not
+        // attached anywhere in the old code base.
+        if (dynamic_cast<ProxyRelationshipManager *>(rm.get()))
+          continue;
+
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
         MooseMesh * const mesh = _action_warehouse.mesh().get();
 
@@ -2106,8 +2118,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           rm->init(mesh_base);
           mesh_base.add_ghosting_functor(*rm);
 
-          // In the final stage, displaced mesh should be already there if there is a displaced mesh
-          if (_action_warehouse.displacedMesh() && !attach_geometric_rm_final)
+          // In the final stage, if there is a displaced mesh, we need to
+          // clone ghosting functors for displacedMesh
+          if (attach_geometric_rm_final && _action_warehouse.displacedMesh())
+          {
+            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
+            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+          }
+          else if (_action_warehouse.displacedMesh())
             mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
                        "geometric relationship managers.");
         }
