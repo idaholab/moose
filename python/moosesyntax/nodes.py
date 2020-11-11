@@ -83,15 +83,20 @@ class SyntaxNode(NodeBase):
         if self.markdown is None:
             self.markdown = os.path.join(self.fullpath().lstrip('/'), 'index.md')
 
-    def groups(self):
+    def groups(self, syntax=True, actions=True, objects=False):
         """
         Return groups associated with this Actions (i.e., where the syntax is defined).
         """
         out = set([self.group]) if self.group is not None else set()
-        for node in self.actions():
-            out.update(node.groups())
-        for node in self.syntax():
-            out.update(node.groups())
+        if syntax:
+            for node in self.syntax():
+                out.update(node.groups())
+        if actions:
+            for node in self.actions():
+                out.update(node.groups())
+        if objects:
+            for node in self.objects():
+                out.update(node.groups())
         return out
 
     def parameters(self):
