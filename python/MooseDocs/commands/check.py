@@ -91,10 +91,8 @@ def main(opt):
         req_reports = [report for report in req_reports if report.title in opt.req_reports]
 
     # Apply --generate option
-    if app_reports and opt.generate:
-        for report in app_reports:
-            if (set(report.app_types) == set(opt.generate)):
-                report.generate_stubs = True
+    if opt.generate:
+        print("The --generate option has been replaced by./moosedocs.py generate.")
 
     # Apply --dump option
     if app_reports and opt.dump:

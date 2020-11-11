@@ -16,7 +16,7 @@ import argparse
 import logging
 import mooseutils
 
-from .commands import build, verify, check
+from .commands import build, verify, check, generate
 from .common import log
 
 def command_line_options():
@@ -40,6 +40,7 @@ def command_line_options():
     build.command_line_options(subparser, parent)
     check.command_line_options(subparser, parent)
     verify.command_line_options(subparser, parent)
+    generate.command_line_options(subparser, parent)
     return parser.parse_args()
 
 def run():
@@ -55,6 +56,8 @@ def run():
         errno = check.main(options)
     elif options.command == 'verify':
         errno = verify.main(options)
+    elif options.command == 'generate':
+        errno = generate.main(options)
 
     handler = logging.getLogger('MooseDocs').handlers[0]
     critical = handler.getCount(logging.CRITICAL)
