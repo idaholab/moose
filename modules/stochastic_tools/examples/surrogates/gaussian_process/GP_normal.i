@@ -42,10 +42,6 @@
     type = GaussianProcess
     filename = 'GP_training_normal_GP_avg.rd'
   []
-  [GP_max]
-    type = GaussianProcess
-    filename = 'GP_training_normal_GP_max.rd'
-  []
 []
 
 # Computing statistics
@@ -56,19 +52,9 @@
     sampler = sample
     output_samples = true
   []
-  [samp_max]
-    type = EvaluateSurrogate
-    model = GP_max
-    sampler = sample
-    output_samples = true
-  []
   [GP_avg_hyperparams]
     type = GaussianProcessData
     gp_name = 'GP_avg'
-  []
-  [GP_max_hyperparams]
-    type = GaussianProcessData
-    gp_name = 'GP_max'
   []
 []
 

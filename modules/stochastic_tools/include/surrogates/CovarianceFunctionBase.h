@@ -47,10 +47,10 @@ public:
                               std::unordered_map<std::string, std::vector<Real>> & /*vec_map*/){};
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  virtual void computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                               const RealEigenMatrix & /*x*/,
-                               std::string /*hyper_param_name*/,
-                               unsigned int /*ind*/) const;
+  virtual void computedKdhyper(RealEigenMatrix & dKdhp,
+                               const RealEigenMatrix & x,
+                               std::string hyper_param_name,
+                               unsigned int ind) const;
 
   virtual bool isTunable(std::string name) const;
 

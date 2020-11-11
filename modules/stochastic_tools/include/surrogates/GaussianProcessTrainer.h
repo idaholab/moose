@@ -32,7 +32,7 @@ public:
 
 #ifdef LIBMESH_HAVE_PETSC
   // Routine to perform hyperparameter tuning
-  int hyperparamTuning();
+  PetscErrorCode hyperparamTuning();
 
   PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
 

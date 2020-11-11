@@ -1,6 +1,6 @@
 # Gaussian Process Surrogate
 
-This example walks through the creation of a few gaussian process surrogates on a simple example system with an analytical solution for comparison. The first surrogate considers a single input parameter to be varied, which lends itself to a simple visual interpretation of the surrogate behavior. The next surrogate extends this idea to two input parameters being modeled. Lastly the full system is modeled with all input parameters, and compared to the analytical solution using sampling. It's recommended users be familiar with the basic surrogate framework, such as [examples/surrogate_creation.md], [examples/surrogate_training.md], and [examples/surrogate_evaluate.md]. 
+This example walks through the creation of a few gaussian process surrogates on a simple example system with an analytical solution for comparison. The first surrogate considers a single input parameter to be varied, which lends itself to a simple visual interpretation of the surrogate behavior. The next surrogate extends this idea to two input parameters being modeled. Lastly the full system is modeled with all input parameters, and compared to the analytical solution using sampling. It's recommended users be familiar with the basic surrogate framework, such as [examples/surrogate_creation.md], [examples/surrogate_training.md], and [examples/surrogate_evaluate.md].
 
 ## Problem Statement
 
@@ -56,7 +56,7 @@ Creation of the `Surrogate` block follows the standard procedure laid out for ot
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Surrogates
 
-One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard `EvaluateSurrogate` vector post processor is replaced with the `EvaluateGaussianProcess` vector post processor, which functions similarly but also outputs the standard deviation of the surrogate at the evaluation point.  
+One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard [EvaluateSurrogate](EvaluateSurrogate.md) vector post processor is replaced with the [EvaluateGaussianProcess](EvaluateGaussianProcess.md) vector post processor, which functions similarly but also outputs the standard deviation of the surrogate at the evaluation point.  
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=VectorPostprocessors
 
@@ -68,7 +68,7 @@ The Gaussian Process surrogate model can only be evaluated at discrete points in
 
 [1D_untuned] demonstrates some basic principles of the gaussian process surrogate for this covariance function. Near training points (red + markers), the uncertainty in the model trends towards the measurement noise $\sigma_n$. The model function is smooth and infinitely differentiable. As we move away from the data points the model tends to just predict the mean of the training data, particularly noticeable in the extrapolation regions of the graph.
 
-However, given that in this scenario we know the model should be a simple linear fit, we may conclude that this fit should be better. To achieve a better fit the model needs to be adjusted, specifically better hyperparameters for the covariance function likely need to be tested. For many hyperparameters this can be accomplished automatically by the system. To enable this the `tune=true` option is set for the Trainer. Which hyperparameters should be tuned can be specified by the `tune_parameters` option, and tuning bounds can be placed using `tuning_min` and `tuning_max`.
+However, given that in this scenario we know the model should be a simple linear fit, we may conclude that this fit should be better. To achieve a better fit the model needs to be adjusted, specifically better hyperparameters for the covariance function likely need to be tested. For many hyperparameters this can be accomplished automatically by the system. To enable this specify the tuned hyperparameters using [!param](/Trainers/GaussianProcessTrainer/tune_parameters) in the trainer. Tuning bounds can be placed using [!param](/Trainers/GaussianProcessTrainer/tuning_min) and [!param](/Trainers/GaussianProcessTrainer/tuning_max).
 
 !listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D_tuned.i block=Trainers Covariance
 

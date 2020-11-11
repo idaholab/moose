@@ -102,14 +102,14 @@
     type = StochasticResults
   []
   [cart_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = gauss_process_avg
     sampler = cart_sample
     output_samples = true
     execute_on = final
   []
   [train_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = gauss_process_avg
     sampler = train_sample
     output_samples = true

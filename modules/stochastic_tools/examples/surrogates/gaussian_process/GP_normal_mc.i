@@ -56,7 +56,7 @@
     multi_app = sub
     sampler = sample
     to_vector_postprocessor = results
-    from_postprocessor = 'avg max'
+    from_postprocessor = 'avg'
   []
 []
 
@@ -77,29 +77,10 @@
     sampler = sample
     results_vpp = results
     results_vector = data:avg
-    tune = 'true'
     tao_options = '-tao_bncg_type gd'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'
-    show_tao = 'true'
-  []
-  [GP_max]
-    type = GaussianProcessTrainer
-    execute_on = timestep_end
-    covariance_function = 'rbf2'
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
-    sampler = sample
-    results_vpp = results
-    results_vector = data:max
-    tune = 'true'
-    tao_options = '-tao_bncg_type gd'
-    tune_parameters = ' signal_variance length_factor'
-    tuning_min = ' 1e-9 1e-3'
-    tuning_max = ' 100  100'
-    show_tao = 'true'
   []
 []
 
@@ -109,16 +90,6 @@
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     signal_variance = 1
     length_factor = '0.038971 0.038971 0.038971 0.038971' #Select a length factor for each parameter (k and q)
-    # signal_variance = 1.98641                        #Use a signal variance of 1 in the kernel
-    # length_factor = '0.912497 0.192563 0.784225 1.21264' #Select a length factor for each parameter (k and q)
-  []
-  [rbf2]
-    type=SquaredExponentialCovariance
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    signal_variance = 1
-    length_factor = '0.038971 0.038971 0.038971 0.038971' #Select a length factor for each parameter (k and q)
-    # signal_variance = 1.98641                      #Use a signal variance of 1 in the kernel
-    # length_factor = '0.912497 0.192563 0.784225 1.21264' #Select a length factor for each parameter (k and q)
   []
 []
 
@@ -126,7 +97,7 @@
   file_base = GP_training_normal
   [out]
     type = SurrogateTrainerOutput
-    trainers = 'GP_avg GP_max'
+    trainers = 'GP_avg'
     execute_on = FINAL
   []
 []

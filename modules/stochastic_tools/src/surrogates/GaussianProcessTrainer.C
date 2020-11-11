@@ -208,7 +208,8 @@ GaussianProcessTrainer::finalize()
 
 #ifdef LIBMESH_HAVE_PETSC
   if (_do_tuning)
-    hyperparamTuning();
+    if (hyperparamTuning())
+      mooseError("PETSc/TAO error in hyperparameter tuning.");
 #endif
 
   _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
@@ -219,7 +220,7 @@ GaussianProcessTrainer::finalize()
 }
 
 #ifdef LIBMESH_HAVE_PETSC
-int
+PetscErrorCode
 GaussianProcessTrainer::hyperparamTuning()
 {
   PetscErrorCode ierr;
@@ -227,7 +228,7 @@ GaussianProcessTrainer::hyperparamTuning()
   GaussianProcessTrainer * GP_ptr = this;
 
   // Setup Tao optimization problem
-  ierr = TaoCreate(MPI_COMM_SELF, &tao);
+  ierr = TaoCreate(_tao_comm.get(), &tao);
   CHKERRQ(ierr);
   ierr = PetscOptionsSetValue(NULL, "-tao_type", "bncg");
   CHKERRQ(ierr);

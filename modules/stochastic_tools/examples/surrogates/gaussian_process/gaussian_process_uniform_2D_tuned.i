@@ -88,20 +88,6 @@
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
   []
-  [exp]
-    type=ExponentialCovariance
-    gamma = 1                                #Define the exponential factor
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
-  []
-  [matern]
-    type=MaternHalfIntCovariance                               #Define the exponential factor
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
-    p = 2
-  []
 []
 
 [Surrogates]
@@ -113,14 +99,14 @@
 
 [VectorPostprocessors]
   [train_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = train_sample
     output_samples = true
     execute_on = final
   []
   [cart_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = cart_sample
     output_samples = true
