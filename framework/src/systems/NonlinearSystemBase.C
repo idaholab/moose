@@ -523,6 +523,9 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
       // Create the object
       bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
 
+      // Give users opportunity to set some parameters
+      postAddResidualObject(*bc);
+
       // Active BoundaryIDs for the object
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
       _vars[tid].addBoundaryVar(boundary_ids, bc_var);
