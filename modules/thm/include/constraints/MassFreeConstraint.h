@@ -10,8 +10,10 @@ class MassFreeConstraint : public NodalConstraint
 public:
   MassFreeConstraint(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & residual);
-  virtual void computeJacobian(SparseMatrix<Number> & jacobian);
+  virtual void computeResidual(NumericVector<Number> & residual) override;
+  using NodalConstraint::computeResidual;
+  virtual void computeJacobian(SparseMatrix<Number> & jacobian) override;
+  using NodalConstraint::computeJacobian;
 
 protected:
   virtual Real computeQpResidual(Moose::ConstraintType type);

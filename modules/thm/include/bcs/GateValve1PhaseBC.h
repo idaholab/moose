@@ -18,8 +18,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   virtual void computeJacobian() override;
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  virtual void computeJacobianBlock(unsigned jvar) override;
+  virtual void computeOffDiagJacobian(unsigned jvar) override;
 
   /**
    * Creates mapping of coupled variable index to local equation system index
