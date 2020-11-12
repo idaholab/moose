@@ -144,7 +144,7 @@ MooseMesh::validParams()
   // derived types that do so.
   params.addPrivateParam<bool>("_mesh_generator_mesh", false);
 
-  params.registerBase("MooseMesh");
+  params.registerBase("MooseMesh", "Mesh");
 
   // groups
   params.addParamNamesToGroup(

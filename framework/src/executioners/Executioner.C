@@ -37,7 +37,7 @@ Executioner::validParams()
       "File base name used for restart",
       "Please use \"Problem/restart_file_base\" instead");
 
-  params.registerBase("Executioner");
+  params.registerBase("Executioner", "Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 

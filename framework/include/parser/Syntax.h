@@ -199,6 +199,16 @@ public:
                            const std::string & action,
                            const std::string & task) const;
 
+
+  /**
+   * Return map to MOOSE base class to the task associated to build the type
+   *
+   * The MOOSE base is defined by InputParameters::registerBase in the validParams method of the
+   * base class. A task is associated to this base with calls to registerMooseObjectTask. This
+   * provides this relationship.
+   */
+  const std::multimap<std::string, std::string> & getMooseSystemToTasks() const;
+
 protected:
   /// The list of registered tasks and a flag indicating whether or not they should be auto-built.
   std::map<std::string, bool> _registered_tasks;

@@ -319,3 +319,9 @@ Syntax::getLineInfo(const std::string & syntax,
 {
   return _syntax_to_line.getInfo(syntax, action, task);
 }
+
+const std::multimap<std::string, std::string> &
+Syntax::getMooseSystemToTasks() const
+{
+  return _moose_systems_to_tasks;
+}

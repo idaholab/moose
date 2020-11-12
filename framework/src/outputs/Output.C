@@ -70,7 +70,7 @@ Output::validParams()
 
   // Register this class as base class
   params.declareControllable("enable");
-  params.registerBase("Output");
+  params.registerBase("Output", "Outputs/*");
 
   return params;
 }

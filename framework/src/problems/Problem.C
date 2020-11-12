@@ -18,7 +18,7 @@ Problem::validParams()
 {
   InputParameters params = MooseObject::validParams();
 
-  params.registerBase("Problem");
+  params.registerBase("Problem", "Problem");
   return params;
 }
 

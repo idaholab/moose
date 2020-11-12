@@ -25,7 +25,7 @@ InputParameters
 Kernel::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("Kernel");
+  params.registerBase("Kernel", "Kernels/*");
   return params;
 }
 

@@ -27,7 +27,7 @@ BoundaryCondition::validParams()
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
-  params.registerBase("BoundaryCondition");
+  params.registerBase("BoundaryCondition", "BCs/*");
 
   return params;
 }

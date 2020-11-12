@@ -67,7 +67,7 @@ MooseVariableBase::validParams()
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
 
-  params.registerBase("MooseVariableBase");
+  params.registerBase("MooseVariableBase", "Variables/*");
   params.addPrivateParam<SystemBase *>("_system_base");
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
   params.addPrivateParam<Moose::VarKindType>("_var_kind");

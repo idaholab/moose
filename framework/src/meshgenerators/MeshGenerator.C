@@ -17,8 +17,7 @@ InputParameters
 MeshGenerator::validParams()
 {
   InputParameters params = MooseObject::validParams();
-
-  params.registerBase("MeshGenerator");
+  params.registerBase("MeshGenerator", "Mesh/*");
   return params;
 }
 

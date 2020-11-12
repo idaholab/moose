@@ -391,6 +391,14 @@ InputParameters::registerBase(const std::string & value)
 }
 
 void
+InputParameters::registerBase(const std::string & value, const std::string & syntax)
+{
+  registerBase(value);
+  InputParameters::set<std::string>("_moose_hit_syntax") = syntax;
+  _params["_moose_hit_syntax"]._is_private = true;
+}
+
+void
 InputParameters::registerSystemAttributeName(const std::string & value)
 {
   InputParameters::set<std::string>("_moose_warehouse_system_name") = value;

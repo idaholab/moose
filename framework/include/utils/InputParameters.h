@@ -461,12 +461,17 @@ public:
    */
   const std::set<ExecFlagType> & getControllableExecuteOnTypes(const std::string & name);
 
+  ///@{
   /**
    * This method must be called from every base "Moose System" to create linkage with the Action
    * System.
    * See "Moose.C" for the registerMooseObjectTask() calls.
+   *
+   * The second argument allows a system to work with the input exploder, see ExplodeInput.C/h
    */
   void registerBase(const std::string & value);
+  void registerBase(const std::string & value, const std::string & syntax);
+  ///@}
 
   /**
    * This method is used to define the MOOSE system name that is used by the TheWarehouse object
