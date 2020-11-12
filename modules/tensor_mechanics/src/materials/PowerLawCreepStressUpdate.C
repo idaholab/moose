@@ -83,14 +83,21 @@ PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, 
 Real
 PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     const MaterialProperty<RankTwoTensor> & stress,
-    const MaterialProperty<RankTwoTensor> & strain_rate)
+    const MaterialProperty<RankTwoTensor> & strain_rate,
+    const bool is_incremental,
+    const MaterialProperty<RankTwoTensor> & strain_rate_old)
 {
-  if (_n_exponent <= 1)
-    return 0.0;
+  if (!is_incremental)
+  {
+    if (_n_exponent <= 1)
+      return 0.0;
 
-  Real creep_factor = _n_exponent / (_n_exponent + 1);
+    Real creep_factor = _n_exponent / (_n_exponent + 1);
 
-  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+    return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+  }
+  else
+    return stress[_qp].doubleContraction((strain_rate_old)[_qp] - (strain_rate)[_qp]);
 }
 
 bool

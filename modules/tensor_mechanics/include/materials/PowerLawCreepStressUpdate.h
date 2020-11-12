@@ -30,7 +30,9 @@ public:
 
   virtual Real
   computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & stress,
-                                 const MaterialProperty<RankTwoTensor> & strain_rate) override;
+                                 const MaterialProperty<RankTwoTensor> & strain_rate,
+                                 const bool is_incremental,
+                                 const MaterialProperty<RankTwoTensor> & strain_rate_old) override;
 
   virtual bool substeppingCapabilityEnabled() override;
 

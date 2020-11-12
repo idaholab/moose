@@ -30,6 +30,10 @@ StrainEnergyRateDensityTempl<is_ad>::validParams()
       "inelastic_models",
       "inelastic_models_size=1",
       "The material objects to use to calculate the strain energy rate density.");
+  params.addParam<bool>("incremental",
+                        false,
+                        "Whether to compute strain energy rate density numerically, instead of "
+                        "using power law closed form.");
   return params;
 }
 
@@ -40,9 +44,13 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _strain_energy_rate_density(
         declareGenericProperty<Real, is_ad>(_base_name + "strain_energy_rate_density")),
+    _strain_energy_rate_density_old(
+        getMaterialPropertyOld<Real>(_base_name + "strain_energy_rate_density")),
     _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "stress")),
     _strain_rate(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_rate")),
-    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size())
+    _strain_rate_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "strain_rate")),
+    _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
+    _is_incremental(getParam<bool>("incremental"))
 {
 
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
@@ -79,7 +87,15 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
   for (unsigned int i = 0; i < _inelastic_models.size(); ++i)
   {
     _inelastic_models[i]->setQp(_qp);
-    _strain_energy_rate_density[_qp] =
-        _inelastic_models[i]->computeStrainEnergyRateDensity(_stress, _strain_rate);
+
+    if (!_is_incremental)
+      _strain_energy_rate_density[_qp] = _inelastic_models[i]->computeStrainEnergyRateDensity(
+          _stress, _strain_rate, false, _strain_rate_old);
+    else
+      // For more complex material models where closed-form solution cannot be obtained
+      _strain_energy_rate_density[_qp] =
+          _strain_energy_rate_density_old[_qp] +
+          _inelastic_models[i]->computeStrainEnergyRateDensity(
+              _stress, _strain_rate, _is_incremental, _strain_rate_old);
   }
 }
