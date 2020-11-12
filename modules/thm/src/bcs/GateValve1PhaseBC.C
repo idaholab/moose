@@ -73,16 +73,18 @@ GateValve1PhaseBC::computeJacobian()
 }
 
 void
-GateValve1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
+GateValve1PhaseBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   DenseMatrix<Real> jacobian_block;
   std::vector<dof_id_type> dofs_j;
   std::map<unsigned int, unsigned int>::const_iterator it;
-  if ((it = _jvar_map.find(jvar.number())) != _jvar_map.end())
+  if ((it = _jvar_map.find(jvar_num)) != _jvar_map.end())
   {
     const unsigned int j_equation_index = it->second;
     _gate_valve_uo.getJacobianEntries(
         _connection_index, _equation_index, j_equation_index, jacobian_block, dofs_j);
+
+    const auto & jvar = getVariable(jvar_num);
 
     // It is assumed here that _phi[_j][_qp] will give the correct value for DoFs
     // on the other subdomain. For 1-D, there should be only one basis function
@@ -100,12 +102,6 @@ GateValve1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 
     _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
   }
-}
-
-void
-GateValve1PhaseBC::computeJacobianBlock(unsigned /*jvar*/)
-{
-  mooseError(name(), ": computeJacobianBlock(unsigned jvar) is a deprecated method.");
 }
 
 std::map<unsigned int, unsigned int>

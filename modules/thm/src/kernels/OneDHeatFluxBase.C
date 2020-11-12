@@ -26,17 +26,11 @@ OneDHeatFluxBase::computeJacobian()
 }
 
 void
-OneDHeatFluxBase::computeOffDiagJacobian(unsigned jvar)
+OneDHeatFluxBase::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  Kernel::computeOffDiagJacobian(jvar);
-}
+  Kernel::computeOffDiagJacobian(jvar_num);
 
-void
-OneDHeatFluxBase::computeOffDiagJacobian(MooseVariableFEBase & jvar)
-{
-  Kernel::computeOffDiagJacobian(jvar);
-
-  if (jvar.number() == _var.number())
+  if (jvar_num == _var.number())
   {
     // when doing the diagonal part, also take care of the off-diag jacobian
     // wrt the heat structure side

@@ -42,17 +42,11 @@ HeatFluxBaseBC::computeJacobian()
 }
 
 void
-HeatFluxBaseBC::computeJacobianBlock(unsigned jvar)
+HeatFluxBaseBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  IntegratedBC::computeJacobianBlock(jvar);
-}
+  IntegratedBC::computeOffDiagJacobian(jvar_num);
 
-void
-HeatFluxBaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
-{
-  IntegratedBC::computeJacobianBlock(jvar);
-
-  if (jvar.number() == _var.number())
+  if (jvar_num == _var.number())
   {
     // when doing the diagonal part, also take care of the off-diag jacobian
     // wrt the heat structure side

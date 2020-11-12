@@ -11,7 +11,6 @@ public:
 
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned jvar) override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
 protected:
   virtual Real computeQpOffDiagJacobianNeighbor(unsigned int jvar) = 0;
