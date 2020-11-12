@@ -1,14 +1,15 @@
 [Tests]
   [main]
-    type = Exodiff
+    type = CheckFiles
     input = input.i
-    exodiff = input_out.e
-    expect_out = "[Mesh]"
+    check_files = 'input_out.i'
+    explode = false
   []
   [explode]
     type = Exodiff
     input = input_out.i
     exodiff = input_out.e
     prereq = main
+    explode = false
   []
 []

@@ -338,6 +338,9 @@ class TestHarness:
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
 
+        if self.options.explode:
+            testers = self.appendExplodeTests(testers)
+
         return testers
 
     def notMySpecFile(self, dirpath, filename):
@@ -429,6 +432,31 @@ class TestHarness:
 
             elif part1.parameters()['recover'] == True and part1.parameters()['check_input']:
                 part1.setStatus(part1.silent)
+
+        testers.extend(new_tests)
+        return testers
+
+    def appendExplodeTests(self, testers):
+        """
+        The result of Outputs/hit=True file should yield the same result as the provided input file.
+        """
+        new_tests = []
+
+        for part1 in testers:
+            part2 = copy.deepcopy(part1)
+
+            # Part 1:
+            part1_params = part1.parameters()
+            part1_params['cli_args'].append('Outputs/hit=true')
+
+            # Part 2:
+            part2_params = part2.parameters()
+            part2_params['test_name'] += '(explode)'
+            part2_params['prereq'].append(part1.parameters()['test_name'])
+            part2_params['input'] = part2_params['input'][:-2] + '_out.i'
+            part2_params['delete_output_before_running'] = False
+
+            new_tests.append(part2)
 
         testers.extend(new_tests)
         return testers
@@ -782,6 +810,7 @@ class TestHarness:
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
+        parser.add_argument('--explode', action='store_true', help='Run test using HIT exploded input file.')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
@@ -869,6 +898,9 @@ class TestHarness:
         if opts.valgrind_mode and opts.nthreads > 1:
             print('ERROR: --threads can not be used with --valgrind')
             sys.exit(1)
+        if opts.explode and (opts.check_input or opts.enable_recover):
+            print('ERROR: --explode cannot be used with --check-input or --recover')
+            sys.exit(1)
         if opts.check_input and opts.no_check_input:
             print('ERROR: --check-input and --no-check-input can not be used together')
             sys.exit(1)
@@ -893,6 +925,7 @@ class TestHarness:
         if opts.pbs and opts.pedantic_checks:
             print('ERROR: --pbs and --pedantic-checks  can not be used simultaneously')
             sys.exit(1)
+
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
         # We can not support running two spec files during one launch into a third party queue manager.
