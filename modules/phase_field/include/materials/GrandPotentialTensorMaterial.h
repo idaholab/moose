@@ -33,7 +33,7 @@ public:
 
 protected:
   /// mobility tensor
-  std::string _D_name;
+  std::string _chiD_name;
   MaterialProperty<RealTensorValue> & _chiD;
   MaterialProperty<RealTensorValue> & _dchiDdc;
 
@@ -46,7 +46,7 @@ protected:
   MaterialProperty<Real> & _Lv;
 
   /// magnitude of mobility tensor
-  MaterialProperty<Real> & _Dmag;
+  MaterialProperty<Real> & _chiDmag;
 
   /// surface energy
   const MaterialProperty<Real> & _sigma_s;

@@ -41,14 +41,14 @@ GrandPotentialTensorMaterial::validParams()
 
 GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters & parameters)
   : PolycrystalDiffusivityTensorBase(parameters),
-    _D_name(getParam<std::string>("f_name")),
-    _chiD(declareProperty<RealTensorValue>(_D_name)),
-    _dchiDdc(declarePropertyDerivative<RealTensorValue>(_D_name, _c_name)),
+    _chiD_name(getParam<std::string>("f_name")),
+    _chiD(declareProperty<RealTensorValue>(_chiD_name)),
+    _dchiDdc(declarePropertyDerivative<RealTensorValue>(_chiD_name, _c_name)),
     _Ls_name(getParam<std::string>("solid_mobility")),
     _Ls(declareProperty<Real>(_Ls_name)),
     _Lv_name(getParam<std::string>("void_mobility")),
     _Lv(declareProperty<Real>(_Lv_name)),
-    _Dmag(declareProperty<Real>(_D_name + "_mag")),
+    _chiDmag(declareProperty<Real>(_chiD_name + "_mag")),
     _sigma_s(getMaterialProperty<Real>("surface_energy")),
     _int_width(getParam<Real>("int_width")),
     _chi_name(getParam<MaterialPropertyName>("chi")),
@@ -65,7 +65,7 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
   {
     _vals_name[i] = getVar("v", i)->name();
     _dchideta[i] = &getMaterialPropertyDerivative<Real>(_chi_name, _vals_name[i]);
-    _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_D_name, _vals_name[i]);
+    _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_chiD_name, _vals_name[i]);
   }
 }
 
@@ -81,7 +81,7 @@ GrandPotentialTensorMaterial::computeProperties()
     for (unsigned int i = 0; i < _op_num; ++i)
       (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp];
 
-    _Dmag[_qp] = _chiD[_qp].norm();
+    _chiDmag[_qp] = _chiD[_qp].norm();
 
     Real GBmob;
     if (_GBMobility < 0)
