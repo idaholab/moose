@@ -182,7 +182,6 @@ public:
    * Set a flag to indicate whether or not to output eigenvalue inverse.
    */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
-#endif
 
 private:
   /**
@@ -190,6 +189,13 @@ private:
    */
   void doFreeNonlinearPowerIterations(unsigned int free_power_iterations);
 
+  /**
+   * Adjust eigen vector by either scaling the existing values or setting new values
+   * The operations are applied for only eigen variables
+   */
+  void adjustEigenVector(const Real value, bool scaling);
+
+#endif
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;

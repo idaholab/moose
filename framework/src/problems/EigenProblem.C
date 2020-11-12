@@ -341,7 +341,7 @@ EigenProblem::computeResidualL2Norm()
 }
 
 void
-EigenProblem::scaleEigenvector(const Real scaling_factor)
+EigenProblem::adjustEigenVector(const Real value, bool scaling)
 {
   std::vector<VariableName> var_names = getVariableNames();
   for (auto & vn : var_names)
@@ -351,53 +351,37 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
       var = &getScalarVariable(0, vn);
     else
       var = &getVariable(0, vn);
+    // Do operations for only eigen variable
     if (var->eigen())
       for (unsigned int vc = 0; vc < var->count(); ++vc)
       {
         std::set<dof_id_type> var_indices;
         _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
         for (const auto & dof : var_indices)
-          _nl_eigen->solution().set(dof, _nl_eigen->solution()(dof) * scaling_factor);
+          _nl_eigen->solution().set(dof, scaling ? (_nl_eigen->solution()(dof) * value) : value);
       }
   }
+
   _nl_eigen->solution().close();
   _nl_eigen->update();
 }
 
 void
+EigenProblem::scaleEigenvector(const Real scaling_factor)
+{
+  adjustEigenVector(scaling_factor, true);
+}
+
+void
 EigenProblem::initEigenvector(const Real initial_value)
 {
-  std::vector<VariableName> var_names = getVariableNames();
-
   // Yaqi's note: the following code will set a flat solution for lagrange and
   // constant monomial variables. For the first or higher order elemental variables,
   // the solution is not flat. Fortunately, the initial guess does not affect
   // the final solution as long as it is not perpendicular to the true solution.
   // We, in general, do not need to worry about that.
-  for (auto & vn : var_names)
-  {
-    MooseVariableBase * var = nullptr;
-    if (hasScalarVariable(vn))
-      var = &getScalarVariable(0, vn);
-    else
-      var = &getVariable(0, vn);
-    // We set values for only eigen variables
-    if (var->eigen())
-    {
-      std::set<dof_id_type> var_indices;
-      for (unsigned int vc = 0; vc < var->count(); ++vc)
-      {
-        var_indices.clear();
-        _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
-        for (const auto & dof : var_indices)
-          _nl_eigen->solution().set(dof, initial_value);
-      }
-    }
-  }
 
-  // sync local solution and global solution
-  _nl_eigen->solution().close();
-  _nl_eigen->update();
+  adjustEigenVector(initial_value, false);
 }
 
 void
