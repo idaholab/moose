@@ -1,0 +1,7 @@
+[Tests]
+  [diffusionrate]
+    type = 'CSVDiff'
+    input = 'diffusion_rate.i'
+    csvdiff = 'diffusion_rate.csv'
+  []
+[]

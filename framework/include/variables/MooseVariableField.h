@@ -106,9 +106,19 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
 
   /**
+   * AD grad of time derivative solution getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const = 0;
+
+  /**
    * AD grad neighbor solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const = 0;
+
+  /**
+   * AD grad of time derivative neighbor solution getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const = 0;
 
   /**
    * AD second solution getter
