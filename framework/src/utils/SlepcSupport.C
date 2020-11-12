@@ -715,9 +715,6 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
 
   PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
-
   PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
 
   // Use the system's update() to get a good local version of the
@@ -779,8 +776,15 @@ mooseMatMult(EigenProblem & eigen_problem, Vec x, Vec r, TagID tag)
 
   PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  This operation does not modify the incoming
+  // "x" vector, it only localizes information from "x" into
+  // sys.current_local_solution.
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
 
   R.zero();
 
