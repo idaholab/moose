@@ -1732,6 +1732,23 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
   return var->adGradSlnNeighbor();
 }
 
+const ADVariableGradient &
+Coupleable::adCoupledGradientDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return getADDefaultGradient();
+  checkFuncType(var_name, VarType::GradientDot, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adGradSlnDot();
+  return var->adGradSlnNeighborDot();
+}
+
 const ADVariableSecond &
 Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp) const
 {

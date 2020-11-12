@@ -162,6 +162,13 @@ public:
     return _ad_grad_u;
   }
 
+  const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
+  {
+    mooseError("Gradient of time derivative not yet implemented for FV");
+    // _need_ad = _need_ad_grad_u = true;
+    // return _ad_grad_u_dot;
+  }
+
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
     _need_ad = _need_ad_second_u = true;
@@ -384,6 +391,7 @@ private:
   mutable bool _need_ad_u_dot;
   mutable bool _need_ad_u_dotdot;
   mutable bool _need_ad_grad_u;
+  mutable bool _need_ad_grad_u_dot;
   mutable bool _need_ad_second_u;
 
   /// local solution flags
@@ -453,6 +461,7 @@ private:
   MooseArray<DualReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputShape> _ad_u_dot;
   ADTemplateVariableValue<OutputShape> _ad_u_dotdot;
+  ADTemplateVariableGradient<OutputShape> _ad_grad_u_dot;
 
   // time derivatives
 
