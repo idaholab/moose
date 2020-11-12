@@ -367,32 +367,7 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
 void
 EigenProblem::initEigenvector(const Real initial_value)
 {
-  dof_id_type n_dofs = 0;
-
   std::vector<VariableName> var_names = getVariableNames();
-
-  // Count how many dofs we have
-  for (auto & vn : var_names)
-  {
-    MooseVariableBase * var = nullptr;
-    if (hasScalarVariable(vn))
-      var = &getScalarVariable(0, vn);
-    else
-      var = &getVariable(0, vn);
-    if (var->eigen())
-    {
-      std::set<dof_id_type> var_indices;
-      for (unsigned int vc = 0; vc < var->count(); ++vc)
-      {
-        var_indices.clear();
-        _nl_eigen->system().local_dof_indices(var->number() + vc, var_indices);
-        n_dofs += var_indices.size();
-      }
-    }
-  }
-
-  // Note that even n_dofs is equal to zero, we can not return here because we might
-  // hit MPI deadlock when 'close' is called at the end of this function
 
   // Yaqi's note: the following code will set a flat solution for lagrange and
   // constant monomial variables. For the first or higher order elemental variables,
@@ -401,11 +376,6 @@ EigenProblem::initEigenvector(const Real initial_value)
   // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
-    // There is nothing we need to scale. We cannot return here, we need
-    // to go through 'close'.
-    if (!n_dofs)
-      break;
-
     MooseVariableBase * var = nullptr;
     if (hasScalarVariable(vn))
       var = &getScalarVariable(0, vn);
@@ -425,6 +395,7 @@ EigenProblem::initEigenvector(const Real initial_value)
     }
   }
 
+  // sync local solution and global solution
   _nl_eigen->solution().close();
   _nl_eigen->update();
 }
@@ -435,11 +406,18 @@ EigenProblem::preScaleEigenVector()
   // pre-scale the solution to make sure ||Bx||_2 is equal to inverse of eigenvalue
   computeResidualTag(
       *_nl_eigen->currentSolution(), _nl_eigen->residualVectorBX(), _nl_eigen->eigenVectorTag());
+
+  // If we do not have eigenvaue yet, we scale 1/|Bx| to unity
   std::pair<Real, Real> eig(1, 0);
+  // If there is an eigenvaue, we scale 1/|Bx| to eigenvaue
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
+
+  // Eigenvaluve magnitude
   Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
+  // Scaling factor
   Real factor = 1 / v / _nl_eigen->residualVectorBX().l2_norm();
+  // Scale eigenvector
   if (!MooseUtils::absoluteFuzzyEqual(factor, 1))
     scaleEigenvector(factor);
 }
