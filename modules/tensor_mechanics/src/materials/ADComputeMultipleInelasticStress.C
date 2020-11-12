@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeMultipleInelasticStress.h"
-#include "ADStressUpdateBase.h"
+#include "StressUpdateBase.h"
 #include "MooseException.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeMultipleInelasticStress);

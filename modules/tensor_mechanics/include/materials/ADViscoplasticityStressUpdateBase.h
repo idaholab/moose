@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADStressUpdateBase.h"
+#include "StressUpdateBase.h"
 
 class ADViscoplasticityStressUpdateBase : public ADStressUpdateBase
 {

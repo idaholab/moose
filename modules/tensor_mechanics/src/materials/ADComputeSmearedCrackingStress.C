@@ -9,7 +9,7 @@
 
 #include "ADComputeSmearedCrackingStress.h"
 #include "ElasticityTensorTools.h"
-#include "ADStressUpdateBase.h"
+#include "StressUpdateBase.h"
 #include "Conversion.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeSmearedCrackingStress);
