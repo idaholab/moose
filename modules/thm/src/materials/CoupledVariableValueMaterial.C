@@ -1,9 +1,13 @@
 #include "CoupledVariableValueMaterial.h"
 
-registerMooseObject("THMApp", CoupledVariableValueMaterial);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("THMApp", CoupledVariableValueMaterial);
+registerMooseObject("THMApp", ADCoupledVariableValueMaterial);
+
+template <bool is_ad>
 InputParameters
-CoupledVariableValueMaterial::validParams()
+CoupledVariableValueMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>(
@@ -14,16 +18,26 @@ CoupledVariableValueMaterial::validParams()
   return params;
 }
 
-CoupledVariableValueMaterial::CoupledVariableValueMaterial(const InputParameters & parameters)
+template <bool is_ad>
+CoupledVariableValueMaterialTempl<is_ad>::CoupledVariableValueMaterialTempl(
+    const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
-    _prop(declareProperty<Real>(_prop_name)),
-    _value(coupledValue("coupled_variable"))
+    _prop(declareGenericProperty<Real, is_ad>(_prop_name)),
+    _value((!is_ad) ? coupledValue("coupled_variable") : _zero),
+    _ad_value((is_ad) ? adCoupledValue("coupled_variable") : _ad_zero)
 {
 }
 
+template <bool is_ad>
 void
-CoupledVariableValueMaterial::computeQpProperties()
+CoupledVariableValueMaterialTempl<is_ad>::computeQpProperties()
 {
-  _prop[_qp] = _value[_qp];
+  if (is_ad)
+    _prop[_qp] = MetaPhysicL::raw_value(_ad_value[_qp]);
+  else
+    _prop[_qp] = _value[_qp];
 }
+
+template class CoupledVariableValueMaterialTempl<false>;
+template class CoupledVariableValueMaterialTempl<true>;
