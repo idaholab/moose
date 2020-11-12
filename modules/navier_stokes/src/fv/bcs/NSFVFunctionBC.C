@@ -16,7 +16,6 @@
 #include "ADReal.h"    // Moose::derivInsert
 #include "MooseMesh.h" // FaceInfo methods
 #include "FVDirichletBC.h"
-#include "NSFVUtils.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -24,17 +23,6 @@
 #include "libmesh/vector_value.h"
 
 registerMooseObject("NavierStokesApp", NSFVFunctionBC);
-
-namespace
-{
-ADReal
-coeffCalculator(const Elem * const elem, void * context)
-{
-  auto * nsfv_bc = static_cast<NSFVFunctionBC *>(context);
-
-  return nsfv_bc->coeffCalculator(elem);
-}
-}
 
 InputParameters
 NSFVFunctionBC::validParams()
@@ -52,12 +40,6 @@ NSFVFunctionBC::NSFVFunctionBC(const InputParameters & params)
     NSFVBase(params),
     _pressure_exact_solution(getFunction("pressure_exact_solution"))
 {
-}
-
-ADReal
-NSFVFunctionBC::coeffCalculator(const Elem * const elem)
-{
-  return NS::coeffCalculator(elem, *this);
 }
 
 void
@@ -116,7 +98,7 @@ NSFVFunctionBC::interpolate(Moose::FV::InterpMethod m,
     // have to essentially create an entire fictional element with defined geometric locations of
     // the faces in order to compute inward advective flux and diffusive flux. For now I'm going to
     // try not doing that and just use the a coeff of the elem
-    const ADReal & face_a = _p_var->adCoeff(elem, this, &::coeffCalculator);
+    const ADReal & face_a = rcCoeff(*elem);
     const Real face_volume = elem_volume;
 
     const ADReal face_D = face_volume / face_a;

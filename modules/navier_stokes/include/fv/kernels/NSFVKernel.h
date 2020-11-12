@@ -14,13 +14,11 @@
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVKernel : public FVMatAdvection, public NSFVBase
+class NSFVKernel : public FVMatAdvection, protected NSFVBase
 {
 public:
   static InputParameters validParams();
   NSFVKernel(const InputParameters & params);
-
-  ADReal coeffCalculator(const Elem * elem);
 
 protected:
   /**
@@ -32,6 +30,9 @@ protected:
                    const ADRealVectorValue & neighbor_v);
 
   ADReal computeQpResidual() override;
+
+  void residualSetup() override { clearRCCoeffs(); }
+  void jacobianSetup() override { clearRCCoeffs(); }
 };
 
 #endif

@@ -15,13 +15,11 @@
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVFunctionBC : public FVMatAdvectionFunctionBC, public NSFVBase
+class NSFVFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVBase
 {
 public:
   static InputParameters validParams();
   NSFVFunctionBC(const InputParameters & params);
-
-  ADReal coeffCalculator(const Elem * elem);
 
 protected:
   /**
@@ -33,6 +31,9 @@ protected:
                    const RealVectorValue & ghost_v);
 
   ADReal computeQpResidual() override;
+
+  void residualSetup() override { clearRCCoeffs(); }
+  void jacobianSetup() override { clearRCCoeffs(); }
 
   const Function & _pressure_exact_solution;
 };

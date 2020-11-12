@@ -16,7 +16,6 @@
 #include "ADReal.h"    // Moose::derivInsert
 #include "MooseMesh.h" // FaceInfo methods
 #include "FVDirichletBC.h"
-#include "NSFVUtils.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -24,17 +23,6 @@
 #include "libmesh/vector_value.h"
 
 registerMooseObject("NavierStokesApp", NSFVKernel);
-
-namespace
-{
-ADReal
-coeffCalculator(const Elem * const elem, void * context)
-{
-  auto * nsfv_kernel = static_cast<NSFVKernel *>(context);
-
-  return nsfv_kernel->coeffCalculator(elem);
-}
-}
 
 InputParameters
 NSFVKernel::validParams()
@@ -45,12 +33,6 @@ NSFVKernel::validParams()
 }
 
 NSFVKernel::NSFVKernel(const InputParameters & params) : FVMatAdvection(params), NSFVBase(params) {}
-
-ADReal
-NSFVKernel::coeffCalculator(const Elem * const elem)
-{
-  return NS::coeffCalculator(elem, *this);
-}
 
 void
 NSFVKernel::interpolate(Moose::FV::InterpMethod m,
@@ -84,7 +66,7 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
         elem_two ? (elem_is_elem_one ? _face_info->neighborVolume() : _face_info->elemVolume()) : 0;
 
     // Now we need to perform the computations of D
-    const ADReal & elem_one_a = _p_var->adCoeff(elem_one, this, &::coeffCalculator);
+    const ADReal & elem_one_a = rcCoeff(*elem_one);
     ADReal face_a = elem_one_a;
 
     mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
@@ -100,7 +82,7 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
 
     if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
     {
-      const ADReal & elem_two_a = _p_var->adCoeff(elem_two, this, &::coeffCalculator);
+      const ADReal & elem_two_a = rcCoeff(*elem_two);
       Moose::FV::interpolate(
           Moose::FV::InterpMethod::Average, face_a, elem_one_a, elem_two_a, *_face_info);
 

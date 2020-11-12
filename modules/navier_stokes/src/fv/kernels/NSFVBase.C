@@ -8,9 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVBase.h"
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+
 #include "InputParameters.h"
 #include "SubProblem.h"
 #include "MooseVariableFV.h"
+
+std::vector<std::unordered_map<const Elem *, ADReal>> NSFVBase::_rc_a_coeffs;
 
 InputParameters
 NSFVBase::validParams()
@@ -74,4 +79,70 @@ NSFVBase::NSFVBase(const InputParameters & params)
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(velocity_interp_method));
+
+  if (_nsfv_tid == 0)
+    _rc_a_coeffs.resize(libMesh::n_threads());
 }
+
+const ADReal &
+NSFVBase::rcCoeff(const Elem & elem) const
+{
+  auto & my_map = _rc_a_coeffs[_nsfv_tid];
+
+  auto it = my_map.find(&elem);
+
+  if (it != my_map.end())
+    return it->second;
+
+  // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
+  // boolean denoting whether a new insertion took place
+  auto emplace_ret = my_map.emplace(&elem, coeffCalculator(elem));
+
+  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
+
+  return emplace_ret.first->second;
+}
+
+ADReal
+NSFVBase::coeffCalculator(const Elem & elem) const
+{
+  ADReal coeff = 0;
+
+  ADRealVectorValue elem_velocity(_u_var->getElemValue(&elem));
+
+  if (_v_var)
+    elem_velocity(1) = _v_var->getElemValue(&elem);
+  if (_w_var)
+    elem_velocity(2) = _w_var->getElemValue(&elem);
+
+  auto action_functor = [&coeff, &elem_velocity, this](const Elem & /*functor_elem*/,
+                                                       const Elem * const neighbor,
+                                                       const FaceInfo * const fi,
+                                                       const Point & surface_vector,
+                                                       Real coord,
+                                                       const bool /*elem_has_info*/) {
+    mooseAssert(fi, "We need a non-null FaceInfo");
+    ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
+    if (_v_var)
+      neighbor_velocity(1) = _v_var->getNeighborValue(neighbor, *fi, elem_velocity(1));
+    if (_w_var)
+      neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
+
+    ADRealVectorValue interp_v;
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, interp_v, elem_velocity, neighbor_velocity, *fi);
+
+    ADReal mass_flow = _rho * interp_v * surface_vector;
+
+    coeff += -mass_flow;
+
+    // Now add the viscous flux
+    coeff += _mu * fi->faceArea() * coord / (fi->elemCentroid() - fi->neighborCentroid()).norm();
+  };
+
+  Moose::FV::loopOverElemFaceInfo(elem, _nsfv_subproblem.mesh(), _nsfv_subproblem, action_functor);
+
+  return coeff;
+}
+
+#endif
