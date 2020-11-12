@@ -64,7 +64,7 @@ DistributedRectilinearMeshGenerator::validParams()
       Moose::RelationshipManagerType::GEOMETRIC,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         // Let this RM safeguard users specified ghosted layers
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers") + 1;
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers");
         // We can not attach geometric early here because some simulation related info, such as,
         // periodic BCs is not available yet during an early stage. Periodic BCs will be passed
         // into ghosting functor during initFunctor of ElementSideNeighborLayers. There is no hurt
