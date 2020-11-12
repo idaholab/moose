@@ -5,6 +5,7 @@
     exodiff = 2d-rc_out.e
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
   []
   [no-slip]
     type = 'Exodiff'
@@ -13,5 +14,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
+    ad_indexing_type = 'global'
   []
 []

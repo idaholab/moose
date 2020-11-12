@@ -6,6 +6,7 @@
     input = 'lid-driven.i'
     exodiff = 'lid-driven_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume method.'
+    ad_indexing_type = 'global'
   []
   [nonsingular]
     type = 'RunApp'
@@ -14,6 +15,7 @@
     expect_out = '0 of 48 singular values'
     absent_out = '\s+[1-9]+[0-9]* of 48 singular values'
     requirement = 'The system shall be able to solve an incompressible Navier-Stokes problem with dirichlet boundary conditions for all the normal components of velocity, using the finite volume method, and have a nonsingular system matrix.'
+    ad_indexing_type = 'global'
   []
   [jacobian]
     type = 'PetscJacobianTester'
@@ -21,6 +23,7 @@
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     requirement = 'The system shall be able to compute a perfect Jacobian when solving a lid-driven incompressible Navier-Stokes problem with the finite volume method.'
     run_sim = True
+    ad_indexing_type = 'global'
   []
   [with-temp]
     type = 'Exodiff'
@@ -28,6 +31,7 @@
     exodiff = 'lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
     method = '!dbg'
+    ad_indexing_type = 'global'
   []
   [transient-with-temp]
     type = 'Exodiff'
@@ -35,5 +39,6 @@
     exodiff = 'transient-lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
     method = '!dbg'
+    ad_indexing_type = 'global'
   []
 []
