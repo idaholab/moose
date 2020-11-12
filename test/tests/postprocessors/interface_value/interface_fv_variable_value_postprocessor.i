@@ -1,3 +1,5 @@
+postprocessor_type = InterfaceAverageVariableValuePostprocessor
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -106,7 +108,7 @@
 
 [Postprocessors]
   [./diffusivity_average]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -114,7 +116,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_primary_secondary]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_primary_minus_secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -122,7 +124,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_secondary_primary]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_secondary_minus_primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -130,7 +132,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_abs]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -138,7 +140,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_primary]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -146,7 +148,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_secondary]
-    type = InterfaceIntegralVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -165,5 +167,6 @@
 []
 
 [Outputs]
+  file_base = ${raw ${postprocessor_type} _fv}
   exodus = true
 []

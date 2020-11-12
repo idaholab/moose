@@ -1,9 +1,9 @@
 [Tests]
   [./interface_average_variable_value_postprocessor_test]
     type = 'Exodiff'
-    input = 'interface_average_variable_value_postprocessor.i'
-    exodiff = 'interface_average_variable_value_postprocessor_out.e'
-    requirement = "Testing the implementation of the InterfaceAverageVariableValuePostprocessor"
+    input = 'interface_fe_variable_value_postprocessor.i'
+    exodiff = 'InterfaceAverageVariableValuePostprocessor_fe.e'
+    requirement = "Testing the implementation of the InterfaceAverageVariableValuePostprocessor "
                "By design at the end of the first step we should observe: "
                "an average material property of 7, "
                "an average material property absolute jump to 6,"
@@ -12,14 +12,15 @@
                "a material property value on the primary side of 10, "
                "a material property value on the primary side of 4 "
     design = 'InterfaceAverageVariableValuePostprocessor.md'
+    cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647'
     max_threads = 2
   [../]
   [./interface_integral_variable_value_postprocessor_test]
     type = 'Exodiff'
-    input = 'interface_integral_variable_value_postprocessor.i'
-    exodiff = 'interface_integral_variable_value_postprocessor_out.e'
-    requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor"
+    input = 'interface_fe_variable_value_postprocessor.i'
+    exodiff = 'InterfaceIntegralVariableValuePostprocessor_fe.e'
+    requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor "
                "By design at the end of the first step we should observe: "
                "an integral material property of 21, "
                "an integral material property absolute jump to 18,"
@@ -28,13 +29,14 @@
                "a material integral property value on the primary side of 30, "
                "a material integral property value on the primary side of 12 "
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
+    cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647'
     max_threads = 2
   [../]
   [./interface_average_variable_value_postprocessor_fv_test]
     type = 'Exodiff'
-    input = 'interface_average_variable_value_postprocessor.i'
-    exodiff = 'interface_average_variable_value_postprocessor_out.e'
+    input = 'interface_fv_variable_value_postprocessor.i'
+    exodiff = 'InterfaceAverageVariableValuePostprocessor_fv.e'
     requirement = "Testing the implementation of the InterfaceAverageVariableValuePostprocessor "
                "for finite volume variables."
                "By design at the end of the first step we should observe: "
@@ -45,14 +47,15 @@
                "a material property value on the primary side of 10, "
                "a material property value on the primary side of 4 "
     design = 'InterfaceAverageVariableValuePostprocessor.md'
+    cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647 #16099'
     skip = '#16149'
     max_threads = 2
   [../]
   [./interface_integral_variable_value_postprocessor_fv_test]
     type = 'Exodiff'
-    input = 'interface_integral_variable_value_postprocessor_fv.i'
-    exodiff = 'interface_integral_variable_value_postprocessor_fv_out.e'
+    input = 'interface_fv_variable_value_postprocessor.i'
+    exodiff = 'InterfaceIntegralVariableValuePostprocessor_fv.e'
     requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor "
                "for finite volume variables."
                "By design at the end of the first step we should observe: "
@@ -63,6 +66,7 @@
                "a material integral property value on the primary side of 30, "
                "a material integral property value on the primary side of 12 "
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
+    cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647 #16099'
     skip = '#16149'
     max_threads = 2
