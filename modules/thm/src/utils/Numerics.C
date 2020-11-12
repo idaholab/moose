@@ -1,5 +1,6 @@
 #include "Numerics.h"
 #include "MooseUtils.h"
+#include "ADReal.h"
 
 namespace THM
 {
@@ -45,9 +46,15 @@ applyQuotientRule(const Real & num,
 }
 
 Real
-Reynolds(Real volume_fraction, Real rho, Real vel, Real Dh, Real mu)
+Reynolds(Real volume_fraction, Real rho, Real vel, Real D_h, Real mu)
 {
-  return volume_fraction * rho * std::fabs(vel) * Dh / mu;
+  return volume_fraction * rho * std::fabs(vel) * D_h / mu;
+}
+
+ADReal
+Reynolds(ADReal volume_fraction, ADReal rho, ADReal vel, ADReal D_h, ADReal mu)
+{
+  return volume_fraction * rho * std::fabs(vel) * D_h / mu;
 }
 
 Real
@@ -56,18 +63,36 @@ Prandtl(Real cp, Real mu, Real k)
   return cp * mu / k;
 }
 
-Real
-Grashof(Real beta, Real dT, Real Dh, Real rho_liquid, Real mu_liquid, Real gravity_magnitude)
+ADReal
+Prandtl(ADReal cp, ADReal mu, ADReal k)
 {
-  // Eq. 6-17
-  return gravity_magnitude * beta * dT * std::pow(Dh, 3) * (rho_liquid * rho_liquid) /
+  return cp * mu / k;
+}
+
+Real
+Grashof(Real beta, Real dT, Real D_h, Real rho_liquid, Real mu_liquid, Real gravity_magnitude)
+{
+  return gravity_magnitude * beta * dT * std::pow(D_h, 3) * (rho_liquid * rho_liquid) /
+         (mu_liquid * mu_liquid);
+}
+
+ADReal
+Grashof(
+    ADReal beta, ADReal dT, ADReal D_h, ADReal rho_liquid, ADReal mu_liquid, Real gravity_magnitude)
+{
+  return gravity_magnitude * beta * dT * std::pow(D_h, 3) * (rho_liquid * rho_liquid) /
          (mu_liquid * mu_liquid);
 }
 
 Real
 Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude)
 {
-  // Eq. 4-119; 5-13.
+  return std::sqrt(surf_tension / (gravity_magnitude * delta_rho));
+}
+
+ADReal
+Laplace(ADReal surf_tension, ADReal delta_rho, Real gravity_magnitude)
+{
   return std::sqrt(surf_tension / (gravity_magnitude * delta_rho));
 }
 
@@ -75,15 +100,28 @@ Real
 viscosityNumber(
     Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real gravity_magnitude)
 {
-  // Equation (4-23), page 129. See also its definition on page 120.
+  return viscosity /
+         std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
+}
+
+ADReal
+viscosityNumber(
+    ADReal viscosity, ADReal surf_tension, ADReal rho_k, ADReal delta_rho, Real gravity_magnitude)
+{
   return viscosity /
          std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
 }
 
 Real
-wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
+wallHeatTransferCoefficient(Real Nu, Real k, Real D_h)
 {
-  return Nu * k / Dh;
+  return Nu * k / D_h;
+}
+
+ADReal
+wallHeatTransferCoefficient(ADReal Nu, ADReal k, ADReal D_h)
+{
+  return Nu * k / D_h;
 }
 
 Real
@@ -215,12 +253,12 @@ E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel)
 }
 
 void
-h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & dh_de, Real & dh_dp, Real & dh_drho)
+h_from_e_p_rho(Real e, Real p, Real rho, Real & h, Real & D_h_de, Real & D_h_dp, Real & D_h_drho)
 {
   h = e + p / rho;
-  dh_de = 1.0;
-  dh_dp = 1.0 / rho;
-  dh_drho = -p / (rho * rho);
+  D_h_de = 1.0;
+  D_h_dp = 1.0 / rho;
+  D_h_drho = -p / (rho * rho);
 }
 
 bool
