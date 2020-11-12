@@ -146,7 +146,11 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 void
 NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
 {
-  if (_precond_matrix_includes_eigen)
+  // If it is an eigen dirichlet boundary condition, we should skip it because their
+  // contributions should be zero. If we do not skip it, preconditioning matrix will
+  // be singular because boundary elements are zero.
+  if (_precond_matrix_includes_eigen && !dynamic_cast<EigenDirichletBC *>(&object) &&
+      !dynamic_cast<EigenArrayDirichletBC *>(&object))
     object.useMatrixTag(_precond_tag);
 
   auto & vtags = object.getVectorTags();
@@ -166,9 +170,9 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
   // then we consider this as noneigen kernel
   if (vtags.find(_Bx_tag) == vtags.end() && mtags.find(_B_tag) == mtags.end())
   {
-    // Vector tag
+    // Noneigen Vector tag
     object.useVectorTag(_Ax_tag);
-    // Matrix tag
+    // Noneigen Matrix tag
     object.useMatrixTag(_A_tag);
     // Noneigen Kernels
     object.useMatrixTag(_precond_tag);
