@@ -54,8 +54,11 @@ private:
   // fixme lynn these have weird names because Petsc already has macros for TAONTR etc.
   /// Enum of tao solver types
   const enum class TaoSolverEnum {
-    NEWTON_TRUST_REGION, ///< NEWTON_TRUST_REGION
-    CONJUGATE_GRADIENT,  ///< CONJUGATE_GRADIENT
-    NELDER_MEAD,         ///< NELDER_MEAD
+    NEWTON_TRUST_REGION,
+    BUNDLE_RISK_MIN,
+    ORTHANT_QUASI_NEWTON,
+    QUASI_NEWTON,
+    CONJUGATE_GRADIENT,
+    NELDER_MEAD,
   } _tao_solver_enum;
 };

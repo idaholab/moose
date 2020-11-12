@@ -8,7 +8,7 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taocg taonm");
+  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -62,6 +62,15 @@ OptimizeSolve::solve()
   {
     case TaoSolverEnum::NEWTON_TRUST_REGION:
       ierr = TaoSetType(_tao, TAONTR);
+      break;
+    case TaoSolverEnum::BUNDLE_RISK_MIN:
+      ierr = TaoSetType(_tao, TAOBMRM);
+      break;
+    case TaoSolverEnum::ORTHANT_QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOOWLQN);
+      break;
+    case TaoSolverEnum::QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOLMVM);
       break;
     case TaoSolverEnum::CONJUGATE_GRADIENT:
       ierr = TaoSetType(_tao, TAOCG);
