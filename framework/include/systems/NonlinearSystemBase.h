@@ -741,6 +741,10 @@ protected:
   void assembleScalingVector();
 #endif
 
+  /**
+   * Called after any ResidualObject-derived objects are added 
+   * to the system.
+   */
   virtual void postAddResidualObject(ResidualObject &) {}
 
 protected:
