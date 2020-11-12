@@ -169,7 +169,7 @@ Eigenvalue::init()
   // it is up to users to provide an initial guess. If "auto_initialization" is off
   // and users does not provide an initial guess, slepc will automatically generate
   // a random vector as the initial guess. The motivation to offer this option is
-  // that we have to initialize  ONLY eigen variables in multiphysics simulation.
+  // that we have to initialize ONLY eigen variables in multiphysics simulation.
   // auto_initialization can be overriden by initial conditions.
   if (getParam<bool>("auto_initialization"))
     _eigen_problem.initEigenvector(1.0);
