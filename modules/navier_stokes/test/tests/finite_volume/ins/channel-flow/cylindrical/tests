@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#15640'
+  design = 'navier_stokes/fv.md'
   [average-no-slip]
     type = 'Exodiff'
     input = 2d-average-no-slip.i

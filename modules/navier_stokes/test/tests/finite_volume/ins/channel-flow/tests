@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#15640'
+  design = 'navier_stokes/fv.md'
   [free-slip]
     type = 'Exodiff'
     input = 2d-rc.i

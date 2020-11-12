@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#15640'
+  design = 'navier_stokes/fv.md'
   [1d-average]
     type = PythonUnitTest
     input = test.py
@@ -6,6 +8,7 @@
     method = '!dbg'
   requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 1D cylindrical coordinates, using an average interpolation scheme, and demonstrate second order convergence in the velocity variable and zeroth order convergence in the pressure variable because of the checkerboard pattern.'
     ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
   []
   [1d-rc-diri]
     type = PythonUnitTest
@@ -14,6 +17,7 @@
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 1D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and first order convergence for the pressure.'
     ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
   []
   [2d-rc-diri]
     type = PythonUnitTest
@@ -23,5 +27,7 @@
     min_parallel = 8
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 2D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and first order convergence for the pressure.'
     ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+    heavy = true
   []
 []

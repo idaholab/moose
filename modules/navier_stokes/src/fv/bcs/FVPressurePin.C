@@ -17,9 +17,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/numeric_vector.h"
 
-registerMooseObject("MooseApp", FVPressurePin);
-
-defineLegacyParams(FVPressurePin);
+registerMooseObject("NavierStokesApp", FVPressurePin);
 
 InputParameters
 FVPressurePin::validParams()
