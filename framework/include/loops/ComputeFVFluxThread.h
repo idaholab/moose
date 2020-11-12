@@ -676,6 +676,37 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::pre()
 {
+  std::vector<FVFluxBC *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(bcs);
+
+  std::vector<FVFluxKernel *> kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(kernels);
+
+  if (_do_jacobian)
+  {
+    for (auto * bc : bcs)
+      bc->jacobianSetup();
+    for (auto * kernel : kernels)
+      kernel->jacobianSetup();
+  }
+  else
+  {
+    for (auto * bc : bcs)
+      bc->residualSetup();
+    for (auto * kernel : kernels)
+      kernel->residualSetup();
+  }
+
   // Clear variables
   _fv_vars.clear();
   _elem_sub_fv_vars.clear();
