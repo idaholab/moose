@@ -74,12 +74,16 @@ public:
    */
   void addGlobal();
 
+  /**
+   * Utilities for making sense of c++ types
+   */
+  static std::string prettyCppType(const std::string & cpp_type);
+  static std::string basicCppType(const std::string & cpp_type);
+
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
                            bool & out_of_range_allowed);
 
-  std::string prettyCppType(const std::string & cpp_type);
-  std::string basicCppType(const std::string & cpp_type);
   size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
 
   std::string

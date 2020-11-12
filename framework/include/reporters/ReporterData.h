@@ -61,6 +61,7 @@ public:
     friend class VectorPostprocessor;
     friend class VectorPostprocessorInterface;
     friend class PostprocessorInterface;
+    friend class MultiAppReporterTransferBase;
   };
 
   ReporterData(MooseApp & moose_app);
@@ -205,6 +206,37 @@ public:
    */
   bool hasReporterWithMode(const ReporterMode & mode) const;
 
+  /**
+   * Helper for performing generic Reporter value transfers.
+   * @param from_name The name of the Reporter, within this instance, to transfer from
+   * @param to_name The name of the reporter to transfer into
+   * @param to_data The ReporterData object to transfer into   *
+   * @param to_index The time index of the reporter to transfer into
+   *
+   * This relies on the virtual ReporterContextBase::transfer method to allow this method to
+   * operate without knowledge of the type being transferred
+   *
+   * see MultiAppReporterTransferBase ReporterContext
+   */
+  void transfer(const ReporterName & from_name,
+                const ReporterName & to_name,
+                ReporterData & to_data,
+                unsigned int to_index = 0) const;
+
+  /**
+   * Helper for performing generic Reporter value transfers.
+   * @param mode The desired consumer mode to be attached to reporter
+   * @param object_name The reporter name to attach the mode
+   *
+   * This relies on the virtual ReporterContextBase::addConsumerMode method to allow this method
+   * to operate without knowledge of the type being transferred. It is needed by the Transfer to
+   * mark reporter values consumer mode to ensure that the correct parallel operations will
+   * occur prior to transfer.
+   *
+   * see MultiAppReporterTransferBase ReporterContext
+   */
+  void addConsumerMode(ReporterMode mode, const std::string & object_name);
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;
@@ -335,4 +367,14 @@ ReporterData::setReporterValue(const ReporterName & reporter_name,
   // https://stackoverflow.com/questions/123758/how-do-i-remove-code-duplication-between-similar-const-and-non-const-member-func
   const auto & me = *this;
   const_cast<T &>(me.getReporterValue<T>(reporter_name, time_index)) = value;
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterContext<T>::transfer(ReporterData & r_data,
+                             const ReporterName & r_name,
+                             unsigned int time_index) const
+{
+  r_data.setReporterValue<T>(r_name, _state.value(), time_index);
 }

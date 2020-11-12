@@ -18,6 +18,7 @@
 #include "ReporterMode.h"
 #include "ReporterState.h"
 #include "nlohmann/json.h"
+#include "JsonSyntaxTree.h"
 
 class ReporterData;
 
@@ -74,6 +75,28 @@ public:
    */
   const ReporterProducerEnum & getProducerModeEnum() const;
 
+  /**
+   * Helper for enabling generic transfer of Reporter values
+   * @param r_data The ReporterData on the app that this data is being transferred to
+   * @param r_name The name of the Report being transfered to
+   *
+   * @see MultiAppReporterTransfer
+   */
+  virtual void transfer(ReporterData & r_data,
+                        const ReporterName & r_name,
+                        unsigned int time_index = 0) const = 0;
+
+  /**
+   * Helper for enabling generic transfer of Reporter values
+   *
+   * This allows the Transfer object to set the ReporterValue consumer mode, which ensures that
+   * the data is in the proper state prior to transfer. Doing this via the override allows it to
+   * occur without the transfer having knowledge of the types being transfered.
+   *
+   * @see MultiAppReporterTransfer
+   */
+  virtual void addConsumerMode(ReporterMode mode, const std::string & object_name) = 0;
+
 protected:
   /// Defines how the Reporter value can be produced and how it is being produced
   ReporterProducerEnum _producer_enum;
@@ -125,6 +148,21 @@ public:
    * Perform automatic parallel communication based on the producer/consumer modes
    */
   virtual void finalize() override;
+
+  /**
+   * Perform type specific transfer
+   *
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   *       know of a better solution, if you have one please implement it.
+   */
+  virtual void transfer(ReporterData & r_data,
+                        const ReporterName & r_name,
+                        unsigned int time_index = 0) const override;
+
+  /**
+   * Add a consumer mode to the associate ReporterState
+   */
+  virtual void addConsumerMode(ReporterMode mode, const std::string & object_name) override;
 
 protected:
   /// The state on which this context object operates
@@ -242,7 +280,14 @@ template <typename T>
 std::string
 ReporterContext<T>::type() const
 {
-  return demangle(typeid(T).name());
+  return JsonSyntaxTree::prettyCppType(demangle(typeid(T).name()));
+}
+
+template <typename T>
+void
+ReporterContext<T>::addConsumerMode(ReporterMode mode, const std::string & object_name)
+{
+  _state.addConsumerMode(mode, object_name);
 }
 
 /**
