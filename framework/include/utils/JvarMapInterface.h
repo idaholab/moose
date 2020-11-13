@@ -31,8 +31,7 @@ class JvarMapKernelInterface : public JvarMapInterfaceBase<T>
 {
 public:
   JvarMapKernelInterface(const InputParameters & parameters);
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using T::computeOffDiagJacobian;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 };
 
 /**
@@ -50,8 +49,7 @@ class JvarMapIntegratedBCInterface : public JvarMapInterfaceBase<T>
 {
 public:
   JvarMapIntegratedBCInterface(const InputParameters & parameters);
-  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
-  using T::computeJacobianBlock;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 };
 
 /**
@@ -195,10 +193,10 @@ JvarMapIntegratedBCInterface<T>::JvarMapIntegratedBCInterface(const InputParamet
 
 template <class T>
 void
-JvarMapKernelInterface<T>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+JvarMapKernelInterface<T>::computeOffDiagJacobian(const unsigned int jvar)
 {
   // the Kernel is not coupled to the variable; no need to loop over QPs
-  if (this->_jvar_map[jvar.number()] < 0)
+  if (this->_jvar_map[jvar] < 0)
     return;
 
   // call the underlying class' off-diagonal Jacobian
@@ -207,12 +205,12 @@ JvarMapKernelInterface<T>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
 template <class T>
 void
-JvarMapIntegratedBCInterface<T>::computeJacobianBlock(MooseVariableFEBase & jvar)
+JvarMapIntegratedBCInterface<T>::computeOffDiagJacobian(const unsigned int jvar)
 {
   // the Kernel is not coupled to the variable; no need to loop over QPs
-  if (this->_jvar_map[jvar.number()] < 0)
+  if (this->_jvar_map[jvar] < 0)
     return;
 
   // call the underlying class' off-diagonal Jacobian
-  T::computeJacobianBlock(jvar);
+  T::computeOffDiagJacobian(jvar);
 }

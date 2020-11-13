@@ -55,36 +55,27 @@ ODEKernel::computeJacobian()
   // compute off-diagonal jacobians wrt scalar variables
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
   for (const auto & var : scalar_vars)
-    computeOffDiagJacobian(var->number());
+    computeOffDiagJacobianScalar(var->number());
 }
 
 void
-ODEKernel::computeOffDiagJacobian(unsigned int jvar)
+ODEKernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  if (_sys.isScalarVariable(jvar))
-  {
-    prepareMatrixTag(_assembly, _var.number(), jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar);
 
-    MooseVariableScalar & var_j = _sys.getScalarVariable(_tid, jvar);
-    for (_i = 0; _i < _var.order(); _i++)
-      for (_j = 0; _j < var_j.order(); _j++)
-      {
-        if (jvar != _var.number())
-          _local_ke(_i, _j) += computeQpOffDiagJacobian(jvar);
-      }
+  MooseVariableScalar & var_j = _sys.getScalarVariable(_tid, jvar);
+  for (_i = 0; _i < _var.order(); _i++)
+    for (_j = 0; _j < var_j.order(); _j++)
+    {
+      if (jvar != _var.number())
+        _local_ke(_i, _j) += computeQpOffDiagJacobianScalar(jvar);
+    }
 
-    accumulateTaggedLocalMatrix();
-  }
+  accumulateTaggedLocalMatrix();
 }
 
 Real
 ODEKernel::computeQpJacobian()
-{
-  return 0.;
-}
-
-Real
-ODEKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.;
 }

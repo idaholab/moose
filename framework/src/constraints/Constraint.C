@@ -9,17 +9,14 @@
 
 #include "Constraint.h"
 
-#include "SystemBase.h"
+#include "SubProblem.h"
 
 defineLegacyParams(Constraint);
 
 InputParameters
 Constraint::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  // Add the SetupInterface parameter, 'execute_on', default is 'linear'
-  params += SetupInterface::validParams();
-  params += TaggingInterface::validParams();
+  InputParameters params = NeighborResidualObject::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -30,27 +27,12 @@ Constraint::validParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.declareControllable("enable");
   params.registerBase("Constraint");
 
   return params;
 }
 
 Constraint::Constraint(const InputParameters & parameters)
-  : MooseObject(parameters),
-    SetupInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
-    GeometricSearchInterface(this),
-    Restartable(this, "Constraints"),
-    MeshChangedInterface(parameters),
-    TaggingInterface(this),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _mesh(_subproblem.mesh())
+  : NeighborResidualObject(parameters), GeometricSearchInterface(this)
 {
 }
-
-Constraint::~Constraint() {}

@@ -39,8 +39,7 @@ public:
    * jocobians of the integral term from userobject once per dof
    */
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * computeNonlocalJacobian and computeNonlocalOffDiagJacobian methods are
@@ -71,4 +70,3 @@ protected:
 
   unsigned int _k;
 };
-

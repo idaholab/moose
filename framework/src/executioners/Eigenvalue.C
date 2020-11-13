@@ -98,8 +98,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   Moose::SlepcSupport::setEigenProblemSolverParams(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
 
-  // If need to initialize eigen vector
-  _eigen_problem.needInitializeEigenVector(getParam<bool>("auto_initialization"));
+  // pass two control parameters to eigen problem
+  _eigen_problem.solverParams()._free_power_iterations =
+      getParam<unsigned int>("free_power_iterations");
+  _eigen_problem.solverParams()._extra_power_iterations =
+      getParam<unsigned int>("extra_power_iterations");
 
   // Whether or not the system outputs the inverse of eigenvaue.
   // It is useful for neutron calculations. The inverse of the eigenvalue is the multiplication
@@ -122,6 +125,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     else
       _eigen_problem.setNormalization(normpp);
   }
+
+  // Set a flag to nonlinear eigen system
+  _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
+      getParam<bool>("precond_matrix_includes_eigen"));
+
 #else
   mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
              "PETSc configuration'");
@@ -144,10 +152,6 @@ Eigenvalue::init()
     return;
   }
 
-  // Set a flag to nonlinear eigen system
-  _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
-      getParam<bool>("precond_matrix_includes_eigen"));
-
   if (isParamValid("normalization"))
   {
     const auto & normpp = getParam<PostprocessorName>("normalization");
@@ -158,51 +162,24 @@ Eigenvalue::init()
 
   // Does not allow time kernels
   checkIntegrity();
+
+  // Provide vector of ones to solver
+  // "auto_initialization" is on by default and we init the vector values associated
+  // with eigen-variables as ones. If "auto_initialization" is turned off by users,
+  // it is up to users to provide an initial guess. If "auto_initialization" is off
+  // and users does not provide an initial guess, slepc will automatically generate
+  // a random vector as the initial guess. The motivation to offer this option is
+  // that we have to initialize ONLY eigen variables in multiphysics simulation.
+  // auto_initialization can be overriden by initial conditions.
+  if (getParam<bool>("auto_initialization"))
+    _eigen_problem.initEigenvector(1.0);
+
   // Some setup
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _eigen_problem.initialSetup();
 
-  // Outputs initial conditions set by users
-  // It is consistent with Steady
-  _time_step = 0;
-  _time = _time_step;
-  _eigen_problem.outputStep(EXEC_INITIAL);
-  _time = _system_time;
-
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();
-
-  // Let do an initial solve if a nonlinear eigen solver but not power is used.
-  // The initial solver is a Inverse Power, and it is used to compute a good initial
-  // guess for Newton
-  auto free_power_iterations = getParam<unsigned int>("free_power_iterations");
-  if (free_power_iterations && _eigen_problem.isNonlinearEigenvalueSolver() &&
-      _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
-  {
-    _eigen_problem.doFreePowerIteration(true);
-    // Set free power iterations
-    setFreeNonlinearPowerIterations(free_power_iterations);
-
-    // Provide vector of ones to solver
-    // "auto_initialization" is on by default and we init the vector values associated
-    // with eigen-variables as ones. If "auto_initialization" is turned off by users,
-    // it is up to users to provide an initial guess. If "auto_initialization" is off
-    // and users does not provide an initial guess, slepc will automatically generate
-    // a random vector as the initial guess. The motivation to offer this option is
-    // that we have to initialize  ONLY eigen variables in multiphysics simulation.
-    if (_eigen_problem.needInitializeEigenVector())
-      _eigen_problem.initEigenvector(1.0);
-
-    _console << " Free power iteration starts" << std::endl;
-
-    // Call solver
-    _eigen_problem.solve();
-
-    // Clear free power iterations
-    clearFreeNonlinearPowerIterations();
-
-    _eigen_problem.doFreePowerIteration(false);
-  }
 }
 
 void
@@ -218,48 +195,11 @@ Eigenvalue::prepareSolverOptions()
     // Master app has the default data base
     if (!_app.isUltimateMaster())
       PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-
     Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
-
     if (!_app.isUltimateMaster())
       PetscOptionsPop();
-
     _eigen_problem.petscOptionsInserted() = true;
   }
-#endif
-}
-
-void
-Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
-{
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-#endif
-
-  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
-#endif
-}
-
-void
-Eigenvalue::clearFreeNonlinearPowerIterations()
-{
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app has the default data base
-  if (!_app.isUltimateMaster())
-    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
-#endif
-
-  Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
-
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
 #endif
 }
 
@@ -288,6 +228,13 @@ Eigenvalue::execute()
   if (_app.isRecovering())
     return;
 
+  // Outputs initial conditions set by users
+  // It is consistent with Steady
+  _time_step = 0;
+  _time = _time_step;
+  _eigen_problem.outputStep(EXEC_INITIAL);
+  _time = _system_time;
+
   preExecute();
 
   // The following code of this function is copied from "Steady"
@@ -310,31 +257,6 @@ Eigenvalue::execute()
     // This loop is for nonlinear multigrids (developed by Alex)
     for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
     {
-
-      // Let us do extra power iterations here if necessary
-      auto extra_power_iterations = getParam<unsigned int>("extra_power_iterations");
-      if (extra_power_iterations && _eigen_problem.isNonlinearEigenvalueSolver() &&
-          _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
-      {
-        _eigen_problem.doFreePowerIteration(true);
-        // Set free power iterations
-        setFreeNonlinearPowerIterations(extra_power_iterations);
-
-        _console << " Extra Free power iteration starts" << std::endl;
-
-        // Call solver
-        _eigen_problem.solve();
-        // Clear free power iterations
-        clearFreeNonlinearPowerIterations();
-
-        _eigen_problem.doFreePowerIteration(false);
-      }
-
-      if (_eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
-        _console << " Nonlinear Newton iteration starts" << std::endl;
-      else
-        _console << " Nonlinear power iteration starts" << std::endl;
-
       _last_solve_converged = _picard_solve.solve();
 
       if (!lastSolveConverged())

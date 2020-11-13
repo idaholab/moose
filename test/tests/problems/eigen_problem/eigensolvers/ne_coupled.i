@@ -87,12 +87,6 @@
     boundary = '0 1 2 3'
     value = 0
   [../]
-
-  [./eigenT]
-    type = EigenDirichletBC
-    variable = T
-    boundary = '0 1 2 3'
-  [../]
 []
 
 [Materials]

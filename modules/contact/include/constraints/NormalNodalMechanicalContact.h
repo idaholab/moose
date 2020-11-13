@@ -29,7 +29,8 @@ protected:
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar) override;
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar) override;
 
   const Real & _lambda;
   const unsigned _lambda_id;

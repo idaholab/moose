@@ -45,7 +45,7 @@ public:
   InterfaceKernelTempl(const InputParameters & parameters);
 
   /// The primary variable that this interface kernel operates on
-  virtual MooseVariableFE<T> & variable() const override { return _var; }
+  virtual const MooseVariableFE<T> & variable() const override { return _var; }
 
   /// The neighbor variable number that this interface kernel operates on
   virtual const MooseVariableFE<T> & neighborVariable() const override { return _neighbor_var; }

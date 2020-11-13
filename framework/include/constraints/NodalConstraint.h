@@ -72,17 +72,25 @@ public:
   /**
    * Computes the nodal residual.
    */
+  virtual void computeResidual() override final
+  {
+    mooseError("NodalConstraint do not need computeResidual()");
+  }
   virtual void computeResidual(NumericVector<Number> & residual);
 
   /**
    * Computes the jacobian for the current element.
    */
+  virtual void computeJacobian() override final
+  {
+    mooseError("NodalConstraint do not need computeJacobian()");
+  }
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * The variable number that this object operates on.
    */
-  MooseVariable & variable() { return _var; }
+  const MooseVariable & variable() const override { return _var; }
 
 protected:
   /**

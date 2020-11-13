@@ -28,8 +28,6 @@ NodeElemConstraint::validParams()
   params.addRequiredParam<SubdomainName>("primary", "primary block id");
   params.addRequiredCoupledVar("primary_variable",
                                "The variable on the primary side of the domain");
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this constraint is applied to.");
 
   return params;
 }
@@ -164,17 +162,17 @@ NodeElemConstraint::computeJacobian()
 }
 
 void
-NodeElemConstraint::computeOffDiagJacobian(unsigned int jvar)
+NodeElemConstraint::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  getConnectedDofIndices(jvar);
+  getConnectedDofIndices(jvar_num);
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
   DenseMatrix<Number> & Ken =
-      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar_num);
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar_num);
 
   _phi_secondary.resize(_connected_dof_indices.size());
 
@@ -195,21 +193,21 @@ NodeElemConstraint::computeOffDiagJacobian(unsigned int jvar)
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
+      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar_num);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
+      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar_num);
 
   if (_Kne.m() && _Kne.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
+        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar_num);
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar);
+      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar_num);
 }
 
 void

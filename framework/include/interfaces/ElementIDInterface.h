@@ -77,14 +77,14 @@ public:
   /**
    * Whether mesh has an element integer with a given name
    */
-  bool hasElementID(const std::string & id_name) const { return _mesh->hasElementID(id_name); }
+  bool hasElementID(const std::string & id_name) const { return _id_mesh->hasElementID(id_name); }
 
   /**
    * Return the maximum element ID for an element integer with its index
    */
   dof_id_type maxElementID(unsigned int elem_id_index) const
   {
-    return _mesh->maxElementID(elem_id_index);
+    return _id_mesh->maxElementID(elem_id_index);
   }
 
   /**
@@ -92,7 +92,7 @@ public:
    */
   dof_id_type minElementID(unsigned int elem_id_index) const
   {
-    return _mesh->minElementID(elem_id_index);
+    return _id_mesh->minElementID(elem_id_index);
   }
 
   /**
@@ -100,7 +100,7 @@ public:
    */
   bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
   {
-    return _mesh->areElemIDsIdentical(id_name1, id_name2);
+    return _id_mesh->areElemIDsIdentical(id_name1, id_name2);
   }
 
   /**
@@ -108,7 +108,7 @@ public:
    */
   std::set<dof_id_type> getAllElemIDs(unsigned int elem_id_index) const
   {
-    return _mesh->getAllElemIDs(elem_id_index);
+    return _id_mesh->getAllElemIDs(elem_id_index);
   }
 
   /**
@@ -118,7 +118,7 @@ public:
   std::set<dof_id_type> getElemIDsOnBlocks(unsigned int elem_id_index,
                                            const std::set<SubdomainID> & blks) const
   {
-    return _mesh->getElemIDsOnBlocks(elem_id_index, blks);
+    return _id_mesh->getElemIDsOnBlocks(elem_id_index, blks);
   }
 
   /**
@@ -137,5 +137,5 @@ private:
   const InputParameters & _obj_parameters;
 
   /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
-  std::shared_ptr<MooseMesh> & _mesh;
+  std::shared_ptr<MooseMesh> & _id_mesh;
 };

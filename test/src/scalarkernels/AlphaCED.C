@@ -29,8 +29,6 @@ AlphaCED::AlphaCED(const InputParameters & parameters)
 {
 }
 
-AlphaCED::~AlphaCED() {}
-
 void
 AlphaCED::reinit()
 {
@@ -65,12 +63,12 @@ AlphaCED::computeQpJacobian()
 }
 
 void
-AlphaCED::computeOffDiagJacobian(unsigned int /*jvar*/)
+AlphaCED::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
 }
 
 Real
-AlphaCED::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+AlphaCED::computeQpOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
   return 0.;
 }

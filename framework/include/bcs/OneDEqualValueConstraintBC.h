@@ -32,7 +32,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
   VariableValue & _lambda;
   unsigned int _lambda_var_number;

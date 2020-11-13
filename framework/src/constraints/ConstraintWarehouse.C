@@ -315,7 +315,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = mc->variable();
+      const MooseVariableFEBase * lm_var = &mc->variable();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());
@@ -335,7 +335,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     const auto & objects = pr.second.getActiveObjects();
     for (const auto & mc : objects)
     {
-      const MooseVariableFEBase * lm_var = mc->variable();
+      const MooseVariableFEBase * lm_var = &mc->variable();
       if (lm_var)
       {
         unique_variables.insert(lm_var->name());

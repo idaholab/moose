@@ -22,11 +22,11 @@ public:
   CoupledForceLagged(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   unsigned int _v_var;
   const VariableValue & _v;

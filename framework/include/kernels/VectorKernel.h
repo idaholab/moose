@@ -31,7 +31,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -39,7 +39,7 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual VectorMooseVariable & variable() override { return _var; }
+  virtual const VectorMooseVariable & variable() const override { return _var; }
 
 protected:
   /**
@@ -57,6 +57,11 @@ protected:
    * component.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * For coupling scalar variables
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
 
   /// This is a regular kernel so we cast to a regular MooseVariable
   VectorMooseVariable & _var;

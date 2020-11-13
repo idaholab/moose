@@ -2468,6 +2468,7 @@ MooseVariableData<RealVectorValue>::assignNodalValue()
 
   for (decltype(n) i = 0; i < n; ++i)
     _nodal_value(i) = _dof_values[i];
+  _nodal_value_array[0] = _nodal_value;
 
   if (is_transient)
   {

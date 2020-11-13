@@ -11,7 +11,6 @@
 
 // Moose Includes
 #include "DiracKernel.h"
-#include "VectorPostprocessorInterface.h"
 
 // Forward Declarations
 class VectorPostprocessorPointSource;
@@ -24,7 +23,7 @@ InputParameters validParams<VectorPostprocessorPointSource>();
  * Coordinates and values are given by a vector Postprocessor.  Values and coordinates for the point
  * source are allowed change as the vector Postprocessor is updated.
  */
-class VectorPostprocessorPointSource : public DiracKernel, public VectorPostprocessorInterface
+class VectorPostprocessorPointSource : public DiracKernel
 {
 public:
   static InputParameters validParams();

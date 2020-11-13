@@ -23,7 +23,7 @@ public:
 
   ADNodalBCTempl(const InputParameters & parameters);
 
-  MooseVariableFE<T> & variable() override { return _var; }
+  const MooseVariableFE<T> & variable() const override { return _var; }
 
 private:
   void computeResidual() override final;

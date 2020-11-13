@@ -83,7 +83,7 @@ ArrayReaction::computeQpJacobian()
 }
 
 RealEigenMatrix
-ArrayReaction::computeQpOffDiagJacobian(MooseVariableFEBase & jvar)
+ArrayReaction::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
 {
   if (jvar.number() == _var.number() && _r_2d_array)
     return _phi[_j][_qp] * _test[_i][_qp] * (*_r_2d_array)[_qp];

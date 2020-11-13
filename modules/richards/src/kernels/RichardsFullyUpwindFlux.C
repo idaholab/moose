@@ -114,9 +114,9 @@ RichardsFullyUpwindFlux::computeResidual()
 }
 
 void
-RichardsFullyUpwindFlux::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+RichardsFullyUpwindFlux::computeOffDiagJacobian(const unsigned int jvar)
 {
-  upwind(false, true, jvar.number());
+  upwind(false, true, jvar);
   return;
 }
 

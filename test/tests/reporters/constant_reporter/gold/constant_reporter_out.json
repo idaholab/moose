@@ -1,0 +1,85 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": 1,
+                    "value_name": "int_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": 2,
+                    "value_name": "int_2"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "int",
+                    "value": -3,
+                    "value_name": "int_3"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<int>",
+                    "value": [
+                        7,
+                        8
+                    ],
+                    "value_name": "int_vec"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "double",
+                    "value": 4.0,
+                    "value_name": "num_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "double",
+                    "value": 5.0,
+                    "value_name": "num_2"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::string",
+                    "value": "six",
+                    "value_name": "str"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<std::string>",
+                    "value": [
+                        "ten",
+                        "eleven",
+                        "twelve",
+                        "thirteen"
+                    ],
+                    "value_name": "str_vec"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<double>",
+                    "value": [
+                        8.0,
+                        80.0,
+                        800.0
+                    ],
+                    "value_name": "vec_1"
+                },
+                {
+                    "object_name": "constant",
+                    "type": "std::vector<double>",
+                    "value": [
+                        9.0,
+                        90.0
+                    ],
+                    "value_name": "vec_2"
+                }
+            ],
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

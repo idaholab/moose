@@ -133,9 +133,8 @@ EigenKernel::computeJacobian()
 }
 
 void
-EigenKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+EigenKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  size_t jvar_num = jvar.number();
   if (!_is_implicit)
     return;
 
@@ -143,13 +142,15 @@ EigenKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     computeJacobian();
   else
   {
+    const auto & jvar = getVariable(jvar_num);
+
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
     _local_ke.resize(ke.m(), ke.n());
     _local_ke.zero();
 
     // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
     // on the displaced mesh
-    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+    auto phi_size = jvar.dofIndices().size();
 
     mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
     Real one_over_eigen = 1.0 / *_eigenvalue;

@@ -37,11 +37,11 @@ public:
   ScalarLagrangeMultiplier(const InputParameters & parameters);
   virtual ~ScalarLagrangeMultiplier();
 
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar);
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar) override;
 
   /// Lagrange multiplier variable ID
   unsigned int _lambda_var;

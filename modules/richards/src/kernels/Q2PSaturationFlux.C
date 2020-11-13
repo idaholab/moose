@@ -109,9 +109,9 @@ Q2PSaturationFlux::computeJacobian()
 }
 
 void
-Q2PSaturationFlux::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+Q2PSaturationFlux::computeOffDiagJacobian(const unsigned int jvar)
 {
-  upwind(false, true, jvar.number());
+  upwind(false, true, jvar);
 }
 
 Real

@@ -21,7 +21,7 @@ public:
 protected:
   virtual RealEigenVector computeQpResidual() override;
 
-  virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
 
 private:
   unsigned int _v_var;

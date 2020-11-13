@@ -20,12 +20,7 @@ defineLegacyParams(ScalarKernel);
 InputParameters
 ScalarKernel::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
-  params += TaggingInterface::validParams();
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this kernel operates on");
-
+  InputParameters params = ResidualObject::validParams();
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -35,56 +30,16 @@ ScalarKernel::validParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.declareControllable("enable");
-
   params.registerBase("ScalarKernel");
 
   return params;
 }
 
 ScalarKernel::ScalarKernel(const InputParameters & parameters)
-  : MooseObject(parameters),
+  : ResidualObject(parameters),
     ScalarCoupleable(this),
-    SetupInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    PostprocessorInterface(this),
-    TransientInterface(this),
-    MeshChangedInterface(parameters),
-    // VPPs used by ScalarKernels must be broadcast because we don't know where the
-    // ScalarKernel will end up being evaluated
-    VectorPostprocessorInterface(this, /*broadcast_by_default=*/true),
-    TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _mesh(_subproblem.mesh()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _u_old(_var.slnOld())
 {
-}
-
-void
-ScalarKernel::computeOffDiagJacobian(unsigned int /*jvar*/)
-{
-}
-
-bool
-ScalarKernel::isActive()
-{
-  return true;
-}
-
-MooseVariableScalar &
-ScalarKernel::variable()
-{
-  return _var;
-}
-
-SubProblem &
-ScalarKernel::subProblem()
-{
-  return _subproblem;
 }

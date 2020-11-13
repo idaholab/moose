@@ -53,7 +53,8 @@ JSONOutput::outputSystemInformation()
 void
 JSONOutput::outputReporters()
 {
-  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  const bool has_distributed = _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED);
+  if (processor_id() == 0 || has_distributed)
   {
     // Create the current output node
     auto & current_node = _json["time_steps"].emplace_back();
@@ -67,7 +68,7 @@ JSONOutput::outputReporters()
       current_node["nonlinear_iteration"] = _nonlinear_iter;
 
     // Inject processor info
-    if (n_processors() > 1)
+    if (n_processors() > 1 && has_distributed)
     {
       _json["part"] = processor_id();
       _json["number_of_parts"] = n_processors();

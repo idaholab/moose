@@ -39,7 +39,7 @@ ImplicitODEy::computeQpJacobian()
 }
 
 Real
-ImplicitODEy::computeQpOffDiagJacobian(unsigned int jvar)
+ImplicitODEy::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _x_var)
     return -4.;

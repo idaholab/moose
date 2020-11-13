@@ -59,6 +59,7 @@ MortarConstraintBase::validParams()
       "primary_variable",
       "Primal variable on primary surface. If this parameter is not provided then the primary "
       "variable will be initialized to the secondary variable");
+  // This parameter has been added. We add it again to update the doc string.
   params.addParam<NonlinearVariableName>(
       "variable",
       "The name of the lagrange multiplier variable that this constraint is applied to. This "

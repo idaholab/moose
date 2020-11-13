@@ -48,7 +48,7 @@ VectorCoupledGradientTimeDerivative::computeQpJacobian()
 }
 
 Real
-VectorCoupledGradientTimeDerivative::computeQpOffDiagJacobian(unsigned jvar)
+VectorCoupledGradientTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_id)
     return _test[_i][_qp] * _d_grad_v_dot_dv[_qp] * _standard_grad_phi[_j][_qp];

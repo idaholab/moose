@@ -42,7 +42,6 @@ VectorPostprocessorPointSource::validParams()
 
 VectorPostprocessorPointSource::VectorPostprocessorPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
-    VectorPostprocessorInterface(this),
     _use_broadcast(getParam<bool>("use_broadcast")),
     _vpp_values(getVectorPostprocessorValue(
         "vector_postprocessor", getParam<std::string>("value_name"), _use_broadcast)),

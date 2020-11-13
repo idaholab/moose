@@ -26,8 +26,7 @@ protected:
   virtual Real computeQpResidual() override { return 0.0; }
   virtual Real computeStiffness(unsigned int i, unsigned int j);
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
-  using Kernel::computeOffDiagJacobian;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
   /// Base name of the material system that this kernel applies to
   const std::string _base_name;

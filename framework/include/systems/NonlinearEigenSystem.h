@@ -20,6 +20,7 @@
 // forward declarations
 class EigenProblem;
 class KernelBase;
+class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -64,8 +65,6 @@ public:
    * A residual vector at MOOSE side for BX
    */
   NumericVector<Number> & residualVectorBX();
-
-  virtual void initialSetup() override;
 
   void attachSLEPcCallbacks();
 
@@ -163,26 +162,9 @@ public:
 
   virtual void turnOffJacobian() override;
 
-private:
-  /**
-   * Add the eigen tag to the right kernels
-   */
-  template <typename T>
-  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Add the precond tag to eigen kernels
-   */
-  template <typename T>
-  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
-
-  /**
-   * Mark a variable an eigen variable if it operates on eigen kernels
-   */
-  template <typename T>
-  void markEigenVariables(MooseObjectTagWarehouse<T> & warehouse);
-
 protected:
+  virtual void postAddResidualObject(ResidualObject & object) override;
+
   NumericVector<Number> & solutionOldInternal() const override
   {
     return *_transient_sys.old_local_solution;

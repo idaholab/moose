@@ -23,10 +23,10 @@ public:
 
   GlobalStrain(const InputParameters & parameters);
 
-  virtual void reinit(){};
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/);
+  virtual void reinit() override {}
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int) override {}
 
 protected:
   virtual void assignComponentIndices(Order var_order);

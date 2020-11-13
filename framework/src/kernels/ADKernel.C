@@ -223,7 +223,8 @@ ADKernelTempl<T>::computeADJacobian(
           if (ivar != _var.number() || !jvariable.hasBlocks(_current_elem->subdomain_id()))
             continue;
 
-          addJacobian(jvariable);
+          // Make sure to get the correct undisplaced/displaced variable
+          addJacobian(getVariable(jvariable.number()));
         }
       };
 
@@ -239,7 +240,7 @@ ADKernelTempl<T>::jacobianSetup()
 
 template <typename T>
 void
-ADKernelTempl<T>::computeOffDiagJacobian(MooseVariableFEBase &)
+ADKernelTempl<T>::computeOffDiagJacobian(const unsigned int)
 {
   if (_my_elem != _current_elem)
   {

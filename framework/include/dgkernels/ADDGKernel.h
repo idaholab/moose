@@ -24,12 +24,12 @@ private:
   void computeElemNeighResidual(Moose::DGResidualType type) override final;
   void computeElemNeighJacobian(Moose::DGJacobianType type) override final;
   void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                       unsigned int jvar) override final;
+                                       const MooseVariableFEBase & jvar) override final;
   void computeJacobian() override final;
   void computeOffDiagJacobian(unsigned int jvar) override final;
 
 protected:
-  MooseVariableFEBase & variable() override { return _var; }
+  const MooseVariableFEBase & variable() const override { return _var; }
 
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;

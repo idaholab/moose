@@ -31,7 +31,7 @@ public:
   NodalScalarKernel(const InputParameters & parameters);
 
   virtual void reinit() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /// List of node IDs
@@ -39,4 +39,3 @@ protected:
   /// List of node boundary names
   std::vector<BoundaryName> _boundary_names;
 };
-

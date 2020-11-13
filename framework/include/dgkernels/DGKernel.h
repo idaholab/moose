@@ -37,7 +37,7 @@ public:
   /**
    * The variable that this kernel operates on.
    */
-  virtual MooseVariableFEBase & variable() override { return _var; }
+  virtual const MooseVariableFEBase & variable() const override { return _var; }
 
   /**
    * Computes the residual for this element or the neighbor
@@ -53,7 +53,7 @@ public:
    * Computes the element-element off-diagonal Jacobian
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
-                                               unsigned int jvar) override;
+                                               const MooseVariableFEBase & jvar) override;
 
 protected:
   /**

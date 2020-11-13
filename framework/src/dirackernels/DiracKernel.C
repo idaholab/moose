@@ -21,11 +21,8 @@ defineLegacyParams(DiracKernel);
 InputParameters
 DiracKernel::validParams()
 {
-  InputParameters params = MooseObject::validParams();
+  InputParameters params = ResidualObject::validParams();
   params += MaterialPropertyInterface::validParams();
-  params += TaggingInterface::validParams();
-  params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this kernel operates on");
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -42,36 +39,22 @@ DiracKernel::validParams()
 
   params.addParamNamesToGroup("use_displaced_mesh drop_duplicate_points", "Advanced");
 
-  params.declareControllable("enable");
   params.registerBase("DiracKernel");
 
   return params;
 }
 
 DiracKernel::DiracKernel(const InputParameters & parameters)
-  : MooseObject(parameters),
-    SetupInterface(this),
+  : ResidualObject(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MooseVariableInterface<Real>(this,
                                  false,
                                  "variable",
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
-    PostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "DiracKernels"),
-    MeshChangedInterface(parameters),
-    TaggingInterface(this),
-    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
     _var(mooseVariableField()),
-    _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
     _current_elem(_var.currentElem()),
@@ -147,15 +130,15 @@ DiracKernel::computeJacobian()
 }
 
 void
-DiracKernel::computeOffDiagJacobian(unsigned int jvar)
+DiracKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  if (jvar == _var.number())
+  if (jvar_num == _var.number())
   {
     computeJacobian();
   }
   else
   {
-    prepareMatrixTag(_assembly, _var.number(), jvar);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     const std::vector<unsigned int> * multiplicities =
         _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
@@ -172,7 +155,7 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
+            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar_num);
       }
     }
 
@@ -447,18 +430,6 @@ DiracKernel::meshChanged()
 {
   _point_cache.clear();
   _reverse_point_cache.clear();
-}
-
-MooseVariableField<Real> &
-DiracKernel::variable()
-{
-  return _var;
-}
-
-SubProblem &
-DiracKernel::subProblem()
-{
-  return _subproblem;
 }
 
 void

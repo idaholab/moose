@@ -30,11 +30,16 @@ public:
   virtual void reinit() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-};
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int jvar)
+  {
+    // Backwards compatibility
+    return computeQpOffDiagJacobian(jvar);
+  }
 
+  virtual Real computeQpOffDiagJacobian(unsigned int) { return 0; }
+};

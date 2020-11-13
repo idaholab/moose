@@ -39,7 +39,7 @@ ImplicitODEx::computeQpJacobian()
 }
 
 Real
-ImplicitODEx::computeQpOffDiagJacobian(unsigned int jvar)
+ImplicitODEx::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   if (jvar == _y_var)
     return -2.;

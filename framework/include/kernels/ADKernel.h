@@ -30,11 +30,11 @@ public:
 
   void jacobianSetup() override;
 
-  MooseVariableFE<T> & variable() override { return _var; }
+  const MooseVariableFE<T> & variable() const override { return _var; }
 
 private:
   void computeJacobian() override final;
-  void computeOffDiagJacobian(MooseVariableFEBase &) override final;
+  void computeOffDiagJacobian(unsigned int) override final;
   void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
   /**

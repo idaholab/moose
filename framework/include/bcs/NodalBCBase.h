@@ -30,22 +30,12 @@ InputParameters validParams<NodalBCBase>();
  * Base class for deriving any boundary condition that works at nodes
  */
 class NodalBCBase : public BoundaryCondition,
-                    public RandomInterface,
                     public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   static InputParameters validParams();
 
   NodalBCBase(const InputParameters & parameters);
-
-  virtual void computeResidual() = 0;
-  virtual void computeJacobian() = 0;
-  virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
-
-  /**
-   * Compute the off-diagonal contributions from scalar variables
-   */
-  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
   /**
    * Whether to verify that this object is acting on a nodal variable

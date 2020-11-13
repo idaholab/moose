@@ -61,7 +61,7 @@ ComputeJacobianThread::computeJacobian()
     for (const auto & kernel : kernels)
       if (kernel->isImplicit())
       {
-        kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+        kernel->prepareShapes(kernel->variable().number());
         kernel->computeJacobian();
         /// done only when nonlocal kernels exist in the system
         if (_fe_problem.checkNonlocalCouplingRequirement())
@@ -98,7 +98,7 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   for (const auto & bc : bcs)
     if (bc->shouldApply() && bc->isImplicit())
     {
-      bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
+      bc->prepareShapes(bc->variable().number());
       bc->computeJacobian();
       /// done only when nonlocal integrated_bcs exist in the system
       if (_fe_problem.checkNonlocalCouplingRequirement())
@@ -119,8 +119,8 @@ ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
   for (const auto & dg : dgks)
     if (dg->isImplicit())
     {
-      dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
-      dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
+      dg->prepareShapes(dg->variable().number());
+      dg->prepareNeighborShapes(dg->variable().number());
       if (dg->hasBlocks(neighbor->subdomain_id()))
         dg->computeJacobian();
     }
@@ -134,8 +134,8 @@ ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
   for (const auto & intk : intks)
     if (intk->isImplicit())
     {
-      intk->subProblem().prepareFaceShapes(intk->variable().number(), _tid);
-      intk->subProblem().prepareNeighborShapes(intk->neighborVariable().number(), _tid);
+      intk->prepareShapes(intk->variable().number());
+      intk->prepareNeighborShapes(intk->neighborVariable().number());
       intk->computeJacobian();
     }
 }

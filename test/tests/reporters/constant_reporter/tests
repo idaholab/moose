@@ -1,0 +1,44 @@
+[Tests]
+  design = 'ConstantReporter.md'
+  issues = '#16055'
+
+  [constant_reporter]
+    type = 'JSONDiff'
+    input = 'constant_reporter.i'
+    jsondiff = 'constant_reporter_out.json'
+
+    requirement = 'The system shall be able to produce arbitrary integer, real number, and string scalar/vector values for use in other calculations.'
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when producing constant reporter values if '
+    [no_values]
+      type = RunException
+      input = 'constant_reporter.i'
+      cli_args = 'Reporters/active=error Reporters/error/integer_names=wrong'
+      expect_err = 'Must specify values using integer_values'
+      match_literal = true
+
+      detail = 'no values are specified, '
+    []
+    [no_names]
+      type = RunException
+      input = 'constant_reporter.i'
+      cli_args = 'Reporters/active=error Reporters/error/integer_values=1'
+      expect_err = 'Use integer_names to specify reporter names.'
+      match_literal = true
+
+      detail = 'no names are specified, '
+    []
+    [mismatch]
+      type = RunException
+      input = 'constant_reporter.i'
+      cli_args = "Reporters/active=error
+                  Reporters/error/integer_values='1 2' Reporters/error/integer_names=wrong"
+      expect_err = 'Number of names specified in integer_names must match number of values specified in integer_values'
+      match_literal = true
+
+      detail = 'or the number of values and names are not equal.'
+    []
+  []
+[]

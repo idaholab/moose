@@ -158,7 +158,7 @@ ParsedODEKernel::computeQpJacobian()
 }
 
 Real
-ParsedODEKernel::computeQpOffDiagJacobian(unsigned int jvar)
+ParsedODEKernel::computeQpOffDiagJacobianScalar(unsigned int jvar)
 {
   int i = _arg_index[jvar];
   if (i < 0)
