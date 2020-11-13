@@ -438,7 +438,7 @@ ADLAROMANCEStressUpdateBase::checkInputWindow(const ADReal & input,
                                               const WindowFailure behavior,
                                               const std::vector<Real> & global_limits)
 {
-  if (behavior != WindowFailure::WARN || behavior != WindowFailure::ERROR)
+  if (behavior != WindowFailure::WARN && behavior != WindowFailure::ERROR)
     return;
 
   if (input < global_limits[0] || input > global_limits[1])
@@ -692,10 +692,13 @@ ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_v
     return 0.0;
 
   ADReal expout = std::exp(rom_output);
-  if (expout > 1.0e-10)
-    expout -= 1.000000E-10;
+  mooseAssert(expout > 0.0, "ROM calculated strain increment is not strictly positive");
+
+  const Real rom_strain_cutoff_value = romStrainCutoff();
+  if (expout > rom_strain_cutoff_value)
+    expout -= rom_strain_cutoff_value;
   else
-    expout = -1.0E-10 * 1.0E-10 / expout + 1.0E-10;
+    expout = -rom_strain_cutoff_value * rom_strain_cutoff_value / expout + rom_strain_cutoff_value;
 
   return -expout * old_input_values[out_index] * _dt;
 }
@@ -794,8 +797,17 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
   _cell_dislocations[_qp] = _old_input_values[_cell_output_index] + _cell_dislocation_increment;
   _wall_dislocations[_qp] = _old_input_values[_wall_output_index] + _wall_dislocation_increment;
 
-  for (unsigned int i = 0; i < _num_inputs; i++)
-    checkInputWindow(_input_values[i], _window_failure[i], _global_limits[i]);
+  // Prevent the ROM from calculating and proceding with negative dislocations
+  if (_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0)
+  {
+    _cell_dislocations[_qp] = _old_input_values[_cell_output_index];
+    _wall_dislocations[_qp] = _old_input_values[_wall_output_index];
+    mooseException("The negative values of the cell dislocation density, ",
+                   MetaPhysicL::raw_value(_cell_dislocations[_qp]),
+                   ", and/or wall dislocation density, ",
+                   MetaPhysicL::raw_value(_wall_dislocations[_qp]),
+                   ". Cutting timestep.");
+  }
 
   if (_verbose)
   {
