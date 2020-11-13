@@ -111,6 +111,7 @@ if [ -z "$go_fast" ]; then
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
+      --with-make-np=${MOOSE_JOBS:-1} \
       $*
 
   exitIfExitCode $?
