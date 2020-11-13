@@ -10,7 +10,7 @@
 #include "ElementUOAux.h"
 #include "ElementUOProvider.h"
 
-registerMooseObject("MooseTestApp", ElementUOAux);
+registerMooseObject("MooseApp", ElementUOAux);
 
 InputParameters
 ElementUOAux::validParams()

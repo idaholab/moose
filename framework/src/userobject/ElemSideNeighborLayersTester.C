@@ -13,7 +13,7 @@
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-registerMooseObject("MooseTestApp", ElemSideNeighborLayersTester);
+registerMooseObject("MooseApp", ElemSideNeighborLayersTester);
 
 InputParameters
 ElemSideNeighborLayersTester::validParams()
