@@ -692,7 +692,7 @@ ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_v
     return 0.0;
 
   ADReal expout = std::exp(rom_output);
-  mooseAssert(expout > 0.0, "ROM calculated strain increment is zero or negative");
+  mooseAssert(expout > 0.0, "ROM calculated strain increment is not strictly positive");
 
   const Real rom_strain_cutoff_value = romStrainCutoff();
   if (expout > rom_strain_cutoff_value)
