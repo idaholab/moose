@@ -35,7 +35,7 @@ AuxScalarKernel::validParams()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
-  params.registerBase("AuxScalarKernel");
+  params.registerBase("AuxScalarKernel", "AuxScalarkernels/*");
 
   return params;
 }

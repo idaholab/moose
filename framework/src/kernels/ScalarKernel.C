@@ -30,7 +30,7 @@ ScalarKernel::validParams()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.registerBase("ScalarKernel");
+  params.registerBase("ScalarKernel", "ScalarKernels/*");
 
   return params;
 }

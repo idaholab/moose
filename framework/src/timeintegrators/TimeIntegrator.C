@@ -21,7 +21,7 @@ InputParameters
 TimeIntegrator::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params.registerBase("TimeIntegrator");
+  params.registerBase("TimeIntegrator", "Executioner/TimeIntegrator");
   return params;
 }
 

@@ -199,7 +199,6 @@ public:
                            const std::string & action,
                            const std::string & task) const;
 
-
   /**
    * Return map to MOOSE base class to the task associated to build the type
    *

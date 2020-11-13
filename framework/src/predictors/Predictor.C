@@ -28,7 +28,7 @@ Predictor::validParams()
       "skip_times_old",
       "Skip the predictor if the previous solution time is in this list of times");
 
-  params.registerBase("Predictor");
+  params.registerBase("Predictor", "Executioner/Predictor");
 
   return params;
 }

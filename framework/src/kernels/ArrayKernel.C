@@ -24,7 +24,7 @@ InputParameters
 ArrayKernel::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("ArrayKernel");
+  params.registerBase("ArrayKernel", "Kernels/*");
   return params;
 }
 

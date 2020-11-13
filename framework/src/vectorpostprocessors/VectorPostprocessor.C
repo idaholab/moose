@@ -46,7 +46,7 @@ VectorPostprocessor::validParams()
       "validParams function.");
 
   params.addParamNamesToGroup("outputs", "Advanced");
-  params.registerBase("VectorPostprocessor");
+  params.registerBase("VectorPostprocessor", "VectorPostprocessors/*");
   return params;
 }
 

@@ -16,10 +16,12 @@
 #include "Conversion.h"
 #include "parse.h"
 
+#include "SetupMeshAction.h"
 #include "SetAdaptivityOptionsAction.h"
-#include "CreateProblemAction.h"
-#include "AddVariableAction.h"
-#include "AddAuxVariableAction.h"
+#include "AddPeriodicBCAction.h"
+//#include "CreateProblemAction.h"
+//#include "AddVariableAction.h"
+//#include "AddAuxVariableAction.h"
 
 registerMooseObjectAliased("MooseApp", Hitoutput, "HIT");
 
@@ -57,8 +59,11 @@ Hitoutput::output(const ExecFlagType & /*type*/)
   // It is possible to loop over actions and get the parameters for each action and task, but
   // the purpose of this object is to explode the objects and not rely on the actions. The following
   // calls are as minimal as possible to re-run the input file.
+  addActionSyntax<SetupMeshAction>("Mesh", root.get(), {"uniform_refine"});
+  addActionSyntax<SetAdaptivityOptionsAction>("Adaptivity", root.get());
+  addActionSyntax<AddPeriodicBCAction>("BCs/Periodic", root.get(), {}, /*create_sections=*/true);
+
   // addActionSyntax<CreateProblemAction>("Problem", root.get());
-  // addActionSyntax<SetAdaptivityOptionsAction>("Adaptivity", root.get());
   // addActionSyntax<AddVariableAction>("Variables", root.get(), /*create_sections = */ true);
   // addActionSyntax<AddAuxVariableAction>("AuxVariables", root.get(), /*create_sections = */ true);
 
@@ -73,6 +78,11 @@ Hitoutput::output(const ExecFlagType & /*type*/)
 void
 Hitoutput::addInputParameters(hit::Node * root, std::shared_ptr<InputParameters> params)
 {
+  // Skip if _disable_moose_hit_syntax is set
+  if (params->isParamValid("_disable_moose_hit_syntax") &&
+      params->get<bool>("_disable_moose_hit_syntax"))
+    return;
+
   if (!params->isParamValid("_moose_hit_syntax"))
   {
     mooseWarning("Only objects that call InputParameters::registerBase with both the system name "
@@ -132,6 +142,7 @@ Hitoutput::addParameter(const std::string & name,
     // Special case for bool parameters
     auto param_bool = dynamic_cast<InputParameters::Parameter<bool> *>(value);
     auto param_realvec = dynamic_cast<InputParameters::Parameter<RealVectorValue> *>(value);
+    auto param_point = dynamic_cast<InputParameters::Parameter<Point> *>(value);
     if (param_bool)
       param_string = param_bool->get() ? "true" : "false";
 
@@ -140,6 +151,13 @@ Hitoutput::addParameter(const std::string & name,
       std::stringstream ss;
       param_realvec->get().write_unformatted(ss);
       param_string = MooseUtils::trim(ss.str());
+    }
+
+    else if (param_point)
+    {
+      std::stringstream ss;
+      ss << param_point->get()(0) << " " << param_point->get()(1) << " " << param_point->get()(2);
+      param_string = ss.str();
     }
 
     else

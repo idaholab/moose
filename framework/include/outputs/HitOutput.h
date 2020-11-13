@@ -6,9 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
-#ifndef HITOUTPUT_H
-#define HITOUTPUT_H
+#pragma once
 
 // libMesh includes
 #include "libmesh/parameters.h"
@@ -67,13 +65,25 @@ protected:
    */
   void addInputParameters(hit::Node * root, std::shared_ptr<InputParameters> params);
 
+  /**
+   * Helper class to add Action parameters (if needed)
+   *
+   * Ideally this would not be needed but some actions trigger behavior not captured within a
+   * MooseObject
+   */
   template <class T>
-  void addActionSyntax(const std::string & name, hit::Node * parent, bool create_sections = false);
+  void addActionSyntax(const std::string & name,
+                       hit::Node * parent,
+                       const std::set<std::string> & param_names = {},
+                       bool create_sections = false);
 };
 
 template <class T>
 void
-Hitoutput::addActionSyntax(const std::string & name, hit::Node * parent, bool create_sections)
+Hitoutput::addActionSyntax(const std::string & name,
+                           hit::Node * parent,
+                           const std::set<std::string> & param_names,
+                           bool create_sections)
 {
   // Locate the actions
   std::vector<const T *> actions = _app.actionWarehouse().template getActions<T>();
@@ -100,11 +110,9 @@ Hitoutput::addActionSyntax(const std::string & name, hit::Node * parent, bool cr
       else
         section = node;
 
-      // Loop over parameters and create a hit::Field for each
       for (const auto & map_pair : action_ptr->parameters())
-        addParameter(map_pair.first, map_pair.second, section, action_ptr->parameters());
+        if (param_names.empty() || param_names.count(map_pair.first))
+          addParameter(map_pair.first, map_pair.second, section, action_ptr->parameters());
     }
   }
 }
-
-#endif

@@ -6,5 +6,6 @@
     input = test_get_actions.i
     expect_out = 'Getting actions is successful'
     requirement = "The system shall be able to retrieve other `Action` objects from within another `Action` object."
+    explode = false # test is for output of an action
   [../]
 []

@@ -16,7 +16,7 @@ Function::validParams()
 {
   InputParameters params = MooseObject::validParams();
 
-  params.registerBase("Function");
+  params.registerBase("Function", "Functions/*");
 
   return params;
 }

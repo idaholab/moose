@@ -23,7 +23,7 @@ InputParameters
 VectorKernel::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("VectorKernel");
+  params.registerBase("VectorKernel", "Kernels/*");
   return params;
 }
 

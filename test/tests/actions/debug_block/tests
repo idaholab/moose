@@ -5,6 +5,7 @@
     type = RunApp
     input = 'debug_print_actions_test.i'
     expect_out = '[DBG][ACT] Action Dependency Sets'
+    explode = false # Debug/show_actions not supported
     match_literal = true
     requirement = "The system shall be capable of reporting `Action` object dependencies."
   [../]
@@ -13,6 +14,7 @@
     input = 'debug_print_actions_test.i'
     expect_out = '[DBG][ACT] TASK'
     match_literal = true
+    explode = false # Debug/show_actions not supported
     requirement = "The system shall be capable of reporting `Action` object task information."
   [../]
 []

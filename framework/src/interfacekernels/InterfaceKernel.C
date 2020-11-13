@@ -25,7 +25,7 @@ InterfaceKernelTempl<T>::validParams()
 {
   InputParameters params = InterfaceKernelBase::validParams();
   if (std::is_same<T, Real>::value)
-    params.registerBase("InterfaceKernel");
+    params.registerBase("InterfaceKernel", "InterfaceKernels/*");
   else if (std::is_same<T, RealVectorValue>::value)
     params.registerBase("VectorInterfaceKernel");
   else

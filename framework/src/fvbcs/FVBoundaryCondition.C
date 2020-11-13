@@ -33,7 +33,7 @@ FVBoundaryCondition::validParams()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");
-  params.registerBase("FVBoundaryCondition");
+  params.registerBase("FVBoundaryCondition", "FVBCs/*");
   return params;
 }
 

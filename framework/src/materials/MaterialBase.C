@@ -55,7 +55,7 @@ MaterialBase::validParams()
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.registerBase("MaterialBase");
+  params.registerBase("MaterialBase", "Materials/*");
   return params;
 }
 

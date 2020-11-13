@@ -28,7 +28,7 @@ MoosePreconditioner::validParams()
   MooseEnum ksp_norm("none preconditioned unpreconditioned natural default", "unpreconditioned");
   params.addParam<MooseEnum>(
       "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
-  params.registerBase("MoosePreconditioner");
+  params.registerBase("MoosePreconditioner", "Preconditioning/*");
 
 #ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();

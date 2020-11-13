@@ -21,7 +21,7 @@ ScalarInitialCondition::validParams()
   params.addParam<VariableName>(
       "variable", "The variable this initial condition is supposed to provide values for.");
 
-  params.registerBase("ScalarInitialCondition");
+  params.registerBase("ScalarInitialCondition", "ICs/*");
 
   return params;
 }

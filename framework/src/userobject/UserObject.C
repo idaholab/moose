@@ -40,7 +40,7 @@ UserObject::validParams()
 
   params.declareControllable("enable");
 
-  params.registerBase("UserObject");
+  params.registerBase("UserObject", "UserObjects/*");
   params.registerSystemAttributeName("UserObject");
 
   params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial",

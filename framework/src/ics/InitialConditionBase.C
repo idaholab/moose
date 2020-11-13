@@ -31,7 +31,7 @@ InitialConditionBase::validParams()
 
   params.addParamNamesToGroup("ignore_uo_dependency", "Advanced");
 
-  params.registerBase("InitialCondition");
+  params.registerBase("InitialCondition", "ICs/*");
 
   return params;
 }

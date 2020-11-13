@@ -24,7 +24,7 @@ Postprocessor::validParams()
   exec_enum.addAvailableFlags(EXEC_TRANSFER);
 
   params.addParamNamesToGroup("outputs", "Advanced");
-  params.registerBase("Postprocessor");
+  params.registerBase("Postprocessor", "Postprocessors/*");
   return params;
 }
 

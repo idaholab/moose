@@ -5,6 +5,7 @@
     type = 'RunException'
     input = 'setup_postprocessor_data.i'
     expect_err = 'TestSetupPostprocessorDataActionFunction pass'
+    explode = false # tests action output
     requirement = "The Postprocessor data shall be initialized by the `SetupPostprocessorDataAction` object and the `PostprocessorInterface::hasPostprocessor` shall return true when called with a defined postprocessor name."
   [../]
   [./test_failure]
@@ -12,6 +13,7 @@
     input = 'setup_postprocessor_data.i'
     expect_err = 'TestSetupPostprocessorDataActionFunction fail'
     cli_args = 'Functions/tester/postprocessor=unknown'
+    explode = false # tests action output
     requirement = "The system `PostprocessorInterface::hasPostprocessor` method shall return false when called with an undefined postprocessor name."
   [../]
 []

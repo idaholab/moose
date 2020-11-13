@@ -2426,6 +2426,7 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 {
   auto fe_type = FEType(Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
                         Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family")));
+  params.set<std::string>("_moose_hit_syntax") = "AuxVariables/*";
 
   if (duplicateVariableCheck(var_name, fe_type, /* is_aux = */ true))
     return;
@@ -2435,8 +2436,11 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 
   _aux->addVariable(var_type, var_name, params);
   if (_displaced_problem)
+  {
+    params.set<bool>("_disable_moose_hit_syntax") = true;
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addAuxVariable(var_type, var_name, params);
+  }
 }
 
 void
@@ -2994,6 +2998,9 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       // Create a copy of the supplied parameters to the setting for "_material_data_type" isn't
       // used from a previous tid loop
       InputParameters current_parameters = parameters;
+
+      // HitOutput should not create these objects
+      current_parameters.addPrivateParam<bool>("_disable_moose_hit_syntax", true);
 
       // face material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
@@ -5119,8 +5126,10 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
                                  InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
-  _aux->addTimeIntegrator(type, name + ":aux", parameters);
   _nl->addTimeIntegrator(type, name, parameters);
+  parameters.set<bool>("_disable_moose_hit_syntax") = true;
+
+  _aux->addTimeIntegrator(type, name + ":aux", parameters);
   _has_time_integrator = true;
 
   // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and

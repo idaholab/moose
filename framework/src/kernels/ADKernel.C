@@ -24,9 +24,9 @@ ADKernelTempl<T>::validParams()
 {
   auto params = KernelBase::validParams();
   if (std::is_same<T, Real>::value)
-    params.registerBase("Kernel");
+    params.registerBase("Kernel", "Kernels/*");
   else if (std::is_same<T, RealVectorValue>::value)
-    params.registerBase("VectorKernel");
+    params.registerBase("VectorKernel", "Kernels/*");
   else
     ::mooseError("unsupported ADKernelTempl specialization");
   return params;

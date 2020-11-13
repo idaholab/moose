@@ -58,7 +58,7 @@ AuxKernelTempl<ComputeValueType>::validParams()
   params.addPrivateParam<bool>("_on_boundary", false);
 
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
-  params.registerBase("AuxKernel");
+  params.registerBase("AuxKernel", "AuxKernels/*");
 
   if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(VectorAuxKernel).name())
     params.registerBase("VectorAuxKernel");

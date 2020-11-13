@@ -26,7 +26,7 @@ TimeStepper::validParams()
       "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
       "Factor to apply to timestep if it a time step fails to convergence.");
 
-  params.registerBase("TimeStepper");
+  params.registerBase("TimeStepper", "Executioner/TimeStepper");
 
   return params;
 }

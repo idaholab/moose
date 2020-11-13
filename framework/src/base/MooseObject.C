@@ -52,6 +52,7 @@ MooseObject::validParams()
   params.addPrivateParam<AuxiliarySystem *>("_aux_sys", nullptr);
   params.addPrivateParam<Transient *>("_executioner", nullptr);
   params.addPrivateParam<THREAD_ID>("_tid");
+  params.addPrivateParam<bool>("_disable_moose_hit_syntax", false); // removes from HitOutput
   return params;
 }
 

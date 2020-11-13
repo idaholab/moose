@@ -17,11 +17,11 @@ MoosePartitioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params.addPrivateParam<MooseMesh *>("mesh");
-  params.registerBase("MoosePartitioner");
+  params.registerBase("MoosePartitioner", "Partitioners/*");
   return params;
 }
 
 MoosePartitioner::MoosePartitioner(const InputParameters & params)
-  : Partitioner(), MooseObject(params), Restartable(this, "Partitioners")
+  : Partitioner(), MooseObject(params), Restartable(this, "Mesh/Partitioner")
 {
 }

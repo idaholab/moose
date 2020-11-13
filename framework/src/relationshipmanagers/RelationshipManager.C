@@ -66,6 +66,7 @@ RelationshipManager::validParams()
   // Set by MOOSE
   params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("RelationshipManager");
+  params.set<bool>("_disable_moose_hit_syntax") = true;
   return params;
 }
 

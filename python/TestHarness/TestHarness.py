@@ -443,6 +443,9 @@ class TestHarness:
         new_tests = []
 
         for part1 in testers:
+            if not part1.parameters()["explode"]:
+                continue
+
             part2 = copy.deepcopy(part1)
 
             # Part 1:

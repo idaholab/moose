@@ -27,7 +27,7 @@ Sampler::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
 
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
-  params.registerBase("Sampler");
+  params.registerBase("Sampler", "Samplers/*");
   params.registerSystemAttributeName("Sampler");
 
   params.addParam<bool>("legacy_support", true, "Disables errors for legacy API support.");

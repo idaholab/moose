@@ -44,7 +44,7 @@ Transfer::validParams()
       possible_directions,
       "Whether this Transfer will be 'to' or 'from' a MultiApp, or "
       "bidirectional, by providing both FROM_MULTIAPP and TO_MULTIAPP.");
-  params.registerBase("Transfer");
+  params.registerBase("Transfer", "Transfers/*");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 

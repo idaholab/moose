@@ -29,7 +29,7 @@ EigenKernel::validParams()
       "eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
   params.addParam<PostprocessorName>(
       "eigen_postprocessor", 1.0, "The name of the postprocessor that provides the eigenvalue.");
-  params.registerBase("EigenKernel");
+  params.registerBase("EigenKernel", "Kernels/*");
   return params;
 }
 

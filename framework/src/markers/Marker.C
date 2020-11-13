@@ -28,7 +28,7 @@ Marker::validParams()
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
 
-  params.registerBase("Marker");
+  params.registerBase("Marker", "Adaptivity/Markers/*");
 
   return params;
 }

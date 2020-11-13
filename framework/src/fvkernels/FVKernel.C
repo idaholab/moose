@@ -50,7 +50,7 @@ FVKernel::validParams()
         rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
       });
 
-  params.registerBase("FVKernel");
+  params.registerBase("FVKernel", "FVKernels/*");
   return params;
 }
 
