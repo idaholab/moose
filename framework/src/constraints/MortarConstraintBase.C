@@ -104,6 +104,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.mortarCoordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
+    _q_point(_assembly.qPointsMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
     _test_primary(_primary_var.phiFaceNeighbor()),

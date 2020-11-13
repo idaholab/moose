@@ -203,6 +203,12 @@ public:
   const MooseArray<Point> & qPoints() const { return _current_q_points; }
 
   /**
+   * Returns the reference to the mortar segment element quadrature points
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const std::vector<Point> & qPointsMortar() const { return _fe_msm->get_xyz(); }
+
+  /**
    * The current points in physical space where we have reinited through reinitAtPhysical()
    * @return A _reference_.  Make sure to store this as a reference!
    */

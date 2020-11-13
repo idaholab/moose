@@ -140,6 +140,9 @@ protected:
   /// The quadrature rule
   const QBase * const & _qrule_msm;
 
+  /// The quadrature points in physical space
+  const std::vector<Point> & _q_point;
+
   /// The shape functions corresponding to the lagrange multiplier variable
   const VariableTestValue & _test;
 
