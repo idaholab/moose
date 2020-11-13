@@ -15,6 +15,6 @@ class TestHarnessTester(TestHarnessTestCase):
         Test that the required_objects check works
         """
         output = self.runTests('--no-color', '-i', 'required_objects')
-        self.assertRegexpMatches(output.decode('utf-8'), r'test_harness\.bad_object.*? \[DOESNOTEXIST NOT FOUND IN EXECUTABLE\] SKIP')
-        self.assertRegexpMatches(output.decode('utf-8'), r'test_harness\.good_objects.*? OK')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.bad_object.*? \[DOESNOTEXIST NOT FOUND IN EXECUTABLE\] SKIP')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.good_objects.*? OK')
         self.checkStatus(output.decode('utf-8'), passed=1, skipped=1)
