@@ -329,6 +329,8 @@ public:
 
   bool haveDisplaced() const override final { return true; }
 
+  bool computingScalingJacobian() const override final;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

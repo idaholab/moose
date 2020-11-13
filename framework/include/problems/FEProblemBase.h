@@ -1947,6 +1947,16 @@ public:
     _nl_abs_div_tol = nl_abs_div_tol;
   }
 
+  /**
+   * Setter for whether we're computing the scaling jacobian
+   */
+  void computingScalingJacobian(bool computing_scaling_jacobian)
+  {
+    _computing_scaling_jacobian = computing_scaling_jacobian;
+  }
+
+  bool computingScalingJacobian() const override final { return _computing_scaling_jacobian; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2325,6 +2335,9 @@ private:
   /// Whether to trust the user coupling matrix no matter what. See
   /// https://github.com/idaholab/moose/issues/16395 for detailed background
   bool _trust_user_coupling_matrix = false;
+
+  /// Flag used to indicate whether we are computing the scaling Jacobian
+  bool _computing_scaling_jacobian = false;
 };
 
 template <typename T>

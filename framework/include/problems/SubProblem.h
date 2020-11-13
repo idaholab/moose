@@ -772,6 +772,11 @@ public:
    */
   virtual bool haveDisplaced() const = 0;
 
+  /**
+   * Getter for whether we're computing the scaling jacobian
+   */
+  virtual bool computingScalingJacobian() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
