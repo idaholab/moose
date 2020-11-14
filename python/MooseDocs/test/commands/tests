@@ -6,6 +6,7 @@
     input = test_check.py
 
     requirement = "The system shall include a utility for reporting the status of software quality items."
+    collections = "FAILURE_ANALYSIS"
   []
   [generate]
     type = PythonUnitTest

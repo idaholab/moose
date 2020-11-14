@@ -94,6 +94,7 @@ class Tester(MooseObject):
         params.addParam('python',        None, "Restrict the test to s specific version of python (e.g., 3.6 or 3.7.1).")
         params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
         params.addParam('requires', None, "A list of programs required for the test to operate, as tested with shutil.which.")
+        params.addParam("working_directory", None, "When set, TestHarness will enter this directory before running test")
 
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
@@ -103,7 +104,7 @@ class Tester(MooseObject):
         params.addParam("validation", False, "Set to True to mark test as a validation problem.")
         params.addParam("verification", False, "Set to True to mark test as a verification problem.")
         params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
-        params.addParam("working_directory", None, "When set, TestHarness will enter this directory before running test")
+        params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
         return params
 
     # This is what will be checked for when we look for valid testers

@@ -39,12 +39,17 @@ class TestGetRequirements(unittest.TestCase):
         self.assertIn('markers/box_marker/tests', r0.filename)
         self.assertIn('markers/box_marker/tests', r1.filename)
 
+        spec0 = r0.specification
+        self.assertEqual(spec0.name, 'mark_only')
+        self.assertEqual(spec0.path, 'box_marker')
+        self.assertIn('markers/box_marker/tests', spec0.filename)
+
     def testRequirementWithDetails(self):
         loc = [os.getcwd()]
         req = get_requirements(loc, ['test_get_requirements_spec0'])
 
         self.assertEqual(len(req), 1)
-        self.assertEqual(len(req['test_get_requirements_spec0']), 9)
+        self.assertEqual(len(req['test_get_requirements_spec0']), 19)
 
         r = req['test_get_requirements_spec0'][0]
         self.assertEqual(r.issues, ['#1234'])
@@ -129,6 +134,46 @@ class TestGetRequirements(unittest.TestCase):
         self.assertEqual(d.name, 'group3-b')
         self.assertEqual(d.detail, '8D')
         self.assertEqual(d.detail_line, 65)
+
+        # collections_default
+        r = req['test_get_requirements_spec0'][9]
+        self.assertIsNone(r.collections)
+
+        # collections_override
+        r = req['test_get_requirements_spec0'][10]
+        self.assertEqual(r.collections, {'A'})
+
+        # collections_group
+        r = req['test_get_requirements_spec0'][11]
+        self.assertEqual(r.collections, {'A', 'B'})
+
+        # types
+        r = req['test_get_requirements_spec0'][12]
+        self.assertEqual(r.types, {'A'})
+
+        # types_group
+        r = req['test_get_requirements_spec0'][13]
+        self.assertEqual(r.types, {'A', 'B'})
+
+        # names
+        r = req['test_get_requirements_spec0'][14]
+        self.assertEqual(r.names, {'names'})
+
+        # names_group
+        r = req['test_get_requirements_spec0'][15]
+        self.assertEqual(r.names, {'names_group/a', 'names_group/b'})
+
+        # prereq_first
+        r = req['test_get_requirements_spec0'][16]
+        self.assertEqual(r.prerequisites, set())
+
+        # prereq_first
+        r = req['test_get_requirements_spec0'][17]
+        self.assertEqual(r.prerequisites, {'prereq_first'})
+
+        # prereq_group
+        r = req['test_get_requirements_spec0'][18]
+        self.assertEqual(r.prerequisites, {'prereq_first', 'prereq_group/a'})
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
