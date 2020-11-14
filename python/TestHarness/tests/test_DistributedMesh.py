@@ -23,4 +23,4 @@ class TestHarnessTester(TestHarnessTestCase):
         # To be acurate, test for OK rather than asserting if 'distributed' is
         # missing from the output.
         output = self.runTests('--distributed', '-i', 'mesh_mode_distributed')
-        self.assertRegexpMatches(output.decode('utf-8'), 'test_harness.distributed_mesh.*?OK')
+        self.assertRegex(output.decode('utf-8'), 'test_harness.distributed_mesh.*?OK')

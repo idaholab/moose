@@ -20,7 +20,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
 
         # Use a different spec file, which makes use of the AnalyzeJacobian tester. The is because
         # a race condition, when caught, will invalidate the rest of the tests with out testing them.
@@ -29,7 +29,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
 
     def testDuplicateOutputsOK(self):
         """
@@ -58,7 +58,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
 
     def testMultipleDuplicateOutputs(self):
         """
@@ -69,4 +69,4 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
 
-        self.assertRegexpMatches(e.output.decode('utf-8'), r'FAILED \(DUPLICATE OUTFILES\)')
+        self.assertRegex(e.output.decode('utf-8'), r'FAILED \(DUPLICATE OUTFILES\)')

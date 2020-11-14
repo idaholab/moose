@@ -54,6 +54,7 @@ class Tester(MooseObject):
         params.addParam('petsc_version_release', ['ALL'], "A test that runs against PETSc master if FALSE ('ALL', 'TRUE', 'FALSE')")
         params.addParam('slepc_version', [], "A list of slepc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')")
+        params.addParam('min_ad_size',   None, "A minimum AD size for which this test will run")
         params.addParam('ad_mode',       ['ALL'], "A list of AD modes for which this test will run ('SPARSE', 'NONSPARSE')")
         params.addParam('ad_indexing_type', ['ALL'], "A list of AD indexing types for which this test will run ('LOCAL', 'GLOBAL')")
         params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
@@ -495,6 +496,12 @@ class Tester(MooseObject):
         # If we're running in recover mode skip tests that have recover = false
         elif options.enable_recover and self.specs['recover'] == False:
             reasons['recover'] = 'NO RECOVER'
+
+        # AD size check
+        ad_size = int(util.getMooseConfigOption(self.specs['moose_dir'], 'ad_size').pop())
+        min_ad_size = self.specs['min_ad_size']
+        if min_ad_size is not None and int(min_ad_size) > ad_size:
+            reasons['min_ad_size'] = "Minimum AD size %d needed, but MOOSE is configured with %d" % (int(min_ad_size), ad_size)
 
         # Check for PETSc versions
         (petsc_status, petsc_version) = util.checkPetscVersion(checks, self.specs)

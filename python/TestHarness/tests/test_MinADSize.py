@@ -11,12 +11,10 @@ import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
-    def testUnknownPrereq(self):
+    def testMinADSize(self):
         """
-        Test for Unknown Prereq
+        Test AD vector size
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'unknown_prereq')
-
-        e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.foo.*?FAILED \(unknown dependency\)')
+        output = self.runTests('-i', 'ad_size', '--no-color').decode('utf-8')
+        self.assertRegex(output, r'tests/test_harness.enough \.* OK')
+        self.assertRegex(output, r'tests/test_harness\.too_few \.* \[MINIMUM AD SIZE 1000 NEEDED, BUT MOOSE IS CONFIGURED WITH \d+\] SKIP')
