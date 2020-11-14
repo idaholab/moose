@@ -16,8 +16,8 @@ public:
   using NodalConstraint::computeJacobian;
 
 protected:
-  virtual Real computeQpResidual(Moose::ConstraintType type);
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   std::vector<Real> _normals;
   const VariableValue & _rhouA;
