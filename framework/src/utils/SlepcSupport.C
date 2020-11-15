@@ -1111,7 +1111,7 @@ mooseSlepcEPSMonitor(EPS eps,
   auto eigenvalue = inverse ? 1.0 / eigenr : eigenr;
 
   // The term "k-eigenvalue" is adopted from the neutronics community.
-  console << " Iteration " << its << std::setprecision(10)
+  console << " Iteration " << its << std::setprecision(10) << std::fixed
           << (inverse ? " k-eigenvalue = " : " eigenvalue = ") << eigenvalue << std::endl;
 
   return 0;
