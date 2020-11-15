@@ -64,11 +64,6 @@ Eigenvalue::validParams()
   // If Newton and Inverse Power is combined in SLEPc side
   params.addPrivateParam<bool>("_newton_inverse_power", false);
 
-  params.addParam<bool>("output_inverse_eigenvalue",
-                        false,
-                        " Whether or not the system output the inverse of eigenvaue. It is useful "
-                        "for neutronic simulation.");
-
   params.addParam<Real>("time", 0.0, "System time");
 
 // Add slepc options and eigen problems
@@ -103,11 +98,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
       getParam<unsigned int>("free_power_iterations");
   _eigen_problem.solverParams()._extra_power_iterations =
       getParam<unsigned int>("extra_power_iterations");
-
-  // Whether or not the system outputs the inverse of eigenvaue.
-  // It is useful for neutron calculations. The inverse of the eigenvalue is the multiplication
-  // factor.
-  _eigen_problem.outputInverseEigenvalue(getParam<bool>("output_inverse_eigenvalue"));
 
   if (!isParamValid("normalization") && isParamValid("normal_factor"))
     paramError("normal_factor",
@@ -209,12 +199,6 @@ Eigenvalue::checkIntegrity()
   // check to make sure that we don't have any time kernels in eigenvaue simulation
   if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvaue simulation");
-}
-
-void
-Eigenvalue::outputInverseEigenvalue(bool inverse)
-{
-  _eigen_problem.outputInverseEigenvalue(inverse);
 }
 
 #endif
