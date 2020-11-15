@@ -41,7 +41,8 @@ FVMomPressure::computeQpResidual()
                          p_interface,
                          _adv_quant_elem[_qp],
                          _adv_quant_neighbor[_qp],
-                         *_face_info);
+                         *_face_info,
+                         true);
 
   return _normal(_index) * p_interface;
 }

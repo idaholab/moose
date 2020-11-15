@@ -40,7 +40,8 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
                         const ADRealVectorValue & elem_v,
                         const ADRealVectorValue & neighbor_v)
 {
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info);
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info, true);
 
   if (m == Moose::FV::InterpMethod::RhieChow)
   {
@@ -50,10 +51,15 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
     // Get uncorrected pressure gradient
     const VectorValue<ADReal> & unc_grad_p = _p_var->uncorrectedAdGradSln(*_face_info);
 
-    auto pr = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
-    const Elem * const elem_one = pr.first;
-    const Elem * const elem_two = pr.second;
-    bool elem_is_elem_one = elem_one == &_face_info->elem();
+    auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
+    const Elem * const elem_one = std::get<0>(tup);
+    const Elem * const elem_two = std::get<1>(tup);
+    const bool elem_is_elem_one = std::get<2>(tup);
+    mooseAssert(
+        elem_is_elem_one ? elem_one == &_face_info->elem() && elem_two == _face_info->neighborPtr()
+                         : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
+        "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
+
     const Point & elem_one_centroid =
         elem_is_elem_one ? _face_info->elemCentroid() : _face_info->neighborCentroid();
     const Point * const elem_two_centroid =
@@ -83,8 +89,13 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
     if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
     {
       const ADReal & elem_two_a = rcCoeff(*elem_two);
-      Moose::FV::interpolate(
-          Moose::FV::InterpMethod::Average, face_a, elem_one_a, elem_two_a, *_face_info);
+
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             face_a,
+                             elem_one_a,
+                             elem_two_a,
+                             *_face_info,
+                             elem_is_elem_one);
 
       coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
       elem_two_volume *= coord;
@@ -92,7 +103,8 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
                              face_volume,
                              elem_one_volume,
                              elem_two_volume,
-                             *_face_info);
+                             *_face_info,
+                             elem_is_elem_one);
     }
 
     const ADReal face_D = face_volume / face_a;
@@ -114,7 +126,8 @@ NSFVKernel::computeQpResidual()
                          _adv_quant_elem[_qp],
                          _adv_quant_neighbor[_qp],
                          v,
-                         *_face_info);
+                         *_face_info,
+                         true);
   return _normal * v * u_interface;
 }
 

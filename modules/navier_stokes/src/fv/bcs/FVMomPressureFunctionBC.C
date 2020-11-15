@@ -43,8 +43,12 @@ FVMomPressureFunctionBC::computeQpResidual()
   auto pressure_ghost = _pressure_exact_solution.value(
       _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
 
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, pressure_face, _pressure[_qp], pressure_ghost, *_face_info);
+  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                         pressure_face,
+                         _pressure[_qp],
+                         pressure_ghost,
+                         *_face_info,
+                         true);
 
   return _normal(_index) * pressure_face;
 }

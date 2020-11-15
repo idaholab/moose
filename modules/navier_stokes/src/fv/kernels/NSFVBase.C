@@ -129,8 +129,12 @@ NSFVBase::coeffCalculator(const Elem & elem) const
       neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
 
     ADRealVectorValue interp_v;
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, interp_v, elem_velocity, neighbor_velocity, *fi);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           interp_v,
+                           elem_velocity,
+                           neighbor_velocity,
+                           *fi,
+                           neighbor == fi->neighborPtr());
 
     ADReal mass_flow = _rho * interp_v * surface_vector;
 

@@ -48,13 +48,17 @@ NSFVFunctionBC::interpolate(Moose::FV::InterpMethod m,
                             const ADRealVectorValue & elem_v,
                             const RealVectorValue & ghost_v)
 {
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info);
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info, true);
 
   if (m == Moose::FV::InterpMethod::RhieChow)
   {
-    auto pr = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
-    const Elem * const elem = pr.first;
-    bool elem_is_elem = elem == &_face_info->elem();
+    auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
+    const Elem * const elem = std::get<0>(tup);
+    const bool elem_is_elem = std::get<2>(tup);
+    mooseAssert(elem_is_elem ? elem == &_face_info->elem() : elem == _face_info->neighborPtr(),
+                "elem_is_elem is incorrect");
+
     const Point & elem_centroid =
         elem_is_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
     const Real elem_volume = elem_is_elem ? _face_info->elemVolume() : _face_info->neighborVolume();
@@ -126,8 +130,13 @@ NSFVFunctionBC::computeQpResidual()
                             : 0);
 
   this->interpolate(_velocity_interp_method, v_face, _vel[_qp], v_ghost);
-  Moose::FV::interpolate(
-      _advected_interp_method, flux_var_face, _adv_quant[_qp], flux_var_ghost, v_face, *_face_info);
+  Moose::FV::interpolate(_advected_interp_method,
+                         flux_var_face,
+                         _adv_quant[_qp],
+                         flux_var_ghost,
+                         v_face,
+                         *_face_info,
+                         true);
   return _normal * v_face * flux_var_face;
 }
 
