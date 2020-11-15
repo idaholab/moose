@@ -116,6 +116,7 @@
     exodiff = 'adv_dominated_stabilized.e'
     cli_args = 'GlobalParams/supg=true Outputs/file_base=adv_dominated_stabilized'
     requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind Petrov-Galerkin stabilization and with a Q2Q1 discretization'
+    recover = false # We only execute output on final
   [../]
   # This SUPG and PSPG stabilized Q1Q1 case does not exhibit any oscillations with Reynolds
   # number a factor of 100 higher than previous two cases and with twice as large a dt.
@@ -127,5 +128,6 @@
     # This problem uses SuperLU.
     superlu = true
     requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind and pressure stabilized Petrov-Galerkin and with a Q1Q1 discretization'
+    recover = false # We only execute output on final
   [../]
 []
