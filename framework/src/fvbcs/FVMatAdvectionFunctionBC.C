@@ -95,9 +95,14 @@ FVMatAdvectionFunctionBC::computeQpResidual()
                                   _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid())
                             : 0);
 
-  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info);
+  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info, true);
 
-  interpolate(
-      _advected_interp_method, flux_var_face, _adv_quant[_qp], flux_var_ghost, v_face, *_face_info);
+  interpolate(_advected_interp_method,
+              flux_var_face,
+              _adv_quant[_qp],
+              flux_var_ghost,
+              v_face,
+              *_face_info,
+              true);
   return _normal * v_face * flux_var_face;
 }

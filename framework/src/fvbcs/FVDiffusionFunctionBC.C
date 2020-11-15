@@ -45,7 +45,7 @@ FVDiffusionFunctionBC::computeQpResidual()
       _coeff_function.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
 
   ADReal k;
-  interpolate(Moose::FV::InterpMethod::Average, k, _coeff[_qp], coeff_ghost, *_face_info);
+  interpolate(Moose::FV::InterpMethod::Average, k, _coeff[_qp], coeff_ghost, *_face_info, true);
 
   return -1 * k * dudn;
 }

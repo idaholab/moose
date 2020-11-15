@@ -555,7 +555,8 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
     // Compact stencil
     ADReal neighbor_value = getElemValue(neighbor);
 
-    return Moose::FV::linearInterpolation(elem_value, neighbor_value, fi);
+    return Moose::FV::linearInterpolation(
+        elem_value, neighbor_value, fi, neighbor == fi.neighborPtr());
   }
 }
 
@@ -581,37 +582,39 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   ADReal elem_value = getElemValue(elem);
 
-  auto action_functor =
-      [&grad, &volume_set, &volume, &elem_value, this](const Elem & functor_elem,
-                                                       const Elem * const neighbor,
-                                                       const FaceInfo * const fi,
-                                                       const Point & surface_vector,
-                                                       Real coord,
-                                                       const bool elem_has_info) {
-        mooseAssert(fi, "We need a FaceInfo for this action_functor");
+  auto action_functor = [&grad, &volume_set, &volume, &elem_value, &elem, this](
+                            const Elem & functor_elem,
+                            const Elem * const neighbor,
+                            const FaceInfo * const fi,
+                            const Point & surface_vector,
+                            Real coord,
+                            const bool elem_has_info) {
+    mooseAssert(fi, "We need a FaceInfo for this action_functor");
+    mooseAssert(elem == &functor_elem,
+                "Just a sanity check that the element being passed in is the one we passed out.");
 
-        grad += getFaceValue(neighbor, *fi, elem_value) * surface_vector;
+    grad += getFaceValue(neighbor, *fi, elem_value) * surface_vector;
 
-        if (!volume_set)
-        {
-          // We use the FaceInfo volumes because those values have been pre-computed and cached. An
-          // explicit call to elem->volume() here would incur unnecessary expense
-          if (elem_has_info)
-          {
-            coordTransformFactor(
-                this->_subproblem, functor_elem.subdomain_id(), fi->elemCentroid(), coord);
-            volume = fi->elemVolume() * coord;
-          }
-          else
-          {
-            coordTransformFactor(
-                this->_subproblem, neighbor->subdomain_id(), fi->neighborCentroid(), coord);
-            volume = fi->neighborVolume() * coord;
-          }
+    if (!volume_set)
+    {
+      // We use the FaceInfo volumes because those values have been pre-computed and cached. An
+      // explicit call to elem->volume() here would incur unnecessary expense
+      if (elem_has_info)
+      {
+        coordTransformFactor(
+            this->_subproblem, functor_elem.subdomain_id(), fi->elemCentroid(), coord);
+        volume = fi->elemVolume() * coord;
+      }
+      else
+      {
+        coordTransformFactor(
+            this->_subproblem, neighbor->subdomain_id(), fi->neighborCentroid(), coord);
+        volume = fi->neighborVolume() * coord;
+      }
 
-          volume_set = true;
-        }
-      };
+      volume_set = true;
+    }
+  };
 
   Moose::FV::loopOverElemFaceInfo(*elem, this->_mesh, this->_subproblem, action_functor);
 
@@ -642,9 +645,10 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   if (it != _face_to_unc_grad.end())
     return it->second;
 
-  auto pr = Moose::FV::determineElemOneAndTwo(fi, *this);
-  const Elem * const elem_one = pr.first;
-  const Elem * const elem_two = pr.second;
+  auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
+  const Elem * const elem_one = std::get<0>(tup);
+  const Elem * const elem_two = std::get<1>(tup);
+  const bool elem_one_is_fi_elem = std::get<2>(tup);
 
   const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
 
@@ -665,7 +669,8 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two);
 
     // Uncorrected gradient value
-    unc_face_grad = Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi);
+    unc_face_grad =
+        Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
   }
   else
   {
@@ -695,10 +700,13 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 
   VectorValue<ADReal> & face_grad = emplace_ret.first->second;
 
-  auto pr = Moose::FV::determineElemOneAndTwo(fi, *this);
-  const Elem * const elem_one = pr.first;
-  const Elem * const elem_two = pr.second;
-  bool elem_is_elem_one = elem_one == &fi.elem();
+  auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
+  const Elem * const elem_one = std::get<0>(tup);
+  const Elem * const elem_two = std::get<1>(tup);
+  const bool elem_is_elem_one = std::get<2>(tup);
+  mooseAssert(elem_is_elem_one ? elem_one == &fi.elem() && elem_two == fi.neighborPtr()
+                               : elem_one == fi.neighborPtr() && elem_two == &fi.elem(),
+              "The determineElemOneAndTwo utility got the elem_is_elem_one value wrong.");
 
   const ADReal elem_one_value = getElemValue(elem_one);
   const ADReal elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
