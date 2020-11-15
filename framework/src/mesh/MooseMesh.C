@@ -3217,7 +3217,7 @@ MooseMesh::computeFaceInfoFaceCoords(const SubProblem & subproblem)
     const Elem * neighbor_elem = fi.neighborPtr();
     SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
     SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
-    if (neighbor_elem)
+    if (neighbor_elem && neighbor_elem != remote_elem)
       neighbor_subdomain_id = neighbor_elem->subdomain_id();
 
     coordTransformFactor(
