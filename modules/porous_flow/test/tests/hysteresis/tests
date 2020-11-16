@@ -76,6 +76,43 @@
     design = 'PorousFlowHysteresisOrder.md PorousFlowPropertyAux.md'
     issues = '#16021'
   [../]
+  [./except10]
+    type = 'RunException'
+    input = 'except10.i'
+    expect_err = 'Must be less than 1 - S_l_min'
+    match_literal = true
+    requirement = 'An error shall be thrown if the maximum gas residual saturation is greater than 1 - minimum_liquid_saturation in hysteretic problems'
+    design = 'hysteresis.md'
+    issues = '#16129'
+  [../]
+  [./except11]
+    type = 'RunException'
+    input = 'except11.i'
+    expect_err = 'Should be chosen sufficiently close to 1 so that the high extension does not interfere with the low extension.  Instead, you may have chosen Pc_max too low'
+    match_literal = true
+    requirement = 'An error shall be thrown if parameters are chosen such that the high and low extension regions of the hysteretic capillary pressure overlap'
+    design = 'hysteresis.md'
+    issues = '#16129'
+  [../]
+  [./except12]
+    type = 'RunException'
+    input = 'except12.i'
+    expect_err = 'S_lr should usually be greater than S_l_min'
+    match_literal = true
+    cli_args = '--error'
+    requirement = 'A warning shall be produced if the residual saturation is not greater than the minimum saturation in hysteretic simulations'
+    design = 'hysteresis.md'
+    issues = '#16129'
+  [../]
+  [./except13]
+    type = 'RunException'
+    input = 'except13.i'
+    expect_err = 'The Dictator proclaims that the number of phases is 2 whereas PorousFlow1PhaseHysP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.'
+    match_literal = true
+    requirement = 'An exception shall be thrown if a single-phase hysteretic capillary-pressure Material is used in situations with more than one fluid phase'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
   [./hys_order_01]
     type = CSVDiff
     input = 'hys_order_01.i'
@@ -147,5 +184,989 @@
     requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, and jumps of greater than 2 in hysteresis order shall be allowed within one time-step, and turning points shall be correctly identified in such situations'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
+  [../]
+  [./hys_sat_01]
+    type = CSVDiff
+    input = 'hys_sat_01.i'
+    csvdiff = 'hys_sat_01_out_sat_0001.csv'
+    requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_02]
+    type = CSVDiff
+    input = 'hys_sat_02.i'
+    csvdiff = 'hys_sat_02_out_sat_0001.csv'
+    requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_03]
+    type = CSVDiff
+    input = 'hys_sat_03.i'
+    csvdiff = 'hys_sat_03_out_sat_0001.csv'
+    requirement = 'PorousFlow shall be able to compute saturation according to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_pc_01_out_pc_0001.csv'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_pc_02_out_pc_0001.csv'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_pc_03_out_pc_0001.csv'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_none_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_w_none_none'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_none_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_none_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_w_none_power'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_quadratic_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_w_quadratic_none'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_quadratic_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_w_quadratic_power'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_exponential_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_w_exponential_none'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_w_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_w_exponential_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_w_exponential_power'
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the primary wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_none_none_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_1_none_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_none_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_none_power_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_1_none_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_quadratic_none_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_1_quadratic_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_quadratic_power_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_1_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_exponential_none_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_1_exponential_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_1_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_pc_p_1_exponential_power_pc_0001.csv'
+    cli_args = "Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_1_exponential_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_none_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_none_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_none_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_2_none_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_quadratic_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_2_quadratic_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_quadratic_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_exponential_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_2_exponential_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_pc_p_2_exponential_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_none_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_none_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_3_none_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_none_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_none_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_3_none_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_quadratic_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_3_quadratic_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_quadratic_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_exponential_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_pc_p_3_exponential_none"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_pc_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_pc_p_3_exponential_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_pc_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute capillary pressure according to the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_prim_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_sat_01_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Outputs/file_base=hys_sat_01_none"
+    requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_prim_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_sat_02_quad_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Outputs/file_base=hys_sat_02_quad"
+    requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_prim_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_sat_03_exp_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Outputs/file_base=hys_sat_03_exp"
+    requirement = 'PorousFlow shall be able to compute saturation from capillary pressure according to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_none_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_w_none_none Materials/pc_calculator/info_required=sat'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_none_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_none_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_w_none_power Materials/pc_calculator/info_required=sat'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_quadratic_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_w_quadratic_none Materials/pc_calculator/info_required=sat'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_quadratic_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_w_quadratic_power Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_exponential_none_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_w_exponential_none Materials/pc_calculator/info_required=sat'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_1_w_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_sat_p_w_exponential_power_pc_0001.csv'
+    cli_args = 'Materials/hys_order/previous_turning_points=0.1 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_w_exponential_power Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5'
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the primary wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_none_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_none_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_none_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_2_none_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_quadratic_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_2_quadratic_none"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_quadratic_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_exponential_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_2_exponential_none"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_sat_p_2_exponential_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_3_none_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_sat_p_3_none_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_3_none_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using no low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_3_quadratic_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_sat_p_3_quadratic_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_3_quadratic_none"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using quadratic low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_sat_p_3_quadratic_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_3_exponential_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_sat_p_3_exponential_none_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_sat_p_3_exponential_none"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using exponential low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_sat_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_sat_p_3_exponential_power_pc_0001.csv'
+    cli_args = "Materials/pc_calculator/info_required=sat Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_sat_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute liquid saturation according to the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_prim_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_dpc_01_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Outputs/file_base=hys_dpc_01_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_prim_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_dpc_02_quad_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Outputs/file_base=hys_dpc_02_quad"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_prim_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_dpc_03_exp_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Outputs/file_base=hys_dpc_03_exp"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_1_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dpc_p_1_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dpc_p_1_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_1_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dpc_p_1_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_1_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_1_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dpc_p_1_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_1_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dpc_p_2_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dpc_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dpc_p_2_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dpc_p_2_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_3_none_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dpc_p_3_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dpc_p_3_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dpc_p_3_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dpc_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dpc_p_3_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dPc_dS_err Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dpc_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_prim_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_d2pc_01_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Outputs/file_base=hys_d2pc_01_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_prim_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_d2pc_02_quad_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Outputs/file_base=hys_d2pc_02_quad"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_prim_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_d2pc_03_exp_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Outputs/file_base=hys_d2pc_03_exp"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_1_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2pc_p_1_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2pc_p_1_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_1_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2pc_p_1_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_1_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_1_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2pc_p_1_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Mesh/mesh/xmin=0.5 VectorPostprocessors/pc/start_point='0.5 0 0' Materials/hys_order/previous_turning_points=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_1_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2pc_p_2_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2pc_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2pc_p_2_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2pc_p_2_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of capillary pressure with respect to liquid saturation along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_3_none_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2pc_p_3_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2pc_p_3_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2pc_p_3_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2pc_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2pc_p_3_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2Pc_dS2_err Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2pc_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the capillary pressure with respect to the liquid saturation along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_prim_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_dsat_01_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Outputs/file_base=hys_dsat_01_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_prim_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_dsat_02_quad_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Outputs/file_base=hys_dsat_02_quad"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_prim_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_dsat_03_exp_pc_0001.csv'
+    abs_zero = 1E-5
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Outputs/file_base=hys_dsat_03_exp VectorPostprocessors/pc/start_point='0.05 0 0'"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_1_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dsat_p_1_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dsat_p_1_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_1_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dsat_p_1_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' VectorPostprocessors/pc/end_point='0.95 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_1_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_1_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_dsat_p_1_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' VectorPostprocessors/pc/end_point='0.95 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_1_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dsat_p_2_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dsat_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dsat_p_2_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_dsat_p_2_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_3_none_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dsat_p_3_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_dsat_p_3_none_none"
+    requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dsat_p_3_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_dsat_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_dsat_p_3_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=dS_dPc_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_dsat_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_prim_01]
+    type = CSVDiff
+    input = 'hys_pc_01.i'
+    csvdiff = 'hys_d2sat_01_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Outputs/file_base=hys_d2sat_01_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using no low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_prim_02]
+    type = CSVDiff
+    input = 'hys_pc_02.i'
+    csvdiff = 'hys_d2sat_02_quad_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Outputs/file_base=hys_d2sat_02_quad"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using quadratic low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_prim_03]
+    type = CSVDiff
+    input = 'hys_pc_03.i'
+    csvdiff = 'hys_d2sat_03_exp_pc_0001.csv'
+    abs_zero = 1E-5
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Outputs/file_base=hys_d2sat_03_exp VectorPostprocessors/pc/start_point='0.05 0 0'"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along to the primary drying curve in hysteretic problems, using exponential low extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_1_none_none]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2sat_p_1_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2sat_p_1_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_1_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2sat_p_1_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' VectorPostprocessors/pc/end_point='0.95 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_1_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_1_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_1.i'
+    csvdiff = 'hys_d2sat_p_1_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 VectorPostprocessors/pc/start_point='0.09 0 0' VectorPostprocessors/pc/end_point='0.95 0 0' Materials/hys_order/previous_turning_points=0.05 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_1_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the first-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_2_none_none]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2sat_p_2_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2sat_p_2_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_2_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2sat_p_2_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_2_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_2_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_2.i'
+    csvdiff = 'hys_d2sat_p_2_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.5 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_2_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of liquid saturation with respect to capillary pressure along the second-order drying  curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_3_none_none]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2sat_p_3_none_none_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=none Materials/pc_calculator/high_extension_type=none Outputs/file_base=hys_d2sat_p_3_none_none"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using no low extension and no high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_3_quadratic_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2sat_p_3_quadratic_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=quadratic Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_3_quadratic_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using quadratic low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./hys_d2sat_3_exponential_power]
+    type = CSVDiff
+    input = 'hys_pc_3.i'
+    csvdiff = 'hys_d2sat_p_3_exponential_power_pc_0001.csv'
+    abs_zero = 1E-6
+    cli_args = "Materials/pc_calculator/info_required=d2S_dPc2_err Materials/pc_calculator/Pc_max=0.3 Materials/pc_calculator/low_extension_type=exponential Materials/pc_calculator/high_extension_type=power Outputs/file_base=hys_d2sat_p_3_exponential_power"
+    requirement = 'PorousFlow shall be able to compute the second derivative of the liquid saturation with respect to capillary pressure along the third-order wetting curve in hysteretic problems, using exponential low extension and power high extension'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./vary_sat_1a]
+    type = CSVDiff
+    input = 'vary_sat_1.i'
+    csvdiff = 'vary_sat_1_out.csv'
+    requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./vary_sat_1b]
+    type = CSVDiff
+    input = 'vary_sat_1.i'
+    csvdiff = 'vary_sat_1b.csv'
+    cli_args = "AuxKernels/sat_aux/function='if(t <= 0.5, 1 - 2 * t, 2 * t - 1)' Executioner/dt=0.0625 Outputs/file_base=vary_sat_1b"
+    requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve and then the primary wetting curve'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./vary_sat_1c]
+    type = CSVDiff
+    input = 'vary_sat_1.i'
+    csvdiff = 'vary_sat_1c.csv'
+    cli_args = "AuxKernels/sat_aux/function='if(t <= 0.4, 1 - 2 * t, 2 * t - 0.6)' Executioner/dt=0.05 Executioner/end_time=0.8 Outputs/file_base=vary_sat_1c"
+    requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve and then the first-order wetting'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./vary_sat_1d]
+    type = CSVDiff
+    input = 'vary_sat_1.i'
+    csvdiff = 'vary_sat_1d.csv'
+    cli_args = "AuxKernels/sat_aux/function='if(t <= 0.4, 1 - 2 * t, if(t <= 0.7, 2 * t - 0.6, 0.8 - 2 * (t - 0.7)))' Executioner/dt=0.05 Executioner/end_time=1.4 Outputs/file_base=vary_sat_1d"
+    requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve, then first-order wetting, and then second-order drying'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./vary_sat_1e]
+    type = CSVDiff
+    input = 'vary_sat_1.i'
+    csvdiff = 'vary_sat_1e.csv'
+    cli_args = "AuxKernels/sat_aux/function='if(t <= 0.4, 1 - 2 * t, if(t <= 0.7, 2 * t - 0.6, if(t <= 0.95, 0.8 - 2 * (t - 0.7), 0.3 + 2 * (t - 0.95))))' Executioner/dt=0.025 Executioner/end_time=1.3 Outputs/file_base=vary_sat_1e"
+    requirement = 'PorousFlow shall be able to compute capillary pressure as a function of saturation in hysteretic time-dependent problems, along the primary drying curve, then first-order wetting, and then second-order drying, and then third-order'
+    design = 'PorousFlowHystereticInfo.md'
+    issues = '#16129'
+  [../]
+  [./1phase]
+    type = CSVDiff
+    input = '1phase.i'
+    csvdiff = '1phase_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along a first-order wetting curve'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
+  [./1phase_3rd]
+    type = CSVDiff
+    input = '1phase_3rd.i'
+    csvdiff = '1phase_3rd_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along first, second and third order curves'
+    design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
   [../]
 []
