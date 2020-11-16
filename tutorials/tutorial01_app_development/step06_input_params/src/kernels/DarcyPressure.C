@@ -12,11 +12,10 @@ DarcyPressure::validParams()
   // Add a required parameter. If this isn't provided in the input file MOOSE will error.
   params.addRequiredParam<Real>("permeability", "The isotropic permeability ($K$) of the medium.");
 
-  // Add an optional parameter that can be any real number, except zero, and set its default value.
-  params.addRangeCheckedParam<Real>(
+  // Add an optional parameter and set its default value.
+  params.addParam<Real>(
       "viscosity",
       7.98e-04,
-      "viscosity != 0",
       "The dynamic viscosity ($\\mu$) of the fluid, the default value is that of water at 30 "
       "degrees Celcius (7.98e-04 Pa-s).");
 
