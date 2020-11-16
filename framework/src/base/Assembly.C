@@ -2309,8 +2309,7 @@ Assembly::reinitMortarElem(const Elem * elem)
 
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
-  setCoordinateTransformation(
-      _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
+  setCoordinateTransformation(_qrule_msm, array_q_points, _coord_msm, elem->subdomain_id());
 }
 
 void
