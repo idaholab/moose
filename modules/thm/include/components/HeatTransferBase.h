@@ -53,6 +53,11 @@ public:
 
   const UserObjectName & getFluidPropertiesName() const;
 
+  /**
+   * Get the name of the connected flow channel
+   */
+  const std::string & getFlowChannelName() const { return _flow_channel_name; }
+
 protected:
   virtual void init() override;
   virtual void initSecondary() override;
