@@ -1,0 +1,9 @@
+[Tests]
+  [tricoords3]
+    type = Exodiff
+    input = tricoords3.i
+    exodiff = tricoords3_in.e
+    cli_args = "--mesh-only"
+    recover = false
+  []
+[]
