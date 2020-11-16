@@ -2411,10 +2411,26 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add Constraint for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
+  {
+    // If this constraint is a mortar constraint, it's possible that the LM variable (e.g.
+    // "variable") is not used. In this case let's check to see whether the secondary variable (the
+    // variable with dofs directly on the mortar segment elements) is in the nonlinear system
+    if (parameters.have_parameter<VariableName>("secondary_variable"))
+    {
+      if (!_nl->hasVariable(parameters.get<VariableName>("secondary_variable")))
+        mooseError(name,
+                   " is using variable '",
+                   parameters.get<NonlinearVariableName>("variable"),
+                   "' and secondary_variable '",
+                   parameters.get<VariableName>("secondary_variable"),
+                   "'. Neither of these variables are in the nonlinear system!");
+    }
+    else
+      mooseError(name,
+                 ": Cannot add Constraint for variable ",
+                 parameters.get<NonlinearVariableName>("variable"),
+                 ", it is not a nonlinear variable!");
+  }
 
   _nl->addConstraint(c_name, name, parameters);
 }
