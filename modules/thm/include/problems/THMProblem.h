@@ -13,6 +13,14 @@ public:
 
   virtual void advanceState() override;
 
+  /**
+   * Check if a postprocessor with a given name exists in the simulation
+   *
+   * @return true if postprocessor with the given name exists in the simulation, false otherwise
+   * @param name The name of the postprocessor
+   */
+  virtual bool hasPostprocessor(const std::string & name) const;
+
 public:
   static InputParameters validParams();
 };
