@@ -56,11 +56,6 @@ public:
    */
   virtual void checkIntegrity();
 
-  /**
-   *  There are two ways to output eigenvalue. "inverse" corresponds to k-eigenvalue
-   */
-  virtual void outputInverseEigenvalue(bool inverse);
-
 private:
   /**
    * Prepare right petsc options

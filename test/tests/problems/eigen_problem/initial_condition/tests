@@ -11,13 +11,23 @@
     requirement = "The system shall provide an initial guess to Newton if users request."
   [../]
 
-  [./output_inverse_eigenvalue]
+  [./inverse_eigenvalue_postprocessor]
     type = 'CSVDiff'
     input = 'ne_ic.i'
     csvdiff = 'ne_ic_out_inverse_eigenvalues_0001.csv'
-    cli_args = 'Executioner/output_inverse_eigenvalue=true Outputs/file_base=ne_ic_out_inverse'
+    cli_args = 'VectorPostprocessors/eigenvalues/inverse_eigenvalue=true Outputs/file_base=ne_ic_out_inverse'
+    absent_out = 'init_ solve'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an option to output the eigenvalue as its inverse."
+  [../]
+
+  [./output_inverse_eigenvalue]
+    type = 'RunApp'
+    input = 'ne_ic.i'
+    cli_args = '--output-inverse-eigenvalue Outputs/file_base=ne_ic_dummy'
+    expect_out = 'Iteration 1 k-eigenvalue = 5.00146'
+    slepc_version = '>=3.8.0'
+    requirement = "The system shall provide an option to output the eigenvalue on screen as its inverse."
   [../]
 
   [./extra_power_iterations]
