@@ -205,6 +205,7 @@ public:
    * @see JSONOutput.C/h
    */
   bool hasReporterWithMode(const ReporterMode & mode) const;
+  bool hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const;
 
   /**
    * Helper for performing generic Reporter value transfers.
