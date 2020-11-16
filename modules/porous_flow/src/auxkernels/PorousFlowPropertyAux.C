@@ -20,7 +20,7 @@ PorousFlowPropertyAux::validParams()
   MooseEnum property_enum("pressure saturation temperature density viscosity mass_fraction relperm "
                           "capillary_pressure enthalpy internal_energy secondary_concentration "
                           "mineral_concentration mineral_reaction_rate porosity permeability "
-                          "hysteresis_order hysteresis_saturation_turning_point");
+                          "hysteresis_order hysteresis_saturation_turning_point hysteretic_info");
   params.addRequiredParam<MooseEnum>(
       "property", property_enum, "The fluid property that this auxillary kernel is to calculate");
   params.addParam<unsigned int>("phase", 0, "The index of the phase this auxillary kernel acts on");
@@ -183,6 +183,10 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
           &getMaterialProperty<std::array<Real, PorousFlowConstants::MAX_HYSTERESIS_ORDER>>(
               "PorousFlow_hysteresis_saturation_tps_qp");
       break;
+
+    case PropertyEnum::HYSTERETIC_INFO:
+      _hys_info = &getMaterialProperty<Real>("PorousFlow_hysteretic_info_qp");
+      break;
   }
 }
 
@@ -259,6 +263,10 @@ PorousFlowPropertyAux::computeValue()
 
     case PropertyEnum::HYSTERESIS_SATURATION_TURNING_POINT:
       property = (*_hys_sat_tps)[_qp].at(_hysteresis_turning_point);
+      break;
+
+    case PropertyEnum::HYSTERETIC_INFO:
+      property = (*_hys_info)[_qp];
       break;
   }
 
