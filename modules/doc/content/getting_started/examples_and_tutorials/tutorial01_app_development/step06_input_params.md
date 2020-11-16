@@ -60,8 +60,6 @@ The `getParam()` method can be called from within any member---not just the cons
 
 ## Demonstration id=demo
 
-### Statement of Physics id=physics
-
 Recall from the [previous step](tutorial01_app_development/step05_kernel_object.md#physics) that, upon applying the [!ac](BVP), the weak form of Darcy's pressure equation is
 
 !equation id=darcy-weak
@@ -110,7 +108,7 @@ cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
 ```
 
-!alert! tip title=Try to input a zero-valued viscosity.<!-- this will be a good demo for RunException on a "create a unit test" step, which will probably be step 8, after materials-->
+!alert! tip title=Try to input a zero-valued viscosity.<!-- this will be a good demo for RunException on the next step about unit tests-->
 It is worth testing the ability of the `addRangeCheckedParam()` method to enforce the specified condition: `"viscosity != 0"`. To do this, add `viscosity = 0` to the `[diffusion]` sub-block in `pressure_diffusion.i` and run it. The application should terminate and print the following error message to the terminal:
 
 ```

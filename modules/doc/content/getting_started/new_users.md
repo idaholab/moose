@@ -76,7 +76,7 @@ files and implement custom behavior in an application. The [first tutorial](tuto
 
 ## Helpful Software id=helpful-software
 
-A text editor is necessary for creating application files. There are many options available, so please feel free to chose an any editor that meets your needs. A popular option for application developers is [Atom](https://atom.io), which has community developed add-ons specifically for MOOSE: [Atom Editor for MOOSE](Atom_Editor.md).
+A text editor is necessary for creating application files. There are many options available, so please feel free to chose an editor that meets your needs. A popular option for application developers is [Atom](https://atom.io), which has community developed add-ons specifically for MOOSE: [Atom Editor for MOOSE](Atom_Editor.md).
 
 A graphical post-processor, particularly one that can read [ExodusII](https://prod-ng.sandia.gov/techlib-noauth/access-control.cgi/1992/922137.pdf) files, is also necessary. [!ac](MOOSE) includes a [!ac](GUI): [PEACOCK](application_usage/peacock.md). Another popular tool is [ParaView](https://www.paraview.org/). Both of these applications are free and will allow you to visualize and process the results of your simulations.
 
