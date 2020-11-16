@@ -1,3 +1,5 @@
+postprocessor_type = InterfaceAverageVariableValuePostprocessor
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -16,8 +18,8 @@
     block_id = 1
     [../]
   [./interface]
-    input = subdomain_id
     type = SideSetsBetweenSubdomainsGenerator
+    input = subdomain_id
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'interface'
@@ -38,28 +40,29 @@
 
 [Variables]
   [./u]
-    family = LAGRANGE
-    order = FIRST
+    family = MONOMIAL
+    order = CONSTANT
+    fv = true
   [../]
 []
 
-
-[Kernels]
+[FVKernels]
   [./diff]
-    type = Diffusion
+    type = FVDiffusion
     variable = u
+    coeff = 1
   [../]
 
   [./ffn]
-    type = BodyForce
+    type = FVBodyForce
     variable = u
     function = ffn
   [../]
 []
 
-[BCs]
+[FVBCs]
   [./all]
-    type = FunctionDirichletBC
+    type = FVFunctionDirichletBC
     variable = u
     boundary = '0 1 2 3'
     function = fn_exact
@@ -103,11 +106,9 @@
   []
 []
 
-
-
 [Postprocessors]
   [./diffusivity_average]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -115,7 +116,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_primary_secondary]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_primary_minus_secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -123,7 +124,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_secondary_primary]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_secondary_minus_primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -131,7 +132,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_abs]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -139,7 +140,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_primary]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -147,7 +148,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_secondary]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = ${postprocessor_type}
     interface_value_type = secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -156,11 +157,16 @@
   [../]
 []
 
+[Problem]
+  kernel_coverage_check = false
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
 []
 
 [Outputs]
+  file_base = ${raw ${postprocessor_type} _fv}
   exodus = true
 []

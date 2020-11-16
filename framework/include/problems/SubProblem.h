@@ -216,6 +216,10 @@ public:
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
+  /// Returns the variable reference for requested MooseVariableField which may be in any system
+  virtual MooseVariableFieldBase & getActualFieldVariable(THREAD_ID tid,
+                                                          const std::string & var_name) = 0;
+
   /// Returns the variable reference for requested VectorMooseVariable which may be in any system
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
 

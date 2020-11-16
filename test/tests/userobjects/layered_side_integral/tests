@@ -1,11 +1,18 @@
 [Tests]
   design = 'userobject/LayeredSideIntegral.md'
-  issues = '#1289'
+  issues = '#1289 #16099'
   [./test]
     type = 'Exodiff'
     input = 'layered_side_integral_test.i'
     exodiff = 'out.e'
     requirement = "MOOSE shall correctly compute layered integrals along a specified boundary"
+  [../]
+
+  [./fv_test]
+    type = 'Exodiff'
+    input = 'layered_side_integral_fv_test.i'
+    exodiff = 'fv_out.e'
+    requirement = "MOOSE shall correctly compute layered integrals of finite volume variables along a specified boundary"
   [../]
 
   [./average]

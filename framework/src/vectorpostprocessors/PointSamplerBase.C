@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "MooseMesh.h"
-#include "MooseVariableFE.h"
 
 #include "libmesh/mesh_tools.h"
 
@@ -44,7 +43,7 @@ PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _pp_value(getPostprocessorValue("scaling"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 
   std::vector<std::string> var_names(_coupled_moose_vars.size());
 
@@ -107,7 +106,7 @@ PointSamplerBase::execute()
         _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
 
         for (MooseIndex(_coupled_moose_vars) j = 0; j < _coupled_moose_vars.size(); ++j)
-          values[j] = (dynamic_cast<MooseVariable *>(_coupled_moose_vars[j]))->sln()[0] *
+          values[j] = (dynamic_cast<MooseVariableField<Real> *>(_coupled_moose_vars[j]))->sln()[0] *
                       _pp_value; // The zero is for the "qp"
 
         _found_points[i] = true;
