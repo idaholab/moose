@@ -189,3 +189,50 @@
    fun:*boost*math*
    ...
 }
+{
+   meowbuild_noai6ai_cached
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   obj:*/usr/lib64/ld-2.17.so
+   ...
+}
+{
+   meowbuild_mpich_libmpi
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:MPIR_Init_thread
+   fun:PMPI_Init_thread
+   ...
+}
+{
+   meowbuild_libdl
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_dlerror_run
+   fun:dlsym
+   ...
+}
+{
+   meowbuild_libgomp
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:gomp_malloc
+   fun:gomp_new_icv
+   fun:gomp_icv
+   fun:omp_set_num_threads
+   ...
+}
+{
+   meowbuild_libc
+   Memcheck:Free
+   fun:free
+   fun:__libc_freeres
+   fun:_vgnU_freeres
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
