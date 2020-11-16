@@ -4,9 +4,9 @@ This step introduces the class used to a define a unique set of parameters for a
 
 ## Input Parameters
 
-Every `MooseObject` includes a set of custom parameters within a single [`InputParameters`](framework/include/utils/InputParameters.h) object whose values may be controlled by its user via an input file. The member in which these parameters are defined is the `validParams()` function. This object must be declared as a `static` member so that it is invoked only once per execution. The output is then parsed and verified by the core systems of MOOSE before it becomes accessible to the constructor methods and other members for each instance of the associated `MooseObject`.
+Every `MooseObject` includes a set of custom parameters within a single [`InputParameters`](framework/include/utils/InputParameters.h) object whose values may be controlled by its user via an input file. These parameters are defined in the `validParams()` method. This method is `static` to allow for it to be called independently and prior to object construction. The output is then parsed and verified by the core systems of MOOSE before it becomes accessible to the constructor methods and other members for each instance of the associated `MooseObject`.
 
-### Defining Valid Parameters
+### Declaring Valid Parameters
 
 When coding a `validParams()` function, it is customary to declare a `params` variable and initialize it with the `validParams()` output from the base class, e.g.,
 
@@ -48,13 +48,9 @@ where `value` is the default value set for the parameter if one is not specified
          end=: ADKernelGrad(parameters),
          include-end=True
 
-The basic method for retrieving a user-defined input is `getParam()`. To set the value for a variable, `_name`, with the input provided for a parameter, `"name"`, this method can be invoked like so:
+The basic method for retrieving a user-defined input is the template `getParam()` method, which returns a constant reference to the desired parameter. This method should be used to initialize a class member variable that references the parameters.
 
-```C++
-_name(getParam<T>("name"));
-```
-
-The `getParam()` method can be called from within any member---not just the constructor. Although, this is typically only necessary for special cases and should be avoided as much as possible, since accessing invariant input parameters during each invocation of a function tends to be unnecessarily expensive. In most cases, parameters should be accessed from the constructor and used to set [global variables](https://www.geeksforgeeks.org/scope-of-variables-in-c/) that are available to all members.
+The `getParam()` method can be called from within any member---not just the constructor. Although, this is typically only necessary for special cases and should be avoided as much as possible, since accessing invariant input parameters during each invocation of a function tends to be unnecessarily expensive. In most cases, parameters should be accessed from the constructor to initialize class member variables.
 
 *For more information about Input Parameters, please visit the [source/utils/InputParameters.md] page.*
 
@@ -69,9 +65,16 @@ Also, recall that the property values are $K = 0.8451 \times 10^{-9} \, \textrm{
 
 ### Source Code id=source-demo
 
-The `DarcyPressure` object shall be modified to allow users to define the constant properties. A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu_{f}$. Assuming that $K$ and $\mu_{f}$ are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`. The only exception is that $\mu_{f}$ cannot be zero, since this would produce a `NaN` value. To enforce this constraint, the parameter object shall be created with `addRangeCheckedParam()`, which is similar to `addParam()`, but it accepts a parsed logical expression that must evaluate to true.
+The `DarcyPressure` object shall be modified to allow users to define the constant properties. A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu_{f}$. Assuming that $K$ and $\mu_{f}$ are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
 
-In `DarcyPressure.C`, change the `validParams()` definition to the following:
+In `DarcyPressure.h`, declare `_permeability` and `_viscosity` as reference variables so that their input value may be accessed without having to create additional copies of them:
+
+!listing tutorials/tutorial01_app_development/step06_input_params/include/kernels/DarcyPressure.h
+         link=False
+         start=/// The reference variables which hold the value for K and mu
+         end=};
+
+Do not modify any other parts of `DarcyPressure.h`. Now, in `DarcyPressure.C`, change the `validParams()` definition to the following:
 
 !listing tutorials/tutorial01_app_development/step06_input_params/src/kernels/DarcyPressure.C
          link=False
@@ -108,19 +111,6 @@ cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
 ```
 
-!alert! tip title=Try to input a zero-valued viscosity.<!-- this will be a good demo for RunException on the next step about unit tests-->
-It is worth testing the ability of the `addRangeCheckedParam()` method to enforce the specified condition: `"viscosity != 0"`. To do this, add `viscosity = 0` to the `[diffusion]` sub-block in `pressure_diffusion.i` and run it. The application should terminate and print the following error message to the terminal:
-
-```
-*** ERROR ***
-Range check failed for parameter Kernels/diffusion/viscosity
-	      Expression: viscosity != 0
-	      Value: 0
-```
-
-Obviously, the erroneous input should be removed before proceeding.
-!alert-end!
-
 ### Results id=result-demo
 
 Run the following commands to visualize the solution with PEACOCK:
@@ -149,4 +139,4 @@ git push
 ```
 
 !content pagination previous=tutorial01_app_development/step05_kernel_object.md
-                    next=tutorial01_app_development/step07_test_harness.md
+                    next=tutorial01_app_development/step07_parallel.md
