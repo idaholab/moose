@@ -32,63 +32,63 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_finite_deform_jacobian = true
     volumetric_locking_correction = false
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz'
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = orthotropic
     C_ijkl = '2.0e5 2.0e5 2.0e5 0.71428571e5 0.71428571e5 0.71428571e5 0.4 0.4 0.4 0.4 0.4 0.4' # Isotropic
-  [../]
+  []
 []
 
 [BCs]
- [./fix_corner_x]
-   type = DirichletBC
-   variable = disp_x
-   boundary = 101
-   value = 0
- [../]
- [./fix_corner_y]
-   type = DirichletBC
-   variable = disp_y
-   boundary = 101
-   value = 0
- [../]
- [./fix_side_y]
-   type = DirichletBC
-   variable = disp_y
-   boundary = 102
-   value = 0
- [../]
- [./fix_z]
-   type = DirichletBC
-   variable = disp_z
-   boundary = back
-   value = 0
- [../]
- [./move_z]
-   type = FunctionDirichletBC
-   variable = disp_z
-   boundary = front
-   function = 't'
- [../]
- [./move_y]
-   type = FunctionDirichletBC
-   variable = disp_y
-   boundary = front
-   function = 't*1.4'
- [../]
+  [fix_corner_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 101
+    value = 0
+  []
+  [fix_corner_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 101
+    value = 0
+  []
+  [fix_side_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 102
+    value = 0
+  []
+  [fix_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = back
+    value = 0
+  []
+  [move_z]
+    type = FunctionDirichletBC
+    variable = disp_z
+    boundary = front
+    function = 't'
+  []
+  [move_y]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = front
+    function = 't*1.4'
+  []
 []
 
 [Executioner]
@@ -101,7 +101,7 @@
   nl_rel_tol = 1e-12
   nl_max_its = 50
 
-  l_tol  = 1e-4
+  l_tol = 1e-4
   l_max_its = 50
 
   dt = 0.4
@@ -111,10 +111,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

@@ -908,7 +908,7 @@ RankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<
 
   if (!preserve_symmetry)
     mooseError("Orthotropic elasticity tensor input is not consistent with symmetry requirements. "
-               "Check for input for accuracy");
+               "Check input for accuracy");
 
   unsigned int ntens = N * (N + 1) / 2;
 
@@ -920,7 +920,7 @@ RankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<
   bool is_positive_definite =
       (k > 0) && (1 - nubc * nucb) > 0 && (1 - nuac * nuca) > 0 && (1 - nuab * nuba) > 0;
   if (!is_positive_definite)
-    mooseError("Orthotropic elasticity tensor input is not positive definite. Check for input for "
+    mooseError("Orthotropic elasticity tensor input is not positive definite. Check input for "
                "accuracy");
 
   mat[0] = Ea * (1 - nubc * nucb) / k;

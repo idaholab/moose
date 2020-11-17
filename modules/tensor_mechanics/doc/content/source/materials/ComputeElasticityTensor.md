@@ -87,7 +87,7 @@ C_{ijkl}^{orthotropic} = \begin{bmatrix}
               \end{bmatrix}
 \end{equation}
 
-The user can also select the fill method `orthotropic`, which generates an elasticity tensor based directly on material parameters. That is, the elasticity tensor is computed via moduli of elasticity, Poisson ratios, and shear stiffnesses, see [eq:orhotropic_fill_method]
+The user can also select the fill method `orthotropic`, which generates an elasticity tensor based directly on material parameters. That is, the elasticity tensor is computed via moduli of elasticity, Poisson's ratios, and shear stiffnesses, see [eq:orhotropic_fill_method]
 \begin{equation}
 \label{eq:orhotropic_fill_method}
 C_{ijkl}^{orthotropic} = \begin{bmatrix}
@@ -113,7 +113,7 @@ to enter an isotropic elasticity tensor.
 
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic_anisotropy/3d_bar_orthotropic_full_rotation.i block=Materials/elasticity_tensor
 
-For the `orthotropic` fill method, the material parameters need to be referred to the global frame and introduced in the following order: $E_{11}\;E_{22}\;E_{33}\;G_{12}\;G_{23}\;G_{31}\;\nu_{21}\;\nu_{31}\;\nu_{32}\;\nu_{12}\;\nu_{13}\;\nu_{23}$.
+For the `orthotropic` fill method, the material parameters need to be referred to the global frame and introduced in the following order: $E_{11}\;E_{22}\;E_{33}\;G_{12}\;G_{23}\;G_{31}\;\nu_{21}\;\nu_{31}\;\nu_{32}\;\nu_{12}\;\nu_{13}\;\nu_{23}$. For cases where axes of orthotropy do not coincide with global axes, Euler angles can be provided to perform a general rotation of the elasticity tensor at the beginning of the simulation.
  
 
 ## Linear Isotropic Symmetry

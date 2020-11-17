@@ -32,105 +32,105 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     use_finite_deform_jacobian = true
     volumetric_locking_correction = false
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz'
-  [../]
+  []
 []
 
 [Materials]
-  [./stress]
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = orthotropic
     C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
-  [../]
+  []
 []
 
 [BCs]
-[./fix_z]
-  type = DirichletBC
-  variable = disp_z
-  boundary = bottom
-  value = 0
-[../]
+  [fix_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = bottom
+    value = 0
+  []
 
-[./rot_y]
- type = DisplacementAboutAxis
- boundary = bottom
- function = t
- angle_units = degrees
- axis_origin = '0. 0. 0.'
- axis_direction = '0. 0. 1.'
- component = 1
- variable = disp_y
-[../]
-#
-[./rot_x]
- type = DisplacementAboutAxis
- boundary = bottom
- function = t
- angle_units = degrees
- axis_origin = '0. 0. 0.'
- axis_direction = '0. 0. 1.'
- component = 0
- variable = disp_x
-[../]
+  [rot_y]
+    type = DisplacementAboutAxis
+    boundary = bottom
+    function = t
+    angle_units = degrees
+    axis_origin = '0. 0. 0.'
+    axis_direction = '0. 0. 1.'
+    component = 1
+    variable = disp_y
+  []
+  #
+  [rot_x]
+    type = DisplacementAboutAxis
+    boundary = bottom
+    function = t
+    angle_units = degrees
+    axis_origin = '0. 0. 0.'
+    axis_direction = '0. 0. 1.'
+    component = 0
+    variable = disp_x
+  []
 
-[./rot_y90]
- type = DisplacementAboutAxis
- boundary = bottom
- function = 90
- angle_units = degrees
- axis_origin = '0. 0. 0.'
- axis_direction = '0. 0. 1.'
- component = 1
- variable = disp_y
-[../]
-#
-[./rot_x90]
- type = DisplacementAboutAxis
- boundary = bottom
- function = 90
- angle_units = degrees
- axis_origin = '0. 0. 0.'
- axis_direction = '0. 0. 1.'
- component = 0
- variable = disp_x
-[../]
+  [rot_y90]
+    type = DisplacementAboutAxis
+    boundary = bottom
+    function = 90
+    angle_units = degrees
+    axis_origin = '0. 0. 0.'
+    axis_direction = '0. 0. 1.'
+    component = 1
+    variable = disp_y
+  []
+  #
+  [rot_x90]
+    type = DisplacementAboutAxis
+    boundary = bottom
+    function = 90
+    angle_units = degrees
+    axis_origin = '0. 0. 0.'
+    axis_direction = '0. 0. 1.'
+    component = 0
+    variable = disp_x
+  []
 
-[./press]
-  boundary = top
-  function = '-1.0*(t-90)*10.0'
-  use_displaced_mesh = true
-  displacements = 'disp_x disp_y disp_z'
-  type = Pressure
-  variable = disp_x
-  component = 0
-[../]
+  [press]
+    boundary = top
+    function = '-1.0*(t-90)*10.0'
+    use_displaced_mesh = true
+    displacements = 'disp_x disp_y disp_z'
+    type = Pressure
+    variable = disp_x
+    component = 0
+  []
 
 []
 
 [Controls]
-  [./c1]
+  [c1]
     type = TimePeriod
     enable_objects = 'BCs::rot_x BCs::rot_y'
     disable_objects = 'BCs::rot_x90 BCs::rot_y90 BCs::press'
     start_time = '0'
     end_time = '90'
-  [../]
-  [./c190plus]
+  []
+  [c190plus]
     type = TimePeriod
     enable_objects = 'BCs::rot_x90 BCs::rot_y90 BCs::press'
     disable_objects = 'BCs::rot_x BCs::rot_y '
     start_time = '90'
     end_time = '390'
-  [../]
+  []
 []
 
 [Executioner]
@@ -148,7 +148,7 @@
   nl_abs_tol = 1e-08
   nl_max_its = 50
 
-  l_tol  = 1e-4
+  l_tol = 1e-4
   l_max_its = 50
   start_time = 0.0
 
@@ -159,10 +159,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

@@ -34,9 +34,9 @@ protected:
   /// Elasticity tensor material property
   const ADMaterialProperty<RankFourTensor> & _elasticity_tensor;
   const ADMaterialProperty<RankTwoTensor> & _strain_increment;
-  /// Rotation up to step "n" to compute non-isotropic elasticity tensor
+  /// Rotation up to current step "n" to compute anisotropic elasticity tensor
   ADMaterialProperty<RankTwoTensor> & _rotation_total;
-  /// Rotation up to step "n" to compute non-isotropic elasticity tensor from previous step
+  /// Rotation up to "n - 1" (previous) step to compute anisotropic elasticity tensor
   const MaterialProperty<RankTwoTensor> & _rotation_total_old;
 
   const ADMaterialProperty<RankTwoTensor> & _rotation_increment;

@@ -414,8 +414,8 @@ protected:
 
   /**
    * fillGeneralOrhotropicFromInputVector takes 10  inputs to fill the Rank-4 tensor
-   * It defines a general orthotropic tensor for which some constraint among
-   * elastic parameters exist/
+   * It defines a general orthotropic tensor for which some constraints among
+   * elastic parameters exist
    * @param input  Ea, Eb, Ec, Gab, Gbc, Gca, nuba, nuca, nucb, nuab, nuac, nubc
    */
   void fillGeneralOrthotropicFromInputVector(const std::vector<T> & input);
