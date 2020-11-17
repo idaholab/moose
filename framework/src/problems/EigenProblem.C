@@ -409,52 +409,53 @@ EigenProblem::preScaleEigenVector()
 void
 EigenProblem::postScaleEigenVector()
 {
-  if (_has_normalization)
+  mooseAssert(_has_normalization, "Should not be called without user-set normalization");
+
+  Real v;
+  if (_normal_factor == std::numeric_limits<Real>::max())
   {
-    Real v;
-    if (_normal_factor == std::numeric_limits<Real>::max())
-    {
-      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
-        mooseError("Number of converged eigenvalues ",
-                   _nl_eigen->getNumConvergedEigenvalues(),
-                   " but you required eigenvaue ",
-                   _active_eigen_index);
+    if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+      mooseError("Number of converged eigenvalues ",
+                 _nl_eigen->getNumConvergedEigenvalues(),
+                 " but you required eigenvaue ",
+                 _active_eigen_index);
 
-      // when normal factor is not provided, we use the inverse of the norm of
-      // the active eigenvalue for normalization
-      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
-      v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
-    }
-    else
-      v = _normal_factor;
+    // when normal factor is not provided, we use the inverse of the norm of
+    // the active eigenvalue for normalization
+    auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
+    v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+  }
+  else
+    v = _normal_factor;
 
-    Real c = getPostprocessorValueByName(_normalization);
+  Real c = getPostprocessorValueByName(_normalization);
 
-    // We scale SLEPc eigen vector here, so we need to scale it back for optimal
-    // convergence if we call EPS solver again
-    mooseAssert(v != 0., "normal factor can not be zero");
+  // We scale SLEPc eigen vector here, so we need to scale it back for optimal
+  // convergence if we call EPS solver again
+  if (v == 0)
+    mooseError("Normalization factor within EigenProblem cannot be zero");
 
-    unsigned int itr = 0;
+  unsigned int itr = 0;
 
-    while (!MooseUtils::absoluteFuzzyEqual(v, c))
-    {
-      // If postprocessor is not defined on eigen variables, scaling might not work
-      if (itr > 10)
-        mooseError("Can not scale eigenvector to the required factor ",
-                   v,
-                   " please check if postprocessor is defined on only eigen variables");
+  while (!MooseUtils::absoluteFuzzyEqual(v, c))
+  {
+    // If postprocessor is not defined on eigen variables, scaling might not work
+    if (itr > 10)
+      mooseError("Can not scale eigenvector to the required factor ",
+                 v,
+                 " please check if postprocessor is defined on only eigen variables");
 
-      mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
+    if (c == 0)
+      mooseError("Postprocessor value used for eigenvalue scaling cannot be zero");
 
-      scaleEigenvector(v / c);
+    scaleEigenvector(v / c);
 
-      // update all aux variables and user objects on linear
-      execute(EXEC_LINEAR);
+    // update all aux variables and user objects on linear
+    execute(EXEC_LINEAR);
 
-      c = getPostprocessorValueByName(_normalization);
+    c = getPostprocessorValueByName(_normalization);
 
-      itr++;
-    }
+    itr++;
   }
 }
 
@@ -504,8 +505,13 @@ EigenProblem::solve()
     // could rebuild matrices due to mesh changes or something else.
     _nl_eigen->attachSLEPcCallbacks();
 
-    // Scale eigen vector if necessary
-    preScaleEigenVector();
+    // We need to make sure that ||Bx||_2 is equal to inverse of eigenvalue for
+    // the NEWTON iteration iteration
+    // - On the first solve, we will scale so that this is true for the initial guess
+    // - If the user has a custom normalization, we will also need to re-scale
+    //   back to the required normalization for the NEWTON solve
+    if (_first_solve || _has_normalization)
+      preScaleEigenVector();
 
     if (isNonlinearEigenvalueSolver() &&
         solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
@@ -517,7 +523,11 @@ EigenProblem::solve()
       {
         _console << " Free power iteration starts" << std::endl;
         doFreeNonlinearPowerIterations(solverParams()._free_power_iterations);
-        _first_solve = false;
+
+        // If there is a source term in the nonlinear problem, the scaling
+        // on the initial condition for ||Bx||_2 = inverse of the eigenvalue
+        // is no longer valid so we will need to re-scale again
+        preScaleEigenVector();
       }
 
       // Let us do extra power iterations here if necessary
@@ -540,8 +550,11 @@ EigenProblem::solve()
     _nl->solve();
     _nl->update();
 
-    // Scale eigen vector if users ask
-    postScaleEigenVector();
+    _first_solve = false;
+
+    // Scale the eigen vector ONLY if the user has a custom normalization
+    if (_has_normalization)
+      postScaleEigenVector();
   }
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
