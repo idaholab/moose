@@ -361,7 +361,7 @@ MooseApp::MooseApp(InputParameters parameters)
   if (std::getenv("MOOSE_HEAP_BASE"))
   {
     static std::string profile_file =
-        std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank()) + ".prof";
+        std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
 
     _heap_profiling = true;
     HeapProfilerStart(profile_file.c_str());

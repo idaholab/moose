@@ -57,8 +57,8 @@ HEAP_PROFILE_INUSE_INTERVAL=104857600 MOOSE_HEAP_BASE=run1_ mpiexec -n 32 ./your
 `HEAP_PROFILE_INUSE_INTERVAL` represents that the code dump heap profiling
 information whenever the memory usage increases by the specified number of bytes.
 `104857600` is `100MB`. You could choose a small number as well if your simulation
-does not use much memory. This example should generate files `run1_0.prof.xxxx.heap`,
-`run1_1.prof.xxxx.heap`, `run1_2.prof.xxxx.heap`, ..., `run1_31.prof.xxxx.heap`.
+does not use much memory. This example should generate files `run1_0.xxxx.heap`,
+`run1_1.xxxx.heap`, `run1_2.xxxx.heap`, ..., `run1_31.xxxx.heap`.
 Here `xxxx` denotes a sequence number, e.g., `0001` is the first dumped heap file,
 `0002` is the second dumped heap file, etc. More instructions on heap profiling
 can be found at [here](https://gperftools.github.io/gperftools/heapprofile.html).
