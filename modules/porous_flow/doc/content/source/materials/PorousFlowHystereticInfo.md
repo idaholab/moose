@@ -3,7 +3,7 @@
 This Material computes quantities relevant to [hysteretic capillary pressure](hysteresis.md).  The quantity computed is written into the `PorousFlow_hysteretic_info_qp` or `PorousFlow_hysteretic_nodal` Property (depending on the `at_nodes` parameter).
 
 !alert warning
-This Material does not compute porepressures or saturations, so cannot be used in usual PorousFlow simulations.  Instead, it enables preliminary exploration of hysteresis in models before hysteretic PorousFlow simulations are run.
+This Material does not compute porepressures or saturations, so cannot be used in usual PorousFlow simulations.  Instead, it enables preliminary exploration of hysteresis in models before hysteretic PorousFlow simulations are run: informative plots may be generated using this Material.
 
 The quantity computed depends on the `info_required` parameter, which may be one of the following.
 

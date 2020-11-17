@@ -19,25 +19,25 @@ PorousFlowHystereticCapillaryPressure::validParams()
   params.addRequiredRangeCheckedParam<Real>(
       "alpha_d",
       "alpha_d > 0",
-      "Van-Genuchten alpha parameter for the primary drying curve.  If using standard units, this "
+      "van Genuchten alpha parameter for the primary drying curve.  If using standard units, this "
       "is measured in Pa^-1.  Suggested value is around 1E-5");
   params.addRequiredRangeCheckedParam<Real>(
       "alpha_w",
       "alpha_w > 0",
-      "Van-Genuchten alpha parameter for the primary wetting curve.  If using standard units, this "
+      "van Genuchten alpha parameter for the primary wetting curve.  If using standard units, this "
       "is measured in Pa^-1.  Suggested value is around 1E-5");
   params.addRequiredRangeCheckedParam<Real>("n_d",
                                             "n_d > 1",
-                                            "Van-Genuchten n parameter for the primary drying "
+                                            "van Genuchten n parameter for the primary drying "
                                             "curve.  Dimensionless.  Suggested value is around 2");
   params.addRequiredRangeCheckedParam<Real>("n_w",
                                             "n_w > 1",
-                                            "Van-Genuchten n parameter for the primary wetting "
+                                            "van Genuchten n parameter for the primary wetting "
                                             "curve.  Dimensionless.  Suggested value is around 2");
   params.addRequiredRangeCheckedParam<Real>(
       "S_l_min",
       "S_l_min >= 0 & S_l_min < 1",
-      "Minimum liquid saturation for which the van-Genuchten expression is valid.  If no lower "
+      "Minimum liquid saturation for which the van Genuchten expression is valid.  If no lower "
       "extension is used then Pc = Pc_max for liquid saturation <= S_l_min");
   params.addRangeCheckedParam<Real>(
       "S_lr",
@@ -51,14 +51,14 @@ PorousFlowHystereticCapillaryPressure::validParams()
       "S_gr_max",
       "S_gr_max >= 0",
       "Residual gas saturation.  1 - S_gr_max is the maximum saturation for which the "
-      "van-Genuchten expression is valid for the wetting curve.  You must ensure S_gr_max < 1 - "
+      "van Genuchten expression is valid for the wetting curve.  You must ensure S_gr_max < 1 - "
       "S_l_min.  Often S_gr_max = -0.3136 * ln(porosity) - 0.1334 is used");
   params.addRangeCheckedParam<Real>(
       "Pc_max",
       std::numeric_limits<Real>::max(),
       "Pc_max > 0",
       "Value of capillary pressure at which the lower extension commences.  The default value "
-      "means capillary pressure uses the van-Genuchten expression for S > S_l_min and is "
+      "means capillary pressure uses the van Genuchten expression for S > S_l_min and is "
       "'infinity' for S <= S_l_min.  This will result in poor convergence around S = S_l_min");
   MooseEnum low_ext_enum("none quadratic exponential", "exponential");
   params.addParam<MooseEnum>(
@@ -66,7 +66,7 @@ PorousFlowHystereticCapillaryPressure::validParams()
       low_ext_enum,
       "Type of extension to use for small liquid saturation values.  The extensions modify the "
       "capillary pressure for all saturation values less than S(Pc_max).  That is, if the "
-      "van-Genuchten "
+      "van Genuchten "
       "expression would produce Pc > Pc_max, then the extension is used instead.  NONE: Simply "
       "cut-off the capillary-pressure at Pc_max, so that Pc <= Pc_max for all S.  QUADRATIC: Pc is "
       "a quadratic in S that is continuous and differentiable at S(Pc_max) and has zero derivative "
@@ -86,7 +86,7 @@ PorousFlowHystereticCapillaryPressure::validParams()
       "Type of extension to use for the wetting curves when the liquid saturation is around 1.  "
       "The extensions modify the wetting capillary pressure for all saturation values greater than "
       "high_ratio * (1 - S_gr_del), where 1 - S_gr_del is the value of liquid saturation when the "
-      "van-Genuchten expression gives Pc = 0.  NONE: use the van-Genuchten expression and when S > "
+      "van Genuchten expression gives Pc = 0.  NONE: use the van Genuchten expression and when S > "
       "1 - S_gr_del, set Pc = 0.  POWER: Pc is proportional to (1 - S)^power, where the "
       "coefficient of proportionality and the power are chosen so the resulting curve is "
       "continuous and differentiable");

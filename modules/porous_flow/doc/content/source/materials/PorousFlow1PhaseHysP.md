@@ -1,6 +1,6 @@
 # PorousFlow1PhaseHysP
 
-This Material computes saturation given porepressure in single-phase, partially-saturated, hysteretic situations, assuming a van-Genuchten relationship.  Detailed documentation about hysteresis and the van-Genuchten relationship can be found on the [hysteresis page](hysteresis.md).  It is the hysteretic cousin of [PorousFlow1PhaseP](PorousFlow1PhaseP.md)
+This Material computes saturation given porepressure in single-phase, partially-saturated, hysteretic situations, assuming a van Genuchten relationship.  Detailed documentation about hysteresis and the van Genuchten relationship can be found on the [hysteresis page](hysteresis.md).  It is the hysteretic cousin of [PorousFlow1PhaseP](PorousFlow1PhaseP.md)
 
 This Material requires a [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material, which will compute the hysteresis order.  `PorousFlow1PhaseHysP` then uses the hysteresis order along with the single-phase porepressure to compute the saturation.
 
@@ -19,7 +19,7 @@ Note the following features:
 !listing modules/porous_flow/test/tests/hysteresis/1phase.i block=AuxKernels
 
 !alert warning
-To improve numerical convergence, it is recommended that you use a `low_extension` and a `high_extension` along with values of `Pc_max` and `S_lr` that are appropriate for your situation.
+To improve numerical convergence, it is recommended that you use a `low_extension` and a `high_extension` along with values of `Pc_max` and `S_lr` that are appropriate for your situation.  See the [hysteresis page](hysteresis.md) for more details.
 
 
 

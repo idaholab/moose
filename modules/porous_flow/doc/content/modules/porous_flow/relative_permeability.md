@@ -69,7 +69,7 @@ Here the cubic is chosen so that its value and derivative match the
 van Genuchten expression at $S=S_{c}$, and so that it is unity at
 $S_{\mathrm{eff}}=1$.
 
-For the non-wetting phase, the van-Genuchten expression is
+For the non-wetting phase, the van Genuchten expression is
 \begin{equation}
 k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
 S_{\mathrm{eff}})^{1/m} \right)^{2m} \ .

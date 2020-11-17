@@ -82,19 +82,19 @@ protected:
    */
   Real d2liquidSaturationQp(Real pc) const;
 
-  /// van-Genuchten alpha parameter for the primary drying curve
+  /// van Genuchten alpha parameter for the primary drying curve
   const Real _alpha_d;
-  /// van-Genuchten alpha parameter for the primary wetting curve
+  /// van Genuchten alpha parameter for the primary wetting curve
   const Real _alpha_w;
-  /// van-Genuchten n parameter for the primary drying curve
+  /// van Genuchten n parameter for the primary drying curve
   const Real _n_d;
-  /// van-Genuchten n parameter for the primary wetting curve
+  /// van Genuchten n parameter for the primary wetting curve
   const Real _n_w;
-  /// Minimum liquid saturation for which the van-Genuchten expression is valid (Pc(_s_l_min) = infinity)
+  /// Minimum liquid saturation for which the van Genuchten expression is valid (Pc(_s_l_min) = infinity)
   const Real _s_l_min;
   /// Liquid saturation below which the liquid relative permeability is zero
   const Real _s_lr;
-  /// Residual gas saturation: 1 - _s_gr_max is the maximum saturation for which the van-Genuchten expression is valid for the wetting curve
+  /// Residual gas saturation: 1 - _s_gr_max is the maximum saturation for which the van Genuchten expression is valid for the wetting curve
   const Real _s_gr_max;
   /// Maximum capillary pressure: for Pc above this value, a "lower" extension will be used
   const Real _pc_max;

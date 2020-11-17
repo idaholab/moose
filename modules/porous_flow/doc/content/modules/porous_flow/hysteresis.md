@@ -26,7 +26,7 @@ The order is computed by the [PorousFlowHysteresisOrder](PorousFlowHysteresisOrd
 
 ## Capillary curves
 
-All capillary curves are based on the [van-Genuchten](capillary_pressure.md) curve
+All capillary curves are based on the [van Genuchten](capillary_pressure.md) curve
 \begin{equation}
 \label{vg.cap.eqn}
 P_{c}(S_{l}) = \frac{1}{\alpha} \left( S_{\mathrm{eff}}^{n/(1-n)} - 1\right)^{1/n} \ ,
@@ -39,10 +39,10 @@ In these formulae:
 
 - $P_{c}$ is the capillary pressure, with SI units Pa.  It obeys $P_{c}\geq 0$.
 - $S_{l}$ is the liquid saturation, which is dimensionless.
-- $\alpha$ is a van-Genuchten parameter, with SI units Pa$^{-1}$.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve --- and both obey $\alpha > 0$.
-- $n$ is a van-Genuchten parameter, which is dimensionless.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve -- and both obey $n>1$.
-- $S_{l,min}$ is the minimum saturation for which the van-Genuchten expression is valid.  It is a dimensionless user-input and obeys $0\leq S_{l,min} < 1$.  Because $n/(1-n) < 0$, $P_{c}$ behaves like $P_{c}\rightarrow\infty$ as $S_{l} \rightarrow S_{l,min}^{+}$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}<S_{l,min}$, which is discussed below.  Two extensions are shown in [histeretic_cap_extensions_fig]
-- $S_{gr}^{\Delta}$ is the residual gas saturation, and $1-S_{gr}^{\Delta}$ is the maximum saturation for which the van-Genuchten expression is valid.  It is dimensionless but it is not a user input (see more details below).  It obeys $S_{gr}^{\Delta} \geq 0$ and $1-S_{gr}^{\Delta} > S_{l,min}$.  As $S_{l}\rightarrow 1-S_{gr}^{\Delta}-$, $P_{c} \rightarrow 0$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}> 1-S_{gr}^{\Delta}$ as described below, as shown in [histeretic_cap_extensions_fig].
+- $\alpha$ is a van Genuchten parameter, with SI units Pa$^{-1}$.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve --- and both obey $\alpha > 0$.
+- $n$ is a van Genuchten parameter, which is dimensionless.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve -- and both obey $n>1$.
+- $S_{l,min}$ is the minimum saturation for which the van Genuchten expression is valid.  It is a dimensionless user-input and obeys $0\leq S_{l,min} < 1$.  Because $n/(1-n) < 0$, $P_{c}$ behaves like $P_{c}\rightarrow\infty$ as $S_{l} \rightarrow S_{l,min}^{+}$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}<S_{l,min}$, which is discussed below.  Two extensions are shown in [histeretic_cap_extensions_fig]
+- $S_{gr}^{\Delta}$ is the residual gas saturation, and $1-S_{gr}^{\Delta}$ is the maximum saturation for which the van Genuchten expression is valid.  It is dimensionless but it is not a user input (see more details below).  It obeys $S_{gr}^{\Delta} \geq 0$ and $1-S_{gr}^{\Delta} > S_{l,min}$.  As $S_{l}\rightarrow 1-S_{gr}^{\Delta}-$, $P_{c} \rightarrow 0$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}> 1-S_{gr}^{\Delta}$ as described below, as shown in [histeretic_cap_extensions_fig].
 
 The primary drying curve uses
 \begin{equation}
@@ -62,7 +62,7 @@ Two types of lower (small $S_{l}$) extensions are available [!citep](doughty2008
 \begin{equation}
 P_{c}^{\mathrm{max}} > 0 \ ,
 \end{equation}
-which is the value at which extension commences (that is, all $P_{c} > P_{c}^{\mathrm{max}}$ will use the extension, not the original van-Genuchten expression [vg.cap.eqn]).  [histeretic_cap_extensions_fig] shows examples for $P_{c}^{\mathrm{max}} = 1.1$.  Both extensions are designed so that the resulting curve is continuous and its derivative is continuous.
+which is the value at which extension commences (that is, all $P_{c} > P_{c}^{\mathrm{max}}$ will use the extension, not the original van Genuchten expression [vg.cap.eqn]).  [histeretic_cap_extensions_fig] shows examples for $P_{c}^{\mathrm{max}} = 1.1$.  Both extensions are designed so that the resulting curve is continuous and its derivative is continuous.
 
 - Quadratic: $P_{c}$ is a quadratic in $S_{l}$ that satisfies $\mathrm{d}P_{c}/\mathrm{d}S_{l} = 0$ at $S_{l} = 0$.
 - Exponential: $P_{c}$ is an exponential in $S_{l}$.
@@ -260,7 +260,7 @@ To include hysteretic capillarity in an existing (non-hysteretic) input file, th
 2. A [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material needs to be included.
 3. A Material that computes the porepressure(s) and saturation(s) needs to be included.
 
-   - For 1-phase partially-saturated situations, [PorousFlow1PhaseP](PorousFlow1PhaseP.md) should be removed and replaced by [PorousFlow1PhaseHysP](PorousFlow1PhaseHysP.md).  Note the van-Genuchten parameter input is $m$ for the non-hysteretic version, but $n$ for the hysteretic version, where $n = 1/(1 - m)$ and $m = 1 - 1/n$.
+   - For 1-phase partially-saturated situations, [PorousFlow1PhaseP](PorousFlow1PhaseP.md) should be removed and replaced by [PorousFlow1PhaseHysP](PorousFlow1PhaseHysP.md).  Note the van Genuchten parameter input is $m$ for the non-hysteretic version, but $n$ for the hysteretic version, where $n = 1/(1 - m)$ and $m = 1 - 1/n$.
    - For 2-phase situations using the two porepressures as the primary variables, [PorousFlow2PhasePP](PorousFlow2PhasePP.md) should be removed and replaced by TODO.
    - For 2-phase situations using the liquid porepressure and gas saturation as the primary variables, [PorousFlow2PhasePS](PorousFlow2PhasePS.md) should be removed and replaced by TODO.
 
@@ -310,13 +310,3 @@ The remainder of the input file is standard, with the inclusion of the hystereti
 The result is [hys_1phase_3_fig].
 
 !media media/porous_flow/hys_1phase_3.png caption=The result of a single-phase simulation in which an external pump removes and adds water to a porous material in order to observe the hysteretic capillary pressure.  id=hys_1phase_3_fig
-
-
-
-
-
-
-
-
-
-

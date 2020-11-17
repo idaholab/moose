@@ -97,7 +97,7 @@ J = \frac{\phi}{dt} \left(
 \end{array}
 \right)
 \end{equation}
-However, as $S_{w}\rightarrow 1$, the standard van-Genuchten expression for $S'$ gives $S'=0$, so
+However, as $S_{w}\rightarrow 1$, the standard van Genuchten expression for $S'$ gives $S'=0$, so
 \begin{equation}
 J = \frac{\phi}{dt} \left(
 \begin{array}{cc}

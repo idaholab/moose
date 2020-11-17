@@ -76,9 +76,9 @@ The tests include:
 
 - 2-phase using the "PS" formulation and [Kuzmin-Turek](kt.md) stabilisation
 
-- 2 phase using the PS formulation and a van-Genuchten capillary pressure
+- 2 phase using the PS formulation and a van Genuchten capillary pressure
 
-- 2 phase using the PS formulation and a van-Genuchten capillary pressure with a logarithmic extension;
+- 2 phase using the PS formulation and a van Genuchten capillary pressure with a logarithmic extension;
 
 - 1 phase when the primary variable is $\mathrm{log}\,\rho$
 
