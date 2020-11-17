@@ -249,15 +249,7 @@ NonlinearEigenSystem::solve()
 
   _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
-  {
-    auto eigenvalue0 = getConvergedEigenvalue(n);
-    // Inverse eigen value if necessary
-    _eigen_values[n].first =
-        (_eigen_problem.isNonlinearEigenvalueSolver() && _eigen_problem.outputInverseEigenvalue())
-            ? 1. / eigenvalue0.first
-            : eigenvalue0.first;
-    _eigen_values[n].second = eigenvalue0.second;
-  }
+    _eigen_values[n] = getConvergedEigenvalue(n);
 
   // Update the active eigenvector to the solution vector
   if (n_converged_eigenvalues)

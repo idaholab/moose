@@ -423,6 +423,17 @@ DisplacedProblem::getStandardVariable(THREAD_ID tid, const std::string & var_nam
   return _displaced_aux.getFieldVariable<Real>(tid, var_name);
 }
 
+MooseVariableFieldBase &
+DisplacedProblem::getActualFieldVariable(THREAD_ID tid, const std::string & var_name)
+{
+  if (_displaced_nl.hasVariable(var_name))
+    return _displaced_nl.getActualFieldVariable<Real>(tid, var_name);
+  else if (!_displaced_aux.hasVariable(var_name))
+    mooseError("No variable with name '" + var_name + "'");
+
+  return _displaced_aux.getActualFieldVariable<Real>(tid, var_name);
+}
+
 VectorMooseVariable &
 DisplacedProblem::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 {

@@ -1,5 +1,5 @@
 [Tests]
-  [test]
+  [fe_test]
     type = 'Exodiff'
     input = 'side_integral_test.i'
     exodiff = 'out.e'
@@ -7,5 +7,15 @@
     issues = '#1405'
     design = 'SideIntegralVariablePostprocessor.md'
     requirement = 'The system shall support computing the integral of a variable quantity over a side on the mesh.'
+  []
+  [fv_test]
+    type = 'Exodiff'
+    input = 'side_integral_fv_test.i'
+    exodiff = 'fv_out.e'
+
+    issues = '#1405 #16099'
+    design = 'SideIntegralVariablePostprocessor.md'
+    requirement = 'The system shall support computing the integral of a finite volume variable'
+        'quantity over a side on the mesh.'
   []
 []

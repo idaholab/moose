@@ -42,6 +42,7 @@ and geomechanics.
 - [Tidal impacts on porepressure](porous_flow/tidal.md)
 - [Restarting from previous simulation](porous_flow/restart.md)
 - [Heterogeneous models](porous_flow/heterogeneous_models.md)
+- [Groundwater models](porous_flow/groundwater_models.md)
 - [QA tests](porous_flow/tests.md)
 
 !col-end!

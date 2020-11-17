@@ -19,6 +19,8 @@ public:
   MooseTestApp(const InputParameters & parameters);
   virtual ~MooseTestApp();
 
+  virtual void executeExecutioner() override;
+
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerApps();
 };

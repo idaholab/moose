@@ -48,7 +48,7 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
                          : coupledNeighborGradient("variable")),
     _interface_value_type(parameters.get<MooseEnum>("interface_value_type"))
 {
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real

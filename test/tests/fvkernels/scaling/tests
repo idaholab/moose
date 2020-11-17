@@ -16,5 +16,26 @@
     absent_out = '20 of 40 singular values'
     input = auto-scaling.i
     requirement = 'The system shall be able to condition a system automatically through variable scaling factors.'
+    prereq = 'bad'
+  []
+  [good_manual]
+    type = Exodiff
+    exodiff = 'auto-scaling_out.e'
+    expect_out = ' 0 of 40 singular values'
+    absent_out = '20 of 40 singular values'
+    input = auto-scaling.i
+    cli_args = 'Executioner/automatic_scaling=false Variables/u/scaling=1e0 Variables/v/scaling=1e18'
+    requirement = 'The system shall be able to condition a system manually through variable scaling factors.'
+    prereq = 'good'
+  []
+  [combined_manual_automatic]
+    type = Exodiff
+    exodiff = 'auto-scaling_out.e'
+    expect_out = ' 0 of 40 singular values'
+    absent_out = '20 of 40 singular values'
+    input = auto-scaling.i
+    cli_args = 'Variables/v/scaling=1e-20'
+    requirement = 'The system shall be able to sequentially apply manual and automatic scaling and in the case of poor manual scaling, restore the condition number automatically.'
+    prereq = 'good_manual'
   []
 []
