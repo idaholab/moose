@@ -47,7 +47,7 @@ endif
 
 ifneq ($(GPERF_DIR), )
     libmesh_CXXFLAGS += -DHAVE_GPERFTOOLS -I$(GPERF_DIR)/include
-    libmesh_LDFLAGS += -L$(GPERF_DIR)/lib -ltcmalloc_and_profiler
+    libmesh_LDFLAGS := -L$(GPERF_DIR)/lib -ltcmalloc_and_profiler $(libmesh_LDFLAGS)
 endif
 
 # Make.common used to provide an obj-suffix which was related to the
