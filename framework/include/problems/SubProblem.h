@@ -777,6 +777,11 @@ public:
    */
   virtual bool computingScalingJacobian() const = 0;
 
+  /**
+   * Getter for whether we're computing the scaling residual
+   */
+  virtual bool computingScalingResidual() const = 0;
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

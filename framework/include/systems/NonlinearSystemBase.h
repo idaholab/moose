@@ -747,7 +747,6 @@ protected:
    */
   virtual void postAddResidualObject(ResidualObject &) {}
 
-protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
   /// solution vector from nonlinear solver
@@ -982,7 +981,4 @@ private:
 
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
-
-  /// Flag used to indicate whether we are computing the scaling Residual
-  bool _computing_scaling_residual = false;
 };

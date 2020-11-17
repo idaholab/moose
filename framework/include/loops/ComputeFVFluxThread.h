@@ -283,6 +283,7 @@ private:
 
   const bool _do_jacobian;
   const bool _scaling_jacobian;
+  const bool _scaling_residual;
   unsigned int _num_cached = 0;
 
   using ThreadedFaceLoop<RangeType>::_fe_problem;
@@ -298,7 +299,8 @@ ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
                                                     const std::set<TagID> & tags)
   : ThreadedFaceLoop<RangeType>(fe_problem, tags),
     _do_jacobian(fe_problem.currentlyComputingJacobian()),
-    _scaling_jacobian(fe_problem.computingScalingJacobian())
+    _scaling_jacobian(fe_problem.computingScalingJacobian()),
+    _scaling_residual(fe_problem.computingScalingResidual())
 {
 }
 
@@ -307,7 +309,8 @@ ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(ComputeFVFluxThread & x, Thr
   : ThreadedFaceLoop<RangeType>(x, split),
     _fv_vars(x._fv_vars),
     _do_jacobian(x._do_jacobian),
-    _scaling_jacobian(x._scaling_jacobian)
+    _scaling_jacobian(x._scaling_jacobian),
+    _scaling_residual(x._scaling_residual)
 {
 }
 
@@ -372,13 +375,17 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
-  // We don't want to do bcs when computing a scaling Jacobian because they might introduce things
-  // like penalty factors
+  // We don't want to do bcs when computing a scaling Jacobian or residual because they might
+  // introduce things like penalty factors
   mooseAssert(
       !_do_jacobian ? !_scaling_jacobian : true,
       "If we're computing the residual, then we definitely shouldn't be computing a scaling "
       "Jacobian.");
-  if (_scaling_jacobian)
+  mooseAssert(_do_jacobian ? !_scaling_residual : true,
+              "If we're computing the Jacobian, then we definitely shouldn't be computing a "
+              "scaling residual");
+
+  if (_scaling_jacobian || _scaling_residual)
     return;
 
   std::vector<FVFluxBC *> bcs;

@@ -331,6 +331,8 @@ public:
 
   bool computingScalingJacobian() const override final;
 
+  bool computingScalingResidual() const override final;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

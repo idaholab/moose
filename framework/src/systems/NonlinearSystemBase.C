@@ -741,7 +741,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
         residual += *_Re_non_time;
       residual.close();
     }
-    if (_computing_scaling_residual)
+    if (_fe_problem.computingScalingResidual())
       // We don't want to do nodal bcs or anything else
       return;
 
@@ -1523,7 +1523,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  if (_computing_scaling_residual)
+  if (_fe_problem.computingScalingResidual())
     // We computed the volumetric objects. We can return now before we get into
     // any strongly enforced constraint conditions or penalty-type objects
     // (DGKernels, IntegratedBCs, InterfaceKernels, Constraints)
@@ -3402,12 +3402,12 @@ NonlinearSystemBase::computeScaling()
 
   if (resid_scaling)
   {
-    _computing_scaling_residual = true;
+    _fe_problem.computingScalingResidual(true);
     _fe_problem.computingNonlinearResid(true);
     // Dispatch to derived classes to ensure that we use the correct vector tag
     computeScalingResidual();
     _fe_problem.computingNonlinearResid(false);
-    _computing_scaling_residual = false;
+    _fe_problem.computingScalingResidual(false);
   }
 
   // Compute our scaling factors for the spatial field variables
