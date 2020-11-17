@@ -28,6 +28,7 @@
   [rxn]
     type = Reaction
     variable = u
+    rate = 2.0
   []
   [diffs]
     type = Diffusion
@@ -49,6 +50,7 @@
   [rxn]
     type = FVReaction
     variable = v
+    rate = 2.0
   []
   [diffw]
     type = FVDiffusion
