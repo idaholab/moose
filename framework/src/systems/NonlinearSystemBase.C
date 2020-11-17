@@ -3314,6 +3314,12 @@ NonlinearSystemBase::computeScaling()
 
   TIME_SECTION(_compute_scaling_timer);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // It's funny but we need to assemble our vector of scaling factors here otherwise we will be
+  // applying scaling factors of 0 during Assembly of our scaling Jacobian
+  assembleScalingVector();
+#endif
+
   // container for repeated access of element global dof indices
   std::vector<dof_id_type> dof_indices;
 
