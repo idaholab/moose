@@ -71,6 +71,14 @@ PowerLawCreepStressUpdate::computeResidual(const Real effective_trial_stress, co
 }
 
 Real
+PowerLawCreepStressUpdate::computeCreepRate(const Real effective_trial_stress)
+{
+  const Real creep_rate =
+      _coefficient * std::pow(effective_trial_stress, _n_exponent) * _exponential * _exp_time;
+  return creep_rate;
+}
+
+Real
 PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, const Real scalar)
 {
   const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
@@ -97,7 +105,27 @@ PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
   }
   else
-    return stress[_qp].doubleContraction((strain_rate_old)[_qp] - (strain_rate)[_qp]);
+  {
+    // Here we do sigma*ecdot - int_{0}^{sigma} (ecdot)d sigma
+    // Compute von Mises stress as a scalar
+    // Create function to perform integration
+    ADRankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
+
+    // compute the effective trial stress
+    ADReal dev_trial_stress_squared =
+        deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+    Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
+    Real first = von_mises_stress * computeCreepRate(von_mises_stress);
+
+    Real tolerance = 1.0e-05;
+    std::size_t max_h_number = 200;
+    Real second = 0.0;
+
+    if (von_mises_stress > 1.0e-6)
+      second = trapezoidalRule(0, von_mises_stress, tolerance, max_h_number);
+
+    return first - second;
+  }
 }
 
 bool

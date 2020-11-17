@@ -545,6 +545,74 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   return total_rom_effective_strain_inc - scalar;
 }
 
+Real
+ADLAROMANCEStressUpdateBase::computeCreepStrainRate(const ADReal & effective_trial_stress)
+{
+  // Update new stress
+  auto trial_stress_mpa = effective_trial_stress * 1.0e-6;
+  ADReal dtrial_stress_dscalar = 0.0;
+
+  // Update stress if strain is being applied, i.e. non-testing simulation
+  _input_values[_stress_input_index] = trial_stress_mpa;
+
+  // Update weights with new stress
+  _weights = _non_stress_weights;
+  computeTileWeight(_weights, _input_values[_stress_input_index], _stress_input_index);
+  auto dweights_dstress = _non_stress_weights;
+  computeTileWeight(
+      dweights_dstress, _input_values[_stress_input_index], _stress_input_index, true);
+
+  // Check window with new stress
+  checkInputWindow(_input_values[_stress_input_index],
+                   _window_failure[_stress_input_index],
+                   _global_limits[_stress_input_index]);
+
+  // Save extrapolation as a material proeprty in order quantify adequate tiling range
+  _extrapolation[_qp] = 0.0;
+  for (unsigned int t = 0; t < _num_tiles; ++t)
+    _extrapolation[_qp] += MetaPhysicL::raw_value(_weights[t]);
+
+  ADReal total_rom_effective_strain_inc = 0.0;
+  ADReal dtotal_rom_effective_strain_inc_dstress = 0.0;
+
+  // Run ROM if all values are within windows.
+  for (unsigned int t = 0; t < _num_tiles; ++t)
+  {
+    if (_weights[t])
+    {
+      const ADReal rom = computeROM(t, _strain_output_index);
+      total_rom_effective_strain_inc += _weights[t] * rom;
+      dtotal_rom_effective_strain_inc_dstress +=
+          _weights[t] * computeROM(t, _strain_output_index, true) + dweights_dstress[t] * rom;
+    }
+  }
+
+  Real creep_rate = MetaPhysicL::raw_value(total_rom_effective_strain_inc) / _dt;
+
+  return MetaPhysicL::raw_value(total_rom_effective_strain_inc);
+}
+
+Real
+ADLAROMANCEStressUpdateBase::computeStrainEnergyRateDensity(
+    const ADMaterialProperty<RankTwoTensor> & stress,
+    const ADMaterialProperty<RankTwoTensor> & strain_rate,
+    const bool /* is_incremental*/,
+    const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
+{
+
+  // Compute von Mises stress as a scalar
+  // Create function to perform integration
+  ADRankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
+
+  // compute the effective trial stress
+  ADReal dev_trial_stress_squared =
+      deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+  Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
+
+  Real first = von_mises_stress * computeCreepStrainRate(von_mises_stress);
+  return first;
+}
+
 void
 ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_index)
 {

@@ -30,7 +30,7 @@ StrainEnergyRateDensityTempl<is_ad>::validParams()
       "inelastic_models",
       "inelastic_models_size=1",
       "The material objects to use to calculate the strain energy rate density.");
-  params.addParam<bool>("incremental",
+  params.addParam<bool>("numerical",
                         false,
                         "Whether to compute strain energy rate density numerically, instead of "
                         "using power law closed form.");
@@ -50,7 +50,7 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
     _strain_rate(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_rate")),
     _strain_rate_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "strain_rate")),
     _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
-    _is_incremental(getParam<bool>("incremental"))
+    _is_numerical(getParam<bool>("numerical"))
 {
 
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
@@ -88,14 +88,12 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
   {
     _inelastic_models[i]->setQp(_qp);
 
-    if (!_is_incremental)
+    if (!_is_numerical)
       _strain_energy_rate_density[_qp] = _inelastic_models[i]->computeStrainEnergyRateDensity(
           _stress, _strain_rate, false, _strain_rate_old);
     else
       // For more complex material models where closed-form solution cannot be obtained
-      _strain_energy_rate_density[_qp] =
-          _strain_energy_rate_density_old[_qp] +
-          _inelastic_models[i]->computeStrainEnergyRateDensity(
-              _stress, _strain_rate, _is_incremental, _strain_rate_old);
+      _strain_energy_rate_density[_qp] = _inelastic_models[i]->computeStrainEnergyRateDensity(
+          _stress, _strain_rate, _is_numerical, _strain_rate_old);
   }
 }

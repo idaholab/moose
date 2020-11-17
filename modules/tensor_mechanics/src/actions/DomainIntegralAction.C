@@ -852,7 +852,8 @@ DomainIntegralAction::act()
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
 
         // Method for computing strain energy density rate.
-        params.set<bool>("incremental") = true;
+        // Change parameter name
+        params.set<bool>("numerical") = true;
         params.set<std::vector<MaterialName>>("inelastic_models") =
             getParam<std::vector<MaterialName>>("inelastic_models");
 

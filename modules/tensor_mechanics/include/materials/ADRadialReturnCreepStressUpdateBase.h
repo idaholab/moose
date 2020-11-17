@@ -28,7 +28,7 @@ public:
    * @param strain_rate The strain rate at the end of the step
    * @return The computed strain energy rate density
    */
-  virtual ADReal
+  virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & /*stress*/,
                                  const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/,
                                  const bool /* is_incremental*/,

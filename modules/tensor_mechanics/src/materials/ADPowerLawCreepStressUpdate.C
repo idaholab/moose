@@ -68,6 +68,14 @@ ADPowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stre
   return creep_rate * _dt - scalar;
 }
 
+Real
+ADPowerLawCreepStressUpdate::computeCreepRate(const ADReal & effective_trial_stress)
+{
+  const ADReal creep_rate =
+      _coefficient * std::pow(effective_trial_stress, _n_exponent) * _exponential * _exp_time;
+  return MetaPhysicL::raw_value(creep_rate);
+}
+
 ADReal
 ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_stress,
                                                const ADReal & scalar)
@@ -79,24 +87,44 @@ ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_st
   return creep_rate_derivative * _dt - 1.0;
 }
 
-ADReal
+Real
 ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & stress,
     const ADMaterialProperty<RankTwoTensor> & strain_rate,
     const bool is_incremental,
     const MaterialProperty<RankTwoTensor> & strain_rate_old)
 {
+  // Not incremental has been "verified". It could also be computed through von Mises stress
   if (!is_incremental)
   {
     if (_n_exponent <= 1)
       return 0.0;
 
     Real creep_factor = _n_exponent / (_n_exponent + 1);
-
-    return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+    return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
   }
   else
-    return stress[_qp].doubleContraction((strain_rate_old)[_qp] - (strain_rate)[_qp]);
+  {
+    // Here we do sigma*ecdot - int_{0}^{sigma} (ecdot)d sigma
+    // Compute von Mises stress as a scalar
+    // Create function to perform integration
+    ADRankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
+
+    // compute the effective trial stress
+    ADReal dev_trial_stress_squared =
+        deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+    Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
+    Real first = von_mises_stress * computeCreepRate(von_mises_stress);
+
+    Real tolerance = 1.0e-12;
+    std::size_t max_h_number = 200;
+    Real second = 0.0;
+
+    if (von_mises_stress > 1.0e-6)
+      second = trapezoidalRule(0, von_mises_stress, tolerance, max_h_number);
+
+    return first - second;
+  }
 }
 
 bool

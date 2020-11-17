@@ -33,12 +33,19 @@ protected:
                                        const ADRankFourTensor & elasticity_tensor) override;
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
+  virtual Real computeCreepStrainRate(const ADReal & effective_trial_stress);
 
   virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
                                    const ADReal & /*scalar*/) override
   {
     return _derivative;
   }
+
+  virtual Real computeStrainEnergyRateDensity(
+      const ADMaterialProperty<RankTwoTensor> & /*stress*/,
+      const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/,
+      const bool /* is_incremental*/,
+      const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/) override;
 
   virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
   virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;

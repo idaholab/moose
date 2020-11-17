@@ -63,8 +63,8 @@ private:
   /// The user supplied list of inelastic models to compute the strain energy release rate
   std::vector<GenericRadialReturnCreepStressUpdateBase<is_ad> *> _inelastic_models;
 
-  /// Whether we compute the strain energy rate density incrementally
-  const bool _is_incremental;
+  /// Whether we compute the strain energy rate density numerically
+  const bool _is_numerical;
 };
 
 typedef StrainEnergyRateDensityTempl<false> StrainEnergyRateDensity;
