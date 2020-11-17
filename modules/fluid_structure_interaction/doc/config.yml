@@ -15,8 +15,6 @@ Extensions:
         home: /modules/fluid_structure_interaction
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fluid_structure_interaction
-        hide:
-            framework: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include
