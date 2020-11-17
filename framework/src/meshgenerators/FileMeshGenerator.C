@@ -9,6 +9,7 @@
 
 #include "FileMeshGenerator.h"
 #include "CastUniquePointer.h"
+#include "RestartableDataIO.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -80,7 +81,22 @@ FileMeshGenerator::generate()
     if (_pars.isParamSetByUser("use_for_exodus_restart"))
       mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
 
-    mesh->read(_file_name);
+    // to support LATEST word for loading checkpoint files
+    std::string file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
+
+    mesh->read(file_name);
+
+    // we also read declared mesh meta data here if there is meta data file
+    RestartableDataIO restartable(_app);
+    std::string fname = file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
+    if (MooseUtils::pathExists(fname))
+    {
+      restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+      // get reference to mesh meta data (created by MooseApp)
+      auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+      if (restartable.readRestartableDataHeaderFromFile(fname, false))
+        restartable.readRestartableData(meta_data, DataNames());
+    }
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

@@ -341,6 +341,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3)),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
+    _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
@@ -1655,6 +1656,8 @@ MooseApp::executeMeshGenerators()
   if (_mesh_generators.empty())
     return;
 
+  _executing_mesh_generators = true;
+
   createMeshGeneratorOrder();
 
   // set the final generator name
@@ -1699,9 +1702,14 @@ MooseApp::executeMeshGenerators()
       // Once we hit the generator we want, we'll terminate the loops (this might be the last
       // iteration anyway)
       if (_final_generator_name == name)
+      {
+        _executing_mesh_generators = false;
         return;
+      }
     }
   }
+
+  _executing_mesh_generators = false;
 }
 
 void
@@ -2187,7 +2195,7 @@ MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
 void
 MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix)
 {
-  if (suffix.empty())
+  if (!suffix.empty())
     std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
   suffix.insert(0, "_");
   _restartable_meta_data.emplace(

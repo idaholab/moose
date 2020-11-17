@@ -190,3 +190,11 @@ Based on this ID, one can proceed with any particular operations, for example, c
 
 IDs can be assigned to the mesh elements with `MeshGenerators` in a similar way to assigning subdomain IDs.
 We note that the element IDs are part of the mesh and will be initialized properly for restart/recover.
+
+## Mesh meta data
+
+Mesh generators can declare mesh meta data, which can be obtained later in Actions or in UserObjects.
+Mesh meta data can only be declared in the constructors of mesh generators so that they can be restarted without re-running mesh generators.
+Mesh meta data can be useful for setting up specific postprocessors, kernels, etc. that require certain geometry information.
+Mesh meta data are not possible or extremely hard to be derived directly from libMesh mesh object.
+A simple example of mesh meta data is the `num_elements_x` provided by [GeneratedMeshGenerator](GeneratedMeshGenerator.md), which can be used as an indicator for a mesh regular in x direction.
