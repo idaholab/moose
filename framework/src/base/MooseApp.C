@@ -348,25 +348,25 @@ MooseApp::MooseApp(InputParameters parameters)
     mooseError("Can not do CPU and heap profiling together");
 
   // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
-  // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
-  if (std::getenv("MOOSE_PROFILE_BASE") || std::getenv("MOOSE_HEAP_BASE"))
+  if (std::getenv("MOOSE_PROFILE_BASE"))
   {
     static std::string profile_file =
         std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
 
-    // CPU profiling
-    if (std::getenv("MOOSE_PROFILE_BASE"))
-    {
-      _cpu_profiling = true;
-      ProfilerStart(profile_file.c_str());
-    }
-    // Heap profiling
-    else
-    {
-      _heap_profiling = true;
-      HeapProfilerStart(profile_file.c_str());
-    }
+    _cpu_profiling = true;
+    ProfilerStart(profile_file.c_str());
   }
+
+  // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
+  if (std::getenv("MOOSE_HEAP_BASE"))
+  {
+    static std::string profile_file =
+        std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank()) + ".prof";
+
+    _heap_profiling = true;
+    HeapProfilerStart(profile_file.c_str());
+  }
+
 #endif
 
   Registry::addKnownLabel(_type);
