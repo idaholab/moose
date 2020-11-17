@@ -28,5 +28,5 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  Real _rate;
+  const Real & _rate;
 };
