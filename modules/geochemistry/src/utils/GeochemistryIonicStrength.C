@@ -30,17 +30,15 @@ GeochemistryIonicStrength::ionicStrength(const ModelGeochemicalDatabase & mgd,
   const unsigned num_basis = mgd.basis_species_charge.size();
   const unsigned num_eqm = mgd.eqm_species_charge.size();
   const unsigned num_kin = mgd.kin_species_charge.size();
-  mooseAssert(num_basis == basis_species_molality.size(),
-              "Ionic strength calculation: Number of basis species in mgd not equal to the size of "
-              "basis_species_molality");
-  mooseAssert(
-      num_eqm == eqm_species_molality.size(),
-      "Ionic strength calculation: Number of equilibrium species in mgd not equal to the size of "
-      "eqm_species_molality");
-  mooseAssert(
-      num_kin == kin_species_molality.size(),
-      "Ionic strength calculation: Number of kinetic species in mgd not equal to the size of "
-      "kin_species_molality");
+  if (num_basis != basis_species_molality.size())
+    mooseError("Ionic strength calculation: Number of basis species in mgd not equal to the size "
+               "of basis_species_molality");
+  if (num_eqm != eqm_species_molality.size())
+    mooseError("Ionic strength calculation: Number of equilibrium species in mgd not equal to the "
+               "size of eqm_species_molality");
+  if (num_kin != kin_species_molality.size())
+    mooseError("Ionic strength calculation: Number of kinetic species in mgd not equal to the size "
+               "of kin_species_molality");
 
   Real ionic_strength = 0.0;
   for (unsigned i = 0; i < num_basis; ++i)
@@ -69,15 +67,15 @@ GeochemistryIonicStrength::stoichiometricIonicStrength(
   const unsigned num_basis = mgd.basis_species_charge.size();
   const unsigned num_eqm = mgd.eqm_species_charge.size();
   const unsigned num_kin = mgd.kin_species_charge.size();
-  mooseAssert(num_basis == basis_species_molality.size(),
-              "Stoichiometric ionic strength calculation: Number of basis species in mgd not equal "
-              "to the size of basis_species_molality");
-  mooseAssert(num_eqm == eqm_species_molality.size(),
-              "Stoichiometric ionic strength calculation: Number of equilibrium species in mgd not "
-              "equal to the size of eqm_species_molality");
-  mooseAssert(num_kin == kin_species_molality.size(),
-              "Stoichiometric ionic strength calculation: Number of kinetic species in mgd not "
-              "equal to the size of kin_species_molality");
+  if (num_basis != basis_species_molality.size())
+    mooseError("Stoichiometric ionic strength calculation: Number of basis species in mgd not "
+               "equal to the size of basis_species_molality");
+  if (num_eqm != eqm_species_molality.size())
+    mooseError("Stoichiometric ionic strength calculation: Number of equilibrium species in mgd "
+               "not equal to the size of eqm_species_molality");
+  if (num_kin != kin_species_molality.size())
+    mooseError("Stoichiometric ionic strength calculation: Number of kinetic species in mgd not "
+               "equal to the size of kin_species_molality");
 
   Real ionic_strength = 0.0;
   if (_use_only_Cl_molality)
