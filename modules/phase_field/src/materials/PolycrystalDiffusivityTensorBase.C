@@ -29,7 +29,8 @@ PolycrystalDiffusivityTensorBase::validParams()
   params.addRequiredParam<Real>("D0", "Diffusion prefactor for vacancies in m^2/s");
   params.addRequiredParam<Real>("Em", "Vacancy migration energy in eV");
   params.addRequiredCoupledVar("c", "Vacancy phase variable");
-  params.addParam<std::string>("D_name", "D", "Name for the diffusivity material property");
+  params.addParam<std::string>(
+      "diffusivity_name", "D", "Name for the diffusivity material property");
   params.addParam<Real>("surfindex", 1.0, "Surface diffusion index weight");
   params.addParam<Real>("gbindex", 1.0, "Grain boundary diffusion index weight");
   params.addParam<Real>("bulkindex", 1.0, "Bulk diffusion index weight");
@@ -43,9 +44,9 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),
     _c_name(getVar("c", 0)->name()),
-    _D_name(getParam<std::string>("D_name")),
-    _D(declareProperty<RealTensorValue>(_D_name)),
-    _dDdc(declarePropertyDerivative<RealTensorValue>(_D_name, _c_name)),
+    _diffusivity_name(getParam<std::string>("diffusivity_name")),
+    _D(declareProperty<RealTensorValue>(_diffusivity_name)),
+    _dDdc(declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
     _D0(getParam<Real>("D0")),
     _Em(getParam<Real>("Em")),
     _s_index(getParam<Real>("surfindex")),

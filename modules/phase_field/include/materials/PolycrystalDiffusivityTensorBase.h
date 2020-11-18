@@ -37,7 +37,7 @@ protected:
   const VariableGradient & _grad_c;
   VariableName _c_name;
 
-  std::string _D_name;
+  std::string _diffusivity_name;
   MaterialProperty<RealTensorValue> & _D;
   MaterialProperty<RealTensorValue> & _dDdc;
 
