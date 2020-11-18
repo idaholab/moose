@@ -59,8 +59,8 @@ MortarConstraintBase::validParams()
       "primary_variable",
       "Primal variable on primary surface. If this parameter is not provided then the primary "
       "variable will be initialized to the secondary variable");
-  // This parameter has been added. We add it again to update the doc string.
-  params.addParam<NonlinearVariableName>(
+  params.makeParamNotRequired<NonlinearVariableName>("variable");
+  params.setDocString(
       "variable",
       "The name of the lagrange multiplier variable that this constraint is applied to. This "
       "parameter may not be supplied in the case of using penalty methods for example");
@@ -78,7 +78,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
     MooseVariableInterface<Real>(this,
                                  true,
-                                 "variable",
+                                 isParamValid("variable") ? "variable" : "secondary_variable",
                                  Moose::VarKindType::VAR_NONLINEAR,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -104,6 +104,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.mortarCoordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
+    _q_point(_assembly.qPointsMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
     _test_primary(_primary_var.phiFaceNeighbor()),
