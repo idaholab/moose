@@ -30,6 +30,29 @@ public:
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
+#ifdef LIBMESH_HAVE_PETSC
+  // Routine to perform hyperparameter tuning
+  PetscErrorCode hyperparamTuning();
+
+  PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
+
+  // Wrapper for PETSc function callback
+  static PetscErrorCode
+  FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
+
+  // Computes Gradient of the loss function
+  void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
+
+  // Sets bounds for hyperparameters
+  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                             libMesh::PetscVector<Number> & theta_u) const;
+  // write stored hyperparam_vecs to PetscVec
+  void mapToVec(libMesh::PetscVector<Number> & theta) const;
+
+  // loads PetscVec to stored hyperparam_vecs
+  void vecToMap(libMesh::PetscVector<Number> & theta);
+#endif
+
 private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler = nullptr;
@@ -62,7 +85,7 @@ private:
   RealEigenMatrix & _K_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
+  Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
@@ -73,12 +96,37 @@ private:
   /// Type of covariance function used for this surrogate
   std::string & _covar_type;
 
+  /// Covariance function object
+  CovarianceFunctionBase * _covariance_function = nullptr;
+
+#ifdef LIBMESH_HAVE_PETSC
+  /// Flag to toggle hyperparameter tuning/optimization
+  bool _do_tuning;
+
+  /// Command line options to feed to TAO optimization
+  std::string _tao_options;
+
+  /// Flag to toggle printing of TAO output
+  bool _show_tao;
+
+  /// Tao Communicator
+  Parallel::Communicator _tao_comm;
+
+  /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
+  std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
+
+  /// Number of tunable hyperparameters
+  unsigned int _num_tunable;
+#endif
+
   /// Scalar hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, Real> & _hyperparam_map;
 
   /// Vector hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function = nullptr;
 };
+
+template <>
+void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+template <>
+void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);

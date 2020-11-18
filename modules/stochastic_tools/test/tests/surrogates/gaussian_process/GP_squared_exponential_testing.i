@@ -25,7 +25,7 @@
 
 [VectorPostprocessors]
   [samp_avg]
-    type = GaussianProcessTester
+    type = EvaluateGaussianProcess
     model = GP_avg
     sampler = test_sample
     output_samples = true

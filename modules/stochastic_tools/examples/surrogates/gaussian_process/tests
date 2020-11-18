@@ -1,0 +1,66 @@
+[Tests]
+  issues = "#15482"
+  design = 'Surrogates/index.md'
+
+  [1D_HC_avg]
+    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the 1D exampl"
+    [untuned]
+      type = CSVDiff
+      input = gaussian_process_uniform_1D.i
+      csvdiff = 'gaussian_process_uniform_1D_out_cart_avg_0002.csv'
+      allow_test_objects = true
+      detail = "using fixed hyperparameters, "
+    []
+    [tuned]
+      type = CSVDiff
+      input = gaussian_process_uniform_1D_tuned.i
+      csvdiff = 'gaussian_process_uniform_1D_tuned_out_cart_avg_0002.csv'
+      allow_test_objects = true
+      petsc_version = '>=3.10.0'
+      detail = "and tuned hyperparameters."
+    []
+  []
+  [2D_HC_avg]
+    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the 2D exampl"
+    [untuned]
+      type = CSVDiff
+      input = gaussian_process_uniform_2D.i
+      csvdiff = 'gaussian_process_uniform_2D_out_cart_avg_0002.csv'
+      allow_test_objects = true
+      method = opt
+      detail = "using fixed hyperparameters, "
+    []
+    [tuned]
+      type = CSVDiff
+      input = gaussian_process_uniform_2D_tuned.i
+      csvdiff = 'gaussian_process_uniform_2D_tuned_out_cart_avg_0002.csv'
+      allow_test_objects = true
+      method = opt
+      petsc_version = '>=3.10.0'
+      detail = "and tuned hyperparameters."
+    []
+  []
+  [4D_HC_avg]
+    requirement = "The sytem shall test syntax for training gaussian process surrogate models for the full 4D example "
+    [train]
+      type = CheckFiles
+      input = GP_normal_mc.i
+      check_files = 'GP_training_normal_GP_avg.rd'
+      heavy = true
+      allow_test_objects = true
+      method = opt
+      petsc_version = '>=3.10.0'
+      detail = "by first training a GP surrogate "
+    []
+    [test]
+      type = CSVDiff
+      input = GP_normal.i
+      csvdiff = 'GP_normal_out_GP_avg_hyperparams_0001.csv'
+      heavy = true
+      allow_test_objects = true
+      method = opt
+      prereq = 4D_HC_avg/train
+      detail = "then evaluating the surrogate."
+    []
+  []
+[]
