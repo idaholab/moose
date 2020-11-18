@@ -269,6 +269,9 @@ GaussianProcessTrainer::hyperparamTuning()
 
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
+  ierr = TaoDestroy(&tao);
+  CHKERRQ(ierr);
+
   return 0;
 }
 
