@@ -17,12 +17,6 @@ advected_interp_method = 'average'
     nx = 32
     ny = 32
   []
-  [pin]
-    type = ExtraNodesetGenerator
-    input = gen
-    new_boundary = 'pin'
-    nodes = '0'
-  []
 []
 
 [Problem]
@@ -49,6 +43,10 @@ advected_interp_method = 'average'
     order = CONSTANT
     family = MONOMIAL
     fv = true
+  []
+  [lambda]
+    family = SCALAR
+    order = FIRST
   []
 []
 
@@ -82,6 +80,11 @@ advected_interp_method = 'average'
     pressure = pressure
     mu = ${mu}
     rho = ${rho}
+  []
+  [mean_zero_pressure]
+    type = FVScalarLagrangeMultiplier
+    variable = pressure
+    lambda = lambda
   []
 
   [u_advection]
@@ -150,15 +153,6 @@ advected_interp_method = 'average'
     variable = T
     advected_interp_method = ${advected_interp_method}
     advected_quantity = "rho_cp_temp"
-  []
-[]
-
-[BCs]
-  [pin]
-    type = FVPressurePin
-    variable = pressure
-    boundary = 'pin'
-    value = 0
   []
 []
 

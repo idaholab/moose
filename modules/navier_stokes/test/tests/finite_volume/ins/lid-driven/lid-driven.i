@@ -18,12 +18,6 @@ rho=1
     nx = 20
     ny = 20
   []
-  [pin]
-    type = ExtraNodesetGenerator
-    input = gen
-    new_boundary = 'pin'
-    nodes = '0'
-  []
 []
 
 [Problem]
@@ -45,6 +39,10 @@ rho=1
     order = CONSTANT
     family = MONOMIAL
     fv = true
+  []
+  [lambda]
+    family = SCALAR
+    order = FIRST
   []
 []
 
@@ -75,6 +73,11 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
+  []
+  [mean_zero_pressure]
+    type = FVScalarLagrangeMultiplier
+    variable = pressure
+    lambda = lambda
   []
 
   [u_advection]
@@ -124,15 +127,6 @@ rho=1
   []
 []
 
-[BCs]
-  [pin]
-    type = FVPressurePin
-    variable = pressure
-    boundary = 'pin'
-    value = 0
-  []
-[]
-
 [FVBCs]
   [top_x]
     type = FVDirichletBC
@@ -171,6 +165,12 @@ rho=1
   []
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
 
 [Executioner]
   type = Steady

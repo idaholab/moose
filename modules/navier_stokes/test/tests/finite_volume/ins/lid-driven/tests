@@ -11,9 +11,9 @@
   [nonsingular]
     type = 'RunApp'
     input = 'lid-driven.i'
-    cli_args = 'Mesh/gen/nx=4 Mesh/gen/ny=4 -pc_type svd -pc_svd_monitor'
-    expect_out = '0 of 48 singular values'
-    absent_out = '\s+[1-9]+[0-9]* of 48 singular values'
+    cli_args = 'Mesh/gen/nx=4 Mesh/gen/ny=4 Outputs/exodus=false -pc_type svd -pc_svd_monitor'
+    expect_out = '0 of 49 singular values'
+    absent_out = '\s+[1-9]+[0-9]* of 49 singular values'
     requirement = 'The system shall be able to solve an incompressible Navier-Stokes problem with dirichlet boundary conditions for all the normal components of velocity, using the finite volume method, and have a nonsingular system matrix.'
     ad_indexing_type = 'global'
   []
@@ -24,6 +24,8 @@
     requirement = 'The system shall be able to compute a perfect Jacobian when solving a lid-driven incompressible Navier-Stokes problem with the finite volume method.'
     run_sim = True
     ad_indexing_type = 'global'
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
   []
   [with-temp]
     type = 'Exodiff'
