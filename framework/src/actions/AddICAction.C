@@ -26,7 +26,7 @@ AddICAction::validParams()
   // we implicitly already know the variable name from this nesting and users
   // don't need to specify it for us with the parameter.  So we say here that
   // the variable param is provided by the action.
-  params.set<std::vector<std::string>>("__provides_to_subobjects__") = {"variable"};
+  params.set<std::vector<std::string>>("_object_params_set_by_action") = {"variable"};
 
   return params;
 }
