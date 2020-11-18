@@ -22,7 +22,7 @@ FVMomPressure::validParams()
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
-                             "The component of the momentum equation that this BC applies to.");
+                             "The component of the momentum equation that this kernel applies to.");
   params.set<MaterialPropertyName>("advected_quantity") = NS::pressure;
   return params;
 }

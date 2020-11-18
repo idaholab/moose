@@ -20,7 +20,7 @@ FVEnergyTimeDerivative::validParams()
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-  params.addParam<MaterialPropertyName>("cp_name", "cp", "the name of the specific heat capacity");
+  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
   return params;
 }
 

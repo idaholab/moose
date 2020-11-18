@@ -42,7 +42,7 @@ forced to execute along a boundary by specifying
 `FVFluxKernel` on a boundary when no Dirichlet BC is present, e.g. with an
 implicit application of the zero normal-gradient condition, is typically identical to
 applying a corresponding `FVFluxBC` because the latter only has access to the
-cell center value abutting the boundary. By directly using a cell-center value
+cell center value adjacent to the boundary. By directly using a cell-center value
 in a `FVFluxBC` (see for example
 [`FVConstantScalarOutflowBC`](/FVConstantScalarOutflowBC.md)), you are implicitly applying
 the same zero normal-gradient condition. In the future (see

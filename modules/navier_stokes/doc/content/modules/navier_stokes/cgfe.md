@@ -69,7 +69,7 @@ should be equal to the volumetric outflow rate. The inflow is equal to
 \end{equation}
 
 where $(-4 * r^2 + 1)$ represents the inlet function for the normal velocity
-component at the inlet. Below is a summary of the voluemtric outflow for different INS
+component at the inlet. Below is a summary of the volumetric outflow for different INS
 formulations:
 
 | Formulation | Outflow |

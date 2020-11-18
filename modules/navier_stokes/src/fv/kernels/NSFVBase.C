@@ -34,8 +34,8 @@ NSFVBase::validParams()
       "The interpolation to use for the velocity. Options are "
       "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
 
-  params.addParam<Real>("mu", 1, "The viscosity");
-  params.addParam<Real>("rho", 1, "The density");
+  params.addRequiredParam<Real>("mu", "The viscosity");
+  params.addRequiredParam<Real>("rho", "The density");
   return params;
 }
 
@@ -64,8 +64,9 @@ NSFVBase::NSFVBase(const InputParameters & params)
     mooseError("the u velocity must be a finite volume variable.");
 
   if (_nsfv_subproblem.mesh().dimension() >= 2 && !_v_var)
-    mooseError("In two-dimensions, the v velocity must be supplied and it must be a finite volume "
-               "variable.");
+    mooseError(
+        "In two or more dimensions, the v velocity must be supplied and it must be a finite volume "
+        "variable.");
 
   if (_nsfv_subproblem.mesh().dimension() >= 3 && !params.isParamValid("w"))
     mooseError("In three-dimensions, the w velocity must be supplied and it must be a finite "
