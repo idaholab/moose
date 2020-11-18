@@ -609,7 +609,13 @@ ADLAROMANCEStressUpdateBase::computeStrainEnergyRateDensity(
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
 
-  Real first = von_mises_stress * computeCreepStrainRate(von_mises_stress);
+  ADRankTwoTensor strain_rate_dev = strain_rate[_qp].deviatoric();
+  ADReal strain_rate_dev_sq = strain_rate_dev.doubleContraction(strain_rate_dev);
+  Real strain_rate_m = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * strain_rate_dev_sq));
+
+  // Real first = von_mises_stress * computeCreepStrainRate(von_mises_stress);
+
+  Real first = von_mises_stress * strain_rate_m;
   return first;
 }
 
