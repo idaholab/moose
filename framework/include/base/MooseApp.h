@@ -1084,7 +1084,11 @@ private:
   /// longer accessible
   bool _popped_final_mesh_generator;
 
-  bool _profiling = false;
+  /// CPU profiling
+  bool _cpu_profiling = false;
+
+  /// Memory profiling
+  bool _heap_profiling = false;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
