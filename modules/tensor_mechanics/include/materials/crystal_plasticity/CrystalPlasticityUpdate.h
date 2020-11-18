@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class CrystalPlasticityUpdate;
 
 /**
  * CrystalPlasticityUpdate uses the multiplicative decomposition of the
