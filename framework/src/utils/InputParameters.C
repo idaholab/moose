@@ -479,6 +479,11 @@ InputParameters::checkParams(const std::string & parsing_syntax)
   {
     if (!isParamValid(it.first) && isParamRequired(it.first))
     {
+      // check if an old, deprecated name exists for this parameter that may be specified
+      auto oit = _new_to_deprecated_coupled_vars.find(it.first);
+      if (oit != _new_to_deprecated_coupled_vars.end() && isParamValid(oit->second))
+        continue;
+
       oss << blockLocation() << ": missing required parameter '" << parampath + "/" + it.first
           << "'\n";
       oss << "\tDoc String: \"" + getDocString(it.first) + "\"" << std::endl;

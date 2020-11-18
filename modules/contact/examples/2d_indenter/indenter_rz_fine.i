@@ -120,7 +120,7 @@
     secondary = '4'
     primary = 6
     variable = frictionless_normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
     tangential_tolerance = 0.01
