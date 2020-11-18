@@ -959,7 +959,7 @@ public:
    */
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0)
   {
-    _jacobian_block_used[tag][ivar][jvar] = 1;
+    jacobianBlockUsed(tag, ivar, jvar, true);
     return _sub_Kee[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
@@ -968,7 +968,7 @@ public:
    */
   DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar, TagID tag = 0)
   {
-    _jacobian_block_nonlocal_used[tag][ivar][jvar] = 1;
+    jacobianBlockNonlocalUsed(tag, ivar, jvar, true);
     return _sub_Keg[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
@@ -1864,6 +1864,78 @@ private:
    */
   void buildVectorLowerDFE(FEType type) const;
   void buildVectorDualLowerDFE(FEType type) const;
+
+  /**
+   * Sets whether or not Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not neighbor Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockNeighborUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_neighbor_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling neighbor Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockNeighborUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_neighbor_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not lower Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockLowerUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_lower_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling lower Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockLowerUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_lower_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
+
+  /**
+   * Sets whether or not nonlocal Jacobian coupling between \p ivar and \p jvar is used
+   * to the value \p used
+   */
+  void jacobianBlockNonlocalUsed(TagID tag, unsigned int ivar, unsigned int jvar, bool used)
+  {
+    _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar] = used;
+  }
+
+  /**
+   * Return a flag to indicate if a particular coupling nonlocal Jacobian block
+   * between \p ivar and \p jvar is used
+   */
+  char jacobianBlockNonlocalUsed(TagID tag, unsigned int ivar, unsigned int jvar) const
+  {
+    return _jacobian_block_nonlocal_used[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
+  }
 
   SystemBase & _sys;
   SubProblem & _subproblem;
