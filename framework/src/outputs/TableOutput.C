@@ -132,31 +132,12 @@ TableOutput::outputReporters()
     outputReporter<float>(r_name);
     outputReporter<long double>(r_name);
     outputReporter<char>(r_name);
-    outputReporter<char *>(r_name);
     outputReporter<std::string>(r_name);
 
-    // Reals need to be last because of pps
-    if (!hasPostprocessorByName(r_name.getObjectName()))
+    // Need to check for reals because PPs and VPPs might have already been outputted
+    if (!hasPostprocessorByName(r_name.getObjectName()) &&
+        vpps.find(r_name.getObjectName()) == vpps.end())
       outputReporter<Real>(r_name);
-
-    outputVectorReporter<bool>(r_name);
-    outputVectorReporter<unsigned short int>(r_name);
-    outputVectorReporter<unsigned int>(r_name);
-    outputVectorReporter<unsigned long int>(r_name);
-    outputVectorReporter<unsigned long long int>(r_name);
-    outputVectorReporter<short int>(r_name);
-    outputVectorReporter<int>(r_name);
-    outputVectorReporter<long int>(r_name);
-    outputVectorReporter<long long int>(r_name);
-    outputVectorReporter<float>(r_name);
-    outputVectorReporter<long double>(r_name);
-    outputVectorReporter<char>(r_name);
-    outputVectorReporter<char *>(r_name);
-    outputVectorReporter<std::string>(r_name);
-
-    // Reals need to be last because of vpps
-    if (vpps.find(r_name.getObjectName()) == vpps.end())
-      outputVectorReporter<Real>(r_name);
   }
 }
 

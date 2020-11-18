@@ -641,13 +641,6 @@ FormattedTable::sortColumns()
   }
 }
 
-template <>
-void
-TableValue<bool>::print(std::ostream & os) const
-{
-  os << (this->_value ? "True" : "False");
-}
-
 std::ostream &
 operator<<(std::ostream & os, const TableValueBase & value)
 {

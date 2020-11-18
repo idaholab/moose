@@ -41,32 +41,14 @@ public:
   virtual ~TableValueBase() = default;
 
   template <typename T>
-  bool isSupportedType() const
+  static constexpr bool isSupportedType()
   {
-    return std::find(_supported_types.begin(), _supported_types.end(), typeid(T).name()) !=
-           _supported_types.end();
+    return std::is_fundamental<T>::value || std::is_same<T, std::string>::value;
   }
 
   virtual void print(std::ostream & os) const = 0;
 
   virtual void store(std::ostream & stream, void * context) = 0;
-
-private:
-  const std::vector<std::string> _supported_types = {typeid(bool).name(),
-                                                     typeid(unsigned short int).name(),
-                                                     typeid(unsigned int).name(),
-                                                     typeid(unsigned long int).name(),
-                                                     typeid(unsigned long long int).name(),
-                                                     typeid(short int).name(),
-                                                     typeid(int).name(),
-                                                     typeid(long int).name(),
-                                                     typeid(long long int).name(),
-                                                     typeid(float).name(),
-                                                     typeid(double).name(),
-                                                     typeid(long double).name(),
-                                                     typeid(char).name(),
-                                                     typeid(char *).name(),
-                                                     typeid(std::string).name()};
 };
 
 std::ostream & operator<<(std::ostream & os, const TableValueBase & value);
@@ -86,7 +68,7 @@ public:
   const T & get() const { return _value; }
   T & set() { return _value; }
 
-  virtual void print(std::ostream & os) const override;
+  virtual void print(std::ostream & os) const override { os << this->_value; };
 
   virtual void store(std::ostream & stream, void * context) override;
   static void
@@ -96,11 +78,11 @@ private:
   T _value;
 };
 
-template <typename T>
-void
-TableValue<T>::print(std::ostream & os) const
+template <>
+inline void
+TableValue<bool>::print(std::ostream & os) const
 {
-  os << this->_value;
+  os << (this->_value ? "True" : "False");
 }
 
 template <typename T>

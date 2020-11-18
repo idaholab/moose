@@ -62,8 +62,6 @@ protected:
   virtual void outputReporters() override;
   template <typename T>
   void outputReporter(const ReporterName & name);
-  template <typename T>
-  void outputVectorReporter(const ReporterName & name);
 
   /**
    * Populates the tables with VectorPostprocessor values
@@ -105,6 +103,8 @@ template <typename T>
 void
 TableOutput::outputReporter(const ReporterName & name)
 {
+  static_assert(TableValueBase::isSupportedType<T>(), "Unsupported table value type.");
+
   if (_reporter_data.hasReporterValue<T>(name))
   {
     if (_reporter_table.empty() ||
@@ -119,13 +119,7 @@ TableOutput::outputReporter(const ReporterName & name)
     _reporter_table.addData<T>(name.getCombinedName(), value);
     _all_data_table.addData<T>(name.getCombinedName(), value);
   }
-}
-
-template <typename T>
-void
-TableOutput::outputVectorReporter(const ReporterName & name)
-{
-  if (_reporter_data.hasReporterValue<std::vector<T>>(name))
+  else if (_reporter_data.hasReporterValue<std::vector<T>>(name))
   {
     const std::string & obj_name = name.getObjectName();
     const std::string & val_name = name.getValueName();
