@@ -12,7 +12,12 @@ a feel for INSFV by looking at some tests.
 This example solves the INS equations for mass, momentum, and energy in a closed
 cavity. Because there are no inlet or outlet boundaries, one pressure degree of
 freedom must be constrained in order to eliminate the nullspace. This is done
-using the [`FVPressurePin`](/FVPressurePin.md) object.
+using the `FVScalarLagrangeMultiplier` object which implements the
+mean-zero pressure approach. The finite element theory of the mean-zero approach
+is described
+[here](https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf). The
+finite volume implementation is completed by simply substituting unity for the
+test functions.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/lid-driven-with-energy.i
 
