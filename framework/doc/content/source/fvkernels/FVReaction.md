@@ -2,9 +2,9 @@
 
 ## Description
 
-`FVReaction` implements a simple first-order reaction term with unity rate
-coefficient where the rate of reaction is directly proportional to the governing
-variable $u$.
+`FVReaction` implements a simple first-order reaction term where the rate of
+reaction is directly proportional $\lambda u$ where $\lambda$ is the rate
+coefficient and $u$ is the governing variable.
 
 `FVReaction` can be used to help set-up variations of advection-diffusion-reaction
 equations.

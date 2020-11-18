@@ -18,20 +18,25 @@ Reaction::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
-      "Implements a simple consuming reaction term with weak form $(\\psi_i, u_h)$.");
+      "Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.");
+  params.addParam<Real>(
+      "rate", 1.0, "The $(\\lambda)$ multiplier, the relative amount consumed per unit time.");
   return params;
 }
 
-Reaction::Reaction(const InputParameters & parameters) : Kernel(parameters) {}
+Reaction::Reaction(const InputParameters & parameters)
+  : Kernel(parameters), _rate(getParam<Real>("rate"))
+{
+}
 
 Real
 Reaction::computeQpResidual()
 {
-  return _test[_i][_qp] * _u[_qp];
+  return _test[_i][_qp] * _rate * _u[_qp];
 }
 
 Real
 Reaction::computeQpJacobian()
 {
-  return _test[_i][_qp] * _phi[_j][_qp];
+  return _test[_i][_qp] * _rate * _phi[_j][_qp];
 }

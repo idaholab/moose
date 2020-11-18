@@ -19,4 +19,6 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+
+  const Real & _rate;
 };
