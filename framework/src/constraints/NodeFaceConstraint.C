@@ -46,7 +46,6 @@ NodeFaceConstraint::validParams()
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
   params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
-  params.addDeprecatedCoupledVar("master_variable", "primary_variable", "September 1st, 2020");
 
   return params;
 }
