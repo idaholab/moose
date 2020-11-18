@@ -4,7 +4,7 @@ The PorousFlow module is designed to enable simulations with any number of fluid
 components in any number of fluid phases. Several specialized flow models are available
 in PorousFlow to simulate some common scenarios.
 
-General formulations are provided for immiscible single and multiphase models:
+General formulations are provided for immiscible single and multiphase models, including hysteresis:
 
 - [Single phase](singlephase.md)
 - [Multiphase](multiphase.md)

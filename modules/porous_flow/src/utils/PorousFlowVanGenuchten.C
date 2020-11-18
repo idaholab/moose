@@ -255,7 +255,10 @@ capillaryPressureHys(Real sl,
   else if (seff <= 0.0)
     pc = low_ext.Pc; // no sensible low extension defined
   else
-    pc = (1.0 / alpha) * std::pow(std::pow(seff, n / (1.0 - n)) - 1.0, 1.0 / n);
+  {
+    const Real a = std::pow(seff, n / (1.0 - n)) - 1.0;
+    pc = (1.0 / alpha) * std::pow(a, 1.0 / n);
+  }
   return pc;
 }
 
@@ -311,13 +314,78 @@ dcapillaryPressureHys(Real sl,
     dpc = 0.0; // no sensible low extension defined
   else
   {
+    const Real a = std::pow(seff, n / (1.0 - n)) - 1.0;
     const Real dseff = 1.0 / (1.0 - sgrdel - slmin);
-    const Real dpc_dseff = (1.0 / alpha) *
-                           std::pow(std::pow(seff, n / (1.0 - n)) - 1.0, 1.0 / n - 1.0) *
-                           std::pow(seff, n / (1.0 - n) - 1.0) / (1.0 - n);
+    const Real dpc_dseff = (1.0 / alpha / (1.0 - n)) * std::pow(a, 1.0 / n - 1.0) *
+                           std::pow(seff, n / (1.0 - n) - 1.0);
     dpc = dpc_dseff * dseff;
   }
   return dpc;
+}
+
+Real
+d2capillaryPressureHys(Real sl,
+                       Real slmin,
+                       Real sgrdel,
+                       Real alpha,
+                       Real n,
+                       const LowCapillaryPressureExtension & low_ext,
+                       const HighCapillaryPressureExtension & high_ext)
+{
+  Real d2pc = 0.0;
+  if (sl < low_ext.S) // important for initializing low_ext that this is < and not <=
+  {
+    switch (low_ext.strategy)
+    {
+      case LowCapillaryPressureExtension::QUADRATIC:
+        d2pc = low_ext.dPc / low_ext.S;
+        break;
+      case LowCapillaryPressureExtension::EXPONENTIAL:
+        d2pc = std::pow(low_ext.dPc, 2) / low_ext.Pc *
+               std::exp(low_ext.dPc * (sl - low_ext.S) / low_ext.Pc);
+        break;
+      default:
+        d2pc = 0.0;
+    }
+    return d2pc;
+  }
+  if (sl > high_ext.S) // important for initializing high_ext that this is >, not >=
+  {
+    switch (high_ext.strategy)
+    {
+      case HighCapillaryPressureExtension::POWER:
+      {
+        if (sl >= 1.0)
+          d2pc = 0.0;
+        else
+        {
+          const Real expon = -high_ext.dPc / high_ext.Pc * (1.0 - high_ext.S);
+          d2pc = high_ext.dPc * (1.0 - expon) / (1.0 - high_ext.S) *
+                 std::pow((1.0 - sl) / (1.0 - high_ext.S), expon - 2.0);
+        }
+        break;
+      }
+      default:
+        d2pc = 0.0;
+    }
+    return d2pc;
+  }
+  const Real seff = (sl - slmin) / (1.0 - sgrdel - slmin);
+  if (seff >= 1.0)
+    d2pc = 0.0; // no sensible high extension defined
+  else if (seff <= 0.0)
+    d2pc = 0.0; // no sensible low extension defined
+  else
+  {
+    const Real a = std::pow(seff, n / (1.0 - n)) - 1.0;
+    const Real dseff = 1.0 / (1.0 - sgrdel - slmin);
+    const Real d2pc_dseff =
+        (1.0 / alpha / (1.0 - n)) *
+        (std::pow(a, 1.0 / n - 2.0) * std::pow(seff, 2.0 * (n / (1.0 - n) - 1.0)) +
+         (n / (1.0 - n) - 1.0) * std::pow(a, 1.0 / n - 1.0) * std::pow(seff, n / (1.0 - n) - 2.0));
+    d2pc = d2pc_dseff * dseff * dseff;
+  }
+  return d2pc;
 }
 
 Real
@@ -461,5 +529,84 @@ dsaturationHys(Real pc,
     ds = (1.0 - sgrdel - slmin) * dseff;
   }
   return ds;
+}
+
+Real
+d2saturationHys(Real pc,
+                Real slmin,
+                Real sgrdel,
+                Real alpha,
+                Real n,
+                const LowCapillaryPressureExtension & low_ext,
+                const HighCapillaryPressureExtension & high_ext)
+{
+  if (pc <= 0)
+    return 0.0;
+  Real d2s = 0.0;
+  if (pc > low_ext.Pc) // important for initialization of the low_ext that this is > and not >=
+  {
+    switch (low_ext.strategy)
+    {
+      case LowCapillaryPressureExtension::QUADRATIC:
+      {
+        const Real s2 = low_ext.S * low_ext.S + 2.0 * (pc - low_ext.Pc) * low_ext.S / low_ext.dPc;
+        if (s2 <= 0.0) // this occurs when we're trying to find a saturation on the wetting curve
+                       // defined by sl = sgrDel at pc = Pcd_Del, if this pc is actually impossible
+                       // to achieve on this wetting curve
+          d2s = 0.0;
+        else
+        {
+          const Real ds2 = 2.0 * low_ext.S / low_ext.dPc;
+          d2s = -0.25 * ds2 * ds2 / std::pow(s2, 1.5);
+        }
+        break;
+      }
+      case LowCapillaryPressureExtension::EXPONENTIAL:
+      {
+        const Real s = low_ext.S + std::log(pc / low_ext.Pc) * low_ext.Pc / low_ext.dPc;
+        if (s <= 0.0) // this occurs when we're trying to find a saturation on the
+                      // wetting curve defined by sl = sgrDel at pc = Pcd_Del, if this
+                      // pc is actually impossible to achieve on this wetting curve
+          d2s = 0.0;
+        else
+          d2s = -low_ext.Pc / std::pow(pc, 2.0) / low_ext.dPc;
+        break;
+      }
+      default:
+        d2s = 0.0;
+    }
+    return d2s;
+  }
+  if (pc < high_ext.Pc) // important for initialization of the high_ext that this is < and not <=
+  {
+    switch (high_ext.strategy)
+    {
+      case HighCapillaryPressureExtension::POWER:
+      {
+        const Real expon = -high_ext.dPc / high_ext.Pc * (1.0 - high_ext.S);
+        d2s = -(1.0 - high_ext.S) * (1.0 / expon) * (1.0 / expon - 1.0) /
+              std::pow(high_ext.Pc, 2.0) * std::pow(pc / high_ext.Pc, 1.0 / expon - 2.0);
+        break;
+      }
+      default:
+        d2s = 0.0;
+    }
+    return d2s;
+  }
+  if (pc == std::numeric_limits<Real>::max())
+    d2s = 0.0;
+  else
+  {
+    const Real seffpow = 1.0 + std::pow(pc * alpha, n);
+    const Real dseffpow = n * (seffpow - 1.0) / pc;
+    const Real d2seffpow = (n - 1.0) * dseffpow / pc;
+    const Real seff = std::pow(seffpow, (1.0 - n) / n);
+    const Real dseff = (1.0 - n) / n * seff / seffpow * dseffpow;
+    const Real d2seff =
+        (1.0 - n) / n *
+        (dseff * dseffpow - seff * dseffpow * dseffpow / seffpow + seff * d2seffpow) / seffpow;
+    d2s = (1.0 - sgrdel - slmin) * d2seff;
+  }
+  return d2s;
 }
 }

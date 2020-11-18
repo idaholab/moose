@@ -165,9 +165,9 @@ van Genuchten $m$ | 0.336 |
 van Genuchten turnover | 0.99 |
 
 In each experiment 120 finite elements are used along the length of
-the Caisson.  The modified van-Genuchten relative permeability curve
+the Caisson.  The modified van Genuchten relative permeability curve
 with a "turnover" (set at $S=0.99$) is employed in order to improve
-convergence significantly.  Hydrus also uses a modified van-Genuchten
+convergence significantly.  Hydrus also uses a modified van Genuchten
 curve, although I couldn't find any details on the modification.
 
 In experiment 1, the caisson is initially at saturation 0.303
