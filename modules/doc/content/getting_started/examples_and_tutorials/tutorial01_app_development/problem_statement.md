@@ -40,6 +40,7 @@ The variables shown in [mass], [energy], and [darcy] denote the properties liste
 | $\epsilon$ | Porosity |
 | $k$ | Thermal Conductivity |
 | $\mathbf{K}$ | Permeability Tensor |
+| $\mu$ | Dynamic Viscosity |
 | $p$ | Pressure |
 | $\rho$ | Density |
 | $\bar{g}$ | Gravity Vector |
