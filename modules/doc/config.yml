@@ -136,6 +136,7 @@ Extensions:
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+            fluid_structure_interaction: !include modules/fluid_structure_interaction/doc/sqa_fluid_structure_interaction.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects
