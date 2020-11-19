@@ -37,17 +37,7 @@ ThermalContactAction::validParams()
       "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addParam<BoundaryName>("primary", "The primary surface");
-  params.addParam<BoundaryName>("secondary", "The secondary surface");
-  params.addDeprecatedParam<BoundaryName>(
-      "master",
-      "The primary surface",
-      "The 'master' parameter will be removed on September 1, 2020. "
-      "Please use the 'primary' parameter instead.");
-  params.addDeprecatedParam<BoundaryName>(
-      "slave",
-      "The secondary surface",
-      "The 'slave' parameter will be removed on September 1, 2020. "
-      "Please use the 'secondary' parameter instead.");
+  params.addRequiredParam<BoundaryName>("secondary", "The secondary surface");
   params.addRangeCheckedParam<Real>("tangential_tolerance",
                                     "tangential_tolerance>=0",
                                     "Tangential distance to extend edges of contact surfaces");
@@ -108,35 +98,10 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
     _order(getParam<MooseEnum>("order")),
     _penetration_var_name(_quadrature ? "qpoint_penetration" : "penetration"),
     _gap_value_name("paired_" + getParam<NonlinearVariableName>("variable")),
-    _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable"))
+    _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable")),
+    _primary_name(getParam<BoundaryName>("primary")),
+    _secondary_name(getParam<BoundaryName>("secondary"))
 {
-  bool valid_secondary = false;
-  if (isParamValid("secondary"))
-  {
-    valid_secondary = true;
-    _secondary_name = getParam<BoundaryName>("secondary");
-  }
-  else if (isParamValid("slave"))
-  {
-    valid_secondary = true;
-    _secondary_name = getParam<BoundaryName>("slave");
-  }
-  if (!valid_secondary)
-    mooseError("The 'secondary' input parameter is not set!");
-
-  bool valid_primary = false;
-  if (isParamValid("primary"))
-  {
-    valid_primary = true;
-    _primary_name = getParam<BoundaryName>("primary");
-  }
-  else if (isParamValid("master"))
-  {
-    valid_primary = true;
-    _primary_name = getParam<BoundaryName>("master");
-  }
-  if (!valid_primary)
-    mooseError("The 'primary' input parameter is not set!");
 }
 
 void
@@ -275,13 +240,12 @@ ThermalContactAction::addDiracKernels()
 
   const std::string object_name = "GapHeatPointSourceMaster";
   InputParameters params = _factory.getValidParams(object_name);
-  std::string secondary_name = isParamValid("secondary") ? "secondary" : "slave";
   params.applySpecificParameters(parameters(),
                                  {"tangential_tolerance",
                                   "normal_smoothing_distance",
                                   "normal_smoothing_method",
                                   "order",
-                                  secondary_name,
+                                  "secondary",
                                   "variable"});
   params.set<BoundaryName>("boundary") = _primary_name;
 

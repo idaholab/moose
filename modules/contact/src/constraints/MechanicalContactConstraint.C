@@ -36,11 +36,6 @@ MechanicalContactConstraint::validParams()
 
   params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addParam<BoundaryName>("secondary", "The secondary boundary");
-  params.addDeprecatedParam<BoundaryName>("slave",
-                                          "The secondary boundary",
-                                          "The 'slave' parameter is deprecated and will be removed "
-                                          "on September 1, 2020. Please use the "
-                                          "'secondary' parameter instead");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
