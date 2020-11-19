@@ -12,6 +12,7 @@
 #include "GeometricCutUserObject.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
+#include "XFEMFuncs.h"
 
 XFEMCrackGrowthIncrement2DCut::XFEMCrackGrowthIncrement2DCut(
     Real x0, Real y0, Real x1, Real y1, Real t0, Real t1)
@@ -61,7 +62,8 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
       const Node * node2 = curr_side->node_ptr(1);
       Real seg_int_frac = 0.0;
 
-      if (IntersectSegmentWithCutLine(*node1, *node2, _cut_line_endpoints, fraction, seg_int_frac))
+      if (Xfem::intersectSegmentWithCutLine(
+              *node1, *node2, _cut_line_endpoints, fraction, seg_int_frac))
       {
         cut_elem = true;
         CutEdgeForCrackGrowthIncr mycut;
@@ -74,50 +76,4 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
     }
   }
   return cut_elem;
-}
-
-bool
-XFEMCrackGrowthIncrement2DCut::IntersectSegmentWithCutLine(
-    const Point & segment_point1,
-    const Point & segment_point2,
-    const std::pair<Point, Point> & cutting_line_points,
-    const Real & cutting_line_fraction,
-    Real & segment_intersection_fraction)
-{
-  // Use the algorithm described here to determine whether a line segment is intersected
-  // by a cutting line, and to compute the fraction along that line where the intersection
-  // occurs:
-  // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-
-  bool cut_segment = false;
-  Point seg_dir = segment_point2 - segment_point1;
-  Point cut_dir = cutting_line_points.second - cutting_line_points.first;
-  Point cut_start_to_seg_start = segment_point1 - cutting_line_points.first;
-
-  Real cut_dir_cross_seg_dir = crossProduct2D(cut_dir, seg_dir);
-
-  if (std::abs(cut_dir_cross_seg_dir) > Xfem::tol)
-  {
-    // Fraction of the distance along the cutting segment where it intersects the edge segment
-    Real cut_int_frac = crossProduct2D(cut_start_to_seg_start, seg_dir) / cut_dir_cross_seg_dir;
-
-    if (cut_int_frac >= 0.0 && cut_int_frac <= cutting_line_fraction)
-    { // Cutting segment intersects the line of the edge segment, but the intersection point may be
-      // outside the segment
-      Real int_frac = crossProduct2D(cut_start_to_seg_start, cut_dir) / cut_dir_cross_seg_dir;
-      if (int_frac >= 0.0 &&
-          int_frac <= 1.0) // TODO: revisit end cases for intersections with corners
-      {
-        cut_segment = true;
-        segment_intersection_fraction = int_frac;
-      }
-    }
-  }
-  return cut_segment;
-}
-
-Real
-XFEMCrackGrowthIncrement2DCut::crossProduct2D(const Point & point_a, const Point & point_b)
-{
-  return (point_a(0) * point_b(1) - point_b(0) * point_a(1));
 }

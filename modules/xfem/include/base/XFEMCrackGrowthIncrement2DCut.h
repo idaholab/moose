@@ -35,14 +35,6 @@ public:
   Real cutCompletionFraction(Real time);
 
 protected:
-  bool IntersectSegmentWithCutLine(const Point & segment_point1,
-                                   const Point & segment_point2,
-                                   const std::pair<Point, Point> & cutting_line_points,
-                                   const Real & cutting_line_fraction,
-                                   Real & segment_intersection_fraction);
-
-  Real crossProduct2D(const Point & point_a, const Point & point_b);
-
   const std::pair<Real, Real> _time_range;
 
 private:
