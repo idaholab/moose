@@ -57,6 +57,7 @@ class TemplateExtension(include.IncludeExtension):
     def initPage(self, page):
         """Initialize page with Extension settings."""
         self.initConfig(page, 'args')
+        page['dependencies'] = set()
 
     def postTokenize(self, page, ast):
 
