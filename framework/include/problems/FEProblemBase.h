@@ -424,6 +424,11 @@ public:
   virtual void init() override;
   virtual void solve() override;
 
+  /**
+   * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}. That is,
+   * the number of evaluable elements does NOT necessarily equal to the number of local and
+   * algebraic ghosting elements.
+   */
   const ConstElemRange & getEvaluableElementRange();
 
   /**
