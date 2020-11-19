@@ -35,8 +35,7 @@ void
 ComputeCrystalPlasticityStress::initialSetup()
 {
   MaterialName model_name = getParam<MaterialName>("crystal_plasticity_update_model");
-  _model =
-      dynamic_cast<CrystalPlasticityUpdate *>(&getMaterialByName(model_name));
+  _model = dynamic_cast<CrystalPlasticityUpdate *>(&getMaterialByName(model_name));
   if (!_model)
     mooseError("Model " + model_name + " is not compatible with ComputeCrystalPlasticityStress");
 }

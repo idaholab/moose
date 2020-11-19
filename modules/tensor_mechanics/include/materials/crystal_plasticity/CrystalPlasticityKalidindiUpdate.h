@@ -36,28 +36,30 @@ protected:
   virtual void initQpStatefulProperties() override;
 
   /**
-   * This virtual method is called to set the constitutive internal state variables
-   * current value to the old property value for the start of the stress convergence
-   * while loop. This class also calculates the constitutive slip system resistance
-   * based on the values set for the constitutive state variables.
-   */
+   * Sets the value of the current and previous substep iteration slip system
+   * resistance to the old value at the start of the PK2 stress convergence
+   * while loop.
+   **/
   virtual void setInitialConstitutiveVariableValues() override;
 
-  /*
-   * This virtual method is called to calculate the total slip system slip
-   * increment based on the constitutive model defined in the child class.
-   * This method must be overwritten in the child class.
+  /**
+   * Sets the current slip system resistance value to the previous substep value.
+   * In cases where only one substep is taken (or when the first) substep is taken,
+   * this method just sets the current value to the old slip system resistance
+   * value again.
    */
+  virtual void setSubstepConstitutiveVariableValues() override;
+
+  /**
+   * Stores the current value of the slip system resistance into a separate
+   * material property in case substepping is needed.
+   */
+  virtual void updateSubstepConstitutiveVariableValues() override;
+
   virtual void
   calculateConstitutiveEquivalentSlipIncrement(RankTwoTensor & equivalent_slip_increment,
                                                bool & error_tolerance) override;
 
-  /*
-   * This virtual method is called to find the derivative of the slip increment
-   * with respect to the applied shear stress on the slip system based on the
-   * constiutive model defined in the child class.  This method must be overwritten
-   * in the child class.
-   */
   virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & dslip_dtau,
                                                    unsigned int slip_model_number = 0) override;
 
@@ -84,13 +86,30 @@ protected:
    */
   void calculateSlipSystemResistance(bool & error_tolerance);
 
-  ///@{Slip system resistance and slip increment variables
+  ///@{Slip system resistance
   MaterialProperty<std::vector<Real>> & _slip_system_resistance;
   const MaterialProperty<std::vector<Real>> & _slip_system_resistance_old;
-  MaterialProperty<std::vector<Real>> & _slip_increment;
-  MaterialProperty<std::vector<Real>> & _previous_it_slip_increment;
-  MaterialProperty<std::vector<Real>> & _previous_it_resistance;
   ///@}
+
+  /// Current slip increment material property
+  MaterialProperty<std::vector<Real>> & _slip_increment;
+
+  /**
+   * Stores the values of the slip system resistance from the previous substep
+   * In classes which use dislocation densities, analogous dislocation density
+   * substep vectors will be required.
+   */
+  std::vector<Real> _previous_substep_slip_resistance;
+
+  /**
+   * Caches the value of the current slip system resistance immediately prior
+   * to the update of the slip system resistance, and is used to calculate the
+   * the slip system resistance increment for the current substep (or step if
+   * only one substep is taken) for the convergence check tolerance comparison.
+   * In classes which use dislocation densities, analogous dislocation density
+   * caching vectors will also be required.
+   */
+  std::vector<Real> _slip_resistance_before_update;
 
   ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
   const Real _r;

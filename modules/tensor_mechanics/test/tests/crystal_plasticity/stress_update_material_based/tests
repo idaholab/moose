@@ -7,24 +7,24 @@
     requirement = 'MOOSE shall provide a StressUpdate material-based extensible crystal plasticity system'
     design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
-#  [./exception]
-#    type = 'Exodiff'
-#    input = 'exception.i'
-#    exodiff = 'exception_out.e'
-#    allow_warnings = true
-#    issues = '#16064'
-#    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
-#    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
-#  [../]
-#  [./substep]
-#    type = 'Exodiff'
-#    input = 'substep.i'
-#    exodiff = 'substep_out.e'
-#    allow_warnings = true
-#    issues = '#6097'
-#    requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
-#    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
-#  [../]
+  [./exception]
+    type = 'Exodiff'
+    input = 'exception.i'
+    exodiff = 'exception_out.e'
+    allow_warnings = true
+    issues = '#16064'
+    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
+    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  [../]
+  [./substep]
+    type = 'Exodiff'
+    input = 'substep.i'
+    exodiff = 'substep_out.e'
+    allow_warnings = true
+    issues = '#6097'
+    requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
+    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  [../]
   [./linesearch]
     type = 'Exodiff'
     input = 'linesearch.i'

@@ -35,13 +35,6 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
         getMaterialPropertyOld<std::vector<Real>>("slip_system_resistance")),
     _slip_increment(declareProperty<std::vector<Real>>("plastic_slip_increment")),
 
-    // Save off the the values of the state variables from the previous increment (before the values
-    // are old)
-    _previous_it_slip_increment(
-        declareProperty<std::vector<Real>>("previous_iteration_slip_increment")),
-    _previous_it_resistance(
-        declareProperty<std::vector<Real>>("previous_iteration_slip_system_resistance")),
-
     // Constitutive values
     _r(getParam<Real>("r")),
     _h(getParam<Real>("h")),
@@ -51,16 +44,17 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
     _xm(getParam<Real>("xm")),
     _gss_initial(getParam<Real>("gss_initial"))
 {
+  // resize local caching vectors used for substepping
+  _previous_substep_slip_resistance.resize(_number_slip_systems);
+  _slip_resistance_before_update.resize(_number_slip_systems);
 }
 
 void
 CrystalPlasticityKalidindiUpdate::initQpStatefulProperties()
 {
   _slip_system_resistance[_qp].resize(_number_slip_systems);
-  _previous_it_resistance[_qp].resize(_number_slip_systems);
   _slip_increment[_qp].resize(_number_slip_systems);
 
-  // Then loop over the slip systems and set the initial values for all the Reals
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     _slip_system_resistance[_qp][i] = _gss_initial;
@@ -75,6 +69,14 @@ CrystalPlasticityKalidindiUpdate::setInitialConstitutiveVariableValues()
 {
   // Would also set old dislocation densities here if included in this model
   _slip_system_resistance[_qp] = _slip_system_resistance_old[_qp];
+  _previous_substep_slip_resistance = _slip_system_resistance_old[_qp];
+}
+
+void
+CrystalPlasticityKalidindiUpdate::setSubstepConstitutiveVariableValues()
+{
+  // Would also set substepped dislocation densities here if included in this model
+  _slip_system_resistance[_qp] = _previous_substep_slip_resistance;
 }
 
 void
@@ -82,7 +84,6 @@ CrystalPlasticityKalidindiUpdate::calculateConstitutiveEquivalentSlipIncrement(
     RankTwoTensor & equivalent_slip_increment, bool & error_tolerance)
 {
   equivalent_slip_increment.zero();
-  _previous_it_slip_increment[_qp] = _slip_increment[_qp];
 
   if (_error_tolerance)
     return;
@@ -97,10 +98,11 @@ CrystalPlasticityKalidindiUpdate::calculateConstitutiveEquivalentSlipIncrement(
     if (_tau[_qp][i] < 0.0)
       _slip_increment[_qp][i] *= -1.0;
 
-    if (std::abs(_slip_increment[_qp][i]) > _slip_incr_tol)
+    if (std::abs(_slip_increment[_qp][i]) * _substep_dt > _slip_incr_tol)
     {
 #ifdef DEBUG
-      mooseWarning("Maximum allowable slip increment exceeded ", std::abs(_slip_increment[_qp][i]));
+      mooseWarning("Maximum allowable slip increment exceeded ",
+                   std::abs(_slip_increment[_qp][i]) * _substep_dt);
 #endif
       error_tolerance = true;
       return;
@@ -134,9 +136,9 @@ void
 CrystalPlasticityKalidindiUpdate::updateConstitutiveSlipSystemResistanceAndVariables(
     bool & error_tolerance)
 {
-  // Set the previous value of the slip system resistance here for comparison in the convergence
-  // check
-  _previous_it_resistance[_qp] = _slip_system_resistance[_qp];
+  // Cache the slip system value before the update for the diff in the convergence check
+  _slip_resistance_before_update = _slip_system_resistance[_qp];
+
   calculateSlipSystemResistance(error_tolerance);
 }
 
@@ -144,20 +146,27 @@ bool
 CrystalPlasticityKalidindiUpdate::areConstitutiveStateVariablesConverged()
 {
   Real resistance_diff = 0.0;
-  Real absolute_old_resistance = 0.0;
+  Real abs_prev_substep_resistance = 0.0;
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
-    absolute_old_resistance = std::abs(_previous_it_resistance[_qp][i]);
-    resistance_diff = std::abs(absolute_old_resistance - _slip_system_resistance[_qp][i]);
+    resistance_diff = std::abs(_slip_resistance_before_update[i] - _slip_system_resistance[_qp][i]);
+    abs_prev_substep_resistance = std::abs(_previous_substep_slip_resistance[i]);
 
-    if (absolute_old_resistance < _zero_tol && resistance_diff > _zero_tol)
+    if (abs_prev_substep_resistance < _zero_tol && resistance_diff > _zero_tol)
       return true;
-    else if (absolute_old_resistance > _zero_tol &&
-             resistance_diff > _resistance_tol * absolute_old_resistance)
+    else if (abs_prev_substep_resistance > _zero_tol &&
+             resistance_diff > _resistance_tol * abs_prev_substep_resistance)
       return true;
   }
 
   return false;
+}
+
+void
+CrystalPlasticityKalidindiUpdate::updateSubstepConstitutiveVariableValues()
+{
+  // Would also set substepped dislocation densities here if included in this model
+  _previous_substep_slip_resistance = _slip_system_resistance[_qp];
 }
 
 void
@@ -196,12 +205,12 @@ CrystalPlasticityKalidindiUpdate::calculateSlipSystemResistance(bool & error_tol
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     slip_system_resistance_increment[i] *= _substep_dt;
-    if (_slip_system_resistance_old[_qp][i] < _zero_tol &&
+    if (_previous_substep_slip_resistance[i] < _zero_tol &&
         slip_system_resistance_increment[i] < 0.0)
-      _slip_system_resistance[_qp][i] = _slip_system_resistance_old[_qp][i];
+      _slip_system_resistance[_qp][i] = _previous_substep_slip_resistance[i];
     else
       _slip_system_resistance[_qp][i] =
-          _slip_system_resistance_old[_qp][i] + slip_system_resistance_increment[i];
+          _previous_substep_slip_resistance[i] + slip_system_resistance_increment[i];
 
     if (_slip_system_resistance[_qp][i] < 0.0)
       error_tolerance = true;

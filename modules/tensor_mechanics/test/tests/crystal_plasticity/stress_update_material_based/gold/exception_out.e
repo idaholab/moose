@@ -1,0 +1,1 @@
+../../user_object_based/gold/exception_out.e

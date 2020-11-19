@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-
 /**
  * CrystalPlasticityUpdate uses the multiplicative decomposition of the
  * deformation gradient and solves the PK2 stress residual equation at the
@@ -60,7 +59,13 @@ protected:
    * Calls the residual and jacobian functions used in the stress update
    * algorithm.
    */
-  void calcResidJacob();
+  void calculateResidualAndJacobian();
+
+  /**
+   * Reset the PK2 stress and the inverse deformation gradient to old values and
+   * provide an interface for inheriting classes to reset material properties
+   */
+  void preSolveQp();
 
   /**
    * Solve the stress and internal state variables (e.g. slip increment,
@@ -185,11 +190,28 @@ protected:
 
   /**
    * This virtual method is called to set the constitutive internal state variables
-   * current value to the old property value for the start of the stress convergence
-   * while loop. This class also calculates the constitutive slip system resistance
-   * based on the values set for the constitutive state variables.
-   */
+   * current value and the previous substep value to the old property value for
+   * the start of the stress convergence while loop.
+   **/
   virtual void setInitialConstitutiveVariableValues(){};
+
+  /**
+   * This virtual method is called to set the current constitutive internal state
+   * variable value to that of the previous substep at the beginning of the next
+   * substep increment. In cases where only one substep is taken (or when the first)
+   * substep is taken, this method sets the current constitutive internal state
+   * variable value to the old value.
+   */
+  virtual void setSubstepConstitutiveVariableValues(){};
+
+  /**
+   * Stores the current value of the constitutive internal state variables into
+   * a separate material property in case substepping is required, once the
+   * constitutive variables have passed convergence tolerances. This separate
+   * material property is used as the previous substep value in the associated
+   * setSubstepConstitutiveVariableValues method in the next substep (if taken).
+   */
+  virtual void updateSubstepConstitutiveVariableValues(){};
 
   /*
    * This virtual method is called to calculate the total slip system slip
@@ -311,7 +333,7 @@ protected:
 
   /**
    * Tracks the rotation of the crystal during deformation
-   * Note: this rotation tensor is not applied to the crystal
+   * Note: this rotation tensor is not applied to the crystal lattice
    */
   MaterialProperty<RankTwoTensor> & _update_rotation;
 
