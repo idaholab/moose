@@ -21,8 +21,6 @@ import mooseutils
 import moosesyntax
 
 from .. import common
-#from ..common import exceptions
-#from ..tree import syntax
 from ..extensions import template
 
 LOG = logging.getLogger(__name__)
