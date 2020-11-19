@@ -84,6 +84,10 @@ TransverselyIsotropicCreepStressUpdate::computeResidual(
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
+  // Need to compute this iteration's stress tensor based on the scalar variable
+  // Basically..
+  // s(n+1) = {Q [I + 2*nu*delta_gamma*Delta]^(-1) Q^T}  s(trial)
+
   DenseVector<Real> dev_np1(6);
   DenseMatrix<Real> inv_matrix(6, 6);
   inv_matrix(0, 0) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(0));
@@ -105,12 +109,13 @@ TransverselyIsotropicCreepStressUpdate::computeResidual(
   transform_to_np1.vector_mult(stress_np1, stress_new);
 
   // Equivalent deviatoric stress function.
-  Real qsigma_square = F * (stress_np1(1) - stress_np1(2)) * (stress_np1(1) - stress_np1(2));
-  qsigma_square += G * (stress_np1(2) - stress_np1(0)) * (stress_np1(2) - stress_np1(0));
-  qsigma_square += H * (stress_np1(0) - stress_np1(1)) * (stress_np1(0) - stress_np1(1));
-  qsigma_square += 2 * L * stress_np1(3) * stress_np1(3);
-  qsigma_square += 2 * M * stress_np1(4) * stress_np1(4);
-  qsigma_square += 2 * N * stress_np1(5) * stress_np1(5);
+
+  Real qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
+  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
+  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
+  qsigma_square += 2 * L * stress_new(3) * stress_new(3);
+  qsigma_square += 2 * M * stress_new(4) * stress_new(4);
+  qsigma_square += 2 * N * stress_new(5) * stress_new(5);
 
   // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
@@ -145,33 +150,13 @@ TransverselyIsotropicCreepStressUpdate::computeDerivative(
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
-  DenseVector<Real> dev_np1(6);
-  DenseMatrix<Real> inv_matrix(6, 6);
-  inv_matrix(0, 0) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(0));
-  inv_matrix(1, 1) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(1));
-  inv_matrix(2, 2) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(2));
-  inv_matrix(3, 3) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(3));
-  inv_matrix(4, 4) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(4));
-  inv_matrix(5, 5) = 1 / (1 + 2.0 * delta_gamma * _eigenvalues_hill(5));
-
-  DenseMatrix<Real> transform_to_np1(6, 6);
-  DenseMatrix<Real> eigenvectors_hill_transpose(6, 6);
-  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
-  DenseMatrix<Real> eigenvectors_hill_copy(_eigenvectors_hill);
-  inv_matrix.right_multiply(eigenvectors_hill_transpose);
-  eigenvectors_hill_copy.right_multiply(inv_matrix);
-  transform_to_np1 = eigenvectors_hill_copy;
-
-  DenseVector<Real> stress_np1(6);
-  transform_to_np1.vector_mult(stress_np1, stress_new);
-
   // Equivalent deviatoric stress function.
-  Real qsigma_square = F * (stress_np1(1) - stress_np1(2)) * (stress_np1(1) - stress_np1(2));
-  qsigma_square += G * (stress_np1(2) - stress_np1(0)) * (stress_np1(2) - stress_np1(0));
-  qsigma_square += H * (stress_np1(0) - stress_np1(1)) * (stress_np1(0) - stress_np1(1));
-  qsigma_square += 2 * L * stress_np1(3) * stress_np1(3);
-  qsigma_square += 2 * M * stress_np1(4) * stress_np1(4);
-  qsigma_square += 2 * N * stress_np1(5) * stress_np1(5);
+  Real qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
+  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
+  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
+  qsigma_square += 2 * L * stress_new(3) * stress_new(3);
+  qsigma_square += 2 * M * stress_new(4) * stress_new(4);
+  qsigma_square += 2 * N * stress_new(5) * stress_new(5);
 
   // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
@@ -195,6 +180,18 @@ TransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
+  // Moose::out output for q_sigma
+  // Abaqus
+  if (_qsigma == 0)
+  {
+    inelasticStrainIncrement(0, 0) = inelasticStrainIncrement(1, 1) =
+        inelasticStrainIncrement(2, 2) = inelasticStrainIncrement(0, 1) =
+            inelasticStrainIncrement(1, 0) = inelasticStrainIncrement(2, 0) =
+                inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(1, 2) =
+                    inelasticStrainIncrement(2, 1) = 0.0;
+    return;
+  }
+
   const Real prefactor = delta_gamma / _qsigma;
 
   inelasticStrainIncrement(0, 0) =
@@ -208,6 +205,7 @@ TransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
   inelasticStrainIncrement(0, 2) = prefactor * 2.0 * M * stress(0, 2);
   inelasticStrainIncrement(1, 2) = prefactor * 2.0 * L * stress(1, 2);
 }
+
 Real
 TransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
     const MaterialProperty<RankTwoTensor> & /*stress*/,
