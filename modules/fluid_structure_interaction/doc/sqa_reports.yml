@@ -6,11 +6,11 @@ Applications:
         content_directory: ${MOOSE_DIR}/modules/fluid_structure_interaction/doc/content
 
 Documents:
-    log_software_requirements_specification: WARNING
-    log_software_design_description: WARNING
-    log_software_test_plan: WARNING
-    log_requirements_traceablity_matrix: WARNING
-    log_verification_validation_plan: WARNING
+    software_requirements_specification: sqa/fluid_structure_interaction_srs.md
+    software_design_description: sqa/fluid_structure_interaction_sdd.md
+    software_test_plan: sqa/fluid_structure_interaction_stp.md
+    requirements_traceablity_matrix: sqa/fluid_structure_interaction_rtm.md
+    verification_validation_plan: sqa/fluid_structure_interaction_vvr.md
     log_safety_software_determination: WARNING
     log_quality_level_determination: WARNING
     log_enterprise_architecture_entry: WARNING
@@ -18,7 +18,6 @@ Documents:
     log_software_quality_plan: WARNING
     log_configuration_management_plan: WARNING
     log_asset_management_plan: WARNING
-    log_verification_validation_plan: WARNING
     log_user_manual: WARNING
     log_theory_manual: WARNING
 
@@ -26,4 +25,3 @@ Requirements:
     fluid_structure_interaction:
         directories:
             - ${MOOSE_DIR}/modules/fluid_structure_interaction
-        log_missing: WARNING
