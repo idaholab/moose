@@ -1,4 +1,5 @@
 # PorousFlowPeacemanBorehole with 2-phase, 3-components, with enthalpy, internal_energy, and thermal_conductivity
+# NOTE: this test has suffered from repeated failures since its inception.  The problem always appears to be caused by having too many Dirac points in an element: see #10471.  As of Nov2020, the dirac7 DiracKernel uses only one Dirac point, not ten_points.bh.  One day it would be good to be able to use point_file = ten_points.bh
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -328,7 +329,8 @@
     mass_fraction_component = 1
     use_relative_permeability = true
     use_internal_energy = true
-    point_file = ten_points.bh
+    point_file = one_point.bh
+    #NOTE this commented-out line: point_file = ten_points.bh
     SumQuantityUO = dummy_outflow7
     character = -1
     bottom_p_or_t = 10
