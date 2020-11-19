@@ -31,7 +31,7 @@ the second to last paramter right before the doc string.
 ## Deprecating coupled variables
 
 The `InputParameters` class provides a convenient method for deprecating coupled
-variable names called `addDeprecatedCoupledVar`. The method takes four
+variable names called `addDeprecatedCoupledVar`. The method takes three
 arguments. The first corresponds to the deprecated name; the second argument is
 the new, blessed name that users should use. This name should have a
 corresponding `params.addCoupledVar('blessed_name', 'blessed_name_doc_string')`
