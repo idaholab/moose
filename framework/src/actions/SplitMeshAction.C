@@ -103,7 +103,7 @@ SplitMeshAction::act()
     auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
     if (!meta_data.empty())
     {
-      const std::string filename(fname + "/mesh_meta_data" +
+      const std::string filename(fname + "/meta_data_mesh" +
                                  restartable_data_io.getRestartableDataExt());
       Moose::out << "Meta data are written into " << filename << "." << std::endl;
 

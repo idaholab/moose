@@ -121,7 +121,7 @@ FileMesh::buildMesh()
 
       // we also read declared mesh meta data here if there is meta data file
       RestartableDataIO restartable(_app);
-      std::string fname = _file_name + "/mesh_meta_data" + restartable.getRestartableDataExt();
+      std::string fname = _file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
       if (MooseUtils::pathExists(fname))
       {
         restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
