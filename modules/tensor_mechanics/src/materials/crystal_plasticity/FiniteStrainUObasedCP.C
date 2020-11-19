@@ -221,7 +221,7 @@ FiniteStrainUObasedCP::computeQpStress()
 
   _delta_dfgrd = _deformation_gradient[_qp] - _dfgrd_tmp_old;
 
-  // Saves the old stateful properties that is modified during sub stepping
+  // Saves the old stateful properties that are modified during sub stepping
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
     _state_vars_old[i] = (*_mat_prop_state_vars_old[i])[_qp];
 
@@ -249,6 +249,7 @@ FiniteStrainUObasedCP::computeQpStress()
         break;
       }
     }
+
     if (substep_iter > _max_substep_iter && _err_tol)
       throw MooseException("FiniteStrainUObasedCP: Constitutive failure.");
   } while (_err_tol);
@@ -275,6 +276,7 @@ FiniteStrainUObasedCP::solveQp()
   solveStatevar();
   if (_err_tol)
     return;
+
   postSolveStatevar();
 }
 
@@ -323,6 +325,7 @@ FiniteStrainUObasedCP::solveStatevar()
     solveStress();
     if (_err_tol)
       return;
+
     postSolveStress();
 
     // Update slip system resistance and state variable
@@ -354,8 +357,7 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
     unsigned int n = (*_mat_prop_state_vars[i])[_qp].size();
     for (unsigned j = 0; j < n; j++)
     {
-      diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] -
-                      _state_vars_prev[i][j]); // Calculate increment size
+      diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] - _state_vars_prev[i][j]);
 
       if (std::abs(_state_vars_old_stored[i][j]) < _zero_tol && diff > _zero_tol)
         return true;

@@ -1,24 +1,14 @@
+[GlobalParams]
+  displacements = 'ux uy uz'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
-  displacements = 'ux uy uz'
-[]
-
-[Variables]
-  [./ux]
-  [../]
-  [./uy]
-  [../]
-  [./uz]
-  [../]
 []
 
 [AuxVariables]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./pk2]
     order = CONSTANT
     family = MONOMIAL
@@ -45,25 +35,17 @@
   [../]
 []
 
-[Functions]
-  [./tdisp]
-    type = ParsedFunction
-    value = 0.1*t
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'ux uy uz'
-    use_displaced_mesh = true
-  [../]
+[Modules/TensorMechanics/Master/all]
+  strain = FINITE
+  add_variables = true
+  generate_output = stress_zz
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [./fp_zz]
     type = RankTwoAux
-    variable = stress_zz
-    rank_two_tensor = stress
+    variable = fp_zz
+    rank_two_tensor = fp
     index_j = 2
     index_i = 2
     execute_on = timestep_end
@@ -76,14 +58,6 @@
    index_i = 2
    execute_on = timestep_end
   [../]
-  [./fp_zz]
-    type = RankTwoAux
-    variable = fp_zz
-    rank_two_tensor = fp
-    index_j = 2
-    index_i = 2
-    execute_on = timestep_end
-  [../]
   [./e_zz]
     type = RankTwoAux
     variable = e_zz
@@ -95,14 +69,14 @@
   [./gss]
     type = MaterialStdVectorAux
     variable = gss
-    property = state_var_gss
+    property = slip_system_resistance
     index = 0
     execute_on = timestep_end
   [../]
   [./slip_inc]
    type = MaterialStdVectorAux
    variable = slip_increment
-   property = slip_rate_gss
+   property = plastic_slip_increment
    index = 0
    execute_on = timestep_end
   [../]
@@ -131,62 +105,26 @@
     type = FunctionDirichletBC
     variable = uz
     boundary = front
-    function = tdisp
-  [../]
-[]
-
-[UserObjects]
-  [./slip_rate_gss]
-    type = CrystalPlasticitySlipRateGSS
-    variable_size = 12
-    slip_sys_file_name = input_slip_sys.txt
-    num_slip_sys_flowrate_props = 2
-    flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
-    uo_state_var_name = state_var_gss
-  [../]
-  [./slip_resistance_gss]
-    type = CrystalPlasticitySlipResistanceGSS
-    variable_size = 12
-    uo_state_var_name = state_var_gss
-  [../]
-  [./state_var_gss]
-    type = CrystalPlasticityStateVariable
-    variable_size = 12
-    groups = '0 4 8 12'
-    group_values = '60.8 60.8 60.8'
-    uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
-    scale_factor = 1.0
-  [../]
-  [./state_var_evol_rate_comp_gss]
-    type = CrystalPlasticityStateVarRateComponentGSS
-    variable_size = 12
-    hprops = '1.0 541.5 109.8 2.5'
-    uo_slip_rate_name = slip_rate_gss
-    uo_state_var_name = state_var_gss
+    function = '0.1*t'
   [../]
 []
 
 [Materials]
-  [./crysp]
-    type = FiniteStrainUObasedCP
-    block = 0
-    stol = 1e-2
-    tan_mod_type = exact
-    uo_slip_rates = 'slip_rate_gss'
-    uo_slip_resistances = 'slip_resistance_gss'
-    uo_state_vars = 'state_var_gss'
-    uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'ux uy uz'
-  [../]
   [./elasticity_tensor]
-    type = ComputeElasticityTensorCP
-    block = 0
+    type = ComputeElasticityTensorConstantRotationCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
+  [../]
+  [./stress]
+    type = ComputeCrystalPlasticityStress
+    crystal_plasticity_update_model = 'trial_xtalpl'
+  [../]
+  [./trial_xtalpl]
+    type = CrystalPlasticityKalidindiUpdate
+    number_slip_systems = 12
+    slip_sys_file_name = input_slip_sys.txt
+    tan_mod_type = exact
+    maximum_substep_iteration = 1
   [../]
 []
 
@@ -229,8 +167,8 @@
   dt = 0.05
   solve_type = 'PJFNK'
 
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
+  petsc_options_value = ' asm      2              lu            gmres     200'
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
