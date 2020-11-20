@@ -1328,6 +1328,86 @@ plt.legend()
 plt.title("Hysteretic capillary pressure example: 3rd order")
 #plt.savefig("../../../doc/content/media/porous_flow/hys_1phase_3.png")
 
+plt.figure(26)
+svals = [1 - 0.001 * i for i in range(1000)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'b-', label = "primary drying")
+svals = [1 - 0.001 * i for i in range(465)] + [0.535 + 0.001 * i for i in range(465)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'g--', label = "drying then wetting")
+f = open("gold/2phasePP_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.semilogy([x[5] for x in data], [x[4] - x[3] for x in data], 'g+', label = 'MOOSE, 2 phase PP')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Capillary pressure ($|P_{c}|$)")
+plt.grid("x")
+plt.xlim([0.4, 1])
+plt.ylim([0.01, 1])
+plt.legend()
+plt.title("Hysteretic capillary pressure examples (2 phase)")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePP_1.png")
+
+plt.figure(27)
+svals = [1 - 0.001 * i for i in range(1000)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'b-', label = "primary drying")
+svals = [1 - 0.001 * i for i in range(512)] + [0.512 + 0.001 * i for i in range(440)] + [0.952 - 0.001 * i for i in range(500)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'g--', label = "drying, wetting, re-drying")
+f = open("gold/2phasePP_2_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.semilogy([x[5] for x in data], [x[4] - x[3] for x in data], 'g+', label = 'MOOSE, 2 phase PP')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Capillary pressure ($|P_{c}|$)")
+plt.grid("x")
+plt.xlim([0, 1])
+plt.ylim([0.01, 40])
+plt.legend()
+plt.title("Hysteretic capillary pressure examples (2 phase)")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePP_2.png")
+
+plt.figure(28)
+svals = [1 - 0.001 * i for i in range(1000)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'b-', label = "primary drying")
+svals = [1 - 0.001 * i for i in range(465)] + [0.535 + 0.001 * i for i in range(465)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'g--', label = "drying then wetting")
+f = open("gold/2phasePS_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.semilogy([x[5] for x in data], [x[4] - x[3] for x in data], 'g+', label = 'MOOSE, 2 phase PS')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Capillary pressure ($|P_{c}|$)")
+plt.grid("x")
+plt.xlim([0, 1])
+plt.ylim([0.01, 40])
+plt.legend()
+plt.title("Hysteretic capillary pressure examples (2 phase)")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_1.png")
+
+plt.figure(29)
+svals = [1 - 0.001 * i for i in range(1000)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'b-', label = "primary drying")
+svals = [1 - 0.001 * i for i in range(512)] + [0.512 + 0.001 * i for i in range(440)] + [0.952 - 0.001 * i for i in range(500)]
+pcvals = [abs(pc) for pc in hys.pc(svals, True)]
+plt.semilogy(svals, pcvals, 'g--', label = "drying, wetting, re-drying")
+f = open("gold/2phasePS_2_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.semilogy([x[5] for x in data], [x[4] - x[3] for x in data], 'g+', label = 'MOOSE, 2 phase PS')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Capillary pressure ($|P_{c}|$)")
+plt.grid("x")
+plt.xlim([0.4, 1])
+plt.ylim([0.001, 1])
+plt.legend()
+plt.title("Hysteretic capillary pressure examples (2 phase)")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_2.png")
+
 plt.show()
 
 sys.exit(0)
