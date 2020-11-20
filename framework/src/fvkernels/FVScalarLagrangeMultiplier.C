@@ -61,9 +61,6 @@ FVScalarLagrangeMultiplier::computeResidual()
 void
 FVScalarLagrangeMultiplier::computeJacobian()
 {
-  mooseError("Global AD indexing is a hungry beast that fills in all the Jacobian whether you want "
-             "it or not. There is off-diagional coupling from this kernel, so you must run with a "
-             "preconditioning matrix that has some off-diagional coupling.");
 }
 
 void
