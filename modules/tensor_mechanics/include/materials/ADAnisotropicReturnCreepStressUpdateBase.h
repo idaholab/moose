@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "AnisotropicReturnStressUpdate.h"
+#include "ADGeneralizedRadialReturnStressUpdate.h"
 
 /**
  * This class provides baseline functionallity for creep models based on the stress update material
  * in a radial return isotropic creep calculations.
  */
-class AnisotropicReturnCreepStressUpdateBase : public AnisotropicReturnStressUpdate
+class ADAnisotropicReturnCreepStressUpdateBase : public ADGeneralizedRadialReturnStressUpdate
 {
 public:
   static InputParameters validParams();
 
-  AnisotropicReturnCreepStressUpdateBase(const InputParameters & parameters);
+  ADAnisotropicReturnCreepStressUpdateBase(const InputParameters & parameters);
 
   /**
    * Compute the strain energy rate density for this inelastic model for the current step.
@@ -29,8 +29,8 @@ public:
    * @return The computed strain energy rate density
    */
   virtual Real
-  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & /*stress*/,
-                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
+  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & /*stress*/,
+                                 const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
   {
     mooseError(
         "The computation of strain energy rate density needs to be implemented by a child class");
@@ -39,41 +39,23 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
-  virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
+  virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
-  virtual void computeStrainFinalize(RankTwoTensor & /*inelasticStrainIncrement*/,
-                                     const RankTwoTensor & /*stress*/,
-                                     const Real /*delta_gamma*/) override
+  virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
+                                     const ADRankTwoTensor & /*stress*/,
+                                     const ADReal & /*delta_gamma*/) override
   {
     mooseError("computeStrainFinalize needs to be implemented by a child class.");
-  }
-
-  /**
-   * This method returns the derivative of the creep strain with respect to the von mises stress. It
-   * assumes the stress delta (von mises stress used to determine the creep rate) is calculated as:
-   * effective_trial_stress - _three_shear_modulus * scalar
-   */
-  virtual Real computeStressDerivative(const DenseVector<Real> & effective_trial_stress,
-                                       const DenseVector<Real> & stress_new,
-                                       const Real scalar) override;
-
-  /*
-   * Method that determines the tangent calculation method. For creep only models, the tangent
-   * calculation method is always PARTIAL
-   */
-  virtual TangentCalculationMethod getTangentCalculationMethod() override
-  {
-    return TangentCalculationMethod::PARTIAL;
   }
 
   /// String that is prepended to the creep_strain Material Property
   const std::string _creep_prepend;
 
   /// Creep strain material property
-  MaterialProperty<RankTwoTensor> & _creep_strain;
+  ADMaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };

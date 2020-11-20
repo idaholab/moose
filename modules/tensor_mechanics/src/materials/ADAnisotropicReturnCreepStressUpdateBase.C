@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AnisotropicReturnCreepStressUpdateBase.h"
+#include "ADAnisotropicReturnCreepStressUpdateBase.h"
 
 InputParameters
-AnisotropicReturnCreepStressUpdateBase::validParams()
+ADAnisotropicReturnCreepStressUpdateBase::validParams()
 {
-  InputParameters params = AnisotropicReturnStressUpdate::validParams();
+  InputParameters params = ADGeneralizedRadialReturnStressUpdate::validParams();
 
   params.addDeprecatedParam<std::string>(
       "creep_prepend",
@@ -24,45 +24,35 @@ AnisotropicReturnCreepStressUpdateBase::validParams()
   return params;
 }
 
-AnisotropicReturnCreepStressUpdateBase::AnisotropicReturnCreepStressUpdateBase(
+ADAnisotropicReturnCreepStressUpdateBase::ADAnisotropicReturnCreepStressUpdateBase(
     const InputParameters & parameters)
-  : AnisotropicReturnStressUpdate(parameters),
+  : ADGeneralizedRadialReturnStressUpdate(parameters),
     _creep_prepend(getParam<std::string>("creep_prepend")),
-    _creep_strain(declareProperty<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain")),
+    _creep_strain(declareADProperty<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain")),
     _creep_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain"))
 {
 }
 
 void
-AnisotropicReturnCreepStressUpdateBase::initQpStatefulProperties()
+ADAnisotropicReturnCreepStressUpdateBase::initQpStatefulProperties()
 {
   _creep_strain[_qp].zero();
 
-  AnisotropicReturnStressUpdate::initQpStatefulProperties();
+  ADGeneralizedRadialReturnStressUpdate::initQpStatefulProperties();
 }
 
 void
-AnisotropicReturnCreepStressUpdateBase::propagateQpStatefulProperties()
+ADAnisotropicReturnCreepStressUpdateBase::propagateQpStatefulProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 
   propagateQpStatefulPropertiesRadialReturn();
 }
 
-Real
-AnisotropicReturnCreepStressUpdateBase::computeStressDerivative(
-    const DenseVector<Real> & effective_trial_stress,
-    const DenseVector<Real> & stress_new,
-    const Real scalar)
-{
-  return -(computeDerivative(effective_trial_stress, stress_new, scalar) + 1.0) /
-         _three_shear_modulus;
-}
-
 void
-AnisotropicReturnCreepStressUpdateBase::computeStressFinalize(
-    const RankTwoTensor & creep_strain_increment)
+ADAnisotropicReturnCreepStressUpdateBase::computeStressFinalize(
+    const ADRankTwoTensor & creep_strain_increment)
 {
   _creep_strain[_qp] = _creep_strain_old[_qp] + creep_strain_increment;
 }

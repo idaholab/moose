@@ -172,8 +172,8 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
 
   ADReal residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
-  Real reference_residual =
-      computeReferenceResidual(effective_trial_stress, stress_new, delta_gamma);
+  ADReal reference_residual =
+      computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
 
   if (converged(_residual, reference_residual))
   {
@@ -201,7 +201,8 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
                             iter_output);
 
     _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
-    reference_residual = computeReferenceResidual(effective_trial_stress, stress_new, delta_gamma);
+    reference_residual =
+        computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
     iterationFinalize(delta_gamma);
 
     if (_bracket_solution)
@@ -270,7 +271,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
         delta_gamma = scalar_old + scalar_increment;
         _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
         reference_residual =
-            computeReferenceResidual(effective_trial_stress, stress_new, delta_gamma);
+            computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
         iterationFinalize(delta_gamma);
 
         if (_bracket_solution)
@@ -301,7 +302,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
 }
 
 bool
-ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const Real reference)
+ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const ADReal & reference)
 {
   const Real residual = MetaPhysicL::raw_value(ad_residual);
   return (std::abs(residual) <= _absolute_tolerance ||
@@ -309,7 +310,8 @@ ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const 
 }
 
 bool
-ADGeneralizedReturnMappingSolution::convergedAcceptable(const unsigned int it, const Real reference)
+ADGeneralizedReturnMappingSolution::convergedAcceptable(const unsigned int it,
+                                                        const ADReal & reference)
 {
   // Require that we have at least done _num_resids evaluations before we allow for
   // acceptable convergence
@@ -390,7 +392,7 @@ ADGeneralizedReturnMappingSolution::outputIterationStep(
     std::stringstream * iter_output,
     const ADDenseVector & effective_trial_stress,
     const ADReal & scalar,
-    const Real reference_residual)
+    const ADReal reference_residual)
 {
   if (iter_output)
   {

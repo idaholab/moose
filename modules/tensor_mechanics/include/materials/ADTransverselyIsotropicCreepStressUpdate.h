@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AnisotropicReturnCreepStressUpdateBase.h"
+#include "ADAnisotropicReturnCreepStressUpdateBase.h"
 
 /**
  * This class uses the stress update material in an anisotropic return isotropic creep
@@ -27,39 +27,40 @@
  * and Piping 88 (2011) 356--364.
  */
 
-class TransverselyIsotropicCreepStressUpdate : public AnisotropicReturnCreepStressUpdateBase
+class ADTransverselyIsotropicCreepStressUpdate : public ADAnisotropicReturnCreepStressUpdateBase
 {
 public:
   static InputParameters validParams();
 
-  TransverselyIsotropicCreepStressUpdate(const InputParameters & parameters);
+  ADTransverselyIsotropicCreepStressUpdate(const InputParameters & parameters);
 
   virtual Real
-  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & stress,
-                                 const MaterialProperty<RankTwoTensor> & strain_rate) override;
+  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
+                                 const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
 
 protected:
-  virtual void computeStressInitialize(const DenseVector<Real> & effective_trial_stress,
-                                       const RankFourTensor & elasticity_tensor) override;
-  virtual Real computeResidual(const DenseVector<Real> & effective_trial_stress,
-                               const DenseVector<Real> & stress_new,
-                               const Real scalar) override;
-  virtual Real computeDerivative(const DenseVector<Real> & effective_trial_stress,
-                                 const DenseVector<Real> & stress_new,
-                                 const Real scalar) override;
+  virtual void computeStressInitialize(const ADDenseVector & effective_trial_stress,
+                                       const ADRankFourTensor & elasticity_tensor) override;
+  virtual ADReal computeResidual(const ADDenseVector & effective_trial_stress,
+                                 const ADDenseVector & stress_new,
+                                 const ADReal & scalar) override;
+  virtual ADReal computeDerivative(const ADDenseVector & effective_trial_stress,
+                                   const ADDenseVector & stress_new,
+                                   const ADReal & scalar) override;
 
-  virtual Real computeReferenceResidual(const DenseVector<Real> & effective_trial_stress,
-                                        const DenseVector<Real> & stress_new,
-                                        const Real residual,
-                                        const Real scalar_effective_inelastic_strain) override;
+  virtual ADReal
+  computeReferenceResidual(const ADDenseVector & effective_trial_stress,
+                           const ADDenseVector & stress_new,
+                           const ADReal & residual,
+                           const ADReal & scalar_effective_inelastic_strain) override;
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
-  virtual void computeStrainFinalize(RankTwoTensor & /*inelasticStrainIncrement*/,
-                                     const RankTwoTensor & /*stress*/,
-                                     const Real /*delta_gamma*/) override;
+  virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
+                                     const ADRankTwoTensor & /*stress*/,
+                                     const ADReal & /*delta_gamma*/) override;
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;
@@ -95,5 +96,5 @@ protected:
   std::vector<Real> _hill_constants;
 
   /// Square of the q function for orthotropy
-  Real _qsigma;
+  ADReal _qsigma;
 };
