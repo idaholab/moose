@@ -1,0 +1,10 @@
+[Tests]
+  [exo]
+    type = Exodiff
+    input = test.i
+    exodiff = 'test_out.e'
+    issues = '#16265'
+    requirement = 'The system shall not duplicate computation of kernels on a node that is shared between two subdomains.'
+    design = 'NodalKernels/index.md'
+  []
+[]
