@@ -6,6 +6,7 @@
     input = test.i
     exodiff = 'test_out.e'
     requirement = 'The system shall give access to the locations in physical space of mortar segment element quadrature points.'
+    abs_zero = 5e-10
   []
   [jac]
     type = PetscJacobianTester
