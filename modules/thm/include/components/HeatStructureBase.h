@@ -124,6 +124,8 @@ protected:
   std::vector<unsigned int> _radial_start_bc_id;
   /// BC ID of the radial regions of the end boundary of the heat structure
   std::vector<unsigned int> _radial_end_bc_id;
+  /// BC ID of the inner radial boundary regions of the heat structure
+  std::vector<unsigned int> _inner_radial_bc_id;
   /// Boundary names of the outer side of the heat structure
   std::vector<BoundaryName> _boundary_names_outer;
   /// Boundary names of the inner side of the heat structure
@@ -140,6 +142,8 @@ protected:
   std::vector<BoundaryName> _boundary_names_radial_start;
   /// Boundary names of the radial regions of the end side of the heat structure
   std::vector<BoundaryName> _boundary_names_radial_end;
+  /// Boundary names of the inner radial boundary regions of the heat structure
+  std::vector<BoundaryName> _boundary_names_inner_radial;
   /// Nodes on the side of the "block"
   std::map<std::string, std::vector<unsigned int>> _side_heat_node_ids;
   /// Nodes at the outer side of the generated heat structure
