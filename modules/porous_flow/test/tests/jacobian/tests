@@ -666,7 +666,7 @@
     cli_args = 'Executioner/num_steps=1'
     threading = '!pthreads'
     requirement = "PorousFlow shall compute all Jacobian entries of all Kernels"
-    issues = '#6845 #10471'
+    issues = '#6845 #10471 #16255'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
   [./line_sink01_5]
