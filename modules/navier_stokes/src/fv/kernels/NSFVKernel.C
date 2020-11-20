@@ -73,7 +73,6 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
 
     // Now we need to perform the computations of D
     const ADReal & elem_one_a = rcCoeff(*elem_one);
-    ADReal face_a = elem_one_a;
 
     mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
                                _subproblem.getCoordSystem(elem_two->subdomain_id())
@@ -84,30 +83,28 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
     coordTransformFactor(_subproblem, elem_one->subdomain_id(), elem_one_centroid, coord);
 
     elem_one_volume *= coord;
-    Real face_volume = elem_one_volume;
+
+    const auto elem_one_D = elem_one_volume / elem_one_a;
+    ADReal face_D;
 
     if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
     {
       const ADReal & elem_two_a = rcCoeff(*elem_two);
 
-      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                             face_a,
-                             elem_one_a,
-                             elem_two_a,
-                             *_face_info,
-                             elem_is_elem_one);
-
       coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
       elem_two_volume *= coord;
+
+      const auto elem_two_D = elem_two_volume / elem_two_a;
+
       Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                             face_volume,
-                             elem_one_volume,
-                             elem_two_volume,
+                             face_D,
+                             elem_one_D,
+                             elem_two_D,
                              *_face_info,
                              elem_is_elem_one);
     }
-
-    const ADReal face_D = face_volume / face_a;
+    else
+      face_D = elem_one_D;
 
     // perform the pressure correction
     v -= face_D * (grad_p - unc_grad_p);
