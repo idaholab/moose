@@ -287,11 +287,9 @@ RadialReturnStressUpdate::maximumPermissibleValue(const Real effective_trial_str
 Real
 RadialReturnStressUpdate::computeTimeStepLimit()
 {
-  Real scalar_inelastic_strain_incr;
-
-  scalar_inelastic_strain_incr =
-      _effective_inelastic_strain[_qp] - _effective_inelastic_strain_old[_qp];
-  if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
+  const Real scalar_inelastic_strain_incr =
+      std::abs(_effective_inelastic_strain[_qp] - _effective_inelastic_strain_old[_qp]);
+  if (!scalar_inelastic_strain_incr)
     return std::numeric_limits<Real>::max();
 
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
