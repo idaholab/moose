@@ -138,7 +138,7 @@
   [../]
   [./gtn]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 1 # arbitrary
     viscoplasticity_model = GTN
     base_name = gtn
@@ -147,7 +147,7 @@
   [../]
   [./lps_ten]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 10
     base_name = ten
     outputs = all
@@ -155,7 +155,7 @@
   [../]
   [./lps_five]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 5
     base_name = five
     outputs = all
@@ -163,7 +163,7 @@
   [../]
   [./lps_three]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 3
     base_name = three
     outputs = all
@@ -171,7 +171,7 @@
   [../]
   [./lps_two]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 2
     base_name = two
     outputs = all
@@ -179,7 +179,7 @@
   [../]
   [./lps_onepointfive]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 1.5
     base_name = onepointfive
     outputs = all
@@ -187,7 +187,7 @@
   [../]
   [./lps_one]
     type = ADViscoplasticityStressUpdate
-    coefficient = 0
+    coefficient = 1e-50
     power = 1
     base_name = one
     outputs = all

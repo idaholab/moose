@@ -41,7 +41,7 @@ ADRadialReturnStressUpdate::validParams()
 
 ADRadialReturnStressUpdate::ADRadialReturnStressUpdate(const InputParameters & parameters)
   : ADStressUpdateBase(parameters),
-    ADSingleVariableReturnMappingSolution(parameters),
+    ADSingleVariableReturnMappingSolution(parameters, &_fe_problem),
     _effective_inelastic_strain(declareADProperty<Real>(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(

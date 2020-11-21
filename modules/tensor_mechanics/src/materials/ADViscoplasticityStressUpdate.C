@@ -52,7 +52,7 @@ ADViscoplasticityStressUpdate::validParams()
 
 ADViscoplasticityStressUpdate::ADViscoplasticityStressUpdate(const InputParameters & parameters)
   : ADViscoplasticityStressUpdateBase(parameters),
-    ADSingleVariableReturnMappingSolution(parameters),
+    ADSingleVariableReturnMappingSolution(parameters, &_fe_problem),
     _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
     _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
     _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
@@ -100,19 +100,20 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
   inelastic_strain_increment.zero();
 
-  // Protect against extremely high values of stresses calculated by other viscoplastic materials
-  if (equiv_stress > _maximum_equivalent_stress)
-    mooseException("In ",
-                   _name,
-                   ": equivalent stress (",
-                   equiv_stress,
-                   ") is higher than maximum_equivalent_stress (",
-                   _maximum_equivalent_stress,
-                   ").\nCutting time step.");
-
   // If equivalent stress is present, calculate creep strain increment
-  if (equiv_stress > _minimum_equivalent_stress)
+  if (_coefficient[_qp] && equiv_stress > _minimum_equivalent_stress)
   {
+    // Protect against extremely high values of stresses calculated by other viscoplastic materials
+    if ((_current_execute_flag == EXEC_LINEAR || _current_execute_flag == EXEC_NONLINEAR) &&
+        equiv_stress > _maximum_equivalent_stress)
+      mooseException("In ",
+                     _name,
+                     ": equivalent stress (",
+                     MetaPhysicL::raw_value(equiv_stress),
+                     ") is higher than maximum_equivalent_stress (",
+                     _maximum_equivalent_stress,
+                     ").\nCutting time step.");
+
     // Initalize stress potential
     ADReal dpsi_dgauge(0);
 
@@ -140,13 +141,18 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
   const ADReal new_equiv_stress =
       new_dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * new_dev_stress_squared);
 
-  if (MooseUtils::relativeFuzzyGreaterThan(new_equiv_stress, equiv_stress))
+  if ((_current_execute_flag == EXEC_LINEAR || _current_execute_flag == EXEC_NONLINEAR) &&
+      new_equiv_stress > equiv_stress && std::abs(stress.trace()) / 3.0 > std::abs(_hydro_stress))
     mooseException("In ",
                    _name,
                    ": updated equivalent stress (",
                    MetaPhysicL::raw_value(new_equiv_stress),
                    ") is greater than initial equivalent stress (",
                    MetaPhysicL::raw_value(equiv_stress),
+                   ") and |hydrostatic stress| (",
+                   std::abs(MetaPhysicL::raw_value(stress.trace())) / 3.0,
+                   ") is greater than the initial |hydrostatic stress| (",
+                   std::abs(MetaPhysicL::raw_value(_hydro_stress)),
                    "). Try decreasing max_inelastic_increment to avoid this exception.");
 
   computeStressFinalize(inelastic_strain_increment);
@@ -210,10 +216,13 @@ ADViscoplasticityStressUpdate::computeResidual(const ADReal & equiv_stress,
   if (_verbose)
   {
     Moose::out << "in computeResidual:\n"
-               << "  position: " << _q_point[_qp] << " hydro_stress: " << _hydro_stress
-               << " equiv_stress: " << equiv_stress << " trial_grage: " << trial_gauge
-               << " M: " << M << std::endl;
-    Moose::out << "  residual: " << residual << "  derivative: " << _derivative << std::endl;
+               << "  position: " << _q_point[_qp]
+               << " hydro_stress: " << MetaPhysicL::raw_value(_hydro_stress)
+               << " equiv_stress: " << MetaPhysicL::raw_value(equiv_stress)
+               << " trial_grage: " << MetaPhysicL::raw_value(trial_gauge)
+               << " M: " << MetaPhysicL::raw_value(M) << std::endl;
+    Moose::out << "  residual: " << MetaPhysicL::raw_value(residual)
+               << "  derivative: " << MetaPhysicL::raw_value(_derivative) << std::endl;
   }
 
   return residual;

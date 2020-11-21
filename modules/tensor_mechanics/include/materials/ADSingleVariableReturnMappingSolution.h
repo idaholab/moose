@@ -14,6 +14,7 @@
 #include "InputParameters.h"
 
 class ConsoleStream;
+class FEProblemBase;
 
 /**
  * Base class that provides capability for Newton return mapping
@@ -24,7 +25,8 @@ class ADSingleVariableReturnMappingSolution
 public:
   static InputParameters validParams();
 
-  ADSingleVariableReturnMappingSolution(const InputParameters & parameters);
+  ADSingleVariableReturnMappingSolution(const InputParameters & parameters,
+                                        FEProblemBase * fe_problem_ptr = nullptr);
   virtual ~ADSingleVariableReturnMappingSolution() {}
 
 protected:
@@ -99,6 +101,8 @@ protected:
    * @param total_it               Total iteration count
    */
   virtual void outputIterationSummary(std::stringstream * iter_output, const unsigned int total_it);
+
+  FEProblemBase * _fe_problem_ptr;
 
   /// Whether to check to see whether iterative solution is within admissible range, and set within that range if outside
   bool _check_range;
