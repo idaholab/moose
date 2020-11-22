@@ -797,15 +797,17 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
   _cell_dislocations[_qp] = _old_input_values[_cell_output_index] + _cell_dislocation_increment;
   _wall_dislocations[_qp] = _old_input_values[_wall_output_index] + _wall_dislocation_increment;
 
-  // Prevent the ROM from calculating and proceding with negative dislocations
-  if (_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0)
+  // Prevent the ROM from calculating and proceeding with negative dislocations
+  if ((_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0) && (_apply_strain))
   {
+    const Real negative_cell_dislocations = MetaPhysicL::raw_value(_cell_dislocations[_qp]);
+    const Real negative_wall_dislocations = MetaPhysicL::raw_value(_wall_dislocations[_qp]);
     _cell_dislocations[_qp] = _old_input_values[_cell_output_index];
     _wall_dislocations[_qp] = _old_input_values[_wall_output_index];
     mooseException("The negative values of the cell dislocation density, ",
-                   MetaPhysicL::raw_value(_cell_dislocations[_qp]),
+                   negative_cell_dislocations,
                    ", and/or wall dislocation density, ",
-                   MetaPhysicL::raw_value(_wall_dislocations[_qp]),
+                   negative_wall_dislocations,
                    ". Cutting timestep.");
   }
 
