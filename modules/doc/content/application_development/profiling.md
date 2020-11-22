@@ -54,6 +54,7 @@ Similarly, you can do a heap profiling like this:
 ```
 HEAP_PROFILE_INUSE_INTERVAL=104857600 MOOSE_HEAP_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
 ```
+
 `HEAP_PROFILE_INUSE_INTERVAL` represents that the code dump heap profiling
 information whenever the memory usage increases by the specified number of bytes.
 `104857600` is `100MB`. You could choose a small number as well if your simulation
