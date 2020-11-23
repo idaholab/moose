@@ -66,19 +66,17 @@ FVScalarLagrangeMultiplier::computeJacobian()
 void
 FVScalarLagrangeMultiplier::computeOffDiagJacobian()
 {
-  auto empty_functor = [](const ADReal &, dof_id_type, const std::set<TagID> &) {};
-
   // Primal
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
   const auto primal_r = _lambda[0] * _assembly.elemVolume();
   mooseAssert(_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processDerivatives(primal_r, _var.dofIndices()[0], _matrix_tags, empty_functor);
+  _assembly.processDerivatives(primal_r, _var.dofIndices()[0], _matrix_tags);
 
   // LM
   const auto lm_r = (_u[_qp] - 1.) * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags, empty_functor);
+  _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
 }
 
 #endif
