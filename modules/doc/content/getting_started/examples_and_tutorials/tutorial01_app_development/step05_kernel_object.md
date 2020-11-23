@@ -33,7 +33,7 @@ Now, one might inspect the files that provide the base class, i.e., [`ADKernel.h
 - `_qp`\\
   Current quadrature point index.
 
-There are are several methods that `ADKernel` (and `Kernel`) objects may override. The most important ones are those which work to evaluate the kernel term in the weak form and they are explained in [kernel-methods].
+There are several methods that `ADKernel` (and `Kernel`) objects may override. The most important ones are those which work to evaluate the kernel term in the weak form and they are explained in [kernel-methods].
 
 !table id=kernel-methods caption=Methods used by different types of Kernel objects that compute the residual term.
 | Base | Override | Use |

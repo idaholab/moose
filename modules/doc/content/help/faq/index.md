@@ -13,6 +13,6 @@
 
 ### Mailing lists:
 
-- moose-users@googlegroups.com - Technical Q&A (moderate traffic)
-- moose-announce@googlegroups.com - Announcements (very light traffic)
-- You can also browse our [mailing list](https://groups.google.com/forum/#!forum/moose-users).
+- [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) - Technical Q&A (moderate traffic)
+- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
+- You can also browse our [old technical Q&A mailing list](https://groups.google.com/forum/#!forum/moose-users).

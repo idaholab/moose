@@ -25,7 +25,7 @@ The purpose of these lists is two fold:
 
 ## Idaho National Laboratory Applications
 
-Please contact the [MOOSE-users](help/contact_us.md) email list if you are interested in using one of these applications.
+Please contact the [MOOSE Discussion forum](help/contact_us.md) if you are interested in using one of these applications.
 
 - MARMOT - Nuclear materials phase field and mechanics application
 - RATTLESNAKE - FEM Diffusion, SN, and PN code

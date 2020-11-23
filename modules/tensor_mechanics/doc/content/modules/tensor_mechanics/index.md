@@ -98,9 +98,9 @@ introductory theory pages on the various models:
 !col-end!
 !row-end!
 
-The tensor mechanics module is being developed by users at national laboratories
-and universities around the world. Contact the developers through the
-[moose-users email list](help/contact_us.md optional=True).
+The TensorMechanics module is being developed by users at national laboratories
+and universities around the world. Learn how to get in touch with the developers
+on the [help/contact_us.md optional=True] page.
 
 ## Developing New Tensor Mechanics Code
 

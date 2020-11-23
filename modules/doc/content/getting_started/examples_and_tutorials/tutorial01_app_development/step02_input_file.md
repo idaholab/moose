@@ -177,7 +177,7 @@ Notice that the [!ac](FEM) solution depicted in [results] satisfies the boundary
 
 ### Commit id=commit-demo
 
-A GitHub repository to store the new MOOSE-based application was created as part of the [previous step](tutorial01_app_development/step01_moose_app.md#repo) of this tutorial. The repository should also contain the first commit to the `origin` remote (the online copy). Now that new a file exists in the local repository, i.e., `problems/pressure_diffusion.i`, and since this input file has been verified to produce good results, it should be committed and pushed to the remote. Before proceeding, inspect the status of the local repository as it compares to the `HEAD`, which denotes the version that existed following the most recent commit:
+A GitHub repository to store the new MOOSE-based application was created as part of the [previous step](tutorial01_app_development/step01_moose_app.md#repo) of this tutorial. The repository should also contain the first commit to the `origin` remote (the online copy). Now that a new file exists in the local repository, i.e., `problems/pressure_diffusion.i`, and since this input file has been verified to produce good results, it should be committed and pushed to the remote. Before proceeding, inspect the status of the local repository as it compares to the `HEAD`, which denotes the version that existed following the most recent commit:
 
 ```bash
 cd ~/projects/babbler

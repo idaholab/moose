@@ -33,36 +33,16 @@ make -j4
 If the application is working correctly, the output shows a single passing test. This indicates that
 the application is ready to be further developed. Be sure to recompile and tests the application each time [MOOSE is updated](installation/index.md#update).
 
-### Enable Physics Modules
+### Enable Modules
 
-To enable use of the various [modules/index.md] available from MOOSE in an application, modify the section of `~/projects/your_app_name/Makefile` that is demonstrated below.
+To enable use of the various [modules/index.md] available from MOOSE in an application, modify the section of `~/projects/your_app_name/Makefile` that is shown below.
 
-```script
-################################## MODULES ####################################
-# To use certain physics included with MOOSE, set variables below to
-# yes as needed.  Or set ALL_MODULES to yes to turn on everything (overrides
-# other set variables).
-
-ALL_MODULES                 := no
-
-CHEMICAL_REACTIONS          := no
-CONTACT                     := no
-EXTERNAL_PETSC_SOLVER       := no
-FLUID_PROPERTIES            := no
-FUNCTIONAL_EXPANSION_TOOLS  := no
-HEAT_CONDUCTION             := no
-LEVEL_SET                   := no
-MISC                        := no
-NAVIER_STOKES               := no
-PHASE_FIELD                 := no
-POROUS_FLOW                 := no
-RDG                         := no
-RICHARDS                    := no
-SOLID_MECHANICS             := no
-STOCHASTIC_TOOLS            := no
-TENSOR_MECHANICS            := no
-XFEM                        := no
-```
+!listing stork/Makefile.app
+         link=False
+         language=script
+         start=MODULES
+         end=XFEM
+         include-end=True
 
 Then, to begin using a module's capabilities, recompile the application in the same manner described in the [#compile] section.
 
@@ -82,16 +62,15 @@ A graphical post-processor, particularly one that can read [ExodusII](https://pr
 
 ## Join the Community id=join
 
-Join one of our mailing lists:
+- Join our mailing list for announcements: [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
 
-- [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) - Technical Q&A (moderate traffic)
-- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
+  - Gmail users: Just click the "Join Group" button,
+  - otherwise, send an email to:\\
+    [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
 
-GMail users can just click the "Join group" button.
-Everyone else can join by sending an email to:
 
-- moose-users+subscribe@googlegroups.com
-- moose-announce+subscribe@googlegroups.com
+- If you haven't already, please sign up for GitHub: [github.com/join](https://github.com/join).
+- Visit the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) on GitHub for technical Q&A.
 
 ## Customizing MOOSE Configuration id=configure
 

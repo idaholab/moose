@@ -143,7 +143,7 @@ cd ~/offline/moose
 ./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads --prefix=$HOME/libs/petsc
 ```
 
-Unfortunately, any errors incurred during the above step is going to be beyond the scope of this document. Most likely, an error will be related to a missing library by one of the myriad contributions we are asking to build PETSc with. Please submit a detailed log of the error, to our [moose-users mailing list](https://groups.google.com/forum/#!forum/moose-users). But do be prepared to be asked to contact your system administrator; Errors of this nature normally require admin rights to fulfill the dependency.
+Unfortunately, any errors incurred during the above step is going to be beyond the scope of this document. Most likely, an error will be related to a missing library by one of the myriad contributions we are asking to build PETSc with. Please submit a detailed log of the error, to the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions). But do be prepared to be asked to contact your system administrator; Errors of this nature normally require admin rights to fulfill the dependency.
 
 Proceed only if PETSc completed successfully.
 
@@ -213,7 +213,7 @@ cd ~/offline/moose
 ./scripts/update_and_rebuild_libmesh.sh --skip-submodule-update
 ```
 
-Unfortunately, any errors incurred during these steps is going to be beyond the scope of this document. Please submit a detailed log of the error, to our [moose-users mailing list](https://groups.google.com/forum/#!forum/moose-users).
+Unfortunately, any errors incurred during these steps is going to be beyond the scope of this document. Please submit a detailed log of the error, to the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 Proceed only if libMesh completed successfully.
 
@@ -243,7 +243,7 @@ cd $MOOSE_DIR/test
 make -j 6
 ```
 
-Again, any errors incurred during this step, is going to be beyond the scope of this document. Please submit a detailed log of the error, to our [moose-users mailing list](https://groups.google.com/forum/#!forum/moose-users).
+Again, any errors incurred during this step, is going to be beyond the scope of this document. Please submit a detailed log of the error, to the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 ## Your Application
 
