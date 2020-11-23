@@ -18,11 +18,11 @@
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
  */
-class NSFVAdvectionKernel : public FVMatAdvection, protected NSFVAdvectionBase
+class NSFVMomentumAdvection : public FVMatAdvection, protected NSFVAdvectionBase
 {
 public:
   static InputParameters validParams();
-  NSFVAdvectionKernel(const InputParameters & params);
+  NSFVMomentumAdvection(const InputParameters & params);
 
 protected:
   /**

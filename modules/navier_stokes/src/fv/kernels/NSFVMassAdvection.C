@@ -16,13 +16,13 @@ registerMooseObject("NavierStokesApp", NSFVMassAdvection);
 InputParameters
 NSFVMassAdvection::validParams()
 {
-  InputParameters params = NSFVAdvectionKernel::validParams();
+  InputParameters params = NSFVMomentumAdvection::validParams();
   params.set<MaterialPropertyName>("advected_quantity") = "rho";
   params.suppressParameter<MaterialPropertyName>("advected_quantity");
   return params;
 }
 
-NSFVMassAdvection::NSFVMassAdvection(const InputParameters & params) : NSFVAdvectionKernel(params)
+NSFVMassAdvection::NSFVMassAdvection(const InputParameters & params) : NSFVMomentumAdvection(params)
 {
 }
 

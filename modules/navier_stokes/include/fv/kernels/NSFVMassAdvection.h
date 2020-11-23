@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "NSFVAdvectionKernel.h"
+#include "NSFVMomentumAdvection.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
 /**
  * A flux kernel transporting mass across cell faces
  */
-class NSFVMassAdvection : public NSFVAdvectionKernel
+class NSFVMassAdvection : public NSFVMomentumAdvection
 {
 public:
   static InputParameters validParams();
