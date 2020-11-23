@@ -16,6 +16,7 @@
 #include "ExecFlagEnum.h"
 #include "InfixIterator.h"
 
+#include "libmesh/utility.h"
 #include "libmesh/elem.h"
 
 // External includes
@@ -335,6 +336,125 @@ splitFileName(std::string full_file)
 
   // Return the path and file as a pair
   return std::pair<std::string, std::string>(path, file);
+}
+
+void
+makedirs(const std::string & dir_name, bool throw_on_failure)
+{
+  // split path into directories with delimiter '/'
+  std::vector<std::string> split_dir_names;
+  MooseUtils::tokenize(dir_name, split_dir_names);
+
+  auto n = split_dir_names.size();
+
+  // remove '.' and '..' when possible
+  auto i = n;
+  i = 0;
+  while (i != n)
+  {
+    if (split_dir_names[i] == ".")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 1] = split_dir_names[j];
+      --n;
+    }
+    else if (i > 0 && split_dir_names[i] == ".." && split_dir_names[i - 1] != "..")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 2] = split_dir_names[j];
+      n -= 2;
+      --i;
+    }
+    else
+      ++i;
+  }
+  if (n == 0)
+    return;
+
+  split_dir_names.resize(n);
+
+  // start creating directories recursively
+  std::string cur_dir = dir_name[0] == '/' ? "" : ".";
+  for (auto & dir : split_dir_names)
+  {
+    cur_dir += "/" + dir;
+
+    if (!pathExists(cur_dir))
+    {
+      auto code = Utility::mkdir(cur_dir.c_str());
+      if (code != 0)
+      {
+        std::string msg = "Failed creating directory " + dir_name;
+        if (throw_on_failure)
+          throw std::invalid_argument(msg);
+        else
+          mooseError(msg);
+      }
+    }
+  }
+}
+
+void
+removedirs(const std::string & dir_name, bool throw_on_failure)
+{
+  // split path into directories with delimiter '/'
+  std::vector<std::string> split_dir_names;
+  MooseUtils::tokenize(dir_name, split_dir_names);
+
+  auto n = split_dir_names.size();
+
+  // remove '.' and '..' when possible
+  auto i = n;
+  i = 0;
+  while (i != n)
+  {
+    if (split_dir_names[i] == ".")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 1] = split_dir_names[j];
+      --n;
+    }
+    else if (i > 0 && split_dir_names[i] == ".." && split_dir_names[i - 1] != "..")
+    {
+      for (auto j = i + 1; j < n; ++j)
+        split_dir_names[j - 2] = split_dir_names[j];
+      n -= 2;
+      --i;
+    }
+    else
+      ++i;
+  }
+  if (n == 0)
+    return;
+
+  split_dir_names.resize(n);
+
+  // start removing directories recursively
+  std::string base_dir = dir_name[0] == '/' ? "" : ".";
+  for (i = n; i > 0; --i)
+  {
+    std::string cur_dir = base_dir;
+    auto j = i;
+    for (j = 0; j < i; ++j)
+      cur_dir += "/" + split_dir_names[j];
+
+    // listDir should return at least '.' and '..'
+    if (pathExists(cur_dir) && listDir(cur_dir).size() == 2)
+    {
+      auto code = rmdir(cur_dir.c_str());
+      if (code != 0)
+      {
+        std::string msg = "Failed removing directory " + dir_name;
+        if (throw_on_failure)
+          throw std::invalid_argument(msg);
+        else
+          mooseError(msg);
+      }
+    }
+    else
+      // stop removing
+      break;
+  }
 }
 
 std::string
