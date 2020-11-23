@@ -18,6 +18,8 @@ TestDeclareReporter::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addParam<ReporterValueName>(
       "int_name", "int", "The name of the interger data"); // MooseDocs:data
+  params.addParam<ReporterValueName>("distributed_vector_name",
+                                     "Distributed vector reporter to produce.");
   return params;
 }
 
@@ -31,7 +33,11 @@ TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
     _scatter_value(
         declareValueByName<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
     _gather_value(declareValueByName<std::vector<dof_id_type>, ReporterGatherContext>(
-        "gather")) // MooseDocs:gather
+        "gather")), // MooseDocs:gather
+    _distributed_vector(isParamValid("distributed_vector_name")
+                            ? &declareValue<std::vector<dof_id_type>>("distributed_vector_name",
+                                                                      REPORTER_MODE_DISTRIBUTED)
+                            : nullptr)
 {
   if (processor_id() == 0)
     for (dof_id_type rank = 0; rank < n_processors(); ++rank)
@@ -51,6 +57,14 @@ TestDeclareReporter::execute()
     _bcast_value = 42;
 
   _gather_value.resize(1, processor_id());
+
+  if (_distributed_vector)
+  {
+    _distributed_vector->resize(_vector.size());
+    (*_distributed_vector)[0] = processor_id();
+    for (unsigned int i = 1; i < _distributed_vector->size(); ++i)
+      (*_distributed_vector)[i] = (*_distributed_vector)[i - 1] * 10;
+  }
 }
 // MooseDocs:execute_end
 
