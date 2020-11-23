@@ -21,6 +21,7 @@
 #include "libmesh/bounding_box.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
+#include "timpi/standard_type.h"
 
 // C++ includes
 #include <string>
@@ -807,6 +808,22 @@ template <>
 struct IsLikeReal<DualReal>
 {
   static constexpr bool value = true;
+};
+
+/**
+ * Custom type trait that has a ::value of true for types that can be broadcasted
+ */
+template <typename T>
+struct canBroadcast
+{
+  static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
+                                std::is_same<T, std::string>::value;
+};
+template <typename T>
+struct canBroadcast<std::vector<T>>
+{
+  static constexpr bool value = std::is_base_of<TIMPI::DataType, TIMPI::StandardType<T>>::value ||
+                                std::is_same<T, std::string>::value;
 };
 
 /**
