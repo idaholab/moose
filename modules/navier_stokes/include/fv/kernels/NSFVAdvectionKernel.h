@@ -37,6 +37,18 @@ protected:
 
   void residualSetup() override { clearRCCoeffs(); }
   void jacobianSetup() override { clearRCCoeffs(); }
+
+  /// The density on the FaceInfo elem
+  const ADMaterialProperty<Real> & _rho_elem;
+
+  /// The density on the FaceInfo neighbor
+  const ADMaterialProperty<Real> & _rho_neighbor;
+
+  /// The dynamic viscosity on the FaceInfo elem
+  const ADMaterialProperty<Real> & _mu_elem;
+
+  /// The dynamic viscosity on the FaceInfo neighbor
+  const ADMaterialProperty<Real> & _mu_neighbor;
 };
 
 #endif

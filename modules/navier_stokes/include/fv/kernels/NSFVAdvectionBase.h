@@ -54,19 +54,12 @@ protected:
   const MooseVariableFV<Real> * wVar() const { return _w_var; }
 
   /**
-   * The dynamic viscosity
-   */
-  Real mu() const { return _mu; }
-
-  /**
-   * The density
-   */
-  Real rho() const { return _rho; }
-
-  /**
    * Returns the Rhie-Chow 'a' coefficient for the requested element \p elem
+   * @param elem The elem to get the Rhie-Chow coefficient for
+   * @param mu The dynamic viscosity
+   * @param rho The density
    */
-  const ADReal & rcCoeff(const Elem & elem) const;
+  const ADReal & rcCoeff(const Elem & elem, const ADReal & mu, const ADReal & rho) const;
 
   /**
    * Clear the RC 'a' coefficient cache
@@ -86,8 +79,11 @@ private:
 
   /**
    * method for computing the Rhie-Chow 'a' coefficients for the given elem \p elem
+   * @param elem The elem to compute the Rhie-Chow coefficient for
+   * @param mu The dynamic viscosity
+   * @param rho The density
    */
-  ADReal coeffCalculator(const Elem & elem) const;
+  ADReal coeffCalculator(const Elem & elem, const ADReal & mu, const ADReal & rho) const;
 
 protected:
   /// pressure variable
@@ -98,11 +94,6 @@ protected:
   const MooseVariableFV<Real> * const _v_var;
   /// z-velocity
   const MooseVariableFV<Real> * const _w_var;
-
-  /// The viscosity
-  const Real _mu;
-  /// The density
-  const Real _rho;
 
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;

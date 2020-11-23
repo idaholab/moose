@@ -41,7 +41,9 @@ NSFVFunctionBC::validParams()
 NSFVFunctionBC::NSFVFunctionBC(const InputParameters & params)
   : FVMatAdvectionFunctionBC(params),
     NSFVAdvectionBase(params),
-    _pressure_exact_solution(getFunction("pressure_exact_solution"))
+    _pressure_exact_solution(getFunction("pressure_exact_solution")),
+    _rho(getADMaterialProperty<Real>("rho")),
+    _mu(getADMaterialProperty<Real>("mu"))
 {
 }
 
@@ -106,7 +108,7 @@ NSFVFunctionBC::interpolate(Moose::FV::InterpMethod m,
   // have to essentially create an entire fictional element with defined geometric locations of
   // the faces in order to compute inward advective flux and diffusive flux. For now I'm going to
   // try not doing that and just use the a coeff of the elem
-  const ADReal & face_a = rcCoeff(*elem);
+  const ADReal & face_a = rcCoeff(*elem, _mu[_qp], _rho[_qp]);
   const Real face_volume = elem_volume;
 
   const ADReal face_D = face_volume / face_a;

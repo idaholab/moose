@@ -35,8 +35,8 @@ NSFVAdvectionBase::validParams()
       "The interpolation to use for the velocity. Options are "
       "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
 
-  params.addRequiredParam<Real>("mu", "The viscosity");
-  params.addRequiredParam<Real>("rho", "The density");
+  params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
+  params.addRequiredParam<MaterialPropertyName>("rho", "The density");
   return params;
 }
 
@@ -55,9 +55,7 @@ NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const MooseVariableFV<Real> *>(&_nsfv_subproblem.getVariable(
                      _nsfv_tid, params.get<std::vector<VariableName>>("w").front()))
-               : nullptr),
-    _mu(params.get<Real>("mu")),
-    _rho(params.get<Real>("rho"))
+               : nullptr)
 {
   if (!_p_var)
     mooseError("the pressure must be a finite volume variable.");
@@ -91,7 +89,7 @@ NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
 }
 
 const ADReal &
-NSFVAdvectionBase::rcCoeff(const Elem & elem) const
+NSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu, const ADReal & rho) const
 {
   auto it = _rc_a_coeffs.find(&_nsfv_app);
   mooseAssert(it != _rc_a_coeffs.end(),
@@ -109,7 +107,7 @@ NSFVAdvectionBase::rcCoeff(const Elem & elem) const
 
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
-  auto emplace_ret = my_map.emplace(&elem, coeffCalculator(elem));
+  auto emplace_ret = my_map.emplace(&elem, coeffCalculator(elem, mu, rho));
 
   mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
@@ -117,7 +115,7 @@ NSFVAdvectionBase::rcCoeff(const Elem & elem) const
 }
 
 ADReal
-NSFVAdvectionBase::coeffCalculator(const Elem & elem) const
+NSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu, const ADReal & rho) const
 {
   ADReal coeff = 0;
 
@@ -128,12 +126,12 @@ NSFVAdvectionBase::coeffCalculator(const Elem & elem) const
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff, &elem_velocity, this](const Elem & /*functor_elem*/,
-                                                       const Elem * const neighbor,
-                                                       const FaceInfo * const fi,
-                                                       const Point & surface_vector,
-                                                       Real coord,
-                                                       const bool /*elem_has_info*/) {
+  auto action_functor = [&coeff, &elem_velocity, &mu, &rho, this](const Elem & /*functor_elem*/,
+                                                                  const Elem * const neighbor,
+                                                                  const FaceInfo * const fi,
+                                                                  const Point & surface_vector,
+                                                                  Real coord,
+                                                                  const bool /*elem_has_info*/) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
     if (_v_var)
@@ -149,12 +147,12 @@ NSFVAdvectionBase::coeffCalculator(const Elem & elem) const
                            *fi,
                            neighbor == fi->neighborPtr());
 
-    ADReal mass_flow = _rho * interp_v * surface_vector;
+    ADReal mass_flow = rho * interp_v * surface_vector;
 
     coeff += -mass_flow;
 
     // Now add the viscous flux
-    coeff += _mu * fi->faceArea() * coord / (fi->elemCentroid() - fi->neighborCentroid()).norm();
+    coeff += mu * fi->faceArea() * coord / (fi->elemCentroid() - fi->neighborCentroid()).norm();
   };
 
   Moose::FV::loopOverElemFaceInfo(elem, _nsfv_subproblem.mesh(), _nsfv_subproblem, action_functor);
