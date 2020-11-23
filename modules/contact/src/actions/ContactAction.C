@@ -43,18 +43,8 @@ ContactAction::validParams()
   InputParameters params = Action::validParams();
   params += ContactAction::commonParameters();
 
-  params.addParam<BoundaryName>("primary", "The primary surface");
-  params.addParam<BoundaryName>("secondary", "The secondary surface");
-  params.addDeprecatedParam<BoundaryName>(
-      "master",
-      "The primary surface",
-      "The 'master' parameter will be removed on September 1, 2020. "
-      "Please use the 'primary' parameter instead.");
-  params.addDeprecatedParam<BoundaryName>(
-      "slave",
-      "The secondary surface",
-      "The 'slave' parameter will be removed on September 1, 2020. "
-      "Please use the 'secondary' parameter instead.");
+  params.addRequiredParam<BoundaryName>("primary", "The primary surface");
+  params.addRequiredParam<BoundaryName>("secondary", "The secondary surface");
 
   params.addParam<MeshGeneratorName>("mesh", "", "The mesh generator for mortar method");
   params.addParam<VariableName>("secondary_gap_offset",
@@ -131,10 +121,8 @@ ContactAction::validParams()
 
 ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
-    _primary(isParamValid("primary") ? getParam<BoundaryName>("primary")
-                                     : getParam<BoundaryName>("master")),
-    _secondary(isParamValid("secondary") ? getParam<BoundaryName>("secondary")
-                                         : getParam<BoundaryName>("slave")),
+    _primary(getParam<BoundaryName>("primary")),
+    _secondary(getParam<BoundaryName>("secondary")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
