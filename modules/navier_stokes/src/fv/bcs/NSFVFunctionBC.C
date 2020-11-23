@@ -30,6 +30,9 @@ NSFVFunctionBC::validParams()
   InputParameters params = FVMatAdvectionFunctionBC::validParams();
   params += NSFVAdvectionBase::validParams();
 
+  // We need 2 ghost layers for the Rhie-Chow interpolation
+  params.set<unsigned short>("ghost_layers") = 2;
+
   params.addRequiredParam<FunctionName>("pressure_exact_solution",
                                         "The function describing the pressure exact solution.");
   return params;

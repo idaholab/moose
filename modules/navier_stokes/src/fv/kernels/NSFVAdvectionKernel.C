@@ -29,6 +29,10 @@ NSFVAdvectionKernel::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
   params += NSFVAdvectionBase::validParams();
+
+  // We need 2 ghost layers for the Rhie-Chow interpolation
+  params.set<unsigned short>("ghost_layers") = 2;
+
   return params;
 }
 
