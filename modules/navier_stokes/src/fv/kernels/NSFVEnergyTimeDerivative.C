@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVEnergyTimeDerivative.h"
+#include "NSFVEnergyTimeDerivative.h"
 
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", FVEnergyTimeDerivative);
+registerMooseObject("NavierStokesApp", NSFVEnergyTimeDerivative);
 
 InputParameters
-FVEnergyTimeDerivative::validParams()
+NSFVEnergyTimeDerivative::validParams()
 {
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
@@ -24,7 +24,7 @@ FVEnergyTimeDerivative::validParams()
   return params;
 }
 
-FVEnergyTimeDerivative::FVEnergyTimeDerivative(const InputParameters & params)
+NSFVEnergyTimeDerivative::NSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
     _rho(getADMaterialProperty<Real>("rho_name")),
     _cp(getADMaterialProperty<Real>("cp_name"))
@@ -32,7 +32,7 @@ FVEnergyTimeDerivative::FVEnergyTimeDerivative(const InputParameters & params)
 }
 
 ADReal
-FVEnergyTimeDerivative::computeQpResidual()
+NSFVEnergyTimeDerivative::computeQpResidual()
 {
   return _rho[_qp] * _cp[_qp] * FVTimeKernel::computeQpResidual();
 }
