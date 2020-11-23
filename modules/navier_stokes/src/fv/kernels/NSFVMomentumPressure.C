@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVMomPressure.h"
+#include "NSFVMomentumPressure.h"
 
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", FVMomPressure);
+registerMooseObject("NavierStokesApp", NSFVMomentumPressure);
 
 InputParameters
-FVMomPressure::validParams()
+NSFVMomentumPressure::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
   params.addClassDescription(
@@ -27,13 +27,13 @@ FVMomPressure::validParams()
   return params;
 }
 
-FVMomPressure::FVMomPressure(const InputParameters & params)
+NSFVMomentumPressure::NSFVMomentumPressure(const InputParameters & params)
   : FVMatAdvection(params), _index(getParam<MooseEnum>("momentum_component"))
 {
 }
 
 ADReal
-FVMomPressure::computeQpResidual()
+NSFVMomentumPressure::computeQpResidual()
 {
   ADReal p_interface;
 

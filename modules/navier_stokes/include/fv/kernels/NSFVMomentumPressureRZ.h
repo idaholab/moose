@@ -9,17 +9,16 @@
 
 #pragma once
 
-#include "FVMatAdvection.h"
+#include "FVElementalKernel.h"
 
-class FVMomPressure : public FVMatAdvection
+class NSFVMomentumPressureRZ : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  FVMomPressure(const InputParameters & params);
+  NSFVMomentumPressureRZ(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// index x|y|z
-  unsigned int _index;
+  const ADVariableValue & _p;
 };
