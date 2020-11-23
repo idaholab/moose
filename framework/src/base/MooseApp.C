@@ -54,6 +54,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/utility.h"
 
 // System include for dynamic library methods
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -344,29 +345,47 @@ MooseApp::MooseApp(InputParameters parameters)
     _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
-  if (std::getenv("MOOSE_PROFILE_BASE") && std::getenv("MOOSE_HEAP_BASE"))
-    mooseError("Can not do CPU and heap profiling together");
-
-  // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
-  if (std::getenv("MOOSE_PROFILE_BASE"))
+  if (isUltimateMaster())
   {
-    static std::string profile_file =
-        std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+    if (std::getenv("MOOSE_PROFILE_BASE") && std::getenv("MOOSE_HEAP_BASE"))
+      mooseError("Can not do CPU and heap profiling together");
 
-    _cpu_profiling = true;
-    ProfilerStart(profile_file.c_str());
+    // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
+    if (std::getenv("MOOSE_PROFILE_BASE"))
+    {
+      static std::string profile_file =
+          std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
+
+      _cpu_profiling = true;
+
+      auto name = MooseUtils::splitFileName(profile_file);
+      if (!name.first.empty())
+        Utility::mkdir(name.first.c_str());
+
+      if (!ProfilerStart(profile_file.c_str()))
+        mooseError("CPU profiler is not started properly");
+    }
+
+    // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
+    if (std::getenv("MOOSE_HEAP_BASE"))
+    {
+      static std::string profile_file =
+          std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
+
+      _heap_profiling = true;
+
+      auto name = MooseUtils::splitFileName(profile_file);
+      if (!name.first.empty())
+        Utility::mkdir(name.first.c_str());
+
+      HeapProfilerStart(profile_file.c_str());
+      if (!IsHeapProfilerRunning())
+        mooseError("Heap profiler is not started properly");
+    }
   }
-
-  // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
-  if (std::getenv("MOOSE_HEAP_BASE"))
-  {
-    static std::string profile_file =
-        std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
-
-    _heap_profiling = true;
-    HeapProfilerStart(profile_file.c_str());
-  }
-
+#else
+  if (std::getenv("MOOSE_PROFILE_BASE") || std::getenv("MOOSE_HEAP_BASE"))
+    mooseError("gperftool is not available for CPU or heap profiling");
 #endif
 
   Registry::addKnownLabel(_type);
@@ -484,12 +503,15 @@ MooseApp::checkRegistryLabels()
 MooseApp::~MooseApp()
 {
 #ifdef HAVE_GPERFTOOLS
-  // CPU profiling stop
-  if (_cpu_profiling)
-    ProfilerStop();
-  // Heap profiling stop
-  if (_heap_profiling)
-    HeapProfilerStop();
+  if (isUltimateMaster())
+  {
+    // CPU profiling stop
+    if (_cpu_profiling)
+      ProfilerStop();
+    // Heap profiling stop
+    if (_heap_profiling)
+      HeapProfilerStop();
+  }
 #endif
   _action_warehouse.clear();
   _executioner.reset();
