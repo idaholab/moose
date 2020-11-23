@@ -89,7 +89,7 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
 void
 ADComputeMultipleInelasticStress::initQpStatefulProperties()
 {
-  ADComputeStressBase::initQpStatefulProperties();
+  ADComputeFiniteStrainElasticStress::initQpStatefulProperties();
   _inelastic_strain[_qp].zero();
 }
 
@@ -142,7 +142,13 @@ ADComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
     if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
       _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
     else
-      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+    {
+      ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
+      elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
+
+      _stress[_qp] =
+          elasticity_tensor_rotated * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    }
   }
   else
   {
@@ -210,8 +216,12 @@ ADComputeMultipleInelasticStress::updateQpState(
         _stress[_qp] =
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
       else
-        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+      {
+        ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
+        elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
+        _stress[_qp] = _stress_old[_qp] + elasticity_tensor_rotated * elastic_strain_increment;
+      }
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
       // the strain increment into an elastic part (elastic_strain_increment) and an
@@ -297,7 +307,12 @@ ADComputeMultipleInelasticStress::updateQpStateSingleModel(
   if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
   else
-    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+  {
+    ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
+    elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
+
+    _stress[_qp] = _stress_old[_qp] + elasticity_tensor_rotated * elastic_strain_increment;
+  }
 
   computeAdmissibleState(
       model_number, elastic_strain_increment, combined_inelastic_strain_increment);

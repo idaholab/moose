@@ -53,6 +53,11 @@ protected:
                            const ADDenseVector & stress_new,
                            const ADReal & residual,
                            const ADReal & scalar_effective_inelastic_strain) override;
+  /**
+   * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
+   * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
+   */
+  void computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -61,6 +66,14 @@ protected:
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
                                      const ADReal & /*delta_gamma*/) override;
+
+  /**
+   * Perform any necessary steps to finalize state after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
+  virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
+                                     const ADReal & delta_gamma,
+                                     ADRankTwoTensor & stress) override;
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;
@@ -97,4 +110,7 @@ protected:
 
   /// Square of the q function for orthotropy
   ADReal _qsigma;
+
+  ADDenseVector _eigenvalues_hill;
+  ADDenseMatrix _eigenvectors_hill;
 };

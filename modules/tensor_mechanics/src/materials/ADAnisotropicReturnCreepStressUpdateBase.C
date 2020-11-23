@@ -51,8 +51,10 @@ ADAnisotropicReturnCreepStressUpdateBase::propagateQpStatefulProperties()
 }
 
 void
-ADAnisotropicReturnCreepStressUpdateBase::computeStressFinalize(
-    const ADRankTwoTensor & creep_strain_increment)
+ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
+    ADRankTwoTensor & inelasticStrainIncrement,
+    const ADRankTwoTensor & /*stress*/,
+    const ADReal & /*delta_gamma*/)
 {
-  _creep_strain[_qp] = _creep_strain_old[_qp] + creep_strain_increment;
+  _creep_strain[_qp] = _creep_strain_old[_qp] + inelasticStrainIncrement;
 }

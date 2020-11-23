@@ -24,6 +24,25 @@
  * This class is based on the Elasto-viscoplasticity algorithm in F. Dunne and N.
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
+
+#include "ADReal.h"
+
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
+
+namespace Eigen
+{
+namespace internal
+{
+template <>
+struct cast_impl<ADReal, int>
+{
+  static inline int run(const ADReal & x) { return static_cast<int>(MetaPhysicL::raw_value(x)); }
+};
+} // namespace internal
+} // namespace Eigen
+typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+
 class ADGeneralizedRadialReturnStressUpdate : public ADStressUpdateBase,
                                               public ADGeneralizedReturnMappingSolution
 {
@@ -104,7 +123,9 @@ protected:
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
-  virtual void computeStressFinalize(const ADRankTwoTensor & /*inelasticStrainIncrement*/) {}
+  virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
+                                     const ADReal & delta_gamma,
+                                     ADRankTwoTensor & stress) = 0;
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
@@ -115,26 +136,15 @@ protected:
   {
     mooseError("computeStrainFinalize needs to be implemented by a child class.");
   }
-  /**
-   * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
-   * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
-   */
-  void computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor);
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
-  /// 3 * shear modulus
-  ADReal _three_shear_modulus;
+  /// 2 * shear modulus
+  ADReal _two_shear_modulus;
 
   ADMaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
   const bool _apply_strain;
-
-  /// Hill constants for orthotropic creep
-  std::vector<Real> _hill_constants; // ADReal?
-
-  ADDenseVector _eigenvalues_hill;
-  ADDenseMatrix _eigenvectors_hill;
 };

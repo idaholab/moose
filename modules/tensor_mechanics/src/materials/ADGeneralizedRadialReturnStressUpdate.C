@@ -43,32 +43,31 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
     _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
-    _apply_strain(getParam<bool>("apply_strain")),
-    _hill_constants(6),
-    _eigenvalues_hill(6),
-    _eigenvectors_hill(6, 6)
+    _apply_strain(getParam<bool>("apply_strain"))
 {
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
-
-  ADDenseMatrix hill_tensor(6, 6);
-  hill_tensor(0, 0) = G + H;
-  hill_tensor(1, 1) = F + H;
-  hill_tensor(2, 2) = F + G;
-  hill_tensor(0, 1) = hill_tensor(1, 0) = -H;
-  hill_tensor(0, 2) = hill_tensor(2, 0) = -G;
-  hill_tensor(1, 2) = hill_tensor(2, 1) = -F;
-
-  hill_tensor(3, 3) = 2.0 * N;
-  hill_tensor(4, 4) = 2.0 * L;
-  hill_tensor(5, 5) = 2.0 * M;
-
-  computeHillTensorEigenDecomposition(hill_tensor);
+  //  const Real F = _hill_constants[0];
+  //  const Real G = _hill_constants[1];
+  //  const Real H = _hill_constants[2];
+  //  const Real L = _hill_constants[3];
+  //  const Real M = _hill_constants[4];
+  //  const Real N = _hill_constants[5];
+  //
+  //  Moose::out << "This is G: " << G << "\n";
+  //
+  //  ADDenseMatrix hill_tensor(6, 6);
+  //  hill_tensor(0, 0) = G + H;
+  //  hill_tensor(1, 1) = F + H;
+  //  hill_tensor(2, 2) = F + G;
+  //  hill_tensor(0, 1) = hill_tensor(1, 0) = -H;
+  //  hill_tensor(0, 2) = hill_tensor(2, 0) = -G;
+  //  hill_tensor(1, 2) = hill_tensor(2, 1) = -F;
+  //
+  //  hill_tensor(3, 3) = 2.0 * N;
+  //  hill_tensor(4, 4) = 2.0 * L;
+  //  hill_tensor(5, 5) = 2.0 * M;
+  //
+  //  computeHillTensorEigenDecomposition(hill_tensor);
 }
 
 void
@@ -111,26 +110,24 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & strain_incr
   stress_dev(4) = deviatoric_trial_stress(1, 2);
   stress_dev(5) = deviatoric_trial_stress(0, 2);
 
-  ADDenseMatrix rotation_matrix_transpose(6, 6);
-  _eigenvectors_hill.get_transpose(rotation_matrix_transpose);
+  //  ADDenseMatrix rotation_matrix_transpose(6, 6);
+  //  _eigenvectors_hill.get_transpose(rotation_matrix_transpose);
+  //
+  //  ADDenseVector stress_dev_hat(6);
+  //  rotation_matrix_transpose.vector_mult(stress_dev_hat, stress_dev);
 
-  ADDenseVector stress_dev_hat(6);
-  rotation_matrix_transpose.vector_mult(stress_dev_hat, stress_dev);
-
-  computeStressInitialize(stress_dev_hat, elasticity_tensor);
+  computeStressInitialize(stress_dev, elasticity_tensor);
 
   // Use Newton iteration to determine a plastic multiplier variable
   ADReal delta_gamma = 0.0;
   // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
-  // computeStressInitialize(effective_trial_stress, elasticity_tensor);
+  _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   ADReal scalar_effective_inelastic_strain = 0.0;
-  if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(stress_dev_hat).l2_norm(), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(stress_dev).l2_norm(), 0.0))
   {
-    returnMappingSolve(stress_dev_hat, stress_new_vector, delta_gamma, _console);
+    returnMappingSolve(stress_dev, stress_new_vector, delta_gamma, _console);
     if (scalar_effective_inelastic_strain != 0.0)
       computeStrainFinalize(inelastic_strain_increment, stress_new, delta_gamma);
     else
@@ -151,40 +148,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & strain_incr
     stress_new = elasticity_tensor * (elastic_strain_old + strain_increment);
   }
 
-  computeStressFinalize(inelastic_strain_increment);
-}
-
-void
-ADGeneralizedRadialReturnStressUpdate::computeHillTensorEigenDecomposition(
-    ADDenseMatrix & hill_tensor)
-{
-  unsigned int dimension = hill_tensor.n();
-  DenseMatrix<Real> hill_tensor_real = MetaPhysicL::raw_value(hill_tensor);
-  // Initializing temporary objects for the eigenvalues and eigenvectors since
-  // evd_left() returns an unordered vector of eigenvalues.
-  DenseVector<Real> eigenvalues(dimension);
-  DenseVector<Real> eigenvalues_imag(dimension);
-
-  DenseMatrix<Real> eigenvectors(dimension, dimension);
-
-  // Performing the eigenvalue decomposition
-  //  ADRealEigenMatrix hill_eigen_tensor(6, 6);
-  //  hill_eigen_tensor(0, 0) = 1.0;
-  //  hill_eigen_tensor(1, 1) = 1.0;
-  //  hill_eigen_tensor(2, 2) = 1.0;
-  //  hill_eigen_tensor(3, 3) = 1.0;
-  //  hill_eigen_tensor(4, 4) = 1.0;
-  //  hill_eigen_tensor(5, 5) = 1.0;
-
-  // compute eigen values and eigen vectors
-  // MatrixXd, EigenMatrix
-  hill_tensor_real.evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
-
-  _eigenvalues_hill = eigenvalues;
-  _eigenvectors_hill = eigenvectors;
-  Moose::out << "eigenvalues: " << eigenvalues << "\n";
-  Moose::out << "eigenvectors: " << eigenvectors << "\n";
-  // printEigenvalues();
+  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new);
 }
 
 ADReal

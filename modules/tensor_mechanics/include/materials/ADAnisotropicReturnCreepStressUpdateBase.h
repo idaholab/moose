@@ -39,7 +39,10 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
-  virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
+  /**
+   * Does the model require the elasticity tensor to be isotropic?
+   */
+  bool requiresIsotropicTensor() override { return false; }
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -47,10 +50,7 @@ protected:
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
-                                     const ADReal & /*delta_gamma*/) override
-  {
-    mooseError("computeStrainFinalize needs to be implemented by a child class.");
-  }
+                                     const ADReal & /*delta_gamma*/) override;
 
   /// String that is prepended to the creep_strain Material Property
   const std::string _creep_prepend;

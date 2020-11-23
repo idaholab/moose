@@ -59,16 +59,21 @@
   [../]
 []
 
-[Materials]
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy'
+    use_automatic_differentiation = true
+  [../]
+[]
 
-  [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 1e10
-    poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ADComputeIncrementalSmallStrain
-  [../]
+[Materials]
+  [elasticity_tensor]
+    type = ADComputeElasticityTensor
+    fill_method = orthotropic
+    C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
+  []
   [./elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_creep"
@@ -146,6 +151,7 @@
 
   num_steps = 200
   dt = 1.0e2
+  automatic_scaling = true
 []
 
 [Postprocessors]
