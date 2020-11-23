@@ -15,7 +15,8 @@
 #include "SubProblem.h"
 #include "MooseVariableFV.h"
 
-std::vector<std::unordered_map<const Elem *, ADReal>> NSFVAdvectionBase::_rc_a_coeffs;
+std::unordered_map<const MooseApp *, std::vector<std::unordered_map<const Elem *, ADReal>>>
+    NSFVAdvectionBase::_rc_a_coeffs;
 
 InputParameters
 NSFVAdvectionBase::validParams()
@@ -40,7 +41,8 @@ NSFVAdvectionBase::validParams()
 }
 
 NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
-  : _nsfv_subproblem(*params.getCheckedPointerParam<SubProblem *>("_subproblem")),
+  : _nsfv_app(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    _nsfv_subproblem(*params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _nsfv_tid(params.get<THREAD_ID>("_tid")),
     _p_var(dynamic_cast<const MooseVariableFV<Real> *>(&_nsfv_subproblem.getVariable(
         _nsfv_tid, params.get<std::vector<VariableName>>("pressure").front()))),
@@ -82,18 +84,28 @@ NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
                static_cast<std::string>(velocity_interp_method));
 
   if (_nsfv_tid == 0)
-    _rc_a_coeffs.resize(libMesh::n_threads());
+  {
+    auto & vec_of_coeffs_map = _rc_a_coeffs[&_nsfv_app];
+    vec_of_coeffs_map.resize(libMesh::n_threads());
+  }
 }
 
 const ADReal &
 NSFVAdvectionBase::rcCoeff(const Elem & elem) const
 {
-  auto & my_map = _rc_a_coeffs[_nsfv_tid];
+  auto it = _rc_a_coeffs.find(&_nsfv_app);
+  mooseAssert(it != _rc_a_coeffs.end(),
+              "No RC coeffs structure exists for the given MooseApp pointer");
+  mooseAssert(_nsfv_tid < it->second.size(),
+              "The RC coeffs structure size "
+                  << it->second.size() << " is greater than or equal to the provided thread ID "
+                  << _nsfv_tid);
+  auto & my_map = it->second[_nsfv_tid];
 
-  auto it = my_map.find(&elem);
+  auto rc_map_it = my_map.find(&elem);
 
-  if (it != my_map.end())
-    return it->second;
+  if (rc_map_it != my_map.end())
+    return rc_map_it->second;
 
   // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
   // boolean denoting whether a new insertion took place
@@ -148,6 +160,19 @@ NSFVAdvectionBase::coeffCalculator(const Elem & elem) const
   Moose::FV::loopOverElemFaceInfo(elem, _nsfv_subproblem.mesh(), _nsfv_subproblem, action_functor);
 
   return coeff;
+}
+
+void
+NSFVAdvectionBase::clearRCCoeffs()
+{
+  auto it = _rc_a_coeffs.find(&_nsfv_app);
+  mooseAssert(it != _rc_a_coeffs.end(),
+              "No RC coeffs structure exists for the given MooseApp pointer");
+  mooseAssert(_nsfv_tid < it->second.size(),
+              "The RC coeffs structure size "
+                  << it->second.size() << " is greater than or equal to the provided thread ID "
+                  << _nsfv_tid);
+  it->second[_nsfv_tid].clear();
 }
 
 #endif

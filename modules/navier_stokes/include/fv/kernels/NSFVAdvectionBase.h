@@ -22,6 +22,7 @@
 template <typename>
 class MooseVariableFV;
 class SubProblem;
+class MooseApp;
 
 /**
  * Common base that both NSFV flux kernels and flux boundary conditions can inherit from
@@ -70,16 +71,18 @@ protected:
   /**
    * Clear the RC 'a' coefficient cache
    */
-  void clearRCCoeffs() { _rc_a_coeffs[_nsfv_tid].clear(); }
+  void clearRCCoeffs();
 
 private:
+  const MooseApp & _nsfv_app;
   const SubProblem & _nsfv_subproblem;
-
   const THREAD_ID _nsfv_tid;
 
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
-  /// the vector is equal to the number of threads in the simulation
-  static std::vector<std::unordered_map<const Elem *, ADReal>> _rc_a_coeffs;
+  /// the vector is equal to the number of threads in the simulation. We maintain a map from
+  /// MooseApp pointer to RC coefficients in order to support MultiApp simulations
+  static std::unordered_map<const MooseApp *, std::vector<std::unordered_map<const Elem *, ADReal>>>
+      _rc_a_coeffs;
 
   /**
    * method for computing the Rhie-Chow 'a' coefficients for the given elem \p elem
