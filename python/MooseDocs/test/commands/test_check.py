@@ -37,30 +37,12 @@ class TestCheck(unittest.TestCase):
         # Restore the working directory
         os.chdir(self._working_dir)
 
-    @mock.patch('moosesqa.SQAMooseAppReport._writeFile')
-    def testCheck(self, writeFile):
-
-        # Store the filenames to be created
-        filenames = list()
-        writeFile.side_effect = lambda fn, *args: filenames.append(fn)
+    def testCheck(self):
 
         # Create command-line arguments in
         opt = types.SimpleNamespace(config='sqa_test_reports.yml', reports=['app'], dump=None,
                                     app_reports=None, req_reports=None,
                                     generate=['MooseTestApp'], show_warnings=False)
-
-        # --generate
-        status = check.main(opt)
-        self.assertEqual(status, 0)
-        self.assertTrue(len(filenames) > 0)
-
-        # --dump
-        opt.dump = ['moose_test']
-        opt.generate = None
-        with mock.patch('sys.stdout', new=io.StringIO()) as stdout:
-            status = check.main(opt)
-        self.assertIn('/Kernels/Diffusion', stdout.getvalue())
-        self.assertEqual(status, 0)
 
         # --reports
         opt.reports = ['app']

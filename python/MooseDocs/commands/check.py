@@ -42,11 +42,8 @@ def command_line_options(subparser, parent):
     parser.add_argument('--show-warnings', action='store_true',
                         help='Display all report warnings.')
 
-    parser.add_argument('--generate', nargs='+', default=None,
-                        help='Generate/update stub pages for syntax and objects for the applications names listed (e.g., MooseApp). The type(s) provided here must match with the types provided in the configuration of the Application(s).')
-
-    parser.add_argument('--dump', nargs='+', default=None,
-                        help='Dump the syntax for the specified application reports (e.g. --dump navier_stokes')
+    parser.add_argument('--generate', nargs='+', default=None, help='Deprecated')
+    parser.add_argument('--dump', nargs='+', default=None, help='Deprecated')
 
     parser.add_argument('--app-reports', nargs='+', default=None,
                         help='Limit to the following application reports (e.g. --app-reports navier_stokes')
@@ -91,16 +88,12 @@ def main(opt):
         req_reports = [report for report in req_reports if report.title in opt.req_reports]
 
     # Apply --generate option
-    if app_reports and opt.generate:
-        for report in app_reports:
-            if (set(report.app_types) == set(opt.generate)):
-                report.generate_stubs = True
+    if opt.generate:
+        print("The --generate option has been replaced by./moosedocs.py generate.")
 
     # Apply --dump option
-    if app_reports and opt.dump:
-        for report in app_reports:
-            if report.title in opt.dump:
-                report.dump_syntax = True
+    if opt.dump:
+        print("The --dump option has been replaced by./moosedocs.py syntax.")
 
     # Apply 'show_warnings' option
     if opt.show_warnings:
