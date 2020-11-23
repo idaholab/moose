@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVBase.h"
+#include "NSFVAdvectionBase.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -15,10 +15,10 @@
 #include "SubProblem.h"
 #include "MooseVariableFV.h"
 
-std::vector<std::unordered_map<const Elem *, ADReal>> NSFVBase::_rc_a_coeffs;
+std::vector<std::unordered_map<const Elem *, ADReal>> NSFVAdvectionBase::_rc_a_coeffs;
 
 InputParameters
-NSFVBase::validParams()
+NSFVAdvectionBase::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addRequiredCoupledVar("pressure", "The pressure variable.");
@@ -39,7 +39,7 @@ NSFVBase::validParams()
   return params;
 }
 
-NSFVBase::NSFVBase(const InputParameters & params)
+NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
   : _nsfv_subproblem(*params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _nsfv_tid(params.get<THREAD_ID>("_tid")),
     _p_var(dynamic_cast<const MooseVariableFV<Real> *>(&_nsfv_subproblem.getVariable(
@@ -86,7 +86,7 @@ NSFVBase::NSFVBase(const InputParameters & params)
 }
 
 const ADReal &
-NSFVBase::rcCoeff(const Elem & elem) const
+NSFVAdvectionBase::rcCoeff(const Elem & elem) const
 {
   auto & my_map = _rc_a_coeffs[_nsfv_tid];
 
@@ -105,7 +105,7 @@ NSFVBase::rcCoeff(const Elem & elem) const
 }
 
 ADReal
-NSFVBase::coeffCalculator(const Elem & elem) const
+NSFVAdvectionBase::coeffCalculator(const Elem & elem) const
 {
   ADReal coeff = 0;
 

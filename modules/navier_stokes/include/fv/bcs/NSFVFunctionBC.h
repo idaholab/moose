@@ -10,12 +10,12 @@
 #pragma once
 
 #include "FVMatAdvectionFunctionBC.h"
-#include "NSFVBase.h"
+#include "NSFVAdvectionBase.h"
 #include "FVUtils.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVBase
+class NSFVFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVAdvectionBase
 {
 public:
   static InputParameters validParams();

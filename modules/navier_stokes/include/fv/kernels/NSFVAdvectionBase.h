@@ -24,13 +24,13 @@ class MooseVariableFV;
 class SubProblem;
 
 /**
- * Common base that both NSFV kernels and boundary conditions can inherit from
+ * Common base that both NSFV flux kernels and flux boundary conditions can inherit from
  */
-class NSFVBase
+class NSFVAdvectionBase
 {
 protected:
   static InputParameters validParams();
-  NSFVBase(const InputParameters & params);
+  NSFVAdvectionBase(const InputParameters & params);
 
   /**
    * pressure variable getter

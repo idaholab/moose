@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVKernel.h"
+#include "NSFVAdvectionKernel.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -22,23 +22,26 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/vector_value.h"
 
-registerMooseObject("NavierStokesApp", NSFVKernel);
+registerMooseObject("NavierStokesApp", NSFVAdvectionKernel);
 
 InputParameters
-NSFVKernel::validParams()
+NSFVAdvectionKernel::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
-  params += NSFVBase::validParams();
+  params += NSFVAdvectionBase::validParams();
   return params;
 }
 
-NSFVKernel::NSFVKernel(const InputParameters & params) : FVMatAdvection(params), NSFVBase(params) {}
+NSFVAdvectionKernel::NSFVAdvectionKernel(const InputParameters & params)
+  : FVMatAdvection(params), NSFVAdvectionBase(params)
+{
+}
 
 void
-NSFVKernel::interpolate(Moose::FV::InterpMethod m,
-                        ADRealVectorValue & v,
-                        const ADRealVectorValue & elem_v,
-                        const ADRealVectorValue & neighbor_v)
+NSFVAdvectionKernel::interpolate(Moose::FV::InterpMethod m,
+                                 ADRealVectorValue & v,
+                                 const ADRealVectorValue & elem_v,
+                                 const ADRealVectorValue & neighbor_v)
 {
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info, true);
@@ -112,7 +115,7 @@ NSFVKernel::interpolate(Moose::FV::InterpMethod m,
 }
 
 ADReal
-NSFVKernel::computeQpResidual()
+NSFVAdvectionKernel::computeQpResidual()
 {
   ADRealVectorValue v;
   ADReal u_interface;

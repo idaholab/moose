@@ -10,15 +10,19 @@
 #pragma once
 
 #include "FVMatAdvection.h"
-#include "NSFVBase.h"
+#include "NSFVAdvectionBase.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVKernel : public FVMatAdvection, protected NSFVBase
+/**
+ * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
+ * physics
+ */
+class NSFVAdvectionKernel : public FVMatAdvection, protected NSFVAdvectionBase
 {
 public:
   static InputParameters validParams();
-  NSFVKernel(const InputParameters & params);
+  NSFVAdvectionKernel(const InputParameters & params);
 
 protected:
   /**

@@ -28,7 +28,7 @@ InputParameters
 NSFVFunctionBC::validParams()
 {
   InputParameters params = FVMatAdvectionFunctionBC::validParams();
-  params += NSFVBase::validParams();
+  params += NSFVAdvectionBase::validParams();
 
   params.addRequiredParam<FunctionName>("pressure_exact_solution",
                                         "The function describing the pressure exact solution.");
@@ -37,7 +37,7 @@ NSFVFunctionBC::validParams()
 
 NSFVFunctionBC::NSFVFunctionBC(const InputParameters & params)
   : FVMatAdvectionFunctionBC(params),
-    NSFVBase(params),
+    NSFVAdvectionBase(params),
     _pressure_exact_solution(getFunction("pressure_exact_solution"))
 {
 }
