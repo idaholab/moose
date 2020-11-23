@@ -104,15 +104,6 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   // Write the checkpoint file
   io.write(curr_file_struct.checkpoint);
 
-  // Write the system data, using ENCODE vs WRITE based on ascii vs binary format
-  _es_ptr->write(curr_file_struct.system,
-                 EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
-                     EquationSystems::WRITE_PARALLEL_FILES,
-                 renumber);
-
-  // Write the restartable data
-  _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
-
   // Write out the restartable mesh meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
@@ -121,13 +112,22 @@ Checkpoint::output(const ExecFlagType & /*type*/)
     {
       const RestartableDataMap & meta_data = map_pair.second.first;
       const std::string & suffix = map_pair.second.second;
-      const std::string filename(current_file + suffix +
+      const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix +
                                  _restartable_data_io.getRestartableDataExt());
 
       curr_file_struct.restart_meta_data.emplace(filename);
       _restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }
+
+  // Write the system data, using ENCODE vs WRITE based on ascii vs binary format
+  _es_ptr->write(curr_file_struct.system,
+                 EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
+                     EquationSystems::WRITE_PARALLEL_FILES,
+                 renumber);
+
+  // Write the restartable data
+  _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
 
   // Remove old checkpoint files
   updateCheckpointFiles(curr_file_struct);
@@ -154,6 +154,10 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Delete checkpoint files (_mesh.cpr)
     if (proc_id == 0)
     {
+      for (const auto & file_name : delete_files.restart_meta_data)
+        remove(file_name.c_str());
+      // This file may not exist so don't worry about checking for success
+
       CheckpointIO::cleanup(delete_files.checkpoint, _parallel_mesh ? comm().size() : 1);
 
       // Delete the system files (xdr and xdr.0000, ...)
@@ -171,13 +175,6 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       int ret = remove(file_name.c_str());
       if (ret != 0)
         mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
-    }
-
-    if (proc_id == 0)
-    {
-      for (const auto & file_name : delete_files.restart_meta_data)
-        remove(file_name.c_str());
-      // This file may not exist so don't worry about checking for success
     }
 
     // Remove the restart files (rd)

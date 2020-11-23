@@ -129,6 +129,10 @@ template <typename T>
 T &
 MeshGenerator::declareMeshProperty(const std::string & data_name)
 {
+  if (_app.executingMeshGenerators())
+    mooseError(
+        "Declaration of mesh meta data can only happen within the constructor of mesh generators");
+
   std::string full_name =
       std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
 
