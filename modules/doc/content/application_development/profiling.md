@@ -31,7 +31,7 @@ This will compile your application with gperftools profiling support enabled.
 You are welcome to set GPERF_DIR to the location of your own gperftools
 installation as well.
 
-### Profiling
+### CPU Profiling
 
 To profile your application, you will need to run a simulation of suitable
 duration - generally at least a few seconds long - while setting the
@@ -46,6 +46,23 @@ This will use the filename base you pass and append a suffix of the form
 `[proc#].prof` to generate an independent profiling data file for each MPI
 rank/process. The above example would generate files `run1_0.prof`,
 `run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`.
+
+### Heap Profiling
+
+Similarly, you can do a heap profiling like this:
+
+```
+HEAP_PROFILE_INUSE_INTERVAL=104857600 MOOSE_HEAP_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
+```
+
+`HEAP_PROFILE_INUSE_INTERVAL` represents that the code dump heap profiling
+information whenever the memory usage increases by the specified number of bytes.
+`104857600` is `100MB`. You could choose a small number as well if your simulation
+does not use much memory. This example should generate files `run1_0.xxxx.heap`,
+`run1_1.xxxx.heap`, `run1_2.xxxx.heap`, ..., `run1_31.xxxx.heap`.
+Here `xxxx` denotes a sequence number, e.g., `0001` is the first dumped heap file,
+`0002` is the second dumped heap file, etc. More instructions on heap profiling
+can be found at [here](https://gperftools.github.io/gperftools/heapprofile.html).
 
 ### Analyzing Profile Data
 
@@ -67,7 +84,8 @@ to interrogate the profiling data. A few of these commands are described
 below, but there are others and several options you can see by entering `help`
 or `help <cmd|option>` in interactive mode or by running `pprof --help` on the
 command line.  The following sections assume you are running in pprof's
-interactive mode.
+interactive mode. We demonstrate the usage of `pprof` for CPU profiling as follows,
+and the exact same command lines can applied to heap files as well.
 
 ### top N
 
@@ -204,4 +222,3 @@ open mooseapp-oprof.dtps
 ```
 
 The Instruments application will open in a new window with the profile.
-

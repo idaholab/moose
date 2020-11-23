@@ -2309,8 +2309,7 @@ Assembly::reinitMortarElem(const Elem * elem)
 
   MooseArray<Point> array_q_points;
   array_q_points.shallowCopy(const_cast<std::vector<Point> &>(_fe_msm->get_xyz()));
-  setCoordinateTransformation(
-      _qrule_msm, array_q_points, _coord_msm, elem->interior_parent()->subdomain_id());
+  setCoordinateTransformation(_qrule_msm, array_q_points, _coord_msm, elem->subdomain_id());
 }
 
 void
@@ -2510,6 +2509,11 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Kln[tag][i].resize(n_vars);
         _sub_Kel[tag][i].resize(n_vars);
         _sub_Knl[tag][i].resize(n_vars);
+
+        _jacobian_block_used[tag][i].resize(n_vars);
+        _jacobian_block_neighbor_used[tag][i].resize(n_vars);
+        _jacobian_block_lower_used[tag][i].resize(n_vars);
+        _jacobian_block_nonlocal_used[tag][i].resize(n_vars);
       }
       else
       {
@@ -2523,11 +2527,12 @@ Assembly::init(const CouplingMatrix * cm)
         _sub_Kln[tag][i].resize(1);
         _sub_Kel[tag][i].resize(1);
         _sub_Knl[tag][i].resize(1);
+
+        _jacobian_block_used[tag][i].resize(1);
+        _jacobian_block_neighbor_used[tag][i].resize(1);
+        _jacobian_block_lower_used[tag][i].resize(1);
+        _jacobian_block_nonlocal_used[tag][i].resize(1);
       }
-      _jacobian_block_used[tag][i].resize(n_vars);
-      _jacobian_block_neighbor_used[tag][i].resize(n_vars);
-      _jacobian_block_lower_used[tag][i].resize(n_vars);
-      _jacobian_block_nonlocal_used[tag][i].resize(n_vars);
     }
   }
 }
@@ -2584,7 +2589,7 @@ Assembly::prepareJacobianBlock()
     {
       jacobianBlock(vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
-      _jacobian_block_used[tag][vi][vj] = 0;
+      jacobianBlockUsed(tag, vi, vj, false);
     }
   }
 }
@@ -2624,7 +2629,7 @@ Assembly::prepareNonlocal()
     {
       jacobianBlockNonlocal(vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
-      _jacobian_block_nonlocal_used[tag][vi][vj] = 0;
+      jacobianBlockNonlocalUsed(tag, vi, vj, false);
     }
   }
 }
@@ -2648,7 +2653,7 @@ Assembly::prepareVariable(MooseVariableFEBase * var)
       {
         jacobianBlock(vi, vj, tag)
             .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
-        _jacobian_block_used[tag][vi][vj] = 0;
+        jacobianBlockUsed(tag, vi, vj, false);
       }
     }
   }
@@ -2678,7 +2683,7 @@ Assembly::prepareVariableNonlocal(MooseVariableFEBase * var)
       {
         jacobianBlockNonlocal(vi, vj, tag)
             .resize(ivar.dofIndices().size() * ivar.count(), jvar.allDofIndices().size() * jcount);
-        _jacobian_block_nonlocal_used[tag][vi][vj] = 0;
+        jacobianBlockNonlocalUsed(tag, vi, vj);
       }
     }
   }
@@ -2713,7 +2718,7 @@ Assembly::prepareNeighbor()
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jcount);
 
-      _jacobian_block_neighbor_used[tag][vi][vj] = 0;
+      jacobianBlockNeighborUsed(tag, vi, vj, false);
     }
   }
 
@@ -2768,7 +2773,7 @@ Assembly::prepareLowerD()
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
-      _jacobian_block_lower_used[tag][vi][vj] = 0;
+      jacobianBlockLowerUsed(tag, vi, vj, false);
     }
   }
 
@@ -2791,7 +2796,7 @@ Assembly::prepareBlock(unsigned int ivar,
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
   {
     jacobianBlock(ivar, jvar, tag).resize(dof_indices.size() * icount, dof_indices.size() * jcount);
-    _jacobian_block_used[tag][ivar][jvar] = 0;
+    jacobianBlockUsed(tag, ivar, jvar, false);
   }
 
   for (auto & tag_Re : _sub_Re)
@@ -2815,7 +2820,8 @@ Assembly::prepareBlockNonlocal(unsigned int ivar,
   {
     jacobianBlockNonlocal(ivar, jvar, tag)
         .resize(idof_indices.size() * icount, jdof_indices.size() * jcount);
-    _jacobian_block_nonlocal_used[tag][ivar][jvar] = 0;
+
+    jacobianBlockNonlocalUsed(tag, ivar, jvar, false);
   }
 }
 
@@ -2837,7 +2843,7 @@ Assembly::prepareScalar()
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
         jacobianBlock(ivar->number(), jvar->number(), tag).resize(idofs, jdofs);
-        _jacobian_block_used[tag][ivar->number()][jvar->number()] = 0;
+        jacobianBlockUsed(tag, ivar->number(), jvar->number(), false);
       }
     }
   }
@@ -2859,10 +2865,10 @@ Assembly::prepareOffDiagScalar()
       for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
       {
         jacobianBlock(ivar->number(), jvar->number(), tag).resize(idofs, jdofs);
-        _jacobian_block_used[tag][ivar->number()][jvar->number()] = 0;
+        jacobianBlockUsed(tag, ivar->number(), jvar->number(), false);
 
         jacobianBlock(jvar->number(), ivar->number(), tag).resize(jdofs, idofs);
-        _jacobian_block_used[tag][jvar->number()][ivar->number()] = 0;
+        jacobianBlockUsed(tag, jvar->number(), ivar->number(), false);
       }
     }
   }
@@ -2989,9 +2995,9 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
                                 TagID tag)
 {
   if (type == Moose::ElementElement)
-    _jacobian_block_used[tag][ivar][jvar] = 1;
+    jacobianBlockUsed(tag, ivar, jvar, true);
   else
-    _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
+    jacobianBlockNeighborUsed(tag, ivar, jvar, true);
 
   if (_block_diagonal_matrix)
   {
@@ -3031,7 +3037,7 @@ Assembly::jacobianBlockMortar(Moose::ConstraintJacobianType type,
                               unsigned int jvar,
                               TagID tag)
 {
-  _jacobian_block_lower_used[tag][ivar][jvar] = 1;
+  jacobianBlockLowerUsed(tag, ivar, jvar, true);
   if (_block_diagonal_matrix)
   {
     switch (type)
@@ -3718,7 +3724,7 @@ Assembly::addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseV
   auto i = ivar.number();
   auto j = jvar.number();
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
-    if (_jacobian_block_used[tag][i][j] && _sys.hasMatrix(tag))
+    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
       addJacobianBlock(_sys.getMatrix(tag),
                        jacobianBlock(i, j, tag),
                        ivar,
@@ -3752,7 +3758,7 @@ Assembly::addJacobianNonlocal()
     for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
-      if (_jacobian_block_nonlocal_used[tag][i][j] && _sys.hasMatrix(tag))
+      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockNonlocal(i, j, tag),
                          *ivar,
@@ -3774,7 +3780,7 @@ Assembly::addJacobianNeighbor()
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
-      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
@@ -3811,7 +3817,7 @@ Assembly::addJacobianMortar()
     auto j = jvar->number();
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
-      if (_jacobian_block_lower_used[tag][i][j] && _sys.hasMatrix(tag))
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::LowerLower, i, j, tag),
@@ -3899,7 +3905,7 @@ Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
   auto i = ivar.number();
   auto j = jvar.number();
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
-    if (_jacobian_block_used[tag][i][j] && _sys.hasMatrix(tag))
+    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
       cacheJacobianBlock(
           jacobianBlock(i, j, tag), ivar, jvar, ivar.dofIndices(), jvar.dofIndices(), tag);
 }
@@ -3916,7 +3922,7 @@ Assembly::cacheJacobianNonlocal()
     for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
-      if (_jacobian_block_nonlocal_used[tag][i][j] && _sys.hasMatrix(tag))
+      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
         cacheJacobianBlockNonzero(jacobianBlockNonlocal(i, j, tag),
                                   *ivar,
                                   *jvar,
@@ -3939,7 +3945,7 @@ Assembly::cacheJacobianNeighbor()
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
-      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
       {
         cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
                            *ivar,

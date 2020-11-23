@@ -22,6 +22,7 @@ following properties are available using the `property` input parameter:
 - `permeability`
 - `hystersis_order`
 - `hysteresis_saturation_turning_point`
+- `hysteretic_info` --- see [PorousFlowHystereticInfo](PorousFlowHystereticInfo.md)
 
 The fluid phase and fluid component are specified in the `phase` and
 `fluid_component` input parameters, respectively.  For properties

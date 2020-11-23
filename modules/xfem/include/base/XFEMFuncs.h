@@ -63,4 +63,35 @@ void normalizePoint(EFAPoint & p);
 double r8_acos(double c);
 
 double angle_rad_3d(double p1[3], double p2[3], double p3[3]);
+
+/**
+ * Determine whether a line segment is intersected by a cutting line, and compute the
+ * fraction along that line where the intersection occurs
+ * @param segment_point1 Point at one end of the line segment
+ * @param segment_point1 Point at other end of the line segment
+ * @param cutting_line_points Pair of points that define the cutting line
+ * @param cutting_line_fraction Fractional distance from the start to end point of the
+ *                              cutting line over which the cutting line is currently
+ *                              active
+ * @param segment_intersection_fraction Frictional distance along the cut segment from
+ *                                      segment_point1 where the intersection occurs
+ * @return true if the segment is intersected, false if it is not
+ */
+bool intersectSegmentWithCutLine(const Point & segment_point1,
+                                 const Point & segment_point2,
+                                 const std::pair<Point, Point> & cutting_line_points,
+                                 const Real & cutting_line_fraction,
+                                 Real & segment_intersection_fraction);
+
+/**
+ * Compute the cross product of two vectors, provided as Point objects, which
+ * have nonzero components only in the x,y plane. Because the vectors both lie
+ * in the x,y plane, the only nonzero component of the cross product vector is
+ * in the z direction, and that is returned as a scalar value by this function.
+ * @param point_a First vector in cross product
+ * @param point_b Second vector in cross product
+ * @return z component of cross product vector
+ */
+Real crossProduct2D(const Point & point_a, const Point & point_b);
+
 } // namespace Xfem

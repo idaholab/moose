@@ -30,7 +30,7 @@ The covariance function may also be used in the surrogate. For convenience the s
 
 If the surrogate is given the trainer (not loaded from a file) the covariance function can be linked via the trainer object.
 
-!listing GaussianProcess.C start=covariance_function( end=: nullptr) include-end=True
+!listing surrogates/GaussianProcess.C start=covariance_function( end=: nullptr) include-end=True
 
 If the surrogate loads the training data from a file, the [](LoadCovarianceDataAction.md) automatically reconstructs the covariance object used in the training phase, and calls the surrogate `setupCovariance()` method to make the linkage. This recreation is done by storing the `buildHyperParamMap()` in the trainer, and storing the hyperparameters for use in the surrogate.
 

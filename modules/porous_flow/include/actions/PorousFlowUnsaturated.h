@@ -13,7 +13,7 @@
 
 /**
  * Action for simulation involving a single phase, partially or fully saturated fluid.
- * The fluid's saturation is found using the van-Genuchten expression, and the
+ * The fluid's saturation is found using the van Genuchten expression, and the
  * relative permeability is found using the FLAC or Corey expression.
  */
 class PorousFlowUnsaturated : public PorousFlowSinglePhaseBase

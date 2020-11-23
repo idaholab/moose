@@ -80,7 +80,7 @@ simulation sits at $x=9.6\,$m as desired.  However, the simulation
 takes $10\,$seconds to complete due to the very low values of saturation
 obtained for van Genuchten $\alpha=10^{-3}\,$Pa$^{-1}$.  Other
 simulations give similar results but run much faster.  For instance,
-the test suite listed above uses the van-Genuchten parameter
+the test suite listed above uses the van Genuchten parameter
 $\alpha=10^{-4}\,$Pa$^{-1}$, but the front diffuses a little into the
 unsaturated region (the front sits between $x=9.7\,$m and $x=10.4\,$m
 at $t=50\,$s).

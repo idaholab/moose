@@ -31,18 +31,16 @@ public:
                                          const Real sigma_n_squared,
                                          const bool is_self_covariance);
 
-  /// Used for outputting Hyper-parameter settings
-  void
-  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
+  /// Redirect dK/dhp for hyperparameter "hp"
+  void computedKdhyper(RealEigenMatrix & dKdhp,
+                       const RealEigenMatrix & x,
+                       std::string hyper_param_name,
+                       unsigned int ind) const override;
 
-protected:
-  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
-
-  /// signal variance (\sigma_f^2)
-  Real _sigma_f_squared;
-
-  /// noise variance (\sigma_n^2)
-  Real _sigma_n_squared;
+  /// Computes dK/dlf for individual length factors
+  static void computedKdlf(RealEigenMatrix & K,
+                           const RealEigenMatrix & x,
+                           const std::vector<Real> & length_factor,
+                           const Real sigma_f_squared,
+                           const int ind);
 };

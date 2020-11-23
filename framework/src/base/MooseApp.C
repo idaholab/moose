@@ -9,6 +9,7 @@
 
 #ifdef HAVE_GPERFTOOLS
 #include "gperftools/profiler.h"
+#include "gperftools/heap-profiler.h"
 #endif
 
 // MOOSE includes
@@ -343,13 +344,29 @@ MooseApp::MooseApp(InputParameters parameters)
     _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
+  if (std::getenv("MOOSE_PROFILE_BASE") && std::getenv("MOOSE_HEAP_BASE"))
+    mooseError("Can not do CPU and heap profiling together");
+
+  // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
   if (std::getenv("MOOSE_PROFILE_BASE"))
   {
     static std::string profile_file =
         std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
-    _profiling = true;
+
+    _cpu_profiling = true;
     ProfilerStart(profile_file.c_str());
   }
+
+  // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
+  if (std::getenv("MOOSE_HEAP_BASE"))
+  {
+    static std::string profile_file =
+        std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
+
+    _heap_profiling = true;
+    HeapProfilerStart(profile_file.c_str());
+  }
+
 #endif
 
   Registry::addKnownLabel(_type);
@@ -467,8 +484,12 @@ MooseApp::checkRegistryLabels()
 MooseApp::~MooseApp()
 {
 #ifdef HAVE_GPERFTOOLS
-  if (_profiling)
+  // CPU profiling stop
+  if (_cpu_profiling)
     ProfilerStop();
+  // Heap profiling stop
+  if (_heap_profiling)
+    HeapProfilerStop();
 #endif
   _action_warehouse.clear();
   _executioner.reset();

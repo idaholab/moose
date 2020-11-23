@@ -232,9 +232,10 @@ ADRadialReturnStressUpdate::maximumPermissibleValue(const ADReal & effective_tri
 Real
 ADRadialReturnStressUpdate::computeTimeStepLimit()
 {
-  Real scalar_inelastic_strain_incr = MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
-                                      _effective_inelastic_strain_old[_qp];
-  if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
+  const Real scalar_inelastic_strain_incr =
+      std::abs(MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
+               _effective_inelastic_strain_old[_qp]);
+  if (!scalar_inelastic_strain_incr)
     return std::numeric_limits<Real>::max();
 
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;

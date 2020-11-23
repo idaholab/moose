@@ -84,7 +84,7 @@ the fluid properties are:
          start=[Modules]
          end=[]
 
-A van-Genuchten capillary pressure relationship is used
+A van Genuchten capillary pressure relationship is used
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
          start=[./pc]

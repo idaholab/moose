@@ -154,11 +154,10 @@ struct LowCapillaryPressureExtension
     QUADRATIC,
     EXPONENTIAL
   };
-  // Note for future: removing the const in the following might be convenient
-  const ExtensionStrategy strategy;
-  const Real S;
-  const Real Pc;
-  const Real dPc;
+  ExtensionStrategy strategy;
+  Real S;
+  Real Pc;
+  Real dPc;
 
   LowCapillaryPressureExtension()
     : strategy(LowCapillaryPressureExtension::NONE),
@@ -185,11 +184,10 @@ struct HighCapillaryPressureExtension
     NONE,
     POWER
   };
-  // Note for future: removing the const in the following might be convenient
-  const ExtensionStrategy strategy;
-  const Real S;
-  const Real Pc;
-  const Real dPc;
+  ExtensionStrategy strategy;
+  Real S;
+  Real Pc;
+  Real dPc;
 
   HighCapillaryPressureExtension()
     : strategy(HighCapillaryPressureExtension::NONE),
@@ -207,11 +205,11 @@ struct HighCapillaryPressureExtension
  * NOTE: this function is undefined for sl < 0 and sl > 1, so you MUST ensure 0 <= sl <= 1
  * NOTE: this returns a non-negative quantity.
  * @param sl liquid saturation. 0 <= sl <= 1
- * @param slmin value of liquid sat where the van-Genuchten expression -> infinity.  0 <= slmin < 1
- * @param sgrdel value of gas saturation where van-Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
  * 1
- * @param alpha van-Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
- * @param n van-Genuchten n parameter.  n > 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
  * @param low_ext strategy and parameters to use for the extension in the small-saturation region
  * (defaults to no extension: this default is not recommended for simulations of real phenomena)
  * @param high_ext strategy and parameters to use for the extension in the high-saturation region
@@ -231,11 +229,11 @@ Real capillaryPressureHys(
  * NOTE: this function is undefined for sl < 0 and sl > 1, so you MUST ensure 0 <= sl <= 1
  * NOTE: this returns a negative quantity.
  * @param sl liquid saturation. 0 <= sl <= 1
- * @param slmin value of liquid sat where the van-Genuchten expression -> infinity.  0 <= slmin < 1
- * @param sgrdel value of gas saturation where van-Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
  * 1
- * @param alpha van-Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
- * @param n van-Genuchten n parameter.  n > 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
  * @param low_ext strategy and parameters to use for the extension in the small-saturation region
  * (defaults to no extension: this default is not recommended for simulations of real phenomena)
  * @param high_ext strategy and parameters to use for the extension in the high-saturation region
@@ -251,14 +249,37 @@ Real dcapillaryPressureHys(
     const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
 
 /**
+ * Second derivative of capillaryPressureHys with respect to sl.
+ * NOTE: this function is undefined for sl < 0 and sl > 1, so you MUST ensure 0 <= sl <= 1
+ * @param sl liquid saturation. 0 <= sl <= 1
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
+ * @param low_ext strategy and parameters to use for the extension in the small-saturation region
+ * (defaults to no extension: this default is not recommended for simulations of real phenomena)
+ * @param high_ext strategy and parameters to use for the extension in the high-saturation region
+ * (defaults to no extension: this default is not recommended for simulations of real phenomena)
+ */
+Real d2capillaryPressureHys(
+    Real sl,
+    Real slmin,
+    Real sgrdel,
+    Real alpha,
+    Real n,
+    const LowCapillaryPressureExtension & low_ext = LowCapillaryPressureExtension(),
+    const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
+
+/**
  * Hysteretic saturation function (Eqn(1) of Doughty2007) with extensions (page5 and Fig1 of
  * Doughty2008), which is the inverse of capillaryPressureHys
  * @param pc capillary pressure.  0 <= pc
- * @param slmin value of liquid sat where the van-Genuchten expression -> infinity.  0 <= slmin < 1
- * @param sgrdel value of gas saturation where van-Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
  * 1
- * @param alpha van-Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
- * @param n van-Genuchten n parameter.  n > 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
  * @param low_ext strategy and parameters to use for the extension in the small-saturation region
  * (defaults to no extension: this default is not recommended for simulations of real phenomena)
  * @param high_ext strategy and parameters to use for the extension in the high-saturation region
@@ -276,11 +297,11 @@ saturationHys(Real pc,
 /**
  * Derivative of Hysteretic saturation function with respect to pc
  * @param pc capillary pressure.  0 <= pc
- * @param slmin value of liquid sat where the van-Genuchten expression -> infinity.  0 <= slmin < 1
- * @param sgrdel value of gas saturation where van-Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
  * 1
- * @param alpha van-Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
- * @param n van-Genuchten n parameter.  n > 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
  * @param low_ext strategy and parameters to use for the extension in the small-saturation region
  * (defaults to no extension: this default is not recommended for simulations of real phenomena)
  * @param high_ext strategy and parameters to use for the extension in the high-saturation region
@@ -294,4 +315,26 @@ dsaturationHys(Real pc,
                Real n,
                const LowCapillaryPressureExtension & low_ext = LowCapillaryPressureExtension(),
                const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
+
+/**
+ * Second derivative of Hysteretic saturation function with respect to pc
+ * @param pc capillary pressure.  0 <= pc
+ * @param slmin value of liquid sat where the van Genuchten expression -> infinity.  0 <= slmin < 1
+ * @param sgrdel value of gas saturation where van Genuchten expression -> 0.  slmin < 1 - Sgrdel <=
+ * 1
+ * @param alpha van Genuchten alpha parameter, with dimensions 1/Pa.  alpha > 0
+ * @param n van Genuchten n parameter.  n > 1
+ * @param low_ext strategy and parameters to use for the extension in the small-saturation region
+ * (defaults to no extension: this default is not recommended for simulations of real phenomena)
+ * @param high_ext strategy and parameters to use for the extension in the high-saturation region
+ * (defaults to no extension: this default is not recommended for simulations of real phenomena)
+ */
+Real
+d2saturationHys(Real pc,
+                Real slmin,
+                Real sgrdel,
+                Real alpha,
+                Real n,
+                const LowCapillaryPressureExtension & low_ext = LowCapillaryPressureExtension(),
+                const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
 }

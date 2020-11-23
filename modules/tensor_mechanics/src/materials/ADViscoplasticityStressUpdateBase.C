@@ -72,8 +72,8 @@ Real
 ADViscoplasticityStressUpdateBase::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
-      MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
-      _effective_inelastic_strain_old[_qp];
+      std::abs(MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
+               _effective_inelastic_strain_old[_qp]);
 
   if (!scalar_inelastic_strain_incr)
     return std::numeric_limits<Real>::max();

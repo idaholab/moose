@@ -260,8 +260,11 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("porosity_qp", "temperature_qp");
   //_deps.insertDependency("porosity_qp", "volumetric_strain_qp");
 
-  _deps.insertDependency("hysteresis_order_nodal", "pressure_saturation_nodal");
-  _deps.insertDependency("hysteresis_order_qp", "pressure_saturation_qp");
+  // following is so that anything derived from PorousFlowVariableBase (with pf_material_type =
+  // pressure_saturation) will add PorousFlowHysteresisOrder at the nodes or qps, if a
+  // PorousflowHysteresisOrder appears in the input file
+  _deps.insertDependency("pressure_saturation_nodal", "hysteresis_order_nodal");
+  _deps.insertDependency("pressure_saturation_qp", "hysteresis_order_qp");
 
   // Postprocessor dependencies
   _deps.insertDependency("PorousFlowFluidMass", "porosity_nodal");

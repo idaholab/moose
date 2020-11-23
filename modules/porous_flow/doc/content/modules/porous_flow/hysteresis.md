@@ -26,7 +26,7 @@ The order is computed by the [PorousFlowHysteresisOrder](PorousFlowHysteresisOrd
 
 ## Capillary curves
 
-All capillary curves are based on the [van-Genuchten](capillary_pressure.md) curve
+All capillary curves are based on the [van Genuchten](capillary_pressure.md) curve
 \begin{equation}
 \label{vg.cap.eqn}
 P_{c}(S_{l}) = \frac{1}{\alpha} \left( S_{\mathrm{eff}}^{n/(1-n)} - 1\right)^{1/n} \ ,
@@ -39,10 +39,10 @@ In these formulae:
 
 - $P_{c}$ is the capillary pressure, with SI units Pa.  It obeys $P_{c}\geq 0$.
 - $S_{l}$ is the liquid saturation, which is dimensionless.
-- $\alpha$ is a van-Genuchten parameter, with SI units Pa$^{-1}$.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve --- and both obey $\alpha > 0$.
-- $n$ is a van-Genuchten parameter, which is dimensionless.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve -- and both obey $n>1$.
-- $S_{l,min}$ is the minimum saturation for which the van-Genuchten expression is valid.  It is a dimensionless user-input and obeys $0\leq S_{l,min} < 1$.  Because $n/(1-n) < 0$, $P_{c}$ behaves like $P_{c}\rightarrow\infty$ as $S_{l} \rightarrow S_{l,min}^{+}$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}<S_{l,min}$, which is discussed below.  Two extensions are shown in [histeretic_cap_extensions_fig]
-- $S_{gr}^{\Delta}$ is the residual gas saturation, and $1-S_{gr}^{\Delta}$ is the maximum saturation for which the van-Genuchten expression is valid.  It is dimensionless but it is not a user input (see more details below).  It obeys $S_{gr}^{\Delta} \geq 0$ and $1-S_{gr}^{\Delta} > S_{l,min}$.  As $S_{l}\rightarrow 1-S_{gr}^{\Delta}-$, $P_{c} \rightarrow 0$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}> 1-S_{gr}^{\Delta}$ as described below, as shown in [histeretic_cap_extensions_fig].
+- $\alpha$ is a van Genuchten parameter, with SI units Pa$^{-1}$.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve --- and both obey $\alpha > 0$.
+- $n$ is a van Genuchten parameter, which is dimensionless.  Two values may be entered by the user --- one describing the primary drying curve and the other for the primary wetting curve -- and both obey $n>1$.
+- $S_{l,min}$ is the minimum saturation for which the van Genuchten expression is valid.  It is a dimensionless user-input and obeys $0\leq S_{l,min} < 1$.  Because $n/(1-n) < 0$, $P_{c}$ behaves like $P_{c}\rightarrow\infty$ as $S_{l} \rightarrow S_{l,min}^{+}$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}<S_{l,min}$, which is discussed below.  Two extensions are shown in [histeretic_cap_extensions_fig]
+- $S_{gr}^{\Delta}$ is the residual gas saturation, and $1-S_{gr}^{\Delta}$ is the maximum saturation for which the van Genuchten expression is valid.  It is dimensionless but it is not a user input (see more details below).  It obeys $S_{gr}^{\Delta} \geq 0$ and $1-S_{gr}^{\Delta} > S_{l,min}$.  As $S_{l}\rightarrow 1-S_{gr}^{\Delta}-$, $P_{c} \rightarrow 0$.  It is sometimes numerically advantageous and/or physically necessary to define extensions of $P_{c}$ for $S_{l}> 1-S_{gr}^{\Delta}$ as described below, as shown in [histeretic_cap_extensions_fig].
 
 The primary drying curve uses
 \begin{equation}
@@ -62,7 +62,7 @@ Two types of lower (small $S_{l}$) extensions are available [!citep](doughty2008
 \begin{equation}
 P_{c}^{\mathrm{max}} > 0 \ ,
 \end{equation}
-which is the value at which extension commences (that is, all $P_{c} > P_{c}^{\mathrm{max}}$ will use the extension, not the original van-Genuchten expression [vg.cap.eqn]).  [histeretic_cap_extensions_fig] shows examples for $P_{c}^{\mathrm{max}} = 1.1$.  Both extensions are designed so that the resulting curve is continuous and its derivative is continuous.
+which is the value at which extension commences (that is, all $P_{c} > P_{c}^{\mathrm{max}}$ will use the extension, not the original van Genuchten expression [vg.cap.eqn]).  [histeretic_cap_extensions_fig] shows examples for $P_{c}^{\mathrm{max}} = 1.1$.  Both extensions are designed so that the resulting curve is continuous and its derivative is continuous.
 
 - Quadratic: $P_{c}$ is a quadratic in $S_{l}$ that satisfies $\mathrm{d}P_{c}/\mathrm{d}S_{l} = 0$ at $S_{l} = 0$.
 - Exponential: $P_{c}$ is an exponential in $S_{l}$.
@@ -244,3 +244,69 @@ The result is illustrated in [histeretic_krel_extended_fig], using a cubic exten
 !media media/porous_flow/hysteretic_krel_example_1.png caption=Example hysteretic relative permeability functions.  The system initialises at full saturation, dries to saturation 0.5 (greater than $S_{l, r}$) and then wets back to saturation 1.  id=histeretic_krel_example_1
 
 !media media/porous_flow/hysteretic_krel_example_2.png caption=Example hysteretic relative permeability functions.  The system initialises at full saturation, dries to saturation 0.1 (less than $S_{l, r}$) and then wets back to saturation 1.  In the extended region ($S_{l} \leq S_{l, r}$), the drying curve equals the wetting curve.  id=histeretic_krel_example_2
+
+## Exploring hysteresis using the python script
+
+A python script that produces plots of hysteretic capillary pressure and relative permeability has been included in the MOOSE repository.  This allows users to quickly explore the consequences of choosing different extension strategies to the capillary and relative-permeability curves, as well as the impact of hysteresis order on the shape of the curves.  It was used to produce all the figures displayed on this page.  It is
+
+!listing modules/porous_flow/test/tests/hysteresis/hys.py
+
+
+## Input file syntax for hysteretic capillarity
+
+To include hysteretic capillarity in an existing (non-hysteretic) input file, the following changes need to be made.
+
+1. Any capillary-pressure UserObjects, such as [PorousFlowCapillaryPressureVG](PorousFlowCapillaryPressureVG.md), may be removed from the input file
+2. A [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material needs to be included.
+3. A Material that computes the porepressure(s) and saturation(s) needs to be included.
+
+   - For 1-phase partially-saturated situations, [PorousFlow1PhaseP](PorousFlow1PhaseP.md) should be removed and replaced by [PorousFlow1PhaseHysP](PorousFlow1PhaseHysP.md).  Note the van Genuchten parameter input is $m$ for the non-hysteretic version, but $n$ for the hysteretic version, where $n = 1/(1 - m)$ and $m = 1 - 1/n$.
+   - For 2-phase situations using the two porepressures as the primary variables, [PorousFlow2PhasePP](PorousFlow2PhasePP.md) should be removed and replaced by TODO.
+   - For 2-phase situations using the liquid porepressure and gas saturation as the primary variables, [PorousFlow2PhasePS](PorousFlow2PhasePS.md) should be removed and replaced by TODO.
+
+An example is:
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./hys_order_material] end=[]
+
+### Preliminary example
+
+Before introducing hysteresis into an input file, it might be useful to assess how hysteresis evolves during model evolution using a [PorousFlowHystereticInfo](PorousFlowHystereticInfo.md) Material.  This Material *does not* compute porepressures or saturations, but instead allows users to visualise capillary pressure.  Hence, the following input file *does not* perform a usual PorousFlow simulation, but instead allows a preliminary exploration of hysteresis:
+
+!listing modules/porous_flow/test/tests/hysteresis/vary_sat_1.i
+
+By changing the `FunctionAux` that controls the saturation, various hysteretic curves may be constructed.
+
+!listing modules/porous_flow/test/tests/hysteresis/vary_sat_1.i start=[./sat_aux] end=[./hys_order]
+
+[hys_vary_sat_1_fig] shows the results of two hysteretic simulations.  Both are initialised at full saturation and are then dried.  The first (green curve) dries to $S_{l} = 0$ before wetting, so follows the primary wetting curve.  The second (yellow curve) dries to $S_{l} = 0.2$ before wetting, so follows a first-order wetting curve.
+
+!media media/porous_flow/hys_vary_sat_1.png caption=The results of two hysteretic simulations.  The lines show the expected result (from the python script) while the crosses and asterisks show the MOOSE result.  id=hys_vary_sat_1_fig
+
+!alert warning
+Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$ and there is no cross around $(0.1, 1)$.  This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior.  Hysteretic simulations thereby use semi-explicit time-stepping, and do not fully conserve fluid mass.  This should have limited impact upon models if saturations do not change excessively during a single time-step.
+
+[hys_vary_sat_1_3rdorder_fig] results when the FunctionAux is
+
+```
+if(t <= 0.4, 1 - 2 * t, if(t <= 0.7, 2 * t - 0.6, if(t <= 0.95, 0.8 - 2 * (t - 0.7), 0.3 + 2 * (t - 0.95))))
+```
+
+!media media/porous_flow/hys_vary_sat_1_3rdorder.png caption=The result of a hysteretic simulation where the system is dried, then re-wet, then dried, then re-wet, so that it follows the zeroth, first, second and third-order curves  id=hys_vary_sat_1_3rdorder_fig
+
+### Single-phase example
+
+A simulation that simply removes and adds water to a system to observe the hysteretic capillary pressure is explored in this section.  The water flux is controlled by the Postprocessor
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./flux] end=[./hys_order]
+
+and the DiracKernel
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i block=DiracKernels
+
+The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./hys_order_material] end=[]
+
+The result is [hys_1phase_3_fig].
+
+!media media/porous_flow/hys_1phase_3.png caption=The result of a single-phase simulation in which an external pump removes and adds water to a porous material in order to observe the hysteretic capillary pressure.  id=hys_1phase_3_fig

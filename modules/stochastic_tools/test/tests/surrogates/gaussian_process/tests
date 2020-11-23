@@ -36,6 +36,30 @@
     input = GP_Matern_half_int.i
     allow_test_objects = true
     csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
-    detail = 'and training and evaluating with a Matern half integer kernel.'
+    detail = 'and training and evaluating with a Matern half integer kernel'
+  []
+  [GP_squared_exponential_tuned]
+    type = CSVDiff
+    input = GP_squared_exponential_tuned.i
+    allow_test_objects = true
+    csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
+    petsc_version = '>=3.10.0'
+    detail = 'then testing hyperparameter tuning for the squared exponential kernel, '
+  []
+  [GP_exponential_tuned]
+    type = CSVDiff
+    input = GP_exponential_tuned.i
+    allow_test_objects = true
+    csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
+    petsc_version = '>=3.10.0'
+    detail = 'exponential kernel, '
+  []
+  [GP_Matern_half_int_tuned]
+    type = CSVDiff
+    input = GP_Matern_half_int_tuned.i
+    allow_test_objects = true
+    csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
+    petsc_version = '>=3.10.0'
+    detail = 'and Matern half integer kernel, '
   []
 []

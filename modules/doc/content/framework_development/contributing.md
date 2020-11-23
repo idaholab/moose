@@ -2,7 +2,16 @@
 
 MOOSE is a collaborative effort and we always welcome contributions!  When contributing to MOOSE you need to keep in mind that hundreds of people are depending on this code to do their jobs every day.  Because of this we have specific policies, procedures, and automated processes to maintain high code quality while allowing many changes to the code daily.
 
-**If you are somewhat new to Git or GitHub we have worked up [a set of slides](https://mooseframework.org/static/media/uploads/docs/moose_github.pdf) to walk you through the processes of modifying MOOSE and submitting patches.**
+!alert! tip title=Start a Discussion
+Prior to investing your time it is recommended that you have a discussion with the community about
+your contribution. This can help determine the best approach for your work and even avoid spending
+time on something that is already possible. MOOSE has broad capabilities and an active community,
+engaging in the community will certainly be beneficial.
+
+!style halign=center
+[+Start a Discussion+](https://github.com/idaholab/discussions)
+
+!alert-end!
 
 ## Code Standards
 
@@ -93,8 +102,6 @@ git push origin branch_name
 ## Create a Pull Request
 
 GitHub utilizes Pull Requests (PRs) to allow you to submit changes stored in your Fork back to the main MOOSE repository.  If you are generally interested in how PRs work you can look at the [official GitHub documentation](https://help.github.com/articles/using-pull-requests).  MOOSE utilizes the "Fork & Pull" collaborative development model.
-
-In addition: [our own slides](https://mooseframework.org/static/media/uploads/docs/moose_github.pdf) are a great way to learn about the process of submitting a PR for the MOOSE project.
 
 The main thing to remember when issuing a PR for MOOSE is that all PRs should be specified to go to the `next` branch.
 

@@ -26,7 +26,7 @@ There is a general procedure for expressing a residual as one that is readily so
 Next, recall that the product rule of differentiation implies that
 
 !equation id=laplace-product
-\psi (\nabla \cdot k \nabla u) = \nabla \cdot (\psi \nabla u) - \nabla \psi \cdot \nabla u
+\psi (\nabla \cdot \nabla u) = \nabla \cdot (\psi \nabla u) - \nabla \psi \cdot \nabla u
 
 Substituting the right-hand side of [laplace-product] results in integration by parts of [laplace-sum]:
 
