@@ -17,13 +17,12 @@
  * This Kernel implements part of the equation that enforces the constraint
  * of
  *
- * \int \phi = V_0
+ * \int \phi = 0
  *
- * where V_0 is a given constant, using a Lagrange multiplier
- * approach.
+ * using a Lagrange multiplier approach.
  *
  * In particular, this Kernel implements the residual contribution for
- * the lambda term in Eq. (5), and both terms in Eq. (6)
+ * the lambda term in Eq. (5), and both terms in Eq. (6) where we have elected to set V_0 = 0
  *
  * [0]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
  */
