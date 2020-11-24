@@ -14,6 +14,7 @@ rho=1.1
 [Problem]
   coord_type = 'RZ'
   kernel_coverage_check = false
+  fv_bcs_integrity_check = false
 []
 
 [Variables]
@@ -120,6 +121,19 @@ rho=1.1
     flux_variable_exact_solution = ${rho}
     vel_x_exact_solution = 'exact_u'
     advected_quantity = ${rho}
+  []
+
+  [u_diri]
+    type = FVFunctionDirichletBC
+    variable = u
+    boundary = 'left right'
+    function = 'exact_u'
+  []
+  [p_diri]
+    type = FVFunctionDirichletBC
+    variable = pressure
+    boundary = 'left right'
+    function = 'exact_p'
   []
 []
 

@@ -16,6 +16,7 @@ rho=1.1
 
 [Problem]
   kernel_coverage_check = false
+  fv_bcs_integrity_check = false
 []
 
 [Variables]
@@ -207,6 +208,25 @@ rho=1.1
     flux_variable_exact_solution = '${rho}'
     vel_x_exact_solution = 'exact_u'
     vel_y_exact_solution = 'exact_v'
+  []
+
+  [u_diri]
+    type = FVFunctionDirichletBC
+    variable = u
+    boundary = 'top bottom left right'
+    function = 'exact_u'
+  []
+  [v_diri]
+    type = FVFunctionDirichletBC
+    variable = v
+    boundary = 'top bottom left right'
+    function = 'exact_v'
+  []
+  [p_diri]
+    type = FVFunctionDirichletBC
+    variable = pressure
+    boundary = 'top bottom left right'
+    function = 'exact_p'
   []
 []
 

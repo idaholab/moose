@@ -9,6 +9,8 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using an average interpolation scheme and produce second order convergence for the velocity components and zeroth order convergence for the pressure because of the checkerboard pattern.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    min_parallel = 8
+    heavy = true
   []
   [rc]
     type = PythonUnitTest
