@@ -351,9 +351,9 @@ class FormatInline(components.ReaderComponent):
 
         # Sub/super script must have word before the rest cannot
         if (tok == '^') or (tok == '@'):
-            if not parent.children or (not parent.children[-1].name == 'Word'):
+            if not parent.children or (parent.children[-1].name not in ('Word', 'Number')):
                 return None
-        elif parent.children and (parent.children[-1].name == 'Word'):
+        elif parent.children and (parent.children[-1].name in ('Word', 'Number')):
             return None
 
         if tok == '@':

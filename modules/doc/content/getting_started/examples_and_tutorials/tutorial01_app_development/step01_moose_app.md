@@ -64,8 +64,6 @@ Ran 1 tests in 0.3 seconds.
 
 Later in this tutorial, the testing system will be explored in greater detail and tests will be created for the Babbler application.
 
-*For more information about the MOOSE testing system, please visit the [application_development/test_system.md] page.*
-
 ## Enable Use of GitHub id=git
 
 [Git](https://git-scm.com) is a version control system that enables teams of software developers to manage contributions to a single code base. When using Git, a `commit` is an update to the repository that marks a checkpoint to be revisited even after further changes are made. A repository's *commit log* shows the history of commits, and helps track the progression of code. A `push` uploads the local version of the repository to the remote (online) one.
