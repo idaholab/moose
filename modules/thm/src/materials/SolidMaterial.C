@@ -28,6 +28,6 @@ void
 SolidMaterial::computeQpProperties()
 {
   _thermal_conductivity[_qp] = _props.k(_temp[_qp]);
-  _specific_heat[_qp] = _props.Cp(_temp[_qp]);
+  _specific_heat[_qp] = _props.cp(_temp[_qp]);
   _density[_qp] = _props.rho(_temp[_qp]);
 }

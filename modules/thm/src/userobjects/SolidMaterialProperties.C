@@ -20,7 +20,7 @@ SolidMaterialProperties::validParams()
 SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _k(getFunction("k")),
-    _Cp(getFunction("Cp")),
+    _cp(getFunction("Cp")),
     _rho(getFunction("rho"))
 {
 }
@@ -47,9 +47,9 @@ SolidMaterialProperties::k(Real temp) const
 }
 
 Real
-SolidMaterialProperties::Cp(Real temp) const
+SolidMaterialProperties::cp(Real temp) const
 {
-  return _Cp.value(temp, Point());
+  return _cp.value(temp, Point());
 }
 
 Real
