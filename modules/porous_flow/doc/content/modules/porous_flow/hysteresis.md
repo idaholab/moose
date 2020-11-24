@@ -282,8 +282,7 @@ By changing the `FunctionAux` that controls the saturation, various hysteretic c
 
 !media media/porous_flow/hys_vary_sat_1.png caption=The results of two hysteretic simulations.  The lines show the expected result (from the python script) while the crosses and asterisks show the MOOSE result.  id=hys_vary_sat_1_fig
 
-!alert warning
-Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$ and there is no cross around $(0.1, 1)$.  This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior.  Hysteretic simulations thereby use semi-explicit time-stepping, and do not fully conserve fluid mass.  This should have limited impact upon models if saturations do not change excessively during a single time-step.
+Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  As the system dries and then re-wets, it follows the primary drying curve for the first time-step after the turning point.  This is why there is no asterisk at $(S_{l}, P_{c}) \approx (0.3, 1)$: instead it appears on the primary drying curve at $(S_{l}, P_{c}) \approx (0.3, 2)$.  Similarly, there is no cross around $(0.1, 1)$.  Consequences of this are discussed in a section below.
 
 [hys_vary_sat_1_3rdorder_fig] results when the FunctionAux is
 
@@ -350,7 +349,7 @@ The result is [hys_2phasePS_2_fig].
 
 ## Hysteretic capillary-pressure implementation remarks
 
-Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$.  Instead it appears on the primary drying curve at around $(S_{l}, P_{c}) = (0.3, 2)$.  As the saturation is reduced along the drying curve, and then increased again, PorousFlow follows the primary drying curve for the first time-step after the turning point.  At subsequent steps, it follows the correct curve.
+As mentioned above, [hys_vary_sat_1_fig] reveals a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$.  Instead it appears on the primary drying curve at around $(S_{l}, P_{c}) = (0.3, 2)$.  As the saturation is reduced along the drying curve, and then increased again, PorousFlow follows the primary drying curve for the first time-step after the turning point.  At subsequent steps, it follows the correct curve.
 
 This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior, as mentioned in [!citet](doughty2007) and [!citet](doughty2008).
 

@@ -32,39 +32,6 @@
   [../]
 []
 
-[DiracKernels]
-  [./pump]
-    type = PorousFlowPointSourceFromPostprocessor
-    mass_flux = flux
-    point = '0.5 0 0'
-    variable = pp
-  [../]
-[]
-
-[AuxVariables]
-  [./sat]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-  [./hys_order]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-[]
-
-[AuxKernels]
-  [./sat]
-    type = PorousFlowPropertyAux
-    variable = sat
-    property = saturation
-  [../]
-  [./hys_order]
-    type = PorousFlowPropertyAux
-    variable = hys_order
-    property = hysteresis_order
-  [../]
-[]
-
 [Modules]
   [./FluidProperties]
     [./simple_fluid]
@@ -107,28 +74,6 @@
     high_extension_type = power
     phase0_porepressure = pp
     phase1_porepressure = pp
-  [../]
-[]
-
-[Postprocessors]
-  [./flux]
-    type = FunctionValuePostprocessor
-    function = 'if(t <= 9, -10, 10)'
-  [../]
-  [./hys_order]
-    type = PointValue
-    point = '0 0 0'
-    variable = hys_order
-  [../]
-  [./sat]
-    type = PointValue
-    point = '0 0 0'
-    variable = sat
-  [../]
-  [./pp]
-    type = PointValue
-    point = '0 0 0'
-    variable = pp
   [../]
 []
 

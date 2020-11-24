@@ -102,7 +102,7 @@ PorousFlow2PhaseHysPS::computeQpProperties()
     {
       (*_dgrads_qp_dgradv)[_qp][0][_svar] = -1.0;
       (*_dgrads_qp_dgradv)[_qp][1][_svar] = 1.0;
-      const Real d2pc_qp = d2capillaryPressureQp(1.0 - _phase1_saturation[_qp]); // d^22(Pc)/dS0^2
+      const Real d2pc_qp = d2capillaryPressureQp(1.0 - _phase1_saturation[_qp]); // d^2(Pc)/dS0^2
       (*_dgradp_qp_dv)[_qp][1][_svar] = d2pc_qp * (*_grads_qp)[_qp][1];
       (*_dgradp_qp_dgradv)[_qp][1][_svar] = -dpc;
     }
