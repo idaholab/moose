@@ -70,11 +70,10 @@ public:
                            const ADRankFourTensor & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old) override;
 
-  virtual ADReal
-  computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                           const ADDenseVector & stress_new,
-                           const ADReal & residual,
-                           const ADReal & scalar_effective_inelastic_strain) override;
+  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
+                                        const ADDenseVector & stress_new,
+                                        const ADReal & residual,
+                                        const ADReal & scalar_effective_inelastic_strain) override;
 
   virtual ADReal
   minimumPermissibleValue(const ADDenseVector & /*effective_trial_stress*/) const override

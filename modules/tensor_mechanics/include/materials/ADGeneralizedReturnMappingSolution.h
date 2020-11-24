@@ -78,10 +78,10 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ADReal computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                                          const ADDenseVector & stress_new,
-                                          const ADReal & residual,
-                                          const ADReal & scalar_effective_inelastic_strain) = 0;
+  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
+                                        const ADDenseVector & stress_new,
+                                        const ADReal & residual,
+                                        const ADReal & scalar_effective_inelastic_strain) = 0;
 
   virtual ADReal computeDerivative(const ADDenseVector & effective_trial_stress,
                                    const ADDenseVector & stress_new,
@@ -129,7 +129,7 @@ protected:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool converged(const ADReal & residual, const ADReal & reference);
+  bool converged(const ADReal & residual, const Real & reference);
 
 private:
   enum class InternalSolveOutput
@@ -200,7 +200,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool convergedAcceptable(const unsigned int it, const ADReal & reference);
+  bool convergedAcceptable(const unsigned int it, const Real & reference);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range

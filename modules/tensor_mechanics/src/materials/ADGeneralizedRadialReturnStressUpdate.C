@@ -29,7 +29,7 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "effective_inelastic_strain_name",
       "Name of the material property that stores the effective inelastic strain");
-  params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
+  params.addParam<bool>("apply_strain", false, "Flag to apply strain. Used for testing.");
   params.addParamNamesToGroup("effective_inelastic_strain_name apply_strain", "Advanced");
   return params;
 }
@@ -45,29 +45,6 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _apply_strain(getParam<bool>("apply_strain"))
 {
-  // Hill constants, some constraints apply
-  //  const Real F = _hill_constants[0];
-  //  const Real G = _hill_constants[1];
-  //  const Real H = _hill_constants[2];
-  //  const Real L = _hill_constants[3];
-  //  const Real M = _hill_constants[4];
-  //  const Real N = _hill_constants[5];
-  //
-  //  Moose::out << "This is G: " << G << "\n";
-  //
-  //  ADDenseMatrix hill_tensor(6, 6);
-  //  hill_tensor(0, 0) = G + H;
-  //  hill_tensor(1, 1) = F + H;
-  //  hill_tensor(2, 2) = F + G;
-  //  hill_tensor(0, 1) = hill_tensor(1, 0) = -H;
-  //  hill_tensor(0, 2) = hill_tensor(2, 0) = -G;
-  //  hill_tensor(1, 2) = hill_tensor(2, 1) = -F;
-  //
-  //  hill_tensor(3, 3) = 2.0 * N;
-  //  hill_tensor(4, 4) = 2.0 * L;
-  //  hill_tensor(5, 5) = 2.0 * M;
-  //
-  //  computeHillTensorEigenDecomposition(hill_tensor);
 }
 
 void
@@ -83,13 +60,13 @@ ADGeneralizedRadialReturnStressUpdate::propagateQpStatefulPropertiesRadialReturn
 }
 
 void
-ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & strain_increment,
+ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_strain_increment,
                                                    ADRankTwoTensor & inelastic_strain_increment,
                                                    const ADRankTwoTensor & /*rotation_increment*/,
                                                    ADRankTwoTensor & stress_new,
                                                    const RankTwoTensor & /*stress_old*/,
                                                    const ADRankFourTensor & elasticity_tensor,
-                                                   const RankTwoTensor & elastic_strain_old)
+                                                   const RankTwoTensor & /*elastic_strain_old*/)
 {
   // Prepare initial trial stress for generalized return mapping
   ADRankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
@@ -124,43 +101,48 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & strain_incr
   _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
-  ADReal scalar_effective_inelastic_strain = 0.0;
   if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(stress_dev).l2_norm(), 0.0))
   {
     returnMappingSolve(stress_dev, stress_new_vector, delta_gamma, _console);
-    if (scalar_effective_inelastic_strain != 0.0)
+
+    if (delta_gamma != 0.0)
       computeStrainFinalize(inelastic_strain_increment, stress_new, delta_gamma);
     else
       inelastic_strain_increment.zero();
+    //    if (_qp == 0)
+    //    {
+    //      Moose::out << "inelastic_strain_increment: "
+    //                 << MetaPhysicL::raw_value(inelastic_strain_increment) << "\n";
+    //      Moose::out << "strain_increment: " << MetaPhysicL::raw_value(elastic_strain_increment)
+    //                 << "\n";
+    //    }
   }
   else
     inelastic_strain_increment.zero();
 
-  if (_apply_strain)
-  {
-    strain_increment -= inelastic_strain_increment;
-    _effective_inelastic_strain[_qp] =
-        _effective_inelastic_strain_old[_qp] + scalar_effective_inelastic_strain;
-
-    // Use the old elastic strain here because we require tensors used by this class
-    // to be isotropic and this method natively allows for changing in time
-    // elasticity tensors
-    stress_new = elasticity_tensor * (elastic_strain_old + strain_increment);
-  }
-
+  elastic_strain_increment -= inelastic_strain_increment;
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + delta_gamma;
   computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new);
+  //  if (_qp == 0)
+  //  {
+  //    Moose::out << "End of RM: inelastic_strain_increment: "
+  //               << MetaPhysicL::raw_value(inelastic_strain_increment) << "\n";
+  //    Moose::out << "End of RM: strain_increment: "
+  //               << MetaPhysicL::raw_value(elastic_strain_increment) << "\n";
+  //  }
 }
 
-ADReal
+Real
 ADGeneralizedRadialReturnStressUpdate::computeReferenceResidual(
     const ADDenseVector & /*effective_trial_stress*/,
     const ADDenseVector & /*stress_new*/,
-    const ADReal & residual,
+    const ADReal & /*residual*/,
     const ADReal & /*scalar_effective_inelastic_strain*/)
 {
-  //  return MetaPhysicL::raw_value(effective_trial_stress / _three_shear_modulus) -
-  //         MetaPhysicL::raw_value(scalar_effective_inelastic_strain);
-  return residual;
+  mooseError("ADGeneralizedRadialReturnStressUpdate::computeReferenceResidual must be implemented "
+             "by child classes");
+
+  return 0.0;
 }
 
 ADReal

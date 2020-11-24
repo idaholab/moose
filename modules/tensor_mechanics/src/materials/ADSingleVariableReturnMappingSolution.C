@@ -184,6 +184,9 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
+    //    Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
+    //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
+    //    Moose::out << "reference_residual: " << reference_residual << "\n";
     scalar_increment = -_residual / computeDerivative(effective_trial_stress, scalar);
     scalar = scalar_old + scalar_increment;
 

@@ -147,7 +147,10 @@ ADComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
       elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
       _stress[_qp] =
-          elasticity_tensor_rotated * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+          elasticity_tensor_rotated * (_elastic_strain_old[_qp] + elastic_strain_increment);
+
+      // Update current total rotation matrix to be used in next step
+      _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
     }
   }
   else
@@ -220,7 +223,11 @@ ADComputeMultipleInelasticStress::updateQpState(
         ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
         elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
-        _stress[_qp] = _stress_old[_qp] + elasticity_tensor_rotated * elastic_strain_increment;
+        _stress[_qp] =
+            elasticity_tensor_rotated * (_elastic_strain_old[_qp] + elastic_strain_increment);
+
+        // Update current total rotation matrix to be used in next step
+        _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
       }
       // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
       // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
@@ -267,9 +274,12 @@ ADComputeMultipleInelasticStress::updateQpState(
                << " stress convergence absolute tolerance = " << _absolute_tolerance << std::endl;
     }
     ++counter;
+
   } while (counter < _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
            (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
            _num_models != 1);
+
+  //  Moose::out << "counter number in ComputeMultipleInelasticStress is: " << counter << "\n";
 
   if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
@@ -311,7 +321,11 @@ ADComputeMultipleInelasticStress::updateQpStateSingleModel(
     ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
     elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
-    _stress[_qp] = _stress_old[_qp] + elasticity_tensor_rotated * elastic_strain_increment;
+    _stress[_qp] =
+        elasticity_tensor_rotated * (_elastic_strain_old[_qp] + elastic_strain_increment);
+
+    // Update current total rotation matrix to be used in next step
+    _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
   }
 
   computeAdmissibleState(

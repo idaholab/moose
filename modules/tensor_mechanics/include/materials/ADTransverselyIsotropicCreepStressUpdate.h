@@ -48,11 +48,10 @@ protected:
                                    const ADDenseVector & stress_new,
                                    const ADReal & scalar) override;
 
-  virtual ADReal
-  computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                           const ADDenseVector & stress_new,
-                           const ADReal & residual,
-                           const ADReal & scalar_effective_inelastic_strain) override;
+  virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
+                                        const ADDenseVector & stress_new,
+                                        const ADReal & residual,
+                                        const ADReal & scalar_effective_inelastic_strain) override;
   /**
    * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
    * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy

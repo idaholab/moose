@@ -58,7 +58,7 @@ ADGeneralizedReturnMappingSolution::ADGeneralizedReturnMappingSolution(
     const InputParameters & parameters)
   : _check_range(false),
     _line_search(true),
-    _bracket_solution(true),
+    _bracket_solution(false),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
     _max_its(1000), // Far larger than ever expected to be needed
@@ -172,7 +172,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
 
   ADReal residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
-  ADReal reference_residual =
+  Real reference_residual =
       computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
 
   if (converged(_residual, reference_residual))
@@ -188,6 +188,10 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
+    //    Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
+    //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
+    //    Moose::out << "reference_residual: " << reference_residual << "\n";
+
     scalar_increment =
         -_residual / computeDerivative(effective_trial_stress, stress_new, delta_gamma);
     delta_gamma = scalar_old + scalar_increment;
@@ -302,7 +306,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
 }
 
 bool
-ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const ADReal & reference)
+ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const Real & reference)
 {
   const Real residual = MetaPhysicL::raw_value(ad_residual);
   return (std::abs(residual) <= _absolute_tolerance ||
@@ -311,7 +315,7 @@ ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const 
 
 bool
 ADGeneralizedReturnMappingSolution::convergedAcceptable(const unsigned int it,
-                                                        const ADReal & reference)
+                                                        const Real & reference)
 {
   // Require that we have at least done _num_resids evaluations before we allow for
   // acceptable convergence
