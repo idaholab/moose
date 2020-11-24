@@ -13,12 +13,14 @@
 #include "Moose.h"
 #include "MooseEnum.h"
 #include "DataIO.h"
+#include "JsonSyntaxTree.h"
 
 // C++ includes
 #include <fstream>
 
 // Forward declarations
 class FormattedTable;
+class TableValueBase;
 namespace libMesh
 {
 class ExodusII_IO;
@@ -28,6 +30,80 @@ template <>
 void dataStore(std::ostream & stream, FormattedTable & table, void * context);
 template <>
 void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+template <>
+void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
+template <>
+void dataLoad(std::istream & stream, TableValueBase *& value, void * context);
+
+class TableValueBase
+{
+public:
+  virtual ~TableValueBase() = default;
+
+  template <typename T>
+  static constexpr bool isSupportedType()
+  {
+    return std::is_fundamental<T>::value || std::is_same<T, std::string>::value;
+  }
+
+  virtual void print(std::ostream & os) const = 0;
+
+  virtual void store(std::ostream & stream, void * context) = 0;
+};
+
+std::ostream & operator<<(std::ostream & os, const TableValueBase & value);
+
+template <typename T>
+class TableValue : public TableValueBase
+{
+public:
+  TableValue(const T & value) : _value(value)
+  {
+    if (!this->isSupportedType<T>())
+      mooseError("Unsupported type ",
+                 JsonSyntaxTree::prettyCppType(demangle(typeid(T).name())),
+                 " for FormattedTable.");
+  }
+
+  const T & get() const { return _value; }
+  T & set() { return _value; }
+
+  virtual void print(std::ostream & os) const override { os << this->_value; };
+
+  virtual void store(std::ostream & stream, void * context) override;
+  static void
+  load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+
+private:
+  T _value;
+};
+
+template <>
+inline void
+TableValue<bool>::print(std::ostream & os) const
+{
+  os << (this->_value ? "True" : "False");
+}
+
+template <typename T>
+void
+TableValue<T>::store(std::ostream & stream, void * context)
+{
+  std::string type = typeid(T).name();
+  ::dataStore(stream, type, context);
+  ::dataStore(stream, _value, context);
+}
+
+template <typename T>
+void
+TableValue<T>::load(std::istream & stream,
+                    std::shared_ptr<TableValueBase> & value_base,
+                    void * context)
+{
+  T value;
+  ::dataLoad(stream, value, context);
+  value_base = std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<T>>(value));
+}
 
 /**
  * This class is used for building, formatting, and outputting tables of numbers.
@@ -74,18 +150,21 @@ public:
    * Method for adding data to the output table. Data is added to the last row. Method will
    * error if called on an empty table.
    */
-  void addData(const std::string & name, Real value);
+  template <typename T = Real>
+  void addData(const std::string & name, const T & value);
 
   /**
    * Method for adding data to the output table.  The dependent variable is named "time"
    */
-  void addData(const std::string & name, Real value, Real time);
+  template <typename T = Real>
+  void addData(const std::string & name, const T & value, Real time);
 
   /**
    * Method for adding an entire vector to a table at a time. Checks are made to ensure that
    * the dependent variable index lines up with the vector indices.
    */
-  void addData(const std::string & name, const std::vector<Real> & vector);
+  template <typename T = Real>
+  void addData(const std::string & name, const std::vector<T> & vector);
 
   /**
    * Retrieve the last time (or independent variable) value.
@@ -95,7 +174,8 @@ public:
   /**
    * Retrieve Data for last value of given name
    */
-  Real & getLastData(const std::string & name);
+  template <typename T = Real>
+  T & getLastData(const std::string & name);
 
   void clear();
 
@@ -182,7 +262,7 @@ protected:
    * with the second part of the table which is the map of dependent variables and their associated
    * values.
    */
-  std::vector<std::pair<Real, std::map<std::string, Real>>> _data;
+  std::vector<std::pair<Real, std::map<std::string, std::shared_ptr<TableValueBase>>>> _data;
 
   /// Alignment widths (only used if asked to print aligned to CSV output)
   std::map<std::string, unsigned int> _align_widths;
@@ -203,7 +283,11 @@ private:
   /// Open or switch the underlying file stream to point to file_name. This is idempotent.
   void open(const std::string & file_name);
 
-  void printRow(std::pair<Real, std::map<std::string, Real>> & row_data, bool align);
+  void printRow(std::pair<Real, std::map<std::string, std::shared_ptr<TableValueBase>>> & row_data,
+                bool align);
+
+  /// Fill any values that are not defined (usually when there are mismatched column lengths)
+  void fillEmptyValues();
 
   /// The optional output file stream
   std::string _output_file_name;
@@ -245,8 +329,98 @@ private:
   friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
 };
 
+template <typename T>
+void
+FormattedTable::addData(const std::string & name, const T & value)
+{
+  if (empty())
+    mooseError("No Data stored in the the FormattedTable");
+
+  auto back_it = _data.rbegin();
+  back_it->second[name] =
+      std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<T>>(value));
+
+  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
+    _column_names.push_back(name);
+    _column_names_unsorted = true;
+  }
+}
+
+template <typename T>
+void
+FormattedTable::addData(const std::string & name, const T & value, Real time)
+{
+  auto back_it = _data.rbegin();
+
+  mooseAssert(back_it == _data.rend() || !MooseUtils::absoluteFuzzyLessThan(time, back_it->first),
+              "Attempting to add data to FormattedTable with the dependent variable in a "
+              "non-increasing order.\nDid you mean to use addData(std::string &, const "
+              "std::vector<Real> &)?");
+
+  // See if the current "row" is already in the table
+  if (back_it == _data.rend() || !MooseUtils::absoluteFuzzyEqual(time, back_it->first))
+  {
+    _data.emplace_back(time, std::map<std::string, std::shared_ptr<TableValueBase>>());
+    back_it = _data.rbegin();
+  }
+  // Insert or update value
+  back_it->second[name] =
+      std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<T>>(value));
+
+  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
+    _column_names.push_back(name);
+    _column_names_unsorted = true;
+  }
+}
+
+template <typename T>
+void
+FormattedTable::addData(const std::string & name, const std::vector<T> & vector)
+{
+  for (MooseIndex(vector) i = 0; i < vector.size(); ++i)
+  {
+    if (i == _data.size())
+      _data.emplace_back(i, std::map<std::string, std::shared_ptr<TableValueBase>>());
+
+    mooseAssert(MooseUtils::absoluteFuzzyEqual(_data[i].first, i),
+                "Inconsistent indexing in VPP vector");
+
+    auto & curr_entry = _data[i];
+    curr_entry.second[name] =
+        std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<T>>(vector[i]));
+  }
+
+  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
+    _column_names.push_back(name);
+    _column_names_unsorted = true;
+  }
+}
+
+template <typename T>
+T &
+FormattedTable::getLastData(const std::string & name)
+{
+  mooseAssert(!empty(), "No Data stored in the FormattedTable");
+
+  auto & last_data_map = _data.rbegin()->second;
+  auto it = last_data_map.find(name);
+  if (it == last_data_map.end())
+    mooseError("No Data found for name: " + name);
+
+  auto value = std::dynamic_pointer_cast<TableValue<T>>(it->second);
+  if (!value)
+    mooseError("Data for ", name, " is not of the requested type.");
+  return value->set();
+}
+
 template <>
 void dataStore(std::ostream & stream, FormattedTable & table, void * context);
 template <>
 void dataLoad(std::istream & stream, FormattedTable & v, void * context);
-
+template <>
+void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
+template <>
+void dataLoad(std::istream & stream, TableValueBase *& value, void * context);

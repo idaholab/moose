@@ -91,18 +91,6 @@ GapConductance::actionParameters()
                                     1,
                                     "emissivity_secondary>=0 & emissivity_secondary<=1",
                                     "The emissivity of the secondary surface");
-  params.addDeprecatedParam<Real>("emissivity_master",
-                                  "The emissivity of the primary surface",
-                                  "Please use \"emissivity_primary\" instead");
-  params.addDeprecatedParam<Real>("emissivity_slave",
-                                  "The emissivity of the secondary surface",
-                                  "Please use \"emissivity_secondary\" instead");
-  params.addDeprecatedParam<Real>("emissivity_1",
-                                  "The emissivity of the fuel surface",
-                                  "Please use \"emissivity_primary\" instead");
-  params.addDeprecatedParam<Real>("emissivity_2",
-                                  "The emissivity of the cladding surface",
-                                  "Please use \"emissivity_secondary\" instead");
   // Common
   params.addRangeCheckedParam<Real>(
       "min_gap", 1e-6, "min_gap>0", "A minimum gap (denominator) size");
@@ -153,33 +141,8 @@ GapConductance::GapConductance(const InputParameters & parameters)
 {
   // set emissivity but allow legacy naming; legacy names are used if they
   // are present
-  Real emissivity_primary = parameters.isParamSetByUser("emissivity_master")
-                                ? getParam<Real>("emissivity_master")
-                                : getParam<Real>("emissivity_primary");
-  if (isParamValid("emissivity_1"))
-  {
-    emissivity_primary = getParam<Real>("emissivity_1");
-
-    // make sure emissivity is physical
-    if (emissivity_primary < 0 || emissivity_primary > 1)
-      paramError("emissivity_1",
-                 "Emissivities must have values between 0 and 1. You provided: ",
-                 emissivity_primary);
-  }
-
-  Real emissivity_secondary = parameters.isParamSetByUser("emissivity_slave")
-                                  ? getParam<Real>("emissivity_slave")
-                                  : getParam<Real>("emissivity_secondary");
-  if (isParamValid("emissivity_2"))
-  {
-    emissivity_secondary = getParam<Real>("emissivity_2");
-
-    // make sure emissivity is physical
-    if (emissivity_secondary < 0 || emissivity_secondary > 1)
-      paramError("emissivity_2",
-                 "Emissivities must have values between 0 and 1. You provided: ",
-                 emissivity_secondary);
-  }
+  const auto emissivity_primary = getParam<Real>("emissivity_primary");
+  const auto emissivity_secondary = getParam<Real>("emissivity_secondary");
 
   _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
                     ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1
@@ -188,23 +151,20 @@ GapConductance::GapConductance(const InputParameters & parameters)
   if (_quadrature)
   {
     if (!parameters.isParamValid("paired_boundary"))
-      mooseError(std::string("No 'paired_boundary' provided for ") + _name);
-  }
-  else
-  {
-    if (!isCoupled("gap_distance"))
-      mooseError(std::string("No 'gap_distance' provided for ") + _name);
+      mooseError("No 'paired_boundary' provided for ", _name);
 
-    if (!isCoupled("gap_temp"))
-      mooseError(std::string("No 'gap_temp' provided for ") + _name);
-  }
-
-  if (_quadrature)
-  {
     _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(
         parameters.get<BoundaryName>("paired_boundary"),
         getParam<std::vector<BoundaryName>>("boundary")[0],
         Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
+  }
+  else
+  {
+    if (!isCoupled("gap_distance"))
+      paramError("gap_distance", "needed if not using quadrature point based gap heat");
+
+    if (!isCoupled("gap_temp"))
+      paramError("gap_temp", "needed if not using quadrature point based gap heat");
   }
 
   if (_mesh.uniformRefineLevel() != 0)

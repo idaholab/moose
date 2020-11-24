@@ -124,6 +124,7 @@ CSV::outputReporters()
 {
   TableOutput::outputReporters();
   _write_all_table = true;
+  _write_vector_table = true;
 }
 
 std::string
@@ -185,10 +186,14 @@ CSV::output(const ExecFlagType & type)
       if (_sort_columns)
         it.second.sortColumns();
 
-      const VectorPostprocessor & vpp_obj =
-          _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
-      auto include_time_suffix = !vpp_obj.containsCompleteHistory();
-      auto is_distributed = vpp_obj.isDistributed();
+      bool include_time_suffix = true;
+      bool is_distributed = _reporter_data.hasReporterWithMode(vpp_name, REPORTER_MODE_DISTRIBUTED);
+      if (hasVectorPostprocessorObjectByName(vpp_name))
+      {
+        const VectorPostprocessor & vpp_obj =
+            _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
+        include_time_suffix = !vpp_obj.containsCompleteHistory();
+      }
 
       if (is_distributed || processor_id() == 0)
       {

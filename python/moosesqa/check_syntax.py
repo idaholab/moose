@@ -52,7 +52,7 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     md_path = os.path.join(prefix, node.markdown)
     md_file = find_md_file(md_path, file_cache, logger)
     is_missing_description = is_object and (not node.description) and (not node.removed)
-    is_missing = (md_file is None) and (not node.removed)
+    is_missing = ((md_file is None) or (not os.path.isfile(md_file))) and (not node.removed)
     is_stub = file_is_stub(md_file) if (not is_missing) and (not node.removed) else False
 
     # ERROR: object is stub

@@ -12,6 +12,7 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 #include "MooseApp.h"
+#include "RestartableDataIO.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/nemesis_io.h"
@@ -117,6 +118,18 @@ FileMesh::buildMesh()
       if (!MooseUtils::pathExists(_file_name))
         mooseError("cannot locate mesh file '", _file_name, "'");
       getMesh().read(_file_name);
+
+      // we also read declared mesh meta data here if there is meta data file
+      RestartableDataIO restartable(_app);
+      std::string fname = _file_name + "/meta_data_mesh" + restartable.getRestartableDataExt();
+      if (MooseUtils::pathExists(fname))
+      {
+        restartable.setErrorOnLoadWithDifferentNumberOfProcessors(false);
+        // get reference to mesh meta data (created by MooseApp)
+        auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
+        if (restartable.readRestartableDataHeaderFromFile(fname, false))
+          restartable.readRestartableData(meta_data, DataNames());
+      }
 
       if (restarting)
       {

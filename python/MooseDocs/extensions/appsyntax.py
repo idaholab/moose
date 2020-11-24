@@ -562,7 +562,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             if child.removed or child.test:
                 continue
 
-            if (groups is None) or (child.group in groups):
+            if (groups is None) or (child.groups(actions=True, syntax=True, objects=True).intersection(groups)):
                 url = os.path.join('syntax', child.markdown)
                 h = core.Heading(parent, level=level, id_=self.settings['id'])
                 autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')))

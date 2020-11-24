@@ -1311,6 +1311,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(RealTensorValue, RealTensorValue);
       setscalar(ExecFlagEnum, ExecFlagEnum);
       setscalar(ReporterName, string);
+      setscalar(ReporterValueName, string);
 
       // vector types
       setvector(Real, double);

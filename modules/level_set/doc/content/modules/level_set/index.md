@@ -4,9 +4,8 @@ The level set module provides basic functionality to solve the level set equatio
 links provided detailed information on the theory and use of the level set module:
 
 - [Theory Manual](level_set/theory.md)
-- [Example 1: Constant Velocity](level_set/example_circle.md)
-- [Example 2: Rotating "Bubble"](level_set/example_rotate.md)
-- [Example 3: Vortex](level_set/example_vortex.md)
+
+!include modules/level_set/level_set_examples.md
 
 For reference the following tables list the objects contained within the level set module and a brief
 description of there purpose, each object may be selected to navigate to a detailed page.

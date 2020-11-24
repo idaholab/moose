@@ -285,7 +285,8 @@ SetupMeshAction::act()
       // 1. We have mesh generators
       // 2. We are not: recovering/restarting and we are the master application
       if (!_app.getMeshGeneratorNames().empty() &&
-          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
+          !((_app.isUseSplit() || _app.isRecovering() || _app.isRestarting()) &&
+            _app.isUltimateMaster()))
       {
         auto mesh_base = _app.getMeshGeneratorMesh();
         if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())

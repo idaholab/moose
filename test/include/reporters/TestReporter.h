@@ -32,6 +32,8 @@ protected:
 
   std::vector<dof_id_type> _values_to_gather;
   std::vector<dof_id_type> & _gather_value;
+
+  std::vector<dof_id_type> * _distributed_vector;
 };
 
 class TestGetReporter : public GeneralReporter

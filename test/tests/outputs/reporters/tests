@@ -3,10 +3,23 @@
   design = 'Reporters/index.md'
 
   [csv]
-    type = CSVDiff
-    input = reporter.i
-    csvdiff = reporter_out.csv
+    requirement = "The system shall automatically output values to a comma separated (CSV) file in "
+    [root]
+      type = CSVDiff
+      input = reporter.i
+      csvdiff = 'reporter_out.csv reporter_out_constant_0001.csv reporter_out_constant_0002.csv reporter_out_constant_0003.csv'
 
-    requirement = "The system shall automatically output scalar aggregated values to a comma separated (CSV) file."
+      detail = "root/replicated mode "
+    []
+    [distributed]
+      type = CSVDiff
+      input = reporter.i
+      cli_args = 'Reporters/active=test Reporters/test/distributed_vector_name=dvec Outputs/file_base=reporter_dist_out'
+      csvdiff = 'reporter_dist_out_test_0003.csv.0 reporter_dist_out_test_0003.csv.1 reporter_dist_out_test_0003.csv.2'
+      min_parallel = 3
+      max_parallel = 3
+
+      detail = "and distributed mode."
+    []
   []
 []

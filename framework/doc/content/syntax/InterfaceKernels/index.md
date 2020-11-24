@@ -21,7 +21,7 @@ Interface kernels can be used to provide any general flux condition at an interf
 - `neighbor_var`: The "secondary" variable. This could be $c_1$ from our example above.
 - `boundary`: The interfacial boundary between the subdomains. Note that this must be a sideset and again must exist on the same subdomain as the primary variable. The fact that this boundary is a sideset allows access to variable gradients.
 
-For additional information about the interface kernel system, don't hesitate to email the moose list at [moose-users@googlegroups.com](mailto:moose-users@googlegroups.com).
+For additional information about the interface kernel system, don't hesitate to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 !syntax list /InterfaceKernels objects=True actions=False subsystems=False
 

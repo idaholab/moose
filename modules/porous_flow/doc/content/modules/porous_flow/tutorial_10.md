@@ -51,7 +51,7 @@ The final block to create is the `Materials`.  This is always the most complicat
   unsensible to test obscure aspects of PorousFlow) but at least they
   are guaranteed to run!
 
-- You can ask on the moose-users google group.
+- You can ask on the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
 In this case, the DEs involve porosity, fluid saturation, fluid density, permeability and viscosity.  The fluid mass is lumped to the nodes, so we'll only need porosity at the nodes:
 
@@ -88,6 +88,3 @@ Our input file has been built!  You may check that it gives exactly the same ans
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_09.md) |
 [Next](porous_flow/tutorial_11.md)
-
-
-

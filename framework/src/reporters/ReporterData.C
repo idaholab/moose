@@ -122,6 +122,18 @@ ReporterData::hasReporterWithMode(const ReporterMode & mode) const
   return false;
 }
 
+bool
+ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
+{
+  for (auto & context_ptr : _context_ptrs)
+  {
+    const ReporterName & rname = context_ptr->name();
+    if (rname.getObjectName() == obj_name && context_ptr->getProducerModeEnum() == mode)
+      return true;
+  }
+  return false;
+}
+
 void
 ReporterData::transfer(const ReporterName & from_name,
                        const ReporterName & to_name,

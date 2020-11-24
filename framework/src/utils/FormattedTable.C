@@ -32,6 +32,7 @@ template <>
 void
 dataStore(std::ostream & stream, FormattedTable & table, void * context)
 {
+  table.fillEmptyValues();
   storeHelper(stream, table._data, context);
   storeHelper(stream, table._align_widths, context);
   storeHelper(stream, table._column_names, context);
@@ -48,6 +49,68 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
   loadHelper(stream, table._column_names, context);
   loadHelper(stream, table._output_row_index, context);
   loadHelper(stream, table._headers_output, context);
+}
+
+template <>
+void
+dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
+{
+  value_base->store(stream, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
+{
+  std::string type;
+  dataLoad(stream, type, context);
+  if (type == typeid(bool).name())
+    TableValue<bool>::load(stream, value_base, context);
+
+  else if (type == typeid(unsigned short int).name())
+    TableValue<unsigned short int>::load(stream, value_base, context);
+
+  else if (type == typeid(unsigned int).name())
+    TableValue<unsigned int>::load(stream, value_base, context);
+
+  else if (type == typeid(unsigned long int).name())
+    TableValue<unsigned long int>::load(stream, value_base, context);
+
+  else if (type == typeid(unsigned long long int).name())
+    TableValue<unsigned long long int>::load(stream, value_base, context);
+
+  else if (type == typeid(short int).name())
+    TableValue<short int>::load(stream, value_base, context);
+
+  else if (type == typeid(int).name())
+    TableValue<int>::load(stream, value_base, context);
+
+  else if (type == typeid(long int).name())
+    TableValue<long int>::load(stream, value_base, context);
+
+  else if (type == typeid(long long int).name())
+    TableValue<long long int>::load(stream, value_base, context);
+
+  else if (type == typeid(float).name())
+    TableValue<float>::load(stream, value_base, context);
+
+  else if (type == typeid(double).name())
+    TableValue<double>::load(stream, value_base, context);
+
+  else if (type == typeid(long double).name())
+    TableValue<long double>::load(stream, value_base, context);
+
+  else if (type == typeid(char).name())
+    TableValue<char>::load(stream, value_base, context);
+
+  else if (type == typeid(char *).name())
+    TableValue<char *>::load(stream, value_base, context);
+
+  else if (type == typeid(std::string).name())
+    TableValue<std::string>::load(stream, value_base, context);
+
+  else
+    mooseError("Unsupported table value type ", demangle(type.c_str()));
 }
 
 void
@@ -128,71 +191,7 @@ FormattedTable::append(bool append_existing_file)
 void
 FormattedTable::addRow(Real time)
 {
-  _data.emplace_back(time, std::map<std::string, Real>());
-}
-
-void
-FormattedTable::addData(const std::string & name, Real value)
-{
-  if (empty())
-    mooseError("No Data stored in the the FormattedTable");
-
-  auto back_it = _data.rbegin();
-  back_it->second[name] = value;
-
-  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
-  {
-    _column_names.push_back(name);
-    _column_names_unsorted = true;
-  }
-}
-
-void
-FormattedTable::addData(const std::string & name, Real value, Real time)
-{
-  auto back_it = _data.rbegin();
-
-  mooseAssert(back_it == _data.rend() || !MooseUtils::absoluteFuzzyLessThan(time, back_it->first),
-              "Attempting to add data to FormattedTable with the dependent variable in a "
-              "non-increasing order.\nDid you mean to use addData(std::string &, const "
-              "std::vector<Real> &)?");
-
-  // See if the current "row" is already in the table
-  if (back_it == _data.rend() || !MooseUtils::absoluteFuzzyEqual(time, back_it->first))
-  {
-    _data.emplace_back(time, std::map<std::string, Real>());
-    back_it = _data.rbegin();
-  }
-  // Insert or update value
-  back_it->second[name] = value;
-
-  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
-  {
-    _column_names.push_back(name);
-    _column_names_unsorted = true;
-  }
-}
-
-void
-FormattedTable::addData(const std::string & name, const std::vector<Real> & vector)
-{
-  for (MooseIndex(vector) i = 0; i < vector.size(); ++i)
-  {
-    if (i == _data.size())
-      _data.emplace_back(i, std::map<std::string, Real>());
-
-    mooseAssert(MooseUtils::absoluteFuzzyEqual(_data[i].first, i),
-                "Inconsistent indexing in VPP vector");
-
-    auto & curr_entry = _data[i];
-    curr_entry.second[name] = vector[i];
-  }
-
-  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
-  {
-    _column_names.push_back(name);
-    _column_names_unsorted = true;
-  }
+  _data.emplace_back(time, std::map<std::string, std::shared_ptr<TableValueBase>>());
 }
 
 Real
@@ -200,19 +199,6 @@ FormattedTable::getLastTime()
 {
   mooseAssert(!empty(), "No Data stored in the FormattedTable");
   return _data.rbegin()->first;
-}
-
-Real &
-FormattedTable::getLastData(const std::string & name)
-{
-  mooseAssert(!empty(), "No Data stored in the FormattedTable");
-
-  auto & last_data_map = _data.rbegin()->second;
-  auto it = last_data_map.find(name);
-  if (it == last_data_map.end())
-    mooseError("No Data found for name: " + name);
-
-  return it->second;
 }
 
 void
@@ -321,6 +307,7 @@ FormattedTable::printTablePiece(std::ostream & out,
                                 std::vector<std::string>::iterator & col_begin,
                                 std::vector<std::string>::iterator & col_end)
 {
+  fillEmptyValues();
   /**
    * Print out the header row
    */
@@ -352,7 +339,7 @@ FormattedTable::printTablePiece(std::ostream & out,
     for (auto header_it = col_begin; header_it != col_end; ++header_it)
     {
       auto & tmp = data_it->second;
-      out << std::setw(col_widths[*header_it]) << tmp[*header_it] << " |";
+      out << std::setw(col_widths[*header_it]) << *tmp[*header_it] << " |";
     }
     out << "\n";
   }
@@ -363,6 +350,8 @@ FormattedTable::printTablePiece(std::ostream & out,
 void
 FormattedTable::printCSV(const std::string & file_name, int interval, bool align)
 {
+  fillEmptyValues();
+
   open(file_name);
 
   if (_output_row_index == 0)
@@ -396,7 +385,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
         for (const auto & jt : it.second)
         {
           std::ostringstream oss;
-          oss << std::setprecision(_csv_precision) << jt.second;
+          oss << std::setprecision(_csv_precision) << *jt.second;
           unsigned int w = oss.str().size();
           _align_widths[jt.first] = std::max(_align_widths[jt.first], w);
         }
@@ -440,7 +429,8 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
 }
 
 void
-FormattedTable::printRow(std::pair<Real, std::map<std::string, Real>> & row_data, bool align)
+FormattedTable::printRow(
+    std::pair<Real, std::map<std::string, std::shared_ptr<TableValueBase>>> & row_data, bool align)
 {
   bool first = true;
 
@@ -456,7 +446,7 @@ FormattedTable::printRow(std::pair<Real, std::map<std::string, Real>> & row_data
 
   for (const auto & col_name : _column_names)
   {
-    std::map<std::string, Real> & tmp = row_data.second;
+    std::map<std::string, std::shared_ptr<TableValueBase>> & tmp = row_data.second;
 
     if (!first)
       _output_file << _csv_delimiter;
@@ -465,9 +455,9 @@ FormattedTable::printRow(std::pair<Real, std::map<std::string, Real>> & row_data
 
     if (align)
       _output_file << std::setprecision(_csv_precision) << std::right
-                   << std::setw(_align_widths[col_name]) << tmp[col_name];
+                   << std::setw(_align_widths[col_name]) << *tmp[col_name];
     else
-      _output_file << std::setprecision(_csv_precision) << tmp[col_name];
+      _output_file << std::setprecision(_csv_precision) << *tmp[col_name];
   }
   _output_file << "\n";
 }
@@ -484,6 +474,8 @@ const std::string after_ext =
 void
 FormattedTable::makeGnuplot(const std::string & base_file, const std::string & format)
 {
+  fillEmptyValues();
+
   // TODO: run this once at end of simulation, right now it runs every iteration
   // TODO: do I need to be more careful escaping column names?
   // Note: open and close the files each time, having open files may mess with gnuplot
@@ -529,7 +521,7 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
     for (const auto & col_name : _column_names)
     {
       auto & tmp = data_it.second;
-      datfile << '\t' << tmp[col_name];
+      datfile << '\t' << *tmp[col_name];
     }
     datfile << '\n';
   }
@@ -577,6 +569,16 @@ void
 FormattedTable::clear()
 {
   _data.clear();
+}
+
+void
+FormattedTable::fillEmptyValues()
+{
+  for (auto & it : _data)
+    for (const auto & col_name : _column_names)
+      if (!it.second[col_name])
+        it.second[col_name] =
+            std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
 }
 
 unsigned short
@@ -637,4 +639,11 @@ FormattedTable::sortColumns()
     std::sort(_column_names.begin(), _column_names.end());
     _column_names_unsorted = false;
   }
+}
+
+std::ostream &
+operator<<(std::ostream & os, const TableValueBase & value)
+{
+  value.print(os);
+  return os;
 }
