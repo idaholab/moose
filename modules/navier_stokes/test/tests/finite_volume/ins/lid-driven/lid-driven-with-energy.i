@@ -69,9 +69,8 @@ advected_interp_method = 'average'
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
@@ -88,7 +87,7 @@ advected_interp_method = 'average'
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = ${vel}
@@ -108,14 +107,14 @@ advected_interp_method = 'average'
   []
 
   [u_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = ${vel}
   []
 
   [v_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = ${vel}
@@ -135,7 +134,7 @@ advected_interp_method = 'average'
   []
 
   [v_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = v
     vel = ${vel}
     momentum_component = 'y'

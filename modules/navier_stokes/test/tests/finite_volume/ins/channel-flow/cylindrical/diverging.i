@@ -39,9 +39,8 @@ penalty=1e6
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
@@ -50,13 +49,12 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
     boundaries_to_force = ${mass_boundaries_to_force}
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -67,7 +65,6 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
     boundaries_to_force = ${momentum_boundaries_to_force}
   []
@@ -79,7 +76,7 @@ penalty=1e6
     boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [u_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
@@ -88,13 +85,13 @@ penalty=1e6
     boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [u_pressure_rz]
-    type = FVMomPressureRZ
+    type = NSFVMomentumPressureRZ
     variable = u
     p = pressure
   []
 
   [v_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -105,7 +102,6 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
     boundaries_to_force = ${momentum_boundaries_to_force}
   []
@@ -117,7 +113,7 @@ penalty=1e6
     boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [v_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'
@@ -149,7 +145,7 @@ penalty=1e6
     value = 1
   []
   [free-slip-wall-u]
-    type = FVPenaltyFreeSlipBC
+    type = NSFVPenaltyFreeSlipBC
     boundary = 'right'
     variable = u
     momentum_component = x
@@ -158,7 +154,7 @@ penalty=1e6
     penalty = ${penalty}
   []
   [free-slip-wall-v]
-    type = FVPenaltyFreeSlipBC
+    type = NSFVPenaltyFreeSlipBC
     boundary = 'right'
     variable = v
     momentum_component = y

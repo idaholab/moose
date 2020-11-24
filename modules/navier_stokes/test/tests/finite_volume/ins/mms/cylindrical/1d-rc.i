@@ -32,9 +32,8 @@ rho=1.1
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = 'average'
     velocity_interp_method = 'rc'
     vel = 'velocity'
@@ -42,7 +41,6 @@ rho=1.1
     u = u
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
   []
   [mass_forcing]
     type = FVBodyForce
@@ -51,7 +49,7 @@ rho=1.1
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -61,7 +59,6 @@ rho=1.1
     u = u
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
   []
   [u_viscosity]
     type = FVDiffusion
@@ -69,14 +66,14 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
     advected_interp_method = 'average'
   []
   [u_pressure_rz]
-    type = FVMomPressureRZ
+    type = NSFVMomentumPressureRZ
     variable = u
     p = pressure
   []
@@ -139,7 +136,9 @@ rho=1.1
 []
 [forcing_p]
   type = ParsedFunction
-  value = '(x*cos(x) + sin(x))/x'
+  value = '(x*rho*cos(x) + rho*sin(x))/x'
+  vars = 'rho'
+  vals = '${rho}'
 []
 []
 

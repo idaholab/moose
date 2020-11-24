@@ -52,9 +52,8 @@ velocity='velocity'
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = ${velocity}
@@ -63,7 +62,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [mass_forcing]
@@ -73,7 +71,7 @@ velocity='velocity'
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = ${velocity}
@@ -84,7 +82,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_viscosity]
@@ -94,7 +91,7 @@ velocity='velocity'
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = ${velocity}
@@ -108,7 +105,7 @@ velocity='velocity'
   []
 
   [v_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = ${velocity}
@@ -119,7 +116,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [v_viscosity]
@@ -129,7 +125,7 @@ velocity='velocity'
     force_boundary_execution = ${force_boundary_execution}
   []
   [v_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = ${velocity}
@@ -244,7 +240,9 @@ velocity='velocity'
 []
 [forcing_p]
   type = ParsedFunction
-  value = '-1/2*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+  value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
+  vars = 'rho'
+  vals = '${rho}'
 []
 [exact_t]
   type = ParsedFunction

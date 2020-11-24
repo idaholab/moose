@@ -59,9 +59,8 @@ velocity_interp_method='rc'
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = 'average'
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
@@ -70,7 +69,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
   []
   [mass_forcing]
     type = FVBodyForce
@@ -79,7 +77,7 @@ velocity_interp_method='rc'
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -90,7 +88,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
   []
   [u_viscosity]
     type = FVDiffusion
@@ -98,9 +95,9 @@ velocity_interp_method='rc'
     coeff = ${mu}
   []
   [u_pressure]
-    # FVMomPressure inherits from FVMatAdvection and in FVMomPressure::validParams we set
+    # NSFVMomentumPressure inherits from FVMatAdvection and in NSFVMomentumPressure::validParams we set
     # 'advected_quantity = NS::pressure'
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
 
@@ -115,7 +112,7 @@ velocity_interp_method='rc'
   []
 
   [v_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -126,7 +123,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
   []
   [v_viscosity]
     type = FVDiffusion
@@ -134,7 +130,7 @@ velocity_interp_method='rc'
     coeff = ${mu}
   []
   [v_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     # these parameters shouldn't be used for anything but are still required
@@ -150,7 +146,7 @@ velocity_interp_method='rc'
 
 [FVBCs]
   [u_advection]
-    type = NSFVFunctionBC
+    type = NSFVMomentumAdvectionFunctionBC
     boundary = 'left right top bottom'
     variable = u
     vel = 'velocity'
@@ -176,7 +172,7 @@ velocity_interp_method='rc'
     coeff_function = '${mu}'
   []
   [u_pressure]
-    type = FVMomPressureFunctionBC
+    type = NSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = u
     momentum_component = 'x'
@@ -185,7 +181,7 @@ velocity_interp_method='rc'
   []
 
   [v_advection]
-    type = NSFVFunctionBC
+    type = NSFVMomentumAdvectionFunctionBC
     boundary = 'left right top bottom'
     variable = v
     vel = 'velocity'
@@ -211,7 +207,7 @@ velocity_interp_method='rc'
     coeff_function = '${mu}'
   []
   [v_pressure]
-    type = FVMomPressureFunctionBC
+    type = NSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = v
     momentum_component = 'y'
@@ -220,12 +216,12 @@ velocity_interp_method='rc'
   []
 
   [mass_continuity_flux]
-    type = NSFVFunctionBC
+    type = NSFVMomentumAdvectionFunctionBC
     variable = pressure
     boundary = 'top bottom left right'
-    advected_quantity = 1
     vel = 'velocity'
-    flux_variable_exact_solution = 1
+    flux_variable_exact_solution = 'rho'
+    advected_quantity = ${rho}
     vel_x_exact_solution = 'exact_u'
     vel_y_exact_solution = 'exact_v'
     velocity_interp_method = ${velocity_interp_method}
@@ -233,7 +229,11 @@ velocity_interp_method='rc'
     u = u
     v = v
     mu = ${mu}
-    rho = ${rho}
+    # WTF, this errors with:
+    #    Material property '${rho}', requested by
+    #    'mass_continuity_flux' is not defined on boundary bottom
+    # if I try to do dollar bracket substitution, so I'm just gonna write it out
+    rho = 1.1
     pressure_exact_solution = 'exact_p'
   []
 
@@ -267,7 +267,7 @@ velocity_interp_method='rc'
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    # we need to compute this here for advection in FVMomPressure
+    # we need to compute this here for advection in NSFVMomentumPressure
     pressure = 'pressure'
   []
 []
@@ -311,7 +311,13 @@ velocity_interp_method='rc'
 []
 [forcing_p]
   type = ParsedFunction
-  value = '-0.81*sin(0.9*y) + 1.21*cos(1.1*x)'
+  value = '-0.81*rho*sin(0.9*y) + 1.21*rho*cos(1.1*x)'
+  vars = 'rho'
+  vals = '${rho}'
+[]
+[rho]
+  type = ParsedFunction
+  value = '${rho}'
 []
 []
 

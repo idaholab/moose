@@ -24,7 +24,7 @@ temp = 'sin(pi * y / 2) * sin(x * pi)'
 
 f_u, e_u = mms.evaluate('div(vel*rho*u) - div(mu * grad(u)) + grad(p).dot(e_i)', u, variable='u', vel=vel, p=p, scalars=['mu', 'rho'], transformation='cylindrical', coordinate_names=('x', 'phi', 'y'))
 f_v, e_v = mms.evaluate('div(vel*rho*v) - div(mu * grad(v)) + grad(p).dot(e_k)', v, variable='v', vel=vel, p=p, scalars=['mu', 'rho'], transformation='cylindrical', coordinate_names=('x', 'phi', 'y'))
-f_p, e_p = mms.evaluate('div(vel)', p, variable='p', vel=vel, transformation='cylindrical', coordinate_names=('x', 'phi', 'y'))
+f_p, e_p = mms.evaluate('div(vel*rho)', p, variable='p', vel=vel, scalars=['rho'], transformation='cylindrical', coordinate_names=('x', 'phi', 'y'))
 f_t, e_t = mms.evaluate('div(vel*rho*cp*temp) - div(k * grad(temp))', temp, variable='temp', vel=vel, scalars=['rho', 'cp', 'k'], transformation='cylindrical', coordinate_names=('x', 'phi', 'y'))
 
 rho = sympy.Symbol('rho')
@@ -41,7 +41,7 @@ mms.print_hit(e_rhov, 'exact_rhov', rho='${rho}')
 mms.print_hit(f_v, 'forcing_v', mu='${mu}', rho='${rho}')
 
 mms.print_hit(e_p, 'exact_p')
-mms.print_hit(f_p, 'forcing_p')
+mms.print_hit(f_p, 'forcing_p', rho='${rho}')
 
 mms.print_hit(e_t, 'exact_t')
 mms.print_hit(f_t, 'forcing_t', k='${k}', rho='${rho}', cp='${cp}')

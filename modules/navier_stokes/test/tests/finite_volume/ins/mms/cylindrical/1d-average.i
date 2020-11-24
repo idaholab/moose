@@ -32,9 +32,8 @@ rho=1.1
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = 'average'
     velocity_interp_method = 'average'
     vel = 'velocity'
@@ -50,7 +49,7 @@ rho=1.1
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -67,9 +66,9 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    # FVMomPressure inherits from FVMatAdvection and in FVMomPressure::validParams we set
+    # NSFVMomentumPressure inherits from FVMatAdvection and in NSFVMomentumPressure::validParams we set
     # 'advected_quantity = NS::pressure'
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
 
@@ -105,7 +104,7 @@ rho=1.1
     coeff_function = '${mu}'
   []
   [u_pressure]
-    type = FVMomPressureFunctionBC
+    type = NSFVMomentumPressureFunctionBC
     boundary = 'left right'
     variable = u
     momentum_component = 'x'
@@ -117,10 +116,10 @@ rho=1.1
     type = FVMatAdvectionFunctionBC
     variable = pressure
     boundary = 'left right'
-    advected_quantity = 1
     vel = 'velocity'
-    flux_variable_exact_solution = 1
+    flux_variable_exact_solution = ${rho}
     vel_x_exact_solution = 'exact_u'
+    advected_quantity = ${rho}
   []
 []
 
@@ -133,7 +132,7 @@ rho=1.1
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
-    # we need to compute this here for advection in FVMomPressure
+    # we need to compute this here for advection in NSFVMomentumPressure
     pressure = 'pressure'
   []
 []
@@ -161,7 +160,9 @@ rho=1.1
 []
 [forcing_p]
   type = ParsedFunction
-  value = '(x*cos(x) + sin(x))/x'
+  value = '(x*rho*cos(x) + rho*sin(x))/x'
+  vars = 'rho'
+  vals = '${rho}'
 []
 []
 

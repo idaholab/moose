@@ -33,9 +33,8 @@ velocity_interp_method='rc'
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
@@ -43,7 +42,6 @@ velocity_interp_method='rc'
     u = u
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = true
   []
   [mass_forcing]
@@ -53,7 +51,7 @@ velocity_interp_method='rc'
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -63,7 +61,6 @@ velocity_interp_method='rc'
     u = u
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = true
   []
   [u_viscosity]
@@ -73,9 +70,9 @@ velocity_interp_method='rc'
     force_boundary_execution = true
   []
   [u_pressure]
-    # FVMomPressure inherits from FVMatAdvection and in FVMomPressure::validParams we set
+    # NSFVMomentumPressure inherits from FVMatAdvection and in NSFVMomentumPressure::validParams we set
     # 'advected_quantity = NS::pressure'
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
 
@@ -116,7 +113,7 @@ velocity_interp_method='rc'
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
-    # we need to compute this here for advection in FVMomPressure
+    # we need to compute this here for advection in NSFVMomentumPressure
     pressure = 'pressure'
   []
 []
@@ -144,7 +141,9 @@ velocity_interp_method='rc'
 []
 [forcing_p]
   type = ParsedFunction
-  value = '(1/2)*pi*cos((1/2)*x*pi)'
+  value = '(1/2)*pi*rho*cos((1/2)*x*pi)'
+  vars = 'rho'
+  vals = '${rho}'
 []
 []
 

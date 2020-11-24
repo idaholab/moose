@@ -45,9 +45,8 @@ force_boundary_execution=true
 
 [FVKernels]
   [mass]
-    type = NSFVKernel
+    type = NSFVMassAdvection
     variable = pressure
-    advected_quantity = 1
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
@@ -56,7 +55,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [mass_forcing]
@@ -66,7 +64,7 @@ force_boundary_execution=true
   []
 
   [u_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -77,7 +75,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_viscosity]
@@ -87,7 +84,7 @@ force_boundary_execution=true
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
@@ -95,7 +92,7 @@ force_boundary_execution=true
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure_rz]
-    type = FVMomPressureRZ
+    type = NSFVMomentumPressureRZ
     variable = u
     p = pressure
   []
@@ -106,7 +103,7 @@ force_boundary_execution=true
   []
 
   [v_advection]
-    type = NSFVKernel
+    type = NSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -117,7 +114,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    ghost_layers = 2
     force_boundary_execution = ${force_boundary_execution}
   []
   [v_viscosity]
@@ -127,7 +123,7 @@ force_boundary_execution=true
     force_boundary_execution = ${force_boundary_execution}
   []
   [v_pressure]
-    type = FVMomPressure
+    type = NSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'
@@ -215,7 +211,9 @@ force_boundary_execution=true
 []
 [forcing_p]
   type = ParsedFunction
-  value = '-pi*sin(y*pi)*cos(x*pi) + (x*pi*sin((1/2)*y*pi)*cos(x*pi) + sin(x*pi)*sin((1/2)*y*pi))/x'
+  value = '-pi*rho*sin(y*pi)*cos(x*pi) + (x*pi*rho*sin((1/2)*y*pi)*cos(x*pi) + rho*sin(x*pi)*sin((1/2)*y*pi))/x'
+  vars = 'rho'
+  vals = '${rho}'
 []
 []
 
