@@ -33,7 +33,7 @@ by combining the two methods described above.
 
 !alert tip title=Optimum numbers are hardware and problem dependent
 The number of processors and threads available for execution is hardware dependent. A modern laptop
-typically has 4 processors, with with 2 threads each. In general, it is recommended to begin with
+typically has 4 processors, with 2 threads each. In general, it is recommended to begin with
 using just [!ac](MPI). Thus, it is typical to use between 4 and 8 processors for the `mpiexec`
 command. If threading is added then using 4 processors for [!ac](MPI) and 2 for threading would be
 typical. The optimum arrangement for parallel execution will be hardware and problem dependent, it
@@ -87,7 +87,7 @@ cd ~/projects/babbler/problems
 Running this problem with 4 levels of refinement may be too much for older systems. It is still
 possible to follow along with this example using less levels of refinement.
 
-The `-r 4` option will split each quadrilteral element into 4 elements, 4 times. Therefore the
+The `-r 4` option will split each quadrilateral element into 4 elements, 4 times. Therefore the
 resulting mesh will be 4^4^ times larger. The original input file results in 1000 elements, thus
 the version executed with this command contains 256,000 elements. This change is evident in the
 mesh section of the terminal output. In addition, the number of [!ac](DOFs) is reported, which is
