@@ -11,11 +11,11 @@
 
 #include "FVFluxBC.h"
 
-class FVPenaltyFreeSlipBC : public FVFluxBC
+class NSFVPenaltyFreeSlipBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  FVPenaltyFreeSlipBC(const InputParameters & params);
+  NSFVPenaltyFreeSlipBC(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

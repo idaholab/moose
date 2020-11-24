@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVFunctionBC.h"
+#include "NSFVMomentumAdvectionFunctionBC.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -16,16 +16,17 @@
 #include "ADReal.h"    // Moose::derivInsert
 #include "MooseMesh.h" // FaceInfo methods
 #include "FVDirichletBC.h"
+#include "Function.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/vector_value.h"
 
-registerMooseObject("NavierStokesApp", NSFVFunctionBC);
+registerMooseObject("NavierStokesApp", NSFVMomentumAdvectionFunctionBC);
 
 InputParameters
-NSFVFunctionBC::validParams()
+NSFVMomentumAdvectionFunctionBC::validParams()
 {
   InputParameters params = FVMatAdvectionFunctionBC::validParams();
   params += NSFVAdvectionBase::validParams();
@@ -38,7 +39,7 @@ NSFVFunctionBC::validParams()
   return params;
 }
 
-NSFVFunctionBC::NSFVFunctionBC(const InputParameters & params)
+NSFVMomentumAdvectionFunctionBC::NSFVMomentumAdvectionFunctionBC(const InputParameters & params)
   : FVMatAdvectionFunctionBC(params),
     NSFVAdvectionBase(params),
     _pressure_exact_solution(getFunction("pressure_exact_solution")),
@@ -48,10 +49,10 @@ NSFVFunctionBC::NSFVFunctionBC(const InputParameters & params)
 }
 
 void
-NSFVFunctionBC::interpolate(Moose::FV::InterpMethod m,
-                            ADRealVectorValue & v_face,
-                            const ADRealVectorValue & elem_v,
-                            const RealVectorValue & ghost_v)
+NSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
+                                             ADRealVectorValue & v_face,
+                                             const ADRealVectorValue & elem_v,
+                                             const RealVectorValue & ghost_v)
 {
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info, true);
@@ -118,7 +119,7 @@ NSFVFunctionBC::interpolate(Moose::FV::InterpMethod m,
 }
 
 ADReal
-NSFVFunctionBC::computeQpResidual()
+NSFVMomentumAdvectionFunctionBC::computeQpResidual()
 {
   ADReal flux_var_face;
   ADRealVectorValue v_face;

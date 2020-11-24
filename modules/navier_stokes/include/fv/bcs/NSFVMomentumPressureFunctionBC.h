@@ -11,11 +11,11 @@
 
 #include "FVFluxBC.h"
 
-class FVMomPressureFunctionBC : public FVFluxBC
+class NSFVMomentumPressureFunctionBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  FVMomPressureFunctionBC(const InputParameters & params);
+  NSFVMomentumPressureFunctionBC(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

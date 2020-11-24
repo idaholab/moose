@@ -15,11 +15,11 @@
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVAdvectionBase
+class NSFVMomentumAdvectionFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVAdvectionBase
 {
 public:
   static InputParameters validParams();
-  NSFVFunctionBC(const InputParameters & params);
+  NSFVMomentumAdvectionFunctionBC(const InputParameters & params);
 
 protected:
   /**

@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVMomPressureFunctionBC.h"
+#include "NSFVMomentumPressureFunctionBC.h"
 
 #include "NS.h"
 #include "Function.h"
 
-registerMooseObject("NavierStokesApp", FVMomPressureFunctionBC);
+registerMooseObject("NavierStokesApp", NSFVMomentumPressureFunctionBC);
 
 InputParameters
-FVMomPressureFunctionBC::validParams()
+NSFVMomentumPressureFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
@@ -27,17 +27,16 @@ FVMomPressureFunctionBC::validParams()
   return params;
 }
 
-FVMomPressureFunctionBC::FVMomPressureFunctionBC(const InputParameters & params)
+NSFVMomentumPressureFunctionBC::NSFVMomentumPressureFunctionBC(const InputParameters & params)
   : FVFluxBC(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure(adCoupledValue("p")),
     _pressure_exact_solution(getFunction("pressure_exact_solution"))
-
 {
 }
 
 ADReal
-FVMomPressureFunctionBC::computeQpResidual()
+NSFVMomentumPressureFunctionBC::computeQpResidual()
 {
   ADReal pressure_face;
   auto pressure_ghost = _pressure_exact_solution.value(
