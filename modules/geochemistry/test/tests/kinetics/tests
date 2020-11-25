@@ -43,7 +43,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     type = CSVDiff
     input = 'quartz_deposition.i'
     csvdiff = 'quartz_deposition_out.csv'
-    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled deposition reactions with a temperature-dependent rate"
     issues = '#15330'
     design = 'kinetic_quartz_arrhenius.md'
   [../]

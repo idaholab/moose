@@ -46,7 +46,7 @@
     type = RunException
     input = except6.i
     expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
-    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    requirement = 'An error will be thrown if the number of species whose activity values are controlled is not equal to the number of activity values provided'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -172,7 +172,7 @@ Minerals:
 Nernst potentials:
 e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     match_literal = true
-    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case without precipitates"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -180,7 +180,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     type = CSVDiff
     input = 'mixing_seawater_step2.i'
     csvdiff = 'mixing_seawater_step2_out.csv'
-    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case with precipitates"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -189,7 +189,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     input = 'mixing.i'
     csvdiff = 'mixing_out.csv'
     heavy = true
-    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    requirement = "The geochemistry module shall be able to mix different fluids together and find the resulting stable assemblage"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -205,7 +205,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     type = CSVDiff
     input = 'seawater_evaporation_no_flow_through.i'
     csvdiff = 'seawater_evaporation_no_flow_through_out.csv'
-    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
+    requirement = "The geochemistry module shall be able to progressively remove reactants"
     issues = '#15330'
     design = 'flow_through.md'
   [../]
@@ -232,7 +232,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     type = CSVDiff
     input = 'flushing_equilibrium_at70degC.i'
     csvdiff = 'flushing_equilibrium_at70degC_out.csv'
-    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    requirement = "The geochemistry module shall be able to find equilibrium concentrations of species that are later provided with kinetic laws"
     issues = '#15330'
     design = 'flush.md'
   [../]

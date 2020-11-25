@@ -6,7 +6,7 @@
     match_literal = true
     issues = '#15690'
     requirement = 'An error will be thrown when trying to record nodal void volume into a non-nodal AuxVariable'
-    design = 'TODO'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   [../]
   [./nnv]
     type = CSVDiff
@@ -14,7 +14,7 @@
     csvdiff = nodal_void_volume_out.csv
     issues = '#15690'
     requirement = 'Geochemistry shall be able to compute nodal void volume'
-    design = 'TODO'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   [../]
   [./nnv_threads]
     type = CSVDiff
@@ -25,7 +25,7 @@
     prereq = nnv
     issues = '#15690'
     requirement = 'Geochemistry shall be able to compute nodal void volume, when using multiple threads'
-    design = 'TODO'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   [../]
   [./nnv_adaptivity]
     type = CSVDiff
@@ -33,7 +33,7 @@
     csvdiff = nodal_void_volume_adaptive_out.csv
     issues = '#15690'
     requirement = 'Geochemistry shall be able to compute nodal void volume, even when the mesh is adapting'
-    design = 'TODO'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   [../]
   [./nnv_adaptivity_threads]
     type = CSVDiff
@@ -44,6 +44,6 @@
     prereq = nnv_adaptivity
     issues = '#15690'
     requirement = 'Geochemistry shall be able to compute nodal void volume, when the mesh is adapting and when using multiple threads'
-    design = 'TODO'
+    design = 'NodalVoidVolumeAux.md NodalVoidVolume.md'
   [../]
 []
