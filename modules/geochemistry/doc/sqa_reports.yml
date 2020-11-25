@@ -26,5 +26,3 @@ Requirements:
     geochemistry:
         directories:
             - ${MOOSE_DIR}/modules/geochemistry
-        log_duplicate_requirement: WARNING
-        log_design_files: WARNING
