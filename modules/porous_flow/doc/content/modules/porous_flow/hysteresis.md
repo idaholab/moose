@@ -256,13 +256,13 @@ A python script that produces plots of hysteretic capillary pressure and relativ
 
 To include hysteretic capillarity in an existing (non-hysteretic) input file, the following changes need to be made.
 
-1. Any capillary-pressure UserObjects, such as [PorousFlowCapillaryPressureVG](PorousFlowCapillaryPressureVG.md), may be removed from the input file
+1. Any capillary-pressure UserObjects, such as [PorousFlowCapillaryPressureVG](PorousFlowCapillaryPressureVG.md) will no-longer be used, so should be removed from the input file for clarity.
 2. A [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material needs to be included.
 3. A Material that computes the porepressure(s) and saturation(s) needs to be included.
 
    - For 1-phase partially-saturated situations, [PorousFlow1PhaseP](PorousFlow1PhaseP.md) should be removed and replaced by [PorousFlow1PhaseHysP](PorousFlow1PhaseHysP.md).  Note the van Genuchten parameter input is $m$ for the non-hysteretic version, but $n$ for the hysteretic version, where $n = 1/(1 - m)$ and $m = 1 - 1/n$.
-   - For 2-phase situations using the two porepressures as the primary variables, [PorousFlow2PhasePP](PorousFlow2PhasePP.md) should be removed and replaced by TODO.
-   - For 2-phase situations using the liquid porepressure and gas saturation as the primary variables, [PorousFlow2PhasePS](PorousFlow2PhasePS.md) should be removed and replaced by TODO.
+   - For 2-phase situations using the two porepressures as the primary variables, [PorousFlow2PhasePP](PorousFlow2PhasePP.md) should be removed and replaced by [PorousFlow2PhaseHysPP](PorousFlow2PhaseHysPP.md).
+   - For 2-phase situations using the liquid porepressure and gas saturation as the primary variables, [PorousFlow2PhasePS](PorousFlow2PhasePS.md) should be removed and replaced by [PorousFlow2PhaseHysPS](PorousFlow2PhaseHysPS.md).
 
 An example is:
 
@@ -282,8 +282,7 @@ By changing the `FunctionAux` that controls the saturation, various hysteretic c
 
 !media media/porous_flow/hys_vary_sat_1.png caption=The results of two hysteretic simulations.  The lines show the expected result (from the python script) while the crosses and asterisks show the MOOSE result.  id=hys_vary_sat_1_fig
 
-!alert warning
-Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$ and there is no cross around $(0.1, 1)$.  This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior.  Hysteretic simulations thereby use semi-explicit time-stepping, and do not fully conserve fluid mass.  This should have limited impact upon models if saturations do not change excessively during a single time-step.
+Careful examination of [hys_vary_sat_1_fig] will reveal a subtle feature of the implementation of hysteresis in PorousFlow.  As the system dries and then re-wets, it follows the primary drying curve for the first time-step after the turning point.  This is why there is no asterisk at $(S_{l}, P_{c}) \approx (0.3, 1)$: instead it appears on the primary drying curve at $(S_{l}, P_{c}) \approx (0.3, 2)$.  Similarly, there is no cross around $(0.1, 1)$.  Consequences of this are discussed in a section below.
 
 [hys_vary_sat_1_3rdorder_fig] results when the FunctionAux is
 
@@ -310,3 +309,48 @@ The remainder of the input file is standard, with the inclusion of the hystereti
 The result is [hys_1phase_3_fig].
 
 !media media/porous_flow/hys_1phase_3.png caption=The result of a single-phase simulation in which an external pump removes and adds water to a porous material in order to observe the hysteretic capillary pressure.  id=hys_1phase_3_fig
+
+### Two-phase example using the PP formulation
+
+A simulation that simply adds gas then removes gas from a 2-phase system to observe the hysteretic capillary pressure is explored in this section.  The gas flux is controlled by the Postprocessor
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[./flux] end=[./hys_order]
+
+and the DiracKernel
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i block=DiracKernels
+
+The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[./hys_order_material] end=[]
+
+The result is [hys_2phasePP_1_fig].
+
+!media media/porous_flow/hys_2phasePP_1.png caption=The result of a two-phase simulation using a PP formulation in which an external pump adds to and removes gas from a porous material in order to observe the hysteretic capillary pressure.  id=hys_2phasePP_1_fig
+
+### Two-phase example using the PS formulation
+
+A simulation that simply adds gas, then removes gas, and adds it again to a 2-phase system to observe the hysteretic capillary pressure is explored in this section.  The gas flux is controlled by the Postprocessor
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[./flux] end=[./hys_order]
+
+and the DiracKernel
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i block=DiracKernels
+
+The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[./hys_order_material] end=[]
+
+The result is [hys_2phasePS_2_fig].
+
+!media media/porous_flow/hys_2phasePS_2.png caption=The result of a two-phase simulation using a PS formulation in which an external pump adds, removes and then adds gas to a porous material in order to observe the hysteretic capillary pressure.  id=hys_2phasePS_2_fig
+
+
+## Hysteretic capillary-pressure implementation remarks
+
+As mentioned above, [hys_vary_sat_1_fig] reveals a subtle feature of the implementation of hysteresis in PorousFlow.  There is no asterisk around $(S_{l}, P_{c}) = (0.3, 1)$.  Instead it appears on the primary drying curve at around $(S_{l}, P_{c}) = (0.3, 2)$.  As the saturation is reduced along the drying curve, and then increased again, PorousFlow follows the primary drying curve for the first time-step after the turning point.  At subsequent steps, it follows the correct curve.
+
+This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior, as mentioned in [!citet](doughty2007) and [!citet](doughty2008).
+
+The lagging behaviour has the unfortunate side-effect that simulations involving hysteretic capillary pressure do not conserve fluid mass.  The remainder of PorousFlow conserves fluid mass exactly, at all times.  However, when dealing with hysteretic capillary pressures, a small amount of mass is lost or gained whenever a turning point is encountered.  This should have limited impact upon models if saturations do not change excessively during a single time-step.

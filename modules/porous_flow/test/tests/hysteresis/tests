@@ -113,6 +113,24 @@
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
   [../]
+  [./except14]
+    type = 'RunException'
+    input = 'except14.i'
+    expect_err = 'The Dictator announces that the number of phases is 1 whereas PorousFlow2PhaseHysPP can only be used for 2-phase simulation.  When you have efficient government, you have dictatorship.'
+    match_literal = true
+    requirement = 'An exception shall be thrown if a two-phase PP hysteretic capillary-pressure Material is used in models that do not have exactly 2 phases'
+    design = 'PorousFlow2PhaseHysPP.md'
+    issues = '#16260'
+  [../]
+  [./except15]
+    type = 'RunException'
+    input = 'except15.i'
+    expect_err = 'The Dictator announces that the number of phases is 1 whereas PorousFlow2PhaseHysPS can only be used for 2-phase simulation.  The Dictator is always watching.'
+    match_literal = true
+    requirement = 'An exception shall be thrown if a two-phase PS hysteretic capillary-pressure Material is used in models that do not have exactly 2 phases'
+    design = 'PorousFlow2PhaseHysPS.md'
+    issues = '#16260'
+  [../]
   [./hys_order_01]
     type = CSVDiff
     input = 'hys_order_01.i'
@@ -1167,6 +1185,56 @@
     csvdiff = '1phase_3rd_out.csv'
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along first, second and third order curves'
     design = 'PorousFlow1PhaseHysP.md'
+    issues = '#16129'
+  [../]
+  [./2phasePP_jacobian]
+    type = PetscJacobianTester
+    input = '2phasePP_jac.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    requirement = 'PorousFlow shall be able to compute the full Jacobian entries in 2-phase hysteretic systems when using a PP formulation'
+    design = 'PorousFlow2PhaseHysPP.md'
+    issues = '#16129'
+  [../]
+  [./2phasePP_1]
+    type = CSVDiff
+    input = '2phasePP.i'
+    csvdiff = '2phasePP_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PP formulation, as the system evolves in time along the primary drying curve and then along a first-order curve'
+    design = 'PorousFlow2PhaseHysPP.md'
+    issues = '#16129'
+  [../]
+  [./2phasePP_2]
+    type = CSVDiff
+    input = '2phasePP_2.i'
+    csvdiff = '2phasePP_2_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PP formulation, as the system evolves in time along the primary drying curve and then along a first-order curve and then along a second-order drying curve until it meets the primary drying curve'
+    design = 'PorousFlow2PhaseHysPP.md'
+    issues = '#16129'
+  [../]
+  [./2phasePS_jacobian]
+    type = PetscJacobianTester
+    input = '2phasePS_jac.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    requirement = 'PorousFlow shall be able to compute the full Jacobian entries in 2-phase hysteretic systems when using a PS formulation'
+    design = 'PorousFlow2PhaseHysPS.md'
+    issues = '#16129'
+  [../]
+  [./2phasePS_1]
+    type = CSVDiff
+    input = '2phasePS.i'
+    csvdiff = '2phasePS_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PS formulation, as the system evolves in time along the primary drying curve and then along a first-order curve'
+    design = 'PorousFlow2PhaseHysPS.md'
+    issues = '#16129'
+  [../]
+  [./2phasePS_2]
+    type = CSVDiff
+    input = '2phasePS_2.i'
+    csvdiff = '2phasePS_2_out.csv'
+    requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PS formulation, as the system evolves in time along the primary drying curve and then along a first-order curve and then along a second-order drying curve until it meets the primary drying curve'
+    design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16129'
   [../]
 []

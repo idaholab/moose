@@ -1,4 +1,4 @@
-# Step 4: Generating a Weak Form
+# Step 4: Generate a Weak Form
 
 The first question to ask when presented with a [!ac](PDE) that governs a problem's physics is: "How do I solve this equation?" The MOOSE answer to this question is to use [Galerkin's Method](#galerkin), which involves expressing the *strong form* of a governing [!ac](PDE) in its *weak form*.
 
