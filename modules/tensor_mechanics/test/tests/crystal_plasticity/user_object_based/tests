@@ -7,6 +7,14 @@
     requirement = 'MOOSE shall provide a plug-in based extensible crystal plasticity system'
     design = '/FiniteStrainUObasedCP.md'
   [../]
+  [./user_object_011orientation]
+    type = 'CSVDiff'
+    input = 'user_object_011orientation.i'
+    csvdiff = 'user_object_011orientation_out.csv'
+    issues = '#16064'
+    requirement = 'The material-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
+    design = '/FiniteStrainUObasedCP.md'
+  [../]
   [./exception]
     type = 'Exodiff'
     input = 'exception.i'

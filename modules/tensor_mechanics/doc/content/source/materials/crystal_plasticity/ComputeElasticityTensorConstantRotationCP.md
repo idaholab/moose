@@ -14,13 +14,17 @@ This material builds an orthotropic elasticity tensor using the fill_method
 
 
 !alert warning title=Crystal Plasticity Simulations use Active Rotation
-The rotation matrix used in this class,`ComputeElasticityTensorConstantRotationCP`, is the transpose of the rotation matrix created from the Bunge Euler
-angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the rotation matrix is
-because of the active rotation convention used in crystal plasticity simulations.
+The rotation matrix used in this
+class,`ComputeElasticityTensorConstantRotationCP`, is the transpose of the
+rotation matrix created from the Bunge Euler angles in the base class,
+[ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the
+rotation matrix is because of the active rotation convention used in crystal
+plasticity simulations.
 
-The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
-[!citep](malvern1969introduction), and is used for simulations of anistropic materials such as cubic
-crystals.  The engineering elasticity tensor notation for an orthotropic material is given in
+The fill method `symmetric9` is appropriate for materials with three orthotropic
+planes of symmetry [!citep](malvern1969introduction), and is used for
+simulations of anistropic materials such as cubic crystals.  The engineering
+elasticity tensor notation for an orthotropic material is given in
 [eq:symmetric9_fill_method]:
 \begin{equation}
 \label{eq:symmetric9_fill_method}
@@ -36,11 +40,12 @@ C_{ijkl} = \begin{bmatrix}
 
 ## Rotation Tensor Conventions
 
-The [Euler angle convention](http://mathworld.wolfram.com/EulerAngles.html) used in
-`ComputeElasticityTensorConstantRotationCP` is the $z$-$x'$-$z'$ (3-1-3) convention.  The Euler angles arguments are
-expected in degrees, not radians, and are denoted as $\phi_1$, $\Phi$, and $\phi_2$, corresponding to
-the axis rotations.  The rotation tensor, $R$, is calculated from the current Euler angles at each
-timestep as shown in [eq:rotation_tensor].
+The [Euler angle convention](http://mathworld.wolfram.com/EulerAngles.html) used
+in `ComputeElasticityTensorConstantRotationCP` is the $z$-$x'$-$z'$ (3-1-3)
+convention.  The Euler angles arguments are expected in degrees, not radians,
+and are denoted as $\phi_1$, $\Phi$, and $\phi_2$, corresponding to the axis
+rotations.  The rotation tensor, $R$, is calculated from the current Euler
+angles at each timestep as shown in [eq:rotation_tensor].
 \begin{equation}
 \label{eq:rotation_tensor}
   \begin{aligned}
@@ -62,11 +67,13 @@ The elasticity tensor is then rotated with [eq:cp_elasticity_tensor_rotation]
 \end{equation}
 at the beginning of the simulation. This calculation is only performed once.
 
-The crystal plasticity materials, including `ComputeElasticityTensorConstantRotationCP` employ an active rotation:
-the crystal system is rotated into the sample (loading) coordinate system. Generally the Bunge Euler
-angles are used to describe a passive rotation: rotating the sample coordinate system into the
-crystal coordinate system. As a result, the rotation tensor applied is the transpose of the rotation
-tensor given in [eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotation].
+The crystal plasticity materials, including
+`ComputeElasticityTensorConstantRotationCP` employ an active rotation: the
+crystal system is rotated into the sample (loading) coordinate system. Generally
+the Bunge Euler angles are used to describe a passive rotation: rotating the
+sample coordinate system into the crystal coordinate system. As a result, the
+rotation tensor applied is the transpose of the rotation tensor given in
+[eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotation].
 
 ## Example Input File Syntax
 

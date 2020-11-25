@@ -7,6 +7,14 @@
     requirement = 'MOOSE shall provide a StressUpdate material-based extensible crystal plasticity system'
     design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   [../]
+  [./update_model_011orientation]
+    type = 'CSVDiff'
+    input = 'update_method_011orientation.i'
+    csvdiff = 'update_method_011orientation_out.csv'
+    issues = '#16064'
+    requirement = 'The material-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
+    design = '/ComputeCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
+  [../]
   [./exception]
     type = 'Exodiff'
     input = 'exception.i'

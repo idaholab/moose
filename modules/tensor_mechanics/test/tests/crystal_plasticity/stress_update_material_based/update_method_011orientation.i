@@ -1,5 +1,5 @@
 [GlobalParams]
-  displacements = 'ux uy uz'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Mesh]
@@ -9,11 +9,19 @@
 []
 
 [AuxVariables]
+  [./pk2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./fp_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e_zz]
+  [./lagrangian_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./lagrangian_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -21,12 +29,9 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-[]
-
-[Functions]
-  [./tdisp]
-    type = ParsedFunction
-    value = 0.01*t
+  [./slip_increment]
+   order = CONSTANT
+   family = MONOMIAL
   [../]
 []
 
@@ -37,6 +42,14 @@
 []
 
 [AuxKernels]
+  [./pk2]
+   type = RankTwoAux
+   variable = pk2
+   rank_two_tensor = pk2
+   index_j = 2
+   index_i = 2
+   execute_on = timestep_end
+  [../]
   [./fp_zz]
     type = RankTwoAux
     variable = fp_zz
@@ -45,47 +58,62 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./e_zz]
+  [./lagrangian_strain_zz]
     type = RankTwoAux
-    variable = e_zz
+    variable = lagrangian_strain_zz
     rank_two_tensor = total_lagrangian_strain
     index_j = 2
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./gss1]
-    type = MaterialStdVectorAux
-    variable = gss
-    property = slip_system_resistance
-    index = 0
+  [./lagrangian_strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = total_lagrangian_strain
+    variable = lagrangian_strain_yy
+    index_i = 1
+    index_j = 1
     execute_on = timestep_end
+  [../]
+  [./gss]
+   type = MaterialStdVectorAux
+   variable = gss
+   property = slip_system_resistance
+   index = 0
+   execute_on = timestep_end
+  [../]
+  [./slip_inc]
+   type = MaterialStdVectorAux
+   variable = slip_increment
+   property = plastic_slip_increment
+   index = 0
+   execute_on = timestep_end
   [../]
 []
 
 [BCs]
   [./symmy]
     type = DirichletBC
-    variable = uy
+    variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
     type = DirichletBC
-    variable = ux
+    variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
     type = DirichletBC
-    variable = uz
+    variable = disp_z
     boundary = back
     value = 0
   [../]
   [./tdisp]
     type = FunctionDirichletBC
-    variable = uz
+    variable = disp_z
     boundary = front
-    function = tdisp
+    function = '0.01*t'
   [../]
 []
 
@@ -94,6 +122,9 @@
     type = ComputeElasticityTensorConstantRotationCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
+    euler_angle_1 = 120.0
+    euler_angle_2 = 125.264
+    euler_angle_3 =  45.0
   [../]
   [./stress]
     type = ComputeCrystalPlasticityStress
@@ -104,10 +135,6 @@
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
     tan_mod_type = exact
-    maximum_substep_iteration = 200
-    use_line_search = true
-    min_line_search_step_size = 0.01
-    resistance_tol = 0.01
   [../]
 []
 
@@ -116,17 +143,29 @@
     type = ElementAverageValue
     variable = stress_zz
   [../]
+  [./pk2]
+   type = ElementAverageValue
+   variable = pk2
+  [../]
   [./fp_zz]
     type = ElementAverageValue
     variable = fp_zz
   [../]
-  [./e_zz]
+  [./lagrangian_strain_yy]
     type = ElementAverageValue
-    variable = e_zz
+    variable = lagrangian_strain_yy
+  [../]
+  [./lagrangian_strain_zz]
+    type = ElementAverageValue
+    variable = lagrangian_strain_zz
   [../]
   [./gss]
     type = ElementAverageValue
     variable = gss
+  [../]
+  [./slip_increment]
+   type = ElementAverageValue
+   variable = slip_increment
   [../]
 []
 
@@ -139,21 +178,20 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
   solve_type = 'PJFNK'
 
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
+  petsc_options_value = ' asm      2              lu            gmres     200'
   nl_abs_tol = 1e-10
-  nl_rel_step_tol = 1e-10
-  dtmax = 10.0
   nl_rel_tol = 1e-10
-  end_time = 1
-  dtmin = 0.02
-  num_steps = 10
   nl_abs_step_tol = 1e-10
+
+  dt = 0.05
+  dtmin = 0.01
+  dtmax = 10.0
+  num_steps = 10
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
