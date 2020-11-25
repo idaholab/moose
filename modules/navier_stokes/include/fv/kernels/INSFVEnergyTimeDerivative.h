@@ -20,6 +20,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _rho;
+  const Real & _rho;
   const ADMaterialProperty<Real> & _cp;
 };

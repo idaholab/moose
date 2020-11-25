@@ -19,20 +19,19 @@ INSFVEnergyTimeDerivative::validParams()
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addRequiredParam<Real>("rho", "The value for the density");
+  params.declareControllable("rho");
   params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
   return params;
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params),
-    _rho(getADMaterialProperty<Real>("rho_name")),
-    _cp(getADMaterialProperty<Real>("cp_name"))
+  : FVTimeKernel(params), _rho(getParam<Real>("rho")), _cp(getADMaterialProperty<Real>("cp_name"))
 {
 }
 
 ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
-  return _rho[_qp] * _cp[_qp] * FVTimeKernel::computeQpResidual();
+  return _rho * _cp[_qp] * FVTimeKernel::computeQpResidual();
 }

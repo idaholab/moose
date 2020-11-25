@@ -73,7 +73,6 @@ advected_interp_method = 'average'
     variable = pressure
     vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
     u = u
     v = v
     pressure = pressure
@@ -193,10 +192,10 @@ advected_interp_method = 'average'
 []
 
 [Materials]
-  [rho]
+  [const]
     type = ADGenericConstantMaterial
-    prop_names = 'rho k cp'
-    prop_values = '${rho} ${k} ${cp}'
+    prop_names = 'k cp'
+    prop_values = '${k} ${cp}'
   []
   [ins_fv]
     type = INSFVMaterial
@@ -204,6 +203,7 @@ advected_interp_method = 'average'
     v = 'v'
     pressure = 'pressure'
     temperature = 'T'
+    rho = ${rho}
   []
 []
 

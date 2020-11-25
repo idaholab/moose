@@ -43,16 +43,15 @@ INSFVMomentumAdvectionFunctionBC::INSFVMomentumAdvectionFunctionBC(const InputPa
   : FVMatAdvectionFunctionBC(params),
     INSFVAdvectionBase(params),
     _pressure_exact_solution(getFunction("pressure_exact_solution")),
-    _rho(getADMaterialProperty<Real>("rho")),
     _mu(getADMaterialProperty<Real>("mu"))
 {
 }
 
 void
 INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
-                                             ADRealVectorValue & v_face,
-                                             const ADRealVectorValue & elem_v,
-                                             const RealVectorValue & ghost_v)
+                                              ADRealVectorValue & v_face,
+                                              const ADRealVectorValue & elem_v,
+                                              const RealVectorValue & ghost_v)
 {
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info, true);
@@ -109,7 +108,7 @@ INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
   // have to essentially create an entire fictional element with defined geometric locations of
   // the faces in order to compute inward advective flux and diffusive flux. For now I'm going to
   // try not doing that and just use the a coeff of the elem
-  const ADReal & face_a = rcCoeff(*elem, _mu[_qp], _rho[_qp]);
+  const ADReal & face_a = rcCoeff(*elem, _mu[_qp]);
   const Real face_volume = elem_volume;
 
   const ADReal face_D = face_volume / face_a;

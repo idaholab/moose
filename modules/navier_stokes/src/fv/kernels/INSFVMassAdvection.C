@@ -16,14 +16,21 @@ registerMooseObject("NavierStokesApp", INSFVMassAdvection);
 InputParameters
 INSFVMassAdvection::validParams()
 {
-  InputParameters params = INSFVMomentumAdvection::validParams();
-  params.set<MaterialPropertyName>("advected_quantity") = "rho";
-  params.suppressParameter<MaterialPropertyName>("advected_quantity");
-  return params;
+  return INSFVMomentumAdvection::validParams();
 }
 
-INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params) : INSFVMomentumAdvection(params)
+INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)
+  : INSFVMomentumAdvection(params)
 {
+}
+
+ADReal
+INSFVMassAdvection::computeQpResidual()
+{
+  ADRealVectorValue v;
+
+  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+  return _normal * v * _rho;
 }
 
 #endif

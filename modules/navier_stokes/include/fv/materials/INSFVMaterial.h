@@ -49,7 +49,7 @@ protected:
   ADMaterialProperty<Real> & _p;
 
   /// density
-  const ADMaterialProperty<Real> & _rho;
+  const Real & _rho;
 
   const bool _has_temperature;
 

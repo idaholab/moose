@@ -21,7 +21,8 @@ INSFVMaterial::validParams()
   params.addRequiredCoupledVar("u", "The x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar("w", 0, "z-velocity"); // only required in 3D
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addRequiredParam<Real>("rho", "The value for the density");
+  params.declareControllable("rho");
   params.addRequiredCoupledVar("pressure", "The pressure variable.");
   params.addCoupledVar("temperature", "the temperature");
   params.addParam<MaterialPropertyName>("cp_name", "cp", "the name of the specific heat capacity");
@@ -39,7 +40,7 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     _rho_v(declareADProperty<Real>(NS::momentum_y)),
     _rho_w(declareADProperty<Real>(NS::momentum_z)),
     _p(declareADProperty<Real>(NS::pressure)),
-    _rho(getADMaterialProperty<Real>("rho_name")),
+    _rho(getParam<Real>("rho")),
     _has_temperature(isParamValid("temperature")),
     _temperature(_has_temperature ? &adCoupledValue("temperature") : nullptr),
     _cp(_has_temperature ? &getADMaterialProperty<Real>("cp_name") : nullptr),
@@ -52,12 +53,12 @@ INSFVMaterial::computeQpProperties()
 {
   _p[_qp] = _p_var[_qp];
   _velocity[_qp](0) = _u_vel[_qp];
-  _rho_u[_qp] = _rho[_qp] * _u_vel[_qp];
+  _rho_u[_qp] = _rho * _u_vel[_qp];
 
   if (_mesh.dimension() >= 2)
   {
     _velocity[_qp](1) = _v_vel[_qp];
-    _rho_v[_qp] = _rho[_qp] * _v_vel[_qp];
+    _rho_v[_qp] = _rho * _v_vel[_qp];
   }
 
   if (_mesh.dimension() >= 3)
@@ -65,7 +66,7 @@ INSFVMaterial::computeQpProperties()
     mooseAssert(_mesh.dimension() == 3, "The mesh dimension is greater than 3?!");
 
     _velocity[_qp](2) = _w_vel[_qp];
-    _rho_w[_qp] = _rho[_qp] * _w_vel[_qp];
+    _rho_w[_qp] = _rho * _w_vel[_qp];
   }
 
   mooseAssert(_mesh.dimension() >= 3 || _velocity[_qp](2) == 0,
@@ -74,5 +75,5 @@ INSFVMaterial::computeQpProperties()
               "y-velocity component should be zero");
 
   if (_has_temperature)
-    (*_rho_cp_temp)[_qp] = _rho[_qp] * (*_cp)[_qp] * (*_temperature)[_qp];
+    (*_rho_cp_temp)[_qp] = _rho * (*_cp)[_qp] * (*_temperature)[_qp];
 }

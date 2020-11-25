@@ -15,7 +15,8 @@
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class INSFVMomentumAdvectionFunctionBC : public FVMatAdvectionFunctionBC, protected INSFVAdvectionBase
+class INSFVMomentumAdvectionFunctionBC : public FVMatAdvectionFunctionBC,
+                                         protected INSFVAdvectionBase
 {
 public:
   static InputParameters validParams();
@@ -36,9 +37,6 @@ protected:
   void jacobianSetup() override { clearRCCoeffs(); }
 
   const Function & _pressure_exact_solution;
-
-  /// The density
-  const ADMaterialProperty<Real> & _rho;
 
   /// The dynamic viscosity
   const ADMaterialProperty<Real> & _mu;

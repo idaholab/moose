@@ -39,8 +39,6 @@ INSFVMomentumAdvection::validParams()
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
     INSFVAdvectionBase(params),
-    _rho_elem(getADMaterialProperty<Real>("rho")),
-    _rho_neighbor(getNeighborADMaterialProperty<Real>("rho")),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu"))
 {
@@ -48,9 +46,9 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
 
 void
 INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
-                                   ADRealVectorValue & v,
-                                   const ADRealVectorValue & elem_v,
-                                   const ADRealVectorValue & neighbor_v)
+                                    ADRealVectorValue & v,
+                                    const ADRealVectorValue & elem_v,
+                                    const ADRealVectorValue & neighbor_v)
 {
   Moose::FV::interpolate(
       Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info, true);
@@ -83,10 +81,9 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
       elem_two ? (elem_is_elem_one ? _face_info->neighborVolume() : _face_info->elemVolume()) : 0;
 
   const auto & elem_one_mu = elem_is_elem_one ? _mu_elem[_qp] : _mu_neighbor[_qp];
-  const auto & elem_one_rho = elem_is_elem_one ? _rho_elem[_qp] : _rho_neighbor[_qp];
 
   // Now we need to perform the computations of D
-  const ADReal & elem_one_a = rcCoeff(*elem_one, elem_one_mu, elem_one_rho);
+  const ADReal & elem_one_a = rcCoeff(*elem_one, elem_one_mu);
 
   mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
                              _subproblem.getCoordSystem(elem_two->subdomain_id())
@@ -104,9 +101,8 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
     const auto & elem_two_mu = elem_is_elem_one ? _mu_neighbor[_qp] : _mu_elem[_qp];
-    const auto & elem_two_rho = elem_is_elem_one ? _rho_neighbor[_qp] : _rho_elem[_qp];
 
-    const ADReal & elem_two_a = rcCoeff(*elem_two, elem_two_mu, elem_two_rho);
+    const ADReal & elem_two_a = rcCoeff(*elem_two, elem_two_mu);
 
     coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
     elem_two_volume *= coord;

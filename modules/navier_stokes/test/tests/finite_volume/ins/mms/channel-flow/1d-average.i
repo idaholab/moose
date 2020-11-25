@@ -35,7 +35,6 @@ velocity_interp_method='average'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure
@@ -105,16 +104,12 @@ velocity_interp_method='average'
 []
 
 [Materials]
-  [rho]
-    type = ADGenericConstantMaterial
-    prop_names = 'rho'
-    prop_values = ${rho}
-  []
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     # we need to compute this here for advection in INSFVMomentumPressure
     pressure = 'pressure'
+    rho = ${rho}
   []
 []
 

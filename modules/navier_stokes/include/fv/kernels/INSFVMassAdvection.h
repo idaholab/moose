@@ -21,6 +21,9 @@ class INSFVMassAdvection : public INSFVMomentumAdvection
 public:
   static InputParameters validParams();
   INSFVMassAdvection(const InputParameters & params);
+
+protected:
+  ADReal computeQpResidual() override;
 };
 
 #endif
