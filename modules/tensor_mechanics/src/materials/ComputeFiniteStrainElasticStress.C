@@ -25,6 +25,8 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
     GuaranteeConsumer(this),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
+    _rotation_total(declareProperty<RankTwoTensor>("rotation_total")),
+    _rotation_total_old(getMaterialPropertyOldByName<RankTwoTensor>("rotation_total")),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
@@ -36,9 +38,15 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
 void
 ComputeFiniteStrainElasticStress::initialSetup()
 {
-  if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
-    mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
-               "that guarantee isotropic tensors.");
+}
+
+void
+ComputeFiniteStrainElasticStress::initQpStatefulProperties()
+{
+  ComputeStressBase::initQpStatefulProperties();
+  RankTwoTensor identity_rotation(RankTwoTensor::initIdentity);
+
+  _rotation_total[_qp] = identity_rotation;
 }
 
 void
@@ -47,8 +55,32 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   // Calculate the stress in the intermediate configuration
   RankTwoTensor intermediate_stress;
 
-  intermediate_stress =
-      _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+  if (hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
+  {
+    intermediate_stress =
+        _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+
+    // Compute dstress_dstrain
+    _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; // This is NOT the exact jacobian
+  }
+  else
+  {
+    // Rotate elasticity tensor to the intermediate configuration
+    // That is, elasticity tensor is defined in the previous time step
+    // This is consistent with the definition of strain increment
+    // The stress is projected onto the current configuration a few lines below
+    RankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
+    elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
+
+    intermediate_stress =
+        elasticity_tensor_rotated * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+
+    // Update current total rotation matrix to be used in next step
+    _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
+
+    // Compute dstress_dstrain
+    _Jacobian_mult[_qp] = elasticity_tensor_rotated; // This is NOT the exact jacobian
+  }
 
   // Rotate the stress state to the current configuration
   _stress[_qp] =
@@ -56,7 +88,4 @@ ComputeFiniteStrainElasticStress::computeQpStress()
 
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
-
-  // Compute dstress_dstrain
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; // This is NOT the exact jacobian
 }

@@ -26,6 +26,8 @@ ADComputeFiniteStrainElasticStress::ADComputeFiniteStrainElasticStress(
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
     _strain_increment(getADMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
+    _rotation_total(declareADProperty<RankTwoTensor>("rotation_total")),
+    _rotation_total_old(getMaterialPropertyOldByName<RankTwoTensor>("rotation_total")),
     _rotation_increment(
         getADMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
     _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
@@ -36,10 +38,15 @@ ADComputeFiniteStrainElasticStress::ADComputeFiniteStrainElasticStress(
 void
 ADComputeFiniteStrainElasticStress::initialSetup()
 {
-  if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
-    mooseError(
-        "ADComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
-        "that guarantee isotropic tensors.");
+}
+
+void
+ADComputeFiniteStrainElasticStress::initQpStatefulProperties()
+{
+  ADComputeStressBase::initQpStatefulProperties();
+  RankTwoTensor identity_rotation(RankTwoTensor::initIdentity);
+
+  _rotation_total[_qp] = identity_rotation;
 }
 
 void
@@ -48,9 +55,24 @@ ADComputeFiniteStrainElasticStress::computeQpStress()
   // Calculate the stress in the intermediate configuration
   ADRankTwoTensor intermediate_stress;
 
-  intermediate_stress =
-      _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
+  if (hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
+    intermediate_stress =
+        _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
+  else
+  {
+    // Rotate elasticity tensor to the intermediate configuration
+    // That is, elasticity tensor is defined in the previous time step
+    // This is consistent with the definition of strain increment
+    // The stress is projected onto the current configuration a few lines below
+    ADRankFourTensor elasticity_tensor_rotated = _elasticity_tensor[_qp];
+    elasticity_tensor_rotated.rotate(_rotation_total_old[_qp]);
 
+    intermediate_stress =
+        elasticity_tensor_rotated * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+
+    // Update current total rotation matrix to be used in next step
+    _rotation_total[_qp] = _rotation_increment[_qp] * _rotation_total_old[_qp];
+  }
   // Rotate the stress state to the current configuration
   _stress[_qp] =
       _rotation_increment[_qp] * intermediate_stress * _rotation_increment[_qp].transpose();

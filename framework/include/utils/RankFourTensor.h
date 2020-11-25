@@ -91,7 +91,8 @@ public:
     antisymmetric_isotropic,
     axisymmetric_rz,
     general,
-    principal
+    principal,
+    orthotropic
   };
 
   template <template <typename> class Tensor, typename Scalar>
@@ -410,6 +411,15 @@ protected:
    */
 
   void fillPrincipalFromInputVector(const std::vector<T> & input);
+
+  /**
+   * fillGeneralOrhotropicFromInputVector takes 10  inputs to fill the Rank-4 tensor
+   * It defines a general orthotropic tensor for which some constraints among
+   * elastic parameters exist
+   * @param input  Ea, Eb, Ec, Gab, Gbc, Gca, nuba, nuca, nucb, nuab, nuac, nubc
+   */
+  void fillGeneralOrthotropicFromInputVector(const std::vector<T> & input);
+
   template <class T2>
   friend void dataStore(std::ostream &, RankFourTensorTempl<T2> &, void *);
 
@@ -446,7 +456,8 @@ struct RawType<RankFourTensorTempl<T>>
 }
 
 template <typename T1, typename T2>
-inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
+inline auto
+operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
     typename std::enable_if<ScalarTraits<T1>::value,
                             RankFourTensorTempl<decltype(T1() * T2())>>::type
 {
@@ -463,7 +474,8 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy
 
 template <typename T>
 template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const T2 & b) const ->
+auto
+RankFourTensorTempl<T>::operator*(const T2 & b) const ->
     typename std::enable_if<ScalarTraits<T2>::value,
                             RankFourTensorTempl<decltype(T() * T2())>>::type
 {

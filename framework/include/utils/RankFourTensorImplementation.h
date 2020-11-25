@@ -39,7 +39,7 @@ RankFourTensorTempl<T>::fillMethodEnum()
 {
   return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic "
                    "symmetric_isotropic_E_nu antisymmetric_isotropic axisymmetric_rz general "
-                   "principal");
+                   "principal orthotropic");
 }
 
 template <typename T>
@@ -113,7 +113,8 @@ RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
 
 template <typename T>
 template <template <typename> class Tensor, typename T2>
-auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
+auto
+RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
     typename std::enable_if<TwoTensorMultTraits<Tensor, T2>::value,
                             RankTwoTensorTempl<decltype(T() * T2())>>::type
 {
@@ -204,7 +205,8 @@ RankFourTensorTempl<T>::operator-() const
 
 template <typename T>
 template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
+auto
+RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
     -> RankFourTensorTempl<decltype(T() * T2())>
 {
   typedef decltype(T() * T2()) ValueType;
@@ -344,7 +346,8 @@ RankFourTensorTempl<Real>::invSymm() const
         {
           if (i == j)
             mat[k == l ? i * ntens + k : i * ntens + k + nskip + l] += _vals[index];
-          else // i!=j
+          else
+            // i!=j
             mat[k == l ? (nskip + i + j) * ntens + k : (nskip + i + j) * ntens + k + nskip + l] +=
                 _vals[index]; // note the +=, which results in double-counting and is rectified
                               // below
@@ -369,7 +372,8 @@ RankFourTensorTempl<Real>::invSymm() const
           if (i == j)
             result._vals[index] =
                 k == l ? mat[i * ntens + k] : mat[i * ntens + k + nskip + l] / 2.0;
-          else // i!=j
+          else
+            // i!=j
             result._vals[index] = k == l ? mat[(nskip + i + j) * ntens + k]
                                          : mat[(nskip + i + j) * ntens + k + nskip + l] / 2.0;
           index++;
@@ -533,6 +537,9 @@ RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMe
       break;
     case principal:
       fillPrincipalFromInputVector(input);
+      break;
+    case orthotropic:
+      fillGeneralOrthotropicFromInputVector(input);
       break;
     default:
       mooseError("fillFromInputVector called with unknown fill_method of ", fill_method);
@@ -870,6 +877,86 @@ RankFourTensorTempl<T>::fillPrincipalFromInputVector(const std::vector<T> & inpu
   (*this)(2, 2, 0, 0) = input[6];
   (*this)(2, 2, 1, 1) = input[7];
   (*this)(2, 2, 2, 2) = input[8];
+}
+
+template <typename T>
+void
+RankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<T> & input)
+{
+  if (input.size() != 12)
+    mooseError("To use fillGeneralOrhotropicFromInputVector, your input must have size 12. Yours "
+               "has size ",
+               input.size());
+
+  const T & Ea = input[0];
+  const T & Eb = input[1];
+  const T & Ec = input[2];
+  const T & Gab = input[3];
+  const T & Gbc = input[4];
+  const T & Gca = input[5];
+  const T & nuba = input[6];
+  const T & nuca = input[7];
+  const T & nucb = input[8];
+  const T & nuab = input[9];
+  const T & nuac = input[10];
+  const T & nubc = input[11];
+
+  // Input must satisfy constraints.
+  bool preserve_symmetry = MooseUtils::absoluteFuzzyEqual(nuab * Eb, nuba * Ea) &&
+                           MooseUtils::absoluteFuzzyEqual(nuca * Ea, nuac * Ec) &&
+                           MooseUtils::absoluteFuzzyEqual(nubc * Ec, nucb * Eb);
+
+  if (!preserve_symmetry)
+    mooseError("Orthotropic elasticity tensor input is not consistent with symmetry requirements. "
+               "Check input for accuracy");
+
+  unsigned int ntens = N * (N + 1) / 2;
+
+  std::vector<T> mat;
+  mat.assign(ntens * ntens, 0);
+
+  T k = 1 - nuab * nuba - nubc * nucb - nuca * nuac - nuab * nubc * nuca - nuba * nucb * nuac;
+
+  bool is_positive_definite =
+      (k > 0) && (1 - nubc * nucb) > 0 && (1 - nuac * nuca) > 0 && (1 - nuab * nuba) > 0;
+  if (!is_positive_definite)
+    mooseError("Orthotropic elasticity tensor input is not positive definite. Check input for "
+               "accuracy");
+
+  mat[0] = Ea * (1 - nubc * nucb) / k;
+  mat[1] = Ea * (nubc * nuca + nuba) / k;
+  mat[2] = Ea * (nuba * nucb + nuca) / k;
+
+  mat[6] = Eb * (nuac * nucb + nuab) / k;
+  mat[7] = Eb * (1 - nuac * nuca) / k;
+  mat[8] = Eb * (nuab * nuca + nucb) / k;
+
+  mat[12] = Ec * (nuab * nubc + nuac) / k;
+  mat[13] = Ec * (nuac * nuba + nubc) / k;
+  mat[14] = Ec * (1 - nuab * nuba) / k;
+
+  mat[21] = 2 * Gab;
+  mat[28] = 2 * Gca;
+  mat[35] = 2 * Gbc;
+
+  // Switching from Voigt to fourth order tensor
+  // Copied from existing code (invSymm)
+  int nskip = N - 1;
+
+  unsigned int index = 0;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+        {
+          if (i == j)
+            (*this)._vals[index] =
+                k == l ? mat[i * ntens + k] : mat[i * ntens + k + nskip + l] / 2.0;
+          else
+            (*this)._vals[index] = k == l ? mat[(nskip + i + j) * ntens + k]
+                                          : mat[(nskip + i + j) * ntens + k + nskip + l] / 2.0;
+          index++;
+        }
 }
 
 template <typename T>
