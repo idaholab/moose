@@ -34,12 +34,12 @@ INSADSmagorinskyEddyViscosity::precomputeQpResidual()
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
   const ADReal strain_rate_tensor_mag =
-      std::sqrt(2.0 * _grad_u[_qp](0, 0) * _grad_u[_qp](0, 0) +
-                2.0 * _grad_u[_qp](1, 1) * _grad_u[_qp](1, 1) +
-                2.0 * _grad_u[_qp](2, 2) * _grad_u[_qp](2, 2) +
-                std::pow(_grad_u[_qp](0, 2) + _grad_u[_qp](2, 0), 2) +
-                std::pow(_grad_u[_qp](0, 1) + _grad_u[_qp](1, 0), 2) +
-                std::pow(_grad_u[_qp](1, 2) + _grad_u[_qp](2, 1), 2) + offset);
+      std::sqrt(2.0 * libMesh::Utility::pow<2>(_grad_u[_qp](0, 0)) +
+                2.0 * libMesh::Utility::pow<2>(_grad_u[_qp](1, 1)) +
+                2.0 * libMesh::Utility::pow<2>(_grad_u[_qp](2, 2)) +
+                libMesh::Utility::pow<2>(_grad_u[_qp](0, 2) + _grad_u[_qp](2, 0)) +
+                libMesh::Utility::pow<2>(_grad_u[_qp](0, 1) + _grad_u[_qp](1, 0)) +
+                libMesh::Utility::pow<2>(_grad_u[_qp](1, 2) + _grad_u[_qp](2, 1)) + offset);
   constexpr Real one_third = 1.0 / 3.0;
   return strain_rate_tensor_mag *
          std::pow(_smagorinsky_constant * std::pow(_current_elem_volume, one_third) /
