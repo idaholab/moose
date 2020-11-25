@@ -159,7 +159,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/adaptive_timestepping=false'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the solve fails and the time-step becomes too small.'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    
@@ -168,7 +168,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/dt_min=1'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the time-step becomes smaller than a user-defined quantity and the solve fails'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    
@@ -184,7 +184,7 @@
     type = CSVDiff
     input = spatial_8.i
     csvdiff = 'spatial_8_out_bulk_Cl_0001.csv'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, including the case where sources are spatially-dependent'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]    

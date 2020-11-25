@@ -20,7 +20,7 @@ NaSO4-;  molality = 0.4991mol/kg(solvent water);  free_conc = 5.012e+04mg/kg(sol
 SO4--;  molality = 0.3957mol/kg(solvent water);  free_conc = 3.206e+04mg/kg(soln);  act_coeff = 0.1126;  log10(a) = -1.351;  SO4-- = -10*H2O - 2*Na+ + 1*Mirabilite;  log10K = 1.091
 NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  act_coeff = 1;  log10(a) = -1.619;  NaCl = 1*Cl- + 1*Na+;  log10K = 1.599'
     match_literal = true
-    requirement = "Differences between the geochemistry module and GWB shall be able explored"
+    requirement = "Differences between the geochemistry module and GWB shall be able explored, such as the differences in meaning when setting bulk constraints"
     issues = '#15641'
     design = 'gwb_diff.md'
   [../]
@@ -48,7 +48,7 @@ HCO3-;  molality = 0.007138mol/kg(solvent water);  free_conc = 434.2mg/kg(soln);
 CaCl+;  molality = 0.001481mol/kg(solvent water);  free_conc = 111.5mg/kg(soln);  act_coeff = 0.8092;  log10(a) = -2.921;  CaCl+ = 1*Cl- + 1*Ca++;  log10K = -0.7
 CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln);  act_coeff = 0.8213;  log10(a) = -3.065;  CaHCO3+ = 1*H+ + 1*Calcite;  log10K = -2.935'
     match_literal = true
-    requirement = "Differences between the geochemistry module and GWB shall be able explored"
+    requirement = "Differences between the geochemistry module and GWB shall be able explored, such as when setting activity constraints"
     issues = '#15641'
     design = 'gwb_diff.md'
   [../]
@@ -537,7 +537,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_temperature=false'
     expect_err = 'Unknown variable solution_temperature'
-    requirement = 'It shall be possible to record bulk moles in time-indpendent problems'
+    requirement = 'It shall be possible to record aqueous solution temperature in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
