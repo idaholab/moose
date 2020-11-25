@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPenaltyFreeSlipBC.h"
+#include "INSFVPenaltyFreeSlipBC.h"
 
-registerMooseObject("NavierStokesApp", NSFVPenaltyFreeSlipBC);
+registerMooseObject("NavierStokesApp", INSFVPenaltyFreeSlipBC);
 
 InputParameters
-NSFVPenaltyFreeSlipBC::validParams()
+INSFVPenaltyFreeSlipBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
@@ -26,7 +26,7 @@ NSFVPenaltyFreeSlipBC::validParams()
   return params;
 }
 
-NSFVPenaltyFreeSlipBC::NSFVPenaltyFreeSlipBC(const InputParameters & params)
+INSFVPenaltyFreeSlipBC::INSFVPenaltyFreeSlipBC(const InputParameters & params)
   : FVFluxBC(params),
     _u(adCoupledValue("u")),
     _v(adCoupledValue("v")),
@@ -38,7 +38,7 @@ NSFVPenaltyFreeSlipBC::NSFVPenaltyFreeSlipBC(const InputParameters & params)
 }
 
 ADReal
-NSFVPenaltyFreeSlipBC::computeQpResidual()
+INSFVPenaltyFreeSlipBC::computeQpResidual()
 {
   return _p * _normal(_comp) * (_normal * ADRealVectorValue(_u[_qp], _v[_qp], _w[_qp]));
 }

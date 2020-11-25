@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "FVTimeKernel.h"
 
-class NSFVMomentumPressureRZ : public FVElementalKernel
+class INSFVMomentumTimeDerivative : public FVTimeKernel
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumPressureRZ(const InputParameters & params);
+  INSFVMomentumTimeDerivative(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  const ADVariableValue & _p;
+  const ADMaterialProperty<Real> & _rho;
 };

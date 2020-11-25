@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMomentumPressureRZ.h"
+#include "INSFVMomentumPressureRZ.h"
 
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVMomentumPressureRZ);
+registerMooseObject("NavierStokesApp", INSFVMomentumPressureRZ);
 
 InputParameters
-NSFVMomentumPressureRZ::validParams()
+INSFVMomentumPressureRZ::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Adds the $-p/r$ term into the radial component of the Navier-Stokes "
@@ -23,13 +23,13 @@ NSFVMomentumPressureRZ::validParams()
   return params;
 }
 
-NSFVMomentumPressureRZ::NSFVMomentumPressureRZ(const InputParameters & params)
+INSFVMomentumPressureRZ::INSFVMomentumPressureRZ(const InputParameters & params)
   : FVElementalKernel(params), _p(adCoupledValue("p"))
 {
 }
 
 ADReal
-NSFVMomentumPressureRZ::computeQpResidual()
+INSFVMomentumPressureRZ::computeQpResidual()
 {
   mooseAssert(_subproblem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ,
               "This object should only be active in an RZ coordinate system.");

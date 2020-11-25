@@ -11,14 +11,15 @@
 
 #include "FVTimeKernel.h"
 
-class NSFVMomentumTimeDerivative : public FVTimeKernel
+class INSFVEnergyTimeDerivative : public FVTimeKernel
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumTimeDerivative(const InputParameters & params);
+  INSFVEnergyTimeDerivative(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
   const ADMaterialProperty<Real> & _rho;
+  const ADMaterialProperty<Real> & _cp;
 };

@@ -9,20 +9,18 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "INSFVMomentumAdvection.h"
 
-class NSFVMomentumPressureFunctionBC : public FVFluxBC
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+
+/**
+ * A flux kernel transporting mass across cell faces
+ */
+class INSFVMassAdvection : public INSFVMomentumAdvection
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumPressureFunctionBC(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  /// index x|y|z
-  unsigned int _index;
-
-  const ADVariableValue & _pressure;
-  const Function & _pressure_exact_solution;
+  INSFVMassAdvection(const InputParameters & params);
 };
+
+#endif

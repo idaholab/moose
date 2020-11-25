@@ -9,17 +9,20 @@
 
 #pragma once
 
-#include "FVMatAdvection.h"
+#include "FVFluxBC.h"
 
-class NSFVMomentumPressure : public FVMatAdvection
+class INSFVPenaltyFreeSlipBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumPressure(const InputParameters & params);
+  INSFVPenaltyFreeSlipBC(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// index x|y|z
-  unsigned int _index;
+  const ADVariableValue & _u;
+  const ADVariableValue & _v;
+  const ADVariableValue & _w;
+  const unsigned int _comp;
+  const Real _p;
 };

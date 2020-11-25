@@ -44,7 +44,7 @@ force_boundary_execution=true
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
@@ -58,7 +58,7 @@ force_boundary_execution=true
   []
 
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -78,7 +78,7 @@ force_boundary_execution=true
     force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
@@ -87,7 +87,7 @@ force_boundary_execution=true
   []
 
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -107,7 +107,7 @@ force_boundary_execution=true
     force_boundary_execution = ${force_boundary_execution}
   []
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'

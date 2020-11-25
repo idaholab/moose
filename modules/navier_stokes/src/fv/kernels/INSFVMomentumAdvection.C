@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMomentumAdvection.h"
+#include "INSFVMomentumAdvection.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -22,13 +22,13 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/vector_value.h"
 
-registerMooseObject("NavierStokesApp", NSFVMomentumAdvection);
+registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 
 InputParameters
-NSFVMomentumAdvection::validParams()
+INSFVMomentumAdvection::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
-  params += NSFVAdvectionBase::validParams();
+  params += INSFVAdvectionBase::validParams();
 
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -36,9 +36,9 @@ NSFVMomentumAdvection::validParams()
   return params;
 }
 
-NSFVMomentumAdvection::NSFVMomentumAdvection(const InputParameters & params)
+INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
-    NSFVAdvectionBase(params),
+    INSFVAdvectionBase(params),
     _rho_elem(getADMaterialProperty<Real>("rho")),
     _rho_neighbor(getNeighborADMaterialProperty<Real>("rho")),
     _mu_elem(getADMaterialProperty<Real>("mu")),
@@ -47,7 +47,7 @@ NSFVMomentumAdvection::NSFVMomentumAdvection(const InputParameters & params)
 }
 
 void
-NSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
+INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                                    ADRealVectorValue & v,
                                    const ADRealVectorValue & elem_v,
                                    const ADRealVectorValue & neighbor_v)
@@ -128,7 +128,7 @@ NSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 }
 
 ADReal
-NSFVMomentumAdvection::computeQpResidual()
+INSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
   ADReal u_interface;

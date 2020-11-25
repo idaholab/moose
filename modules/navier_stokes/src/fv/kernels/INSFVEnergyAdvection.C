@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVEnergyAdvection.h"
+#include "INSFVEnergyAdvection.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-registerMooseObject("NavierStokesApp", NSFVEnergyAdvection);
+registerMooseObject("NavierStokesApp", INSFVEnergyAdvection);
 
 InputParameters
-NSFVEnergyAdvection::validParams()
+INSFVEnergyAdvection::validParams()
 {
-  return NSFVMomentumAdvection::validParams();
+  return INSFVMomentumAdvection::validParams();
 }
 
-NSFVEnergyAdvection::NSFVEnergyAdvection(const InputParameters & params)
-  : NSFVMomentumAdvection(params)
+INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
+  : INSFVMomentumAdvection(params)
 {
 }
 

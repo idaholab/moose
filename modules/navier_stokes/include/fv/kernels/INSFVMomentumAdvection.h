@@ -9,17 +9,20 @@
 
 #pragma once
 
-#include "FVMatAdvectionFunctionBC.h"
-#include "NSFVAdvectionBase.h"
-#include "FVUtils.h"
+#include "FVMatAdvection.h"
+#include "INSFVAdvectionBase.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-class NSFVMomentumAdvectionFunctionBC : public FVMatAdvectionFunctionBC, protected NSFVAdvectionBase
+/**
+ * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
+ * physics
+ */
+class INSFVMomentumAdvection : public FVMatAdvection, protected INSFVAdvectionBase
 {
 public:
   static InputParameters validParams();
-  NSFVMomentumAdvectionFunctionBC(const InputParameters & params);
+  INSFVMomentumAdvection(const InputParameters & params);
 
 protected:
   /**
@@ -28,20 +31,24 @@ protected:
   void interpolate(Moose::FV::InterpMethod m,
                    ADRealVectorValue & interp_v,
                    const ADRealVectorValue & elem_v,
-                   const RealVectorValue & ghost_v);
+                   const ADRealVectorValue & neighbor_v);
 
   ADReal computeQpResidual() override;
 
   void residualSetup() override { clearRCCoeffs(); }
   void jacobianSetup() override { clearRCCoeffs(); }
 
-  const Function & _pressure_exact_solution;
+  /// The density on the FaceInfo elem
+  const ADMaterialProperty<Real> & _rho_elem;
 
-  /// The density
-  const ADMaterialProperty<Real> & _rho;
+  /// The density on the FaceInfo neighbor
+  const ADMaterialProperty<Real> & _rho_neighbor;
 
-  /// The dynamic viscosity
-  const ADMaterialProperty<Real> & _mu;
+  /// The dynamic viscosity on the FaceInfo elem
+  const ADMaterialProperty<Real> & _mu_elem;
+
+  /// The dynamic viscosity on the FaceInfo neighbor
+  const ADMaterialProperty<Real> & _mu_neighbor;
 };
 
 #endif

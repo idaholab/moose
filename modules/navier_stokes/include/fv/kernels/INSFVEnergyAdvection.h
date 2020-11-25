@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "NSFVMomentumAdvection.h"
+#include "INSFVMomentumAdvection.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -17,11 +17,11 @@
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
  */
-class NSFVEnergyAdvection : public NSFVMomentumAdvection
+class INSFVEnergyAdvection : public INSFVMomentumAdvection
 {
 public:
   static InputParameters validParams();
-  NSFVEnergyAdvection(const InputParameters & params);
+  INSFVEnergyAdvection(const InputParameters & params);
 };
 
 #endif

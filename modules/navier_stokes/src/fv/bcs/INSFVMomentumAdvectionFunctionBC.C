@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMomentumAdvectionFunctionBC.h"
+#include "INSFVMomentumAdvectionFunctionBC.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -23,13 +23,13 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/vector_value.h"
 
-registerMooseObject("NavierStokesApp", NSFVMomentumAdvectionFunctionBC);
+registerMooseObject("NavierStokesApp", INSFVMomentumAdvectionFunctionBC);
 
 InputParameters
-NSFVMomentumAdvectionFunctionBC::validParams()
+INSFVMomentumAdvectionFunctionBC::validParams()
 {
   InputParameters params = FVMatAdvectionFunctionBC::validParams();
-  params += NSFVAdvectionBase::validParams();
+  params += INSFVAdvectionBase::validParams();
 
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -39,9 +39,9 @@ NSFVMomentumAdvectionFunctionBC::validParams()
   return params;
 }
 
-NSFVMomentumAdvectionFunctionBC::NSFVMomentumAdvectionFunctionBC(const InputParameters & params)
+INSFVMomentumAdvectionFunctionBC::INSFVMomentumAdvectionFunctionBC(const InputParameters & params)
   : FVMatAdvectionFunctionBC(params),
-    NSFVAdvectionBase(params),
+    INSFVAdvectionBase(params),
     _pressure_exact_solution(getFunction("pressure_exact_solution")),
     _rho(getADMaterialProperty<Real>("rho")),
     _mu(getADMaterialProperty<Real>("mu"))
@@ -49,7 +49,7 @@ NSFVMomentumAdvectionFunctionBC::NSFVMomentumAdvectionFunctionBC(const InputPara
 }
 
 void
-NSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
+INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
                                              ADRealVectorValue & v_face,
                                              const ADRealVectorValue & elem_v,
                                              const RealVectorValue & ghost_v)
@@ -119,7 +119,7 @@ NSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
 }
 
 ADReal
-NSFVMomentumAdvectionFunctionBC::computeQpResidual()
+INSFVMomentumAdvectionFunctionBC::computeQpResidual()
 {
   ADReal flux_var_face;
   ADRealVectorValue v_face;

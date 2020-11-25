@@ -25,13 +25,13 @@ class SubProblem;
 class MooseApp;
 
 /**
- * Common base that both NSFV flux kernels and flux boundary conditions can inherit from
+ * Common base that both INSFV flux kernels and flux boundary conditions can inherit from
  */
-class NSFVAdvectionBase
+class INSFVAdvectionBase
 {
 protected:
   static InputParameters validParams();
-  NSFVAdvectionBase(const InputParameters & params);
+  INSFVAdvectionBase(const InputParameters & params);
 
   /**
    * pressure variable getter

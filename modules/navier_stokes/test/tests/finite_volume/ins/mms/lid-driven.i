@@ -57,7 +57,7 @@ rho=1.1
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = 'average'
     velocity_interp_method = 'average'
@@ -75,7 +75,7 @@ rho=1.1
   []
 
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -93,9 +93,9 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    # NSFVMomentumPressure inherits from FVMatAdvection and in NSFVMomentumPressure::validParams we set
+    # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
     # 'advected_quantity = NS::pressure'
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
 
@@ -110,7 +110,7 @@ rho=1.1
   []
 
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -128,7 +128,7 @@ rho=1.1
     coeff = ${mu}
   []
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     # these parameters shouldn't be used for anything but are still required
@@ -163,7 +163,7 @@ rho=1.1
     coeff_function = '${mu}'
   []
   [u_pressure]
-    type = NSFVMomentumPressureFunctionBC
+    type = INSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = u
     momentum_component = 'x'
@@ -191,7 +191,7 @@ rho=1.1
     coeff_function = '${mu}'
   []
   [v_pressure]
-    type = NSFVMomentumPressureFunctionBC
+    type = INSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = v
     momentum_component = 'y'
@@ -240,7 +240,7 @@ rho=1.1
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    # we need to compute this here for advection in NSFVMomentumPressure
+    # we need to compute this here for advection in INSFVMomentumPressure
     pressure = 'pressure'
   []
 []

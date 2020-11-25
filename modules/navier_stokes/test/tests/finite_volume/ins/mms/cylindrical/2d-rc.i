@@ -41,7 +41,7 @@ rho=1.1
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = 'average'
     velocity_interp_method = 'rc'
@@ -59,7 +59,7 @@ rho=1.1
   []
 
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -77,14 +77,14 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
     advected_interp_method = 'average'
   []
   [u_pressure_rz]
-    type = NSFVMomentumPressureRZ
+    type = INSFVMomentumPressureRZ
     variable = u
     p = pressure
   []
@@ -95,7 +95,7 @@ rho=1.1
   []
 
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -113,7 +113,7 @@ rho=1.1
     coeff = ${mu}
   []
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'

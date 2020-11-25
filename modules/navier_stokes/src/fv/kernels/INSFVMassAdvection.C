@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMassAdvection.h"
+#include "INSFVMassAdvection.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
-registerMooseObject("NavierStokesApp", NSFVMassAdvection);
+registerMooseObject("NavierStokesApp", INSFVMassAdvection);
 
 InputParameters
-NSFVMassAdvection::validParams()
+INSFVMassAdvection::validParams()
 {
-  InputParameters params = NSFVMomentumAdvection::validParams();
+  InputParameters params = INSFVMomentumAdvection::validParams();
   params.set<MaterialPropertyName>("advected_quantity") = "rho";
   params.suppressParameter<MaterialPropertyName>("advected_quantity");
   return params;
 }
 
-NSFVMassAdvection::NSFVMassAdvection(const InputParameters & params) : NSFVMomentumAdvection(params)
+INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params) : INSFVMomentumAdvection(params)
 {
 }
 

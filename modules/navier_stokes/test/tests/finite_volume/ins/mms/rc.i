@@ -59,7 +59,7 @@ velocity_interp_method='rc'
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = 'average'
     velocity_interp_method = ${velocity_interp_method}
@@ -77,7 +77,7 @@ velocity_interp_method='rc'
   []
 
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = 'velocity'
@@ -95,9 +95,9 @@ velocity_interp_method='rc'
     coeff = ${mu}
   []
   [u_pressure]
-    # NSFVMomentumPressure inherits from FVMatAdvection and in NSFVMomentumPressure::validParams we set
+    # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
     # 'advected_quantity = NS::pressure'
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
 
@@ -112,7 +112,7 @@ velocity_interp_method='rc'
   []
 
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = 'velocity'
@@ -130,7 +130,7 @@ velocity_interp_method='rc'
     coeff = ${mu}
   []
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     # these parameters shouldn't be used for anything but are still required
@@ -146,7 +146,7 @@ velocity_interp_method='rc'
 
 [FVBCs]
   [u_advection]
-    type = NSFVMomentumAdvectionFunctionBC
+    type = INSFVMomentumAdvectionFunctionBC
     boundary = 'left right top bottom'
     variable = u
     vel = 'velocity'
@@ -172,7 +172,7 @@ velocity_interp_method='rc'
     coeff_function = '${mu}'
   []
   [u_pressure]
-    type = NSFVMomentumPressureFunctionBC
+    type = INSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = u
     momentum_component = 'x'
@@ -181,7 +181,7 @@ velocity_interp_method='rc'
   []
 
   [v_advection]
-    type = NSFVMomentumAdvectionFunctionBC
+    type = INSFVMomentumAdvectionFunctionBC
     boundary = 'left right top bottom'
     variable = v
     vel = 'velocity'
@@ -207,7 +207,7 @@ velocity_interp_method='rc'
     coeff_function = '${mu}'
   []
   [v_pressure]
-    type = NSFVMomentumPressureFunctionBC
+    type = INSFVMomentumPressureFunctionBC
     boundary = 'left right top bottom'
     variable = v
     momentum_component = 'y'
@@ -216,7 +216,7 @@ velocity_interp_method='rc'
   []
 
   [mass_continuity_flux]
-    type = NSFVMomentumAdvectionFunctionBC
+    type = INSFVMomentumAdvectionFunctionBC
     variable = pressure
     boundary = 'top bottom left right'
     vel = 'velocity'
@@ -267,7 +267,7 @@ velocity_interp_method='rc'
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    # we need to compute this here for advection in NSFVMomentumPressure
+    # we need to compute this here for advection in INSFVMomentumPressure
     pressure = 'pressure'
   []
 []

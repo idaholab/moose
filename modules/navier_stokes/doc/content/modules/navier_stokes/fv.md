@@ -4,7 +4,7 @@
 
 MOOSE's Incompressible Navier Stokes Finite Volume (INSFV) implementation uses a
 colocated grid. To suppress the checkerboard pattern in the pressure field,
-`NSFV` objects support a Rhie-Chow interpolation for the velocity. Users can get
+`INSFV` objects support a Rhie-Chow interpolation for the velocity. Users can get
 a feel for INSFV by looking at some tests.
 
 ### Lid Driven Cavity Flow

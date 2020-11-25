@@ -83,7 +83,7 @@ advected_interp_method = 'average'
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
@@ -101,11 +101,11 @@ advected_interp_method = 'average'
   []
 
   [u_time]
-    type = NSFVMomentumTimeDerivative
+    type = INSFVMomentumTimeDerivative
     variable = 'u'
   []
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     vel = ${vel}
@@ -123,18 +123,18 @@ advected_interp_method = 'average'
     coeff = ${mu}
   []
   [u_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = ${vel}
   []
 
   [v_time]
-    type = NSFVMomentumTimeDerivative
+    type = INSFVMomentumTimeDerivative
     variable = v
   []
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     vel = ${vel}
@@ -152,14 +152,14 @@ advected_interp_method = 'average'
     coeff = ${mu}
   []
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     vel = ${vel}
     momentum_component = 'y'
   []
 
   [temp_time]
-    type = NSFVEnergyTimeDerivative
+    type = INSFVEnergyTimeDerivative
     variable = T
   []
   [temp_conduction]

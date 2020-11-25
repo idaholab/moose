@@ -9,18 +9,17 @@
 
 #pragma once
 
-#include "NSFVMomentumAdvection.h"
+#include "FVMatAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
-/**
- * A flux kernel transporting mass across cell faces
- */
-class NSFVMassAdvection : public NSFVMomentumAdvection
+class INSFVMomentumPressure : public FVMatAdvection
 {
 public:
   static InputParameters validParams();
-  NSFVMassAdvection(const InputParameters & params);
-};
+  INSFVMomentumPressure(const InputParameters & params);
 
-#endif
+protected:
+  ADReal computeQpResidual() override;
+
+  /// index x|y|z
+  unsigned int _index;
+};

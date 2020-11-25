@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVAdvectionBase.h"
+#include "INSFVAdvectionBase.h"
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
@@ -16,10 +16,10 @@
 #include "MooseVariableFV.h"
 
 std::unordered_map<const MooseApp *, std::vector<std::unordered_map<const Elem *, ADReal>>>
-    NSFVAdvectionBase::_rc_a_coeffs;
+    INSFVAdvectionBase::_rc_a_coeffs;
 
 InputParameters
-NSFVAdvectionBase::validParams()
+INSFVAdvectionBase::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addRequiredCoupledVar("pressure", "The pressure variable.");
@@ -40,7 +40,7 @@ NSFVAdvectionBase::validParams()
   return params;
 }
 
-NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
+INSFVAdvectionBase::INSFVAdvectionBase(const InputParameters & params)
   : _nsfv_app(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _nsfv_subproblem(*params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _nsfv_tid(params.get<THREAD_ID>("_tid")),
@@ -89,7 +89,7 @@ NSFVAdvectionBase::NSFVAdvectionBase(const InputParameters & params)
 }
 
 const ADReal &
-NSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu, const ADReal & rho) const
+INSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu, const ADReal & rho) const
 {
   auto it = _rc_a_coeffs.find(&_nsfv_app);
   mooseAssert(it != _rc_a_coeffs.end(),
@@ -115,7 +115,7 @@ NSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu, const ADReal & 
 }
 
 ADReal
-NSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu, const ADReal & rho) const
+INSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu, const ADReal & rho) const
 {
   ADReal coeff = 0;
 
@@ -161,7 +161,7 @@ NSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu, const A
 }
 
 void
-NSFVAdvectionBase::clearRCCoeffs()
+INSFVAdvectionBase::clearRCCoeffs()
 {
   auto it = _rc_a_coeffs.find(&_nsfv_app);
   mooseAssert(it != _rc_a_coeffs.end(),

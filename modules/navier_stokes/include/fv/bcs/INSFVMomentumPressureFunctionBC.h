@@ -11,18 +11,18 @@
 
 #include "FVFluxBC.h"
 
-class NSFVPenaltyFreeSlipBC : public FVFluxBC
+class INSFVMomentumPressureFunctionBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  NSFVPenaltyFreeSlipBC(const InputParameters & params);
+  INSFVMomentumPressureFunctionBC(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  const ADVariableValue & _u;
-  const ADVariableValue & _v;
-  const ADVariableValue & _w;
-  const unsigned int _comp;
-  const Real _p;
+  /// index x|y|z
+  unsigned int _index;
+
+  const ADVariableValue & _pressure;
+  const Function & _pressure_exact_solution;
 };

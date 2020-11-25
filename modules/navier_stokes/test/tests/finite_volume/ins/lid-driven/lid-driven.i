@@ -65,7 +65,7 @@ rho=1
 
 [FVKernels]
   [mass]
-    type = NSFVMassAdvection
+    type = INSFVMassAdvection
     variable = pressure
     pressure = pressure
     u = u
@@ -80,7 +80,7 @@ rho=1
   []
 
   [u_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = u
     advected_quantity = 'rhou'
     pressure = pressure
@@ -97,13 +97,13 @@ rho=1
   []
 
   [u_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
   []
 
   [v_advection]
-    type = NSFVMomentumAdvection
+    type = INSFVMomentumAdvection
     variable = v
     advected_quantity = 'rhov'
     pressure = pressure
@@ -120,7 +120,7 @@ rho=1
   []
 
   [v_pressure]
-    type = NSFVMomentumPressure
+    type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
   []
