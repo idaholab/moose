@@ -30,14 +30,15 @@ INSQCriterionAux::INSQCriterionAux(const InputParameters & parameters)
 Real
 INSQCriterionAux::computeValue()
 {
-  const Real symm_part = 2.0 * std::pow(_grad_velocity[_qp](0, 0), 2) +
-                         2.0 * std::pow(_grad_velocity[_qp](1, 1), 2) +
-                         2.0 * std::pow(_grad_velocity[_qp](2, 2), 2) +
-                         std::pow(_grad_velocity[_qp](0, 2) + _grad_velocity[_qp](2, 0), 2) +
-                         std::pow(_grad_velocity[_qp](0, 1) + _grad_velocity[_qp](1, 0), 2) +
-                         std::pow(_grad_velocity[_qp](1, 2) + _grad_velocity[_qp](2, 1), 2);
-  const Real antisymm_part = std::pow(_grad_velocity[_qp](0, 2) - _grad_velocity[_qp](2, 0), 2) +
-                             std::pow(_grad_velocity[_qp](0, 1) - _grad_velocity[_qp](1, 0), 2) +
-                             std::pow(_grad_velocity[_qp](1, 2) - _grad_velocity[_qp](2, 1), 2);
+  const Real symm_part = 2.0 * Utility::pow<2>(_grad_velocity[_qp](0, 0)) +
+                         2.0 * Utility::pow<2>(_grad_velocity[_qp](1, 1)) +
+                         2.0 * Utility::pow<2>(_grad_velocity[_qp](2, 2)) +
+                         Utility::pow<2>(_grad_velocity[_qp](0, 2) + _grad_velocity[_qp](2, 0)) +
+                         Utility::pow<2>(_grad_velocity[_qp](0, 1) + _grad_velocity[_qp](1, 0)) +
+                         Utility::pow<2>(_grad_velocity[_qp](1, 2) + _grad_velocity[_qp](2, 1));
+  const Real antisymm_part =
+      Utility::pow<2>(_grad_velocity[_qp](0, 2) - _grad_velocity[_qp](2, 0)) +
+      Utility::pow<2>(_grad_velocity[_qp](0, 1) - _grad_velocity[_qp](1, 0)) +
+      Utility::pow<2>(_grad_velocity[_qp](1, 2) - _grad_velocity[_qp](2, 1));
   return 0.5 * (antisymm_part - symm_part);
 }

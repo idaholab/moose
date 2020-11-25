@@ -12,12 +12,12 @@ adds this term to the momentum equation:
 Where the subgrid-scale eddy viscosity is calculated as:
 
 \begin{equation}
-\nu_{sgs} (C_s \bar \Delta )^2 ||\bar \bar S||
+\nu_{sgs} (C_s \bar{\Delta})^2 ||\bar{\bar{S}}||
 \end{equation}
 
 Where the symmetric strain rate tensor magnitude is calculated by:
 \begin{equation}
-||\bar\bar S||^2 = \sum_{i=0}^3 \sum_{j=0}^3 (\nabla \vec u + \nabla \vec u^T)^2
+||\bar{\bar{S}}||^2 = \sum_{i=0}^3 \sum_{j=0}^3 (\nabla \vec u + \nabla \vec u^T)^2
 \end{equation}
 
 The filter length can be calculated in a few ways, and this kernel uses the common approach

@@ -37,7 +37,7 @@ public:
   virtual ~INSQCriterionAux() {}
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   // Velocity gradients
   const VectorVariableGradient & _grad_velocity;
