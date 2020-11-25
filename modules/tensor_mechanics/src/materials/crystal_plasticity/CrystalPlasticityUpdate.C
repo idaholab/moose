@@ -104,7 +104,8 @@ CrystalPlasticityUpdate::CrystalPlasticityUpdate(const InputParameters & paramet
     _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
     _pk2_old(getMaterialPropertyOld<RankTwoTensor>("pk2")),
-    _total_lagrangian_strain(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain
+    _total_lagrangian_strain(
+        declareProperty<RankTwoTensor>("total_lagrangian_strain")), // Lagrangian strain
 
     _slip_direction(_number_slip_systems * LIBMESH_DIM),
     _slip_plane_normal(_number_slip_systems * LIBMESH_DIM),

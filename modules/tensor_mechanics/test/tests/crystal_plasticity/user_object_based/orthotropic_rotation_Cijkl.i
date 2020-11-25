@@ -265,8 +265,8 @@
     C_ijkl = '11e3 12e3 13e3 22e3 23e3 33e3 44e3 55e3 66e3'
     fill_method = symmetric9
     euler_angle_1 = 0.0
-    euler_angle_2 = 90.0
-    euler_angle_3 = 0.0
+    euler_angle_2 = 45.0
+    euler_angle_3 = 45.0
   [../]
 []
 

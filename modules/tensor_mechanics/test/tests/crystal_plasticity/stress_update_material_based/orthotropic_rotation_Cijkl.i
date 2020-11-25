@@ -93,7 +93,7 @@
 [AuxKernels]
   [./lage_xx]
     type = RankTwoAux
-    rank_two_tensor = lage
+    rank_two_tensor = total_lagrangian_strain
     variable = lage_xx
     index_i = 0
     index_j = 0
@@ -101,7 +101,7 @@
   [../]
   [./lage_yy]
     type = RankTwoAux
-    rank_two_tensor = lage
+    rank_two_tensor = total_lagrangian_strain
     variable = lage_yy
     index_i = 1
     index_j = 1
@@ -117,7 +117,7 @@
   [../]
   [./lage_zz]
     type = RankTwoAux
-    rank_two_tensor = lage
+    rank_two_tensor = total_lagrangian_strain
     variable = lage_zz
     index_i = 2
     index_j = 2
@@ -252,12 +252,12 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensorConstantRotationCP
+    type = ComputeElasticityTensorCP
     C_ijkl = '11e3 12e3 13e3 22e3 23e3 33e3 44e3 55e3 66e3'
     fill_method = symmetric9
     euler_angle_1 = 0.0
-    euler_angle_2 = 90.0
-    euler_angle_3 = 0.0
+    euler_angle_2 = 45.0
+    euler_angle_3 = 45.0
   [../]
   [./stress]
     type = ComputeCrystalPlasticityStress

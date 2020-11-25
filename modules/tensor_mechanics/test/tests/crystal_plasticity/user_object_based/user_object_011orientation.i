@@ -17,7 +17,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./e_zz]
+  [./lagrangian_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./lagrangian_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -54,27 +58,35 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./e_zz]
+  [./lagrangian_strain_zz]
     type = RankTwoAux
-    variable = e_zz
-    rank_two_tensor = total_lagrangian_strain
+    variable = lagrangian_strain_zz
+    rank_two_tensor = lage
     index_j = 2
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./gss]
-   type = MaterialStdVectorAux
-   variable = gss
-   property = slip_system_resistance
-   index = 0
-   execute_on = timestep_end
+  [./lagrangian_strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = lage
+    variable = lagrangian_strain_yy
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./slip_inc]
    type = MaterialStdVectorAux
    variable = slip_increment
-   property = plastic_slip_increment
+   property = slip_rate_gss
    index = 0
    execute_on = timestep_end
+  [../]
+  [./gss]
+    type = MaterialStdVectorAux
+    variable = gss
+    property = state_var_gss
+    index = 0
+    execute_on = timestep_end
   [../]
 []
 
@@ -105,21 +117,54 @@
   [../]
 []
 
+[UserObjects]
+  [./slip_rate_gss]
+    type = CrystalPlasticitySlipRateGSS
+    variable_size = 12
+    slip_sys_file_name = input_slip_sys.txt
+    num_slip_sys_flowrate_props = 2
+    flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
+    uo_state_var_name = state_var_gss
+  [../]
+  [./slip_resistance_gss]
+    type = CrystalPlasticitySlipResistanceGSS
+    variable_size = 12
+    uo_state_var_name = state_var_gss
+  [../]
+  [./state_var_gss]
+    type = CrystalPlasticityStateVariable
+    variable_size = 12
+    groups = '0 4 8 12'
+    group_values = '60.8 60.8 60.8'
+    uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
+    scale_factor = 1.0
+  [../]
+  [./state_var_evol_rate_comp_gss]
+    type = CrystalPlasticityStateVarRateComponentGSS
+    variable_size = 12
+    hprops = '1.0 541.5 109.8 2.5'
+    uo_slip_rate_name = slip_rate_gss
+    uo_state_var_name = state_var_gss
+  [../]
+[]
+
 [Materials]
+  [./crysp]
+    type = FiniteStrainUObasedCP
+    stol = 1e-2
+    tan_mod_type = exact
+    uo_slip_rates = 'slip_rate_gss'
+    uo_slip_resistances = 'slip_resistance_gss'
+    uo_state_vars = 'state_var_gss'
+    uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
+  [../]
   [./elasticity_tensor]
-    type = ComputeElasticityTensorConstantRotationCP
+    type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
-  [./stress]
-    type = ComputeCrystalPlasticityStress
-    crystal_plasticity_update_model = 'trial_xtalpl'
-  [../]
-  [./trial_xtalpl]
-    type = CrystalPlasticityKalidindiUpdate
-    number_slip_systems = 12
-    slip_sys_file_name = input_slip_sys.txt
-    tan_mod_type = exact
+    euler_angle_1 = 120.0
+    euler_angle_2 = 125.264
+    euler_angle_3 =  45.0
   [../]
 []
 
@@ -136,9 +181,13 @@
     type = ElementAverageValue
     variable = fp_zz
   [../]
-  [./e_zz]
+  [./lagrangian_strain_yy]
     type = ElementAverageValue
-    variable = e_zz
+    variable = lagrangian_strain_yy
+  [../]
+  [./lagrangian_strain_zz]
+    type = ElementAverageValue
+    variable = lagrangian_strain_zz
   [../]
   [./gss]
     type = ElementAverageValue
@@ -159,20 +208,20 @@
 
 [Executioner]
   type = Transient
+  dt = 0.05
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
-  petsc_options_value = ' asm      2              lu            gmres     200'
+  petsc_options_iname = -pc_hypre_type
+  petsc_options_value = boomerang
   nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-10
-  nl_abs_step_tol = 1e-10
-
-  dt = 0.05
-  dtmin = 0.01
+  nl_rel_step_tol = 1e-10
   dtmax = 10.0
+  nl_rel_tol = 1e-10
+  dtmin = 0.05
   num_steps = 10
+  nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

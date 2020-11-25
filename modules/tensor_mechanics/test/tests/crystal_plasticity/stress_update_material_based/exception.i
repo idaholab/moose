@@ -61,7 +61,7 @@
   [./e_zz]
     type = RankTwoAux
     variable = e_zz
-    rank_two_tensor = lage
+    rank_two_tensor = total_lagrangian_strain
     index_j = 2
     index_i = 2
     execute_on = timestep_end
