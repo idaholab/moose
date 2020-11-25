@@ -9,12 +9,14 @@
 
 #pragma once
 
+// MOOSE includes
+class OutputWarehouse;
+
 // C++ includes
 #include <iostream>
 #include <sstream>
-
-// MOOSE includes
-class OutputWarehouse;
+#include <memory>
+#include <mutex>
 
 // this is the type of s t d :: c o u t
 typedef std::basic_ostream<char, std::char_traits<char>> CoutType;

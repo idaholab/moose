@@ -82,8 +82,8 @@ public:
 #define ARGS args_in...
 
 #endif
-    //if (_active_instance)
-      return;
+    // if (_active_instance)
+    return;
 
     _active_instance = this;
 

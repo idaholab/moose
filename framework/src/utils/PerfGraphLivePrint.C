@@ -15,6 +15,7 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _execution_list(perf_graph._execution_list),
     _done_future(perf_graph._done.get_future()),
     _destructing(perf_graph._destructing),
+    _should_print(true),
     _id_to_section_info(perf_graph._id_to_section_info),
     _time_limit(perf_graph._live_print_time_limit),
     _mem_limit(perf_graph._live_print_mem_limit),
@@ -98,7 +99,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
       (_last_printed_increment &&
        _last_printed_increment != &section_increment_start)) // Print Finished
   {
-    if ((_last_printed_increment->_state == PerfGraph::IncrementState::printed && _id_to_section_info[_last_printed_increment->_id]._print_dots))
+    if ((_last_printed_increment->_state == PerfGraph::IncrementState::printed &&
+         _id_to_section_info[_last_printed_increment->_id]._print_dots))
       _console << '\n';
 
     _console << std::string(2 * section_increment_start._print_stack_level, ' ') << "Finished "
@@ -258,6 +260,13 @@ PerfGraphLivePrint::start()
     if (_destructing && this->_last_execution_list_end == this->_current_execution_list_end)
       return;
 
+    // We store this off for one execution of this loop so that it's consistent all for the whole
+    // iteration
+    _should_print = _perf_graph._live_print_active;
+
+    if (!_should_print)
+      continue;
+
     // The last entry in the current execution list for convenience
     _current_execution_list_last = _current_execution_list_end - 1 >= 0
                                        ? _current_execution_list_end - 1
@@ -289,7 +298,8 @@ PerfGraphLivePrint::start()
     // Make sure that everything comes out on the console
     if (_printed)
     {
-      _console << std::flush;
+      if (_should_print)
+        _console << std::flush;
       _last_num_printed = _console.numPrinted();
     }
 

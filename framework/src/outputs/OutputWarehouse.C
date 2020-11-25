@@ -23,7 +23,7 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse(MooseApp & app)
-    : PerfGraphInterface(app.perfGraph(), "OutputWarehouse"),
+  : PerfGraphInterface(app.perfGraph(), "OutputWarehouse"),
     _app(app),
     _buffer_action_console_outputs(false),
     _output_exec_flag(EXEC_CUSTOM),
@@ -156,8 +156,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
   /**
    * This is one of three locations where we explicitly flush the output buffers during a
    * simulation:
-   * PetscOutput::petscNonlinearOutput()
-   * PetscOutput::petscLinearOutput()
+   * Petsc Output::petscNonlinearOutput()
+   * Petsc Output::petscLinearOutput()
    * OutputWarehouse::outputStep()
    *
    * All other Console output _should_ be using newlines to avoid covering buffer errors
@@ -193,10 +193,7 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
 
   // If someone else is writing - then we may need a newline
   if (&buffer != _last_buffer && !_last_message_ended_in_newline)
-  {
-    std::cerr << "Adding newline" << std::endl;
     message = '\n' + message;
-  }
 
   // Loop through all Console Output objects and pass the current output buffer
   std::vector<Console *> objects = getOutputs<Console>();

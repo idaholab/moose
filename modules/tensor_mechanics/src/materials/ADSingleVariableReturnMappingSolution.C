@@ -147,7 +147,7 @@ ADSingleVariableReturnMappingSolution::returnMappingSolve(const ADReal & effecti
   {
     // the solve did not fail but the user requested debug output anyways
     outputIterationSummary(iter_output.get(), _iteration);
-    console << iter_output->str();
+    console << iter_output->str() << std::flush;
   }
 }
 
@@ -404,5 +404,5 @@ ADSingleVariableReturnMappingSolution::outputIterationSummary(std::stringstream 
   if (iter_output)
     *iter_output << "In " << total_it << " iterations the residual went from "
                  << MetaPhysicL::raw_value(_initial_residual) << " to "
-                 << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'.\n";
+                 << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'." << std::endl;
 }

@@ -20,24 +20,22 @@
 #endif
 
 #define TIME_SECTION2(section_name, level)                                                         \
-  static const PerfID __perf_id =                                                                  \
-    registerTimedSection(section_name, level); \
+  static const PerfID __perf_id = registerTimedSection(section_name, level);                       \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION3(section_name, level, live_message)                                           \
-  static const PerfID __perf_id =                                                                  \
-      registerTimedSection(section_name, level, live_message);  \
+  static const PerfID __perf_id = registerTimedSection(section_name, level, live_message);         \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
-  static const PerfID __perf_id = registerTimedSection(         \
-      section_name, level, live_message, print_dots);                                              \
+  static const PerfID __perf_id =                                                                  \
+      registerTimedSection(section_name, level, live_message, print_dots);                         \
   TIME_SECTION1(__perf_id);
 
 // Overloading solution from https://stackoverflow.com/a/11763277
 #define GET_MACRO(_1, _2, _3, _4, NAME, ...) NAME
 #define TIME_SECTION(...)                                                                          \
-  GET_MACRO(__VA_ARGS__, TIME_SECTION4, TIME_SECTION3, TIME_SECTION2, TIME_SECTION1,)(__VA_ARGS__)
+  GET_MACRO(__VA_ARGS__, TIME_SECTION4, TIME_SECTION3, TIME_SECTION2, TIME_SECTION1, )(__VA_ARGS__)
 
 // Forward declarations
 class PerfGraphInterface;

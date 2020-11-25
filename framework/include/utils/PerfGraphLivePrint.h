@@ -49,6 +49,8 @@ protected:
 
   const std::atomic<bool> & _destructing;
 
+  bool _should_print;
+
   std::unordered_map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
   /// Limit (in seconds) before printing

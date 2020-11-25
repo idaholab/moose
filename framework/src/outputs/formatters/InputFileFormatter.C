@@ -167,7 +167,7 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
             oss << std::right << std::setw(l_offset) << "# Group: " << group;
         }
       }
-      oss << "\n";
+      oss << std::endl;
     }
   }
 

@@ -667,7 +667,7 @@ void
 AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
 {
   const MooseObjectWarehouse<ArrayAuxKernel> & nodal = _nodal_array_aux_storage[type];
-  computeNodalVarsHelper<ArrayAuxKernel>(nodal, _nodal_array_vars, _compute_nodal_array_vars_timer);
+  computeNodalVarsHelper<ArrayAuxKernel>(nodal, _nodal_array_vars);
 }
 
 void
@@ -692,8 +692,7 @@ void
 AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
 {
   const MooseObjectWarehouse<ArrayAuxKernel> & elemental = _elemental_array_aux_storage[type];
-  computeElementalVarsHelper<ArrayAuxKernel>(
-      elemental, _elem_array_vars, _compute_elemental_array_vars_timer);
+  computeElementalVarsHelper<ArrayAuxKernel>(elemental, _elem_array_vars);
 }
 
 void

@@ -229,7 +229,7 @@ IterationAdaptiveDT::computeDT()
     dt = _time_ipol.sample(_time_old);
 
     if (_verbose)
-      _console << "Setting dt to value specified by dt function: " << std::setw(9) << dt << '\n';
+      _console << "Setting dt to value specified by dt function: " << std::setw(9) << dt << std::endl;
   }
   else if (_sync_last_step)
   {
@@ -237,7 +237,7 @@ IterationAdaptiveDT::computeDT()
     dt = _dt_old;
 
     if (_verbose)
-      _console << "Setting dt to value used before sync: " << std::setw(9) << dt << '\n';
+      _console << "Setting dt to value used before sync: " << std::setw(9) << dt << std::endl;
   }
   else if (_adaptive_timestepping)
     computeAdaptiveDT(dt);
@@ -271,7 +271,7 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 
     if (_verbose)
       _console << "Limiting dt to sync with dt function time: " << std::setw(9)
-               << *_tfunc_times.begin() << " dt: " << std::setw(9) << dt << '\n';
+               << *_tfunc_times.begin() << " dt: " << std::setw(9) << dt << std::endl;
   }
 
   return at_sync_point;
@@ -289,10 +289,11 @@ IterationAdaptiveDT::computeFailedDT()
   if (_verbose)
   {
     _console << "\nSolve failed with dt: " << std::setw(9) << _dt
-             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor << '\n';
+             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor
+             << std::endl;
   }
   else
-    _console << "\nSolve failed, cutting timestep.\n";
+    _console << "\nSolve failed, cutting timestep." << std::endl;
 
   return _dt * _cutback_factor;
 }
@@ -338,7 +339,7 @@ IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
       limitedDT = std::max(_dt_min, *_pps_value);
 
       if (_verbose)
-        _console << "Limiting dt to postprocessor value. dt = " << limitedDT << '\n';
+        _console << "Limiting dt to postprocessor value. dt = " << limitedDT << std::endl;
     }
 }
 
@@ -424,7 +425,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     else
       _console << "Limiting dt to limit change in function. dt = ";
 
-    _console << limitedDT << '\n';
+    _console << limitedDT << std::endl;
   }
 }
 
@@ -461,6 +462,8 @@ IterationAdaptiveDT::computeAdaptiveDT(Real & dt, bool allowToGrow, bool allowTo
                << " || lin its = " << _l_its << " > " << shrink_l_its << " old dt: " << std::setw(9)
                << _dt_old << " new dt: " << std::setw(9) << dt << '\n';
   }
+
+  _console << std::flush;
 }
 
 Real
@@ -475,7 +478,7 @@ IterationAdaptiveDT::computeInterpolationDT()
     if (_verbose)
       _console << "Growing dt to recover from cutback. "
                << " old dt: " << std::setw(9) << _dt_old << " new dt: " << std::setw(9) << dt
-               << '\n';
+               << std::endl;
   }
 
   return dt;
@@ -511,7 +514,7 @@ IterationAdaptiveDT::acceptStep()
 
     if (_verbose)
       _console << "Sync point hit in current step, using previous dt for old dt: " << std::setw(9)
-               << _dt_old << '\n';
+               << _dt_old << std::endl;
   }
   else
     _dt_old = _dt;

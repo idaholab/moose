@@ -119,8 +119,10 @@ CommonOutputAction::validParams()
       "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
 
   params.addParam<bool>("perf_graph_live", true, "Enables printing of live progress messages");
-  params.addParam<Real>("perf_graph_live_time_limit", 1.0, "Time (in seconds) to wait before printing a message.");
-  params.addParam<unsigned int>("perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
+  params.addParam<Real>(
+      "perf_graph_live_time_limit", 1.0, "Time (in seconds) to wait before printing a message.");
+  params.addParam<unsigned int>(
+      "perf_graph_live_mem_limit", 100, "Memory (in MB) to cause a message to be printed.");
 
   params.addParam<bool>("print_mesh_changed_info",
                         false,

@@ -184,7 +184,7 @@ GeochemicalModelInterrogator::outputReaction(const std::string & eqm_species) co
       _mgd.eqm_stoichiometry, row, _mgd.basis_species_name, cutoff, _precision);
   ss << "  .  log10(K) = " << log10_eqm_const;
   ss << std::endl;
-  _console << ss.str();
+  _console << ss.str() << std::flush;
 }
 
 bool
@@ -248,7 +248,7 @@ GeochemicalModelInterrogator::outputActivity(const std::string & eqm_species) co
     }
 
   lhs << "= 10^" << rhs << std::endl;
-  _console << lhs.str();
+  _console << lhs.str() << std::flush;
 }
 
 void
@@ -267,7 +267,7 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
     rhs = -std::log10(getActivity(eqm_species));
   else
   {
-    _console << "Not enough activites known to compute equilibrium temperature for reaction\n  ";
+    _console << "Not enough activites known to compute equilibrium temperature for reaction\n  " << std::flush;
     outputReaction(eqm_species);
     return;
   }
@@ -281,7 +281,7 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
       else
       {
         _console
-            << "Not enough activites known to compute equilibrium temperature for reaction\n  ";
+          << "Not enough activites known to compute equilibrium temperature for reaction\n  " << std::flush;
         outputReaction(eqm_species);
         return;
       }
@@ -289,7 +289,7 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
 
   const Real tsoln = solveForT(
       _mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.original_database->getTemperatures().size()), rhs);
-  _console << eqm_species << ".  T = " << tsoln << "degC\n";
+  _console << eqm_species << ".  T = " << tsoln << "degC" << std::endl;
 }
 
 Real

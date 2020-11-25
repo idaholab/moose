@@ -194,6 +194,8 @@ ElementQualityChecker::finalize()
         mooseError("Unknown failure type!");
     }
   }
+
+  _console << std::flush;
 }
 
 bool

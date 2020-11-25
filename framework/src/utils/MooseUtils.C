@@ -630,6 +630,8 @@ MaterialPropertyStorageDump(
       }
     }
   }
+
+  Moose::out << std::flush;
 }
 
 std::string &

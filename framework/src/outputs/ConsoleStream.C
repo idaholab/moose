@@ -15,7 +15,7 @@
 std::mutex _stream_mutex;
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
-    : _output_warehouse(output_warehouse), _oss(std::make_shared<std::ostringstream>())
+  : _output_warehouse(output_warehouse), _oss(std::make_shared<std::ostringstream>())
 {
 }
 

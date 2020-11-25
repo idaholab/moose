@@ -48,7 +48,7 @@ void
 Tricrystal2CircleGrainsICAction::act()
 {
 #ifdef DEBUG
-  Moose::err << "Inside the Tricrystal2CircleGrainsICAction Object\n";
+  Moose::err << "Inside the Tricrystal2CircleGrainsICAction Object" << std::endl;
 #endif
 
   // Loop through the number of order parameters

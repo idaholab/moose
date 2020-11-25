@@ -1470,7 +1470,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   // residual contributions from the domain
   PARALLEL_TRY
   {
-    TIME_SECTION("Kernels", 3/*, "Computing Kernels"*/);
+    TIME_SECTION("Kernels", 3 /*, "Computing Kernels"*/);
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
@@ -1498,7 +1498,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     // do scalar kernels (not sure how to thread this)
     if (_scalar_kernels.hasActiveObjects())
     {
-      TIME_SECTION("ScalarKernels", 3/*, "Computing ScalarKernels"*/);
+      TIME_SECTION("ScalarKernels", 3 /*, "Computing ScalarKernels"*/);
 
       MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
@@ -1543,7 +1543,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBlockObjects())
     {
-      TIME_SECTION("NodalKernels", 3/*, "Computing NodalKernels"*/);
+      TIME_SECTION("NodalKernels", 3 /*, "Computing NodalKernels"*/);
 
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
@@ -1575,7 +1575,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBoundaryObjects())
     {
-      TIME_SECTION("NodalKernelBCs", 3/*, "Computing NodalKernelBCs"*/);
+      TIME_SECTION("NodalKernelBCs", 3 /*, "Computing NodalKernelBCs"*/);
 
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
@@ -1674,7 +1674,7 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 
     if (!bnd_nodes.empty())
     {
-      TIME_SECTION("NodalBCs", 3/*, "Computing NodalBCs"*/);
+      TIME_SECTION("NodalBCs", 3 /*, "Computing NodalBCs"*/);
 
       MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
 
@@ -2964,7 +2964,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   _communicator.min(damping);
 
   if (has_active_dampers && damping < 1.0)
-    _console << " Damping factor: " << damping << "\n";
+    _console << " Damping factor: " << damping << std::endl;
 
   return damping;
 }
@@ -3447,9 +3447,9 @@ NonlinearSystemBase::setupScalingGrouping()
 void
 NonlinearSystemBase::computeScaling()
 {
-  _console << "\nPerforming automatic scaling calculation\n\n";
+  _console << "\nPerforming automatic scaling calculation\n" << std::endl;
 
-  TIME_SECTION(_compute_scaling_timer);
+  TIME_SECTION("computeScaling", 3, "Computing Automatic Scaling");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   // It's funny but we need to assemble our vector of scaling factors here otherwise we will be

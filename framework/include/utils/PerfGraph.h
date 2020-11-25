@@ -127,7 +127,7 @@ public:
   /**
    * Set the time limit before a message prints
    */
-  void setLiveTimeLimit(Real time_limit){ _live_print_time_limit = time_limit; }
+  void setLiveTimeLimit(Real time_limit) { _live_print_time_limit = time_limit; }
 
   /**
    * Sert the memory limit before a message prints
@@ -345,14 +345,11 @@ protected:
   /// This processor id
   processor_id_type _pid;
 
-  /// The name (handle) of the root node
-  static const std::string ROOT_NAME;
-
-  /// The name to display for the root of the graph when printing the entire graph
-  const std::string _root_name;
-
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
+
+  /// Name of the root node
+  std::string _root_name;
 
   /// The id for the root node
   PerfID _root_node_id;
@@ -399,7 +396,7 @@ protected:
   bool _active;
 
   /// Whether or not live printing is active
-  bool _live_print_active;
+  std::atomic<bool> _live_print_active;
 
   /// The promise to the print thread that will signal when to stop
   std::promise<bool> _done;

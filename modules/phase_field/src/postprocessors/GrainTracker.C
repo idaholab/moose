@@ -373,7 +373,7 @@ GrainTracker::finalize()
 
   updateFieldInfo();
   if (_verbosity_level > 1)
-    _console << "Finished inside of updateFieldInfo\n";
+    _console << "Finished inside of updateFieldInfo" << std::endl;
 
   // Set the first time flag false here (after all methods of finalize() have completed)
   _first_time = false;

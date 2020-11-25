@@ -2853,6 +2853,7 @@ MooseMesh::printInfo(std::ostream & os, const unsigned int verbosity /* = 0 */) 
 {
   os << '\n';
   getMesh().print_info(os, verbosity);
+  os << std::flush;
 }
 
 const std::vector<dof_id_type> &

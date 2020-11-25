@@ -243,6 +243,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   {
     _console << "\nMesh Changed:\n";
     _mesh.printInfo();
+    _console << std::flush;
   }
 
   return mesh_changed;

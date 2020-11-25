@@ -148,7 +148,7 @@ NonlinearSystem::solve()
     _initial_residual_before_preset_bcs = _nl_implicit_sys.rhs->l2_norm();
     if (_compute_initial_residual_before_preset_bcs)
       _console << "Initial residual before setting preset BCs: "
-               << _initial_residual_before_preset_bcs << '\n';
+               << _initial_residual_before_preset_bcs << std::endl;
   }
 
   // Clear the iteration counters

@@ -262,7 +262,10 @@ MooseApp::validParams()
                                            "Pauses the application during startup for the "
                                            "specified time to allow for connection of debuggers.");
 
-  params.addCommandLineParam<bool>("perf_graph_live_all", "--perf-graph-live-all", false, "Forces printing of ALL progress messages.");
+  params.addCommandLineParam<bool>("perf_graph_live_all",
+                                   "--perf-graph-live-all",
+                                   false,
+                                   "Forces printing of ALL progress messages.");
 
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
@@ -539,6 +542,8 @@ MooseApp::MooseApp(InputParameters parameters)
                     "Remove said parameter in ",
                     name(),
                     " to remove this deprecation warning.");
+
+  Moose::out << std::flush;
 }
 
 void
@@ -716,11 +721,13 @@ MooseApp::setupOptions()
     _parser.buildJsonSyntaxTree(tree);
     JsonInputFileFormatter formatter;
     Moose::out << "### START DUMP DATA ###\n"
-               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###\n";
+               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
     _ready_to_exit = true;
   }
   else if (isParamValid("registry"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::out << "Label\tType\tName\tClass\tFile\n";
 
     auto & objmap = Registry::allObjects();
@@ -748,9 +755,13 @@ MooseApp::setupOptions()
     }
 
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("registry_hit"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::out << "### START REGISTRY DATA ###\n";
 
     hit::Section root("");
@@ -801,9 +812,13 @@ MooseApp::setupOptions()
 
     Moose::out << "\n### END REGISTRY DATA ###\n";
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("definition"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
     _parser.buildJsonSyntaxTree(tree);
@@ -811,9 +826,13 @@ MooseApp::setupOptions()
     Moose::out << "%-START-SON-DEFINITION-%\n"
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("yaml"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::perf_log.disable_logging();
 
     _parser.initSyntaxFormatter(Parser::YAML, true);
@@ -830,9 +849,13 @@ MooseApp::setupOptions()
       _parser.buildFullTree(yaml_following_arg);
 
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("json"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::perf_log.disable_logging();
 
     // Get command line argument following --json on command line
@@ -849,9 +872,13 @@ MooseApp::setupOptions()
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (getParam<bool>("syntax"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::perf_log.disable_logging();
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
@@ -860,12 +887,18 @@ MooseApp::setupOptions()
       Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (getParam<bool>("apptype"))
   {
+    _perf_graph.setLivePrintActive(false);
+
     Moose::perf_log.disable_logging();
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (!_input_filenames.empty() ||
            isParamValid("input_file")) // They already specified an input filename
@@ -950,6 +983,8 @@ MooseApp::setupOptions()
     _command_line->printUsage();
     _ready_to_exit = true;
   }
+
+  Moose::out << std::flush;
 }
 
 void

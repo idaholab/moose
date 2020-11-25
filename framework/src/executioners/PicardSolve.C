@@ -79,15 +79,8 @@ PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex)
     _has_fixed_point_its = _max_fixed_point_its > 1;
   }
 
-<<<<<<< HEAD
   if (!parameters().isParamSetByAddParam("accept_on_max_picard_iteration"))
     _accept_max_it = getParam<bool>("accept_on_max_picard_iteration");
-=======
-bool
-PicardSolve::solve()
-{
-  TIME_SECTION("PicardSolve", 1);
->>>>>>> Remove more perfgraph registration refs #15444
 
   if (!parameters().isParamSetByAddParam("disable_picard_residual_norm_check"))
     _has_fixed_point_norm = !getParam<bool>("disable_picard_residual_norm_check");
@@ -280,4 +273,6 @@ PicardSolve::printFixedPointConvergenceHistory()
              << " Picard |R| = " << Console::outputNorm(_fixed_point_initial_norm, max_norm)
              << '\n';
   }
+
+  _console << std::flush;
 }

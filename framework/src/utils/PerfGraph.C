@@ -26,9 +26,7 @@
 // System Includes
 #include <chrono>
 
-const std::string PerfGraph::ROOT_NAME = "Root";
-
-PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app, const bool live_all)
+PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app, const bool live_all)
   : ConsoleStreamInterface(app),
     _live_print_all(live_all),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
@@ -49,12 +47,11 @@ PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app, const bo
   if (_pid == 0)
   {
     // Start the printing thread
-    _print_thread = std::thread([this] {
-        this->_live_print->start();
-    });
+    _print_thread = std::thread([this] { this->_live_print->start(); });
   }
 
-  _root_node_id = _perf_graph_registry.registerSection(ROOT_NAME, 0);
+  _root_name = root_name;
+  _root_node_id = _perf_graph_registry.registerSection(root_name, 0);
 
   push(_root_node_id);
 }
@@ -89,7 +86,12 @@ PerfGraph::getNumCalls(const std::string & section_name)
 {
   updateTiming();
 
-  auto section_it = _section_time.find(section_name);
+  std::string real_section_name = section_name;
+
+  if (section_name == "Root")
+    real_section_name = _root_name;
+
+  auto section_it = _section_time.find(real_section_name);
 
   if (section_it == _section_time.end())
   {
@@ -111,7 +113,12 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
 {
   updateTiming();
 
-  auto section_it = _section_time.find(section_name);
+  std::string real_section_name = section_name;
+
+  if (section_name == "Root")
+    real_section_name = _root_name;
+
+  auto section_it = _section_time.find(real_section_name);
 
   if (section_it == _section_time.end())
   {
@@ -125,7 +132,7 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
         " in PerfGraph::getTime()\nIf you are attempting to retrieve the root use \"Root\".");
   }
 
-  auto app_time = _section_time_ptrs[0]->_total;
+  auto app_time = _section_time_ptrs[_root_node_id]->_total;
 
   switch (type)
   {
@@ -186,7 +193,6 @@ PerfGraph::addToExecutionList(const PerfID id,
   if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
     _execution_list_end.store(0, std::memory_order_relaxed);
 }
-
 
 void
 PerfGraph::push(const PerfID id)
@@ -354,8 +360,7 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
   mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
               "Unable to find section name!");
 
-  auto & name =
-      current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
+  auto & name = _id_to_section_info[current_node->id()]._name;
 
   mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
               "Unable to find level!");
@@ -416,13 +421,12 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
 
-  auto & name =
-      current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
+  auto & name = _id_to_section_info[current_node->id()]._name;
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
   // The total time of the root node
-  auto total_root_time = _section_time_ptrs[0]->_total;
+  auto total_root_time = _section_time_ptrs[_root_node_id]->_total;
 
   auto num_calls = current_node->numCalls();
   auto self = std::chrono::duration<double>(current_node->selfTime()).count();
@@ -617,14 +621,17 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
               "updateTiming() must be run before printHeaviestSections()!");
 
   // The total time of the root node
-  auto total_root_time = _section_time_ptrs[0]->_total;
+  auto total_root_time = _section_time_ptrs[_root_node_id]->_total;
 
   // Now print out the largest ones
   for (unsigned int i = 0; i < num_sections; i++)
   {
     auto id = sorted[i];
 
-    vtable.addRow(id == 0 ? _root_name : _id_to_section_info[id]._name,
+    if (!_section_time_ptrs[id])
+      continue;
+
+    vtable.addRow(_id_to_section_info[id]._name,
                   _section_time_ptrs[id]->_num_calls,
                   _section_time_ptrs[id]->_total_memory,
                   _section_time_ptrs[id]->_self,
