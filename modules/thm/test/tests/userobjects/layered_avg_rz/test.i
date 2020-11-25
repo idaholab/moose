@@ -37,19 +37,19 @@ length = 4
   [./mat1]
     type = SolidMaterialProperties
     k = 2.5
-    Cp = 300.
+    cp = 300.
     rho = 1.032e4
   [../]
   [./mat2]
     type = SolidMaterialProperties
     k = 0.6
-    Cp = 1.
+    cp = 1.
     rho = 1.
   [../]
   [./mat3]
     type = SolidMaterialProperties
     k = 21.5
-    Cp = 350.
+    cp = 350.
     rho = 6.55e3
   [../]
 []

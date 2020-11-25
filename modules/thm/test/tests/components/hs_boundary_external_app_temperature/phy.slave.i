@@ -2,7 +2,7 @@
   [./ss316]
     type = SolidMaterialProperties
     rho = 8.0272e3
-    Cp = 502.1
+    cp = 502.1
     k = 16.26
   [../]
 []

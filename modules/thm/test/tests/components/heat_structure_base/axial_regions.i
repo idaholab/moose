@@ -8,7 +8,7 @@
   [./hs_mat]
     type = SolidMaterialProperties
     k = 5
-    Cp = 300
+    cp = 300
     rho = 100
   [../]
 []

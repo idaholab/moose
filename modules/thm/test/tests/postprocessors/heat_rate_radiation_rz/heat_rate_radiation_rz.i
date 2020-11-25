@@ -17,7 +17,7 @@ emissivity = ${fparse Q / (S * sigma * (T_ambient^4 - T^4))}
   [./region1-mat]
     type = SolidMaterialProperties
     k = 1
-    Cp = 1
+    cp = 1
     rho = 1
   [../]
 []

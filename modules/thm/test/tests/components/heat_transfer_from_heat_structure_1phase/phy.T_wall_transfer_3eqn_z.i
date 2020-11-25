@@ -28,7 +28,7 @@
     type = SolidMaterialProperties
     k = 100.0
     rho = 100.0
-    Cp = 100.0
+    cp = 100.0
   [../]
 []
 
