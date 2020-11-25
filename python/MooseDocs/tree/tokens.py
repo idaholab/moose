@@ -48,7 +48,7 @@ class Token(NodeBase):
                         settings property and may be retrieved via the various access methods.
     """
     def __init__(self, name=None, parent=None, **kwargs):
-        for key in kwargs:
+        for key in list(kwargs):
             if key.endswith('_'):
                 kwargs[key[:-1]] = kwargs.pop(key)
         kwargs.setdefault('recursive', True)
