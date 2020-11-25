@@ -7,7 +7,11 @@ SolidMaterialProperties::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<FunctionName>("k", "Thermal conductivity [W/(m-K)]");
-  params.addRequiredParam<FunctionName>("Cp", "Specific heat [J/(kg-K)]");
+  params.addDeprecatedParam<FunctionName>(
+      "Cp",
+      "Specific heat [J/(kg-K)]",
+      "The parameter 'Cp' has been deprecated. Use 'cp' instead.");
+  params.addParam<FunctionName>("cp", "Specific heat [J/(kg-K)]");
   params.addRequiredParam<FunctionName>("rho", "Density [kg/m^3]");
 
   params.addPrivateParam<ExecFlagEnum>("execute_on");
@@ -20,7 +24,7 @@ SolidMaterialProperties::validParams()
 SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _k(getFunction("k")),
-    _cp(getFunction("Cp")),
+    _cp(isParamValid("Cp") ? getFunction("Cp") : getFunction("cp")),
     _rho(getFunction("rho"))
 {
 }
