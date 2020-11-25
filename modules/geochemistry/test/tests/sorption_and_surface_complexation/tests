@@ -5,7 +5,7 @@
     csvdiff = 'selenate_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the Langmuir model'
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md selenate.md'
+    design = 'AddTimeDependentReactionSolverAction.md selenate.md'
   [../]
   [./ferric_hydroxide]
     type = 'RunApp'
@@ -63,6 +63,6 @@ Fe(OH)3(ppd); area = 600m^2; specific charge = 0.1595C/m^2; surface potential = 
     match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the surface complexation approach'
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md surface_complexation.md'
+    design = 'AddTimeDependentReactionSolverAction.md surface_complexation.md'
   [../]
 []

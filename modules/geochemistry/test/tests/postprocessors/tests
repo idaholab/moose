@@ -20,7 +20,7 @@
     prereq = nearest_node_number_2
     min_threads = 2
     max_threads = 2
-    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant."
+    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant, when the calculation employs threads."
   [../]
   [./nearest_node_number_2_2procs]
     type = CSVDiff
@@ -29,7 +29,7 @@
     prereq = nearest_node_number_2_2threads
     min_parallel = 2
     max_parallel = 2
-    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant."
+    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant, when the calculation employs multiple processors."
   [../]
   [./nearest_node_number_2_2procs_2threads]
     type = CSVDiff
@@ -40,7 +40,7 @@
     max_parallel = 2
     min_threads = 2
     max_threads = 2
-    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant."
+    requirement = "The geochemistry module shall contain a postprocessor that can compute the nearest node number to a given point, and will choose the smallest node number if more than one node is equidistant, when the calculation employs both threads and multiple processors."
   [../]
   [./nearest_node_number_3]
     type = CSVDiff
