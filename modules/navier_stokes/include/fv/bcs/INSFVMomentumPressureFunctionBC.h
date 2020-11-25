@@ -11,6 +11,10 @@
 
 #include "FVFluxBC.h"
 
+/**
+ * Implements the momentum equation pressure term on boundaries. Only useful
+ * for MMS since it requires exact solution information
+ */
 class INSFVMomentumPressureFunctionBC : public FVFluxBC
 {
 public:

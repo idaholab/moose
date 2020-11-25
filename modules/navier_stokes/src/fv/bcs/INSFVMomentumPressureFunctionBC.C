@@ -18,6 +18,8 @@ InputParameters
 INSFVMomentumPressureFunctionBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription("Implements the momentum equation pressure term on boundaries. Only "
+                             "useful for MMS since it requires exact solution information");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
@@ -39,7 +41,7 @@ ADReal
 INSFVMomentumPressureFunctionBC::computeQpResidual()
 {
   ADReal pressure_face;
-  auto pressure_ghost = _pressure_exact_solution.value(
+  const auto & pressure_ghost = _pressure_exact_solution.value(
       _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
