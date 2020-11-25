@@ -116,7 +116,6 @@
     requirement = 'Spatially-dependent reaction systems may be multi-threaded'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
-    skip = '#16100'
   [../]    
   [./spatial_4_mpi]
     type = CSVDiff
@@ -135,7 +134,6 @@
     min_threads = 2
     min_parallel = 2
     prereq = spatial_4_mpi
-    skip = '#16100'
     requirement = 'Spatially-dependent reaction systems may use MPI and threads'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'

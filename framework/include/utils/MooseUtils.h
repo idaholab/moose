@@ -194,6 +194,26 @@ std::string stripExtension(const std::string & s);
 std::pair<std::string, std::string> splitFileName(std::string full_file);
 
 /**
+ * Recursively make directories
+ * @param dir_name A complete path
+ * @param throw_on_failure True to throw instead of error out when creating a directory is failed.
+ *
+ * The path can be relative like 'a/b/c' or absolute like '/a/b/c'.
+ * The path is allowed to contain '.' or '..'.
+ */
+void makedirs(const std::string & dir_name, bool throw_on_failure = false);
+
+/**
+ * Recursively remove directories from inner-most when the directories are empty
+ * @param dir_name A complete path
+ * @param throw_on_failure True to throw instead of error out when deleting a directory is failed.
+ *
+ * The path can be relative like 'a/b/c' or absolute like '/a/b/c'.
+ * The path is allowed to contain '.' or '..'.
+ */
+void removedirs(const std::string & dir_name, bool throw_on_failure = false);
+
+/**
  * Function for converting a camel case name to a name containing underscores.
  * @param camel_case_name A string containing camel casing
  * @return a string containing no capital letters with underscores as appropriate

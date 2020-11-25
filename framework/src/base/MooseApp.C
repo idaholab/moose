@@ -54,7 +54,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_base.h"
-#include "libmesh/utility.h"
 
 // System include for dynamic library methods
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -360,8 +359,8 @@ MooseApp::MooseApp(InputParameters parameters)
       _cpu_profiling = true;
 
       auto name = MooseUtils::splitFileName(profile_file);
-      if (!name.first.empty())
-        Utility::mkdir(name.first.c_str());
+      if (!name.first.empty() && processor_id() == 0)
+        MooseUtils::makedirs(name.first.c_str());
 
       if (!ProfilerStart(profile_file.c_str()))
         mooseError("CPU profiler is not started properly");
@@ -376,8 +375,8 @@ MooseApp::MooseApp(InputParameters parameters)
       _heap_profiling = true;
 
       auto name = MooseUtils::splitFileName(profile_file);
-      if (!name.first.empty())
-        Utility::mkdir(name.first.c_str());
+      if (!name.first.empty() && processor_id() == 0)
+        MooseUtils::makedirs(name.first.c_str());
 
       HeapProfilerStart(profile_file.c_str());
       if (!IsHeapProfilerRunning())
