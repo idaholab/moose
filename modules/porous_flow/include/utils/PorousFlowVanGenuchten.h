@@ -339,28 +339,6 @@ d2saturationHys(Real pc,
                 const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
 
 /**
- * Cubic function f(x) that satisfies
- * f(x0) = y0
- * f'(x0) = y0p
- * f(x1) = y1
- * f'(x1) = y1p
- * @param x the argument
- * @return cubic as a function of x
- */
-Real cubic(Real x, Real x0, Real y0, Real y0p, Real x1, Real y1, Real y1p);
-
-/**
- * Derivative of cubic function, f(x), with respect to x.  f(x) satisfies
- * f(x0) = y0
- * f'(x0) = y0p
- * f(x1) = y1
- * f'(x1) = y1p
- * @param x the argument
- * @return the derivative of the cubic as a function of x
- */
-Real dcubic(Real x, Real x0, Real y0, Real y0p, Real x1, Real y1, Real y1p);
-
-/**
  * Hysteretic relative permeability for liquid
  * @param sl liquid saturation
  * @param slr residual liquid saturation.  For sl < slr, this function will always return 0

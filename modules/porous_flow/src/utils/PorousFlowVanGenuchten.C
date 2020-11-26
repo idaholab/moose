@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowVanGenuchten.h"
+#include "PorousFlowCubic.h"
 #include "libmesh/utility.h"
 
 namespace PorousFlowVanGenuchten
@@ -611,44 +612,6 @@ d2saturationHys(Real pc,
 }
 
 Real
-cubic(Real x, Real x0, Real y0, Real y0p, Real x1, Real y1, Real y1p)
-{
-  const Real d = x1 - x0;
-  const Real d2 = Utility::pow<2>(d);
-  const Real mean = 0.5 * (x1 + x0);
-  const Real sq3 = 0.5 * std::sqrt(3.0) * d;
-  const Real term1 = y0p * (x - x0) * Utility::pow<2>(x - x1) /
-                     d2; // term1(x0) = term1(x1) = term1'(x1) = 0, term1'(x0) = y0p
-  const Real term2 = y1p * (x - x1) * Utility::pow<2>(x - x0) /
-                     d2; // term2(x0) = term2(x1) = term2'(x0) = 0, term2'(x1) = y1p
-  const Real term3 = (x - mean - sq3) * (x - mean) * (x - mean + sq3);
-  // term3' = (x - mean) * (x - mean + sq3) + (x - mean - sq3) * (x - mean + sq3) + (x - mean - sq3)
-  // * (x - mean)
-  //        = 3 (x - mean)^2 - sq3^2
-  // note term3' = 0 when x = mean +/- sq3/sqrt(3) = 0.5 * (x1 + x0) +/- 0.5 * (x1 - x0) = {x1, x0}
-  const Real term3_x0 = (x0 - mean - sq3) * (x0 - mean) * (x0 - mean + sq3);
-  const Real term3_x1 = (x1 - mean - sq3) * (x1 - mean) * (x1 - mean + sq3);
-  return (y0 * (term3 - term3_x1) + y1 * (term3_x0 - term3)) / (term3_x0 - term3_x1) + term1 +
-         term2;
-}
-
-Real
-dcubic(Real x, Real x0, Real y0, Real y0p, Real x1, Real y1, Real y1p)
-{
-  const Real d = x1 - x0;
-  const Real d2 = Utility::pow<2>(d);
-  const Real mean = 0.5 * (x1 + x0);
-  const Real sq3 = 0.5 * std::sqrt(3.0) * d;
-  const Real term1_prime = y0p * (Utility::pow<2>(x - x1) + (x - x0) * 2 * (x - x1)) / d2;
-  const Real term2_prime = y1p * (Utility::pow<2>(x - x0) + (x - x1) * 2 * (x - x0)) / d2;
-  const Real term3_prime =
-      3.0 * Utility::pow<2>(mean) - 6 * mean * x - 0.75 * d2 + 3.0 * Utility::pow<2>(x);
-  const Real term3_x0 = (x0 - mean - sq3) * (x0 - mean) * (x0 - mean + sq3);
-  const Real term3_x1 = (x1 - mean - sq3) * (x1 - mean) * (x1 - mean + sq3);
-  return (y0 - y1) * term3_prime / (term3_x0 - term3_x1) + term1_prime + term2_prime;
-}
-
-Real
 relativePermeabilityHys(Real sl,
                         Real slr,
                         Real sgrdel,
@@ -661,7 +624,7 @@ relativePermeabilityHys(Real sl,
                         Real y1,
                         Real y1p)
 {
-  if (sl < slr) // by the definition of slr, always return 0
+  if (sl <= slr) // by the definition of slr, always return 0
     return 0.0;
   const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
   // a and b are useful parameters.  Define b along the drying curve initially, and
@@ -687,7 +650,7 @@ relativePermeabilityHys(Real sl,
     {
       // follow the cubic modification of the wetting curve.  Immediately exit from this function by
       // returning the cubic result
-      return cubic(
+      return PorousFlowCubic::cubic(
           sl, upper_liquid_param * (1.0 - my_sgrdel), y0, y0p, 1.0 - 0.5 * my_sgrdel, y1, y1p);
     }
     else
@@ -717,7 +680,7 @@ drelativePermeabilityHys(Real sl,
                          Real y1,
                          Real y1p)
 {
-  if (sl < slr) // by the definition of slr, always return 0
+  if (sl <= slr) // by the definition of slr, always return 0
     return 0.0;
   const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
   const Real sl_bar_prime = 1.0 / (1.0 - slr);
@@ -756,7 +719,7 @@ drelativePermeabilityHys(Real sl,
     {
       // follow the cubic modification of the wetting curve.  Immediately exit from this function by
       // returning the cubic result
-      return dcubic(
+      return PorousFlowCubic::dcubic(
           sl, upper_liquid_param * (1.0 - my_sgrdel), y0, y0p, 1.0 - 0.5 * my_sgrdel, y1, y1p);
     }
     else
@@ -796,7 +759,7 @@ relativePermeabilityNWHys(Real sl,
     // in the extended region, so immediately return with the relevant value
     if (k_rg_max == 1.0)
       return 1.0;
-    return cubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
+    return PorousFlowCubic::cubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
   }
   if (sl > 1.0 - sgrdel) // saturation is above 1.0 - residual gas saturation
     return 0.0;
@@ -840,7 +803,7 @@ drelativePermeabilityNWHys(Real sl,
     // in the extended region, so immediately return with the relevant value
     if (k_rg_max == 1.0)
       return 0.0;
-    return dcubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
+    return PorousFlowCubic::dcubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
   }
   if (sl > 1.0 - sgrdel) // saturation is above 1.0 - residual gas saturation
     return 0.0;

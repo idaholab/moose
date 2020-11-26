@@ -834,54 +834,6 @@ TEST(PorousFlowVanGenuchten, d2sathys)
   }
 }
 
-/// Test cubic
-TEST(PorousFlowVanGenuchten, cubic)
-{
-  EXPECT_NEAR(3.0, PorousFlowVanGenuchten::cubic(2.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(4.0,
-              (PorousFlowVanGenuchten::cubic(2.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(2.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-  EXPECT_NEAR(6.0, PorousFlowVanGenuchten::cubic(5.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(7.0,
-              (PorousFlowVanGenuchten::cubic(5.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(5.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-  EXPECT_NEAR(-6.0, PorousFlowVanGenuchten::cubic(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(4.0, PorousFlowVanGenuchten::cubic(3.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(3.0, PorousFlowVanGenuchten::cubic(4.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(48.0, PorousFlowVanGenuchten::cubic(7.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-}
-
-/// Test dcubic
-TEST(PorousFlowVanGenuchten, dcubic)
-{
-  EXPECT_NEAR(4.0, PorousFlowVanGenuchten::dcubic(2.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(7.0, PorousFlowVanGenuchten::dcubic(5.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0), 1.0E-12);
-  EXPECT_NEAR(PorousFlowVanGenuchten::dcubic(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0),
-              (PorousFlowVanGenuchten::cubic(1.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-  EXPECT_NEAR(PorousFlowVanGenuchten::dcubic(3.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0),
-              (PorousFlowVanGenuchten::cubic(3.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(3.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-  EXPECT_NEAR(PorousFlowVanGenuchten::dcubic(4.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0),
-              (PorousFlowVanGenuchten::cubic(4.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(4.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-  EXPECT_NEAR(PorousFlowVanGenuchten::dcubic(7.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0),
-              (PorousFlowVanGenuchten::cubic(7.0 + eps, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0) -
-               PorousFlowVanGenuchten::cubic(7.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)) /
-                  eps,
-              1.0E-5);
-}
-
 /// Test relativePermeabilityHys
 TEST(PorousFlowVanGenuchten, relativePermeabilityHys)
 {
