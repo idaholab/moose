@@ -81,7 +81,7 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
   hill_tensor(5, 5) = 2.0 * M;
   //  Moose::out << "hill_tensor constructor: " << hill_tensor << "\n";
 
-  computeHillTensorEigenDecomposition(hill_tensor);
+  //  computeHillTensorEigenDecomposition(hill_tensor);
 }
 
 void
@@ -151,13 +151,16 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
 }
 Real
 ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
-    const ADDenseVector & /*effective_trial_stress*/,
+    const ADDenseVector & effective_trial_stress,
     const ADDenseVector & /*stress_new*/,
     const ADReal & /*residual*/,
-    const ADReal & /*scalar_effective_inelastic_strain*/)
+    const ADReal & scalar_effective_inelastic_strain)
 {
-  // TODO, fix this joke reference residual.
-  return 0.00000001;
+  // This is an approximation. Better to have this method in the material model itself, rather than
+  // an application-agnostic parent class.
+  return MetaPhysicL::raw_value(effective_trial_stress).l2_norm() /
+             MetaPhysicL::raw_value(_two_shear_modulus) -
+         MetaPhysicL::raw_value(scalar_effective_inelastic_strain);
 }
 
 ADReal

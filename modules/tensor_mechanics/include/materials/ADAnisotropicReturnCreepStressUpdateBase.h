@@ -52,9 +52,6 @@ protected:
                                      const ADRankTwoTensor & /*stress*/,
                                      const ADReal & /*delta_gamma*/) override;
 
-  /// String that is prepended to the creep_strain Material Property
-  const std::string _creep_prepend;
-
   /// Creep strain material property
   ADMaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;

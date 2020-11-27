@@ -157,6 +157,7 @@ ADGeneralizedRadialReturnStressUpdate::computeTimeStepLimit()
 {
   Real scalar_inelastic_strain_incr = MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
                                       _effective_inelastic_strain_old[_qp];
+
   if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
     return std::numeric_limits<Real>::max();
 

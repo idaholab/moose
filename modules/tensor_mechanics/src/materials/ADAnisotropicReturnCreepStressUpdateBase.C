@@ -27,10 +27,8 @@ ADAnisotropicReturnCreepStressUpdateBase::validParams()
 ADAnisotropicReturnCreepStressUpdateBase::ADAnisotropicReturnCreepStressUpdateBase(
     const InputParameters & parameters)
   : ADGeneralizedRadialReturnStressUpdate(parameters),
-    _creep_prepend(getParam<std::string>("creep_prepend")),
-    _creep_strain(declareADProperty<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain")),
-    _creep_strain_old(
-        getMaterialPropertyOld<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain"))
+    _creep_strain(declareADProperty<RankTwoTensor>(_base_name + "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
 {
 }
 
