@@ -253,6 +253,13 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
+#ifdef HAVE_GPERFTOOLS
+  params.addCommandLineParam<std::string>(
+      "gperf_profiler_on",
+      "--gperf-profiler-on [ranks]",
+      "To generate profiling report only on comma-separated list of MPI ranks.");
+#endif
+
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
@@ -347,37 +354,73 @@ MooseApp::MooseApp(InputParameters parameters)
 #ifdef HAVE_GPERFTOOLS
   if (isUltimateMaster())
   {
-    if (std::getenv("MOOSE_PROFILE_BASE") && std::getenv("MOOSE_HEAP_BASE"))
-      mooseError("Can not do CPU and heap profiling together");
+    bool has_cpu_profiling = false;
+    bool has_heap_profiling = false;
+    static std::string profile_file;
 
     // For CPU profiling, users need to have envirement 'MOOSE_PROFILE_BASE'
     if (std::getenv("MOOSE_PROFILE_BASE"))
     {
-      static std::string profile_file =
-          std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
-
-      _cpu_profiling = true;
-
-      auto name = MooseUtils::splitFileName(profile_file);
-      if (!name.first.empty() && processor_id() == 0)
-        MooseUtils::makedirs(name.first.c_str());
-
-      if (!ProfilerStart(profile_file.c_str()))
-        mooseError("CPU profiler is not started properly");
+      has_cpu_profiling = true;
+      profile_file = std::getenv("MOOSE_PROFILE_BASE") + std::to_string(_comm->rank()) + ".prof";
     }
 
     // For Heap profiling, users need to have 'MOOSE_HEAP_BASE'
     if (std::getenv("MOOSE_HEAP_BASE"))
     {
-      static std::string profile_file =
-          std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
+      has_heap_profiling = true;
+      profile_file = std::getenv("MOOSE_HEAP_BASE") + std::to_string(_comm->rank());
+    }
 
-      _heap_profiling = true;
+    if (has_cpu_profiling && has_heap_profiling)
+      mooseError("Can not do CPU and heap profiling together");
 
+    if (has_cpu_profiling || has_heap_profiling)
+    {
+      // create directory if needed
       auto name = MooseUtils::splitFileName(profile_file);
-      if (!name.first.empty() && processor_id() == 0)
-        MooseUtils::makedirs(name.first.c_str());
+      if (!name.first.empty())
+      {
+        if (processor_id() == 0)
+          MooseUtils::makedirs(name.first.c_str());
+        _comm->barrier();
+      }
+    }
 
+    // turn on profiling only on selected ranks
+    if (isParamValid("gperf_profiler_on"))
+    {
+      auto rankstr = getParam<std::string>("gperf_profiler_on");
+      std::vector<processor_id_type> ranks;
+      bool success = MooseUtils::tokenizeAndConvert(rankstr, ranks, ", ");
+      if (!success)
+        mooseError("Invalid argument for --gperf-profiler-on: '", rankstr, "'");
+      for (auto & rank : ranks)
+      {
+        if (rank >= _comm->size())
+          mooseError("Invalid argument for --gperf-profiler-on: ",
+                     rank,
+                     " is greater than or equal to ",
+                     _comm->size());
+        if (rank == _comm->rank())
+        {
+          _cpu_profiling = has_cpu_profiling;
+          _heap_profiling = has_heap_profiling;
+        }
+      }
+    }
+    else
+    {
+      _cpu_profiling = has_cpu_profiling;
+      _heap_profiling = has_heap_profiling;
+    }
+
+    if (_cpu_profiling)
+      if (!ProfilerStart(profile_file.c_str()))
+        mooseError("CPU profiler is not started properly");
+
+    if (_heap_profiling)
+    {
       HeapProfilerStart(profile_file.c_str());
       if (!IsHeapProfilerRunning())
         mooseError("Heap profiler is not started properly");
@@ -503,15 +546,12 @@ MooseApp::checkRegistryLabels()
 MooseApp::~MooseApp()
 {
 #ifdef HAVE_GPERFTOOLS
-  if (isUltimateMaster())
-  {
-    // CPU profiling stop
-    if (_cpu_profiling)
-      ProfilerStop();
-    // Heap profiling stop
-    if (_heap_profiling)
-      HeapProfilerStop();
-  }
+  // CPU profiling stop
+  if (_cpu_profiling)
+    ProfilerStop();
+  // Heap profiling stop
+  if (_heap_profiling)
+    HeapProfilerStop();
 #endif
   _action_warehouse.clear();
   _executioner.reset();
