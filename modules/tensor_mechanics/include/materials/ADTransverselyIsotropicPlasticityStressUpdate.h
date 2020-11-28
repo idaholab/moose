@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADAnisotropicReturnCreepStressUpdateBase.h"
+#include "ADAnisotropicReturnPlasticityStressUpdateBase.h"
 
 /**
  * This class uses the stress update material in an anisotropic return isotropic creep
@@ -27,12 +27,13 @@
  * and Piping 88 (2011) 356--364.
  */
 
-class ADTransverselyIsotropicCreepStressUpdate : public ADAnisotropicReturnCreepStressUpdateBase
+class ADTransverselyIsotropicPlasticityStressUpdate
+  : public ADAnisotropicReturnPlasticityStressUpdateBase
 {
 public:
   static InputParameters validParams();
 
-  ADTransverselyIsotropicCreepStressUpdate(const InputParameters & parameters);
+  ADTransverselyIsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
   virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
@@ -52,6 +53,11 @@ protected:
                                         const ADDenseVector & stress_new,
                                         const ADReal & residual,
                                         const ADReal & scalar_effective_inelastic_strain) override;
+  /**
+   * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
+   * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
+   */
+  void computeHillTensorEigenDecomposition(ADDenseMatrix & hill_tensor);
 
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -104,4 +110,7 @@ protected:
 
   /// Square of the q function for orthotropy
   ADReal _qsigma;
+
+  ADDenseVector _eigenvalues_hill;
+  ADDenseMatrix _eigenvectors_hill;
 };

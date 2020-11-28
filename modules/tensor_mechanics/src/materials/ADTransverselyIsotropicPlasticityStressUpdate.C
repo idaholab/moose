@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADTransverselyIsotropicCreepStressUpdate.h"
+#include "ADTransverselyIsotropicPlasticityStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", ADTransverselyIsotropicCreepStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADTransverselyIsotropicPlasticityStressUpdate);
 
 InputParameters
-ADTransverselyIsotropicCreepStressUpdate::validParams()
+ADTransverselyIsotropicPlasticityStressUpdate::validParams()
 {
-  InputParameters params = ADAnisotropicReturnCreepStressUpdateBase::validParams();
+  InputParameters params = ADAnisotropicReturnPlasticityStressUpdateBase::validParams();
   params.addClassDescription(
       "This class uses the stress update material in a radial return isotropic power law creep "
       "model.  This class can be used in conjunction with other creep and plasticity materials for "
@@ -35,9 +35,9 @@ ADTransverselyIsotropicCreepStressUpdate::validParams()
   return params;
 }
 
-ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpdate(
+ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticityStressUpdate(
     const InputParameters & parameters)
-  : ADAnisotropicReturnCreepStressUpdateBase(parameters),
+  : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
     _has_temp(isParamValid("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _coefficient(getParam<Real>("coefficient")),
@@ -49,7 +49,9 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
     _exponential(1.0),
     _exp_time(1.0),
     _hill_constants(6),
-    _qsigma(0.0)
+    _qsigma(0.0),
+    _eigenvalues_hill(6),
+    _eigenvectors_hill(6, 6)
 {
   if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
     paramError("start_time",
@@ -77,10 +79,13 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
   hill_tensor(3, 3) = 2.0 * N;
   hill_tensor(4, 4) = 2.0 * L;
   hill_tensor(5, 5) = 2.0 * M;
+  //  Moose::out << "hill_tensor constructor: " << hill_tensor << "\n";
+
+  computeHillTensorEigenDecomposition(hill_tensor);
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStressInitialize(
+ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
     const ADDenseVector & /*effective_trial_stress*/,
     const ADRankFourTensor & /*elasticity_tensor*/)
 {
@@ -91,10 +96,9 @@ ADTransverselyIsotropicCreepStressUpdate::computeStressInitialize(
 }
 
 ADReal
-ADTransverselyIsotropicCreepStressUpdate::computeResidual(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADDenseVector & stress_new,
-    const ADReal & delta_gamma)
+ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVector & stress_dev,
+                                                               const ADDenseVector & stress_new,
+                                                               const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real F = _hill_constants[0];
@@ -103,6 +107,35 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
   const Real L = _hill_constants[3];
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
+
+  // ** //
+
+  ADDenseMatrix inv_matrix(6, 6);
+  for (unsigned int i = 0; i < 6; i++)
+    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
+
+  ADDenseVector stress_vector(6);
+  stress_vector(0) = stress_new(0);
+  stress_vector(1) = stress_new(1);
+  stress_vector(2) = stress_new(2);
+  stress_vector(3) = stress_new(3);
+  stress_vector(4) = stress_new(4);
+  stress_vector(5) = stress_new(5);
+
+  ADDenseMatrix eigenvectors_hill_transpose(6, 6);
+
+  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
+  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
+
+  // Right multiply by matrix of eigenvectors transpose
+  inv_matrix.right_multiply(eigenvectors_hill_transpose);
+  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
+  eigenvectors_hill_copy.right_multiply(inv_matrix);
+
+  ADDenseVector stress_np1(6);
+  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
+
+  // ** //
 
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
   qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
@@ -120,7 +153,7 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
   return creep_rate * _dt - delta_gamma;
 }
 Real
-ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
+ADTransverselyIsotropicPlasticityStressUpdate::computeReferenceResidual(
     const ADDenseVector & effective_trial_stress,
     const ADDenseVector & /*stress_new*/,
     const ADReal & /*residual*/,
@@ -134,10 +167,10 @@ ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
 }
 
 ADReal
-ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
+ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
     const ADDenseVector & /*effective_trial_stress*/,
     const ADDenseVector & stress_new,
-    const ADReal & /*delta_gamma*/)
+    const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real F = _hill_constants[0];
@@ -146,6 +179,35 @@ ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
   const Real L = _hill_constants[3];
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
+
+  // ** //
+
+  ADDenseMatrix inv_matrix(6, 6);
+  for (unsigned int i = 0; i < 6; i++)
+    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
+
+  ADDenseVector stress_vector(6);
+  stress_vector(0) = stress_new(0);
+  stress_vector(1) = stress_new(1);
+  stress_vector(2) = stress_new(2);
+  stress_vector(3) = stress_new(3);
+  stress_vector(4) = stress_new(4);
+  stress_vector(5) = stress_new(5);
+
+  ADDenseMatrix eigenvectors_hill_transpose(6, 6);
+
+  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
+  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
+
+  // Right multiply by matrix of eigenvectors transpose
+  inv_matrix.right_multiply(eigenvectors_hill_transpose);
+  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
+  eigenvectors_hill_copy.right_multiply(inv_matrix);
+
+  ADDenseVector stress_np1(6);
+  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
+
+  // ** //
 
   // Equivalent deviatoric stress function.
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
@@ -166,7 +228,49 @@ ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
+ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecomposition(
+    ADDenseMatrix & hill_tensor)
+{
+  unsigned int dimension = hill_tensor.n();
+
+  AnisotropyMatrix A;
+  for (unsigned int index_i = 0; index_i < dimension; index_i++)
+    for (unsigned int index_j = 0; index_j < dimension; index_j++)
+      A(index_i, index_j) = hill_tensor(index_i, index_j);
+
+  //  Moose::out << "Print A matrix: " << MetaPhysicL::raw_value(A) << "\n";
+
+  Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es(A);
+  //  std::cout << "The eigenvalues of the pencil (A) are:" << std::endl
+  //            << es.eigenvalues() << std::endl;
+  //  std::cout << "The matrix of eigenvectors, V, is:" << std::endl
+  //            << es.eigenvectors() << std::endl
+  //            << std::endl;
+
+  auto lambda = es.eigenvalues();
+  auto v = es.eigenvectors();
+  //  std::cout << "Consider the first eigenvalue, lambda = " << lambda << std::endl;
+  //  std::cout << "If v is the corresponding eigenvector, then A * v = " << std::endl
+  //            << A * v << std::endl;
+
+  // hill_tensor_real.evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
+  for (unsigned int index_i = 0; index_i < dimension; index_i++)
+    _eigenvalues_hill(index_i) = lambda(index_i);
+
+  for (unsigned int index_i = 0; index_i < dimension; index_i++)
+    for (unsigned int index_j = 0; index_j < dimension; index_j++)
+      _eigenvectors_hill(index_i, index_j) = es.eigenvectors()(index_i, index_j);
+
+  //  for (unsigned int index_i = 0; index_i < dimension; index_i++)
+  //    Moose::out << "eigenvalues: " << _eigenvalues_hill(index_i) << "\n";
+  //
+  //  for (unsigned int index_i = 0; index_i < dimension; index_i++)
+  //    for (unsigned int index_j = 0; index_j < dimension; index_j++)
+  //      Moose::out << "eigenvectors print: " << _eigenvectors_hill(index_i, index_j) << "\n";
+}
+
+void
+ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
     ADRankTwoTensor & inelasticStrainIncrement,
     const ADRankTwoTensor & stress,
     const ADReal & delta_gamma)
@@ -197,7 +301,7 @@ ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
                 inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(1, 2) =
                     inelasticStrainIncrement(2, 1) = 0.0;
 
-    ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
+    ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
         inelasticStrainIncrement, stress, delta_gamma);
     return;
   }
@@ -219,53 +323,53 @@ ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
   inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
       prefactor * 2.0 * L * stress(1, 2);
 
-  ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
+  ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
       inelasticStrainIncrement, stress, delta_gamma);
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStressFinalize(
+ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
     const ADRankTwoTensor & /*creepStrainIncrement*/,
-    const ADReal & /*delta_gamma*/,
-    ADRankTwoTensor & /*stress_new*/)
+    const ADReal & delta_gamma,
+    ADRankTwoTensor & stress_new)
 {
   // Need to compute this iteration's stress tensor based on the scalar variable
   // s(n+1) = {Q [I + 2*nu*delta_gamma*Delta]^(-1) Q^T}  s(trial)
 
-  //  ADDenseMatrix inv_matrix(6, 6);
-  //  for (unsigned int i = 0; i < 6; i++)
-  //    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
-  //
-  //  ADDenseVector stress_vector(6);
-  //  stress_vector(0) = stress_new(0, 0);
-  //  stress_vector(1) = stress_new(1, 1);
-  //  stress_vector(2) = stress_new(2, 2);
-  //  stress_vector(3) = stress_new(0, 1);
-  //  stress_vector(4) = stress_new(1, 2);
-  //  stress_vector(5) = stress_new(0, 2);
-  //
-  //  ADDenseMatrix eigenvectors_hill_transpose(6, 6);
-  //
-  //  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
-  //  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
-  //
-  //  // Right multiply by matrix of eigenvectors transpose
-  //  inv_matrix.right_multiply(eigenvectors_hill_transpose);
-  //  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
-  //  eigenvectors_hill_copy.right_multiply(inv_matrix);
-  //
-  //  ADDenseVector stress_np1(6);
-  //  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
-  //  stress_new(0, 0) = stress_vector(0);
-  //  stress_new(1, 1) = stress_vector(1);
-  //  stress_new(2, 2) = stress_vector(2);
-  //  stress_new(0, 1) = stress_new(1, 0) = stress_vector(3);
-  //  stress_new(1, 2) = stress_new(2, 1) = stress_vector(4);
-  //  stress_new(0, 2) = stress_new(2, 0) = stress_vector(5);
+  ADDenseMatrix inv_matrix(6, 6);
+  for (unsigned int i = 0; i < 6; i++)
+    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
+
+  ADDenseVector stress_vector(6);
+  stress_vector(0) = stress_new(0, 0);
+  stress_vector(1) = stress_new(1, 1);
+  stress_vector(2) = stress_new(2, 2);
+  stress_vector(3) = stress_new(0, 1);
+  stress_vector(4) = stress_new(1, 2);
+  stress_vector(5) = stress_new(0, 2);
+
+  ADDenseMatrix eigenvectors_hill_transpose(6, 6);
+
+  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
+  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
+
+  // Right multiply by matrix of eigenvectors transpose
+  inv_matrix.right_multiply(eigenvectors_hill_transpose);
+  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
+  eigenvectors_hill_copy.right_multiply(inv_matrix);
+
+  ADDenseVector stress_np1(6);
+  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
+  stress_new(0, 0) = stress_vector(0);
+  stress_new(1, 1) = stress_vector(1);
+  stress_new(2, 2) = stress_vector(2);
+  stress_new(0, 1) = stress_new(1, 0) = stress_vector(3);
+  stress_new(1, 2) = stress_new(2, 1) = stress_vector(4);
+  stress_new(0, 2) = stress_new(2, 0) = stress_vector(5);
 }
 
 Real
-ADTransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
+ADTransverselyIsotropicPlasticityStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & /*stress*/,
     const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
 {
