@@ -1071,4 +1071,14 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
+  [./hfrompps]
+    type = 'PetscJacobianTester'
+    input = 'hfrompps.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+    threading = '!pthreads'
+    requirement = "PorousFlow shall compute all Jacobian entries of all DiracKernels"
+    issues = '#15742'
+    design = 'PorousFlowPointEnthalpySourceFromPostprocessor.md'
+  [../]
 []
