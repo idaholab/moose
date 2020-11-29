@@ -17,6 +17,15 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPointSourceFromPostprocessor'
     issues = '#15132'
   [../]
+  [./hfrompps]
+    type = 'CSVDiff'
+    input = 'hfrompps.i'
+    csvdiff = 'hfrompps.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall provide an enthalphy point source computed by a postprocessor'
+    design = 'porous_flow/sinks.md PorousFlowPointEnthalpySourceFromPostprocessor'
+    issues = '#15742'
+  [../]
   [./theis1]
     type = 'CSVDiff'
     input = 'theis1.i'

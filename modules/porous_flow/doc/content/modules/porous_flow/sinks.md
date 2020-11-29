@@ -29,6 +29,22 @@ Such example is shown here:
 
 Note that the parameter ```mass_flux``` is positive for a source and negative for a sink.
 
+
+### Injecting fluid at specified temperature
+
+When injecting a fluid at specified temperature (also computed as a postprocessor), users can add another Dirac
+kernel [`PorousFlowPointEnthalpySourceFromPostprocessor`](/PorousFlowPointEnthalpySourceFromPostprocessor.md).
+(Alternately, users can also fix the temperature of an injected fluid using a Dirichlet BC, but this adds/subtracts
+heat energy to entire nodal volumes of porous material and fluid, so may lead to unacceptable errors
+from the additional heat energies added/removed.)
+
+Such example is shown here:
+
+!listing modules/porous_flow/test/tests/dirackernels/hfrompps.i block=DiracKernels
+
+!listing modules/porous_flow/test/tests/dirackernels/hfrompps.i block=Postprocessors
+
+
 ## PorousFlow polyline sinks in general
 
 Two types of polyline sinks are implemented in PorousFlow: the
