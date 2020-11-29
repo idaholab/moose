@@ -283,10 +283,9 @@ class LinkInline(components.ReaderComponent):
     Without the negative lookahead after the first "[" the match would capture the beginning at
     the shortcut link.
 
-    https://regex101.com/r/LXjbHt/2
+    https://regex101.com/r/LXjbHt/6
     """
-
-    RE = re.compile(r'\[(?!\S+?\] )'                # start of link, see note above
+    RE = re.compile(r'\[(?!\S+?\][ .,])'            # start of link, see note above
                     r'(?P<inline>.*?)\]'            # link text
                     r'\((?P<url>.*?)'               # link url
                     r'(?:\s+(?P<settings>.*?))?\)', # settings
