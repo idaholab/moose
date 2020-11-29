@@ -61,6 +61,8 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
 
+  std::set<const NodalKernel *> nks_executed;
+
   // prepare variables
   for (auto * var : _aux_sys._nodal_vars[_tid])
     var->prepareAux();
@@ -78,7 +80,8 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
       const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
-        nodal_kernel->computeResidual();
+        if (nks_executed.emplace(nodal_kernel.get()).second)
+          nodal_kernel->computeResidual();
     }
 
   _num_cached++;

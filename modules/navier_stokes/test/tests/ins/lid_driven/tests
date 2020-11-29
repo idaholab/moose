@@ -144,4 +144,11 @@
     issues = '#15500'
     requirement = 'The system shall be able to solve a transient stabilized mass/momentum/energy incompressible Navier-Stokes formulation with action syntax.'
   []
+  [ad_stabilized_transient_les]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_les.i'
+    exodiff = 'ad_lid_driven_les_out.e'
+    issues = '#15757'
+    requirement = 'The system shall be able to solve a transient incompressible Navier-Stokes with nonlinear Smagorinsky eddy viscosity.'
+  []
 []
