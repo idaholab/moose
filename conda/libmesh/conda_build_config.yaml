@@ -24,10 +24,10 @@ libpng:
   - 1.6.37 hed695b0_0 # [linux]
 
 moose_petsc:
- - 3.14.2 build_0
+ - 3.14.2 build_1
 
 moose_libmesh_vtk:
- - 6.3.0 build_3
+ - 6.3.0 build_4
 
 pin_run_as_build:
   moose_petsc: x.x.x
