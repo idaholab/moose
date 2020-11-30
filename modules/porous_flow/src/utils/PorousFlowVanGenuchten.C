@@ -682,6 +682,8 @@ drelativePermeabilityHys(Real sl,
 {
   if (sl <= slr) // by the definition of slr, always return 0
     return 0.0;
+  if (sl == 1.0) // derivative is infinite at this point
+    return std::numeric_limits<Real>::max();
   const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
   const Real sl_bar_prime = 1.0 / (1.0 - slr);
   // a and b are useful parameters.  Define b along the drying curve initially, and
