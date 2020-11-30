@@ -79,7 +79,9 @@ INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
   const auto & grad_p_ghost =
       _pressure_exact_solution.gradient(_t, 2. * _face_info->faceCentroid() - elem_centroid);
 
-  // Uncorrected face pressure gradient
+  // Uncorrected face pressure gradient. Geometric weights are exactly 1/2 because we arbitrarily
+  // choose the ghost element centroid such that the face centroid is exactly in the middle of the
+  // line connecting element and ghost element centroids (see code line above)
   const auto unc_grad_p = (grad_p_elem + grad_p_ghost) / 2.;
 
   // Now perform correction
@@ -91,15 +93,9 @@ INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
   const auto & p_ghost =
       _pressure_exact_solution.value(_t, 2. * _face_info->faceCentroid() - elem_centroid);
 
-  auto d_cf = 2. * (_face_info->faceCentroid() - elem_centroid);
-  auto del_pressure = p_ghost - p_elem;
+  const auto d_cf = 2. * (_face_info->faceCentroid() - elem_centroid);
+  const auto del_pressure = p_ghost - p_elem;
 
-  // Direction is important. We always define things to point out from the elem
-  if (!elem_is_elem)
-  {
-    d_cf *= -1;
-    del_pressure *= -1;
-  }
   const auto d_cf_norm = d_cf.norm();
   const auto e_cf = d_cf / d_cf_norm;
 
