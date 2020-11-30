@@ -18,7 +18,8 @@ ComputeRotatedElasticityTensorBaseTempl<is_ad>::validParams()
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
   params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
-  params.addParam<RealTensorValue>("rotation_matrix", RealTensorValue(), "Rotation matrix to apply to elasticity tensor.");
+  params.addParam<RealTensorValue>(
+      "rotation_matrix", RealTensorValue(), "Rotation matrix to apply to elasticity tensor.");
   return params;
 }
 
