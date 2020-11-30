@@ -53,6 +53,8 @@ AddVariableAction::validParams()
                              "allowed)");
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
+  params.addParam<std::vector<Real>>("initial_condition",
+                                     "Specifies the initial condition for this variable");
   return params;
 }
 
@@ -150,7 +152,7 @@ AddVariableAction::act()
   addVariable(var_name);
 
   // Set the initial condition
-  if (_moose_object_pars.isParamValid("initial_condition"))
+  if (_pars.isParamValid("initial_condition"))
     createInitialConditionAction();
 }
 
@@ -160,7 +162,7 @@ AddVariableAction::createInitialConditionAction()
   // Variable name
   std::string var_name = name();
 
-  auto value = _moose_object_pars.get<std::vector<Real>>("initial_condition");
+  auto value = _pars.get<std::vector<Real>>("initial_condition");
 
   // Create the object name
   std::string long_name("");

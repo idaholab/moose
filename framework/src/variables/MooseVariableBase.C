@@ -52,8 +52,6 @@ MooseVariableBase::validParams()
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
 
-  params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
   // ArrayVariable capability
   params.addRangeCheckedParam<unsigned int>(
       "components", 1, "components>0", "Number of components for an array variable");

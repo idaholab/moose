@@ -45,7 +45,12 @@ MOOSE_PROFILE_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
 This will use the filename base you pass and append a suffix of the form
 `[proc#].prof` to generate an independent profiling data file for each MPI
 rank/process. The above example would generate files `run1_0.prof`,
-`run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`.
+`run1_1.prof`, `run1_2.prof`, ..., `run1_31.prof`. It is allowed to include
+a directory in the filename base. You can use a command-line
+argument `--gperf-profiler-on` with a comma-separated list of MPI ranks to generate
+the profiling files only on the selected ranks. For example `--gperf-profiler-on 0,2`
+with the above MOOSE_PROFILE_BASE will generate `run1_0.prof` and `run1_2.prof`.
+If this argument is not given, files of all ranks will be generated.
 
 ### Heap Profiling
 
@@ -63,6 +68,13 @@ does not use much memory. This example should generate files `run1_0.xxxx.heap`,
 Here `xxxx` denotes a sequence number, e.g., `0001` is the first dumped heap file,
 `0002` is the second dumped heap file, etc. More instructions on heap profiling
 can be found at [here](https://gperftools.github.io/gperftools/heapprofile.html).
+It is allowed to inclue a directory in the filename base.
+You can use a command-line argument `--gperf-profiler-on` with a comma-separated
+list of MPI ranks to generate the profiling files only on the selected ranks.
+For example `--gperf-profiler-on 0,2` with the above MOOSE_HEAP_BASE will generate
+`run1_0.xxxx.heap` and `run1_2.xxxx.heap`. If this argument is not given, files of
+all ranks will be generated. This argument can be very useful for reducing the number
+of profiling files when profiling with a large number of processes.
 
 ### Analyzing Profile Data
 
