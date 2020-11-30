@@ -7,9 +7,14 @@
 The material `ComputeElasticityTensor` builds the elasticity (stiffness) tensor with various
 user-selected material symmetry options.  `ComputeElasticityTensor` also rotates the elasticity
 tensor during the initial time step only; this class does not rotate the elasticity tensor during the
-simulation.  The initial rotation is only performed if the user provides arguments to the three Euler
+simulation.  The initial rotation is performed if the user provides arguments to the three Euler
 angle parameters; the Bunge Euler angles provided in this class are used to perform passive (from the
-sample to the crystal) rotations.
+sample to the crystal) rotations using the [extrinsic ZXZ convention](https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix).
+Alternatively, the 3x3 rotation matrix can be defined directly in the input file. Rotations to the elasticity tensor are applied as
+\begin{equation}
+\label{eq:rotate_elasticity_tensor}
+  C_{ijkl} = R_{im} R_{jn} R_{ko} R_{lp} C_{mnop}
+\end{equation}
 
 For a general stiffness tensor with 21 independent components, the elasticity tensor within the
 tensor mechanics module can be represented with the notation shown in
