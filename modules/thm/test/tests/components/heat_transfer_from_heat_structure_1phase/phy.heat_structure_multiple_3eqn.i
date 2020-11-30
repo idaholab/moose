@@ -88,13 +88,13 @@ cp2 = 600
     type = SolidMaterialProperties
     k = ${k1}
     rho = ${rho1}
-    Cp = ${cp1}
+    cp = ${cp1}
   [../]
   [./hs2_mat]
     type = SolidMaterialProperties
     k = ${k2}
     rho = ${rho2}
-    Cp = ${cp2}
+    cp = ${cp2}
   [../]
 []
 

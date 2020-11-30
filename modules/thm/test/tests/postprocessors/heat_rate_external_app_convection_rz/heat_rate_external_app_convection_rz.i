@@ -25,7 +25,7 @@ htc = ${fparse Q / (S * (T_ambient - T))}
   [./region1-mat]
     type = SolidMaterialProperties
     k = 1
-    Cp = 1
+    cp = 1
     rho = 1
   [../]
 []

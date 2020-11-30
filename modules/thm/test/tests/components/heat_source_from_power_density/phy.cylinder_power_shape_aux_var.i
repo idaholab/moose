@@ -16,19 +16,19 @@
   [./fuel-mat]
     type = SolidMaterialProperties
     k = 16
-    Cp = 191.67
+    cp = 191.67
     rho = 1.4583e4
   [../]
   [./gap-mat]
     type = SolidMaterialProperties
     k = 64
-    Cp = 1272
+    cp = 1272
     rho = 865
   [../]
   [./clad-mat]
     type = SolidMaterialProperties
     k = 26
-    Cp = 638
+    cp = 638
     rho = 7.646e3
   [../]
 []

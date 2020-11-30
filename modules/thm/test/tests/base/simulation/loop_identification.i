@@ -71,7 +71,7 @@
   [./hx:wall]
     type = SolidMaterialProperties
     k = 1
-    Cp = 1
+    cp = 1
     rho = 1
   [../]
 []

@@ -33,13 +33,13 @@
   [./region1-mat]
     type = SolidMaterialProperties
     k = 1
-    Cp = 1
+    cp = 1
     rho = 1
   [../]
   [./region2-mat]
     type = SolidMaterialProperties
     k = 1
-    Cp = 5
+    cp = 5
     rho = 3
   [../]
 []
