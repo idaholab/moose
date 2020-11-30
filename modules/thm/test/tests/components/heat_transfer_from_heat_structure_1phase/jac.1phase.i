@@ -21,7 +21,7 @@
   [./fuel-mat]
     type = SolidMaterialProperties
     k = 2.5
-    Cp = 300.
+    cp = 300.
     rho = 1.032e4
   [../]
 []

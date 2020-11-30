@@ -19,7 +19,7 @@
   [./mat1]
     type = SolidMaterialProperties
     k = 16
-    Cp = 356.
+    cp = 356.
     rho = 6.551400E+03
   [../]
 []

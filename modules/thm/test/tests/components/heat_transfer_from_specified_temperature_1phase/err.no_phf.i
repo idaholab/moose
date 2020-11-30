@@ -8,7 +8,7 @@
   [mat]
     type = SolidMaterialProperties
     k = 1
-    Cp = 2
+    cp = 2
     rho = 3
   []
 []

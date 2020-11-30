@@ -21,7 +21,7 @@ E_change = ${fparse scale * heat_flux * A * t}
   [./hs_mat]
     type = SolidMaterialProperties
     rho = ${density}
-    Cp = ${specific_heat_capacity}
+    cp = ${specific_heat_capacity}
     k = ${conductivity}
   [../]
 []

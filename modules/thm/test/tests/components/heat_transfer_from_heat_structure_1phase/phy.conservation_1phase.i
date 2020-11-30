@@ -24,7 +24,7 @@
   [./main-material]
     type = SolidMaterialProperties
     k = 1e4
-    Cp = 500.0
+    cp = 500.0
     rho = 100.0
   [../]
 []
