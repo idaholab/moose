@@ -7,4 +7,20 @@
     design = 'CompositeElasticityTensor.md'
     requirement = 'The system shall provide a method for assembleing an elasticity tensor from multiple tensor contributions weighted by material properties.'
   [../]
+  [./rotation_matrix_one_rotation]
+    type = 'Exodiff'
+    input = 'rotation_matrix_1_rotation.i'
+    exodiff = 'rotation_matrix_1_rotation_out.e'
+    issues = ''
+    design = ''
+    requirement = ''
+  [../]
+  [./rotation_matrix_two_rotations]
+    type = 'Exodiff'
+    input = 'rotation_matrix_2_rotations.i'
+    exodiff = 'rotation_matrix_2_rotations_out.e'
+    issues = ''
+    design = ''
+    requirement = ''
+  [../]
 []
