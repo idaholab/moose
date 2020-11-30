@@ -337,4 +337,130 @@ d2saturationHys(Real pc,
                 Real n,
                 const LowCapillaryPressureExtension & low_ext = LowCapillaryPressureExtension(),
                 const HighCapillaryPressureExtension & high_ext = HighCapillaryPressureExtension());
+
+/**
+ * Hysteretic relative permeability for liquid
+ * @param sl liquid saturation
+ * @param slr residual liquid saturation.  For sl < slr, this function will always return 0
+ * @param sgrdel value of gas saturation where van Genuchten wetting capillary-pressure expression
+ * -> 0.  This depends on the turning-point saturation when drying became wetting, using the Land
+ * equation
+ * @param sgrmax maximum value possible for sgrdel.  This will be equal to sgrdel if the
+ * turning-point saturation is small
+ * @param sldel value of the turning-point saturation when drying became wetting
+ * @param m van-Genuchten m parameter
+ * @param upper_liquid_param cubic modification of the wetting relative permeability will occur
+ * between upper_liquid_param * (1 - sgrdel) and 1 - 0.5 * sgrdel.  0 < upper_liquid_param <= 1.
+ * Usually upper_liquid_param is close to 1 (eg 0.9)
+ * @param y0 value of the unmodified wetting relative permeability at sl = upper_liquid_param * (1 -
+ * sgrdel)
+ * @param y0p value of the derivtaive of the unmodified wetting relative permeability at sl =
+ * upper_liquid_param * (1 - sgrdel)
+ * @param y1 value of the unmodified wetting relative permeability at sl = 1 - 0.5 * sgrdel
+ * @param y1p value of the derivtaive of the unmodified wetting relative permeability at sl = 1 -
+ * 0.5 * sgrdel
+ */
+Real relativePermeabilityHys(Real sl,
+                             Real slr,
+                             Real sgrdel,
+                             Real sgrmax,
+                             Real sldel,
+                             Real m,
+                             Real upper_liquid_param,
+                             Real y0,
+                             Real y0p,
+                             Real y1,
+                             Real y1p);
+
+/**
+ * Derivative of Hysteretic relative permeability for liquid, with respect to liquid saturation
+ * @param sl liquid saturation
+ * @param slr residual liquid saturation.  For sl < slr, this function will always return 0
+ * @param sgrdel value of gas saturation where van Genuchten wetting capillary-pressure expression
+ * -> 0.  This depends on the turning-point saturation when drying became wetting, using the Land
+ * equation
+ * @param sgrmax maximum value possible for sgrdel.  This will be equal to sgrdel if the
+ * turning-point saturation is small
+ * @param sldel value of the turning-point saturation when drying became wetting
+ * @param m van-Genuchten m parameter
+ * @param upper_liquid_param cubic modification of the wetting relative permeability will occur
+ * between upper_liquid_param * (1 - sgrdel) and 1 - 0.5 * sgrdel.  0 < upper_liquid_param <= 1.
+ * Usually upper_liquid_param is close to 1 (eg 0.9)
+ * @param y0 value of the unmodified wetting relative permeability at sl = upper_liquid_param * (1 -
+ * sgrdel)
+ * @param y0p value of the derivtaive of the unmodified wetting relative permeability at sl =
+ * upper_liquid_param * (1 - sgrdel)
+ * @param y1 value of the unmodified wetting relative permeability at sl = 1 - 0.5 * sgrdel
+ * @param y1p value of the derivtaive of the unmodified wetting relative permeability at sl = 1 -
+ * 0.5 * sgrdel
+ */
+Real drelativePermeabilityHys(Real sl,
+                              Real slr,
+                              Real sgrdel,
+                              Real sgrmax,
+                              Real sldel,
+                              Real m,
+                              Real upper_liquid_param,
+                              Real y0,
+                              Real y0p,
+                              Real y1,
+                              Real y1p);
+
+/**
+ * Hysteretic relative permeability for gas
+ * @param sl liquid saturation
+ * @param slr residual liquid saturation.  For sl < slr, this function will always return 0
+ * @param sgrdel value of gas saturation where van Genuchten wetting capillary-pressure expression
+ * -> 0.  This depends on the turning-point saturation when drying became wetting, using the Land
+ * equation
+ * @param sgrmax maximum value possible for sgrdel.  This will be equal to sgrdel if the
+ * turning-point saturation is small
+ * @param sldel value of the turning-point saturation when drying became wetting
+ * @param m van-Genuchten m parameter
+ * @param gamma index satisfying gamma > 0.  Usually gamma = 1/3.
+ * @param k_rg_max Maximum value of unextended gas relative permeability.  If no low-saturation
+ * extension is used then gas relative permeability = k_rg_max for sl <= slr.  Satisfies 0 <
+ * k_rg_max <= 1.  Frequently k_rg_max = 1 is used
+ * @param y0p Value of the derivative of the low-saturation extension at sl = slr.  If an extension
+ * is used then the gas relative permeability in the region sl <= slr is a cubic whose value is
+ * unity at sl = 0, and derivative is zero at sl = 0
+ */
+Real relativePermeabilityNWHys(Real sl,
+                               Real slr,
+                               Real sgrdel,
+                               Real sgrmax,
+                               Real sldel,
+                               Real m,
+                               Real gamma,
+                               Real k_rg_max,
+                               Real y0p);
+
+/**
+ * Derivative of hysteretic relative permeability for gas with respect to the liquid saturation
+ * @param sl liquid saturation
+ * @param slr residual liquid saturation.  For sl < slr, this function will always return 0
+ * @param sgrdel value of gas saturation where van Genuchten wetting capillary-pressure expression
+ * -> 0.  This depends on the turning-point saturation when drying became wetting, using the Land
+ * equation
+ * @param sgrmax maximum value possible for sgrdel.  This will be equal to sgrdel if the
+ * turning-point saturation is small
+ * @param sldel value of the turning-point saturation when drying became wetting
+ * @param m van-Genuchten m parameter
+ * @param gamma index satisfying gamma > 0.  Usually gamma = 1/3.
+ * @param k_rg_max Maximum value of unextended gas relative permeability.  If no low-saturation
+ * extension is used then gas relative permeability = k_rg_max for sl <= slr.  Satisfies 0 <
+ * k_rg_max <= 1.  Frequently k_rg_max = 1 is used
+ * @param y0p Value of the derivative of the low-saturation extension at sl = slr.  If an extension
+ * is used then the gas relative permeability in the region sl <= slr is a cubic whose value is
+ * unity at sl = 0, and derivative is zero at sl = 0
+ */
+Real drelativePermeabilityNWHys(Real sl,
+                                Real slr,
+                                Real sgrdel,
+                                Real sgrmax,
+                                Real sldel,
+                                Real m,
+                                Real gamma,
+                                Real k_rg_max,
+                                Real y0p);
 }

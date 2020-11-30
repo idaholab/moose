@@ -105,7 +105,7 @@ def krel_liquid(sl, slr, sgrdel, sgrmax, sldel, m, upper_liquid_param, y0, y0p, 
     if (sl < slr):
         return 0.0
     sl_bar = (sl - slr) / (1.0 - slr)
-    if sgrdel == 0.0: # along the drying curve
+    if (sgrdel == 0.0 or sl <= sldel): # along the drying curve
         s_gt_bar = 0.0
         a = math.pow(1.0 - math.pow(sl_bar, 1.0 / m), m)
         b = 0.0
@@ -177,7 +177,7 @@ def krel_liquid_prime(sl, slr, sgrdel, sgrmax, sldel, m, upper_liquid_param):
             b = s_gt_bar / (1.0 - sl_bar_del) * math.pow(1.0 - math.pow(sl_bar_del, 1.0 / m), m)
             bprime = s_gt_bar_prime * b / s_gt_bar
     kr = math.sqrt(sl_bar) * math.pow(1.0 - a - b, 2)
-    return 0.5 * kr / sl_bar - math.sqrt(sl_bar) * 2.0 * (1.0 - a - b) * (aprime + bprime)
+    return 0.5 * kr / sl_bar * sl_bar_prime - math.sqrt(sl_bar) * 2.0 * (1.0 - a - b) * (aprime + bprime)
 
 def krel_gas(sl, slr, sgrdel, sgrmax, sldel, m, gamma, k_rg_max, y0p):
     if (sl < slr):
@@ -185,7 +185,7 @@ def krel_gas(sl, slr, sgrdel, sgrmax, sldel, m, gamma, k_rg_max, y0p):
             return 1.0
         return cubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p)
     sl_bar = (sl - slr) / (1.0 - slr)
-    if sgrdel == 0.0: # on the drying curve
+    if (sgrdel == 0.0 or sl < sldel): # on the drying curve
         s_gt_bar = 0.0
     else:
         if (sldel < slr): # turning point occured below slr, but "there is no hysteresis along the extension" according to p6 of Doughty2008.  The above checked that sl >= slr.  I assume the wetting relperm curve is the same as if the turning point = slr:
@@ -205,7 +205,7 @@ def krel_gas(sl, slr, sgrdel, sgrmax, sldel, m, gamma, k_rg_max, y0p):
 def krel_gas_prime(sl, slr, sgrdel, sgrmax, sldel, m, gamma, k_rg_max):
     if (sl < slr):
         if (k_rg_max == 1.0):
-            return 1.0
+            return 0.0
         return 0.0 # NOTE: this is incorrect but it is never used
     if (sl > 1.0 - sgrdel):
         return 0.0 # always zero, irrespective of any hysteresis
