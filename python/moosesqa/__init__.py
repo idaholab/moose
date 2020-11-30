@@ -14,3 +14,8 @@ from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
 from .SQAMooseAppReport import SQAMooseAppReport
 from .Requirement import Requirement, Detail, TestSpecification
 from .LogHelper import LogHelper
+
+MOOSESQA_COLLECTIONS = dict()
+MOOSESQA_COLLECTIONS['FAILURE_ANALYSIS'] = "Requirements that perform check for simulation " \
+                                           "integrity such as error handling and convergence " \
+                                           "failures."

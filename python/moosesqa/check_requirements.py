@@ -13,6 +13,7 @@ import logging
 import enum
 import pyhit
 import mooseutils
+import moosesqa
 from .Requirement import Requirement
 from .LogHelper import LogHelper
 
@@ -84,6 +85,10 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
         root = mooseutils.git_root_dir()
         ver = mooseutils.git_version()
         file_list = mooseutils.git_ls_files(root, recurse_submodules=True)
+
+    # Setup allowed collections
+    if allowed_collections is None:
+        allowed_collections = set(moosesqa.MOOSESQA_COLLECTIONS.keys())
 
     # Storage container for duplicate detection
     requirement_dict = collections.defaultdict(set)

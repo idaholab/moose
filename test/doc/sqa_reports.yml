@@ -38,5 +38,3 @@ Requirements:
             - test/tests
         log_testable: WARNING
         show_warning: false
-        allowed_collections:
-            - FAILURE_ANALYSIS

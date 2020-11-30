@@ -111,3 +111,14 @@ control, system configuration, event logging and communications.
 1. Requirements should address functionality, usability, performance, system interfaces, reliability,
    and security.
 !template-end!
+
+
+## Requirement Collections id=requirement-collections
+
+!template field key=requirement-collections-intro required=False
+
+!template! field key=requirement-collections
+This section should contain lists of requirement collections, where a "collection" is simply a
+grouping of requirements that are related in some fashion. For example, all tests for error handling
+could be grouped into a "failure analysis" collection.
+!template-end!

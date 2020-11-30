@@ -24,7 +24,6 @@ from .LogHelper import LogHelper
 @mooseutils.addProperty('specs', ptype=str)
 @mooseutils.addProperty('test_names', ptype=set)
 @mooseutils.addProperty('global_report', ptype=bool, default=False)
-@mooseutils.addProperty('allowed_collections', ptype=list)
 class SQARequirementReport(SQAReport):
     """
     Data wrapper for SQA requirement/design/issue information.
@@ -38,7 +37,6 @@ class SQARequirementReport(SQAReport):
         working_dir = self.working_dir or mooseutils.git_root_dir()
         local_dirs = self.directories
         specs = self.specs or 'tests'
-        allowed_collections = self.allowed_collections or list()
 
         # Get complete directory paths
         if local_dirs:
@@ -68,9 +66,7 @@ class SQARequirementReport(SQAReport):
             self.test_names.add((req.filename, req.name, req.line))
 
         # Check the requirements
-        logger = check_requirements(requirements, color_text=self.color_text,
-                                    allowed_collections=allowed_collections, **kwargs)
-
+        logger = check_requirements(requirements, color_text=self.color_text, **kwargs)
         return logger
 
 @mooseutils.addProperty('reports', ptype=list)

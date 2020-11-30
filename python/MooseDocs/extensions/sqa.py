@@ -28,7 +28,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
-from . import core, command, floats, autolink, civet, appsyntax
+from . import core, command, floats, autolink, civet, appsyntax, table
 
 LOG = logging.getLogger(__name__)
 
@@ -225,7 +225,7 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats)
+        self.requires(core, command, autolink, floats, table)
 
         for ext in self.translator.extensions:
             if ext.name == 'civet':
@@ -236,6 +236,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
         self.addCommand(reader, SQACollectionsCommand())
+        self.addCommand(reader, SQACollectionsListCommand())
         self.addCommand(reader, SQADependenciesCommand())
         self.addCommand(reader, SQADocumentCommand())
         self.addCommand(reader, SQAReportCommand())
@@ -456,6 +457,26 @@ class SQACollectionsCommand(SQARequirementsCommand):
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements, category)
 
+        return parent
+
+class SQACollectionsListCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'collections-list'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings.update(floats.caption_settings())
+        settings['prefix'] = ('Table', settings['prefix'][1])
+        return settings
+
+    def createToken(self, parent, info, page):
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+                                  token_type=table.TableFloat, **self.attributes)
+
+        rows = [[k,v] for k, v in moosesqa.MOOSESQA_COLLECTIONS.items()]
+        tbl = table.builder(rows, headings=['Collection', 'Description'])
+        tbl.parent = flt
         return parent
 
 class SQARequirementsMatrixCommand(command.CommandComponent):

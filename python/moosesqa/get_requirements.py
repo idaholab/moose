@@ -122,7 +122,7 @@ def _create_requirement(child, path, filename, design, design_line, issues, issu
     req.issues_line = child.line('issues', issues_line)
 
     # "collections" parameter
-    collections = child.get('collections', collections if not req.collections else None)
+    collections = child.get('collections', collections if (collections is not None) else None)
     req.collections = set(collections.strip().split()) if (collections is not None) else None
     req.collections_line = child.line('collections', collections_line)
 

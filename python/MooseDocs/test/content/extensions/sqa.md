@@ -35,6 +35,10 @@
 
 !sqa collections category=demo items=Andrew
 
+### Collection List
+
+!sqa collections-list
+
 ## Types
 
 ### All Types
