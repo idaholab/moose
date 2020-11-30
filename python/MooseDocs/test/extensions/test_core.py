@@ -86,5 +86,49 @@ this'''
             self.assertToken(ast(0)(3), 'Space', count=1)
             self.assertToken(ast(0)(4), 'Word', content='bar')
 
+    def testLinkInline(self):
+        text = '[Bar](bar)'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'Link', size=1, url='bar')
+        self.assertToken(ast(0,0,0), 'Word', content='Bar')
+
+        text = '[Bar](bar id=y)'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'Link', size=1, url='bar', id_='y')
+        self.assertToken(ast(0,0,0), 'Word', content='Bar')
+
+        text = '[foo] [Bar](bar)'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=3)
+        self.assertToken(ast(0,0), 'ShortcutLink', key='foo')
+        self.assertToken(ast(0,1), 'Space', count=1)
+        self.assertToken(ast(0,2), 'Link', size=1, url='bar')
+        self.assertToken(ast(0,2,0), 'Word', content='Bar')
+
+        text = '[Bar](bar.md) [foo]'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=3)
+        self.assertToken(ast(0,0), 'Link', size=1, url='bar.md')
+        self.assertToken(ast(0,0,0), 'Word', content='Bar')
+        self.assertToken(ast(0,1), 'Space', count=1)
+        self.assertToken(ast(0,2), 'ShortcutLink', key='foo')
+
+        text = '[bar.md], [Foo](foo.md)'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=4)
+        self.assertToken(ast(0,0), 'ShortcutLink', key='bar.md')
+        self.assertToken(ast(0,1), 'Punctuation', content=',')
+        self.assertToken(ast(0,2), 'Space', count=1)
+        self.assertToken(ast(0,3), 'Link', size=1, url='foo.md')
+        self.assertToken(ast(0,3,0), 'Word', content='Foo')
+
+        text = '[`[Foo]`](foo)'
+        ast = self.tokenize(text)
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'Link', size=1, url='foo')
+        self.assertToken(ast(0,0,0), 'Monospace', content='[Foo]')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
