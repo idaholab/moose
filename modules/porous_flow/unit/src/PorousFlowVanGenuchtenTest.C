@@ -833,3 +833,368 @@ TEST(PorousFlowVanGenuchten, d2sathys)
                 1.0E-5);
   }
 }
+
+/// Test relativePermeabilityHys
+TEST(PorousFlowVanGenuchten, relativePermeabilityHys)
+{
+  // Tests for sldel = 0.5 >= slr = 0.2
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // zero because sl < slr
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.2, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // zero because sl = slr
+  EXPECT_NEAR(0.002847974503642625,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying because sl <= sldel
+  EXPECT_NEAR(0.002847974503642625,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying because sgrdel = 0
+  EXPECT_NEAR(0.05828443549816974,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.5, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying because sl <= sldel
+  EXPECT_NEAR(0.10056243969693253,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.08943153676247108,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying because sgrdel = 0
+  EXPECT_NEAR(0.3159149169921876,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.8, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // cubic
+  EXPECT_NEAR(0.8011290515690178,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.95, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying, because sl > cubic modification region
+
+  // Tests for sldel = 0.15 < slr = 0.2
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.1, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // zero because sl < slr
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.2, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // zero because sl = slr
+  EXPECT_NEAR(0.005858393312913491,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.3, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.002847974503642625,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying because sgrdel = 0
+  EXPECT_NEAR(0.1363562523627124,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.55, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.31,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.7, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // cubic
+  EXPECT_NEAR(0.8011290515690178,
+              PorousFlowVanGenuchten::relativePermeabilityHys(
+                  0.95, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12); // drying, because sl > cubic modification region
+}
+
+/// Test drelativePermeabilityHys
+TEST(PorousFlowVanGenuchten, drelativePermeabilityHys)
+{
+  // essentially follow the testing strategy in the relativePermeabilityHys Test, but do not test
+  // the derivative at the points where it is discontinuous
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-12);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3 + eps, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55 + eps, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.8, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.8 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.8, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.95, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.95 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.95, 0.2, 0.15, 0.25, 0.5, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.1, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.3, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3 + eps, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3 + eps, 0.2, 0.0, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.55, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55 + eps, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.55, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.7, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.7 + eps, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.7, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityHys(
+                  0.95, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2),
+              (PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.95 + eps, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2) -
+               PorousFlowVanGenuchten::relativePermeabilityHys(
+                   0.95, 0.2, 0.15, 0.25, 0.15, 0.9, 0.9, 0.3, 0.5, 0.45, 2.2)) /
+                  eps,
+              1.0E-5);
+}
+
+/// Test relativePermeabilityNWHys
+TEST(PorousFlowVanGenuchten, relativePermeabilityNWHys)
+{
+  // Tests for sldel = 0.5 >= slr = 0.2
+  EXPECT_NEAR(0.91875,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // cubic extension region because sl < slr
+  EXPECT_NEAR(1.0,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 1.0, -0.75),
+              1.0E-12); // cubic extension region because sl < slr, but k_rg_max = 1
+  EXPECT_NEAR(0.8,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.2, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // at boundary of extension since sl = slr
+  EXPECT_NEAR(0.6368139633459233,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // drying because sl <= sldel
+  EXPECT_NEAR(0.6368139633459233,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // drying because sgrdel = 0
+  EXPECT_NEAR(0.33222054246699,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.5, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // drying because sl <= sldel
+  EXPECT_NEAR(0.24397255389213568,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.2691316236913443,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // drying because sgrdel = 0
+  EXPECT_NEAR(0.01509148277290631,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.85, 0.2, 0.05, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.85, 0.2, 0.18, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // sl > 1 - s_gr_del
+
+  // Tests for sldel = 0.15 < slr = 0.2
+  EXPECT_NEAR(0.91875,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.1, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // cubic extension region because sl < slr
+  EXPECT_NEAR(1.0,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.1, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 1.0, -0.75),
+              1.0E-12); // cubic extension region because sl < slr, but k_rg_max = 1
+  EXPECT_NEAR(0.8,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.2, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // at boundary of extension since sl = slr
+  EXPECT_NEAR(0.5616820966427329,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.3, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.6368139633459233,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // wetting = drying because sgrdel = 0
+  EXPECT_NEAR(0.11086138435665097,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.55, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // wetting
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                  0.76, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // always zero for large saturation
+}
+
+/// Test drelativePermeabilityNWHys
+TEST(PorousFlowVanGenuchten, drelativePermeabilityNWHys)
+{
+  // Testing strategy follows the relativePermeabilityNWHys strategy, except the points at which the
+  // derivative is not defined are not tested
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.1 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // cubic extension region because sl < slr
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.1, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 1.0, -0.75),
+              1.0E-12); // cubic extension region because sl < slr, but k_rg_max = 1
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // drying because sl <= sldel
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3 + eps, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // drying because sgrdel = 0
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.45, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.45 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.45, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // drying because sl <= sldel
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55 + eps, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55, 0.2, 0.15, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // wetting
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55 + eps, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55, 0.2, 0.0, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // drying because sgrdel = 0
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.85, 0.2, 0.05, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.85 + eps, 0.2, 0.05, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.85, 0.2, 0.05, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // wetting
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.85, 0.2, 0.18, 0.25, 0.5, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // sl > 1 - s_gr_del
+
+  // Tests for sldel = 0.15 < slr = 0.2
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.1, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.1 + eps, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.1, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // cubic extension region because sl < slr
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.1, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 1.0, -0.75),
+              1.0E-12); // cubic extension region because sl < slr, but k_rg_max = 1
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.3, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3 + eps, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // wetting
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3 + eps, 0.2, 0.0, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.3, 0.2, 0.0, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // wetting = drying because sgrdel = 0
+  EXPECT_NEAR(PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.55, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              (PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55 + eps, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75) -
+               PorousFlowVanGenuchten::relativePermeabilityNWHys(
+                   0.55, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75)) /
+                  eps,
+              1.0E-5); // wetting
+  EXPECT_NEAR(0.0,
+              PorousFlowVanGenuchten::drelativePermeabilityNWHys(
+                  0.76, 0.2, 0.18, 0.25, 0.15, 0.9, 0.3, 0.8, -0.75),
+              1.0E-12); // always zero for large saturation
+}

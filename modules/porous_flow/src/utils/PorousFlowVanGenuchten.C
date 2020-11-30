@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowVanGenuchten.h"
+#include "PorousFlowCubic.h"
 #include "libmesh/utility.h"
 
 namespace PorousFlowVanGenuchten
@@ -608,5 +609,231 @@ d2saturationHys(Real pc,
     d2s = (1.0 - sgrdel - slmin) * d2seff;
   }
   return d2s;
+}
+
+Real
+relativePermeabilityHys(Real sl,
+                        Real slr,
+                        Real sgrdel,
+                        Real sgrmax,
+                        Real sldel,
+                        Real m,
+                        Real upper_liquid_param,
+                        Real y0,
+                        Real y0p,
+                        Real y1,
+                        Real y1p)
+{
+  if (sl <= slr) // by the definition of slr, always return 0
+    return 0.0;
+  const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
+  // a and b are useful parameters.  Define b along the drying curve initially, and
+  // modify a and b appropriately if the wetting result is required
+  Real a = 0;
+  Real b = 0;
+  if (sgrdel == 0.0 || sl <= sldel) // along the drying curve
+    a = std::pow(1.0 - std::pow(sl_bar, 1.0 / m), m);
+  else // along the wetting curve
+  {
+    // In most cases, use sldel and sgrdel as provided to this function.  However, because "there is
+    // no hysteresis along the extension" according to p6 of Doughty2008, if the turning point is
+    // less than slr, then use the expressions for the case when the turning point was slr
+    const Real my_sldel = (sldel < slr) ? slr : sldel;
+    const Real my_sgrdel = (sldel < slr) ? sgrmax : sgrdel;
+    if (sl >= 1.0 - 0.5 * my_sgrdel)
+    {
+      // follow the drying curve.  The parameter b has already been defined.  It
+      // is important for initialization of the curic that the above condition is >= and not >
+      a = std::pow(1.0 - std::pow(sl_bar, 1.0 / m), m);
+    }
+    else if (sl > upper_liquid_param * (1.0 - my_sgrdel))
+    {
+      // follow the cubic modification of the wetting curve.  Immediately exit from this function by
+      // returning the cubic result
+      return PorousFlowCubic::cubic(
+          sl, upper_liquid_param * (1.0 - my_sgrdel), y0, y0p, 1.0 - 0.5 * my_sgrdel, y1, y1p);
+    }
+    else
+    {
+      // standard case of wetting curve outside the cubic-modification and drying-curve regions
+      const Real sl_bar_del = (my_sldel - slr) / (1.0 - slr);
+      const Real s_gt_bar =
+          my_sgrdel * (sl - my_sldel) / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+      a = (1 - s_gt_bar / (1.0 - sl_bar_del)) *
+          std::pow(1.0 - std::pow(sl_bar + s_gt_bar, 1.0 / m), m);
+      b = s_gt_bar / (1.0 - sl_bar_del) * std::pow(1.0 - std::pow(sl_bar_del, 1.0 / m), m);
+    }
+  }
+  return std::sqrt(sl_bar) * Utility::pow<2>(1.0 - a - b);
+}
+
+Real
+drelativePermeabilityHys(Real sl,
+                         Real slr,
+                         Real sgrdel,
+                         Real sgrmax,
+                         Real sldel,
+                         Real m,
+                         Real upper_liquid_param,
+                         Real y0,
+                         Real y0p,
+                         Real y1,
+                         Real y1p)
+{
+  if (sl <= slr) // by the definition of slr, always return 0
+    return 0.0;
+  const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
+  const Real sl_bar_prime = 1.0 / (1.0 - slr);
+  // a and b are useful parameters.  Define b along the drying curve initially, and
+  // modify a and b appropriately if the wetting result is required
+  Real a = 0;
+  Real a_prime = 0.0;
+  Real b = 0;
+  Real b_prime = 0.0;
+  if (sgrdel == 0.0 || sl <= sldel) // along the drying curve
+  {
+    const Real c = std::pow(sl_bar, 1.0 / m);
+    const Real dc_dsbar = c / m / sl_bar;
+    a = std::pow(1.0 - c, m);
+    const Real da_dsbar = -m * a / (1.0 - c) * dc_dsbar;
+    a_prime = da_dsbar * sl_bar_prime;
+  }
+  else // along the wetting curve
+  {
+    // In most cases, use sldel and sgrdel as provided to this function.  However, because "there is
+    // no hysteresis along the extension" according to p6 of Doughty2008, if the turning point is
+    // less than slr, then use the expressions for the case when the turning point was slr
+    const Real my_sldel = (sldel < slr) ? slr : sldel;
+    const Real my_sgrdel = (sldel < slr) ? sgrmax : sgrdel;
+    if (sl >= 1.0 - 0.5 * my_sgrdel)
+    {
+      // follow the drying curve.  The parameter b has already been defined.  It
+      // is important for initialization of the curic that the above condition is >= and not >
+      const Real c = std::pow(sl_bar, 1.0 / m);
+      const Real dc_dsbar = c / m / sl_bar;
+      a = std::pow(1.0 - c, m);
+      const Real da_dsbar = -m * a / (1.0 - c) * dc_dsbar;
+      a_prime = da_dsbar * sl_bar_prime;
+    }
+    else if (sl > upper_liquid_param * (1.0 - my_sgrdel))
+    {
+      // follow the cubic modification of the wetting curve.  Immediately exit from this function by
+      // returning the cubic result
+      return PorousFlowCubic::dcubic(
+          sl, upper_liquid_param * (1.0 - my_sgrdel), y0, y0p, 1.0 - 0.5 * my_sgrdel, y1, y1p);
+    }
+    else
+    {
+      // standard case of wetting curve outside the cubic-modification and drying-curve regions
+      const Real sl_bar_del = (my_sldel - slr) / (1.0 - slr);
+      const Real s_gt_bar =
+          my_sgrdel * (sl - my_sldel) / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+      const Real s_gt_bar_prime = my_sgrdel / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+      const Real c = std::pow(sl_bar + s_gt_bar, 1.0 / m);
+      const Real c_prime = c / m / (sl_bar + s_gt_bar) * (sl_bar_prime + s_gt_bar_prime);
+      a = (1 - s_gt_bar / (1.0 - sl_bar_del)) * std::pow(1.0 - c, m);
+      a_prime =
+          -s_gt_bar_prime / (1.0 - sl_bar_del) * std::pow(1.0 - c, m) - m * a / (1.0 - c) * c_prime;
+      b = s_gt_bar / (1.0 - sl_bar_del) * std::pow(1.0 - std::pow(sl_bar_del, 1.0 / m), m);
+      b_prime = s_gt_bar_prime * b / s_gt_bar;
+    }
+  }
+  const Real kr = std::sqrt(sl_bar) * Utility::pow<2>(1.0 - a - b);
+  return 0.5 * kr / sl_bar * sl_bar_prime -
+         std::sqrt(sl_bar) * 2.0 * (1.0 - a - b) * (a_prime + b_prime);
+}
+
+Real
+relativePermeabilityNWHys(Real sl,
+                          Real slr,
+                          Real sgrdel,
+                          Real sgrmax,
+                          Real sldel,
+                          Real m,
+                          Real gamma,
+                          Real k_rg_max,
+                          Real y0p)
+{
+  if (sl < slr)
+  {
+    // in the extended region, so immediately return with the relevant value
+    if (k_rg_max == 1.0)
+      return 1.0;
+    return PorousFlowCubic::cubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
+  }
+  if (sl > 1.0 - sgrdel) // saturation is above 1.0 - residual gas saturation
+    return 0.0;
+  const Real sl_bar = (sl - slr) / (1.0 - slr);
+  Real s_gt_bar = 0.0; // initialize this parameter as if on the drying curve
+  if (sgrdel != 0.0 && sl > sldel)
+  {
+    // On the wetting curve
+    // In most cases, use sldel and sgrdel as provided to this function.  However, because "there is
+    // no hysteresis along the extension" according to p6 of Doughty2008, if the turning point is
+    // less than slr, then use the expressions for the case when the turning point was slr
+    const Real my_sldel = (sldel < slr) ? slr : sldel;
+    const Real my_sgrdel = (sldel < slr) ? sgrmax : sgrdel;
+    s_gt_bar = my_sgrdel * (sl - my_sldel) / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+  }
+  Real kr = 0.0;
+  if (sl_bar + s_gt_bar <= 1.0) // check for the condition where sl is too big, in which case kr =
+                                // 0, irrespective of hysteresis
+  {
+    const Real a = std::pow(1.0 - (sl_bar + s_gt_bar), gamma);
+    const Real c = std::pow(sl_bar + s_gt_bar, 1.0 / m);
+    const Real b = std::pow(1.0 - c, 2.0 * m);
+    kr = k_rg_max * a * b;
+  }
+  return kr;
+}
+
+Real
+drelativePermeabilityNWHys(Real sl,
+                           Real slr,
+                           Real sgrdel,
+                           Real sgrmax,
+                           Real sldel,
+                           Real m,
+                           Real gamma,
+                           Real k_rg_max,
+                           Real y0p)
+{
+  if (sl < slr)
+  {
+    // in the extended region, so immediately return with the relevant value
+    if (k_rg_max == 1.0)
+      return 0.0;
+    return PorousFlowCubic::dcubic(sl, 0.0, 1.0, 0.0, slr, k_rg_max, y0p);
+  }
+  if (sl > 1.0 - sgrdel) // saturation is above 1.0 - residual gas saturation
+    return 0.0;
+  const Real sl_bar = (sl - slr) / (1.0 - slr);
+  const Real sl_bar_prime = 1.0 / (1.0 - slr);
+  Real s_gt_bar = 0.0;       // initialize this parameter as if on the drying curve
+  Real s_gt_bar_prime = 0.0; // again, assume on drying curve
+  if (sgrdel != 0.0 && sl > sldel)
+  {
+    // On the wetting curve
+    // In most cases, use sldel and sgrdel as provided to this function.  However, because "there is
+    // no hysteresis along the extension" according to p6 of Doughty2008, if the turning point is
+    // less than slr, then use the expressions for the case when the turning point was slr
+    const Real my_sldel = (sldel < slr) ? slr : sldel;
+    const Real my_sgrdel = (sldel < slr) ? sgrmax : sgrdel;
+    s_gt_bar = my_sgrdel * (sl - my_sldel) / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+    s_gt_bar_prime = my_sgrdel / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
+  }
+  Real kr_prime = 0.0;
+  if (sl_bar + s_gt_bar <= 1.0) // check for the condition where sl is too big, in which case kr =
+                                // 0, irrespective of hysteresis
+  {
+    const Real a = std::pow(1.0 - (sl_bar + s_gt_bar), gamma);
+    const Real a_prime = -gamma * a / (1.0 - (sl_bar + s_gt_bar)) * (sl_bar_prime + s_gt_bar_prime);
+    const Real c = std::pow(sl_bar + s_gt_bar, 1.0 / m);
+    const Real c_prime = c / m / (sl_bar + s_gt_bar) * (sl_bar_prime + s_gt_bar_prime);
+    const Real b = std::pow(1.0 - c, 2.0 * m);
+    const Real b_prime = -2.0 * m * b / (1.0 - c) * c_prime;
+    kr_prime = k_rg_max * (a * b_prime + a_prime * b);
+  }
+  return kr_prime;
 }
 }
