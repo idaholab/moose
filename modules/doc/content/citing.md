@@ -137,6 +137,25 @@ journal = {International Journal for Numerical Methods in Engineering},
 }
 ```
 
+### Porous Flow
+
+The [following paper](https://doi.org/10.21105/joss.02176) provides an overview of the MOOSE Porous Flow module.
+
+```
+@article{Wilkins2020,
+  doi = {10.21105/joss.02176},
+  url = {https://doi.org/10.21105/joss.02176},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {55},
+  pages = {2176},
+  author = {Andy Wilkins and Christopher P. Green and Jonathan Ennis-King},
+  title = {PorousFlow: a multiphysics simulation code for coupled problems in porous media},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ### XFEM
 
 The following papers document various aspects of the MOOSE XFEM module.
