@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-# Civet recipe should directly call update_and_rebuild_petsc_alt.sh
+# This script is intended for INTERNAL use only by CIVET testing.
+#
+# It is recommended for all users to use our default version of PETSc,
+# which can be compiled using scripts/update_and_rebuild_petsc.sh
+#
+# If you wish to use an alternate version of PETSc, you should compile
+# it on your own and set PETSC_DIR and PETSC_ARCH.
 
 # Give regular users a big warning
 echo "*** WARNING ***"
