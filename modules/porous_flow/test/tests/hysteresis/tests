@@ -131,6 +131,15 @@
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16260'
   [../]
+  [./except16]
+    type = 'RunException'
+    input = 'except16.i'
+    expect_err = 'Must be less than 1 - S_lr'
+    match_literal = true
+    requirement = 'When using hysteretic relative permeabilities, an exception shall be thrown if the gas residual saturation is not less than 1 - liquid_residual_saturation'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
   [./hys_order_01]
     type = CSVDiff
     input = 'hys_order_01.i'
@@ -1236,5 +1245,74 @@
     requirement = 'PorousFlow shall be able to compute saturations and porepressures in 2-phase hysteretic systems when using a PS formulation, as the system evolves in time along the primary drying curve and then along a first-order curve and then along a second-order drying curve until it meets the primary drying curve'
     design = 'PorousFlow2PhaseHysPS.md'
     issues = '#16129'
+  [../]
+  [./1phase_relperm]
+    type = CSVDiff
+    input = '1phase_relperm.i'
+    csvdiff = '1phase_relperm_out.csv'
+    requirement = 'PorousFlow shall be able to compute hysteretic relative permeability in 1-phase systems as the system evolves in time along the primary drying curve and then along a first-order wetting curve'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md'
+    issues = '#16324'
+  [../]
+  [./1phase_relperm_2]
+    type = CSVDiff
+    input = '1phase_relperm_2.i'
+    csvdiff = '1phase_relperm_2_csv.csv'
+    requirement = 'PorousFlow shall be able to compute hysteretic relative permeability in 1-phase systems as the saturation cycles between high and low values, including going below the residual saturation'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md'
+    issues = '#16324'
+  [../]
+  [./2phasePS_relperm]
+    type = CSVDiff
+    input = '2phasePS_relperm.i'
+    csvdiff = '2phasePS_relperm_out.csv'
+    requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system evolves in time along the primary drying curve and then along first-order wetting curves'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
+  [./2phasePS_relperm_2_linear_like]
+    type = CSVDiff
+    input = '2phasePS_relperm_2.i'
+    csvdiff = '2phasePS_relperm_2_linear_like.csv'
+    cli_args = 'Materials/relperm_gas/k_rg_max=0.4 Materials/relperm_gas/gas_low_extension_type=linear_like Outputs/csv/file_base=2phasePS_relperm_2_linear_like'
+    requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations using a linear-like extension'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
+  [./2phasePS_relperm_2_cubic]
+    type = CSVDiff
+    input = '2phasePS_relperm_2.i'
+    csvdiff = '2phasePS_relperm_2_cubic.csv'
+    cli_args = 'Materials/relperm_gas/k_rg_max=0.4 Materials/relperm_gas/gas_low_extension_type=cubic Outputs/csv/file_base=2phasePS_relperm_2_cubic'
+    requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations using a cubic extension'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
+  [./2phasePS_relperm_2_none]
+    type = CSVDiff
+    input = '2phasePS_relperm_2.i'
+    csvdiff = '2phasePS_relperm_2_none.csv'
+    cli_args = 'Materials/relperm_gas/k_rg_max=1.0 Outputs/csv/file_base=2phasePS_relperm_2_none'
+    requirement = 'PorousFlow shall be able to compute hysteretic liquid and gas relative permeabilities in 2-phase systems as the system dries and then re-wets, and the gas relative permeability is extended to low saturations by assuming is is unity'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
+  [./relperm_jac]
+    type = PetscJacobianTester
+    input = 'relperm_jac.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    requirement = 'PorousFlow shall be able to compute the full Jacobian entries when using hysteretic relative permeabilities, as the system evolves along a zeroth order curve'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
+  [../]
+  [./relperm_jac_1]
+    type = PetscJacobianTester
+    input = 'relperm_jac_1.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    requirement = 'PorousFlow shall be able to compute the full Jacobian entries when using hysteretic relative permeabilities, as the system evolves along a first-order curve'
+    design = 'PorousFlowHystereticRelativePermeabilityLiquid.md PorousFlowHystereticRelativePermeabilityGas.md'
+    issues = '#16324'
   [../]
 []

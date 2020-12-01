@@ -1408,6 +1408,203 @@ plt.legend()
 plt.title("Hysteretic capillary pressure examples (2 phase)")
 #plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_2.png")
 
+# For comparison with the relperm series of tests
+Slmin = 0.1
+Sgrmax = 0.3
+alphad = 10.0
+alphaw = 10.0
+nd = 1.5
+nw = 1.5
+absPcmax = 1E10
+lower_extension_type = "quadratic"
+upper_extension_type = "power"
+Slr = 0.1
+Sgrmax = 0.2
+m = 0.9
+upper_ratio = 0.9
+gamma = 0.33
+krgmax = 0.8
+relperm_gas_extension = "linear_like"
+hys = Hys(Slr, m, gamma, krgmax, upper_liquid_param, Slmin, Sgrmax, alphad, alphaw, nd, nw, absPcmax, lower_extension_type, upper_ratio, upper_extension_type, relperm_gas_extension)
+
+plt.figure(30)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+svals = [1 - 0.001 * i for i in range(502)] + [0.498 + 0.001 * i for i in range(502)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "expected")
+f = open("gold/1phase_relperm_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[4] for x in data], [x[3] for x in data], 'g+', label = 'MOOSE, 1-phase')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Liquid relative permeability")
+plt.xticks([0, 0.4, 0.5, 0.6, 0.7, 0.9, 1], ["0", "0.4", "0.5", "0.6", "0.7", "0.9", "1"])
+plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1], ["0", "0.2", "0.4", "0.6", "0.8", "1"])
+plt.grid()
+plt.xlim([0.4, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("1-phase hysteretic relative permeability")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_1phase_relperm.png")
+
+plt.figure(31)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.plot([Slr, Slr], [0, 1], 'k:')
+plt.text(Slr, -1E-2, "$S_{lr}$", horizontalalignment='center', verticalalignment='top')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+svals = [1 - 0.001 * i for i in range(302)] + [0.698 + 0.001 * i for i in range(126)] + [0.824 - 0.001 * i for i in range(802)] + [0.02 + 0.001 * i for i in range(980)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "expected")
+f = open("gold/1phase_relperm_2_csv.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[4] for x in data], [x[3] for x in data], 'g+', label = 'MOOSE, 1-phase')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Liquid relative permeability")
+plt.xticks([0, 0.5, 1], ["0", "0.5", "1"])
+plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1], ["0", "0.2", "0.4", "0.6", "0.8", "1"])
+plt.grid()
+plt.xlim([0.0, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("1-phase hysteretic relative permeability: cyclic saturation")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_1phase_2_relperm.png")
+
+plt.figure(32)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot(svals, hys.relperm_gas_drying(svals), 'r:', label = "Drying, gas")
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+svals = [1 - 0.001 * i for i in range(457)] + [0.543 + 0.001 * i for i in range(457)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "exepcted, liquid")
+plt.plot(svals, [k[1] for k in kvals], 'b--', label = "expected, gas")
+plt.plot([1.0 - hys.s_grdel_land(0.543)], [0.0], 'gs', label = "$1 - S_{gr}^{\Delta}$")
+f = open("gold/2phasePS_relperm_out.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[5] for x in data], [x[4] for x in data], 'g+', label = 'MOOSE, liquid')
+plt.plot([x[5] for x in data], [x[3] for x in data], 'b+', label = 'MOOSE, gas')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Relative permeability")
+plt.xticks([0, 0.5, 0.6, 0.7, 0.9, 1], ["0", "0.5", "0.6", "0.7", "0.9", "1"])
+plt.grid()
+plt.xlim([0.5, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("2-phase hysteretic relative permeability")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_relperm.png")
+
+Slr = 0.4
+krgmax = 0.4
+relperm_gas_extension = "linear_like"
+hys = Hys(Slr, m, gamma, krgmax, upper_liquid_param, Slmin, Sgrmax, alphad, alphaw, nd, nw, absPcmax, lower_extension_type, upper_ratio, upper_extension_type, relperm_gas_extension)
+plt.figure(33)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot(svals, hys.relperm_gas_drying(svals), 'r:', label = "Drying, gas")
+plt.plot([Slr, Slr], [0, 1], 'k:')
+plt.text(Slr, -1E-2, "$S_{lr}$", horizontalalignment='center', verticalalignment='top')
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+plt.text(0, krgmax, "$k_{r,g}^{max}$", horizontalalignment='right', verticalalignment='center')
+svals = [1 - 0.001 * i for i in range(725)] + [0.275 + 0.001 * i for i in range(725)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "exepcted, liquid")
+plt.plot(svals, [k[1] for k in kvals], 'b--', label = "expected, gas")
+f = open("gold/2phasePS_relperm_2_linear_like.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[5] for x in data], [x[4] for x in data], 'g+', label = 'MOOSE, liquid')
+plt.plot([x[5] for x in data], [x[3] for x in data], 'b+', label = 'MOOSE, gas')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Relative permeability")
+plt.xticks([0, 0.5, 1], ["0", "0.5", "1"])
+plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1], ["0", "0.2", "", "0.6", "0.8", "1"])
+plt.grid()
+plt.xlim([0, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("2-phase hysteretic relative permeability: linear-like extension")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_relperm_2_linear_like.png")
+
+relperm_gas_extension = "cubic"
+hys = Hys(Slr, m, gamma, krgmax, upper_liquid_param, Slmin, Sgrmax, alphad, alphaw, nd, nw, absPcmax, lower_extension_type, upper_ratio, upper_extension_type, relperm_gas_extension)
+plt.figure(34)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot(svals, hys.relperm_gas_drying(svals), 'r:', label = "Drying, gas")
+plt.plot([Slr, Slr], [0, 1], 'k:')
+plt.text(Slr, -1E-2, "$S_{lr}$", horizontalalignment='center', verticalalignment='top')
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+plt.text(0, krgmax, "$k_{r,g}^{max}$", horizontalalignment='right', verticalalignment='center')
+svals = [1 - 0.001 * i for i in range(725)] + [0.275 + 0.001 * i for i in range(725)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "exepcted, liquid")
+plt.plot(svals, [k[1] for k in kvals], 'b--', label = "expected, gas")
+f = open("gold/2phasePS_relperm_2_cubic.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[5] for x in data], [x[4] for x in data], 'g+', label = 'MOOSE, liquid')
+plt.plot([x[5] for x in data], [x[3] for x in data], 'b+', label = 'MOOSE, gas')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Relative permeability")
+plt.xticks([0, 0.5, 1], ["0", "0.5", "1"])
+plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1], ["0", "0.2", "", "0.6", "0.8", "1"])
+plt.grid()
+plt.xlim([0, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("2-phase hysteretic relative permeability: cubic extension")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_relperm_2_cubic.png")
+
+Slr = 0.4
+krgmax = 1.0
+relperm_gas_extension = "linear_like"
+hys = Hys(Slr, m, gamma, krgmax, upper_liquid_param, Slmin, Sgrmax, alphad, alphaw, nd, nw, absPcmax, lower_extension_type, upper_ratio, upper_extension_type, relperm_gas_extension)
+plt.figure(35)
+svals = [0.001 * i for i in range(1001)]
+plt.plot(svals, hys.relperm_liquid_drying(svals), 'r-', label = "Drying, liquid")
+plt.plot(svals, hys.relperm_gas_drying(svals), 'r:', label = "Drying, gas")
+plt.plot([Slr, Slr], [0, 1], 'k:')
+plt.text(Slr, -1E-2, "$S_{lr}$", horizontalalignment='center', verticalalignment='top')
+plt.plot([1 - Sgrmax, 1 - Sgrmax], [0, 1.0], 'k:')
+plt.text(1 - Sgrmax, -1E-2, "$1 - S_{grmax}$", horizontalalignment='center', verticalalignment='top')
+plt.text(0, krgmax, "$k_{r,g}^{max}$", horizontalalignment='right', verticalalignment='center')
+svals = [1 - 0.001 * i for i in range(725)] + [0.275 + 0.001 * i for i in range(725)]
+kvals = hys.relperms(svals, True)
+plt.plot(svals, [k[0] for k in kvals], 'g--', label = "exepcted, liquid")
+plt.plot(svals, [k[1] for k in kvals], 'b--', label = "expected, gas")
+f = open("gold/2phasePS_relperm_2_none.csv", "r")
+data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
+f.close()
+plt.plot([x[5] for x in data], [x[4] for x in data], 'g+', label = 'MOOSE, liquid')
+plt.plot([x[5] for x in data], [x[3] for x in data], 'b+', label = 'MOOSE, gas')
+plt.xlabel("Aqueous saturation ($S_{l}$)")
+plt.ylabel("Relative permeability")
+plt.xticks([0, 0.5, 1], ["0", "0.5", "1"])
+plt.yticks([0, 0.2, 0.4, 0.6, 0.8, 1], ["0", "0.2", "0.4", "0.6", "0.8", ""])
+plt.grid()
+plt.xlim([0, 1])
+plt.ylim([-1E-2, 1 + 1E-3])
+plt.legend()
+plt.tight_layout()
+plt.title("2-phase hysteretic relative permeability: no extension")
+#plt.savefig("../../../doc/content/media/porous_flow/hys_2phasePS_relperm_2_none.png")
+
+
 plt.show()
 
 sys.exit(0)
