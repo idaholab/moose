@@ -173,7 +173,7 @@ This produces continuous capillary-pressure functions as shown in [histeretic_or
 
 ## Relative permeabilities
 
-Hysteresis is defined for two-phase systems only.  The water and gas relative permeability functions are both hysteretic.  Only the drying and first-order wetting curves are defined.  This means that if the system dries (following the drying curve) and then wets (following the first-order wetting curve) and then subsequently dries, the system will move along the first-order wetting curve until the turning point is reached, when it will move along the drying curve.
+Hysteresis is defined for one-phase and two-phase systems only.  The phase is assumed to be the liquid phase in one-phase models.  The liquid and gas relative permeability functions are both hysteretic.  Only the drying and first-order wetting curves are defined.  This means that if the system dries (following the drying curve) and then wets (following the first-order wetting curve) and then subsequently dries, the system will move along the first-order wetting curve until the turning point is reached, when it will move along the drying curve.
 
 The starting point for the relative permeability functions for liquid ($k_{r,l}$) and gas ($k_{r,g}$) are of the [van Genuchten](relative_permeability.md) form [!citet](doughty2007)
 \begin{equation}
@@ -219,10 +219,10 @@ Assuming the relative permeability values are constant outside the well-defined 
 
 1. There is no hysteresis in the region $S_{l} < S_{l, r}$: the drying curves equal the wetting curves in this region, and if $\mathrm{TP}_{0} < S_{l, r}$ then $\mathrm{TP}_{0} = S_{l, r}$ is used in the wetting curves. 
 
-2. The gas relative permeability is extended to the region $S_{l} < S_{l, r}$ so that $k_{r, g}(0) = 1$.   Two types of extension are possible in MOOSE:
+2. The gas relative permeability is extended to the region $S_{l} < S_{l, r}$ so that $k_{r, g}(0) = 1$.   Two types of extension are possible in MOOSE.  Both are cubic functions satisfying $k_{r, g}(0) = 1$, $k_{r, g}(S_{l, r}) = k_{r, g}^{max}$ and $k'_{r, g}(0) = 0$:
 
-   - A "linear" extension, where $k_{r, g}$ is linear in the low-saturation region.  This results in a continuous curve that has a discontinuous derivative at $S_{l} = S_{l, r}$.
-   - A "cubic" extension, where $k_{r, g}$ is a cubic whose value and derivative match the main curve at $S_{l} = S_{l, r}$, and whose derivative is zero at $S_{l} = 0$.
+   - A "linear-like" extension, where the cubic's derivative at $S_{l} = S_{l, r}$ equals $(k_{r, g}^{max} - 1)/S_{l, r}$.  That is, the derivative is equal to the average slope in the extended region.  This means the final result has a discontinuous derivative at $S_{l, r}$, but the result often "looks better" to the eye (see figures below).
+   - A "cubic" extension, where the cubic's derivative at $S_{l} = S_{l, r}$ equals the primary drying-curve's derivative at that point.  This means the drying curve is C1 continuous (the wetting curve is not).
 
 3. The water wetting curve is modified around the point $1 - S_{gr}^{\Delta}$, which is the point of infinite derivative.  Firstly, it is assumed that $S_{gr}^{max} > 0$.  If this is not the case then the following modification will not work, but may be unecessary anyway.  Two points are defined
 
@@ -235,9 +235,9 @@ Assuming the relative permeability values are constant outside the well-defined 
    - for $S>S_{\mathrm{big}}$ the liquid drying curve, given in [relperm.eqns.0], is used
    - otherwise, a cubic spline interpolates between these two, with parameters chosen so that the final result is continuous and has a continuous derivative.
 
-The result is illustrated in [histeretic_krel_extended_fig], using a cubic extension for the gas relative permeability curve, and $r = 0.9$.
+The result is illustrated in [histeretic_krel_extended_fig], using a linear-like extension for the gas relative permeability curve, and $r = 0.9$.
 
-!media media/porous_flow/hysteretic_krel_extended.png caption=Extended and modified relative permeability curves, using a cubic extension for the gas relative permeability curve, and $r$ being 0.9.  id=histeretic_krel_extended_fig
+!media media/porous_flow/hysteretic_krel_extended.png caption=Extended and modified relative permeability curves, using a linear-like extension for the gas relative permeability curve, and $r$ being 0.9.  id=histeretic_krel_extended_fig
 
 ### Examples
 
@@ -354,3 +354,65 @@ As mentioned above, [hys_vary_sat_1_fig] reveals a subtle feature of the impleme
 This is because the computation of hysteresis order *lags one timestep behind* the MOOSE simulation.  This is to ensure reasonable convergence behavior, as mentioned in [!citet](doughty2007) and [!citet](doughty2008).
 
 The lagging behaviour has the unfortunate side-effect that simulations involving hysteretic capillary pressure do not conserve fluid mass.  The remainder of PorousFlow conserves fluid mass exactly, at all times.  However, when dealing with hysteretic capillary pressures, a small amount of mass is lost or gained whenever a turning point is encountered.  This should have limited impact upon models if saturations do not change excessively during a single time-step.
+
+## Input file syntax for hysteretic relative permeability
+
+To include hysteretic relative permeability in an existing (non-hysteretic) input file, the following changes need to be made
+
+1. A [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material needs to be included.
+2. Materials are needed to compute the relative permeability.  The existing Materials, such as [PorousFlowRelativePermeabilityVG](PorousFlowRelativePermeabilityVG.md) need to be replaced with [PorousFlowHystereticRelativePermeabilityLiquid](PorousFlowHystereticRelativePermeabilityLiquid.md), and, for 2-phase simulations [PorousFlowHystereticRelativePermeabilityGas](PorousFlowHystereticRelativePermeabilityGas.md).
+
+A 1-phase example is:
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./hys_order_material] end=[]
+
+!alert note
+Models need not contain both hysteretic capillary pressures and hysteretic relative permeabilities: the hysteresis may only appear in the capillary pressure, or the relative permeabilities.
+
+### Single-phase examples
+
+A simulation that simply removes and adds water to a system to observe the hysteretic relative permeability is explored in this section.  The water flux is controlled by the Postprocessor
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./flux] end=[./hys_order]
+
+and the DiracKernel
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i block=DiracKernels
+
+The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
+
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./hys_order_material] end=[]
+
+The result is [hys_1phase_relperm_fig].  By altering the `flux`, the system may be dried, re-wet, dried and re-wet again, to generate results stuch as [hys_1phase_relperm_2_fig]
+
+!media media/porous_flow/hys_1phase_relperm.png caption=The result of a single-phase simulation in which an external pump removes and adds water to a porous material in order to observe the hysteretic relative permeability.  id=hys_1phase_relperm_fig
+
+!media media/porous_flow/hys_1phase_2_relperm.png caption=The result of a single-phase simulation in which an external pump removes water until $S_{l} \approx 0.7$, then adds water until $S_{l} \approx 0.8$, then removes water until $S_{l} \approx 0.02$, then adds water until full saturation is reached.  id=hys_1phase_relperm_2_fig
+
+
+### Two-phase examples
+
+A simulation that simply adds and removes gas from a system to observe the hysteretic relative permeability is explored in this section.  The water flux is controlled by the Postprocessor
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[./flux] end=[./hys_order]
+
+and the DiracKernel
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i block=DiracKernels
+
+The remainder of the input file is standard, with the inclusion of the hysteretic relative permeabilities:
+
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[./hys_order_material] end=[]
+
+The result is [hys_2phasePS_relperm_fig].  By altering the `flux`, `k_rg_max` and `gas_low_extension_type`, the impact of various extensions may be explored, as shown in [hys_2phasePS_relperm_2_cubic_fig], [hys_2phasePS_relperm_2_linear_like_fig] and [hys_2phasePS_relperm_2_none_fig].
+
+!media media/porous_flow/hys_2phasePS_relperm.png caption=The result of a two-phase simulation in which an external pump adds and removes gas from a porous material in order to observe the hysteretic relative permeability.  id=hys_2phasePS_relperm_fig
+
+!media media/porous_flow/hys_2phasePS_relperm_2_cubic.png caption=The result of a two-phase simulation in which an external pump adds and removes gas from a porous material in order to observe the hysteretic relative permeability.  A cubic extension is used for the gas relative permeability.  id=hys_2phasePS_relperm_2_cubic_fig
+
+!media media/porous_flow/hys_2phasePS_relperm_2_linear_like.png caption=The result of a two-phase simulation in which an external pump adds and removes gas from a porous material in order to observe the hysteretic relative permeability.  A linear-like extension is used for the gas relative permeability.  id=hys_2phasePS_relperm_2_linear_like_fig
+
+!media media/porous_flow/hys_2phasePS_relperm_2_none.png caption=The result of a two-phase simulation in which an external pump adds and removes gas from a porous material in order to observe the hysteretic relative permeability.  No extension is used for the gas relative permeability, since $k_{r,g}^{max}$ is unity.  id=hys_2phasePS_relperm_2_none_fig
+
+
+

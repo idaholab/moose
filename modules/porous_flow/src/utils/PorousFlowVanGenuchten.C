@@ -682,6 +682,8 @@ drelativePermeabilityHys(Real sl,
 {
   if (sl <= slr) // by the definition of slr, always return 0
     return 0.0;
+  if (sl == 1.0) // derivative is infinite at this point
+    return std::numeric_limits<Real>::max();
   const Real sl_bar = (sl - slr) / (1.0 - slr); // effective saturation
   const Real sl_bar_prime = 1.0 / (1.0 - slr);
   // a and b are useful parameters.  Define b along the drying curve initially, and
@@ -776,8 +778,8 @@ relativePermeabilityNWHys(Real sl,
     s_gt_bar = my_sgrdel * (sl - my_sldel) / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
   }
   Real kr = 0.0;
-  if (sl_bar + s_gt_bar <= 1.0) // check for the condition where sl is too big, in which case kr =
-                                // 0, irrespective of hysteresis
+  if (sl_bar + s_gt_bar < 1.0) // check for the condition where sl is too big, in which case kr =
+                               // 0, irrespective of hysteresis
   {
     const Real a = std::pow(1.0 - (sl_bar + s_gt_bar), gamma);
     const Real c = std::pow(sl_bar + s_gt_bar, 1.0 / m);
@@ -823,13 +825,14 @@ drelativePermeabilityNWHys(Real sl,
     s_gt_bar_prime = my_sgrdel / (1.0 - slr) / (1.0 - my_sldel - my_sgrdel);
   }
   Real kr_prime = 0.0;
-  if (sl_bar + s_gt_bar <= 1.0) // check for the condition where sl is too big, in which case kr =
-                                // 0, irrespective of hysteresis
+  if (sl_bar + s_gt_bar < 1.0) // check for the condition where sl is too big, in which case kr =
+                               // 0, irrespective of hysteresis
   {
     const Real a = std::pow(1.0 - (sl_bar + s_gt_bar), gamma);
     const Real a_prime = -gamma * a / (1.0 - (sl_bar + s_gt_bar)) * (sl_bar_prime + s_gt_bar_prime);
     const Real c = std::pow(sl_bar + s_gt_bar, 1.0 / m);
-    const Real c_prime = c / m / (sl_bar + s_gt_bar) * (sl_bar_prime + s_gt_bar_prime);
+    const Real c_prime =
+        (c == 0 ? 0.0 : c / m / (sl_bar + s_gt_bar) * (sl_bar_prime + s_gt_bar_prime));
     const Real b = std::pow(1.0 - c, 2.0 * m);
     const Real b_prime = -2.0 * m * b / (1.0 - c) * c_prime;
     kr_prime = k_rg_max * (a * b_prime + a_prime * b);
