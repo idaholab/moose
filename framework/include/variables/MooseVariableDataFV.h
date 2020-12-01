@@ -165,8 +165,6 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
     mooseError("Gradient of time derivative not yet implemented for FV");
-    // _need_ad = _need_ad_grad_u = true;
-    // return _ad_grad_u_dot;
   }
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const

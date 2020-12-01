@@ -494,7 +494,6 @@ protected:
    * @param var_name Name of coupled variable
    * @return Vector of ADVariableGradient pointers for each component of \p var_name
    */
-
   std::vector<const ADVariableGradient *> adCoupledGradients(const std::string & var_name) const;
 
   /**
