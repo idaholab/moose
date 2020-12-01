@@ -65,6 +65,7 @@
   [./spatial_1_console]
     type = RunApp
     input = spatial_1_console.i
+    max_parallel = 1
     expect_out = 'pH = 4.2'
     match_literal = true
     requirement = 'It should be able output, to the console, detailed information from any node including molalities, bulk compositions, etc'
