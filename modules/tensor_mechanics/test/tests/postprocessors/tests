@@ -16,4 +16,24 @@
     design = 'MaterialTensorAverage.md'
     issues = '#15424'
   [../]
+
+  [./normal_displacement_small_penalty]
+    type = 'Exodiff'
+    input = 'normal_boundary_displacement.i'
+    exodiff = 'normal_displacement_small_penalty.e'
+    requirement = 'The system shall compute normal displacements on for a surface for checking application of penalty boundary conditions.'
+    cli_args = 'Outputs/file_base=normal_displacement_small_penalty'
+    design = 'NormalBoundaryDisplacement.md'
+    issues = '#16346'
+  [../]
+
+  [./normal_displacement_large_penalty]
+    type = 'Exodiff'
+    input = 'normal_boundary_displacement.i'
+    exodiff = 'normal_displacement_large_penalty.e'
+    requirement = 'The system shall compute normal displacements on for a surface for checking application of penalty boundary conditions.'
+    cli_args = 'BCs/InclinedNoDisplacementBC/top/penalty=1 Outputs/file_base=normal_displacement_large_penalty'
+    design = 'NormalBoundaryDisplacement.md'
+    issues = '#16346'
+  [../]
 []
