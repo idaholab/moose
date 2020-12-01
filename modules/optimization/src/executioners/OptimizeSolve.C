@@ -21,8 +21,11 @@ OptimizeSolve::validParams()
 
 OptimizeSolve::OptimizeSolve(Executioner * ex)
   : SolveObject(ex),
+    _my_comm(MPI_COMM_SELF),
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
-    _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>())
+    _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
+    _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm)),
+    _hessian(_my_comm)
 {
 }
 
@@ -40,16 +43,28 @@ OptimizeSolve::solve()
   else if (ffs.size() > 1)
     mooseError("Only one form function per problem because of how its queried");
   _form_function = ffs[0];
-  _form_function->initializePetscVectors();
 
-  // Communicator used by form function
-  MPI_Comm my_comm = _form_function->getComm().get();
+  // Initialize solution and matrix
+  _form_function->setInitialCondition(*_parameters.get());
+  _ndof = _parameters->size();
+  _hessian.init(/*global_rows =*/_ndof,
+                /*global_cols =*/_ndof,
+                /*local_rows =*/_ndof,
+                /*local_cols =*/_ndof,
+                /*block_diag_nz =*/_ndof,
+                /*block_off_diag_nz =*/0);
 
+  return taoSolve() == 0;
+}
+
+PetscErrorCode
+OptimizeSolve::taoSolve()
+{
   // Petsc error code to be checked after each petsc call
-  PetscErrorCode ierr;
+  PetscErrorCode ierr = 0;
 
   // Initialize tao object
-  ierr = TaoCreate(my_comm, &_tao);
+  ierr = TaoCreate(_my_comm.get(), &_tao);
   CHKERRQ(ierr);
 
   // Print optimization data every step
@@ -89,15 +104,11 @@ OptimizeSolve::solve()
   CHKERRQ(ierr);
   ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
   CHKERRQ(ierr);
-  ierr = TaoSetHessianRoutine(_tao,
-                              _form_function->getHessian().mat(),
-                              _form_function->getHessian().mat(),
-                              hessianFunctionWrapper,
-                              this);
+  ierr = TaoSetHessianRoutine(_tao, _hessian.mat(), _hessian.mat(), hessianFunctionWrapper, this);
   CHKERRQ(ierr);
 
   // Set initial guess
-  ierr = TaoSetInitialVector(_tao, _form_function->getParameters().vec());
+  ierr = TaoSetInitialVector(_tao, _parameters->vec());
   CHKERRQ(ierr);
 
   // Set petsc options
@@ -118,7 +129,7 @@ OptimizeSolve::solve()
   ierr = TaoDestroy(&_tao);
   CHKERRQ(ierr);
 
-  return ierr == 0;
+  return ierr;
 }
 
 PetscErrorCode
@@ -147,8 +158,13 @@ PetscErrorCode
 OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
-  (*objective) = solver->objectiveFunction(param);
+
+  libMesh::PetscVector<Number> & param_solver =
+      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
+  libMesh::PetscVector<Number> param(x, solver->_my_comm);
+  param.swap(param_solver);
+
+  (*objective) = solver->objectiveFunction();
   return 0;
 }
 
@@ -156,9 +172,15 @@ PetscErrorCode
 OptimizeSolve::gradientFunctionWrapper(Tao /*tao*/, Vec x, Vec gradient, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
-  libMesh::PetscVector<Number> grad(gradient, solver->getFormFunction().getComm());
-  solver->gradientFunction(param, grad);
+
+  libMesh::PetscVector<Number> & param_solver =
+      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
+  libMesh::PetscVector<Number> param(x, solver->_my_comm);
+  param.swap(param_solver);
+
+  libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
+
+  solver->gradientFunction(grad);
   return 0;
 }
 
@@ -166,46 +188,53 @@ PetscErrorCode
 OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat hessian, Mat /*pc*/, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-  libMesh::PetscVector<Number> param(x, solver->getFormFunction().getComm());
-  libMesh::PetscMatrix<Number> mat(hessian, solver->getFormFunction().getComm());
-  solver->hessianFunction(param, mat);
+
+  libMesh::PetscVector<Number> & param_solver =
+      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
+  libMesh::PetscVector<Number> param(x, solver->_my_comm);
+  param.swap(param_solver);
+
+  libMesh::PetscMatrix<Number> mat(hessian, solver->_my_comm);
+
+  solver->hessianFunction(mat);
   return 0;
 }
 
 Real
-OptimizeSolve::objectiveFunction(const libMesh::PetscVector<Number> & x)
+OptimizeSolve::objectiveFunction()
 {
-  _form_function->setParameters(x);
+  _form_function->updateParameters(*_parameters.get());
+
   _problem.execute(EXEC_FORWARD);
   _problem.execMultiApps(EXEC_FORWARD);
   if (_solve_on.contains(EXEC_FORWARD))
     _inner_solve->solve();
+
   return _form_function->computeObjective();
 }
 
 void
-OptimizeSolve::gradientFunction(const libMesh::PetscVector<Number> & x,
-                                libMesh::PetscVector<Number> & gradient)
+OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
-  _form_function->setParameters(x);
+  _form_function->updateParameters(*_parameters.get());
+
   _problem.execute(EXEC_ADJOINT);
   _problem.execMultiApps(EXEC_ADJOINT);
   if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
 
-  _form_function->computeGradient();
-  gradient = _form_function->getGradient();
+  _form_function->computeGradient(gradient);
 }
 
 void
-OptimizeSolve::hessianFunction(const libMesh::PetscVector<Number> & x,
-                               libMesh::PetscMatrix<Number> & hessian)
+OptimizeSolve::hessianFunction(libMesh::PetscMatrix<Number> & hessian)
 {
-  _form_function->setParameters(x);
+  _form_function->updateParameters(*_parameters.get());
+
   _problem.execute(EXEC_HESSIAN);
   _problem.execMultiApps(EXEC_HESSIAN);
   if (_solve_on.contains(EXEC_HESSIAN))
     _inner_solve->solve();
-  _form_function->computeHessian();
-  hessian.swap(_form_function->getHessian());
+
+  _form_function->computeHessian(hessian);
 }

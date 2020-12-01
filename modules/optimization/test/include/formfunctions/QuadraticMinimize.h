@@ -14,8 +14,8 @@ public:
   QuadraticMinimize(const InputParameters & parameters);
 
   virtual Real computeObjective() override;
-  virtual void computeGradient() override;
-  virtual void computeHessian() override;
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
+  virtual void computeHessian(libMesh::PetscMatrix<Number> & hessian) override;
 
 private:
   /// Inputted objective function value

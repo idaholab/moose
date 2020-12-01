@@ -26,7 +26,7 @@ QuadraticMinimize::computeObjective()
   Real val = _result;
   for (dof_id_type i = 0; i < _ndof; ++i)
   {
-    Real tmp = _parameters(i) - _measured_values[i];
+    Real tmp = (*_parameters[i])[0] - _measured_values[i];
     val += tmp * tmp;
   }
 
@@ -34,18 +34,18 @@ QuadraticMinimize::computeObjective()
 }
 
 void
-QuadraticMinimize::computeGradient()
+QuadraticMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
 {
   for (dof_id_type i = 0; i < _ndof; ++i)
-    _gradient.set(i, 2.0 * (_parameters(i) - _measured_values[i]));
-  _gradient.close();
+    gradient.set(i, 2.0 * ((*_parameters[i])[0] - _measured_values[i]));
+  gradient.close();
 }
 
 void
-QuadraticMinimize::computeHessian()
+QuadraticMinimize::computeHessian(libMesh::PetscMatrix<Number> & hessian)
 {
-  _hessian.zero();
+  hessian.zero();
   for (dof_id_type i = 0; i < _ndof; ++i)
-    _hessian.set(i, i, 2.0);
-  _hessian.close();
+    hessian.set(i, i, 2.0);
+  hessian.close();
 }

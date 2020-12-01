@@ -9,7 +9,7 @@ public:
   ObjectiveGradientMinimize(const InputParameters & parameters);
 
   virtual Real computeObjective() override;
-  virtual void computeGradient() override;
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
 
 private:
   /// number of data values

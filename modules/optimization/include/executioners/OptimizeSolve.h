@@ -5,8 +5,10 @@
 #include "FormFunction.h"
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
 
-class OptimizeSolve;
+class FormFunction;
 
 class OptimizeSolve : public SolveObject
 {
@@ -20,15 +22,16 @@ public:
 
 protected:
   /// Objective routine
-  virtual Real objectiveFunction(const libMesh::PetscVector<Number> & x);
+  virtual Real objectiveFunction();
 
   /// Gradient routine
-  virtual void gradientFunction(const libMesh::PetscVector<Number> & x,
-                                libMesh::PetscVector<Number> & gradient);
+  virtual void gradientFunction(libMesh::PetscVector<Number> & gradient);
 
   /// Hessian routine
-  virtual void hessianFunction(const libMesh::PetscVector<Number> & x,
-                               libMesh::PetscMatrix<Number> & hessian);
+  virtual void hessianFunction(libMesh::PetscMatrix<Number> & hessian);
+
+  /// Communicator used for operations
+  const libMesh::Parallel::Communicator _my_comm;
 
   /// List of execute flags for when to solve the system
   const ExecFlagEnum & _solve_on;
@@ -40,12 +43,14 @@ protected:
   Tao _tao;
 
 private:
+  /// Here is where we call tao and solve
+  PetscErrorCode taoSolve();
+
   /// output optimization iteration solve data
   static PetscErrorCode monitor(Tao tao, void * ctx);
 
   ///@{
   /// Function wrappers for tao
-  ///
   static PetscErrorCode objectiveFunctionWrapper(Tao tao, Vec x, Real * objective, void * ctx);
   static PetscErrorCode gradientFunctionWrapper(Tao tao, Vec x, Vec gradient, void * ctx);
   static PetscErrorCode hessianFunctionWrapper(Tao tao, Vec x, Mat hessian, Mat pc, void * ctx);
@@ -61,4 +66,13 @@ private:
     CONJUGATE_GRADIENT,
     NELDER_MEAD,
   } _tao_solver_enum;
+
+  /// Number of parameters being optimized
+  dof_id_type _ndof;
+
+  /// Parameters (solution)
+  std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
+
+  /// Hessian (matrix)
+  libMesh::PetscMatrix<Number> _hessian;
 };

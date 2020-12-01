@@ -64,9 +64,9 @@ ObjectiveGradientMinimize::computeObjective()
 }
 
 void
-ObjectiveGradientMinimize::computeGradient()
+ObjectiveGradientMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
 {
   for (dof_id_type i = 0; i < _ndof; ++i)
-    _gradient.set(i, *_adjoint_data_computed[i]);
-  _gradient.close();
+    gradient.set(i, *_adjoint_data_computed[i]);
+  gradient.close();
 }

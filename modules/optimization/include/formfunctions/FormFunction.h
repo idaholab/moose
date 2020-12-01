@@ -2,6 +2,7 @@
 
 #include "MooseObject.h"
 
+#include "OptimizeSolve.h"
 #include "OptimizationParameterVectorPostprocessor.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -16,14 +17,9 @@ public:
 
   /**
    * Function to initialize petsc vectors from vpp data
+   * FIXME: this should be const
    */
-  void initializePetscVectors();
-
-  /**
-   * Function to set parameters.
-   * This is the first function called in objective/gradient/hessian routine
-   */
-  void setParameters(const libMesh::PetscVector<Number> & x);
+  void setInitialCondition(libMesh::PetscVector<Number> & param);
 
   /**
    * Function to compute objective.
@@ -35,7 +31,7 @@ public:
    * Function to compute gradient.
    * This is the last call of the gradient routine.
    */
-  virtual void computeGradient()
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient)
   {
     mooseError("Gradient function has not been defined for form function type ", _type);
   }
@@ -44,7 +40,7 @@ public:
    * Function to compute gradient.
    * This is the last call of the hessian routine.
    */
-  virtual void computeHessian()
+  virtual void computeHessian(libMesh::PetscMatrix<Number> & hessian)
   {
     mooseError("Hessian function has not been defined for form function type ", _type);
   }
@@ -54,45 +50,22 @@ public:
    */
   dof_id_type getNumberOfParameters() const { return _ndof; }
 
-  /**
-   * Function to retrieve current parameters
-   */
-  libMesh::PetscVector<Number> & getParameters() { return _parameters; }
-  const libMesh::PetscVector<Number> & getParameters() const { return _parameters; }
-
-  /**
-   * Function to retrieve last computed gradient
-   */
-  libMesh::PetscVector<Number> & getGradient() { return _gradient; }
-  const libMesh::PetscVector<Number> & getGradient() const { return _gradient; }
-
-  /**
-   * Function to retrieve last computed gradient
-   */
-  libMesh::PetscMatrix<Number> & getHessian() { return _hessian; }
-  const libMesh::PetscMatrix<Number> & getHessian() const { return _hessian; }
-
-  /**
-   * Get communicator used for matrices
-   */
-  const libMesh::Parallel::Communicator & getComm() const { return _my_comm; }
-
 protected:
-  /// Communicator used for operations
-  const libMesh::Parallel::Communicator _my_comm;
-
-  /// VPP to sent data to
+  /// VPP to send data to
   OptimizationParameterVectorPostprocessor & _parameter_vpp;
 
+  /// Const reference to vpp data
+  std::vector<const VectorPostprocessorValue *> _parameters;
+
   /// Number of parameters
-  dof_id_type _ndof;
+  dof_id_type _ndof = 0;
 
-  /// Parameters
-  libMesh::PetscVector<Number> _parameters;
+private:
+  /**
+   * Function to set parameters.
+   * This is the first function called in objective/gradient/hessian routine
+   */
+  void updateParameters(const libMesh::PetscVector<Number> & x);
 
-  /// Gradient
-  libMesh::PetscVector<Number> _gradient;
-
-  /// Hessian
-  libMesh::PetscMatrix<Number> _hessian;
+  friend class OptimizeSolve;
 };
