@@ -3,7 +3,9 @@
 # Civet recipe should directly call update_and_rebuild_petsc_alt.sh
 
 # Give regular users a big warning
-echo "update_and_rebuild_petsc_alt is used for civet only, please do not use it!!!!!"
+echo "*** WARNING ***"
+echo "scripts/update_and_rebuild_petsc_alt.sh is intended for internal"
+echo "use only. Please use scripts/update_and_rebuild_petsc.sh instead."
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $SCRIPT_DIR
