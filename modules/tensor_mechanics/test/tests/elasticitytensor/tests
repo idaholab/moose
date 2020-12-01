@@ -21,6 +21,6 @@
     exodiff = 'rotation_matrix_2_rotations_out.e'
     issues = '#16340'
     design = 'ComputeElasticityTensor.md'
-    requirement = 'The system shall provide a method for rotating a tensor using a rotation matrix.'
+    requirement = 'The system shall provide a method for rotating a tensor using a rotation matrix requiring more than one rotation.'
   [../]
 []

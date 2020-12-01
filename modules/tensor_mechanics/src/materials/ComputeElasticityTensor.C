@@ -40,7 +40,7 @@ ComputeElasticityTensorTempl<is_ad>::ComputeElasticityTensorTempl(
   else
   {
     // Use user-provided rotation matrix if given
-    if (parameters.isParamSetByUser("rotation_matrix"))
+    if (parameters.isParamValid("rotation_matrix"))
       _Cijkl.rotate(_rotation_matrix);
     else
     {
