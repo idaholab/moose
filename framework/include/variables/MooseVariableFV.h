@@ -303,6 +303,14 @@ public:
    */
   const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi) const;
 
+  /**
+   * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
+   * expansion we'll simply return the ajacent element centroid value. If we're doing two terms,
+   * then we will compute the gradient if necessary to help us interpolate from the element centroid
+   * value to the face
+   */
+  const ADReal & getBoundaryFaceValue(const FaceInfo & fi) const;
+
 #endif
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
@@ -447,19 +455,26 @@ public:
 
 private:
   /**
-   * get the finite volume solution interpolated to the face associated with \p fi.  If the
-   * neighbor is null or this variable doesn't exist on the neighbor element's subdomain, then we
-   * compute a face value based on any Dirichlet boundary conditions associated with the face
-   * information, or absent that we assume a zero gradient and simply return the \p elem_value
+   * Returns whether this is an interpolary boundary face. An interpolary boundary face is boundary
+   * face for which is not a corresponding Dirichlet condition, e.g. we need to compute some
+   * approximation for the boundary face value using the adjacent cell centroid information
+   */
+  bool isInterpolaryBoundaryFace(const FaceInfo & fi) const;
+
+  /**
+   * This method requires that \p isInterpolaryBoundaryFace(fi) be false
+   *
+   * This method gets the finite volume solution interpolated to the face associated
+   * with \p fi using information from the adjacent cells.  If the neighbor is null or this variable
+   * doesn't exist on the neighbor element's subdomain, then we compute a face value based on any
+   * Dirichlet boundary conditions associated with the face information
    * @param neighbor The \p neighbor element which will help us compute the face interpolation
    * @param fi The face information object
-   * @param elem_value The solution value on the "element". This value will be returned as the face
-   * value if there is no associated neighbor value and there is no Dirichlet boundary condition on
-   * the face associated with \p fi. If there is an associated neighbor, then \p elem_value will be
-   * used as part of a linear interpolation
+   * @param elem_value The solution value on the "element". If there is an associated neighbor, then
+   * \p elem_value will be used as part of a linear interpolation
    * @return The interpolated face value
    */
-  ADReal
+  const ADReal &
   getFaceValue(const Elem * const neighbor, const FaceInfo & fi, const ADReal & elem_value) const;
 
   /**
@@ -577,11 +592,15 @@ private:
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 
+  /// A cache that maps from faces to face values
+  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
+
   /// Whether to use an extended stencil for interpolating the solution to face centers. If this is
   /// true then the face center value is computed as a weighted average of connected vertices. If it
   /// is false, then the face center value is simply a linear interpolation betweeh the two
   /// neighboring cell center values
   const bool _use_extended_stencil;
+  const bool _two_term_boundary_expansion;
 #endif
 };
 

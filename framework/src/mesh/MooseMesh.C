@@ -3267,15 +3267,13 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
 
   for (FaceInfo & face : _all_face_info)
   {
-    if (face.processor_id() != this->processor_id())
-      continue;
-
     // get elem & neighbor elements, and set subdomain ids
     const Elem & elem_elem = face.elem();
     const Elem * const neighbor_elem = face.neighborPtr();
     const SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    const SubdomainID neighbor_subdomain_id =
-        neighbor_elem ? neighbor_elem->subdomain_id() : Elem::invalid_subdomain_id;
+    const SubdomainID neighbor_subdomain_id = (neighbor_elem && neighbor_elem != remote_elem)
+                                                  ? neighbor_elem->subdomain_id()
+                                                  : Elem::invalid_subdomain_id;
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
@@ -3302,7 +3300,8 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
       face.elemDofIndices(var_name) = elem_dof_indices;
       // neighbor
       std::vector<dof_id_type> neighbor_dof_indices;
-      if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
+      if (neighbor_elem && neighbor_elem != remote_elem &&
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
         var->getDofIndices(neighbor_elem, neighbor_dof_indices);
       else
         neighbor_dof_indices = {libMesh::DofObject::invalid_id};
