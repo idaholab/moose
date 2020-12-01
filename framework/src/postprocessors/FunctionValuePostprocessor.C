@@ -23,6 +23,10 @@ FunctionValuePostprocessor::validParams()
   params.addParam<Point>(
       "point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
+  params.addParam<std::vector<PostprocessorName>>(
+      "indirect_dependencies",
+      "If the evaluated function depends on other postprocessors they must be listed here to "
+      "ensure proper dependency resolution");
 
   params.declareControllable("point scale_factor");
   params.addClassDescription(
@@ -34,7 +38,10 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
   : GeneralPostprocessor(parameters),
     _function(getFunction("function")),
     _point(getParam<Point>("point")),
-    _scale_factor(getParam<Real>("scale_factor"))
+    _scale_factor(getParam<Real>("scale_factor")),
+    _indirect_dependencies(
+        getParam<std::vector<PostprocessorName>>("indirect_dependencies").begin(),
+        getParam<std::vector<PostprocessorName>>("indirect_dependencies").end())
 {
 }
 

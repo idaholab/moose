@@ -33,8 +33,11 @@ public:
   virtual void execute() override;
   virtual PostprocessorValue getValue() override;
 
+  const std::set<std::string> & getRequestedItems() override { return _indirect_dependencies; }
+
 protected:
   const Function & _function;
   const Point & _point;
   const Real & _scale_factor;
+  const std::set<std::string> _indirect_dependencies;
 };
