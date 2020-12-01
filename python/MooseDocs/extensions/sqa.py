@@ -84,6 +84,7 @@ class SQAExtension(command.CommandExtension):
                                         ", 'dependencies', 'repo', 'reports'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
         config['reports'] = (None, "Build SQA reports for dashboard creation.")
+        config['add_run_exception_to_failure_analysis'] = (True, "Automatically include RunException tests in the 'FAILURE_ANALYSIS' collection.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -184,6 +185,14 @@ class SQAExtension(command.CommandExtension):
                 if app_syntax is None:
                     msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
                     LOG.warning(msg)
+
+        # Add RunException tests to FAILURE_ANALYSIS collection
+        for req_category in self.__requirements.values():
+            for requirements in req_category.values():
+                for req in requirements:
+                    t_types = req.types
+                    if (req.collections is None) and (t_types is not None) and ('RunException' in t_types):
+                        req.collections = set(['FAILURE_ANALYSIS'])
 
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 

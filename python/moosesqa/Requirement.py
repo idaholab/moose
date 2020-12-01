@@ -17,7 +17,6 @@ import mooseutils
 @mooseutils.addProperty('prerequisites', ptype=set)
 @mooseutils.addProperty('skip', ptype=bool, default=False)
 @mooseutils.addProperty('deleted', ptype=bool, default=False)
-@mooseutils.addProperty('collections', ptype=set)
 class TestSpecification(mooseutils.AutoPropertyMixin):
     """Object for storing Test specification information w/r/t SQA"""
 
@@ -25,8 +24,6 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
         super().__init__(*args, **kwargs)
         if self.prerequisites is None:
             self.prerequisites = set()
-        if self.collections is None:
-            self.collections = set()
 
     @property
     def testable(self):
@@ -58,7 +55,6 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
 @mooseutils.addProperty('validation', ptype=list)
 @mooseutils.addProperty('validation_line', ptype=int)
 @mooseutils.addProperty('duplicate', ptype=bool, default=False)
-
 class Requirement(mooseutils.AutoPropertyMixin):
     """struct for storing Requirement information."""
 

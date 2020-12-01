@@ -118,7 +118,6 @@ class TestRequirement(unittest.TestCase):
         self.assertEqual(len(req.names), 2)
         self.assertEqual(req.names, {'andrew', '1980'})
 
-
 class TestDetail(unittest.TestCase):
     def testInit(self):
         kwargs = dict(name='name', path='path', filename='filename', line=1)
