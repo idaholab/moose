@@ -1315,10 +1315,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_u_dot.resize(nqp);
   }
   if (_need_ad_grad_u_dot)
-  {
-    _ad_dofs_dot.resize(num_dofs); // may not need this?
     _ad_grad_u_dot.resize(nqp);
-  }
 
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   auto ad_offset = Moose::adOffset(
