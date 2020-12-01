@@ -96,7 +96,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
 }
 
 ADReal
-ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVector & stress_dev,
+ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVector & /*stress_dev*/,
                                                                const ADDenseVector & stress_new,
                                                                const ADReal & delta_gamma)
 {
@@ -115,12 +115,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVect
     inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
 
   ADDenseVector stress_vector(6);
-  stress_vector(0) = stress_new(0);
-  stress_vector(1) = stress_new(1);
-  stress_vector(2) = stress_new(2);
-  stress_vector(3) = stress_new(3);
-  stress_vector(4) = stress_new(4);
-  stress_vector(5) = stress_new(5);
+  stress_vector = stress_new;
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -187,12 +182,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
     inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
 
   ADDenseVector stress_vector(6);
-  stress_vector(0) = stress_new(0);
-  stress_vector(1) = stress_new(1);
-  stress_vector(2) = stress_new(2);
-  stress_vector(3) = stress_new(3);
-  stress_vector(4) = stress_new(4);
-  stress_vector(5) = stress_new(5);
+  stress_vector = stress_new;
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -241,19 +231,9 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecompositi
   //  Moose::out << "Print A matrix: " << MetaPhysicL::raw_value(A) << "\n";
 
   Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es(A);
-  //  std::cout << "The eigenvalues of the pencil (A) are:" << std::endl
-  //            << es.eigenvalues() << std::endl;
-  //  std::cout << "The matrix of eigenvectors, V, is:" << std::endl
-  //            << es.eigenvectors() << std::endl
-  //            << std::endl;
 
   auto lambda = es.eigenvalues();
   auto v = es.eigenvectors();
-  //  std::cout << "Consider the first eigenvalue, lambda = " << lambda << std::endl;
-  //  std::cout << "If v is the corresponding eigenvector, then A * v = " << std::endl
-  //            << A * v << std::endl;
-
-  // hill_tensor_real.evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     _eigenvalues_hill(index_i) = lambda(index_i);
 
