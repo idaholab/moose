@@ -1,6 +1,6 @@
 # PorousFlowHystereticRelativePermeabilityGas
 
-This Material computes the gas relative permeability using the van-Genuchten formulation.  The relative permeability is assumed to be hysteretic.  This Material may be used two-phase situations only.
+This Material computes the gas relative permeability using the van Genuchten formulation.  The relative permeability is assumed to be hysteretic.  This Material may be used in two-phase situations only.
 
 Along the drying curve, the relative permeability is
 \begin{equation}

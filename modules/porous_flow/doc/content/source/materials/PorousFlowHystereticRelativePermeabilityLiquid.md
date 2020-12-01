@@ -1,6 +1,6 @@
 # PorousFlowHystereticRelativePermeabilityLiquid
 
-This Material computes the liquid relative permeability using the van-Genuchten formulation.  The relative permeability is assumed to be hysteretic.  This Material may be used in single-phase or two-phase situations only.
+This Material computes the liquid relative permeability using the van Genuchten formulation.  The relative permeability is assumed to be hysteretic.  This Material may be used in single-phase or two-phase situations only.
 
 Along the drying curve, the relative permeability is
 \begin{equation}
