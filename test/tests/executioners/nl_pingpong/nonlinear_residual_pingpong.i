@@ -66,7 +66,7 @@
   nl_abs_tol = 1e-15
   nl_max_its = 50
   line_search = none
-  n_max_nonlinear_pinpong = 2
+  n_max_nonlinear_pingpong = 2
 []
 
 [Outputs]
