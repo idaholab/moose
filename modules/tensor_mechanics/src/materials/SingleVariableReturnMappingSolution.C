@@ -78,14 +78,14 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
 
 Real
 SingleVariableReturnMappingSolution::minimumPermissibleValue(
-    const Real /*effective_trial_stress*/) const
+    const Real & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::lowest();
 }
 
 Real
 SingleVariableReturnMappingSolution::maximumPermissibleValue(
-    const Real /*effective_trial_stress*/) const
+    const Real & /*effective_trial_stress*/) const
 {
   return std::numeric_limits<Real>::max();
 }

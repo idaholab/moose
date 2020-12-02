@@ -91,7 +91,7 @@ IsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
 }
 
 void
-IsotropicPlasticityStressUpdate::computeStressInitialize(const Real effective_trial_stress,
+IsotropicPlasticityStressUpdate::computeStressInitialize(const Real & effective_trial_stress,
                                                          const RankFourTensor & elasticity_tensor)
 {
   computeYieldStress(elasticity_tensor);

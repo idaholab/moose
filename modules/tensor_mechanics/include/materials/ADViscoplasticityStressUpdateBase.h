@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADStressUpdateBase.h"
+#include "StressUpdateBase.h"
 
 class ADViscoplasticityStressUpdateBase : public ADStressUpdateBase
 {
@@ -28,6 +28,8 @@ public:
    * Does the model require the elasticity tensor to be isotropic?
    */
   bool requiresIsotropicTensor() override { return true; }
+
+  using ADStressUpdateBase::updateState;
 
 protected:
   virtual void initQpStatefulProperties() override;

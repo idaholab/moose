@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADRadialReturnStressUpdate.h"
+#include "RadialReturnStressUpdate.h"
 
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity

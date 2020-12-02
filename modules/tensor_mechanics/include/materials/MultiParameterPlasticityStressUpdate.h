@@ -103,6 +103,7 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
+  using StressUpdateBase::updateState;
   virtual void updateState(RankTwoTensor & strain_increment,
                            RankTwoTensor & inelastic_strain_increment,
                            const RankTwoTensor & rotation_increment,

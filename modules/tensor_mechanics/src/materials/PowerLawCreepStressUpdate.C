@@ -50,7 +50,7 @@ PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & par
 }
 
 void
-PowerLawCreepStressUpdate::computeStressInitialize(const Real /*effective_trial_stress*/,
+PowerLawCreepStressUpdate::computeStressInitialize(const Real & /*effective_trial_stress*/,
                                                    const RankFourTensor & /*elasticity_tensor*/)
 {
   if (_has_temp)
