@@ -38,11 +38,11 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
   : GeneralPostprocessor(parameters),
     _function(getFunction("function")),
     _point(getParam<Point>("point")),
-    _scale_factor(getParam<Real>("scale_factor")),
-    _indirect_dependencies(
-        getParam<std::vector<PostprocessorName>>("indirect_dependencies").begin(),
-        getParam<std::vector<PostprocessorName>>("indirect_dependencies").end())
+    _scale_factor(getParam<Real>("scale_factor"))
 {
+  const auto & indirect_dependencies =
+      getParam<std::vector<PostprocessorName>>("indirect_dependencies");
+  _depend_vars.insert(indirect_dependencies.begin(), indirect_dependencies.end());
 }
 
 void
