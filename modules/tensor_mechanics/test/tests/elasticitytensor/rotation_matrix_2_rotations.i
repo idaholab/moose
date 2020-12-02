@@ -155,9 +155,7 @@
     # the angles here are the same as used to build the rotation matrix above because
     # we build the _transpose_ from euler angles in MOOSE, but we also transposed
     # the matrix for this example, so it goes back to the original;
-    # the reversed order may be due to the fact that we left-multiplied to
-    # build the rotation matrix above but in MOOSE we use extrinsic rotations
-    # which right-multiplies rotations
+    # the reversed order is due to the "extrinsic" convention used by MOOSE
     euler_angle_1 = 0.
     euler_angle_2 = 54.73561032
     euler_angle_3 = 45.
