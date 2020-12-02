@@ -1,15 +1,11 @@
 #include "HeatStructureCylindrical.h"
-#include "SolidMaterialProperties.h"
-#include "ConstantFunction.h"
-#include "Enums.h"
-#include "THMMesh.h"
 
 registerMooseObject("THMApp", HeatStructureCylindrical);
 
 InputParameters
 HeatStructureCylindrical::validParams()
 {
-  InputParameters params = HeatStructureBase::validParams();
+  InputParameters params = HeatStructureCylindricalBase::validParams();
 
   params.addRequiredParam<std::vector<std::string>>("names", "Name of each radial region");
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each radial region [m]");
@@ -26,7 +22,7 @@ HeatStructureCylindrical::validParams()
 }
 
 HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & params)
-  : HeatStructureBase(params), _inner_radius(getParam<Real>("inner_radius"))
+  : HeatStructureCylindricalBase(params)
 {
   _names = getParam<std::vector<std::string>>("names");
   _number_of_hs = _names.size();
@@ -44,6 +40,8 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
 
   _num_rods = getParam<Real>("num_rods");
 
+  _inner_radius = getParam<Real>("inner_radius");
+
   if (_width.size() == _number_of_hs)
   {
     std::vector<Real> r(_number_of_hs + 1, _inner_radius);
@@ -58,36 +56,9 @@ HeatStructureCylindrical::HeatStructureCylindrical(const InputParameters & param
 void
 HeatStructureCylindrical::check() const
 {
-  HeatStructureBase::check();
+  HeatStructureCylindricalBase::check();
 
   checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
   checkEqualSize<std::string, Real>("names", "widths");
   checkEqualSize<std::string, std::string>("names", "materials");
-}
-
-void
-HeatStructureCylindrical::addMooseObjects()
-{
-  HeatStructureBase::addMooseObjects();
-
-  _hc_model->addHeatEquationRZ();
-}
-
-Real
-HeatStructureCylindrical::getUnitPerimeter(const HeatStructureSideType & side) const
-{
-  switch (side)
-  {
-    case HeatStructureSideType::OUTER:
-      return 2 * M_PI * (_inner_radius + _total_width);
-
-    case HeatStructureSideType::INNER:
-      return 2 * M_PI * _inner_radius;
-
-    case HeatStructureSideType::START:
-    case HeatStructureSideType::END:
-      return std::numeric_limits<Real>::quiet_NaN();
-  }
-
-  mooseError(name(), ": Unknown value of 'side' parameter.");
 }
