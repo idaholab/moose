@@ -113,7 +113,6 @@
     material_property_names = 'A cseq'
     function = 'w/A + cseq' # since w = A*(c-cseq)
     derivative_order = 2
-    enable_jit = false
   [../]
   [./cl]
     type = DerivativeParsedMaterial
@@ -122,7 +121,6 @@
     material_property_names = 'A cleq'
     function = 'w/A + cleq' # since w = A*(c-cleq)
     derivative_order = 2
-    enable_jit = false
   [../]
   [./total_GrandPotential]
     type = DerivativeTwoPhaseMaterial
