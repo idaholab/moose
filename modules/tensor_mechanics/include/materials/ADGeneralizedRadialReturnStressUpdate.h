@@ -25,10 +25,12 @@
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
 
-#include "ADReal.h"
+#include "MooseTypes.h"
 
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
+#include <Eigen/Dense>
+#include "metaphysicl/dualnumber.h"
 
 namespace Eigen
 {
@@ -41,6 +43,7 @@ struct cast_impl<ADReal, int>
 };
 } // namespace internal
 } // namespace Eigen
+
 typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
 
 class ADGeneralizedRadialReturnStressUpdate : public ADStressUpdateBase,
