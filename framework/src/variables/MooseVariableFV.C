@@ -740,6 +740,16 @@ MooseVariableFV<OutputType>::clearCaches()
 #endif
 }
 
+template <typename OutputType>
+unsigned int
+MooseVariableFV<OutputType>::needSolutionState() const
+{
+  unsigned int state = 0;
+  state = std::max(state, _element_data->needSolutionState());
+  state = std::max(state, _neighbor_data->needSolutionState());
+  return state;
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

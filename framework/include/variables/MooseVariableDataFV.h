@@ -279,6 +279,11 @@ public:
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }
 
+  /**
+   * The solution states that are needed for this variable data.
+   */
+  unsigned int needSolutionState() const;
+
 private:
   void initializeSolnVars();
 

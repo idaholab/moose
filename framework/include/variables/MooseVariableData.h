@@ -478,6 +478,11 @@ public:
     return _matrix_tag_u[tag];
   }
 
+  /**
+   * The solution states that are needed for this variable data.
+   */
+  unsigned int needSolutionState() const;
+
 private:
   /**
    * Helper methods for assigning nodal values from their corresponding solution values (dof

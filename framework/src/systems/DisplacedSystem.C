@@ -29,10 +29,6 @@ DisplacedSystem::DisplacedSystem(DisplacedProblem & problem,
     dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
     dof_map.set_implicit_neighbor_dofs(false);
   }
-
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
 }
 
 DisplacedSystem::~DisplacedSystem() {}
@@ -46,22 +42,19 @@ DisplacedSystem::getVector(const std::string & name)
     return _undisplaced_system.getVector(name);
 }
 
+const NumericVector<Number> &
+DisplacedSystem::getVector(const std::string & name) const
+{
+  if (_sys.have_vector(name))
+    return _sys.get_vector(name);
+  else
+    return _undisplaced_system.getVector(name);
+}
+
 void
 DisplacedSystem::addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti)
 {
   _time_integrator = ti;
-}
-
-NumericVector<Number> &
-DisplacedSystem::solutionOldInternal() const
-{
-  return *_sys.old_local_solution;
-}
-
-NumericVector<Number> &
-DisplacedSystem::solutionOlderInternal() const
-{
-  return *_sys.older_local_solution;
 }
 
 System &

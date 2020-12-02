@@ -133,8 +133,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _computing_scaling_jacobian(false),
     _computing_scaling_residual(false),
     _automatic_scaling(false),
-    _verbose(false),
-    _default_solution_states(2)
+    _verbose(false)
 {
 }
 
@@ -933,6 +932,12 @@ SystemBase::getVector(const std::string & name)
   return system().get_vector(name);
 }
 
+const NumericVector<Number> &
+SystemBase::getVector(const std::string & name) const
+{
+  return system().get_vector(name);
+}
+
 NumericVector<Number> &
 SystemBase::getVector(TagID tag)
 {
@@ -1328,6 +1333,9 @@ SystemBase::copyOldSolutions()
 void
 SystemBase::restoreSolutions()
 {
+  if (!hasSolutionState(1))
+    mooseError("Cannot restore solutions without old solution");
+
   *(const_cast<NumericVector<Number> *&>(currentSolution())) = solutionOld();
   solution() = solutionOld();
   if (solutionUDotOld())
@@ -1351,14 +1359,32 @@ SystemBase::name() const
   return system().name();
 }
 
+void
+SystemBase::initSolutionState()
+{
+  // Default is the current solution
+  unsigned int state = 0;
+
+  // Add additional states as required by the variable states requested
+  for (const auto & var : getVariables(/* tid = */ 0))
+    state = std::max(state, var->needSolutionState());
+  for (const auto & var : getScalarVariables(/* tid = */ 0))
+    state = std::max(state, var->needSolutionState());
+
+  needSolutionState(state);
+}
+
+std::string
+SystemBase::oldSolutionStateVectorName(const unsigned int state) const
+{
+  mooseAssert(state != 0, "Not an old state");
+  return "solution_state_" + std::to_string(state);
+}
+
 const NumericVector<Number> &
 SystemBase::solutionState(const unsigned int state) const
 {
-  mooseAssert(!_solution_states.empty(),
-              "No solution states available: make sure to init the default states in system "
-              "constructors");
-
-  if (state >= _solution_states.size())
+  if (!hasSolutionState(state))
     mooseError("Solution state ",
                state,
                " was requested in ",
@@ -1367,33 +1393,44 @@ SystemBase::solutionState(const unsigned int state) const
                _solution_states.size() - 1,
                " is available.");
 
+  if (state == 0)
+    mooseAssert(_solution_states[0] == &solutionInternal(), "Inconsistent current solution");
+  else
+    mooseAssert(_solution_states[state] == &getVector(oldSolutionStateVectorName(state)),
+                "Inconsistent solution state");
+
   return *_solution_states[state];
 }
 
 NumericVector<Number> &
 SystemBase::solutionState(const unsigned int state)
 {
-  // Create up to the state requested if unavailable
-  if (state >= _solution_states.size())
-  {
-    _solution_states.resize(state + 1);
-
-    // The first three states (now, old, older) will point to the solutions in the libMesh system,
-    // which is why we are using the "internal" calls to these vectors. _solution_states will then
-    // be the forward facing access to these vectors
-    _solution_states[0] = &solutionInternal();
-    if (state > 0)
-      _solution_states[1] = &solutionOldInternal();
-    if (state > 1)
-      _solution_states[2] = &solutionOlderInternal();
-
-    // Create anything that is past older (state of 3+)
-    for (unsigned int i = 3; i <= state; ++i)
-      if (!_solution_states[i])
-        _solution_states[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
-  }
-
+  if (!hasSolutionState(state))
+    needSolutionState(state);
   return *_solution_states[state];
+}
+
+void
+SystemBase::needSolutionState(const unsigned int state)
+{
+  if (hasSolutionState(state))
+    return;
+
+  _solution_states.resize(state + 1);
+
+  // The 0-th (current) solution state is owned by libMesh
+  if (!_solution_states[0])
+    _solution_states[0] = &solutionInternal();
+  else
+    mooseAssert(_solution_states[0] == &solutionInternal(), "Inconsistent current solution");
+
+  // We will manually add all states past current
+  for (unsigned int i = 1; i <= state; ++i)
+    if (!_solution_states[i])
+      _solution_states[i] = &addVector(oldSolutionStateVectorName(i), true, GHOSTED);
+    else
+      mooseAssert(_solution_states[i] == &getVector(oldSolutionStateVectorName(i)),
+                  "Inconsistent solution state");
 }
 
 void

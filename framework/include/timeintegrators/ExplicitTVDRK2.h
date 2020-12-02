@@ -73,6 +73,9 @@ protected:
 
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_old;
+
+  /// The older solution
+  const NumericVector<Number> & _solution_older;
 };
 
 template <typename T, typename T2, typename T3>
@@ -92,4 +95,3 @@ ExplicitTVDRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T
     u_dot *= 0.5 / _dt;
   }
 }
-

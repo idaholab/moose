@@ -25,7 +25,8 @@ ExplicitRK2::validParams()
 ExplicitRK2::ExplicitRK2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_old(_nl.addVector("residual_old", false, GHOSTED))
+    _residual_old(_nl.addVector("residual_old", false, GHOSTED)),
+    _solution_older(_sys.solutionState(2))
 {
   mooseInfo("ExplicitRK2-derived TimeIntegrators (ExplicitMidpoint, Heun, Ralston) and other "
             "multistage TimeIntegrators are known not to work with "

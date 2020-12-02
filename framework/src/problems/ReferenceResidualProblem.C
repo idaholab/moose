@@ -139,7 +139,7 @@ ReferenceResidualProblem::initialSetup()
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
-  TransientExplicitSystem & as = aux_sys.sys();
+  auto & as = aux_sys.sys();
 
   if (_soln_var_names.size() == 0)
   {
@@ -356,7 +356,7 @@ ReferenceResidualProblem::updateReferenceResidual()
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
-  TransientExplicitSystem & as = aux_sys.sys();
+  auto & as = aux_sys.sys();
 
   for (unsigned int i = 0; i < _group_resid.size(); ++i)
   {

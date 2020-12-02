@@ -789,6 +789,17 @@ MooseVariableFE<OutputType>::isNodalNeighborDefined() const
   return _neighbor_data->isNodalDefined();
 }
 
+template <typename OutputType>
+unsigned int
+MooseVariableFE<OutputType>::needSolutionState() const
+{
+  unsigned int state = 0;
+  state = std::max(state, _element_data->needSolutionState());
+  state = std::max(state, _neighbor_data->needSolutionState());
+  state = std::max(state, _lower_data->needSolutionState());
+  return state;
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
 template class MooseVariableFE<RealEigenVector>;

@@ -183,4 +183,9 @@ public:
    * Return the number of shape functions on the lower dimensional element for this variable
    */
   virtual std::size_t phiLowerSize() const = 0;
+
+  /**
+   * The highest solution state required for this variable (0 = current, 1 = old, etc...).
+   */
+  virtual unsigned int needSolutionState() const = 0;
 };

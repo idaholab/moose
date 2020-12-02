@@ -532,6 +532,8 @@ public:
     mooseError("We don't currently implement second derivatives for FV");
   }
 
+  unsigned int needSolutionState() const override final;
+
 protected:
   /**
    * clear finite volume caches

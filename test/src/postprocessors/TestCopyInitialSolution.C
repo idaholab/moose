@@ -22,6 +22,7 @@ TestCopyInitialSolution::validParams()
 TestCopyInitialSolution::TestCopyInitialSolution(const InputParameters & parameters)
   : GeneralPostprocessor(parameters)
 {
+  _fe_problem.getNonlinearSystemBase().needSolutionState(2);
 }
 
 TestCopyInitialSolution::~TestCopyInitialSolution() {}

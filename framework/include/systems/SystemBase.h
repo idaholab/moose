@@ -223,6 +223,11 @@ public:
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
 
   /**
+   * Initializes the solution state.
+   */
+  void initSolutionState();
+
+  /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
    *
    * If the state does not exist, it will be initialized in addition to any newer
@@ -232,11 +237,18 @@ public:
 
   /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
-   *
-   * By default, up to state _default_solution_states is added. Any older states must be
-   * added using the non-const solutionState().
    */
   const NumericVector<Number> & solutionState(const unsigned int state) const;
+
+  /**
+   * Registers that the solution state \p state is needed.
+   */
+  void needSolutionState(const unsigned int state);
+
+  /**
+   * Whether or not the system has the solution state (0 = current, 1 = old, 2 = older, etc).
+   */
+  bool hasSolutionState(const unsigned int state) const { return _solution_states.size() > state; }
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
@@ -306,19 +318,20 @@ public:
   virtual std::set<TagID> defaultMatrixTags() const { return {systemMatrixTag()}; }
 
   /**
-   * Get a raw NumericVector
+   * Get a raw NumericVector by name
    */
+  ///@{
   virtual NumericVector<Number> & getVector(const std::string & name);
+  virtual const NumericVector<Number> & getVector(const std::string & name) const;
+  ///@}
 
   /**
-   * Get a raw NumericVector
+   * Get a raw NumericVector by tag
    */
+  ///@{
   virtual NumericVector<Number> & getVector(TagID tag);
-
-  /**
-   * Get a raw NumericVector
-   */
   virtual const NumericVector<Number> & getVector(TagID tag) const;
+  ///@}
 
   /**
    * Associate a vector for a given tag
@@ -867,18 +880,9 @@ public:
 
 protected:
   /**
-   * Internal getters for the states of the solution as owned by libMesh.
-   *
-   * For the first three states (0 = current, 1 = old, 2 = older), we point directly to the
-   * solutions in libMesh (which is why these virtuals are needed). This allows us to store a more
-   * generalized set of solution states in _solution_states that also enables the addition of older
-   * states if we need them.
+   * Internal getter for solution owned by libMesh.
    */
-  ///@{
   virtual NumericVector<Number> & solutionInternal() const = 0;
-  virtual NumericVector<Number> & solutionOldInternal() const = 0;
-  virtual NumericVector<Number> & solutionOlderInternal() const = 0;
-  ///@}
 
   SubProblem & _subproblem;
 
@@ -949,10 +953,12 @@ protected:
   /// True if printing out additional information
   bool _verbose;
 
-  /// The number of default solution states to store
-  unsigned int _default_solution_states;
-
 private:
+  /**
+   * Gets the vector name used for an old (not current) solution state.
+   */
+  std::string oldSolutionStateVectorName(const unsigned int) const;
+
   /// The solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)

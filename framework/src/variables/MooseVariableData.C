@@ -193,6 +193,17 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 }
 
 template <typename OutputType>
+unsigned int
+MooseVariableData<OutputType>::needSolutionState() const
+{
+  if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
+    return 2;
+  if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
+    return 1;
+  return 0;
+}
+
+template <typename OutputType>
 void
 MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
 {

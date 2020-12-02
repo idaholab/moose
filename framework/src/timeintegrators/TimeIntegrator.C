@@ -35,7 +35,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionState(1)),
-    _solution_older(_sys.solutionState(2)),
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),

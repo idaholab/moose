@@ -32,6 +32,7 @@ validParams<CentralDifference>()
 CentralDifference::CentralDifference(const InputParameters & parameters)
   : ActuallyExplicitEuler(parameters),
     _du_dotdot_du(_sys.duDotDotDu()),
+    _solution_older(_sys.solutionState(2)),
     _solution_old_old_old(_sys.solutionState(3))
 {
   _is_explicit = true;
