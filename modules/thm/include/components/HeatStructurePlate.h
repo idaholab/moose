@@ -11,6 +11,7 @@ class HeatStructurePlate : public HeatStructureBase
 public:
   HeatStructurePlate(const InputParameters & params);
 
+  virtual void check() const override;
   virtual void addMooseObjects() override;
   virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
 
