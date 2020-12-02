@@ -1,5 +1,5 @@
 [Tests]
-  design = 'Preconditioning/index.md'
+  design = 'HMGPreconditioner.md'
   issues = '#16210'
 
   [hmg]
@@ -11,7 +11,7 @@
     petsc_version = '>=3.12.0'
     requirement = "The system shall support the use of HMG (high performance MG)"
     # Check if PtAP algorithms are setup correctly
-    expect_out = "using allatonce MatPtAP\(\) implementation"
+    expect_out = "using\s+allatonce\s+MatPtAP\(\)\s+implementation"
   []
 
   [hmg_3D]
@@ -24,6 +24,6 @@
     cli_args = 'Mesh/dmg/dim=3 Mesh/dmg/nz=10 Outputs/file_base=diffusion_hmg_3d_out -log_view'
     requirement = "The system shall support the use of HMG (high performance MG) for 3D problems"
     # Check if strong_threshold is setup correctly
-    expect_out = "PETSc Preconditioner:    hmg strong_threshold: 0.7"
+    expect_out = "PETSc\s+Preconditioner:\s+hmg\s+strong_threshold:\s+0.7"
   []
 []
