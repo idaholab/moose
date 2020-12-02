@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "THMApp.h"
 #include "HeatStructureBase.h"
-#include "HeatStructureCylindrical.h"
+#include "HeatStructureCylindricalBase.h"
 
 InputParameters
 HeatConductionModel::validParams()
@@ -99,7 +99,7 @@ HeatConductionModel::addHeatEquationXYZ()
 void
 HeatConductionModel::addHeatEquationRZ()
 {
-  HeatStructureCylindrical & hs_cyl = dynamic_cast<HeatStructureCylindrical &>(_hs);
+  HeatStructureCylindricalBase & hs_cyl = dynamic_cast<HeatStructureCylindricalBase &>(_hs);
 
   const auto & blocks = hs_cyl.getSubdomainNames();
   const auto & position = hs_cyl.getPosition();

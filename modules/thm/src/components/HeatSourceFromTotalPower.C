@@ -1,6 +1,6 @@
 #include "HeatSourceFromTotalPower.h"
 #include "HeatStructureBase.h"
-#include "HeatStructureCylindrical.h"
+#include "HeatStructureCylindricalBase.h"
 #include "HeatStructurePlate.h"
 #include "TotalPowerBase.h"
 
@@ -62,7 +62,8 @@ HeatSourceFromTotalPower::addMooseObjects()
     volume += hs.getVolumes()[idx];
   }
 
-  const HeatStructureCylindrical * hs_cyl = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+  const HeatStructureCylindricalBase * hs_cyl =
+      dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
 
   if (!_has_psf)
