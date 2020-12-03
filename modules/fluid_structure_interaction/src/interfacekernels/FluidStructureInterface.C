@@ -103,10 +103,10 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
           break;
         case Moose::ElementNeighbor:
           jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](0);
+                _normals[_qp](_component);
           break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](0);
+          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
           break;
       }
       break;
@@ -121,10 +121,10 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
           break;
         case Moose::ElementNeighbor:
           jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](1);
+                _normals[_qp](_component);
           break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](1);
+          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
           break;
       }
       break;
@@ -139,10 +139,10 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
           break;
         case Moose::ElementNeighbor:
           jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](2);
+                _normals[_qp](_component);
           break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](2);
+          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
           break;
       }
       break;
