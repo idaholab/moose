@@ -1,19 +1,21 @@
 #pragma once
 
-#include "MooseObject.h"
+#include "GeneralReporter.h"
 
 #include "OptimizeSolve.h"
 #include "OptimizationParameterVectorPostprocessor.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class FormFunction : public MooseObject,
-                     public VectorPostprocessorInterface,
-                     public PostprocessorInterface
+class FormFunction : public GeneralReporter
 {
 public:
   static InputParameters validParams();
   FormFunction(const InputParameters & parameters);
+
+  void initialize() override final {}
+  void execute() override final {}
+  void finalize() override final {}
 
   /**
    * Function to initialize petsc vectors from vpp data

@@ -41,9 +41,7 @@ isopodApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerExecFlag(EXEC_HESSIAN);
 
   // Form Function actions
-  registerSyntaxTask("AddFormFunctionAction", "FormFunction", "add_form_function");
-  registerMooseObjectTask("add_form_function", FormFunction, false);
-  addTaskDependency("add_form_function", "add_vector_postprocessor");
+  registerSyntaxTask("AddFormFunctionAction", "FormFunction", "add_reporter");
 }
 
 void

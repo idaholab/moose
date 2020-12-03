@@ -4,7 +4,7 @@
 #include "FEProblemBase.h"
 #include "FormFunction.h"
 
-registerMooseAction("isopodApp", AddFormFunctionAction, "add_form_function");
+registerMooseAction("isopodApp", AddFormFunctionAction, "add_reporter");
 
 InputParameters
 AddFormFunctionAction::validParams()
@@ -19,7 +19,5 @@ AddFormFunctionAction::AddFormFunctionAction(InputParameters params) : MooseObje
 void
 AddFormFunctionAction::act()
 {
-  std::shared_ptr<FormFunction> ff =
-      _factory.create<FormFunction>(_type, _name, _moose_object_pars);
-  _problem->theWarehouse().add(ff);
+  _problem->addReporter(_type, _name, _moose_object_pars);
 }

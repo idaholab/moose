@@ -36,13 +36,9 @@ OptimizeSolve::solve()
   _inner_solve->solve();
 
   // Grab form function
-  std::vector<FormFunction *> ffs;
-  _problem.theWarehouse().query().condition<AttribSystem>("FormFunction").queryInto(ffs);
-  if (ffs.empty())
+  if (!_problem.hasUserObject("FormFunction"))
     mooseError("No form function object found.");
-  else if (ffs.size() > 1)
-    mooseError("Only one form function per problem because of how its queried");
-  _form_function = ffs[0];
+  _form_function = &_problem.getUserObject<FormFunction>("FormFunction");
 
   // Initialize solution and matrix
   _form_function->setInitialCondition(*_parameters.get());
