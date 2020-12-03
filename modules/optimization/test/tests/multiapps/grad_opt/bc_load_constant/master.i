@@ -1,6 +1,18 @@
 [StochasticTools]
 []
 
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 20
+  xmax = 1
+  ymax = 2
+  bias_x = 1.0
+  bias_y = 1.0
+[]
+
+
 [FormFunction]
   type = ObjectiveGradientMinimize
   parameter_names = 'bc_left bc_right'
@@ -23,11 +35,13 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
+    clone_master_mesh = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
+    clone_master_mesh = true
   []
 []
 
