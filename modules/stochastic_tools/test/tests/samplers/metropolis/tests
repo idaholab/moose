@@ -1,0 +1,31 @@
+[Tests]
+  design = Metropolis.md
+  issues = '#15949'
+
+  [sample]
+    requirement = "The system shall support the ability to sample data using the Metropolis method:"
+
+    [three_Markov_chains]
+      type = CSVDiff
+      input = 'metropolis.i'
+      csvdiff = 'metropolis_out_data_0001.csv metropolis_out_data_0002.csv metropolis_out_data_0003.csv metropolis_out_data_0004.csv metropolis_out_data_0005.csv metropolis_out_data_0006.csv metropolis_out_data_0007.csv metropolis_out_data_0008.csv metropolis_out_data_0009.csv metropolis_out_data_0010.csv'
+      min_parallel = 4
+      max_parallel = 4
+
+      detail = "with multiple Markov chains."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error when defining a Metropolis sampling method:"
+
+    [different_input_sizes]
+      type = RunException
+      input = metropolis.i
+      cli_args = "Samplers/sample/proposal_std='0.5 0.5 0.75'"
+      expect_err = "The number of distributions, input names, proposal standard deviations, and initial values should be equal"
+
+      detail = "when number of distributions, input names, proposal standard deviations, and initial values differ."
+    []
+  []
+[]
