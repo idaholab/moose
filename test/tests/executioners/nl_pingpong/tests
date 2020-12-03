@@ -2,8 +2,8 @@
   [./nl_pingpong]
     type = RunApp
     input = 'nonlinear_residual_pingpong.i'
-    expect_out = "Nonlinear solve did not converge due to DIVERGED_LINE_SEARCH"
-    requirement = 'MOOSE shall kill execution when non linear residual pingpong is detected.'
+    expect_out = "Nonlinear solve did not converge"
+    requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual oscillates by a user-controlled number of times.'
     issues = '#16376'
     design = 'FEProblemSolve.md'
   [../]

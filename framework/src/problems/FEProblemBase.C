@@ -6588,20 +6588,13 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   else
     fnorm_old = system._last_nl_rnorm;
 
-  // ping pong will alwasy start with an increase in the residual value.
+  // Check for nonlinear residual pingpong.
+  // Pingpong will always start from a residual increase
   const bool increase = fnorm > fnorm_old ? true : false;
-
-  if (_n_nl_pingpong == 0 && increase)
+  if ((_n_nl_pingpong % 2 == 1 && !increase) || (_n_nl_pingpong % 2 == 0 && increase))
     _n_nl_pingpong += 1;
-  else if (_n_nl_pingpong == 0 && !increase)
-    _n_nl_pingpong = 0;
   else
-  {
-    if ((_n_nl_pingpong % 2 == 1 && !increase) || (_n_nl_pingpong % 2 == 0 && increase))
-      _n_nl_pingpong += 1;
-    else
-      _n_nl_pingpong = 0;
-  }
+    _n_nl_pingpong = 0;
 
   std::ostringstream oss;
   if (fnorm != fnorm)
