@@ -89,23 +89,23 @@ protected:
   /// Number of heat structures, i.e., for typical PWR, 3 (clad, gap, and fuel).
   unsigned int _number_of_hs;
   /// Name of heat structure parts.
-  const std::vector<std::string> & _names;
+  std::vector<std::string> _names;
   /// Map from block name to block index
   std::map<std::string, unsigned int> _name_index;
   /// Material names
-  const std::vector<std::string> & _material_names;
+  std::vector<std::string> _material_names;
   /// width(radius) of each heat structure
-  const std::vector<Real> & _width;
+  std::vector<Real> _width;
   /// Total width of all regions
-  const Real _total_width;
+  Real _total_width;
   /// volume of each heat structure
   std::vector<Real> _volume;
   /// Number of elements in each heat structure
-  const std::vector<unsigned int> & _n_part_elems;
+  std::vector<unsigned int> _n_part_elems;
   /// Total elements number for each slice of heat structure
   unsigned int _total_elem_number;
   /// The number of rods represented by this heat structure
-  const Real & _num_rods;
+  Real _num_rods;
 
   // mesh related
   /// BC ID of the heat structure (outer)

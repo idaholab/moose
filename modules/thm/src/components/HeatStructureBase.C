@@ -29,36 +29,12 @@ HeatStructureBase::validParams()
   InputParameters params = GeometricalComponent::validParams();
   params.addPrivateParam<std::string>("component_type", "heat_struct");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
-  params.addRequiredParam<std::vector<std::string>>("names", "User given heat structure names");
-  params.addRequiredParam<std::vector<Real>>("widths", "Width of each heat structure [m]");
-  params.addRequiredParam<std::vector<unsigned int>>("n_part_elems",
-                                                     "Number of elements of each heat structure");
-  params.addRequiredParam<std::vector<std::string>>("materials",
-                                                    "Material names to be used in heat structures");
-  params.addParam<Real>("num_rods", 1., "Number of rods represented by this heat structure");
   return params;
 }
 
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
-  : GeometricalComponent(params),
-    _number_of_hs(0),
-    _names(getParam<std::vector<std::string>>("names")),
-    _material_names(getParam<std::vector<std::string>>("materials")),
-    _width(getParam<std::vector<Real>>("widths")),
-    _total_width(std::accumulate(_width.begin(), _width.end(), 0.0)),
-    _n_part_elems(getParam<std::vector<unsigned int>>("n_part_elems")),
-    _total_elem_number(0),
-    _num_rods(getParam<Real>("num_rods"))
+  : GeometricalComponent(params), _number_of_hs(0), _total_elem_number(0)
 {
-  _number_of_hs = _names.size();
-  if (_n_part_elems.size() == _number_of_hs)
-  {
-    for (unsigned int i = 0; i < _number_of_hs; i++)
-      _total_elem_number += _n_part_elems[i];
-  }
-
-  for (unsigned int i = 0; i < _names.size(); i++)
-    _name_index[_names[i]] = i;
 }
 
 std::shared_ptr<HeatConductionModel>
@@ -90,10 +66,6 @@ HeatStructureBase::check() const
   else if (_n_sections > 1)
     logError("If there is more than 1 axial region, then the parameter 'axial_region_names' must "
              "be specified.");
-
-  checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
-  checkEqualSize<std::string, Real>("names", "widths");
-  checkEqualSize<std::string, std::string>("names", "materials");
 }
 
 bool
