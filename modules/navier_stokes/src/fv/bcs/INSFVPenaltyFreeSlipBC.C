@@ -15,6 +15,8 @@ InputParameters
 INSFVPenaltyFreeSlipBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
+  params.addClassDescription(
+      "Implements a free slip boundary condition using a penalty formulation.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", 0, "The velocity in the y direction.");
   params.addCoupledVar("w", 0, "The velocity in the z direction.");

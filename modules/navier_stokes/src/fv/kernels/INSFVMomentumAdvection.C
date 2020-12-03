@@ -33,6 +33,8 @@ INSFVMomentumAdvection::validParams()
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
 
+  params.addClassDescription("Object for advecting momentum, e.g. rho*u");
+
   return params;
 }
 
