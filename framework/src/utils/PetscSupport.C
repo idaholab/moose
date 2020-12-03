@@ -437,7 +437,7 @@ petscNonlinearConverged(SNES snes,
       break;
 
     case MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG:
-      *reason = SNES_DIVERGED_LINE_SEARCH;
+      *reason = SNES_DIVERGED_LOCAL_MIN;
       break;
   }
 

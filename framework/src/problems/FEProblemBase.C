@@ -6590,8 +6590,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   // Check for nonlinear residual pingpong.
   // Pingpong will always start from a residual increase
-  const bool increase = fnorm > fnorm_old ? true : false;
-  if ((_n_nl_pingpong % 2 == 1 && !increase) || (_n_nl_pingpong % 2 == 0 && increase))
+  if ((_n_nl_pingpong % 2 == 1 && !(fnorm > fnorm_old)) ||
+      (_n_nl_pingpong % 2 == 0 && fnorm > fnorm_old))
     _n_nl_pingpong += 1;
   else
     _n_nl_pingpong = 0;
