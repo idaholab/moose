@@ -1,6 +1,6 @@
 #include "HSBoundaryAmbientConvection.h"
 #include "HeatConductionModel.h"
-#include "HeatStructureCylindrical.h"
+#include "HeatStructureCylindricalBase.h"
 
 registerMooseObject("THMApp", HSBoundaryAmbientConvection);
 
@@ -44,7 +44,8 @@ void
 HSBoundaryAmbientConvection::addMooseObjects()
 {
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-  const HeatStructureCylindrical * hs_cyl = dynamic_cast<const HeatStructureCylindrical *>(&hs);
+  const HeatStructureCylindricalBase * hs_cyl =
+      dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
 
   {

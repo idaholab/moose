@@ -1,6 +1,6 @@
 #include "HeatSourceBase.h"
 #include "HeatStructureBase.h"
-#include "HeatStructureCylindrical.h"
+#include "HeatStructureCylindricalBase.h"
 #include "HeatStructurePlate.h"
 
 InputParameters
@@ -29,9 +29,10 @@ HeatSourceBase::check() const
 
   if (hasComponent<HeatStructureBase>("hs"))
   {
-    if (!hasComponent<HeatStructurePlate>("hs") && !hasComponent<HeatStructureCylindrical>("hs"))
+    if (!hasComponent<HeatStructurePlate>("hs") &&
+        !hasComponent<HeatStructureCylindricalBase>("hs"))
       logError(
-          "Heat structure must be of type 'HeatStructurePlate' or 'HeatStructureCylindrical'.");
+          "Heat structure must be of type 'HeatStructurePlate' or 'HeatStructureCylindricalBase'.");
 
     const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
 

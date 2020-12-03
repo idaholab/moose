@@ -1,7 +1,7 @@
 #include "HeatTransferFromHeatStructure1Phase.h"
 #include "FlowChannel1Phase.h"
 #include "HeatStructureBase.h"
-#include "HeatStructureCylindrical.h"
+#include "HeatStructureCylindricalBase.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
 
@@ -118,7 +118,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindrical *>(&hs) != nullptr;
+  const bool is_cylindrical = dynamic_cast<const HeatStructureCylindricalBase *>(&hs) != nullptr;
   const FlowChannel1Phase & flow_channel =
       getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
