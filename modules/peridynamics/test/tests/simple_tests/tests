@@ -65,7 +65,7 @@
     exodiff = '2D_small_strain_H1NOSPD.e'
     map = false
     requirement = 'ComputePlaneSmallStrainNOSPD shall provide the correct strain
-                   for the form I of the horizon stabilized peridynamic correspondence model.'
+                   for Form I of the horizon stabilized peridynamic correspondence model.'
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
@@ -75,7 +75,7 @@
     exodiff = '2D_finite_strain_H1NOSPD.e'
     map = false
     requirement = 'ComputePlaneFiniteStrainNOSPD shall provide the correct strain
-                   increment and rotation increment for the form II of the horizon stabilized
+                   increment and rotation increment for Form II of the horizon stabilized
                    peridynamic correspondence model.'
     design = 'modules/peridynamics/ComputePlaneFiniteStrainNOSPD.md'
     issues = '#11561'

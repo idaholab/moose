@@ -17,7 +17,7 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::validParams()
 {
   InputParameters params = MechanicsFiniteStrainBaseNOSPD::validParams();
   params.addClassDescription(
-      "Class for calculating the residual and the Jacobian for the form II "
+      "Class for calculating the residual and the Jacobian for Form II "
       "of the horizon-stabilized peridynamic correspondence model under finite strain assumptions");
 
   params.addRequiredParam<unsigned int>(
@@ -44,12 +44,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalResidual()
   // Cauchy stress is calculated as Sigma_n+1 = Sigma_n + R * (C * dt * D) * R^T
 
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
-    for (_i = 0; _i < _nnodes; ++_i)
-      _local_re(_i) += (_i == 0 ? -1 : 1) * _multi[nd] * _horizon_radius[nd] / _origin_vec.norm() *
-                       ((_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
-                        _shape2[nd].inverse())
-                           .row(_component) *
-                       _origin_vec * _bond_status;
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      _local_re(i) += (i == 0 ? -1 : 1) * _multi[nd] * _horizon_radius[nd] / _origin_vec.norm() *
+                      ((_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
+                       _shape2[nd].inverse())
+                          .row(_component) *
+                      _origin_vec * _bond_status;
 }
 
 void
@@ -80,13 +80,13 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalResidual()
         origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
                         *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-        for (_i = 0; _i < _nnodes; ++_i)
-          _local_re(_i) = (_i == 0 ? -1 : 1) * _multi[nd] * _horizon_radius[nd] /
-                          origin_vec_nb.norm() *
-                          ((_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
-                           _shape2[nd].inverse())
-                              .row(_component) *
-                          origin_vec_nb * _bond_status;
+        for (unsigned int i = 0; i < _nnodes; ++i)
+          _local_re(i) = (i == 0 ? -1 : 1) * _multi[nd] * _horizon_radius[nd] /
+                         origin_vec_nb.norm() *
+                         ((_dgrad[nd].det() * _stress[nd] * _dgrad[nd].inverse().transpose()) *
+                          _shape2[nd].inverse())
+                             .row(_component) *
+                         origin_vec_nb * _bond_status;
 
         // cache the residual contribution
         _assembly.cacheResidualNodes(_local_re, ivardofs);
@@ -94,16 +94,16 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalResidual()
         if (_has_save_in)
         {
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          for (_i = 0; _i < _save_in.size(); ++_i)
+          for (unsigned int i = 0; i < _save_in.size(); ++i)
           {
             std::vector<dof_id_type> save_in_dofs(_nnodes);
             save_in_dofs[0] = _current_elem->node_ptr(nd)->dof_number(
-                _save_in[_i]->sys().number(), _save_in[_i]->number(), 0);
+                _save_in[i]->sys().number(), _save_in[i]->number(), 0);
             save_in_dofs[1] =
                 _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])
-                    ->dof_number(_save_in[_i]->sys().number(), _save_in[_i]->number(), 0);
+                    ->dof_number(_save_in[i]->sys().number(), _save_in[i]->number(), 0);
 
-            _save_in[_i]->sys().solution().add_vector(_local_re, save_in_dofs);
+            _save_in[i]->sys().solution().add_vector(_local_re, save_in_dofs);
           }
         }
       }
@@ -141,12 +141,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalJacobian()
         origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
                         *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-        for (_i = 0; _i < _nnodes; ++_i)
-          for (_j = 0; _j < _nnodes; ++_j)
-            _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 1 : 0) * _multi[nd] *
-                                _horizon_radius[nd] / origin_vec_nb.norm() *
-                                (dPxdUx * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
-                                _bond_status;
+        for (unsigned int i = 0; i < _nnodes; ++i)
+          for (unsigned int j = 0; j < _nnodes; ++j)
+            _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 1 : 0) * _multi[nd] *
+                              _horizon_radius[nd] / origin_vec_nb.norm() *
+                              (dPxdUx * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
+                              _bond_status;
 
         _assembly.cacheJacobianBlock(_local_ke, ivardofs, ivardofs, _var.scalingFactor());
       }
@@ -201,17 +201,17 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
                              *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
             dFdUk.zero();
-            for (_i = 0; _i < _dim; ++_i)
-              dFdUk(_component, _i) =
-                  _horizon_radius[nd] / origin_vec_nb2.norm() * origin_vec_nb2(_i) * vol_nb2;
+            for (unsigned int i = 0; i < _dim; ++i)
+              dFdUk(_component, i) =
+                  _horizon_radius[nd] / origin_vec_nb2.norm() * origin_vec_nb2(i) * vol_nb2;
 
             dFdUk *= _shape2[nd].inverse();
 
             // calculate dJ/du
             dJdU = 0.0;
-            for (_i = 0; _i < 3; ++_i)
-              for (_j = 0; _j < 3; ++_j)
-                dJdU += detF * invF(_j, _i) * dFdUk(_i, _j);
+            for (unsigned int i = 0; i < 3; ++i)
+              for (unsigned int j = 0; j < 3; ++j)
+                dJdU += detF * invF(j, i) * dFdUk(i, j);
 
             // calculate dS/du
             dSdU = dSdFhat * dFdUk * _dgrad_old[nd].inverse();
@@ -228,12 +228,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
             dPxdUkx = dJdU * _stress[nd] * invF.transpose() + detF * dSdU * invF.transpose() +
                       detF * _stress[nd] * dinvFTdU;
 
-            for (_i = 0; _i < _nnodes; ++_i)
-              for (_j = 0; _j < _nnodes; ++_j)
-                _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[nd] *
-                                    _horizon_radius[nd] / origin_vec_nb1.norm() *
-                                    (dPxdUkx * _shape2[nd].inverse()).row(_component) *
-                                    origin_vec_nb1 * _bond_status;
+            for (unsigned int i = 0; i < _nnodes; ++i)
+              for (unsigned int j = 0; j < _nnodes; ++j)
+                _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 0 : 1) * _multi[nd] *
+                                  _horizon_radius[nd] / origin_vec_nb1.norm() *
+                                  (dPxdUkx * _shape2[nd].inverse()).row(_component) *
+                                  origin_vec_nb1 * _bond_status;
 
             _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
 
@@ -241,21 +241,21 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
             {
               unsigned int rows = _nnodes;
               DenseVector<Real> diag(rows);
-              for (_i = 0; _i < rows; ++_i)
-                diag(_i) = _local_ke(_i, _i);
+              for (unsigned int i = 0; i < rows; ++i)
+                diag(i) = _local_ke(i, i);
 
               Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-              for (_i = 0; _i < _diag_save_in.size(); ++_i)
+              for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
               {
                 std::vector<dof_id_type> diag_save_in_dofs(2);
                 diag_save_in_dofs[0] = _current_elem->node_ptr(nd)->dof_number(
-                    _diag_save_in[_i]->sys().number(), _diag_save_in[_i]->number(), 0);
+                    _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
                 diag_save_in_dofs[1] = _pdmesh.nodePtr(neighbors[dg_neighbors[nb2]])
-                                           ->dof_number(_diag_save_in[_i]->sys().number(),
-                                                        _diag_save_in[_i]->number(),
+                                           ->dof_number(_diag_save_in[i]->sys().number(),
+                                                        _diag_save_in[i]->number(),
                                                         0);
 
-                _diag_save_in[_i]->sys().solution().add_vector(diag, diag_save_in_dofs);
+                _diag_save_in[i]->sys().solution().add_vector(diag, diag_save_in_dofs);
               }
             }
           }
@@ -267,7 +267,7 @@ void
 HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
     unsigned int jvar_num, unsigned int coupled_component)
 {
-  if (coupled_component == 3) // temperature is coupled
+  if (_temp_coupled && jvar_num == _temp_var->number()) // temperature is coupled
   {
     std::vector<RankTwoTensor> dSdT(_nnodes);
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
@@ -301,26 +301,28 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
           origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
                           *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-          for (_i = 0; _i < _nnodes; ++_i)
-            for (_j = 0; _j < _nnodes; ++_j)
-              _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 1 : 0) * _multi[nd] *
-                                  _horizon_radius[nd] / origin_vec_nb.norm() *
-                                  (dSdT[nd] * _shape2[nd].inverse()).row(_component) *
-                                  origin_vec_nb * _bond_status;
+          for (unsigned int i = 0; i < _nnodes; ++i)
+            for (unsigned int j = 0; j < _nnodes; ++j)
+              _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 1 : 0) * _multi[nd] *
+                                _horizon_radius[nd] / origin_vec_nb.norm() *
+                                (dSdT[nd] * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
+                                _bond_status;
 
           _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
     }
     _local_ke.zero();
   }
-  else if (coupled_component == 4) // weak plane stress case, out_of_plane_strain is coupled
+  else if (_out_of_plane_strain_coupled &&
+           jvar_num == _out_of_plane_strain_var
+                           ->number()) // weak plane stress case, out_of_plane_strain is coupled
   {
     std::vector<RankTwoTensor> dSdE33(_nnodes);
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
     {
-      for (_i = 0; _i < 3; ++_i)
-        for (_j = 0; _j < 3; ++_j)
-          dSdE33[nd](_i, _j) = _Jacobian_mult[nd](_i, _j, 2, 2);
+      for (unsigned int i = 0; i < 3; ++i)
+        for (unsigned int j = 0; j < 3; ++j)
+          dSdE33[nd](i, j) = _Jacobian_mult[nd](i, j, 2, 2);
 
       dSdE33[nd] = _dgrad[nd].det() * dSdE33[nd] * _dgrad[nd].inverse().transpose();
     }
@@ -351,12 +353,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
           origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
                           *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-          for (_i = 0; _i < _nnodes; ++_i)
-            for (_j = 0; _j < _nnodes; ++_j)
-              _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 1 : 0) * _multi[nd] *
-                                  _horizon_radius[nd] / origin_vec_nb.norm() *
-                                  (dSdE33[nd] * _shape2[nd].inverse()).row(_component) *
-                                  origin_vec_nb * _bond_status;
+          for (unsigned int i = 0; i < _nnodes; ++i)
+            for (unsigned int j = 0; j < _nnodes; ++j)
+              _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 1 : 0) * _multi[nd] *
+                                _horizon_radius[nd] / origin_vec_nb.norm() *
+                                (dSdE33[nd] * _shape2[nd].inverse()).row(_component) *
+                                origin_vec_nb * _bond_status;
 
           _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
@@ -396,12 +398,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
           origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
                           *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-          for (_i = 0; _i < _nnodes; ++_i)
-            for (_j = 0; _j < _nnodes; ++_j)
-              _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 1 : 0) * _multi[nd] *
-                                  _horizon_radius[nd] / origin_vec_nb.norm() *
-                                  (dPxdUy * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
-                                  _bond_status;
+          for (unsigned int i = 0; i < _nnodes; ++i)
+            for (unsigned int j = 0; j < _nnodes; ++j)
+              _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 1 : 0) * _multi[nd] *
+                                _horizon_radius[nd] / origin_vec_nb.norm() *
+                                (dPxdUy * _shape2[nd].inverse()).row(_component) * origin_vec_nb *
+                                _bond_status;
 
           _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
         }
@@ -414,7 +416,15 @@ void
 HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(
     unsigned int jvar_num, unsigned int coupled_component)
 {
-  if (coupled_component != 3 && coupled_component != 4)
+  if (_temp_coupled && jvar_num == _temp_var->number())
+  {
+    // no nonlocal contribution from temperature
+  }
+  else if (_out_of_plane_strain_coupled && jvar_num == _out_of_plane_strain_var->number())
+  {
+    // no nonlocal contribution from out of plane strain
+  }
+  else
   {
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
     {
@@ -461,17 +471,17 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacob
                                *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
               dFdUk.zero();
-              for (_i = 0; _i < _dim; ++_i)
-                dFdUk(coupled_component, _i) =
-                    _horizon_radius[nd] / origin_vec_nb2.norm() * origin_vec_nb2(_i) * vol_nb2;
+              for (unsigned int i = 0; i < _dim; ++i)
+                dFdUk(coupled_component, i) =
+                    _horizon_radius[nd] / origin_vec_nb2.norm() * origin_vec_nb2(i) * vol_nb2;
 
               dFdUk *= _shape2[nd].inverse();
 
               // calculate dJ/du
               dJdU = 0.0;
-              for (_i = 0; _i < 3; ++_i)
-                for (_j = 0; _j < 3; ++_j)
-                  dJdU += detF * invF(_j, _i) * dFdUk(_i, _j);
+              for (unsigned int i = 0; i < 3; ++i)
+                for (unsigned int j = 0; j < 3; ++j)
+                  dJdU += detF * invF(j, i) * dFdUk(i, j);
 
               // calculate dS/du
               dSdU = dSdFhat * dFdUk * _dgrad_old[nd].inverse();
@@ -488,12 +498,12 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacob
               dPxdUky = dJdU * _stress[nd] * invF.transpose() + detF * dSdU * invF.transpose() +
                         detF * _stress[nd] * dinvFTdU;
 
-              for (_i = 0; _i < _nnodes; ++_i)
-                for (_j = 0; _j < _nnodes; ++_j)
-                  _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[nd] *
-                                      _horizon_radius[nd] / origin_vec_nb1.norm() *
-                                      (dPxdUky * _shape2[nd].inverse()).row(_component) *
-                                      origin_vec_nb1 * _bond_status;
+              for (unsigned int i = 0; i < _nnodes; ++i)
+                for (unsigned int j = 0; j < _nnodes; ++j)
+                  _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 0 : 1) * _multi[nd] *
+                                    _horizon_radius[nd] / origin_vec_nb1.norm() *
+                                    (dPxdUky * _shape2[nd].inverse()).row(_component) *
+                                    origin_vec_nb1 * _bond_status;
 
               _assembly.cacheJacobianBlock(_local_ke, ivardofs, jvardofs, _var.scalingFactor());
             }

@@ -39,37 +39,37 @@ WeakPlaneStressNOSPD::computeLocalResidual()
 void
 WeakPlaneStressNOSPD::computeLocalJacobian()
 {
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < _nnodes; ++_j)
-      _local_ke(_i, _j) += (_i == _j ? 1 : 0) * _Jacobian_mult[_i](2, 2, 2, 2) * _dg_vol_frac[_i] *
-                           _node_vol[_i] * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < _nnodes; ++j)
+      _local_ke(i, j) += (i == j ? 1 : 0) * _Jacobian_mult[i](2, 2, 2, 2) * _dg_vol_frac[i] *
+                         _node_vol[i] * _bond_status;
 }
 
 void
-WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int /*jvar_num*/,
+WeakPlaneStressNOSPD::computeLocalOffDiagJacobian(unsigned int jvar_num,
                                                   unsigned int coupled_component)
 {
   _local_ke.zero();
-  if (coupled_component == 3) // off-diagonal Jacobian with respect to coupled temperature variable
+  if (_temp_coupled && jvar_num == _temp_var->number()) // for coupled temperature variable
   {
     std::vector<RankTwoTensor> dSdT(_nnodes);
     for (unsigned int nd = 0; nd < _nnodes; nd++)
       for (unsigned int es = 0; es < _deigenstrain_dT.size(); es++)
         dSdT[nd] = -_Jacobian_mult[nd] * (*_deigenstrain_dT[es])[nd];
 
-    for (_i = 0; _i < _nnodes; ++_i)
-      for (_j = 0; _j < _nnodes; ++_j)
-        _local_ke(_i, _j) +=
-            (_i == _j ? 1 : 0) * dSdT[_i](2, 2) * _dg_vol_frac[_i] * _node_vol[_i] * _bond_status;
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      for (unsigned int j = 0; j < _nnodes; ++j)
+        _local_ke(i, j) +=
+            (i == j ? 1 : 0) * dSdT[i](2, 2) * _dg_vol_frac[i] * _node_vol[i] * _bond_status;
   }
-  else // off-diagonal Jacobian with respect to coupled displacement variables
+  else // for coupled displacement variables
   {
     // dSidUi and dSjdUj are considered as local off-diagonal Jacobian
     // contributions to their neighbors are considered as nonlocal off-diagonal
-    for (_i = 0; _i < _nnodes; ++_i)
-      for (_j = 0; _j < _nnodes; ++_j)
-        _local_ke(_i, _j) += (_i == _j ? 1 : 0) * computeDSDU(coupled_component, _j)(2, 2) *
-                             _dg_vol_frac[_j] * _node_vol[_j] * _bond_status;
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      for (unsigned int j = 0; j < _nnodes; ++j)
+        _local_ke(i, j) += (i == j ? 1 : 0) * computeDSDU(coupled_component, j)(2, 2) *
+                           _dg_vol_frac[j] * _node_vol[j] * _bond_status;
   }
 }
 
@@ -77,12 +77,17 @@ void
 WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                                                        unsigned int coupled_component)
 {
-  if (coupled_component != 3)
+  if (_temp_coupled && jvar_num == _temp_var->number())
+  {
+    // no nonlocal contribution from temperature
+  }
+  else
   {
     for (unsigned int nd = 0; nd < _nnodes; nd++)
     {
       // calculation of jacobian contribution to current_node's neighbors
-      // NOT including the contribution to nodes i and j, which is considered as local off-diagonal
+      // NOT including the contribution to nodes i and j, which is considered as local
+      // off-diagonal
       std::vector<dof_id_type> jvardofs(_nnodes);
       jvardofs[0] = _current_elem->node_ptr(nd)->dof_number(_sys.number(), jvar_num, 0);
       std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(nd));
@@ -109,9 +114,9 @@ WeakPlaneStressNOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                           *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
           dFdUk.zero();
-          for (_i = 0; _i < _dim; ++_i)
-            dFdUk(coupled_component, _i) =
-                _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(_i) * vol_nb;
+          for (unsigned int i = 0; i < _dim; ++i)
+            dFdUk(coupled_component, i) =
+                _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(i) * vol_nb;
 
           dFdUk *= _shape2[nd].inverse();
 

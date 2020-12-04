@@ -14,7 +14,7 @@
 class PeridynamicsMesh;
 
 /**
- * Kernel class for the form I of the horizon-stabilized peridynamic correspondence model for small
+ * Kernel class for Form I of the horizon-stabilized peridynamic correspondence model for small
  * strain
  */
 class HorizonStabilizedFormISmallStrainMechanicsNOSPD : public MechanicsBaseNOSPD
@@ -30,7 +30,7 @@ protected:
   virtual void computeLocalJacobian() override;
   virtual void computeNonlocalJacobian() override;
 
-  virtual void computeLocalOffDiagJacobian(unsigned int /*jvar_num*/,
+  virtual void computeLocalOffDiagJacobian(unsigned int jvar_num,
                                            unsigned int coupled_component) override;
   virtual void computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                                                 unsigned int coupled_component) override;

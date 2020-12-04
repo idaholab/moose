@@ -83,7 +83,7 @@ GeneralizedPlaneStrainActionPD::act()
     if (_formulation == "ORDINARY_STATE")
       k_type = "GeneralizedPlaneStrainOffDiagOSPD"; // Based on the ordinary state-based model
     else if (_formulation == "NONORDINARY_STATE")
-      k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on the form I of horizon-stabilized
+      k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on Form I of horizon-stabilized
                                                      // correspondence model
     else
       paramError("formulation", "Unsupported peridynamic formulation");

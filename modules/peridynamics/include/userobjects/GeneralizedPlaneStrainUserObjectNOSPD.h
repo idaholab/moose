@@ -13,7 +13,7 @@
 
 /**
  * UserObject class to compute the residual and diagonal Jacobian components for scalar out-of-plane
- * strain variable of generalized plane strain model based on the form I of the horizon-stablized
+ * strain variable of generalized plane strain model based on Form I of the horizon-stablized
  * peridynamic correspondence model
  */
 class GeneralizedPlaneStrainUserObjectNOSPD : public GeneralizedPlaneStrainUserObjectBasePD

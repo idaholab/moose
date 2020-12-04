@@ -74,16 +74,16 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispPartialOffDiagJacobianScalar(unsi
   // fill in the column corresponding to the scalar variable
   std::vector<RankTwoTensor> dSdE33(_nnodes);
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
-    for (_i = 0; _i < 3; ++_i)
-      for (_j = 0; _j < 3; ++_j)
-        dSdE33[nd](_i, _j) = _Jacobian_mult[nd](_i, _j, 2, 2);
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        dSdE33[nd](i, j) = _Jacobian_mult[nd](i, j, 2, 2);
 
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < jvar.order(); ++_j)
-      ken(_i, _j) += (_i == _j ? -1 : 1) *
-                     (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
-                      _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
-                     _origin_vec * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < jvar.order(); ++j)
+      ken(i, j) += (i == j ? -1 : 1) *
+                   (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                    _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
+                   _origin_vec * _bond_status;
 
   kne(0, 0) +=
       computeDSDU(component, 0)(2, 2) * _node_vol[0] * _dg_vol_frac[0] * _bond_status; // node i
@@ -110,12 +110,12 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
       for (unsigned int j = 0; j < 3; ++j)
         dSdE33[nd](i, j) = _Jacobian_mult[nd](i, j, 2, 2);
 
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < jvar.order(); ++_j)
-      ken(_i, _j) += (_i == _j ? -1 : 1) *
-                     (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
-                      _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
-                     _origin_vec * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < jvar.order(); ++j)
+      ken(i, j) += (i == j ? -1 : 1) *
+                   (_multi[0] * (dSdE33[0] * _shape2[0].inverse()).row(component) +
+                    _multi[1] * (dSdE33[1] * _shape2[1].inverse()).row(component)) *
+                   _origin_vec * _bond_status;
 
   // fill in the row corresponding to the scalar variable
   kne(0, 0) +=
@@ -156,9 +156,9 @@ GeneralizedPlaneStrainOffDiagNOSPD::computeDispFullOffDiagJacobianScalar(unsigne
         origin_vec_nb = *dgneighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
         dFdUk.zero();
-        for (_i = 0; _i < _dim; ++_i)
-          dFdUk(component, _i) =
-              _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(_i) * vol_nb;
+        for (unsigned int i = 0; i < _dim; ++i)
+          dFdUk(component, i) =
+              _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(i) * vol_nb;
 
         dFdUk *= _shape2[nd].inverse();
         dPdUk = _Jacobian_mult[nd] * 0.5 * (dFdUk.transpose() + dFdUk);

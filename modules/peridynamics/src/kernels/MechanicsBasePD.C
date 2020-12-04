@@ -57,9 +57,9 @@ MechanicsBasePD::prepare()
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
     _ivardofs[nd] = _current_elem->node_ptr(nd)->dof_number(_sys.number(), _var.number(), 0);
 
-  for (_i = 0; _i < _dim; ++_i)
-    _current_vec(_i) = _origin_vec(_i) + _disp_var[_i]->getNodalValue(*_current_elem->node_ptr(1)) -
-                       _disp_var[_i]->getNodalValue(*_current_elem->node_ptr(0));
+  for (unsigned int i = 0; i < _dim; ++i)
+    _current_vec(i) = _origin_vec(i) + _disp_var[i]->getNodalValue(*_current_elem->node_ptr(1)) -
+                      _disp_var[i]->getNodalValue(*_current_elem->node_ptr(0));
 
   _current_unit_vec = _current_vec / _current_vec.norm();
 }
@@ -76,24 +76,18 @@ MechanicsBasePD::computeOffDiagJacobian(const unsigned int jvar_num)
     unsigned int coupled_component = 0;
     bool active = false;
 
-    for (_i = 0; _i < _dim; ++_i)
-      if (jvar_num == _disp_var[_i]->number())
+    for (unsigned int i = 0; i < _dim; ++i)
+      if (jvar_num == _disp_var[i]->number())
       {
-        coupled_component = _i;
+        coupled_component = i;
         active = true;
       }
 
     if (_temp_coupled && jvar_num == _temp_var->number())
-    {
-      coupled_component = 3;
       active = true;
-    }
 
     if (_out_of_plane_strain_coupled && jvar_num == _out_of_plane_strain_var->number())
-    {
-      coupled_component = 4;
       active = true;
-    }
 
     if (active)
     {

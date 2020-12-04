@@ -50,10 +50,10 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computeLocalResidual()
   // Cauchy stress is calculated as Sigma = C * E.
 
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
-    for (_i = 0; _i < _nnodes; ++_i)
-      _local_re(_i) += (_i == 0 ? -1 : 1) * _multi[nd] *
-                       (_stress[nd] * _shape2[nd].inverse()).row(_component) * _origin_vec *
-                       _bond_status;
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      _local_re(i) += (i == 0 ? -1 : 1) * _multi[nd] *
+                      (_stress[nd] * _shape2[nd].inverse()).row(_component) * _origin_vec *
+                      _bond_status;
 
   // add fictitious force for model stabilization
   _local_re(0) += -sforce;
@@ -64,17 +64,17 @@ void
 ForceStabilizedSmallStrainMechanicsNOSPD::computeLocalJacobian()
 {
   // excludes dTi/dUj and dTj/dUi contribution which was considered as nonlocal contribution
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < _nnodes; ++_j)
-      _local_ke(_i, _j) += (_i == 0 ? -1 : 1) * _multi[_j] *
-                           (computeDSDU(_component, _j) * _shape2[_j].inverse()).row(_component) *
-                           _origin_vec * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < _nnodes; ++j)
+      _local_ke(i, j) += (i == 0 ? -1 : 1) * _multi[j] *
+                         (computeDSDU(_component, j) * _shape2[j].inverse()).row(_component) *
+                         _origin_vec * _bond_status;
 
   // compute local stabilization force jacobian
   Real diag = 0.5 * (_sf_coeff[0] + _sf_coeff[1]);
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < _nnodes; ++_j)
-      _local_ke(_i, _j) += (_i == _j ? 1 : -1) * diag * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < _nnodes; ++j)
+      _local_ke(i, j) += (i == j ? 1 : -1) * diag * _bond_status;
 }
 
 void
@@ -104,19 +104,19 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computeNonlocalJacobian()
         origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
         dFdUk.zero();
-        for (_i = 0; _i < _dim; ++_i)
-          dFdUk(_component, _i) =
-              vol_nb * _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(_i);
+        for (unsigned int i = 0; i < _dim; ++i)
+          dFdUk(_component, i) =
+              vol_nb * _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(i);
 
         dFdUk *= _shape2[nd].inverse();
         dSxdUkx = _Jacobian_mult[nd] * 0.5 * (dFdUk.transpose() + dFdUk);
 
         _local_ke.zero();
-        for (_i = 0; _i < _nnodes; ++_i)
-          for (_j = 0; _j < _nnodes; ++_j)
-            _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[nd] *
-                                (dSxdUkx * _shape2[nd].inverse()).row(_component) * _origin_vec *
-                                _bond_status;
+        for (unsigned int i = 0; i < _nnodes; ++i)
+          for (unsigned int j = 0; j < _nnodes; ++j)
+            _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 0 : 1) * _multi[nd] *
+                              (dSxdUkx * _shape2[nd].inverse()).row(_component) * _origin_vec *
+                              _bond_status;
 
         _assembly.cacheJacobianBlock(_local_ke, _ivardofs, ivardofs, _var.scalingFactor());
 
@@ -124,12 +124,12 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computeNonlocalJacobian()
         {
           unsigned int rows = _nnodes;
           DenseVector<Real> diag(rows);
-          for (_i = 0; _i < rows; ++_i)
-            diag(_i) = _local_ke(_i, _i);
+          for (unsigned int i = 0; i < rows; ++i)
+            diag(i) = _local_ke(i, i);
 
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          for (_i = 0; _i < _diag_save_in.size(); ++_i)
-            _diag_save_in[_i]->sys().solution().add_vector(diag, _diag_save_in[_i]->dofIndices());
+          for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
+            _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
         }
       }
   }
@@ -137,29 +137,29 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computeNonlocalJacobian()
 
 void
 ForceStabilizedSmallStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
-    unsigned int /* jvar_num */, unsigned int coupled_component)
+    unsigned int jvar_num, unsigned int coupled_component)
 {
   _local_ke.zero();
-  if (coupled_component == 3)
+  if (_temp_coupled && jvar_num == _temp_var->number())
   {
     std::vector<RankTwoTensor> dSdT(_nnodes);
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
       for (unsigned int es = 0; es < _deigenstrain_dT.size(); ++es)
         dSdT[nd] = -(_Jacobian_mult[nd] * (*_deigenstrain_dT[es])[nd]);
 
-    for (_i = 0; _i < _nnodes; ++_i)
-      for (_j = 0; _j < _nnodes; ++_j)
-        _local_ke(_i, _j) += (_i == 0 ? -1 : 1) * _multi[_j] *
-                             (dSdT[_j] * _shape2[_j].inverse()).row(_component) * _origin_vec *
-                             _bond_status;
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      for (unsigned int j = 0; j < _nnodes; ++j)
+        _local_ke(i, j) += (i == 0 ? -1 : 1) * _multi[j] *
+                           (dSdT[j] * _shape2[j].inverse()).row(_component) * _origin_vec *
+                           _bond_status;
   }
   else
   {
-    for (_i = 0; _i < _nnodes; ++_i)
-      for (_j = 0; _j < _nnodes; ++_j)
-        _local_ke(_i, _j) +=
-            (_i == 0 ? -1 : 1) * _multi[_j] *
-            (computeDSDU(coupled_component, _j) * _shape2[_j].inverse()).row(_component) *
+    for (unsigned int i = 0; i < _nnodes; ++i)
+      for (unsigned int j = 0; j < _nnodes; ++j)
+        _local_ke(i, j) +=
+            (i == 0 ? -1 : 1) * _multi[j] *
+            (computeDSDU(coupled_component, j) * _shape2[j].inverse()).row(_component) *
             _origin_vec * _bond_status;
   }
 }
@@ -168,7 +168,11 @@ void
 ForceStabilizedSmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(
     unsigned int jvar_num, unsigned int coupled_component)
 {
-  if (coupled_component != 3)
+  if (_temp_coupled && jvar_num == _temp_var->number())
+  {
+    // no nonlocal contribution from temperature
+  }
+  else
   {
     for (unsigned int nd = 0; nd < _nnodes; ++nd)
     {
@@ -194,19 +198,19 @@ ForceStabilizedSmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobian(
           origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
           dFdUk.zero();
-          for (_i = 0; _i < _dim; ++_i)
-            dFdUk(coupled_component, _i) =
-                _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(_i) * vol_nb;
+          for (unsigned int i = 0; i < _dim; ++i)
+            dFdUk(coupled_component, i) =
+                _horizon_radius[nd] / origin_vec_nb.norm() * origin_vec_nb(i) * vol_nb;
 
           dFdUk *= _shape2[nd].inverse();
           dSxdUky = _Jacobian_mult[nd] * 0.5 * (dFdUk.transpose() + dFdUk);
 
           _local_ke.zero();
-          for (_i = 0; _i < _nnodes; ++_i)
-            for (_j = 0; _j < _nnodes; ++_j)
-              _local_ke(_i, _j) = (_i == 0 ? -1 : 1) * (_j == 0 ? 0 : 1) * _multi[nd] *
-                                  (dSxdUky * _shape2[nd].inverse()).row(_component) * _origin_vec *
-                                  _bond_status;
+          for (unsigned int i = 0; i < _nnodes; ++i)
+            for (unsigned int j = 0; j < _nnodes; ++j)
+              _local_ke(i, j) = (i == 0 ? -1 : 1) * (j == 0 ? 0 : 1) * _multi[nd] *
+                                (dSxdUky * _shape2[nd].inverse()).row(_component) * _origin_vec *
+                                _bond_status;
 
           _assembly.cacheJacobianBlock(_local_ke, _ivardofs, jvardofs, _var.scalingFactor());
         }

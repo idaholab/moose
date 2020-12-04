@@ -12,7 +12,7 @@
 #include "MechanicsBaseNOSPD.h"
 
 /**
- * Kernel class for coupled off diagonal Jacobian entries of form I of horizon stabilized
+ * Kernel class for coupled off diagonal Jacobian entries of Form I of horizon stabilized
  * peridynamic generalized plane strain model
  */
 class GeneralizedPlaneStrainOffDiagNOSPD : public MechanicsBaseNOSPD

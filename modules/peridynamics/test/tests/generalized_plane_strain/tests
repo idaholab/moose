@@ -54,7 +54,7 @@
     abs_zero = 1.5e-10
     map = false
     requirement = 'GeneralizedPlaneStrainUserObjectNOSPD shall provide the residual
-                   and diagonal jacobian entry for formulation based on the form I of 
+                   and diagonal jacobian entry for formulation based on Form I of
                    the horizon stabilized correspondence model.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainUserObjectNOSPD.md'
     issues = '#11561'

@@ -75,10 +75,10 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
 
   // LOCAL jacobian contribution
   // fill in the column corresponding to the scalar variable from bond ij
-  for (_i = 0; _i < _nnodes; _i++)
-    for (_j = 0; _j < jvar.order(); _j++)
-      ken(_i, _j) +=
-          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < jvar.order(); ++j)
+      ken(i, j) +=
+          (i == j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
 
   // NONLOCAL jacobian contribution
   std::vector<RankTwoTensor> shape(_nnodes), dgrad(_nnodes);
@@ -174,13 +174,13 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispPartialOffDiagJacobianScalar(unsig
   MooseVariableScalar & jvar = _sys.getScalarVariable(_tid, jvar_num);
 
   // fill in the column corresponding to the scalar variable from bond ij
-  for (_i = 0; _i < _nnodes; ++_i)
-    for (_j = 0; _j < jvar.order(); ++_j)
+  for (unsigned int i = 0; i < _nnodes; ++i)
+    for (unsigned int j = 0; j < jvar.order(); ++j)
     {
-      ken(_i, _j) +=
-          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
-      kne(_j, _i) +=
-          (_i == _j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
+      ken(i, j) +=
+          (i == j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
+      kne(j, i) +=
+          (i == j ? -1 : 1) * _current_unit_vec(component) * _bond_local_dfdE[0] * _bond_status;
     }
 }
 

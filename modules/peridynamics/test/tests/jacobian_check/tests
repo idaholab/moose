@@ -164,7 +164,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
-                   and jacobian for the form I of the horizon stabilized peridynamic correspondence model
+                   and jacobian for Form I of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
@@ -188,7 +188,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD shall provide the accurate residual
-                   and jacobian for the form II of the horizon stabilized peridynamic correspondence model
+                   and jacobian for Form II of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
@@ -212,7 +212,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD and HeatConductionBPD shall provide
-                   the accurate residual and jacobian for thermomechanics problems based on the form I
+                   the accurate residual and jacobian for thermomechanics problems based on Form I
                    of the horizon stabilized peridynamic correspondence model and the bond-based heat conduction model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
@@ -224,7 +224,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD and HeatConductionBPD shall provide
-                   the accurate residual and jacobian for thermomechanics problems based on the form II
+                   the accurate residual and jacobian for thermomechanics problems based on Form II
                    of the horizon stabilized peridynamic correspondence model and the bond-based heat conduction model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
@@ -236,7 +236,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
-                   and jacobian for the form I of the horizon stabilized peridynamic correspondence model
+                   and jacobian for Form I of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
@@ -247,7 +247,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     requirement = 'HorizonStabilizedFormIISmallStrainMechanicsNOSPD shall provide the accurate residual
-                   and jacobian for the form II of the horizon stabilized peridynamic correspondence model
+                   and jacobian for Form II of the horizon stabilized peridynamic correspondence model
                    under small strain assumptions.'
     design = 'modules/peridynamics/HorizonStabilizedFormIISmallStrainMechanicsNOSPD.md'
     issues = '#11561'
@@ -320,7 +320,7 @@
     difference_tol = 1E10
     requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal
                    jacobian for coupling between scalar variable and displacement variables
-                   for the form I of the horizon stabilized peridynamic correspondence model based
+                   for Form I of the horizon stabilized peridynamic correspondence model based
                    generalized plane strain model.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'
@@ -345,7 +345,7 @@
     difference_tol = 1E10
     requirement = 'GeneralizedPlaneStrainOffDiagNOSPD shall provide the off-diagonal
                    jacobian for coupling between scalar variable and field variables (disp and temp)
-                   for the form I of the horizon stabilized peridynamic correspondence model based
+                   for Form I of the horizon stabilized peridynamic correspondence model based
                    generalized plane strain model.'
     design = 'modules/peridynamics/GeneralizedPlaneStrainOffDiagNOSPD.md'
     issues = '#11561'

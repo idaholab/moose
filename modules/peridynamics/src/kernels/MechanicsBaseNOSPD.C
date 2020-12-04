@@ -37,9 +37,9 @@ MechanicsBaseNOSPD::MechanicsBaseNOSPD(const InputParameters & parameters)
     _deigenstrain_dT(_eigenstrain_names.size())
 {
   if (_temp_coupled)
-    for (_i = 0; _i < _deigenstrain_dT.size(); ++_i)
-      _deigenstrain_dT[_i] =
-          &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[_i], _temp_var->name());
+    for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
+      _deigenstrain_dT[i] =
+          &getMaterialPropertyDerivative<RankTwoTensor>(_eigenstrain_names[i], _temp_var->name());
 }
 
 RankTwoTensor

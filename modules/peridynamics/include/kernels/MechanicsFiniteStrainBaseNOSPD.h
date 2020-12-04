@@ -12,7 +12,7 @@
 #include "MechanicsBaseNOSPD.h"
 
 /**
- * Base kernel class for finite strain correspondence material models
+ * Base kernel class for finite strain correspondence models
  */
 class MechanicsFiniteStrainBaseNOSPD : public MechanicsBaseNOSPD
 {

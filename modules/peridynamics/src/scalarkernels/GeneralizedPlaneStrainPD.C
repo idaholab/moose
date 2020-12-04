@@ -38,14 +38,14 @@ void
 GeneralizedPlaneStrainPD::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); _i++)
-    re(_i) += _gpsuo.returnResidual();
+  for (unsigned int i = 0; i < re.size(); ++i)
+    re(i) += _gpsuo.returnResidual();
 }
 
 void
 GeneralizedPlaneStrainPD::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); _i++)
-    ke(_i, _i) += _gpsuo.returnJacobian();
+  for (unsigned int i = 0; i < ke.m(); ++i)
+    ke(i, i) += _gpsuo.returnJacobian();
 }

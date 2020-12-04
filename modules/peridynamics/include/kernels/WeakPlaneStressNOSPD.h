@@ -12,7 +12,7 @@
 #include "MechanicsBaseNOSPD.h"
 
 /**
- * Kernel class for weak plane stress formulation based on the form I of the horizon-stabilized
+ * Kernel class for weak plane stress formulation based on Form I of the horizon-stabilized
  * peridynamic correspondence model
  */
 class WeakPlaneStressNOSPD : public MechanicsBaseNOSPD
@@ -24,7 +24,7 @@ public:
 
   virtual void computeLocalResidual() override;
   virtual void computeLocalJacobian() override;
-  virtual void computeLocalOffDiagJacobian(unsigned int /*jvar_num*/,
+  virtual void computeLocalOffDiagJacobian(unsigned int jvar_num,
                                            unsigned int coupled_component) override;
   virtual void computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                                                 unsigned int coupled_component) override;

@@ -110,20 +110,20 @@ MechanicsFiniteStrainBaseNOSPD::computeDJDU(unsigned int component, unsigned int
 {
   // for finite formulation, compute the derivative of determinant of deformation gradient w.r.t the
   // solution components
-  // dJ / du = dJ / dF_iJ * dF_iJ / du = J * inv(F)_Ji * dF_iJ / du
+  // dJ / du = dJ / dF_ij * dF_ij / du = J * inv(F)_ji * dF_ij / du
 
   Real dJdU = 0.0;
   RankTwoTensor invF = _dgrad[nd].inverse();
   Real detF = _dgrad[nd].det();
   for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int J = 0; J < 3; ++J)
+    for (unsigned int j = 0; j < 3; ++j)
     {
       if (component == 0)
-        dJdU += detF * invF(J, i) * _ddgraddu[nd](i, J);
+        dJdU += detF * invF(j, i) * _ddgraddu[nd](i, j);
       else if (component == 1)
-        dJdU += detF * invF(J, i) * _ddgraddv[nd](i, J);
+        dJdU += detF * invF(j, i) * _ddgraddv[nd](i, j);
       else if (component == 2)
-        dJdU += detF * invF(J, i) * _ddgraddw[nd](i, J);
+        dJdU += detF * invF(j, i) * _ddgraddw[nd](i, j);
     }
 
   return dJdU;
@@ -134,24 +134,8 @@ MechanicsFiniteStrainBaseNOSPD::computeDinvFTDU(unsigned int component, unsigned
 {
   // for finite formulation, compute the derivative of transpose of inverse of deformation gradient
   // w.r.t the solution components
-  // d(inv(F)_Ji)/du = d(inv(F)_Ji)/dF_kL * dF_kL/du = - inv(F)_Jk * inv(F)_Li * dF_kL/du
-  // the bases are gi, GJ, gk, GL, indictates the inverse transpose rather than the inverse
-
-  // RankTwoTensor dinvFTdU;
-  // dinvFTdU.zero();
-  // RankTwoTensor invF = _dgrad[nd].inverse();
-  // for (unsigned int i = 0; i < 3; ++i)
-  //   for (unsigned int J = 0; J < 3; ++J)
-  //     for (unsigned int k = 0; k < 3; ++k)
-  //       for (unsigned int L = 0; L < 3; ++L)
-  //       {
-  //         if (component == 0)
-  //           dinvFTdU(i, J) += -invF(J, k) * invF(L, i) * _ddgraddu[nd](k, L);
-  //         else if (component == 1)
-  //           dinvFTdU(i, J) += -invF(J, k) * invF(L, i) * _ddgraddv[nd](k, L);
-  //         else if (component == 2)
-  //           dinvFTdU(i, J) += -invF(J, k) * invF(L, i) * _ddgraddw[nd](k, L);
-  //       }
+  // d(inv(F)_ji)/du = d(inv(F)_ji)/dF_kl * dF_kl/du = - inv(F)_jk * inv(F)_li * dF_kl/du
+  // the bases are gi, gj, gk, gl, indictates the inverse transpose rather than the inverse
 
   RankTwoTensor dinvFTdU;
   dinvFTdU.zero();
@@ -204,16 +188,16 @@ MechanicsFiniteStrainBaseNOSPD::computeDinvFTDU(unsigned int component, unsigned
 
   dinvFTdU /= _dgrad[nd].det();
   for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int J = 0; J < 3; ++J)
+    for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
-        for (unsigned int L = 0; L < 3; ++L)
+        for (unsigned int l = 0; l < 3; ++l)
         {
           if (component == 0)
-            dinvFTdU(i, J) -= invF(i, J) * invF(L, k) * _ddgraddu[nd](k, L);
+            dinvFTdU(i, j) -= invF(i, j) * invF(l, k) * _ddgraddu[nd](k, l);
           else if (component == 1)
-            dinvFTdU(i, J) -= invF(i, J) * invF(L, k) * _ddgraddv[nd](k, L);
+            dinvFTdU(i, j) -= invF(i, j) * invF(l, k) * _ddgraddv[nd](k, l);
           else if (component == 2)
-            dinvFTdU(i, J) -= invF(i, J) * invF(L, k) * _ddgraddw[nd](k, L);
+            dinvFTdU(i, j) -= invF(i, j) * invF(l, k) * _ddgraddw[nd](k, l);
         }
 
   return dinvFTdU;

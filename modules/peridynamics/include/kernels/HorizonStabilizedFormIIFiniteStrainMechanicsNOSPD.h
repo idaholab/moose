@@ -14,7 +14,7 @@
 class PeridynamicsMesh;
 
 /**
- * Kernel class for the form II of the horizon-stabilized peridynamic correspondence model for
+ * Kernel class for Form II of the horizon-stabilized peridynamic correspondence model for
  * finite strain
  */
 class HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD : public MechanicsFiniteStrainBaseNOSPD

@@ -76,8 +76,8 @@ PeridynamicsKernelBase::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (_i = 0; _i < _save_in.size(); ++_i)
-      _save_in[_i]->sys().solution().add_vector(_local_re, _save_in[_i]->dofIndices());
+    for (unsigned int i = 0; i < _save_in.size(); ++i)
+      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 
   _local_re.zero();
@@ -102,12 +102,12 @@ PeridynamicsKernelBase::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (_i = 0; _i < rows; ++_i)
-      diag(_i) = _local_ke(_i, _i);
+    for (unsigned int i = 0; i < rows; ++i)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (_i = 0; _i < _diag_save_in.size(); ++_i)
-      _diag_save_in[_i]->sys().solution().add_vector(diag, _diag_save_in[_i]->dofIndices());
+    for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 
   _local_ke.zero();
