@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/fsi/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/fsi/doc/sqa_reports.yml

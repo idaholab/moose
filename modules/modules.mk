@@ -19,7 +19,7 @@ ifeq ($(ALL_MODULES),yes)
         CONTACT                     := yes
         EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
-        FLUID_STRUCTURE_INTERACTION := yes
+        FSI := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
         GEOCHEMISTRY                := yes
         HEAT_CONDUCTION             := yes
@@ -70,7 +70,7 @@ ifeq ($(XFEM),yes)
         TENSOR_MECHANICS            := yes
 endif
 
-ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
+ifeq ($(FSI),yes)
         TENSOR_MECHANICS            := yes
         NAVIER_STOKES               := yes
         FLUID_PROPERTIES            := yes
@@ -79,7 +79,7 @@ ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fluid_structure_interaction functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg richards stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg richards stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -244,9 +244,9 @@ ifeq ($(CONTACT),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_structure_interaction
-  APPLICATION_NAME   := fluid_structure_interaction
+ifeq ($(FSI),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fsi
+  APPLICATION_NAME   := fsi
 
   DEPEND_MODULES     := tensor_mechanics navier_stokes
   SUFFIX             := fsi
