@@ -17,6 +17,7 @@
 #include "MooseArray.h"
 #include "SystemBase.h"
 #include "Assembly.h"
+#include "MooseObjectName.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -679,6 +680,18 @@ bool
 SubProblem::isMatPropRequested(const std::string & prop_name) const
 {
   return _material_property_requested.find(prop_name) != _material_property_requested.end();
+}
+
+void
+SubProblem::addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name)
+{
+  _consumed_material_properties[obj_name].insert(prop_name);
+}
+
+const std::map<MooseObjectName, std::set<std::string>> &
+SubProblem::getConsumedPropertyMap() const
+{
+  return _consumed_material_properties;
 }
 
 DiracKernelInfo &
