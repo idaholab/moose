@@ -47,20 +47,18 @@ public:
     mooseError("Hessian function has not been defined for form function type ", _type);
   }
 
-  /**
-   * Function to retrieve current parameters
-   */
-  dof_id_type getNumberOfParameters() const { return _ndof; }
-
 protected:
-  /// VPP to send data to
-  OptimizationParameterVectorPostprocessor & _parameter_vpp;
-
-  /// Const reference to vpp data
-  std::vector<const VectorPostprocessorValue *> _parameters;
-
+  /// Parameter names
+  const std::vector<ReporterValueName> & _parameter_names;
   /// Number of parameters
-  dof_id_type _ndof = 0;
+  const unsigned int _nparam;
+  /// Number of values for each parameter
+  const std::vector<dof_id_type> & _nvalues;
+  /// Total number of degrees of freedom
+  const dof_id_type _ndof;
+
+  /// Parameter values declared as reporter data
+  std::vector<std::vector<Real> *> _parameters;
 
 private:
   /**

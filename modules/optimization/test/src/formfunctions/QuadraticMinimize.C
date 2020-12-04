@@ -7,37 +7,44 @@ QuadraticMinimize::validParams()
 {
   InputParameters params = FormFunction::validParams();
   params.addRequiredParam<Real>("objective", "Desired value of objective function.");
-  params.addRequiredParam<VectorPostprocessorName>("measured_vpp",
-                                                   "VectorPostprocessor of measured data.");
+  params.addRequiredParam<std::vector<Real>>("solution", "Desired solution to optimization.");
   return params;
 }
 
 QuadraticMinimize::QuadraticMinimize(const InputParameters & parameters)
   : FormFunction(parameters),
     _result(getParam<Real>("objective")),
-    _measured_values(getVectorPostprocessorValue(
-        "measured_vpp", "values", false)) // fixme lynn values should not be hardcoded
+    _solution(getParam<std::vector<Real>>("solution"))
 {
+  if (_solution.size() != _ndof)
+    paramError("solution", "Size not equal to number of degrees of freedom (", _ndof, ").");
 }
 
 Real
 QuadraticMinimize::computeObjective()
 {
-  Real val = _result;
-  for (dof_id_type i = 0; i < _ndof; ++i)
-  {
-    Real tmp = (*_parameters[i])[0] - _measured_values[i];
-    val += tmp * tmp;
-  }
+  Real obj = _result;
+  unsigned int i = 0;
+  for (const auto & param : _parameters)
+    for (const auto & val : *param)
+    {
+      Real tmp = val - _solution[i++];
+      obj += tmp * tmp;
+    }
 
-  return val;
+  return obj;
 }
 
 void
 QuadraticMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
 {
-  for (dof_id_type i = 0; i < _ndof; ++i)
-    gradient.set(i, 2.0 * ((*_parameters[i])[0] - _measured_values[i]));
+  unsigned int i = 0;
+  for (const auto & param : _parameters)
+    for (const auto & val : *param)
+    {
+      gradient.set(i, 2.0 * (val - _solution[i]));
+      i++;
+    }
   gradient.close();
 }
 

@@ -3,12 +3,12 @@
 
 [FormFunction]
   type = QuadraticMinimize
-  parameter_names = 'results'
-  num_values = 3
-  initial_condition = '5 8 1'
+  parameter_names = 'result1 result2 result3'
+  num_values = '3 2 2'
+  initial_condition = '5 4 2 9 5 1 0'
 
   objective = 1.0
-  solution = '1 2 3'
+  solution = '1 2 3 4 5 6 7'
 []
 
 [Executioner]

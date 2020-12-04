@@ -21,6 +21,6 @@ private:
   /// Inputted objective function value
   const Real & _result;
 
-  /// VPP containing the measurement data
-  const VectorPostprocessorValue & _measured_values;
+  /// Desired solution to optimization
+  const std::vector<Real> & _solution;
 };
