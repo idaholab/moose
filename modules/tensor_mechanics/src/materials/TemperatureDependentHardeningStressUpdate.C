@@ -82,7 +82,7 @@ TemperatureDependentHardeningStressUpdate::TemperatureDependentHardeningStressUp
 
 void
 TemperatureDependentHardeningStressUpdate::computeStressInitialize(
-    const Real effectiveTrialStress, const RankFourTensor & elasticity_tensor)
+    const Real & effectiveTrialStress, const RankFourTensor & elasticity_tensor)
 {
   initializeHardeningFunctions();
   computeYieldStress(elasticity_tensor);

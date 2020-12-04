@@ -12,8 +12,7 @@
 #include "ADComputeFiniteStrainElasticStress.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
-
-class ADStressUpdateBase;
+#include "StressUpdateBase.h"
 
 /**
  * ADComputeMultipleInelasticStress computes the stress and a decomposition of the strain

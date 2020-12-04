@@ -620,8 +620,9 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
      * which happens before the parser is even created.  We'll throw an error if somebody attempts
      * to add this option later.
      */
-    if (option == "-log_summary")
-      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please "
+    if (option == "-log_summary" || option == "-log_view")
+      mooseError("The PETSc option \"-log_summary\" or \"-log_view\" can only be used on the "
+                 "command line.  Please "
                  "remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in
@@ -665,29 +666,80 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   bool tiny_pivot_found = false;
 #endif
   std::string pc_description = "";
+#if !PETSC_VERSION_LESS_THAN(3, 12, 0)
+  // If users use HMG, we would like to set
+  bool hmg_found = false;
+  bool matptap_found = false;
+  bool hmg_strong_threshold_found = false;
+#endif
+  bool option_changed = false;
+  std::vector<std::string> new_option_names;
+  std::vector<std::string> new_option_values;
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
+    new_option_names.clear();
+    new_option_values.clear();
+    option_changed = false;
     // Do not add duplicate settings
     if (find(po.inames.begin(), po.inames.end(), petsc_options_inames[i]) == po.inames.end())
     {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
       if (petsc_options_inames[i] == "-pc_factor_mat_solver_package")
-        po.inames.push_back("-pc_factor_mat_solver_type");
-      else
-        po.inames.push_back(petsc_options_inames[i]);
+      {
+        new_option_names.push_back("-pc_factor_mat_solver_type");
+        new_option_values.push_back(petsc_options_values[i]);
+        option_changed = true;
+      }
 #else
       if (petsc_options_inames[i] == "-pc_factor_mat_solver_type")
-        po.inames.push_back("-pc_factor_mat_solver_package");
-      else
-        po.inames.push_back(petsc_options_inames[i]);
+      {
+        new_option_names.push_back("-pc_factor_mat_solver_package");
+        new_option_values.push_back(petsc_options_values[i]);
+        option_changed = true;
+      }
 #endif
-      po.values.push_back(petsc_options_values[i]);
 
       // Look for a pc description
       if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" ||
           petsc_options_inames[i] == "-pc_hypre_type")
         pc_description += petsc_options_values[i] + ' ';
 
+#if !PETSC_VERSION_LESS_THAN(3, 12, 0)
+      if (petsc_options_inames[i] == "-pc_type" && petsc_options_values[i] == "hmg")
+        hmg_found = true;
+
+        // MPIAIJ for PETSc 3.12.0: -matptap_via
+        // MAIJ for PETSc 3.12.0: -matmaijptap_via
+        // MPIAIJ for PETSc 3.13 or higher: -matptap_via, -matproduct_ptap_via
+        // MAIJ for PETSc 3.13 or higher: -matproduct_ptap_via
+#if !PETSC_VERSION_LESS_THAN(3, 13, 0)
+      if (hmg_found && (petsc_options_inames[i] == "-matptap_via" ||
+                        petsc_options_inames[i] == "-matmaijptap_via"))
+      {
+        new_option_names.push_back("-matproduct_ptap_via");
+        new_option_values.push_back(petsc_options_values[i]);
+        option_changed = true;
+      }
+#else
+      if (hmg_found && (petsc_options_inames[i] == "-matproduct_ptap_via"))
+      {
+        new_option_names.push_back("-matptap_via");
+        new_option_values.push_back(petsc_options_values[i]);
+        new_option_names.push_back("-matmaijptap_via");
+        new_option_values.push_back(petsc_options_values[i]);
+        option_changed = true;
+      }
+#endif
+
+      if (petsc_options_inames[i] == "-matptap_via" ||
+          petsc_options_inames[i] == "-matmaijptap_via" ||
+          petsc_options_inames[i] == "-matproduct_ptap_via")
+        matptap_found = true;
+
+      // For 3D problems, we need to set this 0.7
+      if (petsc_options_inames[i] == "-hmg_inner_pc_hypre_boomeramg_strong_threshold")
+        hmg_strong_threshold_found = true;
+#endif
       // This special case is common enough that we'd like to handle it for the user.
       if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
         boomeramg_found = true;
@@ -703,6 +755,20 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       if (petsc_options_inames[i] == "-mat_superlu_dist_replacetinypivot")
         tiny_pivot_found = true;
 #endif
+
+      if (option_changed)
+      {
+        for (MooseIndex(new_option_names.size()) op = 0; op < new_option_names.size(); op++)
+        {
+          po.inames.push_back(new_option_names[op]);
+          po.values.push_back(new_option_values[op]);
+        }
+      }
+      else
+      {
+        po.inames.push_back(petsc_options_inames[i]);
+        po.values.push_back(petsc_options_values[i]);
+      }
     }
     else
     {
@@ -721,6 +787,30 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     po.values.push_back("0.7");
     pc_description += "strong_threshold: 0.7 (auto)";
   }
+
+#if !PETSC_VERSION_LESS_THAN(3, 12, 0)
+  if (hmg_found && !hmg_strong_threshold_found && fe_problem.mesh().dimension() == 3)
+  {
+    po.inames.push_back("-hmg_inner_pc_hypre_boomeramg_strong_threshold");
+    po.values.push_back("0.7");
+    pc_description += "strong_threshold: 0.7 (auto)";
+  }
+
+  // Default PETSc PtAP takes too much memory, and it is not quite useful
+  // Let us switch to use new algorithm
+  if (hmg_found && !matptap_found)
+  {
+#if !PETSC_VERSION_LESS_THAN(3, 13, 0)
+    po.inames.push_back("-matproduct_ptap_via");
+    po.values.push_back("allatonce");
+#else
+    po.inames.push_back("-matptap_via");
+    po.values.push_back("allatonce");
+    po.inames.push_back("-matmaijptap_via");
+    po.values.push_back("allatonce");
+#endif
+  }
+#endif
 
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
   // In PETSc-3.7.{0--4}, there is a bug when using superlu_dist, and we have to use

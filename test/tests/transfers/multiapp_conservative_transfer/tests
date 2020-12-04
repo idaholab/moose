@@ -45,4 +45,19 @@
     requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
   [../]
 
+  [./negative_adjuster]
+    type = Exodiff
+    input = 'primary_negative_adjuster.i'
+    issues = '#15952'
+    requirement = 'The systen shall allow adjustment if both from and to adjuster are negative.'
+    exodiff = 'primary_negative_adjuster_out_sub0.e'
+  [../]
+
+  [./skip_adjustment]
+    type = Exodiff
+    input = 'primary_skipped_adjuster.i'
+    issues = '#15952'
+    requirement = 'The systen shall allow to skip adjustments without throwing an error if from/to adjusters do not satisfy conditions.'
+    exodiff = 'primary_skipped_adjuster_out_sub0.e'
+  [../]
 []

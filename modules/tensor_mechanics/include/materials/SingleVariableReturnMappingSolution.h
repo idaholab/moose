@@ -40,14 +40,14 @@ protected:
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real minimumPermissibleValue(const Real effective_trial_stress) const;
+  virtual Real minimumPermissibleValue(const Real & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real maximumPermissibleValue(const Real effective_trial_stress) const;
+  virtual Real maximumPermissibleValue(const Real & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -80,7 +80,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeReferenceResidual(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeReferenceResidual(const Real & effective_trial_stress,
+                                        const Real & scalar) = 0;
 
   /**
    * Finalize internal state variables for a model for a given iteration.

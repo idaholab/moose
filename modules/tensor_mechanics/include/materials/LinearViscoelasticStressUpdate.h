@@ -33,6 +33,8 @@ public:
    * Computes the new creep strain, and removes the creep contribution from the elastic strains and
    * stress. The tangent_operator is set equal to the elasticity tensor of the material.
    */
+  using StressUpdateBase::updateState;
+
   virtual void updateState(RankTwoTensor & strain_increment,
                            RankTwoTensor & inelastic_strain_increment,
                            const RankTwoTensor & rotation_increment,

@@ -36,7 +36,7 @@ public:
   IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(const Real effective_trial_stress,
+  virtual void computeStressInitialize(const Real & effective_trial_stress,
                                        const RankFourTensor & elasticity_tensor) override;
   virtual void computeYieldStress(const RankFourTensor & elasticity_tensor) override;
   virtual Real computeHardeningDerivative(Real scalar) override;

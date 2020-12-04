@@ -11,8 +11,14 @@
 
 #include "StressUpdateBase.h"
 #include "SingleVariableReturnMappingSolution.h"
+#include "ADSingleVariableReturnMappingSolution.h"
 
 // Forward declaration
+template <bool is_ad>
+using SingleVariableReturnMappingSolutionTempl =
+    typename std::conditional<is_ad,
+                              ADSingleVariableReturnMappingSolution,
+                              SingleVariableReturnMappingSolution>::type;
 
 /**
  * RadialReturnStressUpdate computes the radial return stress increment for
@@ -27,12 +33,19 @@
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
 
-class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
+template <bool is_ad>
+class RadialReturnStressUpdateTempl : public StressUpdateBaseTempl<is_ad>,
+                                      public SingleVariableReturnMappingSolutionTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  RadialReturnStressUpdate(const InputParameters & parameters);
+  RadialReturnStressUpdateTempl(const InputParameters & parameters);
+
+  using Material::_current_elem;
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
 
   /**
    * A radial return (J2) mapping method is performed with return mapping
@@ -47,35 +60,57 @@ public:
    * @param compute_full_tangent_operator Flag currently unused by this class
    * @param tangent_operator              Currently a copy of the elasticity tensor in this class
    */
-  virtual void updateState(RankTwoTensor & strain_increment,
-                           RankTwoTensor & inelastic_strain_increment,
-                           const RankTwoTensor & rotation_increment,
-                           RankTwoTensor & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const RankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator,
-                           RankFourTensor & tangent_operator) override;
+  virtual void updateState(RankTwoTensor & /*strain_increment*/,
+                           RankTwoTensor & /*inelastic_strain_increment*/,
+                           const RankTwoTensor & /*rotation_increment*/,
+                           RankTwoTensor & /*stress_new*/,
+                           const RankTwoTensor & /*stress_old*/,
+                           const RankFourTensor & /*elasticity_tensor*/,
+                           const RankTwoTensor & /*elastic_strain_old*/,
+                           bool /*compute_full_tangent_operator*/,
+                           RankFourTensor & /*tangent_operator*/) override;
 
-  virtual void updateStateSubstep(RankTwoTensor & strain_increment,
-                                  RankTwoTensor & inelastic_strain_increment,
-                                  const RankTwoTensor & rotation_increment,
-                                  RankTwoTensor & stress_new,
-                                  const RankTwoTensor & stress_old,
-                                  const RankFourTensor & elasticity_tensor,
-                                  const RankTwoTensor & elastic_strain_old,
-                                  bool compute_full_tangent_operator,
-                                  RankFourTensor & tangent_operator) override;
+  virtual void updateState(ADRankTwoTensor & /*strain_increment*/,
+                           ADRankTwoTensor & /*inelastic_strain_increment*/,
+                           const ADRankTwoTensor & /*rotation_increment*/,
+                           ADRankTwoTensor & /*stress_new*/,
+                           const RankTwoTensor & /*stress_old*/,
+                           const ADRankFourTensor & /*elasticity_tensor*/,
+                           const RankTwoTensor & /*elastic_strain_old*/) override;
 
-  virtual Real computeReferenceResidual(const Real effective_trial_stress,
-                                        const Real scalar_effective_inelastic_strain) override;
+  /**
+   * Similar to the updateState function, this method updates the strain and stress for one substep
+   */
+  virtual void updateStateSubstep(RankTwoTensor & /*strain_increment*/,
+                                  RankTwoTensor & /*inelastic_strain_increment*/,
+                                  const RankTwoTensor & /*rotation_increment*/,
+                                  RankTwoTensor & /*stress_new*/,
+                                  const RankTwoTensor & /*stress_old*/,
+                                  const RankFourTensor & /*elasticity_tensor*/,
+                                  const RankTwoTensor & /*elastic_strain_old*/,
+                                  bool /*compute_full_tangent_operator*/,
+                                  RankFourTensor & /*tangent_operator*/) override;
 
-  virtual Real minimumPermissibleValue(const Real /*effective_trial_stress*/) const override
+  virtual void updateStateSubstep(ADRankTwoTensor & /*strain_increment*/,
+                                  ADRankTwoTensor & /*inelastic_strain_increment*/,
+                                  const ADRankTwoTensor & /*rotation_increment*/,
+                                  ADRankTwoTensor & /*stress_new*/,
+                                  const RankTwoTensor & /*stress_old*/,
+                                  const ADRankFourTensor & /*elasticity_tensor*/,
+                                  const RankTwoTensor & /*elastic_strain_old*/) override;
+
+  virtual Real
+  computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,
+                           const GenericReal<is_ad> & scalar_effective_inelastic_strain) override;
+
+  virtual GenericReal<is_ad>
+  minimumPermissibleValue(const GenericReal<is_ad> & /*effective_trial_stress*/) const override
   {
     return 0.0;
   }
 
-  virtual Real maximumPermissibleValue(const Real effective_trial_stress) const override;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -89,18 +124,19 @@ public:
   bool requiresIsotropicTensor() override { return true; }
 
   /**
+   * Radial return mapped models should be isotropic by default!
+   */
+  bool isIsotropic() override { return true; };
+
+  /**
    * If substepping is enabled, calculate the number of substeps as a function
    * of the elastic strain increment guess and the maximum inelastic strain increment
    * ratio based on a user-specified tolerance.
    * @param strain_increment    When called, this is the elastic strain guess
    * @return                    The number of substeps required
    */
-  virtual int calculateNumberSubsteps(const RankTwoTensor & strain_increment) override;
-
-  /**
-   * Radial return mapped models should be isotropic by default!
-   */
-  bool isIsotropic() override { return true; };
+  virtual int
+  calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & strain_increment) override;
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -120,8 +156,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
-  virtual void computeStressInitialize(const Real /*effective_trial_stress*/,
-                                       const RankFourTensor & /*elasticity_tensor*/)
+  virtual void computeStressInitialize(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                                       const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
   {
   }
 
@@ -139,7 +175,10 @@ protected:
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
-  virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & /*inelasticStrainIncrement*/)
+  {
+  }
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
@@ -147,19 +186,19 @@ protected:
   /**
    * Calculate the tangent_operator.
    */
-  void computeTangentOperator(Real effective_trial_stress,
-                              RankTwoTensor & stress_new,
-                              bool compute_full_tangent_operator,
-                              RankFourTensor & tangent_operator);
+  void computeTangentOperator(Real /*effective_trial_stress*/,
+                              RankTwoTensor & /*stress_new*/,
+                              bool /*compute_full_tangent_operator*/,
+                              RankFourTensor & /*tangent_operator*/);
 
   /// 3 * shear modulus
-  Real _three_shear_modulus;
+  GenericReal<is_ad> _three_shear_modulus;
 
-  MaterialProperty<Real> & _effective_inelastic_strain;
+  GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
   /// Stores the scalar effective inelastic strain increment from Newton iteration
-  Real _scalar_effective_inelastic_strain;
+  GenericReal<is_ad> _scalar_effective_inelastic_strain;
 
   /**
    * Maximum allowable scalar inelastic strain increment, used to control the
@@ -188,4 +227,10 @@ protected:
    * Rank four deviatoric projection tensor
    */
   const RankFourTensor _deviatoric_projection_four;
+
+  /// Debugging option to enable specifying instead of calculating strain
+  const bool _apply_strain;
 };
+
+typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;
+typedef RadialReturnStressUpdateTempl<true> ADRadialReturnStressUpdate;
