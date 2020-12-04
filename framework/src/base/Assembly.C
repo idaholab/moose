@@ -1870,6 +1870,17 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   if (_current_side_elem)
     delete _current_side_elem;
   _current_side_elem = _current_elem->build_side_ptr(_current_side).release();
+
+  // We've initialized the reference points. Now we need to compute the physical location of the
+  // quadrature points. We do not do any FE initialization so we cannot simply copy over FE results
+  // like we do in reinitFEFace. Instead we handle the computation of the physical locations
+  // manually
+  const auto num_qp = _current_qrule_face->n_points();
+  _current_q_points_face.resize(num_qp);
+  const auto & ref_points = _current_qrule_face->get_points();
+  for (const auto qp : make_range(num_qp))
+    _current_q_points_face[qp] =
+        FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_points[qp]);
 }
 
 void
