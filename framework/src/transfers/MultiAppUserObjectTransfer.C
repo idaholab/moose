@@ -51,6 +51,12 @@ MultiAppUserObjectTransfer::validParams()
       "skip_bounding_box_check",
       false,
       "Skip the check if the to_elem is within the bounding box of the from_app.");
+  params.addParam<std::vector<SubdomainName>>(
+      "block", "The block we are transferring to (if not specified, whole domain is used).");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary",
+      "The boundary we are transferring to (if not specified, whole domain is used unless 'block' "
+      "parameter is used).");
 
   params.addClassDescription(
       "Samples a variable's value in the Master domain at the point where the MultiApp is and "
@@ -75,6 +81,9 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
     paramError("source_variable",
                " You should not provide any source variables since the transfer takes values from "
                "user objects ");
+
+  if (isParamValid("block") && isParamValid("boundary"))
+    mooseError(name(), ": Transfer can be either block- or boundary-restricted. Not both.");
 }
 
 void
@@ -100,14 +109,29 @@ MultiAppUserObjectTransfer::execute()
 
           NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
-          MeshBase * mesh = NULL;
+          MooseMesh * mesh = NULL;
 
           if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
-          {
-            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh().getMesh();
-          }
+            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh();
           else
-            mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).mesh();
+
+          _blk_ids.clear();
+          _bnd_ids.clear();
+          if (isParamValid("block"))
+          {
+            const std::vector<SubdomainName> & blocks =
+                getParam<std::vector<SubdomainName>>("block");
+            std::vector<SubdomainID> ids = mesh->getSubdomainIDs(blocks);
+            _blk_ids.insert(ids.begin(), ids.end());
+          }
+          else if (isParamValid("boundary"))
+          {
+            const std::vector<BoundaryName> & boundary_names =
+                getParam<std::vector<BoundaryName>>("boundary");
+            std::vector<BoundaryID> ids = mesh->getBoundaryIDs(boundary_names, true);
+            _bnd_ids.insert(ids.begin(), ids.end());
+          }
 
           auto & fe_type = to_sys->variable_type(var_num);
           bool is_constant = fe_type.order == CONSTANT;
@@ -121,8 +145,14 @@ MultiAppUserObjectTransfer::execute()
 
           if (is_nodal)
           {
-            for (auto & node : mesh->local_node_ptr_range())
+            for (auto & node : mesh->getMesh().local_node_ptr_range())
             {
+              if (blockRestricted() && !hasBlocks(mesh, node))
+                continue;
+
+              if (boundaryRestricted() && !isBoundaryNode(mesh, node))
+                continue;
+
               if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
@@ -139,8 +169,15 @@ MultiAppUserObjectTransfer::execute()
           else // Elemental
           {
             std::vector<Point> points;
-            for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
+            for (auto & elem : as_range(mesh->getMesh().local_elements_begin(),
+                                        mesh->getMesh().local_elements_end()))
             {
+              if (blockRestricted() && !hasBlocks(elem))
+                continue;
+
+              if (boundaryRestricted() && !isBoundaryElem(mesh, elem))
+                continue;
+
               // Skip this element if the variable has no dofs at it.
               if (elem->n_dofs(sys_num, var_num) < 1)
                 continue;
@@ -168,7 +205,6 @@ MultiAppUserObjectTransfer::execute()
               unsigned int offset = 0;
               for (auto & point : points) // If this variable has dofs at this elem
               {
-                // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
 
                 swapper.forceSwap();
@@ -211,12 +247,28 @@ MultiAppUserObjectTransfer::execute()
       // Create a serialized version of the solution vector
       NumericVector<Number> * to_solution = to_sys.solution.get();
 
-      MeshBase * to_mesh = NULL;
+      MooseMesh * to_mesh = NULL;
 
       if (_displaced_target_mesh && to_problem.getDisplacedProblem())
-        to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
+        to_mesh = &to_problem.getDisplacedProblem()->mesh();
       else
-        to_mesh = &to_problem.mesh().getMesh();
+        to_mesh = &to_problem.mesh();
+
+      _blk_ids.clear();
+      _bnd_ids.clear();
+      if (isParamValid("block"))
+      {
+        const std::vector<SubdomainName> & blocks = getParam<std::vector<SubdomainName>>("block");
+        std::vector<SubdomainID> ids = to_mesh->getSubdomainIDs(blocks);
+        _blk_ids.insert(ids.begin(), ids.end());
+      }
+      else if (isParamValid("boundary"))
+      {
+        const std::vector<BoundaryName> & boundary_names =
+            getParam<std::vector<BoundaryName>>("boundary");
+        std::vector<BoundaryID> ids = to_mesh->getBoundaryIDs(boundary_names, true);
+        _bnd_ids.insert(ids.begin(), ids.end());
+      }
 
       auto & fe_type = to_sys.variable_type(to_var_num);
       bool is_constant = fe_type.order == CONSTANT;
@@ -231,8 +283,14 @@ MultiAppUserObjectTransfer::execute()
         // boxes
         if (is_nodal)
         {
-          for (auto & node : to_mesh->node_ptr_range())
+          for (auto & node : to_mesh->getMesh().node_ptr_range())
           {
+            if (blockRestricted() && !hasBlocks(to_mesh, node))
+              continue;
+
+            if (boundaryRestricted() && !isBoundaryNode(to_mesh, node))
+              continue;
+
             if (node->n_dofs(to_sys_num, to_var_num) > 0)
             {
               unsigned int node_found_in_sub_app = 0;
@@ -267,8 +325,15 @@ MultiAppUserObjectTransfer::execute()
         else // elemental
         {
           std::vector<Point> points;
-          for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
+          for (auto & elem :
+               as_range(to_mesh->getMesh().elements_begin(), to_mesh->getMesh().elements_end()))
           {
+            if (blockRestricted() && !hasBlocks(elem))
+              continue;
+
+            if (boundaryRestricted() && !isBoundaryElem(to_mesh, elem))
+              continue;
+
             // Skip this element if the variable has no dofs at it.
             if (elem->n_dofs(to_sys_num, to_var_num) < 1)
               continue;
@@ -337,8 +402,14 @@ MultiAppUserObjectTransfer::execute()
 
         if (is_nodal)
         {
-          for (auto & node : to_mesh->node_ptr_range())
+          for (auto & node : to_mesh->getMesh().node_ptr_range())
           {
+            if (blockRestricted() && !hasBlocks(to_mesh, node))
+              continue;
+
+            if (boundaryRestricted() && !isBoundaryNode(to_mesh, node))
+              continue;
+
             if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
@@ -367,8 +438,15 @@ MultiAppUserObjectTransfer::execute()
         else // Elemental
         {
           std::vector<Point> points;
-          for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
+          for (auto & elem :
+               as_range(to_mesh->getMesh().elements_begin(), to_mesh->getMesh().elements_end()))
           {
+            if (blockRestricted() && !hasBlocks(elem))
+              continue;
+
+            if (boundaryRestricted() && !isBoundaryElem(to_mesh, elem))
+              continue;
+
             // Skip this element if the variable has no dofs at it.
             if (elem->n_dofs(to_sys_num, to_var_num) < 1)
               continue;
@@ -430,4 +508,53 @@ MultiAppUserObjectTransfer::execute()
   _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
 
   postExecute();
+}
+
+bool
+MultiAppUserObjectTransfer::blockRestricted() const
+{
+  return !_blk_ids.empty();
+}
+
+bool
+MultiAppUserObjectTransfer::boundaryRestricted() const
+{
+  return !_bnd_ids.empty();
+}
+
+bool
+MultiAppUserObjectTransfer::hasBlocks(const Elem * elem) const
+{
+  return _blk_ids.find(elem->subdomain_id()) != _blk_ids.end();
+}
+
+bool
+MultiAppUserObjectTransfer::hasBlocks(const MooseMesh * mesh, const Node * node) const
+{
+  const std::set<SubdomainID> & node_blk_ids = mesh->getNodeBlockIds(*node);
+  std::set<SubdomainID> u;
+  std::set_intersection(_blk_ids.begin(),
+                        _blk_ids.end(),
+                        node_blk_ids.begin(),
+                        node_blk_ids.end(),
+                        std::inserter(u, u.begin()));
+  return !u.empty();
+}
+
+bool
+MultiAppUserObjectTransfer::isBoundaryNode(const MooseMesh * mesh, const Node * node) const
+{
+  for (auto & bid : _bnd_ids)
+    if (mesh->isBoundaryNode(node->id(), bid))
+      return true;
+  return false;
+}
+
+bool
+MultiAppUserObjectTransfer::isBoundaryElem(const MooseMesh * mesh, const Elem * elem) const
+{
+  for (auto & bid : _bnd_ids)
+    if (mesh->isBoundaryElem(elem->id(), bid))
+      return true;
+  return false;
 }
