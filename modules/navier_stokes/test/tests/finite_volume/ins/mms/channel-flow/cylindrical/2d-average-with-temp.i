@@ -150,11 +150,16 @@ velocity='velocity'
     force_boundary_execution = ${force_boundary_execution}
   []
   [temp_advection]
-    type = FVMatAdvection
+    type = INSFVEnergyAdvection
     vel = ${velocity}
     variable = temperature
     advected_interp_method = ${advected_interp_method}
-    advected_quantity = "rho_cp_temp"
+    velocity_interp_method = ${velocity_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
     force_boundary_execution = ${force_boundary_execution}
   []
   [temp_forcing]

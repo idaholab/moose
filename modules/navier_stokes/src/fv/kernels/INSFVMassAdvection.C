@@ -16,7 +16,10 @@ registerMooseObject("NavierStokesApp", INSFVMassAdvection);
 InputParameters
 INSFVMassAdvection::validParams()
 {
-  return INSFVMomentumAdvection::validParams();
+  auto params = INSFVMomentumAdvection::validParams();
+  params.addClassDescription("Object for advecting mass, e.g. rho");
+  params.suppressParameter<MaterialPropertyName>("advected_quantity");
+  return params;
 }
 
 INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)

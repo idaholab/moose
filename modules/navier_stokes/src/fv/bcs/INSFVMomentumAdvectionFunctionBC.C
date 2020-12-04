@@ -119,7 +119,14 @@ INSFVMomentumAdvectionFunctionBC::computeQpResidual()
   ADReal flux_var_face;
   ADRealVectorValue v_face;
 
-  Real flux_var_ghost = _flux_variable_exact_solution.value(
+  mooseAssert(
+      _flux_variable_exact_solution,
+      "_flux_variable_exact_solution is null in "
+      "INSFVMomentumAdvectionFunctionBC::computeQpResidual. Did "
+      "you suppress the flux_variable_exact_solution parameter in your derived class and forget to "
+      "override computeQpResidual?");
+
+  Real flux_var_ghost = _flux_variable_exact_solution->value(
       _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
   RealVectorValue v_ghost(
       _vel_x_exact_solution.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid()),

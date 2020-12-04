@@ -170,11 +170,16 @@ advected_interp_method = 'average'
     variable = T
   []
   [temp_advection]
-    type = FVMatAdvection
-    vel = ${vel}
+    type = INSFVEnergyAdvection
     variable = T
+    vel = ${vel}
+    velocity_interp_method = 'average'
     advected_interp_method = ${advected_interp_method}
-    advected_quantity = "rho_cp_temp"
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
   []
 []
 
