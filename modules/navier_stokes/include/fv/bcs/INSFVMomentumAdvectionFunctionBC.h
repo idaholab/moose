@@ -13,8 +13,6 @@
 #include "INSFVAdvectionBase.h"
 #include "FVUtils.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * Implements the momentum equation advection term on boundaries. Only useful
  * for MMS since it requires exact solution information
@@ -45,5 +43,3 @@ protected:
   /// The dynamic viscosity
   const ADMaterialProperty<Real> & _mu;
 };
-
-#endif

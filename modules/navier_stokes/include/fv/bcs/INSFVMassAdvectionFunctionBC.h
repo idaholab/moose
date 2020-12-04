@@ -11,8 +11,6 @@
 
 #include "INSFVMomentumAdvectionFunctionBC.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * Implements the mass equation advection term on boundaries. Only useful
  * for MMS since it requires exact solution information
@@ -26,5 +24,3 @@ public:
 protected:
   ADReal computeQpResidual() override;
 };
-
-#endif

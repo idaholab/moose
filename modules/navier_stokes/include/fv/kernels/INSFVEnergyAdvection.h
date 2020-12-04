@@ -11,8 +11,6 @@
 
 #include "INSFVMomentumAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
@@ -23,5 +21,3 @@ public:
   static InputParameters validParams();
   INSFVEnergyAdvection(const InputParameters & params);
 };
-
-#endif

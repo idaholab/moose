@@ -9,8 +9,6 @@
 
 #include "INSFVEnergyAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 registerMooseObject("NavierStokesApp", INSFVEnergyAdvection);
 
 InputParameters
@@ -26,6 +24,9 @@ INSFVEnergyAdvection::validParams()
 INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params)
 {
-}
-
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
 #endif
+}

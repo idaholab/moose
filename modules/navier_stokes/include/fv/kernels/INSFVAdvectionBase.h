@@ -9,10 +9,6 @@
 
 #pragma once
 
-#include "MooseConfig.h"
-
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 #include "MooseTypes.h" // THREAD_ID
 #include "FVUtils.h"
 
@@ -99,5 +95,3 @@ protected:
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
 };
-
-#endif

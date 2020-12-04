@@ -9,8 +9,6 @@
 
 #include "INSFVAdvectionBase.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 #include "InputParameters.h"
 #include "SubProblem.h"
 #include "MooseVariableFV.h"
@@ -59,6 +57,12 @@ INSFVAdvectionBase::INSFVAdvectionBase(const InputParameters & params)
                : nullptr),
     _rho(params.get<Real>("rho"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
+
   if (!_p_var)
     mooseError("the pressure must be a finite volume variable.");
 
@@ -116,6 +120,7 @@ INSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu) const
   return emplace_ret.first->second;
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
 ADReal
 INSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu) const
 {
@@ -161,6 +166,15 @@ INSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu) const
 
   return coeff;
 }
+#else
+ADReal
+INSFVAdvectionBase::coeffCalculator(const Elem &, const ADReal &) const
+{
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+}
+#endif
 
 void
 INSFVAdvectionBase::clearRCCoeffs()
@@ -174,5 +188,3 @@ INSFVAdvectionBase::clearRCCoeffs()
                   << _nsfv_tid);
   it->second[_nsfv_tid].clear();
 }
-
-#endif

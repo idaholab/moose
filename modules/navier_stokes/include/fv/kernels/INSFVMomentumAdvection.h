@@ -12,8 +12,6 @@
 #include "FVMatAdvection.h"
 #include "INSFVAdvectionBase.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
@@ -44,5 +42,3 @@ protected:
   /// The dynamic viscosity on the FaceInfo neighbor
   const ADMaterialProperty<Real> & _mu_neighbor;
 };
-
-#endif

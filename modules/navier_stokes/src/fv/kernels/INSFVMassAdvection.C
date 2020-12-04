@@ -9,8 +9,6 @@
 
 #include "INSFVMassAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 registerMooseObject("NavierStokesApp", INSFVMassAdvection);
 
 InputParameters
@@ -25,6 +23,11 @@ INSFVMassAdvection::validParams()
 INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params)
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
 }
 
 ADReal
@@ -35,5 +38,3 @@ INSFVMassAdvection::computeQpResidual()
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
   return _normal * v * _rho;
 }
-
-#endif

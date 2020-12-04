@@ -11,8 +11,6 @@
 
 #include "FVElementalKernel.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * This Kernel implements the residuals that enforce the constraint
  *
@@ -48,5 +46,3 @@ private:
   /// The value that we want the average of the primal variable to be equal to
   const Real _phi0;
 };
-
-#endif

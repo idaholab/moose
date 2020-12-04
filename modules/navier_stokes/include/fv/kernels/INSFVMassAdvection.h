@@ -11,8 +11,6 @@
 
 #include "INSFVMomentumAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 /**
  * A flux kernel transporting mass across cell faces
  */
@@ -25,5 +23,3 @@ public:
 protected:
   ADReal computeQpResidual() override;
 };
-
-#endif

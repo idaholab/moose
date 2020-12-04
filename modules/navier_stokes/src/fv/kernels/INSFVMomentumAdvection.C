@@ -9,8 +9,6 @@
 
 #include "INSFVMomentumAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 #include "MooseVariableFieldBase.h"
 #include "SystemBase.h"
 #include "ADReal.h"    // Moose::derivInsert
@@ -44,8 +42,14 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                                     ADRealVectorValue & v,
@@ -124,6 +128,15 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   // perform the pressure correction
   v -= face_D * (grad_p - unc_grad_p);
 }
+#else
+void
+INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod,
+                                    ADRealVectorValue &,
+                                    const ADRealVectorValue &,
+                                    const ADRealVectorValue &)
+{
+}
+#endif
 
 ADReal
 INSFVMomentumAdvection::computeQpResidual()
@@ -141,5 +154,3 @@ INSFVMomentumAdvection::computeQpResidual()
                          true);
   return _normal * v * u_interface;
 }
-
-#endif

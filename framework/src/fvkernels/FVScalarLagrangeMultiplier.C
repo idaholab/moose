@@ -9,8 +9,6 @@
 
 #include "FVScalarLagrangeMultiplier.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 #include "MooseVariableScalar.h"
 #include "MooseVariableFV.h"
 #include "Assembly.h"
@@ -34,6 +32,11 @@ FVScalarLagrangeMultiplier::FVScalarLagrangeMultiplier(const InputParameters & p
     _lambda(adCoupledScalarValue("lambda")),
     _phi0(getParam<Real>("phi0"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("FVScalarLagrangeMultiplier is not supported by local AD indexing. In order to use "
+             "FVScalarLagrangeMultiplier, please run the configure script in the root MOOSE "
+             "directory with the configure option '--with-ad-indexing-type=global'");
+#endif
 }
 
 ADReal
@@ -80,5 +83,3 @@ FVScalarLagrangeMultiplier::computeOffDiagJacobian()
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
 }
-
-#endif
