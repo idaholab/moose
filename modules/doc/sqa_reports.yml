@@ -165,11 +165,11 @@ Applications:
         log_stub_files: WARNING
         show_warning: false
 
-    fluid_structure_interaction:
+    fsi:
         exe_directory: modules/combined
         app_types:
-            - FluidStructureInteractionApp
-        content_directory: modules/fluid_structure_interaction/doc/content
+            - FsiApp
+        content_directory: modules/fsi/doc/content
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -372,8 +372,8 @@ Requirements:
         directories:
             - modules/xfem
 
-    fluid_structure_interaction:
+    fsi:
         directories:
-            - modules/fluid_structure_interaction
+            - modules/fsi
         log_missing: WARNING
         show_warning: false

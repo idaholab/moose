@@ -16,7 +16,7 @@
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
 #include "FluidPropertiesApp.h"
-#include "FluidStructureInteractionApp.h"
+#include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
 #include "GeochemistryApp.h"
 #include "HeatConductionApp.h"
@@ -69,7 +69,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ChemicalReactionsApp::registerAll(f, af, s);
   ContactApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
-  FluidStructureInteractionApp::registerAll(f, af, s);
+  FsiApp::registerAll(f, af, s);
   FunctionalExpansionToolsApp::registerAll(f, af, s);
   GeochemistryApp::registerAll(f, af, s);
   HeatConductionApp::registerAll(f, af, s);

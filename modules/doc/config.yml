@@ -6,7 +6,7 @@ Content:
     - modules/contact/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
-    - modules/fluid_structure_interaction/doc/content
+    - modules/fsi/doc/content
     - modules/functional_expansion_tools/doc/content
     - modules/heat_conduction/doc/content
     - modules/level_set/doc/content
@@ -136,7 +136,7 @@ Extensions:
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
-            fluid_structure_interaction: !include modules/fluid_structure_interaction/doc/sqa_fluid_structure_interaction.yml
+            fsi: !include modules/fsi/doc/sqa_fsi.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects
