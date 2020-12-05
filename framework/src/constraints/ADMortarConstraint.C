@@ -19,6 +19,7 @@ InputParameters
 ADMortarConstraint::validParams()
 {
   InputParameters params = MortarConstraintBase::validParams();
+  params.set<bool>("is_ad") = true;
   return params;
 }
 

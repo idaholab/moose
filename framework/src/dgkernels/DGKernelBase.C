@@ -14,6 +14,7 @@
 #include "SystemBase.h"
 #include "MaterialData.h"
 #include "ParallelUniqueId.h"
+#include "ADUtils.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/dense_vector.h"
@@ -53,10 +54,14 @@ DGKernelBase::validParams()
       "about this variable (the type, what blocks it's on, etc.)");
 
   // DG Kernels always need one layer of ghosting.
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC |
-                                    Moose::RelationshipManagerType::COUPLING);
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<bool>("create_full_coupling_matrix") =
+            obj_params.get<bool>("is_ad") && Moose::globalADIndexing();
+      });
 
   params.addParam<std::vector<BoundaryName>>(
       "exclude_boundary", "The internal side sets to be excluded from this kernel.");

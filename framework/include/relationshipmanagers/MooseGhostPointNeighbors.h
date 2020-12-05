@@ -41,7 +41,7 @@ public:
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
   virtual std::string getInfo() const override;
-  virtual bool operator==(const RelationshipManager & rhs) const override;
+  virtual bool operator>=(const RelationshipManager & rhs) const override;
 
 protected:
   virtual void internalInitWithMesh(const MeshBase & mesh) override;

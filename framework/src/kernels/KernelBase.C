@@ -14,6 +14,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
+#include "ADUtils.h"
 
 #include "libmesh/threads.h"
 
@@ -47,6 +48,16 @@ KernelBase::validParams()
 
   params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
+
+  // Kernels always couple within their element
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = 0;
+        rm_params.set<bool>("create_full_coupling_matrix") =
+            obj_params.get<bool>("is_ad") && Moose::globalADIndexing();
+      });
   return params;
 }
 

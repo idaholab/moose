@@ -10,6 +10,7 @@
 #include "FVKernel.h"
 #include "Assembly.h"
 #include "SubProblem.h"
+#include "ADUtils.h"
 
 InputParameters
 FVKernel::validParams()
@@ -36,6 +37,7 @@ FVKernel::validParams()
                         false,
                         "Whether to use point neighbors, which introduces additional ghosting to "
                         "that used for simple face neighbors.");
+  params.set<bool>("is_ad") = true;
 
   // FV Kernels always need one layer of ghosting because when looping over
   // faces to compute fluxes, the elements on each side of the face may be on
@@ -48,6 +50,8 @@ FVKernel::validParams()
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
         rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+        rm_params.set<bool>("create_full_coupling_matrix") =
+            obj_params.get<bool>("is_ad") && Moose::globalADIndexing();
       });
 
   params.registerBase("FVKernel");

@@ -42,7 +42,7 @@ public:
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
   virtual std::string getInfo() const override;
-  virtual bool operator==(const RelationshipManager & rhs) const override;
+  virtual bool operator>=(const RelationshipManager & rhs) const override;
 
   void dofmap_reinit() override;
 
@@ -54,4 +54,11 @@ protected:
   unsigned short _layers;
 
   const bool _use_point_neighbors;
+
+private:
+  /**
+   * Helper for initing
+   */
+  template <typename Functor>
+  void initFunctor(Functor & functor);
 };

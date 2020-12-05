@@ -11,6 +11,7 @@
 
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseConfig.h"
 
 class SystemBase;
 namespace libMesh
@@ -20,6 +21,19 @@ class Elem;
 
 namespace Moose
 {
+/**
+ * Whether we are using global AD indexing
+ */
+inline bool
+globalADIndexing()
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  return true;
+#else
+  return false;
+#endif
+}
+
 /**
  * Helper function for computing automatic differentiation offset. Let's explain how our derivative
  * index numbering scheme works:

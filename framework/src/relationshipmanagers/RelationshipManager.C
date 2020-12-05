@@ -63,6 +63,12 @@ RelationshipManager::validParams()
       "still says 'mesh' to match with common parameter name in MOOSE - but if it's purely "
       "algebraic then it's going to the DofMap no matter what!");
 
+  params.addParam<bool>(
+      "create_full_coupling_matrix",
+      false,
+      "Whether this relationship manager should trigger a full coupling matrix. Note that this "
+      "parameter is really only sensical if this RM will be used for a coupling functor.");
+
   // Set by MOOSE
   params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("RelationshipManager");
@@ -80,7 +86,8 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _system_type(getParam<Moose::RMSystemType>("system_type"))
+    _system_type(getParam<Moose::RMSystemType>("system_type")),
+    _create_full_coupling_matrix(getParam<bool>("create_full_coupling_matrix"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }
@@ -94,7 +101,8 @@ RelationshipManager::RelationshipManager(const RelationshipManager & other)
     _rm_type(other._rm_type),
     _for_whom(other._for_whom),
     _use_displaced_mesh(other._use_displaced_mesh),
-    _system_type(other._system_type)
+    _system_type(other._system_type),
+    _create_full_coupling_matrix(other._create_full_coupling_matrix)
 {
 }
 
@@ -117,6 +125,22 @@ RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
 {
   return (input_rm & Moose::RelationshipManagerType::COUPLING) ==
          Moose::RelationshipManagerType::COUPLING;
+}
+
+bool
+RelationshipManager::createFullCouplingMatrix() const
+{
+  if (!isType(Moose::RelationshipManagerType::COUPLING))
+    mooseError("The createFullCouplingMatrix API should only be called for coupling functors");
+
+  return _create_full_coupling_matrix;
+}
+
+bool
+RelationshipManager::baseGreaterEqual(const RelationshipManager & rhs) const
+{
+  return isType(rhs._rm_type) && _system_type == rhs._system_type &&
+         _create_full_coupling_matrix >= rhs._create_full_coupling_matrix;
 }
 
 Moose::RelationshipManagerType RelationshipManager::geo_and_alg =

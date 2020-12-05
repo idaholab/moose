@@ -87,8 +87,28 @@ public:
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
-    mooseError("Comparison operator required for this RelationshipManager required");
+    mooseError("RelationshipManager::operator>= must be overridden");
   }
+
+  /**
+   * Whether this relationship manager provides more or the same amount and type of ghosting as the
+   * \p rhs
+   */
+  virtual bool operator>=(const RelationshipManager & rhs) const
+  {
+    mooseDeprecated(
+        "Are you overriding RelationshipManager::operator==? We are transiting to make operator>= "
+        "the required override. If you are not overriding operator>= or operator==, you are about "
+        "to get an error message saying that operator>= must be overridden.");
+
+    return *this == rhs;
+  }
+
+  /**
+   * Whether the base class provides more or the same amount and type of ghosting as the
+   * \p rhs
+   */
+  virtual bool baseGreaterEqual(const RelationshipManager & rhs) const;
 
   /**
    * Whether or not this RM can be attached to the Mesh early if it's geometric.
@@ -104,6 +124,12 @@ public:
    * in MOOSE.  If this thing is algebraic then it's going to the DofMap
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
+
+  /**
+   * Whether this relationship manager should trigger a full coupling matrix. It is a prereq of
+   * calling this method that this->isType(COPULING) == true
+   */
+  bool createFullCouplingMatrix() const;
 
   /**
    * Set the dof map
@@ -187,4 +213,9 @@ public:
    *                ALGEBRAIC, COUPLING or a combination of the three
    */
   static InputParameters oneLayerGhosting(Moose::RelationshipManagerType rm_type);
+
+private:
+  /// Whether this relationship manager should trigger a full coupling matrix. Note that this
+  /// parameter is really only sensical if this->isType(COPULING) == true
+  const bool _create_full_coupling_matrix;
 };

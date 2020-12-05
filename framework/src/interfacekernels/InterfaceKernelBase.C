@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "ADUtils.h"
 
 #include "libmesh/quadrature.h"
 
@@ -63,10 +64,14 @@ InterfaceKernelBase::validParams()
       "save-in jacobian contributions from the primary ('p') or secondary side ('s').");
 
   // InterfaceKernels always need one layer of ghosting.
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC |
-                                    Moose::RelationshipManagerType::COUPLING);
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<bool>("create_full_coupling_matrix") =
+            obj_params.get<bool>("is_ad") && Moose::globalADIndexing();
+      });
   return params;
 }
 

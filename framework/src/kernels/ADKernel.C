@@ -29,6 +29,7 @@ ADKernelTempl<T>::validParams()
     params.registerBase("VectorKernel");
   else
     ::mooseError("unsupported ADKernelTempl specialization");
+  params.template set<bool>("is_ad") = true;
   return params;
 }
 

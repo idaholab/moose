@@ -29,6 +29,7 @@ ADInterfaceKernelTempl<T>::validParams()
     params.registerBase("VectorInterfaceKernel");
   else
     ::mooseError("unsupported ADInterfaceKernelTempl specialization");
+  params.set<bool>("is_ad") = true;
   return params;
 }
 
