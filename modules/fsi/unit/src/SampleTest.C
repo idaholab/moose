@@ -19,7 +19,7 @@ TEST(MySampleTests, descriptiveTestName)
   // ASSERT_EQ(2, 1);
 
   // this won't run if you uncomment the above test because above assert will fail
-  ASSERT_NO_THROW(1 + 1);
+  // ASSERT_NO_THROW(1 + 1);
 
   // for a complete list of assertions and for more unit testing documentation see:
   // https://github.com/google/googletest/blob/master/googletest/docs/Primer.md
