@@ -18,20 +18,7 @@ Lagrangian Eulerian to this module.
 
 The +Fluid-Structure Interaction Module+ can be used in a variety of simulations
 where the fluid and structural components are inter-dependent on each other. That is,
- the fluid behavior is affected by the structural behavior and vice-versa. The following
- figures show results from a few different simulations.
-
-!row!
-
-!media fsi/gravity_waves.png
-       style=width:40%;float:left;padding-top:2.5%;
-       caption=Gravity waves over a bed of fluid subjected to an initial disturbance. This was simulated using the [free surface boundary condition](/FluidFreeSurfaceBC.md).
-
-!media fsi/tank.png
-      style=width:35%;height:10%;float:right;padding-top:2.5%;
-      caption=Steel tank with liquid nuclear fuel subjected to an external dynamic load. This was simulated using the [fluid-structure interface](/FluidStructureInterface.md).
-
-!row-end!
+ the fluid behavior is affected by the structural behavior and vice-versa.
 
 ## Developing New Fluid-Structure Interaction Code
 
