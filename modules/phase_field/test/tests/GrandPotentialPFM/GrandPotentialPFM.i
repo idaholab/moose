@@ -79,23 +79,23 @@
 [Materials]
   [./constants]
     type = GenericConstantMaterial
-    prop_names  = 'kappa_op  D    L    chi  cs   cl   A'
+    prop_names  = 'kappa_op  D    L    chi  cseq   cleq   A'
     prop_values = '4.0       1.0  1.0  1.0  0.0  1.0  1.0'
   [../]
 
   [./liquid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cl * w'
+    function = '-0.5 * w^2/A - cleq * w'
     args = 'w'
     f_name = f1
-    material_property_names = 'cl A'
+    material_property_names = 'cleq A'
   [../]
   [./solid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cs * w'
+    function = '-0.5 * w^2/A - cseq * w'
     args = 'w'
     f_name = f2
-    material_property_names = 'cs A'
+    material_property_names = 'cseq A'
   [../]
   [./switching_function]
     type = SwitchingFunctionMaterial
@@ -105,6 +105,22 @@
   [./barrier_function]
     type = BarrierFunctionMaterial
     eta = eta
+  [../]
+  [./cs]
+    type = DerivativeParsedMaterial
+    args = 'w'
+    f_name = cs
+    material_property_names = 'A cseq'
+    function = 'w/A + cseq' # since w = A*(c-cseq)
+    derivative_order = 2
+  [../]
+  [./cl]
+    type = DerivativeParsedMaterial
+    args = 'w'
+    f_name = cl
+    material_property_names = 'A cleq'
+    function = 'w/A + cleq' # since w = A*(c-cleq)
+    derivative_order = 2
   [../]
   [./total_GrandPotential]
     type = DerivativeTwoPhaseMaterial
@@ -118,7 +134,7 @@
   [./coupled_eta_function]
     type = DerivativeParsedMaterial
     function = '(cs - cl) * dh'
-    args = 'eta'
+    args = 'eta w'
     f_name = ft
     material_property_names = 'cs cl dh:=D[h,eta]'
     derivative_order = 1
