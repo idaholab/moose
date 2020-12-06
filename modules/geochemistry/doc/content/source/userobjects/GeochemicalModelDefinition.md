@@ -13,7 +13,7 @@ This is a list of [basis components](basis.md) relevant to the [aqueous equilibr
 
 - "H2O" must appear first in this list;
 - No member must appear more than once in this list;
-- These components must be chosen from the "basis species" in the [database](database.md), the [sorbing sites](equilibrium.md) (if any) and the decoupled redox states that are in [disequilibrium](basis.md) (if any).
+- These components must be chosen from the "basis species" in the [database](geochemistry/database/index.md), the [sorbing sites](equilibrium.md) (if any) and the decoupled redox states that are in [disequilibrium](basis.md) (if any).
 
 Any [redox pair](basis.md) that is not in this list or the [`kinetic_redox`](kinetics.md) list, will be assumed to be at equilibrium with the aqueous solution and will be considered a [secondary species](basis.md).
 
@@ -23,7 +23,7 @@ All these species, except H2O, may be later swapped out of this list, either by 
 
 This list contains the minerals that are in equilibrium with the aqueous solution.  Conditions on the members of this list are:
 
-- They must be "minerals" in the [database](database.md);
+- They must be "minerals" in the [database](geochemistry/database/index.md);
 - No member can appear more than once in this list;
 - Their [equilibrium reaction](equilibrium.md) must consist of only the `basis_species`, and [secondary species](basis.md) and non-kinetically-controlled [redox couples](basis.md) that can be expressed in terms of the basis_species;
 - If they are also "sorbing minerals" in the database then their [sorption sites](equilibrium.md) must consist of the basis_species only.
@@ -41,7 +41,7 @@ This list, along with the kinetic_minerals list, comprises the entire list of mi
 This is a list of [gases](basis.md) that are in equilibrium with the aqueous solution and can have
 their [fugacities](fugacity.md) fixed, at least at some time and spatial location.
 
-- All members of this list must be a "gas" in the [database file](database.md).
+- All members of this list must be a "gas" in the [database file](geochemistry/database/index.md).
 - No gas must appear more than once in this list.
 - The equilibrium reaction of each gas must involve only the basis_species, or secondary species or non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
 
@@ -51,10 +51,10 @@ This list comprises all the gases that are in the simulation: all others are eli
 
 This is a list of minerals that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
 
-- The list can only include the "minerals" in the [database file](database.md).
+- The list can only include the "minerals" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.
 - The [equilibrium reaction](equilibrium.md) of each mineral must involve only the basis_species, or secondary species or non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
-- If a mineral is also a "sorbing mineral" in the [database](database.md) then their [sorption sites](equilibrium.md) must consist of the basis_speices only.
+- If a mineral is also a "sorbing mineral" in the [database](geochemistry/database/index.md) then their [sorption sites](equilibrium.md) must consist of the basis_speices only.
 - No members of this list must be in the minerals list.
 
 These minerals can never be [swapped](swap.md) into the basis, nor can they be "supressed".
@@ -64,7 +64,7 @@ These minerals can never be [swapped](swap.md) into the basis, nor can they be "
 
 This is a list of [redox pairs](basis.md) that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
 
-- The list can only include the "redox couples" in the [database file](database.md).
+- The list can only include the "redox couples" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.
 - The [equilibrium reaction](equilibrium.md) of each member must involve only the basis_species, or secondary species or non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
 - No members of this list must be in the basis_species list.
@@ -75,7 +75,7 @@ These species can never be [swapped](swap.md) into the basis.
 
 This is a list of [surface sorbing species](basis.md) that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
 
-- The list can only include the "surface species" in the [database file](database.md).
+- The list can only include the "surface species" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.
 - The [equilibrium reaction](equilibrium.md) of each member must involve only the basis_species, or secondary species or non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
 
@@ -89,17 +89,17 @@ A list of [GeochemistryKineticRate](GeochemistryKineticRate.md) user objects tha
 
 The complete list of [secondary species](equilibrium.md) is automatically computed based on the above information using the following algorithm:
 
-1. All "redox couples" in the [database](database.md) are queried one-by-one, and included if:
+1. All "redox couples" in the [database](geochemistry/database/index.md) are queried one-by-one, and included if:
 
 - they are not part of the `kinetic_redox` list; and
 - they are not part of the `basis_species` list; and
 - their reaction involves only basis_species or secondary species already encountered.  This means redox couples whose reactions involve already-encountered redox couples can be included in the secondary species' list.
 
-2. All secondary species in the [database](database.md) are queried one-by-one, and included if:
+2. All secondary species in the [database](geochemistry/database/index.md) are queried one-by-one, and included if:
 
 - their reaction involves basis_species, or secondary species already encountered.
 
-3. All surface species in the [database](database.md) are queried one-by-one, and included if:
+3. All surface species in the [database](geochemistry/database/index.md) are queried one-by-one, and included if:
 
 - they are not in the kinetic_surface_species list; and
 - their reaction involves only basis_species or secondary species encountered so far

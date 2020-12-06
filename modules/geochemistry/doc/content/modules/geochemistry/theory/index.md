@@ -5,7 +5,7 @@ The `geochemistry` module is designed to solve reactive transport in geochemical
 ## Reactions
 
 - [An introduction to equilibrium reactions, equilibrium constants, etc](equilibrium_reactions.md)
-- [The database](database.md)
+- [The database](geochemistry/database/index.md)
 - [Equilibrium in aqueous solutions, sorption, mathematical equations and the numerical solution procedure](equilibrium.md)
 - [Kinetics](kinetics.md)
 - [Activity coefficients](activity_coefficients.md) and [gas fugacity](fugacity.md)
