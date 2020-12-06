@@ -46,3 +46,10 @@ void function();
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i block=Mesh Kernels prefix=xxxxx
 
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i block=Kernels/diff indent=4 header=[AuxKernels] footer=[./]
+
+## Remove input file lines
+
+Hide the `issues` parameter in the following listing:
+
+!listing moose/test/tests/kernels/simple_diffusion/tests
+         remove_param=Tests/test/issues

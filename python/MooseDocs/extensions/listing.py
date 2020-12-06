@@ -12,6 +12,7 @@ import pyhit
 import moosetree
 import mooseutils
 import MooseDocs
+import re
 from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
@@ -166,22 +167,48 @@ class InputListingCommand(FileListingCommand):
     def defaultSettings():
         settings = FileListingCommand.defaultSettings()
         settings['block'] = (None, 'Space separated list of input file block names to include.')
+        settings['remove_block'] = (None, 'Space separated list of input file block names to hide.')
+        settings['remove_param'] = (None, "Space separated list of input parameters to hide. " \
+                                          "Specify the FULL path like: 'Kernels/diffusion/block.'")
         return settings
 
     def extractContent(self, filename):
         """Extract the file contents for display."""
         if self.settings['block']:
-            content = self.extractInputBlocks(filename, self.settings['block'])
+            hit = self.extractInputBlocks(pyhit.load(filename), self.settings['block'])
         else:
-            content = common.read(filename)
+            hit = pyhit.load(filename)
 
-        content, _ = common.extractContent(content, self.settings)
+        if self.settings['remove_block']:
+            for block in self.settings['remove_block'].split():
+                node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
+                if node is None:
+                    msg = "Unable to find block '{}' in {}."
+                    raise exceptions.MooseDocsException(msg, block, filename)
+                node.remove()
+
+        if self.settings['remove_param']:
+            for param in self.settings['remove_param'].split():
+                block = re.sub(r'[^/]+$', '', param)
+                node = moosetree.find(hit, lambda n: n.fullpath + '/' == '/' + block)
+                if node is None:
+                    msg = "Unable to find block '{}' in {}."
+                    raise exceptions.MooseDocsException(msg, block, filename)
+
+                match = node.get(param.replace(block, ''))
+                if match is None:
+                    msg = "Unable to find parameter '{}' in the input file:\n\n{}\n\nCheck for " \
+                          "spelling errors and be sure to specify the FULL path of the " \
+                          "parameter as it appears in the above."
+                    raise exceptions.MooseDocsException(msg, param, str(hit.render()))
+                node.removeParam(param.replace(block, ''))
+
+        content, _ = common.extractContent(str(hit.render()), self.settings)
         return content
 
     @staticmethod
-    def extractInputBlocks(filename, blocks):
-        """Remove input file block(s)"""
-        hit = pyhit.load(filename)
+    def extractInputBlocks(hit, blocks):
+        """Read input file block(s)"""
         out = []
         for block in blocks.split(' '):
             node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
@@ -189,7 +216,8 @@ class InputListingCommand(FileListingCommand):
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
             out.append(str(node.render()))
-        return '\n'.join(out)
+        return pyhit.parse('\n'.join(out))
+
 
 def get_listing_options(token):
     opts = latex.Bracket(None)
