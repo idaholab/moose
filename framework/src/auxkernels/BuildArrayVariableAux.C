@@ -9,6 +9,8 @@
 
 #include "BuildArrayVariableAux.h"
 
+#include "SystemBase.h"
+
 registerMooseObject("MooseApp", BuildArrayVariableAux);
 
 defineLegacyParams(BuildArrayVariableAux);
