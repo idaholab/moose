@@ -567,7 +567,7 @@ ADLAROMANCEStressUpdateBase::computeCreepStrainRate(const ADReal & effective_tri
                    _window_failure[_stress_input_index],
                    _global_limits[_stress_input_index]);
 
-  // Save extrapolation as a material proeprty in order quantify adequate tiling range
+  // Save extrapolation as a material property in order quantify adequate tiling range
   _extrapolation[_qp] = 0.0;
   for (unsigned int t = 0; t < _num_tiles; ++t)
     _extrapolation[_qp] += MetaPhysicL::raw_value(_weights[t]);
@@ -589,34 +589,34 @@ ADLAROMANCEStressUpdateBase::computeCreepStrainRate(const ADReal & effective_tri
 
   Real creep_rate = MetaPhysicL::raw_value(total_rom_effective_strain_inc) / _dt;
 
-  return MetaPhysicL::raw_value(total_rom_effective_strain_inc);
+  return creep_rate;
 }
 
 Real
 ADLAROMANCEStressUpdateBase::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & stress,
     const ADMaterialProperty<RankTwoTensor> & strain_rate,
-    const bool /* is_incremental*/,
+    const bool numerical,
     const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
 {
 
-  // Compute von Mises stress as a scalar
-  // Create function to perform integration
   ADRankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
-
-  // compute the effective trial stress
   ADReal dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
 
-  ADRankTwoTensor strain_rate_dev = strain_rate[_qp].deviatoric();
-  ADReal strain_rate_dev_sq = strain_rate_dev.doubleContraction(strain_rate_dev);
-  Real strain_rate_m = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * strain_rate_dev_sq));
+  Real tolerance = 1.0e-04;
+  std::size_t max_h_number = 200;
+  Real second = 0.0;
 
-  // Real first = von_mises_stress * computeCreepStrainRate(von_mises_stress);
+  // See Kim, "Contour integral calculations for generalised creep laws within abaqus",
+  // International Journal of Pressure Vessels and Piping 78 􏰥2001) 661-666
+  if (numerical && von_mises_stress > 1.0e-6)
+    second = trapezoidalRule(0, von_mises_stress, tolerance, max_h_number);
 
-  Real first = von_mises_stress * strain_rate_m;
-  return first;
+  return MetaPhysicL::raw_value(stress[_qp])
+             .doubleContraction(MetaPhysicL::raw_value((strain_rate)[_qp])) -
+         second;
 }
 
 void

@@ -43,7 +43,7 @@ private:
   const std::string _base_name;
 
   /// The strain energy density material property
-  GenericMaterialProperty<Real, is_ad> & _strain_energy_rate_density;
+  MaterialProperty<Real> & _strain_energy_rate_density;
 
   /// The strain energy density material property from previous step
   const MaterialProperty<Real> & _strain_energy_rate_density_old;

@@ -42,8 +42,7 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _strain_energy_rate_density(
-        declareGenericProperty<Real, is_ad>(_base_name + "strain_energy_rate_density")),
+    _strain_energy_rate_density(declareProperty<Real>(_base_name + "strain_energy_rate_density")),
     _strain_energy_rate_density_old(
         getMaterialPropertyOld<Real>(_base_name + "strain_energy_rate_density")),
     _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "stress")),
@@ -84,6 +83,8 @@ template <bool is_ad>
 void
 StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
 {
+  //  Moose::out << "StrainEnergyRateDensityTempl called \n";
+
   for (unsigned int i = 0; i < _inelastic_models.size(); ++i)
   {
     _inelastic_models[i]->setQp(_qp);

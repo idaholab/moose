@@ -94,6 +94,11 @@ DomainIntegralAction::validParams()
                                   "This input parameter is deprecated and will be removed soon. "
                                   "Use 'integrals = KFromJIntegral' to request output of the "
                                   "conversion from the J-integral to stress intensity factors");
+  params.addParam<bool>(
+      "is_stress_ad", false, "Whether Eshelby tensor should retrieve the stress as an AD class");
+  params.addParam<bool>("numerical_serd",
+                        false,
+                        "Whether strain energy rate density is computed via numerical integration");
   params.addParam<std::vector<MaterialName>>(
       "inelastic_models",
       "The material objects to use to calculate the strain energy rate density.");
@@ -131,7 +136,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _use_displaced_mesh(false),
     _output_q(getParam<bool>("output_q")),
     _incremental(getParam<bool>("incremental")),
-    _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false)
+    _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
+    _is_stress_ad(getParam<bool>("is_stress_ad"))
 {
 
   if (_q_function_type == GEOMETRY)
@@ -815,8 +821,14 @@ DomainIntegralAction::act()
     if (have_j_integral)
     {
       std::string mater_name;
-      const std::string mater_type_name("StrainEnergyDensity");
+      std::string mater_type_name("StrainEnergyDensity");
       mater_name = "StrainEnergyDensity";
+
+      if (_is_stress_ad)
+      {
+        mater_type_name = "ADStrainEnergyDensity";
+        mater_name = "ADStrainEnergyDensity";
+      }
 
       InputParameters params = _factory.getValidParams(mater_type_name);
       _incremental = getParam<bool>("incremental");
@@ -824,9 +836,14 @@ DomainIntegralAction::act()
       params.set<std::vector<SubdomainName>>("block") = {_blocks};
       _problem->addMaterial(mater_type_name, mater_name, params);
 
-      std::string mater_name2;
-      const std::string mater_type_name2("EshelbyTensor");
-      mater_name2 = "EshelbyTensor";
+      std::string mater_name2("EshelbyTensor");
+      std::string mater_type_name2("EshelbyTensor");
+
+      if (_is_stress_ad)
+      {
+        mater_name2 = "ADEshelbyTensor";
+        mater_type_name2 = "ADEshelbyTensor";
+      }
 
       InputParameters params2 = _factory.getValidParams(mater_type_name2);
       _displacements = getParam<std::vector<VariableName>>("displacements");
@@ -845,15 +862,19 @@ DomainIntegralAction::act()
       if (have_c_integral)
       {
         std::string mater_name;
-        const std::string mater_type_name("StrainEnergyRateDensity");
+        std::string mater_type_name("StrainEnergyRateDensity");
         mater_name = "StrainEnergyRateDensity";
 
+        if (_is_stress_ad)
+        {
+          mater_type_name = "ADStrainEnergyRateDensity";
+          mater_name = "ADStrainEnergyRateDensity";
+        }
         InputParameters params = _factory.getValidParams(mater_type_name);
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
 
         // Method for computing strain energy density rate.
-        // Change parameter name
-        params.set<bool>("numerical") = true;
+        params.set<bool>("numerical") = getParam<bool>("numerical_serd");
         params.set<std::vector<MaterialName>>("inelastic_models") =
             getParam<std::vector<MaterialName>>("inelastic_models");
 
