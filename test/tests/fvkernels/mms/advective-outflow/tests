@@ -15,4 +15,13 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
+  [extrapolate]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestExtrapolation
+    issues = '#16169'
+    requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
 []
