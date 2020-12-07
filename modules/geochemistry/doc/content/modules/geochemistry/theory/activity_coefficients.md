@@ -46,8 +46,8 @@ In this equation
 
 - $z$ is the charge number of the species (if $z=0$ then see below).
 - $I$ is the ionic strength of the solution
-- $\mathring{a}$ is the ion size parameter, measured in Angstrom ($\mathring{A}$) and given for all primary basis species, redox couples and secondary species in the [chemical database](database.md)
-- Coefficients $A$, $B$ and $\dot{B}$ depend on temperature, and are given in the [chemical database](database.md).  At at 25$^{\circ}$C: $A=0.5092\,$mol$^{-1/2}$.kg$^{1/2}$, $B=0.3283\,$mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$ and $\dot{B}=0.0410\,$mol$^{-1}$.kg.
+- $\mathring{a}$ is the ion size parameter, measured in Angstrom ($\mathring{A}$) and given for all primary basis species, redox couples and secondary species in the [chemical database](geochemistry/database/index.md)
+- Coefficients $A$, $B$ and $\dot{B}$ depend on temperature, and are given in the [chemical database](geochemistry/database/index.md).  At at 25$^{\circ}$C: $A=0.5092\,$mol$^{-1/2}$.kg$^{1/2}$, $B=0.3283\,$mol$^{-1/2}$.kg$^{1/2}$.$\mathring{A}^{-1}$ and $\dot{B}=0.0410\,$mol$^{-1}$.kg.
 
 ### Neutral species
 
@@ -55,7 +55,7 @@ When $z=0$, the activity coefficients may be computed using (Eqn(8.6) of [!cite]
 \begin{equation}
 \log_{10}\gamma = aI + bI^{2} + cI^{3} + dI^{4} \ .
 \end{equation}
-Here $a$, $b$, $c$ and $d$ are functions of temperature, and are tabulated in [chemical databases](database.md) (assuming $I$ is measured in mol.kg$^{-1}$).  Also, the database must contain a keyword, such as $\mathring{a}=-0.5$, that instructs the solver to use this expression instead of the standard Debye-Huckel B-dot model (see Section 3.1.4 of [!cite](gwb_reference)).
+Here $a$, $b$, $c$ and $d$ are functions of temperature, and are tabulated in [chemical databases](geochemistry/database/index.md) (assuming $I$ is measured in mol.kg$^{-1}$).  Also, the database must contain a keyword, such as $\mathring{a}=-0.5$, that instructs the solver to use this expression instead of the standard Debye-Huckel B-dot model (see Section 3.1.4 of [!cite](gwb_reference)).
 
 ### Alternative formula
 
@@ -63,7 +63,7 @@ Sometimes, the activity coefficients are computed using
 \begin{equation}
 \log_{10}\gamma = \dot{B}I \ .
 \end{equation}
-If so, the [chemical database](database.md) should contain a keyword $\mathring{a}=-1$ to instruct the solver to use this expression instead of the standard Debye-Huckel B-dot model  (see Section 3.1.4 of [!cite](gwb_reference)).
+If so, the [chemical database](geochemistry/database/index.md) should contain a keyword $\mathring{a}=-1$ to instruct the solver to use this expression instead of the standard Debye-Huckel B-dot model  (see Section 3.1.4 of [!cite](gwb_reference)).
 
 ## Activity of water
 
@@ -85,7 +85,7 @@ In these expression
 - $A$ \[kg$^{1/2}$.mol$^{-1/2}$\] is the standard Debye-Huckel $A$ parameter
 - $\tilde{a}$, $\tilde{b}$, $\tilde{d}$ and $\tilde{d}$ are temperature-dependent coefficients.
 
-The values of $\tilde{a}$, $\tilde{b}$, $\tilde{d}$ and $\tilde{d}$ are given in the [chemical database](database.md), assuming units of molality.  At 25$^{\circ}$C
+The values of $\tilde{a}$, $\tilde{b}$, $\tilde{d}$ and $\tilde{d}$ are given in the [chemical database](geochemistry/database/index.md), assuming units of molality.  At 25$^{\circ}$C
 
 - $\tilde{a}=1.45397\,$kg$^{1/2}$.mol$^{-1/2}$,
 - $\tilde{b}=0.022357\,$kg.mol$^{-1}$,

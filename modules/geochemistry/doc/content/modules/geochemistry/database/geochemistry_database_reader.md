@@ -1,6 +1,6 @@
 # The `geochemistry` database reader
 
-A description of the GWB database format has been given [elsewhere](database.md).  This page describes the database reader of the `geochemistry` module.
+A description of the GWB database format has been given [elsewhere](db_description.md).  This page describes the database reader of the `geochemistry` module.
 
 ## Database format
 

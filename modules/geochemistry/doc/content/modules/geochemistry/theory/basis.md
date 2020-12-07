@@ -6,7 +6,7 @@ Choosing the "basis" of primary species is the first stage in a geochemical simu
 
 ## Default basis
 
-Reading the [reaction database](database.md) provides a default list of basis species.  H$_{2}$O is always present in this basis, along with many other species such as Ag$^{+}$, Al$^{3+}$, Fe$^{2+}$, H$^{+}$, HCO$_{3}^{-}$, etc.
+Reading the [reaction database](geochemistry/database/index.md) provides a default list of basis species.  H$_{2}$O is always present in this basis, along with many other species such as Ag$^{+}$, Al$^{3+}$, Fe$^{2+}$, H$^{+}$, HCO$_{3}^{-}$, etc.
 
 Denote water by $A_{w}$ and all the other species in the default basis by $A_{i}$.  These are convenient labels: they are not quantities such as number of moles of a substance.  For example, one of the $A_{i}$ will be Ag$^{+}$, another will be Al$^{3+}$, etc.  At this stage
 \begin{equation}
@@ -15,7 +15,7 @@ Denote water by $A_{w}$ and all the other species in the default basis by $A_{i}
 
 ## Redox disequilibrium
 
-The [database](database.md) also contains a number of "redox couples".  These represent the basis species (e.g. Fe$^{2+}$) in alternative oxidataion states (e.g. Fe$^{3+}$).  The user must define which redox species are "coupled" and which are "decoupled".
+The [database](geochemistry/database/index.md) also contains a number of "redox couples".  These represent the basis species (e.g. Fe$^{2+}$) in alternative oxidataion states (e.g. Fe$^{3+}$).  The user must define which redox species are "coupled" and which are "decoupled".
 
 - Coupled (the default).  In this case, the redox pair is in equilibrium.  The database may be used to express the alternative oxidation state in terms of basis species.  For instance: $\mathrm{Fe}^{3+}= -0.5\mathrm{H}_{2}\mathrm{O} + \mathrm{Fe}^{2+} + \mathrm{H}^{+} + 0.25\mathrm{O}_{2}\mathrm{(aq)}$, which allows Fe$^{3+}$ to be eliminated from all reactions (similar to a [swap](swap.md)).  The alternative oxidation state may thereby be considered to be a secondary species (with its own equilibrium constant) and will not appear in the basis.
 
@@ -29,7 +29,7 @@ The $A_{i}$ contains the original basis species and the decoupled redox pairs th
 
 ## Minerals
 
-The [database](database.md) also contains information concerning mineralisation reactions.  It may be convenient to remove a number of the $A_{i}$ in favour of an equal number of minerals.  This is performed via a [swap](swap.md).  This is the only way of specifying a particular concentration for a mineral.  Often minerals are thought to be immobile (with regards to [transport](transport.md)) although this assumption might be relaxed to account, for example, for the migration of colloids or suspended sediment.
+The [database](geochemistry/database/index.md) also contains information concerning mineralisation reactions.  It may be convenient to remove a number of the $A_{i}$ in favour of an equal number of minerals.  This is performed via a [swap](swap.md).  This is the only way of specifying a particular concentration for a mineral.  Often minerals are thought to be immobile (with regards to [transport](transport.md)) although this assumption might be relaxed to account, for example, for the migration of colloids or suspended sediment.
 
 Of course, the basis species Pb$^{2+}$ cannot be sensibly replaced by the mineral Acanthite (Ag$_{2}$S), but Anglesite, PbSO$_{4}$ would be appropriate.
 
@@ -41,7 +41,7 @@ The $A_{i}$ contains the original basis species and the decoupled redox pairs th
 
 ## Gases
 
-The [database](database.md) also contains reactions involving gases.  It may be convenient to remove a number of the $A_{i}$ in favour of an equal number of gases, because the [fugacities](fugacity.md) of the gases are known.  This is performed via a [swap](swap.md).  This is the only way of specifying a particular fugacity for a gas.
+The [database](geochemistry/database/index.md) also contains reactions involving gases.  It may be convenient to remove a number of the $A_{i}$ in favour of an equal number of gases, because the [fugacities](fugacity.md) of the gases are known.  This is performed via a [swap](swap.md).  This is the only way of specifying a particular fugacity for a gas.
 
 Of course, the basis species Pb$^{2+}$ cannot be sensibly replaced by the gas CO$_{2}$(g), but, given the reaction
 \begin{equation}

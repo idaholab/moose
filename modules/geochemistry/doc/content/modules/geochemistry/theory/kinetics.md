@@ -51,7 +51,7 @@ Consider one or more minerals $A_{\bar{k}}$ whose rates of dissolution and preci
 \begin{equation}
 A_{\bar{k}} \rightleftharpoons \nu_{w\bar{k}}A_{w} + \sum_{i}\nu_{i\bar{k}}A_{i} + \sum_{k}\nu_{k\bar{k}}A_{k} + \sum_{m}\nu_{m\bar{k}}A_{m} \ .
 \end{equation}
-This reaction is written in the [database](database.md), just like for the other $A_{l}$.  It defines the stoichiometric coefficients $\nu_{\ast\bar{k}}$ used above.
+This reaction is written in the [database](geochemistry/database/index.md), just like for the other $A_{l}$.  It defines the stoichiometric coefficients $\nu_{\ast\bar{k}}$ used above.
 
 ### Approach 1
 
@@ -89,7 +89,7 @@ There are a lot of terms in this expression:
 - $E_{b}$ \[J.mol$^{-1}$\] is the activation energy for component $b$, which [!cite](palandri) write for many reactions of interest
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature and $T_{0}$ is a reference temperature
-- $K$ \[dimensionless\] is the reaction's equilibrium constant, quantified through the [database](database.md)
+- $K$ \[dimensionless\] is the reaction's equilibrium constant, quantified through the [database](geochemistry/database/index.md)
 - $Q$ \[dimensionless\] is the reaction's activity product
 - $\theta_{b}$ and $\eta_{b}$ are two dimensionless indices, which [!cite](palandri) write for many reactions of interest.
 
