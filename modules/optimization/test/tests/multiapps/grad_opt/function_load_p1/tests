@@ -1,0 +1,8 @@
+[Tests]
+  [function_load_grad_p1_taolmvm]
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    csvdiff = master_out.csv
+  []
+[]

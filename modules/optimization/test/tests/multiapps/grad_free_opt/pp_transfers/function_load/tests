@@ -1,0 +1,9 @@
+[Tests]
+  [function_load_grad_free_p4_taolmvm]
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    csvdiff = master_out.csv
+    heavy = true
+  []
+[]
