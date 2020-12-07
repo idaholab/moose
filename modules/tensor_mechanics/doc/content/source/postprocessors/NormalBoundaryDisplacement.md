@@ -1,4 +1,4 @@
-# Side Reaction Postprocessor
+# NormalBoundaryDisplacement
 
 !syntax description /Postprocessors/NormalBoundaryDisplacement
 
@@ -9,26 +9,24 @@ It permits modes: `average absolute_average max absolute_max` which are as follo
 
 `average`:
 \begin{equation}
-  I = \frac{1}{S \kappa}\int_{\partial S} \vec{n}^T ~ \vec{d}  dS / \kappa,
+  I = \frac{1}{S}\int_{\partial S} \vec{n}^T ~ \vec{d}  dS,
 \end{equation}
-where $S$ is the surface area, $\vec{n}$ is the normal vector, $\vec{d}$ is the displacement vector, and $\kappa$ is a normalization factor.
+where $S$ is the surface area, $\vec{n}$ is the normal vector, and $\vec{d}$ is the displacement vector.
 
 `absolute_average`:
 \begin{equation}
-  I = \frac{1}{S \kappa} \int_{\partial S} \left | \vec{n}^T ~ \vec{d} \right|  dS / \kappa.
+  I = \frac{1}{S} \int_{\partial S} \left | \vec{n}^T ~ \vec{d} \right|  dS.
 \end{equation}
 
 `max`:
 \begin{equation}
-  I = \frac{1}{\kappa}\max\limits_{S}  \vec{n}^T ~ \vec{d}  .
+  I = \max\limits_{S}  \vec{n}^T ~ \vec{d}  .
 \end{equation}
 
 `absolute_max`:
 \begin{equation}
-  I = \frac{1}{\kappa} \max\limits_{S}  \left | \vec{n}^T ~ \vec{d} \right|  .
+  I = \max\limits_{S}  \left | \vec{n}^T ~ \vec{d} \right|  .
 \end{equation}
-
-The normalization factor can be set by the parameter `normalization`. If true then $\kappa = \sqrt{S}$, otherwise $\kappa = 1$.
 
 !syntax parameters /Postprocessors/NormalBoundaryDisplacement
 

@@ -13,19 +13,14 @@
 
 registerMooseObject("TensorMechanicsApp", NormalBoundaryDisplacement);
 
-defineLegacyParams(NormalBoundaryDisplacement);
-
 InputParameters
 NormalBoundaryDisplacement::validParams()
 {
   InputParameters params = SidePostprocessor::validParams();
   params.addRequiredCoupledVar("displacements", "The names of the displacement variables");
-  MooseEnum type_options("average=0 absolute_average=1 max=2 absolute_max=3", "average");
-  params.addParam<MooseEnum>("value_type", type_options, "Type of extreme value to return.");
-  params.addParam<bool>(
-      "normalize",
-      true,
-      "Computes a relative measure of normal displacement by dividing the results by sqrt(area)");
+  MooseEnum type_options("average=0 absolute_average=1 max=2 absolute_max=3");
+  params.addRequiredParam<MooseEnum>(
+      "value_type", type_options, "Type of extreme value to return.");
   params.addClassDescription(
       "This postprocessor computes the normal displacement on a given set of boundaries.");
   return params;
@@ -33,8 +28,7 @@ NormalBoundaryDisplacement::validParams()
 
 NormalBoundaryDisplacement::NormalBoundaryDisplacement(const InputParameters & parameters)
   : SidePostprocessor(parameters),
-    _value_type(getParam<MooseEnum>("value_type")),
-    _normalize(getParam<bool>("normalize")),
+    _value_type(getParam<MooseEnum>("value_type").getEnum<NormalValType>()),
     _ncomp(coupledComponents("displacements"))
 {
   if (_ncomp != _mesh.dimension())
@@ -48,7 +42,7 @@ NormalBoundaryDisplacement::NormalBoundaryDisplacement(const InputParameters & p
 void
 NormalBoundaryDisplacement::initialize()
 {
-  _integral_displacement = 0;
+  _boundary_displacement = 0;
   _area = 0;
 }
 
@@ -64,20 +58,20 @@ NormalBoundaryDisplacement::execute()
     _area += _JxW[qp] * _coord[qp];
     switch (_value_type)
     {
-      case 0:
-        _integral_displacement += _JxW[qp] * _coord[qp] * ddn;
+      case NormalValType::AVERAGE:
+        _boundary_displacement += _JxW[qp] * _coord[qp] * ddn;
         break;
-      case 1:
-        _integral_displacement += _JxW[qp] * _coord[qp] * std::abs(ddn);
+      case NormalValType::ABSOLUTE_AVERAGE:
+        _boundary_displacement += _JxW[qp] * _coord[qp] * std::abs(ddn);
         break;
-      case 2:
-        if (ddn > _integral_displacement)
-          _integral_displacement = ddn;
+      case NormalValType::MAX:
+        if (ddn > _boundary_displacement)
+          _boundary_displacement = ddn;
         break;
-      case 3:
+      case NormalValType::ABSOLUTE_MAX:
         ddn = std::abs(ddn);
-        if (ddn > _integral_displacement)
-          _integral_displacement = ddn;
+        if (ddn > _boundary_displacement)
+          _boundary_displacement = ddn;
         break;
     }
   }
@@ -86,7 +80,7 @@ NormalBoundaryDisplacement::execute()
 Real
 NormalBoundaryDisplacement::getValue()
 {
-  return _integral_displacement;
+  return _boundary_displacement;
 }
 
 void
@@ -96,19 +90,19 @@ NormalBoundaryDisplacement::threadJoin(const UserObject & y)
 
   switch (_value_type)
   {
-    case 0:
-      _integral_displacement += pps._integral_displacement;
+    case NormalValType::AVERAGE:
+      _boundary_displacement += pps._boundary_displacement;
       break;
-    case 1:
-      _integral_displacement += pps._integral_displacement;
+    case NormalValType::ABSOLUTE_AVERAGE:
+      _boundary_displacement += pps._boundary_displacement;
       break;
-    case 2:
-      if (pps._integral_displacement > _integral_displacement)
-        _integral_displacement = pps._integral_displacement;
+    case NormalValType::MAX:
+      if (pps._boundary_displacement > _boundary_displacement)
+        _boundary_displacement = pps._boundary_displacement;
       break;
-    case 3:
-      if (pps._integral_displacement > _integral_displacement)
-        _integral_displacement = pps._integral_displacement;
+    case NormalValType::ABSOLUTE_MAX:
+      if (pps._boundary_displacement > _boundary_displacement)
+        _boundary_displacement = pps._boundary_displacement;
       break;
   }
 
@@ -121,22 +115,19 @@ NormalBoundaryDisplacement::finalize()
   gatherSum(_area);
   switch (_value_type)
   {
-    case 0:
-      gatherSum(_integral_displacement);
-      _integral_displacement /= _area;
+    case NormalValType::AVERAGE:
+      gatherSum(_boundary_displacement);
+      _boundary_displacement /= _area;
       break;
-    case 1:
-      gatherSum(_integral_displacement);
-      _integral_displacement /= _area;
+    case NormalValType::ABSOLUTE_AVERAGE:
+      gatherSum(_boundary_displacement);
+      _boundary_displacement /= _area;
       break;
-    case 2:
-      gatherMax(_integral_displacement);
+    case NormalValType::MAX:
+      gatherMax(_boundary_displacement);
       break;
-    case 3:
-      gatherMax(_integral_displacement);
+    case NormalValType::ABSOLUTE_MAX:
+      gatherMax(_boundary_displacement);
       break;
   }
-
-  if (_normalize)
-    _integral_displacement /= std::sqrt(_area);
 }

@@ -11,12 +11,6 @@
 
 #include "SidePostprocessor.h"
 
-// Forward Declarations
-class NormalBoundaryDisplacement;
-
-template <>
-InputParameters validParams<NormalBoundaryDisplacement>();
-
 /**
  * This postprocessor computes displacements normal to a provided
  * set of boundaries
@@ -35,11 +29,16 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  /// the type of the integral_disp value
-  MooseEnum _value_type;
+  enum class NormalValType
+  {
+    AVERAGE,
+    ABSOLUTE_AVERAGE,
+    MAX,
+    ABSOLUTE_MAX
+  };
 
-  /// if the result is normalized by sqrt(area)
-  bool _normalize;
+  /// the type of the normal displacement value
+  NormalValType _value_type;
 
   /// number of components in _disp
   unsigned int _ncomp;
@@ -47,8 +46,8 @@ protected:
   /// displacement variable disp_x, disp_y, disp_z
   std::vector<const VariableValue *> _disp;
 
-  /// integral displacement value accumulated during execute
-  Real _integral_displacement;
+  /// boundary displacement value accumulated during execute
+  Real _boundary_displacement;
 
   /// area of the boundary/boundaries
   Real _area;
