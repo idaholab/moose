@@ -6,13 +6,12 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import os
+import re
 import pyhit
 import moosetree
 import mooseutils
 import MooseDocs
-import re
 from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
@@ -161,54 +160,36 @@ class InputListingCommand(FileListingCommand):
     """
 
     COMMAND = 'listing'
-    SUBCOMMAND = 'i'
+    SUBCOMMAND = ('i', 'hit')
 
     @staticmethod
     def defaultSettings():
         settings = FileListingCommand.defaultSettings()
-        settings['block'] = (None, 'Space separated list of input file block names to include.')
-        settings['remove_block'] = (None, 'Space separated list of input file block names to hide.')
-        settings['remove_param'] = (None, "Space separated list of input parameters to hide. " \
-                                          "Specify the FULL path like: 'Kernels/diffusion/block.'")
+        settings['block'] = (None, 'Space separated list of input file block names to include. This cannot be used with the "remove" setting.')
+        settings['remove'] = (None, 'Space separated list of input file block and/or parameter names to remove. The full path to the block or parameter must be used, e.g., "Kernels/diffusion/variable".')
         return settings
 
     def extractContent(self, filename):
         """Extract the file contents for display."""
+        if self.settings['block'] and self.settings['remove']:
+            msg = "The 'block' and 'remove' settings cannot be used together."
+            raise exceptions.MooseDocsException(msg)
+
+        content = None
         if self.settings['block']:
-            hit = self.extractInputBlocks(pyhit.load(filename), self.settings['block'])
+            content = self.extractInputBlocks(filename, self.settings['block'])
+        elif self.settings['remove']:
+            content = self.removeInputBlocks(filename, self.settings['remove'])
         else:
-            hit = pyhit.load(filename)
+            content = common.read(filename)
 
-        if self.settings['remove_block']:
-            for block in self.settings['remove_block'].split():
-                node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
-                if node is None:
-                    msg = "Unable to find block '{}' in {}."
-                    raise exceptions.MooseDocsException(msg, block, filename)
-                node.remove()
-
-        if self.settings['remove_param']:
-            for param in self.settings['remove_param'].split():
-                block = re.sub(r'[^/]+$', '', param)
-                node = moosetree.find(hit, lambda n: n.fullpath + '/' == '/' + block)
-                if node is None:
-                    msg = "Unable to find block '{}' in {}."
-                    raise exceptions.MooseDocsException(msg, block, filename)
-
-                match = node.get(param.replace(block, ''))
-                if match is None:
-                    msg = "Unable to find parameter '{}' in the input file:\n\n{}\n\nCheck for " \
-                          "spelling errors and be sure to specify the FULL path of the " \
-                          "parameter as it appears in the above."
-                    raise exceptions.MooseDocsException(msg, param, str(hit.render()))
-                node.removeParam(param.replace(block, ''))
-
-        content, _ = common.extractContent(str(hit.render()), self.settings)
+        content, _ = common.extractContent(content, self.settings)
         return content
 
     @staticmethod
-    def extractInputBlocks(hit, blocks):
-        """Read input file block(s)"""
+    def extractInputBlocks(filename, blocks):
+        """Remove input file block(s)"""
+        hit = pyhit.load(filename)
         out = []
         for block in blocks.split(' '):
             node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
@@ -216,8 +197,37 @@ class InputListingCommand(FileListingCommand):
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
             out.append(str(node.render()))
-        return pyhit.parse('\n'.join(out))
+        return '\n'.join(out)
 
+    @staticmethod
+    def removeInputBlocks(filename, remove):
+        hit = pyhit.load(filename)
+        for r in re.split(r' +', remove):
+            for node in moosetree.iterate(hit):
+                blk, param = InputListingCommand.removeHelper(node, r)
+                if (blk is not None) and (param is None):
+                    node.remove()
+                elif (blk is not None) and (param is not None):
+                    node.removeParam(param)
+
+            if (blk is None) and (param is None):
+                msg = 'Unable to locate block or parameter with name: {}'
+                raise exceptions.MooseDocsException(msg, r)
+
+        return str(hit.render())
+
+    @staticmethod
+    def removeHelper(node, block):
+        if node.fullpath == block:
+            return node, None
+
+        if '/' in block:
+            block, param = block.rsplit('/', 1)
+            print(block, param, node.parent.fullpath)
+            if (node.fullpath == block) and (param in node):
+                return node, param
+
+        return None, None
 
 def get_listing_options(token):
     opts = latex.Bracket(None)

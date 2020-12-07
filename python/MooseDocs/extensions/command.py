@@ -91,7 +91,7 @@ class CommandBase(components.ReaderComponent):
             if match:
                 cmd = (info['command'], match.group('ext'))
             elif info['subcommand'].endswith('/tests'):
-                cmd = (info['command'], 'i') # consider 'tests' as input files for hit formatting
+                cmd = (info['command'], 'hit') # consider 'tests' as input files for hit formatting
             elif info['subcommand'].startswith('http'):
                 cmd = (info['command'], None)
             elif '=' in info['subcommand']:

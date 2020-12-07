@@ -52,4 +52,7 @@ void function();
 Hide the `issues` parameter in the following listing:
 
 !listing moose/test/tests/kernels/simple_diffusion/tests
-         remove_param=Tests/test/issues
+         remove=/Tests/test/issues
+
+!listing moose/test/tests/kernels/simple_diffusion/tests
+         remove=/Tests/test
