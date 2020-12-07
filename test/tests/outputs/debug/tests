@@ -78,4 +78,13 @@
      requirement = "The system shall be include the ability to display residual information for scalar variables."
      design = "TopResidualDebugOutput.md"
    [../]
+
+   [show_material_properties_consumed]
+     type = RunApp
+     input = show_material_props_consumed.i
+     expect_out = "Object: Kernel::diff2\s+Properties: andrew"
+
+     requirement = "The system shall include debug syntax that includes material property consumption information."
+     design = "MaterialPropertyDebugOutput.md Debug/index.md"
+   []
 []
