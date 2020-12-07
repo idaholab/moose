@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'build_array_variable_aux.i'
     exodiff = 'build_array_variable_aux_out.e'
+    design = 'auxkernels/BuildArrayVariableAux.md'
     requirement = 'The system shall correctly copy the values of regular variables into the component fields of an array variable.'
     issues = '#16402'
   [../]
