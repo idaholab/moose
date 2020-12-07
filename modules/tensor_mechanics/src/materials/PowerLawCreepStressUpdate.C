@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PowerLawCreepStressUpdate.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
 
@@ -116,7 +117,10 @@ PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     Real second = 0.0;
 
     if (von_mises_stress > 1.0e-6)
-      second = trapezoidalRule(0, von_mises_stress, tolerance, max_h_number);
+      second = MathUtils::trapezoidalRule(
+          0, von_mises_stress, tolerance, max_h_number, [this](Real val) {
+            return computeCreepRate(val);
+          });
 
     // See Kim, "Contour integral calculations for generalised creep laws within abaqus",
     // International Journal of Pressure Vessels and Piping 78 􏰥2001) 661-666

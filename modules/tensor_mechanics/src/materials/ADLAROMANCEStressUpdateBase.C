@@ -605,14 +605,19 @@ ADLAROMANCEStressUpdateBase::computeStrainEnergyRateDensity(
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
 
-  Real tolerance = 1.0e-04;
-  std::size_t max_h_number = 200;
   Real second = 0.0;
 
   // See Kim, "Contour integral calculations for generalised creep laws within abaqus",
   // International Journal of Pressure Vessels and Piping 78 􏰥2001) 661-666
   if (numerical && von_mises_stress > 1.0e-6)
-    second = trapezoidalRule(0, von_mises_stress, tolerance, max_h_number);
+  {
+    Real tolerance = 1.0e-04;
+    std::size_t max_h_number = 200;
+    second =
+        MathUtils::trapezoidalRule(0, von_mises_stress, tolerance, max_h_number, [this](Real val) {
+          return computeCreepStrainRate(val);
+        });
+  }
 
   return MetaPhysicL::raw_value(stress[_qp])
              .doubleContraction(MetaPhysicL::raw_value((strain_rate)[_qp])) -
