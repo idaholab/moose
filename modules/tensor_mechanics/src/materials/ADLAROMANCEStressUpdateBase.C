@@ -607,8 +607,8 @@ ADLAROMANCEStressUpdateBase::computeStrainEnergyRateDensity(
 
   Real second = 0.0;
 
-  // See Kim, "Contour integral calculations for generalised creep laws within abaqus",
-  // International Journal of Pressure Vessels and Piping 78 􏰥2001) 661-666
+  // See Kim, Contour integral calculations for generalised creep laws within abaqus,
+  // International Journal of Pressure Vessels and Piping 78 661-666
   if (numerical && von_mises_stress > 1.0e-6)
   {
     Real tolerance = 1.0e-04;

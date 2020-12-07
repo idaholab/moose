@@ -121,8 +121,8 @@ ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
             return computeCreepRate(val);
           });
 
-    // See Kim, "Contour integral calculations for generalised creep laws within abaqus",
-    // International Journal of Pressure Vessels and Piping 78 􏰥2001) 661-666
+    // See Kim, Contour integral calculations for generalised creep laws within abaqus,
+    // International Journal of Pressure Vessels and Piping 78 661-666
     return MetaPhysicL::raw_value(stress[_qp])
                .doubleContraction(MetaPhysicL::raw_value((strain_rate)[_qp])) -
            second;
