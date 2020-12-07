@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADStressUpdateBase.h"
+#include "StressUpdateBase.h"
 #include "ADGeneralizedReturnMappingSolution.h"
 
 /**
