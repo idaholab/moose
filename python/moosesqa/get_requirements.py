@@ -12,7 +12,7 @@ import collections
 import logging
 import pyhit
 import mooseutils
-from .Requirement import Requirement
+from .Requirement import TestSpecification, Requirement, Detail
 
 def get_requirements(directories, specs, prefix='F', category=None):
     """
@@ -41,29 +41,61 @@ def _add_requirements(out, location, filename):
     Opens tests specification and extracts requirement items.
     """
     root = pyhit.load(filename)
+
+    # Options available at the top-level
+    #   [Tests]
+    #      design = 'foo.md bar.md'
+    #      issues = '#12345 ab23bd34'
     design = root.children[0].get('design', None)
     design_line = root.children[0].line('design', None)
     issues = root.children[0].get('issues', None)
     issues_line = root.children[0].line('issues', None)
     deprecated = root.children[0].get('deprecated', False)
     deprecated_line = root.children[0].line('deprecated', None)
+    collections = root.children[0].get('collections', None)
+    collections_line = root.children[0].line('collections', None)
 
     group = os.path.relpath(filename, location).split('/')[0]
     path = os.path.relpath(os.path.dirname(filename), location)
-
     for child in root.children[0]:
         req = _create_requirement(child, path, filename,
                                   design, design_line,
                                   issues, issues_line,
+                                  collections, collections_line,
                                   deprecated, deprecated_line)
         out[group].append(req)
 
         # Get "detail" parameter from nested tests
         for grandchild in child.children:
-            detail = _create_requirement(grandchild, path, filename, None, None, None, None, None, None)
+            detail = _create_detail(grandchild, path, filename)
+            detail.specification = _create_specification(grandchild, '{}/{}'.format(child.name, grandchild.name), path, filename)
             req.details.append(detail)
 
-def _create_requirement(child, path, filename, design, design_line, issues, issues_line, deprecated, deprecated_line):
+        if not req.details:
+            req.specification = _create_specification(child, child.name, path, filename)
+
+def _create_specification(child, name, path, filename):
+    spec = TestSpecification(name=name,
+                             path=path,
+                             filename=filename,
+                             line=child.line())
+    # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
+    spec.skip = child.get('skip', None) is not None
+    spec.deleted = child.get('deleted', None) is not None
+
+    # Store the prerequisites, if any
+    prereq = child.get('prereq', None)
+    if prereq is not None:
+        spec.prerequisites = set(prereq.split(' '))
+
+    # Type
+    spec.type = child.get('type').strip() if child.get('type', None) is not None else None
+
+    return spec
+
+
+def _create_requirement(child, path, filename, design, design_line, issues, issues_line,
+                        collections, collections_line, deprecated, deprecated_line):
 
     # Create the Requirement object
     req = Requirement(name=child.name,
@@ -89,26 +121,43 @@ def _create_requirement(child, path, filename, design, design_line, issues, issu
     req.issues = issues.split() if (issues is not None) else None
     req.issues_line = child.line('issues', issues_line)
 
-    # "detail" parameter
-    req.detail = child.get('detail', None)
-    req.detail_line = child.line('detail', None)
-
-    # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
-    req.skip = child.get('skip', None) is not None
-    req.deleted = child.get('deleted', None) is not None
+    # "collections" parameter
+    collections = child.get('collections', collections if (collections is not None) else None)
+    req.collections = set(collections.strip().split()) if (collections is not None) else None
+    req.collections_line = child.line('collections', collections_line)
 
     # V&V document
     verification = child.get('verification', None)
-    req.verification = verification.split() if (verification is not None) else None
+    req.verification = verification.strip().split() if (verification is not None) else None
     req.verification_line = child.line('verification', None)
 
     validation = child.get('validation', None)
-    req.validation = validation.split() if (validation is not None) else None
+    req.validation = validation.strip().split() if (validation is not None) else None
     req.validation_line = child.line('validation', None)
 
-    # Store the prerequisites, if any
-    prereq = child.get('prereq', None)
-    if prereq is not None:
-        req.prerequisites = set(prereq.split(' '))
+    # "detail" parameter (this will error in check_requirements)
+    req.detail = child.get('detail', None)
+    req.detail_line = child.line('detail', None)
+    return req
 
+def _create_detail(child, path, filename):
+    req = Detail(name=child.name,
+                 path=path,
+                 filename=filename,
+                 line=child.line())
+
+    req.detail = child.get('detail', None)
+    req.detail_line = child.line('detail', None)
+
+    # "requirement" parameter  (this will error in check_requirements)
+    req.requirement = child.get('requirement', None)
+    req.requirement_line = child.line('requirement', None)
+    req.design = child.get('design', None)
+    req.design_line = child.line('design', None)
+    req.issues = child.get('issues', None)
+    req.issues_line = child.line('issues', None)
+    req.deprecated = child.get('deprecated', None)
+    req.deprecated_line = child.line('deprecated', None)
+    req.collections = child.get('collections', None)
+    req.collections_line = child.line('collections', None)
     return req

@@ -28,7 +28,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
-from . import core, command, floats, autolink, civet, appsyntax
+from . import core, command, floats, autolink, civet, appsyntax, table
 
 LOG = logging.getLogger(__name__)
 
@@ -42,6 +42,7 @@ SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', l
 SQARequirementText = tokens.newToken('SQARequirementText')
 SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[], line=None, filename=None)
 SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[], line=None, filename=None, url=None)
+SQARequirementCollections = tokens.newToken('SQARequirementCollections', collections=[])
 SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
                                               spec_name=None, spec_path=None)
 SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
@@ -83,6 +84,7 @@ class SQAExtension(command.CommandExtension):
                                         ", 'dependencies', 'repo', 'reports'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
         config['reports'] = (None, "Build SQA reports for dashboard creation.")
+        config['add_run_exception_to_failure_analysis'] = (True, "Automatically include RunException tests in the 'FAILURE_ANALYSIS' collection.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -184,6 +186,14 @@ class SQAExtension(command.CommandExtension):
                     msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
                     LOG.warning(msg)
 
+        # Add RunException tests to FAILURE_ANALYSIS collection
+        for req_category in self.__requirements.values():
+            for requirements in req_category.values():
+                for req in requirements:
+                    t_types = req.types
+                    if (req.collections is None) and (t_types is not None) and ('RunException' in t_types):
+                        req.collections = set(['FAILURE_ANALYSIS'])
+
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
     def hasCivetExtension(self):
@@ -224,7 +234,7 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats)
+        self.requires(core, command, autolink, floats, table)
 
         for ext in self.translator.extensions:
             if ext.name == 'civet':
@@ -234,6 +244,8 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
+        self.addCommand(reader, SQACollectionsCommand())
+        self.addCommand(reader, SQACollectionsListCommand())
         self.addCommand(reader, SQADependenciesCommand())
         self.addCommand(reader, SQADocumentCommand())
         self.addCommand(reader, SQAReportCommand())
@@ -245,6 +257,7 @@ class SQAExtension(command.CommandExtension):
         renderer.add('SQARequirementText', RenderSQARequirementText())
         renderer.add('SQARequirementDesign', RenderSQARequirementDesign())
         renderer.add('SQARequirementIssues', RenderSQARequirementIssues())
+        renderer.add('SQARequirementCollections', RenderSQARequirementCollections())
         renderer.add('SQARequirementSpecification', RenderSQARequirementSpecification())
         renderer.add('SQARequirementPrequisites', RenderSQARequirementPrequisites())
         renderer.add('SQARequirementDetails', RenderSQARequirementDetails())
@@ -281,6 +294,7 @@ class SQARequirementsCommand(command.CommandComponent):
         config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
                                         "the 'link' setting must be true.")
         config['link-results'] = (True, "Enable/disable the link to the test results.")
+        config['link-collections'] = (True, "Enable/disable the collections badge(s).")
 
         return config
 
@@ -307,7 +321,7 @@ class SQARequirementsCommand(command.CommandComponent):
 
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname,
-                                        satisfied=not (req.skip or req.deleted))
+                                        satisfied=req.testable)
         text = SQARequirementText(item)
         if req.requirement is not None:
             self.reader.tokenize(text, req.requirement, page, MarkdownReader.INLINE, info.line, report=False)
@@ -342,24 +356,23 @@ class SQARequirementsCommand(command.CommandComponent):
                                          content=core.Code(None, language='text', content=content))
 
             if self.settings['link-design'] and req.design:
-                p = SQARequirementDesign(item, filename=req.filename, design=req.design,
-                                         line=req.design_line)
+                SQARequirementDesign(item, filename=req.filename, design=req.design,
+                                     line=req.design_line)
 
             if self.settings['link-issues'] and req.issues:
-                p = SQARequirementIssues(item, filename=req.filename, issues=req.issues,
-                                         line=req.issues_line, url=self.extension.remote(category))
+                SQARequirementIssues(item, filename=req.filename, issues=req.issues,
+                                     line=req.issues_line, url=self.extension.remote(category))
+
+            if self.settings['link-collections'] and req.collections:
+                SQARequirementCollections(item, collections=req.collections)
 
             if self.settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
-                for prereq in req.prerequisites:
-                    for other in requirements:
-                        if (other.name == prereq) and (other.path == req.path):
-                            labels.append((other.path, other.name, other.label))
-                        for detail in other.details:
-                            if (detail.name == prereq) and (detail.path == req.path):
-                                labels.append((other.path, other.name, other.label))
-
-                SQARequirementPrequisites(item, specs=labels)
+                for other in requirements:
+                    if (other is not req) and (other.path == req.path) and (req.prerequisites.intersection(other.names)):
+                        labels.append((other.path, other.name, other.label))
+                if labels:
+                    SQARequirementPrequisites(item, specs=labels)
 
             if self.settings.get('link-results', False):
                 keys = list()
@@ -414,6 +427,65 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements, category)
 
+        return parent
+
+class SQACollectionsCommand(SQARequirementsCommand):
+    COMMAND = 'sqa'
+    SUBCOMMAND = ('collections', 'types')
+
+    @staticmethod
+    def defaultSettings():
+        config = SQARequirementsCommand.defaultSettings()
+        config['category'] = (None, "Provide the category.")
+        config['items'] = (None, "List the 'collections' or 'types', if not provided all will be shown.")
+        config.pop('link-prerequisites')
+        return config
+
+    def createToken(self, parent, info, page):
+        category = self.settings.get('category')
+        if category == '_empty_':
+            return parent
+
+        collection_map = collections.defaultdict(list)
+        allowed = self.settings.get('items')
+        if allowed is not None:
+            allowed = set(allowed.strip().split())
+
+        for requirements in self.extension.requirements(category).values():
+            for req in requirements:
+                attrib = getattr(req, info['subcommand'])
+                if attrib is None:
+                    continue
+                for c in attrib:
+                    if (allowed is None) or (c in allowed):
+                        collection_map[c].append(req)
+
+        for item, requirements in collection_map.items():
+            matrix = SQARequirementMatrix(parent)
+            heading = SQARequirementMatrixHeading(matrix, category=category, string=item)
+            for req in requirements:
+                self._addRequirement(matrix, info, page, req, requirements, category)
+
+        return parent
+
+class SQACollectionsListCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'collections-list'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings.update(floats.caption_settings())
+        settings['prefix'] = ('Table', settings['prefix'][1])
+        return settings
+
+    def createToken(self, parent, info, page):
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+                                  token_type=table.TableFloat, **self.attributes)
+
+        rows = [[k,v] for k, v in moosesqa.MOOSESQA_COLLECTIONS.items()]
+        tbl = table.builder(rows, headings=['Collection', 'Description'])
+        tbl.parent = flt
         return parent
 
 class SQARequirementsMatrixCommand(command.CommandComponent):
@@ -678,10 +750,8 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
     def findDesign(self, filename, design, line):
         node = self.translator.findPage(design, throw_on_zero=False)
         if node is None:
-            msg = "Unable to locate the design page: {}\n    {}:{}" \
-                  .format(design, filename, line)
-            LOG.error(msg)
-            return None
+            msg = "Unable to locate the design page: {}\n    {}:{}"
+            raise exceptions.MooseDocsException(msg, design, filename, line)
         return node
 
     def createHTML(self, parent, token, page):
@@ -693,7 +763,7 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
                 link.info = token.info
                 self.createHTMLHelper(p, link, page, node)
             else:
-                html.Tag(p, 'a', string=str(design), class_='moose-sqa-error')
+                html.Tag(p, 'a', string=str(design), class_='moose-error')
 
     def createLatex(self, parent, token, page):
         prev = token.previous
@@ -777,8 +847,26 @@ class RenderSQARequirementIssues(components.RenderComponent):
             else:
                 latex.Command(parent, 'href', args=[latex.Brace(string=url)], string=str(issue))
 
-class RenderSQARequirementSpecification(components.RenderComponent):
+class RenderSQARequirementCollections(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        p = html.Tag(parent, 'p', string='Collections: ', class_='moose-sqa-items')
+        for item in token['collections']:
+            html.Tag(p, 'span', string=str(item))
 
+    def createLatex(self, parent, token, page):
+        prev = token.previous
+        if prev and prev.name != 'SQARequirementDetails':
+            latex.Command(parent, 'newline', start='\n', end='\n')
+        latex.String(parent, content='Collections:~', escape=False)
+        no_seperator = True
+
+        for item in token['collections']:
+            if not no_seperator:
+                latex.String(parent, content='; ')
+                no_seperator = False
+            latex.Command(parent, 'textcolor', args=[latex.Brace(string='blue')], string=item)
+
+class RenderSQARequirementSpecification(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
         return html.Tag(parent, 'p', string='Specification: ')
 

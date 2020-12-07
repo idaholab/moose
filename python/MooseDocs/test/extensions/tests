@@ -57,12 +57,17 @@
     [media]
       type = PythonUnitTest
       input = test_media.py
-      detail = "displaying images and videos, and"
+      detail = "displaying images and videos,"
     []
     [gallery]
       type = PythonUnitTest
       input = test_gallery.py
-      detail = "displaying image galleries."
+      detail = "displaying image galleries, and"
+    []
+    [template]
+      type = PythonUnitTest
+      input = test_template.py
+      detail = "support template files."
     []
   []
 []

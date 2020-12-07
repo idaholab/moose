@@ -67,7 +67,6 @@ class SQARequirementReport(SQAReport):
 
         # Check the requirements
         logger = check_requirements(requirements, color_text=self.color_text, **kwargs)
-
         return logger
 
 @mooseutils.addProperty('reports', ptype=list)

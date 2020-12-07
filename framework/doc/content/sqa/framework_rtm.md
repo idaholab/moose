@@ -38,5 +38,19 @@ can be found in the [Software Test Plan](sqa/framework_stp.md).
 !template-end!
 
 !template! item key=requirements-traceability-matrix
-!sqa requirements category=framework
+!sqa requirements category={{category}}
+!template-end!
+
+!template! item key=requirement-collections-intro
+A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
+"FAILURE_ANALYSIS" collection is comprised of requirements that perform checks for simulation
+failures. The following table lists the names and descriptions of the available collections.
+
+!sqa collections-list caption=List of requirement "collections" names and descriptions.
+
+The following is a complete list of each requirement that has been assigned to a collection.
+!template-end!
+
+!template! item key=requirement-collections
+!sqa collections category={{category}}
 !template-end!

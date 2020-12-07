@@ -16,7 +16,7 @@
 
   [get_requirements]
     type = PythonUnitTest
-    input = test_check_syntax.py
+    input = test_get_requirements.py
     requirement = "The system shall include a tool for gathering requirement information for software quality documentation."
   []
 

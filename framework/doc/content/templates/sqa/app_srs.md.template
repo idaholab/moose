@@ -21,3 +21,10 @@ The following is a complete list for all the functional requirements for {{app}}
 
 !template field key=requirements required=False
 !sqa requirements link=False category={{category}}
+
+## Requirement Collections id=requirement-collections
+
+!template field key=requirement-collections-intro required=False
+
+!template field key=requirement-collections required=False
+!sqa collections category={{category}} link=False

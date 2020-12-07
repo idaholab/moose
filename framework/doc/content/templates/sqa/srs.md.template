@@ -139,7 +139,7 @@ Define specific acronyms.
 !template-end!
 
 
-## System Requirements id=system-requirements
+### System Requirements id=system-requirements
 
 !template field key=system-requirements required=False
 
@@ -189,6 +189,7 @@ the requirements.
 !template! field
       key=useability-requirements
 !template field-begin
+
 ## Usability Requirements
 
 Define usability requirements. Usability requirements and objectives for the system or service
@@ -358,10 +359,19 @@ contractor-logistics support.
 Define requirements imposed on the system to ensure that it can be packaged, handled, shipped, and
 transported within its intended operational context.
 
-
 ## Verification
 
 !template field key=verification
 Provide the verification approaches and methods planned to qualify the system or system element. The
 information items for verification are recommended to be given in a parallel manner with the
 information items in Subsections 3.1 through 3.13.
+
+## Requirement Collections id=requirement-collections
+
+!template field key=requirement-collections-intro required=False
+
+!template! field key=requirement-collections
+This section should contain lists of requirement collections, where a "collection" is simply a
+grouping of requirements that are related in some fashion. For example, all tests for error handling
+could be grouped into a "failure analysis" collection.
+!template-end!

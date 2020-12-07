@@ -24,3 +24,27 @@
 !sqa requirements-matrix prefix=Z
 - Item One
 - Item Two
+
+## Collections
+
+### All Collections
+
+!sqa collections category=demo
+
+### Specific Collection
+
+!sqa collections category=demo items=Andrew
+
+### Collection List
+
+!sqa collections-list
+
+## Types
+
+### All Types
+
+!sqa types category=demo
+
+### Specific Type
+
+!sqa types category=demo items=Andrew

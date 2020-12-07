@@ -10,6 +10,7 @@
     requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
     design = 'Executioner/index.md'
     issues = '#5144 #5153'
+    collections = 'FAILURE_ANALYSIS'
   [../]
 
   [./range_check_param]
@@ -19,6 +20,7 @@
 
     requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
     issues = '#2777'
+    collections = 'FAILURE_ANALYSIS'
   [../]
 
   [./checked_pointer_param_test]
