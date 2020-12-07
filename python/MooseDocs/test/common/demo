@@ -2,6 +2,7 @@
   issues = '#1234'
   design = core.md
   [r0]
+    type = Andrew
     requirement = "Requirement One"
   []
   [r1]
@@ -24,9 +25,11 @@
     requirement = "Requirement Group One"
     verification = bibtex.md
     [group0-a]
+       type = Deanne
        detail = 1D
     []
     [group0-b]
+       type = Deanne
        detail = 2D
     []
   []
@@ -34,6 +37,7 @@
   [group1]
     requirement = "Requirement Group Two"
     issues = "#8910"
+    collections = Andrew
     [group1-a]
        detail = 3D
     []
@@ -46,6 +50,7 @@
     requirement = "Requirement Group Three"
     design = bibtex.md
     validation = 'katex.md bibtex.md'
+    collections = Deanne
     [group2-a]
        detail = 5D
     []

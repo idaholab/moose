@@ -200,3 +200,17 @@ No special requirements are needed for packaging or shipping any media containin
 some [!ac](MOOSE)-based applications maybe be export controlled in which case all export control restrictions must
 be adhered to when packaging and shipping media.
 !template-end!
+
+!template! item key=requirement-collections-intro
+A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
+"FAILURE_ANALYSIS" collection is comprised of requirements that perform checks for simulation
+failures. The following table lists the names and descriptions of the available collections.
+
+!sqa collections-list caption=List of requirement "collections" names and descriptions.
+
+The following is a complete list of each requirement that has been assigned to a collection.
+!template-end!
+
+!template! item key=requirement-collections
+!sqa collections category={{category}} link=False
+!template-end!

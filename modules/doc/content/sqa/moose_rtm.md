@@ -16,3 +16,9 @@ is detailed in the files listed below.
 !template item key=requirements
 All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](RTM) documents, please
 refer to the documents listed in [#dependencies].
+
+!template item key=requirement-collections-intro
+
+!template item key=requirement-collections
+All of the requirement collections for [!ac](MOOSE) are provided in the dependent [!ac](RTM)
+documents, please refer to the documents listed in [#dependencies].

@@ -22,3 +22,10 @@ design documents and test cases for {{app}}.
 
 !template field key=requirements required=False
 !sqa requirements link=True category={{category}}
+
+## Requirement Collections id=requirement-collections
+
+!template field key=requirement-collections-intro required=False
+
+!template field key=requirement-collections required=False
+!sqa collections category={{category}}
