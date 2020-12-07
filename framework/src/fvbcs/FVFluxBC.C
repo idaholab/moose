@@ -30,7 +30,8 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
   : FVBoundaryCondition(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, /*nodal=*/false, /*is_fv=*/true),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    _u(_var.adSln())
+    _u(_var.adSln()),
+    _u_neighbor(_var.adSlnNeighbor())
 {
 }
 
@@ -159,4 +160,46 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   };
 
   _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+}
+
+const ADReal &
+FVFluxBC::uOnUSub() const
+{
+  mooseAssert(_face_info, "The face info has not been set");
+  const auto ft = _face_info->faceType(_var.name());
+  mooseAssert(
+      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+      "The variable " << _var.name()
+                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
+                      << this->name());
+  mooseAssert(_qp == 0,
+              "At the time of writing, we only support one quadrature point, which should "
+              "correspond to the location of the cell centroid. If that changes, we should "
+              "probably change the body of FVFluxBC::uOnUSub");
+
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+    return _u[_qp];
+  else
+    return _u_neighbor[_qp];
+}
+
+const ADReal &
+FVFluxBC::uOnGhost() const
+{
+  mooseAssert(_face_info, "The face info has not been set");
+  const auto ft = _face_info->faceType(_var.name());
+  mooseAssert(
+      ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+      "The variable " << _var.name()
+                      << " should be defined on exactly one adjacent subdomain for FVFluxBC "
+                      << this->name());
+  mooseAssert(_qp == 0,
+              "At the time of writing, we only support one quadrature point, which should "
+              "correspond to the location of the cell centroid. If that changes, we should "
+              "probably change the body of FVFluxBC::uOnGhost");
+
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+    return _u_neighbor[_qp];
+  else
+    return _u[_qp];
 }

@@ -39,6 +39,6 @@ FVConstantScalarOutflowBC::computeQpResidual()
   return _normal * _velocity * _var.getBoundaryFaceValue(*_face_info);
 #else
   // this simply returns a cell centroid value which will only result in first order accuracy
-  return _normal * _velocity * _u[_qp];
+  return _normal * _velocity * uOnUSub();
 #endif
 }
