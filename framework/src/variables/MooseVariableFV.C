@@ -541,6 +541,20 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
       return it->second;
   }
 
+  // Do we have a Dirichlet condition?
+  const auto & diri_pr = getDirichletBC(fi);
+  if (diri_pr.first)
+  {
+    const auto & pr = _face_to_value.emplace(&fi, diri_pr.second->boundaryValue(fi));
+    mooseAssert(pr.second, "This should have inserted a new key-value pair");
+    return pr.first->second;
+  }
+
+  //
+  // No Dirichlet conditions so we extrapolate a face value from the element/cell centroid
+  // information
+  //
+
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
 
@@ -558,7 +572,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
   }
   else
   {
-    // We are doing a one-term Taylor expansion and the face value is simply the centoroid value
+    // We are doing a one-term Taylor expansion and the face value is simply the centroid value
     const auto & pr = _face_to_value.emplace(&fi, getElemValue(elem));
     mooseAssert(pr.second, "This should have inserted a new key-value pair");
     return pr.first->second;

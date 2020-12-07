@@ -577,6 +577,24 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       "I only really understand having a time derivative for this and not having a time "
       "derivative for the other if this is elemental data and the other is not elemental data.");
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const ADReal u_other = _subproblem.currentlyComputingJacobian()
+                             ? other_face.adSln()[0]
+                             : other_face.sln(Moose::Current)[0];
+  const auto & u_face = _var.getBoundaryFaceValue(fi);
+  const auto u_ghost = 2 * u_face - u_other;
+
+  if (_need_ad_u)
+    assignForAllQps(u_ghost, _ad_u, nqp);
+  assignForAllQps(u_ghost.value(), _u, nqp);
+
+  // If people have time derivatives on faces, then they're f'd for now because we do not know the
+  // time dependence of u_face. Let's try to do better than silent wrong values at least in
+  // debugging modes by tossing some NaNs in
+  if (_need_ad_u_dot && other_face._need_ad_u_dot)
+    assignForAllQps(std::numeric_limits<typename ADReal::value_type>::quiet_NaN(), _ad_u_dot, nqp);
+
+#else
   if (_has_dirichlet_bc)
   {
     // extrapolate from the boundary element across the boundary face using
@@ -629,10 +647,12 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       // Since we are simply tracking the other face's value, the time derivative is also the same
       assignForAllQps(other_face.adUDot()[0], _ad_u_dot, nqp);
   }
+#endif
 
-  // At this point we're only doing const monomials and we're no doing reconstruction, so any
-  // spatial derivatives are zero. We need to explicitly assign here to ensure that the values and
-  // DualNumber derivatives are properly initialized
+  // At this point we're only doing const monomials and we're not accessing reconstruction
+  // information through no-param-accessors (e.g. adGradSln()), so any spatial derivatives are zero.
+  // We need to explicitly assign here to ensure that the values and DualNumber derivatives are
+  // properly initialized
   if (_need_ad_grad_u)
     assignForAllQps(0, _ad_grad_u, nqp);
   if (_need_ad_second_u)
