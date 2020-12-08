@@ -41,7 +41,7 @@ class Test2DAverage(unittest.TestCase):
 class Test2DRC(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = mms.run_spatial('2d-rc.i', 8, y_pp=labels, mpi=8)
+        df1 = mms.run_spatial('2d-rc.i', 9, y_pp=labels, mpi=32)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -104,7 +104,7 @@ class TestPlanePoiseuilleRCFirst(unittest.TestCase):
 class Test2DRCNoSlip(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = mms.run_spatial('2d-rc-no-slip.i', 8, y_pp=labels, mpi=8)
+        df1 = mms.run_spatial('2d-rc-no-slip.i', 9, y_pp=labels, mpi=32)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -128,14 +128,14 @@ class Test2DAverageTemp(unittest.TestCase):
 class Test2DRCTemp(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p', 'L2t']
-        df1 = mms.run_spatial('2d-average-with-temp.i', 8, "velocity_interp_method='rc'", y_pp=labels, mpi=8)
+        df1 = mms.run_spatial('2d-average-with-temp.i', 8, "velocity_interp_method='rc'", y_pp=labels, mpi=16)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
         fig.save('2d-rc-with-temp.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)

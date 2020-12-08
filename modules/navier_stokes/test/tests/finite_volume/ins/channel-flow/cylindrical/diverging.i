@@ -9,6 +9,7 @@ penalty=1e6
 
 [Mesh]
   file = diverging.msh
+  uniform_refine = 2
 []
 
 [Problem]
