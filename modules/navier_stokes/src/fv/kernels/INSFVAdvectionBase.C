@@ -159,7 +159,8 @@ INSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu) const
     coeff += -mass_flow;
 
     // Now add the viscous flux
-    coeff += mu * fi->faceArea() * coord / (fi->elemCentroid() - fi->neighborCentroid()).norm();
+    coeff += mu * fi->faceArea() * coord /
+             (fi->normal() * (fi->neighborCentroid() - fi->elemCentroid()));
   };
 
   Moose::FV::loopOverElemFaceInfo(elem, _nsfv_subproblem.mesh(), _nsfv_subproblem, action_functor);
