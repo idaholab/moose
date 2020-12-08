@@ -23,6 +23,17 @@ public:
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
   /**
+   * Function to get bounds
+   */
+  std::vector<Real> getUpperBounds() { return _upper_bounds; };
+  std::vector<Real> getLowerBounds() { return _lower_bounds; };
+
+  /**
+   * Function to compute default bounds when user did not provide bounds
+   */
+  virtual std::vector<Real> computeDefaultBounds(Real val);
+
+  /**
    * Function to compute objective.
    * This is the last function called in objective routine
    */
@@ -32,7 +43,7 @@ public:
    * Function to compute gradient.
    * This is the last call of the gradient routine.
    */
-  virtual void computeGradient(libMesh::PetscVector<Number> & gradient)
+  virtual void computeGradient(libMesh::PetscVector<Number> & /*gradient*/)
   {
     mooseError("Gradient function has not been defined for form function type ", _type);
   }
@@ -41,10 +52,15 @@ public:
    * Function to compute gradient.
    * This is the last call of the hessian routine.
    */
-  virtual void computeHessian(libMesh::PetscMatrix<Number> & hessian)
+  virtual void computeHessian(libMesh::PetscMatrix<Number> & /*hessian*/)
   {
     mooseError("Hessian function has not been defined for form function type ", _type);
   }
+
+  /**
+   * Function to get the total number of parameters
+   */
+  unsigned int getNumParams() { return _nparam; };
 
 protected:
   /// Helper for getting or declaring data
@@ -62,6 +78,10 @@ protected:
 
   /// Parameter values declared as reporter data
   std::vector<std::vector<Real> *> _parameters;
+
+  /// Bounds of the parameters
+  const std::vector<Real> _lower_bounds;
+  const std::vector<Real> _upper_bounds;
 
 private:
   /**

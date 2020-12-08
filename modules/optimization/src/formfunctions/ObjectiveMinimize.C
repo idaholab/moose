@@ -25,7 +25,11 @@ Real
 ObjectiveMinimize::computeObjective()
 {
   if (_data_computed.size() != _data_target.size())
-    paramError("data_target", "Computed data is inconsistent with target data.");
+    paramError("data_target",
+               "Computed data is inconsistent with target data.  \ndata_target.size()= ",
+               _data_target.size(),
+               "\ndata_computed.size()= ",
+               _data_computed.size());
 
   Real val = 0;
   for (std::size_t i = 0; i < _data_computed.size(); ++i)
@@ -34,6 +38,5 @@ ObjectiveMinimize::computeObjective()
     val += tmp * tmp;
   }
   val = 0.5 * val;
-
   return val;
 }

@@ -12,6 +12,10 @@ FormFunction::validParams()
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Initial condition for each parameter values, default is 0.");
+  params.addParam<std::vector<Real>>(
+      "lower_bounds", "lower bounds for each parameter values, default is -infinity.");
+  params.addParam<std::vector<Real>>(
+      "upper_bounds", "upper bounds for each parameter values, default is infinity.");
   return params;
 }
 
@@ -20,7 +24,13 @@ FormFunction::FormFunction(const InputParameters & parameters)
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparam(_parameter_names.size()),
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
-    _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0))
+    _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
+    _lower_bounds(isParamValid("lower_bounds")
+                      ? getParam<std::vector<Real>>("lower_bounds")
+                      : computeDefaultBounds(-std::numeric_limits<double>::infinity())),
+    _upper_bounds(isParamValid("upper_bounds")
+                      ? getParam<std::vector<Real>>("upper_bounds")
+                      : computeDefaultBounds(std::numeric_limits<double>::infinity()))
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
@@ -43,6 +53,11 @@ FormFunction::FormFunction(const InputParameters & parameters)
                            initial_condition.begin() + v + _nvalues[i]);
     v += _nvalues[i];
   }
+
+  if (_lower_bounds.size() != _nparam)
+    paramError("lower_bounds", "Lower bound data is not equal to the total number of parameters.");
+  if (_upper_bounds.size() != _nparam)
+    paramError("upper_bounds", "Upper bound data is not equal to the total number of parameters.");
 }
 
 void
@@ -78,4 +93,14 @@ FormFunction::getDataValueHelper(const std::string & get_param, const std::strin
     return getReporterValue<std::vector<Real>>(get_param, REPORTER_MODE_REPLICATED);
   else
     return declareValue<std::vector<Real>>(declare_param, REPORTER_MODE_REPLICATED);
+}
+
+std::vector<Real>
+FormFunction::computeDefaultBounds(Real val)
+{
+  std::vector<Real> vec;
+  vec.resize(_nparam);
+  for (auto i : index_range(vec))
+    vec[i] = val;
+  return vec;
 }

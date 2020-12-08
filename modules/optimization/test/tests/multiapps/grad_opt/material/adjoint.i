@@ -1,11 +1,18 @@
 [Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 20
+  xmax = 2
+  ymax = 2
 []
 
 [Variables]
   [temperature]
+    order = FIRST
+    family = LAGRANGE
   []
 []
-
 [Kernels]
   [heat_conduction]
     type = HeatConduction
@@ -25,6 +32,12 @@
   []
 []
 
+[AuxVariables]
+  [temperature_forward]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
 
 [BCs]
   [left]
@@ -53,46 +66,52 @@
   []
 []
 
+[Functions]
+  [thermo_conduct]
+    type = ParsedFunction
+    value = alpha
+    vars = 'alpha'
+    vals = 'p1'
+  []
+[]
+
 [Materials]
   [steel]
-    type = GenericConstantMaterial
-    prop_names = thermal_conductivity
-    prop_values = 5
+    type = GenericFunctionMaterial
+    prop_names = 'thermal_conductivity'
+    prop_values = 'thermo_conduct'
   []
+  [volumetric_heat]
+    type = ADGenericFunctionMaterial
+    prop_names = 'volumetric_heat'
+    prop_values = '1000'
+  []
+[]
+
+[Problem]
+  type = FEProblem
 []
 
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-[]
-
-[Functions]
-  [left_constant_deriv_a]
-    type = ParsedFunction
-    value = 1.0
-  []
-  [left_linear_deriv_b]
-    type = ParsedFunction
-    value = y
-  []
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'preonly lu       superlu_dist'
 []
 
 [Postprocessors]
-  [adjoint_bc_0]
-    type = VariableFunctionSideIntegral
-    boundary = left
-    function = left_constant_deriv_a
+  [pp_adjoint_grad]
+    # integral of load function gradient w.r.t parameter
+    type = DiffusionVariableIntegral
     variable = temperature
+    variable_forward = temperature_forward
   []
-  [adjoint_bc_1]
-    type = VariableFunctionSideIntegral
-    boundary = left
-    function = left_linear_deriv_b
-    variable = temperature
+  [p1]
+    type = ConstantValuePostprocessor
+    value = 10
+    execute_on = 'initial linear'
   []
 []
 
@@ -105,9 +124,15 @@
              0   0   0   0;
              10  10  10  10'
   []
-  [adjoint_bc]
+  [adjoint_grad]
     type = VectorOfPostprocessors
-    postprocessors = 'adjoint_bc_0 adjoint_bc_1'
+    postprocessors = 'pp_adjoint_grad'
+  []
+[]
+
+[Controls]
+  [parameterReceiver]
+    type = ControlsReceiver
   []
 []
 

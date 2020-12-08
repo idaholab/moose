@@ -8,7 +8,7 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm");
+  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm taoblmvm");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -89,10 +89,17 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::NELDER_MEAD:
       ierr = TaoSetType(_tao, TAONM);
       break;
+    case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOBLMVM);
+      break;
     default:
       mooseError("Invalid Tao solve type");
   }
 
+  CHKERRQ(ierr);
+
+  // Set bounds for bounded optimization
+  ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
   CHKERRQ(ierr);
 
   // Set objective, gradient, and hessian functions
@@ -190,6 +197,15 @@ OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat hessian, Mat /*pc*
   return 0;
 }
 
+PetscErrorCode
+OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx)
+{
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+
+  PetscErrorCode ierr = solver->variableBounds(tao);
+  return ierr;
+}
+
 Real
 OptimizeSolve::objectiveFunction()
 {
@@ -227,4 +243,28 @@ OptimizeSolve::hessianFunction(libMesh::PetscMatrix<Number> & hessian)
     _inner_solve->solve();
 
   _form_function->computeHessian(hessian);
+}
+
+PetscErrorCode
+OptimizeSolve::variableBounds(Tao tao)
+{
+  // get bounds
+  std::vector<Real> upper_bounds = _form_function->getUpperBounds();
+  std::vector<Real> lower_bounds = _form_function->getLowerBounds();
+
+  unsigned int sz = _form_function->getNumParams();
+
+  libMesh::PetscVector<Number> xl(_my_comm, sz);
+  libMesh::PetscVector<Number> xu(_my_comm, sz);
+
+  // copy values from upper and lower bounds to xl and xu
+  for (auto i = 0; i < sz; ++i)
+  {
+    xl.set(i, lower_bounds[i]);
+    xu.set(i, upper_bounds[i]);
+  }
+  // set upper and lower bounds in tao solver
+  PetscErrorCode ierr;
+  ierr = TaoSetVariableBounds(tao, xl.vec(), xu.vec());
+  return ierr;
 }

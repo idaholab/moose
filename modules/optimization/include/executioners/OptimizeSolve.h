@@ -21,6 +21,9 @@ public:
   const FormFunction & getFormFunction() const { return *_form_function; }
 
 protected:
+  /// Bounds routine
+  virtual PetscErrorCode variableBounds(Tao tao);
+
   /// Objective routine
   virtual Real objectiveFunction();
 
@@ -54,6 +57,7 @@ private:
   static PetscErrorCode objectiveFunctionWrapper(Tao tao, Vec x, Real * objective, void * ctx);
   static PetscErrorCode gradientFunctionWrapper(Tao tao, Vec x, Vec gradient, void * ctx);
   static PetscErrorCode hessianFunctionWrapper(Tao tao, Vec x, Mat hessian, Mat pc, void * ctx);
+  static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
   ///@}
 
   // fixme lynn these have weird names because Petsc already has macros for TAONTR etc.
@@ -65,6 +69,7 @@ private:
     QUASI_NEWTON,
     CONJUGATE_GRADIENT,
     NELDER_MEAD,
+    BOUNDED_QUASI_NEWTON,
   } _tao_solver_enum;
 
   /// Number of parameters being optimized
