@@ -188,7 +188,10 @@ def build_hit(expr, name, **kwargs):
     """
     import pyhit
 
-    symbols = set([str(s) for s in expr.free_symbols]).difference(set(['R.x', 'R.y', 'R.z', 't']))
+    if hasattr(expr, 'free_symbols'):
+        symbols = set([str(s) for s in expr.free_symbols]).difference(set(['R.x', 'R.y', 'R.z', 't']))
+    else:
+        symbols = set()
     for symbol in symbols:
         kwargs.setdefault(symbol, 1.)
 
