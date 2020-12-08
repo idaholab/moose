@@ -505,24 +505,12 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
   if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
     return getElemValue(neighbor);
   else
-  {
-    // If we don't have a neighbor, then we're along a boundary, and we may have a DirichletBC
-    const auto & pr = getDirichletBC(fi);
-
-    if (pr.first)
-    {
-      mooseAssert(pr.second, "The FVDirichletBC is null!");
-
-      const FVDirichletBCBase & bc = *pr.second;
-
-      // Linear interpolation: face_value = (elem_value + neighbor_value) / 2
-      return 2. * bc.boundaryValue(fi) - elem_value;
-    }
-    else
-      // No DirichletBC so we'll implicitly apply a zero gradient condition and assume that the
-      // face value is equivalent to the element value
-      return elem_value;
-  }
+    // If we don't have a neighbor, then we're along a boundary
+    // Linear interpolation: face_value = (elem_value + neighbor_value) / 2. Note that weights of
+    // 1/2 are perfectly appropriate here because we can arbitrarily put our ghost cell centroid
+    // anywhere and by convention we locate it such that a line drawn between the ghost cell
+    // centroid and the element centroid is perfectly bisected by the face centroid
+    return 2. * getBoundaryFaceValue(fi) - elem_value;
 }
 
 template <typename OutputType>
@@ -869,10 +857,8 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   VectorValue<ADReal> & unc_face_grad = emplace_ret.first->second;
 
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
-  // check for a Dirichlet BC. If we have a Dirichlet BC, then we will apply a zero Hessian
-  // assumption. If we do not, then we know we are applying a zero gradient assumption elsehwere
-  // in our calculations, so we should be consistent and apply a zero gradient assumption here as
-  // well
+  // apply a zero Hessian assumption and use the element centroid gradient as the uncorrected face
+  // gradient
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two);
@@ -880,13 +866,6 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
     // Uncorrected gradient value
     unc_face_grad =
         Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
-  }
-  else
-  {
-    const auto & pr = getDirichletBC(fi);
-
-    if (!pr.first)
-      unc_face_grad = 0;
   }
 
   return unc_face_grad;
