@@ -7,9 +7,16 @@
 The material `ComputeElasticityTensor` builds the elasticity (stiffness) tensor with various
 user-selected material symmetry options.  `ComputeElasticityTensor` also rotates the elasticity
 tensor during the initial time step only; this class does not rotate the elasticity tensor during the
-simulation.  The initial rotation is only performed if the user provides arguments to the three Euler
+simulation.  The initial rotation is performed if the user provides arguments to the three Euler
 angle parameters; the Bunge Euler angles provided in this class are used to perform passive (from the
-sample to the crystal) rotations.
+sample to the crystal) rotations using the [extrinsic $Z_1 X_2 Z_3$ convention](https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix)
+to build the rotation matrix $R$. Alternatively, the 3x3 rotation matrix can be defined directly in the input file.
+Rotations to the elasticity tensor are applied as
+\begin{equation}
+\label{eq:rotate_elasticity_tensor}
+  C_{ijkl} = R_{im} R_{jn} R_{ko} R_{lp} C_{mnop}
+\end{equation}
+See [below](#rotation-examples) for examples of tensor rotations.
 
 For a general stiffness tensor with 21 independent components, the elasticity tensor within the
 tensor mechanics module can be represented with the notation shown in
@@ -100,7 +107,7 @@ C_{ijkl}^{orthotropic} = \begin{bmatrix}
               \end{bmatrix}
 \end{equation}
 where $k = 1 - \nu_{12} \nu_{21} - \nu_{23} \nu_{32} - \nu_{31} \nu_{13} - \nu_{12} \nu_{23} \nu_{31} - \nu_{21} \nu_{32} \nu_{13}$.
- 
+
 
 ### Example Input File Syntax
 
@@ -114,7 +121,7 @@ to enter an isotropic elasticity tensor.
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic_anisotropy/3d_bar_orthotropic_full_rotation.i block=Materials/elasticity_tensor
 
 For the `orthotropic` fill method, the material parameters need to be referred to the global frame and introduced in the following order: $E_{11}\;E_{22}\;E_{33}\;G_{12}\;G_{23}\;G_{31}\;\nu_{21}\;\nu_{31}\;\nu_{32}\;\nu_{12}\;\nu_{13}\;\nu_{23}$. For cases where axes of orthotropy do not coincide with global axes, Euler angles can be provided to perform a general rotation of the elasticity tensor at the beginning of the simulation.
- 
+
 
 ## Linear Isotropic Symmetry
 
@@ -241,6 +248,96 @@ string.  This fill method case is used in the child class
 for [ComputeCosseratElasticityTensor](/ComputeCosseratElasticityTensor.md) for details and examples
 of the input file syntax.
 
+## Rotation Examples
+
+Since the elasticity tensor is defined with respect to a given crystal orientation which may be
+different than the simulation coordinate frame, one may wish to apply a rotation to the
+elasticity tensor. Some example use cases include simulating a specific crystal plane
+in a 2D simulation or embedding a secondary phase in a matrix phase. The rotation ensures the
+correct stress is generated when a given strain is applied. Strain is calculated in the "sample"
+or "simulation" reference frame and so the proper "sample to crystal" rotation must be applied.
+As shown in [eq:rotate_elasticity_tensor], a rotation matrix is needed for this operation, which
+can be built with Euler angles or entered in the input file directly.
+
+### Rotation About An Axis
+
+Suppose we wish to rotate the elasticity tensor about the z-axis by 30 degrees. The rotation matrix
+for rotating a vector by 30 degrees about the z-axis (an "active" rotation matrix) is
+\begin{equation}
+\label{eq:z_axis_rotation_30_degrees}
+R_z = \begin{bmatrix}
+          \frac{\sqrt{3}}{2} & -\frac{1}{2}       &  0  \\
+          \frac{1}{2}        & \frac{\sqrt{3}}{2} &  0  \\
+          0                  &      0             &  1
+      \end{bmatrix}
+  \approx
+      \begin{bmatrix}
+             0.8660254 & -0.5      &  0  \\
+             0.5       & 0.8660254 &  0  \\
+             0         & 0         &  1
+      \end{bmatrix}
+\end{equation}
+Such a rotation can be implemented by directly supplying the rotation matrix in the input file
+using the `rotation_matrix` parameter in `ComputeElasticityTensor`.
+
+### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
+         block=Materials/elasticity_matrix
+
+Note that the same rotation can be applied using Euler angles. MOOSE expects the "passive"
+(Bunge) convention, so the input angle is -30 degrees. Also note that since the $Z_1 X_2 Z_3$ convention
+is used, and only a single rotation is needed, the angle could be entered as either
+`euler_angle_1` or `euler_angle_3`.
+
+### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_1_rotation.i
+         block=Materials/elasticity_euler
+
+### Orientation Relationship Rotation
+
+Rather than a specific axis-angle rotation, sometimes the elasticity tensor must be rotated to
+satisfy a particular orientation relationship. In this case, the basis vectors of the rotated
+coordinate system are known, and the corresponding rotation matrix can be built using the
+unit basis vectors as rows of the rotation matrix. For example suppose we have the following
+rotation matrix that can be used in the case where the $\left<111\right>$ direction of our
+rotated or "crystal" system points along the z-axis of our simulation or "sample" system.
+\begin{equation}
+\label{eq:orientation_rotation}
+R = \begin{bmatrix}
+        \frac{\sqrt{2}}{2} & \frac{\sqrt{6}}{6} & \frac{\sqrt{3}}{3}  \\
+       -\frac{\sqrt{2}}{2} & \frac{\sqrt{6}}{6} & \frac{\sqrt{3}}{3}  \\
+        0                  & -\frac{\sqrt{6}}{3} & \frac{\sqrt{3}}{3}
+    \end{bmatrix}
+ \approx
+    \begin{bmatrix}
+         0.70710678 &  0.40824829 & 0.57735027  \\
+        -0.70710678 &  0.40824829 & 0.57735027  \\
+         0          & -0.81649658 & 0.57735027
+    \end{bmatrix}
+\end{equation}
+To verify, we apply this rotation matrix to the $\hat{z}=\left<001\right>$ direction of our "sample" or
+simulation frame: $R\hat{z}=\left<111\right>$, meaning it correctly converts directions from "sample" to
+"crystal" frame, which is a "passive" rotation.
+
+### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
+         block=Materials/elasticity_matrix
+
+The rotation matrix in [eq:orientation_rotation] can also be built in an "active" sense
+by doing a 45 degree rotation about the z-axis and then a ~54.7 degree ($\arccos\left(1/\sqrt{3}\right)$ radians)
+rotation about the x-axis, then taking the transpose. Therefore these
+are the corresponding Euler angles to be used since we rotated the elasticity tensor by the "passive" matrix
+rather than the "active" matrix in the previous example. However, where more than 1 rotation is needed, the
+order of rotations matter. Since the Euler angle convention in MOOSE uses "extrinsic" rotations, the
+order must be reversed.
+
+### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elasticitytensor/rotation_matrix_2_rotations.i
+         block=Materials/elasticity_euler
 
 !syntax parameters /Materials/ComputeElasticityTensor
 
