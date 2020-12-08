@@ -9,13 +9,12 @@
 
 [Variables]
   [temperature]
-    order = FIRST
-    family = LAGRANGE
   []
 []
+
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temperature
   []
   [./heat_source]
@@ -63,7 +62,7 @@
 
 [Materials]
   [steel]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 'thermo_conduct'
   []
