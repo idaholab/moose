@@ -188,12 +188,19 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
-    //    Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
+    Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
     //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
     //    Moose::out << "reference_residual: " << reference_residual << "\n";
 
     scalar_increment = -_residual / computeDerivative(stress_dev, stress_new, delta_gamma);
     delta_gamma = scalar_old + scalar_increment;
+
+    //    Moose::out << "delta_gamma: " << delta_gamma << "\n";
+    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
+    Moose::out << "delta_gamma: " << delta_gamma << "\n";
+
+    //    Moose::out << "scalar_old: " << scalar_old << "\n";
+    //    Moose::out << "scalar_increment: " << scalar_increment << "\n";
 
     if (_check_range)
       checkPermissibleRange(delta_gamma,
@@ -223,26 +230,6 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
     else
     {
       bool modified_increment = false;
-
-      // Line Search
-      if (_line_search)
-      {
-        if (residual_old - _residual != 0.0)
-        {
-          ADReal alpha = residual_old / (residual_old - _residual);
-          alpha = MathUtils::clamp(alpha, 1.0e-2, 1.0);
-
-          if (alpha != 1.0)
-          {
-            modified_increment = true;
-            scalar_increment *= alpha;
-            if (iter_output)
-              *iter_output << "  Line search alpha = " << MetaPhysicL::raw_value(alpha)
-                           << " increment = " << MetaPhysicL::raw_value(scalar_increment)
-                           << std::endl;
-          }
-        }
-      }
 
       if (_bracket_solution)
       {
@@ -307,6 +294,12 @@ bool
 ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const Real & reference)
 {
   const Real residual = MetaPhysicL::raw_value(ad_residual);
+  // Not sure about abs below
+  //  Moose::out << "In converged: (residual): " << (residual) << "\n";
+  //  Moose::out << "In converged: std::abs(residual): " << std::abs(residual) << "\n";
+  //  Moose::out << "In converged: reference: " << reference << "\n";
+  //  Moose::out << "In converged: _relative_tolerance: " << _relative_tolerance << "\n";
+
   return (std::abs(residual) <= _absolute_tolerance ||
           std::abs(residual / reference) <= _relative_tolerance);
 }

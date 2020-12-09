@@ -104,4 +104,5 @@ protected:
   ADReal _yield_condition;
   ADReal _yield_stress;
   ADDenseMatrix _hill_tensor;
+  ADDenseVector _stress_np1;
 };

@@ -113,8 +113,13 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
   else
     inelastic_strain_increment.zero();
 
-  elastic_strain_increment -= inelastic_strain_increment;
-  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
+  // elastic_strain_increment -= inelastic_strain_increment;
+
+  /// FIXME
+  // stress_new = elasticity_tensor * (elastic_strain_increment + elastic_strain_old);
+  Moose::out << "delta_gamma: " << delta_gamma << "\n";
+  // computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
+
   //  if (_qp == 0)
   //  {
   //    Moose::out << "End of RM: inelastic_strain_increment: "

@@ -46,9 +46,10 @@ ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticity
     _hardening_variable(declareADProperty<Real>(_base_name + "hardening_variable")),
     _hardening_variable_old(getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
     _hardening_slope(0.0),
-    _yield_condition(-1.0),
+    _yield_condition(1.0),
     _yield_stress(getParam<Real>("yield_stress")),
-    _hill_tensor(6, 6)
+    _hill_tensor(6, 6),
+    _stress_np1(6)
 
 {
   _hill_constants = getParam<std::vector<Real>>("hill_constants");
@@ -81,57 +82,20 @@ void
 ADTransverselyIsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
-
+  _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
   ADAnisotropicReturnPlasticityStressUpdateBase::propagateQpStatefulProperties();
 }
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADRankFourTensor & /*elasticity_tensor*/)
+    const ADDenseVector & stress_dev, const ADRankFourTensor & /*elasticity_tensor*/)
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
-}
+  _yield_condition = 10.0;
+  _yield_condition = -computeResidual(stress_dev, stress_dev, 0.0);
 
-ADReal
-ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
-    const ADDenseVector & stress_dev,
-    const ADDenseVector & /*stress_sigma*/,
-    const ADReal & delta_gamma)
-{
-  // Obtain trial stress, needed to compute yield function value.
-
-  ADDenseMatrix inv_matrix(6, 6);
-  for (unsigned int i = 0; i < 6; i++)
-    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
-
-  ADDenseVector stress_vector(6);
-  stress_vector = stress_dev;
-
-  ADDenseMatrix eigenvectors_hill_transpose(6, 6);
-
-  _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
-  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
-
-  // Right multiply by matrix of eigenvectors transpose
-  inv_matrix.right_multiply(eigenvectors_hill_transpose);
-  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
-  eigenvectors_hill_copy.right_multiply(inv_matrix);
-
-  ADDenseVector stress_np1(6);
-  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
-
-  ADReal omega = computeOmega(delta_gamma, stress_np1);
-  _hardening_slope = computeHardeningDerivative();
-  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
-
-  ADReal s_y = _hardening_variable[_qp] + _yield_stress;
-
-  ADReal residual = 0.0;
-  residual = s_y / omega - 1.0;
-
-  return residual;
+  //  Moose::out << "Initial yield: " << _yield_condition << "\n";
 }
 
 ADReal
@@ -148,6 +112,9 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeOmega(const ADReal & delta
     omega += K(i) * stress_trial(i) * stress_trial(i);
   }
   omega *= 0.5;
+
+  if (omega == 0.0)
+    omega = 1.0e-36;
 
   return std::sqrt(omega);
 }
@@ -195,14 +162,15 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeReferenceResidual(
 }
 
 ADReal
-ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
+ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
     const ADDenseVector & stress_dev,
     const ADDenseVector & /*stress_sigma*/,
     const ADReal & delta_gamma)
 {
-  ADDenseMatrix inv_matrix(6, 6);
-  for (unsigned int i = 0; i < 6; i++)
-    inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
+
+  // If in elastic regime, just return
+  if (_yield_condition <= 0.0)
+    return 0.0;
 
   ADDenseVector stress_vector(6);
   stress_vector = stress_dev;
@@ -210,27 +178,51 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
   _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
-  ADDenseMatrix eigenvectors_hill_copy(_eigenvectors_hill);
+  eigenvectors_hill_transpose.vector_mult(_stress_np1, stress_vector);
 
-  // Right multiply by matrix of eigenvectors transpose
-  inv_matrix.right_multiply(eigenvectors_hill_transpose);
-  // Right multiply eigenvector matrix by [I + 2*nu*delta_gamma*Delta]^(-1) Q^T
-  eigenvectors_hill_copy.right_multiply(inv_matrix);
-
-  ADDenseVector stress_np1(6);
-  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
-
-  ADReal omega = computeOmega(delta_gamma, stress_np1);
+  ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_slope = computeHardeningDerivative();
   _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 
-  ADReal sy = _hardening_variable[_qp] + _yield_stress;
+  //  Moose::out << "_hardening_variable[_qp]: " << _hardening_variable[_qp] << "\n";
+
+  ADReal s_y = _hardening_variable[_qp] * _hardening_slope + _yield_stress;
+  //  Moose::out << "omega: " << omega << "\n";
+  //  Moose::out << "s_y: " << s_y << "\n";
+
+  ADReal residual = 0.0;
+  residual = s_y / omega - 1.0;
+
+  //  Moose::out << "in The residual is: " << residual << "\n";
+  //  Moose::out << "In residual The s_y is: " << s_y << "\n";
+  //  Moose::out << "in residual The omega is: " << omega << "\n";
+
+  // mooseError("Stopping artificially for debugging.");
+
+  return residual;
+}
+
+ADReal
+ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
+    const ADDenseVector & stress_dev,
+    const ADDenseVector & /*stress_sigma*/,
+    const ADReal & delta_gamma)
+{
+  // If in elastic regime, return unit derivative
+  if (_yield_condition <= 0.0)
+    return 1.0;
+
+  ADReal omega = computeOmega(delta_gamma, _stress_np1);
+  _hardening_slope = computeHardeningDerivative();
+  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
+
+  ADReal sy = _hardening_variable[_qp] * _hardening_slope + _yield_stress;
   ADReal sy_alpha = _hardening_slope;
 
   ADReal omega_gamma;
   ADReal sy_gamma;
 
-  computeDeltaDerivatives(delta_gamma, stress_np1, sy_alpha, omega, omega_gamma, sy_gamma);
+  computeDeltaDerivatives(delta_gamma, _stress_np1, sy_alpha, omega, omega_gamma, sy_gamma);
   ADReal residual_derivative = 1 / omega * (sy_gamma - 1 / omega * omega_gamma * sy);
 
   return residual_derivative;
@@ -321,7 +313,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
-    const ADRankTwoTensor & /*inelastic_strain_increment*/,
+    const ADRankTwoTensor & plastic_strain_increment,
     const ADReal & delta_gamma,
     ADRankTwoTensor & stress_new,
     const ADDenseVector & stress_dev)
@@ -329,6 +321,11 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
   // Need to compute this iteration's stress tensor based on the scalar variable
   // For deviatoric
   // s(n+1) = {Q [I + 2*nu*delta_gamma*Delta]^(-1) Q^T}  s(trial)
+
+  if (_yield_condition <= 0.0)
+    return;
+
+  _plasticity_strain[_qp] += plastic_strain_increment;
 
   ADDenseMatrix inv_matrix(6, 6);
   for (unsigned int i = 0; i < 6; i++)
