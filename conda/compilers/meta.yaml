@@ -9,8 +9,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://mooseframework.org/source_packages/moose-compilers.tar.gz
-  sha256: {{ sha256 }}
+  path: .
 
 build:
   number: {{ build }}  # [linux,osx]
@@ -36,10 +35,6 @@ requirements:
     - libclang {{ libclang }}                # [osx]
     - libcxx {{ libcxx }}                    # [osx]
     - make                                   # [unix]
-
-test:
-  commands:
-    - test -f $PREFIX/share/moose-compilers
 
 about:
   home: https://mooseframework.org/
