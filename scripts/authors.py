@@ -46,11 +46,12 @@ def update_count(c, lang, counts):
     for key, value in c.items():
         counts[key][lang] += value
 
-def report(counts):
+def report(counts, commits, merges):
     """
     Prints the global count in a table on the screen
     """
-    titles = list(list(counts.values())[0].keys()) + ['Total']
+    titles = list(list(counts.values())[0].keys()) + ['Total', 'Commits', 'Merges']
+
     row_format = '{:>25}'
     row_format += "{:>10}" * (len(titles))
     n = 25 + 10 * len(titles)
@@ -61,9 +62,17 @@ def report(counts):
 
     for author, row in reversed(sorted(counts.items(), key=lambda item:sum(item[1].values()))):
         row['Total'] = sum(row.values())
-        values = ['{:,}'.format(row[key]) for key in titles]
+        values = ['{:,}'.format(row[key]) for key in titles if key not in ('Commits', 'Merges')]
+
+        c = commits.get(author, 0)
+        m = merges.get(author, 0)
+        values += [c, m]
+        row['Commits'] = c
+        row['Merges'] = m
+
         for key in titles:
             totals[key] += row[key]
+
         print(row_format.format(author, *values))
     print('-'*n)
     print(row_format.format('TOTAL', *['{:,}'.format(totals[key]) for key in titles]))
@@ -96,4 +105,12 @@ if __name__ == '__main__':
             for c in pool.imap_unordered(target, files):
                 update_count(c, group, counts)
         print('done')
-    report(counts)
+
+    # Compute number of commits per user
+    commits = dict()
+    merges = dict()
+    for location in args.locations:
+        commits.update(mooseutils.git_committers(location, '--no-merges'))
+        merges.update(mooseutils.git_committers(location, '--merges'))
+
+    report(counts, commits, merges)

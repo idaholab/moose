@@ -118,7 +118,7 @@ def git_lines(filename, blank=False):
     Return the number of lines per author for the given filename
     Inputs:
       filename: Filename to consider
-      blank[bool]: Include/exclude blank lindes
+      blank[bool]: Include/exclude blank lines
     """
     if not os.path.isfile(filename):
         raise OSError("File does not exist: {}".format(filename))
@@ -129,4 +129,24 @@ def git_lines(filename, blank=False):
         match = regex.search(line)
         if blank or len(match.group('content')) > 0:
             counts[match.group('name')] += 1
+    return counts
+
+def git_committers(loc=os.getcwd(), *args):
+    """
+    Return the number of commits per author given a location
+
+    Inputs:
+       loc[str]: Filename/directory to consider
+       args: Appended to 'git shortlog -s' command (e.g., '--merges', '--no-merges', etc.)
+    """
+    if not os.path.exists(loc):
+        raise OSError("The supplied location must be a file or directory: {}".format(loc))
+    cmd = ['git', 'shortlog', '-s']
+    cmd += args
+    cmd += ['--', loc]
+    committers = check_output(cmd, encoding='utf-8')
+    counts = collections.defaultdict(int)
+    for line in committers.splitlines():
+        items = line.split("\t", 1)
+        counts[items[1]] = int(items[0])
     return counts

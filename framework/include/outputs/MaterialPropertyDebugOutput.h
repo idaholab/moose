@@ -15,6 +15,7 @@
 // Forward declerations
 class MaterialPropertyDebugOutput;
 class MaterialBase;
+class MooseObjectName;
 
 template <>
 InputParameters validParams<MaterialPropertyDebugOutput>();
@@ -28,11 +29,6 @@ class MaterialPropertyDebugOutput : public Output
 {
 public:
   static InputParameters validParams();
-
-  /**
-   * Class constructor
-   * @param parameters Object input parameters
-   */
   MaterialPropertyDebugOutput(const InputParameters & parameters);
 
 protected:
@@ -55,4 +51,3 @@ protected:
   void printMaterialProperties(std::stringstream & output,
                                const std::vector<std::shared_ptr<MaterialBase>> & materials) const;
 };
-

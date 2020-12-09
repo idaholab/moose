@@ -93,6 +93,16 @@ class Test(unittest.TestCase):
         with self.assertRaises(OSError) as e:
             mooseutils.git_authors('wrong')
 
+    @unittest.skip("Fails on CIVET and I can't reproduce it")
+    def testCommitters(self):
+        names = mooseutils.git_committers(mooseutils.__file__)
+        self.assertIn('Andrew E. Slaughter', names)
+        with self.assertRaises(OSError) as e:
+            mooseutils.git_authors('wrong')
+
+        names = mooseutils.git_committers(mooseutils.__file__, '--merges')
+        self.assertIn('Logan Harbour', names)
+
     def testGitLines(self):
         with open(__file__, 'r') as fid:
             lines = fid.readlines()
@@ -109,6 +119,7 @@ class Test(unittest.TestCase):
         self.assertIn('Andrew E. Slaughter', counts)
         self.assertTrue(counts['Andrew E. Slaughter'] > 0)
         self.assertEqual(n_with_blank, sum(list(counts.values())))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

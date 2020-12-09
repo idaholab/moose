@@ -13,7 +13,7 @@ from .mooseutils import text_diff, unidiff, text_unidiff, run_profile, list_file
 from .mooseutils import generate_filebase, recursive_update, fuzzyEqual, fuzzyAbsoluteEqual
 from .gitutils import is_git_repo, git_commit, git_commit_message, git_merge_commits, git_ls_files
 from .gitutils import git_root_dir, git_init_submodule, git_submodule_status, git_version
-from .gitutils import git_authors, git_lines
+from .gitutils import git_authors, git_lines, git_committers
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path

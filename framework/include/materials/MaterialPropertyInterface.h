@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 #include "MaterialData.h"
 #include "MathUtils.h"
+#include "MooseObjectName.h"
 
 // Forward declarations
 class InputParameters;
@@ -253,6 +254,9 @@ protected:
   /// The name of the object that this interface belongs to
   const std::string _mi_name;
 
+  /// The "complete" name of the object that this interface belongs for material property output
+  const MooseObjectName _mi_moose_object_name;
+
   /// The type of data
   Moose::MaterialDataType _material_data_type;
 
@@ -471,6 +475,9 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
+  // Update consumed properties in MaterialPropertyDebugOutput
+  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
+
   return _material_data->getProperty<T>(name);
 }
 
@@ -490,6 +497,9 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
   _get_material_property_called = true;
 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  // Update consumed properties in MaterialPropertyDebugOutput
+  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
 
   return _material_data->getADProperty<T>(name);
 }
@@ -542,6 +552,9 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
                                                                          std::set<SubdomainID>());
 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  // Update consumed properties in MaterialPropertyDebugOutput
+  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
 
   return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
       &_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));

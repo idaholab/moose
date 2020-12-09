@@ -235,7 +235,7 @@ public:
 
   /**
    * Rotate the tensor using
-   * C_ijkl = R_im R_in R_ko R_lp C_mnop
+   * C_ijkl = R_im R_jn R_ko R_lp C_mnop
    */
   void rotate(const TypeTensor<T> & R);
 

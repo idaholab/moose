@@ -34,6 +34,7 @@ protected:
   using ComputeRotatedElasticityTensorBaseTempl<is_ad>::_elasticity_tensor;
   using ComputeRotatedElasticityTensorBaseTempl<is_ad>::_qp;
   using ComputeRotatedElasticityTensorBaseTempl<is_ad>::issueGuarantee;
+  using ComputeRotatedElasticityTensorBaseTempl<is_ad>::_rotation_matrix;
 };
 
 typedef ComputeElasticityTensorTempl<false> ComputeElasticityTensor;

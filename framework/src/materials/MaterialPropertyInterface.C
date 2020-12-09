@@ -28,6 +28,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
                                                      const std::set<BoundaryID> & boundary_ids)
   : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
+    _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
@@ -74,7 +75,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
     _default_real_properties.emplace_back(libmesh_make_unique<MaterialProperty<Real>>());
     auto & default_property = _default_real_properties.back();
 
-    // resize to accomodate maximum number obf qpoints
+    // resize to accommodate maximum number of qpoints
     auto nqp = _mi_feproblem.getMaxQps();
     default_property->resize(nqp);
 
@@ -102,7 +103,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
     _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialProperty<Real>>());
     auto & default_property = _default_ad_real_properties.back();
 
-    // resize to accomodate maximum number obf qpoints
+    // resize to accommodate maximum number of qpoints
     auto nqp = _mi_feproblem.getMaxQps();
     default_property->resize(nqp);
 

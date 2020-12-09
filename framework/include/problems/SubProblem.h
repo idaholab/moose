@@ -40,6 +40,7 @@ class RestartableDataValue;
 class SystemBase;
 class LineSearch;
 class FaceInfo;
+class MooseObjectName;
 
 // libMesh forward declarations
 namespace libMesh
@@ -564,6 +565,16 @@ public:
   virtual bool isMatPropRequested(const std::string & prop_name) const;
 
   /**
+   * Helper for tracking the object that is consuming a property for MaterialPropertyDebugOutput
+   */
+  void addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name);
+
+  /**
+   * Return the map that tracks the object with consumed material properties
+   */
+  const std::map<MooseObjectName, std::set<std::string>> & getConsumedPropertyMap() const;
+
+  /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
   virtual void addGhostedElem(dof_id_type elem_id) = 0;
@@ -844,6 +855,9 @@ private:
   std::string restrictionSubdomainCheckName(SubdomainID check_id);
   std::string restrictionBoundaryCheckName(BoundaryID check_id);
   ///@}
+
+  // Contains properties consumed by objects, see addConsumedPropertyName
+  std::map<MooseObjectName, std::set<std::string>> _consumed_material_properties;
 
   friend class Restartable;
 };
