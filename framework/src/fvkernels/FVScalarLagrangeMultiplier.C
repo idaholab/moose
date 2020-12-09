@@ -19,8 +19,8 @@ InputParameters
 FVScalarLagrangeMultiplier::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("This class is used to enforce integral of phi = 0 with a "
-                             "Lagrange multiplier approach.");
+  params.addClassDescription("This class is used to enforce integral of phi = volume * phi_0 "
+                             "with a Lagrange multiplier approach.");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
   params.addParam<Real>("phi0", 0, "What we want the average value of the primal variable to be.");
   return params;

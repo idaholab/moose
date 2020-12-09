@@ -62,9 +62,9 @@ linearInterpolation(const T & value1,
 }
 
 /// Provides interpolation of face values for non-advection-specific purposes (although it can/will
-/// still be used by advective kernels sometimes).  The interpolated value is stored in result.
+/// still be used by advective kernels sometimes). The interpolated value is stored in result.
 /// This should be called when a face value needs to be computed from two neighboring
-/// cells/elements.  value1 and value2 represent the cell property/values from which to compute the
+/// cells/elements. value1 and value2 represent the cell property/values from which to compute the
 /// face value. The \p one_is_elem parameter indicates whether value1 corresponds to the FaceInfo
 /// elem value; else it corresponds to the FaceInfo neighbor value
 template <typename T, typename T2, typename T3>

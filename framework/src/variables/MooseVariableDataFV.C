@@ -588,8 +588,8 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     assignForAllQps(u_ghost, _ad_u, nqp);
   assignForAllQps(u_ghost.value(), _u, nqp);
 
-  // If people have time derivatives on faces, then they're f'd for now because we do not know the
-  // time dependence of u_face. Let's try to do better than silent wrong values at least in
+  // If people have time derivatives on faces, then they're in trouble (for now) because we do not
+  // know the time dependence of u_face. Let's try to do better than silent wrong values at least in
   // debugging modes by tossing some NaNs in
   if (_need_ad_u_dot && other_face._need_ad_u_dot)
     assignForAllQps(std::numeric_limits<typename ADReal::value_type>::quiet_NaN(), _ad_u_dot, nqp);
