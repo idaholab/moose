@@ -100,7 +100,8 @@ enum class MooseNonlinearConvergenceReason
   DIVERGED_FUNCTION_COUNT = -2,
   DIVERGED_FNORM_NAN = -4,
   DIVERGED_LINE_SEARCH = -6,
-  DIVERGED_DTOL = -9
+  DIVERGED_DTOL = -9,
+  DIVERGED_NL_RESIDUAL_PINGPONG = -10
 };
 
 // The idea with these enums is to abstract the reasons for
@@ -1893,6 +1894,12 @@ public:
 
   bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
+  /// method setting the maximum number of allowable non linear residual pingpong
+  void setMaxNLPingPong(const unsigned int n_max_nl_pingpong)
+  {
+    _n_max_nl_pingpong = n_max_nl_pingpong;
+  }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1914,6 +1921,10 @@ protected:
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
+
+  /// maximum numbver
+  unsigned int _n_nl_pingpong = 0;
+  unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
 
   std::shared_ptr<NonlinearSystemBase> _nl;
   std::shared_ptr<AuxiliarySystem> _aux;
