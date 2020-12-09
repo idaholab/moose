@@ -9,14 +9,247 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import collections
 import unittest
-from moosesqa import get_requirements
+import mooseutils
+from moosesqa import Requirement, number_requirements, get_requirements_from_file, get_requirements_from_files
+from moosesqa import  get_requirements_from_tests, get_test_specification
+from moosesqa.get_requirements import _find_file
 
-class TestGetRequirements(unittest.TestCase):
+class TestGetRequirementsFromFile(unittest.TestCase):
+    def testBasic(self):
+        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        filename = os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_basic')
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(len(req), 2)
+        self.assertEqual(req[0].name, 'single')
+        self.assertEqual(req[0].filename, filename)
+        self.assertEqual(req[0].line, 2)
+        self.assertEqual(req[0].label, None)
+        self.assertEqual(req[0].requirement, 'A simple requirement')
+        self.assertEqual(req[0].requirement_line, 3)
+        self.assertEqual(req[0].issues, ['#1234'])
+        self.assertEqual(req[0].issues_line, 4)
+        self.assertEqual(req[0].design, ['file.md'])
+        self.assertEqual(req[0].design_line, 5)
+        self.assertEqual(req[0].details, list())
+        spec = req[0].specification
+        self.assertEqual(spec.name, 'single')
+        self.assertEqual(spec.filename, filename)
+        self.assertEqual(spec.line, 2)
+        self.assertEqual(spec.type, None)
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        self.assertEqual(req[1].name, 'group')
+        self.assertEqual(req[1].filename, filename)
+        self.assertEqual(req[1].line, 8)
+        #self.assertEqual(req[0].specification, None)
+        self.assertEqual(req[1].label, None)
+        self.assertEqual(req[1].requirement, 'A group requirement')
+        self.assertEqual(req[1].requirement_line, 9)
+        self.assertEqual(req[1].issues, ['#4321'])
+        self.assertEqual(req[1].issues_line, 10)
+        self.assertEqual(req[1].design, ['other.md'])
+        self.assertEqual(req[1].design_line, 11)
+        self.assertEqual(req[1].specification, None)
+        self.assertEqual(len(req[1].details), 2)
+
+        d0 = req[1].details[0]
+        self.assertEqual(d0.name, 'a')
+        self.assertEqual(d0.filename, filename)
+        self.assertEqual(d0.line, 12)
+        self.assertEqual(d0.detail, 'a')
+        self.assertEqual(d0.detail_line, 13)
+        spec = d0.specification
+        self.assertEqual(spec.name, 'group/a')
+        self.assertEqual(spec.filename, filename)
+        self.assertEqual(spec.line, 12)
+        self.assertEqual(spec.type, None)
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        d1 = req[1].details[1]
+        self.assertEqual(d1.name, 'b')
+        self.assertEqual(d1.filename, filename)
+        self.assertEqual(d1.line, 15)
+        self.assertEqual(d1.detail, 'b')
+        self.assertEqual(d1.detail_line, 16)
+        spec = d1.specification
+        self.assertEqual(spec.name, 'group/b')
+        self.assertEqual(spec.filename, filename)
+        self.assertEqual(spec.line, 15)
+        self.assertEqual(spec.type, None)
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+    def testWithTestsOption(self):
+        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        filename = os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_with_test')
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(len(req), 2)
+        self.assertEqual(req[0].name, 'single')
+        self.assertEqual(req[0].filename, filename)
+        self.assertEqual(req[0].line, 2)
+        self.assertEqual(req[0].label, None)
+        self.assertEqual(req[0].requirement, 'A simple requirement')
+        self.assertEqual(req[0].requirement_line, 3)
+        self.assertEqual(req[0].issues, ['#1234'])
+        self.assertEqual(req[0].issues_line, 4)
+        self.assertEqual(req[0].design, ['file.md'])
+        self.assertEqual(req[0].design_line, 5)
+        self.assertEqual(req[0].details, list())
+        spec = req[0].specification
+        self.assertEqual(spec.name, 'test')
+        self.assertTrue(spec.filename.endswith('test/tests/kernels/simple_diffusion/tests'))
+        self.assertEqual(spec.line, 2)
+        self.assertEqual(spec.type, 'Exodiff')
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        self.assertEqual(req[1].name, 'group')
+        self.assertEqual(req[1].filename, filename)
+        self.assertEqual(req[1].line, 9)
+        self.assertEqual(req[1].label, None)
+        self.assertEqual(req[1].requirement, 'A group requirement')
+        self.assertEqual(req[1].requirement_line, 10)
+        self.assertEqual(req[1].issues, ['#4321'])
+        self.assertEqual(req[1].issues_line, 11)
+        self.assertEqual(req[1].design, ['other.md'])
+        self.assertEqual(req[1].design_line, 12)
+        self.assertEqual(req[1].specification, None)
+        self.assertEqual(len(req[1].details), 2)
+
+        d0 = req[1].details[0]
+        self.assertEqual(d0.name, 'a')
+        self.assertEqual(d0.filename, filename)
+        self.assertEqual(d0.line, 13)
+        self.assertEqual(d0.detail, 'a')
+        self.assertEqual(d0.detail_line, 14)
+        spec = d0.specification
+        self.assertEqual(spec.name, 'mark_only')
+        self.assertTrue(spec.filename.endswith('markers/box_marker/tests'))
+        self.assertEqual(spec.line, 6)
+        self.assertEqual(spec.type, 'Exodiff')
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        d1 = req[1].details[1]
+        self.assertEqual(d1.name, 'b')
+        self.assertEqual(d1.filename, filename)
+        self.assertEqual(d1.line, 17)
+        self.assertEqual(d1.detail, 'b')
+        self.assertEqual(d1.detail_line, 18)
+        spec = d1.specification
+        self.assertEqual(spec.name, 'mark_and_adapt')
+        self.assertTrue(spec.filename.endswith('markers/box_marker/tests'))
+        self.assertEqual(spec.line, 14)
+        self.assertEqual(spec.type, 'Exodiff')
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+    def testError(self):
+        with self.assertRaises(FileNotFoundError) as e:
+            req = get_requirements_from_file('wrong')
+        self.assertIn('The supplied filename does not exist: wrong', str(e.exception))
+
+class TestGetRequirementsFromFiles(unittest.TestCase):
+    def testBasic(self):
+        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        filenames = [os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_basic'),
+                     os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_with_test')]
+
+        req = get_requirements_from_files(filenames)
+        self.assertEqual(len(req), 2)
+        self.assertIn('spec_basic', req)
+        self.assertIn('spec_with_test', req)
+
+    def testError(self):
+        with self.assertRaises(FileNotFoundError) as e:
+            req = get_requirements_from_files(['wrong'])
+        self.assertIn('The supplied filename does not exist: wrong', str(e.exception))
+
+class TestNumberRequirements(unittest.TestCase):
+    def testBase(self):
+        r0 = Requirement()
+        r1 = Requirement()
+        r2 = Requirement()
+        req = collections.OrderedDict(a=[r0, r1], b=[r2])
+
+        number_requirements(req, 'R', 1980)
+        self.assertEqual(r0.label, 'R1980.1.1')
+        self.assertEqual(r1.label, 'R1980.1.2')
+        self.assertEqual(r2.label, 'R1980.2.1')
+
+class TestFindFile(unittest.TestCase):
+    def testExact(self):
+        fname = '/test/tests/kernels/simple_diffusion/tests'
+        root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
+
+        filename = _find_file(root_dir, fname)
+        self.assertEqual(filename, os.path.join(root_dir, fname.strip('/')))
+
+    def testEndswith(self):
+        fname = 'markers/box_marker/tests'
+        root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
+
+        filename = _find_file(root_dir, fname)
+        self.assertEqual(filename, os.path.join(root_dir, 'test', 'tests', 'markers', 'box_marker', 'tests'))
+
+    def testNoneError(self):
+        fname = 'markers/box_marker/wrong'
+        root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
+        with self.assertRaises(NameError) as e:
+            filename = _find_file(root_dir, fname)
+        self.assertIn('Unable to locate a test specification', str(e.exception))
+
+    def testToManyError(self):
+        fname = 'box_marker/tests'
+        root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
+        with self.assertRaises(NameError) as e:
+            filename = _find_file(root_dir, fname)
+        self.assertIn('Located multiple test specifications', str(e.exception))
+
+class TestGetTestSpecification(unittest.TestCase):
+    def testBasic(self):
+        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        filename = os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_basic')
+
+        spec = get_test_specification(filename, 'single')
+        self.assertEqual(spec.name, 'single')
+        self.assertEqual(spec.filename, filename)
+        self.assertEqual(spec.line, 2)
+        self.assertEqual(spec.type, None)
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        spec = get_test_specification(filename, 'group/a')
+        self.assertEqual(spec.name, 'group/a')
+        self.assertEqual(spec.filename, filename)
+        self.assertEqual(spec.line, 12)
+        self.assertEqual(spec.type, None)
+        self.assertEqual(spec.prerequisites, set())
+        self.assertEqual(spec.skip, False)
+        self.assertEqual(spec.deleted, False)
+
+        with self.assertRaises(KeyError) as e:
+            spec = get_test_specification(filename, 'wrong')
+        self.assertIn("Unable to locate 'wrong'", str(e.exception))
+
+class TestGetRequirementsFromTests(unittest.TestCase):
     def testBasic(self):
         MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
         loc = [os.path.join(MOOSE_DIR, 'test', 'tests', 'markers')]
-        req = get_requirements(loc, ['tests'])
+        req = get_requirements_from_tests(loc, ['tests'])
 
         r0 = req['box_marker'][0]
         r1 = req['box_marker'][1]
@@ -33,20 +266,16 @@ class TestGetRequirements(unittest.TestCase):
         self.assertEqual(r0.name, 'mark_only')
         self.assertEqual(r1.name, 'mark_and_adapt')
 
-        self.assertEqual(r0.path, 'box_marker')
-        self.assertEqual(r1.path, 'box_marker')
-
         self.assertIn('markers/box_marker/tests', r0.filename)
         self.assertIn('markers/box_marker/tests', r1.filename)
 
         spec0 = r0.specification
         self.assertEqual(spec0.name, 'mark_only')
-        self.assertEqual(spec0.path, 'box_marker')
         self.assertIn('markers/box_marker/tests', spec0.filename)
 
     def testRequirementWithDetails(self):
         loc = [os.getcwd()]
-        req = get_requirements(loc, ['test_get_requirements_spec0'])
+        req = get_requirements_from_tests(loc, ['test_get_requirements_spec0'])
 
         self.assertEqual(len(req), 1)
         self.assertEqual(len(req['test_get_requirements_spec0']), 19)

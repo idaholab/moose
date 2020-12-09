@@ -6,7 +6,8 @@ logger.addHandler(SilentRecordHandler())
 
 from .get_sqa_reports import get_sqa_reports
 from .check_syntax import check_syntax, file_is_stub, find_md_file
-from .get_requirements import get_requirements
+from .get_requirements import get_requirements_from_tests, get_requirements_from_file, get_requirements_from_files
+from .get_requirements import number_requirements, get_test_specification
 from .check_requirements import check_requirements
 from .SQAReport import SQAReport
 from .SQADocumentReport import SQADocumentReport

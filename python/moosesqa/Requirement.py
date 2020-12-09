@@ -10,13 +10,14 @@ import enum
 import mooseutils
 
 @mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('path', ptype=str)
 @mooseutils.addProperty('filename', ptype=str)
+@mooseutils.addProperty('local', ptype=str)
 @mooseutils.addProperty('line', ptype=int)
 @mooseutils.addProperty('type', ptype=str)
 @mooseutils.addProperty('prerequisites', ptype=set)
 @mooseutils.addProperty('skip', ptype=bool, default=False)
 @mooseutils.addProperty('deleted', ptype=bool, default=False)
+@mooseutils.addProperty('text', ptype=str)
 class TestSpecification(mooseutils.AutoPropertyMixin):
     """Object for storing Test specification information w/r/t SQA"""
 
@@ -34,11 +35,10 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
         return 'Specification: {}'.format(self.name)
 
 @mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('path', ptype=str)
 @mooseutils.addProperty('filename', ptype=str)
 @mooseutils.addProperty('line', ptype=int)
 @mooseutils.addProperty('specification', ptype=TestSpecification)
-@mooseutils.addProperty('label', ptype=str)
+@mooseutils.addProperty('details', ptype=list)
 @mooseutils.addProperty('requirement', ptype=str)
 @mooseutils.addProperty('requirement_line', ptype=int)
 @mooseutils.addProperty('issues', ptype=list)
@@ -47,13 +47,13 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
 @mooseutils.addProperty('design_line', ptype=int)
 @mooseutils.addProperty('collections', ptype=set)
 @mooseutils.addProperty('collections_line', ptype=int)
-@mooseutils.addProperty('details', ptype=list)
 @mooseutils.addProperty('deprecated', ptype=bool, default=False)
 @mooseutils.addProperty('deprecated_line', ptype=int)
 @mooseutils.addProperty('verification', ptype=list)
 @mooseutils.addProperty('verification_line', ptype=int)
 @mooseutils.addProperty('validation', ptype=list)
 @mooseutils.addProperty('validation_line', ptype=int)
+@mooseutils.addProperty('label', ptype=str)
 @mooseutils.addProperty('duplicate', ptype=bool, default=False)
 class Requirement(mooseutils.AutoPropertyMixin):
     """struct for storing Requirement information."""
@@ -104,6 +104,15 @@ class Requirement(mooseutils.AutoPropertyMixin):
                     test_types.add(d.specification.type)
         return {t for t in test_types if t is not None} or None
 
+    @property
+    def specifications(self):
+        if self.specification is not None:
+            yield self.specification
+        elif self.details:
+            for d in self.details:
+                if d.specification is not None:
+                    yield d.specification
+
     def __str__(self):
         out = 'Requirement: {}; requirement = {}; design = {}; issues = {}'
 
@@ -115,7 +124,6 @@ class Requirement(mooseutils.AutoPropertyMixin):
         return out.format(self.name, repr(self.requirement), repr(self.design), repr(self.issues))
 
 @mooseutils.addProperty('name', ptype=str)
-@mooseutils.addProperty('path', ptype=str)
 @mooseutils.addProperty('filename', ptype=str)
 @mooseutils.addProperty('line', ptype=int)
 @mooseutils.addProperty('detail', ptype=str)

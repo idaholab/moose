@@ -6,40 +6,76 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import os
 import collections
 import logging
 import pyhit
 import mooseutils
+import moosetree
 from .Requirement import TestSpecification, Requirement, Detail
 
-def get_requirements(directories, specs, prefix='F', category=None):
+def get_requirements_from_tests(directories, specs):
     """
     Build requirements dictionary from the provided directories.
+
+    Input:
+        directories[list]: A list of directories to consider
+        specs[list]: A list of test specification names (e.g., ['tests'])
+        prefix[str]: Requirement label prefix, e.g.
+
     """
     out = collections.defaultdict(list)
     for location in directories:
         for filename in sorted(mooseutils.git_ls_files(location)):
-            if not os.path.isfile(filename):
-                continue
-            fname = os.path.basename(filename)
-            if fname in specs:
-                _add_requirements(out, location, filename)
-
-    for i, requirements in enumerate(out.values()):
-        for j, req in enumerate(requirements):
-            if category:
-                req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
-            else:
-                req.label = "{}{}.{}".format(prefix, i+1, j+1)
-
+            if os.path.isfile(filename) and (os.path.basename(filename) in specs):
+                group = os.path.relpath(filename, location).split('/')[0]
+                out[group] = get_requirements_from_file(filename)
     return out
 
-def _add_requirements(out, location, filename):
+def number_requirements(requirement_dict, prefix, category):
     """
-    Opens tests specification and extracts requirement items.
+    Apply a number label to the requirements.
+
+    Input:
+        requirement_dict[dict]: Container of Requirement objects, as returned from get_requirement_from_tests.
+        prefix[str]: A string prefix to apply to label, e.g., 'F'
+        category[int]: Category index to apply to label.
+
+    The format of the number is <prefix><category>.<group>.<number>, e.g., F3.2.1. The group
+    is the indexed according to the supplied dict keys.
+
+    IMPORTANT: These numbers are not designed to be referenced in any manner, they are simply applied
+               for organizational purposes.
     """
+    for i, requirements in enumerate(requirement_dict.values()):
+        for j, req in enumerate(requirements):
+            req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
+
+def get_requirements_from_files(filenames):
+    """
+    Extracts requirement information from specific files, see get_requirements_from_file
+    """
+    out = collections.defaultdict(list)
+    for filename in filenames:
+        if not os.path.isfile(filename):
+            raise FileNotFoundError("The supplied filename does not exist: {}".format(filename))
+        group, _ = os.path.splitext(os.path.basename(filename))
+        out[group] = get_requirements_from_file(filename)
+    return out
+
+def get_requirements_from_file(filename):
+    """
+    Opens hit file and extracts requirement items.
+
+    Input:
+        filename[str]: The HIT file to open and extract Requirements
+
+    Returns:
+         A list of Requirement objects.
+    """
+    if not os.path.isfile(filename):
+        raise FileNotFoundError("The supplied filename does not exist: {}".format(filename))
+    requirements = list()
     root = pyhit.load(filename)
 
     # Options available at the top-level
@@ -55,51 +91,112 @@ def _add_requirements(out, location, filename):
     collections = root.children[0].get('collections', None)
     collections_line = root.children[0].line('collections', None)
 
-    group = os.path.relpath(filename, location).split('/')[0]
-    path = os.path.relpath(os.path.dirname(filename), location)
     for child in root.children[0]:
-        req = _create_requirement(child, path, filename,
+        req = _create_requirement(child, filename,
                                   design, design_line,
                                   issues, issues_line,
                                   collections, collections_line,
                                   deprecated, deprecated_line)
-        out[group].append(req)
+        requirements.append(req)
 
         # Get "detail" parameter from nested tests
         for grandchild in child.children:
-            detail = _create_detail(grandchild, path, filename)
-            detail.specification = _create_specification(grandchild, '{}/{}'.format(child.name, grandchild.name), path, filename)
+            detail = _create_detail(grandchild, filename)
+            detail.specification = _create_specification(grandchild, '{}/{}'.format(child.name, grandchild.name), filename)
             req.details.append(detail)
 
         if not req.details:
-            req.specification = _create_specification(child, child.name, path, filename)
+            req.specification = _create_specification(child, child.name, filename)
 
-def _create_specification(child, name, path, filename):
-    spec = TestSpecification(name=name,
-                             path=path,
-                             filename=filename,
-                             line=child.line())
-    # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
-    spec.skip = child.get('skip', None) is not None
-    spec.deleted = child.get('deleted', None) is not None
+    return requirements
 
-    # Store the prerequisites, if any
-    prereq = child.get('prereq', None)
-    if prereq is not None:
-        spec.prerequisites = set(prereq.split(' '))
+def get_test_specification(filename, block):
+    """
+    Create a TestSpecification object from the HIT file and block name.
 
-    # Type
-    spec.type = child.get('type').strip() if child.get('type', None) is not None else None
+    Input:
+        filename[str]: Complete filename of a HIT file containing test specification(s)
+        block[str]: The name of the block to use for creating the TestSpecification object
+
+    This function exists to allow for requirements to be defined outside of the test specifications,
+    but still reference tests for the purpose of SQA traceability. Support for this was added to
+    allow for non-functional requirements to be defined outside of the test specifications.
+    """
+    root = pyhit.load(filename)
+
+    # Locate the desired block
+    node = moosetree.find(root, lambda n: n.fullpath.endswith(block))
+    if node is None:
+        raise KeyError("Unable to locate '{}' in {}".format(block, filename))
+
+    # Build/return TestSpecification object
+    name = node.name if node.parent.parent.is_root else '{}/{}'.format(node.parent.name, node.name)
+    return _create_specification(node, name, filename)
+
+def _find_file(working_dir, pattern):
+    """
+    Helper for finding file in repository.
+
+    see _create_specification
+    """
+    if pattern.startswith('/'):
+        pattern = os.path.join(working_dir, pattern.strip('/'))
+
+    matches = [f for f in mooseutils.git_ls_files(working_dir) if f.endswith(pattern)]
+
+    if not matches:
+        raise NameError("Unable to locate a test specification with pattern: {}".format(pattern))
+    elif len(matches) > 1:
+        msg = "Located multiple test specifications with pattern: {}\n".format(pattern)
+        msg += "    \n".join(matches)
+        raise NameError(msg)
+
+    return matches[0]
+
+def _create_specification(child, name, filename):
+    """
+    Create and return a TestSpecificaiton object.
+
+    Inputs:
+        child[pyhit.Node]: Node containing test specification
+        name: The name to apply to the specification
+        filename: Location of the specification
+
+    NOTE: If the supplied 'child' node contains a 'test' parameter this is used to create the
+          specification rather than the node itself. The content of the 'test' should be the
+          filename and the block name, separated by a colon. The filename should be unique when
+          a list of all files in the repository is inspected with endswith.
+
+          test = simple_diffusion/tests:test
+    """
+
+    if 'test' in child:
+        fname, block = child['test'].split(':', 1)
+        spec_file = _find_file(mooseutils.git_root_dir(os.path.dirname(filename)), fname)
+        spec = get_test_specification(spec_file, block)
+
+    else:
+        spec = TestSpecification(name=name, filename=filename, line=child.line())
+        spec.type = child.get('type').strip() if child.get('type', None) is not None else None
+        spec.text = child.render()
+        spec.local = mooseutils.git_localpath(filename)
+
+        # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
+        spec.skip = child.get('skip', None) is not None
+        spec.deleted = child.get('deleted', None) is not None
+
+        # Store the prerequisites, if any
+        prereq = child.get('prereq', None)
+        if prereq is not None:
+            spec.prerequisites = set(prereq.split(' '))
 
     return spec
 
-
-def _create_requirement(child, path, filename, design, design_line, issues, issues_line,
+def _create_requirement(child, filename, design, design_line, issues, issues_line,
                         collections, collections_line, deprecated, deprecated_line):
 
     # Create the Requirement object
     req = Requirement(name=child.name,
-                      path=path,
                       filename=filename,
                       line=child.line())
 
@@ -140,9 +237,8 @@ def _create_requirement(child, path, filename, design, design_line, issues, issu
     req.detail_line = child.line('detail', None)
     return req
 
-def _create_detail(child, path, filename):
+def _create_detail(child, filename):
     req = Detail(name=child.name,
-                 path=path,
                  filename=filename,
                  line=child.line())
 
