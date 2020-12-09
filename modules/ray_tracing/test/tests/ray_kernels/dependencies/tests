@@ -1,0 +1,12 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'ray_kernel_dependencies.i'
+    csvdiff = 'ray_kernel_dependencies_out.csv'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the dependency resolution of RayKernels.'
+    design = 'RayKernels/index.md'
+    issues = '#16028'
+  []
+[]

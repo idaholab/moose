@@ -635,22 +635,42 @@ public:
   const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
   /**
-   * Returns true if the problem is in the process of computing Jacobian
+   * Returns true if the problem is in the process of computing the Jacobian
    */
-  virtual const bool & currentlyComputingJacobian() const { return _currently_computing_jacobian; };
+  const bool & currentlyComputingJacobian() const { return _currently_computing_jacobian; };
 
-  virtual void setCurrentlyComputingJacobian(const bool & flag)
+  /**
+   * Set whether or not the problem is in the process of computing the Jacobian
+   */
+  void setCurrentlyComputingJacobian(const bool currently_computing_jacobian)
   {
-    _currently_computing_jacobian = flag;
+    _currently_computing_jacobian = currently_computing_jacobian;
   }
 
-  /// Check whether residual being evaulated is non-linear
+  /**
+   * Returns true if the problem is in the process of computing the nonlinear residual
+   */
   bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
 
-  /// Set whether residual being evaulated is non-linear
-  virtual void computingNonlinearResid(bool computing_nonlinear_residual)
+  /**
+   * Set whether or not the problem is in the process of computing the nonlinear residual
+   */
+  virtual void computingNonlinearResid(const bool computing_nonlinear_residual)
   {
     _computing_nonlinear_residual = computing_nonlinear_residual;
+  }
+
+  /**
+   * Returns true if the problem is in the process of computing the residual
+   */
+  bool currentlyComputingResidual() const { return _currently_computing_residual; }
+
+  /**
+   * Set whether or not the problem is in the process of computing the residual
+   */
+  virtual void setCurrentlyComputingResidual(const bool currently_computing_residual)
+  {
+    _currently_computing_residual = currently_computing_residual;
   }
 
   /// Is it safe to access the tagged  matrices
@@ -823,8 +843,11 @@ protected:
   /// Flag to determine whether the problem is currently computing Jacobian
   bool _currently_computing_jacobian;
 
-  /// Whether residual being evaulated is non-linear
+  /// Whether the non-linear residual is being evaluated
   bool _computing_nonlinear_residual;
+
+  /// Whether the residual is being evaluated
+  bool _currently_computing_residual;
 
   /// Is it safe to retrieve data from tagged matrices
   bool _safe_access_tagged_matrices;

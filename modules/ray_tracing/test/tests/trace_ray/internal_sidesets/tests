@@ -1,0 +1,74 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [kill]
+    requirement = 'The system shall support the ending of traced rays on internal sidesets in '
+    [1d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_1d.i'
+      csvdiff = 'internal_sidesets_1d_kill_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_1d_kill_out
+                  RayBCs/active=\'kill_internal\''
+      allow_test_objects = true
+
+      detail = 'one-dimensional meshes, '
+    []
+    [2d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_2d.i'
+      csvdiff = 'internal_sidesets_2d_kill_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_2d_kill_out
+                  RayBCs/active=\'kill_internal\''
+      allow_test_objects = true
+
+      detail = 'two-dimensional meshes, '
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_3d.i'
+      csvdiff = 'internal_sidesets_3d_kill_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_3d_kill_out
+                  RayBCs/active=\'kill_internal\''
+      allow_test_objects = true
+
+      detail = 'and three-dimensional meshes.'
+    []
+  []
+
+  [reflect]
+    requirement = 'The system shall support the specular reflection of traced rays on internal sidesets in '
+    [1d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_1d.i'
+      csvdiff = 'internal_sidesets_1d_reflect_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_1d_reflect_out
+                  "RayBCs/active=\'kill_external reflect_internal\'"'
+      allow_test_objects = true
+
+      detail = 'one-dimensional meshes, '
+    []
+
+    [2d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_2d.i'
+      csvdiff = 'internal_sidesets_2d_reflect_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_2d_reflect_out
+                  "RayBCs/active=\'kill_external reflect_internal\'"'
+      allow_test_objects = true
+
+      detail = 'two-dimensional meshes, '
+    []
+
+    [3d]
+      type = 'CSVDiff'
+      input = 'internal_sidesets_3d.i'
+      csvdiff = 'internal_sidesets_3d_reflect_out.csv'
+      cli_args = 'Outputs/file_base=internal_sidesets_3d_reflect_out
+                  "RayBCs/active=\'kill_external reflect_internal\'"'
+      allow_test_objects = true
+
+      detail = 'and three-dimensional meshes.'
+    []
+  []
+[]

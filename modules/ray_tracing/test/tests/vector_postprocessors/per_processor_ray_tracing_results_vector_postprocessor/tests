@@ -1,0 +1,16 @@
+[Tests]
+  [test]
+    type = 'RunApp' # exodiff
+    input = 'per_processor_ray_tracing_results_vector_postprocessor.i'
+    # TODO: find out a test for this that is not platform dependent so we can do exodiff
+    # exodiff = 'per_processor_ray_tracing_results_vector_postprocessor_out.e'
+    # min_parallel = 4
+    # max_parallel = 4
+    # min_threads = 1
+    # max_threads = 1
+    allow_test_objects = true
+    issues = '#16028'
+    design = 'PerProcessorRayTracingResultsVectorPostprocessor.md'
+    requirement = 'The system shall support the output of information pretaining to the tracing of rays on a per-processor basis.'
+  []
+[]

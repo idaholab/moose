@@ -106,4 +106,32 @@
     requirement = 'Meshes that are pre-split with active RelationshipManager objects work the same '
                   'as if using an online DistributedMesh.'
   []
+
+  [grid_from_file]
+    type = 'CheckFiles'
+    input = 'grid_from_file.i'
+    cli_args = '--split-mesh 4'
+    check_files = 'grid_from_file.cpr/4/header.cpr grid_from_file.cpr/4/split-4-0.cpr grid_from_file.cpr/4/split-4-1.cpr grid_from_file.cpr/4/split-4-2.cpr grid_from_file.cpr/4/split-4-3.cpr'
+    recover = false
+    min_parallel = 2
+    max_parallel = 2
+    issues = "#11944"
+    design = 'Mesh/splitting.md'
+    requirement = 'Splitting meshes from file should work with custom partitioners.'
+    mesh_mode = REPLICATED
+  []
+
+  [grid_from_generated]
+    type = 'CheckFiles'
+    input = 'grid_from_generated.i'
+    cli_args = '--split-mesh=4 --split-file=grid_from_generated'
+    check_files = 'grid_from_generated.cpr/4/header.cpr grid_from_generated.cpr/4/split-4-0.cpr grid_from_generated.cpr/4/split-4-1.cpr grid_from_generated.cpr/4/split-4-2.cpr grid_from_generated.cpr/4/split-4-3.cpr'
+    recover = false
+    min_parallel = 2
+    max_parallel = 2
+    issues = "#11944"
+    design = 'Mesh/splitting.md'
+    requirement = 'Splitting meshes from a generated mesh should work with custom partitioners.'
+    mesh_mode = REPLICATED
+  []
 []

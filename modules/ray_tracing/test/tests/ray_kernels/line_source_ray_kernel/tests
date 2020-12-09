@@ -1,0 +1,26 @@
+[Tests]
+  design = 'LineSourceRayKernel.md'
+  issues = '#16028'
+
+  [test]
+    type = 'Exodiff'
+    input = 'line_source_ray_kernel.i'
+    exodiff = 'line_source_ray_kernel_out.e'
+    requirement = 'The system shall provide an ability to produce a source term along a line.'
+  []
+  [simple_diffusion]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with a line source term, with '
+    [fe]
+      type = 'Exodiff'
+      input = 'simple_diffusion_line_source.i'
+      exodiff = 'simple_diffusion_line_source_out.e'
+      detail = 'finite elements '
+    []
+    [fv]
+      type = 'Exodiff'
+      input = 'fv_simple_diffusion_line_source.i'
+      exodiff = 'fv_simple_diffusion_line_source_out.e'
+      detail = 'and finite volumes.'
+    []
+  []
+[]

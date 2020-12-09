@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayTracingStudy.md'
+
+  [no_bc]
+    type = 'RunException'
+    input = 'tolerate_failure.i'
+    expect_err = 'Ray on processor .* and thread .* failed to trace'
+    requirement = 'The system shall support the failure of a trace gracefully via a warning.'
+    allow_warnings = true
+    should_crash = false
+  []
+[]

@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'RunApp'
+    input = 'ray_get_info.i'
+    allow_test_objects = true
+    issues = '#16028'
+    design = 'RayTracingStudy.md Ray.md'
+    requirement = 'The system shall support the console output of information pertaining to a Ray.'
+  []
+[]

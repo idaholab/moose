@@ -4330,6 +4330,16 @@ Assembly::hasScalingVector()
 }
 #endif
 
+void
+Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
+{
+  mooseAssert(_current_qrule == _current_qrule_arbitrary, "Rule should be arbitrary");
+  mooseAssert(weights.size() == _current_physical_points.size(), "Size mismatch");
+
+  for (MooseIndex(weights.size()) i = 0; i < weights.size(); ++i)
+    _current_JxW[i] = weights[i];
+}
+
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::fePhi<VectorValue<Real>>(FEType type) const

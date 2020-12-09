@@ -1,0 +1,22 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [error]
+    requirement = 'The system shall report an error when a ray hits a boundary during tracing and '
+
+    [both]
+      type = RunException
+      input = 'raybc_check.i'
+      expect_err = 'Boundaries that did not have any RayBCs\:.*1 \(right\).*2 \(top\)'
+      detail = 'the boundary does not have any RayBCs '
+    []
+    [one]
+      type = RunException
+      input = 'raybc_check.i'
+      expect_err = 'Boundaries that did not have any RayBCs\:.*1 \(right\)'
+      cli_args = 'RayBCs/active=top'
+      detail = 'and then the boundary does not have any RayBCs that change the trajectory of the ray or end the ray.'
+    []
+  []
+[]

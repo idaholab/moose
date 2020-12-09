@@ -22,6 +22,7 @@
 #include "NavierStokesTestApp.h"
 #include "PeridynamicsTestApp.h"
 #include "PhaseFieldTestApp.h"
+#include "RayTracingTestApp.h"
 #include "RichardsTestApp.h"
 #include "StochasticToolsTestApp.h"
 #include "TensorMechanicsTestApp.h"
@@ -64,6 +65,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
     PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
     PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
+    RayTracingTestApp::registerAll(f, af, s, use_test_objs);
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
     TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
@@ -93,6 +95,7 @@ CombinedTestApp::registerObjects(Factory & factory)
   NavierStokesTestApp::registerObjects(factory);
   PeridynamicsTestApp::registerObjects(factory);
   PhaseFieldTestApp::registerObjects(factory);
+  RayTracingTestApp::registerObjects(factory);
   RichardsTestApp::registerObjects(factory);
   StochasticToolsTestApp::registerObjects(factory);
   TensorMechanicsTestApp::registerObjects(factory);
@@ -113,6 +116,7 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   NavierStokesTestApp::associateSyntax(syntax, action_factory);
   PeridynamicsTestApp::associateSyntax(syntax, action_factory);
   PhaseFieldTestApp::associateSyntax(syntax, action_factory);
+  RayTracingTestApp::associateSyntax(syntax, action_factory);
   RichardsTestApp::associateSyntax(syntax, action_factory);
   StochasticToolsTestApp::associateSyntax(syntax, action_factory);
   TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
@@ -133,6 +137,7 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   NavierStokesTestApp::registerExecFlags(factory);
   PeridynamicsTestApp::registerExecFlags(factory);
   PhaseFieldTestApp::registerExecFlags(factory);
+  RayTracingTestApp::registerExecFlags(factory);
   RichardsTestApp::registerExecFlags(factory);
   StochasticToolsTestApp::registerExecFlags(factory);
   TensorMechanicsTestApp::registerExecFlags(factory);

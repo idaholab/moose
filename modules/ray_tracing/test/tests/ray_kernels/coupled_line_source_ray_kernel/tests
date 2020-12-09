@@ -1,0 +1,44 @@
+[Tests]
+  design = 'RayKernels/index.md'
+  issues = '#16028'
+
+  [test]
+    type = 'Exodiff'
+    input = 'coupled_line_source_ray_kernel.i'
+    exodiff = 'coupled_line_source_ray_kernel_out.e'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the coupling of variables on rays that contribute to the residual and Jacobian.'
+  []
+  [test_jac]
+    type = 'PetscJacobianTester'
+    input = 'coupled_line_source_ray_kernel.i'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    allow_test_objects = true
+
+    requirement = 'The system shall be able to produce the exact Jacobian with coupled variables on rays.'
+  []
+
+  [test_ad]
+    type = 'Exodiff'
+    input = 'coupled_line_source_ray_kernel.i'
+    exodiff = 'coupled_line_source_ray_kernel_out.e'
+    cli_args = 'RayKernels/active=source_ad'
+    allow_test_objects = true
+
+    requirement = 'The system shall support the coupling of variables using automatic differentiation on rays that contribute to the residual and Jacobian.'
+  []
+  [test_ad_jac]
+    type = 'PetscJacobianTester'
+    input = 'coupled_line_source_ray_kernel.i'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = 'RayKernels/active=source_ad'
+    allow_test_objects = true
+
+    requirement = 'The system shall be able to produce the exact Jacobian using automatic differentiation on rays.'
+  []
+[]

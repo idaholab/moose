@@ -1,0 +1,26 @@
+[Tests]
+  design = 'RepeatableRayStudyBase.md'
+  issues = '#11631'
+  [test]
+    requirement = 'The RepeatableRayStudyBase shall support the'
+    [checkpoint]
+      type = 'RunApp'
+      input = 'recover.i'
+      allow_test_objects = true
+      cli_args = 'Outputs/checkpoint=true Executioner/num_steps=1'
+      recover = false
+      detail = 'outputting of checkpoint files and'
+    []
+    [recover]
+      type = 'CSVDiff'
+      input = 'recover.i'
+      csvdiff = 'recover_out.csv'
+      cli_args = '--recover'
+      allow_test_objects = true
+      prereq = 'test/checkpoint'
+      delete_output_before_running = false
+      recover = false
+      detail = 'shall be capable of restarting from the output data.'
+    []
+  []
+[]

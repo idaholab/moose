@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayTracingStudy.md'
+
+  [test]
+    requirement = 'The system shall support the storage and manipulation of data and auxiliary data on a ray when '
+
+    [sized]
+      type = 'CSVDiff'
+      input = 'ray_data.i'
+      csvdiff = 'ray_data_out.csv'
+      allow_test_objects = true
+      detail = 'sizing the Ray data on acquire '
+    []
+    [unsized]
+      type = 'CSVDiff'
+      input = 'ray_data.i'
+      csvdiff = 'ray_data_out.csv'
+      allow_test_objects = true
+      detail = 'and when not sizing the Ray data on acquire.'
+      cli_args = 'UserObjects/test1/use_unsized_rays=true UserObjects/test2/use_unsized_rays=true UserObjects/test3/use_unsized_rays=true UserObjects/test4/use_unsized_rays=true'
+    []
+  []
+[]

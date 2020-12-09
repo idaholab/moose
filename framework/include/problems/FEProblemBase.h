@@ -1810,7 +1810,10 @@ public:
   virtual bool hasMortarCoupling() const { return _has_mortar; }
 
   using SubProblem::computingNonlinearResid;
-  void computingNonlinearResid(bool computing_nonlinear_residual) override;
+  void computingNonlinearResid(bool computing_nonlinear_residual) final;
+
+  using SubProblem::currentlyComputingResidual;
+  void setCurrentlyComputingResidual(bool currently_computing_residual) final;
 
   /**
    * Set the number of steps in a grid sequences

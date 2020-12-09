@@ -14,6 +14,7 @@ Content:
     - modules/peridynamics/doc/content
     - modules/phase_field/doc/content
     - modules/porous_flow/doc/content
+    - modules/ray_tracing/doc/content
     - modules/rdg/doc/content
     - modules/richards/doc/content
     - modules/stochastic_tools/doc/content
