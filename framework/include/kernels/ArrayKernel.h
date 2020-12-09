@@ -123,4 +123,11 @@ protected:
 
   /// Number of components of the array variable
   const unsigned int _count;
+
+private:
+  /// Work vector for residual and diag jacobian
+  RealEigenVector _work_vector;
+
+  /// Work vector for off diag jacobian
+  RealEigenMatrix _work_matrix;
 };
