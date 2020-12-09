@@ -43,6 +43,7 @@ const ExecFlagType EXEC_PRE_DISPLACE("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP("PRE_MULTIAPP_SETUP");
 const ExecFlagType EXEC_TRANSFER("TRANSFER");
+const ExecFlagType EXEC_PRE_KERNELS("PRE_KERNELS");
 
 namespace Moose
 {
@@ -386,6 +387,7 @@ registerExecFlags(Factory & factory)
   registerExecFlag(EXEC_PRE_DISPLACE);
   registerExecFlag(EXEC_SAME_AS_MULTIAPP);
   registerExecFlag(EXEC_PRE_MULTIAPP_SETUP);
+  registerExecFlag(EXEC_PRE_KERNELS);
 }
 
 void

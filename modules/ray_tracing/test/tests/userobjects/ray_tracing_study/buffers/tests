@@ -1,0 +1,27 @@
+[Tests]
+  [tests]
+    requirement = 'The system shall be able to trace rays using a '
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+
+    [lifo]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'lots_out.csv'
+      cli_args = 'UserObjects/lots/work_buffer_type=lifo
+                  Outputs/file_base=lots_out'
+      allow_test_objects = true
+      detail = 'last in, first out buffer '
+    []
+
+    [circular]
+      type = 'CSVDiff'
+      input = '../lots.i'
+      csvdiff = 'lots_out.csv'
+      cli_args = 'UserObjects/lots/work_buffer_type=circular
+                  Outputs/file_base=lots_out'
+      allow_test_objects = true
+      detail = 'and with a circular buffer.'
+    []
+  []
+[]

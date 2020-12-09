@@ -1,0 +1,13 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028 #16170'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'nonplanar.i'
+    csvdiff = 'nonplanar_out.csv'
+    allow_test_objects = true
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to trace rays on 3D meshes that have nonplanar faces.'
+  []
+[]

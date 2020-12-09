@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'kernel_change_ray.i'
+    csvdiff = 'kernel_change_ray_out.csv'
+    allow_test_objects = true
+    issues = '#16028'
+    design = 'RayKernels/index.md RayTracingStudy.md'
+    requirement = 'The system shall be able to change the trajectory of rays during tracing within RayKernels.'
+  []
+[]

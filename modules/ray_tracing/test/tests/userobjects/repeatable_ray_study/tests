@@ -1,0 +1,10 @@
+[Tests]
+  [max_distance]
+    type = 'CSVDiff'
+    input = 'max_distance.i'
+    csvdiff = 'max_distance_out.csv'
+    issues = '#16028'
+    design = 'RayTracingStudy.md'
+    requirement = 'The system shall support ending rays by a user-set maximum distance.'
+  []
+[]

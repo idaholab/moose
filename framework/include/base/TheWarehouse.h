@@ -277,6 +277,9 @@ public:
       return _w->queryInto(query_id, results);
     }
 
+    /// Gets the number of attributes associated with the cached query
+    std::size_t numAttribs() const { return _attribs.size(); }
+
   private:
     template <int Index, typename A, typename... As>
     void addAttribs()

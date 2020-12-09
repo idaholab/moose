@@ -74,6 +74,7 @@
 #include "MooseError.h"
 #include "FVElementalKernel.h"
 #include "FVFluxKernel.h"
+#include "UserObject.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -689,6 +690,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION(_compute_residual_tags_timer);
 
+  _fe_problem.setCurrentlyComputingResidual(true);
+
   bool required_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
 
   _n_residual_evaluations++;
@@ -709,6 +712,23 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
   try
   {
     zeroTaggedVectors(tags);
+
+    // Residual contributions from UOs - for now this is used for ray tracing
+    // and ray kernels that contribute to the residual (think line sources)
+    std::vector<UserObject *> uos;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("UserObject")
+        .condition<AttribExecOns>(EXEC_PRE_KERNELS)
+        .queryInto(uos);
+    for (auto & uo : uos)
+      uo->residualSetup();
+    for (auto & uo : uos)
+    {
+      uo->initialize();
+      uo->execute();
+    }
+
     computeResidualInternal(tags);
     closeTaggedVectors(tags);
 
@@ -755,6 +775,8 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 
   // not supposed to do anything on matrix
   activeAllMatrixTags();
+
+  _fe_problem.setCurrentlyComputingResidual(false);
 }
 
 void
@@ -2667,6 +2689,22 @@ NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
 
   try
   {
+    // Jacobian contributions from UOs - for now this is used for ray tracing
+    // and ray kernels that contribute to the Jacobian (think line sources)
+    std::vector<UserObject *> uos;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("UserObject")
+        .condition<AttribExecOns>(EXEC_PRE_KERNELS)
+        .queryInto(uos);
+    for (auto & uo : uos)
+      uo->jacobianSetup();
+    for (auto & uo : uos)
+    {
+      uo->initialize();
+      uo->execute();
+    }
+
     computeJacobianInternal(tags);
   }
   catch (MooseException & e)

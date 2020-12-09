@@ -200,6 +200,15 @@ public:
     for (auto id : ids)
       _vals.push_back(id);
   }
+  AttribBoundaries(TheWarehouse & w,
+                   const std::vector<BoundaryID> & ids,
+                   bool must_be_restricted = false)
+    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+  {
+    _vals.reserve(ids.size());
+    for (auto id : ids)
+      _vals.push_back(id);
+  }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;

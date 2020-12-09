@@ -1,0 +1,26 @@
+[Tests]
+  [tests]
+    issues = '#16028'
+    design = 'RayBCs/index.md RayTracingStudy.md'
+    requirement = 'The system shall be able to create additional rays during tracing with RayBCs in '
+
+    [2d]
+      type = 'CSVDiff'
+      input = 'bc_create_ray.i'
+      csvdiff = 'bc_create_ray_2d_out.csv'
+      allow_test_objects = true
+      cli_args = 'Outputs/file_base=bc_create_ray_2d_out'
+      detail = 'two-dimensional meshes '
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'bc_create_ray.i'
+      csvdiff = 'bc_create_ray_3d_out.csv'
+      allow_test_objects = true
+      cli_args = 'Outputs/file_base=bc_create_ray_3d_out
+                  Mesh/active=gmg_3d
+                  "RayBCs/active=\'kill_3d create_3d\'"'
+      detail = 'and in three-dimensional meshes.'
+    []
+  []
+[]

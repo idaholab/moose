@@ -1,0 +1,22 @@
+[Tests]
+  design = 'RayTracingStudyResult.md RayTracingStudy.md'
+  issues = '#16028'
+  [tests]
+    requirement = 'The system shall support the output'
+    [rays_distance]
+      type = 'CSVDiff'
+      input = 'ray_tracing_study_result.i'
+      csvdiff = 'ray_tracing_study_result_out.csv'
+      cli_args = 'Postprocessors/active=\'total_rays_started total_distance\''
+      allow_test_objects = true
+      detail = 'of the total number of rays started, the total distance traveled by rays, and'
+    []
+    [crossings]
+      type = 'RunApp'
+      input = 'ray_tracing_study_result.i'
+      cli_args = 'Postprocessors/active=\'total_processor_crossings max_processor_crossings\''
+      allow_test_objects = true
+      detail = 'the number of processor crossings the rays have encountered.'
+    []
+  []
+[]

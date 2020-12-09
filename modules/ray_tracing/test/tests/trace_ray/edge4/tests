@@ -1,0 +1,21 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [test]
+    type = 'CSVDiff'
+    input = '../lots.i'
+    csvdiff = 'lots_out.csv'
+    cli_args = 'Mesh/gmg/elem_type=edge4
+                Mesh/gmg/dim=1
+                RayBCs/active=kill_1d
+                UserObjects/lots/vertex_to_vertex=true
+                UserObjects/lots/centroid_to_vertex=true
+                UserObjects/lots/centroid_to_centroid=true
+                Outputs/file_base=lots_out'
+    allow_test_objects = true
+    abs_zero = 1e-8
+    method = '!dbg'
+    requirement = 'The system shall be able to trace rays within EDGE4 elements.'
+  []
+[]

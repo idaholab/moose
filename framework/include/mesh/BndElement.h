@@ -31,3 +31,17 @@ struct BndElement
   BoundaryID _bnd_id;
 };
 
+struct ConstBndElement
+{
+  ConstBndElement(const Elem * elem, unsigned short int side, BoundaryID bnd_id)
+    : elem(elem), side(side), bnd_id(bnd_id)
+  {
+  }
+
+  /// pointer to the element
+  const Elem * elem;
+  /// side number
+  unsigned short int side;
+  /// boundary id for the node
+  BoundaryID bnd_id;
+};

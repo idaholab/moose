@@ -1,0 +1,109 @@
+[Tests]
+  issues = '#16028'
+
+  [elem_type]
+    requirement = 'The system shall support the mesh output of traced rays on meshes of element types '
+    design = 'RayTracingMeshOutput.md'
+
+    [quad4]
+      type = 'Exodiff'
+      input = 'ray_mesh_output.i'
+      exodiff = 'quad4_rays.e'
+      cli_args = 'Outputs/rays/file_base=quad4_rays'
+
+      detail = 'QUAD4,'
+    []
+    [tri3]
+      type = 'Exodiff'
+      input = 'ray_mesh_output.i'
+      exodiff = 'tri3_rays.e'
+      cli_args = 'Mesh/gmg/elem_type=TRI3
+                  Outputs/rays/file_base=tri3_rays'
+      detail = 'TRI3,'
+    []
+    [hex8]
+      type = 'Exodiff'
+      input = 'ray_mesh_output_3d.i'
+      exodiff = 'hex8_rays.e'
+      cli_args = 'Outputs/rays/file_base=hex8_rays'
+      detail = 'HEX8, and'
+    []
+    [tet4]
+      type = 'Exodiff'
+      input = 'ray_mesh_output_3d.i'
+      exodiff = 'tet4_rays.e'
+      cli_args = 'Mesh/gmg/elem_type=tet4
+                  Outputs/rays/file_base=tet4_rays'
+      detail = 'TET4.'
+    []
+  []
+
+  [nemesis]
+    type = RunApp # Exodiff
+    input = 'ray_mesh_output.i'
+    cli_args = 'Outputs/rays/type=RayTracingNemesis
+                "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                Outputs/rays/file_base=nemesis_rays'
+    # TODO: re-enable these tests as exodiff once we use a grid partitioner (currently not
+    # compatible with MeshGenerators)
+    # exodiff = 'nemesis_rays.e.4.0 nemesis_rays.e.4.1 nemesis_rays.e.4.2 nemesis_rays.e.4.3'
+    # min_parallel = 4
+    # max_parallel = 4
+    # mesh_mode = replicated # depends on partitioning of the master mesh
+    requirement = 'The system shall support the mesh output of traced rays using the Nemesis format.'
+    design = 'RayTracingNemesis.md RayTracingMeshOutput.md'
+  []
+
+  [no_segments]
+    design = 'RayTracingMeshOutput.md'
+    requirement = 'The system shall support the mesh output of traced rays using the fewest segments possible to represent the trace in '
+    [exodus]
+      type = RunApp # Exodiff
+      input = 'ray_mesh_output.i'
+      cli_args = 'UserObjects/study/segments_on_cache_traces=false
+                  "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                  Outputs/rays/file_base=no_segments_rays'
+      # TODO: re-enable these tests as exodiff once we use a grid partitioner (currently not
+      # compatible with MeshGenerators); see #16320
+      # exodiff = 'no_segments_rays.e'
+      # exodiff_opts = '-ignore_dups'
+      # min_parallel = 3
+      # max_parallel = 3
+      # mesh_mode = replicated # depends on partitioning of the master mesh
+      detail = 'Exodus format and'
+    []
+    [nemesis]
+      type = RunApp # Exodiff
+      input = 'ray_mesh_output.i'
+      cli_args = 'Outputs/rays/type=RayTracingNemesis
+                  UserObjects/study/segments_on_cache_traces=false
+                  "Outputs/rays/output_properties=\'ray_id intersections pid processor_crossings trajectory_changes\'"
+                  Outputs/rays/file_base=no_segments_nemesis_rays'
+      # TODO: re-enable these tests as exodiff once we use a grid partitioner (currently not
+      # compatible with MeshGenerators); see #16320
+      # exodiff = 'no_segments_nemesis_rays.e.2.0 no_segments_nemesis_rays.e.2.1'
+      # min_parallel = 2
+      # max_parallel = 2
+      # mesh_mode = replicated # depends on partitioning of the master mesh
+      detail = 'in Nemesis format.'
+    []
+  []
+
+  [data]
+    requirement = 'The sytem shall support the output of ray data when outputting rays in a mesh format using'
+    design = 'RayTracingMeshOutput.md'
+    [exodus]
+      type = 'Exodiff'
+      input = 'ray_mesh_output_data.i'
+      exodiff = 'ray_mesh_output_data_rays.e ray_mesh_output_data_rays_nodal.e'
+      detail = 'exodus and'
+    []
+    [nemesis]
+      type = 'RunApp'
+      input = 'ray_mesh_output_data.i'
+      cli_args = 'Outputs/rays/type=RayTracingNemesis Outputs/rays_nodal/type=RayTracingNemesis'
+      # TODO: Make this test an exodiff; see #16320
+      detail = 'nemesis formats.'
+    []
+  []
+[]
