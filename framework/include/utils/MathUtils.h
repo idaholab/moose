@@ -295,7 +295,7 @@ mooseSetToZero(std::vector<Real> & vec)
 
 /**
  * Helper function to perform numerical integration of a one-dimensional function
- * Any function that takes a real and returns a real can be passed through "lambda"
+ * Any function that takes a real and returns a real can be passed through lambdas
  */
 template <typename T>
 Real
@@ -315,12 +315,10 @@ trapezoidalRule(Real a, Real b, Real tol, std::size_t max_refinements, T lambda)
   Real interval_1 = interval_0 * 0.5 + yh * h;
   Real interval_length_1 = interval_length_0 * 0.5 + abs(yh) * h;
 
-  // The recursion is:
-  // I_k = 1/2 I_{k-1} + 1/2^k \sum_{j=1; j odd, j < 2^k} f(a + j(b-a)/2^k)
   std::size_t iteration_number = 2;
   Real error = abs(interval_0 - interval_1);
 
-  while (iteration_number < 8 ||
+  while (iteration_number < 5 ||
          (iteration_number < max_refinements && error > tol * interval_length_1))
   {
     interval_0 = interval_1;
