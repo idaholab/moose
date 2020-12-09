@@ -45,6 +45,7 @@ struct cast_impl<ADReal, int>
 } // namespace Eigen
 
 typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
 
 class ADGeneralizedRadialReturnStressUpdate : public ADStressUpdateBase,
                                               public ADGeneralizedReturnMappingSolution
@@ -127,13 +128,15 @@ protected:
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
-                                     ADRankTwoTensor & stress) = 0;
+                                     ADRankTwoTensor & stress,
+                                     const ADDenseVector & /*stress_dev*/) = 0;
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
+                                     const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/)
   {
     mooseError("computeStrainFinalize needs to be implemented by a child class.");

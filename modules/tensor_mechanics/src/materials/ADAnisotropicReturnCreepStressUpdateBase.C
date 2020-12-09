@@ -52,6 +52,7 @@ void
 ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
     ADRankTwoTensor & inelasticStrainIncrement,
     const ADRankTwoTensor & /*stress*/,
+    const ADDenseVector & /*stress_dev*/,
     const ADReal & /*delta_gamma*/)
 {
   _creep_strain[_qp] = _creep_strain_old[_qp] + inelasticStrainIncrement;

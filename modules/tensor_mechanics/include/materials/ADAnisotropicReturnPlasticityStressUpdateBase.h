@@ -50,6 +50,7 @@ protected:
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
+                                     const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/) override;
 
   /// Plasticity strain material property

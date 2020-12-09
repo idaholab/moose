@@ -59,6 +59,7 @@ protected:
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
+                                     const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/) override;
 
   /**
@@ -67,7 +68,8 @@ protected:
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
-                                     ADRankTwoTensor & stress) override;
+                                     ADRankTwoTensor & stress,
+                                     const ADDenseVector & /*stress_dev*/) override;
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;

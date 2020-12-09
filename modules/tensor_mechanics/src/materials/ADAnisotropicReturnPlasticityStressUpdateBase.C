@@ -52,6 +52,7 @@ void
 ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
     ADRankTwoTensor & inelasticStrainIncrement,
     const ADRankTwoTensor & /*stress*/,
+    const ADDenseVector & /*stress_dev*/,
     const ADReal & /*delta_gamma*/)
 {
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp] + inelasticStrainIncrement;

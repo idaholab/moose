@@ -21,13 +21,11 @@ ADTransverselyIsotropicPlasticityStressUpdate::validParams()
       "more complex simulations.");
 
   // Linear strain hardening parameters
-  params.addCoupledVar("temperature", "Coupled temperature");
-  params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
-  params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
-  params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
-  params.addRequiredParam<Real>("activation_energy", "Activation energy");
-  params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
-  params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
+  params.addRequiredParam<Real>("hardening_constant",
+                                "Hardening constant (H) for anisotropic plasticity");
+  params.addRequiredParam<Real>("yield_stress",
+                                "Yield stress (constant value) for anisotropic plasticity");
+
   params.addRequiredParam<std::vector<Real>>("hill_constants",
                                              "Hill material constants in order: F, "
                                              "G, H, L, M, N");
@@ -38,29 +36,24 @@ ADTransverselyIsotropicPlasticityStressUpdate::validParams()
 ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticityStressUpdate(
     const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
-    _has_temp(isParamValid("temperature")),
-    _temperature(_has_temp ? coupledValue("temperature") : _zero),
-    _coefficient(getParam<Real>("coefficient")),
-    _n_exponent(getParam<Real>("n_exponent")),
-    _m_exponent(getParam<Real>("m_exponent")),
-    _activation_energy(getParam<Real>("activation_energy")),
-    _gas_constant(getParam<Real>("gas_constant")),
-    _start_time(getParam<Real>("start_time")),
-    _exponential(1.0),
-    _exp_time(1.0),
     _hill_constants(6),
     _qsigma(0.0),
     _eigenvalues_hill(6),
-    _eigenvectors_hill(6, 6)
-{
-  if (_start_time < _app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
-    paramError("start_time",
-               "Start time must be equal to or greater than the Executioner start_time if a "
-               "non-integer m_exponent is used");
+    _eigenvectors_hill(6, 6),
+    _hardening_constant(getParam<Real>("hardening_constant")),
+    _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
+                                                           : nullptr),
+    _hardening_variable(declareADProperty<Real>(_base_name + "hardening_variable")),
+    _hardening_variable_old(getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
+    _hardening_slope(0.0),
+    _yield_condition(-1.0),
+    _yield_stress(getParam<Real>("yield_stress")),
+    _hill_tensor(6, 6)
 
+{
   _hill_constants = getParam<std::vector<Real>>("hill_constants");
 
-  // Hill constants, some constraints apply
+  // Hill constants, some constraints apply (user-driven now)
   const Real F = _hill_constants[0];
   const Real G = _hill_constants[1];
   const Real H = _hill_constants[2];
@@ -68,20 +61,28 @@ ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticity
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
-  ADDenseMatrix hill_tensor(6, 6);
-  hill_tensor(0, 0) = G + H;
-  hill_tensor(1, 1) = F + H;
-  hill_tensor(2, 2) = F + G;
-  hill_tensor(0, 1) = hill_tensor(1, 0) = -H;
-  hill_tensor(0, 2) = hill_tensor(2, 0) = -G;
-  hill_tensor(1, 2) = hill_tensor(2, 1) = -F;
+  _hill_tensor.zero();
 
-  hill_tensor(3, 3) = 2.0 * N;
-  hill_tensor(4, 4) = 2.0 * L;
-  hill_tensor(5, 5) = 2.0 * M;
-  //  Moose::out << "hill_tensor constructor: " << hill_tensor << "\n";
+  _hill_tensor(0, 0) = G + H;
+  _hill_tensor(1, 1) = F + H;
+  _hill_tensor(2, 2) = F + G;
+  _hill_tensor(0, 1) = _hill_tensor(1, 0) = -H;
+  _hill_tensor(0, 2) = _hill_tensor(2, 0) = -G;
+  _hill_tensor(1, 2) = _hill_tensor(2, 1) = -F;
 
-  computeHillTensorEigenDecomposition(hill_tensor);
+  _hill_tensor(3, 3) = 2.0 * N;
+  _hill_tensor(4, 4) = 2.0 * L;
+  _hill_tensor(5, 5) = 2.0 * M;
+
+  computeHillTensorEigenDecomposition(_hill_tensor);
+}
+
+void
+ADTransverselyIsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
+{
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+
+  ADAnisotropicReturnPlasticityStressUpdateBase::propagateQpStatefulProperties();
 }
 
 void
@@ -89,33 +90,24 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
     const ADDenseVector & /*effective_trial_stress*/,
     const ADRankFourTensor & /*elasticity_tensor*/)
 {
-  if (_has_temp)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
-
-  _exp_time = std::pow(_t - _start_time, _m_exponent);
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
 }
 
 ADReal
-ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVector & /*stress_dev*/,
-                                                               const ADDenseVector & stress_new,
-                                                               const ADReal & delta_gamma)
+ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
+    const ADDenseVector & stress_dev,
+    const ADDenseVector & /*stress_sigma*/,
+    const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
-
-  // ** //
+  // Obtain trial stress, needed to compute yield function value.
 
   ADDenseMatrix inv_matrix(6, 6);
   for (unsigned int i = 0; i < 6; i++)
     inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
 
   ADDenseVector stress_vector(6);
-  stress_vector = stress_new;
+  stress_vector = stress_dev;
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -130,59 +122,90 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(const ADDenseVect
   ADDenseVector stress_np1(6);
   eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
 
-  // ** //
+  ADReal omega = computeOmega(delta_gamma, stress_np1);
+  _hardening_slope = computeHardeningDerivative();
+  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 
-  ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
-  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
-  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
-  qsigma_square += 2 * L * stress_new(4) * stress_new(4);
-  qsigma_square += 2 * M * stress_new(5) * stress_new(5);
-  qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+  ADReal s_y = _hardening_variable[_qp] + _yield_stress;
 
-  // moose assert > 0
-  qsigma_square = std::sqrt(qsigma_square);
-  const ADReal creep_rate =
-      _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
+  ADReal residual = 0.0;
+  residual = s_y / omega - 1.0;
 
-  // Return iteration difference between creep strain and inelastic strain multiplier
-  return creep_rate * _dt - delta_gamma;
+  return residual;
 }
+
+ADReal
+ADTransverselyIsotropicPlasticityStressUpdate::computeOmega(const ADReal & delta_gamma,
+                                                            const ADDenseVector & stress_trial)
+{
+  ADDenseVector K(6);
+  ADReal omega = 0.0;
+
+  for (unsigned int i = 0; i < 6; i++)
+  {
+    K(i) = _eigenvalues_hill(i) /
+           (Utility::pow<2>(1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i)));
+    omega += K(i) * stress_trial(i) * stress_trial(i);
+  }
+  omega *= 0.5;
+
+  return std::sqrt(omega);
+}
+
+void
+ADTransverselyIsotropicPlasticityStressUpdate::computeDeltaDerivatives(
+    const ADReal & delta_gamma,
+    const ADDenseVector & stress_trial,
+    const ADReal & sy_alpha,
+    ADReal & omega,
+    ADReal & omega_gamma,
+    ADReal & sy_gamma)
+{
+  omega_gamma = 0.0;
+  sy_gamma = 0.0;
+
+  ADDenseVector K_deltaGamma(6);
+  omega = computeOmega(delta_gamma, stress_trial);
+
+  ADDenseVector K(6);
+  for (unsigned int i = 0; i < 6; i++)
+    K(i) = _eigenvalues_hill(i) /
+           (Utility::pow<2>(1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i)));
+
+  for (unsigned int i = 0; i < 6; i++)
+    K_deltaGamma(i) = -2.0 * _two_shear_modulus * _eigenvalues_hill(i) * K(i) /
+                      (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
+
+  for (unsigned int i = 0; i < 6; i++)
+    omega_gamma += K_deltaGamma(i) * stress_trial(i) * stress_trial(i);
+
+  omega_gamma /= 4.0 * omega;
+  sy_gamma = 2.0 * sy_alpha * (omega + delta_gamma * omega_gamma);
+}
+
 Real
 ADTransverselyIsotropicPlasticityStressUpdate::computeReferenceResidual(
-    const ADDenseVector & effective_trial_stress,
+    const ADDenseVector & /*effective_trial_stress*/,
     const ADDenseVector & /*stress_new*/,
     const ADReal & /*residual*/,
-    const ADReal & scalar_effective_inelastic_strain)
+    const ADReal & /*scalar_effective_inelastic_strain*/)
 {
-  // This is an approximation. Better to have this method in the material model itself, rather than
-  // an application-agnostic parent class.
-  return MetaPhysicL::raw_value(effective_trial_stress).l2_norm() /
-             MetaPhysicL::raw_value(_two_shear_modulus) -
-         MetaPhysicL::raw_value(scalar_effective_inelastic_strain);
+  // Residual already normalized for anisotropic plasticity.
+  return 1.0;
 }
 
 ADReal
 ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADDenseVector & stress_new,
+    const ADDenseVector & stress_dev,
+    const ADDenseVector & /*stress_sigma*/,
     const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
-
-  // ** //
-
   ADDenseMatrix inv_matrix(6, 6);
   for (unsigned int i = 0; i < 6; i++)
     inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
 
   ADDenseVector stress_vector(6);
-  stress_vector = stress_new;
+  stress_vector = stress_dev;
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -197,24 +220,20 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
   ADDenseVector stress_np1(6);
   eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
 
-  // ** //
+  ADReal omega = computeOmega(delta_gamma, stress_np1);
+  _hardening_slope = computeHardeningDerivative();
+  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 
-  // Equivalent deviatoric stress function.
-  ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
-  qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
-  qsigma_square += H * (stress_new(0) - stress_new(1)) * (stress_new(0) - stress_new(1));
-  qsigma_square += 2 * L * stress_new(4) * stress_new(4);
-  qsigma_square += 2 * M * stress_new(5) * stress_new(5);
-  qsigma_square += 2 * N * stress_new(3) * stress_new(3);
+  ADReal sy = _hardening_variable[_qp] + _yield_stress;
+  ADReal sy_alpha = _hardening_slope;
 
-  // moose assert > 0
-  qsigma_square = std::sqrt(qsigma_square);
-  _qsigma = qsigma_square;
+  ADReal omega_gamma;
+  ADReal sy_gamma;
 
-  const ADReal creep_rate_derivative = 1.0 * _coefficient * _n_exponent *
-                                       std::pow(qsigma_square, _n_exponent - 1.0) * _exponential *
-                                       _exp_time;
-  return (creep_rate_derivative * _dt - 1.0);
+  computeDeltaDerivatives(delta_gamma, stress_np1, sy_alpha, omega, omega_gamma, sy_gamma);
+  ADReal residual_derivative = 1 / omega * (sy_gamma - 1 / omega * omega_gamma * sy);
+
+  return residual_derivative;
 }
 
 void
@@ -247,86 +266,73 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecompositi
   //  for (unsigned int index_i = 0; index_i < dimension; index_i++)
   //    for (unsigned int index_j = 0; index_j < dimension; index_j++)
   //      Moose::out << "eigenvectors print: " << _eigenvectors_hill(index_i, index_j) << "\n";
+
+  //  mooseError("Artificially stopping the simulation");
+}
+
+ADReal
+ADTransverselyIsotropicPlasticityStressUpdate::computeHardeningValue(const ADReal & delta_gamma,
+                                                                     const ADReal & omega)
+{
+  return _hardening_variable_old[_qp] + 2.0 * delta_gamma * omega;
+}
+
+ADReal
+ADTransverselyIsotropicPlasticityStressUpdate::computeHardeningDerivative()
+{
+  return _hardening_constant;
 }
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
     ADRankTwoTensor & inelasticStrainIncrement,
     const ADRankTwoTensor & stress,
+    const ADDenseVector & stress_dev,
     const ADReal & delta_gamma)
 {
-  // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  ADDenseVector stress_vector(6);
+  stress_vector(0) = stress(0, 0);
+  stress_vector(1) = stress(1, 1);
+  stress_vector(2) = stress(2, 2);
+  stress_vector(3) = stress(0, 1);
+  stress_vector(4) = stress(1, 2);
+  stress_vector(5) = stress(0, 2);
 
-  // Equivalent deviatoric stress function.
-  ADReal qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));
-  qsigma_square += G * (stress(2, 2) - stress(0, 0)) * (stress(2, 2) - stress(0, 0));
-  qsigma_square += H * (stress(0, 0) - stress(1, 1)) * (stress(0, 0) - stress(1, 1));
-  qsigma_square += 2 * L * stress(1, 2) * stress(1, 2);
-  qsigma_square += 2 * M * stress(0, 2) * stress(0, 2);
-  qsigma_square += 2 * N * stress(0, 1) * stress(0, 1);
+  // e^P = delta_gamma * hill_tensor * stress
+  ADDenseVector inelasticStrainIncrement_vector(6);
+  ADDenseVector hill_stress(6);
+  _hill_tensor.vector_mult(hill_stress, stress_vector);
+  hill_stress.scale(delta_gamma);
+  inelasticStrainIncrement_vector = hill_stress;
 
-  // moose assert > 0
-  qsigma_square = std::sqrt(qsigma_square);
-  if (qsigma_square == 0)
-  {
-    inelasticStrainIncrement(0, 0) = inelasticStrainIncrement(1, 1) =
-        inelasticStrainIncrement(2, 2) = inelasticStrainIncrement(0, 1) =
-            inelasticStrainIncrement(1, 0) = inelasticStrainIncrement(2, 0) =
-                inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(1, 2) =
-                    inelasticStrainIncrement(2, 1) = 0.0;
-
-    ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
-        inelasticStrainIncrement, stress, delta_gamma);
-    return;
-  }
-
-  // Use Hill-type flow rule to compute the time step inelastic increment.
-  const ADReal prefactor = delta_gamma / qsigma_square;
-
-  inelasticStrainIncrement(0, 0) =
-      prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
-  inelasticStrainIncrement(1, 1) =
-      prefactor * (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
-  inelasticStrainIncrement(2, 2) =
-      prefactor * (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
-
+  inelasticStrainIncrement(0, 0) = inelasticStrainIncrement_vector(0);
+  inelasticStrainIncrement(1, 1) = inelasticStrainIncrement_vector(1);
+  inelasticStrainIncrement(2, 2) = inelasticStrainIncrement_vector(2);
   inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) =
-      prefactor * 2.0 * N * stress(0, 1);
-  inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
-      prefactor * 2.0 * M * stress(0, 2);
+      inelasticStrainIncrement_vector(3);
   inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
-      prefactor * 2.0 * L * stress(1, 2);
+      inelasticStrainIncrement_vector(4);
+  inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
+      inelasticStrainIncrement_vector(5);
 
   ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
-      inelasticStrainIncrement, stress, delta_gamma);
+      inelasticStrainIncrement, stress, stress_dev, delta_gamma);
 }
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
-    const ADRankTwoTensor & /*creepStrainIncrement*/,
+    const ADRankTwoTensor & /*inelastic_strain_increment*/,
     const ADReal & delta_gamma,
-    ADRankTwoTensor & stress_new)
+    ADRankTwoTensor & stress_new,
+    const ADDenseVector & stress_dev)
 {
   // Need to compute this iteration's stress tensor based on the scalar variable
+  // For deviatoric
   // s(n+1) = {Q [I + 2*nu*delta_gamma*Delta]^(-1) Q^T}  s(trial)
 
   ADDenseMatrix inv_matrix(6, 6);
   for (unsigned int i = 0; i < 6; i++)
     inv_matrix(i, i) = 1 / (1 + _two_shear_modulus * delta_gamma * _eigenvalues_hill(i));
-
-  ADDenseVector stress_vector(6);
-  stress_vector(0) = stress_new(0, 0);
-  stress_vector(1) = stress_new(1, 1);
-  stress_vector(2) = stress_new(2, 2);
-  stress_vector(3) = stress_new(0, 1);
-  stress_vector(4) = stress_new(1, 2);
-  stress_vector(5) = stress_new(0, 2);
 
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
@@ -339,13 +345,16 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
   eigenvectors_hill_copy.right_multiply(inv_matrix);
 
   ADDenseVector stress_np1(6);
-  eigenvectors_hill_copy.vector_mult(stress_np1, stress_vector);
-  stress_new(0, 0) = stress_vector(0);
-  stress_new(1, 1) = stress_vector(1);
-  stress_new(2, 2) = stress_vector(2);
-  stress_new(0, 1) = stress_new(1, 0) = stress_vector(3);
-  stress_new(1, 2) = stress_new(2, 1) = stress_vector(4);
-  stress_new(0, 2) = stress_new(2, 0) = stress_vector(5);
+  eigenvectors_hill_copy.vector_mult(stress_np1, stress_dev);
+
+  ADRankTwoTensor stress_new_volumetric = stress_new - stress_new.deviatoric();
+
+  stress_new(0, 0) = stress_new_volumetric(0, 0) + stress_np1(0);
+  stress_new(1, 1) = stress_new_volumetric(1, 1) + stress_np1(1);
+  stress_new(2, 2) = stress_new_volumetric(2, 2) + stress_np1(2);
+  stress_new(0, 1) = stress_new(1, 0) = stress_np1(3);
+  stress_new(1, 2) = stress_new(2, 1) = stress_np1(4);
+  stress_new(0, 2) = stress_new(2, 0) = stress_np1(5);
 }
 
 Real

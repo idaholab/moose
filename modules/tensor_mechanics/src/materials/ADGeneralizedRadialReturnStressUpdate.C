@@ -87,17 +87,10 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
   stress_dev(4) = deviatoric_trial_stress(1, 2);
   stress_dev(5) = deviatoric_trial_stress(0, 2);
 
-  //  ADDenseMatrix rotation_matrix_transpose(6, 6);
-  //  _eigenvectors_hill.get_transpose(rotation_matrix_transpose);
-  //
-  //  ADDenseVector stress_dev_hat(6);
-  //  rotation_matrix_transpose.vector_mult(stress_dev_hat, stress_dev);
-
   computeStressInitialize(stress_dev, elasticity_tensor);
 
   // Use Newton iteration to determine a plastic multiplier variable
   ADReal delta_gamma = 0.0;
-  // Set the value of 3 * shear modulus for use as a reference residual value
   _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
@@ -106,7 +99,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
     returnMappingSolve(stress_dev, stress_new_vector, delta_gamma, _console);
 
     if (delta_gamma != 0.0)
-      computeStrainFinalize(inelastic_strain_increment, stress_new, delta_gamma);
+      computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
     else
       inelastic_strain_increment.zero();
     //    if (_qp == 0)
@@ -121,8 +114,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
     inelastic_strain_increment.zero();
 
   elastic_strain_increment -= inelastic_strain_increment;
-  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + delta_gamma;
-  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new);
+  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
   //  if (_qp == 0)
   //  {
   //    Moose::out << "End of RM: inelastic_strain_increment: "

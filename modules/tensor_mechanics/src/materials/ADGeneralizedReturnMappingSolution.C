@@ -91,7 +91,7 @@ ADGeneralizedReturnMappingSolution::maximumPermissibleValue(
 }
 
 void
-ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & effective_trial_stress,
+ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & stress_dev,
                                                        const ADDenseVector & stress_new,
                                                        ADReal & scalar,
                                                        const ConsoleStream & console)
@@ -105,7 +105,7 @@ ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & eff
   // do the internal solve and capture iteration info during the first round
   // iff full history output is requested regardless of whether the solve failed or succeeded
   auto solve_state =
-      internalSolve(effective_trial_stress,
+      internalSolve(stress_dev,
                     stress_new,
                     scalar,
                     _internal_solve_full_iteration_history ? iter_output.get() : nullptr);
@@ -138,7 +138,7 @@ ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & eff
     // if full history output is only requested for failed solves we have to repeat
     // the solve a second time
     if (_internal_solve_full_iteration_history)
-      internalSolve(effective_trial_stress, stress_new, scalar, iter_output.get());
+      internalSolve(stress_dev, stress_new, scalar, iter_output.get());
 
     // Append summary and throw exception
     outputIterationSummary(iter_output.get(), _iteration);
@@ -154,31 +154,31 @@ ADGeneralizedReturnMappingSolution::returnMappingSolve(const ADDenseVector & eff
 }
 
 typename ADGeneralizedReturnMappingSolution::SolveState
-ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effective_trial_stress,
+ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_dev,
                                                   const ADDenseVector & stress_new,
                                                   ADReal & delta_gamma,
                                                   std::stringstream * iter_output)
 {
-  delta_gamma = initialGuess(effective_trial_stress);
+  delta_gamma = initialGuess(stress_dev);
   ADReal scalar_old = delta_gamma;
   ADReal scalar_increment = 0.0;
-  const ADReal min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
-  const ADReal max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
+  const ADReal min_permissible_scalar = minimumPermissibleValue(stress_dev);
+  const ADReal max_permissible_scalar = maximumPermissibleValue(stress_dev);
   ADReal scalar_upper_bound = max_permissible_scalar;
   ADReal scalar_lower_bound = min_permissible_scalar;
   _iteration = 0;
 
-  _initial_residual = _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
+  _initial_residual = _residual = computeResidual(stress_dev, stress_new, delta_gamma);
 
   ADReal residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual =
-      computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
+      computeReferenceResidual(stress_dev, stress_new, _residual, delta_gamma);
 
   if (converged(_residual, reference_residual))
   {
     iterationFinalize(delta_gamma);
-    outputIterationStep(iter_output, effective_trial_stress, delta_gamma, reference_residual);
+    outputIterationStep(iter_output, stress_dev, delta_gamma, reference_residual);
     return SolveState::SUCCESS;
   }
 
@@ -192,8 +192,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
     //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
     //    Moose::out << "reference_residual: " << reference_residual << "\n";
 
-    scalar_increment =
-        -_residual / computeDerivative(effective_trial_stress, stress_new, delta_gamma);
+    scalar_increment = -_residual / computeDerivative(stress_dev, stress_new, delta_gamma);
     delta_gamma = scalar_old + scalar_increment;
 
     if (_check_range)
@@ -204,9 +203,8 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
                             max_permissible_scalar,
                             iter_output);
 
-    _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
-    reference_residual =
-        computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
+    _residual = computeResidual(stress_dev, stress_new, delta_gamma);
+    reference_residual = computeReferenceResidual(stress_dev, stress_new, _residual, delta_gamma);
     iterationFinalize(delta_gamma);
 
     if (_bracket_solution)
@@ -219,7 +217,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
 
     if (converged(_residual, reference_residual))
     {
-      outputIterationStep(iter_output, effective_trial_stress, delta_gamma, reference_residual);
+      outputIterationStep(iter_output, stress_dev, delta_gamma, reference_residual);
       break;
     }
     else
@@ -273,9 +271,9 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
       if (modified_increment)
       {
         delta_gamma = scalar_old + scalar_increment;
-        _residual = computeResidual(effective_trial_stress, stress_new, delta_gamma);
+        _residual = computeResidual(stress_dev, stress_new, delta_gamma);
         reference_residual =
-            computeReferenceResidual(effective_trial_stress, stress_new, _residual, delta_gamma);
+            computeReferenceResidual(stress_dev, stress_new, _residual, delta_gamma);
         iterationFinalize(delta_gamma);
 
         if (_bracket_solution)
@@ -288,7 +286,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & effectiv
       }
     }
 
-    outputIterationStep(iter_output, effective_trial_stress, delta_gamma, reference_residual);
+    outputIterationStep(iter_output, stress_dev, delta_gamma, reference_residual);
 
     ++_iteration;
     residual_old = _residual;

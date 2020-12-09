@@ -16,15 +16,6 @@
  * model.  This class is one of the basic radial return constitutive models; more complex
  * constitutive models combine creep and plasticity.
  *
- * This class inherits from AnisotropicReturnCreepStressUpdateBase and must be used
- * in conjunction with ComputeMultipleInelasticStress.  This class calculates
- * creep based on stress, temperature, and time effects.  This class also
- * computes the creep strain as a stateful material property.
- *
- * This class extends the usage of PowerLawCreep to transversely isotropic (i.e. anisotropic)
- * cases. For more information, consult, e.g. Stewart et al, "An anisotropic tertiary creep
- * damage constitutive model for anistropic materials", International Journal of Pressure Vessels
- * and Piping 88 (2011) 356--364.
  */
 
 class ADTransverselyIsotropicPlasticityStressUpdate
@@ -53,6 +44,15 @@ protected:
                                         const ADDenseVector & stress_new,
                                         const ADReal & residual,
                                         const ADReal & scalar_effective_inelastic_strain) override;
+  virtual void propagateQpStatefulProperties() override;
+  /**
+   * Does the model require the elasticity tensor to be isotropic? Yes, this class only does
+   * anisotropic *plasticity*
+   */
+  bool requiresIsotropicTensor() override { return true; }
+
+  ADReal computeHardeningDerivative();
+  ADReal computeHardeningValue(const ADReal & scalar, const ADReal & omega);
   /**
    * Compute eigendecomposition of Hill's tensor for anisotropic plasticity
    * @param hill_tensor 6x6 matrix representing fourth order Hill's tensor describing anisotropy
@@ -65,6 +65,7 @@ protected:
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
+                                     const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/) override;
 
   /**
@@ -73,37 +74,17 @@ protected:
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
-                                     ADRankTwoTensor & stress) override;
+                                     ADRankTwoTensor & stress,
+                                     const ADDenseVector & /*stress_dev*/) override;
 
-  /// Flag to determine if temperature is supplied by the user
-  const bool _has_temp;
+  ADReal computeOmega(const ADReal & delta_gamma, const ADDenseVector & stress_trial);
 
-  /// Temperature variable value
-  const VariableValue & _temperature;
-
-  /// Leading coefficient
-  const Real _coefficient;
-
-  /// Exponent on the effective stress
-  const Real _n_exponent;
-
-  /// Exponent on time
-  const Real _m_exponent;
-
-  /// Activation energy for exp term
-  const Real _activation_energy;
-
-  /// Gas constant for exp term
-  const Real _gas_constant;
-
-  /// Simulation start time
-  const Real _start_time;
-
-  /// Exponential calculated from activation, gas constant, and temperature
-  Real _exponential;
-
-  /// Exponential calculated from current time
-  Real _exp_time;
+  void computeDeltaDerivatives(const ADReal & delta_gamma,
+                               const ADDenseVector & stress_trial,
+                               const ADReal & sy_alpha,
+                               ADReal & omega,
+                               ADReal & omega_gamma,
+                               ADReal & sy_gamma);
 
   /// Hill constants for orthotropic creep
   std::vector<Real> _hill_constants;
@@ -113,4 +94,14 @@ protected:
 
   ADDenseVector _eigenvalues_hill;
   ADDenseMatrix _eigenvectors_hill;
+
+  const Real _hardening_constant;
+  const Function * const _hardening_function;
+
+  ADMaterialProperty<Real> & _hardening_variable;
+  const MaterialProperty<Real> & _hardening_variable_old;
+  ADReal _hardening_slope;
+  ADReal _yield_condition;
+  ADReal _yield_stress;
+  ADDenseMatrix _hill_tensor;
 };
