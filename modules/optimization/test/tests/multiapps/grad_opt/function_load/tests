@@ -1,0 +1,12 @@
+[Tests]
+  [quadratic_function_load_grad_taolmvm]
+    requirement = "The function alpha*sin(C1+x*pi/2)*sin(C2+y*pi/2)+beta "  
+                  "  This is nonlinear because C1 and C2 will show up in the adjoint "
+                  " function that computes the gradient.  It takes 37 iterations which is a lot."
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    csvdiff = master_out.csv
+    heavy = true
+  []
+[]
