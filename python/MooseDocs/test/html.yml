@@ -67,6 +67,11 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+            custom:
+                prefix: C
+                files:
+                    - custom.hit
+
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
