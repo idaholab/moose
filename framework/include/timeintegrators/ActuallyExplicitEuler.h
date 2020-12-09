@@ -39,6 +39,8 @@ protected:
    */
   template <typename T, typename T2>
   void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const;
+
+  const bool & _constant_mass;
 };
 
 template <typename T, typename T2>
