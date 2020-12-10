@@ -51,6 +51,8 @@ public:
       _data[i] = rhs._data[i];
   }
 
+  ~MooseArray() = default;
+
   /**
    * Sets all values of the array to the passed in value
    * @param value The value every entry of the array will be set to.
@@ -139,11 +141,6 @@ public:
    * Doesn't actually make a copy of the data.
    *
    * Just makes _this_ object operate on the same data.
-   *
-   * Note! You can leak memory with this function if you
-   * don't take care to have a copy of _this_ array somewhere
-   * else.  This is because the data pointer will get overridden
-   * here.
    */
   void shallowCopy(const MooseArray & rhs);
 
@@ -151,17 +148,6 @@ public:
    * Doesn't actually make a copy of the data.
    *
    * Just makes _this_ object operate on the same data.
-   *
-   * Note! You can leak memory with this function if you
-   * don't take care to have a copy of _this_ array somewhere
-   * else.  This is because the data pointer will get overridden
-   * here.
-   *
-   * I repeat!  This is an extremely dangerous function!
-   *
-   * DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING!
-   *
-   * YOU HAVE BEEN WARNED!
    */
   void shallowCopy(std::vector<T> & rhs);
 
@@ -273,7 +259,8 @@ MooseArray<T>::size() const
 }
 
 template <typename T>
-inline T & MooseArray<T>::operator[](const unsigned int i)
+inline T &
+MooseArray<T>::operator[](const unsigned int i)
 {
   mooseAssert(i < _size,
               "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
@@ -282,7 +269,8 @@ inline T & MooseArray<T>::operator[](const unsigned int i)
 }
 
 template <typename T>
-inline const T & MooseArray<T>::operator[](const unsigned int i) const
+inline const T &
+MooseArray<T>::operator[](const unsigned int i) const
 {
   mooseAssert(i < _size,
               "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
@@ -304,7 +292,7 @@ template <typename T>
 inline void
 MooseArray<T>::shallowCopy(const MooseArray & rhs)
 {
-  _data_ptr.release();
+  _data_ptr.reset();
   _data = rhs._data;
   _size = rhs._size;
   _allocated_size = rhs._allocated_size;
@@ -314,7 +302,7 @@ template <typename T>
 inline void
 MooseArray<T>::shallowCopy(std::vector<T> & rhs)
 {
-  _data_ptr.release();
+  _data_ptr.reset();
   _data = &rhs[0];
   _size = rhs.size();
   _allocated_size = rhs.size();
