@@ -155,10 +155,8 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
-  libMesh::PetscVector<Number> & param_solver =
-      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  param.swap(param_solver);
+  *solver->_parameters = param;
 
   (*objective) = solver->objectiveFunction();
   return 0;
@@ -169,10 +167,8 @@ OptimizeSolve::gradientFunctionWrapper(Tao /*tao*/, Vec x, Vec gradient, void * 
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
-  libMesh::PetscVector<Number> & param_solver =
-      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  param.swap(param_solver);
+  *solver->_parameters = param;
 
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
@@ -185,10 +181,8 @@ OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat hessian, Mat /*pc*
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
-  libMesh::PetscVector<Number> & param_solver =
-      *cast_ptr<libMesh::PetscVector<Number> *>(solver->_parameters.get());
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
-  param.swap(param_solver);
+  *solver->_parameters = param;
 
   libMesh::PetscMatrix<Number> mat(hessian, solver->_my_comm);
 
