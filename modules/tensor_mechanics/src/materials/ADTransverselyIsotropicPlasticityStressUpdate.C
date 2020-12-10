@@ -92,6 +92,8 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+
   _yield_condition = 10.0;
   _yield_condition = -computeResidual(stress_dev, stress_dev, 0.0);
 
@@ -172,21 +174,15 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
   if (_yield_condition <= 0.0)
     return 0.0;
 
-  ADDenseVector stress_vector(6);
-  stress_vector = stress_dev;
-
   ADDenseMatrix eigenvectors_hill_transpose(6, 6);
 
   _eigenvectors_hill.get_transpose(eigenvectors_hill_transpose);
-  eigenvectors_hill_transpose.vector_mult(_stress_np1, stress_vector);
+  eigenvectors_hill_transpose.vector_mult(_stress_np1, stress_dev);
 
   ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_slope = computeHardeningDerivative();
-  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 
-  //  Moose::out << "_hardening_variable[_qp]: " << _hardening_variable[_qp] << "\n";
-
-  ADReal s_y = _hardening_variable[_qp] * _hardening_slope + _yield_stress;
+  ADReal s_y = computeHardeningValue(delta_gamma, omega) * _hardening_slope + _yield_stress;
   //  Moose::out << "omega: " << omega << "\n";
   //  Moose::out << "s_y: " << s_y << "\n";
 
@@ -214,9 +210,8 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
 
   ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_slope = computeHardeningDerivative();
-  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 
-  ADReal sy = _hardening_variable[_qp] * _hardening_slope + _yield_stress;
+  ADReal sy = computeHardeningValue(delta_gamma, omega) * _hardening_slope + _yield_stress;
   ADReal sy_alpha = _hardening_slope;
 
   ADReal omega_gamma;
@@ -282,21 +277,18 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
     const ADDenseVector & stress_dev,
     const ADReal & delta_gamma)
 {
-  ADDenseVector stress_vector(6);
-  stress_vector(0) = stress(0, 0);
-  stress_vector(1) = stress(1, 1);
-  stress_vector(2) = stress(2, 2);
-  stress_vector(3) = stress(0, 1);
-  stress_vector(4) = stress(1, 2);
-  stress_vector(5) = stress(0, 2);
-
   // e^P = delta_gamma * hill_tensor * stress
   ADDenseVector inelasticStrainIncrement_vector(6);
   ADDenseVector hill_stress(6);
-  _hill_tensor.vector_mult(hill_stress, stress_vector);
+  _hill_tensor.vector_mult(hill_stress, stress_dev);
   hill_stress.scale(delta_gamma);
   inelasticStrainIncrement_vector = hill_stress;
 
+  if (false)
+  {
+    Moose::out << "stress_dev for strain: " << MetaPhysicL::raw_value(stress_dev) << "\n";
+    Moose::out << "hill_stress for strain: " << MetaPhysicL::raw_value(hill_stress) << "\n";
+  }
   inelasticStrainIncrement(0, 0) = inelasticStrainIncrement_vector(0);
   inelasticStrainIncrement(1, 1) = inelasticStrainIncrement_vector(1);
   inelasticStrainIncrement(2, 2) = inelasticStrainIncrement_vector(2);
@@ -306,6 +298,10 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
       inelasticStrainIncrement_vector(4);
   inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
       inelasticStrainIncrement_vector(5);
+
+  if (false)
+    Moose::out << "inelasticStrainIncrement for strain: "
+               << MetaPhysicL::raw_value(inelasticStrainIncrement) << "\n";
 
   ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);
@@ -324,8 +320,6 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
 
   if (_yield_condition <= 0.0)
     return;
-
-  _plasticity_strain[_qp] += plastic_strain_increment;
 
   ADDenseMatrix inv_matrix(6, 6);
   for (unsigned int i = 0; i < 6; i++)
@@ -352,6 +346,9 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
   stress_new(0, 1) = stress_new(1, 0) = stress_np1(3);
   stress_new(1, 2) = stress_new(2, 1) = stress_np1(4);
   stress_new(0, 2) = stress_new(2, 0) = stress_np1(5);
+
+  ADReal omega = computeOmega(delta_gamma, _stress_np1);
+  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
 }
 
 Real

@@ -56,4 +56,6 @@ ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
     const ADReal & /*delta_gamma*/)
 {
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp] + inelasticStrainIncrement;
+  _effective_inelastic_strain[_qp] =
+      _effective_inelastic_strain_old[_qp] + inelasticStrainIncrement.L2norm();
 }

@@ -61,7 +61,7 @@ ADGeneralizedReturnMappingSolution::ADGeneralizedReturnMappingSolution(
     _bracket_solution(false),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
-    _max_its(1000), // Far larger than ever expected to be needed
+    _max_its(10), // More than 10 would point to an issue.
     _internal_solve_full_iteration_history(
         parameters.get<bool>("internal_solve_full_iteration_history")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
@@ -188,20 +188,25 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
-    Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
-    //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
-    //    Moose::out << "reference_residual: " << reference_residual << "\n";
+    if (false)
+    {
+      Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
+      //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
+      //    Moose::out << "reference_residual: " << reference_residual << "\n";
+    }
 
     scalar_increment = -_residual / computeDerivative(stress_dev, stress_new, delta_gamma);
     delta_gamma = scalar_old + scalar_increment;
 
-    //    Moose::out << "delta_gamma: " << delta_gamma << "\n";
-    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
-    Moose::out << "delta_gamma: " << delta_gamma << "\n";
+    if (false)
+    {
+      //    Moose::out << "delta_gamma: " << delta_gamma << "\n";
+      Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
+      Moose::out << "delta_gamma: " << delta_gamma << "\n";
 
-    //    Moose::out << "scalar_old: " << scalar_old << "\n";
-    //    Moose::out << "scalar_increment: " << scalar_increment << "\n";
-
+      //    Moose::out << "scalar_old: " << scalar_old << "\n";
+      //    Moose::out << "scalar_increment: " << scalar_increment << "\n";
+    }
     if (_check_range)
       checkPermissibleRange(delta_gamma,
                             scalar_increment,
@@ -211,6 +216,7 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
                             iter_output);
 
     _residual = computeResidual(stress_dev, stress_new, delta_gamma);
+
     reference_residual = computeReferenceResidual(stress_dev, stress_new, _residual, delta_gamma);
     iterationFinalize(delta_gamma);
 

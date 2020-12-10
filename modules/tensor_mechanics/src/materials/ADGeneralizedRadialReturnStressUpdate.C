@@ -113,12 +113,20 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
   else
     inelastic_strain_increment.zero();
 
-  // elastic_strain_increment -= inelastic_strain_increment;
+  elastic_strain_increment -= inelastic_strain_increment;
 
   /// FIXME
   // stress_new = elasticity_tensor * (elastic_strain_increment + elastic_strain_old);
-  Moose::out << "delta_gamma: " << delta_gamma << "\n";
-  // computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
+
+  if (false)
+  {
+    Moose::out << "delta_gamma: " << delta_gamma << "\n";
+    Moose::out << "plastic_strain_increment: " << MetaPhysicL::raw_value(inelastic_strain_increment)
+               << "\n";
+    Moose::out << "elastic_strain_increment: " << MetaPhysicL::raw_value(elastic_strain_increment)
+               << "\n";
+  }
+  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
 
   //  if (_qp == 0)
   //  {
