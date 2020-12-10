@@ -60,61 +60,64 @@ INSFVMomentumAdvectionFunctionBC::interpolate(Moose::FV::InterpMethod m,
                                               const ADRealVectorValue & elem_v,
                                               const RealVectorValue & ghost_v)
 {
-  const auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
-  const Elem * const elem = std::get<0>(tup);
-  const bool elem_is_elem = std::get<2>(tup);
-  mooseAssert(elem_is_elem ? elem == &_face_info->elem() : elem == _face_info->neighborPtr(),
-              "elem_is_elem is incorrect");
+  // const auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
+  // const Elem * const elem = std::get<0>(tup);
+  // const bool elem_is_elem = std::get<2>(tup);
+  // mooseAssert(elem_is_elem ? elem == &_face_info->elem() : elem == _face_info->neighborPtr(),
+  //             "elem_is_elem is incorrect");
 
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info, elem_is_elem);
+  // Moose::FV::interpolate(
+  //     Moose::FV::InterpMethod::Average, v_face, elem_v, ghost_v, *_face_info, elem_is_elem);
 
-  if (m != Moose::FV::InterpMethod::RhieChow)
-    return;
+  // if (m != Moose::FV::InterpMethod::RhieChow)
+  //   return;
 
-  const auto & elem_centroid =
-      elem_is_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const auto elem_volume = elem_is_elem ? _face_info->elemVolume() : _face_info->neighborVolume();
+  // const auto & elem_centroid =
+  //     elem_is_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
+  // const auto elem_volume = elem_is_elem ? _face_info->elemVolume() :
+  // _face_info->neighborVolume();
 
-  // Get pressure gradient for the elem
-  const auto & grad_p_elem = _p_var->adGradSln(elem);
+  // // Get pressure gradient for the elem
+  // const auto & grad_p_elem = _p_var->adGradSln(elem);
 
-  // Get pressure gradient for the ghost
-  const auto & grad_p_ghost =
-      _pressure_exact_solution.gradient(_t, 2. * _face_info->faceCentroid() - elem_centroid);
+  // // Get pressure gradient for the ghost
+  // const auto & grad_p_ghost =
+  //     _pressure_exact_solution.gradient(_t, 2. * _face_info->faceCentroid() - elem_centroid);
 
-  // Uncorrected face pressure gradient. Geometric weights are exactly 1/2 because we arbitrarily
-  // choose the ghost element centroid such that the face centroid is exactly in the middle of the
-  // line connecting element and ghost element centroids (see code line above)
-  const auto unc_grad_p = (grad_p_elem + grad_p_ghost) / 2.;
+  // // Uncorrected face pressure gradient. Geometric weights are exactly 1/2 because we arbitrarily
+  // // choose the ghost element centroid such that the face centroid is exactly in the middle of the
+  // // line connecting element and ghost element centroids (see code line above)
+  // const auto unc_grad_p = (grad_p_elem + grad_p_ghost) / 2.;
 
-  // Now perform correction
+  // // Now perform correction
 
-  // Get pressure value for the elem
-  const auto & p_elem = _p_var->getElemValue(elem);
+  // // Get pressure value for the elem
+  // const auto & p_elem = _p_var->getElemValue(elem);
 
-  // Get pressure value for the ghost
-  const auto & p_ghost =
-      _pressure_exact_solution.value(_t, 2. * _face_info->faceCentroid() - elem_centroid);
+  // // Get pressure value for the ghost
+  // const auto & p_ghost =
+  //     _pressure_exact_solution.value(_t, 2. * _face_info->faceCentroid() - elem_centroid);
 
-  const auto d_cf = 2. * (_face_info->faceCentroid() - elem_centroid);
-  const auto del_pressure = p_ghost - p_elem;
+  // const auto d_cf = 2. * (_face_info->faceCentroid() - elem_centroid);
+  // const auto del_pressure = p_ghost - p_elem;
 
-  const auto d_cf_norm = d_cf.norm();
-  const auto e_cf = d_cf / d_cf_norm;
+  // const auto d_cf_norm = d_cf.norm();
+  // const auto e_cf = d_cf / d_cf_norm;
 
-  // Corrected face pressure gradient
-  const auto grad_p = unc_grad_p + (del_pressure / d_cf_norm - unc_grad_p * e_cf) * e_cf;
+  // // Corrected face pressure gradient
+  // const auto grad_p = unc_grad_p + (del_pressure / d_cf_norm - unc_grad_p * e_cf) * e_cf;
 
-  // Moukalled 15.110 suggests that is valid to use the element centroid value as the average value
-  // on the boundary face
-  const auto & face_a = rcCoeff(*elem, _mu[_qp]);
-  const auto & face_volume = elem_volume;
+  // // Moukalled 15.110 suggests that is valid to use the element centroid value as the average value
+  // // on the boundary face
+  // const auto & face_a = rcCoeff(*elem, _mu[_qp]);
+  // const auto & face_volume = elem_volume;
 
-  const auto face_D = face_volume / face_a;
+  // const auto face_D = face_volume / face_a;
 
-  // perform the pressure correction
-  v_face -= face_D * (grad_p - unc_grad_p);
+  // // perform the pressure correction
+  // v_face -= face_D * (grad_p - unc_grad_p);
+
+  mooseError("Dont call me. I may not be correct");
 }
 #else
 void

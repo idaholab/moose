@@ -3,12 +3,13 @@
 import mms
 import sympy
 
-vel = '1.1*sin(1.1*x) * e_i + 0.9*cos(0.9*y) * e_j'
-p = '1.2*sin(0.8*x)*cos(1.3*y)'
+u = 'cos(pi/2 * x) * sin(y)'
+v = 'sin(x) * cos(pi/2 * y)'
+vel = u + '* e_i +' + v + ' * e_j'
+p = 'sin(x)*sin(y)'
 
-f_u, e_u = mms.evaluate('div(vel*rho*u) - div(mu * grad(u)) + grad(p).dot(e_i)', '1.1*sin(1.1*x)', variable='u', vel=vel, p=p, scalars=['mu', 'rho'])
-f_v, e_v = mms.evaluate('div(vel*rho*v) - div(mu * grad(v)) + grad(p).dot(e_j)', '0.9*cos(0.9*y)', variable='v', vel=vel, p=p, scalars=['mu', 'rho'])
-
+f_u, e_u = mms.evaluate('div(vel*rho*u) - div(mu * grad(u)) + grad(p).dot(e_i)', u, variable='u', vel=vel, p=p, scalars=['mu', 'rho'])
+f_v, e_v = mms.evaluate('div(vel*rho*v) - div(mu * grad(v)) + grad(p).dot(e_j)', v, variable='v', vel=vel, p=p, scalars=['mu', 'rho'])
 f_p, e_p = mms.evaluate('div(vel*rho)', p, variable='p', vel=vel, scalars=['rho'])
 
 rho = sympy.Symbol('rho')

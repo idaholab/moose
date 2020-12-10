@@ -2,14 +2,19 @@ mu=1.1
 rho=1.1
 velocity_interp_method='rc'
 
+[GlobalParams]
+  force_boundary_execution = false
+  two_term_boundary_expansion = false
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = -0.6
-    xmax = 0.6
-    ymin = -0.6
-    ymax = 0.6
+    xmin = -1
+    xmax = 1
+    ymin = -1
+    ymax = 1
     nx = 2
     ny = 2
   []
@@ -27,35 +32,26 @@ velocity_interp_method='rc'
     family = MONOMIAL
     fv = true
     initial_condition = 1
+    type = MooseVariableFVReal
   []
   [v]
     order = CONSTANT
     family = MONOMIAL
     fv = true
     initial_condition = 1
+    type = MooseVariableFVReal
   []
   [pressure]
     order = CONSTANT
     family = MONOMIAL
     fv = true
+    type = MooseVariableFVReal
+  []
+  [lambda]
+    family = SCALAR
+    order = FIRST
   []
 []
-
-# [AuxVariables]
-#   [v]
-#     order = CONSTANT
-#     family = MONOMIAL
-#     fv = true
-#   []
-# []
-
-# [ICs]
-#   [v]
-#     type = FunctionIC
-#     function = 'exact_v'
-#     variable = v
-#   []
-# []
 
 [FVKernels]
   [mass]
@@ -73,6 +69,11 @@ velocity_interp_method='rc'
     type = FVBodyForce
     variable = pressure
     function = forcing_p
+  []
+  [mean_zero_pressure]
+    type = FVScalarLagrangeMultiplier
+    variable = pressure
+    lambda = lambda
   []
 
   [u_advection]
@@ -144,98 +145,6 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
-  [u_advection]
-    type = INSFVMomentumAdvectionFunctionBC
-    boundary = 'left right top bottom'
-    variable = u
-    vel = 'velocity'
-    flux_variable_exact_solution = 'exact_rhou'
-    advected_quantity = 'rhou'
-    advected_interp_method = 'average'
-    vel_x_exact_solution = 'exact_u'
-    vel_y_exact_solution = 'exact_v'
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
-    pressure_exact_solution = 'exact_p'
-  []
-  [u_diffusion]
-    type = FVDiffusionFunctionBC
-    boundary = 'left right top bottom'
-    variable = u
-    exact_solution = 'exact_u'
-    coeff = '${mu}'
-    coeff_function = '${mu}'
-  []
-  [u_pressure]
-    type = INSFVMomentumPressureFunctionBC
-    boundary = 'left right top bottom'
-    variable = u
-    momentum_component = 'x'
-    p = pressure
-    pressure_exact_solution = 'exact_p'
-  []
-
-  [v_advection]
-    type = INSFVMomentumAdvectionFunctionBC
-    boundary = 'left right top bottom'
-    variable = v
-    vel = 'velocity'
-    flux_variable_exact_solution = 'exact_rhov'
-    advected_quantity = 'rhov'
-    advected_interp_method = 'average'
-    vel_x_exact_solution = 'exact_u'
-    vel_y_exact_solution = 'exact_v'
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
-    pressure_exact_solution = 'exact_p'
-  []
-  [v_diffusion]
-    type = FVDiffusionFunctionBC
-    boundary = 'left right top bottom'
-    variable = v
-    exact_solution = 'exact_v'
-    coeff = '${mu}'
-    coeff_function = '${mu}'
-  []
-  [v_pressure]
-    type = INSFVMomentumPressureFunctionBC
-    boundary = 'left right top bottom'
-    variable = v
-    momentum_component = 'y'
-    p = pressure
-    pressure_exact_solution = 'exact_p'
-  []
-
-  [mass_continuity_flux]
-    type = INSFVMomentumAdvectionFunctionBC
-    variable = pressure
-    boundary = 'top bottom left right'
-    vel = 'velocity'
-    flux_variable_exact_solution = 'rho'
-    advected_quantity = ${rho}
-    vel_x_exact_solution = 'exact_u'
-    vel_y_exact_solution = 'exact_v'
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    # WTF, this errors with:
-    #    Material property '${rho}', requested by
-    #    'mass_continuity_flux' is not defined on boundary bottom
-    # if I try to do dollar bracket substitution, so I'm just gonna write it out
-    rho = 1.1
-    pressure_exact_solution = 'exact_p'
-  []
-
   [u_diri]
     type = FVFunctionDirichletBC
     variable = u
@@ -247,12 +156,6 @@ velocity_interp_method='rc'
     variable = v
     boundary = 'top bottom left right'
     function = 'exact_v'
-  []
-  [p_diri]
-    type = FVFunctionDirichletBC
-    variable = pressure
-    boundary = 'top bottom left right'
-    function = 'exact_p'
   []
 []
 
@@ -270,49 +173,45 @@ velocity_interp_method='rc'
 [Functions]
 [exact_u]
   type = ParsedFunction
-  value = '1.1*sin(1.1*x)'
+  value = 'sin(y)*cos((1/2)*x*pi)'
 []
 [exact_rhou]
   type = ParsedFunction
-  value = '1.1*rho*sin(1.1*x)'
+  value = 'rho*sin(y)*cos((1/2)*x*pi)'
   vars = 'rho'
   vals = '${rho}'
 []
 [forcing_u]
   type = ParsedFunction
-  value = '1.331*mu*sin(1.1*x) - 0.891*rho*sin(1.1*x)*sin(0.9*y) + 2.662*rho*sin(1.1*x)*cos(1.1*x) + 0.96*cos(0.8*x)*cos(1.3*y)'
+  value = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
   vars = 'mu rho'
   vals = '${mu} ${rho}'
 []
 [exact_v]
   type = ParsedFunction
-  value = '0.9*cos(0.9*y)'
+  value = 'sin(x)*cos((1/2)*y*pi)'
 []
 [exact_rhov]
   type = ParsedFunction
-  value = '0.9*rho*cos(0.9*y)'
+  value = 'rho*sin(x)*cos((1/2)*y*pi)'
   vars = 'rho'
   vals = '${rho}'
 []
 [forcing_v]
   type = ParsedFunction
-  value = '0.729*mu*cos(0.9*y) - 1.458*rho*sin(0.9*y)*cos(0.9*y) + 1.089*rho*cos(1.1*x)*cos(0.9*y) - 1.56*sin(0.8*x)*sin(1.3*y)'
+  value = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
   vars = 'mu rho'
   vals = '${mu} ${rho}'
 []
 [exact_p]
   type = ParsedFunction
-  value = '1.2*sin(0.8*x)*cos(1.3*y)'
+  value = 'sin(x)*sin(y)'
 []
 [forcing_p]
   type = ParsedFunction
-  value = '-0.81*rho*sin(0.9*y) + 1.21*rho*cos(1.1*x)'
+  value = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
   vars = 'rho'
   vals = '${rho}'
-[]
-[rho]
-  type = ParsedFunction
-  value = '${rho}'
 []
 []
 

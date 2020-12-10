@@ -54,14 +54,13 @@ protected:
    * @param elem The elem to get the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  const ADReal & rcCoeff(const Elem & elem, const ADReal & mu) const;
+  virtual const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
 
   /**
    * Clear the RC 'a' coefficient cache
    */
   void clearRCCoeffs();
 
-private:
   const MooseApp & _nsfv_app;
   const SubProblem & _nsfv_subproblem;
   const THREAD_ID _nsfv_tid;
@@ -69,7 +68,8 @@ private:
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
   /// the vector is equal to the number of threads in the simulation. We maintain a map from
   /// MooseApp pointer to RC coefficients in order to support MultiApp simulations
-  static std::unordered_map<const MooseApp *, std::vector<std::unordered_map<const Elem *, ADReal>>>
+  static std::unordered_map<const MooseApp *,
+                            std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
       _rc_a_coeffs;
 
   /**
@@ -77,9 +77,8 @@ private:
    * @param elem The elem to compute the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  ADReal coeffCalculator(const Elem & elem, const ADReal & mu) const;
+  virtual VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const;
 
-protected:
   /// pressure variable
   const MooseVariableFV<Real> * const _p_var;
   /// x-velocity

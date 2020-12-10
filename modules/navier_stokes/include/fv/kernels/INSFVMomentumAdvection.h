@@ -41,4 +41,8 @@ protected:
 
   /// The dynamic viscosity on the FaceInfo neighbor
   const ADMaterialProperty<Real> & _mu_neighbor;
+
+  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const override;
+
+  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
 };

@@ -13,7 +13,8 @@
 #include "SubProblem.h"
 #include "MooseVariableFV.h"
 
-std::unordered_map<const MooseApp *, std::vector<std::unordered_map<const Elem *, ADReal>>>
+std::unordered_map<const MooseApp *,
+                   std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
     INSFVAdvectionBase::_rc_a_coeffs;
 
 InputParameters
@@ -94,81 +95,20 @@ INSFVAdvectionBase::INSFVAdvectionBase(const InputParameters & params)
   }
 }
 
-const ADReal &
+const VectorValue<ADReal> &
 INSFVAdvectionBase::rcCoeff(const Elem & elem, const ADReal & mu) const
 {
-  auto it = _rc_a_coeffs.find(&_nsfv_app);
-  mooseAssert(it != _rc_a_coeffs.end(),
-              "No RC coeffs structure exists for the given MooseApp pointer");
-  mooseAssert(_nsfv_tid < it->second.size(),
-              "The RC coeffs structure size "
-                  << it->second.size() << " is greater than or equal to the provided thread ID "
-                  << _nsfv_tid);
-  auto & my_map = it->second[_nsfv_tid];
-
-  auto rc_map_it = my_map.find(&elem);
-
-  if (rc_map_it != my_map.end())
-    return rc_map_it->second;
-
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second a
-  // boolean denoting whether a new insertion took place
-  auto emplace_ret = my_map.emplace(&elem, coeffCalculator(elem, mu));
-
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
-
-  return emplace_ret.first->second;
+  mooseError("You have to override me");
 }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-ADReal
+VectorValue<ADReal>
 INSFVAdvectionBase::coeffCalculator(const Elem & elem, const ADReal & mu) const
 {
-  ADReal coeff = 0;
-
-  ADRealVectorValue elem_velocity(_u_var->getElemValue(&elem));
-
-  if (_v_var)
-    elem_velocity(1) = _v_var->getElemValue(&elem);
-  if (_w_var)
-    elem_velocity(2) = _w_var->getElemValue(&elem);
-
-  auto action_functor = [&coeff, &elem_velocity, &mu, this](const Elem & /*functor_elem*/,
-                                                            const Elem * const neighbor,
-                                                            const FaceInfo * const fi,
-                                                            const Point & surface_vector,
-                                                            Real coord,
-                                                            const bool /*elem_has_info*/) {
-    mooseAssert(fi, "We need a non-null FaceInfo");
-    ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
-    if (_v_var)
-      neighbor_velocity(1) = _v_var->getNeighborValue(neighbor, *fi, elem_velocity(1));
-    if (_w_var)
-      neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
-
-    ADRealVectorValue interp_v;
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           interp_v,
-                           elem_velocity,
-                           neighbor_velocity,
-                           *fi,
-                           neighbor == fi->neighborPtr());
-
-    ADReal mass_flow = _rho * interp_v * surface_vector;
-
-    coeff += -mass_flow;
-
-    // Now add the viscous flux
-    coeff += mu * fi->faceArea() * coord /
-             (fi->normal() * (fi->neighborCentroid() - fi->elemCentroid()));
-  };
-
-  Moose::FV::loopOverElemFaceInfo(elem, _nsfv_subproblem.mesh(), _nsfv_subproblem, action_functor);
-
-  return coeff;
+  mooseError("You have to override me");
 }
 #else
-ADReal
+VectorValue<ADReal>
 INSFVAdvectionBase::coeffCalculator(const Elem &, const ADReal &) const
 {
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
