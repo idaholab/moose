@@ -97,7 +97,7 @@
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '0.2 0.8 0.2 0.8; 0.2 0.6 1.4 1.8; 0 0 0; 10 10 10 10'
+    value = '0.2 0.8 0.2 0.8; 0.2 0.6 1.4 1.8; 0 0 0 0; 10 10 10 10'
   []
   [adjoint_pt]
     type = VectorOfPostprocessors

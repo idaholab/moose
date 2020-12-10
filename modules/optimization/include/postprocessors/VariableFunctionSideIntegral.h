@@ -9,26 +9,23 @@
 
 #pragma once
 
-#include "ElementIntegralPostprocessor.h"
+#include "FunctionSideIntegral.h"
+
+class Function;
 
 /**
- * Integrates a function over elements
+ * This postprocessor computes the inner product of a function and variable over a sideset
  */
-class VariableFunctionElementIntegral : public ElementIntegralPostprocessor
+class VariableFunctionSideIntegral : public FunctionSideIntegral
 {
 public:
   static InputParameters validParams();
 
-  VariableFunctionElementIntegral(const InputParameters & parameters);
+  VariableFunctionSideIntegral(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
 
-  /// Function to integrate
-  const Function & _function;
-
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
-
-  const Real & _scale_factor;
 };

@@ -8,23 +8,23 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temperature
   []
 []
 
 [BCs]
   [left]
-    type = NeumannBC
+    type = FunctionNeumannBC
     variable = temperature
     boundary = left
-    value = 0
+    function = left_function
   []
   [right]
-    type = NeumannBC
+    type = FunctionNeumannBC
     variable = temperature
     boundary = right
-    value = 0
+    function = right_function
   []
   [bottom]
     type = DirichletBC
@@ -40,9 +40,24 @@
   []
 []
 
+[Functions]
+  [left_function]
+    type = ParsedFunction
+    value = a*1.0
+    vars = 'a'
+    vals = 'p1'
+  []
+  [right_function]
+    type = ParsedFunction
+    value = b*1.0
+    vars = 'b'
+    vals = 'p2'
+  []
+[]
+
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []
@@ -66,6 +81,19 @@
               0.2 1.4 0
               0.8 1.8 0'
     measured_values = '199 214 154 129'
+  []
+[]
+
+[Postprocessors]
+  [p1]
+    type = ConstantValuePostprocessor
+    value = 0
+    execute_on = LINEAR
+  []
+  [p2]
+    type = ConstantValuePostprocessor
+    value = 0
+    execute_on = LINEAR
   []
 []
 

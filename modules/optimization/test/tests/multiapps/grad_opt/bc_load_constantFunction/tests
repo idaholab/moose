@@ -1,0 +1,10 @@
+[Tests]
+  [taolmvm]
+    requirement = "This tests that a function NeumannBC with a constant value"
+                  " parsed function can be parameterized."
+    type = CSVDiff
+    rel_err = 0.01
+    input = master.i
+    csvdiff = master_out_receiver_0001.csv
+  []
+[]

@@ -12,8 +12,6 @@
 
 registerMooseObject("isopodApp", VariableFunctionElementIntegral);
 
-defineLegacyParams(VariableFunctionElementIntegral);
-
 InputParameters
 VariableFunctionElementIntegral::validParams()
 {
@@ -24,27 +22,21 @@ VariableFunctionElementIntegral::validParams()
   params.addRequiredCoupledVar("variable",
                                "The name of the variable that this boundary condition applies to");
   params.addClassDescription("Integrates a function times variable over elements");
-  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the postprocessor value");
+  params.addParam<Real>(
+      "scale_factor", 1, "A scale factor to be applied to the postprocessor value");
   return params;
 }
 
 VariableFunctionElementIntegral::VariableFunctionElementIntegral(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
-  MooseVariableInterface<Real>(this,
-                               false,
-                               "variable",
-                               Moose::VarKindType::VAR_ANY,
-                               Moose::VarFieldType::VAR_FIELD_STANDARD),
-   _function(getFunction("function")),
-  _u(coupledValue("variable")),
-  _grad_u(coupledGradient("variable")),
-  _scale_factor(getParam<Real>("scale_factor"))
+    _function(getFunction("function")),
+    _u(coupledValue("variable")),
+    _scale_factor(getParam<Real>("scale_factor"))
 {
-  addMooseVariableDependency(&mooseVariableField());
 }
 
 Real
 VariableFunctionElementIntegral::computeQpIntegral()
 {
-  return _function.value(_t, _q_point[_qp])*_u[_qp]*_scale_factor;
+  return _function.value(_t, _q_point[_qp]) * _u[_qp] * _scale_factor;
 }

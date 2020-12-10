@@ -1,12 +1,4 @@
-function_vals = '0 0 0'
-
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 20
-  ny = 20
-  xmax = 2
-  ymax = 2
 []
 
 [Variables]
@@ -16,7 +8,7 @@ function_vals = '0 0 0'
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temperature
   []
 []
@@ -63,14 +55,10 @@ function_vals = '0 0 0'
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []
-[]
-
-[Problem]#do we need this
-  type = FEProblem
 []
 
 [Executioner]
@@ -82,48 +70,28 @@ function_vals = '0 0 0'
   petsc_options_value = 'hypre boomeramg'
 []
 
-# FUNCTION FROM FORWARD.i
-# type = ParsedFunction
-# value = alpha*x*x+beta*beta*x+c
-# vars = 'alpha beta c'
-# vals = 'p1 p2 p3'
-
 [Functions]
-  [volumetric_heat_func_deriv_alpha]
+  [left_constant_deriv_a]
     type = ParsedFunction
-    value = x*x
-    vars = 'alpha beta c'
-    vals = ${function_vals}
+    value = 1.0
   []
-  [volumetric_heat_func_deriv_beta]
+  [left_linear_deriv_b]
     type = ParsedFunction
-    value = 2*beta*x
-    vars = 'alpha beta c'
-    vals = ${function_vals}
-  []
-  [volumetric_heat_func_deriv_c]
-    type = ParsedFunction
-    value = 1
-    vars = 'alpha beta c'
-    vals = ${function_vals}
+    value = y
   []
 []
 
 [Postprocessors]
-  # integral of load function gradient w.r.t parameter
-  [adjoint_pt_0]
-    type = VariableFunctionElementIntegral
-    function = volumetric_heat_func_deriv_alpha
+  [adjoint_bc_0]
+    type = VariableFunctionSideIntegral
+    boundary = left
+    function = left_constant_deriv_a
     variable = temperature
   []
-  [adjoint_pt_1]
-    type = VariableFunctionElementIntegral
-    function = volumetric_heat_func_deriv_beta
-    variable = temperature
-  []
-  [adjoint_pt_2]
-    type = VariableFunctionElementIntegral
-    function = volumetric_heat_func_deriv_c
+  [adjoint_bc_1]
+    type = VariableFunctionSideIntegral
+    boundary = left
+    function = left_linear_deriv_b
     variable = temperature
   []
 []
@@ -132,17 +100,27 @@ function_vals = '0 0 0'
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0 0; 10 10 10 10'
+    value = '0.2 0.8 0.2 0.8;
+             0.2 0.6 1.4 1.8;
+             0   0   0   0;
+             10  10  10  10'
   []
-  [adjoint_pt]
+  [adjoint_bc]
     type = VectorOfPostprocessors
-    postprocessors = 'adjoint_pt_0 adjoint_pt_1 adjoint_pt_2'
+    postprocessors = 'adjoint_bc_0 adjoint_bc_1'
+  []
+[]
+
+
+[Controls]
+  [adjointReceiver]
+    type = ControlsReceiver
   []
 []
 
 
 [Outputs]
-  # console = true
+  console = true
   exodus = true
   file_base = 'adjoint'
 []

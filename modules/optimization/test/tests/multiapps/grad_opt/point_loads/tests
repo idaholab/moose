@@ -15,5 +15,6 @@
 #    cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_test_gradient_view -tao_fd_delta -tao_gatol'"
 #              " Executioner/petsc_options_value='true true true 0.0001 0.001'"
     csvdiff = master_out_receiver_0001.csv
+    heavy = true
   []
 []
