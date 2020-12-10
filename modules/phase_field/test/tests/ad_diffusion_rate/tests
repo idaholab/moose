@@ -1,4 +1,6 @@
 [Tests]
+  design = 'ADDiffusionRate.md'
+  issue = '#16167'
   [diffusionrate]
     type = 'CSVDiff'
     input = 'diffusion_rate.i'
