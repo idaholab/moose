@@ -15,7 +15,7 @@
       GlobalParams/rdg_slope_reconstruction=MINMOD
       Outputs/file_base='phy.massflowrate_3eqn_rdg'"
     group = 'inlet_mass_flow_rate outlet pipe 1phase rdg'
-    max_time = 600
+    max_time = 1000
   [../]
   [./phy:reversed_flow]
     type = 'Exodiff'
