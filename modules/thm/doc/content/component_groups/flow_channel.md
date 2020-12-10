@@ -60,3 +60,9 @@ size 0.25 m, whereas the last 40 m have 60 elements of size $0.\bar{6}$ m.
 length = '10 40'
 n_elems = '40 60'
 ```
+
+When using more than one entry in the `length` and `n_elems` parameters, the
+parameter `axial_region_names` is used to provide names for each entry. These
+get used to create blocks with the format `<component_name>:<region_name>`,
+where `<component_name>` is the name of the component and `<region_name>` is
+an entry in the `axial_region_names` parameter.
