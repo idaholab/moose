@@ -1,14 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 3
-  ny = 3
-  nz = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  second_order = true
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = true
+  volumetric_locking_correction = false
 []
 
 [AuxVariables]
@@ -28,17 +29,19 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [elastic_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
 []
 [Variables]
   [disp_x]
+    order = SECOND
+    scaling = 1e-10
   []
   [disp_y]
+    order = SECOND
+    scaling = 1e-10
   []
   [disp_z]
+    order = SECOND
+    scaling = 1e-10
   []
 []
 [AuxKernels]
@@ -69,13 +72,6 @@
     index_i = 1
     index_j = 1
   []
-  [elastic_strain_yy]
-    type = ADRankTwoAux
-    rank_two_tensor = elastic_strain
-    variable = elastic_strain_yy
-    index_i = 1
-    index_j = 1
-  []
 []
 
 [Functions]
@@ -101,7 +97,7 @@
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 206800
-    poissons_ratio = 0.3
+    poissons_ratio = 0.0
   []
 
   #  [stress_]
@@ -111,21 +107,18 @@
   [elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_plasticity"
-    max_iterations = 50
-    absolute_tolerance = 1e-09
+    max_iterations = 500
+    absolute_tolerance = 1e-05
   []
 
   [trial_plasticity]
     type = ADTransverselyIsotropicPlasticityStressUpdate
     # internal_solve_output_on = always
     # F G H L M N
-    hardening_constant = 4000
-    yield_stress = 2.0
+    hardening_constant = 5000
+    yield_stress = 20000000000000
     hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
-    absolute_tolerance = 1e-14
     base_name = trial_plasticity
-    internal_solve_full_iteration_history = true
-    max_inelastic_increment = 1.0e-6
   []
 []
 
@@ -158,6 +151,12 @@
     []
   []
 
+  #  [./pull_disp_y]
+  #    type = ADFunctionDirichletBC
+  #    variable = disp_y
+  #    boundary = top
+  #    function = pull
+  #  [../]
 []
 
 [Preconditioning]
@@ -174,28 +173,17 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
   petsc_options_value = '101                asm      lu'
 
+  line_search = 'none'
   nl_rel_tol = 1e-07
-  nl_abs_tol = 1.0e-14
+  nl_abs_tol = 1.0e-15
   l_max_its = 90
   num_steps = 40
-  # dt = 5.0e0
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 30
-    iteration_window = 9
-    growth_factor = 1.0
-    cutback_factor = 0.5
-    timestep_limiting_postprocessor = matl_ts_min
-    dt = 5.0e-1
-  []
+  dt = 5.0e1
   start_time = 0
   automatic_scaling = true
 []
 
 [Postprocessors]
-  [matl_ts_min]
-    type = MaterialTimeStepPostprocessor
-  []
   [max_disp_x]
     type = ElementExtremeValue
     variable = disp_x
@@ -218,14 +206,6 @@
   [num_nonlin]
     type = NumNonlinearIterations
     outputs = console
-  []
-  [plasticity_strain]
-    type = ElementAverageValue
-    variable = plasticity_strain_yy
-  []
-  [elastic_strain]
-    type = ElementAverageValue
-    variable = elastic_strain_yy
   []
 []
 

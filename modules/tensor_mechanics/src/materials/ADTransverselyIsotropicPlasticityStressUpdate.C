@@ -200,7 +200,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
 
 ADReal
 ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
-    const ADDenseVector & stress_dev,
+    const ADDenseVector & /*stress_dev*/,
     const ADDenseVector & /*stress_sigma*/,
     const ADReal & delta_gamma)
 {
@@ -309,7 +309,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStressFinalize(
-    const ADRankTwoTensor & plastic_strain_increment,
+    const ADRankTwoTensor & /*plastic_strain_increment*/,
     const ADReal & delta_gamma,
     ADRankTwoTensor & stress_new,
     const ADDenseVector & stress_dev)
