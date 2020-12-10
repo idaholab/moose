@@ -43,6 +43,13 @@ addAdvancedOutputParams(InputParameters & params)
       "A list of the variables and postprocessors that should be output to the Exodus file "
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
+  // Enable output of PP/VPP to JSON
+  params.addParam<bool>(
+      "postprocessors_as_reporters", false, "Output Postprocessors values as Reporter values.");
+  params.addParam<bool>("vectorpostprocessors_as_reporters",
+                        false,
+                        "Output VectorsPostprocessors vectors as Reporter values.");
+
   // 'Variables' Group
   params.addParamNamesToGroup("hide show", "Variables");
 
@@ -124,7 +131,9 @@ AdvancedOutput::AdvancedOutput(const InputParameters & parameters)
     _elemental_as_nodal(isParamValid("elemental_as_nodal") ? getParam<bool>("elemental_as_nodal")
                                                            : false),
     _scalar_as_nodal(isParamValid("scalar_as_nodal") ? getParam<bool>("scalar_as_nodal") : false),
-    _reporter_data(_problem_ptr->getReporterData())
+    _reporter_data(_problem_ptr->getReporterData()),
+    _postprocessors_as_reporters(getParam<bool>("postprocessors_as_reporters")),
+    _vectorpostprocessors_as_reporters(getParam<bool>("vectorpostprocessors_as_reporters"))
 {
   _is_advanced = true;
   _advanced_execute_on = OutputOnWarehouse(_execute_on, parameters);
@@ -443,8 +452,9 @@ AdvancedOutput::initAvailableLists()
 
   // Initialize Reporter name list
   for (auto && r_name : _reporter_data.getReporterNames())
-    if (!hasPostprocessorObjectByName(r_name.getObjectName()) &&
-        !hasVectorPostprocessorObjectByName(r_name.getObjectName()))
+    if ((_postprocessors_as_reporters || !hasPostprocessorObjectByName(r_name.getObjectName())) &&
+        (_vectorpostprocessors_as_reporters ||
+         !hasVectorPostprocessorObjectByName(r_name.getObjectName())))
       _execute_data["reporters"].available.insert(r_name);
 }
 
