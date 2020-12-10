@@ -74,6 +74,11 @@ FEProblemSolve::validParams()
   params.addParam<Real>("nl_div_tol", 1.0e10, "Nonlinear Divergence Tolerance");
   params.addParam<Real>("nl_abs_step_tol", 0., "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 0., "Nonlinear Relative step Tolerance");
+  params.addParam<unsigned int>(
+      "n_max_nonlinear_pingpong",
+      100,
+      "The maximum number of times the non linear residual can ping pong "
+      "before requesting halting the current evalution and requesting timestep cut");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -168,6 +173,8 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
                               _pars.isParamSetByUser("snesmf_reuse_base"));
 
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
+
+  _problem.setMaxNLPingPong(getParam<unsigned int>("n_max_nonlinear_pingpong"));
 
   _nl.setDecomposition(_splitting);
 }

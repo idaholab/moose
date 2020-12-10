@@ -3,35 +3,49 @@
   issues = '#13964 #9726'
 
   # 2D explicit analysis with nodal masses equivalent to the lumped mass solve
-  [./explicit_nodalmass]
+  [explicit_nodalmass]
     type = 'CSVDiff'
     input = '2d_nodalmass_explicit.i'
     csvdiff = '2d_nodalmass_explicit_out.csv'
-    requirement = "The CentralDifference timeintegrator shall correctly calculate "
-                  "the response of a 2D mesh with nodal masses equal to those of "
-                  "a corresponding lumped mass system."
-  [../]
+    requirement = "The system shall include central difference time integration that correctly "
+                  "calculates the response of a 2D mesh with nodal masses equal to those of a "
+                  "corresponding lumped mass system."
+  []
 
   # 2D implicit analysis with nodal masses equivalent to the lumped mass solve
-  [./implicit_nodalmass]
+  [implicit_nodalmass]
     type = 'CSVDiff'
     input = '2d_nodalmass_implicit.i'
     csvdiff = '2d_nodalmass_implicit_out.csv'
-    requirement = "The NewmarkBeta timeintegrator shall correctly calculate "
-                  "the response of a 2D mesh with nodal masses equal to those of "
-                  "a corresponding lumped mass system."
-  [../]
+    requirement = "The system shall include Newmark-beta time integration that correctly calculates "
+                  "the response of a 2D mesh with nodal masses equal to those of a corresponding "
+                  "lumped mass system."
+  []
 
   # 2D explicit analysis with lumped mass solve
-  [./explicit_lumped]
+  [explicit_lumped]
     type = 'CSVDiff'
     input = '2d_lumped_explicit.i'
     cli_args = Outputs/file_base=2d_nodalmass_explicit_out
     csvdiff = '2d_nodalmass_explicit_out.csv'
     prereq = explicit_nodalmass
-    requirement = "The CentralDifference timeintegrator used with the lumped mass "
-                  "option shall correctly calculate the response of a 2D mesh "
-                  "and produce results that are identical to those calculated using "
-                  "equivalent nodal masses."
-  [../]
+    requirement = "The system syall include central difference time integration that when used with "
+                  "the lumped mass option shall correctly calculate the response of a 2D mesh and "
+                  "produce results that are identical to those calculated using equivalent nodal "
+                  "masses."
+  []
+
+  # 2D explicit analysis with constant mass solve
+  [explicit_constant_mass]
+    type = 'CSVDiff'
+    input = '2d_lumped_explicit.i'
+    cli_args = 'Outputs/file_base=2d_nodalmass_explicit_out '
+               'Executioner/TimeIntegrator/use_constant_mass=true'
+    csvdiff = '2d_nodalmass_explicit_out.csv'
+    prereq = explicit_nodalmass
+    requirement = "The system syall include central difference time integration that when used with "
+                  "the constant mass option shall correctly calculate the response of a 2D mesh and "
+                  "produce results that are identical to those calculated using equivalent nodal "
+                  "masses."
+  []
 []

@@ -6574,12 +6574,27 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   NonlinearSystemBase & system = getNonlinearSystemBase();
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
+  Real fnorm_old;
   // This is the first residual before any iterations have been done,
   // but after preset BCs (if any) have been imposed on the solution
   // vector.  We save it, and use it to detect convergence if
   // compute_initial_residual_before_preset_bcs=false.
   if (it == 0)
+  {
     system._initial_residual_after_preset_bcs = fnorm;
+    fnorm_old = fnorm;
+    _n_nl_pingpong = 0;
+  }
+  else
+    fnorm_old = system._last_nl_rnorm;
+
+  // Check for nonlinear residual pingpong.
+  // Pingpong will always start from a residual increase
+  if ((_n_nl_pingpong % 2 == 1 && !(fnorm > fnorm_old)) ||
+      (_n_nl_pingpong % 2 == 0 && fnorm > fnorm_old))
+    _n_nl_pingpong += 1;
+  else
+    _n_nl_pingpong = 0;
 
   std::ostringstream oss;
   if (fnorm != fnorm)
@@ -6628,6 +6643,11 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
       oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
           << divtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
+    }
+    else if (_n_nl_pingpong > _n_max_nl_pingpong)
+    {
+      oss << "Diverged due to maximum non linear residual pingpong achieved" << '\n';
+      reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
     }
   }
 
