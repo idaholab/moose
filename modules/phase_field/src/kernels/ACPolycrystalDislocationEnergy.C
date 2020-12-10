@@ -73,7 +73,7 @@ ACPolycrystalDislocationEnergy::computeDFDOP(PFFunctionType type)
     {
       Real test = k * dh_dOP * (rho_i - dislocation_density) / _sum_h_OP[_qp];
 
-      if (isnormal(test))
+      if (std::isnormal(test))
         return test;
       else
         return 0;
