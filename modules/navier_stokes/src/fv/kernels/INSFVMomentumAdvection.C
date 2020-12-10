@@ -50,6 +50,9 @@ INSFVMomentumAdvection::validParams()
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
 
+  params.addParam<std::vector<BoundaryName>>(
+      "no_slip_wall_boundaries", std::vector<BoundaryName>(), "No slip wall boundaries.");
+
   params.addClassDescription("Object for advecting momentum, e.g. rho*u");
 
   return params;
@@ -71,7 +74,8 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
                ? dynamic_cast<const MooseVariableFV<Real> *>(&_subproblem.getVariable(
                      _tid, params.get<std::vector<VariableName>>("w").front()))
                : nullptr),
-    _rho(params.get<Real>("rho"))
+    _rho(params.get<Real>("rho")),
+    _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -85,12 +89,12 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   if (!_u_var)
     mooseError("the u velocity must be a finite volume variable.");
 
-  if (_subproblem.mesh().dimension() >= 2 && !_v_var)
+  if (_dim >= 2 && !_v_var)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied and it must be a finite volume "
         "variable.");
 
-  if (_subproblem.mesh().dimension() >= 3 && !params.isParamValid("w"))
+  if (_dim >= 3 && !params.isParamValid("w"))
     mooseError("In three-dimensions, the w velocity must be supplied and it must be a finite "
                "volume variable.");
 
@@ -107,6 +111,13 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   {
     auto & vec_of_coeffs_map = _rc_a_coeffs[&_app];
     vec_of_coeffs_map.resize(libMesh::n_threads());
+  }
+
+  {
+    // Setup no slip wall boundary IDs
+    const auto & vec = getParam<std::vector<BoundaryName>>("no_slip_wall_boundaries");
+    for (const auto name : vec)
+      _no_slip_wall_boundaries.insert(_mesh.getBoundaryID(name));
   }
 }
 
@@ -166,32 +177,39 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
   VectorValue<ADReal> coeff = 0;
 
   ADRealVectorValue elem_velocity(_u_var->getElemValue(&elem));
-  unsigned int dim = 1;
 
   if (_v_var)
-  {
     elem_velocity(1) = _v_var->getElemValue(&elem);
-    ++dim;
-  }
   if (_w_var)
-  {
     elem_velocity(2) = _w_var->getElemValue(&elem);
-    ++dim;
-  }
 
-  auto action_functor = [&coeff, &elem_velocity, &mu, &dim, this](const Elem & /*functor_elem*/,
-                                                                  const Elem * const neighbor,
-                                                                  const FaceInfo * const fi,
-                                                                  const Point & surface_vector,
-                                                                  Real /*coord*/,
-                                                                  const bool /*elem_has_info*/) {
+  auto action_functor = [&coeff, &elem_velocity, &mu, this](const Elem & /*functor_elem*/,
+                                                            const Elem * const neighbor,
+                                                            const FaceInfo * const fi,
+                                                            const Point & surface_vector,
+                                                            Real /*coord*/,
+                                                            const bool /*elem_has_info*/) {
     mooseAssert(fi, "We need a non-null FaceInfo");
+
+    const Point normal = (neighbor == fi->neighborPtr()) ? fi->normal() : Point(-fi->normal());
 
     if (fi->isBoundary())
     {
-      for (const auto i : make_range(dim))
-        coeff(i) += mu * surface_vector.norm() / (fi->faceCentroid() - fi->elemCentroid()).norm() *
-                    (1 - fi->normal()(i) * fi->normal()(i));
+      bool bc_found = false;
+
+      // In my mind there should only be about one bc_id per FaceInfo
+      for (const auto bc_id : fi->boundaryIDs())
+        if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
+        {
+          for (const auto i : make_range(_dim))
+            coeff(i) += mu * surface_vector.norm() /
+                        std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) *
+                        (1 - normal(i) * normal(i));
+          bc_found = true;
+          break;
+        }
+
+      // if (!bc_found)
     }
     else
     {
@@ -220,7 +238,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
       temp_coeff +=
           mu * surface_vector.norm() / (fi->neighborCentroid() - fi->elemCentroid()).norm();
 
-      for (const auto i : make_range(dim))
+      for (const auto i : make_range(_dim))
         coeff(i) += temp_coeff;
     }
   };
@@ -291,14 +309,8 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 
   elem_one_volume *= coord;
 
-  unsigned int dim = 1;
-  if (_v_var)
-    ++dim;
-  if (_w_var)
-    ++dim;
-
   VectorValue<ADReal> elem_one_D = 0;
-  for (const auto i : make_range(dim))
+  for (const auto i : make_range(_dim))
   {
     mooseAssert(elem_one_a(i).value() != 0, "We should not be dividing by zero");
     elem_one_D(i) = elem_one_volume / elem_one_a(i);
@@ -316,7 +328,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
     elem_two_volume *= coord;
 
     VectorValue<ADReal> elem_two_D = 0;
-    for (const auto i : make_range(dim))
+    for (const auto i : make_range(_dim))
     {
       mooseAssert(elem_two_a(i).value() != 0, "We should not be dividing by zero");
       elem_two_D(i) = elem_two_volume / elem_two_a(i);
@@ -332,7 +344,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
     face_D = elem_one_D;
 
   // perform the pressure correction
-  for (const auto i : make_range(dim))
+  for (const auto i : make_range(_dim))
     v(i) -= face_D(i) * (grad_p(i) - unc_grad_p(i));
 }
 #else

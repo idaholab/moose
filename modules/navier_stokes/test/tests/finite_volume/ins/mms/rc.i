@@ -5,6 +5,7 @@ velocity_interp_method='rc'
 [GlobalParams]
   force_boundary_execution = false
   two_term_boundary_expansion = false
+  no_slip_wall_boundaries = 'left right top bottom'
 []
 
 [Mesh]

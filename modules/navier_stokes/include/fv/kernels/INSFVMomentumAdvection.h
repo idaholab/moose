@@ -72,8 +72,14 @@ protected:
   /// Density
   const Real & _rho;
 
+  /// the dimension of the simulation
+  const unsigned int _dim;
+
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
+
+  /// Boundary IDs with no slip walls
+  std::set<BoundaryID> _no_slip_wall_boundaries;
 
 private:
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
