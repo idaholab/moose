@@ -55,7 +55,8 @@ domain name in your command above because of the "Host" setting in your SSH conf
 
 ## SOCKS Proxy id=socks-proxy
 
-In order to access common HPC resources (hpcgitlab.hpc.inl.gov, hpcweb.inl.gov, etc) within a web browser, you must tunnel traffic to said resources using a SOCKS proxy. This is achieved by using a PAC (Proxy-Auto Configuration) file, which we have configured as:
+To access common HPC resources (hpcgitlab.hpc.inl.gov, hpcweb.inl.gov, etc) within a web browser, traffic must be routed through a SOCKS proxy. This can be achieved by using a PAC (Proxy-Auto Configuration) file:
+
 
 !listing moose/scripts/hpc_proxy.pac
 
@@ -64,7 +65,7 @@ Add the proxy configuration to your browser via the following url:
 ```https://raw.githubusercontent.com/idaholab/moose/master/scripts/hpc_proxy.pac
 ```
 
-Documentation is available for doing this within Firefox [here](https://support.mozilla.org/en-US/kb/connection-settings-firefox). Add the URL above within the "Automatic proxy configuration URL" box. We do not recommend utilizing Google Chrome with this functionality because it requires setting a system-wide proxy configuration.
+Documentation is available for using [Firefox](https://support.mozilla.org/en-US/kb/connection-settings-firefox). Add the URL above within the "Automatic proxy configuration URL" box. We do not recommend utilizing Google Chrome with this functionality because it requires setting a system-wide proxy configuration.
 
 ## Log in to HPC Gitlab
 
