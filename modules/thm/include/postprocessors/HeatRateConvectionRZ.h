@@ -16,10 +16,10 @@ protected:
 
   /// Temperature
   const VariableValue & _T;
-  /// Ambient temperature
-  const Real & _T_ambient;
-  /// Heat transfer coefficient
-  const Real & _htc;
+  /// Ambient temperature function
+  const Function & _T_ambient_fn;
+  /// Ambient heat transfer coefficient function
+  const Function & _htc_ambient_fn;
 
 public:
   static InputParameters validParams();

@@ -1,4 +1,5 @@
 #include "ConvectionHeatTransferBC.h"
+#include "Function.h"
 
 registerMooseObject("THMApp", ConvectionHeatTransferBC);
 
@@ -6,8 +7,9 @@ InputParameters
 ConvectionHeatTransferBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
-  params.addRequiredParam<Real>("T_ambient", "Ambient Temperature");
-  params.addRequiredParam<Real>("htc_ambient", "Heat transfer coefficient with ambient");
+  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function");
+  params.addRequiredParam<FunctionName>("htc_ambient",
+                                        "Ambient heat transfer coefficient function");
   params.addParam<PostprocessorName>(
       "scale_pp", 1.0, "Post-processor by which to scale boundary condition");
   return params;
@@ -15,8 +17,8 @@ ConvectionHeatTransferBC::validParams()
 
 ConvectionHeatTransferBC::ConvectionHeatTransferBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _T_ambient(getParam<Real>("T_ambient")),
-    _htc_ambient(getParam<Real>("htc_ambient")),
+    _T_ambient_fn(getFunction("T_ambient")),
+    _htc_ambient_fn(getFunction("htc_ambient")),
     _scale_pp(getPostprocessorValue("scale_pp"))
 {
 }
@@ -24,11 +26,12 @@ ConvectionHeatTransferBC::ConvectionHeatTransferBC(const InputParameters & param
 Real
 ConvectionHeatTransferBC::computeQpResidual()
 {
-  return _scale_pp * _htc_ambient * (_u[_qp] - _T_ambient) * _test[_i][_qp];
+  return _scale_pp * _htc_ambient_fn.value(_t, _q_point[_qp]) *
+         (_u[_qp] - _T_ambient_fn.value(_t, _q_point[_qp])) * _test[_i][_qp];
 }
 
 Real
 ConvectionHeatTransferBC::computeQpJacobian()
 {
-  return _scale_pp * _htc_ambient * _phi[_j][_qp] * _test[_i][_qp];
+  return _scale_pp * _htc_ambient_fn.value(_t, _q_point[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
 }
