@@ -3,7 +3,8 @@
     type = CSVDiff
     rel_err = 0.01
     input = master.i
-    csvdiff = master_out.csv
+    csvdiff = master_out_measured_0001.csv
+    cli_args = "FormFunction/initial_condition='588 417 -9 -8'"
     heavy = true
   []
 []

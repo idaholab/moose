@@ -1,20 +1,13 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
+#include "ReporterInterface.h"
 
 // Forward declarations
 class ControlsReceiver;
 
-class OptimizationParameterTransfer : public MultiAppTransfer
+class OptimizationParameterTransfer : public MultiAppTransfer, public ReporterInterface
 {
 public:
   static InputParameters validParams();
@@ -31,8 +24,13 @@ private:
    */
   ControlsReceiver * getReceiver(unsigned int app_index);
 
-  /// Storage for the list of parameters to control
-  const VectorPostprocessorName & _vpp_name;
+  /// Value names from FormFunction
+  const std::vector<ReporterValueName> & _value_names;
+  /// Parameter names in sub-application
+  const std::vector<std::string> & _parameters;
   /// The name of the ControlsReceiver Control object on the sub-application
   const std::string & _receiver_name;
+
+  /// Parameter values from FormFunction
+  std::vector<const std::vector<Real> *> _values;
 };

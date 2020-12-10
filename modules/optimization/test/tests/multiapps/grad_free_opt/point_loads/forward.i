@@ -7,6 +7,7 @@
   xmax = 1
   ymax = 2
 []
+
 [Variables]
   [temperature]
   []
@@ -20,28 +21,16 @@
 []
 
 [DiracKernels]
-  [vpp_point_source]
+  [pt]
     type = VectorPostprocessorPointSource
     variable = temperature
-    vector_postprocessor = receive_values_sub
-    value_name = value
-  []
-  [vpp_point_source]
-    type = VectorPostprocessorPointSource
-    variable = temperature
-    vector_postprocessor = receive_values_sub
-    value_name = value
+    vector_postprocessor = point_source
+    x_coord_name = 'x'
+    y_coord_name = 'y'
+    z_coord_name = 'z'
+    value_name = 'value'
   []
 []
-
-# all objective func parameters be controolable in sub-app
-# changing material properties will need to be controllable
-# full postprocessors that get the measurement values back.
-# Mapping for objectiving function parameters and what it controls in sub
-# and mapping from post proc value in the subapp and how it corresponds to a measurement value (target value)
-
-# list of controllable parameters
-#list of postprocessors that comput the objective
 
 
 [BCs]
@@ -79,25 +68,38 @@
   []
 []
 
+[Problem]#do we need this
+  type = FEProblem
+[]
+
 [Executioner]
   type = Steady
+  solve_type = PJFNK
+  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-8
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [VectorPostprocessors]
-  [./sample_points_sub]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
+  []
+  [data_pt]
     type = PointValueSampler
+    points = '0.3 0.3 0
+              0.4 1.0 0
+              0.8 0.5 0
+              0.8 0.6 0'
     variable = temperature
-    points = '0.25 1.25 0 0.5 1.5 0'
-    sort_by = id
-    execute_on = 'initial timestep_end'
-  [../]
-  [./receive_values_sub]
-    type = VectorPostprocessorReceiver
-    execute_on = 'timestep_begin'
-  [../]
+    sort_by = x
+  []
 []
 
 [Outputs]
   console = true
-  file_base = 'zmaster/sub'
+  exodus = true
+  file_base = 'forward'
 []

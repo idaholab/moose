@@ -2,9 +2,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
+  nx = 10
   ny = 20
-  xmax = 2
+  xmax = 1
   ymax = 2
 []
 
@@ -18,11 +18,6 @@
     type = ADHeatConduction
     variable = temperature
   []
-  [./heat_source]
-    type = ADMatHeatSource
-    material_property = volumetric_heat
-    variable = temperature
-  [../]
 []
 
 [BCs]
@@ -52,25 +47,11 @@
   []
 []
 
-[Functions]
-  [volumetric_heat_func]
-    type = ParsedFunction
-    value = alpha*sin(x*pi/2)*sin(y*pi/2)
-    vars = 'alpha'
-    vals = 'p1'
-  []
-[]
-
 [Materials]
   [steel]
     type = ADGenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
-  []
-  [volumetric_heat]
-    type = ADGenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = volumetric_heat_func
   []
 []
 
@@ -83,31 +64,15 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
+[VectorPostprocessors]
+  [data_pt]
+    type = PointValueSampler
+    points = '0.2 0.2 0
+              0.8 0.6 0
+              0.2 1.4 0
+              0.8 1.8 0'
     variable = temperature
-    point = '0.2 0.2 0'
-  []
-  [data_pt_1]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.6 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.2 1.4 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '0.8 1.8 0'
-  []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 10
-    execute_on = 'initial linear'
+    sort_by = y
   []
 []
 

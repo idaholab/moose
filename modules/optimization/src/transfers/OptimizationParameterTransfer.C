@@ -1,15 +1,6 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "OptimizationParameterTransfer.h"
 #include "MultiApp.h"
 #include "ControlsReceiver.h"
-#include "OptimizationParameterVectorPostprocessor.h"
 #include "InputParameterWarehouse.h"
 
 registerMooseObject("isopodApp", OptimizationParameterTransfer);
@@ -19,14 +10,17 @@ OptimizationParameterTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Copies optimization data to a ControlsReceiver object.");
-  params.addRequiredParam<VectorPostprocessorName>(
-      "parameter_vpp",
-      "The name of the OptimizationParameterVectorPostprocessor to get data "
-      "from");
+
+  params.addRequiredParam<std::vector<ReporterValueName>>(
+      "value_names", "Name of parameter values from FormFunction.");
+  params.addRequiredParam<std::vector<std::string>>(
+      "parameters",
+      "A list of parameters (on the sub application) to control with values from "
+      "'parameter_names'.");
+
   params.addRequiredParam<std::string>("to_control",
                                        "The name of the 'ControlsReceiver' on the sub application "
                                        "to which the optimization parameters will be transferred.");
-
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
 
@@ -35,53 +29,39 @@ OptimizationParameterTransfer::validParams()
 
 OptimizationParameterTransfer::OptimizationParameterTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    _vpp_name(getParam<VectorPostprocessorName>("parameter_vpp")),
+    ReporterInterface(this),
+    _value_names(getParam<std::vector<ReporterValueName>>("value_names")),
+    _parameters(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
+  if (_value_names.size() != _parameters.size())
+    paramError("parameters", "Number of 'value_names' must match number of 'parameters'.");
 }
 
 void
 OptimizationParameterTransfer::initialSetup()
 {
-  auto & vpp =
-      _multi_app->problemBase().getUserObject<OptimizationParameterVectorPostprocessor>(_vpp_name);
-
-  std::vector<std::string> parameter_names(vpp.getParameterNames());
-
-  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
+  _values.reserve(_value_names.size());
+  for (const auto & name : _value_names)
   {
-    if (_multi_app->hasLocalApp(i))
-    {
-      InputParameterWarehouse & wh =
-          _multi_app->appProblemBase(i).getMooseApp().getInputParameterWarehouse();
-
-      std::vector<Real> sub_app_initial_values(parameter_names.size());
-      for (std::size_t j = 0; j < parameter_names.size(); ++j)
-      {
-        std::vector<Real> datas =
-            wh.getControllableParameterValues<Real>((MooseObjectParameterName)parameter_names[j]);
-        sub_app_initial_values[j] = datas[0];
-      }
-      vpp.setParameterValues(sub_app_initial_values);
-    }
+    ReporterName rname("FormFunction", name);
+    _values.push_back(&getReporterValueByName<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED));
   }
 }
 
 void
 OptimizationParameterTransfer::execute()
 {
-  auto & vpp =
-      _multi_app->problemBase().getUserObject<OptimizationParameterVectorPostprocessor>(_vpp_name);
-  std::vector<std::string> parameter_names(vpp.getParameterNames());
-  std::vector<Real> parameter_values(vpp.getParameterValues());
+  std::vector<Real> values_full;
+  for (const auto & v : _values)
+    values_full.insert(values_full.end(), v->begin(), v->end());
+
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
-  {
     if (_multi_app->hasLocalApp(i))
     {
       ControlsReceiver * ptr = getReceiver(i);
-      ptr->transfer(parameter_names, parameter_values);
+      ptr->transfer(_parameters, values_full);
     }
-  }
 }
 
 ControlsReceiver *

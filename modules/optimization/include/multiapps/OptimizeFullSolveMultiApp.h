@@ -12,4 +12,6 @@ class OptimizeFullSolveMultiApp : public FullSolveMultiApp
 public:
   static InputParameters validParams();
   OptimizeFullSolveMultiApp(const InputParameters & parameters);
+
+  virtual void preTransfer(Real dt, Real target_time) override;
 };

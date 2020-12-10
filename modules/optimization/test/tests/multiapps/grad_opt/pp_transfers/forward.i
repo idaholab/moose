@@ -21,26 +21,33 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
-    variable = temperature
-    value = -2458
-    point = '0.2 0.2'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 7257
-    point = '0.2 0.8'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 26335
-    point = '0.8 0.2'
-  [../]
+  [pt]
+    type = VectorPostprocessorPointSource
+    vector_postprocessor = point_source
+    x_coord_name = 'x'
+    y_coord_name = 'y'
+    z_coord_name = 'z'
+    value_name = 'value'
+  []
+  # [./pt0]
+  #   type = ConstantPointSource
+  #   variable = temperature
+  #   value = -2458
+  #   point = '0.2 0.2'
+  # [../]
+  # [./pt1]
+  #   type = ConstantPointSource
+  #   variable = temperature
+  #   value = 7257
+  #   point = '0.2 0.8'
+  # [../]
+  # [./pt2]
+  #   type = ConstantPointSource
+  #   variable = temperature
+  #   value = 26335
+  #   point = '0.8 0.2'
+  # [../]
 []
-
 
 [BCs]
   [left]
@@ -90,35 +97,51 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
-    variable = temperature
-    point = '0.3 0.3 0'
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
   []
-  [data_pt_1]
-    type = PointValue
+  [data_pt]
+    type = PointValueSampler
+    points = '0.3 0.3 0
+              0.4 1.0 0
+              0.8 0.5 0
+              0.8 0.6 0'
     variable = temperature
-    point = '0.4 1.0 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.5 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.6 0'
   []
 []
 
+# [Postprocessors]
+  # [data_pt_0]
+  #   type = PointValue
+  #   variable = temperature
+  #   point = '0.3 0.3 0'
+  # []
+  # [data_pt_1]
+  #   type = PointValue
+  #   variable = temperature
+  #   point = '0.4 1.0 0'
+  # []
+  # [data_pt_2]
+  #   type = PointValue
+  #   variable = temperature
+  #   point = '0.8 0.5 0'
+  # []
+  # [data_pt_3]
+  #   type = PointValue
+  #   variable = temperature
+  #   point = '0.8 0.6 0'
+  # []
+# []
+
 # should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
-  []
-[]
+# [Controls]
+#   [parameterReceiver]
+#     type = ControlsReceiver
+#   []
+# []
 
 
 [Outputs]

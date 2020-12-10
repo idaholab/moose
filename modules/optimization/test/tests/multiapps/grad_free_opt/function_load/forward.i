@@ -2,9 +2,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
+  nx = 20
   ny = 20
-  xmax = 1
+  xmax = 2
   ymax = 2
 []
 
@@ -18,39 +18,22 @@
     type = ADHeatConduction
     variable = temperature
   []
-[]
-
-[DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [./heat_source]
+    type = ADMatHeatSource
+    material_property = volumetric_heat
     variable = temperature
-    value = -2458
-    point = '0.2 0.2'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 7257
-    point = '0.2 0.8'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 26335
-    point = '0.8 0.2'
   [../]
 []
-
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = NeumannBC
     variable = temperature
     boundary = left
     value = 0
   []
   [right]
-    type = DirichletBC
+    type = NeumannBC
     variable = temperature
     boundary = right
     value = 0
@@ -59,13 +42,22 @@
     type = DirichletBC
     variable = temperature
     boundary = bottom
-    value = 0
+    value = 200
   []
   [top]
     type = DirichletBC
     variable = temperature
     boundary = top
-    value = 0
+    value = 100
+  []
+[]
+
+[Functions]
+  [volumetric_heat_func]
+    type = ParsedFunction
+    value = alpha*sin(C1+x*pi/2)*sin(C2+y*pi/2)+beta
+    vars = 'alpha beta C1 C2'
+    vals = '100 1 -10 -10'
   []
 []
 
@@ -75,10 +67,11 @@
     prop_names = thermal_conductivity
     prop_values = 5
   []
-[]
-
-[Problem]#do we need this
-  type = FEProblem
+  [volumetric_heat]
+    type = ADGenericFunctionMaterial
+    prop_names = 'volumetric_heat'
+    prop_values = volumetric_heat_func
+  []
 []
 
 [Executioner]
@@ -90,36 +83,17 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
+[VectorPostprocessors]
+  [data_pt]
+    type = PointValueSampler
+    points = '0.2 0.2 0
+              0.8 0.6 0
+              0.2 1.4 0
+              0.8 1.8 0'
     variable = temperature
-    point = '0.3 0.3 0'
-  []
-  [data_pt_1]
-    type = PointValue
-    variable = temperature
-    point = '0.4 1.0 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.5 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.6 0'
+    sort_by = y
   []
 []
-
-# should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
-  []
-[]
-
 
 [Outputs]
   console = true

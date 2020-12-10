@@ -10,9 +10,13 @@ public:
 
   virtual Real computeObjective() override;
 
-private:
+protected:
+  /// Helper for getting or declaring data
+  const std::vector<Real> & getDataValueHelper(const std::string & get_param,
+                                               const std::string & declare_param);
+
   /// vector of simulation data
-  std::vector<const PostprocessorValue *> _data_computed;
+  const std::vector<Real> & _data_computed;
   /// vector of measured data
   const std::vector<Real> & _data_target;
 };
