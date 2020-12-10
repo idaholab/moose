@@ -62,7 +62,8 @@ To access common HPC resources (hpcgitlab.hpc.inl.gov, hpcweb.inl.gov, etc) with
 
 Add the proxy configuration to your browser via the following url:
 
-```https://raw.githubusercontent.com/idaholab/moose/master/scripts/hpc_proxy.pac
+```
+https://raw.githubusercontent.com/idaholab/moose/master/scripts/hpc_proxy.pac
 ```
 
 Documentation is available for using [Firefox](https://support.mozilla.org/en-US/kb/connection-settings-firefox). Add the URL above within the "Automatic proxy configuration URL" box. We do not recommend utilizing Google Chrome with this functionality because it requires setting a system-wide proxy configuration.
