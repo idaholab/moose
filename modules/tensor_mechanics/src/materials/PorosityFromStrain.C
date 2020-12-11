@@ -57,5 +57,7 @@ PorosityFromStrainTempl<is_ad>::computeQpProperties()
       _porosity_old[_qp];
 
   if (_porosity[_qp] < 0.0)
-    _porosity[_qp] = 0.0;
+    _porosity[_qp] = _initial_porosity;
+  if (std::isnan(_porosity[_qp]))
+    mooseException("In ", _name, ": porosity is nan. Cutting timestep");
 }

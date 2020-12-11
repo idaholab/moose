@@ -94,4 +94,8 @@ ADViscoplasticityStressUpdateBase::updateIntermediatePorosity(
   // the one that we're about to calculate
   _intermediate_porosity =
       (1.0 - _porosity_old[_qp]) * inelastic_volumetric_increment.trace() + _porosity_old[_qp];
+  if (_intermediate_porosity < 0.0)
+    mooseException("In ", _name, ": porosity is less than zero");
+  if (std::isnan(_intermediate_porosity))
+    mooseException("In ", _name, ": porosity is nan. Cutting timestep");
 }
