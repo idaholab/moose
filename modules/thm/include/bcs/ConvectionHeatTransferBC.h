@@ -11,10 +11,10 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  /// Ambient Temperature
-  const Real & _T_ambient;
-  /// Heat transfer coefficient with ambient
-  const Real & _htc_ambient;
+  /// Ambient temperature function
+  const Function & _T_ambient_fn;
+  /// Ambient heat transfer coefficient function
+  const Function & _htc_ambient_fn;
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
 

@@ -9,9 +9,9 @@ HSBoundaryAmbientConvection::validParams()
 {
   InputParameters params = HSBoundary::validParams();
 
-  params.addRequiredParam<Real>("htc_ambient",
-                                "Convective heat transfer coefficient with ambient [W/(m^2-K)]");
-  params.addRequiredParam<Real>("T_ambient", "Ambient temperature [K]");
+  params.addRequiredParam<FunctionName>(
+      "htc_ambient", "Ambient Convective heat transfer coefficient function [W/(m^2-K)]");
+  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function [K]");
   params.addParam<PostprocessorName>("scale_pp",
                                      "Post-processor by which to scale boundary condition");
 
@@ -21,8 +21,8 @@ HSBoundaryAmbientConvection::validParams()
 HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters & params)
   : HSBoundary(params),
 
-    _T_ambient(getParam<Real>("T_ambient")),
-    _htc_ambient(getParam<Real>("htc_ambient"))
+    _T_ambient_fn_name(getParam<FunctionName>("T_ambient")),
+    _htc_ambient_fn_name(getParam<FunctionName>("htc_ambient"))
 {
 }
 
@@ -54,8 +54,8 @@ HSBoundaryAmbientConvection::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
-    pars.set<Real>("T_ambient") = _T_ambient;
-    pars.set<Real>("htc_ambient") = _htc_ambient;
+    pars.set<FunctionName>("T_ambient") = _T_ambient_fn_name;
+    pars.set<FunctionName>("htc_ambient") = _htc_ambient_fn_name;
     if (is_cylindrical)
     {
       pars.set<Point>("axis_point") = hs.getPosition();
@@ -75,8 +75,8 @@ HSBoundaryAmbientConvection::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
-    pars.set<Real>("T_ambient") = _T_ambient;
-    pars.set<Real>("htc") = _htc_ambient;
+    pars.set<FunctionName>("T_ambient") = _T_ambient_fn_name;
+    pars.set<FunctionName>("htc") = _htc_ambient_fn_name;
     pars.set<Point>("axis_point") = hs.getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius();

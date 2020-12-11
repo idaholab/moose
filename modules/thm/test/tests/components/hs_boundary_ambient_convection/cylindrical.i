@@ -1,6 +1,8 @@
 T_hs = 300
-T_ambient = 500
-htc = 100
+T_ambient1 = 500
+htc1 = 100
+T_ambient2 = 400
+htc2 = 300
 t = 0.001
 
 L = 2
@@ -15,9 +17,25 @@ conductivity = 16.26
 R_i = ${fparse 0.5 * D_i}
 D_o = ${fparse D_i + 2 * thickness}
 A = ${fparse pi * D_o * L}
-heat_flux = ${fparse htc * (T_ambient - T_hs)}
+heat_flux_avg = ${fparse 0.5 * (htc1 * (T_ambient1 - T_hs) + htc2 * (T_ambient2 - T_hs))}
+heat_flux_integral = ${fparse heat_flux_avg * A}
 scale = 0.8
-E_change = ${fparse scale * heat_flux * A * t}
+E_change = ${fparse scale * heat_flux_integral * t}
+
+[Functions]
+  [T_ambient_fn]
+    type = PiecewiseConstant
+    axis = z
+    x = '0 1'
+    y = '${T_ambient1} ${T_ambient2}'
+  []
+  [htc_ambient_fn]
+    type = PiecewiseConstant
+    axis = z
+    x = '0 1'
+    y = '${htc1} ${htc2}'
+  []
+[]
 
 [HeatStructureMaterials]
   [./hs_mat]
@@ -49,8 +67,8 @@ E_change = ${fparse scale * heat_flux * A * t}
     type = HSBoundaryAmbientConvection
     boundary = 'hs:outer'
     hs = hs
-    T_ambient = ${T_ambient}
-    htc_ambient = ${htc}
+    T_ambient = T_ambient_fn
+    htc_ambient = htc_ambient_fn
     scale_pp = bc_scale_pp
   [../]
 []
