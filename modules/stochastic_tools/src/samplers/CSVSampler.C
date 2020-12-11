@@ -17,14 +17,17 @@ CSVSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Sampler that reads samples from CSV file.");
-  params.addRequiredParam<FileName>("samples_file", "Name of the CSV file that contains the samples matrix.");
-  params.addParam<std::vector<dof_id_type>>("column_indices", "Column indices in the CSV file to be sampled from. Number of indices here will be the same as the number of columns per matrix.");
+  params.addRequiredParam<FileName>("samples_file",
+                                    "Name of the CSV file that contains the samples matrix.");
+  params.addParam<std::vector<dof_id_type>>(
+      "column_indices",
+      "Column indices in the CSV file to be sampled from. Number of indices here will be the same "
+      "as the number of columns per matrix.");
   return params;
 }
 
 CSVSampler::CSVSampler(const InputParameters & parameters)
-  : Sampler(parameters),
-    _perf_compute_sample(registerTimedSection("computeSample", 4))
+  : Sampler(parameters), _perf_compute_sample(registerTimedSection("computeSample", 4))
 {
   // Reading the samples file and getting data
   MooseUtils::DelimitedFileReader reader(getParam<FileName>("samples_file"), &_communicator);
@@ -33,11 +36,11 @@ CSVSampler::CSVSampler(const InputParameters & parameters)
 
   // If indices are not provided, all of the data will be read
   if (!isParamValid("column_indices"))
-    {
-      // _indices.resize(_data.size());
-      for (unsigned int i = 0; i < _data.size(); i++)
-        _indices.push_back(i);
-    }
+  {
+    // _indices.resize(_data.size());
+    for (unsigned int i = 0; i < _data.size(); i++)
+      _indices.push_back(i);
+  }
   else
   // If  indices are provided, check that they are all smaller than number of
   // columns in the data
@@ -46,7 +49,11 @@ CSVSampler::CSVSampler(const InputParameters & parameters)
     for (unsigned int i = 0; i < _indices.size(); i++)
     {
       if (_indices[i] >= _data.size())
-        mooseError("In ", _name, ": column index, ", _indices[i], " is larger than the number of columns in the samples file.");
+        mooseError("In ",
+                   _name,
+                   ": column index, ",
+                   _indices[i],
+                   " is larger than the number of columns in the samples file.");
     }
   }
 

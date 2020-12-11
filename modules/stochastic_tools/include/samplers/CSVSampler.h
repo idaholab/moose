@@ -12,7 +12,7 @@
 #include "Sampler.h"
 
 /**
- * A class used to perform Monte Carlo Sampling
+ * A class used to generate samples from a CSV file
  */
 class CSVSampler : public Sampler
 {
