@@ -192,6 +192,12 @@ public:
    */
   virtual Real relativeSolutionDifferenceNorm();
 
+  /**
+   * Set the number of time steps
+   * @param num_steps number of time steps
+   */
+  virtual void forceNumSteps(const unsigned int num_steps) { _num_steps = num_steps; }
+
 protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
