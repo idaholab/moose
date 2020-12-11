@@ -1,0 +1,38 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "data",
+                    "type": "std::vector<double>",
+                    "value": [
+                        1949.0,
+                        1954.0,
+                        1977.0,
+                        1980.0
+                    ],
+                    "value_name": "vector"
+                }
+            ],
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporters": [
+                {
+                    "object_name": "data",
+                    "type": "std::vector<double>",
+                    "value": [
+                        1949.0,
+                        1954.0,
+                        1977.0,
+                        1980.0
+                    ],
+                    "value_name": "vector"
+                }
+            ],
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

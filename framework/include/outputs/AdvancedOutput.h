@@ -359,6 +359,9 @@ private:
   /// Storage for the last output time for the various output types, this is used to avoid duplicate output when using OUTPUT_FINAL flag
   std::map<std::string, Real> _last_execute_time;
 
+  /// Flags for outputting PP/VPP data as a reporter
+  const bool _postprocessors_as_reporters, _vectorpostprocessors_as_reporters;
+
   // Allow complete access
   friend class OutputWarehouse;
   friend class Console;
