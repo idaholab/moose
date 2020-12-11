@@ -15,10 +15,10 @@ public:
 protected:
   virtual void check() const override;
 
-  /// The value of ambient temperature
-  const Real & _T_ambient;
-  /// The value of convective heat transfer coefficient
-  const Real & _htc_ambient;
+  /// Ambient temperature function name
+  const FunctionName & _T_ambient_fn_name;
+  /// Convective heat transfer coefficient function name
+  const FunctionName & _htc_ambient_fn_name;
 
 public:
   static InputParameters validParams();
