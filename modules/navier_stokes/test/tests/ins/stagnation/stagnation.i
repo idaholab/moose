@@ -28,7 +28,7 @@
   dtmin = 1.e-6
   num_steps = 5
   l_max_its = 100
-  nl_max_its = 10
+  nl_max_its = 15
   nl_rel_tol = 1.e-9
 
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'

@@ -25,7 +25,7 @@
     type = 'RunApp'
     input = 'ne_ic.i'
     cli_args = '--output-inverse-eigenvalue Outputs/file_base=ne_ic_dummy'
-    expect_out = 'Iteration 1 k-eigenvalue = 5.00146'
+    expect_out = 'Iteration\s+[0-9]\s+k-eigenvalue\s+=\s+5.00146'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an option to output the eigenvalue on screen as its inverse."
   [../]
