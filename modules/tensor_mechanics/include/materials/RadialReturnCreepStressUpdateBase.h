@@ -15,12 +15,17 @@
  * This class provides baseline functionallity for creep models based on the stress update material
  * in a radial return isotropic creep calculations.
  */
-class RadialReturnCreepStressUpdateBase : public RadialReturnStressUpdate
+template <bool is_ad>
+class RadialReturnCreepStressUpdateBaseTempl : public RadialReturnStressUpdateTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
+  RadialReturnCreepStressUpdateBaseTempl(const InputParameters & parameters);
+
+  using Material::_qp;
+  using RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn;
+  using SingleVariableReturnMappingSolutionTempl<is_ad>::computeDerivative;
 
   /**
    * Compute the strain energy rate density for this inelastic model for the current step.
@@ -28,9 +33,9 @@ public:
    * @param strain_rate The strain rate at the end of the step
    * @return The computed strain energy rate density
    */
-  virtual Real
-  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & /*stress*/,
-                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
+  virtual GenericReal<is_ad> computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*stress*/,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*strain_rate*/)
   {
     mooseError(
         "The computation of strain energy rate density needs to be implemented by a child class");
@@ -39,7 +44,8 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
-  virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
 
   /**
    * This method returns the derivative of the creep strain with respect to the von mises stress. It
@@ -58,10 +64,10 @@ protected:
     return TangentCalculationMethod::PARTIAL;
   }
 
-  /// String that is prepended to the creep_strain Material Property
-  const std::string _creep_prepend;
-
   /// Creep strain material property
-  MaterialProperty<RankTwoTensor> & _creep_strain;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };
+
+typedef RadialReturnCreepStressUpdateBaseTempl<false> RadialReturnCreepStressUpdateBase;
+typedef RadialReturnCreepStressUpdateBaseTempl<true> ADRadialReturnCreepStressUpdateBase;
