@@ -11,6 +11,8 @@
 
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
+// Ignore depcrecated copy warnings for this class from libmesh Eigen contrib
+#include "libmesh/ignore_warnings.h"
 #include <Eigen/Geometry>
 
 // forward declaration
@@ -36,3 +38,6 @@ public:
   // Euler to Quaternions
   Eigen::Quaternion<Real> toQuaternion();
 };
+
+// Restore warnings for other classes
+#include "libmesh/restore_warnings.h"
