@@ -3,7 +3,6 @@
 #include "GeneralReporter.h"
 
 #include "OptimizeSolve.h"
-#include "OptimizationParameterVectorPostprocessor.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
