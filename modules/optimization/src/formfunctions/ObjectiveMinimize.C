@@ -10,8 +10,7 @@ ObjectiveMinimize::validParams()
                                 "Name of reporter value containing measure pointed values.");
   params.addParam<ReporterValueName>("data_computed_name",
                                      "Reporter value to create if 'data_computed' does not exist.");
-  params.addRequiredParam<std::vector<Real>>("data_target",
-                                             "Target measured value for each postprocessor.");
+  params.addRequiredParam<std::vector<Real>>("data_target", "Target measured value.");
   return params;
 }
 
@@ -37,18 +36,4 @@ ObjectiveMinimize::computeObjective()
   val = 0.5 * val;
 
   return val;
-}
-
-const std::vector<Real> &
-ObjectiveMinimize::getDataValueHelper(const std::string & get_param,
-                                      const std::string & declare_param)
-{
-  if (!isParamValid(get_param) && !isParamValid(declare_param))
-    mooseError("Must provide either ", get_param, " or ", declare_param, " in ", type());
-  else if (isParamValid(get_param) && isParamValid(declare_param))
-    paramError(declare_param, "Cannot specify both ", get_param, " and ", declare_param);
-  else if (isParamValid(get_param))
-    return getReporterValue<std::vector<Real>>(get_param, REPORTER_MODE_REPLICATED);
-  else
-    return declareValue<std::vector<Real>>(declare_param, REPORTER_MODE_REPLICATED);
 }

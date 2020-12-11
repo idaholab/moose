@@ -1,3 +1,4 @@
+function_vals = '0 0 0'
 
 [Mesh]
   type = GeneratedMesh
@@ -21,30 +22,15 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [pt]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = 10
-    point = '0.2 0.5 0'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.5 0.5 0'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '1.5 0.5 0'
-  [../]
-  [./pt3]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '1.8 0.5 0'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = x
+    y_coord_name = y
+    z_coord_name = z
+    value_name = value
+  []
 []
 
 
@@ -107,19 +93,19 @@
     type = ParsedFunction
     value = x*x
     vars = 'alpha beta c'
-    vals = 'p1 p2 p3'
+    vals = ${function_vals}
   []
   [volumetric_heat_func_deriv_beta]
     type = ParsedFunction
     value = 2*beta*x
     vars = 'alpha beta c'
-    vals = 'p1 p2 p3'
+    vals = ${function_vals}
   []
   [volumetric_heat_func_deriv_c]
     type = ParsedFunction
     value = 1
     vars = 'alpha beta c'
-    vals = 'p1 p2 p3'
+    vals = ${function_vals}
   []
 []
 
@@ -140,30 +126,17 @@
     function = volumetric_heat_func_deriv_c
     variable = temperature
   []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = linear #these need to have execute_on linear to get the gradient correct
-  []
-  [p2]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = linear
-  []
-  [p3]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = linear
-  []
 []
 
-
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0; 10 10 10 10'
   []
-  [parameterReceiver]
-    type = ControlsReceiver
+  [adjoint_pt]
+    type = VectorOfPostprocessors
+    postprocessors = 'adjoint_pt_0 adjoint_pt_1 adjoint_pt_2'
   []
 []
 

@@ -12,16 +12,8 @@ public:
   virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
 
 private:
-  /// number of data values
-  unsigned int _data_size;
-  /// vector of simulation data
-  std::vector<const PostprocessorValue *> _data_computed;
-  /// vector of measured data
-  const std::vector<Real> & _data_target;
-  /// misfit at data points
-  std::vector<Real> _data_misfit;
-  /// VPP to send misfit data to for adjoint
-  OptimizationParameterVectorPostprocessor & _adjoint_vpp;
-  /// vector of simulation data
-  std::vector<const PostprocessorValue *> _adjoint_data_computed;
+  /// vector of misfit data
+  const std::vector<Real> & _misfit;
+  /// vector of adjoint data
+  const std::vector<Real> & _adjoint_data;
 };

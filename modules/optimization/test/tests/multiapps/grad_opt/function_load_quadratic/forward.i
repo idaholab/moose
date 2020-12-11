@@ -57,7 +57,7 @@
     type = ParsedFunction
     value = alpha*x*x+beta*beta*x+c
     vars = 'alpha beta c'
-    vals = 'p1 p2 p3'
+    vals = '0 0 0'
   []
 []
 
@@ -83,47 +83,15 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
+[VectorPostprocessors]
+  [data_pt]
+    type = MeasuredDataPointSampler
     variable = temperature
-    point = '0.2 0.5 0'
-  []
-  [data_pt_1]
-    type = PointValue
-    variable = temperature
-    point = '0.5 0.5 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '1.5 0.5 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '1.8 0.5 0'
-  []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = LINEAR #these need to have execute_on linear to get the gradient correct
-  []
-  [p2]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = LINEAR
-  []
-  [p3]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = LINEAR
-  []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+    points = '0.2 0.5 0
+              0.5 0.5 0
+              1.5 0.5 0
+              1.8 0.5 0'
+    measured_values = '210 220 160 120'
   []
 []
 

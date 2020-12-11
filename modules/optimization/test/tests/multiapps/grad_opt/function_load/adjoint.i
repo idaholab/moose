@@ -1,3 +1,4 @@
+function_vals = '100 1 -10 -10'
 
 [Mesh]
   type = GeneratedMesh
@@ -21,32 +22,16 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [pt]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = 10
-    point = '0.2 0.2 0'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 0.6 0'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.2 1.4 0'
-  [../]
-  [./pt3]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 1.8 0'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = x
+    y_coord_name = y
+    z_coord_name = z
+    value_name = value
+  []
 []
-
 
 [BCs]
   [left]
@@ -83,10 +68,6 @@
   []
 []
 
-[Problem]#do we need this
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -111,25 +92,25 @@
     type = ParsedFunction
     value = sin(C1+x*pi/2)*sin(C2+y*pi/2)
     vars = 'alpha beta C1 C2'
-    vals = 'p1 p2 p3 p4'
+    vals = ${function_vals}
   []
   [volumetric_heat_func_deriv_beta]
     type = ParsedFunction
     value = 1
     vars = 'alpha beta C1 C2'
-    vals = 'p1 p2 p3 p4'
+    vals = ${function_vals}
   []
   [volumetric_heat_func_deriv_C1]
     type = ParsedFunction
     value = alpha*cos(C1+x*pi/2)*sin(C2+y*pi/2)
     vars = 'alpha beta C1 C2'
-    vals = 'p1 p2 p3 p4'
+    vals = ${function_vals}
   []
   [volumetric_heat_func_deriv_C2]
     type = ParsedFunction
     value = alpha*sin(C1+x*pi/2)*cos(C2+y*pi/2)
     vars = 'alpha beta C1 C2'
-    vals = 'p1 p2 p3 p4'
+    vals = ${function_vals}
   []
 []
 
@@ -155,38 +136,19 @@
     function = volumetric_heat_func_deriv_C2
     variable = temperature
   []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 100
-    execute_on = LINEAR
-  []
-  [p2]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = LINEAR
-  []
-  [p3]
-    type = ConstantValuePostprocessor
-    value = -10
-    execute_on = LINEAR
-  []
-  [p4]
-    type = ConstantValuePostprocessor
-    value = -10
-    execute_on = LINEAR
-  []
 []
 
-
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.8 0.2 0.8; 0.2 0.6 1.4 1.8; 0 0 0; 10 10 10 10'
   []
-  [parameterReceiver]
-    type = ControlsReceiver
+  [adjoint_pt]
+    type = VectorOfPostprocessors
+    postprocessors = 'adjoint_pt_0 adjoint_pt_1 adjoint_pt_2 adjoint_pt_3'
   []
 []
-
 
 [Outputs]
   console = true

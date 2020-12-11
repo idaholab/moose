@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -57,7 +56,7 @@
     type = ParsedFunction
     value = alpha*sin(C1+x*pi/2)*sin(C2+y*pi/2)+beta
     vars = 'alpha beta C1 C2'
-    vals = 'p1 p2 p3 p4'
+    vals = '100 1 -10 -10'
   []
 []
 
@@ -83,57 +82,19 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
+[VectorPostprocessors]
+  [data_pt]
+    type = MeasuredDataPointSampler
     variable = temperature
-    point = '0.2 0.2 0'
-  []
-  [data_pt_1]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.6 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.2 1.4 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '0.8 1.8 0'
-  []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 100
-    execute_on = LINEAR
-  []
-  [p2]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = LINEAR
-  []
-  [p3]
-    type = ConstantValuePostprocessor
-    value = -10
-    execute_on = LINEAR
-  []
-  [p4]
-    type = ConstantValuePostprocessor
-    value = -10
-    execute_on = LINEAR
-  []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+    points = '0.2 0.2 0
+              0.8 0.6 0
+              0.2 1.4 0
+              0.8 1.8 0'
+    measured_values = '209 218 164 121'
   []
 []
 
 [Outputs]
-  # console = true
   exodus = true
   file_base = 'forward'
 []

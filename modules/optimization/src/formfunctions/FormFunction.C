@@ -66,3 +66,16 @@ FormFunction::updateParameters(const libMesh::PetscVector<Number> & x)
     for (auto & val : *param)
       val = x(n++);
 }
+
+const std::vector<Real> &
+FormFunction::getDataValueHelper(const std::string & get_param, const std::string & declare_param)
+{
+  if (!isParamValid(get_param) && !isParamValid(declare_param))
+    mooseError("Must provide either ", get_param, " or ", declare_param, " in ", type());
+  else if (isParamValid(get_param) && isParamValid(declare_param))
+    paramError(declare_param, "Cannot specify both ", get_param, " and ", declare_param);
+  else if (isParamValid(get_param))
+    return getReporterValue<std::vector<Real>>(get_param, REPORTER_MODE_REPLICATED);
+  else
+    return declareValue<std::vector<Real>>(declare_param, REPORTER_MODE_REPLICATED);
+}

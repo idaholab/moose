@@ -21,30 +21,15 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [pt]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = 10
-    point = '0.2 0.2 0'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 0.6 0'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.2 1.4 0'
-  [../]
-  [./pt3]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 1.8 0'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = x
+    y_coord_name = y
+    z_coord_name = z
+    value_name = value
+  []
 []
 
 
@@ -83,10 +68,6 @@
   []
 []
 
-[Problem]#do we need this
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -112,13 +93,17 @@
   []
 []
 
-
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.8 0.2 0.8; 0.2 0.6 1.4 1.8; 0 0 0; 10 10 10 10'
+  []
+  [adjoint_pt]
+    type = VectorOfPostprocessors
+    postprocessors = 'adjoint_pt_0'
   []
 []
-
 
 [Outputs]
   console = true

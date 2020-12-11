@@ -1,4 +1,3 @@
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -23,54 +22,15 @@
 []
 
 [DiracKernels]
-  [./ar00]
-    type = ConstantPointSource
+  [ar]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = 0
-    point = '0.3 0.8 0'
-  [../]
-  [./ar01]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.3 0.6 0'
-  [../]
-  [./ar02]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.3 0.4 0'
-  [../]
-  [./ar03]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.3 0.2 0'
-  [../]
-  [./ar04]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.7 0.8 0'
-  [../]
-  [./ar05]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.7 0.6 0'
-  [../]
-  [./ar06]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.7 0.4 0'
-  [../]
-  [./ar07]
-    type = ConstantPointSource
-    variable = temperature
-    value = 0
-    point = '0.7 0.2 0'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = x
+    y_coord_name = y
+    z_coord_name = z
+    value_name = value
+  []
 []
 
 
@@ -122,151 +82,52 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-[dr00]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.1 0'
-[]
-[dr01]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.2 0'
-[]
-[dr02]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.3 0'
-[]
-[dr03]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.4 0'
-[]
-[dr04]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.5 0'
-[]
-[dr05]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.6 0'
-[]
-[dr06]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.7 0'
-[]
-[dr07]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.8 0'
-[]
-[dr08]
-  type = PointValue
-  variable = temperature
-  point = '0.5 0.9 0'
-[]
-[dr09]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.1 0'
-[]
-[dr10]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.2 0'
-[]
-[dr11]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.3 0'
-[]
-[dr12]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.4 0'
-[]
-[dr13]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.5 0'
-[]
-[dr14]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.6 0'
-[]
-[dr15]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.7 0'
-[]
-[dr16]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.8 0'
-[]
-[dr17]
-  type = PointValue
-  variable = temperature
-  point = '0.9 0.9 0'
-[]
-[dr18]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.1 0'
-[]
-[dr19]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.2 0'
-[]
-[dr20]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.3 0'
-[]
-[dr21]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.4 0'
-[]
-[dr22]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.5 0'
-[]
-[dr23]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.6 0'
-[]
-[dr24]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.7 0'
-[]
-[dr25]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.8 0'
-[]
-[dr26]
-  type = PointValue
-  variable = temperature
-  point = '0.1 0.9 0'
-[]
-[]
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.3 0.3 0.3 0.3 0.7 0.7 0.7 0.7;
+             0.8 0.6 0.4 0.2 0.8 0.6 0.4 0.2;
+             0   0   0   0   0   0   0   0;
+             0   0   0   0   0   0   0   0'
+  []
+  [dr]
+    type = MeasuredDataPointSampler
+    variable = temperature
+    points = '0.5 0.1 0
+              0.5 0.2 0
+              0.5 0.3 0
+              0.5 0.4 0
+              0.5 0.5 0
+              0.5 0.6 0
+              0.5 0.7 0
+              0.5 0.8 0
+              0.5 0.9 0
 
-# should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+              0.9 0.1 0
+              0.9 0.2 0
+              0.9 0.3 0
+              0.9 0.4 0
+              0.9 0.5 0
+              0.9 0.6 0
+              0.9 0.7 0
+              0.9 0.8 0
+              0.9 0.9 0
+
+              0.1 0.1 0
+              0.1 0.2 0
+              0.1 0.3 0
+              0.1 0.4 0
+              0.1 0.5 0
+              0.1 0.6 0
+              0.1 0.7 0
+              0.1 0.8 0
+              0.1 0.9 0'
+    measured_values = '6.65 12.04 15.13 16.17 15.50 13.65 10.89 7.57 3.87
+                       1.88 3.41  4.26  4.55  4.36  3.84  3.07  2.14 1.09
+                       3.00 5.38  6.61  6.93  6.52  5.66  4.47  3.09 1.57'
   []
 []
-
 
 [Outputs]
   console = false

@@ -10,24 +10,18 @@
 #pragma once
 
 // MOOSE includes
-#include "MeasuredDataPointSamplerBase.h"
+#include "PointValueSampler.h"
 
-// Forward Declarations
-class MeasuredDataPointSampler;
-
-template <>
-InputParameters validParams<MeasuredDataPointSampler>();
-
-// FIXME LYNN  This is an exact copy of PointSampler because I need to add measurement data to the
-// values so that it can be sorted with the values.  This is all because SamplerBase has protected
-// inheritance in PointSamplerBase.
-
-class MeasuredDataPointSampler : public MeasuredDataPointSamplerBase
+class MeasuredDataPointSampler : public PointValueSampler
 {
 public:
   static InputParameters validParams();
 
   MeasuredDataPointSampler(const InputParameters & parameters);
 
-  virtual void initialize() override;
+  virtual void finalize() override;
+
+protected:
+  std::vector<VectorPostprocessorValue *> _measured;
+  std::vector<VectorPostprocessorValue *> _diff;
 };

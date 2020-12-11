@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -21,32 +20,16 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [pt]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = 10
-    point = '0.3 0.3'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.4 1.0'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 0.5'
-  [../]
-  [./pt3]
-    type = ConstantPointSource
-    variable = temperature
-    value = 10
-    point = '0.8 0.6'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = 'x'
+    y_coord_name = 'y'
+    z_coord_name = 'z'
+    value_name = 'value'
+  []
 []
-
 
 [BCs]
   [left]
@@ -83,10 +66,6 @@
   []
 []
 
-[Problem]#do we need this
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -96,31 +75,21 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [adjoint_pt_0]
-    type = PointValue
-    variable = temperature
-    point = '0.2 0.2 0'
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.3 0.4 0.8 0.8; 0.3 1.0 0.5 0.6; 0 0 0 0; 10 10 10 10'
   []
-  [adjoint_pt_1]
-    type = PointValue
+  [data_pt]
+    type = PointValueSampler
+    points = '0.2 0.2 0
+              0.2 0.8 0
+              0.8 0.2 0'
     variable = temperature
-    point = '0.2 0.8 0'
-  []
-  [adjoint_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.2 0'
+    sort_by = id
   []
 []
-
-# should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
-  []
-[]
-
 
 [Outputs]
   console = true

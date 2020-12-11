@@ -48,6 +48,10 @@ public:
   }
 
 protected:
+  /// Helper for getting or declaring data
+  const std::vector<Real> & getDataValueHelper(const std::string & get_param,
+                                               const std::string & declare_param);
+
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
   /// Number of parameters

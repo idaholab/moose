@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -21,24 +20,15 @@
 []
 
 [DiracKernels]
-  [./pt0]
-    type = ConstantPointSource
+  [pt]
+    type = VectorPostprocessorPointSource
     variable = temperature
-    value = -2458
-    point = '0.2 0.2'
-  [../]
-  [./pt1]
-    type = ConstantPointSource
-    variable = temperature
-    value = 7257
-    point = '0.2 0.8'
-  [../]
-  [./pt2]
-    type = ConstantPointSource
-    variable = temperature
-    value = 26335
-    point = '0.8 0.2'
-  [../]
+    vector_postprocessor = point_source
+    x_coord_name = 'x'
+    y_coord_name = 'y'
+    z_coord_name = 'z'
+    value_name = 'value'
+  []
 []
 
 
@@ -77,10 +67,6 @@
   []
 []
 
-[Problem]#do we need this
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -90,31 +76,21 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
-    variable = temperature
-    point = '0.0 0.3 0'
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
   []
-  [data_pt_1]
-    type = PointValue
+  [data_pt]
+    type = MeasuredDataPointSampler
     variable = temperature
-    point = '0.0 0.5 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.0 1.0 0'
+    points = '0.0 0.3 0
+              0.0 0.5 0
+              0.0 1.0 0'
+    measured_values = '100 200 300'
   []
 []
-
-# should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
-  []
-[]
-
 
 [Outputs]
   console = true

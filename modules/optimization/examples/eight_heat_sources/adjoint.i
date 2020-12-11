@@ -1,4 +1,3 @@
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -23,168 +22,15 @@
 []
 
 [DiracKernels]
-[a00]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.1 0'
-[]
-[a01]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.2 0'
-[]
-[a02]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.3 0'
-[]
-[a03]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.4 0'
-[]
-[a04]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.5 0'
-[]
-[a05]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.6 0'
-[]
-[a06]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.7 0'
-[]
-[a07]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.8 0'
-[]
-[a08]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.5 0.9 0'
-[]
-[a09]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.1 0'
-[]
-[a10]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.2 0'
-[]
-[a11]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.3 0'
-[]
-[a12]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.4 0'
-[]
-[a13]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.5 0'
-[]
-[a14]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.6 0'
-[]
-[a15]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.7 0'
-[]
-[a16]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.8 0'
-[]
-[a17]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.9 0.9 0'
-[]
-[a18]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.1 0'
-[]
-[a19]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.2 0'
-[]
-[a20]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.3 0'
-[]
-[a21]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.4 0'
-[]
-[a22]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.5 0'
-[]
-[a23]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.6 0'
-[]
-[a24]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.7 0'
-[]
-[a25]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.8 0'
-[]
-[a26]
-  type = ConstantPointSource
-  variable = temperature
-  value = 7.5
-  point = '0.1 0.9 0'
-[]
+  [a]
+    type = VectorPostprocessorPointSource
+    variable = temperature
+    vector_postprocessor = point_source
+    x_coord_name = x
+    y_coord_name = y
+    z_coord_name = z
+    value_name = value
+  []
 []
 
 [BCs]
@@ -222,10 +68,6 @@
   []
 []
 
-[Problem]#do we need this
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -235,56 +77,40 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [ar00]
-    type = PointValue
-    variable = temperature
-    point = '0.3 0.8 0'
+[VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    value = '0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+             0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9
+             0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1;
+
+             0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+             0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+             0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9;
+
+             0   0   0   0   0   0   0   0   0
+             0   0   0   0   0   0   0   0   0
+             0   0   0   0   0   0   0   0   0;
+
+             7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5
+             7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5
+             7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5 7.5'
   []
-  [ar01]
-    type = PointValue
+  [ar]
+    type = PointValueSampler
     variable = temperature
-    point = '0.3 0.6 0'
-  []
-  [ar02]
-    type = PointValue
-    variable = temperature
-    point = '0.3 0.4 0'
-  []
-  [ar03]
-    type = PointValue
-    variable = temperature
-    point = '0.3 0.2 0'
-  []
-  [ar04]
-    type = PointValue
-    variable = temperature
-    point = '0.7 0.8 0'
-  []
-  [ar05]
-    type = PointValue
-    variable = temperature
-    point = '0.7 0.6 0'
-  []
-  [ar06]
-    type = PointValue
-    variable = temperature
-    point = '0.7 0.4 0'
-  []
-  [ar07]
-    type = PointValue
-    variable = temperature
-    point = '0.7 0.2 0'
+    points = '0.3 0.8 0
+              0.3 0.6 0
+              0.3 0.4 0
+              0.3 0.2 0
+              0.7 0.8 0
+              0.7 0.6 0
+              0.7 0.4 0
+              0.7 0.2 0'
+    sort_by = id
   []
 []
-
-# should be able to do all this in the transfer  line 40 of sampler Receiver
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
-  []
-[]
-
 
 [Outputs]
   console = false

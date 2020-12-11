@@ -3,11 +3,12 @@
 
 [FormFunction]
   type = ObjectiveGradientMinimize
-  adjoint_vpp = 'adjoint_results'
-  adjoint_data_computed = 'adjoint_rec_0 adjoint_rec_1 adjoint_rec_2 adjoint_rec_3'
-  parameter_vpp = 'parameter_results'
-  data_computed = 'data_rec_0 data_rec_1 data_rec_2 data_rec_3'
-  data_target = '209 218 164 121'
+  parameter_names = 'parameter_results'
+  num_values = '4'
+  initial_condition = '100 1 -10 -10'
+
+  misfit_name = 'misfit'
+  adjoint_data_name = 'adjoint'
 []
 
 [Executioner]
@@ -25,149 +26,62 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = FORWARD
+    reset_app = true
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = ADJOINT
+    reset_app = true
+  []
+[]
+
+[Controls]
+  [toforward]
+    type = OptimizationMultiAppCommandLineControl
+    multi_app = forward
+    value_names = 'parameter_results'
+    parameters = 'Functions/volumetric_heat_func/vals'
+  []
+  [toadjoint]
+    type = OptimizationMultiAppCommandLineControl
+    multi_app = adjoint
+    value_names = 'parameter_results'
+    parameters = 'function_vals'
   []
 []
 
 [Transfers]
-  [toforward]
-    type = OptimizationParameterTransfer
+  [fromforward]
+    type = MultiAppReporterTransfer
     multi_app = forward
-    parameter_vpp = parameter_results
-    to_control = parameterReceiver
-  []
-  [pp_transfer_0]
-    type = MultiAppPostprocessorTransfer
+    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
+    to_reporters = 'FormFunction/misfit receiver/measured'
     direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_0
-    to_postprocessor = data_rec_0
-    reduction_type = average
   []
-  [pp_transfer_1]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_1
-    to_postprocessor = data_rec_1
-    reduction_type = average
-  []
-  [pp_transfer_2]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_2
-    to_postprocessor = data_rec_2
-    reduction_type = average
-  []
-  [pp_transfer_3]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_3
-    to_postprocessor = data_rec_3
-    reduction_type = average
-  []
-
-  [toAdjoint]
-    type = OptimizationParameterTransfer
+  [toadjoint]
+    type = MultiAppReporterTransfer
     multi_app = adjoint
-    parameter_vpp = adjoint_results
-    to_control = adjointReceiver
+    from_reporters = 'FormFunction/misfit'
+    to_reporters = 'point_source/value'
+    direction = to_multiapp
   []
-  [toAdjoint2]
-    type = OptimizationParameterTransfer
+  [fromadjoint]
+    type = MultiAppReporterTransfer
     multi_app = adjoint
-    parameter_vpp = parameter_results
-    to_control = parameterReceiver
-  []
-  [pp_adjoint_0]
-    type = MultiAppPostprocessorTransfer
+    from_reporters = 'adjoint_pt/adjoint_pt'
+    to_reporters = 'FormFunction/adjoint'
     direction = from_multiapp
-    multi_app = adjoint
-    from_postprocessor = adjoint_pt_0
-    to_postprocessor = adjoint_rec_0
-    reduction_type = average
-  []
-  [pp_adjoint_1]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = adjoint
-    from_postprocessor = adjoint_pt_1
-    to_postprocessor = adjoint_rec_1
-    reduction_type = average
-  []
-  [pp_adjoint_2]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = adjoint
-    from_postprocessor = adjoint_pt_2
-    to_postprocessor = adjoint_rec_2
-    reduction_type = average
-  []
-  [pp_adjoint_3]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = adjoint
-    from_postprocessor = adjoint_pt_3
-    to_postprocessor = adjoint_rec_3
-    reduction_type = average
   []
 []
 
-[VectorPostprocessors]
-  [parameter_results]
-    type = OptimizationParameterVectorPostprocessor
-    parameters = 'Postprocessors/p1/value
-                  Postprocessors/p2/value
-                  Postprocessors/p3/value
-                  Postprocessors/p4/value'
-  []
-  [adjoint_results]
-    type = OptimizationParameterVectorPostprocessor
-    parameters = 'DiracKernels/pt0/value
-                  DiracKernels/pt1/value
-                  DiracKernels/pt2/value
-                  DiracKernels/pt3/value'
+[Reporters]
+  [receiver]
+    type = ConstantReporter
+    real_vector_names = measured
+    real_vector_values = '0 0 0 0'
   []
 []
-
-[Postprocessors]
-  [data_rec_0]
-    type = Receiver
-  []
-  [data_rec_1]
-    type = Receiver
-  []
-  [data_rec_2]
-    type = Receiver
-  []
-  [data_rec_3]
-    type = Receiver
-  []
-
-  [adjoint_rec_0]
-    type = Receiver
-    outputs = none
-  []
-  [adjoint_rec_1]
-    type = Receiver
-    outputs = none
-  []
-  [adjoint_rec_2]
-    type = Receiver
-    outputs = none
-  []
-  [adjoint_rec_3]
-    type = Receiver
-    outputs = none
-  []
-[]
-
 
 [Outputs]
   console = true

@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -64,26 +63,15 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Postprocessors]
-  [data_pt_0]
-    type = PointValue
+[VectorPostprocessors]
+  [data_pt]
+    type = MeasuredDataPointSampler
     variable = temperature
-    point = '0.2 0.2 0'
-  []
-  [data_pt_1]
-    type = PointValue
-    variable = temperature
-    point = '0.8 0.6 0'
-  []
-  [data_pt_2]
-    type = PointValue
-    variable = temperature
-    point = '0.2 1.4 0'
-  []
-  [data_pt_3]
-    type = PointValue
-    variable = temperature
-    point = '0.8 1.8 0'
+    points = '0.2 0.2 0
+              0.8 0.6 0
+              0.2 1.4 0
+              0.8 1.8 0'
+    measured_values = '199 214 154 129'
   []
 []
 
