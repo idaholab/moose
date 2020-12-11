@@ -4,12 +4,11 @@
   nx = 1
   ny = 1
   nz = 1
-  second_order = true
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = false
+  volumetric_locking_correction = true
 []
 
 [AuxVariables]
@@ -21,15 +20,12 @@
 
 [Variables]
   [disp_x]
-    order = SECOND
     scaling = 1e-10
   []
   [disp_y]
-    order = SECOND
     scaling = 1e-10
   []
   [disp_z]
-    order = SECOND
     scaling = 1e-10
   []
 []
@@ -72,23 +68,6 @@
    [stress_]
       type = ADComputeFiniteStrainElasticStress
    []
-
-#  [elastic_strain]
-#    type = ADComputeMultipleInelasticStress
-#    inelastic_models = "trial_plasticity"
-#    max_iterations = 500
-#    absolute_tolerance = 1e-05
-#  []
-
-#  [trial_plasticity]
-#    type = ADTransverselyIsotropicPlasticityStressUpdate
-#    # internal_solve_output_on = always
-#    # F G H L M N
-#    hardening_constant = 5000
-#    yield_stress = 20000000000000
-#    hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
-#    base_name = trial_plasticity
-#  []
 []
 
 [BCs]

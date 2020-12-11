@@ -4,12 +4,11 @@
   nx = 1
   ny = 1
   nz = 1
-  second_order = true
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  volumetric_locking_correction = false
+  volumetric_locking_correction = true
 []
 
 [AuxVariables]
@@ -32,15 +31,12 @@
 []
 [Variables]
   [disp_x]
-    order = SECOND
     scaling = 1e-10
   []
   [disp_y]
-    order = SECOND
     scaling = 1e-10
   []
   [disp_z]
-    order = SECOND
     scaling = 1e-10
   []
 []
@@ -100,10 +96,6 @@
     poissons_ratio = 0.0
   []
 
-  #  [stress_]
-  #     type = ADComputeFiniteStrainElasticStress
-  #  []
-
   [elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_plasticity"
@@ -150,13 +142,6 @@
       function = pull
     []
   []
-
-  #  [./pull_disp_y]
-  #    type = ADFunctionDirichletBC
-  #    variable = disp_y
-  #    boundary = top
-  #    function = pull
-  #  [../]
 []
 
 [Preconditioning]
