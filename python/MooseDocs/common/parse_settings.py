@@ -49,7 +49,7 @@ def match_settings(known, raw):
             value = False
         elif value.lower() == 'none':
             value = None
-        elif all([v.isdigit() for v in value]):
+        elif value and all([v.isdigit() for v in value]):
             value = float(value)
 
         if key in known:

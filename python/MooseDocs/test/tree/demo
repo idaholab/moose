@@ -1,6 +1,7 @@
 [Tests]
   issues = '#1980'
   design = core.md
+  classification = custom
   [r0]
     requirement = "Tree One"
   []

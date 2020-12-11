@@ -247,5 +247,16 @@ class TestCheckRequirements(unittest.TestCase):
             moosesqa.check_requirements([req0, req1], allowed_collections={'test'})
         self.assertIn("Invalid collection names found: test2", cm.output[0])
 
+    def testClassification(self):
+        req0 = moosesqa.Requirement(name='req0',
+                                    requirement='requirement', design=['Diffusion.md'], issues=['#1234'],
+                                    specification=moosesqa.TestSpecification(), classification='test')
+        req1 = moosesqa.Requirement(name='req1',
+                                    requirement='requirement2', design=['Diffusion.md'], issues=['#1234'],
+                                    specification=moosesqa.TestSpecification(), classification='test2')
+        with self.assertLogs(level='ERROR') as cm:
+            moosesqa.check_requirements([req0, req1], allowed_classifications={'test'})
+        self.assertIn("Invalid classification found: test2", cm.output[0])
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

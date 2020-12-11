@@ -36,7 +36,7 @@
 
 ## Custom Matrix
 
-!sqa requirements category=custom prefix=C
+!sqa requirements category=demo prefix=C
 
 ## Collections
 
@@ -44,6 +44,6 @@
 
 !sqa collections-list
 
-### Collections
+### Requirement Collection
 
 !sqa collections category=demo

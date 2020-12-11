@@ -34,7 +34,7 @@ class RequirementLogHelper(LogHelper):
         line = mooseutils.colorText(str(line if (line is not None) else req.line), 'CYAN', colored=RequirementLogHelper.COLOR_TEXT)
         return '{}:{}:{}\n'.format(filename, name, line)
 
-def check_requirements(requirements, file_list=None, color_text=True, allowed_collections=None, **kwargs):
+def check_requirements(requirements, file_list=None, color_text=True, allowed_collections=None, allowed_classifications=None, **kwargs):
     """
     Tool for checking Requirement for deficiencies
     """
@@ -66,6 +66,7 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
     kwargs.setdefault('log_extra_issues', log_default)
     kwargs.setdefault('log_extra_collections', log_default)
     kwargs.setdefault('log_invalid_collection', log_default)
+    kwargs.setdefault('log_invalid_classification', log_default)
     kwargs.setdefault('log_issue_format', log_default)
     kwargs.setdefault('log_design_files', log_default)
     kwargs.setdefault('log_validation_files', log_default)
@@ -90,12 +91,18 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
     if allowed_collections is None:
         allowed_collections = set(moosesqa.MOOSESQA_COLLECTIONS.keys())
 
+    # Setup allowed
+    if allowed_classifications is None:
+        allowed_classifications = set(k.upper() for k in moosesqa.MOOSESQA_CLASSIFICATION.keys())
+    else:
+        allowed_classifications = set(c.upper() for c in allowed_classifications)
+
     # Storage container for duplicate detection
     requirement_dict = collections.defaultdict(set)
 
     # Check each Requirement object for deficiencies
     for req in requirements:
-        _check_requirement(req, logger, file_list, allowed_collections)
+        _check_requirement(req, logger, file_list, allowed_collections, allowed_classifications)
         if req.requirement is not None:
             key = [req.requirement]
             for detail in req.details:
@@ -116,7 +123,7 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
 
     return logger
 
-def _check_requirement(req, logger, file_list, allowed_collections):
+def _check_requirement(req, logger, file_list, allowed_collections, allowed_classifications):
     """Opens tests specification and extracts requirement items."""
 
     # Test for 'deprecated' with other parameters
@@ -256,6 +263,13 @@ def _check_requirement(req, logger, file_list, allowed_collections):
             if wrong:
                 msg = 'Invalid collection names found: {}'.format(' '.join(wrong))
                 LogHelper.log(logger, 'log_invalid_collection', msg)
+
+        # Test for invalid 'classification'
+        if (allowed_classifications is not None) and (req.classification is not None):
+            if req.classification.upper() not in allowed_classifications:
+                msg = 'Invalid classification found: {}'.format(req.classification)
+                LogHelper.log(logger, 'log_invalid_classification', msg)
+
 
 def _has_file(filename, file_list):
     """Test if the filename is located in the list"""

@@ -66,10 +66,6 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
-            custom:
-                prefix: C
-                files:
-                    - custom.hit
 
     MooseDocs.extensions.navigation:
         name: MOOSEDocs

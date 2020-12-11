@@ -105,6 +105,13 @@ class TestRequirement(unittest.TestCase):
         self.assertEqual(len(req.collections), 1)
         self.assertEqual(req.collections, {'andrew'})
 
+    def testClassification(self):
+        req = Requirement()
+        self.assertIsNone(req.classification)
+
+        req = Requirement(classification='andrew')
+        self.assertEqual(req.classification, 'andrew')
+
     def testNames(self):
         req = Requirement()
         self.assertEqual(len(req.names), 0)

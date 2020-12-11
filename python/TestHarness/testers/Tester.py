@@ -106,6 +106,7 @@ class Tester(MooseObject):
         params.addParam("verification", False, "Set to True to mark test as a verification problem.")
         params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
         params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
+        params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
         return params
 
     # This is what will be checked for when we look for valid testers

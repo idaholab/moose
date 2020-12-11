@@ -82,7 +82,6 @@ class SQAExtension(command.CommandExtension):
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
         config['reports'] = (None, "Build SQA reports for dashboard creation.")
         config['add_run_exception_to_failure_analysis'] = (True, "Automatically include RunException tests in the 'FAILURE_ANALYSIS' collection.")
-        config['custom-requirements'] = (dict(), "Add the ability to read in hit files for creating custom requirements.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -125,58 +124,14 @@ class SQAExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Gathering SQA requirement information...")
 
-        repos = self.get('repos')
-        for index, (category, info) in enumerate(self.get('categories').items(), 1):
-            prefix = info.get('prefix', 'F')
-            specs = info.get('specs', ['tests'])
-            repo = info.get('repo', 'default')
-            reports = info.get('reports', None)
-
-            # Test directories
-            directories = list()
-            for d in info.get('directories', []):
-                path = mooseutils.eval_path(d)
-                if not os.path.isdir(path):
-                    path = os.path.join(MooseDocs.ROOT_DIR, d)
-                if not os.path.isdir(path):
-                    msg = "Input directory does not exist: %s"
-                    LOG.error(msg, path)
-                    continue
-                directories.append(path)
-
-            # Custom requirement files
-            files = list()
-            for f in info.get('files', []):
-                loc, fname = os.path.split(f)
-                path = os.path.join(mooseutils.eval_path(loc), fname)
-                if not os.path.isfile(path):
-                    path = os.path.join(MooseDocs.ROOT_DIR, loc, fname)
-                if not os.path.isfile(path):
-                    msg = "Input file does not exist: %s"
-                    LOG.error(msg, path)
-                    continue
-                files.append(path)
-
-            # Create requirement database from tests
-            self.__requirements[prefix][category].update(moosesqa.get_requirements_from_tests(directories, specs))
-
-            # Create requirement database from files
-            self.__requirements[prefix][category].update(moosesqa.get_requirements_from_files(files))
-
-            # Create dependency database
-            self.__dependencies[category] = info.get('dependencies', [])
-
-            # Create remote repository database
-            self.__remotes[category] = repos.get(repo, None)
-
-            # Create reports from included SQA apps (e.g., moose/modulus/stochastic_tools)
-            if reports:
-                self.__reports[category] = moosesqa.get_sqa_reports(reports)
+        # Build the requirements, dependencies, remotes, and reports data structures
+        for category, info in self.get('categories').items():
+            self._updateCategoryItems(category, info)
 
         # Number the requirements
-        for p in self.__requirements.keys():
-            for c, category in enumerate(self.__requirements[p].keys()):
-                moosesqa.number_requirements(self.__requirements[p][category], p, c+1)
+        for c, category in enumerate(self.__requirements.keys(), start=1):
+            for p, req_dict in self.__requirements[category].items():
+                moosesqa.number_requirements(req_dict, p, c)
 
         # Report for the entire app (e.g, moose/modules/doc)
         general_reports = self.get('reports')
@@ -208,26 +163,57 @@ class SQAExtension(command.CommandExtension):
                     LOG.warning(msg)
 
         # Add RunException tests to FAILURE_ANALYSIS collection
-        for req_category in self.__requirements['F'].values():
-            for requirements in req_category.values():
-                for req in requirements:
-                    t_types = req.types
-                    if (req.collections is None) and (t_types is not None) and ('RunException' in t_types):
-                        req.collections = set(['FAILURE_ANALYSIS'])
+        for req_category in self.__requirements.values():
+            for req_prefix in req_category.values():
+                for requirements in req_prefix.values():
+                    for req in requirements:
+                        t_types = req.types
+                        if (req.collections is None) and (t_types is not None) and ('RunException' in t_types):
+                            req.collections = set(['FAILURE_ANALYSIS'])
 
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
-    def postTokenize(self, page, ast):
-        """Update the requirement storage with requirements given in input text."""
-        for key, value in self.getAttributeItems():
-            self.__requirements[key[0]][key[1]][key[2]].append(value)
+    def _updateCategoryItems(self, category, info):
+        """
+        Helper for processing 'categories' configuration items.
+        """
+        specs = info.get('specs', ['tests'])
+        repo = info.get('repo', 'default')
+        reports = info.get('reports', None)
 
-        # Re-number to account for custom requirements
-        for prefix, categories in self.__requirements.items():
-            for c, out in enumerate(categories.values()):
-                for i, requirements in enumerate(out.values()):
-                    for j, req in enumerate(requirements):
-                        req.label = "{}{}.{}.{}".format(prefix, c+1, i+1, j+1)
+        # Test directories
+        directories = list()
+        for d in info.get('directories', []):
+            path = mooseutils.eval_path(d)
+            if not os.path.isdir(path):
+                path = os.path.join(MooseDocs.ROOT_DIR, d)
+            if not os.path.isdir(path):
+                msg = "Input directory does not exist: %s"
+                LOG.error(msg, path)
+                continue
+            directories.append(path)
+
+        # Create requirement database from tests
+        for group, requirements in moosesqa.get_requirements_from_tests(directories, specs).items():
+            for req in requirements:
+                key = req.classification or 'FUNCTIONAL'
+                if key not in moosesqa.MOOSESQA_CLASSIFICATION:
+                    self.setActive(False)
+                    msg = "SQA extension disabled.\nUnknown classification key in requirement: %s:%s"
+                    LOG.error(msg, req.filename, req.classification_line)
+                prefix = moosesqa.MOOSESQA_CLASSIFICATION[key][0]
+                self.__requirements[category][prefix][group].append(req)
+
+        # Create dependency database
+        self.__dependencies[category] = info.get('dependencies', [])
+
+        # Create remote repository database
+        repos = self.get('repos')
+        self.__remotes[category] = repos.get(repo, None)
+
+        # Create reports from included SQA apps (e.g., moose/modulus/stochastic_tools)
+        if reports:
+            self.__reports[category] = moosesqa.get_sqa_reports(reports)
 
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
@@ -235,10 +221,13 @@ class SQAExtension(command.CommandExtension):
 
     def requirements(self, category, prefix='F'):
         """Return the requirements dictionaries."""
-        req = self.__requirements[prefix].get(category, None)
-        if req is None:
+        c = self.__requirements.get(category, None)
+        if c is None:
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
-        return req
+        r = c.get(prefix, None)
+        if r is None:
+            raise exceptions.MooseDocsException("Unknown or missing 'prefix': {}", prefix)
+        return r
 
     def dependencies(self, category):
         """Return the dependency list for given category."""
@@ -333,6 +322,9 @@ class SQARequirementsCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
         prefix = self.settings['prefix']
         group_map = self.extension.get('requirement-groups', dict())
         for group, requirements in self.extension.requirements(category, prefix).items():
@@ -459,8 +451,11 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         return config
 
     def createToken(self, parent, info, page):
-        design = collections.defaultdict(list)
         category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
+        design = collections.defaultdict(list)
         prefix = self.settings['prefix']
         for requirements in self.extension.requirements(category, prefix).values():
             for req in requirements:
@@ -500,9 +495,12 @@ class SQAVerificationCommand(SQARequirementsCommand):
         return config
 
     def createToken(self, parent, info, page):
+        category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
         subcommand = info['subcommand']
         self.settings['link-{}'.format(subcommand)] = True
-        category = self.settings['category']
         prefix = self.settings['prefix']
         matrix = SQARequirementMatrix(parent)
         SQARequirementMatrixHeading(matrix, category=category, string=subcommand.title())
@@ -525,8 +523,11 @@ class SQACollectionsCommand(SQARequirementsCommand):
         return config
 
     def createToken(self, parent, info, page):
-        self.settings['link-collections'] = True
         category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
+        self.settings['link-collections'] = True
         prefix = self.settings['prefix']
         collection_map = collections.defaultdict(list)
         allowed = self.settings['items']
@@ -583,7 +584,7 @@ class SQADependenciesCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         suffix = self.settings['suffix']
-        category = self.settings['category']
+        category = self.settings['category'] or None
         if category == '_empty_':
             depends = self.extension.get('categories').keys()
         else:
@@ -610,7 +611,10 @@ class SQADocumentCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category')
+        category = self.settings['category']
+        if category == '_empty_':
+            return parent
+
         suffix = self.settings.get('suffix')
         return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)

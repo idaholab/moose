@@ -12,6 +12,7 @@ import logging
 import pyhit
 import mooseutils
 import moosetree
+import moosesqa
 from .Requirement import TestSpecification, Requirement, Detail
 
 def get_requirements_from_tests(directories, specs):
@@ -21,10 +22,8 @@ def get_requirements_from_tests(directories, specs):
     Input:
         directories[list]: A list of directories to consider
         specs[list]: A list of test specification names (e.g., ['tests'])
-        prefix[str]: Requirement label prefix, e.g.
-
     """
-    out = collections.defaultdict(list)
+    out = collections.defaultdict(lambda: collections.defaultdict(list))
     for location in directories:
         for filename in sorted(mooseutils.git_ls_files(location)):
             if os.path.isfile(filename) and (os.path.basename(filename) in specs):
@@ -38,7 +37,7 @@ def number_requirements(requirement_dict, prefix, category):
 
     Input:
         requirement_dict[dict]: Container of Requirement objects, as returned from get_requirement_from_tests.
-        prefix[str]: A string prefix to apply to label, e.g., 'F'
+        prefix[str]: Number prefix (e.g., 'F')
         category[int]: Category index to apply to label.
 
     The format of the number is <prefix><category>.<group>.<number>, e.g., F3.2.1. The group
@@ -50,18 +49,6 @@ def number_requirements(requirement_dict, prefix, category):
     for i, requirements in enumerate(requirement_dict.values()):
         for j, req in enumerate(requirements):
             req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
-
-def get_requirements_from_files(filenames):
-    """
-    Extracts requirement information from specific files, see get_requirements_from_file
-    """
-    out = collections.defaultdict(list)
-    for filename in filenames:
-        if not os.path.isfile(filename):
-            raise FileNotFoundError("The supplied filename does not exist: {}".format(filename))
-        group, _ = os.path.splitext(os.path.basename(filename))
-        out[group] = get_requirements_from_file(filename)
-    return out
 
 def get_requirements_from_file(filename):
     """
@@ -90,12 +77,15 @@ def get_requirements_from_file(filename):
     deprecated_line = root.children[0].line('deprecated', None)
     collections = root.children[0].get('collections', None)
     collections_line = root.children[0].line('collections', None)
+    classification = root.children[0].get('classification', None)
+    classification_line = root.children[0].line('classification', None)
 
     for child in root.children[0]:
         req = _create_requirement(child, filename,
                                   design, design_line,
                                   issues, issues_line,
                                   collections, collections_line,
+                                  classification, classification_line,
                                   deprecated, deprecated_line)
         requirements.append(req)
 
@@ -161,39 +151,26 @@ def _create_specification(child, name, filename):
         child[pyhit.Node]: Node containing test specification
         name: The name to apply to the specification
         filename: Location of the specification
-
-    NOTE: If the supplied 'child' node contains a 'test' parameter this is used to create the
-          specification rather than the node itself. The content of the 'test' should be the
-          filename and the block name, separated by a colon. The filename should be unique when
-          a list of all files in the repository is inspected with endswith.
-
-          test = simple_diffusion/tests:test
     """
+    spec = TestSpecification(name=name, filename=filename, line=child.line())
+    spec.type = child.get('type').strip() if child.get('type', None) is not None else None
+    spec.text = child.render()
+    spec.local = mooseutils.git_localpath(filename)
 
-    if 'test' in child:
-        fname, block = child['test'].split(':', 1)
-        spec_file = _find_file(mooseutils.git_root_dir(os.path.dirname(filename)), fname)
-        spec = get_test_specification(spec_file, block)
+    # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
+    spec.skip = child.get('skip', None) is not None
+    spec.deleted = child.get('deleted', None) is not None
 
-    else:
-        spec = TestSpecification(name=name, filename=filename, line=child.line())
-        spec.type = child.get('type').strip() if child.get('type', None) is not None else None
-        spec.text = child.render()
-        spec.local = mooseutils.git_localpath(filename)
-
-        # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
-        spec.skip = child.get('skip', None) is not None
-        spec.deleted = child.get('deleted', None) is not None
-
-        # Store the prerequisites, if any
-        prereq = child.get('prereq', None)
-        if prereq is not None:
-            spec.prerequisites = set(prereq.split(' '))
+    # Store the prerequisites, if any
+    prereq = child.get('prereq', None)
+    if prereq is not None:
+        spec.prerequisites = set(prereq.split(' '))
 
     return spec
 
 def _create_requirement(child, filename, design, design_line, issues, issues_line,
-                        collections, collections_line, deprecated, deprecated_line):
+                        collections, collections_line, classification, classification_line,
+                        deprecated, deprecated_line):
 
     # Create the Requirement object
     req = Requirement(name=child.name,
@@ -222,6 +199,11 @@ def _create_requirement(child, filename, design, design_line, issues, issues_lin
     collections = child.get('collections', collections if (collections is not None) else None)
     req.collections = set(collections.strip().split()) if (collections is not None) else None
     req.collections_line = child.line('collections', collections_line)
+
+    # "classification" parameter
+    classification = child.get('classification', classification if (classification is not None) else None)
+    req.classification = classification.strip().upper() if (classification is not None) else None
+    req.classification_line = child.line('classification', classification_line)
 
     # V&V document
     verification = child.get('verification', None)
@@ -256,4 +238,6 @@ def _create_detail(child, filename):
     req.deprecated_line = child.line('deprecated', None)
     req.collections = child.get('collections', None)
     req.collections_line = child.line('collections', None)
+    req.classification = child.get('classification', None)
+    req.classification_line = child.line('classification', None)
     return req

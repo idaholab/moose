@@ -62,10 +62,6 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
-            custom:
-                prefix: C
-                files:
-                    - python/MooseDocs/test/custom.hit
 
     MooseDocs.extensions.civet:
         active: False

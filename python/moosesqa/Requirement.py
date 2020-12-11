@@ -47,6 +47,8 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
 @mooseutils.addProperty('design_line', ptype=int)
 @mooseutils.addProperty('collections', ptype=set)
 @mooseutils.addProperty('collections_line', ptype=int)
+@mooseutils.addProperty('classification', ptype=str)
+@mooseutils.addProperty('classification_line', ptype=int)
 @mooseutils.addProperty('deprecated', ptype=bool, default=False)
 @mooseutils.addProperty('deprecated_line', ptype=int)
 @mooseutils.addProperty('verification', ptype=list)
