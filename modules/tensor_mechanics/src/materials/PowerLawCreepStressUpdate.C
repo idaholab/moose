@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PowerLawCreepStressUpdate.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
 
@@ -71,6 +72,14 @@ PowerLawCreepStressUpdate::computeResidual(const Real effective_trial_stress, co
 }
 
 Real
+PowerLawCreepStressUpdate::computeCreepRate(const Real effective_trial_stress)
+{
+  const Real creep_rate =
+      _coefficient * std::pow(effective_trial_stress, _n_exponent) * _exponential * _exp_time;
+  return creep_rate;
+}
+
+Real
 PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, const Real scalar)
 {
   const Real stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
@@ -83,14 +92,40 @@ PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, 
 Real
 PowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     const MaterialProperty<RankTwoTensor> & stress,
-    const MaterialProperty<RankTwoTensor> & strain_rate)
+    const MaterialProperty<RankTwoTensor> & strain_rate,
+    const bool numerical,
+    const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
 {
-  if (_n_exponent <= 1)
-    return 0.0;
+  if (!numerical)
+  {
+    if (_n_exponent <= 1)
+      return 0.0;
 
-  Real creep_factor = _n_exponent / (_n_exponent + 1);
+    Real creep_factor = _n_exponent / (_n_exponent + 1);
 
-  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+    return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+  }
+  else
+  {
+    RankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
+    Real dev_trial_stress_squared =
+        deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+    Real von_mises_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
+
+    Real tolerance = 1.0e-05;
+    std::size_t max_h_number = 200;
+    Real second = 0.0;
+
+    if (von_mises_stress > 1.0e-6)
+      second = MathUtils::trapezoidalRule(
+          0, von_mises_stress, tolerance, max_h_number, [this](Real val) {
+            return computeCreepRate(val);
+          });
+
+    // See Kim, Contour integral calculations for generalised creep laws within abaqus,
+    // International Journal of Pressure Vessels and Piping 78 661-666
+    return stress[_qp].doubleContraction((strain_rate)[_qp]) - second;
+  }
 }
 
 bool

@@ -51,7 +51,7 @@
 
 [AuxKernels]
   [./SERD]
-    type = ADMaterialRealAux
+    type = MaterialRealAux
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end

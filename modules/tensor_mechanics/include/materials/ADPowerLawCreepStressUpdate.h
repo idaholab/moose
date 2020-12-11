@@ -28,9 +28,13 @@ public:
 
   ADPowerLawCreepStressUpdate(const InputParameters & parameters);
 
-  virtual ADReal
+  virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
-                                 const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
+                                 const ADMaterialProperty<RankTwoTensor> & strain_rate,
+                                 const bool is_incremental,
+                                 const MaterialProperty<RankTwoTensor> & strain_rate_old) override;
+  Real computeCreepRate(const ADReal & effective_trial_stress);
+  Real functionToIntegrate(const Real & x);
 
   virtual bool substeppingCapabilityEnabled() override;
 
@@ -63,7 +67,7 @@ protected:
   /// Simulation start time
   const Real _start_time;
 
-  /// Exponential calculated from activiaction, gas constant, and temperature
+  /// Exponential calculated from activation, gas constant, and temperature
   ADReal _exponential;
 
   /// Exponential calculated from current time

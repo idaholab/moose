@@ -28,9 +28,11 @@ public:
    * @param strain_rate The strain rate at the end of the step
    * @return The computed strain energy rate density
    */
-  virtual ADReal
+  virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & /*stress*/,
-                                 const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
+                                 const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/,
+                                 const bool /* is_incremental*/,
+                                 const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
   {
     mooseError(
         "The computation of strain energy rate density needs to be implemented by a child class");

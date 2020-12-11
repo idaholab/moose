@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include <vector>
 #include <array>
+#include <cmath>
 
 #include "MathUtils.h"
 
@@ -143,4 +144,35 @@ TEST(MathUtilsTest, polynomial)
 
   EXPECT_NEAR(MathUtils::polynomial(table1a, 1.5), 29.5625, 1e-5);
   EXPECT_NEAR(MathUtils::polynomialDerivative(table1a, 1.5), 40.0, 1e-5);
+}
+
+TEST(MathUtilsTest, trapezoidalRuleExponential)
+{
+  Real tolerance = 1.0e-5;
+  std::size_t max_number_intervals = 400;
+  Real normalizer = 1.0 / 250;
+
+  Real numerical_solution =
+      MathUtils::trapezoidalRule(0.0, 2.0, tolerance, max_number_intervals, [](Real val) {
+        return val * std::exp(3.0 * val);
+      });
+
+  Real analytical_solution = std::exp(6) * 5.0 / 9.0 + 1.0 / 9.0;
+  EXPECT_NEAR(normalizer * analytical_solution, normalizer * numerical_solution, 1e-5);
+}
+
+TEST(MathUtilsTest, trapezoidalRuleNaturalLog)
+{
+  Real tolerance = 1.0e-5;
+  std::size_t max_number_intervals = 400;
+  Real a = 2.6;
+  Real b = 4.9;
+
+  Real numerical_solution =
+      MathUtils::trapezoidalRule(0.0, 1.0, tolerance, max_number_intervals, [a, b](Real val) {
+        return std::exp(val * std::log(a) + (1 - val) * std::log(b));
+      });
+
+  Real analytical_solution = (a - b) / (std::log(a) - std::log(b));
+  EXPECT_NEAR(analytical_solution, numerical_solution, 1e-5);
 }

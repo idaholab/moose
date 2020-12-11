@@ -30,7 +30,9 @@ public:
    */
   virtual Real
   computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & /*stress*/,
-                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
+                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/,
+                                 const bool /*is_incremental*/,
+                                 const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
   {
     mooseError(
         "The computation of strain energy rate density needs to be implemented by a child class");

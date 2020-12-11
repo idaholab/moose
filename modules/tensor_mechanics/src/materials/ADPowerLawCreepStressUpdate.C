@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADPowerLawCreepStressUpdate.h"
+#include "MathUtils.h"
 
 registerMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
@@ -65,7 +66,16 @@ ADPowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stre
   const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ADReal creep_rate =
       _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
+
   return creep_rate * _dt - scalar;
+}
+
+Real
+ADPowerLawCreepStressUpdate::computeCreepRate(const ADReal & effective_trial_stress)
+{
+  const ADReal creep_rate =
+      _coefficient * std::pow(effective_trial_stress, _n_exponent) * _exponential * _exp_time;
+  return MetaPhysicL::raw_value(creep_rate);
 }
 
 ADReal
@@ -79,17 +89,44 @@ ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_st
   return creep_rate_derivative * _dt - 1.0;
 }
 
-ADReal
+Real
 ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & stress,
-    const ADMaterialProperty<RankTwoTensor> & strain_rate)
+    const ADMaterialProperty<RankTwoTensor> & strain_rate,
+    const bool numerical,
+    const MaterialProperty<RankTwoTensor> & /*strain_rate_old*/)
 {
-  if (_n_exponent <= 1)
-    return 0.0;
+  if (!numerical)
+  {
+    if (_n_exponent <= 1)
+      return 0.0;
 
-  Real creep_factor = _n_exponent / (_n_exponent + 1);
+    Real creep_factor = _n_exponent / (_n_exponent + 1);
+    return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
+  }
+  else
+  {
+    ADRankTwoTensor deviatoric_trial_stress = stress[_qp].deviatoric();
+    ADReal dev_trial_stress_squared =
+        deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
+    Real von_mises_stress = MetaPhysicL::raw_value(std::sqrt(3.0 / 2.0 * dev_trial_stress_squared));
 
-  return creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+    Real tolerance = 1.0e-05;
+    std::size_t max_h_number = 200;
+    Real second = 0.0;
+
+    if (von_mises_stress > 1.0e-6)
+      second = MathUtils::trapezoidalRule(
+          0, von_mises_stress, tolerance, max_h_number, [this](Real val) {
+            return computeCreepRate(val);
+          });
+
+    // See Kim, Contour integral calculations for generalised creep laws within abaqus,
+    // International Journal of Pressure Vessels and Piping 78 661-666
+    return MetaPhysicL::raw_value(stress[_qp])
+               .doubleContraction(MetaPhysicL::raw_value((strain_rate)[_qp])) -
+           second;
+  }
 }
 
 bool
