@@ -203,3 +203,9 @@ TimeStepper::forceTimeStep(Real dt)
 {
   _current_dt = dt;
 }
+
+void
+TimeStepper::forceNumSteps(const unsigned int num_steps)
+{
+  _executioner.forceNumSteps(num_steps);
+}
