@@ -1,4 +1,4 @@
-!template load file=rtm.md.template category=framework project=Framework
+!template load file=rtm.md.template project=Framework
 
 !template! item key=minimum_requirements
 !include sqa/minimum_requirements.md
@@ -37,9 +37,17 @@ can be found in the [Software Test Plan](sqa/framework_stp.md).
 
 !template-end!
 
-!template! item key=requirements-traceability-matrix
-!sqa requirements category={{category}}
-!template-end!
+!template item key=functional-requirements
+!sqa requirements prefix=F category=framework
+
+!template item key=usability-requirements
+!sqa requirements prefix=U category=framework
+
+!template item key=performance-requirements
+!sqa requirements prefix=P category=framework
+
+!template item key=system-interfaces-requirements
+!sqa requirements prefix=S category=framework
 
 !template! item key=requirement-collections-intro
 A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
@@ -52,5 +60,5 @@ The following is a complete list of each requirement that has been assigned to a
 !template-end!
 
 !template! item key=requirement-collections
-!sqa collections category={{category}}
+!sqa collections category=framework
 !template-end!

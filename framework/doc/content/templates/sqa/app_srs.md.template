@@ -12,19 +12,23 @@ describe the expected interactions that the software shall provide.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SRS) for {{app}} is dependent upon the following documents.
 
+!template! field key=dependencies required=False
 !sqa dependencies suffix=srs category={{category}}
+!template-end!
 
 ## Requirements
 
 !template field key=requirements-intro required=False
 The following is a complete list for all the functional requirements for {{app}}.
 
-!template field key=requirements required=False
+!template! field key=requirements required=False
 !sqa requirements link=False category={{category}}
+!template-end!
 
 ## Requirement Collections id=requirement-collections
 
 !template field key=requirement-collections-intro required=False
 
-!template field key=requirement-collections required=False
+!template! field key=requirement-collections required=False
 !sqa collections category={{category}} link=False
+!template-end!
