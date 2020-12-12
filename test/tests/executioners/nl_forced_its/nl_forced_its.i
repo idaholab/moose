@@ -48,8 +48,8 @@
 
   l_max_its = 20
   nl_max_its = 20
-  nl_forced_its = 4
-  nl_abs_div_tol = 1e+5
+  nl_forced_its = 2
+  nl_abs_div_tol = 1e+7
 
   dt = 1
   num_steps = 2
