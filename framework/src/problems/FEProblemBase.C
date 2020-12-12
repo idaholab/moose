@@ -6700,13 +6700,19 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
-    else if (divtol > 0 && fnorm > the_residual * divtol)
+    else if (divtol > 0 && it >= _nl_forced_its && fnorm > the_residual * divtol)
     {
       oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
           << divtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
-    else if (_n_nl_pingpong > _n_max_nl_pingpong)
+    else if (_abs_nl_divtol > 0 && it >= _nl_forced_its && fnorm > _abs_nl_divtol)
+    {
+      oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
+          << _abs_nl_divtol << '\n';
+      reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
+    }
+    else if (it >= _nl_forced_its && _n_nl_pingpong > _n_max_nl_pingpong)
     {
       oss << "Diverged due to maximum non linear residual pingpong achieved" << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
