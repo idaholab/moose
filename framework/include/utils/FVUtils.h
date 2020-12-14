@@ -44,6 +44,52 @@ enum class InterpMethod
 };
 
 /**
+ * Produce the interpolation cofficients in the equation:
+ *
+ * \phi_f = c_1 * \phi_{F1} + c_2 * \phi_{F2}
+ *
+ * A couple of examples: if we are doing an average interpolation with
+ * an orthogonal regular grid, then the pair will be (0.5, 0.5). If we are doing an
+ * upwind interpolation with the velocity facing outward from the F1 element,
+ * then the pair will be (1.0, 0.0).
+ *
+ * @param m The interpolation method
+ * @param fi The face information
+ * @param one_is_elem Whether fi.elem() == F1
+ * @param advector The advecting velocity. Not relevant for an Average interpolation
+ * @return a pair where the first Real is c_1 and the second Real is c_2
+ */
+template <typename Vector = RealVectorValue>
+std::pair<Real, Real>
+interpCoeffs(const InterpMethod m,
+             const FaceInfo & fi,
+             const bool one_is_elem,
+             const Vector advector = Vector())
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+    {
+      if (one_is_elem)
+        return std::make_pair(fi.gC(), 1. - fi.gC());
+      else
+        return std::make_pair(1. - fi.gC(), fi.gC());
+    }
+
+    case InterpMethod::Upwind:
+    {
+      if ((advector * fi.normal() > 0) == one_is_elem)
+        return std::make_pair(1., 0.);
+      else
+        return std::make_pair(0., 1.);
+    }
+
+    default:
+      mooseError("Unrecognized interpolation method");
+  }
+}
+
+/**
  * A simple linear interpolation of values between cell centers to a cell face. The \p one_is_elem
  * parameter indicates whether value1 corresponds to the FaceInfo elem value; else it corresponds to
  * the FaceInfo neighbor value
@@ -55,10 +101,8 @@ linearInterpolation(const T & value1,
                     const FaceInfo & fi,
                     const bool one_is_elem)
 {
-  if (one_is_elem)
-    return fi.gC() * value1 + (1. - fi.gC()) * value2;
-  else
-    return fi.gC() * value2 + (1. - fi.gC()) * value1;
+  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+  return coeffs.first * value1 + coeffs.second * value2;
 }
 
 /// Provides interpolation of face values for non-advection-specific purposes (although it can/will
@@ -104,20 +148,8 @@ interpolate(InterpMethod m,
             const FaceInfo & fi,
             const bool one_is_elem)
 {
-  switch (m)
-  {
-    case InterpMethod::Average:
-      result = linearInterpolation(value1, value2, fi, one_is_elem);
-      break;
-    case InterpMethod::Upwind:
-      if (advector * fi.normal() > 0)
-        result = one_is_elem ? value1 : value2;
-      else
-        result = one_is_elem ? value2 : value1;
-      break;
-    default:
-      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
-  }
+  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector);
+  result = coeffs.first * value1 + coeffs.second * value2;
 }
 
 template <typename ActionFunctor>
