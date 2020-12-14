@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+export PATH=/bin:$PATH
 
 if [[ $mpi == "openmpi" ]]; then
   export OMPI_MCA_plm=isolated
