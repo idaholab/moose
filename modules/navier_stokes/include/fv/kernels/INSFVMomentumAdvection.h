@@ -81,6 +81,12 @@ protected:
   /// Boundary IDs with no slip walls
   std::set<BoundaryID> _no_slip_wall_boundaries;
 
+  /// Boundary IDs with slip walls
+  std::set<BoundaryID> _slip_wall_boundaries;
+
+  /// Flow Boundary IDs
+  std::set<BoundaryID> _flow_boundaries;
+
 private:
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
   /// the vector is equal to the number of threads in the simulation. We maintain a map from
