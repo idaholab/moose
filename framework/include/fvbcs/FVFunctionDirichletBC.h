@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 
 /**
  * Applies a Dirichlet boundary condition with a value prescribed by a function
  */
-class FVFunctionDirichletBC : public FVDirichletBC
+class FVFunctionDirichletBC : public FVDirichletBCBase
 {
 public:
   /**

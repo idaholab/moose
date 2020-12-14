@@ -25,7 +25,6 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "FVBoundaryCondition.h"
-#include "FVDirichletBC.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
