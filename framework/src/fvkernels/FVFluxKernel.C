@@ -64,7 +64,7 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
 // problem dimension and just multiply by the face area.
 
 bool
-FVFluxKernel::skipForBoundary(const FaceInfo & fi)
+FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
 {
   if (!fi.isBoundary() || _force_boundary_execution)
     return false;

@@ -155,6 +155,40 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
           id,
           " by flow_boundaries and the union of no_slip_wall_boundaries and slip_wall_boundaries.");
   }
+
+  if (getParam<bool>("force_boundary_execution"))
+    paramError("force_boundary_execution",
+               "Do not use the force_boundary_execution parameter to control execution of INSFV "
+               "advection objects");
+
+  if (!getParam<std::vector<BoundaryName>>("boundaries_to_force").empty())
+    paramError("boundaries_to_force",
+               "Do not use the boundaries_to_force parameter to control execution of INSFV "
+               "advection objects");
+}
+
+bool
+INSFVMomentumAdvection::skipForBoundary(const FaceInfo & fi) const
+{
+  if (!fi.isBoundary())
+    return false;
+
+  // If we have flux bcs then we do skip
+  const auto & flux_pr = _var.getFluxBCs(fi);
+  if (flux_pr.first)
+    return true;
+
+  // If we have dirichlet bcs then we don't skip.
+  if (_var.getDirichletBC(fi).first)
+    return false;
+
+  // Finally if we have a flow boundary, we don't skip. Mass and momentum are transported via
+  // advection across boundaries
+  for (const auto bc_id : fi.boundaryIDs())
+    if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
+      return false;
+
+  return true;
 }
 
 const VectorValue<ADReal> &

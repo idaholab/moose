@@ -53,6 +53,13 @@ protected:
   /// those calculations will be handled for appropriately by this function.
   virtual ADReal gradUDotNormal() const;
 
+  /// Kernels are called even on boundaries in case one is for a variable with
+  /// a dirichlet BC - in which case we need to run the kernel with a
+  /// ghost-element.  This returns true if we need to run because of dirichlet
+  /// conditions - otherwise this returns false and all jacobian/residual calcs
+  /// should be skipped.
+  virtual bool skipForBoundary(const FaceInfo & fi) const;
+
   const ADRealVectorValue & normal() const { return _normal; }
 
   MooseVariableFV<Real> & _var;
@@ -89,13 +96,6 @@ private:
   /// @param residual The already computed residual (probably done with \p computeQpResidual) that
   /// also holds derivative information for filling in the Jacobians.
   void computeJacobian(Moose::DGJacobianType type, const ADReal & residual);
-
-  /// Kernels are called even on boundaries in case one is for a variable with
-  /// a dirichlet BC - in which case we need to run the kernel with a
-  /// ghost-element.  This returns true if we need to run because of dirichlet
-  /// conditions - otherwise this returns false and all jacobian/residual calcs
-  /// should be skipped.
-  bool skipForBoundary(const FaceInfo & fi);
 
   const bool _force_boundary_execution;
 

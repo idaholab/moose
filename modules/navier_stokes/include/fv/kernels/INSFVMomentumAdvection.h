@@ -60,6 +60,8 @@ protected:
    */
   void clearRCCoeffs();
 
+  bool skipForBoundary(const FaceInfo & fi) const override;
+
   /// pressure variable
   const MooseVariableFV<Real> * const _p_var;
   /// x-velocity
