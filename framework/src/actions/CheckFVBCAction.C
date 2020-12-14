@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "FVFluxBC.h"
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 
 registerMooseAction("MooseApp", CheckFVBCAction, "check_integrity");
 
@@ -47,7 +47,7 @@ CheckFVBCAction::act()
 
       unsigned int var_num = var->number();
       std::vector<FVFluxBC *> flux_bcs;
-      std::vector<FVDirichletBC *> dirichlet_bcs;
+      std::vector<FVDirichletBCBase *> dirichlet_bcs;
       the_warehouse.query()
           .template condition<AttribSystem>("FVFluxBC")
           .template condition<AttribVar>(var_num)
