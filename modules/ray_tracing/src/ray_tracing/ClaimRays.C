@@ -54,11 +54,11 @@ ClaimRays::claim()
           rays_to_send[pid].push_back(ray);
 
   // Functor for possibly claiming a vector of Rays
-  std::function<void(processor_id_type, const std::vector<std::shared_ptr<Ray>> &)> claim_functor =
-      [&](processor_id_type /* pid */, const std::vector<std::shared_ptr<Ray>> & rays) {
-        for (auto & ray : rays)
-          possiblyClaim(ray);
-      };
+  auto claim_functor = [&](processor_id_type /* pid */,
+                           const std::vector<std::shared_ptr<Ray>> & rays) {
+    for (auto & ray : rays)
+      possiblyClaim(ray);
+  };
 
   // Send the relevant Rays to everyone and then claim
   if (_do_exchange)
@@ -76,7 +76,7 @@ ClaimRays::possiblyClaim(const std::shared_ptr<Ray> & ray)
   prePossiblyClaimRay(ray);
 
   const auto elem =
-      claimPoint(ray->currentPoint(), ray->id(), (*_point_locator)(ray->currentPoint()));
+      claimPoint(ray->currentPoint(), getID(ray), (*_point_locator)(ray->currentPoint()));
   if (elem)
   {
     _local_rays.push_back(ray);
