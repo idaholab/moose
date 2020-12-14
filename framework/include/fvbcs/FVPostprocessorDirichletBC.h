@@ -14,10 +14,6 @@
 class FVPostprocessorDirichletBC : public FVDirichletBCBase
 {
 public:
-  /**
-   * Class constructor.
-   * @param parameters The InputParameters for the object
-   */
   FVPostprocessorDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();

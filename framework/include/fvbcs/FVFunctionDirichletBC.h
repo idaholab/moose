@@ -17,11 +17,6 @@
 class FVFunctionDirichletBC : public FVDirichletBCBase
 {
 public:
-  /**
-   * Class constructor.
-   * @param parameters The InputParameters for the object
-   * @param nodal Whether this BC is applied to nodes or not
-   */
   FVFunctionDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();

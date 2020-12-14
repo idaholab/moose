@@ -17,16 +17,11 @@
 class FVDirichletBC : public FVDirichletBCBase
 {
 public:
-  /**
-   * Class constructor.
-   * @param parameters The InputParameters for the object
-   * @param nodal Whether this BC is applied to nodes or not
-   */
   FVDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  virtual Real boundaryValue(const FaceInfo & fi) const;
+  Real boundaryValue(const FaceInfo & fi) const override;
 
 private:
   const Real & _val;

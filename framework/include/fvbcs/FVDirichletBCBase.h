@@ -19,10 +19,6 @@
 class FVDirichletBCBase : public FVBoundaryCondition
 {
 public:
-  /**
-   * Class constructor.
-   * @param parameters The InputParameters for the object
-   */
   FVDirichletBCBase(const InputParameters & parameters);
 
   static InputParameters validParams();
