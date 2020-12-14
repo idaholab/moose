@@ -1,0 +1,20 @@
+[Tests]
+  [churchill]
+    type = 'CSVDiff'
+    input = 'churchill.i'
+    csvdiff = 'churchill_out.csv'
+    recover = false
+  []
+  [churchill_ad]
+    type = 'CSVDiff'
+    input = 'churchill_ad.i'
+    csvdiff = 'churchill_ad_out.csv'
+    recover = false
+  []
+  [laminar_annulus_ad]
+    type = 'CSVDiff'
+    input = 'laminar_annulus_ad.i'
+    csvdiff = 'laminar_annulus_ad_out.csv'
+    recover = false
+  []
+[]
