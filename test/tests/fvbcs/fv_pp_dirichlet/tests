@@ -1,4 +1,6 @@
 [Tests]
+  design = 'FVPostprocessorDirichletBC.md'
+  issues = '#16477'
   [./fv_pp_dirichlet]
     type = 'Exodiff'
     input = 'fv_pp_dirichlet.i'
