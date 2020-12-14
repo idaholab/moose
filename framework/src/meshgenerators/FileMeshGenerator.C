@@ -119,7 +119,13 @@ FileMeshGenerator::generate()
       // get reference to mesh meta data (created by MooseApp)
       auto & meta_data = _app.getRestartableDataMap(MooseApp::MESH_META_DATA);
       if (restartable.readRestartableDataHeaderFromFile(fname, false))
-        restartable.readRestartableData(meta_data, DataNames());
+      {
+        DataNames dnames = {"MeshMetaData/split/fake_neighbor_list"};
+        std::cout << "reading metadata from " << fname << "\n";
+        restartable.readRestartableData(meta_data, dnames);
+        bool has_fake_neighbors = _app.hasRestartableMetaData("fake_neighbor_list", "split");
+        std::cout << "has_fake_neighbors " << has_fake_neighbors << "\n";
+      }
     }
   }
 

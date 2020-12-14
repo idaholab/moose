@@ -2,7 +2,7 @@
 
 NCPU="8"
 CHECKPOINT_FILE_NAME="testfile.cpa"
-MOOSE_TEST_EXEXCUTIONER_TYPE="dbg"
+MOOSE_TEST_EXEXCUTIONER_TYPE="opt"
 
 
 ## this is tthe first step taht normally isn't needed, it simply generates a single exodus file that will be used by step 2
@@ -24,9 +24,9 @@ $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_tes
 mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_test_mesh_prepare_split.i --distributed-mesh Mesh/msh/file=$CHECKPOINT_FILE_NAME Outputs/nemesis=true Outputs/checkpoint=true
 
 ##Step 5: restarting the simulation using the msae input file, notice the problem paramter to relaod stateful var
-RESTART_CHECKPOINT_FILE_LOCATION="simple_diffusion_test_mesh_prepare_split_out_cp"
-CHECKPOINT_ID="0001"
-mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_test_mesh_prepare_split.i --distributed-mesh Mesh/msh/file=$RESTART_CHECKPOINT_FILE_LOCATION/${CHECKPOINT_ID}_mesh.cpr  Problem/restart_file_base=$RESTART_CHECKPOINT_FILE_LOCATION/$CHECKPOINT_ID Outputs/nemesis=true Outputs/checkpoint=true Outputs/file_base="restart"
+# RESTART_CHECKPOINT_FILE_LOCATION="simple_diffusion_test_mesh_prepare_split_out_cp"
+# CHECKPOINT_ID="0001"
+# mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_test_mesh_prepare_split.i --distributed-mesh Mesh/msh/file=$RESTART_CHECKPOINT_FILE_LOCATION/${CHECKPOINT_ID}_mesh.cpr  Problem/restart_file_base=$RESTART_CHECKPOINT_FILE_LOCATION/$CHECKPOINT_ID Outputs/nemesis=true Outputs/checkpoint=true Outputs/file_base="restart"
 
 ## STEP 5a and 5b are two restart procedure you should not try!!!!! In way way or another tehy will broak teh output. hence they are commented
 
@@ -41,5 +41,5 @@ mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i sim
 # mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_test_mesh_prepare_split.i --distributed-mesh Mesh/msh/file=$RESTART_CHECKPOINT_FILE_LOCATION/${CHECKPOINT_ID}_mesh.cpr Outputs/nemesis=true Outputs/checkpoint=true --recover
 
 
-##Step 6, comparison with monolitic mesh
-mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_monolithic.i
+# ##Step 6, comparison with monolitic mesh
+# mpirun -np $NCPU $MOOSE_DIR/test/moose_test-$MOOSE_TEST_EXEXCUTIONER_TYPE -i simple_diffusion_monolithic.i

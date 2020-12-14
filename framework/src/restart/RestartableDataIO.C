@@ -151,6 +151,13 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
       mooseError("Error while reading stream");
   }
 
+  std::cout << "\n\ndeserializeRestartableData \nRestartableDataNames"
+            << "\n";
+  for (unsigned int i = 0; i < n_data; i++)
+  {
+    std::cout << data_names[i] << "\n";
+  }
+
   // Grab this processor's block size
   unsigned int data_blk_size = 0;
   stream.read((char *)&data_blk_size, sizeof(data_blk_size));
@@ -165,6 +172,9 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
     // Determine if the current name is in the filter set
     bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
     bool is_data_in_filter = filter_names.find(current_name) != filter_names.end();
+
+    std::cout << data_names[i] << " is_data_restartable " << is_data_restartable
+              << " is_data_in_filter " << !is_data_in_filter << "\n";
     if (is_data_restartable      // Only restore values if they're currently being used and
         && (recovering ||        // Only read this value if we're either recovering or
             !is_data_in_filter)) // the data isn't specifically filtered out
