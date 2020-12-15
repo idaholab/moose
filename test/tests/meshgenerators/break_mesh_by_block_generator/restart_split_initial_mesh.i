@@ -3,7 +3,7 @@
   ## execution must NOT be --mes-only as we are saving element integers for later use
   [msh]
     type = FileMeshGenerator
-    file = simple_diffusion_test_mesh_in.e
+    file = restart_create_initial_mesh_in.e
   []
   [split]
     input = msh

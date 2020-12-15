@@ -48,11 +48,6 @@ class Checkpoint : public FileOutput
 public:
   static InputParameters validParams();
 
-  static void writeMeshMetaData(const processor_id_type pid,
-                                const MooseApp & app,
-                                const std::string & current_file,
-                                CheckpointFileNames & curr_file_struct,
-                                RestartableDataIO & restartable_data_io);
   /**
    * Class constructor
    * @param parameters
