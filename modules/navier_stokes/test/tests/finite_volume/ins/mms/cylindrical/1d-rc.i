@@ -40,6 +40,7 @@ rho=1.1
     u = u
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -58,6 +59,7 @@ rho=1.1
     u = u
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion

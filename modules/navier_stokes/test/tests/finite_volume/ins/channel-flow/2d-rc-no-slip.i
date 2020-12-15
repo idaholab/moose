@@ -2,7 +2,6 @@ mu=1.1
 rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
-force_boundary_execution=true
 
 [Mesh]
   [gen]
@@ -46,6 +45,7 @@ force_boundary_execution=true
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure
@@ -53,7 +53,8 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
 
   [u_advection]
@@ -68,13 +69,13 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -82,7 +83,6 @@ force_boundary_execution=true
     momentum_component = 'x'
     vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
   []
 
   [v_advection]
@@ -97,13 +97,13 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
     variable = v
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -111,7 +111,6 @@ force_boundary_execution=true
     momentum_component = 'y'
     vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
   []
 []
 

@@ -4,7 +4,6 @@ k=1.1
 cp=1.1
 advected_interp_method='average'
 velocity_interp_method='average'
-force_boundary_execution=true
 velocity='velocity'
 
 [Mesh]
@@ -55,6 +54,7 @@ velocity='velocity'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = ${velocity}
     pressure = pressure
@@ -62,7 +62,8 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'top bottom'
+    no_slip_wall_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -82,13 +83,13 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'top bottom'
+    no_slip_wall_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -96,7 +97,6 @@ velocity='velocity'
     momentum_component = 'x'
     vel = ${velocity}
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [u_pressure_rz]
     type = INSFVMomentumPressureRZ
@@ -121,13 +121,13 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'top bottom'
+    no_slip_wall_boundaries = 'left right'
   []
   [v_viscosity]
     type = FVDiffusion
     variable = v
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -135,7 +135,6 @@ velocity='velocity'
     momentum_component = 'y'
     vel = ${velocity}
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
   []
   [v_forcing]
     type = FVBodyForce
@@ -147,7 +146,6 @@ velocity='velocity'
     type = FVDiffusion
     coeff = 'k'
     variable = temperature
-    force_boundary_execution = ${force_boundary_execution}
   []
   [temp_advection]
     type = INSFVEnergyAdvection
@@ -160,7 +158,8 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
+    flow_boundaries = 'top bottom'
+    no_slip_wall_boundaries = 'left right'
   []
   [temp_forcing]
     type = FVBodyForce

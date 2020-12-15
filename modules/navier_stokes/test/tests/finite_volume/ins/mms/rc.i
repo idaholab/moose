@@ -58,6 +58,7 @@ velocity_interp_method='rc'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = 'average'
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure

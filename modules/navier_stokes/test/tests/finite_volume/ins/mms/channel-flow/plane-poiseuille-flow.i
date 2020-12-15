@@ -52,6 +52,7 @@ two_term_boundary_expansion=true
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure
@@ -59,7 +60,8 @@ two_term_boundary_expansion=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    boundaries_to_force = 'left right'
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -79,20 +81,19 @@ two_term_boundary_expansion=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    boundaries_to_force = 'left right'
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    boundaries_to_force = 'left right'
   []
   [u_pressure]
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
-    boundaries_to_force = 'left right'
   []
   [u_forcing]
     type = FVBodyForce
@@ -112,20 +113,19 @@ two_term_boundary_expansion=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    boundaries_to_force = 'left right'
+    flow_boundaries = 'left right'
+    no_slip_wall_boundaries = 'top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
     variable = v
     coeff = ${mu}
-    boundaries_to_force = 'left right'
   []
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'
-    boundaries_to_force = 'left right'
   []
   [v_forcing]
     type = FVBodyForce

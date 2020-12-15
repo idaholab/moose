@@ -23,11 +23,15 @@ velocity_interp_method='rc'
     family = MONOMIAL
     fv = true
     initial_condition = 1
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = true
   []
   [pressure]
     order = CONSTANT
     family = MONOMIAL
     fv = true
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = true
   []
 []
 
@@ -41,7 +45,7 @@ velocity_interp_method='rc'
     u = u
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = true
+    flow_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -60,13 +64,12 @@ velocity_interp_method='rc'
     u = u
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = true
+    flow_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    force_boundary_execution = true
   []
   [u_pressure]
     # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
@@ -78,7 +81,6 @@ velocity_interp_method='rc'
     # these parameters shouldn't be used for anything but are still required
     vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = true
   []
   [u_forcing]
     type = FVBodyForce

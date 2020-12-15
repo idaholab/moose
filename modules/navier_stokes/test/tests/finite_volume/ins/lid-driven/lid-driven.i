@@ -72,6 +72,7 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
   [mean_zero_pressure]
     type = FVScalarLagrangeMultiplier
@@ -88,6 +89,7 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [u_viscosity]
@@ -111,6 +113,7 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [v_viscosity]

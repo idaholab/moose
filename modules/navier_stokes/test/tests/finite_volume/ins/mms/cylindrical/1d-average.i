@@ -35,6 +35,7 @@ rho=1.1
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = 'average'
     velocity_interp_method = 'average'
     vel = 'velocity'
     pressure = pressure
@@ -86,20 +87,14 @@ rho=1.1
 
 [FVBCs]
   [u_advection]
-    type = INSFVMomentumAdvectionFunctionBC
+    type = FVMatAdvectionFunctionBC
     boundary = 'left right'
     variable = u
     vel = 'velocity'
     flux_variable_exact_solution = 'exact_rhou'
     advected_quantity = 'rhou'
     advected_interp_method = 'average'
-    velocity_interp_method = 'average'
     vel_x_exact_solution = 'exact_u'
-    pressure_exact_solution = 'exact_p'
-    pressure = pressure
-    u = u
-    mu = ${mu}
-    rho = ${rho}
   []
   [u_diffusion]
     type = FVDiffusionFunctionBC
@@ -119,17 +114,12 @@ rho=1.1
   []
 
   [mass_continuity_flux]
-    type = INSFVMassAdvectionFunctionBC
+    type = FVMatAdvectionFunctionBC
     variable = pressure
     boundary = 'left right'
     vel = 'velocity'
-    velocity_interp_method = 'average'
     vel_x_exact_solution = 'exact_u'
-    pressure_exact_solution = 'exact_p'
-    pressure = pressure
-    u = u
-    mu = ${mu}
-    rho = ${rho}
+    flux_variable_exact_solution = ${rho}
   []
 
   [u_diri]

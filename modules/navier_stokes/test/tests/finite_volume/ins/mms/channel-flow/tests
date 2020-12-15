@@ -59,7 +59,8 @@
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    min_parallel = 8
+    min_parallel = 32
+    heavy = true
   []
   [plane-poiseuille-average-first]
     type = PythonUnitTest
@@ -80,7 +81,7 @@
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    min_parallel = 16
+    min_parallel = 32
     heavy = true
   []
   [2d-rc-no-slip]

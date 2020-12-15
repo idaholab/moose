@@ -2,10 +2,9 @@ mu=1
 rho=1
 advected_interp_method='average'
 velocity_interp_method='rc'
-force_boundary_execution=false
-mass_boundaries_to_force='bottom top'
-momentum_boundaries_to_force=''
 penalty=1e6
+# we can think of the axis as a slip wall boundary, no normal velocity and no viscous shear
+slip_wall_boundaries = 'left'
 
 [Mesh]
   file = diverging.msh
@@ -42,6 +41,7 @@ penalty=1e6
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure
@@ -49,8 +49,8 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${mass_boundaries_to_force}
+    flow_boundaries = 'top bottom'
+    slip_wall_boundaries = ${slip_wall_boundaries}
   []
 
   [u_advection]
@@ -65,24 +65,19 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
+    flow_boundaries = 'top bottom'
+    slip_wall_boundaries = ${slip_wall_boundaries}
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [u_pressure]
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [u_pressure_rz]
     type = INSFVMomentumPressureRZ
@@ -102,24 +97,20 @@ penalty=1e6
     v = v
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
+    flow_boundaries = 'top bottom'
+    # we can think of the axis as a slip wall boundary, no normal velocity and no viscous shear
+    slip_wall_boundaries = ${slip_wall_boundaries}
   []
   [v_viscosity]
     type = FVDiffusion
     variable = v
     coeff = ${mu}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
   []
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = ${force_boundary_execution}
-    boundaries_to_force = ${momentum_boundaries_to_force}
   []
 []
 

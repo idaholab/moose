@@ -35,13 +35,14 @@ velocity_interp_method='average'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     vel = 'velocity'
     pressure = pressure
     u = u
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = true
+    flow_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -60,13 +61,12 @@ velocity_interp_method='average'
     u = u
     mu = ${mu}
     rho = ${rho}
-    force_boundary_execution = true
+    flow_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
     variable = u
     coeff = ${mu}
-    force_boundary_execution = true
   []
   [u_pressure]
     # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
@@ -78,7 +78,6 @@ velocity_interp_method='average'
     # these parameters shouldn't be used for anything but are still required
     vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
-    force_boundary_execution = true
   []
   [u_forcing]
     type = FVBodyForce

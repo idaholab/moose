@@ -72,12 +72,14 @@ advected_interp_method = 'average'
     type = INSFVMassAdvection
     variable = pressure
     vel = ${vel}
+    advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     u = u
     v = v
     pressure = pressure
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
   [mean_zero_pressure]
     type = FVScalarLagrangeMultiplier
@@ -97,6 +99,7 @@ advected_interp_method = 'average'
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [u_viscosity]
@@ -124,6 +127,7 @@ advected_interp_method = 'average'
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [v_viscosity]
@@ -149,13 +153,14 @@ advected_interp_method = 'average'
     type = INSFVEnergyAdvection
     variable = T
     vel = ${vel}
-    velocity_interp_method = 'average'
+    velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
     pressure = pressure
     u = u
     v = v
     mu = ${mu}
     rho = ${rho}
+    no_slip_wall_boundaries = 'left right top bottom'
   []
 []
 
