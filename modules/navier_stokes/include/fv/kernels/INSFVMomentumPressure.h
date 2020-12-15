@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVMatAdvection.h"
+#include "FVElementalKernel.h"
 
-class INSFVMomentumPressure : public FVMatAdvection
+class INSFVMomentumPressure : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
@@ -19,6 +19,9 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+
+  /// The pressure variable
+  const MooseVariableFVReal * const _p_var;
 
   /// index x|y|z
   const unsigned int _index;

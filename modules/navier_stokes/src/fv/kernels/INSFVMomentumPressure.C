@@ -16,34 +16,41 @@ registerMooseObject("NavierStokesApp", INSFVMomentumPressure);
 InputParameters
 INSFVMomentumPressure::validParams()
 {
-  InputParameters params = FVMatAdvection::validParams();
+  InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
+  params.addRequiredCoupledVar("p", "The pressure");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.set<MaterialPropertyName>("advected_quantity") = NS::pressure;
   return params;
 }
 
 INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
-  : FVMatAdvection(params), _index(getParam<MooseEnum>("momentum_component"))
+  : FVElementalKernel(params),
+    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("p", 0))),
+    _index(getParam<MooseEnum>("momentum_component"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
+
+  if (!_p_var)
+    paramError("p", "p must be a finite volume variable");
 }
 
 ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
-  ADReal p_interface;
-
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         p_interface,
-                         _adv_quant_elem[_qp],
-                         _adv_quant_neighbor[_qp],
-                         *_face_info,
-                         true);
-
-  return _normal(_index) * p_interface;
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#else
+  return _p_var->adGradSln(_current_elem)(_index);
+#endif
 }
