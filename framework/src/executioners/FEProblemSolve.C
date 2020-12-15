@@ -187,6 +187,8 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
 
   _problem.setNLForcedIterations(getParam<unsigned int>("nl_forced_its"));
 
+  _problem.setNLForcedIterations(getParam<unsigned int>("nl_forced_its"));
+
   _problem.setNLAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   _nl.setDecomposition(_splitting);

@@ -6664,7 +6664,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     oss << "Failed to converge, function norm is NaN\n";
     reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
-  else if (fnorm < abstol && (it || !force_iteration))
+  else if ((it >= _nl_forced_its) && fnorm < abstol)
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << '\n';
     reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
@@ -6675,13 +6675,13 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
         << '\n';
     reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
   }
-  else if (it && fnorm > system._last_nl_rnorm && fnorm >= div_threshold)
+  else if ((it >= _nl_forced_its) && it && fnorm > system._last_nl_rnorm && fnorm >= div_threshold)
   {
     oss << "Nonlinear solve was blowing up!\n";
     reason = MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH;
   }
 
-  if (it && reason == MooseNonlinearConvergenceReason::ITERATING)
+  if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     // If compute_initial_residual_before_preset_bcs==false, then use the
     // first residual computed by Petsc to determine convergence.
@@ -6700,19 +6700,19 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
-    else if (divtol > 0 && it >= _nl_forced_its && fnorm > the_residual * divtol)
+    else if (divtol > 0 && fnorm > the_residual * divtol)
     {
       oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
           << divtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
-    else if (_abs_nl_divtol > 0 && it >= _nl_forced_its && fnorm > _abs_nl_divtol)
+    else if (_abs_nl_divtol > 0 && fnorm > _abs_nl_divtol)
     {
       oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
           << _abs_nl_divtol << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
-    else if (it >= _nl_forced_its && _n_nl_pingpong > _n_max_nl_pingpong)
+    else if (_n_nl_pingpong > _n_max_nl_pingpong)
     {
       oss << "Diverged due to maximum non linear residual pingpong achieved" << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_NL_RESIDUAL_PINGPONG;
@@ -7099,4 +7099,13 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
       mooseError("Unrecognized material data type.");
       break;
   }
+}
+
+void
+FEProblemBase::setNLForcedIterations(const unsigned int nl_forced_its)
+{
+  if (_petsc_options.flags.contains("-snes_force_iteration") && nl_forced_its == 0)
+    _nl_forced_its = 1;
+  else
+    _nl_forced_its = nl_forced_its;
 }

@@ -1916,7 +1916,7 @@ public:
   }
 
   /// method setting the minimum number of nonlinear iterations before performing divergence checks
-  void setNLForcedIterations(const unsigned int nl_forced_its) { _nl_forced_its = nl_forced_its; }
+  void setNLForcedIterations(const unsigned int /*nl_forced_its*/);
 
   /// method setting the absolute divergence tolerance
   void setNLAbsoluteDivergenceTolerance(const Real abs_nl_divtol)
