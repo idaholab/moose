@@ -51,6 +51,16 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
+// This warning is a known issue since 2019 (https://github.com/google/googletest/issues/2224)
+// Google has yet to fix it, so we will direct clang > 9 to ignore the warnings.
+#ifdef __clang__
+#pragma clang diagnostic push
+#if (__clang_major__ > 9)
+// This was introduced in clang 10
+#pragma clang diagnostic ignored "-Wdeprecated-copy"
+#endif // clang > 9
+#endif
+
 #include <limits>
 #include <ostream>
 #include <vector>
@@ -21188,5 +21198,10 @@ int RUN_ALL_TESTS() GTEST_MUST_USE_RESULT_;
 inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
+
+// Restore warnings to other classes (see top of file for info on ignored warnings)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_H_

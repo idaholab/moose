@@ -1,7 +1,5 @@
 #!/bin/bash
 set -eu
-install -d $PREFIX/share
-install -m 644 moose-compilers $PREFIX/share
 # Allow mpirun/exec to oversubscribe without errors
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<'EOF' > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"

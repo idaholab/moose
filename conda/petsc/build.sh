@@ -1,5 +1,7 @@
 #!/bin/bash
 set -eu
+export PATH=/bin:$PATH
+
 export PETSC_DIR=$SRC_DIR
 export PETSC_ARCH=arch-conda-c-opt
 
