@@ -125,6 +125,9 @@ FileMeshGenerator::generate()
         restartable.readRestartableData(meta_data, dnames);
         bool has_fake_neighbors = _app.hasRestartableMetaData("fake_neighbor_list", "split");
         std::cout << "has_fake_neighbors " << has_fake_neighbors << "\n";
+
+        if (!has_fake_neighbors)
+          mooseError("can't find the fake neighbor restartable data in the metadata file");
       }
     }
   }

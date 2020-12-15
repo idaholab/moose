@@ -149,4 +149,27 @@
                'interface;'
     []
   []
+
+  [restart_generate_initial_mesh]
+      type = 'RunApp'
+      input = 'restart_create_initial_mesh.i'
+      cli_args = '--mesh-only'
+      expect_out = 'Writing Exodus'
+  []
+  [restart_split_initial_mesh]
+      prereq = 'restart_generate_initial_mesh'
+      type = 'RunApp'
+      input = 'restart_split_initial_mesh.i'
+      cli_args = '--split-mesh 2 --split-file BMBB_restart.cpa'
+      expect_out = 'Splitting 2 ways...'
+  []
+  [restart_use_the_split_mesh]
+      prereq = 'restart_split_initial_mesh'
+      type = 'RunApp'
+      input = 'restart_use_split_mesh.i'
+      cli_args = '--distributed-mesh'
+      min_parallel = 2
+      max_parallel = 2
+  []
+
 []

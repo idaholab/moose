@@ -1,7 +1,7 @@
 [Mesh]
   [msh]
     type = FileMeshGenerator
-    #file = this the exodus or checkpoint file we want to use
+    file = BMBB_restart.cpa
     has_fake_neighbors = true
     # exodus_extra_element_integers = 'bmbb_element_id' this iwll be neeeded to reconstruct the broken mesh
     fake_neighbor_list_file_name = 'fake_neighbors_test_bmbb.csv'

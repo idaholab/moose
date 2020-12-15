@@ -46,8 +46,6 @@ protected:
   const bool _split_transition_interface;
   const BoundaryName _interface_transition_name;
   const std::string _integer_name = "bmbb_element_id";
-  std::map<std::pair<dof_id_type, unsigned int>, std::pair<dof_id_type, unsigned int>>
-      _fake_neighbor_list;
 
 private:
   /// generate the new boundary interface
@@ -65,4 +63,7 @@ private:
 
   /// the filename where the fake neighbor list will be saved
   const FileName _fake_neighbor_list_file_name;
+
+  std::map<std::pair<dof_id_type, unsigned int>, std::pair<dof_id_type, unsigned int>> &
+      _fake_neighbor_list;
 };
