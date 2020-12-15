@@ -1010,15 +1010,16 @@ RayTracingStudy::getRayDataIndexInternal(const std::string & name,
   const auto & other_map = aux ? _ray_data_map : _ray_aux_data_map;
   if (other_map.find(name) != other_map.end())
     mooseError(_error_prefix,
-               ": Ray data with name ",
+               ": Ray data with name '",
                name,
-               " was not found.\n",
+               "' was not found.\n\n",
                "However, Ray ",
                (aux ? "(non-aux)" : "aux"),
                " data with said name was found.\n",
                "Did you mean to use ",
-               (aux ? "getRayAuxDataIndex()/getRayAuxDataIndices()?"
-                    : "getRayDataIndex()/getRayDataIndices()"));
+               (aux ? "getRayDataIndex()/getRayDataIndices()?"
+                    : "getRayAuxDataIndex()/getRayAuxDataIndices()"),
+               "?");
 
   mooseError(_error_prefix, ": Unknown Ray ", (aux ? "aux" : ""), " data with name ", name);
 }
