@@ -10,7 +10,7 @@
 #include "FluidStructureInterface.h"
 #include "MooseVariableFE.h"
 
-registerMooseObject("FsiApp", FluidStructureInterface);
+registerMooseObject("FluidStructureInteractionApp", FluidStructureInterface);
 
 InputParameters
 FluidStructureInterface::validParams()
