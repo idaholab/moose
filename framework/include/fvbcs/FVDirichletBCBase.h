@@ -9,20 +9,19 @@
 
 #pragma once
 
-#include "FVDirichletBCBase.h"
+#include "FVBoundaryCondition.h"
 
 /**
- * Base class for
+ * Base class for finite volume Dirichlet boundaray conditions. A base class is
+ * needed because Dirichlet BCs must be handled specially when computing fluxes
+ * on faces in the FV method.
  */
-class FVDirichletBC : public FVDirichletBCBase
+class FVDirichletBCBase : public FVBoundaryCondition
 {
 public:
-  FVDirichletBC(const InputParameters & parameters);
+  FVDirichletBCBase(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  Real boundaryValue(const FaceInfo & fi) const override;
-
-private:
-  const Real & _val;
+  virtual Real boundaryValue(const FaceInfo & fi) const = 0;
 };

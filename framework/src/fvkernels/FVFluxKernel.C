@@ -11,7 +11,6 @@
 
 #include "MooseVariableFV.h"
 #include "SystemBase.h"
-#include "FVDirichletBC.h"
 #include "MooseMesh.h"
 #include "ADUtils.h"
 #include "libmesh/elem.h"

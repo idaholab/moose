@@ -11,18 +11,16 @@
 
 #include "FVDirichletBCBase.h"
 
-/**
- * Base class for
- */
-class FVDirichletBC : public FVDirichletBCBase
+class FVPostprocessorDirichletBC : public FVDirichletBCBase
 {
 public:
-  FVDirichletBC(const InputParameters & parameters);
+  FVPostprocessorDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
   Real boundaryValue(const FaceInfo & fi) const override;
 
 private:
-  const Real & _val;
+  /// The value for this BC
+  const PostprocessorValue & _postprocessor_value;
 };
