@@ -64,6 +64,10 @@ CSVSampler::CSVSampler(const InputParameters & parameters)
 Real
 CSVSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  // Checks to make sure that the row and column indices are not out of bounds
+  mooseAssert(row_index < _data[0].size(), "row_index cannot be out of bounds of the data file.");
+  mooseAssert(col_index < _indices.size(), "col_index cannot be out of bounds of the provided column indices.")
+
   TIME_SECTION(_perf_compute_sample);
-  return _data[_indices[col_index]][row_index];
+  return _data[_indices[col_index]][row_index]; // entering samples into the matrix
 }
