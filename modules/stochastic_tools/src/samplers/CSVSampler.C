@@ -20,13 +20,13 @@ CSVSampler::validParams()
   params.addRequiredParam<FileName>("samples_file",
                                     "Name of the CSV file that contains the samples matrix.");
   params.addParam<std::vector<dof_id_type>>(
-    "column_indices",
-    "Column indices in the CSV file to be sampled from. Number of indices here "
-    "will be the same as the number of columns per matrix.");
+      "column_indices",
+      "Column indices in the CSV file to be sampled from. Number of indices here "
+      "will be the same as the number of columns per matrix.");
   params.addParam<std::vector<std::string>>(
-    "column_names",
-    "Column names in the CSV file to be sampled from. Number of columns names "
-    "here will be the same as the number of columns per matrix.");
+      "column_names",
+      "Column names in the CSV file to be sampled from. Number of columns names "
+      "here will be the same as the number of columns per matrix.");
   return params;
 }
 
