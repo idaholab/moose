@@ -38,7 +38,6 @@ FluidStructureInterface::FluidStructureInterface(const InputParameters & paramet
 Real
 FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = 0;
   switch (_component)
   {
     case 0:
@@ -46,12 +45,10 @@ FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
       switch (type)
       {
         case Moose::Element: // Element is fluid
-          r = _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](0);
-          break;
+          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
 
         case Moose::Neighbor: // Neighbor is structure
-          r = _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](0);
-          break;
+          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
       }
       break;
     }
@@ -60,12 +57,10 @@ FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
       switch (type)
       {
         case Moose::Element: // Element is fluid
-          r = _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](1);
-          break;
+          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
 
         case Moose::Neighbor: // Neighbor is structure
-          r = _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](1);
-          break;
+          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
       }
       break;
     }
@@ -74,23 +69,20 @@ FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
       switch (type)
       {
         case Moose::Element: // Element is fluid
-          r = _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](2);
-          break;
+          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
 
         case Moose::Neighbor: // Neighbor is structure
-          r = _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](2);
-          break;
+          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
       }
       break;
     }
   }
-  return r;
+  return 0.0;
 }
 
 Real
 FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
 {
-  Real jac = 0;
   switch (_component)
   {
     case 0:
@@ -102,12 +94,10 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
         case Moose::NeighborNeighbor:
           break;
         case Moose::ElementNeighbor:
-          jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
+          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
                 _normals[_qp](_component);
-          break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-          break;
+          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
       }
       break;
     }
@@ -120,12 +110,10 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
         case Moose::NeighborNeighbor:
           break;
         case Moose::ElementNeighbor:
-          jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
+          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
                 _normals[_qp](_component);
-          break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-          break;
+          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
       }
       break;
     }
@@ -138,15 +126,13 @@ FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
         case Moose::NeighborNeighbor:
           break;
         case Moose::ElementNeighbor:
-          jac = _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
+          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
                 _normals[_qp](_component);
-          break;
         case Moose::NeighborElement:
-          jac = _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-          break;
+          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
       }
       break;
     }
   }
-  return jac;
+  return 0.0;
 }
