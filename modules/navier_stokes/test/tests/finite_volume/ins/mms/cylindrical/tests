@@ -10,15 +10,6 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
-  [1d-rc-diri]
-    type = PythonUnitTest
-    input = test.py
-    test_case = Test1DRC
-    method = '!dbg'
-    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 1D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and first order convergence for the pressure.'
-    ad_indexing_type = 'global'
-    required_python_packages = 'pandas matplotlib'
-  []
   [2d-rc-diri]
     type = PythonUnitTest
     input = test.py
