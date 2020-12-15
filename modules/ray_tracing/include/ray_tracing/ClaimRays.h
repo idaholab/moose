@@ -80,6 +80,19 @@ protected:
     return _inflated_neighbor_bboxes;
   }
 
+  /**
+   * Gets an ID associated with the Ray for claiming purposes. Defaults
+   * to the Ray's ID.
+   *
+   * To break ties in claiming (when multiple processors have elements that
+   * contain a point, say on an element's side on a processor boundary),
+   * we pick the smallest element ID when this ID is even and the
+   * largest element ID is odd. It is possible that the same Rays can
+   * be generated with different IDs, in which case the user may
+   * want to use a different ID for this process.
+   */
+  virtual RayID getID(const std::shared_ptr<Ray> & ray) const { return ray->id(); }
+
   /// The mesh
   MooseMesh & _mesh;
   /// The communicator
