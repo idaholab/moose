@@ -20,55 +20,71 @@ CSVSampler::validParams()
   params.addRequiredParam<FileName>("samples_file",
                                     "Name of the CSV file that contains the samples matrix.");
   params.addParam<std::vector<dof_id_type>>(
-      "column_indices",
-      "Column indices in the CSV file to be sampled from. Number of indices here will be the same "
-      "as the number of columns per matrix.");
+    "column_indices",
+    "Column indices in the CSV file to be sampled from. Number of indices here "
+    "will be the same as the number of columns per matrix.");
+  params.addParam<std::vector<std::string>>(
+    "column_names",
+    "Column names in the CSV file to be sampled from. Number of columns names "
+    "here will be the same as the number of columns per matrix.");
   return params;
 }
 
 CSVSampler::CSVSampler(const InputParameters & parameters)
   : Sampler(parameters), _perf_compute_sample(registerTimedSection("computeSample", 4))
 {
-  // Reading the samples file and getting data
-  MooseUtils::DelimitedFileReader reader(getParam<FileName>("samples_file"), &_communicator);
-  reader.read();
-  _data = reader.getData();
-
-  // If indices are not provided, all of the data will be read
-  if (!isParamValid("column_indices"))
+  // If indices or names are not provided, all of the data will be read and the
+  // matrix will be the same as the contents of the data file
+  if (!isParamValid("column_indices") && !isParamValid("column_names"))
   {
-    // _indices.resize(_data.size());
-    for (unsigned int i = 0; i < _data.size(); i++)
-      _indices.push_back(i);
+    // Reading the samples file and getting data
+    MooseUtils::DelimitedFileReader reader(getParam<FileName>("samples_file"), &_communicator);
+    reader.read();
+    _data = reader.getData();
   }
-  else
-  // If  indices are provided, check that they are all smaller than number of
-  // columns in the data
+  // Both column indices and names cannot be provided
+  else if (isParamValid("column_indices") && isParamValid("column_names"))
+    mooseError("In sampler, ",
+               _name,
+               ": Please provide either column_indices or column_names but not both.");
+  // If only column indices is provided, generate the matrix accordingly and
+  // store it in _data
+  else if (isParamValid("column_indices"))
   {
-    _indices = getParam<std::vector<dof_id_type>>("column_indices");
-    for (unsigned int i = 0; i < _indices.size(); i++)
+    std::vector<dof_id_type> indices = getParam<std::vector<dof_id_type>>("column_indices");
+    for (unsigned int i = 0; i < indices.size(); i++)
     {
-      if (_indices[i] >= _data.size())
-        mooseError("In ",
-                   _name,
-                   ": column index, ",
-                   _indices[i],
-                   " is larger than the number of columns in the samples file.");
+      // Reading the samples file and getting data
+      MooseUtils::DelimitedFileReader reader(getParam<FileName>("samples_file"), &_communicator);
+      reader.read();
+      _data.push_back(reader.getData(indices[i]));
+    }
+  }
+  // If column names are provided, generate the matrix accordingly and store it
+  // in _data
+  else
+  {
+    std::vector<std::string> names = getParam<std::vector<std::string>>("column_names");
+    for (unsigned int i = 0; i < names.size(); i++)
+    {
+      // Reading the samples file and getting data
+      MooseUtils::DelimitedFileReader reader(getParam<FileName>("samples_file"), &_communicator);
+      reader.read();
+      _data.push_back(reader.getData(names[i]));
     }
   }
 
   setNumberOfRows(_data[0].size());
-  setNumberOfCols(_indices.size());
+  setNumberOfCols(_data.size());
 }
 
 Real
 CSVSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   // Checks to make sure that the row and column indices are not out of bounds
-  mooseAssert(row_index < _data[0].size(), "row_index cannot be out of bounds of the data file.");
-  mooseAssert(col_index < _indices.size(),
-              "col_index cannot be out of bounds of the provided column indices.")
+  mooseAssert(row_index < _data[0].size(), "row_index cannot be out of bounds of the data.");
+  mooseAssert(col_index < _data.size(), "col_index cannot be out of bounds of the data.");
 
-      TIME_SECTION(_perf_compute_sample);
-  return _data[_indices[col_index]][row_index]; // entering samples into the matrix
+  TIME_SECTION(_perf_compute_sample);
+  return _data[col_index][row_index]; // entering samples into the matrix
 }
