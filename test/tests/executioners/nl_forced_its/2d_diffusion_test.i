@@ -57,7 +57,9 @@
 
 [Executioner]
   type = Steady
-
+  nl_forced_its = 2
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-50
   solve_type = 'NEWTON'
 []
 

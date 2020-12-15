@@ -6627,7 +6627,6 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real abstol,
                                          const PetscInt nfuncs,
                                          const PetscInt max_funcs,
-                                         const PetscBool force_iteration,
                                          const Real initial_residual_before_preset_bcs,
                                          const Real div_threshold)
 {
@@ -7099,13 +7098,4 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
       mooseError("Unrecognized material data type.");
       break;
   }
-}
-
-void
-FEProblemBase::setNLForcedIterations(const unsigned int nl_forced_its)
-{
-  if (_petsc_options.flags.contains("-snes_force_iteration") && nl_forced_its == 0)
-    _nl_forced_its = 1;
-  else
-    _nl_forced_its = nl_forced_its;
 }

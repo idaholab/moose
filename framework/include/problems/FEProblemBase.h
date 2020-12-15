@@ -214,7 +214,6 @@ public:
                             const Real abstol,
                             const PetscInt nfuncs,
                             const PetscInt max_funcs,
-                            const PetscBool force_iteration,
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
@@ -1916,7 +1915,9 @@ public:
   }
 
   /// method setting the minimum number of nonlinear iterations before performing divergence checks
-  void setNLForcedIterations(const unsigned int /*nl_forced_its*/);
+  void setNLForcedIterations(const unsigned int nl_forced_its) { _nl_forced_its = nl_forced_its; }
+
+  unsigned int getNLForcedIterations() { return _nl_forced_its; };
 
   /// method setting the absolute divergence tolerance
   void setNLAbsoluteDivergenceTolerance(const Real abs_nl_divtol)

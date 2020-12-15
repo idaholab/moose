@@ -353,6 +353,17 @@ petscNonlinearConverged(SNES snes,
   CHKERRABORT(problem.comm().get(), ierr);
 #endif
 
+  if (force_iteration && !(problem.getNLForcedIterations()))
+    problem.setNLForcedIterations(1);
+
+  if (!force_iteration && (problem.getNLForcedIterations()))
+  {
+#if !PETSC_VERSION_LESS_THAN(3, 8, 4)
+    ierr = SNESSetForceIteration(snes, PETSC_TRUE);
+    CHKERRABORT(problem.comm().get(), ierr);
+#endif
+  }
+
 // See if SNESSetFunctionDomainError() has been called.  Note:
 // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()
 // were added in different releases of PETSc.
@@ -385,7 +396,6 @@ petscNonlinearConverged(SNES snes,
                                         atol,
                                         nfuncs,
                                         maxf,
-                                        force_iteration,
                                         system._initial_residual_before_preset_bcs,
                                         std::numeric_limits<Real>::max());
 
