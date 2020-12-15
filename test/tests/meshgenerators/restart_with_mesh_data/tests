@@ -1,0 +1,20 @@
+[Tests]
+  issues = '15972'
+  design = MeshMetaDataInterface.md
+
+  [restart]
+    requirement = 'The system shall support'
+    [part_one]
+      type = RunApp
+      input = part_one.i
+
+      detail = "declaring mesh data"
+    []
+    [part_two]
+      type = RunApp
+      input = part_two.i
+
+      detail = "that can be loaded from a checkpoint file during restart."
+    []
+  []
+[]
