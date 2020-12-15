@@ -77,11 +77,6 @@ slip_wall_boundaries = 'left'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    vel = 'velocity'
-  []
-  [u_pressure_rz]
-    type = INSFVMomentumPressureRZ
-    variable = u
     p = pressure
   []
 
@@ -110,7 +105,7 @@ slip_wall_boundaries = 'left'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    vel = 'velocity'
+    p = pressure
   []
 []
 

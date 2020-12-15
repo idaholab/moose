@@ -67,15 +67,10 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
-    # 'advected_quantity = NS::pressure'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-
-    # these parameters shouldn't be used for anything but are still required
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -104,14 +99,6 @@ rho=1.1
     coeff = '${mu}'
     coeff_function = '${mu}'
   []
-  [u_pressure]
-    type = INSFVMomentumPressureFunctionBC
-    boundary = 'left right'
-    variable = u
-    momentum_component = 'x'
-    p = pressure
-    pressure_exact_solution = 'exact_p'
-  []
 
   [mass_continuity_flux]
     type = FVMatAdvectionFunctionBC
@@ -120,6 +107,7 @@ rho=1.1
     vel = 'velocity'
     vel_x_exact_solution = 'exact_u'
     flux_variable_exact_solution = ${rho}
+    advected_quantity = ${rho}
   []
 
   [u_diri]

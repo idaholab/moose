@@ -97,15 +97,10 @@ velocity_interp_method='rc'
     coeff = ${mu}
   []
   [u_pressure]
-    # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
-    # 'advected_quantity = NS::pressure'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-
-    # these parameters shouldn't be used for anything but are still required
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -135,9 +130,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    # these parameters shouldn't be used for anything but are still required
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [v_forcing]
     type = FVBodyForce
@@ -166,7 +159,6 @@ velocity_interp_method='rc'
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    # we need to compute this here for advection in INSFVMomentumPressure
     pressure = 'pressure'
     rho = ${rho}
   []

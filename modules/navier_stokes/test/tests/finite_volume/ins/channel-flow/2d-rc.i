@@ -81,8 +81,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
+    p = pressure
   []
 
   [v_advection]
@@ -109,8 +108,7 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
+    p = pressure
   []
 []
 

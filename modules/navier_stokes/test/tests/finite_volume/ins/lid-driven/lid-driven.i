@@ -102,6 +102,7 @@ rho=1
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
+    p = pressure
   []
 
   [v_advection]
@@ -126,6 +127,7 @@ rho=1
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
+    p = pressure
   []
 []
 

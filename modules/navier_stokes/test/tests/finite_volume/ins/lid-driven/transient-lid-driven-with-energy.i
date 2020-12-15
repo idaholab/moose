@@ -129,7 +129,7 @@ advected_interp_method = 'average'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    vel = ${vel}
+    p = pressure
   []
 
   [v_time]
@@ -159,8 +159,8 @@ advected_interp_method = 'average'
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
-    vel = ${vel}
     momentum_component = 'y'
+    p = pressure
   []
 
   [temp_time]

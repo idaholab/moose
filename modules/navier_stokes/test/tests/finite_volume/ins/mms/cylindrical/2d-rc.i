@@ -91,12 +91,6 @@ rho=1.1
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    vel = 'velocity'
-    advected_interp_method = 'average'
-  []
-  [u_pressure_rz]
-    type = INSFVMomentumPressureRZ
-    variable = u
     p = pressure
   []
   [u_forcing]
@@ -128,8 +122,7 @@ rho=1.1
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [v_forcing]
     type = FVBodyForce

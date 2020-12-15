@@ -123,7 +123,7 @@ two_term_boundary_expansion=true
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-    vel = 'velocity'
+    p = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -155,7 +155,7 @@ two_term_boundary_expansion=true
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    vel = 'velocity'
+    p = pressure
   []
   [v_forcing]
     type = FVBodyForce

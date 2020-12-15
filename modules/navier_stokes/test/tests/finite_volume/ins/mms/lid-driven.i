@@ -12,6 +12,7 @@ rho=1.1
     nx = 2
     ny = 2
   []
+  parallel_type = distributed
 []
 
 [Problem]
@@ -25,35 +26,29 @@ rho=1.1
     family = MONOMIAL
     fv = true
     initial_condition = 1
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = true
   []
   [v]
     order = CONSTANT
     family = MONOMIAL
     fv = true
     initial_condition = 1
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = true
   []
   [pressure]
     order = CONSTANT
     family = MONOMIAL
     fv = true
+    type = MooseVariableFVReal
+    two_term_boundary_expansion = true
+  []
+  [lambda]
+    order = FIRST
+    family = SCALAR
   []
 []
-
-# [AuxVariables]
-#   [v]
-#     order = CONSTANT
-#     family = MONOMIAL
-#     fv = true
-#   []
-# []
-
-# [ICs]
-#   [v]
-#     type = FunctionIC
-#     function = 'exact_v'
-#     variable = v
-#   []
-# []
 
 [FVKernels]
   [mass]
@@ -73,6 +68,11 @@ rho=1.1
     type = FVBodyForce
     variable = pressure
     function = forcing_p
+  []
+  [mean_zero_pressure]
+    type = FVScalarLagrangeMultiplier
+    variable = pressure
+    lambda = lambda
   []
 
   [u_advection]
@@ -95,15 +95,10 @@ rho=1.1
     coeff = ${mu}
   []
   [u_pressure]
-    # INSFVMomentumPressure inherits from FVMatAdvection and in INSFVMomentumPressure::validParams we set
-    # 'advected_quantity = NS::pressure'
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
-
-    # these parameters shouldn't be used for anything but are still required
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [u_forcing]
     type = FVBodyForce
@@ -134,9 +129,7 @@ rho=1.1
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    # these parameters shouldn't be used for anything but are still required
-    vel = 'velocity'
-    advected_interp_method = 'average'
+    p = pressure
   []
   [v_forcing]
     type = FVBodyForce
@@ -165,14 +158,6 @@ rho=1.1
     coeff = '${mu}'
     coeff_function = '${mu}'
   []
-  [u_pressure]
-    type = INSFVMomentumPressureFunctionBC
-    boundary = 'left right top bottom'
-    variable = u
-    momentum_component = 'x'
-    p = pressure
-    pressure_exact_solution = 'exact_p'
-  []
 
   [v_advection]
     type = FVMatAdvectionFunctionBC
@@ -192,14 +177,6 @@ rho=1.1
     exact_solution = 'exact_v'
     coeff = '${mu}'
     coeff_function = '${mu}'
-  []
-  [v_pressure]
-    type = INSFVMomentumPressureFunctionBC
-    boundary = 'left right top bottom'
-    variable = v
-    momentum_component = 'y'
-    p = pressure
-    pressure_exact_solution = 'exact_p'
   []
 
   [mass_continuity_flux]
@@ -225,12 +202,6 @@ rho=1.1
     boundary = 'top bottom left right'
     function = 'exact_v'
   []
-  [p_diri]
-    type = FVFunctionDirichletBC
-    variable = pressure
-    boundary = 'top bottom left right'
-    function = 'exact_p'
-  []
 []
 
 [Materials]
@@ -238,7 +209,6 @@ rho=1.1
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    # we need to compute this here for advection in INSFVMomentumPressure
     pressure = 'pressure'
     rho = ${rho}
   []
@@ -257,7 +227,7 @@ rho=1.1
 []
 [forcing_u]
   type = ParsedFunction
-  value = '1.331*mu*sin(1.1*x) - 0.891*rho*sin(1.1*x)*sin(0.9*y) + 2.662*rho*sin(1.1*x)*cos(1.1*x) + 0.96*cos(0.8*x)*cos(1.3*y)'
+  value = '1.331*mu*sin(1.1*x) - 0.891*rho*sin(1.1*x)*sin(0.9*y) + 2.662*rho*sin(1.1*x)*cos(1.1*x) + 0.96*cos(0.8*x)*sin(1.3*y)'
   vars = 'mu rho'
   vals = '${mu} ${rho}'
 []
@@ -273,13 +243,13 @@ rho=1.1
 []
 [forcing_v]
   type = ParsedFunction
-  value = '0.729*mu*cos(0.9*y) - 1.458*rho*sin(0.9*y)*cos(0.9*y) + 1.089*rho*cos(1.1*x)*cos(0.9*y) - 1.56*sin(0.8*x)*sin(1.3*y)'
+  value = '0.729*mu*cos(0.9*y) - 1.458*rho*sin(0.9*y)*cos(0.9*y) + 1.089*rho*cos(1.1*x)*cos(0.9*y) + 1.56*sin(0.8*x)*cos(1.3*y)'
   vars = 'mu rho'
   vals = '${mu} ${rho}'
 []
 [exact_p]
   type = ParsedFunction
-  value = '1.2*sin(0.8*x)*cos(1.3*y)'
+  value = '1.2*sin(0.8*x)*sin(1.3*y)'
 []
 [forcing_p]
   type = ParsedFunction
@@ -292,12 +262,11 @@ rho=1.1
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
+  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart -pc_asm_overlap'
+  petsc_options_value = 'asm      lu           NONZERO                   100                4'
 []
 
 [Outputs]
-  exodus = true
   csv = true
   [dof]
     type = DOFMap
