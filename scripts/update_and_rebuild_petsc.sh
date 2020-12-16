@@ -111,6 +111,7 @@ if [ -z "$go_fast" ]; then
       --download-parmetis=1 \
       --download-superlu_dist=1 \
       --download-mumps=1 \
+      --download-strumpack=1 \
       --download-scalapack=1 \
       --download-slepc=1 \
       --with-mpi=1 \
