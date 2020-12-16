@@ -3193,14 +3193,11 @@ MooseMesh::buildFaceInfo()
         // if at a lowerdim intersection, add the remaining elem-neighbor pair of the intersection
         if (neighbor && neighbor_neighbor && neighbor->active() && neighbor->level() == elem->level() && neighbor->dim() == elem->dim() && neighbor_neighbor->id() != elem_id)
         {
-          // std::cout<<"found intersection element, id = "<<elem_id<<std::endl;
-          // std::cout<<"other elements at the intersection, id = "<<neighbor->id()<<std::endl;
           std::vector<Elem *> intersection_elems;
           //find all the neighbors at the intersections
           while(neighbor_neighbor->id() != elem_id) //condition to continue until we have looped back to the element considered
           {
             intersection_elems.push_back(neighbor_neighbor);
-            // std::cout<<"other elements at the intersection, id = "<<neighbor_neighbor->id()<<std::endl;
             neighbor = neighbor_neighbor;
             side_neighbor=0;
             while(side_neighbor < neighbor->n_sides())
