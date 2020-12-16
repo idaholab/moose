@@ -14,9 +14,9 @@ We begin with the standard "simple diffusion" problem:
 For this problem, we seek the value of the integral
 
 !equation
-\int_L u_h(\vec{r})~dr, \quad L = \{\vec{r}_1 + t\vec{r}_2 \mid t \in [0, 1]\}
+\int_L u_h(\vec{r})~dr, \quad L = \{\vec{r}_1 + t\vec{r}_2 \mid t \in [0, 1]\}\,,
 
-for the lines defined by
+where $u_h$ is the finite-element solution, for the lines defined by
 
 !equation
 \vec{r}_1 = (0, 0)\,, \quad \vec{r}_2 = (5, 5)
