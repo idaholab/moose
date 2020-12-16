@@ -111,7 +111,10 @@ MeshSideSetGenerator::generate()
       auto s = (*it)->_side;
       Elem * neighbor = elem->neighbor_ptr(s);
 
-      if (neighbor && elem->id()>neighbor->id()) //test so that lowerdim elem are not duplicated on internal boundaries //UPDATE this will fail for SideSetsBetweenSubdomains
+      if (neighbor &&
+          elem->id() >
+              neighbor->id()) // test so that lowerdim elem are not duplicated on internal
+                              // boundaries //UPDATE this will fail for SideSetsBetweenSubdomains
       {
         // build element from the side
         std::unique_ptr<Elem> side(elem->build_side_ptr(s, false));
@@ -123,13 +126,13 @@ MeshSideSetGenerator::generate()
 
         // update elem-neighbor connections:
         // the new neighbor of "elem" is the lowerdim element
-        elem->set_neighbor(s,new_elem);
+        elem->set_neighbor(s, new_elem);
         // the new neighbor of "neighbor" is the lowerdim element
         for (unsigned int s_i = 0; s_i < neighbor->n_sides(); ++s_i)
         {
           side = neighbor->build_side_ptr(s_i, false);
-          if (side->centroid()==new_elem->centroid())
-            neighbor->set_neighbor(s_i,new_elem);
+          if (side->centroid() == new_elem->centroid())
+            neighbor->set_neighbor(s_i, new_elem);
         }
 
         ////// PART TO BE ABLE TO ASSIGN BC TO LOWERDIM ON EXTERNAL BOUNDARIES
@@ -142,7 +145,8 @@ MeshSideSetGenerator::generate()
             if (std::get<0>(*it)->absolute_fuzzy_equals(side_centroid,1e-5))
               {
                 boundary_info.add_side(new_elem->id(), s_i, 100+std::get<1>(*it));
-                boundary_info.nodeset_name(100+std::get<1>(*it)) = "LD_" + boundary_info.sideset_name(std::get<1>(*it));
+                boundary_info.nodeset_name(100+std::get<1>(*it)) = "LD_" +
+        boundary_info.sideset_name(std::get<1>(*it));
               }
         }
         //*/
@@ -150,31 +154,38 @@ MeshSideSetGenerator::generate()
     }
 
   // Loop to assign the neighbors of all the new lowerdim elements
-  // for each element in the lower dim block, we check if the elem has neighbor by finding other elements that share a side at the same position
+  // for each element in the lower dim block, we check if the elem has neighbor by finding other
+  // elements that share a side at the same position
   for (auto & elem_i : mesh->element_ptr_range())
     if (elem_i->subdomain_id() == _block_id)
       for (unsigned int s_i = 0; s_i < elem_i->n_sides(); ++s_i)
       {
         std::unique_ptr<Elem> face_i(elem_i->build_side_ptr(s_i, false));
         std::vector<std::pair<unsigned int, Elem *>> neighbors;
-        neighbors.push_back(std::make_pair(s_i,elem_i));
+        neighbors.push_back(std::make_pair(s_i, elem_i));
         for (auto & elem_j : mesh->element_ptr_range())
           if (elem_j->subdomain_id() == _block_id && elem_j != elem_i)
             for (unsigned int s_j = 0; s_j < elem_j->n_sides(); ++s_j)
             {
               std::unique_ptr<Elem> face_j(elem_j->build_side_ptr(s_j, false));
-              if(face_i->centroid()==face_j->centroid())
-                neighbors.push_back(std::make_pair(s_j,elem_j));
+              if (face_i->centroid() == face_j->centroid())
+                neighbors.push_back(std::make_pair(s_j, elem_j));
             }
-        if (neighbors.size()>1) // then we have found neighbors to the element
+        if (neighbors.size() > 1) // then we have found neighbors to the element
         {
-          // the implementation below (along with the modification in MooseMesh) allows to take into account all the intersections a lower dim can have
-          // in that case, all the neighbors to one lowerdim element at an intersection are taken into account by doing a loop of unique elem-neighbor pairs
-          for (unsigned int i = 0; i < neighbors.size()-1; ++i)
-            std::get<1>(neighbors[i])->set_neighbor(std::get<0>(neighbors[i]),std::get<1>(neighbors[i+1]));
-          // loop back on the the element considered to have of unique connections at a lowerdim intersection
-          std::get<1>(neighbors.back())->set_neighbor(std::get<0>(neighbors.back()),std::get<1>(neighbors[0]));
-          // note that with this current implementation the same assignment is overwritten multiple times
+          // the implementation below (along with the modification in MooseMesh) allows to take into
+          // account all the intersections a lower dim can have in that case, all the neighbors to
+          // one lowerdim element at an intersection are taken into account by doing a loop of
+          // unique elem-neighbor pairs
+          for (unsigned int i = 0; i < neighbors.size() - 1; ++i)
+            std::get<1>(neighbors[i])
+                ->set_neighbor(std::get<0>(neighbors[i]), std::get<1>(neighbors[i + 1]));
+          // loop back on the the element considered to have of unique connections at a lowerdim
+          // intersection
+          std::get<1>(neighbors.back())
+              ->set_neighbor(std::get<0>(neighbors.back()), std::get<1>(neighbors[0]));
+          // note that with this current implementation the same assignment is overwritten multiple
+          // times
         }
       }
 

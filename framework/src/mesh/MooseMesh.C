@@ -3116,15 +3116,17 @@ MooseMesh::buildFaceInfo()
     {
       // get the neighbor element
       Elem * neighbor = elem->neighbor_ptr(side);
-      Elem * neighbor_neighbor; //the neighbor or "neighbor". It should be "elem" unless we are at a lowerdim intersection
+      Elem * neighbor_neighbor; // the neighbor or "neighbor". It should be "elem" unless we are at
+                                // a lowerdim intersection
       std::unique_ptr<Elem> face_elem(elem->build_side_ptr(side, false));
-      unsigned int side_neighbor=0;
-      if (neighbor && neighbor->active() && neighbor->level() == elem->level() && neighbor->dim() == elem->dim())
+      unsigned int side_neighbor = 0;
+      if (neighbor && neighbor->active() && neighbor->level() == elem->level() &&
+          neighbor->dim() == elem->dim())
       {
-        while(side_neighbor < neighbor->n_sides())
+        while (side_neighbor < neighbor->n_sides())
         {
           std::unique_ptr<Elem> face_i(neighbor->build_side_ptr(side_neighbor, false));
-          if(face_i->centroid()==face_elem->centroid())
+          if (face_i->centroid() == face_elem->centroid())
             break;
           side_neighbor++;
         }
@@ -3166,8 +3168,9 @@ MooseMesh::buildFaceInfo()
       if (!neighbor ||
           (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
-          (neighbor->active() && (neighbor->level() == elem->level()) &&
-           neighbor_neighbor && (neighbor_neighbor->id() != elem_id)) || //added the specific case of lowerdim intersections
+          (neighbor->active() && (neighbor->level() == elem->level()) && neighbor_neighbor &&
+           (neighbor_neighbor->id() !=
+            elem_id)) || // added the specific case of lowerdim intersections
           (neighbor->level() < elem->level()))
       {
         _all_face_info.emplace_back(elem, side, neighbor);
@@ -3191,19 +3194,23 @@ MooseMesh::buildFaceInfo()
         }
 
         // if at a lowerdim intersection, add the remaining elem-neighbor pair of the intersection
-        if (neighbor && neighbor_neighbor && neighbor->active() && neighbor->level() == elem->level() && neighbor->dim() == elem->dim() && neighbor_neighbor->id() != elem_id)
+        if (neighbor && neighbor_neighbor && neighbor->active() &&
+            neighbor->level() == elem->level() && neighbor->dim() == elem->dim() &&
+            neighbor_neighbor->id() != elem_id)
         {
           std::vector<Elem *> intersection_elems;
-          //find all the neighbors at the intersections
-          while(neighbor_neighbor->id() != elem_id) //condition to continue until we have looped back to the element considered
+          // find all the neighbors at the intersections
+          while (
+              neighbor_neighbor->id() !=
+              elem_id) // condition to continue until we have looped back to the element considered
           {
             intersection_elems.push_back(neighbor_neighbor);
             neighbor = neighbor_neighbor;
-            side_neighbor=0;
-            while(side_neighbor < neighbor->n_sides())
+            side_neighbor = 0;
+            while (side_neighbor < neighbor->n_sides())
             {
               std::unique_ptr<Elem> face_i(neighbor->build_side_ptr(side_neighbor, false));
-              if(face_i->centroid()==face_elem->centroid())
+              if (face_i->centroid() == face_elem->centroid())
                 break;
               side_neighbor++;
             }
@@ -3212,7 +3219,8 @@ MooseMesh::buildFaceInfo()
           // add all the FaceInfos
           for (unsigned int i = 0; i < intersection_elems.size(); ++i)
           {
-            _all_face_info.emplace_back(elem, side, intersection_elems[i]); //providing the new neighbor
+            _all_face_info.emplace_back(
+                elem, side, intersection_elems[i]); // providing the new neighbor
 
             auto & fi = _all_face_info.back();
 

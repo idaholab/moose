@@ -30,7 +30,7 @@ FVLowerDimDiffusion::FVLowerDimDiffusion(const InputParameters & params)
     _coeff_LD(getParam<Real>("coeff_LD")),
     _thickness(getParam<Real>("thickness"))
 {
-  if (_thickness<=0)
+  if (_thickness <= 0)
     mooseError("thickness has to be strictly positive");
 }
 
@@ -43,14 +43,18 @@ FVLowerDimDiffusion::computeQpResidual()
   auto dist_neighbor = (_face_info->faceCentroid() - _face_info->neighborCentroid()).norm();
   auto coeff_neighbor = _coeff_neighbor[_qp];
   if (!_face_info->isBoundary() // to be able to call neighbor ptr
-      && _face_info->elem().dim()>_face_info->neighbor().dim()) // then we are dealing with the transverse flow to the LowerDim (always oriented towards the LowerDim)
+      && _face_info->elem().dim() >
+             _face_info->neighbor().dim()) // then we are dealing with the transverse flow to the
+                                           // LowerDim (always oriented towards the LowerDim)
   {
     coeff_neighbor = _coeff_LD;
-    dist_neighbor = _thickness/2.;
-    dist_elem = (_face_info->faceCentroid() - _face_info->elemCentroid()).norm(); // - _thickness/2.;
+    dist_neighbor = _thickness / 2.;
+    dist_elem =
+        (_face_info->faceCentroid() - _face_info->elemCentroid()).norm(); // - _thickness/2.;
   }
 
-  ADReal k = (dist_neighbor * _coeff_elem[_qp] + dist_elem * coeff_neighbor) / (dist_elem + dist_neighbor); //average weighted with distance
-  
+  ADReal k = (dist_neighbor * _coeff_elem[_qp] + dist_elem * coeff_neighbor) /
+             (dist_elem + dist_neighbor); // average weighted with distance
+
   return -1 * k * dudn;
 }
