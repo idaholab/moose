@@ -46,7 +46,7 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const RealEigenVector & _u;
 
-  virtual RealEigenVector computeQpResidual() = 0;
+  virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
    * The user can override this function to compute the "on-diagonal"
@@ -60,4 +60,8 @@ protected:
    * computing an off-diagonal jacobian component.
    */
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
+
+private:
+  /// Work vector for residual
+  RealEigenVector _work_vector;
 };

@@ -34,10 +34,10 @@ ArrayPenaltyDirichletBC::ArrayPenaltyDirichletBC(const InputParameters & paramet
 {
 }
 
-RealEigenVector
-ArrayPenaltyDirichletBC::computeQpResidual()
+void
+ArrayPenaltyDirichletBC::computeQpResidual(RealEigenVector & residual)
 {
-  return _p * _test[_i][_qp] * (_u[_qp] - _v);
+  residual = _p * _test[_i][_qp] * (_u[_qp] - _v);
 }
 
 RealEigenVector

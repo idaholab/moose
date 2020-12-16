@@ -47,7 +47,7 @@ protected:
   /**
    * Method for computing the residual at quadrature points
    */
-  virtual RealEigenVector computeQpResidual() = 0;
+  virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
    * Method for computing the diagonal Jacobian at quadrature points
@@ -111,4 +111,8 @@ protected:
 
   /// Number of components of the array variable
   const unsigned int _count;
+
+private:
+  /// Work vector for residual
+  RealEigenVector _work_vector;
 };

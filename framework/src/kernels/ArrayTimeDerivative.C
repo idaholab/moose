@@ -44,17 +44,17 @@ ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
   }
 }
 
-RealEigenVector
-ArrayTimeDerivative::computeQpResidual()
+void
+ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
   if (_coeff)
-    return (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
+    residual = (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   else if (_coeff_array)
   {
     mooseAssert((*_coeff_array)[_qp].size() == _var.count(),
                 "time_derivative_coefficient size is inconsistent with the number of components "
                 "in array variable");
-    return ((*_coeff_array)[_qp].array() * _u_dot[_qp].array()) * _test[_i][_qp];
+    residual.noalias() = (*_coeff_array)[_qp].asDiagonal() * _u_dot[_qp] * _test[_i][_qp];
   }
   else
   {
@@ -64,7 +64,7 @@ ArrayTimeDerivative::computeQpResidual()
     mooseAssert((*_coeff_2d_array)[_qp].rows() == _var.count(),
                 "time_derivative_coefficient size is inconsistent with the number of components "
                 "in array variable");
-    return (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
+    residual.noalias() = (*_coeff_2d_array)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   }
 }
 

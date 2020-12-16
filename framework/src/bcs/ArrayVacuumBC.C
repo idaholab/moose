@@ -31,10 +31,10 @@ ArrayVacuumBC::ArrayVacuumBC(const InputParameters & parameters)
   _alpha /= 2;
 }
 
-RealEigenVector
-ArrayVacuumBC::computeQpResidual()
+void
+ArrayVacuumBC::computeQpResidual(RealEigenVector & residual)
 {
-  return _alpha.cwiseProduct(_u[_qp]) * _test[_i][_qp];
+  residual = _alpha.cwiseProduct(_u[_qp]) * _test[_i][_qp];
 }
 
 RealEigenVector

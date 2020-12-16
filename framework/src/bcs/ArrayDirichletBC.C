@@ -31,8 +31,8 @@ ArrayDirichletBC::ArrayDirichletBC(const InputParameters & parameters)
 {
 }
 
-RealEigenVector
-ArrayDirichletBC::computeQpResidual()
+void
+ArrayDirichletBC::computeQpResidual(RealEigenVector & residual)
 {
-  return _u - _values;
+  residual = _u - _values;
 }

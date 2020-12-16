@@ -46,7 +46,7 @@ protected:
   /**
    * Compute this Kernel's contribution to the residual at the current quadrature point
    */
-  virtual RealEigenVector computeQpResidual() = 0;
+  virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
    * Compute this Kernel's contribution to the diagonal Jacobian at the current quadrature point
