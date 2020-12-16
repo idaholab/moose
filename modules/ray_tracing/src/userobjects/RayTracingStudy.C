@@ -86,7 +86,9 @@ RayTracingStudy::validParams()
       "Whether or not to verify if Rays have valid information before being traced.");
   params.addParam<bool>("verify_trace_intersections",
                         true,
-                        "Whether or not to verify the trace intersections in devel and dbg modes.");
+                        "Whether or not to verify the trace intersections in devel and dbg modes. "
+                        "Trace intersections are not verified regardless of this parameter in "
+                        "optimized modes (opt, oprof).");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
@@ -131,7 +133,9 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _segments_on_cache_traces(getParam<bool>("segments_on_cache_traces")),
     _ray_max_distance(getParam<Real>("ray_distance")),
     _verify_rays(getParam<bool>("verify_rays")),
+#ifndef NDEBUG
     _verify_trace_intersections(getParam<bool>("verify_trace_intersections")),
+#endif
 
     _execute_study_timer(registerTimedSection("executeStudy", 1)),
     _generate_timer(registerTimedSection("generate", 1)),

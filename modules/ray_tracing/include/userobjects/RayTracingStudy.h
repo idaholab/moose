@@ -899,7 +899,9 @@ protected:
   /// Whether or not to verify if Rays have valid information before being traced
   const bool _verify_rays;
   /// Whether or not to verify the trace intersections in devel and dbg modes
+#ifndef NDEBUG
   const bool _verify_trace_intersections;
+#endif
 
 private:
   /**
