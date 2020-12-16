@@ -31,7 +31,17 @@ The `line_source` [LineSourceRayKernel.md] contributes to the variable `u` for [
 
 The visualized result follows in [result].
 
-!media large_media/ray_tracing/simple_diffusion_line_source.png id=result style=width:70%; caption=Simple diffusion line source example result.
+!row!
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source.png
+       id=result
+       caption=Simple diffusion line source example result.
+
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_mesh.png
+      caption=The result pictured in [result] with a mesh overlay.
+      id=result-mesh
+!row-end!
 
 Just for the purposes of producing a more appealing picture, let's add some adaptivity to the mix to refine the region around the ray.
 
@@ -47,4 +57,14 @@ Setting the number of adaptivity steps to 5 via a command line argument, i.e.:
 
 leads to the well-refined and visually satisfying result below in [result-adaptivity].
 
-!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity.png id=result-adaptivity style=width:70%; caption=Simple diffusion line source example result with adaptivity.
+!row!
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity.png
+       id=result-adaptivity
+       caption=Simple diffusion line source example result with adaptivity.
+
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity_mesh.png
+      caption=The result pictured in [result-adaptivity] with a mesh overlay.
+      id=result-adaptivity-mesh
+!row-end!
