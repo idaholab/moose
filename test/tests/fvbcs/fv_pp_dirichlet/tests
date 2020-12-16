@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FVPostprocessorDirichletBC.md'
+  issues = '#16477'
+  [./fv_pp_dirichlet]
+    type = 'Exodiff'
+    input = 'fv_pp_dirichlet.i'
+    exodiff = 'fv_pp_dirichlet_out.e'
+    requirement = 'The system shall run a simple 1D diffusion problem with a Dirichlet BC value set by a postprocessor.'
+  []
+[]

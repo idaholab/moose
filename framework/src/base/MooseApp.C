@@ -2163,7 +2163,7 @@ MooseApp::getRelationshipManagerInfo() const
         counts[demangle(typeid(*gf).name())]++;
     }
 
-    for (const auto pair : counts)
+    for (const auto & pair : counts)
       info_strings.emplace_back(std::make_pair(
           "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
   }
@@ -2187,7 +2187,7 @@ MooseApp::getRelationshipManagerInfo() const
         counts[demangle(typeid(*gf).name())]++;
     }
 
-    for (const auto pair : counts)
+    for (const auto & pair : counts)
       info_strings.emplace_back(
           std::make_pair("Default",
                          pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "") +

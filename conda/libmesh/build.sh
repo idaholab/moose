@@ -1,5 +1,7 @@
 #!/bin/bash
-set -eux
+set -eu
+export PATH=/bin:$PATH
+
 export PKG_CONFIG_PATH=$BUILD_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 export PETSC_DIR=`pkg-config PETSc --variable=prefix`
 

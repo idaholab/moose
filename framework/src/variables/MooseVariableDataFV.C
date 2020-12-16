@@ -17,7 +17,7 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 #include "Attributes.h"
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 #include "SubProblem.h"
 #include "FVKernel.h"
 #include "ADUtils.h"
@@ -525,7 +525,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
   _has_dirichlet_bc = false;
   initializeSolnVars();
 
-  std::vector<FVDirichletBC *> bcs;
+  std::vector<FVDirichletBCBase *> bcs;
 
   // TODO: this query probably (maybe?)needs to also filter based on the
   // active tags - these currently live in the flux thread loop object and I'm

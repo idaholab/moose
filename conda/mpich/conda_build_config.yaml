@@ -11,31 +11,31 @@ MACOSX_DEPLOYMENT_TARGET:      # [osx]
   - 10.9                       # [osx]
 
 libllvm:
-  - 9.0.1 ha1b3eb9_0
+  - 11.0.0 hf85e3d2_0
 
 libclang:
-  - 9.0.1 default_hf57f61e_0
+  - 11.0.0 default_h9e6edd0_2
 
 compilerrt:
-  - 9.0.1 h6a512c6_0
+  - 11.0.0 h01488ec_2
 
 compilerrtosx:
-  - 9.0.1 h6a512c6_0
+  - 11.0.0 hd3c4e95_2
 
 clangxx:
-  - 9.0.1 default_hf57f61e_0
+  - 11.0.0 default_h9e6edd0_2
 
 clangosx:
-  - 9.0.1 h05bbb7f_0
+  - 11.0.0 hb91bd55_5
 
 clangxxosx:
-  - 9.0.1 h05bbb7f_0
+  - 11.0.0 h7e1b574_5
 
 clang:
-  - 9.0.1 default_hf57f61e_0
+  - 11.0.0 h694c41f_2
 
 llvmopenmp:
-  - 9.0.1 h28b9765_2
+  - 11.0.0 h73239a0_1
 
 osxfortran:
   - 7.3.0 h22b1bf0_7
@@ -53,7 +53,7 @@ gccimpl:
   - 7.3.0 hd420e75_5
 
 libcxx:
-  - 9.0.1 1
+  - 11.0.0 h4c3b8ed_1
 
 moose_compilers:
-  - 2020.04.13
+  - 2020.11.24

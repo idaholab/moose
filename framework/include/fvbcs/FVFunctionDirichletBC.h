@@ -9,19 +9,14 @@
 
 #pragma once
 
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 
 /**
  * Applies a Dirichlet boundary condition with a value prescribed by a function
  */
-class FVFunctionDirichletBC : public FVDirichletBC
+class FVFunctionDirichletBC : public FVDirichletBCBase
 {
 public:
-  /**
-   * Class constructor.
-   * @param parameters The InputParameters for the object
-   * @param nodal Whether this BC is applied to nodes or not
-   */
   FVFunctionDirichletBC(const InputParameters & parameters);
 
   static InputParameters validParams();

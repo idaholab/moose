@@ -1883,7 +1883,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
     _bboxes.resize(num_regions + 1);
 
     decltype(num_regions) region = 1;
-    for (const auto list_ref : disjoint_regions)
+    for (const auto & list_ref : disjoint_regions)
     {
       for (const auto elem_id : list_ref)
         updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));

@@ -151,7 +151,7 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 
   // Add any other user-added matrix tags if they have associated matrices
   const auto & matrix_tags = getMatrixTags();
-  for (const auto matrix_tag : matrix_tags)
+  for (const auto & matrix_tag : matrix_tags)
     if (_nl_eigen->hasMatrix(matrix_tag.second))
       _fe_matrix_tags.insert(matrix_tag.second);
 
@@ -234,7 +234,7 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
 
   // Add any other user-added matrix tags if they have associated matrices
   const auto & matrix_tags = getMatrixTags();
-  for (const auto matrix_tag : matrix_tags)
+  for (const auto & matrix_tag : matrix_tags)
     if (_nl_eigen->hasMatrix(matrix_tag.second))
       _fe_matrix_tags.insert(matrix_tag.second);
 

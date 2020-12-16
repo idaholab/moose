@@ -17,7 +17,7 @@
 #include "Assembly.h"
 #include "FVUtils.h"
 #include "FVFluxBC.h"
-#include "FVDirichletBC.h"
+#include "FVDirichletBCBase.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -367,10 +367,10 @@ MooseVariableFV<OutputType>::isVector() const
 }
 
 template <typename OutputType>
-std::pair<bool, const FVDirichletBC *>
+std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
-  std::vector<FVDirichletBC *> bcs;
+  std::vector<FVDirichletBCBase *> bcs;
 
   this->_subproblem.getMooseApp()
       .theWarehouse()
@@ -499,7 +499,7 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
     {
       mooseAssert(pr.second, "The FVDirichletBC is null!");
 
-      const FVDirichletBC & bc = *pr.second;
+      const FVDirichletBCBase & bc = *pr.second;
 
       // Linear interpolation: face_value = (elem_value + neighbor_value) / 2
       return 2. * bc.boundaryValue(fi) - elem_value;
@@ -524,7 +524,7 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
 
     if (pr.first)
     {
-      const FVDirichletBC & bc = *pr.second;
+      const FVDirichletBCBase & bc = *pr.second;
 
       return ADReal(bc.boundaryValue(fi));
     }

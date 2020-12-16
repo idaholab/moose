@@ -26,7 +26,7 @@ template <typename>
 class MooseVariableFV;
 
 typedef MooseVariableFV<Real> MooseVariableFVReal;
-class FVDirichletBC;
+class FVDirichletBCBase;
 class FVFluxBC;
 
 namespace libMesh
@@ -414,7 +414,7 @@ public:
     return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC();
   }
 
-  std::pair<bool, const FVDirichletBC *> getDirichletBC(const FaceInfo & fi) const;
+  std::pair<bool, const FVDirichletBCBase *> getDirichletBC(const FaceInfo & fi) const;
 
   std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 
