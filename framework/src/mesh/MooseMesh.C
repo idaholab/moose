@@ -3110,12 +3110,26 @@ MooseMesh::buildFaceInfo()
 
   for (auto it = begin; it != end; ++it)
   {
-    const Elem * elem = *it;
+    Elem * elem = *it;
     const dof_id_type elem_id = elem->id();
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
-      const Elem * neighbor = elem->neighbor_ptr(side);
+      Elem * neighbor = elem->neighbor_ptr(side);
+      Elem * neighbor_neighbor; //the neighbor or "neighbor". It should be "elem" unless we are at a lowerdim intersection
+      std::unique_ptr<Elem> face_elem(elem->build_side_ptr(side, false));
+      unsigned int side_neighbor=0;
+      if (neighbor && neighbor->active() && neighbor->level() == elem->level() && neighbor->dim() == elem->dim())
+      {
+        while(side_neighbor < neighbor->n_sides())
+        {
+          std::unique_ptr<Elem> face_i(neighbor->build_side_ptr(side_neighbor, false));
+          if(face_i->centroid()==face_elem->centroid())
+            break;
+          side_neighbor++;
+        }
+        neighbor_neighbor = neighbor->neighbor_ptr(side_neighbor);
+      }
 
       // We want to create a face object in all of the following cases:
       //
@@ -3152,6 +3166,8 @@ MooseMesh::buildFaceInfo()
       if (!neighbor ||
           (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
+          (neighbor->active() && (neighbor->level() == elem->level()) &&
+           neighbor_neighbor && (neighbor_neighbor->id() != elem_id)) || //added the specific case of lowerdim intersections
           (neighbor->level() < elem->level()))
       {
         _all_face_info.emplace_back(elem, side, neighbor);
@@ -3172,6 +3188,53 @@ MooseMesh::buildFaceInfo()
           auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
           if (rit != side_map.end())
             boundary_ids.insert(rit->second.begin(), rit->second.end());
+        }
+
+        // if at a lowerdim intersection, add the remaining elem-neighbor pair of the intersection
+        if (neighbor && neighbor_neighbor && neighbor->active() && neighbor->level() == elem->level() && neighbor->dim() == elem->dim() && neighbor_neighbor->id() != elem_id)
+        {
+          // std::cout<<"found intersection element, id = "<<elem_id<<std::endl;
+          // std::cout<<"other elements at the intersection, id = "<<neighbor->id()<<std::endl;
+          std::vector<Elem *> intersection_elems;
+          //find all the neighbors at the intersections
+          while(neighbor_neighbor->id() != elem_id) //condition to continue until we have looped back to the element considered
+          {
+            intersection_elems.push_back(neighbor_neighbor);
+            // std::cout<<"other elements at the intersection, id = "<<neighbor_neighbor->id()<<std::endl;
+            neighbor = neighbor_neighbor;
+            side_neighbor=0;
+            while(side_neighbor < neighbor->n_sides())
+            {
+              std::unique_ptr<Elem> face_i(neighbor->build_side_ptr(side_neighbor, false));
+              if(face_i->centroid()==face_elem->centroid())
+                break;
+              side_neighbor++;
+            }
+            neighbor_neighbor = neighbor->neighbor_ptr(side_neighbor);
+          }
+          // add all the FaceInfos
+          for (unsigned int i = 0; i < intersection_elems.size(); ++i)
+          {
+            _all_face_info.emplace_back(elem, side, intersection_elems[i]); //providing the new neighbor
+
+            auto & fi = _all_face_info.back();
+
+            // get all the sidesets that this face is contained in and cache them
+            // in the face info.
+            std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
+            boundary_ids.clear();
+
+            auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
+            if (lit != side_map.end())
+              boundary_ids.insert(lit->second.begin(), lit->second.end());
+
+            if (fi.neighborPtr())
+            {
+              auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
+              if (rit != side_map.end())
+                boundary_ids.insert(rit->second.begin(), rit->second.end());
+            }
+          }
         }
       }
     }

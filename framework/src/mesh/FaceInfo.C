@@ -57,4 +57,30 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   _vertices.resize(_face->n_vertices());
   for (const auto vertex_num : make_range(_face->n_vertices()))
     _vertices[vertex_num] = _face->node_ptr(vertex_num);
+
+  // find other_neighbors with the potential other neighors that would be present at the intersection of a lowerdim
+  _other_neighbors.clear();
+  if (_neighbor && (_neighbor_side_id == std::numeric_limits<unsigned int>::max() ||
+        elem->which_neighbor_am_i(neighbor) == std::numeric_limits<unsigned int>::max() )
+        && elem->dim()==neighbor->dim() )
+  {
+    unsigned int side_neighbor=0;
+    const Elem * elem_loop;
+    const Elem * neighbor_loop=elem->neighbor_ptr(side);;
+    while(neighbor_loop->id() != elem->id()) //condition to continue
+    {
+      if (neighbor_loop->id() != neighbor->id())
+        _other_neighbors.push_back(neighbor_loop);
+      elem_loop = neighbor_loop;
+      side_neighbor=0;
+      while(side_neighbor < elem_loop->n_sides())
+      {
+        std::unique_ptr<const Elem> face_i(elem_loop->build_side_ptr(side_neighbor, false));
+        if(face_i->centroid()==_face_centroid)
+          break;
+        side_neighbor++;
+      }
+      neighbor_loop = elem_loop->neighbor_ptr(side_neighbor);
+    }
+  }
 }

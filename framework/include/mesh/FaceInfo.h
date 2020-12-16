@@ -81,6 +81,7 @@ public:
                  "is null. This occurs for faces at the domain boundary");
     return *_neighbor;
   }
+  const std::vector<const Elem *> & other_neighbors() const { return _other_neighbors; }
   ///@}
 
   /// Returns the element centroids of the elements on the elem and neighbor sides of the face.
@@ -177,6 +178,7 @@ private:
   /// the elem and neighbor elems
   const Elem * const _elem;
   const Elem * const _neighbor;
+  std::vector<const Elem *> _other_neighbors;
 
   /// the elem subdomain id
   const SubdomainID _elem_subdomain_id;
