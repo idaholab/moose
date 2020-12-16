@@ -44,7 +44,7 @@
   []
 
   [csv_sampler_names]
-    requirement = "The CSV Sampler shall sample from a CSV file when column indices are provided."
+    requirement = "The CSV Sampler shall sample from a CSV file when column names are provided."
 
     type = 'CSVDiff'
     input = 'csv_sampler_names.i'
