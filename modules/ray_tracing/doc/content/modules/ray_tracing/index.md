@@ -2,7 +2,7 @@
 
 The ray tracing module traces rays through the finite element mesh. Notable features include:
 
-- Supports all planar finite element types in MOOSE
+- Supports tracing in meshes with planar sides (2D and 3D)
 - Supports mesh adaptivity
 - Supports contribution to residuals and Jacobians along ray segments
 - Supports ray interaction with internal and external boundaries
