@@ -1303,9 +1303,12 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       _should_continue = false;
 
       traceAssert(_intersection_distance >= 0, "Negative _intersection_distance");
-      if (_study.verifyTraceIntersections())
-        traceAssert(_current_elem->contains_point(_intersection_point),
-                    "Doesn't contain point after past max distance");
+#ifndef NDEBUG
+      if (_study.verifyTraceIntersections() && !_current_elem->contains_point(_intersection_point))
+        failTrace("Does not contain point after past max distance",
+                  /* warning = */ false,
+                  __LINE__);
+#endif
     }
 
     if (!_study.currentRayKernels(_tid).empty())
@@ -1644,11 +1647,15 @@ TraceRay::continueTraceOffProcessor(const std::shared_ptr<Ray> & ray)
 void
 TraceRay::onTrajectoryChanged(const std::shared_ptr<Ray> & ray)
 {
-  if (_study.verifyTraceIntersections())
-    traceAssert(_intersected_extrema.atExtrema()
-                    ? _current_elem->close_to_point(ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
-                    : _current_elem->contains_point(ray->currentPoint()),
-                "Elem doesn't contain point");
+#ifndef NDEBUG
+  if (_study.verifyTraceIntersections() && _intersected_extrema.atExtrema()
+          ? !_current_elem->close_to_point(ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
+          : !_current_elem->contains_point(ray->currentPoint()))
+    failTrace("Elem does not contain point after trajectory change",
+              /* warning = */ false,
+              __LINE__);
+#endif
+
   traceAssert(ray->shouldContinue(), "Ray should continue when trajectory is being changed");
 
   ray->setTrajectoryChanged(false);
@@ -1974,29 +1981,33 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
               "Ray currentPoint() incorrect");
   traceAssert((*_current_ray)->currentIncomingSide() == _incoming_side,
               "Ray currentIncomingSide() incorrect");
-  if (_study.verifyTraceIntersections() && _current_elem->has_affine_map())
-    traceAssert(_current_elem->contains_point(_incoming_point),
-                "_current_elem does not contain incoming point");
 #ifndef NDEBUG
-  if (_intersected_side != RayTracingCommon::invalid_side &&
-      !_study.sideIsNonPlanar(_current_elem, _intersected_side))
+  if (_study.verifyTraceIntersections())
   {
-    traceAssert(sidePtrHelper(_current_elem, _intersected_side)
-                    ->close_to_point(_intersection_point, LOOSE_TRACE_TOLERANCE),
-                "Intersected point is not on intersected side");
-    traceAssert(!_study.sideIsIncoming(
-                    _current_elem, _intersected_side, (*_current_ray)->direction(), _tid),
-                "Intersected side is not outgoing");
-  }
-  if (_incoming_side != RayTracingCommon::invalid_side &&
-      !_study.sideIsNonPlanar(_current_elem, _incoming_side))
-  {
-    traceAssert(sidePtrHelper(_current_elem, _incoming_side)
-                    ->close_to_point(_incoming_point, LOOSE_TRACE_TOLERANCE),
-                "Incoming point is not on incoming side");
-    traceAssert(
-        _study.sideIsIncoming(_current_elem, _incoming_side, (*_current_ray)->direction(), _tid),
-        "Incoming side is not incoming");
+    if (_current_elem->has_affine_map())
+      traceAssert(_current_elem->contains_point(_incoming_point),
+                  "_current_elem does not contain incoming point");
+
+    if (_intersected_side != RayTracingCommon::invalid_side &&
+        !_study.sideIsNonPlanar(_current_elem, _intersected_side))
+    {
+      traceAssert(sidePtrHelper(_current_elem, _intersected_side)
+                      ->close_to_point(_intersection_point, LOOSE_TRACE_TOLERANCE),
+                  "Intersected point is not on intersected side");
+      traceAssert(!_study.sideIsIncoming(
+                      _current_elem, _intersected_side, (*_current_ray)->direction(), _tid),
+                  "Intersected side is not outgoing");
+    }
+    if (_incoming_side != RayTracingCommon::invalid_side &&
+        !_study.sideIsNonPlanar(_current_elem, _incoming_side))
+    {
+      traceAssert(sidePtrHelper(_current_elem, _incoming_side)
+                      ->close_to_point(_incoming_point, LOOSE_TRACE_TOLERANCE),
+                  "Incoming point is not on incoming side");
+      traceAssert(
+          _study.sideIsIncoming(_current_elem, _incoming_side, (*_current_ray)->direction(), _tid),
+          "Incoming side is not incoming");
+    }
   }
 #endif
   traceAssert(MooseUtils::absoluteFuzzyEqual(_intersection_distance,

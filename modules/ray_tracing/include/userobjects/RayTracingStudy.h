@@ -664,7 +664,9 @@ public:
   /**
    * Whether or not trace verification is enabled in devel/dbg modes
    */
+#ifndef NDEBUG
   bool verifyTraceIntersections() const { return _verify_trace_intersections; }
+#endif
 
   /**
    * Whether or not \p side is incoming on element \p elem in direction \p direction.
