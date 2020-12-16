@@ -51,10 +51,6 @@ FVLowerDimDiffusion::computeQpResidual()
   }
 
   ADReal k = (dist_neighbor * _coeff_elem[_qp] + dist_elem * coeff_neighbor) / (dist_elem + dist_neighbor); //average weighted with distance
-
-  // ADReal k;
-  // interpolate(
-  //     Moose::FV::InterpMethod::Average, k, _coeff_elem[_qp], _coeff_neighbor[_qp], *_face_info);
-
+  
   return -1 * k * dudn;
 }
