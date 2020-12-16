@@ -2885,6 +2885,54 @@ FEProblemBase::projectSolution()
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
+void
+FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
+                                                    ConstBndNodeRange & bnd_nodes)
+{
+  ComputeInitialConditionThread cic(*this);
+  Threads::parallel_reduce(elem_range, cic);
+
+  // Need to close the solution vector here so that boundary ICs take precendence
+  _nl->solution().close();
+  _aux->solution().close();
+
+  ComputeBoundaryInitialConditionThread cbic(*this);
+  Threads::parallel_reduce(bnd_nodes, cbic);
+
+  _nl->solution().close();
+  _aux->solution().close();
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
+  {
+    const auto & ics = _scalar_ics.getActiveObjects();
+    for (const auto & ic : ics)
+    {
+      MooseVariableScalar & var = ic->variable();
+      var.reinit();
+
+      DenseVector<Number> vals(var.order());
+      ic->compute(vals);
+
+      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      {
+        const dof_id_type global_index = var.dofIndices()[i];
+        var.sys().solution().set(global_index, vals(i));
+        var.setValue(i, vals(i));
+      }
+    }
+  }
+
+  _nl->solution().close();
+  _nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
+
+  _aux->solution().close();
+  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
 std::shared_ptr<MaterialBase>
 FEProblemBase::getMaterial(std::string name,
                            Moose::MaterialDataType type,
@@ -6180,6 +6228,20 @@ void
 FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
+}
+
+void
+FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range)
+{
+  ComputeMaterialsObjectThread cmt(*this,
+                                   _material_data,
+                                   _bnd_material_data,
+                                   _neighbor_material_data,
+                                   _material_props,
+                                   _bnd_material_props,
+                                   _neighbor_material_props,
+                                   _assembly);
+  cmt(elem_range, true);
 }
 
 void

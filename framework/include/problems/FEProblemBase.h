@@ -695,6 +695,14 @@ public:
 
   void projectSolution();
 
+  /**
+   * Project initial conditions for custom \p elem_range and \p bnd_node_range
+   * This is needed when elements/boundary nodes are added to a specific subdomain
+   * at an intermediate step
+   */
+  void projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
+                                            ConstBndNodeRange & bnd_node_range);
+
   // Materials /////
   virtual void addMaterial(const std::string & kernel_name,
                            const std::string & name,
@@ -1450,6 +1458,13 @@ public:
    * to be notified when the mesh changes.
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
+
+  /**
+   * Initialize stateful properties for elements in a specific \p elem_range
+   * This is needed when elements/boundary nodes are added to a specific subdomain
+   * at an intermediate step
+   */
+  void initElementStatefulProps(const ConstElemRange & elem_range);
 
   /**
    * Method called to perform a series of sanity checks before a simulation is run. This method

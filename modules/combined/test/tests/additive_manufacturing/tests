@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#15795'
+  design = 'ActivateElementsUserObjectBase.md ActivateElementsByPath.md ActivateElementsCoupled.md'
+  [./check_element_addition]
+    type = 'Exodiff'
+    input = 'check_element_addition.i'
+    exodiff = 'check_element_addition_out.e-s002'
+    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    requirement = 'The subdomain 1 should be expanded while subdomain 2 should be contracted via ActivateElementsUserObject. The addition of elements is controlled by a function path.'
+  [../]
+  [./check_element_addition_by_variable]
+    type = 'Exodiff'
+    input = 'check_element_addition_by_variable.i'
+    exodiff = 'check_element_addition_by_variable_out.e-s002'
+    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    requirement = 'The subdomain 1 should be expanded via ActivateElementsUserObject. The addition of elements is controlled by a coupled variable strain_zz.'
+  [../]
+  [./check_stateful_properties]
+    type = 'Exodiff'
+    input = 'check_stateful_properties.i'
+    exodiff = 'check_stateful_properties_out.e-s002'
+    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    requirement = 'The newly activated elements should have the stateful material properties for heat conduction as specified in the input.'
+  [../]
+  [./check_initial_condition]
+    type = 'Exodiff'
+    input = 'check_initial_condition.i'
+    exodiff = 'check_initial_condition_out.e-s002'
+    cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
+    requirement = 'The newly activated elements should have the IC of variables as specified in the input.'
+  [../]
+[]
