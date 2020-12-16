@@ -19,4 +19,5 @@
   ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
   temperature = 25
   stoichiometric_ionic_str_using_Cl_only = true
+  precision = 5
 []
