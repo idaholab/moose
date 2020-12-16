@@ -691,13 +691,15 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   // elem grad eqns: ibf coefficients, e.g. eqn. 1, LHS term 2 coefficients
   std::vector<VectorValue<Real>> grad_ibf_coeffs;
-  // elem grad eqnas: rhs b value, e.g. eqn. 1 RHS
+  // elem grad eqns: rhs b value, e.g. eqn. 1 RHS
   VectorValue<ADReal> grad_b = 0;
 
   auto action_functor = [&volume_set,
                          &volume,
                          &elem_value,
+#ifndef NDEBUG
                          &elem,
+#endif
                          &ibf_faces,
                          &ibf_grad_coeffs,
                          &ibf_b,

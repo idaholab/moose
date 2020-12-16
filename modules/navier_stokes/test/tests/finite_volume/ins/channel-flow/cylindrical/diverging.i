@@ -112,12 +112,6 @@ slip_wall_boundaries = 'left'
 [FVBCs]
   active = 'inlet-u inlet-v free-slip-wall-u free-slip-wall-v'
 
-  # Note that how the inlet is handled is not quite right for a no-slip problem. We must operate our
-  # mass and momentum flux kernels on the inlet because clearly there is mass and momentum being
-  # transported across the boundary. However, as documented in #16169 we implicitly apply a
-  # zero-normal-gradient condition for the pressure at the inlet, and this affects the results in
-  # the vicinity. The inlet mass flow rate should be equal to pi, however, the result with the
-  # current set of bcs is a little higher than that
   [inlet-u]
     type = FVDirichletBC
     boundary = 'bottom'

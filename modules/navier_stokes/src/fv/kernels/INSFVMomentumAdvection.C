@@ -230,7 +230,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
   //
   // \sum_f -D \nabla \phi * \hat{n} =
   //   -D_e * (phi_E - \phi_C) / d_{CE} * 1 - D_w * (\phi_C - \phi_W) / d_{WC} * -1 =
-  //   D_w / d_{CE} * (\phi_C - \phi_E) + D_e / d_{WC} * (\phi_C - \phi_W)
+  //   D_e / d_{CE} * (\phi_C - \phi_E) + D_w / d_{WC} * (\phi_C - \phi_W)
   //
   // Note the positive coefficients for \phi_C !!
   //
@@ -265,7 +265,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
     const Point normal = rc_elem_is_fi_elem ? fi->normal() : Point(-fi->normal());
 
     // Unless specified otherwise, "elem" here refers to the element we're computing the
-    // Rhie-Chow coefficeint for. "neighbor" is the element across the current FaceInfo (fi)
+    // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
 
     if (fi->isBoundary())
@@ -343,7 +343,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
 
       // Now add the viscous flux. Note that this includes only the orthogonal component! See
       // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
-      // E_f, eqaution 8.69
+      // E_f, equation 8.69
       temp_coeff +=
           mu * surface_vector.norm() / (fi->neighborCentroid() - fi->elemCentroid()).norm();
 

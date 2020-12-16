@@ -44,7 +44,7 @@ enum class InterpMethod
 };
 
 /**
- * Produce the interpolation cofficients in the equation:
+ * Produce the interpolation coefficients in the equation:
  *
  * \phi_f = c_1 * \phi_{F1} + c_2 * \phi_{F2}
  *
