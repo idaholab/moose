@@ -18,30 +18,43 @@ enum class ROMInputTransform
   EXP
 };
 
-class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase
+template <bool is_ad>
+class LAROMANCEStressUpdateBaseTempl : public RadialReturnCreepStressUpdateBaseTempl<is_ad>
 {
+  using Material::_dt;
+  using Material::_q_point;
+  using Material::_qp;
+  using Material::_t;
+  using Material::coupledGenericValue;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeResidual;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeDerivative;
+
 public:
   static InputParameters validParams();
 
-  ADLAROMANCEStressUpdateBase(const InputParameters & parameters);
+  LAROMANCEStressUpdateBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup() override;
 
   virtual void initQpStatefulProperties() override;
-  virtual void computeStressInitialize(const ADReal & effective_trial_stress,
-                                       const ADRankFourTensor & elasticity_tensor) override;
-  virtual ADReal computeResidual(const ADReal & effective_trial_stress,
-                                 const ADReal & scalar) override;
+  virtual void
+  computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
+                          const GenericRankFourTensor<is_ad> & elasticity_tensor) override;
+  virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & effective_trial_stress,
+                                             const GenericReal<is_ad> & scalar) override;
 
-  virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
-                                   const ADReal & /*scalar*/) override
+  virtual GenericReal<is_ad>
+  computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
+                    const GenericReal<is_ad> & /*scalar*/) override
   {
     return _derivative;
   }
 
-  virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
-  virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
+  virtual void
+  computeStressFinalize(const GenericRankTwoTensor<is_ad> & plastic_strain_increment) override;
+  virtual GenericReal<is_ad>
+  maximumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const override;
   virtual Real computeTimeStepLimit() override;
 
   /// Enum to error, warn, ignore, or extrapolate if input is outside of window of applicability
@@ -68,7 +81,7 @@ protected:
    * @param derivative Optional flag to return derivative of ROM increment with respect to stress.
    * @return ROM computed increment
    */
-  ADReal
+  GenericReal<is_ad>
   computeROM(const unsigned int tile, const unsigned out_index, const bool derivative = false);
 
   /**
@@ -77,7 +90,7 @@ protected:
    * @param behavior WindowFailure enum indicating what to do if input is outside of limits
    * @param global_limits Vector of lower and upper global limits of the input
    */
-  void checkInputWindow(const ADReal & input,
+  void checkInputWindow(const GenericReal<is_ad> & input,
                         const WindowFailure behavior,
                         const std::vector<Real> & global_limits);
 
@@ -91,11 +104,11 @@ protected:
    * @param derivative Optional flag to return derivative of converted input with respect to stress.
    * @return Converted input
    */
-  ADReal normalizeInput(const ADReal & input,
-                        const ROMInputTransform transform,
-                        const Real transform_coef,
-                        const std::vector<Real> & transformed_limits,
-                        const bool derivative = false);
+  GenericReal<is_ad> normalizeInput(const GenericReal<is_ad> & input,
+                                    const ROMInputTransform transform,
+                                    const Real transform_coef,
+                                    const std::vector<Real> & transformed_limits,
+                                    const bool derivative = false);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
@@ -104,9 +117,9 @@ protected:
    * @param drom_input Optional derivative of ROM input with respect to stress
    * @param derivative Optional flag to return derivative of converted input with respect to stress.
    */
-  void buildPolynomials(const ADReal & rom_input,
-                        std::vector<ADReal> & polynomial_inputs,
-                        const ADReal & drom_input = 0,
+  void buildPolynomials(const GenericReal<is_ad> & rom_input,
+                        std::vector<GenericReal<is_ad>> & polynomial_inputs,
+                        const GenericReal<is_ad> & drom_input = 0,
                         const bool derivative = false);
 
   /**
@@ -118,8 +131,8 @@ protected:
    * @param precomputed Vector that holds the precomputed ROM values
    */
   void precomputeValues(const std::vector<Real> & coefs,
-                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                        std::vector<ADReal> & precomputed);
+                        const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
+                        std::vector<GenericReal<is_ad>> & precomputed);
 
   /**
    * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
@@ -133,10 +146,11 @@ protected:
    * to stress.
    * @return ROM output
    */
-  ADReal computeValues(const std::vector<ADReal> & precomputed,
-                       const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                       const std::vector<ADReal> & dpolynomial_inputs = {},
-                       const bool derivative = false);
+  GenericReal<is_ad>
+  computeValues(const std::vector<GenericReal<is_ad>> & precomputed,
+                const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
+                const std::vector<GenericReal<is_ad>> & dpolynomial_inputs = {},
+                const bool derivative = false);
 
   /**
    * Computes the output variable increments from the ROM predictions by bringing out of the
@@ -148,11 +162,11 @@ protected:
    * @param derivative Optional flag to return derivative of output with respect to stress.
    * @return Converted ROM output
    */
-  ADReal convertOutput(const std::vector<Real> & old_input_values,
-                       const ADReal & rom_output,
-                       const unsigned out_index,
-                       const ADReal & drom_output = 0.0,
-                       const bool derivative = false);
+  GenericReal<is_ad> convertOutput(const std::vector<Real> & old_input_values,
+                                   const GenericReal<is_ad> & rom_output,
+                                   const unsigned out_index,
+                                   const GenericReal<is_ad> & drom_output = 0.0,
+                                   const bool derivative = false);
 
   /**
    * Returns the material specific value for the low bound cutoff of the ROM output,
@@ -169,8 +183,9 @@ protected:
    * @param derivative Optional flag to return derivative of Legendre polynomial Legendre
    * @return Computed value from Legendre polynomial
    */
-  ADReal
-  computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
+  GenericReal<is_ad> computePolynomial(const GenericReal<is_ad> & value,
+                                       const unsigned int degree,
+                                       const bool derivative = false);
 
   /**
    * Calculate the sigmoid function weighting for the input based on the limits
@@ -180,8 +195,10 @@ protected:
    * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
    * @return weight
    */
-  ADReal
-  sigmoid(const Real lower, const Real upper, const ADReal & val, const bool derivative = false);
+  GenericReal<is_ad> sigmoid(const Real lower,
+                             const Real upper,
+                             const GenericReal<is_ad> & val,
+                             const bool derivative = false);
 
   /**
    * Compute the weight for applied to each tile based on the location in input-space
@@ -190,8 +207,8 @@ protected:
    * @param in_index Input index
    * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
    */
-  void computeTileWeight(std::vector<ADReal> & weights,
-                         ADReal & input,
+  void computeTileWeight(std::vector<GenericReal<is_ad>> & weights,
+                         GenericReal<is_ad> & input,
                          const unsigned int in_index,
                          const bool derivative = false);
 
@@ -344,10 +361,10 @@ protected:
   };
 
   /// Coupled temperature variable
-  const ADVariableValue & _temperature;
+  const GenericVariableValue<is_ad> & _temperature;
 
   /// Optionally coupled environmental factor
-  const ADMaterialProperty<Real> * _environmental;
+  const GenericMaterialProperty<Real, is_ad> * _environmental;
 
   /// Vector of WindowFailure enum that informs how to handle input that is outside of the limits
   std::vector<WindowFailure> _window_failure;
@@ -356,7 +373,7 @@ protected:
   const bool _verbose;
 
   ///@{Material properties for cell (glissile) dislocation densities (1/m^2)
-  ADMaterialProperty<Real> & _cell_dislocations;
+  GenericMaterialProperty<Real, is_ad> & _cell_dislocations;
   const MaterialProperty<Real> & _cell_dislocations_old;
   ///@}
 
@@ -370,10 +387,10 @@ protected:
   const Function * const _cell_function;
 
   /// Container for cell dislocation increment
-  ADReal _cell_dislocation_increment;
+  GenericReal<is_ad> _cell_dislocation_increment;
 
   ///@{Material properties for wall (locked) dislocation densities (1/m^2)
-  ADMaterialProperty<Real> & _wall_dislocations;
+  GenericMaterialProperty<Real, is_ad> & _wall_dislocations;
   const MaterialProperty<Real> & _wall_dislocations_old;
   ///@}
 
@@ -387,7 +404,7 @@ protected:
   const Function * const _wall_function;
 
   /// Container for wall dislocation increment
-  ADReal _wall_dislocation_increment;
+  GenericReal<is_ad> _wall_dislocation_increment;
 
   /// Index corresponding to the position for the dislocations with in the cell in the input vector
   const unsigned int _cell_input_index;
@@ -456,44 +473,47 @@ protected:
   std::vector<unsigned int> _makeframe_helper;
 
   /// Creep rate material property
-  ADMaterialProperty<Real> & _creep_rate;
+  GenericMaterialProperty<Real, is_ad> & _creep_rate;
 
   /// Cell dislocations rate of change
-  ADMaterialProperty<Real> & _cell_rate;
+  GenericMaterialProperty<Real, is_ad> & _cell_rate;
 
   /// Wall dislocations rate of change
-  ADMaterialProperty<Real> & _wall_rate;
+  GenericMaterialProperty<Real, is_ad> & _wall_rate;
 
   /// Material property to hold smootherstep applied in order to extrapolate.
   MaterialProperty<Real> & _extrapolation;
 
   /// Container for derivative of creep increment with respect to strain
-  ADReal _derivative;
+  GenericReal<is_ad> _derivative;
 
   /// Container for input values
-  std::vector<ADReal> _input_values;
+  std::vector<GenericReal<is_ad>> _input_values;
 
   /// Container for old input values
   std::vector<Real> _old_input_values;
 
   /// Container for converted rom_inputs
-  std::vector<std::vector<ADReal>> _rom_inputs;
+  std::vector<std::vector<GenericReal<is_ad>>> _rom_inputs;
 
   /// Container for ROM polynomial inputs
-  std::vector<std::vector<std::vector<ADReal>>> _polynomial_inputs;
+  std::vector<std::vector<std::vector<GenericReal<is_ad>>>> _polynomial_inputs;
 
   /// Container for ROM precomputed values
-  std::vector<std::vector<ADReal>> _precomputed_vals;
+  std::vector<std::vector<GenericReal<is_ad>>> _precomputed_vals;
 
   /// Container for global limits
   std::vector<std::vector<Real>> _global_limits;
 
   /// Container for weights for each tile as computed for all input values beside stress
-  std::vector<ADReal> _non_stress_weights;
+  std::vector<GenericReal<is_ad>> _non_stress_weights;
 
   /// Container for weights for each tile as computed for all input values beside stress
-  std::vector<ADReal> _weights;
+  std::vector<GenericReal<is_ad>> _weights;
 
   /// Container for tiling orientations
   std::vector<unsigned int> _tiling;
 };
+
+typedef LAROMANCEStressUpdateBaseTempl<false> LAROMANCEStressUpdateBase;
+typedef LAROMANCEStressUpdateBaseTempl<true> ADLAROMANCEStressUpdateBase;
