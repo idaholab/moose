@@ -95,6 +95,7 @@
 #include "MooseVariableFV.h"
 #include "FVBoundaryCondition.h"
 #include "Reporter.h"
+#include "ADUtils.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -4834,6 +4835,12 @@ FEProblemBase::init()
     return;
 
   TIME_SECTION(_init_timer);
+
+  // If we have AD and we are doing global AD indexing, then we should by default set the matrix
+  // coupling to full. If the user has told us to trust their coupling matrix, then this call will
+  // not do anything
+  if (haveADObjects() && Moose::globalADIndexing())
+    setCoupling(Moose::COUPLING_FULL);
 
   unsigned int n_vars = _nl->nVariables();
   {

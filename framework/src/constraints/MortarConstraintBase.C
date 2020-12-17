@@ -11,7 +11,6 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MooseVariableFE.h"
-#include "ADUtils.h"
 
 defineLegacyParams(MortarConstraintBase);
 
@@ -53,8 +52,6 @@ MortarConstraintBase::validParams()
             obj_params.get<SubdomainName>("secondary_subdomain");
         rm_params.set<SubdomainName>("primary_subdomain") =
             obj_params.get<SubdomainName>("primary_subdomain");
-        rm_params.set<bool>("create_full_coupling_matrix") =
-            obj_params.get<bool>("is_ad") && Moose::globalADIndexing();
       });
 
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");

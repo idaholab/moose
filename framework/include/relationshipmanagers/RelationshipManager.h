@@ -126,12 +126,6 @@ public:
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
   /**
-   * Whether this relationship manager should trigger a full coupling matrix. It is a prereq of
-   * calling this method that this->isType(COPULING) == true
-   */
-  bool createFullCouplingMatrix() const;
-
-  /**
    * Set the dof map
    */
   void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
@@ -213,9 +207,4 @@ public:
    *                ALGEBRAIC, COUPLING or a combination of the three
    */
   static InputParameters oneLayerGhosting(Moose::RelationshipManagerType rm_type);
-
-private:
-  /// Whether this relationship manager should trigger a full coupling matrix. Note that this
-  /// parameter is really only sensical if this->isType(COPULING) == true
-  const bool _create_full_coupling_matrix;
 };

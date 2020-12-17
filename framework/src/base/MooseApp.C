@@ -2140,8 +2140,6 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             auto & dof_map = problem.getNonlinearSystemBase().dofMap();
             dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
             rm->setDofMap(dof_map);
-            if (rm->createFullCouplingMatrix())
-              problem.setCoupling(Moose::COUPLING_FULL);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
           // is no reason to add it to the DofMap twice. In the case of any other system, it
@@ -2160,8 +2158,6 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
             auto & dof_map = problem.getNonlinearSystemBase().dofMap();
             dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
             rm->setDofMap(dof_map);
-            if (rm->createFullCouplingMatrix())
-              problem.setCoupling(Moose::COUPLING_FULL);
           }
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
           // is no reason to add it to the DofMap twice. In the case of any other system, it

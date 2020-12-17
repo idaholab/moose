@@ -22,7 +22,6 @@ InputParameters
 ADDGKernel::validParams()
 {
   InputParameters params = DGKernelBase::validParams();
-  params.set<bool>("is_ad") = true;
   return params;
 }
 

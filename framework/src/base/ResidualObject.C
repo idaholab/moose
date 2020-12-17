@@ -22,7 +22,6 @@ ResidualObject::validParams()
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this residual object operates on");
-  params.addPrivateParam<bool>("is_ad", false);
 
   params.declareControllable("enable");
   return params;
