@@ -1,4 +1,4 @@
-{% set build = 4 %}
+{% set build = 5 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.3.2" %}
 
@@ -30,7 +30,7 @@ requirements:
     - clangxx_osx-64 {{ clangxxosx }}        # [osx]
     - compiler-rt {{ compilerrt }}           # [osx]
     - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                 # [osx]
+    - libllvm11 {{ libllvm }}                # [osx]
     - clang-tools                            # [osx]
     - llvm-openmp {{ llvmopenmp }}           # [osx]
     - gfortran_osx-64 {{ osxfortran }}       # [osx]
@@ -49,7 +49,7 @@ requirements:
     - clangxx_osx-64 {{ clangxxosx }}        # [osx]
     - compiler-rt {{ compilerrt }}           # [osx]
     - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                 # [osx]
+    - libllvm11 {{ libllvm }}                # [osx]
     - clang-tools                            # [osx]
     - llvm-openmp {{ llvmopenmp }}           # [osx]
     - gfortran_osx-64 {{ osxfortran }}       # [osx]
