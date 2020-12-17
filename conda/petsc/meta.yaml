@@ -9,7 +9,7 @@ package:
   version: {{ version }}
 
 source:
-  git_url: ../../petsc
+  path: ../../petsc
 
 build:
   number: {{ build }}
