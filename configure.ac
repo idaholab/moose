@@ -57,7 +57,7 @@ AS_CASE("$ad_indexing_type",
         [
           AS_IF([test "$derivative_type" = nonsparse],
                  [
-                   dnl The user explicitly requested a nonsparse container which is incompatabile with global indexing
+                   dnl The user explicitly requested a non-sparse container which is incompatible with global indexing
                    AC_MSG_ERROR(cannot use global AD indexing with a nonsparse derivative container)
                  ])
           AC_DEFINE(GLOBAL_AD_INDEXING, 1, [Whether to use a global indexing scheme for AD])
