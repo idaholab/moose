@@ -8,6 +8,32 @@ We begin with the standard "simple diffusion" problem:
 
 !listing modules/ray_tracing/test/tests/ray_kernels/line_source_ray_kernel/simple_diffusion_line_source.i start=Mesh end=UserObjects
 
+Within this problem, we wish to define a constant line source with constant $c = 5$ between the two points
+
+!equation
+\vec{r}_1 = (1, 1) \quad \text{and} \quad \vec{r}_2 = (5, 2)\,.
+
+The strong form of this system is
+
+!equation
+-\nabla \cdot \nabla u(\vec{r}) = c \delta_L(\vec{r})\,, \quad x \in [0, 5]\,, \quad y \in [0, 5]\,,
+
+!equation
+u(0, y) = 0\,, \quad y \in [0, 5]\,,
+
+!equation
+u(5, y) = 1\,, \quad y \in [0, 5]\,,
+
+where
+
+!equation
+\delta_L(\vec{r}) =
+\begin{cases}
+1\,, & \vec{r} \in L \\
+0\,, & \text{otherwise}
+\end{cases}\,,\quad
+L = \{\vec{r}_1 + t\vec{r}_2 \mid t \in [0, 1]\}\,.
+
 ### Defining the Study
 
 A [RepeatableRayStudy.md] is defined that generates and executes the rays that compute the line source:
@@ -31,7 +57,17 @@ The `line_source` [LineSourceRayKernel.md] contributes to the variable `u` for [
 
 The visualized result follows in [result].
 
-!media large_media/ray_tracing/simple_diffusion_line_source.png id=result style=width:70%; caption=Simple diffusion line source example result.
+!row!
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source.png
+       id=result
+       caption=Simple diffusion line source example result.
+
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_mesh.png
+      caption=The result pictured in [result] with a mesh overlay.
+      id=result-mesh
+!row-end!
 
 Just for the purposes of producing a more appealing picture, let's add some adaptivity to the mix to refine the region around the ray.
 
@@ -47,4 +83,14 @@ Setting the number of adaptivity steps to 5 via a command line argument, i.e.:
 
 leads to the well-refined and visually satisfying result below in [result-adaptivity].
 
-!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity.png id=result-adaptivity style=width:70%; caption=Simple diffusion line source example result with adaptivity.
+!row!
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity.png
+       id=result-adaptivity
+       caption=Simple diffusion line source example result with adaptivity.
+
+!col small=12 medium=6 large=6
+!media large_media/ray_tracing/simple_diffusion_line_source_adaptivity_mesh.png
+      caption=The result pictured in [result-adaptivity] with a mesh overlay.
+      id=result-adaptivity-mesh
+!row-end!
