@@ -95,14 +95,11 @@ RayKernelBase::changeRayStartDirection(const Point & start, const Point & direct
                "\n\nThis is not currently supported.\n\n",
                ray->getInfo());
 
-#ifdef NDEBUG
-  if (_study.verifyRays())
-#endif
-    if (!_current_elem->contains_point(start))
-      mooseError(_error_prefix,
-                 " is trying to change a Ray's trajectory,\n",
-                 "but the new start point is not within the Ray's current element\n\n",
-                 ray->getInfo());
+  if (_study.verifyRays() && !_current_elem->contains_point(start))
+    mooseError(_error_prefix,
+               " is trying to change a Ray's trajectory,\n",
+               "but the new start point is not within the Ray's current element\n\n",
+               ray->getInfo());
 
   ray->changeStartDirection(start, direction, Ray::ChangeStartDirectionKey());
 }

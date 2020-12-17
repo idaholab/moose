@@ -658,9 +658,15 @@ public:
   const TraceRay & traceRay(const THREAD_ID tid) const { return *_threaded_trace_ray[tid]; }
 
   /**
-   * Whether or not Ray verification is enabled in opt mode
+   * Whether or not to verify if Rays have valid information before being traced
    */
   bool verifyRays() const { return _verify_rays; }
+  /**
+   * Whether or not trace verification is enabled in devel/dbg modes
+   */
+#ifndef NDEBUG
+  bool verifyTraceIntersections() const { return _verify_trace_intersections; }
+#endif
 
   /**
    * Whether or not \p side is incoming on element \p elem in direction \p direction.
@@ -890,8 +896,12 @@ protected:
   const bool _segments_on_cache_traces;
   /// Max distance a Ray can travel before being killed (can change)
   const Real _ray_max_distance;
-  /// Whether or not to verify Rays that are added to the buffer in opt mode
+  /// Whether or not to verify if Rays have valid information before being traced
   const bool _verify_rays;
+  /// Whether or not to verify the trace intersections in devel and dbg modes
+#ifndef NDEBUG
+  const bool _verify_trace_intersections;
+#endif
 
 private:
   /**

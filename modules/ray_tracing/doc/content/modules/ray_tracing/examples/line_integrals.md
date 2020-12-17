@@ -11,22 +11,27 @@ We begin with the standard "simple diffusion" problem:
 
 !listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Mesh end=Outputs
 
-For this problem, we seek the value of the integral
+For this problem, we seek the value of the integrals (where $u_h$ is the finite-element solution)
 
 !equation
-\int_L u_h~dr, \quad L = \{\vec{r}_1 + t\vec{r}_2 \mid t \in [0, 1]\}
-
-for the lines defined by
-
-!equation
-\vec{r}_1 = (0, 0)\,, \quad \vec{r}_1 = (5, 5)
+\int_{L_1} u_h(\vec{r})~dr, \quad L_1 = \{(0, 0) + t(5, 5) \mid t \in [0, 1]\}\,,
 
 and
 
 !equation
-\vec{r}_1 = (5, 0)\,, \quad \vec{r}_1 = (5, 5)
+\int_{L_2} u_h(\vec{r})~dr, \quad L_2 = \{(5, 0) + t(5, 5) \mid t \in [0, 1]\}\,,
 
-For simplicity, we will denote the lines as `diag` and `right_up`, respectively.
+in which we will denote the first line, $L_1$, as `diag` and the second, $L_2$, as `right_up` for simplicity.
+
+Note that the integral along the second line, $L_2$, is trivial due to the Dirichlet boundary condition,
+
+!equation
+u_h(5, y) = 1\,, \quad y \in [0, 5]\,,
+
+which implies
+
+!equation
+\int_{L_2} u_h(\vec{r})~dr = \int_0^5 u_h(5, y)\,dy = \int_0^5 dy = 5\,, \quad L_2 = \{(5, 0) + t(5, 5) \mid t \in [0, 1]\}\,.
 
 ## Defining the Study
 

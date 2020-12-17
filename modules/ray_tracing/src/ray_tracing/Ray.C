@@ -241,9 +241,7 @@ Ray::setStart(const Point & starting_point,
   _current_elem = starting_elem;
   _current_incoming_side = starting_incoming_side;
 
-#ifndef NDEBUG
   if (_study.verifyRays())
-#endif
   {
     if (!_study.looseBoundingBox().contains_point(starting_point))
       errorWhenInitializing("Mesh does not contain starting point.");
@@ -307,11 +305,8 @@ Ray::setStartingEndPoint(const Point & starting_end_point)
     errorWhenInitializing(
         "Cannot use Ray::setStartingEndPoint() after Ray::setStartingMaxDistance().");
 
-#ifndef NDEBUG
-  if (_study.verifyRays())
-#endif
-    if (!_study.looseBoundingBox().contains_point(starting_end_point))
-      errorWhenInitializing("End point is not within the mesh for Ray::setStartingEndPoint().");
+  if (_study.verifyRays() && !_study.looseBoundingBox().contains_point(starting_end_point))
+    errorWhenInitializing("End point is not within the mesh for Ray::setStartingEndPoint().");
 
   Point difference = starting_end_point;
   difference -= _current_point;
