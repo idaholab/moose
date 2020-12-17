@@ -27,9 +27,6 @@ if MOOSE_PYTHON_DIR not in sys.path:
 # run from any location. CIVET runs 'modules/doc/moosedocs.py check' from the root directory.
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-import moosesqa
-moosesqa.MOOSESQA_CLASSIFICATION['CUSTOM'] = ('C', "This is a custom classification")
-
 from MooseDocs import main
 if __name__ == '__main__':
     sys.exit(main.run())

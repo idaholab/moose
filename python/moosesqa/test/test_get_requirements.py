@@ -99,10 +99,10 @@ class TestNumberRequirements(unittest.TestCase):
         r2 = Requirement()
         req = collections.OrderedDict(a=[r0, r1], b=[r2])
 
-        number_requirements(req, 'R', 1980)
-        self.assertEqual(r0.label, 'R1980.1.1')
-        self.assertEqual(r1.label, 'R1980.1.2')
-        self.assertEqual(r2.label, 'R1980.2.1')
+        number_requirements(req, 1980)
+        self.assertEqual(r0.label, '1980.1.1')
+        self.assertEqual(r1.label, '1980.1.2')
+        self.assertEqual(r2.label, '1980.2.1')
 
 class TestFindFile(unittest.TestCase):
     def testExact(self):
@@ -318,6 +318,13 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         # prereq_group
         r = req['test_get_requirements_spec0'][18]
         self.assertEqual(r.prerequisites, {'prereq_first', 'prereq_group/a'})
+
+class TestRequirementCollections(unittest.TestCase):
+    def testAvailable(self):
+        # Help avoid this being changed without docs being updated
+        import moosesqa
+        self.assertEqual(moosesqa.MOOSESQA_COLLECTIONS, {'FUNCTIONAL', 'USABILITY', 'PERFORMANCE', 'SYSTEM', 'FAILURE_ANALYSIS'},
+                         "If you are adding to moosesqa.MOOSESQA_COLLECTIONS make sure you update associated documentation.")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

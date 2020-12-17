@@ -16,34 +16,12 @@
 
 ## Collections
 
-### All Collections
-
-!sqa collections category=demo
-
 ### Specific Collection
 
-!sqa collections category=demo items=Andrew
+!sqa requirements collections=Andrew category=demo
 
 ## Types
 
-### All Types
-
-!sqa types category=demo
-
 ### Specific Type
 
-!sqa types category=demo items=Andrew
-
-## Custom Matrix
-
-!sqa requirements category=demo prefix=C
-
-## Collections
-
-### Collection List
-
-!sqa collections-list
-
-### Requirement Collection
-
-!sqa collections category=demo
+!sqa requirements category=demo types=TestType

@@ -31,16 +31,16 @@ def get_requirements_from_tests(directories, specs):
                 out[group] = get_requirements_from_file(filename)
     return out
 
-def number_requirements(requirement_dict, prefix, category):
+def number_requirements(requirement_dict, category):
     """
     Apply a number label to the requirements.
 
     Input:
-        requirement_dict[dict]: Container of Requirement objects, as returned from get_requirement_from_tests.
-        prefix[str]: Number prefix (e.g., 'F')
+        requirement_dict[dict]: Container of Requirement objects, as returned from
+                                get_requirement_from_tests.
         category[int]: Category index to apply to label.
 
-    The format of the number is <prefix><category>.<group>.<number>, e.g., F3.2.1. The group
+    The format of the number is <category>.<group>.<number>, e.g., 3.2.1. The group
     is the indexed according to the supplied dict keys.
 
     IMPORTANT: These numbers are not designed to be referenced in any manner, they are simply applied
@@ -48,7 +48,7 @@ def number_requirements(requirement_dict, prefix, category):
     """
     for i, requirements in enumerate(requirement_dict.values()):
         for j, req in enumerate(requirements):
-            req.label = "{}{}.{}.{}".format(prefix, category, i+1, j+1)
+            req.label = "{}.{}.{}".format(category, i+1, j+1)
 
 def get_requirements_from_file(filename):
     """
@@ -77,15 +77,12 @@ def get_requirements_from_file(filename):
     deprecated_line = root.children[0].line('deprecated', None)
     collections = root.children[0].get('collections', None)
     collections_line = root.children[0].line('collections', None)
-    classification = root.children[0].get('classification', None)
-    classification_line = root.children[0].line('classification', None)
 
     for child in root.children[0]:
         req = _create_requirement(child, filename,
                                   design, design_line,
                                   issues, issues_line,
                                   collections, collections_line,
-                                  classification, classification_line,
                                   deprecated, deprecated_line)
         requirements.append(req)
 
@@ -169,8 +166,7 @@ def _create_specification(child, name, filename):
     return spec
 
 def _create_requirement(child, filename, design, design_line, issues, issues_line,
-                        collections, collections_line, classification, classification_line,
-                        deprecated, deprecated_line):
+                        collections, collections_line, deprecated, deprecated_line):
 
     # Create the Requirement object
     req = Requirement(name=child.name,
@@ -199,11 +195,6 @@ def _create_requirement(child, filename, design, design_line, issues, issues_lin
     collections = child.get('collections', collections if (collections is not None) else None)
     req.collections = set(collections.strip().split()) if (collections is not None) else None
     req.collections_line = child.line('collections', collections_line)
-
-    # "classification" parameter
-    classification = child.get('classification', classification if (classification is not None) else None)
-    req.classification = classification.strip().upper() if (classification is not None) else None
-    req.classification_line = child.line('classification', classification_line)
 
     # V&V document
     verification = child.get('verification', None)
@@ -238,6 +229,4 @@ def _create_detail(child, filename):
     req.deprecated_line = child.line('deprecated', None)
     req.collections = child.get('collections', None)
     req.collections_line = child.line('collections', None)
-    req.classification = child.get('classification', None)
-    req.classification_line = child.line('classification', None)
     return req

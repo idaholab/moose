@@ -4,6 +4,7 @@
   classification = custom
   [r0]
     requirement = "Tree One"
+    type = TestType
   []
   [r1]
     requirement = "Tree Two"
@@ -13,6 +14,7 @@
     requirement = "Tree Three"
     design = "bibtex.md"
     prereq = r1
+    type = TestType
   []
   [r3]
     requirement = "Tree Four"

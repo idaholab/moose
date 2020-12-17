@@ -20,8 +20,6 @@ from MooseDocs import base
 from MooseDocs.tree import pages
 logging.basicConfig()
 
-moosesqa.MOOSESQA_CLASSIFICATION['CUSTOM'] = ('C', "This is a custom classification")
-
 class TestSQARequirementsAST(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
 
@@ -36,30 +34,21 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         ast = self.tokenize(text)
         self._assertAST_common(ast(0))
 
-        text = "!sqa requirements category=Demo prefix=C link=False"
-        ast = self.tokenize(text)
-        self._assertAST_tree(ast(0))
-
-
     def testASTSpecLink(self):
-        text = "!sqa requirements category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False link-collections=False"
+        text = "!sqa requirements category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
-        self._assertAST_common(ast(0))
 
-        self.assertSize(ast, 13)
+        self._assertAST_common(ast(0))
+        self.assertSize(ast, 18)
         for i in range(1, 13):
             self.assertToken(ast(i), 'ModalLink')
 
-        text = "!sqa requirements prefix=C category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False link-collections=False"
-        ast = self.tokenize(text)
-        self._assertAST_tree(ast(0))
-
-        self.assertSize(ast, 5)
-        for i in range(1, 5):
+        self._assertAST_tree(ast(13))
+        for i in range(14, 18):
             self.assertToken(ast(i), 'ModalLink')
 
     def testASTDesignLink(self):
-        text = "!sqa requirements category=Demo link=True link-spec=False link-design=True link-issues=False link-prerequisites=False link-collections=False"
+        text = "!sqa requirements category=Demo link=True link-spec=False link-design=True link-issues=False link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
 
         self._assertAST_common(ast(0))
@@ -74,18 +63,8 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self.assertToken(ast(0)(7)(2), 'SQARequirementDesign', design=['bibtex.md'])
         self.assertToken(ast(0)(8)(2), 'SQARequirementDesign', design=['katex.md'])
 
-        text = "!sqa requirements prefix=C category=Demo link=True link-spec=False link-design=True link-issues=False link-prerequisites=False link-collections=False"
-        ast = self.tokenize(text)
-
-        self._assertAST_tree(ast(0))
-        self.assertToken(ast(0)(1)(1), 'SQARequirementDesign', design=['core.md'])
-        self.assertToken(ast(0)(2)(1), 'SQARequirementDesign', design=['core.md'])
-        self.assertToken(ast(0)(3)(1), 'SQARequirementDesign', design=['bibtex.md'])
-        self.assertToken(ast(0)(4)(1), 'SQARequirementDesign', design=['katex.md'])
-
-
     def testASTIssuesLink(self):
-        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False link-collections=False"
+        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
 
         self._assertAST_common(ast(0))
@@ -100,40 +79,36 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self.assertToken(ast(0)(7)(2), 'SQARequirementIssues', issues=['#1234'])
         self.assertToken(ast(0)(8)(2), 'SQARequirementIssues', issues=['#4321'])
 
-        text = "!sqa requirements prefix=C category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False link-collections=False"
-        ast = self.tokenize(text)
-
-        self._assertAST_tree(ast(0))
-        self.assertToken(ast(0)(1)(1), 'SQARequirementIssues', issues=['#1980'])
-        self.assertToken(ast(0)(2)(1), 'SQARequirementIssues', issues=['#2011'])
-        self.assertToken(ast(0)(3)(1), 'SQARequirementIssues', issues=['#1980'])
-        self.assertToken(ast(0)(4)(1), 'SQARequirementIssues', issues=['#2013'])
-
-
     def testASTPrereqLink(self):
-        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=True link-collections=False"
+        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=True link-collections=False link-types=False"
         ast = self.tokenize(text)
-
         self._assertAST_common(ast(0))
+        self._assertAST_tree(ast(1))
 
-        text = "!sqa requirements prefix=C category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=True link-collections=False"
-        ast = self.tokenize(text)
+        self.assertToken(ast(1)(3)(1), 'SQARequirementPrerequisites', size=0, specs=[('r1', '1.2.2')])
+        self.assertToken(ast(1)(4)(1), 'SQARequirementPrerequisites', size=0, specs=[('r1', '1.2.2')])
 
-        self._assertAST_tree(ast(0))
-        self.assertToken(ast(0)(3)(1), 'SQARequirementPrerequisites', size=0, specs=[('r1', 'C1.1.2')])
-        self.assertToken(ast(0)(4)(1), 'SQARequirementPrerequisites', size=0, specs=[('r1', 'C1.1.2')])
-
-        self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', size=1)
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=2)
-        self.assertToken(ast(0)(2), 'SQARequirementMatrixItem', size=2)
-        self.assertToken(ast(0)(3), 'SQARequirementMatrixItem', size=3)
-        self.assertToken(ast(0)(4), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(1)(0), 'SQARequirementMatrixHeading', size=1)
+        self.assertToken(ast(1)(1), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(1)(2), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(1)(3), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(1)(4), 'SQARequirementMatrixItem', size=3)
 
     def testASTCollectionsLink(self):
-        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=False link-collections=True"
+        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=False link-collections=True link-types=False"
         ast = self.tokenize(text)
+        self._assertAST_common(ast(0))
+        self._assertAST_tree(ast(1))
         self.assertToken(ast(0)(6), 'SQARequirementMatrixItem', size=4)
         self.assertToken(ast(0)(6)(2), 'SQARequirementCollections', size=0, collections={"Andrew"})
+
+    def testASTTypesLink(self):
+        text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=False link-collections=False link-types=True"
+        ast = self.tokenize(text)
+        self._assertAST_common(ast(0))
+        self._assertAST_tree(ast(1))
+        self.assertToken(ast(1)(3), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(1)(3)(1), 'SQARequirementTypes', size=0, types={"TestType"})
 
     def _assertHTML(self, res):
         self.assertSize(res, 1)
@@ -188,7 +163,7 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
                         categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
                                                   specs=['demo'])))
     def testVerification(self):
-        text = "!sqa verification category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false"
+        text = "!sqa verification category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false link-types=false"
         ast = self.tokenize(text)
         self.assertToken(ast(0), 'SQARequirementMatrix', size=3)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo')
@@ -210,7 +185,7 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(2)(2)(1), 'AutoLink', page='bibtex.md')
 
     def testValidation(self):
-        text = "!sqa validation category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false"
+        text = "!sqa validation category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false link-types=false"
         ast = self.tokenize(text)
         self.assertToken(ast(0), 'SQARequirementMatrix', size=3)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo')
@@ -246,11 +221,11 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
     def testCommand(self, mock_find_page):
         text = "!sqa cross-reference category=Demo"
         ast = self.tokenize(text)
-        self.assertSize(ast, 15)
-        self.assertToken(ast(0), 'SQARequirementMatrix', size=5)
+        self.assertSize(ast, 19)
+        self.assertToken(ast(0), 'SQARequirementMatrix', size=7)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo', size=1)
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='core.md', size=0)
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=5)
+        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=7)
 
         self.assertToken(ast(0)(1)(0), 'SQARequirementText', size=3)
         self.assertToken(ast(0)(1)(0)(0), 'Word', content='Requirement')
@@ -335,7 +310,7 @@ class TestSQARequirementsRender(MooseDocsTestCase):
 
         self.assertHTMLTag(res(0), 'ul', size=8, class_='moose-sqa-requirements')
         self.assertHTMLTag(res(0)(0), 'li', size=2)
-        self.assertHTMLTag(res(0)(0)(0), 'span', string='F1.1.1', class_='moose-sqa-requirement-number')
+        self.assertHTMLTag(res(0)(0)(0), 'span', string='1.1.1', class_='moose-sqa-requirement-number')
         self.assertHTMLTag(res(0)(0)(1), 'span', size=3, class_='moose-sqa-requirement-content')
         self.assertHTMLString(res(0)(0)(1)(0), 'Requirement')
         self.assertHTMLString(res(0)(0)(1)(1), ' ')
@@ -343,7 +318,7 @@ class TestSQARequirementsRender(MooseDocsTestCase):
 
         self.assertHTMLTag(res(0), 'ul', size=8, class_='moose-sqa-requirements')
         self.assertHTMLTag(res(0)(5), 'li', size=2)
-        self.assertHTMLTag(res(0)(5)(0), 'span', string='F1.1.6', class_='moose-sqa-requirement-number')
+        self.assertHTMLTag(res(0)(5)(0), 'span', string='1.1.6', class_='moose-sqa-requirement-number')
         self.assertHTMLTag(res(0)(5)(1), 'span', size=6, class_='moose-sqa-requirement-content')
         self.assertHTMLString(res(0)(5)(1)(0), 'Requirement')
         self.assertHTMLString(res(0)(5)(1)(1), ' ')
@@ -356,18 +331,6 @@ class TestSQARequirementsRender(MooseDocsTestCase):
         self.assertHTMLTag(ol(0), 'li', size=2, class_='moose-sqa-detail-item')
         self.assertHTMLString(ol(0)(0), '3')
         self.assertHTMLString(ol(0)(1), 'D')
-
-        text = "!sqa requirements prefix=C category=Demo link=False"
-        _, res = self.execute(text, renderer=base.HTMLRenderer())
-
-        self.assertHTMLTag(res(0), 'ul', size=4, class_='moose-sqa-requirements')
-        self.assertHTMLTag(res(0)(0), 'li', size=2)
-        self.assertHTMLTag(res(0)(0)(0), 'span', string='C1.1.1', class_='moose-sqa-requirement-number')
-        self.assertHTMLTag(res(0)(0)(1), 'span', size=3, class_='moose-sqa-requirement-content')
-        self.assertHTMLString(res(0)(0)(1)(0), 'Tree')
-        self.assertHTMLString(res(0)(0)(1)(1), ' ')
-        self.assertHTMLString(res(0)(0)(1)(2), 'One')
-
 
     def testSQARequirementMatrix(self):
         tok = sqa.SQARequirementMatrix(None)
@@ -417,20 +380,20 @@ class TestSQARequirementsRender(MooseDocsTestCase):
 
     def testSQARequirementMatrixItemUnSatisfied(self):
 
-        tok = sqa.SQARequirementMatrixItem(None, label='F1.1.1', satisfied=False)
+        tok = sqa.SQARequirementMatrixItem(None, label='1.1.1', satisfied=False)
 
         res = self.render(tok, renderer=base.HTMLRenderer())
-        self.assertHTMLTag(res(0)(0), 'span', string='F1.1.1', class_='moose-sqa-requirement-number moose-sqa-requirement-unsatisfied')
+        self.assertHTMLTag(res(0)(0), 'span', string='1.1.1', class_='moose-sqa-requirement-number moose-sqa-requirement-unsatisfied')
 
         res = self.render(tok, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res(0)(0), 'span', string='F1.1.1', class_='moose-sqa-requirement-number tooltipped moose-sqa-requirement-unsatisfied')
+        self.assertHTMLTag(res(0)(0), 'span', string='1.1.1', class_='moose-sqa-requirement-number tooltipped moose-sqa-requirement-unsatisfied')
 
         res = self.render(tok, renderer=base.RevealRenderer())
-        self.assertHTMLTag(res(0)(0), 'span', string='F1.1.1', class_='moose-sqa-requirement-number moose-sqa-requirement-unsatisfied')
+        self.assertHTMLTag(res(0)(0), 'span', string='1.1.1', class_='moose-sqa-requirement-number moose-sqa-requirement-unsatisfied')
 
         res = self.render(tok, renderer=base.LatexRenderer())
         arg = res(0)['args'][0]
-        self.assertLatex(arg(0), 'Command', 'textcolor', string='F1.1.1')
+        self.assertLatex(arg(0), 'Command', 'textcolor', string='1.1.1')
         self.assertLatexArg(arg(0), 0, 'Brace', string='red')
 
     def testSQARequirementMatrixListItem(self):
@@ -620,7 +583,7 @@ class TestSQARequirementsRender(MooseDocsTestCase):
         self.assertSize(res, 1)
         self.assertLatex(res(0), 'Command', 'section*', string='F1:~')
 
-class TestSQACollectionsAndTypesAST(MooseDocsTestCase):
+class TestSQARequiremetnsWithCollectionsAndTypesAST(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
 
     def setupExtension(self, ext):
@@ -630,83 +593,24 @@ class TestSQACollectionsAndTypesAST(MooseDocsTestCase):
                                                   specs=['demo'])))
 
     def testCollections(self):
-        text = "!sqa collections link=False category=Demo"
-        ast = self.tokenize(text)
-        self.assertSize(ast, 2)
-        self.assertToken(ast(0), 'SQARequirementMatrix')
-        self.assertSize(ast(0), 2)
-        self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', string='Andrew')
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem')
-
-        self.assertToken(ast(1), 'SQARequirementMatrix')
-        self.assertSize(ast(1), 2)
-        self.assertToken(ast(1)(0), 'SQARequirementMatrixHeading', string='Deanne')
-        self.assertToken(ast(1)(1), 'SQARequirementMatrixItem')
-
-        text = "!sqa collections link=False category=Demo items=Andrew"
+        text = "!sqa requirements collections=Andrew Deanne link=False category=Demo"
         ast = self.tokenize(text)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'SQARequirementMatrix')
-        self.assertSize(ast(0), 2)
-        self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', string='Andrew')
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem')
+        self.assertSize(ast(0), 3)
+        self.assertToken(ast(0,0), 'SQARequirementMatrixHeading', string='Common')
+        self.assertToken(ast(0,1), 'SQARequirementMatrixItem', reqname='group1')
+        self.assertToken(ast(0,2), 'SQARequirementMatrixItem', reqname='group2')
 
     def testTypes(self):
-        text = "!sqa types link=False category=Demo"
-        ast = self.tokenize(text)
-        self.assertSize(ast, 2)
-        self.assertToken(ast(0), 'SQARequirementMatrix')
-        self.assertSize(ast(0), 2)
-        self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', string='Andrew')
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem')
-
-        self.assertToken(ast(1), 'SQARequirementMatrix')
-        self.assertSize(ast(1), 2)
-        self.assertToken(ast(1)(0), 'SQARequirementMatrixHeading', string='Deanne')
-        self.assertToken(ast(1)(1), 'SQARequirementMatrixItem')
-
-        text = "!sqa types link=False category=Demo items=Andrew"
+        text = "!sqa requirements types=TestType link=False category=Demo"
         ast = self.tokenize(text)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'SQARequirementMatrix')
-        self.assertSize(ast(0), 2)
-        self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', string='Andrew')
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem')
-
-class TestSQACollectionsListAST(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
-
-    def setupExtension(self, ext):
-        if ext == sqa:
-            return dict(active=True,
-                        categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
-                                                  specs=['demo'])))
-    def testDefault(self):
-        text = "!sqa collections-list"
-        ast = self.tokenize(text)
-        self.assertSize(ast, 1)
-        self._testTable(ast(0))
-
-    def testFloat(self):
-        text = "!sqa collections-list id=foo caption=foo"
-        ast = self.tokenize(text)
-        self.assertSize(ast, 2)
-        self.assertToken(ast(0), 'TableFloat')
-        self.assertToken(ast(1), 'Shortcut')
-        self._testTable(ast(0,1))
-
-    def _testTable(self, ast):
-        self.assertToken(ast, 'Table', size=2, form='LL')
-        self.assertToken(ast(0), 'TableHead', size=1)
-        self.assertToken(ast(0,0), 'TableRow', size=2)
-        self.assertToken(ast(0,0,0), 'TableHeadItem', string='Collection')
-        self.assertToken(ast(0,0,1), 'TableHeadItem', string='Description')
-
-        self.assertToken(ast(1), 'TableBody', size=1)
-        self.assertToken(ast(1,0), 'TableRow', size=2)
-        self.assertToken(ast(1,0,0), 'TableItem', string='FAILURE_ANALYSIS')
-        self.assertToken(ast(1,0,1), 'TableItem')
-
+        self.assertSize(ast(0), 3)
+        self.assertToken(ast(0,0), 'SQARequirementMatrixHeading', string='Tree')
+        self.assertToken(ast(0,1), 'SQARequirementMatrixItem', reqname='r0')
+        self.assertToken(ast(0,2), 'SQARequirementMatrixItem', reqname='r2')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
