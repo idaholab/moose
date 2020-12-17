@@ -6705,10 +6705,10 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << divtol << " * initial residual " << the_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
-    else if (_abs_nl_divtol > 0 && fnorm > _abs_nl_divtol)
+    else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
     {
       oss << "Diverged due to residual " << fnorm << " > absolute divergence tolerance "
-          << _abs_nl_divtol << '\n';
+          << _nl_abs_div_tol << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
     else if (_n_nl_pingpong > _n_max_nl_pingpong)

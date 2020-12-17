@@ -347,22 +347,20 @@ petscNonlinearConverged(SNES snes,
 
   // Whether or not to force SNESSolve() take at least one iteration regardless of the initial
   // residual norm
-  PetscBool force_iteration = PETSC_FALSE;
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
+  PetscBool force_iteration = PETSC_FALSE;
   ierr = SNESGetForceIteration(snes, &force_iteration);
   CHKERRABORT(problem.comm().get(), ierr);
-#endif
 
-  if (force_iteration && !(problem.getNLForcedIterations()))
-    problem.setNLForcedIterations(1);
+  if (force_iteration && !(problem.getNonlinearForcedIterations()))
+    problem.setNonlinearForcedIterations(1);
 
-  if (!force_iteration && (problem.getNLForcedIterations()))
+  if (!force_iteration && (problem.getNonlinearForcedIterations()))
   {
-#if !PETSC_VERSION_LESS_THAN(3, 8, 4)
     ierr = SNESSetForceIteration(snes, PETSC_TRUE);
     CHKERRABORT(problem.comm().get(), ierr);
-#endif
   }
+#endif
 
 // See if SNESSetFunctionDomainError() has been called.  Note:
 // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()

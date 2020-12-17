@@ -8,7 +8,7 @@
     issues = '#16474'
     design = 'FEProblemSolve.md'
   [../]
-  [./test_force_3_iterations]
+  [./test_force_2_nl_iterations]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
     expect_out = 'Nonlinear solve converged due to CONVERGED_FNORM_ABS iterations 2'

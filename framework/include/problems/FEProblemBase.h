@@ -1915,14 +1915,18 @@ public:
   }
 
   /// method setting the minimum number of nonlinear iterations before performing divergence checks
-  void setNLForcedIterations(const unsigned int nl_forced_its) { _nl_forced_its = nl_forced_its; }
+  void setNonlinearForcedIterations(const unsigned int nl_forced_its)
+  {
+    _nl_forced_its = nl_forced_its;
+  }
 
-  unsigned int getNLForcedIterations() { return _nl_forced_its; };
+  /// method returning the number of forced nonlinear iterations
+  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; };
 
   /// method setting the absolute divergence tolerance
-  void setNLAbsoluteDivergenceTolerance(const Real abs_nl_divtol)
+  void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
   {
-    _abs_nl_divtol = abs_nl_divtol;
+    _nl_abs_div_tol = nl_abs_div_tol;
   }
 
 protected:
@@ -1955,7 +1959,7 @@ protected:
   int _nl_forced_its = 0;
 
   /// the absolute non linear divergnce tolerance
-  Real _abs_nl_divtol = -1;
+  Real _nl_abs_div_tol = -1;
 
   std::shared_ptr<NonlinearSystemBase> _nl;
   std::shared_ptr<AuxiliarySystem> _aux;
