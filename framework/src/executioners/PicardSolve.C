@@ -133,7 +133,8 @@ PicardSolve::PicardSolve(Executioner * ex)
     _previous_entering_time(_problem.time() - 1),
     _solve_message(_problem.shouldSolve() ? "Solve Converged!" : "Solve Skipped!"),
     _auto_advance_set_by_user(isParamValid("auto_advance")),
-    _auto_advance_user_value(_auto_advance_set_by_user ? getParam<bool>("auto_advance") : true)
+    _auto_advance_user_value(_auto_advance_set_by_user ? getParam<bool>("auto_advance") : true),
+    _fail_step(false)
 {
   if (_relax_factor != 1.0)
     // Store a copy of the previous solution here
@@ -492,6 +493,12 @@ PicardSolve::solveStep(Real begin_norm_old,
       _picard_status = MoosePicardConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
     }
+  }
+
+  if (_fail_step)
+  {
+    _fail_step = false;
+    return false;
   }
 
   _executioner.postSolve();

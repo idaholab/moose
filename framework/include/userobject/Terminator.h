@@ -23,38 +23,38 @@ template <>
 InputParameters validParams<Terminator>();
 
 /**
-  * This Userobject requests termination of the current solve based on
-  * the values of Postprocessors (and a logical expression testing them)
-  *
-  *                     <((((((\\\
-  *                     /      . }\
-  *                     ;--..--._|}
-  *  (\                 '--/\--'  )
-  *   \\                | '-'  :'|
-  *    \\               . -==- .-|
-  *     \\               \.__.'   \--._
-  *     [\\          __.--|       //  _/'--.
-  *     \ \\       .'-._ ('-----'/ __/      \
-  *      \ \\     /   __>|      | '--.       |
-  *       \ \\   |   \   |     /    /       /
-  *        \ '\ /     \  |     |  _/       /
-  *         \  \       \ |     | /        /
-  *          \  \      \        /
-  */
+ * This Userobject requests termination of the current solve based on
+ * the values of Postprocessors (and a logical expression testing them)
+ *
+ *                     <((((((\\\
+ *                     /      . }\
+ *                     ;--..--._|}
+ *  (\                 '--/\--'  )
+ *   \\                | '-'  :'|
+ *    \\               . -==- .-|
+ *     \\               \.__.'   \--._
+ *     [\\          __.--|       //  _/'--.
+ *     \ \\       .'-._ ('-----'/ __/      \
+ *      \ \\     /   __>|      | '--.       |
+ *       \ \\   |   \   |     /    /       /
+ *        \ '\ /     \  |     |  _/       /
+ *         \  \       \ |     | /        /
+ *          \  \      \        /
+ */
 class Terminator : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   Terminator(const InputParameters & parameters);
-  /// The Terminator DEFINITELY needs a destructor!
-  virtual ~Terminator();
 
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
 
 protected:
+  const enum class FailMode { HARD, SOFT } _fail_mode;
+
   /// Postprocessor names
   std::vector<std::string> _pp_names;
 
@@ -70,8 +70,7 @@ protected:
   FunctionParserBase<Real> _fp;
 
   /// Fparser parameter buffer
-  Real * _params;
+  std::vector<Real> _params;
 };
 
 #endif // LIBMESH_HAVE_FPARSER
-
