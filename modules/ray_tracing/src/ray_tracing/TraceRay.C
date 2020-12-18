@@ -1648,9 +1648,10 @@ void
 TraceRay::onTrajectoryChanged(const std::shared_ptr<Ray> & ray)
 {
 #ifndef NDEBUG
-  if (_study.verifyTraceIntersections() && _intersected_extrema.atExtrema()
-          ? !_current_elem->close_to_point(ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
-          : !_current_elem->contains_point(ray->currentPoint()))
+  if (_study.verifyTraceIntersections() &&
+      (_intersected_extrema.atExtrema()
+           ? !_current_elem->close_to_point(ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
+           : !_current_elem->contains_point(ray->currentPoint())))
     failTrace("Elem does not contain point after trajectory change",
               /* warning = */ false,
               __LINE__);
