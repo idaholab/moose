@@ -38,27 +38,13 @@ can be found in the [Software Test Plan](sqa/framework_stp.md).
 !template-end!
 
 !template item key=functional-requirements
-!sqa requirements prefix=F category=framework
+!sqa requirements collections=FUNCTIONAL category=framework
 
 !template item key=usability-requirements
-!sqa requirements prefix=U category=framework
+!sqa requirements collections=USABILITY category=framework
 
 !template item key=performance-requirements
-!sqa requirements prefix=P category=framework
+!sqa requirements collections=PERFORMANCE category=framework
 
 !template item key=system-interfaces-requirements
-!sqa requirements prefix=S category=framework
-
-!template! item key=requirement-collections-intro
-A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
-"FAILURE_ANALYSIS" collection is comprised of requirements that perform checks for simulation
-failures. The following table lists the names and descriptions of the available collections.
-
-!sqa collections-list caption=List of requirement "collections" names and descriptions.
-
-The following is a complete list of each requirement that has been assigned to a collection.
-!template-end!
-
-!template! item key=requirement-collections
-!sqa collections category=framework
-!template-end!
+!sqa requirements collections=SYSTEM category=framework

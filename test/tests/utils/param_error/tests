@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16410'
+  design = utils/InputParameters.md
+  [error]
+    type = RunException
+    input = param_error.i
+    expect_err = "param_error.i:10: missing required parameter 'Kernels/diffusion/D'"
+
+    requirement = "The system shall automatically report input errors when a required parameter is not specified."
+  []
+[]

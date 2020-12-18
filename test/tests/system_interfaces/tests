@@ -1,7 +1,7 @@
 [Tests]
   issues = "#16410"
   design = "sqa/non_functional.md"
-  classification = SYSTEM
+  collections = SYSTEM
   [mpi]
     type = RunApp
     input = input.i

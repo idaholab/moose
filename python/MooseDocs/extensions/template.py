@@ -23,7 +23,6 @@ LOG = logging.getLogger(__name__)
 
 TemplateItem = tokens.newToken('TemplateItem', key='')
 TemplateField = tokens.newToken('TemplateField', key='', required=True)
-TemplateSubField = tokens.newToken('TemplateSubField')
 
 def make_extension(**kwargs):
     return TemplateExtension(**kwargs)
@@ -38,7 +37,9 @@ class TemplateExtension(include.IncludeExtension):
     @staticmethod
     def defaultConfig():
         config = include.IncludeExtension.defaultConfig()
-        config['args'] = (dict(), "Template arguments to be applied to templates.")
+        config['args'] = (dict(), "Key value pair template arguments to be applied. The key " \
+                                  "should  exist within the template file as {{key}}, which is " \
+                                  "replaced by value when loaded.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -50,7 +51,6 @@ class TemplateExtension(include.IncludeExtension):
         self.addCommand(reader, TemplateLoadCommand())
         self.addCommand(reader, TemplateFieldCommand())
         self.addCommand(reader, TemplateItemCommand())
-        self.addCommand(reader, TemplateFieldContentCommand())
 
         renderer.add('TemplateField', RenderTemplateField())
 
@@ -142,18 +142,6 @@ class TemplateItemCommand(command.CommandComponent):
             self.reader.tokenize(item, content, page, line=info.line, group=group)
         return parent
 
-class TemplateFieldContentCommand(command.CommandComponent):
-    COMMAND = 'template'
-    SUBCOMMAND = ('field-begin', 'field-end')
-
-    def createToken(self, parent, info, page):
-
-        if parent.name != 'TemplateField':
-            msg = "The '!template {}' command must be within a '!template field' command."
-            raise exceptions.MooseDocsException(msg, info['subcommand'])
-
-        return TemplateSubField(parent, command=info['subcommand'])
-
 class RenderTemplateField(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
@@ -174,18 +162,8 @@ class RenderTemplateField(components.RenderComponent):
         replacement = moosetree.find(token.root, func)
 
         if replacement:
-            # Add beginning TemplateSubField
-            for child in token:
-                if (child.name == 'TemplateSubField') and (child['command'] == 'field-begin'):
-                    self.renderer.render(parent, child, page)
-
             # Render TemplateItem
             self.renderer.render(parent, replacement, page)
-
-            # Add ending TemplateSubField
-            for child in token:
-                if (child.name == 'TemplateSubField') and (child['command'] == 'field-end'):
-                    self.renderer.render(parent, child, page)
 
             # Remove the TemplateFieldItem, otherwise the content will be rendered again
             replacement.parent = None

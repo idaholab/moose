@@ -2,7 +2,7 @@
   # These tests intentionally use 'command' to demonstrate the command-line usability.
   issues = "#16410"
   design = "sqa/non_functional.md"
-  classification = USABILITY
+  collections = USABILITY
   [command-line]
     requirement = "The system will be operated using a command-line interface that"
     [empty]
@@ -26,7 +26,6 @@
       type = RunCommand
       method = opt
       command = "../../moose_test-opt -i input.i"
-      max_parallel = 1
 
       detail = "an input file and"
     []
@@ -34,7 +33,6 @@
       type = RunCommand
       method = opt
       command = "../../moose_test-opt -i input.i Mesh/uniform_refine=1"
-      max_parallel = 1
 
       detail = "command-line options."
     []

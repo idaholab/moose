@@ -19,9 +19,6 @@ TEXT = """!template load file=example.template.md project=MOOSE
 
 !template item key=field-with-item
 This is some content that should be below the second heading.
-
-!template item key=field-with-subcontent
-This should be in the middle.
 """
 
 class TestTemplate(MooseDocsTestCase):
@@ -38,7 +35,7 @@ class TestTemplate(MooseDocsTestCase):
 
     def testAST(self):
         ast = self.tokenize(TEXT)
-        self.assertEqual(len(ast), 12)
+        self.assertEqual(len(ast), 9)
         self.assertToken(ast(0), 'Heading', size=3)
         self.assertToken(ast(1), 'Paragraph', size=10)
         self.assertToken(ast(2), 'Heading', size=5)
@@ -48,21 +45,13 @@ class TestTemplate(MooseDocsTestCase):
         self.assertToken(ast(5), 'TemplateField', size=0)
         self.assertToken(ast(6), 'Heading', size=7)
         self.assertToken(ast(7), 'TemplateField', size=1)
-        self.assertToken(ast(7,0), 'Paragraph', size=29)
-        self.assertToken(ast(8), 'Heading', size=9)
-        self.assertToken(ast(9), 'TemplateField', size=2)
-        self.assertToken(ast(9,0), 'TemplateSubField', size=1)
-        self.assertToken(ast(9,0,0), 'Paragraph', size=12)
-        self.assertToken(ast(9,1), 'TemplateSubField', size=1)
-        self.assertToken(ast(9,1,0), 'Paragraph', size=12)
-        self.assertToken(ast(10), 'TemplateItem', size=1)
-        self.assertToken(ast(10,0), 'Paragraph', size=22)
-        self.assertToken(ast(11), 'TemplateItem', size=1)
-        self.assertToken(ast(11,0), 'Paragraph', size=12)
+        self.assertToken(ast(7,0), 'Paragraph', size=35)
+        self.assertToken(ast(8), 'TemplateItem', size=1)
+        self.assertToken(ast(8,0), 'Paragraph', size=22)
 
     def testRenderField(self):
         _, res = self.execute(TEXT, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', size=12)
+        self.assertHTMLTag(res, 'div', size=8)
 
         self.assertHTMLTag(res(0), 'h1', size=3)
         self.assertEqual(res(0).text(), 'Template Extension')
@@ -82,15 +71,6 @@ class TestTemplate(MooseDocsTestCase):
         self.assertHTMLTag(res(6), 'h2', size=7)
         self.assertEqual(res(6).text(), 'Field with Missing Replacement')
         self.assertHTMLTag(res(7), 'div', size=3)
-
-        self.assertHTMLTag(res(8), 'h2', size=9)
-        self.assertEqual(res(8).text(), 'Field with Begin / End Content')
-        self.assertHTMLTag(res(9), 'p', size=12)
-        self.assertEqual(res(9).text(), "This should be at the start .")
-        self.assertHTMLTag(res(10), 'p', size=12)
-        self.assertEqual(res(10).text(), "This should be in the middle .")
-        self.assertHTMLTag(res(11), 'p', size=12)
-        self.assertEqual(res(11).text(), "This should be at the end .")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

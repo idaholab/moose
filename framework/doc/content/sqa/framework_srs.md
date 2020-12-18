@@ -81,16 +81,16 @@ each addition to the MOOSE framework or its modules.
 !template-end!
 
 !template item key=functional-requirements
-!sqa requirements link=False prefix=F category=framework
+!sqa requirements link=False collections=FUNCTIONAL category=framework
 
 !template item key=usability-requirements
-!sqa requirements link=False prefix=U category=framework
+!sqa requirements link=False collections=USABILITY category=framework
 
 !template item key=performance-requirements
-!sqa requirements link=False prefix=P category=framework
+!sqa requirements link=False collections=PERFORMANCE category=framework
 
 !template item key=system-interfaces-requirements
-!sqa requirements link=False prefix=S category=framework
+!sqa requirements link=False collections=SYSTEM category=framework
 
 !template! item key=human-system-integration
 [!ac](MOOSE) is a command line driven application which conforms to all standard terminal
@@ -181,18 +181,4 @@ teams follow the [!ac](NQA-1) standards.
 No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) source code. However,
 some [!ac](MOOSE)-based applications maybe be export controlled in which case all export control restrictions must
 be adhered to when packaging and shipping media.
-!template-end!
-
-!template! item key=requirement-collections-intro
-A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
-"FAILURE_ANALYSIS" collection is comprised of requirements that perform checks for simulation
-failures. The following table lists the names and descriptions of the available collections.
-
-!sqa collections-list caption=List of requirement "collections" names and descriptions.
-
-The following is a complete list of each requirement that has been assigned to a collection.
-!template-end!
-
-!template! item key=requirement-collections
-!sqa collections category=framework link=False
 !template-end!

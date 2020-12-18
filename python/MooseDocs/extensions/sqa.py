@@ -293,9 +293,9 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['category'] = (None, "Provide the category.")
-        config['collections'] = (None, "Limit the Requirement list to the specified collections.")
-        config['types'] = (None, "Limit the Requirement list to the specified test types.")
+        config['category'] = (None, "Provide the category, as listed in the extension 'categories' configuration.")
+        config['collections'] = (None, "Limit the Requirement list to the specified collections (e.g., 'FUNCTIONAL FAILURE_ANALYSIS').")
+        config['types'] = (None, "Limit the Requirement list to the specified test types (e.g., 'RunException Exodiff').")
 
         config['link'] = (True, "Enable/disable the linking of test specifications and " \
                                  "test files.")
@@ -437,7 +437,6 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
     @staticmethod
     def defaultSettings():
         config = SQARequirementsCommand.defaultSettings()
-        config['category'] = (None, "Provide the category.")
         config.pop('link-prerequisites')
         return config
 

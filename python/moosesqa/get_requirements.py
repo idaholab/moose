@@ -23,12 +23,12 @@ def get_requirements_from_tests(directories, specs):
         directories[list]: A list of directories to consider
         specs[list]: A list of test specification names (e.g., ['tests'])
     """
-    out = collections.defaultdict(lambda: collections.defaultdict(list))
+    out = collections.defaultdict(list)
     for location in directories:
         for filename in sorted(mooseutils.git_ls_files(location)):
             if os.path.isfile(filename) and (os.path.basename(filename) in specs):
                 group = os.path.relpath(filename, location).split('/')[0]
-                out[group] = get_requirements_from_file(filename)
+                out[group] += get_requirements_from_file(filename)
     return out
 
 def number_requirements(requirement_dict, category):

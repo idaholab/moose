@@ -1,4 +1,4 @@
-# {{project}} System Requirements Specification
+# {{project}} Failure Analysis Report
 
 ## Introduction id=introduction
 
@@ -358,13 +358,3 @@ transported within its intended operational context.
 Provide the verification approaches and methods planned to qualify the system or system element. The
 information items for verification are recommended to be given in a parallel manner with the
 information items in Subsections 3.1 through 3.13.
-
-## Requirement Collections id=requirement-collections
-
-!template field key=requirement-collections-intro required=False
-
-!template! field key=requirement-collections
-This section should contain lists of requirement collections, where a "collection" is simply a
-grouping of requirements that are related in some fashion. For example, all tests for error handling
-could be grouped into a "failure analysis" collection.
-!template-end!

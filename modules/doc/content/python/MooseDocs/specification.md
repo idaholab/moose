@@ -60,6 +60,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [extensions/gallery.md] | Tools for building image galleries. |
 | [extensions/style.md] | Command for setting text styling. |
 | [extensions/ifelse.md] | Commands for if/elif/else statements in markdown. |
+| [extensions/template.md] | Tools for building MooseDocs markdown templates. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |

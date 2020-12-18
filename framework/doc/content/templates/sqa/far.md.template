@@ -1,0 +1,22 @@
+# {{project}} Failure Analysis Report
+
+## Introduction id=introduction
+
+!template field key=introduction
+Introduce the failure analysis performed.
+
+## References id=references
+
+!bibtex bibliography title=None
+
+## Failure Analysis
+
+!template field key=failure-analysis
+Detail the failure analysis performed, with respect to the requirements/tests marked as
+failure analysis.
+
+## Failure Analysis Requirements id=failure-analysis-requirements
+
+!template! field key=failure-analysis-requirements
+This section of the specification should contain all of the requirements related to failure analysis.
+!template-end!

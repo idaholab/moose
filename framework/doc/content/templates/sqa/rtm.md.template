@@ -107,13 +107,3 @@ Include the tracebility matrix for performance requirements.
 
 !template field key=system-interfaces-requirements
 Include the tracebility matrix for system interface requirements.
-
-## Requirement Collections id=requirement-collections
-
-!template field key=requirement-collections-intro required=False
-
-!template! field key=requirement-collections
-This section should contain lists of requirement collections, where a "collection" is simply a
-grouping of requirements that are related in some fashion. For example, all tests for error handling
-could be grouped into a "failure analysis" collection.
-!template-end!

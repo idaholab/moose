@@ -68,4 +68,10 @@
     input = test_LogHelper.py
     requirement = "The system shall include a utility to enable control the of logging messages for software quality reports."
   []
+
+  [documents]
+    type = PythonUnitTest
+    input = test_documents.py
+    requirement = "The system shall include documented requirement collections and SQA template files."
+  []
 []
