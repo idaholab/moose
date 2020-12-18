@@ -67,8 +67,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
 
     _boundary_id(parameters.get<BoundaryID>("_boundary_id")),
 
-    _var(static_cast<MooseVariableField<Real> &>(
-        _subproblem.getActualFieldVariable(_tid, parameters.get<VariableName>("variable")))),
+    _var(mooseVariableField()),
     _scale_by_flux_faces(parameters.get<bool>("scale_by_flux_faces")),
 
     _u(_var.sln()),

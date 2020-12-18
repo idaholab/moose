@@ -50,9 +50,9 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
-
-    _u(mooseVariableField().sln()),
-    _grad_u(mooseVariableField().gradSln())
+    _var(mooseVariableField()),
+    _u(_var.sln()),
+    _grad_u(_var.gradSln())
 {
   const std::vector<MooseVariableFieldBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)

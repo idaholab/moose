@@ -8,20 +8,20 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./error]
+  [Indicators]
+    [error]
       type = ValueJumpIndicator
       variable = something
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
     fv = true
-  [../]
+  []
 []
 
 [Problem]
@@ -29,7 +29,7 @@
 []
 
 [ICs]
-  [./leftright]
+  [leftright]
     type = BoundingBoxIC
     variable = something
     inside = 1
@@ -37,22 +37,22 @@
     y1 = 0
     x2 = 0.5
     x1 = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./something]
+  [something]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [FVKernels]
-  [./diff]
+  [diff]
     type = FVDiffusion
     variable = u
     coeff = coeff
-  [../]
+  []
 []
 
 [Materials]
@@ -64,18 +64,18 @@
 []
 
 [FVBCs]
-  [./left]
+  [left]
     type = FVDirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = FVDirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
