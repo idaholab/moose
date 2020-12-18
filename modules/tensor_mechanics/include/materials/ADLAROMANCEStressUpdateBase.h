@@ -68,8 +68,10 @@ protected:
    * @param derivative Optional flag to return derivative of ROM increment with respect to stress.
    * @return ROM computed increment
    */
-  ADReal
-  computeROM(const unsigned int tile, const unsigned out_index, const bool derivative = false);
+  ADReal computeROM(const unsigned int tile,
+                    const unsigned out_index,
+                    const std::vector<std::vector<Real>> & precomputed_vals,
+                    const bool derivative = false);
 
   /**
    * Method to check input values against applicability windows set by ROM data set.
@@ -91,11 +93,11 @@ protected:
    * @param derivative Optional flag to return derivative of converted input with respect to stress.
    * @return Converted input
    */
-  ADReal normalizeInput(const ADReal & input,
-                        const ROMInputTransform transform,
-                        const Real transform_coef,
-                        const std::vector<Real> & transformed_limits,
-                        const bool derivative = false);
+  Real normalizeInput(const Real & input,
+                      const ROMInputTransform transform,
+                      const Real transform_coef,
+                      const std::vector<Real> & transformed_limits,
+                      const bool derivative = false);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
@@ -104,9 +106,9 @@ protected:
    * @param drom_input Optional derivative of ROM input with respect to stress
    * @param derivative Optional flag to return derivative of converted input with respect to stress.
    */
-  void buildPolynomials(const ADReal & rom_input,
-                        std::vector<ADReal> & polynomial_inputs,
-                        const ADReal & drom_input = 0,
+  void buildPolynomials(const Real & rom_input,
+                        std::vector<Real> & polynomial_inputs,
+                        const Real & drom_input = 0,
                         const bool derivative = false);
 
   /**
@@ -118,8 +120,8 @@ protected:
    * @param precomputed Vector that holds the precomputed ROM values
    */
   void precomputeValues(const std::vector<Real> & coefs,
-                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                        std::vector<ADReal> & precomputed);
+                        const std::vector<std::vector<Real>> & polynomial_inputs,
+                        std::vector<Real> & precomputed);
 
   /**
    * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
@@ -133,9 +135,9 @@ protected:
    * to stress.
    * @return ROM output
    */
-  ADReal computeValues(const std::vector<ADReal> & precomputed,
-                       const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                       const std::vector<ADReal> & dpolynomial_inputs = {},
+  ADReal computeValues(const std::vector<Real> & precomputed,
+                       const std::vector<std::vector<Real>> & polynomial_inputs,
+                       const std::vector<Real> & dpolynomial_inputs = {},
                        const bool derivative = false);
 
   /**
@@ -169,8 +171,8 @@ protected:
    * @param derivative Optional flag to return derivative of Legendre polynomial Legendre
    * @return Computed value from Legendre polynomial
    */
-  ADReal
-  computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
+  Real
+  computePolynomial(const Real & value, const unsigned int degree, const bool derivative = false);
 
   /**
    * Calculate the sigmoid function weighting for the input based on the limits
@@ -477,13 +479,16 @@ protected:
   std::vector<Real> _old_input_values;
 
   /// Container for converted rom_inputs
-  std::vector<std::vector<ADReal>> _rom_inputs;
+  std::vector<std::vector<Real>> _rom_inputs;
 
   /// Container for ROM polynomial inputs
-  std::vector<std::vector<std::vector<ADReal>>> _polynomial_inputs;
+  std::vector<std::vector<std::vector<Real>>> _polynomial_inputs;
 
   /// Container for ROM precomputed values
-  std::vector<std::vector<ADReal>> _precomputed_vals;
+  std::vector<std::vector<Real>> _precomputed_vals;
+
+  std::vector<std::vector<Real>> _precomputed_vals_cells;
+  std::vector<std::vector<Real>> _precomputed_vals_walls;
 
   /// Container for global limits
   std::vector<std::vector<Real>> _global_limits;

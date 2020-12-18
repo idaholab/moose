@@ -266,10 +266,16 @@ ADLAROMANCEStressUpdateBase::initialSetup()
 
   // Prepare containers
   _input_values.resize(_num_inputs);
-  _precomputed_vals.resize(_num_tiles, std::vector<ADReal>(_num_coefs));
-  _rom_inputs.resize(_num_tiles, std::vector<ADReal>(_num_inputs));
+  _precomputed_vals.resize(_num_tiles, std::vector<Real>(_num_coefs));
+
+  _precomputed_vals_cells.resize(_num_tiles, std::vector<Real>(_num_coefs));
+  _precomputed_vals_walls.resize(_num_tiles, std::vector<Real>(_num_coefs));
+
+  _rom_inputs.resize(_num_tiles, std::vector<Real>(_num_inputs));
   _polynomial_inputs.resize(
-      _num_tiles, std::vector<std::vector<ADReal>>(_num_inputs, std::vector<ADReal>(_degree)));
+      _num_tiles, std::vector<std::vector<Real>>(_num_inputs, std::vector<Real>(_degree)));
+
+  // The weights need to be AD
   _non_stress_weights.resize(_num_tiles);
   _weights.resize(_num_tiles);
 
@@ -353,6 +359,10 @@ ADLAROMANCEStressUpdateBase::computeStressInitialize(const ADReal & effective_tr
   }
 
   // Precompute transformed input and prebuild polynomials for inputs other than strain
+  precomputeROM(_cell_output_index);
+  _precomputed_vals_cells = _precomputed_vals;
+  precomputeROM(_wall_output_index);
+  _precomputed_vals_walls = _precomputed_vals;
   precomputeROM(_strain_output_index);
 }
 
@@ -495,10 +505,11 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   {
     if (_weights[t])
     {
-      const ADReal rom = computeROM(t, _strain_output_index);
+      const ADReal rom = computeROM(t, _strain_output_index, _precomputed_vals);
       total_rom_effective_strain_inc += _weights[t] * rom;
       dtotal_rom_effective_strain_inc_dstress +=
-          _weights[t] * computeROM(t, _strain_output_index, true) + dweights_dstress[t] * rom;
+          _weights[t] * computeROM(t, _strain_output_index, _precomputed_vals, true) +
+          dweights_dstress[t] * rom;
     }
   }
 
@@ -557,7 +568,7 @@ ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_index)
       {
         if (i != _stress_input_index)
         {
-          _rom_inputs[t][i] = normalizeInput(_input_values[i],
+          _rom_inputs[t][i] = normalizeInput(_input_values[i].value(),
                                              _transform[t][out_index][i],
                                              _transform_coefs[t][out_index][i],
                                              _transformed_normalization_limits[t][out_index][i]);
@@ -572,47 +583,49 @@ ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_index)
 ADReal
 ADLAROMANCEStressUpdateBase::computeROM(const unsigned int t,
                                         const unsigned out_index,
+                                        const std::vector<std::vector<Real>> & precomputed_vals,
                                         const bool derivative)
 {
   // Update due to new stress
   _rom_inputs[t][_stress_input_index] =
-      normalizeInput(_input_values[_stress_input_index],
+      normalizeInput(_input_values[_stress_input_index].value(),
                      _transform[t][out_index][_stress_input_index],
                      _transform_coefs[t][out_index][_stress_input_index],
                      _transformed_normalization_limits[t][out_index][_stress_input_index]);
   buildPolynomials(_rom_inputs[t][_stress_input_index], _polynomial_inputs[t][_stress_input_index]);
 
   // Compute ROM values
-  const ADReal rom_output = computeValues(_precomputed_vals[t], _polynomial_inputs[t]);
+  const ADReal rom_output = computeValues(precomputed_vals[t], _polynomial_inputs[t]);
 
   // Return converted output if not derivative
   if (!derivative)
     return convertOutput(_old_input_values, rom_output, out_index);
 
   const ADReal drom_input =
-      normalizeInput(_input_values[_stress_input_index],
+      normalizeInput(_input_values[_stress_input_index].value(),
                      _transform[t][out_index][_stress_input_index],
                      _transform_coefs[t][out_index][_stress_input_index],
                      _transformed_normalization_limits[t][out_index][_stress_input_index],
                      derivative);
 
-  std::vector<ADReal> dpolynomial_inputs(_degree, 0.0);
-  buildPolynomials(_rom_inputs[t][_stress_input_index], dpolynomial_inputs, drom_input, derivative);
+  std::vector<Real> dpolynomial_inputs(_degree, 0.0); // member data
+  buildPolynomials(
+      _rom_inputs[t][_stress_input_index], dpolynomial_inputs, drom_input.value(), derivative);
 
   const ADReal drom_output =
-      computeValues(_precomputed_vals[t], _polynomial_inputs[t], dpolynomial_inputs, derivative);
+      computeValues(precomputed_vals[t], _polynomial_inputs[t], dpolynomial_inputs, derivative);
 
   return convertOutput(_old_input_values, rom_output, out_index, drom_output, derivative);
 }
 
-ADReal
-ADLAROMANCEStressUpdateBase::normalizeInput(const ADReal & input,
+Real
+ADLAROMANCEStressUpdateBase::normalizeInput(const Real & input,
                                             const ROMInputTransform transform,
                                             const Real transform_coef,
                                             const std::vector<Real> & transformed_limits,
                                             const bool derivative)
 {
-  ADReal x = input;
+  Real x = input;
   convertValue(x, transform, transform_coef, derivative);
 
   // transformed_limits[2] = transformed_limits[1] - transformed_limits[0]
@@ -623,9 +636,9 @@ ADLAROMANCEStressUpdateBase::normalizeInput(const ADReal & input,
 }
 
 void
-ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
-                                              std::vector<ADReal> & polynomial_inputs,
-                                              const ADReal & drom_input,
+ADLAROMANCEStressUpdateBase::buildPolynomials(const Real & rom_input,
+                                              std::vector<Real> & polynomial_inputs,
+                                              const Real & drom_input,
                                               const bool derivative)
 {
   for (unsigned int d = 0; d < _degree; ++d)
@@ -639,8 +652,8 @@ ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
 void
 ADLAROMANCEStressUpdateBase::precomputeValues(
     const std::vector<Real> & coefs,
-    const std::vector<std::vector<ADReal>> & polynomial_inputs,
-    std::vector<ADReal> & precomputed)
+    const std::vector<std::vector<Real>> & polynomial_inputs, // make this a real
+    std::vector<Real> & precomputed)
 {
   for (unsigned int c = 0; c < _num_coefs; ++c)
   {
@@ -652,11 +665,10 @@ ADLAROMANCEStressUpdateBase::precomputeValues(
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeValues(
-    const std::vector<ADReal> & precomputed,
-    const std::vector<std::vector<ADReal>> & polynomial_inputs,
-    const std::vector<ADReal> & dpolynomial_inputs,
-    const bool derivative)
+ADLAROMANCEStressUpdateBase::computeValues(const std::vector<Real> & precomputed,
+                                           const std::vector<std::vector<Real>> & polynomial_inputs,
+                                           const std::vector<Real> & dpolynomial_inputs,
+                                           const bool derivative)
 {
   ADReal rom_output = 0.0;
   ADReal val;
@@ -703,8 +715,8 @@ ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_v
   return -expout * old_input_values[out_index] * _dt;
 }
 
-ADReal
-ADLAROMANCEStressUpdateBase::computePolynomial(const ADReal & value,
+Real
+ADLAROMANCEStressUpdateBase::computePolynomial(const Real & value,
                                                const unsigned int degree,
                                                const bool derivative)
 {
@@ -724,13 +736,13 @@ ADLAROMANCEStressUpdateBase::computePolynomial(const ADReal & value,
   {
     if (derivative)
       return 3.0 * value;
-    return 1.5 * Utility::pow<2>(value) - 0.5;
+    return 1.5 * (value * value) - 0.5;
   }
   else
   {
     if (derivative)
-      return 7.5 * Utility::pow<2>(value) - 1.5;
-    return 2.5 * Utility::pow<3>(value) - 1.5 * value;
+      return 7.5 * (value * value) - 1.5;
+    return 2.5 * (value * value * value) - 1.5 * value;
   }
 }
 
@@ -782,15 +794,15 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
   _cell_dislocation_increment = 0.0;
   _wall_dislocation_increment = 0.0;
 
-  precomputeROM(_cell_output_index);
   for (unsigned int t = 0; t < _num_tiles; ++t)
     if (_weights[t])
-      _cell_dislocation_increment += _weights[t] * computeROM(t, _cell_output_index);
+      _cell_dislocation_increment +=
+          _weights[t] * computeROM(t, _cell_output_index, _precomputed_vals_cells);
 
-  precomputeROM(_wall_output_index);
   for (unsigned int t = 0; t < _num_tiles; ++t)
     if (_weights[t])
-      _wall_dislocation_increment += _weights[t] * computeROM(t, _wall_output_index);
+      _wall_dislocation_increment +=
+          _weights[t] * computeROM(t, _wall_output_index, _precomputed_vals_walls);
 
   _cell_rate[_qp] = _cell_dislocation_increment / _dt;
   _wall_rate[_qp] = _wall_dislocation_increment / _dt;
