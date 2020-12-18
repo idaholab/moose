@@ -26,4 +26,18 @@
     # Check if strong_threshold is setup correctly
     expect_out = "PETSc\s+Preconditioner:\s+hmg\s+strong_threshold:\s+0.7"
   []
+
+  [hmg_strumpack]
+    type = 'Exodiff'
+    input = 'diffusion_hmg.i'
+    exodiff = 'diffusion_strumpack_3d_out.e'
+    min_parallel = 2
+    petsc_version = '>=3.12.0'
+    strumpack = true
+    issues = '#16501'
+    cli_args = 'Mesh/dmg/dim=3 Mesh/dmg/nz=10 Outputs/file_base=diffusion_strumpack_3d_out -pc_type lu 	-pc_factor_mat_solver_type strumpack  -snes_view'
+    requirement = "The system shall support the use of strumpack (sparse direct solver) for 3D problems"
+    # Check if strumpack is used
+    expect_out = "package\s+used\s+to\s+perform\s+factorization:\s+strumpack"
+  []
 []

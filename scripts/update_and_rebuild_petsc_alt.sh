@@ -44,6 +44,9 @@ cd $SCRIPT_DIR
 
 # --skip-submodule-update is used so that we will stay with the particular version
 # we checkout earlier. hypre is relocated, so we do a customized overwrite for v3.11.4
-sh $SCRIPT_DIR/update_and_rebuild_petsc.sh $* --skip-submodule-update --download-hypre=git://https://github.com/hypre-space/hypre.git
+sh $SCRIPT_DIR/update_and_rebuild_petsc.sh $* \
+  --skip-submodule-update \
+  --download-strumpack=0 \
+  --download-hypre=git://https://github.com/hypre-space/hypre.git
 
 exit 0

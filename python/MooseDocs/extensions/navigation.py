@@ -218,13 +218,15 @@ class NavigationExtension(Extension):
 
         # Locate h1 heading, if it is found extract the rendered text
         h = heading.find_heading(page)
-        page_name = page.name#h.text() if h else page.name
+        page_name = page.name
         long_name = self.get('long-name')
         name = self.get('name')
-        if long_name is not None:
+        if h is not None:
+            html.Tag(head, 'title', string='{} | {}'.format(h.text(), name))
+        elif long_name is not None:
             html.Tag(head, 'title', string=long_name)
         elif name is not None:
-            html.Tag(head, 'title', string='{}|{}'.format(page_name, name))
+            html.Tag(head, 'title', string='{} | {}'.format(page_name, name))
         else:
             html.Tag(head, 'title', string=str(page_name))
 
