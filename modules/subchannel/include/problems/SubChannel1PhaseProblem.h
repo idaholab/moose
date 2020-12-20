@@ -24,6 +24,7 @@ public:
   void computeWij(int iz);
   void computeSumWij(double SumSumWij, int iz);
   void computeMdot(int iz);
+  void computeEnthalpy(int iz);
   void computeProperties(int iz);
   void computeDP(int iz);
   double computeFrictionFactor(double Re);

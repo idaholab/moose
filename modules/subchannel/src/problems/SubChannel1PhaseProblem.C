@@ -336,36 +336,19 @@ SubChannel1PhaseProblem::computeMdot(int iz)
     auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
     // Copy the variables at the inlet (bottom) of this element.
     auto mdot_in = (*mdot_soln)(node_in);
-    auto h_in = (*h_soln)(node_in); // J/kg
     auto volume = dz * (*S_flow_soln)(node_in);
     auto mdot_out = 0.0;
-    auto h_out = 0.0;
     // Wij positive out of i into j;
     if (isTransient())
     {
       mdot_out = mdot_in - (*SumWij_soln)(node_out) -
                  ((*rho_soln)(node_in)-rho_soln->old(node_in)) * volume / dt();
-      h_out = std::pow(mdot_out, -1) *
-              (mdot_in * h_in - (*SumWijh_soln)(node_out) - (*SumWijPrimeDhij_soln)(node_out) +
-               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0 -
-               ((*rho_soln)(node_in)*h_in - rho_soln->old(node_in) * h_soln->old(node_in)) *
-                   volume / dt());
     }
     else
     {
       mdot_out = mdot_in - (*SumWij_soln)(node_out);
-      // note use of trapezoidal rule concistent with axial power rate calculation
-      // (PowerIC.C)
-      h_out = std::pow(mdot_out, -1) *
-              (mdot_in * h_in - (*SumWijh_soln)(node_out) - (*SumWijPrimeDhij_soln)(node_out) +
-               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0);
     }
-    if (h_out < 0)
-    {
-      _console << "Wij = : " << Wij << "\n";
-      mooseError(
-          name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", iz);
-    }
+
     if (mdot_out < 0)
     {
       _console << "Wij = : " << Wij << "\n";
@@ -377,7 +360,50 @@ SubChannel1PhaseProblem::computeMdot(int iz)
     }
     // Update solution vectors
     mdot_soln->set(node_out, mdot_out); // kg/sec
-    h_soln->set(node_out, h_out);       // J/kg
+  }
+}
+
+void
+SubChannel1PhaseProblem::computeEnthalpy(int iz)
+{
+  auto dz = _subchannel_mesh._z_grid[iz] - _subchannel_mesh._z_grid[iz - 1];
+  // go through the channels of the level.
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+  {
+    // Start with applying mass-conservation equation & energy - conservation equation
+    // Find the nodes for the top and bottom of this element.
+    auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
+    auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
+    // Copy the variables at the inlet (bottom) of this element.
+    auto mdot_in = (*mdot_soln)(node_in);
+    auto h_in = (*h_soln)(node_in); // J/kg
+    auto volume = dz * (*S_flow_soln)(node_in);
+    auto mdot_out = (*mdot_soln)(node_out);
+    auto h_out = 0.0;
+
+    if (isTransient())
+    {
+      h_out = std::pow(mdot_out, -1) *
+              (mdot_in * h_in - (*SumWijh_soln)(node_out) - (*SumWijPrimeDhij_soln)(node_out) +
+               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0 -
+               ((*rho_soln)(node_in)*h_in - rho_soln->old(node_in) * h_soln->old(node_in)) *
+                   volume / dt());
+    }
+    else
+    {
+      // note use of trapezoidal rule consistent with axial power rate calculation (PowerIC.C)
+      h_out = std::pow(mdot_out, -1) *
+              (mdot_in * h_in - (*SumWijh_soln)(node_out) - (*SumWijPrimeDhij_soln)(node_out) +
+               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0);
+    }
+    if (h_out < 0)
+    {
+      _console << "Wij = : " << Wij << "\n";
+      mooseError(
+          name(), " : Calculation of negative Enthalpy h_out = : ", h_out, " Axial Level= : ", iz);
+    }
+    // Update the solution vectors at the outlet of the cell
+    h_soln->set(node_out, h_out); // J/kg
   }
 }
 
@@ -519,8 +545,10 @@ SubChannel1PhaseProblem::externalSolve()
           // calculate Sum values per subchannel
           double SumSumWij = 0.0;
           computeSumWij(SumSumWij, iz);
-          // Calculate mass flow, enthalpy using conservation equations
+          // Calculate mass flowusing conservation equations
           computeMdot(iz);
+          // Calculate enthalpy using conservation equations
+          computeEnthalpy(iz);
           // Calculate density, Temperature using the mass and energy calculated before
           computeProperties(iz);
           // Calculate Error per level
