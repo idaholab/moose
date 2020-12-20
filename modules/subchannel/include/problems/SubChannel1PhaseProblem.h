@@ -27,11 +27,12 @@ public:
   void computeDP(int iz);
 
 protected:
+  Eigen::VectorXd Wij;
   Eigen::VectorXd Wij_old;
   Eigen::VectorXd WijPrime;
-  Eigen::MatrixXd Wij_global_old;
-  Eigen::VectorXd Wij;
   Eigen::MatrixXd Wij_global;
+  Eigen::MatrixXd Wij_global_old;
+  Eigen::MatrixXd WijPrime_global;
   const Real _g_grav;
   SubChannelMesh & _subchannel_mesh;
   const SinglePhaseFluidProperties * _fp;

@@ -33,11 +33,13 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   WijPrime.resize(_subchannel_mesh._n_gaps);
   Wij.resize(_subchannel_mesh._n_gaps);
   Wij_old.resize(_subchannel_mesh._n_gaps);
+  WijPrime_global.resize(_subchannel_mesh._n_gaps, _subchannel_mesh._nz + 1);
   Wij_global.resize(_subchannel_mesh._n_gaps, _subchannel_mesh._nz + 1);
   Wij_global_old.resize(_subchannel_mesh._n_gaps, _subchannel_mesh._nz + 1);
   Wij_global.setZero();
   Wij_global_old.setZero();
   WijPrime.setZero();
+  WijPrime_global.setZero();
 }
 
 void
