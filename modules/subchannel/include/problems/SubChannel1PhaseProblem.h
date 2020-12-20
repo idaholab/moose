@@ -25,6 +25,7 @@ public:
   void computeSumWij(double SumSumWij, int iz);
   void computeMdot(int iz);
   void computeDP(int iz);
+  double computeFrictionFactor(double Re);
 
 protected:
   Eigen::VectorXd Wij;
