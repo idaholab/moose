@@ -375,16 +375,25 @@ SubChannel1PhaseProblem::computeMdot(int iz)
                  " Axial Level= : ",
                  iz);
     }
-    auto T_out = _fp->T_from_p_h((*P_soln)(node_out), h_out);
-    auto rho_out = _fp->rho_from_p_T((*P_soln)(node_out), T_out);
-    // Update the solution vectors at the outlet of the cell
-    // (mass,density,Temperature,Enthalpy is upwinded).
+    // Update solution vectors
     mdot_soln->set(node_out, mdot_out); // kg/sec
     h_soln->set(node_out, h_out);       // J/kg
-    T_soln->set(node_out, T_out);       // Kelvin
-    rho_soln->set(node_out, rho_out);   // Kg/m3 (This line couples density)
+  }
+}
+
+void
+SubChannel1PhaseProblem::computeProperties(int iz)
+{
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+  {
+    // Find the nodes for the top and bottom of this element.
+    auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
+    auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
+    auto T_out = _fp->T_from_p_h((*P_soln)(node_out), (*h_soln)(node_out));
+    auto rho_out = _fp->rho_from_p_T((*P_soln)(node_out), T_out);
+    T_soln->set(node_out, T_out);     // Kelvin
+    rho_soln->set(node_out, rho_out); // Kg/m3
     // Update the solution vectors at the inlet of the whole assembly.
-    // These values will be updated just 5 times depending on the bottom limiter value
     if (iz == 1)
     {
       h_soln->set(node_in, _fp->h_from_p_T((*P_soln)(node_in), (*T_soln)(node_in)));
@@ -510,9 +519,10 @@ SubChannel1PhaseProblem::externalSolve()
           // calculate Sum values per subchannel
           double SumSumWij = 0.0;
           computeSumWij(SumSumWij, iz);
-          // Calculate mass flow, enthalpy, density, Temperature using the mass and energy
-          // conseravation equations
+          // Calculate mass flow, enthalpy using conservation equations
           computeMdot(iz);
+          // Calculate density, Temperature using the mass and energy calculated before
+          computeProperties(iz);
           // Calculate Error per level
           auto mdot_L2norm_new = mdot_soln->L2norm();
           MError = std::abs((mdot_L2norm_new - mdot_L2norm_old) / (mdot_L2norm_old + 1E-14));
