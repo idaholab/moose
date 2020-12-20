@@ -114,6 +114,32 @@ SubChannel1PhaseProblem::converged()
   return true;
 }
 
+double
+SubChannel1PhaseProblem::computeFrictionFactor(double Re)
+{
+  double a, b;
+  if (Re < 1.0)
+  {
+    return 64.0;
+  }
+  else if (Re >= 1.0 && Re < 5000.0)
+  {
+    a = 64.0;
+    b = -1.0;
+  }
+  else if (Re >= 5000.0 && Re < 30000.0)
+  {
+    a = 0.316;
+    b = -0.25;
+  }
+  else
+  {
+    a = 0.184;
+    b = -0.20;
+  }
+  return a * std::pow(Re, b);
+}
+
 void
 SubChannel1PhaseProblem::computeWij(int iz)
 {
@@ -182,20 +208,25 @@ SubChannel1PhaseProblem::computeWij(int iz)
     while (newton_error > newton_tolerance && newton_cycles <= max_newton_cycles)
     {
       auto Re = std::abs(Wijguess / Sij) * Dh_ij / mu;
-      if (Re < 1)
+      if (Re < 1.0)
       {
-        b = -1.0;
-        a = 1e5;
+        a = 0.0;
+        b = 2.0; // doesn't matter in this case
       }
-      else if (Re >= 1.0 && Re < 4000)
+      else if (Re >= 1.0 && Re < 5000.0)
       {
-        b = 1.0;
         a = 64.0;
+        b = -1.0;
+      }
+      else if (Re >= 5000.0 && Re < 30000.0)
+      {
+        a = 0.316;
+        b = -0.25;
       }
       else
       {
-        b = 0.2;
         a = 0.184;
+        b = -0.20;
       }
       newton_cycles++;
       if (newton_cycles == max_newton_cycles)
@@ -203,9 +234,9 @@ SubChannel1PhaseProblem::computeWij(int iz)
         mooseError(
             name(), " CrossFlow Calculation didn't converge, newton_cycles: ", newton_cycles);
       }
-      auto fij = a * std::pow(Re, -b);
+      auto fij = computeFrictionFactor(Re);
       auto dRedW = Dh_ij / (Sij * mu);
-      auto dfijdW = -b * a * std::pow(Re, -b - 1.0) * dRedW;
+      auto dfijdW = b * a * std::pow(Re, b - 1.0) * dRedW;
       auto Kij = fij * Lij / Dh_ij + kij;
       auto dKijdW = (Lij / Dh_ij) * dfijdW;
       auto derivativeTerm = (Wijguess - std::abs(Wij_old(i_gap))) * Lij * Sij * rho_bar / dt();
