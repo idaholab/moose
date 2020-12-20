@@ -261,6 +261,7 @@ SubChannel1PhaseProblem::computeWij(int iz)
     Wij(i_gap) = sign * Wijguess;
   }
   /// Update global Matrix
+  WijPrime_global.col(iz) = WijPrime;
   Wij_global.col(iz) = Wij;
 }
 
@@ -296,16 +297,17 @@ SubChannel1PhaseProblem::computeSumWij(double SumSumWij, int iz)
       // area of channel j
       auto Sj = (*S_flow_soln)(node_in_j);
       // apply local sign to crossflow
-      SumWij += _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij(i_gap);
+      SumWij += _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz);
       // take care of the sign by applying the map, use donor cell
-      SumWijh += _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij(i_gap) *
+      SumWijh += _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz) *
                  ((*h_soln)(node_in_i) + (*h_soln)(node_in_j) + (*h_soln)(node_out_i) +
                   (*h_soln)(node_out_j)) /
                  4.0;
-      SumWijPrimeDhij += WijPrime(i_gap) * (((*h_soln)(node_in) + (*h_soln)(node_out)) -
-                                            ((*h_soln)(node_in_j) + (*h_soln)(node_out_j)) / 2.0 -
-                                            ((*h_soln)(node_in_i) + (*h_soln)(node_out_i)) / 2.0);
-      SumWijPrimeDUij += WijPrime(i_gap) *
+      SumWijPrimeDhij +=
+          WijPrime_global(i_gap, iz) * (((*h_soln)(node_in) + (*h_soln)(node_out)) -
+                                        ((*h_soln)(node_in_j) + (*h_soln)(node_out_j)) / 2.0 -
+                                        ((*h_soln)(node_in_i) + (*h_soln)(node_out_i)) / 2.0);
+      SumWijPrimeDUij += WijPrime_global(i_gap, iz) *
                          (((*mdot_soln)(node_in) + (*mdot_soln)(node_out)) / rho / S -
                           ((*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) / 2.0 / rho_j / Sj -
                           ((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i)) / 2.0 / rho_i / Si);
