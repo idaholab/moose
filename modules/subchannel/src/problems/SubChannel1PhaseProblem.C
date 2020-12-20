@@ -435,7 +435,7 @@ SubChannel1PhaseProblem::computeDP(int iz)
     }
     auto mu = _fp->mu_from_rho_T(rho_i, T_i);
     auto Re = (((*mdot_soln)(node_in) / Si) * Dh_i / mu);
-    auto fi = 0.184 * std::pow(Re, -0.2);
+    auto fi = computeFrictionFactor(Re);
     auto Friction = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) /
                     (std::pow(Si, 2.0) * rho_i); // Pa
     auto Gravity = _g_grav * rho_i * dz;         // Pa
