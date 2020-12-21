@@ -7,7 +7,7 @@
   []
 []
 
-# Here we sum up the inverses of teh ICs above. This should add up to 2.0 everywhere
+# Here we sum up the inverses of the ICs above. This should add up to 2.0 everywhere
 [Functions]
   [map]
     type = ParsedFunction

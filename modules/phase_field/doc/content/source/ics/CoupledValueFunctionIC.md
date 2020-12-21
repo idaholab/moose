@@ -3,10 +3,9 @@
 !syntax description /ICs/CoupledValueFunctionIC
 
 CoupledValueFunctionIC initializes the value of a variable with the value of a
-coupled  [MOOSE Function](functions.md) which is evaluated with a set of up to
-four coupled  variable values `v` as its input parameters. The coupled variable
-values are sunstituted for the  `x`,`y`,`y`, and `t` function variables in that
-order.
+coupled MOOSE Function which is evaluated with a set of up to four coupled
+variable values `v` as its input parameters. The coupled variable values are
+substituted for the `x`,`y`,`z`, and `t` function variables in that order.
 
 One example application is the use of a
 [`PiecewiseMultilinear`](PiecewiseMultilinear.md) function with a data file
