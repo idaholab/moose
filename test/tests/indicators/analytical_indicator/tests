@@ -1,13 +1,19 @@
 [Tests]
-  issues = '#1275'
+  issues = '#1275 #16069'
   design = 'AnalyticalIndicator.md'
 
-  [./test]
+  [analytical]
     type = 'Exodiff'
     input = 'analytical_indicator_test.i'
     exodiff = 'analytical_indicator_test_out.e'
     scale_refine = 2
 
     requirement = "The system shall include the ability to compute the square of the difference between a solution variable and an analytical function for the purpose of performing automatic mesh adaptivity."
-  [../]
+  []
+  [analytical_fv]
+    type = 'Exodiff'
+    input = 'analytical_indicator_fv.i'
+    exodiff = 'analytical_indicator_fv_out.e'
+    requirement = "The system shall include the ability to compute the square of the difference between a FV solution variable and an analytical function for the purpose of performing automatic mesh adaptivity."
+  []
 []
