@@ -4,7 +4,7 @@
 
 The ray is killed by setting the Ray to not be continued:
 
-!listing modules/ray_tracing/src/ray_bcs/KillRayBC.C re=void\sKillRayBC::onBoundary.*?^}
+!listing modules/ray_tracing/src/raybcs/KillRayBC.C re=void\sKillRayBC::onBoundary.*?^}
 
 !syntax parameters /RayBCs/KillRayBC
 

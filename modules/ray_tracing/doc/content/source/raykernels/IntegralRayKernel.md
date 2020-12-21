@@ -20,10 +20,10 @@ For examples, see:
 
 To integrate along a desired quantity, inherit from IntegralRayKernel and override the `computeQpIntegral()` method in which `_qp` is the current quadrature point index. For example:
 
-!listing modules/ray_tracing/src/ray_kernels/VariableIntegralRayKernel.C re=Real\sVariableIntegralRayKernel::computeQpIntegral.*?^}
+!listing modules/ray_tracing/src/raykernels/VariableIntegralRayKernel.C re=Real\sVariableIntegralRayKernel::computeQpIntegral.*?^}
 
 Many other useful member variables exist that describe the [Ray.md] segment. For more information, see [Using a RayKernel](syntax/RayKernels/index.md#using-a-raykernel).
 
 The integrated value produced by a class that derives from this should be obtained using the [RayIntegralValue.md] postprocessor. For example:
 
-!listing test/tests/ray_kernels/variable_integral_ray_kernel/variable_integral_ray_kernel.i start=RayKernels end=Problem
+!listing test/tests/raykernels/variable_integral_ray_kernel/variable_integral_ray_kernel.i start=RayKernels end=Problem

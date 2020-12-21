@@ -9,7 +9,7 @@ The integration performed for the function $f(r)$ is
 
 which is achieved by overriding `computeQpIntegral()` as:
 
-!listing modules/ray_tracing/src/ray_kernels/FunctionIntegralRayKernel.C re=Real\sFunctionIntegralRayKernel::computeQpIntegral.*?^}
+!listing modules/ray_tracing/src/raykernels/FunctionIntegralRayKernel.C re=Real\sFunctionIntegralRayKernel::computeQpIntegral.*?^}
 
 The resulting integrated value can be obtained using a [RayIntegralValue.md] postprocessor.
 
