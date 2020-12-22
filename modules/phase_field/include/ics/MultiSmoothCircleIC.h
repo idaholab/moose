@@ -11,8 +11,6 @@
 
 #include "SmoothCircleBaseIC.h"
 
-// Forward Declarations
-
 /**
  * MultismoothCircleIC creates multiple SmoothCircles (number = numbub) that are randomly
  * positioned around the domain with a minimum spacing equal to bubspac. The system attempts to

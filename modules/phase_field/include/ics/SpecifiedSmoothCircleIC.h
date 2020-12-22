@@ -11,14 +11,11 @@
 
 #include "SmoothCircleBaseIC.h"
 
-// Forward Declarations
-
 /**
- * SpecifiedsmoothCircleIC creates multiple SmoothCircles (number = size of x_positions) that are
- *positioned in the
- * set locations with the set radii.  This is adapted from PolySpecifiedSmoothCircleIC from HYRAX by
- *A.M. Jokisaari
- **/
+ * SpecifiedsmoothCircleIC creates multiple SmoothCircles (number = size of x_positions)
+ * that are positioned in the set locations with the set radii.
+ * This is adapted from PolySpecifiedSmoothCircleIC from HYRAX by A.M. Jokisaari.
+ */
 class SpecifiedSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:

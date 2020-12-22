@@ -33,8 +33,6 @@
 // System includes
 #include <string>
 
-// Forward Declarations
-
 /**
  * C1ICBase is used by the CrossIC.
  */

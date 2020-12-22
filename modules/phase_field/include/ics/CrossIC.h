@@ -30,8 +30,6 @@
 #include "InitialCondition.h"
 #include "C1ICBase.h"
 
-// Forward Declarations
-
 /**
  * CrossIC creates a C1 continuous initial condition that looks like a cross in
  * the middle of the domain.

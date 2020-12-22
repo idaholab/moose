@@ -13,8 +13,6 @@
 #include "EBSDReader.h"
 #include "PolycrystalICTools.h"
 
-// Forward Declarations
-
 /**
  * ReconPhaseVarIC initializes a single order parameter to represent a phase
  * obtained form an EBSDReader object. The op will be set to 1 for nodes that are
@@ -32,10 +30,7 @@ public:
 
 private:
   MooseMesh & _mesh;
-
   const EBSDReader & _ebsd_reader;
-
   unsigned int _phase;
-
   const std::map<dof_id_type, std::vector<Real>> & _node_to_phase_weight_map;
 };
