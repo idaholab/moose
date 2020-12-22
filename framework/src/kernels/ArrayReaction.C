@@ -56,6 +56,7 @@ ArrayReaction::computeQpResidual(RealEigenVector & residual)
     mooseAssert((*_r_array)[_qp].size() == _var.count(),
                 "reaction_coefficient size is inconsistent with the number of components of array "
                 "variable");
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_r_array)[_qp].asDiagonal() * _u[_qp] * _test[_i][_qp];
   }
 
@@ -67,6 +68,7 @@ ArrayReaction::computeQpResidual(RealEigenVector & residual)
     mooseAssert((*_r_2d_array)[_qp].rows() == _var.count(),
                 "reaction_coefficient size is inconsistent with the number of components of array "
                 "variable");
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
     residual.noalias() = (*_r_2d_array)[_qp] * _u[_qp] * _test[_i][_qp];
   }
 }

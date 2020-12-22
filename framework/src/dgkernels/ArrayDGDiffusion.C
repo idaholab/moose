@@ -48,6 +48,7 @@ ArrayDGDiffusion::initQpResidual(Moose::DGResidualType type)
   const Real h_elem =
       _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
 
+  // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
   _res1.noalias() = _diff[_qp].asDiagonal() * _grad_u[_qp] * _array_normals[_qp];
   _res1.noalias() += _diff_neighbor[_qp].asDiagonal() * _grad_u_neighbor[_qp] * _array_normals[_qp];
   _res1 *= 0.5;
