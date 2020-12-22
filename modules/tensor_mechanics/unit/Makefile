@@ -18,28 +18,28 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 # Extra stuff for GTEST
 ADDITIONAL_INCLUDES	:= -isystem $(FRAMEWORK_DIR)/contrib/gtest
 ADDITIONAL_INCLUDES	:= -isystem $(MOOSE_DIR)/unit/include
-ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
+ADDITIONAL_LIBS 	  := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-EXTERNAL_PETSC_SOLVER := yes
+TENSOR_MECHANICS  := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 APPLICATION_DIR  := $(shell pwd)
-APPLICATION_NAME := external_petsc_solver-unit
+APPLICATION_NAME := tensor_mechanics-unit
 BUILD_EXEC       := yes
 app_BASE_DIR     :=
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the MOOSE unit test source files and include their dependencies.
-external_petsc_solver_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
-external_petsc_solver_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(external_petsc_solver_unit_srcfiles))
--include $(external_petsc_solver_unit_deps)
+tensor_mechanics_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
+tensor_mechanics_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(tensor_mechanics_unit_srcfiles))
+-include $(tensor_mechanics_unit_deps)
 
 ###############################################################################
 # Additional special case targets should be added here

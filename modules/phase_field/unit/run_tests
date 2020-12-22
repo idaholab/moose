@@ -1,0 +1,18 @@
+#!/bin/bash
+
+APPLICATION_NAME=phase_field
+# If $METHOD is not set, use opt
+if [ -z $METHOD ]; then
+  export METHOD=opt
+fi
+
+if [ -e ./unit/$APPLICATION_NAME-unit-$METHOD ]
+then
+  ./unit/$APPLICATION_NAME-unit-$METHOD
+elif [ -e ./$APPLICATION_NAME-unit-$METHOD ]
+then
+  ./$APPLICATION_NAME-unit-$METHOD
+else
+  echo "Executable missing!"
+  exit 1
+fi
