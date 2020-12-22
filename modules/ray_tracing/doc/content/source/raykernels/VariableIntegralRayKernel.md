@@ -9,7 +9,7 @@ The integral performed along the value $u$ is
 
 which is achieved by overriding `computeQpIntegral`, as:
 
-!listing modules/ray_tracing/src/ray_kernels/VariableIntegralRayKernel.C re=Real\sVariableIntegralRayKernel::computeQpIntegral.*?^}
+!listing modules/ray_tracing/src/raykernels/VariableIntegralRayKernel.C re=Real\sVariableIntegralRayKernel::computeQpIntegral.*?^}
 
 The resulting integrated value can be obtained using a [RayIntegralValue.md] postprocessor.
 

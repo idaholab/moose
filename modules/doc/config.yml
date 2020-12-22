@@ -93,22 +93,29 @@ Extensions:
             interfacekernels: syntax/InterfaceKernels/index.md
             interfaces: framework_development/interfaces/index.md
             kernels: syntax/Kernels/index.md
+            linesearches: syntax/LineSearches/index.md
             markers: syntax/Adaptivity/Markers/index.md
             materials: syntax/Materials/index.md
             mesh: syntax/Mesh/index.md
-            meshmodifiers: syntax/MeshModifiers/index.md
+            meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
             outputs: syntax/Outputs/index.md
+            parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md
             postprocessors: syntax/Postprocessors/index.md
             preconditioners: syntax/Preconditioning/index.md
             predictors: syntax/Executioner/Predictor/index.md
             problems: syntax/Problem/index.md
+            raybcs: syntax/RayBCs/index.md
+            raykernels: syntax/RayKernels/index.md
+            relationshipmanagers: source/relationshipmanagers/RelationshipManager.md
+            reporters: syntax/Reporters/index.md
             restart: application_usage/restart_recover.md
             samplers: syntax/Samplers/index.md
             scalarkernels: syntax/ScalarKernels/index.md
             splits: syntax/Preconditioning/index.md
+            surrogates: syntax/Surrogates/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
             timesteppers: syntax/Executioner/TimeStepper/index.md
             transfers: syntax/Transfers/index.md
