@@ -61,15 +61,11 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 2
-  dt = 1
+  type = Steady
   solve_type = NEWTON
 []
 
 [Adaptivity]
-  marker = marker
-  max_h_level = 1
   [Indicators]
     [error]
       type = AnalyticalIndicator
