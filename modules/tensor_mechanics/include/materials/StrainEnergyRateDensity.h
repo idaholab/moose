@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
 #include "RadialReturnCreepStressUpdateBase.h"
-#include "ADRadialReturnCreepStressUpdateBase.h"
 #include "MooseTypes.h"
 
 // select the appropriate class based on the is_ad boolean parameter
