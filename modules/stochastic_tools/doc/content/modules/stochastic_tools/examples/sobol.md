@@ -44,7 +44,7 @@ the vectors supplied.
 
 If CSV output is enabled, the [SobolStatistics.md] object will write a file that contains
 columns of data. Each column comprises of the computed indices for the quantities of
-interest. For example, [#sobol_out] is the complete output from the [SobolStatistics.md] object
+interest. For example, [sobol_out] is the complete output from the [SobolStatistics.md] object
 for this example problem.
 
 !listing caption=Computed Sobol indices for the example heat conduction problem. id=sobol_out
@@ -70,7 +70,7 @@ $s$). The next four rows contain the total-effect indices. The final rows contai
 indices, see [SobolStatistics.md] for further information regarding the output.
 
 For the problem at hand, the first-order and second-order indices for the two quantities of interest
-are presented in [#S_T_avg] and [#S_q_left]. The diagonal entries are the first-order incides and
+are presented in [S_T_avg] and [S_q_left]. The diagonal entries are the first-order incides and
 the off-diagonal terms are the second-order indices. For example for $T_{avg}$ the first order-index
 for $\gamma$ is $S_1 = 0.763$ and the second-order index $S_{1,2} = 0.014$ for $\gamma$ interacting
 with $q_0$. The negative values are essentially zero, if more replicates were executed these
@@ -96,7 +96,7 @@ The data in these two tables clearly indicates that a majority of the variance o
 interest are due to the variance of $\gamma$ ($S_1$) and $q_0$ ($S_2$). Additionally, a small
 contribution of the variance is from a second-order interaction, $S_{1,2}$, between $\gamma$ and
 $q_0$. The importance of $\gamma$ and $q_0$ if further evident by the total-effect indices, as shown in
-[#total-effect].
+[total-effect].
 
 !table id=total-effect caption=Total-effect Sobol indices for $T_{avg}$ and $q_{left}$.
 | $S_T$      | 1 ($\gamma$) | 2 ($q_0$) | 3 ($T_0$) | 4 ($s$) |

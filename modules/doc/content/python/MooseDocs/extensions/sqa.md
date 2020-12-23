@@ -165,7 +165,7 @@ A dictionary that links the default requirement group names to the desired group
 the list of directories provided in each category defined in each item of the "categories"
 configuration option (see [#categories-config]). When listed this group is used to organize
 the requirements (see [framework_srs.md]). The "requirement-groups" allows the group name to
-be modified. For example, [#example-req-groups] demonstrates the use of this option.
+be modified. For example, [example-req-groups] demonstrates the use of this option.
 
 !listing caption=Example use of "requirement-groups" configuration option. id=example-req-groups
 MooseDocs.extensions.sqa:
@@ -181,18 +181,18 @@ on [sqa/index.md] for MOOSE; please refer to [python/moosesqa/index.md] for addi
 ### +`default_collection`+
 
 An option that includes a single string that provides the default collection name
-(see [#collections]) for requirements. This option defaults to "FUNCTIONAL", thus all requirements
+(see [#requirements-list]) for requirements. This option defaults to "FUNCTIONAL", thus all requirements
 gathered from the specifications are considered to be functional requirements by default.
 
 ### +`append_run_exception_to_failure_analysis`+
 
-A boolean that when true (the default) adds the "FAILURE_ANALYSIS" collection (see [#collections])
+A boolean that when true (the default) adds the "FAILURE_ANALYSIS" collection (see [#requirements-list])
 to all [RunException](framework_stp.md#approval-requirements) tests.
 
 ## Requirements List
 
 The `sqa requirements` command will list all the requirements located in the test specifications
-for a project; [#sqa-requirements] lists all the available settings for this command. Please
+for a project; [sqa-requirements] lists all the available settings for this command. Please
 refer to the [moose_srs.md#system-requirements] for example use.
 
 !devel settings id=sqa-requirements

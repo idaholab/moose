@@ -147,7 +147,7 @@ fashion.
 
 ## Default Material Properties
 
-The [#material-name] input parameter also provides the ability to set default values for scalar
+The `MaterialPropertyName` input parameter also provides the ability to set default values for scalar
 (`Real`) properties. In the above example, the input file can use number or
 parsed function (see [MooseParsedFunction.md]) to define a the property value. For example, the input
 snippet above could set a constant value.
