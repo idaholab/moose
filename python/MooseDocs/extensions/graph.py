@@ -239,7 +239,7 @@ class GraphTemplate(object):
 
     def __call__(self, **kwargs):
         """Replace the markers with the supplied key, value pairs."""
-        for key in kwargs:
+        for key in list(kwargs.keys()):
             if key.endswith('_'):
                 kwargs[key[:-1]] = kwargs.pop(key)
 
