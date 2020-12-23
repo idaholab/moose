@@ -127,13 +127,13 @@ MOOSE allows physics to build on each other---to minimize the effort needed to b
 SQA documents.
 
 The `categories` option is a dictionary of dictionaries that include four keys: `specs`,
-`dependencies`, `repo`, and `reports`. [#example-categories-config] is an example of the nested
+`dependencies`, `repo`, and `reports`. [example-categories-config] is an example of the nested
 dictionary used for this option. These sub-options are detailed as follows.
 
 - `directories`: A list of directories to search for requirements that are defined within test
   specifications.
 - `specs`: A list of test specifications names.
-- `dependencies`: A list of category dependencies. For example, in [#example-categories-config]
+- `dependencies`: A list of category dependencies. For example, in [example-categories-config]
   the "heat_conduction" category depends on the "framework" category. This list allows the
   dependency lists within the various SQA documents, as shown in [sqa/moose_srs.md].
 - `reports`: Options for SQA report generation, see [python/moosesqa/index.md] for additional
