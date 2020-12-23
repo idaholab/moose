@@ -11,22 +11,19 @@
 
 #include "InitialCondition.h"
 
-/**
- * ThumbIC creates a rectangle with a half circle on top
- */
-class ThumbIC : public InitialCondition
+class Function;
+
+class CoupledValueFunctionIC : public InitialCondition
 {
 public:
   static InputParameters validParams();
 
-  ThumbIC(const InputParameters & parameters);
+  CoupledValueFunctionIC(const InputParameters & parameters);
 
-  virtual Real value(const Point & p);
+  virtual Real value(const Point & /*p*/) override;
 
 protected:
-  const Real _xcoord;
-  const Real _width;
-  const Real _height;
-  const Real _invalue;
-  const Real _outvalue;
+  const Function & _func;
+  const unsigned int _var_num;
+  const std::vector<const VariableValue *> _vals;
 };

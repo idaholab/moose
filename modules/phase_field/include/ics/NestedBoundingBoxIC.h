@@ -11,8 +11,6 @@
 
 #include "SmoothMultiBoundingBoxBaseIC.h"
 
-// Forward Declarations
-
 /**
  * NestedBoundingBoxIC creates several nested boxes defined by their coordinates in the domain.
  * If int_width > zero, the border of the boxes smoothly transitions from

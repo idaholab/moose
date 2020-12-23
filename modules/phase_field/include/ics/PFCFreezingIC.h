@@ -11,8 +11,6 @@
 
 #include "RandomICBase.h"
 
-// Forward Declarations
-
 /**
  * PFCFreezingIC creates an initial density for a PFC model that has one area of a set
  * crystal structure (initialized using sinusoids) and all the rest with a random structure.

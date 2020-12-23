@@ -33,7 +33,7 @@ See the [Ray.md] documentation for what members are available for use during tra
 
 A RayBC can stop a [Ray.md] from being traced, as is done in [KillRayBC.md]:
 
-!listing modules/ray_tracing/src/ray_bcs/KillRayBC.C re=void\sKillRayBC::onBoundary.*?^}
+!listing modules/ray_tracing/src/raybcs/KillRayBC.C re=void\sKillRayBC::onBoundary.*?^}
 
 Similarly, you can check if another RayBC has set to kill a [Ray.md] after this segment with:
 
@@ -77,7 +77,7 @@ The correct specular reflection (inwards to the domain) can be achieved by apply
 
  Recall that the act of changing a [Ray.md] direction, achieved by `changeRayDirection()`, takes an optional parameter `const bool skip_changed_check`. In this case, where we want to apply the same [ReflectRayBC.md] twice, we pass in `num_applying > 1` as the argument to `skip_changed_check` to *allow* the changing of a [Ray.md] trajectory multiple times if the same [ReflectRayBC.md] is applied more than once. This is done in [ReflectRayBC.md] as follows:
 
-!listing modules/ray_tracing/src/ray_bcs/ReflectRayBC.C re=void\sReflectRayBC::onBoundary.*?^}
+!listing modules/ray_tracing/src/raybcs/ReflectRayBC.C re=void\sReflectRayBC::onBoundary.*?^}
 
 ## Creating a New Ray
 

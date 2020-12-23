@@ -77,15 +77,15 @@ If your RayKernel requires data or auxiliary data on a [Ray.md] that is unique t
 
 An example of this exists in [IntegralRayKernel.md], which accumulates integrals into a data member on the [Ray.md]. Each [IntegralRayKernel.md] requires its own value to accumulate into, therefore the [IntegralRayKernel.md] registers a value for its own use:
 
-!listing modules/ray_tracing/src/ray_kernels/IntegralRayKernel.C re=IntegralRayKernel::IntegralRayKernel.*?^}
+!listing modules/ray_tracing/src/raykernels/IntegralRayKernel.C re=IntegralRayKernel::IntegralRayKernel.*?^}
 
-!listing modules/ray_tracing/include/ray_kernels/IntegralRayKernel.h re=class IntegralRayKernel :.*?^};
+!listing modules/ray_tracing/include/raykernels/IntegralRayKernel.h re=class IntegralRayKernel :.*?^};
 
 By registering the data, the data is guaranteed to be available for all constructed [Rays](Ray.md) and can be accessed by `currentRay()->data()` and `currentRay()->auxData()`.
 
 In the case of the [IntegralRayKernel.md], the [Ray.md] data is accessed as such:
 
-!listing modules/ray_tracing/src/ray_kernels/IntegralRayKernel.C re=void\sIntegralRayKernel::onSegment.*?^}
+!listing modules/ray_tracing/src/raykernels/IntegralRayKernel.C re=void\sIntegralRayKernel::onSegment.*?^}
 
 ## Creating Additional Rays
 

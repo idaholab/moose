@@ -73,7 +73,7 @@ protected:
 
   BoundaryID _boundary_id;
 
-  MooseVariable & _var;
+  MooseVariableField<Real> & _var;
 
   bool _scale_by_flux_faces;
 

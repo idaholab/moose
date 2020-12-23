@@ -11,8 +11,6 @@
 
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 
-// Forward Declarations
-
 /**
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
  * These are intended to be the larger particles. Then the IC creates a specified number

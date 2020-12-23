@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADRadialReturnCreepStressUpdateBase.h"
+#include "RadialReturnCreepStressUpdateBase.h"
 
 /**
  * This class uses the stress update material in a radial return isotropic creep

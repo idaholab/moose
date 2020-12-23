@@ -11,8 +11,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-
 /**
  * Makes initial condition which creates a linear ramp of the given variable
  * on the x-axis with specified side values
@@ -25,14 +23,7 @@ public:
   RampIC(const InputParameters & parameters);
 
 protected:
-  /**
-   * The value of the variable at a point.
-   */
   virtual Real value(const Point & p);
-
-  /**
-   * The value of the gradient at a point.
-   */
   virtual RealGradient gradient(const Point & /*p*/);
 
   const Real _xlength;

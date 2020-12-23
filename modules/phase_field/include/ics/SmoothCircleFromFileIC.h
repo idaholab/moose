@@ -14,14 +14,11 @@
 #include "SmoothCircleBaseIC.h"
 #include "DelimitedFileReader.h"
 
-// Forward Declarations
-
 /**
  * Reads multiple circles from a text file with the columns labeled
  * x   y   z   r. It expects the file to have a one-line header.
  * Applies all of the circles to the same variable.
- **/
-
+ */
 class SmoothCircleFromFileIC : public SmoothCircleBaseIC
 {
 public:
@@ -40,7 +37,7 @@ protected:
     Z,
     R
   };
-  // Double braces in array initializer are workaround for bug in gcc 4.9.2
+
   std::array<int, 4> _col_map = {{-1, -1, -1, -1}};
   std::vector<std::vector<Real>> _data;
   FileName _file_name;

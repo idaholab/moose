@@ -9,57 +9,67 @@
 
 #include "RadialReturnCreepStressUpdateBase.h"
 
+template <bool is_ad>
 InputParameters
-RadialReturnCreepStressUpdateBase::validParams()
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = RadialReturnStressUpdate::validParams();
-
-  params.addDeprecatedParam<std::string>(
-      "creep_prepend",
-      "",
-      "String that is prepended to the creep_strain Material Property",
-      "This has been replaced by the 'base_name' parameter");
+  InputParameters params = RadialReturnStressUpdateTempl<is_ad>::validParams();
   params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
-
   return params;
 }
 
-RadialReturnCreepStressUpdateBase::RadialReturnCreepStressUpdateBase(
+template <bool is_ad>
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::RadialReturnCreepStressUpdateBaseTempl(
     const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters),
-    _creep_prepend(getParam<std::string>("creep_prepend")),
-    _creep_strain(declareProperty<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain")),
+  : RadialReturnStressUpdateTempl<is_ad>(parameters),
+    _creep_strain(this->template declareGenericProperty<RankTwoTensor, is_ad>(this->_base_name +
+                                                                              "creep_strain")),
     _creep_strain_old(
-        getMaterialPropertyOld<RankTwoTensor>(_base_name + _creep_prepend + "creep_strain"))
+        this->template getMaterialPropertyOld<RankTwoTensor>(this->_base_name + "creep_strain"))
 {
 }
 
+template <bool is_ad>
 void
-RadialReturnCreepStressUpdateBase::initQpStatefulProperties()
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::initQpStatefulProperties()
 {
   _creep_strain[_qp].zero();
 
-  RadialReturnStressUpdate::initQpStatefulProperties();
+  RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties();
 }
 
+template <bool is_ad>
 void
-RadialReturnCreepStressUpdateBase::propagateQpStatefulProperties()
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 
   propagateQpStatefulPropertiesRadialReturn();
 }
 
+template <bool is_ad>
 Real
-RadialReturnCreepStressUpdateBase::computeStressDerivative(const Real effective_trial_stress,
-                                                           const Real scalar)
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStressDerivative(
+    const Real /*effective_trial_stress*/, const Real /*scalar*/)
 {
-  return -(computeDerivative(effective_trial_stress, scalar) + 1.0) / _three_shear_modulus;
+  mooseError("computeStressDerivative called: no stress derivative computation is needed for AD");
 }
 
+template <>
+Real
+RadialReturnCreepStressUpdateBaseTempl<false>::computeStressDerivative(
+    const Real effective_trial_stress, const Real scalar)
+{
+  return -(computeDerivative(effective_trial_stress, scalar) + 1.0) / this->_three_shear_modulus;
+}
+
+template <bool is_ad>
 void
-RadialReturnCreepStressUpdateBase::computeStressFinalize(
-    const RankTwoTensor & plastic_strain_increment)
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStressFinalize(
+    const GenericRankTwoTensor<is_ad> & plastic_strain_increment)
 {
   _creep_strain[_qp] = _creep_strain_old[_qp] + plastic_strain_increment;
 }
+
+template class RadialReturnCreepStressUpdateBaseTempl<false>;
+template class RadialReturnCreepStressUpdateBaseTempl<true>;

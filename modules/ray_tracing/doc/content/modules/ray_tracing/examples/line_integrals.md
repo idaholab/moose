@@ -9,7 +9,7 @@ The discussion that follows will describe how to integrate a variable across a l
 
 We begin with the standard "simple diffusion" problem:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Mesh end=Outputs
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Mesh end=Outputs
 
 For this problem, we seek the value of the integrals (where $u_h$ is the finite-element solution)
 
@@ -37,7 +37,7 @@ which implies
 
 A [RepeatableRayStudy.md] is defined that generates and executes the rays that compute the variable line integral:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=UserObjects end=RayKernels
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=UserObjects end=RayKernels
 
 The `study` object defines two rays to be exectued on `TIMESTEP_END`:
 
@@ -48,7 +48,7 @@ The `study` object defines two rays to be exectued on `TIMESTEP_END`:
 
 [RayKernels/index.md] are objects that are executed on the segments of the rays. In this case, we wish to compute the integral of a variable so we will define a [VariableIntegralRayKernel.md]:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=RayKernels end=Postprocessors
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=RayKernels end=Postprocessors
 
 The `u_integral` [VariableIntegralRayKernel.md] will accumulate the variable line integral of the `u` Variable for our defined rays, `diag` and `right_up`.
 
@@ -59,7 +59,7 @@ Other commonly used [IntegralRayKernels](IntegralRayKernel.md) are the [Function
 
 Lastly, we need to obtain the accumulated integrals from the `study`. We will utilize a [RayIntegralValue.md] [Postprocessor](Postprocessors/index.md) to achieve this:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Postprocessors
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Postprocessors
 
 The accumulated integrals are seen in output:
 

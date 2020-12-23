@@ -11,8 +11,6 @@
 
 #include "SmoothCircleBaseIC.h"
 
-// Forward Declarations
-
 /**
  * LatticeSmoothcircleIC creates a lattice of smoothcircles as an initial condition.
  * They are either directly on the lattice or randomly perturbed from the lattice.

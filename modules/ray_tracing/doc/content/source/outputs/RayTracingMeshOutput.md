@@ -35,17 +35,17 @@ As an example, we are going to output the segment-wise accumulated integral for 
 
 To recap, we begin with the "simple diffusion" problem:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Mesh end=Outputs
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Mesh end=Outputs
 
 A [RepeatableRayStudy.md] is utilized that computes the integral of the variable $u$ from $(0, 0)$ to $(5, 5)$ and from $(5, 0)$ to $(5, 5)$:
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=UserObjects end=Postprocessors
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=UserObjects end=Postprocessors
 
 Take note that we must enable the commented out parameters [!param](/UserObjects/RepeatableRayStudy/always_cache_traces) and [!param](/UserObjects/RepeatableRayStudy/data_on_cache_traces) in order to enable the caching of information needed for the output.
 
 Lastly, we are going to add a [RayTracingExodus.md] output object that will output the traces in Exodus format. For Nemesis format, simply use [RayTracingNemesis.md].
 
-!listing modules/ray_tracing/test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Outputs end=UserObjects
+!listing modules/ray_tracing/test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i start=Outputs end=UserObjects
 
 In order to enable this output, we will set [!param](/UserObjects/RepeatableRayStudy/execute_on) to `TIMESTEP_END` as per the comment.
 
@@ -54,7 +54,7 @@ In order to enable this output, we will set [!param](/UserObjects/RepeatableRayS
 First, we will run the example with constant data for the integrated value on each segment:
 
 ```
-./ray_tracing-opt -i test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i UserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/output_data=true Outputs/rays/execute_on=TIMESTEP_END
+./ray_tracing-opt -i test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.i UserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/output_data=true Outputs/rays/execute_on=TIMESTEP_END
 ```
 
 Overlaying the standard output of the problem, `simple_diffusion_line_integral_out.e`, with the ray output, `simple_diffusion_line_integral_rays.e` and visualizing the `u_integral_value` variable on the ray output mesh, we obtain the result below in [constant].
@@ -64,7 +64,7 @@ Overlaying the standard output of the problem, `simple_diffusion_line_integral_o
 Second, we will instead plot the ray data in a nodal sense, in which the value on a segment is represented in a linear fashion with its start and end point values. This is done by enabling enabling [!param](/Outputs/RayTracingExodus/output_data_nodal), as:
 
 ```
-./ray_tracing-opt -i test/tests/ray_kernels/variable_integral_ray_kernel/simple_diffusion_line_integral.iUserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/output_data_nodal=true Outputs/rays/execute_on=TIMESTEP_END
+./ray_tracing-opt -i test/tests/raykernels/variable_integral_ray_kernel/simple_diffusion_line_integral.iUserObjects/study/always_cache_traces=true UserObjects/study/data_on_cache_traces=true Outputs/rays/output_data_nodal=true Outputs/rays/execute_on=TIMESTEP_END
 ```
 
 Again, overlaying the ray mesh result on the problem result we obtain the result below in [nodal].

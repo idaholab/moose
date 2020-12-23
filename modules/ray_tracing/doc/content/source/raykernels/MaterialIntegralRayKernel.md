@@ -11,7 +11,7 @@ The integral performed for the material $u$ is
 
 where $u$ is the material property, which is achieved by overriding `computeQpIntegral` as:
 
-!listing modules/ray_tracing/src/ray_kernels/MaterialIntegralRayKernel.C re=Real\sMaterialIntegralRayKernel::computeQpIntegral.*?^}
+!listing modules/ray_tracing/src/raykernels/MaterialIntegralRayKernel.C re=Real\sMaterialIntegralRayKernel::computeQpIntegral.*?^}
 
 The resulting integrated value can be obtained using a [RayIntegralValue.md] postprocessor.
 

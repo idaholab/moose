@@ -53,9 +53,9 @@ To register value(s), use the methods `registerRayData()` and `registerRayAuxDat
 
 For example, the [IntegralRayKernel.md] is the base object for [RayKernels/index.md] that integrate a field across a line (variables, materials, etc). In order to accumulate the integrated value, these kernels need a data value on the [Ray.md]. As such, they register the need for [Ray.md] data in the constructor and store the index for access:
 
-!listing modules/ray_tracing/src/ray_kernels/IntegralRayKernel.C re=IntegralRayKernel::IntegralRayKernel.*?^}
+!listing modules/ray_tracing/src/raykernels/IntegralRayKernel.C re=IntegralRayKernel::IntegralRayKernel.*?^}
 
-!listing modules/ray_tracing/include/ray_kernels/IntegralRayKernel.h re=class IntegralRayKernel :.*?^};
+!listing modules/ray_tracing/include/raykernels/IntegralRayKernel.h re=class IntegralRayKernel :.*?^};
 
 While you can acquire [Rays](Ray.md) that do not necessarily have the data size set according to the registration using the [#ray-pool], any time the data is accessed on a [Ray.md] (via `Ray::data()` and `Ray::auxData()`), if it is not sized properly as required by the registration, it will be resized to the registered size with zeros.
 

@@ -10,7 +10,7 @@
 #include "ElementIndicator.h"
 
 #include "Assembly.h"
-#include "MooseVariableFE.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 
 #include "libmesh/threads.h"
@@ -50,15 +50,13 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
-
-    _var(_subproblem.getStandardVariable(_tid, parameters.get<VariableName>("variable"))),
-
+    _var(mooseVariableField()),
     _u(_var.sln()),
     _grad_u(_var.gradSln())
 {
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFieldBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 
-  addMooseVariableDependency(mooseVariable());
+  addMooseVariableDependency(&mooseVariableField());
 }
