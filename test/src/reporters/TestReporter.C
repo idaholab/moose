@@ -11,6 +11,7 @@
 
 registerMooseObject("MooseTestApp", TestDeclareReporter);
 registerMooseObject("MooseTestApp", TestGetReporter);
+registerMooseObject("MooseTestApp", TestDeclareInitialSetupReporter);
 
 InputParameters
 TestDeclareReporter::validParams()
@@ -127,4 +128,24 @@ TestGetReporter::execute()
     if (_gather_value != gold)
       mooseError("Gather reporter test failed!");
   }
+}
+
+InputParameters
+TestDeclareInitialSetupReporter::validParams()
+{
+  InputParameters params = GeneralReporter::validParams();
+  params.addRequiredParam<Real>("value", "The value to report.");
+  return params;
+}
+
+TestDeclareInitialSetupReporter::TestDeclareInitialSetupReporter(const InputParameters & parameters)
+  : GeneralReporter(parameters)
+{
+}
+
+void
+TestDeclareInitialSetupReporter::initialSetup()
+{
+  Real & value = declareValueByName<Real>("value");
+  value = getParam<Real>("value");
 }

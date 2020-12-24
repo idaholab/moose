@@ -1,0 +1,22 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "info",
+                    "type": "unsigned int",
+                    "value": 1,
+                    "value_name": "num_elements"
+                },
+                {
+                    "object_name": "initialSetup",
+                    "type": "double",
+                    "value": 1980.0,
+                    "value_name": "value"
+                }
+            ],
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
