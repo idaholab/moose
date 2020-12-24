@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import re
 import pyhit
 import moosetree
 import mooseutils
@@ -68,7 +67,6 @@ class LocalListingCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
-        settings.update(common.extractContentSettings())
         settings['max-height'] = ('350px', "The default height for listing content.")
         settings['language'] = (None, "The language to use for highlighting, if not supplied it " \
                                       "will be inferred from the extension (if possible).")
@@ -80,9 +78,6 @@ class LocalListingCommand(command.CommandComponent):
         content = info['inline'] if 'inline' in info else info['block']
         code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                          language=self.settings['language'], content=content)
-
-        if flt is parent:
-            code.attributes.update(**self.attributes)
 
         if flt is not parent:
             code.name = 'ListingCode' #TODO: Find a better way
@@ -115,8 +110,6 @@ class FileListingCommand(LocalListingCommand):
 
         code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                          content=content, language=lang)
-        if flt is parent:
-            code.attributes.update(**self.attributes)
 
         if flt is not parent:
             code.name = 'ListingCode' #TODO: Find a better way
@@ -165,21 +158,17 @@ class InputListingCommand(FileListingCommand):
     @staticmethod
     def defaultSettings():
         settings = FileListingCommand.defaultSettings()
-        settings['block'] = (None, 'Space separated list of input file block names to include. This cannot be used with the "remove" setting.')
-        settings['remove'] = (None, 'Space separated list of input file block and/or parameter names to remove. The full path to the block or parameter must be used, e.g., "Kernels/diffusion/variable".')
+        settings['block'] = (None, 'Space separated list of input file block names to include.')
+        settings['remove'] = (None, 'Space separated list of input file block and/or parameter ' \
+                                    'names to remove. The full path to parameters must be used, ' \
+                                    'e.g., `Kernels/diffusion/variable`.')
         return settings
 
     def extractContent(self, filename):
         """Extract the file contents for display."""
-        if self.settings['block'] and self.settings['remove']:
-            msg = "The 'block' and 'remove' settings cannot be used together."
-            raise exceptions.MooseDocsException(msg)
-
-        content = None
-        if self.settings['block']:
-            content = self.extractInputBlocks(filename, self.settings['block'])
-        elif self.settings['remove']:
-            content = self.removeInputBlocks(filename, self.settings['remove'])
+        if any([self.settings['block'], self.settings['remove']]):
+            hit = self.extractInputBlocks(filename, self.settings['block'] or '')
+            content = self.removeInputBlocks(hit, self.settings['remove'] or '')
         else:
             content = common.read(filename)
 
@@ -188,29 +177,31 @@ class InputListingCommand(FileListingCommand):
 
     @staticmethod
     def extractInputBlocks(filename, blocks):
-        """Remove input file block(s)"""
+        """Read input file block(s)"""
         hit = pyhit.load(filename)
         out = []
-        for block in blocks.split(' '):
-            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block))
+        for block in blocks.split():
+            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.strip('/')))
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
             out.append(str(node.render()))
-        return '\n'.join(out)
+        return pyhit.parse('\n'.join(out)) if out else hit
 
     @staticmethod
-    def removeInputBlocks(filename, remove):
-        hit = pyhit.load(filename)
-        for r in re.split(r' +', remove):
+    def removeInputBlocks(hit, remove):
+        """Remove input file block(s) and/or parameter(s)"""
+        for r in remove.split():
             for node in moosetree.iterate(hit):
-                blk, param = InputListingCommand.removeHelper(node, r)
-                if (blk is not None) and (param is None):
-                    node.remove()
-                elif (blk is not None) and (param is not None):
-                    node.removeParam(param)
+                block, param = InputListingCommand.removeHelper(node, r)
+                if block is not None:
+                    if param is None:
+                        node.remove()
+                    else:
+                        node.removeParam(param)
+                    break
 
-            if (blk is None) and (param is None):
+            if block is None:
                 msg = 'Unable to locate block or parameter with name: {}'
                 raise exceptions.MooseDocsException(msg, r)
 
@@ -218,13 +209,12 @@ class InputListingCommand(FileListingCommand):
 
     @staticmethod
     def removeHelper(node, block):
-        if node.fullpath == block:
+        if node.fullpath.endswith(block):
             return node, None
 
         if '/' in block:
             block, param = block.rsplit('/', 1)
-            print(block, param, node.parent.fullpath)
-            if (node.fullpath == block) and (param in node):
+            if (node.fullpath.strip('/') == block.strip('/')) and (param in node):
                 return node, param
 
         return None, None
