@@ -78,7 +78,7 @@ public:
   /**
    * Helper for enabling generic transfer of Reporter values
    * @param r_data The ReporterData on the app that this data is being transferred to
-   * @param r_name The name of the Report being transfered to
+   * @param r_name The name of the Report being transferred to
    *
    * @see MultiAppReporterTransfer
    */
@@ -181,9 +181,11 @@ protected:
   /// The state on which this context object operates
   ReporterState<T> & _state;
 
+  /// Output data to JSON, see JSONOutput
+  virtual void store(nlohmann::json & json) const override;
+
   // The following are called by the ReporterData and are not indented for external use
   virtual void copyValuesBack() override;
-  virtual void store(nlohmann::json & json) const override;
   friend class ReporterData;
 };
 
@@ -286,7 +288,10 @@ template <typename T>
 void
 ReporterContext<T>::store(nlohmann::json & json) const
 {
-  storeHelper(json, this->_state.value());
+  json["object_name"] = this->name().getObjectName();
+  json["value_name"] = this->name().getValueName();
+  json["type"] = this->type();
+  storeHelper(json["value"], this->_state.value());
 }
 
 template <typename T>

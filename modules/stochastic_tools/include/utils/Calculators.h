@@ -46,9 +46,13 @@ MultiMooseEnum makeCalculatorEnum();
 class Calculator : public libMesh::ParallelObject
 {
 public:
-  Calculator(const libMesh::ParallelObject &);
+  Calculator(const libMesh::ParallelObject &, const std::string & stat);
   virtual ~Calculator() = default;
+  const std::string & name() const;
   virtual Real compute(const std::vector<Real> &, bool) const = 0;
+
+private:
+  const std::string _stat;
 };
 
 class Mean : public Calculator
@@ -83,6 +87,7 @@ class StdDev : public Calculator
 {
 public:
   StdDev(const libMesh::ParallelObject &);
+  StdDev(const libMesh::ParallelObject &, const std::string & stat);
   virtual Real compute(const std::vector<Real> &, bool) const override;
 };
 

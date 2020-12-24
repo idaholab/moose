@@ -48,10 +48,15 @@ makeBootstrapCalculator(const MooseEnum & item,
 }
 
 BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other,
+                                         const std::string & method,
                                          const std::vector<Real> & levels,
                                          unsigned int replicates,
                                          unsigned int seed)
-  : libMesh::ParallelObject(other), _levels(levels), _replicates(replicates), _seed(seed)
+  : libMesh::ParallelObject(other),
+    _method(method),
+    _levels(levels),
+    _replicates(replicates),
+    _seed(seed)
 {
   mooseAssert(*std::min_element(levels.begin(), levels.end()) > 0,
               "The supplied levels must be greater than zero.");
@@ -158,12 +163,36 @@ BootstrapCalculator::shuffle(const std::vector<Real> & data,
   return replicate;
 }
 
+const std::vector<Real> &
+BootstrapCalculator::levels() const
+{
+  return _levels;
+}
+
+unsigned int
+BootstrapCalculator::replicates() const
+{
+  return _replicates;
+}
+
+unsigned int
+BootstrapCalculator::seed() const
+{
+  return _seed;
+}
+
+const std::string &
+BootstrapCalculator::name() const
+{
+  return _method;
+}
+
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////
 Percentile::Percentile(const libMesh::ParallelObject & other,
                        const std::vector<Real> & levels,
                        unsigned int replicates,
                        unsigned int seed)
-  : BootstrapCalculator(other, levels, replicates, seed)
+  : BootstrapCalculator(other, "percentile", levels, replicates, seed)
 {
 }
 
@@ -193,7 +222,7 @@ BiasCorrectedAccelerated::BiasCorrectedAccelerated(const libMesh::ParallelObject
                                                    const std::vector<Real> & levels,
                                                    unsigned int replicates,
                                                    unsigned int seed)
-  : BootstrapCalculator(other, levels, replicates, seed)
+  : BootstrapCalculator(other, "bca", levels, replicates, seed)
 {
 }
 

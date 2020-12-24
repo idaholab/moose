@@ -1,0 +1,186 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            4.0,
+                            5.0,
+                            5.0
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "max",
+                    "type": "double",
+                    "value": 5.0,
+                    "value_name": "const::value_MAX"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            2.2,
+                            3.0,
+                            3.8
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "mean",
+                    "type": "double",
+                    "value": 3.0,
+                    "value_name": "const::value_MEAN"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            1.0,
+                            1.0,
+                            2.0
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "min",
+                    "type": "double",
+                    "value": 1.0,
+                    "value_name": "const::value_MIN"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            5.5677643628300215,
+                            7.416198487095663,
+                            8.94427190999916
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "l2norm",
+                    "type": "double",
+                    "value": 7.416198487095663,
+                    "value_name": "const::value_NORM2"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            2.0,
+                            4.0,
+                            5.0
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "ratio",
+                    "type": "double",
+                    "value": 5.0,
+                    "value_name": "const::value_RATIO"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            0.8366600265340756,
+                            1.4142135623730951,
+                            1.816590212458495
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "stddev",
+                    "type": "double",
+                    "value": 1.5811388300841898,
+                    "value_name": "const::value_STDDEV"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            0.3741657386773941,
+                            0.6324555320336759,
+                            0.8124038404635959
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "stderr",
+                    "type": "double",
+                    "value": 0.7071067811865476,
+                    "value_name": "const::value_STDERR"
+                },
+                {
+                    "confidence_intervals": {
+                        "levels": [
+                            0.1,
+                            0.5,
+                            0.9
+                        ],
+                        "method": "percentile",
+                        "replicates": 10000,
+                        "seed": 1,
+                        "values": [
+                            11.0,
+                            15.0,
+                            19.0
+                        ]
+                    },
+                    "object_name": "stats",
+                    "stat": "sum",
+                    "type": "double",
+                    "value": 15.0,
+                    "value_name": "const::value_SUM"
+                }
+            ],
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

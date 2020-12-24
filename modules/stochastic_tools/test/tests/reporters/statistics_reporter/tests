@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#16584'
+  design = 'reporters/StatisticsReporter.md'
+
+  [statistics]
+    type = JSONDiff
+    input = statistics.i
+    jsondiff = statistics_out.json
+
+    requirement = "The system shall support the calculation of statistics using of data vectors."
+  []
+
+  [statistics_ci]
+    type = JSONDiff
+    input = statistics_ci.i
+    jsondiff = statistics_ci_out.json
+
+    requirement = "The system shall support the calculation of confidence level intervals for statistics calculations."
+  []
+[]

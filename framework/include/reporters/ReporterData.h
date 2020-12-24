@@ -193,7 +193,7 @@ public:
   void check() const;
 
   /**
-   * Return true if the supplied mode exists in the produced Repoter values
+   * Return true if the supplied mode exists in the produced Reporter values
    *
    * @see JSONOutput.C/h
    */
@@ -236,6 +236,13 @@ public:
    * @param reporter_name Object/data name for the Reporter value
    */
   const ReporterContextBase * getReporterContextBase(const ReporterName & reporter_name) const;
+
+  /**
+   * Return the ReporterProducerEnum for an existing ReporterValue
+   * @param reporter_name The name of the reporter value, which includes the object name and the
+   *                      data name.
+   */
+  const ReporterProducerEnum & getReporterMode(const ReporterName & reporter_name) const;
 
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored

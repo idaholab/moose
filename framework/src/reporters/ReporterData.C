@@ -140,3 +140,12 @@ ReporterData::addConsumerMode(ReporterMode mode, const std::string & object_name
     mooseError("Unable to locate Reporter with name:", object_name);
   const_cast<ReporterContextBase *>(ptr)->addConsumerMode(mode, object_name);
 }
+
+const ReporterProducerEnum &
+ReporterData::getReporterMode(const ReporterName & reporter_name) const
+{
+  const ReporterContextBase * ptr = getReporterContextBase(reporter_name);
+  if (ptr == nullptr)
+    mooseError("Unable to locate Reporter with name:", reporter_name);
+  return ptr->getProducerModeEnum();
+}

@@ -49,6 +49,7 @@ class BootstrapCalculator : public libMesh::ParallelObject
 {
 public:
   BootstrapCalculator(const libMesh::ParallelObject & other,
+                      const std::string & method,
                       const std::vector<Real> & levels,
                       unsigned int replicates,
                       unsigned int seed);
@@ -64,6 +65,14 @@ public:
                                     const Calculator & calc,
                                     const bool is_distributed) const = 0;
 
+  ///@{
+  /// Return the input items (see ReporterStatisticsContext)
+  const std::string & name() const;
+  const std::vector<Real> & levels() const;
+  unsigned int replicates() const;
+  unsigned int seed() const;
+  ///@}
+
 protected:
   // Compute Bootstrap estimates of a statistic
   std::vector<Real>
@@ -71,6 +80,9 @@ protected:
 
   // Randomly shuffle a vector of data
   std::vector<Real> shuffle(const std::vector<Real> &, MooseRandom &, const bool) const;
+
+  // Calculation method
+  const std::string _method;
 
   // Confidence levels to compute in range (0, 1)
   const std::vector<Real> _levels;
