@@ -166,7 +166,12 @@ SubProblem::getVectorTagID(const TagName & tag_name) const
   if (search != _vector_tags_name_map.end())
     return search->second;
 
-  mooseError("Vector tag '", tag_name_upper, "' does not exist");
+  std::string message =
+      tag_name_upper == "TIME"
+          ? ".\n\nThis may occur if "
+            "you have a TimeKernel in your problem but did not specify a transient executioner."
+          : "";
+  mooseError("Vector tag '", tag_name_upper, "' does not exist", message);
 }
 
 TagName
