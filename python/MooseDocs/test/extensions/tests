@@ -59,6 +59,11 @@
       input = test_media.py
       detail = "displaying images and videos,"
     []
+    [listing]
+      type = PythonUnitTest
+      input = test_listing.py
+      detail = "creating source code listings,"
+    []
     [gallery]
       type = PythonUnitTest
       input = test_gallery.py
