@@ -97,7 +97,8 @@ public:
   virtual bool operator>=(const RelationshipManager & rhs) const
   {
     mooseDeprecated(
-        "Are you overriding RelationshipManager::operator==? We are transiting to make operator>= "
+        "Are you overriding RelationshipManager::operator==? We are transitioning to make "
+        "operator>= "
         "the required override. If you are not overriding operator>= or operator==, you are about "
         "to get an error message saying that operator>= must be overridden.");
 

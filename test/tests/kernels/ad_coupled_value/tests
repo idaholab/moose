@@ -62,7 +62,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     issues = '#16396'
-    requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing, resulting in a perfect Jacobian even when the user has not request full coupling.'
+    requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing, resulting in a perfect Jacobian even when the user has not requested full coupling.'
     ad_indexing_type = 'global'
   []
   [trust_user_and_then_error]
