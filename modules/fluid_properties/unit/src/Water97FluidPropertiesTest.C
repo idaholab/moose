@@ -47,24 +47,24 @@ TEST_F(Water97FluidPropertiesTest, triplePointProperties)
 TEST_F(Water97FluidPropertiesTest, inRegion)
 {
   // Region 1
-  EXPECT_EQ(_fp->inRegion(3.0e6, 300), 1);
-  EXPECT_EQ(_fp->inRegion(80.0e6, 300), 1);
-  EXPECT_EQ(_fp->inRegion(3.0e6, 500), 1);
+  EXPECT_EQ(_fp->inRegion(3.0e6, 300), (unsigned int)1);
+  EXPECT_EQ(_fp->inRegion(80.0e6, 300), (unsigned int)1);
+  EXPECT_EQ(_fp->inRegion(3.0e6, 500), (unsigned int)1);
 
   // Region 2
-  EXPECT_EQ(_fp->inRegion(3.5e3, 300), 2);
-  EXPECT_EQ(_fp->inRegion(30.0e6, 700), 2);
-  EXPECT_EQ(_fp->inRegion(30.0e6, 700), 2);
+  EXPECT_EQ(_fp->inRegion(3.5e3, 300), (unsigned int)2);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 700), (unsigned int)2);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 700), (unsigned int)2);
 
   // Region 3
-  EXPECT_EQ(_fp->inRegion(25.588e6, 650), 3);
-  EXPECT_EQ(_fp->inRegion(22.298e6, 650), 3);
-  EXPECT_EQ(_fp->inRegion(78.32e6, 750), 3);
+  EXPECT_EQ(_fp->inRegion(25.588e6, 650), (unsigned int)3);
+  EXPECT_EQ(_fp->inRegion(22.298e6, 650), (unsigned int)3);
+  EXPECT_EQ(_fp->inRegion(78.32e6, 750), (unsigned int)3);
 
   // Region 5
-  EXPECT_EQ(_fp->inRegion(0.5e6, 1500), 5);
-  EXPECT_EQ(_fp->inRegion(30.0e6, 1500), 5);
-  EXPECT_EQ(_fp->inRegion(30.0e6, 2000), 5);
+  EXPECT_EQ(_fp->inRegion(0.5e6, 1500), (unsigned int)5);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 1500), (unsigned int)5);
+  EXPECT_EQ(_fp->inRegion(30.0e6, 2000), (unsigned int)5);
 
   // Test out of range errors
   try
@@ -176,58 +176,58 @@ TEST_F(Water97FluidPropertiesTest, vaporTemperature)
  */
 TEST_F(Water97FluidPropertiesTest, subregion3)
 {
-  EXPECT_EQ(_fp->subregion3(50.0e6, 630.0), 0);
-  EXPECT_EQ(_fp->subregion3(80.0e6, 670.0), 0);
-  EXPECT_EQ(_fp->subregion3(50.0e6, 710.0), 1);
-  EXPECT_EQ(_fp->subregion3(80.0e6, 750.0), 1);
-  EXPECT_EQ(_fp->subregion3(20.0e6, 630.0), 2);
-  EXPECT_EQ(_fp->subregion3(30.0e6, 650.0), 2);
-  EXPECT_EQ(_fp->subregion3(26.0e6, 656.0), 3);
-  EXPECT_EQ(_fp->subregion3(30.0e6, 670.0), 3);
-  EXPECT_EQ(_fp->subregion3(26.0e6, 661.0), 4);
-  EXPECT_EQ(_fp->subregion3(30.0e6, 675.0), 4);
-  EXPECT_EQ(_fp->subregion3(26.0e6, 671.0), 5);
-  EXPECT_EQ(_fp->subregion3(30.0e6, 690.0), 5);
-  EXPECT_EQ(_fp->subregion3(23.6e6, 649.0), 6);
-  EXPECT_EQ(_fp->subregion3(24.0e6, 650.0), 6);
-  EXPECT_EQ(_fp->subregion3(23.6e6, 652.0), 7);
-  EXPECT_EQ(_fp->subregion3(24.0e6, 654.0), 7);
-  EXPECT_EQ(_fp->subregion3(23.6e6, 653.0), 8);
-  EXPECT_EQ(_fp->subregion3(24.0e6, 655.0), 8);
-  EXPECT_EQ(_fp->subregion3(23.5e6, 655.0), 9);
-  EXPECT_EQ(_fp->subregion3(24.0e6, 660.0), 9);
-  EXPECT_EQ(_fp->subregion3(23.0e6, 660.0), 10);
-  EXPECT_EQ(_fp->subregion3(24.0e6, 670.0), 10);
-  EXPECT_EQ(_fp->subregion3(22.6e6, 646.0), 11);
-  EXPECT_EQ(_fp->subregion3(23.0e6, 646.0), 11);
-  EXPECT_EQ(_fp->subregion3(22.6e6, 648.6), 12);
-  EXPECT_EQ(_fp->subregion3(22.8e6, 649.3), 12);
-  EXPECT_EQ(_fp->subregion3(22.6e6, 649.0), 13);
-  EXPECT_EQ(_fp->subregion3(22.8e6, 649.7), 13);
-  EXPECT_EQ(_fp->subregion3(22.6e6, 649.1), 14);
-  EXPECT_EQ(_fp->subregion3(22.8e6, 649.9), 14);
-  EXPECT_EQ(_fp->subregion3(22.6e6, 649.4), 15);
-  EXPECT_EQ(_fp->subregion3(22.8e6, 650.2), 15);
-  EXPECT_EQ(_fp->subregion3(21.1e6, 640.0), 16);
-  EXPECT_EQ(_fp->subregion3(21.8e6, 643.0), 16);
-  EXPECT_EQ(_fp->subregion3(21.1e6, 644.0), 17);
-  EXPECT_EQ(_fp->subregion3(21.8e6, 648.0), 17);
-  EXPECT_EQ(_fp->subregion3(19.1e6, 635.0), 18);
-  EXPECT_EQ(_fp->subregion3(20.0e6, 638.0), 18);
-  EXPECT_EQ(_fp->subregion3(17.0e6, 626.0), 19);
-  EXPECT_EQ(_fp->subregion3(20.0e6, 640.0), 19);
-  EXPECT_EQ(_fp->subregion3(21.5e6, 644.6), 20);
-  EXPECT_EQ(_fp->subregion3(22.0e6, 646.1), 20);
-  EXPECT_EQ(_fp->subregion3(22.5e6, 648.6), 21);
-  EXPECT_EQ(_fp->subregion3(22.3e6, 647.9), 21);
-  EXPECT_EQ(_fp->subregion3(22.15e6, 647.5), 22);
-  EXPECT_EQ(_fp->subregion3(22.3e6, 648.1), 22);
-  EXPECT_EQ(_fp->subregion3(22.11e6, 648.0), 23);
-  EXPECT_EQ(_fp->subregion3(22.3e6, 649.0), 23);
-  EXPECT_EQ(_fp->subregion3(22.0e6, 646.84), 24);
-  EXPECT_EQ(_fp->subregion3(22.064e6, 647.05), 24);
-  EXPECT_EQ(_fp->subregion3(22.0e6, 646.89), 25);
-  EXPECT_EQ(_fp->subregion3(22.064e6, 647.15), 25);
+  EXPECT_EQ(_fp->subregion3(50.0e6, 630.0), (unsigned int)0);
+  EXPECT_EQ(_fp->subregion3(80.0e6, 670.0), (unsigned int)0);
+  EXPECT_EQ(_fp->subregion3(50.0e6, 710.0), (unsigned int)1);
+  EXPECT_EQ(_fp->subregion3(80.0e6, 750.0), (unsigned int)1);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 630.0), (unsigned int)2);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 650.0), (unsigned int)2);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 656.0), (unsigned int)3);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 670.0), (unsigned int)3);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 661.0), (unsigned int)4);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 675.0), (unsigned int)4);
+  EXPECT_EQ(_fp->subregion3(26.0e6, 671.0), (unsigned int)5);
+  EXPECT_EQ(_fp->subregion3(30.0e6, 690.0), (unsigned int)5);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 649.0), (unsigned int)6);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 650.0), (unsigned int)6);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 652.0), (unsigned int)7);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 654.0), (unsigned int)7);
+  EXPECT_EQ(_fp->subregion3(23.6e6, 653.0), (unsigned int)8);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 655.0), (unsigned int)8);
+  EXPECT_EQ(_fp->subregion3(23.5e6, 655.0), (unsigned int)9);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 660.0), (unsigned int)9);
+  EXPECT_EQ(_fp->subregion3(23.0e6, 660.0), (unsigned int)10);
+  EXPECT_EQ(_fp->subregion3(24.0e6, 670.0), (unsigned int)10);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 646.0), (unsigned int)11);
+  EXPECT_EQ(_fp->subregion3(23.0e6, 646.0), (unsigned int)11);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 648.6), (unsigned int)12);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.3), (unsigned int)12);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.0), (unsigned int)13);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.7), (unsigned int)13);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.1), (unsigned int)14);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 649.9), (unsigned int)14);
+  EXPECT_EQ(_fp->subregion3(22.6e6, 649.4), (unsigned int)15);
+  EXPECT_EQ(_fp->subregion3(22.8e6, 650.2), (unsigned int)15);
+  EXPECT_EQ(_fp->subregion3(21.1e6, 640.0), (unsigned int)16);
+  EXPECT_EQ(_fp->subregion3(21.8e6, 643.0), (unsigned int)16);
+  EXPECT_EQ(_fp->subregion3(21.1e6, 644.0), (unsigned int)17);
+  EXPECT_EQ(_fp->subregion3(21.8e6, 648.0), (unsigned int)17);
+  EXPECT_EQ(_fp->subregion3(19.1e6, 635.0), (unsigned int)18);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 638.0), (unsigned int)18);
+  EXPECT_EQ(_fp->subregion3(17.0e6, 626.0), (unsigned int)19);
+  EXPECT_EQ(_fp->subregion3(20.0e6, 640.0), (unsigned int)19);
+  EXPECT_EQ(_fp->subregion3(21.5e6, 644.6), (unsigned int)20);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.1), (unsigned int)20);
+  EXPECT_EQ(_fp->subregion3(22.5e6, 648.6), (unsigned int)21);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 647.9), (unsigned int)21);
+  EXPECT_EQ(_fp->subregion3(22.15e6, 647.5), (unsigned int)22);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 648.1), (unsigned int)22);
+  EXPECT_EQ(_fp->subregion3(22.11e6, 648.0), (unsigned int)23);
+  EXPECT_EQ(_fp->subregion3(22.3e6, 649.0), (unsigned int)23);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.84), (unsigned int)24);
+  EXPECT_EQ(_fp->subregion3(22.064e6, 647.05), (unsigned int)24);
+  EXPECT_EQ(_fp->subregion3(22.0e6, 646.89), (unsigned int)25);
+  EXPECT_EQ(_fp->subregion3(22.064e6, 647.15), (unsigned int)25);
 }
 
 /**
