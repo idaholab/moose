@@ -1958,7 +1958,7 @@ protected:
   /// the number of forced nonlinear iterations
   int _nl_forced_its = 0;
 
-  /// the absolute non linear divergnce tolerance
+  /// the absolute non linear divergence tolerance
   Real _nl_abs_div_tol = -1;
 
   std::shared_ptr<NonlinearSystemBase> _nl;
