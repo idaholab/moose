@@ -207,73 +207,76 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
 
 TEST_F(PorousFlowConnectedNodesTest, numNodes)
 {
-  EXPECT_EQ(_n1.numNodes(), 4);
-  EXPECT_EQ(_n2.numNodes(), 3);
+  EXPECT_EQ(_n1.numNodes(), (std::size_t)4);
+  EXPECT_EQ(_n2.numNodes(), (std::size_t)3);
 }
 
 TEST_F(PorousFlowConnectedNodesTest, globalID)
 {
-  EXPECT_EQ(_n1.globalID(0), 1);
-  EXPECT_EQ(_n1.globalID(1), 12);
-  EXPECT_EQ(_n1.globalID(2), 123);
-  EXPECT_EQ(_n1.globalID(3), 1234);
-  EXPECT_EQ(_n1.globalIDs()[0], 1);
-  EXPECT_EQ(_n1.globalIDs()[1], 12);
-  EXPECT_EQ(_n1.globalIDs()[2], 123);
-  EXPECT_EQ(_n1.globalIDs()[3], 1234);
+  EXPECT_EQ(_n1.globalID(0), (dof_id_type)1);
+  EXPECT_EQ(_n1.globalID(1), (dof_id_type)12);
+  EXPECT_EQ(_n1.globalID(2), (dof_id_type)123);
+  EXPECT_EQ(_n1.globalID(3), (dof_id_type)1234);
+  EXPECT_EQ(_n1.globalIDs()[0], (dof_id_type)1);
+  EXPECT_EQ(_n1.globalIDs()[1], (dof_id_type)12);
+  EXPECT_EQ(_n1.globalIDs()[2], (dof_id_type)123);
+  EXPECT_EQ(_n1.globalIDs()[3], (dof_id_type)1234);
 }
 
 TEST_F(PorousFlowConnectedNodesTest, sequentialID)
 {
-  EXPECT_EQ(_n1.sequentialID(1), 0);
-  EXPECT_EQ(_n1.sequentialID(12), 1);
-  EXPECT_EQ(_n1.sequentialID(123), 2);
-  EXPECT_EQ(_n1.sequentialID(1234), 3);
+  EXPECT_EQ(_n1.sequentialID(1), (dof_id_type)0);
+  EXPECT_EQ(_n1.sequentialID(12), (dof_id_type)1);
+  EXPECT_EQ(_n1.sequentialID(123), (dof_id_type)2);
+  EXPECT_EQ(_n1.sequentialID(1234), (dof_id_type)3);
 }
 
 TEST_F(PorousFlowConnectedNodesTest, connections)
 {
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[0], 0);
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[1], 1);
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[2], 2);
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[3], 3);
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(12)[0], 3);
-  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(123)[0], 3);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[0], (dof_id_type)0);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[1], (dof_id_type)1);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[2], (dof_id_type)2);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(1)[3], (dof_id_type)3);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(12)[0], (dof_id_type)3);
+  EXPECT_EQ(_n1.sequentialConnectionsToGlobalID(123)[0], (dof_id_type)3);
 
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[0], 0);
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[1], 1);
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[2], 2);
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[3], 3);
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(1)[0], 3);
-  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(2)[0], 3);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[0], (dof_id_type)0);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[1], (dof_id_type)1);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[2], (dof_id_type)2);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(0)[3], (dof_id_type)3);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(1)[0], (dof_id_type)3);
+  EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(2)[0], (dof_id_type)3);
 
-  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 0), 0);
-  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 1), 1);
-  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 2), 2);
-  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 3), 3);
-  EXPECT_EQ(_n1.indexOfSequentialConnection(1, 3), 0);
-  EXPECT_EQ(_n1.indexOfSequentialConnection(2, 3), 0);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 0), (unsigned)0);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 1), (unsigned)1);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 2), (unsigned)2);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 3), (unsigned)3);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(1, 3), (unsigned)0);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(2, 3), (unsigned)0);
 
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[0], 1);
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[1], 12);
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[2], 123);
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[3], 1234);
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(12)[0], 1234);
-  EXPECT_EQ(_n1.globalConnectionsToGlobalID(123)[0], 1234);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[0], (dof_id_type)1);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[1], (dof_id_type)12);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[2], (dof_id_type)123);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[3], (dof_id_type)1234);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(12)[0], (dof_id_type)1234);
+  EXPECT_EQ(_n1.globalConnectionsToGlobalID(123)[0], (dof_id_type)1234);
 
-  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1), 0);
-  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 12), 1);
-  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 123), 2);
-  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1234), 3);
-  EXPECT_EQ(_n1.indexOfGlobalConnection(12, 1234), 0);
-  EXPECT_EQ(_n1.indexOfGlobalConnection(123, 1234), 0);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1), (unsigned)0);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 12), (unsigned)1);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 123), (unsigned)2);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1234), (unsigned)3);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(12, 1234), (unsigned)0);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(123, 1234), (unsigned)0);
 
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[0], 1);
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[1], 12);
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[2], 123);
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[3], 1234);
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(1)[0], 1234);
-  EXPECT_EQ(_n1.globalConnectionsToSequentialID(2)[0], 1234);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[0], (dof_id_type)1);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[1], (dof_id_type)12);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[2], (dof_id_type)123);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[3], (dof_id_type)1234);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(1)[0], (dof_id_type)1234);
+  EXPECT_EQ(_n1.globalConnectionsToSequentialID(2)[0], (dof_id_type)1234);
 }
 
-TEST_F(PorousFlowConnectedNodesTest, sizeSequential) { EXPECT_EQ(_n1.sizeSequential(), 1234); }
+TEST_F(PorousFlowConnectedNodesTest, sizeSequential)
+{
+  EXPECT_EQ(_n1.sizeSequential(), (std::size_t)1234);
+}

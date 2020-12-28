@@ -11,45 +11,45 @@
 
 TEST_F(PorousFlowDictatorTest, numVariables)
 {
-  EXPECT_EQ(_dictator->numVariables(), 3);
-  EXPECT_EQ(_dictator_no_fetype->numVariables(), 2);
+  EXPECT_EQ(_dictator->numVariables(), (unsigned int)3);
+  EXPECT_EQ(_dictator_no_fetype->numVariables(), (unsigned int)2);
 }
 
 TEST_F(PorousFlowDictatorTest, numPhases)
 {
-  EXPECT_EQ(_dictator->numPhases(), 2);
-  EXPECT_EQ(_dictator_no_fetype->numPhases(), 1);
+  EXPECT_EQ(_dictator->numPhases(), (unsigned int)2);
+  EXPECT_EQ(_dictator_no_fetype->numPhases(), (unsigned int)1);
 }
 
 TEST_F(PorousFlowDictatorTest, numComponents)
 {
-  EXPECT_EQ(_dictator->numComponents(), 4);
-  EXPECT_EQ(_dictator_no_fetype->numComponents(), 3);
+  EXPECT_EQ(_dictator->numComponents(), (unsigned int)4);
+  EXPECT_EQ(_dictator_no_fetype->numComponents(), (unsigned int)3);
 }
 
 TEST_F(PorousFlowDictatorTest, numAqueousEquilibrium)
 {
-  EXPECT_EQ(_dictator->numAqueousEquilibrium(), 5);
-  EXPECT_EQ(_dictator_no_fetype->numAqueousEquilibrium(), 0);
+  EXPECT_EQ(_dictator->numAqueousEquilibrium(), (unsigned int)5);
+  EXPECT_EQ(_dictator_no_fetype->numAqueousEquilibrium(), (unsigned int)0);
 }
 
 TEST_F(PorousFlowDictatorTest, numAqueousKinetic)
 {
-  EXPECT_EQ(_dictator->numAqueousKinetic(), 6);
-  EXPECT_EQ(_dictator_no_fetype->numAqueousKinetic(), 0);
+  EXPECT_EQ(_dictator->numAqueousKinetic(), (unsigned int)6);
+  EXPECT_EQ(_dictator_no_fetype->numAqueousKinetic(), (unsigned int)0);
 }
 
 TEST_F(PorousFlowDictatorTest, aqueousPhaseNumber)
 {
-  EXPECT_EQ(_dictator->aqueousPhaseNumber(), 1);
-  EXPECT_EQ(_dictator_no_fetype->aqueousPhaseNumber(), 0);
+  EXPECT_EQ(_dictator->aqueousPhaseNumber(), (unsigned int)1);
+  EXPECT_EQ(_dictator_no_fetype->aqueousPhaseNumber(), (unsigned int)0);
 }
 
 TEST_F(PorousFlowDictatorTest, porousFlowVariableNum)
 {
-  EXPECT_EQ(_dictator->porousFlowVariableNum(1), 0);
-  EXPECT_EQ(_dictator->porousFlowVariableNum(4), 1);
-  EXPECT_EQ(_dictator->porousFlowVariableNum(3), 2);
+  EXPECT_EQ(_dictator->porousFlowVariableNum(1), (unsigned int)0);
+  EXPECT_EQ(_dictator->porousFlowVariableNum(4), (unsigned int)1);
+  EXPECT_EQ(_dictator->porousFlowVariableNum(3), (unsigned int)2);
 
   try
   {
@@ -103,15 +103,15 @@ TEST_F(PorousFlowDictatorTest, porousFlowVariableNum)
     ASSERT_TRUE(pos != std::string::npos);
   }
 
-  EXPECT_EQ(_dictator_no_fetype->porousFlowVariableNum(1), 0);
-  EXPECT_EQ(_dictator_no_fetype->porousFlowVariableNum(6), 1);
+  EXPECT_EQ(_dictator_no_fetype->porousFlowVariableNum(1), (unsigned int)0);
+  EXPECT_EQ(_dictator_no_fetype->porousFlowVariableNum(6), (unsigned int)1);
 }
 
 TEST_F(PorousFlowDictatorTest, mooseVariableNum)
 {
-  EXPECT_EQ(_dictator->mooseVariableNum(0), 1);
-  EXPECT_EQ(_dictator->mooseVariableNum(1), 4);
-  EXPECT_EQ(_dictator->mooseVariableNum(2), 3);
+  EXPECT_EQ(_dictator->mooseVariableNum(0), (unsigned int)1);
+  EXPECT_EQ(_dictator->mooseVariableNum(1), (unsigned int)4);
+  EXPECT_EQ(_dictator->mooseVariableNum(2), (unsigned int)3);
 
   try
   {
@@ -126,8 +126,8 @@ TEST_F(PorousFlowDictatorTest, mooseVariableNum)
     ASSERT_TRUE(pos != std::string::npos);
   }
 
-  EXPECT_EQ(_dictator_no_fetype->mooseVariableNum(0), 1);
-  EXPECT_EQ(_dictator_no_fetype->mooseVariableNum(1), 6);
+  EXPECT_EQ(_dictator_no_fetype->mooseVariableNum(0), (unsigned int)1);
+  EXPECT_EQ(_dictator_no_fetype->mooseVariableNum(1), (unsigned int)6);
 }
 
 TEST_F(PorousFlowDictatorTest, isPorousFlowVariable)
