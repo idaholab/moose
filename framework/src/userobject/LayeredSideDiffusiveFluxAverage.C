@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 
-registerMooseObjectDeprecated("MooseApp", LayeredSideFluxAverage, "06/30/2021 24:00");
+registerMooseObject("MooseApp", LayeredSideDiffusiveFluxAverage);
 
-defineLegacyParams(LayeredSideFluxAverage);
+defineLegacyParams(LayeredSideDiffusiveFluxAverage);
 
 InputParameters
-LayeredSideFluxAverage::validParams()
+LayeredSideDiffusiveFluxAverage::validParams()
 {
   InputParameters params = LayeredSideIntegral::validParams();
   params.addClassDescription("Computes the diffusive flux of a variable on layers alongside "
@@ -25,17 +25,15 @@ LayeredSideFluxAverage::validParams()
   return params;
 }
 
-LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameters)
+LayeredSideDiffusiveFluxAverage::LayeredSideDiffusiveFluxAverage(const InputParameters & parameters)
   : LayeredSideAverage(parameters),
     _diffusivity(parameters.get<std::string>("diffusivity")),
     _diffusion_coef(getMaterialProperty<Real>(_diffusivity))
 {
-  mooseDeprecated("LayeredSideFluxAverage is deprecated. "
-                  "Please use LayeredSideDiffusiveFluxAverage instead.");
 }
 
 Real
-LayeredSideFluxAverage::computeQpIntegral()
+LayeredSideDiffusiveFluxAverage::computeQpIntegral()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)

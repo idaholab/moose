@@ -1,5 +1,7 @@
 # SideFluxIntegral
 
+This object is deprecated. See [SideDiffusiveFluxIntegral](/SideDiffusiveFluxIntegral.md) 
+
 !syntax description /Postprocessors/SideFluxIntegral
 
 ## Example Input Syntax

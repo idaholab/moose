@@ -126,7 +126,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./flux_from_clad]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = temp
     boundary = 5
     diffusivity = thermal_conductivity

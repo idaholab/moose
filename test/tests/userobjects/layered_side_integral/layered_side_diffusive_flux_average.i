@@ -8,9 +8,6 @@
 
 [Variables]
   [./u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
   [../]
 []
 
@@ -21,23 +18,22 @@
   [../]
 []
 
-[FVKernels]
+[Kernels]
   [./diff]
-    type = FVDiffusion
+    type = Diffusion
     variable = u
-    coeff = 1
   [../]
 []
 
-[FVBCs]
+[BCs]
   [./bottom]
-    type = FVDirichletBC
+    type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
   [../]
   [./top]
-    type = FVDirichletBC
+    type = DirichletBC
     variable = u
     boundary = top
     value = 1
@@ -64,7 +60,7 @@
 
 [UserObjects]
   [./layered_side_flux_average]
-    type = LayeredSideFluxAverage
+    type = LayeredSideDiffusiveFluxAverage
     direction = y
     diffusivity = diffusivity
     num_layers = 1
@@ -76,10 +72,6 @@
 
 [Executioner]
   type = Steady
-  nl_abs_tol = 1e-14
-  nl_rel_tol = 1e-14
-  l_abs_tol = 1e-14
-  l_tol = 1e-6
 []
 
 [Outputs]

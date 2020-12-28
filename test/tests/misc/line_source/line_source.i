@@ -43,7 +43,7 @@
 
 [Postprocessors]
   [./total_flux]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = u
     boundary = outside
     diffusivity = diffusivity
@@ -60,4 +60,3 @@
 [Outputs]
   exodus = true
 []
-

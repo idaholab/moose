@@ -7,39 +7,40 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SideFluxIntegral.h"
+#include "SideDiffusiveFluxIntegral.h"
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObjectDeprecated("MooseApp", SideFluxIntegral, "06/30/2021 24:00");
-registerMooseObjectDeprecated("MooseApp", ADSideFluxIntegral, "06/30/2021 24:00");
+registerMooseObject("MooseApp", SideDiffusiveFluxIntegral);
+registerMooseObject("MooseApp", ADSideDiffusiveFluxIntegral);
 
-defineLegacyParams(SideFluxIntegral);
+defineLegacyParams(SideDiffusiveFluxIntegral);
 
 template <bool is_ad>
 InputParameters
-SideFluxIntegralTempl<is_ad>::validParams()
+SideDiffusiveFluxIntegralTempl<is_ad>::validParams()
 {
   InputParameters params = SideIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");
-  params.addClassDescription("Computes the integral of the flux over the specified boundary");
+  params.addClassDescription(
+      "Computes the integral of the diffusive flux over the specified boundary");
   return params;
 }
 
 template <bool is_ad>
-SideFluxIntegralTempl<is_ad>::SideFluxIntegralTempl(const InputParameters & parameters)
+SideDiffusiveFluxIntegralTempl<is_ad>::SideDiffusiveFluxIntegralTempl(
+    const InputParameters & parameters)
   : SideIntegralVariablePostprocessor(parameters),
     _diffusivity(parameters.get<MaterialPropertyName>("diffusivity")),
     _diffusion_coef(getGenericMaterialProperty<Real, is_ad>(_diffusivity))
 {
-  mooseDeprecated("SideFluxIntegral is deprecated. Please use SideDiffusiveFluxIntegral instead.");
 }
 
 template <bool is_ad>
 Real
-SideFluxIntegralTempl<is_ad>::computeQpIntegral()
+SideDiffusiveFluxIntegralTempl<is_ad>::computeQpIntegral()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
@@ -59,5 +60,5 @@ SideFluxIntegralTempl<is_ad>::computeQpIntegral()
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp]) * _grad_u[_qp] * _normals[_qp];
 }
 
-template class SideFluxIntegralTempl<false>;
-template class SideFluxIntegralTempl<true>;
+template class SideDiffusiveFluxIntegralTempl<false>;
+template class SideDiffusiveFluxIntegralTempl<true>;

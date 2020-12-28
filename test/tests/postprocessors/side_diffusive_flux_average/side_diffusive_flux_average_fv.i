@@ -55,7 +55,7 @@
 [Postprocessors]
   [./avg_flux_right]
     # Computes flux integral on the boundary, which should be -1
-    type = SideFluxAverage
+    type = SideDiffusiveFluxAverage
     variable = u
     boundary = right
     diffusivity = diffusivity

@@ -9,8 +9,8 @@
 
 #include "SideFluxAverage.h"
 
-registerMooseObject("MooseApp", SideFluxAverage);
-registerMooseObject("MooseApp", ADSideFluxAverage);
+registerMooseObjectDeprecated("MooseApp", SideFluxAverage, "06/30/2021 24:00");
+registerMooseObjectDeprecated("MooseApp", ADSideFluxAverage, "06/30/2021 24:00");
 
 template <bool is_ad>
 InputParameters
@@ -24,6 +24,7 @@ template <bool is_ad>
 SideFluxAverageTempl<is_ad>::SideFluxAverageTempl(const InputParameters & parameters)
   : SideFluxIntegralTempl<is_ad>(parameters), _volume(0)
 {
+  mooseDeprecated("SideFluxAverage is deprecated. Please use SideDiffusiveFluxAverage instead.");
 }
 
 template <bool is_ad>
