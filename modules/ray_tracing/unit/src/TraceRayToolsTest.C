@@ -58,7 +58,7 @@ traceRayToolsTestMesh(const int type)
   return mesh;
 }
 
-TEST(TraceRayTools, withinEdge)
+TEST(TraceRayToolsTest, withinEdge)
 {
   ElemExtrema extrema;
 
@@ -94,7 +94,7 @@ TEST(TraceRayTools, withinEdge)
   }
 }
 
-TEST(TraceRayTools, withinEdgeOnSide)
+TEST(TraceRayToolsTest, withinEdgeOnSide)
 {
   ElemExtrema extrema;
 
@@ -140,7 +140,7 @@ TEST(TraceRayTools, withinEdgeOnSide)
   }
 }
 
-TEST(TraceRayTools, atVertex)
+TEST(TraceRayToolsTest, atVertex)
 {
   for (const auto type : TraceRayTools::TRACEABLE_ELEMTYPES)
   {
@@ -159,7 +159,7 @@ TEST(TraceRayTools, atVertex)
   }
 }
 
-TEST(TraceRayTools, atVertexOnSide)
+TEST(TraceRayToolsTest, atVertexOnSide)
 {
   for (const auto type : TraceRayTools::TRACEABLE_ELEMTYPES)
   {
@@ -184,7 +184,7 @@ TEST(TraceRayTools, atVertexOnSide)
   }
 }
 
-TEST(TraceRayTools, findPointNeighbors)
+TEST(TraceRayToolsTest, findPointNeighbors)
 {
   MooseUtils::StaticallyAllocatedSet<const Elem *, MAX_POINT_NEIGHBORS> neighbor_set;
   MooseUtils::StaticallyAllocatedSet<const Elem *, MAX_POINT_NEIGHBORS> neighbor_untested_set;
@@ -260,7 +260,7 @@ TEST(TraceRayTools, findPointNeighbors)
   }
 }
 
-TEST(TraceRayTools, isWithinSegment)
+TEST(TraceRayToolsTest, isWithinSegment)
 {
   EXPECT_TRUE(TraceRayTools::isWithinSegment(Point(0, 1, 2), Point(1, 1, 2), Point(0.5, 1, 2)));
   EXPECT_TRUE(TraceRayTools::isWithinSegment(Point(5, 6, 7), Point(8, 9, 10), Point(5, 6, 7)));
