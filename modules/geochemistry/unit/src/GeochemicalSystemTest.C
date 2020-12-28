@@ -7,113 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "gtest/gtest.h"
-
-#include "GeochemicalSystem.h"
-
-const GeochemicalDatabaseReader db_calcite("database/moose_testdb.json", true, true, false);
-const PertinentGeochemicalSystem model_calcite(
-    db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
-const PertinentGeochemicalSystem model_kinetic_calcite(
-    db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {"Calcite"}, {}, {}, "O2(aq)", "e-");
-ModelGeochemicalDatabase mgd_calcite = model_calcite.modelGeochemicalDatabase();
-ModelGeochemicalDatabase mgd_kinetic_calcite = model_kinetic_calcite.modelGeochemicalDatabase();
-GeochemistrySpeciesSwapper swapper3(3, 1E-6);
-GeochemistrySpeciesSwapper swapper4(4, 1E-6);
-GeochemistrySpeciesSwapper swapper5(5, 1E-6);
-GeochemistrySpeciesSwapper swapper6(6, 1E-6);
-GeochemistrySpeciesSwapper swapper7(7, 1E-6);
-GeochemistrySpeciesSwapper swapper8(8, 1E-6);
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_calcite = {
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-    GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-GeochemistryIonicStrength is3(3.0, 3.0, false, false);
-GeochemistryActivityCoefficientsDebyeHuckel ac3(is3, db_calcite);
-GeochemistryIonicStrength is0(0.0, 0.0, false, false);
-GeochemistryActivityCoefficientsDebyeHuckel ac0(is0, db_calcite);
-GeochemistryIonicStrength is8(1E-8, 1E-8, false, false);
-GeochemistryActivityCoefficientsDebyeHuckel ac8(is8, db_calcite);
-const GeochemicalSystem egs_calcite(mgd_calcite,
-                                    ac3,
-                                    is3,
-                                    swapper4,
-                                    {"Ca++"},
-                                    {"Calcite"},
-                                    "H+",
-                                    {"H2O", "Calcite", "H+", "HCO3-"},
-                                    {1.75, 3.0, 2.0, 1.0},
-                                    cm_calcite,
-                                    25,
-                                    0,
-                                    1E-20,
-                                    {},
-                                    {});
-const GeochemicalSystem egs_kinetic_calcite(mgd_kinetic_calcite,
-                                            ac3,
-                                            is3,
-                                            swapper4,
-                                            {},
-                                            {},
-                                            "H+",
-                                            {"H2O", "Ca++", "H+", "HCO3-"},
-                                            {1.75, 3.0, 2.0, 1.0},
-                                            cm_calcite,
-                                            25,
-                                            0,
-                                            1E-20,
-                                            {"Calcite"},
-                                            {1.1});
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_dummy = {};
-const PertinentGeochemicalSystem model_redox(
-    db_calcite,
-    {"H2O", "H+", "HCO3-", "O2(aq)", "(O-phth)--", "CH4(aq)", "StoiCheckRedox", "Fe+++"},
-    {"Fe(OH)3(ppd)fake"},
-    {"CH4(g)fake", "O2(g)"},
-    {},
-    {},
-    {},
-    "O2(aq)",
-    "e-");
-ModelGeochemicalDatabase mgd_redox = model_redox.modelGeochemicalDatabase();
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_redox = {
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-const GeochemicalSystem
-    egs_redox(mgd_redox,
-              ac3,
-              is3,
-              swapper8,
-              {},
-              {},
-              "Fe+++",
-              {"H2O", "H+", "HCO3-", "O2(aq)", "(O-phth)--", "CH4(aq)", "StoiCheckRedox", "Fe+++"},
-              {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0},
-              cm_redox,
-              25,
-              0,
-              1E-20,
-              {},
-              {});
+#include "GeochemicalSystemTest.h"
 
 /// Check MultiMooseEnum constructor
-TEST(GeochemicalSystemTest, constructWithMultiMooseEnum)
+TEST_F(GeochemicalSystemTest, constructWithMultiMooseEnum)
 {
   MultiMooseEnum constraint_meaning("moles_bulk_water kg_solvent_water moles_bulk_species "
                                     "free_molality free_moles_mineral_species fugacity activity");
   constraint_meaning.push_back("activity moles_bulk_species moles_bulk_species free_molality");
-  ModelGeochemicalDatabase mgd_calcite2 = model_calcite.modelGeochemicalDatabase();
+  ModelGeochemicalDatabase mgd_calcite2 = _model_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs(mgd_calcite2,
-                              ac3,
-                              is3,
-                              swapper4,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {"Ca++"},
                               {"Calcite"},
                               "H+",
@@ -128,13 +34,16 @@ TEST(GeochemicalSystemTest, constructWithMultiMooseEnum)
 }
 
 /// Check num in basis
-TEST(GeochemicalSystemTest, numInBasis) { EXPECT_EQ(egs_calcite.getNumInBasis(), 4); }
+TEST_F(GeochemicalSystemTest, numInBasis) { EXPECT_EQ(_egs_calcite.getNumInBasis(), (unsigned)4); }
 
 /// Check num in equilibrium
-TEST(GeochemicalSystemTest, numInEquilibrium) { EXPECT_EQ(egs_calcite.getNumInEquilibrium(), 6); }
+TEST_F(GeochemicalSystemTest, numInEquilibrium)
+{
+  EXPECT_EQ(_egs_calcite.getNumInEquilibrium(), (unsigned)6);
+}
 
 /// Check swaps have correct size
-TEST(GeochemicalSystemTest, swapSizeException)
+TEST_F(GeochemicalSystemTest, swapSizeException)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -151,7 +60,7 @@ TEST(GeochemicalSystemTest, swapSizeException)
   try
   {
     GeochemicalSystem egs(
-        mgd, ac3, is3, swapper7, {"H+"}, {}, "H+", {}, {}, cm_dummy, 25, 0, 1E-20, {}, {});
+        mgd, _ac3, _is3, _swapper7, {"H+"}, {}, "H+", {}, {}, _cm_dummy, 25, 0, 1E-20, {}, {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -164,36 +73,7 @@ TEST(GeochemicalSystemTest, swapSizeException)
 }
 
 /// Check swaps is not swapping charge-balance species out
-TEST(GeochemicalSystemTest, swapChargeBalanceException)
-{
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
-  PertinentGeochemicalSystem model(database,
-                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                   {},
-                                   {},
-                                   {},
-                                   {},
-                                   {},
-                                   "O2(aq)",
-                                   "e-");
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-
-  try
-  {
-    GeochemicalSystem egs(
-        mgd, ac3, is3, swapper7, {"H+"}, {"FeOH"}, "H+", {}, {}, cm_dummy, 25, 0, 1E-20, {}, {});
-    FAIL() << "Missing expected exception.";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Cannot swap out H+ because it is the charge-balance species") !=
-                std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
-}
-/// Check illegal swap produces an error
-TEST(GeochemicalSystemTest, swapException)
+TEST_F(GeochemicalSystemTest, swapChargeBalanceException)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -210,15 +90,57 @@ TEST(GeochemicalSystemTest, swapException)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper7,
+                          _ac3,
+                          _is3,
+                          _swapper7,
+                          {"H+"},
+                          {"FeOH"},
+                          "H+",
+                          {},
+                          {},
+                          _cm_dummy,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Cannot swap out H+ because it is the charge-balance species") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+/// Check illegal swap produces an error
+TEST_F(GeochemicalSystemTest, swapException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {},
+                                   {},
+                                   {},
+                                   {},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper7,
                           {"CO2(aq)"},
                           {"CO2(aq)"},
                           "H+",
                           {},
                           {},
-                          cm_dummy,
+                          _cm_dummy,
                           25,
                           0,
                           1E-20,
@@ -236,7 +158,7 @@ TEST(GeochemicalSystemTest, swapException)
 }
 
 /// Check constraint sizes
-TEST(GeochemicalSystemTest, constraintSizeExceptions)
+TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -255,9 +177,9 @@ TEST(GeochemicalSystemTest, constraintSizeExceptions)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {},
                           {},
                           "H+",
@@ -282,9 +204,9 @@ TEST(GeochemicalSystemTest, constraintSizeExceptions)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {},
                           {},
                           "H+",
@@ -310,9 +232,9 @@ TEST(GeochemicalSystemTest, constraintSizeExceptions)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {},
                           {},
                           "H+",
@@ -337,7 +259,7 @@ TEST(GeochemicalSystemTest, constraintSizeExceptions)
   }
 }
 /// Check constraint sizes
-TEST(GeochemicalSystemTest, constraintNameExceptions)
+TEST_F(GeochemicalSystemTest, constraintNameExceptions)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -352,9 +274,9 @@ TEST(GeochemicalSystemTest, constraintNameExceptions)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {},
                           {},
                           "H+",
@@ -379,9 +301,9 @@ TEST(GeochemicalSystemTest, constraintNameExceptions)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {"HCO3-"},
                           {"CO2(aq)"},
                           "H+",
@@ -405,7 +327,7 @@ TEST(GeochemicalSystemTest, constraintNameExceptions)
 }
 
 /// Check appropriate positivity
-TEST(GeochemicalSystemTest, positiveException1)
+TEST_F(GeochemicalSystemTest, positiveException1)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -420,9 +342,9 @@ TEST(GeochemicalSystemTest, positiveException1)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {"HCO3-"},
                           {"CO2(aq)"},
                           "H+",
@@ -445,7 +367,7 @@ TEST(GeochemicalSystemTest, positiveException1)
   }
 }
 /// Check appropriate positivity
-TEST(GeochemicalSystemTest, positiveException2)
+TEST_F(GeochemicalSystemTest, positiveException2)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -460,9 +382,9 @@ TEST(GeochemicalSystemTest, positiveException2)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {"HCO3-"},
                           {"CO2(aq)"},
                           "H+",
@@ -486,7 +408,7 @@ TEST(GeochemicalSystemTest, positiveException2)
 }
 
 /// Check appropriate positivity
-TEST(GeochemicalSystemTest, positiveException3)
+TEST_F(GeochemicalSystemTest, positiveException3)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -502,9 +424,9 @@ TEST(GeochemicalSystemTest, positiveException3)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper4,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {"O2(aq)"},
                           {"O2(g)"},
                           "H+",
@@ -528,7 +450,7 @@ TEST(GeochemicalSystemTest, positiveException3)
 }
 
 /// Check appropriate positivity
-TEST(GeochemicalSystemTest, positiveException4)
+TEST_F(GeochemicalSystemTest, positiveException4)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -543,9 +465,9 @@ TEST(GeochemicalSystemTest, positiveException4)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {"HCO3-"},
                           {"CO2(aq)"},
                           "H+",
@@ -569,7 +491,7 @@ TEST(GeochemicalSystemTest, positiveException4)
 }
 
 /// Check appropriate positivity
-TEST(GeochemicalSystemTest, positiveException5)
+TEST_F(GeochemicalSystemTest, positiveException5)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -585,9 +507,9 @@ TEST(GeochemicalSystemTest, positiveException5)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper4,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {"Ca++"},
                           {"Calcite"},
                           "H+",
@@ -613,7 +535,7 @@ TEST(GeochemicalSystemTest, positiveException5)
 }
 
 /// Check water provided with appropriate value
-TEST(GeochemicalSystemTest, waterException)
+TEST_F(GeochemicalSystemTest, waterException)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -628,9 +550,9 @@ TEST(GeochemicalSystemTest, waterException)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {"HCO3-"},
                           {"CO2(aq)"},
                           "H+",
@@ -655,7 +577,7 @@ TEST(GeochemicalSystemTest, waterException)
 }
 
 /// Check gases are provided with appropriate value
-TEST(GeochemicalSystemTest, fugacityException)
+TEST_F(GeochemicalSystemTest, fugacityException)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -671,9 +593,9 @@ TEST(GeochemicalSystemTest, fugacityException)
   try
   {
     GeochemicalSystem egs(mgd,
-                          ac3,
-                          is3,
-                          swapper4,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {"O2(aq)"},
                           {"O2(g)"},
                           "H+",
@@ -696,7 +618,7 @@ TEST(GeochemicalSystemTest, fugacityException)
 }
 
 /// Check minerals are provided with appropriate meaning
-TEST(GeochemicalSystemTest, mineralMeaningExecption)
+TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
 {
   std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
@@ -706,10 +628,10 @@ TEST(GeochemicalSystemTest, mineralMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "H+",
@@ -739,10 +661,10 @@ TEST(GeochemicalSystemTest, mineralMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "H+",
@@ -766,7 +688,7 @@ TEST(GeochemicalSystemTest, mineralMeaningExecption)
 }
 
 /// Check aqueous species are provided with appropriate meaning
-TEST(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
+TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
 {
   std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
@@ -776,10 +698,10 @@ TEST(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "HCO3-",
@@ -809,10 +731,10 @@ TEST(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "H+",
@@ -837,7 +759,7 @@ TEST(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
 }
 
 /// Check charge-balance species is provided with appropriate meaning
-TEST(GeochemicalSystemTest, chargeBalanceMeaningExecption)
+TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
 {
   std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
@@ -847,10 +769,10 @@ TEST(GeochemicalSystemTest, chargeBalanceMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "H+",
@@ -884,10 +806,10 @@ TEST(GeochemicalSystemTest, chargeBalanceMeaningExecption)
 
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "H+",
@@ -915,20 +837,20 @@ TEST(GeochemicalSystemTest, chargeBalanceMeaningExecption)
 }
 
 /// Check charge-balance species is in the basis
-TEST(GeochemicalSystemTest, chargeBalanceInBasisExecption)
+TEST_F(GeochemicalSystemTest, chargeBalanceInBasisExecption)
 {
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "OH-",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
-                          cm_calcite,
+                          _cm_calcite,
                           25,
                           0,
                           1E-20,
@@ -947,20 +869,20 @@ TEST(GeochemicalSystemTest, chargeBalanceInBasisExecption)
 }
 
 /// Check charge-balance species has a charge
-TEST(GeochemicalSystemTest, chargeBalanceHasChargeExecption)
+TEST_F(GeochemicalSystemTest, chargeBalanceHasChargeExecption)
 {
   try
   {
-    GeochemicalSystem egs(mgd_calcite,
-                          ac3,
-                          is3,
-                          swapper4,
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
                           {},
                           {},
                           "Calcite",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
-                          cm_calcite,
+                          _cm_calcite,
                           25,
                           0,
                           1E-20,
@@ -979,17 +901,17 @@ TEST(GeochemicalSystemTest, chargeBalanceHasChargeExecption)
 }
 
 /// Check charge-balance species index
-TEST(GeochemicalSystemTest, chargeBalanceIndex)
+TEST_F(GeochemicalSystemTest, chargeBalanceIndex)
 {
-  EXPECT_EQ(egs_calcite.getChargeBalanceBasisIndex(), 1);
+  EXPECT_EQ(_egs_calcite.getChargeBalanceBasisIndex(), (unsigned)1);
 }
 
 /// Check getLog10K
-TEST(GeochemicalSystemTest, getLog10K)
+TEST_F(GeochemicalSystemTest, getLog10K)
 {
   try
   {
-    EXPECT_EQ(egs_calcite.getLog10K(123), 1);
+    EXPECT_EQ(_egs_calcite.getLog10K(123), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -999,59 +921,59 @@ TEST(GeochemicalSystemTest, getLog10K)
                          "6 equilibrium species") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
-  EXPECT_EQ(egs_calcite.getLog10K(0), -6.3660); // CO2(aq) at 25degC
+  EXPECT_EQ(_egs_calcite.getLog10K(0), -6.3660); // CO2(aq) at 25degC
 }
 
 /// Check getInAlgebraicSystem
-TEST(GeochemicalSystemTest, getInAlgebraicSystem)
+TEST_F(GeochemicalSystemTest, getInAlgebraicSystem)
 {
   const std::vector<bool> as_gold = {false, true, false, false};
-  EXPECT_EQ(egs_calcite.getInAlgebraicSystem().size(), 4);
+  EXPECT_EQ(_egs_calcite.getInAlgebraicSystem().size(), (std::size_t)4);
   for (unsigned i = 0; i < as_gold.size(); ++i)
-    EXPECT_EQ(egs_calcite.getInAlgebraicSystem()[i], as_gold[i]);
+    EXPECT_EQ(_egs_calcite.getInAlgebraicSystem()[i], as_gold[i]);
 }
 
 /// Check NumInAlgebraicSystem
-TEST(GeochemicalSystemTest, NumInAlgebraicSystem)
+TEST_F(GeochemicalSystemTest, NumInAlgebraicSystem)
 {
-  EXPECT_EQ(egs_calcite.getNumInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs_calcite.getNumBasisInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs_calcite.getNumSurfacePotentials(), 0);
-  EXPECT_EQ(egs_kinetic_calcite.getNumInAlgebraicSystem(), 3);
-  EXPECT_EQ(egs_kinetic_calcite.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs_kinetic_calcite.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(_egs_calcite.getNumInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(_egs_calcite.getNumBasisInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(_egs_calcite.getNumSurfacePotentials(), (unsigned)0);
+  EXPECT_EQ(_egs_kinetic_calcite.getNumInAlgebraicSystem(), (unsigned)3);
+  EXPECT_EQ(_egs_kinetic_calcite.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(_egs_kinetic_calcite.getNumSurfacePotentials(), (unsigned)0);
 }
 
 /// Check getBasisIndexOfAlgebraicSystem()
-TEST(GeochemicalSystemTest, getBasisIndexOfAlgebraicSystem)
+TEST_F(GeochemicalSystemTest, getBasisIndexOfAlgebraicSystem)
 {
-  EXPECT_EQ(egs_calcite.getBasisIndexOfAlgebraicSystem()[0], 1);
-  EXPECT_EQ(egs_kinetic_calcite.getBasisIndexOfAlgebraicSystem()[0], 1);
-  EXPECT_EQ(egs_kinetic_calcite.getBasisIndexOfAlgebraicSystem()[1], 3);
+  EXPECT_EQ(_egs_calcite.getBasisIndexOfAlgebraicSystem()[0], (unsigned)1);
+  EXPECT_EQ(_egs_kinetic_calcite.getBasisIndexOfAlgebraicSystem()[0], (unsigned)1);
+  EXPECT_EQ(_egs_kinetic_calcite.getBasisIndexOfAlgebraicSystem()[1], (unsigned)3);
 }
 
 /// Check getAlgebraicIndexOfBasisSystem()
-TEST(GeochemicalSystemTest, getAlgebraicIndexOfBasisSystem)
+TEST_F(GeochemicalSystemTest, getAlgebraicIndexOfBasisSystem)
 {
-  EXPECT_EQ(egs_calcite.getAlgebraicIndexOfBasisSystem()[1], 0);
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicIndexOfBasisSystem()[1], 0);
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicIndexOfBasisSystem()[3], 1);
+  EXPECT_EQ(_egs_calcite.getAlgebraicIndexOfBasisSystem()[1], (unsigned)0);
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicIndexOfBasisSystem()[1], (unsigned)0);
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicIndexOfBasisSystem()[3], (unsigned)1);
 }
 
 /// Check getnw
-TEST(GeochemicalSystemTest, getSolventWaterMass)
+TEST_F(GeochemicalSystemTest, getSolventWaterMass)
 {
-  EXPECT_EQ(egs_calcite.getSolventWaterMass(), 1.0);
+  EXPECT_EQ(_egs_calcite.getSolventWaterMass(), 1.0);
 
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-  const GeochemicalSystem egs(mgd_calcite,
-                              ac3,
-                              is3,
-                              swapper4,
+  const GeochemicalSystem egs(_mgd_calcite,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {},
                               {},
                               "H+",
@@ -1067,20 +989,20 @@ TEST(GeochemicalSystemTest, getSolventWaterMass)
 }
 
 /// Check getBulkMolesOld
-TEST(GeochemicalSystemTest, getBulkMolesOld)
+TEST_F(GeochemicalSystemTest, getBulkMolesOld)
 {
-  EXPECT_EQ(egs_calcite.getBulkMolesOld()[3], 3.0); // Calcite
-  EXPECT_EQ(egs_calcite.getBulkMolesOld()[1], 2.0); // H+
+  EXPECT_EQ(_egs_calcite.getBulkMolesOld()[3], 3.0); // Calcite
+  EXPECT_EQ(_egs_calcite.getBulkMolesOld()[1], 2.0); // H+
 
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-  const GeochemicalSystem egs(mgd_calcite,
-                              ac3,
-                              is3,
-                              swapper4,
+  const GeochemicalSystem egs(_mgd_calcite,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {},
                               {},
                               "H+",
@@ -1099,41 +1021,41 @@ TEST(GeochemicalSystemTest, getBulkMolesOld)
 }
 
 /// Check getSolventMassAndFreeMolalityAndMineralMoles and getAlgebraicVariableValues
-TEST(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
+TEST_F(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
 {
-  EXPECT_EQ(egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
-  EXPECT_EQ(egs_calcite.getAlgebraicVariableValues()[0],
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_calcite.getAlgebraicBasisValues()[0],
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_calcite.getAlgebraicVariableDenseValues()(0),
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
+  EXPECT_EQ(_egs_calcite.getAlgebraicVariableValues()[0],
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getAlgebraicBasisValues()[0],
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getAlgebraicVariableDenseValues()(0),
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
 
-  EXPECT_EQ(egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
-  EXPECT_EQ(egs_calcite.getAlgebraicVariableValues()[0],
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicBasisValues()[0],
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicVariableDenseValues()(0),
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicVariableValues()[1],
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicBasisValues()[1],
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicVariableDenseValues()(1),
-            egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicVariableValues()[2], 1.1);              // Calcite
-  EXPECT_EQ(egs_kinetic_calcite.getAlgebraicVariableDenseValues()(2), 1.1);         // Calcite
+  EXPECT_EQ(_egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
+  EXPECT_EQ(_egs_calcite.getAlgebraicVariableValues()[0],
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicBasisValues()[0],
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableDenseValues()(0),
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableValues()[1],
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicBasisValues()[1],
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableDenseValues()(1),
+            _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[3]); // Ca++
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableValues()[2], 1.1);              // Calcite
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableDenseValues()(2), 1.1);         // Calcite
 
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-  const GeochemicalSystem egs(mgd_calcite,
-                              ac3,
-                              is3,
-                              swapper4,
+  const GeochemicalSystem egs(_mgd_calcite,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {},
                               {},
                               "H+",
@@ -1148,21 +1070,21 @@ TEST(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
   EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[0], 0.5); // H2O
   EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
   EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[3], 3.5); // Calcite
-  EXPECT_EQ(egs_calcite.getAlgebraicVariableValues()[0],
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_calcite.getAlgebraicBasisValues()[0],
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs_calcite.getAlgebraicVariableDenseValues()(0),
-            egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getAlgebraicVariableValues()[0],
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getAlgebraicBasisValues()[0],
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
+  EXPECT_EQ(_egs_calcite.getAlgebraicVariableDenseValues()(0),
+            _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
 }
 
 /// Check getBasisActivityKnown
-TEST(GeochemicalSystemTest, getBasisActivityKnown)
+TEST_F(GeochemicalSystemTest, getBasisActivityKnown)
 {
-  EXPECT_EQ(egs_calcite.getBasisActivityKnown()[0], true);  // H2O
-  EXPECT_EQ(egs_calcite.getBasisActivityKnown()[1], false); // H+
-  EXPECT_EQ(egs_calcite.getBasisActivityKnown()[2], false); // HCO3-
-  EXPECT_EQ(egs_calcite.getBasisActivityKnown()[3], true);  // Calcite
+  EXPECT_EQ(_egs_calcite.getBasisActivityKnown()[0], true);  // H2O
+  EXPECT_EQ(_egs_calcite.getBasisActivityKnown()[1], false); // H+
+  EXPECT_EQ(_egs_calcite.getBasisActivityKnown()[2], false); // HCO3-
+  EXPECT_EQ(_egs_calcite.getBasisActivityKnown()[3], true);  // Calcite
 
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -1176,9 +1098,9 @@ TEST(GeochemicalSystemTest, getBasisActivityKnown)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -1198,15 +1120,15 @@ TEST(GeochemicalSystemTest, getBasisActivityKnown)
 }
 
 /// Check getBasisActivity
-TEST(GeochemicalSystemTest, getBasisActivity)
+TEST_F(GeochemicalSystemTest, getBasisActivity)
 {
-  EXPECT_EQ(egs_calcite.getBasisActivity(0), 1.75);   // H2O
-  EXPECT_EQ(egs_calcite.getBasisActivity(3), 1.0);    // Calcite
-  EXPECT_EQ(egs_calcite.getBasisActivity()[0], 1.75); // H2O
-  EXPECT_EQ(egs_calcite.getBasisActivity()[3], 1.0);  // Calcite
+  EXPECT_EQ(_egs_calcite.getBasisActivity(0), 1.75);   // H2O
+  EXPECT_EQ(_egs_calcite.getBasisActivity(3), 1.0);    // Calcite
+  EXPECT_EQ(_egs_calcite.getBasisActivity()[0], 1.75); // H2O
+  EXPECT_EQ(_egs_calcite.getBasisActivity()[3], 1.0);  // Calcite
   try
   {
-    EXPECT_EQ(egs_calcite.getBasisActivity(4), 1);
+    EXPECT_EQ(_egs_calcite.getBasisActivity(4), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1229,9 +1151,9 @@ TEST(GeochemicalSystemTest, getBasisActivity)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
 
   GeochemicalSystem egs(mgd,
-                        ac0,
-                        is0,
-                        swapper4,
+                        _ac0,
+                        _is0,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -1252,11 +1174,11 @@ TEST(GeochemicalSystemTest, getBasisActivity)
 }
 
 /// Check getBasisActivityCoeff
-TEST(GeochemicalSystemTest, getBasisActivityCoeff)
+TEST_F(GeochemicalSystemTest, getBasisActivityCoeff)
 {
   try
   {
-    EXPECT_EQ(egs_calcite.getBasisActivityCoefficient(4), 1);
+    EXPECT_EQ(_egs_calcite.getBasisActivityCoefficient(4), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1280,9 +1202,9 @@ TEST(GeochemicalSystemTest, getBasisActivityCoeff)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
 
   GeochemicalSystem egs(mgd,
-                        ac0,
-                        is0,
-                        swapper4,
+                        _ac0,
+                        _is0,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -1302,11 +1224,11 @@ TEST(GeochemicalSystemTest, getBasisActivityCoeff)
 }
 
 /// Check getEqmActivityCoefficient exception
-TEST(GeochemicalSystemTest, getEqmActivityCoefficientException)
+TEST_F(GeochemicalSystemTest, getEqmActivityCoefficientException)
 {
   try
   {
-    EXPECT_EQ(egs_calcite.getEquilibriumActivityCoefficient(44), 1);
+    EXPECT_EQ(_egs_calcite.getEquilibriumActivityCoefficient(44), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1320,11 +1242,11 @@ TEST(GeochemicalSystemTest, getEqmActivityCoefficientException)
 }
 
 /// Check getEqmMolality
-TEST(GeochemicalSystemTest, getEqmMolality)
+TEST_F(GeochemicalSystemTest, getEqmMolality)
 {
   try
   {
-    EXPECT_EQ(egs_calcite.getEquilibriumMolality(44), 1);
+    EXPECT_EQ(_egs_calcite.getEquilibriumMolality(44), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1337,89 +1259,89 @@ TEST(GeochemicalSystemTest, getEqmMolality)
   }
 
   // CO2(aq) = -H2O + H+ + HCO3-
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(0) /
-                  (egs_calcite.getBasisActivity(1) * egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getBasisActivity(0) /
-                   egs_calcite.getEquilibriumActivityCoefficient(0) /
-                   std::pow(10.0, egs_calcite.getLog10K(0))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(0) /
+                  (_egs_calcite.getBasisActivity(1) * _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getBasisActivity(0) /
+                   _egs_calcite.getEquilibriumActivityCoefficient(0) /
+                   std::pow(10.0, _egs_calcite.getLog10K(0))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[0] /
-                  (egs_calcite.getBasisActivity(1) * egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getBasisActivity(0) /
-                   egs_calcite.getEquilibriumActivityCoefficient()[0] /
-                   std::pow(10.0, egs_calcite.getLog10K(0))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[0] /
+                  (_egs_calcite.getBasisActivity(1) * _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getBasisActivity(0) /
+                   _egs_calcite.getEquilibriumActivityCoefficient()[0] /
+                   std::pow(10.0, _egs_calcite.getLog10K(0))),
               1.0,
               1.0E-8);
   // CO3-- = HCO3- - H+
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(1) /
-                  (egs_calcite.getBasisActivity(2) / egs_calcite.getBasisActivity(1) /
-                   egs_calcite.getEquilibriumActivityCoefficient(1) /
-                   std::pow(10.0, egs_calcite.getLog10K(1))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(1) /
+                  (_egs_calcite.getBasisActivity(2) / _egs_calcite.getBasisActivity(1) /
+                   _egs_calcite.getEquilibriumActivityCoefficient(1) /
+                   std::pow(10.0, _egs_calcite.getLog10K(1))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[1] /
-                  (egs_calcite.getBasisActivity(2) / egs_calcite.getBasisActivity(1) /
-                   egs_calcite.getEquilibriumActivityCoefficient()[1] /
-                   std::pow(10.0, egs_calcite.getLog10K(1))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[1] /
+                  (_egs_calcite.getBasisActivity(2) / _egs_calcite.getBasisActivity(1) /
+                   _egs_calcite.getEquilibriumActivityCoefficient()[1] /
+                   std::pow(10.0, _egs_calcite.getLog10K(1))),
               1.0,
               1.0E-8);
   // CaCO3 = Calcite
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(2) /
-                  (1.0 / egs_calcite.getEquilibriumActivityCoefficient(2) /
-                   std::pow(10.0, egs_calcite.getLog10K(2))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(2) /
+                  (1.0 / _egs_calcite.getEquilibriumActivityCoefficient(2) /
+                   std::pow(10.0, _egs_calcite.getLog10K(2))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[2] /
-                  (1.0 / egs_calcite.getEquilibriumActivityCoefficient()[2] /
-                   std::pow(10.0, egs_calcite.getLog10K(2))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[2] /
+                  (1.0 / _egs_calcite.getEquilibriumActivityCoefficient()[2] /
+                   std::pow(10.0, _egs_calcite.getLog10K(2))),
               1.0,
               1.0E-8);
   // CaOH+ = Calcite - HCO3- + H20
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(3) /
-                  (egs_calcite.getBasisActivity(0) / egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getEquilibriumActivityCoefficient()[3] /
-                   std::pow(10.0, egs_calcite.getLog10K(3))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(3) /
+                  (_egs_calcite.getBasisActivity(0) / _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getEquilibriumActivityCoefficient()[3] /
+                   std::pow(10.0, _egs_calcite.getLog10K(3))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[3] /
-                  (egs_calcite.getBasisActivity(0) / egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getEquilibriumActivityCoefficient(3) /
-                   std::pow(10.0, egs_calcite.getLog10K(3))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[3] /
+                  (_egs_calcite.getBasisActivity(0) / _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getEquilibriumActivityCoefficient(3) /
+                   std::pow(10.0, _egs_calcite.getLog10K(3))),
               1.0,
               1.0E-8);
   // OH- = H20 - H+
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(4) /
-                  (egs_calcite.getBasisActivity(0) / egs_calcite.getBasisActivity(1) /
-                   egs_calcite.getEquilibriumActivityCoefficient(4) /
-                   std::pow(10.0, egs_calcite.getLog10K(4))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(4) /
+                  (_egs_calcite.getBasisActivity(0) / _egs_calcite.getBasisActivity(1) /
+                   _egs_calcite.getEquilibriumActivityCoefficient(4) /
+                   std::pow(10.0, _egs_calcite.getLog10K(4))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[4] /
-                  (egs_calcite.getBasisActivity(0) / egs_calcite.getBasisActivity(1) /
-                   egs_calcite.getEquilibriumActivityCoefficient()[4] /
-                   std::pow(10.0, egs_calcite.getLog10K(4))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[4] /
+                  (_egs_calcite.getBasisActivity(0) / _egs_calcite.getBasisActivity(1) /
+                   _egs_calcite.getEquilibriumActivityCoefficient()[4] /
+                   std::pow(10.0, _egs_calcite.getLog10K(4))),
               1.0,
               1.0E-8);
   // Ca++ = Calcite - HCO3- + H+
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality(5) /
-                  (egs_calcite.getBasisActivity(1) / egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getEquilibriumActivityCoefficient(5) /
-                   std::pow(10.0, egs_calcite.getLog10K(5))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality(5) /
+                  (_egs_calcite.getBasisActivity(1) / _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getEquilibriumActivityCoefficient(5) /
+                   std::pow(10.0, _egs_calcite.getLog10K(5))),
               1.0,
               1.0E-8);
-  EXPECT_NEAR(egs_calcite.getEquilibriumMolality()[5] /
-                  (egs_calcite.getBasisActivity(1) / egs_calcite.getBasisActivity(2) /
-                   egs_calcite.getEquilibriumActivityCoefficient()[5] /
-                   std::pow(10.0, egs_calcite.getLog10K(5))),
+  EXPECT_NEAR(_egs_calcite.getEquilibriumMolality()[5] /
+                  (_egs_calcite.getBasisActivity(1) / _egs_calcite.getBasisActivity(2) /
+                   _egs_calcite.getEquilibriumActivityCoefficient()[5] /
+                   std::pow(10.0, _egs_calcite.getLog10K(5))),
               1.0,
               1.0E-8);
 }
 
 /// Check computeAndGetEquilibriumActivity)
-TEST(GeochemicalSystemTest, computeAndGetEquilibriumActivity)
+TEST_F(GeochemicalSystemTest, computeAndGetEquilibriumActivity)
 {
-  GeochemicalSystem nonconst = egs_redox;
+  GeochemicalSystem nonconst = _egs_redox;
   const ModelGeochemicalDatabase & mgd = nonconst.getModelGeochemicalDatabase();
   const std::vector<Real> & eqm_m = nonconst.getEquilibriumMolality();
   const std::vector<Real> & eqm_ga = nonconst.getEquilibriumActivityCoefficient();
@@ -1448,11 +1370,11 @@ TEST(GeochemicalSystemTest, computeAndGetEquilibriumActivity)
 }
 
 /// Check getEquilibriumActivity execption
-TEST(GeochemicalSystemTest, getEquilibriumActivityExeception)
+TEST_F(GeochemicalSystemTest, getEquilibriumActivityExeception)
 {
   try
   {
-    EXPECT_EQ(egs_calcite.getEquilibriumActivity(6), 1);
+    EXPECT_EQ(_egs_calcite.getEquilibriumActivity(6), 1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -1466,7 +1388,7 @@ TEST(GeochemicalSystemTest, getEquilibriumActivityExeception)
 }
 
 /// Check getTotalChargeOld
-TEST(GeochemicalSystemTest, getTotalChargeOld)
+TEST_F(GeochemicalSystemTest, getTotalChargeOld)
 {
   const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   const PertinentGeochemicalSystem model(
@@ -1477,9 +1399,9 @@ TEST(GeochemicalSystemTest, getTotalChargeOld)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const GeochemicalSystem egs(mgd,
-                              ac3,
-                              is3,
-                              swapper3,
+                              _ac3,
+                              _is3,
+                              _swapper3,
                               {},
                               {},
                               "StoiCheckBasis",
@@ -1499,17 +1421,17 @@ TEST(GeochemicalSystemTest, getTotalChargeOld)
 }
 
 /// Check getresidual
-TEST(GeochemicalSystemTest, getResidual)
+TEST_F(GeochemicalSystemTest, getResidual)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-  const GeochemicalSystem egs(mgd_calcite,
-                              ac3,
-                              is3,
-                              swapper4,
+  const GeochemicalSystem egs(_mgd_calcite,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {},
                               {},
                               "HCO3-",
@@ -1522,9 +1444,9 @@ TEST(GeochemicalSystemTest, getResidual)
                               {},
                               {});
   // Here, water and HCO3- are the components in the algebraic system
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
 
   const DenseVector<Real> mole_additions(4);
 
@@ -1562,29 +1484,29 @@ TEST(GeochemicalSystemTest, getResidual)
   const Real mHCO3 = egs.getSolventMassAndFreeMolalityAndMineralMoles()[2];
   // H2O has algebraic index = 0 and basis index = 0
   Real res = -175.0 + nw * GeochemistryConstants::MOLES_PER_KG_WATER;
-  for (unsigned j = 0; j < mgd_calcite.eqm_species_name.size(); ++j)
-    res += nw * mgd_calcite.eqm_stoichiometry(j, 0) * egs.getEquilibriumMolality(j);
+  for (unsigned j = 0; j < _mgd_calcite.eqm_species_name.size(); ++j)
+    res += nw * _mgd_calcite.eqm_stoichiometry(j, 0) * egs.getEquilibriumMolality(j);
   EXPECT_NEAR(egs.getResidualComponent(0, mole_additions) / res, 1.0, 1.0E-12);
   // HCO3- has algebraic index = 1 and basis index = 2
   res = -egs.getBulkMolesOld()[1] +
         nw * mHCO3; // first term is because of charge balance (H+ has basis index 1)
-  for (unsigned j = 0; j < mgd_calcite.eqm_species_name.size(); ++j)
-    res += nw * mgd_calcite.eqm_stoichiometry(j, 2) * egs.getEquilibriumMolality(j);
+  for (unsigned j = 0; j < _mgd_calcite.eqm_species_name.size(); ++j)
+    res += nw * _mgd_calcite.eqm_stoichiometry(j, 2) * egs.getEquilibriumMolality(j);
   EXPECT_NEAR(egs.getResidualComponent(1, mole_additions) / res, 1.0, 1.0E-12);
 
   // The above is a good test of the indexing, but due to crazy log10K it is difficult to
   // demonstrate correct residual, so instead:
   PertinentGeochemicalSystem model2(
-      db_calcite, {"H2O", "H+", "StoiCheckBasis"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+      _db_calcite, {"H2O", "H+", "StoiCheckBasis"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2 = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const GeochemicalSystem egs2(mgd2,
-                               ac3,
-                               is3,
-                               swapper3,
+                               _ac3,
+                               _is3,
+                               _swapper3,
                                {},
                                {},
                                "StoiCheckBasis",
@@ -1598,9 +1520,9 @@ TEST(GeochemicalSystemTest, getResidual)
                                {});
   DenseVector<Real> mole_add3(3);
   // Here, water and StoiCheckBasis are the components in the algebraic system
-  EXPECT_EQ(egs2.getNumInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs2.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs2.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs2.getNumInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs2.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs2.getNumSurfacePotentials(), (unsigned)0);
   // The equilibrium species are StoiCheckRedox (m = 9.82934e+06) and OH- (m = 4.78251e-15)
   const Real nw2 = egs2.getSolventMassAndFreeMolalityAndMineralMoles()[0];
   const Real mscb = egs2.getSolventMassAndFreeMolalityAndMineralMoles()[2];
@@ -1622,27 +1544,27 @@ TEST(GeochemicalSystemTest, getResidual)
 }
 
 /// check that  enforcing charge balance works
-TEST(GeochemicalSystemTest, enforceChargeBalance)
+TEST_F(GeochemicalSystemTest, enforceChargeBalance)
 {
-  GeochemicalSystem nonconst = egs_calcite;
+  GeochemicalSystem nonconst = _egs_calcite;
   ASSERT_TRUE(std::abs(nonconst.getTotalChargeOld()) > 1.0); // initially there is nonzero charge
   nonconst.enforceChargeBalance();
   EXPECT_NEAR(nonconst.getTotalChargeOld(), 0.0, 1E-12);
 }
 
 /// Setting algebraic variables exception
-TEST(GeochemicalSystemTest, setVarException)
+TEST_F(GeochemicalSystemTest, setVarException)
 {
-  GeochemicalSystem egs(mgd_calcite,
-                        ac3,
-                        is3,
-                        swapper4,
+  GeochemicalSystem egs(_mgd_calcite,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
                         {"H2O", "Calcite", "H+", "HCO3-"},
                         {1.75, 3.0, 2.0, 1.0},
-                        cm_calcite,
+                        _cm_calcite,
                         25,
                         0,
                         1E-20,
@@ -1683,7 +1605,7 @@ TEST(GeochemicalSystemTest, setVarException)
  * Note that because the Jacobian calculations do not consider derivatives of activity or
  * activity coefficients, they are only roughly correct
  */
-TEST(GeochemicalSystemTest, jac1)
+TEST_F(GeochemicalSystemTest, jac1)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
@@ -1691,10 +1613,10 @@ TEST(GeochemicalSystemTest, jac1)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem egs(
-      mgd_calcite,
-      ac8,
-      is8,
-      swapper4,
+      _mgd_calcite,
+      _ac8,
+      _is8,
+      _swapper4,
       {},
       {},
       "HCO3-",
@@ -1711,9 +1633,9 @@ TEST(GeochemicalSystemTest, jac1)
   DenseMatrix<Real> dmole_add(4, 4);
 
   // Here, water and HCO3- are the components in the algebraic system
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   DenseVector<Real> res_orig(2);
   res_orig(0) = egs.getResidualComponent(0, mole_add);
   res_orig(1) = egs.getResidualComponent(1, mole_add);
@@ -1780,17 +1702,17 @@ TEST(GeochemicalSystemTest, jac1)
  * Note that because the Jacobian calculations do not consider derivatives of activity or
  * activity coefficients, they are only roughly correct
  */
-TEST(GeochemicalSystemTest, jac2)
+TEST_F(GeochemicalSystemTest, jac2)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-  GeochemicalSystem egs(mgd_calcite,
-                        ac8,
-                        is8,
-                        swapper4,
+  GeochemicalSystem egs(_mgd_calcite,
+                        _ac8,
+                        _is8,
+                        _swapper4,
                         {},
                         {},
                         "HCO3-",
@@ -1806,9 +1728,9 @@ TEST(GeochemicalSystemTest, jac2)
   DenseMatrix<Real> dmole_add(4, 4);
 
   // Here, H+ and HCO3- are the components in the algebraic system
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   DenseVector<Real> res_orig(2);
   res_orig(0) = egs.getResidualComponent(0, mole_add);
   res_orig(1) = egs.getResidualComponent(1, mole_add);
@@ -1876,17 +1798,17 @@ TEST(GeochemicalSystemTest, jac2)
  * fixed. Note that because the Jacobian calculations do not consider derivatives of activity or
  * activity coefficients, they are only roughly correct
  */
-TEST(GeochemicalSystemTest, jac3)
+TEST_F(GeochemicalSystemTest, jac3)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
-  GeochemicalSystem egs(mgd_calcite,
-                        ac8,
-                        is8,
-                        swapper4,
+  GeochemicalSystem egs(_mgd_calcite,
+                        _ac8,
+                        _is8,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -1902,9 +1824,9 @@ TEST(GeochemicalSystemTest, jac3)
   DenseMatrix<Real> dmole_add(4, 4);
 
   // Here H+ is the only component in the algebraic system
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   DenseVector<Real> res_orig(1);
   res_orig(0) = egs.getResidualComponent(0, mole_add);
   const std::vector<Real> var_orig = egs.getAlgebraicVariableValues(); // around 3E-4
@@ -1940,10 +1862,10 @@ TEST(GeochemicalSystemTest, jac3)
  * Note that because the Jacobian calculations do not consider derivatives of activity or
  * activity coefficients, they are only roughly correct
  */
-TEST(GeochemicalSystemTest, jac4)
+TEST_F(GeochemicalSystemTest, jac4)
 {
   const PertinentGeochemicalSystem model(
-      db_calcite, {"H2O", "H+", "Ca++", "HCO3-"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+      _db_calcite, {"H2O", "H+", "Ca++", "HCO3-"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
@@ -1951,9 +1873,9 @@ TEST(GeochemicalSystemTest, jac4)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
   GeochemicalSystem egs(mgd,
-                        ac8,
-                        is8,
-                        swapper4,
+                        _ac8,
+                        _is8,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -1968,9 +1890,9 @@ TEST(GeochemicalSystemTest, jac4)
   DenseVector<Real> mole_add(4);
   DenseMatrix<Real> dmole_add(4, 4);
 
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 3);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 3);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)3);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)3);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   DenseVector<Real> res_orig(3);
   res_orig(0) = egs.getResidualComponent(0, mole_add);
   res_orig(1) = egs.getResidualComponent(1, mole_add);
@@ -2029,10 +1951,10 @@ TEST(GeochemicalSystemTest, jac4)
 }
 
 /// check saturation indices
-TEST(GeochemicalSystemTest, saturationIndices)
+TEST_F(GeochemicalSystemTest, saturationIndices)
 {
   const PertinentGeochemicalSystem model(
-      db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+      _db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_fixed_activity = {
       GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
@@ -2040,9 +1962,9 @@ TEST(GeochemicalSystemTest, saturationIndices)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
   const GeochemicalSystem egs(mgd,
-                              ac3,
-                              is3,
-                              swapper4,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {},
                               {},
                               "H+",
@@ -2067,9 +1989,9 @@ TEST(GeochemicalSystemTest, saturationIndices)
 }
 
 /// check swap exceptions
-TEST(GeochemicalSystemTest, swapExceptions)
+TEST_F(GeochemicalSystemTest, swapExceptions)
 {
-  GeochemicalSystem nonconst = egs_calcite;
+  GeochemicalSystem nonconst = _egs_calcite;
   try
   {
     nonconst.performSwap(0, 0);
@@ -2111,9 +2033,9 @@ TEST(GeochemicalSystemTest, swapExceptions)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -2145,9 +2067,9 @@ TEST(GeochemicalSystemTest, swapExceptions)
   cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
   cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
   GeochemicalSystem egs2(mgd,
-                         ac3,
-                         is3,
-                         swapper4,
+                         _ac3,
+                         _is3,
+                         _swapper4,
                          {"O2(aq)"},
                          {"O2(g)"},
                          "H+",
@@ -2175,18 +2097,18 @@ TEST(GeochemicalSystemTest, swapExceptions)
 }
 
 /// check swap
-TEST(GeochemicalSystemTest, swap)
+TEST_F(GeochemicalSystemTest, swap)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-  ModelGeochemicalDatabase mgd = model_calcite.modelGeochemicalDatabase();
+  ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"Ca++"},
                         {"Calcite"},
                         "H+",
@@ -2199,34 +2121,35 @@ TEST(GeochemicalSystemTest, swap)
                         {},
                         {});
 
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getInAlgebraicSystem()[0], false);
   EXPECT_EQ(egs.getInAlgebraicSystem()[1], true);
   EXPECT_EQ(egs.getInAlgebraicSystem()[2], false);
   EXPECT_EQ(egs.getInAlgebraicSystem()[3], false);
-  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), 1);
+  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), (unsigned)1);
   const std::vector<Real> bm = egs.getBulkMolesOld();
 
   egs.performSwap(3, 5); // swap out Calcite and replace by Ca++
 
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 2);      // now Ca++ has a bulk moles attached to it
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 2); // now Ca++ has a bulk moles attached to it
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)2); // now Ca++ has a bulk moles attached to it
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(),
+            (unsigned)2); // now Ca++ has a bulk moles attached to it
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getInAlgebraicSystem()[0], false);
   EXPECT_EQ(egs.getInAlgebraicSystem()[1], true);
   EXPECT_EQ(egs.getInAlgebraicSystem()[2], false);
   EXPECT_EQ(egs.getInAlgebraicSystem()[3], true);
   // Ca++ = Calcite - HCO3- + H+.  So, same number of bulk moles of Ca++ as Calcite, but number of
   // bulk moles of H+ = (original bulk moles of H+) - bulk moles of Calcite
-  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), 1);
+  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), (unsigned)1);
   EXPECT_NEAR(egs.getBulkMolesOld()[1], bm[1] - bm[3], 1.0E-7);
   EXPECT_NEAR(egs.getBulkMolesOld()[3], bm[3], 1.0E-7);
 }
 
 /// check get ionic strengths
-TEST(GeochemicalSystemTest, getIS)
+TEST_F(GeochemicalSystemTest, getIS)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
@@ -2234,12 +2157,12 @@ TEST(GeochemicalSystemTest, getIS)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemistryIonicStrength is(0.0078125, 0.0078125, false, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(is, db_calcite);
-  ModelGeochemicalDatabase mgd = model_calcite.modelGeochemicalDatabase();
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is, _db_calcite);
+  ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs_small_IS(mgd,
                                        ac,
                                        is,
-                                       swapper4,
+                                       _swapper4,
                                        {},
                                        {},
                                        "H+",
@@ -2255,12 +2178,12 @@ TEST(GeochemicalSystemTest, getIS)
   EXPECT_EQ(egs_small_IS.getStoichiometricIonicStrength(), 0.0078125);
 
   GeochemistryIonicStrength is_false(3.0, 3.0, true, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac_false(is_false, db_calcite);
+  GeochemistryActivityCoefficientsDebyeHuckel ac_false(is_false, _db_calcite);
   const GeochemicalSystem egs(
       mgd,
       ac_false,
       is_false,
-      swapper4,
+      _swapper4,
       {},
       {},
       "H+",
@@ -2277,7 +2200,7 @@ TEST(GeochemicalSystemTest, getIS)
 }
 
 /// Check alterChargeBalanceSpecies and revert
-TEST(GeochemicalSystemTest, alterAndRevertChargeBalance)
+TEST_F(GeochemicalSystemTest, alterAndRevertChargeBalance)
 {
   const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   const PertinentGeochemicalSystem model(
@@ -2288,9 +2211,9 @@ TEST(GeochemicalSystemTest, alterAndRevertChargeBalance)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper3,
+                        _ac3,
+                        _is3,
+                        _swapper3,
                         {},
                         {},
                         "StoiCheckBasis",
@@ -2308,50 +2231,50 @@ TEST(GeochemicalSystemTest, alterAndRevertChargeBalance)
               1.0 / 2.5,
               1E-9); // this has been changed from 5.0 by the charge-balancing
   EXPECT_EQ(egs.getBulkMolesOld()[2], 1.0);
-  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), 1);
+  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), (unsigned)1);
 
   // StoiCheckBasis has molality 0.2, while HCO3- has molality 0.5, so can change the charge-balance
   // species via:
   egs.alterChargeBalanceSpecies(0.3); // now the charge-balance species should be HCO3-
-  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), 2);
+  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), (unsigned)2);
   EXPECT_EQ(egs.getBulkMolesOld()[1], 5.0);
   EXPECT_EQ(egs.getBulkMolesOld()[2],
             5 * 2.5); // this has been changed from 1.0 by the charge-balancing
 
   // revert to the original
   EXPECT_TRUE(egs.revertToOriginalChargeBalanceSpecies());
-  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), 1);
+  EXPECT_EQ(egs.getChargeBalanceBasisIndex(), (unsigned)1);
   EXPECT_NEAR(egs.getBulkMolesOld()[1], 1.0 / 2.5, 1E-9);
   EXPECT_EQ(egs.getBulkMolesOld()[2], 1.0);
 }
 
 /// Check getNumRedox
-TEST(GeochemicalSystemTest, getNumRedox) { EXPECT_EQ(egs_redox.getNumRedox(), 3); }
+TEST_F(GeochemicalSystemTest, getNumRedox) { EXPECT_EQ(_egs_redox.getNumRedox(), (unsigned)3); }
 
 /// Check getOriginalRedoxLHS
-TEST(GeochemicalSystemTest, getOriginalRedoxLHS)
+TEST_F(GeochemicalSystemTest, getOriginalRedoxLHS)
 {
-  EXPECT_EQ(egs_redox.getOriginalRedoxLHS(), "e-");
+  EXPECT_EQ(_egs_redox.getOriginalRedoxLHS(), "e-");
 }
 
 /// Check getRedoxLog10K
-TEST(GeochemicalSystemTest, getRedoxLog10K)
+TEST_F(GeochemicalSystemTest, getRedoxLog10K)
 {
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
-  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const bool ophth_is_slot_one = (_mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
   const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
   const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
   Real boa = 1.0 / 4.0 / 7.5;
   EXPECT_NEAR(
-      egs_redox.getRedoxLog10K(ophth_slot), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+      _egs_redox.getRedoxLog10K(ophth_slot), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
   boa = 1.0 / 8.0;
   EXPECT_NEAR(
-      egs_redox.getRedoxLog10K(ch4_slot), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+      _egs_redox.getRedoxLog10K(ch4_slot), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
   try
   {
-    egs_redox.getRedoxLog10K(3);
+    _egs_redox.getRedoxLog10K(3);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2366,27 +2289,27 @@ TEST(GeochemicalSystemTest, getRedoxLog10K)
 }
 
 /// Check log10RedoxActivityProduct
-TEST(GeochemicalSystemTest, log10RedoxActivityProduct)
+TEST_F(GeochemicalSystemTest, log10RedoxActivityProduct)
 {
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
-  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const bool ophth_is_slot_one = (_mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
   const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
   const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
 
   Real boa = 1.0 / 4.0 / 7.5;
   const Real log10ap_o =
       boa * std::log10(5.0) + (-1.0 - 6.0 * boa) * std::log10(2.0) - 8 * boa * std::log10(3.0);
-  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(ophth_slot), log10ap_o, 1E-8);
+  EXPECT_NEAR(_egs_redox.log10RedoxActivityProduct(ophth_slot), log10ap_o, 1E-8);
 
   boa = 1.0 / 8.0;
   const Real log10ap_c =
       boa * std::log10(6.0) - (1.0 + boa) * std::log10(2.0) - boa * std::log10(3.0);
-  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(ch4_slot), log10ap_c, 1E-8);
+  EXPECT_NEAR(_egs_redox.log10RedoxActivityProduct(ch4_slot), log10ap_c, 1E-8);
   try
   {
-    egs_redox.log10RedoxActivityProduct(3);
+    _egs_redox.log10RedoxActivityProduct(3);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2399,11 +2322,11 @@ TEST(GeochemicalSystemTest, log10RedoxActivityProduct)
 }
 
 /// Check getSurfacePotential exception
-TEST(GeochemicalSystemTest, getSurfacePotentialException)
+TEST_F(GeochemicalSystemTest, getSurfacePotentialException)
 {
   try
   {
-    egs_calcite.getSurfacePotential(0);
+    _egs_calcite.getSurfacePotential(0);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2416,11 +2339,11 @@ TEST(GeochemicalSystemTest, getSurfacePotentialException)
 }
 
 /// Check getSurfaceCharge exception
-TEST(GeochemicalSystemTest, getSurfaceChargeException)
+TEST_F(GeochemicalSystemTest, getSurfaceChargeException)
 {
   try
   {
-    egs_calcite.getSurfaceCharge(0);
+    _egs_calcite.getSurfaceCharge(0);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2433,7 +2356,7 @@ TEST(GeochemicalSystemTest, getSurfaceChargeException)
 }
 
 /// Check sorbing surface area
-TEST(GeochemicalSystemTest, sorbingSurfaceArea)
+TEST_F(GeochemicalSystemTest, sorbingSurfaceArea)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -2453,9 +2376,9 @@ TEST(GeochemicalSystemTest, sorbingSurfaceArea)
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES};
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper5,
+                        _ac3,
+                        _is3,
+                        _swapper5,
                         {"Fe+++"},
                         {"Fe(OH)3(ppd)"},
                         "H+",
@@ -2467,12 +2390,12 @@ TEST(GeochemicalSystemTest, sorbingSurfaceArea)
                         1E-20,
                         {},
                         {});
-  EXPECT_EQ(egs.getSorbingSurfaceArea().size(), 1);
+  EXPECT_EQ(egs.getSorbingSurfaceArea().size(), (std::size_t)1);
   EXPECT_EQ(egs.getSorbingSurfaceArea()[0], 1.5 * 106.8689 * 600.0);
 }
 
 /// Check surface potential things (not jacobian)
-TEST(GeochemicalSystemTest, surfacePot)
+TEST_F(GeochemicalSystemTest, surfacePot)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -2494,9 +2417,9 @@ TEST(GeochemicalSystemTest, surfacePot)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const Real temp = 45.0;
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper6,
+                        _ac3,
+                        _is3,
+                        _swapper6,
                         {},
                         {},
                         "H+",
@@ -2512,22 +2435,22 @@ TEST(GeochemicalSystemTest, surfacePot)
   const DenseMatrix<Real> dmole_add(6, 6);
 
   // test basic things like sizes and that the algebraic variables are correctly set
-  EXPECT_EQ(egs.getNumInAlgebraicSystem(), 3);
-  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 1);
+  EXPECT_EQ(egs.getNumInAlgebraicSystem(), (unsigned)3);
+  EXPECT_EQ(egs.getNumBasisInAlgebraicSystem(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)1);
   EXPECT_EQ(egs.getBasisIndexOfAlgebraicSystem()[0],
-            1); // H+ is slot=0 in algebraic system and slot=1 in basis
+            (unsigned)1); // H+ is slot=0 in algebraic system and slot=1 in basis
   EXPECT_EQ(egs.getBasisIndexOfAlgebraicSystem()[1],
-            5); // HCO3-
-  EXPECT_EQ(egs.getAlgebraicIndexOfBasisSystem()[1], 0);
-  EXPECT_EQ(egs.getAlgebraicIndexOfBasisSystem()[5], 1);
+            (unsigned)5); // HCO3-
+  EXPECT_EQ(egs.getAlgebraicIndexOfBasisSystem()[1], (unsigned)0);
+  EXPECT_EQ(egs.getAlgebraicIndexOfBasisSystem()[5], (unsigned)1);
   DenseVector<Real> alg_vars = egs.getAlgebraicVariableDenseValues();
-  EXPECT_EQ(alg_vars.size(), 3);
+  EXPECT_EQ(alg_vars.size(), (std::size_t)3);
   std::vector<Real> mols = egs.getAlgebraicBasisValues();
-  EXPECT_EQ(mols.size(), 2);
+  EXPECT_EQ(mols.size(), (std::size_t)2);
   EXPECT_EQ(mols[0], alg_vars(0));
   EXPECT_EQ(mols[1], alg_vars(1));
-  EXPECT_EQ(egs.getAlgebraicVariableValues().size(), 3);
+  EXPECT_EQ(egs.getAlgebraicVariableValues().size(), (std::size_t)3);
 
   // try setting a _surface_pot_expr to a non-positive quantity
   try
@@ -2550,7 +2473,7 @@ TEST(GeochemicalSystemTest, surfacePot)
 
   // check that the setting worked
   const std::vector<Real> av = egs.getAlgebraicVariableValues();
-  EXPECT_EQ(av.size(), 3);
+  EXPECT_EQ(av.size(), (std::size_t)3);
   for (unsigned i = 0; i < 3; ++i)
     EXPECT_EQ(av[i], alg_vars(i));
 
@@ -2619,7 +2542,7 @@ TEST(GeochemicalSystemTest, surfacePot)
 }
 
 /// Check jacobian when there is a surface potential
-TEST(GeochemicalSystemTest, surfacePotJac)
+TEST_F(GeochemicalSystemTest, surfacePotJac)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -2645,7 +2568,7 @@ TEST(GeochemicalSystemTest, surfacePotJac)
   GeochemicalSystem egs(mgd,
                         ac2,
                         is2,
-                        swapper6,
+                        _swapper6,
                         {},
                         {},
                         "H+",
@@ -2687,7 +2610,7 @@ TEST(GeochemicalSystemTest, surfacePotJac)
 }
 
 /// Check jacobian when there is a surface potential and kinetic species
-TEST(GeochemicalSystemTest, bigJac)
+TEST_F(GeochemicalSystemTest, bigJac)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -2713,7 +2636,7 @@ TEST(GeochemicalSystemTest, bigJac)
   GeochemicalSystem egs(mgd,
                         ac2,
                         is2,
-                        swapper6,
+                        _swapper6,
                         {},
                         {},
                         "H+",
@@ -2755,7 +2678,7 @@ TEST(GeochemicalSystemTest, bigJac)
 }
 
 /// Check jacobian when there is a surface potential and kinetic species and mole additions
-TEST(GeochemicalSystemTest, bigJac2)
+TEST_F(GeochemicalSystemTest, bigJac2)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
@@ -2781,7 +2704,7 @@ TEST(GeochemicalSystemTest, bigJac2)
   GeochemicalSystem egs(mgd,
                         ac2,
                         is2,
-                        swapper6,
+                        _swapper6,
                         {},
                         {},
                         "H+",
@@ -2842,18 +2765,18 @@ TEST(GeochemicalSystemTest, bigJac2)
 }
 
 /// Check setTemperature and getTemperature
-TEST(GeochemicalSystemTest, setGetTemperature)
+TEST_F(GeochemicalSystemTest, setGetTemperature)
 {
-  GeochemicalSystem nonconst = egs_calcite;
+  GeochemicalSystem nonconst = _egs_calcite;
   EXPECT_EQ(nonconst.getTemperature(), 25.0);
   nonconst.setTemperature(40.0);
   EXPECT_EQ(nonconst.getTemperature(), 40.0);
 }
 
 /// Check exceptions for setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
-TEST(GeochemicalSystemTest, setMolalitiesExcept1)
+TEST_F(GeochemicalSystemTest, setMolalitiesExcept1)
 {
-  GeochemicalSystem nonconst = egs_calcite;
+  GeochemicalSystem nonconst = _egs_calcite;
 
   try
   {
@@ -3024,10 +2947,10 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept1)
 }
 
 /// Check exceptions for setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
-TEST(GeochemicalSystemTest, setMolalitiesExcept2)
+TEST_F(GeochemicalSystemTest, setMolalitiesExcept2)
 {
   const PertinentGeochemicalSystem model_gas_and_sorption(
-      db_calcite,
+      _db_calcite,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
       {"Goethite"},
       {"O2(g)"},
@@ -3046,9 +2969,9 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem nonconst(mgd,
-                             ac3,
-                             is3,
-                             swapper7,
+                             _ac3,
+                             _is3,
+                             _swapper7,
                              {"O2(aq)"},
                              {"O2(g)"},
                              "H+",
@@ -3249,9 +3172,9 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
 }
 
 /// Check exceptions for setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
-TEST(GeochemicalSystemTest, setMolalitiesExcept3)
+TEST_F(GeochemicalSystemTest, setMolalitiesExcept3)
 {
-  GeochemicalSystem nonconst = egs_kinetic_calcite;
+  GeochemicalSystem nonconst = _egs_kinetic_calcite;
   try
   {
     nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
@@ -3287,10 +3210,10 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept3)
 }
 
 /// Check setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
-TEST(GeochemicalSystemTest, setMolalities1)
+TEST_F(GeochemicalSystemTest, setMolalities1)
 {
   const PertinentGeochemicalSystem model_gas_and_sorption(
-      db_calcite,
+      _db_calcite,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
       {"Goethite"},
       {"O2(g)"},
@@ -3309,9 +3232,9 @@ TEST(GeochemicalSystemTest, setMolalities1)
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem nonconst(mgd,
-                             ac0,
-                             is0,
-                             swapper7,
+                             _ac0,
+                             _is0,
+                             _swapper7,
                              {"O2(aq)"},
                              {"O2(g)"},
                              "Fe+++",
@@ -3400,10 +3323,10 @@ TEST(GeochemicalSystemTest, setMolalities1)
 }
 
 /// Check setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
-TEST(GeochemicalSystemTest, setMolalities2)
+TEST_F(GeochemicalSystemTest, setMolalities2)
 {
   const PertinentGeochemicalSystem model_gas_and_sorption(
-      db_calcite,
+      _db_calcite,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
       {"Goethite"},
       {"O2(g)"},
@@ -3422,9 +3345,9 @@ TEST(GeochemicalSystemTest, setMolalities2)
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem nonconst(mgd,
-                             ac3,
-                             is3,
-                             swapper7,
+                             _ac3,
+                             _is3,
+                             _swapper7,
                              {"O2(aq)"},
                              {"O2(g)"},
                              "Fe+++",
@@ -3515,18 +3438,18 @@ TEST(GeochemicalSystemTest, setMolalities2)
 }
 
 /// Check getConstraintMeaning
-TEST(GeochemicalSystemTest, getConstraintMeaning)
+TEST_F(GeochemicalSystemTest, getConstraintMeaning)
 {
-  ModelGeochemicalDatabase mgd = model_calcite.modelGeochemicalDatabase();
+  ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const GeochemicalSystem egs(mgd,
-                              ac3,
-                              is3,
-                              swapper4,
+                              _ac3,
+                              _is3,
+                              _swapper4,
                               {"Ca++"},
                               {"Calcite"},
                               "H+",
@@ -3543,7 +3466,7 @@ TEST(GeochemicalSystemTest, getConstraintMeaning)
 }
 
 /// Check changeConstraintToBulk exceptions
-TEST(GeochemicalSystemTest, changeContraintToBulkExceptions)
+TEST_F(GeochemicalSystemTest, changeContraintToBulkExceptions)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3557,9 +3480,9 @@ TEST(GeochemicalSystemTest, changeContraintToBulkExceptions)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -3615,7 +3538,7 @@ TEST(GeochemicalSystemTest, changeContraintToBulkExceptions)
 }
 
 /// Check closeSystem
-TEST(GeochemicalSystemTest, closeSystem)
+TEST_F(GeochemicalSystemTest, closeSystem)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3629,9 +3552,9 @@ TEST(GeochemicalSystemTest, closeSystem)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -3651,7 +3574,7 @@ TEST(GeochemicalSystemTest, closeSystem)
 }
 
 /// Check changeConstraintToBulk
-TEST(GeochemicalSystemTest, changeConstraintToBulk)
+TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3665,9 +3588,9 @@ TEST(GeochemicalSystemTest, changeConstraintToBulk)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -3712,7 +3635,7 @@ TEST(GeochemicalSystemTest, changeConstraintToBulk)
 }
 
 /// Check addToBulkMoles exceptions
-TEST(GeochemicalSystemTest, addToBulkMolesExceptions)
+TEST_F(GeochemicalSystemTest, addToBulkMolesExceptions)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3726,9 +3649,9 @@ TEST(GeochemicalSystemTest, addToBulkMolesExceptions)
   cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {"O2(aq)"},
                         {"O2(g)"},
                         "H+",
@@ -3757,7 +3680,7 @@ TEST(GeochemicalSystemTest, addToBulkMolesExceptions)
 }
 
 /// Check addToBulkMoles
-TEST(GeochemicalSystemTest, addToBulkMoles)
+TEST_F(GeochemicalSystemTest, addToBulkMoles)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3773,9 +3696,9 @@ TEST(GeochemicalSystemTest, addToBulkMoles)
   std::vector<Real> bm = {1.0, 2.0, 3.0, 4.0};
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -3803,9 +3726,9 @@ TEST(GeochemicalSystemTest, addToBulkMoles)
 }
 
 /// Check setConstraintValue exceptions
-TEST(GeochemicalSystemTest, setConstraintValueExceptions)
+TEST_F(GeochemicalSystemTest, setConstraintValueExceptions)
 {
-  GeochemicalSystem nonconst = egs_calcite;
+  GeochemicalSystem nonconst = _egs_calcite;
   try
   {
     nonconst.setConstraintValue(4, 1.0);
@@ -3823,7 +3746,7 @@ TEST(GeochemicalSystemTest, setConstraintValueExceptions)
 }
 
 /// Check setConstraintValue
-TEST(GeochemicalSystemTest, setConstraintValue)
+TEST_F(GeochemicalSystemTest, setConstraintValue)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -3839,9 +3762,9 @@ TEST(GeochemicalSystemTest, setConstraintValue)
   std::vector<Real> bm_in = {1.0, 2.0, 3.0, 4.0};
 
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -3902,7 +3825,7 @@ TEST(GeochemicalSystemTest, setConstraintValue)
 }
 
 /// illustrates how to use getModelGeochemicalDatabase and setModelGeochemicalDatabase
-TEST(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
+TEST_F(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
 {
   // this test involves radically changing the basis to illustrate copying, etc, works: no coder
   // should actually perform these radical changes otherwise a crash is virtually guaranteed!
@@ -3915,12 +3838,12 @@ TEST(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem egs(
-      mgd, ac3, is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cm, 25, 0, 1E-20, {}, {});
+      mgd, _ac3, _is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cm, 25, 0, 1E-20, {}, {});
 
   const ModelGeochemicalDatabase & mgd_ref = egs.getModelGeochemicalDatabase();
-  EXPECT_EQ(mgd_ref.basis_species_name.size(), 2);
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), (std::size_t)2);
   ModelGeochemicalDatabase copy_of_mgd = egs.getModelGeochemicalDatabase();
-  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2);
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), (std::size_t)2);
 
   // the following copies all the data of egs into copy_of_egs, but only the references (such as
   // _mgd) get copied: the data they refer to doesn't get copied
@@ -3934,27 +3857,28 @@ TEST(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
   // Copy mgd3 into the memory referred to by copy_of_egs._mgd, which is also referred to by
   // egs._mgd and mgd_ref
   copy_of_egs.setModelGeochemicalDatabase(mgd3);
-  EXPECT_EQ(mgd_ref.basis_species_name.size(), 3);
-  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), 3);
-  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), 3);
-  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2); // copy_of_mgd shouldn't be impacted
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), (std::size_t)3);
+  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), (std::size_t)3);
+  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), (std::size_t)3);
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(),
+            (std::size_t)2); // copy_of_mgd shouldn't be impacted
 
   // do a similar thing with 1 basis species
   const PertinentGeochemicalSystem pgs1(db, {"H2O"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd1 = pgs1.modelGeochemicalDatabase();
   egs.setModelGeochemicalDatabase(mgd1);
-  EXPECT_EQ(mgd_ref.basis_species_name.size(), 1);
-  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), 1);
-  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), 1);
-  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2);
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), (std::size_t)1);
+  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), (std::size_t)1);
+  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), (std::size_t)1);
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), (std::size_t)2);
 }
 
 /// check setMineralRelatedFreeMoles
-TEST(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
+TEST_F(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
 {
   // first, create an GeochemicalSystem that has minerals and sorption-related things
   const PertinentGeochemicalSystem model_gas_and_sorption(
-      db_calcite,
+      _db_calcite,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH", "Ca++"},
       {"Goethite", "Calcite"},
       {"O2(g)"},
@@ -3975,9 +3899,9 @@ TEST(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem nonconst(
       mgd,
-      ac0,
-      is0,
-      swapper8,
+      _ac0,
+      _is0,
+      _swapper8,
       {"O2(aq)", "Ca++"},
       {"O2(g)", "Calcite"},
       "Fe+++",
@@ -4033,20 +3957,20 @@ TEST(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
 }
 
 /// check initialKineticMole exceptions
-TEST(GeochemicalSystemTest, initialKinMoleExcept)
+TEST_F(GeochemicalSystemTest, initialKinMoleExcept)
 {
   try
   {
-    const GeochemicalSystem bad(mgd_kinetic_calcite,
-                                ac3,
-                                is3,
-                                swapper4,
+    const GeochemicalSystem bad(_mgd_kinetic_calcite,
+                                _ac3,
+                                _is3,
+                                _swapper4,
                                 {},
                                 {},
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
-                                cm_calcite,
+                                _cm_calcite,
                                 25,
                                 0,
                                 1E-20,
@@ -4064,16 +3988,16 @@ TEST(GeochemicalSystemTest, initialKinMoleExcept)
 
   try
   {
-    const GeochemicalSystem bad(mgd_kinetic_calcite,
-                                ac3,
-                                is3,
-                                swapper4,
+    const GeochemicalSystem bad(_mgd_kinetic_calcite,
+                                _ac3,
+                                _is3,
+                                _swapper4,
                                 {},
                                 {},
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
-                                cm_calcite,
+                                _cm_calcite,
                                 25,
                                 0,
                                 1E-20,
@@ -4091,16 +4015,16 @@ TEST(GeochemicalSystemTest, initialKinMoleExcept)
 
   try
   {
-    const GeochemicalSystem bad(mgd_kinetic_calcite,
-                                ac3,
-                                is3,
-                                swapper4,
+    const GeochemicalSystem bad(_mgd_kinetic_calcite,
+                                _ac3,
+                                _is3,
+                                _swapper4,
                                 {},
                                 {},
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
-                                cm_calcite,
+                                _cm_calcite,
                                 25,
                                 0,
                                 1E-20,
@@ -4118,16 +4042,16 @@ TEST(GeochemicalSystemTest, initialKinMoleExcept)
 
   try
   {
-    const GeochemicalSystem bad(mgd_kinetic_calcite,
-                                ac3,
-                                is3,
-                                swapper4,
+    const GeochemicalSystem bad(_mgd_kinetic_calcite,
+                                _ac3,
+                                _is3,
+                                _swapper4,
                                 {},
                                 {},
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
-                                cm_calcite,
+                                _cm_calcite,
                                 25,
                                 0,
                                 1E-20,
@@ -4145,11 +4069,11 @@ TEST(GeochemicalSystemTest, initialKinMoleExcept)
 }
 
 /// check getKineticLog10K exceptions
-TEST(GeochemicalSystemTest, getKineticLog10Kexcept)
+TEST_F(GeochemicalSystemTest, getKineticLog10Kexcept)
 {
   try
   {
-    egs_kinetic_calcite.getKineticLog10K(1);
+    _egs_kinetic_calcite.getKineticLog10K(1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4162,11 +4086,11 @@ TEST(GeochemicalSystemTest, getKineticLog10Kexcept)
 }
 
 /// check log10KineticActivityProduct exceptions
-TEST(GeochemicalSystemTest, log10KineticActivityProductExcept)
+TEST_F(GeochemicalSystemTest, log10KineticActivityProductExcept)
 {
   try
   {
-    egs_kinetic_calcite.log10KineticActivityProduct(1);
+    _egs_kinetic_calcite.log10KineticActivityProduct(1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4180,11 +4104,11 @@ TEST(GeochemicalSystemTest, log10KineticActivityProductExcept)
 }
 
 /// check getKineticMoles exceptions
-TEST(GeochemicalSystemTest, getKineticMolesExcept)
+TEST_F(GeochemicalSystemTest, getKineticMolesExcept)
 {
   try
   {
-    egs_kinetic_calcite.getKineticMoles(1);
+    _egs_kinetic_calcite.getKineticMoles(1);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4197,9 +4121,9 @@ TEST(GeochemicalSystemTest, getKineticMolesExcept)
 }
 
 /// check setKineticMoles exceptions
-TEST(GeochemicalSystemTest, setKineticMolesExcept)
+TEST_F(GeochemicalSystemTest, setKineticMolesExcept)
 {
-  GeochemicalSystem nonconst = egs_kinetic_calcite;
+  GeochemicalSystem nonconst = _egs_kinetic_calcite;
 
   try
   {
@@ -4229,28 +4153,31 @@ TEST(GeochemicalSystemTest, setKineticMolesExcept)
 }
 
 /// check getNumKinetic
-TEST(GeochemicalSystemTest, getNumKinetic) { EXPECT_EQ(egs_kinetic_calcite.getNumKinetic(), 1); }
+TEST_F(GeochemicalSystemTest, getNumKinetic)
+{
+  EXPECT_EQ(_egs_kinetic_calcite.getNumKinetic(), (unsigned)1);
+}
 
 /// check getKineticLog10K
-TEST(GeochemicalSystemTest, getKineticLog10K)
+TEST_F(GeochemicalSystemTest, getKineticLog10K)
 {
-  EXPECT_EQ(egs_kinetic_calcite.getKineticLog10K(0), 1.7130);
-  EXPECT_EQ(egs_kinetic_calcite.getKineticLog10K().size(), 1);
-  EXPECT_EQ(egs_kinetic_calcite.getKineticLog10K()[0], 1.7130);
+  EXPECT_EQ(_egs_kinetic_calcite.getKineticLog10K(0), 1.7130);
+  EXPECT_EQ(_egs_kinetic_calcite.getKineticLog10K().size(), (std::size_t)1);
+  EXPECT_EQ(_egs_kinetic_calcite.getKineticLog10K()[0], 1.7130);
 }
 
 /// check log10KineticActivityProduct
-TEST(GeochemicalSystemTest, log10KineticActivityProduct)
+TEST_F(GeochemicalSystemTest, log10KineticActivityProduct)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-  const GeochemicalSystem gs(mgd_kinetic_calcite,
-                             ac3,
-                             is3,
-                             swapper4,
+  const GeochemicalSystem gs(_mgd_kinetic_calcite,
+                             _ac3,
+                             _is3,
+                             _swapper4,
                              {},
                              {},
                              "Ca++",
@@ -4268,76 +4195,76 @@ TEST(GeochemicalSystemTest, log10KineticActivityProduct)
 }
 
 /// check getKineticMoles
-TEST(GeochemicalSystemTest, getKineticMoles)
+TEST_F(GeochemicalSystemTest, getKineticMoles)
 {
-  GeochemicalSystem gs(mgd_kinetic_calcite,
-                       ac3,
-                       is3,
-                       swapper4,
+  GeochemicalSystem gs(_mgd_kinetic_calcite,
+                       _ac3,
+                       _is3,
+                       _swapper4,
                        {},
                        {},
                        "H+",
                        {"H2O", "H+", "HCO3-", "Ca++"},
                        {1.75, 3.0, 2.0, 1.0},
-                       cm_calcite,
+                       _cm_calcite,
                        25,
                        0,
                        1E-20,
                        {"Calcite"},
                        {1.1});
   EXPECT_EQ(gs.getKineticMoles(0), 1.1);
-  EXPECT_EQ(gs.getKineticMoles().size(), 1);
+  EXPECT_EQ(gs.getKineticMoles().size(), (std::size_t)1);
   EXPECT_EQ(gs.getKineticMoles()[0], 1.1);
   gs.setKineticMoles(0, 2.2);
   EXPECT_EQ(gs.getKineticMoles(0), 2.2);
-  EXPECT_EQ(gs.getKineticMoles().size(), 1);
+  EXPECT_EQ(gs.getKineticMoles().size(), (std::size_t)1);
   EXPECT_EQ(gs.getKineticMoles()[0], 2.2);
 }
 
 /// check getBulkMolesOld with kinetic contributions
-TEST(GeochemicalSystemTest, getBulk_with_kinetic)
+TEST_F(GeochemicalSystemTest, getBulk_with_kinetic)
 {
   const PertinentGeochemicalSystem model_without_calcite(
-      db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+      _db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd_without_calcite = model_without_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs_without_kinetic(mgd_without_calcite,
-                                              ac3,
-                                              is3,
-                                              swapper4,
+                                              _ac3,
+                                              _is3,
+                                              _swapper4,
                                               {},
                                               {},
                                               "H+",
                                               {"H2O", "Ca++", "H+", "HCO3-"},
                                               {1.75, 3.0, 2.0, 1.0},
-                                              cm_calcite,
+                                              _cm_calcite,
                                               25,
                                               0,
                                               1E-20,
                                               {},
                                               {});
-  EXPECT_EQ(egs_kinetic_calcite.getBulkMolesOld()[0],
+  EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[0],
             egs_without_kinetic.getBulkMolesOld()[0]); // H2O
-  EXPECT_EQ(egs_kinetic_calcite.getBulkMolesOld()[1],
+  EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[1],
             egs_without_kinetic.getBulkMolesOld()[1]); // H+ has fixed bulk
-  EXPECT_EQ(egs_kinetic_calcite.getBulkMolesOld()[2],
+  EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[2],
             egs_without_kinetic.getBulkMolesOld()[2] + 1.1); // HCO3- has fixed free molality
-  EXPECT_EQ(egs_kinetic_calcite.getBulkMolesOld()[3],
+  EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[3],
             egs_without_kinetic.getBulkMolesOld()[3]); // Ca++ has fixed bulk
 }
 
 /// check setAlgebraicVariables with kinetic
-TEST(GeochemicalSystemTest, setAlgebraicVars_kinetic)
+TEST_F(GeochemicalSystemTest, setAlgebraicVars_kinetic)
 {
-  GeochemicalSystem gs(mgd_kinetic_calcite,
-                       ac3,
-                       is3,
-                       swapper4,
+  GeochemicalSystem gs(_mgd_kinetic_calcite,
+                       _ac3,
+                       _is3,
+                       _swapper4,
                        {},
                        {},
                        "H+",
                        {"H2O", "H+", "HCO3-", "Ca++"},
                        {1.75, 3.0, 2.0, 1.0},
-                       cm_calcite,
+                       _cm_calcite,
                        25,
                        0,
                        1E-20,
@@ -4351,9 +4278,9 @@ TEST(GeochemicalSystemTest, setAlgebraicVars_kinetic)
 }
 
 /// check mineral free molality calculation when there are kinetic species
-TEST(GeochemicalSystemTest, free_molality_kinetic)
+TEST_F(GeochemicalSystemTest, free_molality_kinetic)
 {
-  const PertinentGeochemicalSystem model(db_calcite,
+  const PertinentGeochemicalSystem model(_db_calcite,
                                          {"H2O", "H+", "HCO3-", "Ca++"},
                                          {"Calcite"},
                                          {},
@@ -4369,9 +4296,9 @@ TEST(GeochemicalSystemTest, free_molality_kinetic)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem gs(mgd,
-                       ac0,
-                       is0,
-                       swapper4,
+                       _ac0,
+                       _is0,
+                       _swapper4,
                        {"Ca++"},
                        {"Calcite"},
                        "H+",
@@ -4392,9 +4319,9 @@ TEST(GeochemicalSystemTest, free_molality_kinetic)
 }
 
 /// check setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles when there are kinetic species
-TEST(GeochemicalSystemTest, setSolventETC4)
+TEST_F(GeochemicalSystemTest, setSolventETC4)
 {
-  const PertinentGeochemicalSystem model(db_calcite,
+  const PertinentGeochemicalSystem model(_db_calcite,
                                          {"H2O", "H+", "HCO3-", "Ca++"},
                                          {"Calcite"},
                                          {},
@@ -4410,9 +4337,9 @@ TEST(GeochemicalSystemTest, setSolventETC4)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem gs(mgd,
-                       ac0,
-                       is0,
-                       swapper4,
+                       _ac0,
+                       _is0,
+                       _swapper4,
                        {"Ca++"},
                        {"Calcite"},
                        "H+",
@@ -4452,7 +4379,7 @@ TEST(GeochemicalSystemTest, setSolventETC4)
 }
 
 /// check computeJacobian exception
-TEST(GeochemicalSystemTest, computeJacobianExcept)
+TEST_F(GeochemicalSystemTest, computeJacobianExcept)
 {
   DenseMatrix<Real> jac;
 
@@ -4461,7 +4388,7 @@ TEST(GeochemicalSystemTest, computeJacobianExcept)
     const DenseVector<Real> res(4);
     const DenseVector<Real> mole_additions(5);
     const DenseMatrix<Real> dmole_additions(5, 5);
-    egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
+    _egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4476,7 +4403,7 @@ TEST(GeochemicalSystemTest, computeJacobianExcept)
     const DenseVector<Real> res(3);
     const DenseVector<Real> mole_additions(4);
     const DenseMatrix<Real> dmole_additions(5, 5);
-    egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
+    _egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4492,7 +4419,7 @@ TEST(GeochemicalSystemTest, computeJacobianExcept)
     const DenseVector<Real> res(3);
     const DenseVector<Real> mole_additions(5);
     const DenseMatrix<Real> dmole_additions(4, 5);
-    egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
+    _egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4508,7 +4435,7 @@ TEST(GeochemicalSystemTest, computeJacobianExcept)
     const DenseVector<Real> res(3);
     const DenseVector<Real> mole_additions(5);
     const DenseMatrix<Real> dmole_additions(5, 4);
-    egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
+    _egs_kinetic_calcite.computeJacobian(res, jac, mole_additions, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -4521,12 +4448,12 @@ TEST(GeochemicalSystemTest, computeJacobianExcept)
 }
 
 /// check updateOldWithCurrent exception
-TEST(GeochemicalSystemTest, updateOldWithCurrent)
+TEST_F(GeochemicalSystemTest, updateOldWithCurrent)
 {
   try
   {
     const DenseVector<Real> mole_additions(4);
-    GeochemicalSystem nonconst = egs_kinetic_calcite;
+    GeochemicalSystem nonconst = _egs_kinetic_calcite;
     nonconst.updateOldWithCurrent(mole_additions);
     FAIL() << "Missing expected exception.";
   }
@@ -4540,9 +4467,9 @@ TEST(GeochemicalSystemTest, updateOldWithCurrent)
 }
 
 /// check setKineticRates exceptions
-TEST(GeochemicalSystemTest, setKineticRatesExcept)
+TEST_F(GeochemicalSystemTest, setKineticRatesExcept)
 {
-  GeochemicalSystem nonconst = egs_kinetic_calcite;
+  GeochemicalSystem nonconst = _egs_kinetic_calcite;
   DenseVector<Real> mole_additions(5);
   DenseMatrix<Real> dmole_additions(5, 5);
   try
@@ -4587,9 +4514,9 @@ TEST(GeochemicalSystemTest, setKineticRatesExcept)
 }
 
 /// check setKineticRates: note that this checks rates and derivatives are produced, while GeochemicalKineticRateCalculatorTest tests that the rates and derivatives are numerically correct
-TEST(GeochemicalSystemTest, setKineticRates)
+TEST_F(GeochemicalSystemTest, setKineticRates)
 {
-  PertinentGeochemicalSystem mod(db_calcite,
+  PertinentGeochemicalSystem mod(_db_calcite,
                                  {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
                                  {},
                                  {},
@@ -4612,9 +4539,9 @@ TEST(GeochemicalSystemTest, setKineticRates)
   DenseMatrix<Real> dmole_additions(7, 7);
   ModelGeochemicalDatabase mgd_kin = mod.modelGeochemicalDatabase();
   GeochemicalSystem egs(mgd_kin,
-                        ac3,
-                        is3,
-                        swapper5,
+                        _ac3,
+                        _is3,
+                        _swapper5,
                         {},
                         {},
                         "H+",
@@ -4727,7 +4654,7 @@ TEST(GeochemicalSystemTest, setKineticRates)
 }
 
 /// Check getBulkOldInOriginalBasis
-TEST(GeochemicalSystemTest, getBulkOldInOriginalBasis)
+TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
 {
   const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
@@ -4735,10 +4662,10 @@ TEST(GeochemicalSystemTest, getBulkOldInOriginalBasis)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
 
-  GeochemicalSystem egs_no_swaps(mgd_kinetic_calcite,
-                                 ac3,
-                                 is3,
-                                 swapper4,
+  GeochemicalSystem egs_no_swaps(_mgd_kinetic_calcite,
+                                 _ac3,
+                                 _is3,
+                                 _swapper4,
                                  {},
                                  {},
                                  "H+",
@@ -4755,11 +4682,11 @@ TEST(GeochemicalSystemTest, getBulkOldInOriginalBasis)
   EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(2), 5.0);  // HCO3-
   EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(3), 2.0);  // Ca++
 
-  ModelGeochemicalDatabase my_mgd_calcite = mgd_calcite;
+  ModelGeochemicalDatabase my_mgd_calcite = _mgd_calcite;
   GeochemicalSystem egs(my_mgd_calcite,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -4790,7 +4717,7 @@ TEST(GeochemicalSystemTest, getBulkOldInOriginalBasis)
 }
 
 /// Check TransportedBulk and also in original basis
-TEST(GeochemicalSystemTest, getTransportedBulkMoles)
+TEST_F(GeochemicalSystemTest, getTransportedBulkMoles)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   const std::vector<std::string> original_basis = {
@@ -4813,9 +4740,9 @@ TEST(GeochemicalSystemTest, getTransportedBulkMoles)
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper6,
+                        _ac3,
+                        _is3,
+                        _swapper6,
                         {},
                         {},
                         "H+",
@@ -4940,7 +4867,7 @@ TEST(GeochemicalSystemTest, getTransportedBulkMoles)
 }
 
 /// Check TransportedBulk for case including kinetic redox
-TEST(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
+TEST_F(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -4960,9 +4887,9 @@ TEST(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
   GeochemicalSystem egs(mgd,
-                        ac3,
-                        is3,
-                        swapper4,
+                        _ac3,
+                        _is3,
+                        _swapper4,
                         {},
                         {},
                         "H+",
@@ -4997,7 +4924,7 @@ TEST(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
 }
 
 /// Check copy assignment constructor exceptions: the copy assignment is further checked in GeochmicalSolverTest for a nontrivial situation
-TEST(GeochemicalSystemTest, copyAssignmentExcept)
+TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
@@ -5008,9 +4935,9 @@ TEST(GeochemicalSystemTest, copyAssignmentExcept)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   GeochemicalSystem dest(mgd,
-                         ac3,
-                         is3,
-                         swapper3,
+                         _ac3,
+                         _is3,
+                         _swapper3,
                          {},
                          {},
                          "H+",
@@ -5025,7 +4952,7 @@ TEST(GeochemicalSystemTest, copyAssignmentExcept)
 
   try
   {
-    dest = egs_calcite; // wrong number of basis species
+    dest = _egs_calcite; // wrong number of basis species
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -5037,9 +4964,9 @@ TEST(GeochemicalSystemTest, copyAssignmentExcept)
   }
 
   GeochemicalSystem dest2(mgd,
-                          ac3,
-                          is3,
-                          swapper3,
+                          _ac3,
+                          _is3,
+                          _swapper3,
                           {},
                           {},
                           "HCO3-",
@@ -5065,19 +4992,19 @@ TEST(GeochemicalSystemTest, copyAssignmentExcept)
   }
 
   const PertinentGeochemicalSystem model_no_kinetic_calcite(
-      db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+      _db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd_no_kinetic_calcite =
       model_no_kinetic_calcite.modelGeochemicalDatabase();
   GeochemicalSystem egs_no_kinetic_calcite(mgd_no_kinetic_calcite,
-                                           ac3,
-                                           is3,
-                                           swapper4,
+                                           _ac3,
+                                           _is3,
+                                           _swapper4,
                                            {},
                                            {},
                                            "H+",
                                            {"H2O", "Ca++", "H+", "HCO3-"},
                                            {1.75, 3.0, 2.0, 1.0},
-                                           cm_calcite,
+                                           _cm_calcite,
                                            25,
                                            0,
                                            1E-20,
@@ -5085,7 +5012,7 @@ TEST(GeochemicalSystemTest, copyAssignmentExcept)
                                            {});
   try
   {
-    egs_no_kinetic_calcite = egs_kinetic_calcite; // wrong number of kinetic species
+    egs_no_kinetic_calcite = _egs_kinetic_calcite; // wrong number of kinetic species
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
