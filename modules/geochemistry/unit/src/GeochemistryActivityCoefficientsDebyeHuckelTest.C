@@ -92,8 +92,8 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
   std::vector<Real> eqm_ac;
   ac.buildActivityCoefficients(mgd, basis_ac, eqm_ac);
 
-  EXPECT_EQ(basis_ac.size(), 6);
-  EXPECT_EQ(eqm_ac.size(), 8);
+  EXPECT_EQ(basis_ac.size(), (std::size_t)6);
+  EXPECT_EQ(eqm_ac.size(), (std::size_t)8);
 
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
