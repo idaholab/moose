@@ -214,7 +214,6 @@ public:
                             const Real abstol,
                             const PetscInt nfuncs,
                             const PetscInt max_funcs,
-                            const PetscBool force_iteration,
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
@@ -1915,6 +1914,21 @@ public:
     _n_max_nl_pingpong = n_max_nl_pingpong;
   }
 
+  /// method setting the minimum number of nonlinear iterations before performing divergence checks
+  void setNonlinearForcedIterations(const unsigned int nl_forced_its)
+  {
+    _nl_forced_its = nl_forced_its;
+  }
+
+  /// method returning the number of forced nonlinear iterations
+  unsigned int getNonlinearForcedIterations() const { return _nl_forced_its; };
+
+  /// method setting the absolute divergence tolerance
+  void setNonlinearAbsoluteDivergenceTolerance(const Real nl_abs_div_tol)
+  {
+    _nl_abs_div_tol = nl_abs_div_tol;
+  }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1940,6 +1954,12 @@ protected:
   /// maximum numbver
   unsigned int _n_nl_pingpong = 0;
   unsigned int _n_max_nl_pingpong = std::numeric_limits<unsigned int>::max();
+
+  /// the number of forced nonlinear iterations
+  int _nl_forced_its = 0;
+
+  /// the absolute non linear divergence tolerance
+  Real _nl_abs_div_tol = -1;
 
   std::shared_ptr<NonlinearSystemBase> _nl;
   std::shared_ptr<AuxiliarySystem> _aux;

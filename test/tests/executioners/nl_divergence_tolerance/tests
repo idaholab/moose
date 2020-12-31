@@ -1,4 +1,4 @@
-[Tests]  
+[Tests]
   design = 'syntax/Executioner/index.md'
   [./test]
     type = 'Exodiff'
@@ -10,5 +10,13 @@
     mesh_mode = REPLICATED
     requirement = "The Executioner system shall support the PETSc non-linear divergence tolerance."
     issues = '#13991'
+  [../]
+  [./test_abs_divtol]
+    type = RunApp
+    input = 'nl_abs_divergence_tolerance.i'
+    expect_out = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
+    requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual exceeds the absolute divergence tolerance while iterating'
+    issues = '#16474'
+    design = 'FEProblemSolve.md'
   [../]
 []
