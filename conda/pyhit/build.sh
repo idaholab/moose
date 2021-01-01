@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eu
 
+git clean -xfd
 cp -R pyhit $SP_DIR/
 cd src
 make bindings
