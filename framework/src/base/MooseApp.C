@@ -1970,7 +1970,7 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
   // We don't need Geometric-only RelationshipManagers when we run with
   // ReplicatedMesh unless we are splitting the mesh.
   // We prefer to always add geometric RMs. There is no hurt to add RMs for replicated mesh
-  // since MeshBase::delete_remote_elements{} is not implemented in replicated mesh.
+  // since MeshBase::delete_remote_elements{} is a no-op (empty) for replicated mesh.
   // The motivation here is that mesh parallel type might not be set yet for distributed mesh
   // generator, and for the default parallel type "isDistributedMesh()" is false. All geometric
   // RMs are just ignored for distributed mesh generator
