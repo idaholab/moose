@@ -90,6 +90,7 @@ ArrayIntegratedBC::computeResidual()
     initQpResidual();
     for (_i = 0; _i < _test.size(); _i++)
     {
+      _work_vector.setZero();
       computeQpResidual(_work_vector);
       mooseAssert(_work_vector.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");

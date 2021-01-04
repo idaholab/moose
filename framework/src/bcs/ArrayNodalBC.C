@@ -43,6 +43,7 @@ ArrayNodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
+    _work_vector.setZero();
     computeQpResidual(_work_vector);
 
     for (auto tag_id : _vector_tags)
