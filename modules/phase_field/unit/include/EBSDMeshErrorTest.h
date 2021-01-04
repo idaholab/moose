@@ -16,7 +16,7 @@
 #include "EBSDMesh.h"
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
-#include "MooseUnitApp.h"
+#include "PhaseFieldApp.h"
 #include "AppFactory.h"
 
 class EBSDMeshErrorTest : public ::testing::Test
@@ -25,7 +25,7 @@ protected:
   void SetUp()
   {
     const char * argv[2] = {"foo", "\0"};
-    _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+    _app = AppFactory::createAppShared("PhaseFieldApp", 1, (char **)argv);
     _factory = &_app->getFactory();
   }
 
@@ -71,4 +71,3 @@ protected:
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
 };
-

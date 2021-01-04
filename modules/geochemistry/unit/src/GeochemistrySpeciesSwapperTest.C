@@ -221,17 +221,17 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   bulk_composition(2) = 2.5;
   bulk_composition(3) = 3.0;
 
-  ASSERT_EQ(mgd.basis_species_index.size(), 4);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)4);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)0);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -254,9 +254,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
     else
       ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "Calcite"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
   std::map<std::string, Real> charge_gold;
   charge_gold["H2O"] = 0.0;
@@ -370,27 +370,27 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   swapper.performSwap(mgd, bulk_composition, "Ca++", "Calcite");
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.basis_species_index.size(), 4);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)4);
   for (const auto & sp : {"Calcite", "H2O", "HCO3-", "H+"})
-    ASSERT_EQ(mgd.basis_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.basis_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.basis_species_index["Calcite"], ca_posn);
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "Ca++"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["Ca++"], calcite_posn);
 
   // check the swap is recorded correctly
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], ca_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], calcite_posn);
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)4);
   DenseMatrix<Real> gold_swap_matrix(4, 4);
   for (unsigned i = 0; i < 4; ++i)
     gold_swap_matrix(i, i) = 1.0;
@@ -535,7 +535,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
 
   // swap back, and check that swap_to_original_basis is the identity
   swapper.performSwap(mgd, bulk_composition, "Calcite", "Ca++");
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)4);
   for (unsigned i = 0; i < 4; ++i)
     for (unsigned j = 0; j < 4; ++j)
       if (i == j)
@@ -562,17 +562,17 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
-  ASSERT_EQ(mgd.basis_species_index.size(), 4);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)4);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 5);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)5);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)0);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -584,9 +584,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   for (const auto & species : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_transported[species.second], true);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 5);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)5);
   for (const auto & sp : {"OH-", "CO2(aq)", "CO3--", "StoiCheckRedox", "StoiCheckGas"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_gas[species.second], false);
@@ -692,25 +692,25 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   swapper.performSwap(mgd, "StoiCheckBasis", "StoiCheckGas");
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.basis_species_index.size(), 4);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)4);
   for (const auto & sp : {"H2O", "StoiCheckGas", "H+", "HCO3-"})
-    ASSERT_EQ(mgd.basis_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.basis_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.basis_species_index["StoiCheckGas"], sc_basis_posn);
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.eqm_species_index.size(), 5);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)5);
   for (const auto & sp : {"OH-", "CO2(aq)", "CO3--", "StoiCheckRedox", "StoiCheckBasis"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["StoiCheckBasis"], sc_gas_posn);
 
   // check the swap is recorded correctly
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 4);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)4);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], sc_basis_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], sc_gas_posn);
 
@@ -897,21 +897,21 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
-  ASSERT_EQ(mgd.basis_species_index.size(), 7);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)7);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.kin_species_index.size(), 4);
+  ASSERT_EQ(mgd.kin_species_index.size(), (std::size_t)4);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)0);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -945,13 +945,13 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     else
       ASSERT_EQ(mgd.kin_species_transported[species.second], true);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
-  ASSERT_EQ(mgd.kin_species_index.size(), 4);
+  ASSERT_EQ(mgd.kin_species_index.size(), (std::size_t)4);
   for (const auto & sp : {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake", "(O-phth)--", ">(s)FeO-"})
-    ASSERT_EQ(mgd.kin_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.kin_species_index.count(sp), (std::size_t)1);
 
   std::map<std::string, Real> charge_gold;
   charge_gold["H2O"] = 0.0;
@@ -1132,7 +1132,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), t), feom[t], eps);
   }
 
-  ASSERT_EQ(mgd.kin_rate.size(), 3);
+  ASSERT_EQ(mgd.kin_rate.size(), (std::size_t)3);
   std::vector<std::vector<Real>> kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
   kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
   kin_rate_gold[0][mgd.basis_species_index.at("O2(aq)")] = 2.2;
@@ -1153,31 +1153,31 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   swapper.performSwap(mgd, "O2(aq)", "Fe+++");
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.basis_species_index.size(), 7);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)7);
   for (const auto & sp : {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "Fe+++"})
-    ASSERT_EQ(mgd.basis_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.basis_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.basis_species_index["Fe+++"], o2aq_posn);
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "O2(aq)", "CH4(g)fake"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["O2(aq)"], fe3_posn);
 
-  ASSERT_EQ(mgd.kin_species_index.size(), 4);
+  ASSERT_EQ(mgd.kin_species_index.size(), (std::size_t)4);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
   for (const auto & sp : {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake", "(O-phth)--", ">(s)FeO-"})
-    ASSERT_EQ(mgd.kin_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.kin_species_index.count(sp), (std::size_t)1);
 
   // check the swap is recorded correctly
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 7);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)7);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], o2aq_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], fe3_posn);
 
@@ -1319,7 +1319,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), t), feom[t], eps);
   }
 
-  ASSERT_EQ(mgd.kin_rate.size(), 3);
+  ASSERT_EQ(mgd.kin_rate.size(), (std::size_t)3);
   std::vector<std::vector<Real>> new_kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
   new_kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
   new_kin_rate_gold[0][7 + mgd.eqm_species_index.at("O2(aq)")] = 2.2;
@@ -1353,7 +1353,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   EXPECT_EQ(mgd.redox_lhs, "e-");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 3);
+  EXPECT_EQ(mgd.redox_stoichiometry.m(), (unsigned)3);
   const Real p = 1.0 / 4.0 / 7.5;
   // not sure of the order of the redox_stoichiometry stuff: this tells us
   const bool fe3_is_slot_one =
@@ -1380,9 +1380,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   DenseMatrix<Real> orig_stoi = mgd.redox_stoichiometry;
   DenseMatrix<Real> orig_log10K = mgd.redox_log10K;
 
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0);
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)0);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)0);
 
   const unsigned hco3_posn = mgd.basis_species_index["HCO3-"];
   const unsigned co3_posn = mgd.eqm_species_index["CO3--"];
@@ -1390,11 +1390,11 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   // swap CO3-- into the basis in place of HCO3-
   swapper.performSwap(mgd, "HCO3-", "CO3--");
 
-  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
-  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), (std::size_t)1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), (std::size_t)1);
   ASSERT_EQ(mgd.have_swapped_out_of_basis[0], hco3_posn);
   ASSERT_EQ(mgd.have_swapped_into_basis[0], co3_posn);
-  ASSERT_EQ(mgd.swap_to_original_basis.n(), 7);
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), (unsigned)7);
   DenseMatrix<Real> gold_swap_matrix(7, 7);
   for (unsigned i = 0; i < 7; ++i)
   {
@@ -1408,7 +1408,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
       EXPECT_EQ(mgd.swap_to_original_basis(i, j), gold_swap_matrix(i, j));
 
   EXPECT_EQ(mgd.redox_lhs, "e-");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 3);
+  EXPECT_EQ(mgd.redox_stoichiometry.m(), (unsigned)3);
 
   // Since HCO3- = CO3-- + H+
   // e- = p*(O-phth)-- + (5p+0.5)*H20 - 8p*CO3-- + (-6p-1-8p)*H+
@@ -1499,11 +1499,11 @@ TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwap)
   const std::vector<Real> eqm_molality = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
   bool legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, false, false, false, best);
   EXPECT_TRUE(legit);
-  EXPECT_EQ(best, 3);
+  EXPECT_EQ(best, (unsigned)3);
   legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, false, false, best);
   EXPECT_TRUE(legit);
-  EXPECT_EQ(best, 5);
+  EXPECT_EQ(best, (unsigned)5);
   legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, true, true, best);
   EXPECT_TRUE(legit);
-  EXPECT_EQ(best, 5);
+  EXPECT_EQ(best, (unsigned)5);
 }

@@ -11,7 +11,7 @@
 
 #include "RayTracingAngularQuadrature.h"
 
-TEST(RayTracingAngularQuadrature, gaussLegendre)
+TEST(RayTracingAngularQuadratureTest, gaussLegendre)
 {
   const std::vector<Real> x = {
       3.5964357465057e-05,  0.0001894843595316997, 0.0004656390634237284, 0.0008644220255445423,
@@ -129,7 +129,7 @@ TEST(RayTracingAngularQuadrature, gaussLegendre)
   }
 }
 
-TEST(RayTracingAngularQuadrature, Chebyshev)
+TEST(RayTracingAngularQuadratureTest, Chebyshev)
 {
   const std::vector<Real> x = {
       0.000000000000e+00, 6.283185307180e-02, 1.256637061436e-01, 1.884955592154e-01,
@@ -171,7 +171,7 @@ TEST(RayTracingAngularQuadrature, Chebyshev)
   }
 }
 
-TEST(RayTracingAngularQuadrature, BasicGetters)
+TEST(RayTracingAngularQuadratureTest, BasicGetters)
 {
   const unsigned int polar_order = 3;
   const unsigned int azimuthal_order = 3;
@@ -229,7 +229,7 @@ testDirections(const std::vector<Point> & directions, const RayTracingAngularQua
       EXPECT_NEAR(aq.getDirection(l)(d), directions[l](d), 1.e-10);
 }
 
-TEST(RayTracingAngularQuadrature, HalfRange2D)
+TEST(RayTracingAngularQuadratureTest, HalfRange2D)
 {
   RayTracingAngularQuadrature aq(2, 3, 3, 0, 1);
   EXPECT_EQ((std::size_t)3, aq.numDirections());
@@ -273,7 +273,7 @@ TEST(RayTracingAngularQuadrature, HalfRange2D)
   testDirections(rot_directions, aq);
 }
 
-TEST(RayTracingAngularQuadrature, FullRange2D)
+TEST(RayTracingAngularQuadratureTest, FullRange2D)
 {
   RayTracingAngularQuadrature aq(2, 3, 4, -1, 1);
 
@@ -296,7 +296,7 @@ TEST(RayTracingAngularQuadrature, FullRange2D)
   testDirections(directions, aq);
 }
 
-TEST(RayTracingAngularQuadrature, Cone2D)
+TEST(RayTracingAngularQuadratureTest, Cone2D)
 {
   RayTracingAngularQuadrature aq(2, 4, 3, 0.8, 1);
 
@@ -339,7 +339,7 @@ TEST(RayTracingAngularQuadrature, Cone2D)
   testDirections(rot_directions, aq);
 }
 
-TEST(RayTracingAngularQuadrature, HalfRange3D)
+TEST(RayTracingAngularQuadratureTest, HalfRange3D)
 {
   RayTracingAngularQuadrature aq(3, 3, 5, 0, 1);
 
@@ -401,7 +401,7 @@ TEST(RayTracingAngularQuadrature, HalfRange3D)
   testDirections(rot_directions, aq);
 }
 
-TEST(RayTracingAngularQuadrature, FullRange3D)
+TEST(RayTracingAngularQuadratureTest, FullRange3D)
 {
   RayTracingAngularQuadrature aq(3, 3, 3, -1, 1);
 
@@ -429,7 +429,7 @@ TEST(RayTracingAngularQuadrature, FullRange3D)
   testDirections(directions, aq);
 }
 
-TEST(RayTracingAngularQuadrature, Cone3D)
+TEST(RayTracingAngularQuadratureTest, Cone3D)
 {
   RayTracingAngularQuadrature aq(3, 4, 5, 0.75, 1);
 

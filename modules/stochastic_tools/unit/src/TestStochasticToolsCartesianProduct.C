@@ -24,8 +24,8 @@ TEST(StochasticTools, CartesianProduct)
 
   const CartesianProduct<Real> cp(x);
 
-  EXPECT_EQ(cp.numRows(), 24);
-  EXPECT_EQ(cp.numCols(), 3);
+  EXPECT_EQ(cp.numRows(), (std::size_t)24);
+  EXPECT_EQ(cp.numCols(), (std::size_t)3);
 
   {
     auto out = cp.computeMatrix();
@@ -79,8 +79,8 @@ TEST(StochasticTools, WeightedCartesianProduct)
 
   const WeightedCartesianProduct<Real, Real> wcp(x, w);
 
-  EXPECT_EQ(wcp.numRows(), 24);
-  EXPECT_EQ(wcp.numCols(), 3);
+  EXPECT_EQ(wcp.numRows(), (std::size_t)24);
+  EXPECT_EQ(wcp.numCols(), (std::size_t)3);
 
   {
     auto out = wcp.computeWeightVector();
