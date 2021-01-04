@@ -569,7 +569,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
 template <typename OutputType>
 bool
-MooseVariableFV<OutputType>::isInterpolaryBoundaryFace(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
   const auto & face_type = fi.faceType(this->name());
 
@@ -584,7 +584,7 @@ MooseVariableFV<OutputType>::isInterpolaryBoundaryFace(const FaceInfo & fi) cons
   const auto & pr = getDirichletBC(fi);
 
   // First member of this pair indicates whether we have a DirichletBC. If we do, then we are not an
-  // interpolary boundary face
+  // extrapolated boundary face
   return !pr.first;
 }
 
@@ -594,8 +594,8 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
                                           const FaceInfo & fi,
                                           const ADReal & elem_value) const
 {
-  mooseAssert(!isInterpolaryBoundaryFace(fi),
-              "This function should not be called if we're on an interpolary boundary face.");
+  mooseAssert(!isExtrapolatedBoundaryFace(fi),
+              "This function should not be called if we're on an extrapolated boundary face.");
 
   auto pr = _face_to_value.emplace(&fi, 0);
 
@@ -611,7 +611,7 @@ MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
     const auto & diri_pr = getDirichletBC(fi);
 
     mooseAssert(diri_pr.first,
-                "This functor should only be called if we are not on an interpolary boundary "
+                "This functor should only be called if we are not on an extrapolated boundary "
                 "face. If we don't have a neighbor or the neighbor doesn't have this "
                 "variable, then we *must* have a Dirichlet BC");
 
@@ -665,45 +665,43 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   ADReal elem_value = getElemValue(elem);
 
-  // If we are performing a two term Taylor expansion for interpolary boundary faces (faces on
+  // If we are performing a two term Taylor expansion for extrapolated boundary faces (faces on
   // boundaries that do not have associated Dirichlet conditions), then the element gradient depends
   // on the boundary face value and the boundary face value depends on the element gradient, so we
   // have a system of equations to solve. Here is the system:
   //
-  // \nabla \phi_C - \frac{1}{V} \sum_{ibf} \phi_{ibf} \vec{S_f} =
+  // \nabla \phi_C - \frac{1}{V} \sum_{ebf} \phi_{ebf} \vec{S_f} =
   //   \frac{1}{V} \sum_{of} \phi_{of} \vec{S_f}                       eqn. 1
   //
-  // \phi_{ibf} - \vec{d_{Cf}} \cdot \nabla \phi_C = \phi_C            eqn. 2
+  // \phi_{ebf} - \vec{d_{Cf}} \cdot \nabla \phi_C = \phi_C            eqn. 2
   //
-  // where $C$ refers to the cell centroid, $ibf$ refers to an interpolary boundary face, $of$
-  // refers to "other faces", e.g. non-ibf faces, and $f$ is a general face. $d_{Cf}$ is the vector
+  // where $C$ refers to the cell centroid, $ebf$ refers to an extrapolated boundary face, $of$
+  // refers to "other faces", e.g. non-ebf faces, and $f$ is a general face. $d_{Cf}$ is the vector
   // drawn from the element centroid to the face centroid, and $\vec{S_f}$ is the surface vector,
   // e.g. the face area times the outward facing normal
 
-  // We'll save off the interpolary boundary faces (ibf) for later assignment to the cache (these
+  // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
   // are the keys)
-  std::vector<const FaceInfo *> ibf_faces;
-  // ibf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient
-  std::vector<VectorValue<Real>> ibf_grad_coeffs;
-  // ibf eqns: rhs b values. These will actually correspond to the elem_value so we can use a
+  std::vector<const FaceInfo *> ebf_faces;
+  // ebf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient
+  std::vector<VectorValue<Real>> ebf_grad_coeffs;
+  // ebf eqns: rhs b values. These will actually correspond to the elem_value so we can use a
   // pointer and avoid copying. This is the RHS of eqn. 2
-  std::vector<const ADReal *> ibf_b;
+  std::vector<const ADReal *> ebf_b;
 
-  // elem grad eqns: ibf coefficients, e.g. eqn. 1, LHS term 2 coefficients
-  std::vector<VectorValue<Real>> grad_ibf_coeffs;
+  // elem grad eqns: ebf coefficients, e.g. eqn. 1, LHS term 2 coefficients
+  std::vector<VectorValue<Real>> grad_ebf_coeffs;
   // elem grad eqns: rhs b value, e.g. eqn. 1 RHS
   VectorValue<ADReal> grad_b = 0;
 
   auto action_functor = [&volume_set,
                          &volume,
                          &elem_value,
-#ifndef NDEBUG
-                         &elem,
-#endif
-                         &ibf_faces,
-                         &ibf_grad_coeffs,
-                         &ibf_b,
-                         &grad_ibf_coeffs,
+                         libmesh_dbg_var(&elem),
+                         &ebf_faces,
+                         &ebf_grad_coeffs,
+                         &ebf_b,
+                         &grad_ebf_coeffs,
                          &grad_b,
                          this](const Elem & functor_elem,
                                const Elem * const neighbor,
@@ -715,29 +713,29 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     mooseAssert(elem == &functor_elem,
                 "Just a sanity check that the element being passed in is the one we passed out.");
 
-    if (isInterpolaryBoundaryFace(*fi))
+    if (isExtrapolatedBoundaryFace(*fi))
     {
       if (_two_term_boundary_expansion)
       {
-        ibf_faces.push_back(fi);
+        ebf_faces.push_back(fi);
 
         // eqn. 2
-        ibf_grad_coeffs.push_back(-1. * (elem_has_info
+        ebf_grad_coeffs.push_back(-1. * (elem_has_info
                                              ? (fi->faceCentroid() - fi->elemCentroid())
                                              : (fi->faceCentroid() - fi->neighborCentroid())));
-        ibf_b.push_back(&elem_value);
+        ebf_b.push_back(&elem_value);
 
         // eqn. 1
-        grad_ibf_coeffs.push_back(-surface_vector);
+        grad_ebf_coeffs.push_back(-surface_vector);
       }
       else
-        // We are doing a one-term expansion for the interpolary boundary faces, in which case we
+        // We are doing a one-term expansion for the extrapolated boundary faces, in which case we
         // have no eqn. 2 and we have no second term in the LHS of eqn. 1. Instead we apply the
         // element centroid value as the face value (one-term expansion) in the RHS of eqn. 1
         grad_b += surface_vector * elem_value;
     }
     else
-      // We are not on an ibf, so we just use our getFaceValue method
+      // We are not on an ebf, so we just use our getFaceValue method
       grad_b += surface_vector * getFaceValue(neighbor, *fi, elem_value);
 
     if (!volume_set)
@@ -766,22 +764,22 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   mooseAssert(volume_set && volume > 0, "We should have set the volume");
   grad_b /= volume;
 
-  mooseAssert(ibf_faces.size() < UINT_MAX,
+  mooseAssert(ebf_faces.size() < UINT_MAX,
               "You've created a mystical element that has more faces than can be held by unsigned "
               "int. I applaud you.");
-  const auto num_ibfs = static_cast<unsigned int>(ibf_faces.size());
+  const auto num_ebfs = static_cast<unsigned int>(ebf_faces.size());
 
   // test for simple case
-  if (num_ibfs == 0)
+  if (num_ebfs == 0)
     grad = grad_b;
   else
   {
     // We have to solve a system
-    const unsigned int sys_dim = LIBMESH_DIM + num_ibfs;
+    const unsigned int sys_dim = LIBMESH_DIM + num_ebfs;
     DenseVector<ADReal> x(sys_dim), b(sys_dim);
     DenseMatrix<ADReal> A(sys_dim, sys_dim);
 
-    // Let's make i refer to LIBMESH_DIM indices, and j refer to num_ibfs indices
+    // Let's make i refer to LIBMESH_DIM indices, and j refer to num_ebfs indices
 
     // eqn. 1
     for (const auto i : make_range(unsigned(LIBMESH_DIM)))
@@ -790,25 +788,25 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
       A(i, i) = 1;
 
       // LHS term 2 coeffs
-      for (const auto j : make_range(num_ibfs))
-        A(i, LIBMESH_DIM + j) = grad_ibf_coeffs[j](i) / volume;
+      for (const auto j : make_range(num_ebfs))
+        A(i, LIBMESH_DIM + j) = grad_ebf_coeffs[j](i) / volume;
 
       // RHS
       b(i) = grad_b(i);
     }
 
     // eqn. 2
-    for (const auto j : make_range(num_ibfs))
+    for (const auto j : make_range(num_ebfs))
     {
       // LHS term 1 coeffs
       A(LIBMESH_DIM + j, LIBMESH_DIM + j) = 1;
 
       // LHS term 2 coeffs
       for (const auto i : make_range(unsigned(LIBMESH_DIM)))
-        A(LIBMESH_DIM + j, i) = ibf_grad_coeffs[j](i);
+        A(LIBMESH_DIM + j, i) = ebf_grad_coeffs[j](i);
 
       // RHS
-      b(LIBMESH_DIM + j) = *ibf_b[j];
+      b(LIBMESH_DIM + j) = *ebf_b[j];
     }
 
     A.lu_solve(b, x);
@@ -816,8 +814,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
       grad(i) = x(i);
 
     // Cache the face value information
-    for (const auto j : make_range(num_ibfs))
-      _face_to_value.emplace(ibf_faces[j], x(LIBMESH_DIM + j));
+    for (const auto j : make_range(num_ebfs))
+      _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
   }
 
   const auto coord_system = this->_subproblem.getCoordSystem(elem->subdomain_id());

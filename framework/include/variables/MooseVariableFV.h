@@ -455,14 +455,14 @@ public:
 
 private:
   /**
-   * Returns whether this is an interpolary boundary face. An interpolary boundary face is boundary
-   * face for which is not a corresponding Dirichlet condition, e.g. we need to compute some
-   * approximation for the boundary face value using the adjacent cell centroid information
+   * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
+   * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
+   * some approximation for the boundary face value using the adjacent cell centroid information
    */
-  bool isInterpolaryBoundaryFace(const FaceInfo & fi) const;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * This method requires that \p isInterpolaryBoundaryFace(fi) be false
+   * This method requires that \p isExtrapolatedBoundaryFace(fi) be false
    *
    * This method gets the finite volume solution interpolated to the face associated
    * with \p fi using information from the adjacent cells.  If the neighbor is null or this variable
