@@ -178,7 +178,14 @@ public:
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
 
-  bool areCoupled(unsigned int ivar, unsigned int jvar);
+  bool areCoupled(unsigned int ivar, unsigned int jvar) const;
+
+  /**
+   * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
+   * create a full coupling matrix. See https://github.com/idaholab/moose/issues/16395 for detailed
+   * background
+   */
+  void trustUserCouplingMatrix();
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   couplingEntries(THREAD_ID tid);
@@ -2303,6 +2310,10 @@ private:
   /// MooseEnum describing how to obtain reference points for displaced mesh dgkernels and/or
   /// interface kernels. Options are invert_elem_phys, use_undisplaced_ref, and the default unset.
   MooseEnum _displaced_neighbor_ref_pts;
+
+  /// Whether to trust the user coupling matrix no matter what. See
+  /// https://github.com/idaholab/moose/issues/16395 for detailed background
+  bool _trust_user_coupling_matrix = false;
 };
 
 template <typename T>

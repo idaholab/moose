@@ -70,7 +70,7 @@ public:
 
   std::string getInfo() const override;
 
-  virtual bool operator==(const RelationshipManager & other) const override;
+  virtual bool operator>=(const RelationshipManager & other) const override;
 
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;

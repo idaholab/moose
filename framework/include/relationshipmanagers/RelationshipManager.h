@@ -87,8 +87,29 @@ public:
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
-    mooseError("Comparison operator required for this RelationshipManager required");
+    mooseError("RelationshipManager::operator>= must be overridden");
   }
+
+  /**
+   * Whether this relationship manager provides more or the same amount and type of ghosting as the
+   * \p rhs
+   */
+  virtual bool operator>=(const RelationshipManager & rhs) const
+  {
+    mooseDeprecated(
+        "Are you overriding RelationshipManager::operator==? We are transitioning to make "
+        "operator>= "
+        "the required override. If you are not overriding operator>= or operator==, you are about "
+        "to get an error message saying that operator>= must be overridden.");
+
+    return *this == rhs;
+  }
+
+  /**
+   * Whether the base class provides more or the same amount and type of ghosting as the
+   * \p rhs
+   */
+  virtual bool baseGreaterEqual(const RelationshipManager & rhs) const;
 
   /**
    * Whether or not this RM can be attached to the Mesh early if it's geometric.

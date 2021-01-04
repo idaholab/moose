@@ -709,6 +709,11 @@ public:
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
   /**
+   * Purge this relationship manager from meshes and DofMaps and finally from us
+   */
+  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+  /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
    * will be attached when Algebraic are attached.
@@ -758,20 +763,10 @@ public:
   /**
    * Return the container of relationship managers
    */
-  const std::vector<std::shared_ptr<RelationshipManager>> & relationshipManagers() const
+  const std::set<std::shared_ptr<RelationshipManager>> & relationshipManagers() const
   {
     return _relationship_managers;
   }
-
-  /**
-   * Loop through RMs and call dofmap_reinit
-   */
-  void dofMapReinitForRMs();
-
-  /**
-   * Loop through RMs and call mesh_reinit
-   */
-  void meshReinitForRMs();
 
   /**
    * Function to check the integrity of the restartable meta data structure
@@ -977,7 +972,7 @@ protected:
   /// true if we want to just check the input file
   bool _check_input;
 
-  std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
+  std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
 
   /// The library, registration method and the handle to the method
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
