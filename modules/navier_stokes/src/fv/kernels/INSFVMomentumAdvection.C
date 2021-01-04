@@ -9,7 +9,8 @@
 
 #include "INSFVMomentumAdvection.h"
 
-#include "MooseVariableFieldBase.h"
+#include "INSFVPressureVariable.h"
+#include "INSFVVelocityVariable.h"
 #include "SystemBase.h"
 #include "ADReal.h"    // Moose::derivInsert
 #include "MooseMesh.h" // FaceInfo methods
@@ -68,16 +69,16 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _p_var(dynamic_cast<const MooseVariableFV<Real> *>(
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(
         &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("pressure").front()))),
-    _u_var(dynamic_cast<const MooseVariableFV<Real> *>(
+    _u_var(dynamic_cast<const INSFVVelocityVariable *>(
         &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("u").front()))),
     _v_var(params.isParamValid("v")
-               ? dynamic_cast<const MooseVariableFV<Real> *>(&_subproblem.getVariable(
+               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
                      _tid, params.get<std::vector<VariableName>>("v").front()))
                : nullptr),
     _w_var(params.isParamValid("w")
-               ? dynamic_cast<const MooseVariableFV<Real> *>(&_subproblem.getVariable(
+               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
                      _tid, params.get<std::vector<VariableName>>("w").front()))
                : nullptr),
     _rho(params.get<Real>("rho")),

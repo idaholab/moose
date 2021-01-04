@@ -281,7 +281,7 @@ public:
    * Retrieve (or potentially compute) the gradient on the provided element
    * @param elem The element for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
+  virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
 
   /**
    * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
@@ -453,7 +453,7 @@ public:
                           const FaceInfo & fi,
                           const ADReal & elem_value) const;
 
-private:
+protected:
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
@@ -477,6 +477,7 @@ private:
   const ADReal &
   getFaceValue(const Elem * const neighbor, const FaceInfo & fi, const ADReal & elem_value) const;
 
+private:
   /**
    * Get the finite volume solution interpolated to \p vertex. This interpolation is done doing a
    * distance-weighted average of neighboring cell center values
@@ -580,27 +581,31 @@ private:
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
+protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
 
   /// A cache for storing uncorrected gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
 
+  /// A cache that maps from faces to face values
+  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
+
+  /// Whether to use a two term expansion for computing boundary face values
+  const bool _two_term_boundary_expansion;
+
+private:
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 
-  /// A cache that maps from faces to face values
-  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
-
   /// Whether to use an extended stencil for interpolating the solution to face centers. If this is
   /// true then the face center value is computed as a weighted average of connected vertices. If it
   /// is false, then the face center value is simply a linear interpolation betweeh the two
   /// neighboring cell center values
   const bool _use_extended_stencil;
-  const bool _two_term_boundary_expansion;
 #endif
 };
 

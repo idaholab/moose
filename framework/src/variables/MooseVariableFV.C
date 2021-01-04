@@ -29,7 +29,10 @@ template <typename OutputType>
 InputParameters
 MooseVariableFV<OutputType>::validParams()
 {
-  auto params = MooseVariableField<OutputType>::validParams();
+  InputParameters params = MooseVariableField<OutputType>::validParams();
+  params.set<bool>("fv") = true;
+  params.set<MooseEnum>("family") = "MONOMIAL";
+  params.set<MooseEnum>("order") = "CONSTANT";
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   params.template addParam<bool>("use_extended_stencil",
                                  false,
@@ -64,14 +67,14 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 #ifdef MOOSE_GLOBAL_AD_INDEXING
     ,
+    _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
+                                     ? this->template getParam<bool>("two_term_boundary_expansion")
+                                     : false),
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
     // these parameters available
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
                               ? this->template getParam<bool>("use_extended_stencil")
-                              : false),
-    _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
-                                     ? this->template getParam<bool>("two_term_boundary_expansion")
-                                     : false)
+                              : false)
 #endif
 {
   _element_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
@@ -697,7 +700,9 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   auto action_functor = [&volume_set,
                          &volume,
                          &elem_value,
-                         libmesh_dbg_var(&elem),
+#ifndef NDEBUG
+                         &elem,
+#endif
                          &ebf_faces,
                          &ebf_grad_coeffs,
                          &ebf_b,

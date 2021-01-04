@@ -11,6 +11,9 @@
 
 #include "FVMatAdvection.h"
 
+class INSFVVelocityVariable;
+class INSFVPressureVariable;
+
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
@@ -63,13 +66,13 @@ protected:
   bool skipForBoundary(const FaceInfo & fi) const override;
 
   /// pressure variable
-  const MooseVariableFV<Real> * const _p_var;
+  const INSFVPressureVariable * const _p_var;
   /// x-velocity
-  const MooseVariableFV<Real> * const _u_var;
+  const INSFVVelocityVariable * const _u_var;
   /// y-velocity
-  const MooseVariableFV<Real> * const _v_var;
+  const INSFVVelocityVariable * const _v_var;
   /// z-velocity
-  const MooseVariableFV<Real> * const _w_var;
+  const INSFVVelocityVariable * const _w_var;
 
   /// Density
   const Real & _rho;
