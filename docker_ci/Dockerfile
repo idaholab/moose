@@ -10,13 +10,13 @@
 # arguments to be set using the --build-arg flag.  
 #
 # DISTRO_NAME: Optional.  Linux distribution (ubuntu, centos)
-# DISTRO_VERSION: Optional with above (18.04, 7 respectively)
+# DISTRO_VERSION: Optional with above (20.04, 8 respectively)
 # MOOSE_JOBS: Optional.  Sets number of cores for running make.
 # PETSC_REV: Commit hash of submodule petsc.
 # LIBMESH_REV: Commit hash of submodule libmesh.
 #-----------------------------------------------------------------------------#
 ARG DISTRO_NAME=ubuntu
-ARG DISTRO_VERSION=18.04
+ARG DISTRO_VERSION=20.04
 
 FROM ${DISTRO_NAME}:${DISTRO_VERSION}
 

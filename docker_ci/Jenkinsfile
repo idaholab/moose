@@ -6,7 +6,7 @@ tree.
 
 For this all to work, $DOCKER_TAG must be prescribed as a pipeline 
 parameter in Jenkins.  Additionally, $DISTRO_NAME and $DISTRO_VERSION need to
-be defined, e.g. Ubuntu and 18.04, respectively.  Supported package managers 
+be defined, e.g. Ubuntu and 20.04, respectively.  Supported package managers 
 are apt and yum.  Distros that should work include Ubuntu, Debian, CentOS, 
 and Amazon Linux.
 */
@@ -86,11 +86,14 @@ pipeline {
     post {
         success {
             script {
+                def resultBefore = currentBuild.result
+                
                 try {   
                     // Send message build was successful
                     slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
-                } catch (Exception e) {
-                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                } catch (java.lang.NoSuchMethodError ex) {
+                    echo "${SLACK_ERR}" // Slack not required to build
+                    currentBuild.result = resultBefore
                 }
             }
         }
@@ -98,15 +101,10 @@ pipeline {
         failure {
             script {
                 try {        
-                    MOOSE_COMMIT = sh(
-                        script: 'git rev-parse HEAD',
-                        returnStdout: true
-                    )
-
                     // Send message build failed
                     slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
-                } catch (Exception e) {
-                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                } catch (java.lang.NoSuchMethodError ex) {
+                    echo "${SLACK_ERR}" // Slack not required to build
                 }
             }
         }
