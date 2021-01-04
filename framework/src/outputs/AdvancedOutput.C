@@ -142,10 +142,14 @@ AdvancedOutput::AdvancedOutput(const InputParameters & parameters)
 void
 AdvancedOutput::initialSetup()
 {
-  // Do not initialize more than once
-  // This check is needed for YAK which calls Executioners from within Executioners
-  if (_initialized)
-    return;
+  init();
+}
+
+void
+AdvancedOutput::init()
+{
+  // Clear existing execute information lists
+  _execute_data.reset();
 
   // Initialize the available output
   initAvailableLists();
@@ -154,7 +158,7 @@ AdvancedOutput::initialSetup()
   initShowHideLists(getParam<std::vector<VariableName>>("show"),
                     getParam<std::vector<VariableName>>("hide"));
 
-  // If 'elemental_as_nodal = true' the elemental variable names must be appended to thec
+  // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
   // it will create the correct nodal variable from the elemental
   if (_elemental_as_nodal)
@@ -183,9 +187,6 @@ AdvancedOutput::initialSetup()
   // Initialize the execution flags
   for (auto & it : _advanced_execute_on)
     initExecutionTypes(it.first, it.second);
-
-  // Set the initialization flag
-  _initialized = true;
 }
 
 AdvancedOutput::~AdvancedOutput() {}
@@ -268,6 +269,9 @@ AdvancedOutput::shouldOutput(const ExecFlagType & type)
 void
 AdvancedOutput::output(const ExecFlagType & type)
 {
+  // (re)initialize the list of available items for output
+  init();
+
   // Call the various output types, if data exists
   if (wantOutput("nodal", type))
   {
@@ -755,11 +759,6 @@ AdvancedOutput::addValidParams(InputParameters & params, const MultiMooseEnum & 
 bool
 AdvancedOutput::hasOutputHelper(const std::string & name)
 {
-  if (!_initialized)
-    mooseError("The output object must be initialized before it may be determined if ",
-               name,
-               " output is enabled.");
-
   return !_execute_data[name].output.empty() && _advanced_execute_on.contains(name) &&
          _advanced_execute_on[name].isValid() && !_advanced_execute_on[name].contains("none");
 }
