@@ -29,6 +29,9 @@ ArrayDirichletBC::validParams()
 ArrayDirichletBC::ArrayDirichletBC(const InputParameters & parameters)
   : ArrayNodalBC(parameters), _values(getParam<RealEigenVector>("values"))
 {
+  if (_values.size() != _count)
+    paramError(
+        "values", "Number of 'values' must equal number of variable components (", _count, ").");
 }
 
 void

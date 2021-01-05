@@ -32,6 +32,9 @@ ArrayPenaltyDirichletBC::ArrayPenaltyDirichletBC(const InputParameters & paramet
     _p(getParam<Real>("penalty")),
     _v(getParam<RealEigenVector>("value"))
 {
+  if (_v.size() != _count)
+    paramError(
+        "value", "Number of 'values' must equal number of variable components (", _count, ").");
 }
 
 void

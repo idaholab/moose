@@ -44,7 +44,8 @@ public:
 
 protected:
   /**
-   * Compute this Kernel's contribution to the residual at the current quadrature point
+   * Compute this Kernel's contribution to the residual at the current quadrature point,
+   * to be filled in \p residual.
    */
   virtual void computeQpResidual(RealEigenVector & residual) = 0;
 

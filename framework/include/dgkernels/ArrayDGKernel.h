@@ -65,7 +65,7 @@ public:
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual on
-   * neighboring element.
+   * neighboring element. Residual to be filled in \p residual.
    */
   virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) = 0;
 

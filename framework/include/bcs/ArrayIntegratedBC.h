@@ -45,7 +45,7 @@ public:
 
 protected:
   /**
-   * Method for computing the residual at quadrature points
+   * Method for computing the residual at quadrature points, to be filled in \p residual.
    */
   virtual void computeQpResidual(RealEigenVector & residual) = 0;
 

@@ -33,7 +33,8 @@ ArrayNodalBC::ArrayNodalBC(const InputParameters & parameters)
     _var(*mooseVariable()),
     _current_node(_var.node()),
     _u(_var.nodalValue()),
-    _work_vector(_var.count())
+    _count(_var.count()),
+    _work_vector(_count)
 {
   addMooseVariableDependency(mooseVariable());
 }
@@ -45,6 +46,8 @@ ArrayNodalBC::computeResidual()
   {
     _work_vector.setZero();
     computeQpResidual(_work_vector);
+    mooseAssert(_work_vector.size() == _count,
+                "Size of local residual is not equal to the number of array variable components");
 
     for (auto tag_id : _vector_tags)
       if (_sys.hasVector(tag_id))

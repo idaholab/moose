@@ -46,6 +46,10 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const RealEigenVector & _u;
 
+  /**
+   * Compute this BC's contribution to the residual at the current quadrature point,
+   * to be filled in \p residual.
+   */
   virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
@@ -60,6 +64,9 @@ protected:
    * computing an off-diagonal jacobian component.
    */
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar);
+
+  /// Number of components of the array variable
+  const unsigned int _count;
 
 private:
   /// Work vector for residual
