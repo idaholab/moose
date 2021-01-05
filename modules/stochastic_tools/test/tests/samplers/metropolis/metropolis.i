@@ -20,12 +20,10 @@
     type = Metropolis
     num_rows = 3
     distributions = 'weibull uniform'
-    inputs_vpp = data1
-    inputs_names = 'sample_0 sample_1'
     proposal_std = '0.15 0.5'
     initial_values = '0.5 3.5'
-    execute_on = timestep_end # 'initial timestep_end'
-    # seed = 105
+    execute_on = timestep_end
+    seed = 105
   []
 []
 
@@ -33,22 +31,13 @@
   [data]
     type = SamplerData
     sampler = sample
-    execute_on = timestep_begin # 'initial timestep_end'
-    # sample_method = 'get_global_samples'
-    # parallel_type = 'distributed'
-  []
-  [data1]
-    type = SamplerData
-    sampler = sample
-    execute_on = timestep_end # 'initial timestep_end'
-    # sample_method = 'get_global_samples'
-    # parallel_type = 'distributed'
+    execute_on = timestep_begin
   []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  num_steps = 10
 []
 
 [Outputs]

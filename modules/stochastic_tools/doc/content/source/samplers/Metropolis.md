@@ -25,8 +25,7 @@ chains can also be run in parallel.
 
 The following file creates the Metropolis sampler for two input parameters having Weibull and
 Uniform distributions. [!param](/Samplers/Metropolis/num_rows) denotes the number of
-Markov chains. [!param](/Samplers/Metropolis/inputs_vpp) provides Metropolis sampler with the previous sample in
-order to decide the next sample. [!param](/Samplers/Metropolis/proposal_std) contains the standard deviations
+Markov chains. [!param](/Samplers/Metropolis/proposal_std) contains the standard deviations
  of the proposal distributions for the two parameters. [!param](/Samplers/Metropolis/initial_values) are the
  starting values for the Metropolis sampler.
 

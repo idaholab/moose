@@ -10,19 +10,16 @@
 #pragma once
 
 #include "Sampler.h"
-#include "VectorPostprocessorInterface.h"
 
 /**
  * A class used to perform Markov Cahin Monte Carlo Sampling using the Metropolis algorithm
  */
-class Metropolis : public Sampler, public VectorPostprocessorInterface
+class Metropolis : public Sampler
 {
 public:
   static InputParameters validParams();
 
   Metropolis(const InputParameters & parameters);
-
-  virtual void sampleSetUp() override;
 
 protected:
   /// Return the sample for the given row and column
@@ -31,9 +28,6 @@ protected:
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
-  /// Input names
-  const std::vector<std::string> & _inputs_names;
-
   /// Standard deviations of the proposal distributions
   const std::vector<Real> & _proposal_std;
 
@@ -41,14 +35,14 @@ protected:
   const std::vector<Real> & _initial_values;
 
 private:
-  /// Check if the values are distributed
-  bool _values_distributed;
-
   /// Storage to keep track of the sample index
   const int & _step;
 
-  /// Storage for vector VectorPostprocessorValue
-  std::vector<const VectorPostprocessorValue *> _inputs_ptr;
+  /// Storage of the previous sample to propose the next sample
+  std::vector<std::vector<Real>> _prev_val;
+
+  /// Storage to ensure next sample is computed only once
+  int _check_step;
 
   const PerfID _perf_compute_sample;
 };
