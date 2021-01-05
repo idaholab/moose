@@ -25,24 +25,16 @@ advected_interp_method = 'average'
 
 [Variables]
   [u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVPressureVariable
   []
   [T]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVEnergyVariable
   []
   [lambda]
     family = SCALAR

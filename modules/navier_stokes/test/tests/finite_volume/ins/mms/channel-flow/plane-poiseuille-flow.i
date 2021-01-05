@@ -24,26 +24,17 @@ two_term_boundary_expansion=true
 
 [Variables]
   [u]
-    type = MooseVariableFVReal
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
     two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
   [v]
-    type = MooseVariableFVReal
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
     two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
   [pressure]
-    type = MooseVariableFVReal
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVPressureVariable
     two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
 []

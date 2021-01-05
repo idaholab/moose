@@ -26,19 +26,13 @@ rho=1
 
 [Variables]
   [u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVPressureVariable
   []
   [lambda]
     family = SCALAR

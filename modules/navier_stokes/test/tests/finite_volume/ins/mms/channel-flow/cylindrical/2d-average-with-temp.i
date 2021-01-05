@@ -27,26 +27,22 @@ velocity='velocity'
 
 [Variables]
   [u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
+    two_term_boundary_expansion = false
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
+    two_term_boundary_expansion = false
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVPressureVariable
+    two_term_boundary_expansion = false
   []
   [temperature]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVEnergyVariable
+    two_term_boundary_expansion = false
   []
 []
 

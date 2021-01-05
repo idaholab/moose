@@ -29,24 +29,15 @@ velocity_interp_method='rc'
 
 [Variables]
   [u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
-    type = MooseVariableFVReal
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
-    type = MooseVariableFVReal
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-    type = MooseVariableFVReal
+    type = INSFVPressureVariable
   []
   [lambda]
     family = SCALAR

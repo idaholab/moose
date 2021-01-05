@@ -22,26 +22,17 @@ rho=1.1
 
 [Variables]
   [u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
-    type = MooseVariableFVReal
     two_term_boundary_expansion = true
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = INSFVVelocityVariable
     initial_condition = 1
-    type = MooseVariableFVReal
     two_term_boundary_expansion = true
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-    type = MooseVariableFVReal
+    type = INSFVPressureVariable
     two_term_boundary_expansion = true
   []
   [lambda]
