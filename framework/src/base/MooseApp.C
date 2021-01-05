@@ -1967,13 +1967,13 @@ donateForWhom(const RelationshipManager & donor, RelationshipManager & acceptor)
 bool
 MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 {
-  // We don't need Geometric-only RelationshipManagers when we run with
-  // ReplicatedMesh unless we are splitting the mesh.
   // We prefer to always add geometric RMs. There is no hurt to add RMs for replicated mesh
   // since MeshBase::delete_remote_elements{} is a no-op (empty) for replicated mesh.
-  // The motivation here is that mesh parallel type might not be set yet for distributed mesh
-  // generator, and for the default parallel type "isDistributedMesh()" is false. All geometric
-  // RMs are just ignored for distributed mesh generator
+  // The motivation here is that MooseMesh::_use_distributed_mesh may not be properly set
+  // at the time we are adding geometric relationship managers. We deleted the following
+  // old logic to add all geometric RMs regardless of there is a distributed mesh or not.
+  // Otherwise, all geometric RMs will be improperly ignored for a distributed mesh generator.
+
   // if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
   //    (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
   //     !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
