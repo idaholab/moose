@@ -15,6 +15,7 @@
 #include "SubProblem.h"
 #include "MooseApp.h"
 #include "TheWarehouse.h"
+#include "INSFVAttributes.h"
 
 InputParameters
 INSFVVariable::validParams()
@@ -53,8 +54,7 @@ INSFVVariable::isFullyDevelopedFlowFace(const FaceInfo & fi) const
   this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribSystem>("INSFVFullyDevelopedFlowBC")
-      .template condition<AttribThread>(_tid)
+      .template condition<AttribINSFVBCs>(INSFVBCs::INSFVFullyDevelopedFlowBC)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .queryInto(bcs);
 

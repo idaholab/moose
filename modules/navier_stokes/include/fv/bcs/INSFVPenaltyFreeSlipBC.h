@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "INSFVSlipWallBC.h"
 
-class INSFVPenaltyFreeSlipBC : public FVFluxBC
+class INSFVPenaltyFreeSlipBC : public INSFVSlipWallBC
 {
 public:
   static InputParameters validParams();

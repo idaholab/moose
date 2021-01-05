@@ -12,9 +12,13 @@
 #include "INSFVPressureVariable.h"
 #include "INSFVVelocityVariable.h"
 #include "SystemBase.h"
-#include "ADReal.h"    // Moose::derivInsert
-#include "MooseMesh.h" // FaceInfo methods
+#include "MooseMesh.h"
 #include "FVDirichletBC.h"
+#include "INSFVFlowBC.h"
+#include "INSFVFullyDevelopedFlowBC.h"
+#include "INSFVNoSlipWallBC.h"
+#include "INSFVSlipWallBC.h"
+#include "INSFVSymmetryBC.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -52,13 +56,6 @@ INSFVMomentumAdvection::validParams()
 
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
-
-  params.addParam<std::vector<BoundaryName>>(
-      "no_slip_wall_boundaries", std::vector<BoundaryName>(), "No slip wall boundaries.");
-  params.addParam<std::vector<BoundaryName>>(
-      "slip_wall_boundaries", std::vector<BoundaryName>(), "Slip wall boundaries.");
-  params.addParam<std::vector<BoundaryName>>(
-      "flow_boundaries", std::vector<BoundaryName>(), "Flow boundaries.");
 
   params.addClassDescription("Object for advecting momentum, e.g. rho*u");
 
@@ -120,42 +117,45 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     vec_of_coeffs_map.resize(libMesh::n_threads());
   }
 
+  std::set<BoundaryID> all_connected_boundaries;
+  const auto & blk_ids = blockRestricted() ? blockIDs() : _mesh.meshSubdomains();
+  for (const auto blk_id : blk_ids)
   {
-    // Setup no slip wall boundary IDs
-    const auto & vec = getParam<std::vector<BoundaryName>>("no_slip_wall_boundaries");
-    for (const auto & name : vec)
-      _no_slip_wall_boundaries.insert(_mesh.getBoundaryID(name));
-  }
-  {
-    // Setup slip wall boundary IDs
-    const auto & vec = getParam<std::vector<BoundaryName>>("slip_wall_boundaries");
-    for (const auto & name : vec)
-      _slip_wall_boundaries.insert(_mesh.getBoundaryID(name));
-  }
-  {
-    // Setup flow boundary IDs
-    const auto & vec = getParam<std::vector<BoundaryName>>("flow_boundaries");
-    for (const auto & name : vec)
-      _flow_boundaries.insert(_mesh.getBoundaryID(name));
+    const auto & connected_boundaries = _mesh.getSubdomainBoundaryIds(blk_id);
+    for (const auto bnd_id : connected_boundaries)
+      all_connected_boundaries.insert(bnd_id);
   }
 
-  std::set<BoundaryID> sum = _no_slip_wall_boundaries;
-  for (const auto id : _slip_wall_boundaries)
+  // Ok we now have all the connected boundaries figured out, but there's an issue. Perhaps the user
+  // has multiple blocks over which our INSFV physics are defined for whatever reason. Then the
+  // interface boundary should not be considered a boundary here. We must erase it. E.g. when we are
+  // done all_connected_boundaries should only hold our INSFV physics's "true" boundaries
+  eraseInterfaces(all_connected_boundaries);
+
+  for (const auto bnd_id : all_connected_boundaries)
   {
-    const auto pr = sum.emplace(id);
-    if (!pr.second)
-      mooseError(
-          "Duplicate coverage of ", id, " by no_slip_wall_boundaries and slip_wall_boundaries.");
+    unsigned int bc_types_added = 0;
+    bc_types_added += setupFlowBoundaries(bnd_id);
+    bc_types_added +=
+        setupBoundaries<INSFVNoSlipWallBC>(bnd_id, "INSFVNoSlipWallBC", _no_slip_wall_boundaries);
+    bc_types_added +=
+        setupBoundaries<INSFVSlipWallBC>(bnd_id, "INSFVSlipWallBC", _slip_wall_boundaries);
+    bc_types_added +=
+        setupBoundaries<INSFVSymmetryBC>(bnd_id, "INSFVSymmetryBC", _symmetry_boundaries);
+
+    if (bc_types_added != 1)
+      mooseError("Each boundary in an INSFV simulation must be covered by exactly one type of the "
+                 "following boundary condition types: INSFVFlowBC, INSFVNoSlipWallBC, "
+                 "INSFVSlipWallBC, INSFVSymmetryBC. However, the boundary '",
+                 const_cast<MooseMesh &>(_mesh).getBoundaryName(bnd_id),
+                 "' is covered by ",
+                 bc_types_added,
+                 " different types.");
   }
-  for (const auto id : _flow_boundaries)
-  {
-    const auto pr = sum.emplace(id);
-    if (!pr.second)
-      mooseError(
-          "Duplicate coverage of ",
-          id,
-          " by flow_boundaries and the union of no_slip_wall_boundaries and slip_wall_boundaries.");
-  }
+
+  if (all_connected_boundaries != _all_boundaries)
+    mooseError("We should have complete coverage of all connected boundaries in object ",
+               this->name());
 
   if (getParam<bool>("force_boundary_execution"))
     paramError("force_boundary_execution",
@@ -166,6 +166,46 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     paramError("boundaries_to_force",
                "Do not use the boundaries_to_force parameter to control execution of INSFV "
                "advection objects");
+}
+
+bool
+INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
+{
+  std::vector<INSFVFlowBC *> flow_bcs;
+
+  this->_subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("INSFVFlowBC")
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(flow_bcs);
+
+  if (!flow_bcs.empty())
+  {
+    if (dynamic_cast<INSFVFullyDevelopedFlowBC *>(flow_bcs.front()))
+    {
+      _fully_developed_flow_boundaries.insert(bnd_id);
+
+#ifndef NDEBUG
+      for (auto * flow_bc : flow_bcs)
+        mooseAssert(dynamic_cast<INSFVFullyDevelopedFlowBC *>(flow_bc),
+                    "If one BC is a fully developed flow BC, then all other flow BCs on that "
+                    "boundary must also be fully developed flow BCs");
+    }
+    else
+      for (auto * flow_bc : flow_bcs)
+        mooseAssert(!dynamic_cast<INSFVFullyDevelopedFlowBC *>(flow_bc),
+                    "If one BC is not a fully developed flow BC, then all other flow BCs on that "
+                    "boundary must also not be fully developed flow BCs");
+#else
+    }
+#endif
+
+    _flow_boundaries.insert(bnd_id);
+    _all_boundaries.insert(bnd_id);
+  }
+
+  return !flow_bcs.empty();
 }
 
 bool
@@ -190,6 +230,49 @@ INSFVMomentumAdvection::skipForBoundary(const FaceInfo & fi) const
       return false;
 
   return true;
+}
+
+void
+INSFVMomentumAdvection::eraseInterfaces(std::set<BoundaryID> & bnd_ids)
+{
+  std::set<BoundaryID> bnd_ids_to_erase;
+
+  for (const auto bnd_id : bnd_ids)
+  {
+    const auto & sub_ids = _mesh.getBoundaryConnectedBlocks(bnd_id);
+    if (sub_ids.size() > 1)
+      mooseError("I'm sorry but for current sanity checking in INSFV, a sideset may only run over "
+                 "one subdomain");
+    mooseAssert(sub_ids.size() == 1,
+                "How did we register "
+                    << bnd_id
+                    << " as a boundary ID when it doesn't appear to be attached to anything?");
+
+    const auto & union_sub_neighbor_ids = _mesh.getInterfaceConnectedBlocks(bnd_id);
+    std::set<SubdomainID> neighbor_ids;
+    std::set_difference(union_sub_neighbor_ids.begin(),
+                        union_sub_neighbor_ids.end(),
+                        sub_ids.begin(),
+                        sub_ids.end(),
+                        std::inserter(neighbor_ids, neighbor_ids.begin()));
+
+    if (neighbor_ids.empty())
+      // We must be along a true boundary
+      continue;
+
+    if (neighbor_ids.size() > 1)
+      mooseError("I'm sorry but for current sanity checking in INSFV, all elements on the "
+                 "neighboring side of a sideset should have the same SubdomainID");
+
+    const auto sub_id = *sub_ids.begin();
+    const auto neigh_id = *neighbor_ids.begin();
+
+    if (this->hasBlocks(std::set<SubdomainID>({sub_id, neigh_id})))
+      bnd_ids_to_erase.insert(bnd_id);
+  }
+
+  for (const auto erase_id : bnd_ids_to_erase)
+    bnd_ids.erase(erase_id);
 }
 
 const VectorValue<ADReal> &
@@ -272,86 +355,93 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
     if (fi->isBoundary())
     {
       // In my mind there should only be about one bc_id per FaceInfo
-      for (const auto bc_id : fi->boundaryIDs())
+      mooseAssert(fi->boundaryIDs().size() == 1,
+                  "I think some of my logic might depend on my implicit assumption that we have "
+                  "one boundary ID at most per face");
+      const auto bc_id = *fi->boundaryIDs().begin();
+
+      if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
       {
-        if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
-        {
-          // Need to account for viscous shear stress from wall
-          for (const auto i : make_range(_dim))
-            coeff(i) += mu * surface_vector.norm() /
-                        std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) *
-                        (1 - normal(i) * normal(i));
+        // Need to account for viscous shear stress from wall
+        for (const auto i : make_range(_dim))
+          coeff(i) += mu * surface_vector.norm() /
+                      std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) *
+                      (1 - normal(i) * normal(i));
 
-          // No flow normal to wall, so no contribution to coefficient from the advection term
-          break;
-        }
+        // No flow normal to wall, so no contribution to coefficient from the advection term
+        return;
+      }
 
-        if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
-        {
-          ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
-          if (_v_var)
-            face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
-          if (_w_var)
-            face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
+      if (_slip_wall_boundaries.find(bc_id) != _slip_wall_boundaries.end())
+        // In the case of a slip wall we neither have viscous shear stress from the wall nor
+        // normal outflow, so our contribution to the coefficient is zero
+        return;
 
-          const auto advection_coeffs = Moose::FV::interpCoeffs(
-              _advected_interp_method, *fi, rc_elem_is_fi_elem, face_velocity);
-          ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
+      if (_fully_developed_flow_boundaries.find(bc_id) != _fully_developed_flow_boundaries.end())
+      {
+        ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
+        if (_v_var)
+          face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
+        if (_w_var)
+          face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-          // For flow boundaries, the coefficient addition is the same for every velocity component
-          for (const auto i : make_range(_dim))
-            coeff(i) += temp_coeff;
+        const auto advection_coeffs = Moose::FV::interpCoeffs(
+            _advected_interp_method, *fi, rc_elem_is_fi_elem, face_velocity);
+        ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
 
-          // No wall exerting shear on the fluid, so no contribution to the coefficient from the
-          // viscous term
-          break;
-        }
+        // For flow boundaries, the coefficient addition is the same for every velocity component
+        for (const auto i : make_range(_dim))
+          coeff(i) += temp_coeff;
 
-        if (_slip_wall_boundaries.find(bc_id) == _slip_wall_boundaries.end())
-          mooseError(
-              "If INSFVMomentumAdvection is to be executed along a boundary, then that boundary "
-              "must be included in one of the following parameters: 'no_slip_wall_boundaries', "
-              "'slip_wall_boundaries', or 'flow_boundaries'. However, the current boundary ID ",
-              bc_id,
-              " is not currently covered.");
+        // The gradient of each velocity component in the normal direction is zero for fully
+        // developed flows. We do not have any boundary flux from the viscous term
+        return;
+      }
 
-        // In the case of a slip wall we neither have viscous shear stress from the wall nor normal
-        // outflow, so our contribution to the coefficient is zero
+      if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
+      {
+        // Moukealled eqns. 15.154 - 15.156
+        for (const auto i : make_range(_dim))
+          coeff(i) += 2. * mu * surface_vector.norm() /
+                      std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) * normal(i) *
+                      normal(i);
+
+        return;
       }
     }
-    else
-    {
-      ADRealVectorValue neighbor_velocity(
-          _u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
-      if (_v_var)
-        neighbor_velocity(1) = _v_var->getNeighborValue(neighbor, *fi, elem_velocity(1));
-      if (_w_var)
-        neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
 
-      ADRealVectorValue interp_v;
-      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                             interp_v,
-                             elem_velocity,
-                             neighbor_velocity,
-                             *fi,
-                             rc_elem_is_fi_elem);
+    // Else we are on an internal face or we are on a non-developed flow boundary, in which case
+    // there are no modifications to the coefficients like there are for other types of boundary
+    // conditions
 
-      // we are only interested in the interpolation coefficient for the Rhie-Chow element,
-      // so we just use the 'first' member of the returned pair
-      const auto advection_coeffs =
-          Moose::FV::interpCoeffs(_advected_interp_method, *fi, rc_elem_is_fi_elem, interp_v);
-      ADReal temp_coeff = _rho * interp_v * surface_vector * advection_coeffs.first;
+    ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
+    if (_v_var)
+      neighbor_velocity(1) = _v_var->getNeighborValue(neighbor, *fi, elem_velocity(1));
+    if (_w_var)
+      neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
 
-      // Now add the viscous flux. Note that this includes only the orthogonal component! See
-      // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
-      // E_f, equation 8.69
-      temp_coeff +=
-          mu * surface_vector.norm() / (fi->neighborCentroid() - fi->elemCentroid()).norm();
+    ADRealVectorValue interp_v;
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           interp_v,
+                           elem_velocity,
+                           neighbor_velocity,
+                           *fi,
+                           rc_elem_is_fi_elem);
 
-      // For internal faces the coefficient is the same for every velocity component.
-      for (const auto i : make_range(_dim))
-        coeff(i) += temp_coeff;
-    }
+    // we are only interested in the interpolation coefficient for the Rhie-Chow element,
+    // so we just use the 'first' member of the returned pair
+    const auto advection_coeffs =
+        Moose::FV::interpCoeffs(_advected_interp_method, *fi, rc_elem_is_fi_elem, interp_v);
+    ADReal temp_coeff = _rho * interp_v * surface_vector * advection_coeffs.first;
+
+    // Now add the viscous flux. Note that this includes only the orthogonal component! See
+    // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
+    // E_f, equation 8.69
+    temp_coeff += mu * surface_vector.norm() / (fi->neighborCentroid() - fi->elemCentroid()).norm();
+
+    // For internal faces the coefficient is the same for every velocity component.
+    for (const auto i : make_range(_dim))
+      coeff(i) += temp_coeff;
   };
 
   Moose::FV::loopOverElemFaceInfo(elem, _subproblem.mesh(), _subproblem, action_functor);

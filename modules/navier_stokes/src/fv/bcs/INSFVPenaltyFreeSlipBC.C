@@ -14,7 +14,7 @@ registerMooseObject("NavierStokesApp", INSFVPenaltyFreeSlipBC);
 InputParameters
 INSFVPenaltyFreeSlipBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = INSFVSlipWallBC::validParams();
   params.addClassDescription(
       "Implements a free slip boundary condition using a penalty formulation.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
@@ -29,7 +29,7 @@ INSFVPenaltyFreeSlipBC::validParams()
 }
 
 INSFVPenaltyFreeSlipBC::INSFVPenaltyFreeSlipBC(const InputParameters & params)
-  : FVFluxBC(params),
+  : INSFVSlipWallBC(params),
     _u(adCoupledValue("u")),
     _v(adCoupledValue("v")),
     _w(adCoupledValue("w")),

@@ -10,6 +10,13 @@
 #pragma once
 
 #include "FVMatAdvection.h"
+#include "TheWarehouse.h"
+#include "SubProblem.h"
+#include "MooseApp.h"
+#include "Attributes.h"
+
+#include <vector>
+#include <set>
 
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
@@ -92,7 +99,36 @@ protected:
   /// Flow Boundary IDs
   std::set<BoundaryID> _flow_boundaries;
 
+  /// Fully Developed Flow Boundary IDs. This is a subset of \p _flow_boundaries
+  std::set<BoundaryID> _fully_developed_flow_boundaries;
+
+  /// Symmetry Boundary IDs
+  std::set<BoundaryID> _symmetry_boundaries;
+
+  /// All the BoundaryIDs covered by our different types of INSFVBCs
+  std::set<BoundaryID> _all_boundaries;
+
 private:
+  /**
+   *  @return Whether we added the \p bc_id to \p _flow_boundaries
+   */
+  bool setupFlowBoundaries(BoundaryID bnd_id);
+
+  /**
+   * @param bc_type The string identifier of the type of bc we should be querying for
+   *  @return Whether we added the \p bc_id to \p bnd_ids
+   */
+  template <typename T>
+  bool setupBoundaries(const BoundaryID bnd_id,
+                       const std::string & bc_type,
+                       std::set<BoundaryID> & bnd_ids);
+
+  /**
+   * erases boundaries in \p bnd_ids which are actually interfaces between blocks over which we are
+   * defined
+   */
+  void eraseInterfaces(std::set<BoundaryID> & bnd_ids);
+
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
   /// the vector is equal to the number of threads in the simulation. We maintain a map from
   /// MooseApp pointer to RC coefficients in order to support MultiApp simulations
@@ -100,3 +136,27 @@ private:
                             std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
       _rc_a_coeffs;
 };
+
+template <typename T>
+bool
+INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
+                                        const std::string & bc_type,
+                                        std::set<BoundaryID> & bnd_ids)
+{
+  std::vector<T *> bcs;
+
+  this->_subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>(bc_type)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(bcs);
+
+  if (!bcs.empty())
+  {
+    bnd_ids.insert(bnd_id);
+    _all_boundaries.insert(bnd_id);
+  }
+
+  return !bcs.empty();
+}

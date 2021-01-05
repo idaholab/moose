@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVFullyDevelopedFlowBC.h"
+#include "INSFVNoSlipWallBC.h"
 #include "InputParameters.h"
 
+registerMooseObject("NavierStokesApp", INSFVNoSlipWallBC);
+
 InputParameters
-INSFVFullyDevelopedFlowBC::validParams()
+INSFVNoSlipWallBC::validParams()
 {
-  auto params = INSFVFlowBC::validParams();
-  params.registerSystemAttributeName("INSFVFullyDevelopedFlowBC");
+  auto params = FVDirichletBC::validParams();
+  params.registerSystemAttributeName("INSFVNoSlipWallBC");
+  params.set<Real>("value") = 0;
   return params;
 }
 
-INSFVFullyDevelopedFlowBC::INSFVFullyDevelopedFlowBC(const InputParameters & params)
-  : INSFVFlowBC(params)
-{
-}
+INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params) : FVDirichletBC(params) {}

@@ -9,13 +9,11 @@
 
 #pragma once
 
-#include "INSFVFlowBC.h"
-
 class InputParameters;
 
-class INSFVFullyDevelopedFlowBC : public INSFVFlowBC
+class INSFVSymmetryBC
 {
 public:
   static InputParameters validParams();
-  INSFVFullyDevelopedFlowBC(const InputParameters & params);
+  INSFVSymmetryBC(const InputParameters & params);
 };

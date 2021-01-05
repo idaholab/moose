@@ -9,13 +9,12 @@
 
 #pragma once
 
-#include "INSFVFlowBC.h"
-
 class InputParameters;
 
-class INSFVFullyDevelopedFlowBC : public INSFVFlowBC
+class INSFVFlowBC
 {
 public:
   static InputParameters validParams();
-  INSFVFullyDevelopedFlowBC(const InputParameters & params);
+  INSFVFlowBC(const InputParameters & params);
+  virtual ~INSFVFlowBC() = default;
 };

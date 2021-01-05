@@ -7,18 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVFullyDevelopedFlowBC.h"
+#include "INSFVFlowBC.h"
 #include "InputParameters.h"
 
 InputParameters
-INSFVFullyDevelopedFlowBC::validParams()
+INSFVFlowBC::validParams()
 {
-  auto params = INSFVFlowBC::validParams();
-  params.registerSystemAttributeName("INSFVFullyDevelopedFlowBC");
+  auto params = emptyInputParameters();
+  params.registerSystemAttributeName("INSFVFlowBC");
   return params;
 }
 
-INSFVFullyDevelopedFlowBC::INSFVFullyDevelopedFlowBC(const InputParameters & params)
-  : INSFVFlowBC(params)
-{
-}
+INSFVFlowBC::INSFVFlowBC(const InputParameters &) {}
