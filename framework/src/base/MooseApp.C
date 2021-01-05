@@ -2091,13 +2091,6 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     {
       if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       {
-        // We do not need to attach geometric ProxyRelationshipManager since
-        // all regular relationship managers are added to both undisplaced meshes
-        // and displaced mesh. BTW, geometric ProxyRelationshipManager was not
-        // attached anywhere in the old code base.
-        if (dynamic_cast<ProxyRelationshipManager *>(rm.get()))
-          continue;
-
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
         MooseMesh * const mesh = _action_warehouse.mesh().get();
 
