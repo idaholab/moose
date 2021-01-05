@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#16462'
+  design = 'CSVSampler.md'
+
+  [csv_sampler]
+    requirement = 'The CSV Sampler shall read samples from a CSV file '
+                  'while the sample data is '
+
+    [sampling_test]
+      type = 'CSVDiff'
+      input = 'csv_sampler.i'
+      csvdiff = 'csv_sampler_out_data_0000.csv csv_sampler_out_data_0001.csv'
+
+      detail = 'distributed across processors, '
+    []
+
+    [sampling_test_global]
+      type = 'CSVDiff'
+      input = 'csv_sampler.i'
+      csvdiff = 'csv_sampler_out_data_0000.csv csv_sampler_out_data_0001.csv'
+      prereq = csv_sampler/sampling_test
+      cli_args = VectorPostprocessors/data/sampler_method=get_global_samples
+
+      detail = 'replicated across processors, and '
+    []
+
+    [sampling_test_distributed]
+      type = 'CSVDiff'
+      input = 'csv_sampler.i'
+      csvdiff = 'csv_sampler_distributed_out_data_0000.csv.0 csv_sampler_distributed_out_data_0000.csv.1 csv_sampler_distributed_out_data_0001.csv.0 csv_sampler_distributed_out_data_0001.csv.1'
+      cli_args = 'VectorPostprocessors/data/parallel_type=DISTRIBUTED Outputs/file_base=csv_sampler_distributed_out'
+      min_parallel = 2
+      max_parallel = 2
+      detail = 'distributed across processors with the output also distributed.'
+    []
+  []
+
+  [csv_sampler_indices]
+    requirement = "The CSV Sampler shall sample from a CSV file when column indices are provided."
+
+    type = 'CSVDiff'
+    input = 'csv_sampler_indices.i'
+    csvdiff = 'csv_sampler_indices_out_data_0000.csv csv_sampler_indices_out_data_0001.csv'
+  []
+
+  [csv_sampler_names]
+    requirement = "The CSV Sampler shall sample from a CSV file when column names are provided."
+
+    type = 'CSVDiff'
+    input = 'csv_sampler_names.i'
+    csvdiff = 'csv_sampler_indices_out_data_0000.csv csv_sampler_indices_out_data_0001.csv'
+    cli_args = Outputs/file_base='csv_sampler_indices_out'
+  []
+[]
