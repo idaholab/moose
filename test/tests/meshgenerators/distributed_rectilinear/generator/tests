@@ -10,6 +10,14 @@
     requirement = 'MOOSE shall be able to generate 2D Quad4 mesh in parallel'
   [../]
 
+  [./check_nlayers]
+    type = 'RunException'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    cli_args = 'Mesh/gmg/num_side_layers=5'
+    requirement = 'MOOSE shall be able to check if or not users ask for too many layers of ghosting elements'
+    expect_err = 'Range\s+check\s+failed\s+for\s+parameter\s+Mesh\/gmg\/num\_side\_layers\s+Expression:\s+num\_side\_layers\>\=1\s+\&\s+num\_side\_layers\<5\s+Value:\s+5'
+  [../]
+
   [./1D]
     type = 'Exodiff'
     input = 'distributed_rectilinear_mesh_generator.i'

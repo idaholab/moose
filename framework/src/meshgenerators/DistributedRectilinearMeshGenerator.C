@@ -54,9 +54,10 @@ DistributedRectilinearMeshGenerator::validParams()
   params.addParam<processor_id_type>(
       "num_cores_for_partition", 0, "Number of cores for partitioning the graph");
 
-  params.addParam<unsigned>(
+  params.addRangeCheckedParam<unsigned>(
       "num_side_layers",
       2,
+      "num_side_layers>=1 & num_side_layers<5",
       "Number of layers of off-processor side neighbors is reserved during mesh generation");
 
   params.addRelationshipManager(
