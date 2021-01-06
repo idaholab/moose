@@ -59,7 +59,7 @@ class StyleCommand(command.CommandComponent):
 class RenderStyleToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        style = [token['style']]
+        style = [token.get('style', '')]
         if token['halign']:
             if token['halign'] not in ('center', 'left', 'right'):
                 msg = "The supplied string for 'halign' is '{}' but it must be " \

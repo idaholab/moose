@@ -4,6 +4,6 @@
 
 !include preamble.md line=We hold
 
-!include preamble.md re=(?P<content>Right\s.*?Government) indent=1 prefix=^ suffix=$ header=Header footer=Footer
+!include preamble.md re=(?P<content>Right\s.*?Government) indent=1 prepend=^ append=$ header=Header footer=Footer
 
 > !include amendments.md

@@ -124,7 +124,7 @@ class FloatExtension(Extension):
 
     def postTokenize(self, page, ast):
         """Set float number for each counter."""
-        counts = page.get('counts', collections.defaultdict(int))
+        counts = collections.defaultdict(int)
         for node in moosetree.iterate(ast, lambda n: n.name == 'FloatCaption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
