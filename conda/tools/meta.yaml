@@ -10,7 +10,7 @@ source:
 
 build:
   number: {{ build }}
-  skip: true                 # [win]
+  skip: true                 # [osx,win]
   noarch: python
 
 requirements:
