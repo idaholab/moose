@@ -1,10 +1,13 @@
 python:
+ - 3.8
  - 3.7
  - 3.6
 
 vtk:
+ - 8.2.0 py38h3f69d5f_218 # [osx]
  - 8.2.0 py37hcba847f_203 # [osx]
  - 8.2.0 py36hcba847f_203 # [osx]
+ - 8.2.0 py38hf2e56f5_218 # [linux]
  - 8.2.0 py37hfdee58b_203 # [linux]
  - 8.2.0 py36hfdee58b_203 # [linux]
 
