@@ -17,6 +17,7 @@ requirements:
   host:
     - python >=3.6,<3.9
     - vtk 8.2.0
+
   run:
     - python >=3.6,<3.9
     - vtk 8.2.0
