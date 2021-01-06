@@ -38,20 +38,16 @@ public:
   RelationshipManager(const RelationshipManager & other);
 
   /**
-   * Called before this RM is attached.  Will only be called once.
+   * Called before this RM is attached
    */
-  void init(const MeshBase & mesh)
-  {
-    if (!_inited)
-    {
-      internalInitWithMesh(mesh);
-      set_mesh(&mesh);
-    }
-    _inited = true;
-  }
+  void init(const MeshBase & mesh, const SubProblem * subproblem = nullptr);
 
   /**
-   * Whether or not this RM has been inited
+   * Whether or not this RM has been inited. NOTE that this just indicates that the \p init method
+   * has been called at least once. Conceivably this could have been during the early geometric
+   * setup phase and if this relationship manager is also algebraic/coupling, we are not assured
+   * that this RelationshipManager is fully initialized until the \p init call during the
+   * algebraic/coupling/late-geometric setup phase
    */
   bool inited() { return _inited; }
 
@@ -126,11 +122,6 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
-  /**
-   * Set the dof map
-   */
-  void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
-
 protected:
   /**
    * Called before this RM is attached.  Only called once
@@ -143,6 +134,10 @@ protected:
 
   /// Pointer to the \p MooseMesh object
   MooseMesh * const _moose_mesh;
+
+  /// Pointer to SubProblem. This should be populated at some point if this RM does algebraic or
+  /// coupling ghosting
+  const SubProblem * _subproblem = nullptr;
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit

@@ -9,6 +9,8 @@
 
 #include "RelationshipManager.h"
 #include "MooseApp.h"
+#include "SubProblem.h"
+#include "SystemBase.h"
 
 defineLegacyParams(RelationshipManager);
 
@@ -158,4 +160,37 @@ RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
   auto params = dummyParams();
   params.addRelationshipManager("ElementSideNeighborLayers", rm_type);
   return params;
+}
+
+void
+RelationshipManager::init(const MeshBase & mesh, const SubProblem * const subproblem)
+{
+  if (_subproblem)
+    mooseAssert(subproblem == _subproblem,
+                "We have initilized this RelationshipManager with two different subproblems");
+  else
+    _subproblem = subproblem;
+
+  if (_subproblem)
+  {
+    if (_system_type == Moose::RMSystemType::NONLINEAR)
+      _dof_map = &_subproblem->systemBaseNonlinear().dofMap();
+    else if (_system_type == Moose::RMSystemType::AUXILIARY)
+      _dof_map = &_subproblem->systemBaseAuxiliary().dofMap();
+  }
+
+  // It is conceivable that this init method gets called twice, once during early geometric setup
+  // and later when we're doing algebraic/coupling (and late geometric) setup. There might be new
+  // information available during the latter call that the derived RelationshipManager can
+  // leverage, so we should make sure we call through to internal init both times
+  internalInitWithMesh(mesh);
+
+  if (_mesh)
+    mooseAssert(&mesh == _mesh,
+                "We have initialized this RelationshipManager with two different meshes.");
+  else
+    // One would hope that internalInitWithMesh set the mesh, but we can't be sure
+    set_mesh(&mesh);
+
+  _inited = true;
 }
