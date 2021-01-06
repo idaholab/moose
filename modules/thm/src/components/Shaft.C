@@ -32,7 +32,7 @@ Shaft::init()
 {
   Component::init();
 
-  for (const std::string comp_name : _connected_components)
+  for (const auto & comp_name : _connected_components)
   {
     if (hasComponentByName<Component>(comp_name))
     {
@@ -54,7 +54,7 @@ void
 Shaft::addVariables()
 {
   std::vector<SubdomainName> connected_subdomains;
-  for (const std::string comp_name : _connected_components)
+  for (const auto & comp_name : _connected_components)
   {
     const Component & c = getComponentByName<Component>(comp_name);
     if (dynamic_cast<const FlowConnection *>(&c) != nullptr)
@@ -78,7 +78,7 @@ Shaft::addMooseObjects()
 {
   std::vector<UserObjectName> uo_names;
 
-  for (const std::string comp_name : _connected_components)
+  for (const auto & comp_name : _connected_components)
   {
     const Component & c = getComponentByName<Component>(comp_name);
     const ShaftConnectable & scc = dynamic_cast<const ShaftConnectable &>(c);
