@@ -14,9 +14,11 @@ build:
 
 requirements:
   host:
-    - python {{ python }}
-    - vtk {{ vtk }}
+    - python >=3.6,<3.9
+    - vtk 8.2.0
   run:
+    - python >=3.6,<3.9
+    - vtk 8.2.0
     - numpy
     - pyqt
     - matplotlib
@@ -29,11 +31,9 @@ requirements:
     - mock
     - lxml
     - scikit-image
-    - vtk {{ vtk }}
     - pylatexenc
     - jinja2
     - mako
-    - python {{ python }}
 
 test:
   imports:
