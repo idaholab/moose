@@ -9,8 +9,6 @@
 
 #include "RelationshipManager.h"
 #include "MooseApp.h"
-#include "SubProblem.h"
-#include "SystemBase.h"
 
 defineLegacyParams(RelationshipManager);
 
@@ -46,14 +44,6 @@ RelationshipManager::validParams()
   params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
 
   /**
-   * This parameter is used to indicate which system and subsequent DofMap this relationship manager
-   * should be applied to. This parameter is not meaningful when the RM is of geometric type only.
-   * If this parameter is equal to ANY, then this RM can be applied to both non-linear and aux
-   * systems.
-   */
-  params.addPrivateParam<Moose::RMSystemType>("system_type", Moose::RMSystemType::NONE);
-
-  /**
    * The name of the object (or Action) requesting this RM
    */
   params.addRequiredParam<std::string>("for_whom", "What object is requesting this RM?");
@@ -78,11 +68,9 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
         "mesh",
         "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
         "was supplied and no generation block was provided")),
-    _dof_map(nullptr),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _system_type(getParam<Moose::RMSystemType>("system_type"))
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }
@@ -91,12 +79,10 @@ RelationshipManager::RelationshipManager(const RelationshipManager & other)
   : MooseObject(other._pars),
     GhostingFunctor(other),
     _moose_mesh(other._moose_mesh),
-    _dof_map(other._dof_map),
     _attach_geometric_early(other._attach_geometric_early),
     _rm_type(other._rm_type),
     _for_whom(other._for_whom),
-    _use_displaced_mesh(other._use_displaced_mesh),
-    _system_type(other._system_type)
+    _use_displaced_mesh(other._use_displaced_mesh)
 {
 }
 
@@ -124,7 +110,7 @@ RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
 bool
 RelationshipManager::baseGreaterEqual(const RelationshipManager & rhs) const
 {
-  return isType(rhs._rm_type) && _system_type == rhs._system_type;
+  return isType(rhs._rm_type);
 }
 
 Moose::RelationshipManagerType RelationshipManager::geo_and_alg =
@@ -163,21 +149,12 @@ RelationshipManager::oneLayerGhosting(Moose::RelationshipManagerType rm_type)
 }
 
 void
-RelationshipManager::init(const MeshBase & mesh, const SubProblem * const subproblem)
+RelationshipManager::init(const MeshBase & mesh, const DofMap * const dof_map)
 {
-  if (_subproblem)
-    mooseAssert(subproblem == _subproblem,
-                "We have initilized this RelationshipManager with two different subproblems");
-  else
-    _subproblem = subproblem;
+  mooseAssert(_dof_map ? dof_map == _dof_map : true,
+              "Trying to initialize with a different dof map");
 
-  if (_subproblem)
-  {
-    if (_system_type == Moose::RMSystemType::NONLINEAR)
-      _dof_map = &_subproblem->systemBaseNonlinear().dofMap();
-    else if (_system_type == Moose::RMSystemType::AUXILIARY)
-      _dof_map = &_subproblem->systemBaseAuxiliary().dofMap();
-  }
+  _dof_map = dof_map;
 
   // It is conceivable that this init method gets called twice, once during early geometric setup
   // and later when we're doing algebraic/coupling (and late geometric) setup. There might be new
@@ -185,12 +162,8 @@ RelationshipManager::init(const MeshBase & mesh, const SubProblem * const subpro
   // leverage, so we should make sure we call through to internal init both times
   internalInitWithMesh(mesh);
 
-  if (_mesh)
-    mooseAssert(&mesh == _mesh,
-                "We have initialized this RelationshipManager with two different meshes.");
-  else
-    // One would hope that internalInitWithMesh set the mesh, but we can't be sure
-    set_mesh(&mesh);
+  // One would hope that internalInitWithMesh set the mesh, but we can't be sure
+  set_mesh(&mesh);
 
   _inited = true;
 }

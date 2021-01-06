@@ -40,7 +40,7 @@ public:
   /**
    * Called before this RM is attached
    */
-  void init(const MeshBase & mesh, const SubProblem * subproblem = nullptr);
+  void init(const MeshBase & mesh, const DofMap * dof_map = nullptr);
 
   /**
    * Whether or not this RM has been inited. NOTE that this just indicates that the \p init method
@@ -135,13 +135,9 @@ protected:
   /// Pointer to the \p MooseMesh object
   MooseMesh * const _moose_mesh;
 
-  /// Pointer to SubProblem. This should be populated at some point if this RM does algebraic or
-  /// coupling ghosting
-  const SubProblem * _subproblem = nullptr;
-
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
-  const DofMap * _dof_map;
+  const DofMap * _dof_map = nullptr;
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that
@@ -157,9 +153,6 @@ protected:
 
   /// Which system this should go to (undisplaced or displaced)
   const bool _use_displaced_mesh;
-
-  /// What type of systems this RM can be applied to
-  const Moose::RMSystemType _system_type;
 
 public:
   /**

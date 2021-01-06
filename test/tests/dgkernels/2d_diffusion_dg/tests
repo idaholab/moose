@@ -69,8 +69,6 @@
     design = 'RelationshipManager.md'
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no mallocs. Sparsity will be reinitialized but not vectors'
     mesh_mode = distributed
-    expect_out = 'Reinitializing sparsity'
-    absent_out = 'Reinitializing vectors'
     max_parallel = 1
   []
   [proper_ghosting_with_action_parallel_distributed]
@@ -82,7 +80,6 @@
     design = 'RelationshipManager.md'
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no mallocs. Sparsity and vectors will both be reinitialized'
     mesh_mode = distributed
-    expect_out = 'Reinitializing vectors.*?\nReinitializing sparsity'
     min_parallel = 2
   []
   [no_additional_rms_distributed]

@@ -2129,20 +2129,22 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         // Now we've built the problem, so we can use it
         auto & problem = _executioner->feProblem();
-        const SubProblem * subproblem;
-        if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
-          subproblem = problem.getDisplacedProblem().get();
-        else
-          subproblem = &problem;
+        auto & undisplaced_nl = problem.systemBaseNonlinear();
+        auto & undisplaced_nl_dof_map = undisplaced_nl.dofMap();
 
         // Ensure that the relationship manager is initialized
-        rm->init(problem.mesh().getMesh(), subproblem);
+        rm->init(problem.mesh().getMesh(), &undisplaced_nl_dof_map);
 
         std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
         if (_action_warehouse.displacedMesh())
         {
           clone_rm = rm->clone();
-          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+          const DofMap * const displaced_nl_dof_map =
+              problem.getDisplacedProblem()
+                  ? &problem.getDisplacedProblem()->systemBaseNonlinear().dofMap()
+                  : nullptr;
+          static_cast<RelationshipManager *>(clone_rm.get())
+              ->init(_action_warehouse.displacedMesh()->getMesh(), displaced_nl_dof_map);
         }
 
         // If it's also Geometric but didn't get attached early - then let's attach it now
@@ -2159,18 +2161,16 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
         {
           if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          {
             // We actually need to add this to the FEProblemBase NonlinearSystemBase's DofMap
             // because the DisplacedProblem "nonlinear" DisplacedSystem doesn't have any matrices
             // for which to do coupling
-            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
-          }
+            undisplaced_nl_dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
+
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
           // is no reason to add it to the DofMap twice. In the case of any other system, it
-          // actually would be disastrous to add this rm because it's going to set a coupling matrix
-          // based on the non-linear system. So we don't add this rm at all here if its also
-          // a coupling functor
+          // actually would be disastrous to add this rm because it's going to set a coupling
+          // matrix based on the non-linear system. So we don't add this rm at all here if its
+          // also a coupling functor
           else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC &&
                    !rm->isType(Moose::RelationshipManagerType::COUPLING))
             problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
@@ -2179,10 +2179,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         else // undisplaced
         {
           if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          {
-            auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-            dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
-          }
+            undisplaced_nl_dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
+
           // If this rm is algebraic AND coupling, then in the case of the non-linear system there
           // is no reason to add it to the DofMap twice. In the case of any other system, it
           // actually would be disastrous to add this rm because it's going to set a coupling matrix

@@ -887,6 +887,12 @@ private:
   // Contains properties consumed by objects, see addConsumedPropertyName
   std::map<MooseObjectName, std::set<std::string>> _consumed_material_properties;
 
+  /// A map from a root algebraic ghosting functor, e.g. the ghosting functor passed into \p
+  /// removeAlgebraicGhostingFunctor, to its clones in other systems, e.g. systems other than system
+  /// 0
+  std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
+      _root_alg_gf_to_sys_clones;
+
   friend class Restartable;
 };
 
