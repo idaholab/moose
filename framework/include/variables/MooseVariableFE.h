@@ -637,7 +637,7 @@ public:
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
 
-  unsigned int needSolutionState() const override final;
+  unsigned int oldestSolutionStateRequested() const override final;
 
 protected:
   usingMooseVariableBaseMembers;

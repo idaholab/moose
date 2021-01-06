@@ -532,7 +532,7 @@ public:
     mooseError("We don't currently implement second derivatives for FV");
   }
 
-  unsigned int needSolutionState() const override final;
+  unsigned int oldestSolutionStateRequested() const override final;
 
 protected:
   /**

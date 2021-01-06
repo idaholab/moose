@@ -742,11 +742,11 @@ MooseVariableFV<OutputType>::clearCaches()
 
 template <typename OutputType>
 unsigned int
-MooseVariableFV<OutputType>::needSolutionState() const
+MooseVariableFV<OutputType>::oldestSolutionStateRequested() const
 {
   unsigned int state = 0;
-  state = std::max(state, _element_data->needSolutionState());
-  state = std::max(state, _neighbor_data->needSolutionState());
+  state = std::max(state, _element_data->oldestSolutionStateRequested());
+  state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
   return state;
 }
 

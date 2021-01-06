@@ -142,9 +142,10 @@ public:
   void insert(NumericVector<Number> & soln);
 
   /**
-   * The highest solution state required for this variable (0 = current, 1 = old, etc...).
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
    */
-  unsigned int needSolutionState() const;
+  unsigned int oldestSolutionStateRequested() const;
 
 protected:
   /// The value of scalar variable

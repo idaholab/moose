@@ -111,7 +111,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
 
 template <typename OutputType>
 unsigned int
-MooseVariableDataFV<OutputType>::needSolutionState() const
+MooseVariableDataFV<OutputType>::oldestSolutionStateRequested() const
 {
   if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
     return 2;

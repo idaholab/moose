@@ -403,7 +403,7 @@ MooseVariableScalar::slnOlder()
 }
 
 unsigned int
-MooseVariableScalar::needSolutionState() const
+MooseVariableScalar::oldestSolutionStateRequested() const
 {
   if (_need_u_older)
     return 2;

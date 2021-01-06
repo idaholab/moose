@@ -1367,9 +1367,9 @@ SystemBase::initSolutionState()
 
   // Add additional states as required by the variable states requested
   for (const auto & var : getVariables(/* tid = */ 0))
-    state = std::max(state, var->needSolutionState());
+    state = std::max(state, var->oldestSolutionStateRequested());
   for (const auto & var : getScalarVariables(/* tid = */ 0))
-    state = std::max(state, var->needSolutionState());
+    state = std::max(state, var->oldestSolutionStateRequested());
 
   needSolutionState(state);
 }

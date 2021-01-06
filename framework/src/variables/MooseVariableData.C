@@ -194,7 +194,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
 
 template <typename OutputType>
 unsigned int
-MooseVariableData<OutputType>::needSolutionState() const
+MooseVariableData<OutputType>::oldestSolutionStateRequested() const
 {
   if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
     return 2;

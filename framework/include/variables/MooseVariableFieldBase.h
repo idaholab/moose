@@ -185,7 +185,8 @@ public:
   virtual std::size_t phiLowerSize() const = 0;
 
   /**
-   * The highest solution state required for this variable (0 = current, 1 = old, etc...).
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
    */
-  virtual unsigned int needSolutionState() const = 0;
+  virtual unsigned int oldestSolutionStateRequested() const = 0;
 };

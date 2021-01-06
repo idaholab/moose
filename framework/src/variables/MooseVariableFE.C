@@ -791,12 +791,12 @@ MooseVariableFE<OutputType>::isNodalNeighborDefined() const
 
 template <typename OutputType>
 unsigned int
-MooseVariableFE<OutputType>::needSolutionState() const
+MooseVariableFE<OutputType>::oldestSolutionStateRequested() const
 {
   unsigned int state = 0;
-  state = std::max(state, _element_data->needSolutionState());
-  state = std::max(state, _neighbor_data->needSolutionState());
-  state = std::max(state, _lower_data->needSolutionState());
+  state = std::max(state, _element_data->oldestSolutionStateRequested());
+  state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
+  state = std::max(state, _lower_data->oldestSolutionStateRequested());
   return state;
 }
 
