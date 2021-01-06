@@ -197,11 +197,13 @@ public:
   const OutputOnWarehouse & advancedExecuteOn() const;
 
 protected:
-  /**
-   * Initialization method.
-   * This populates the various data structures needed to control the output
-   */
+  /// Call init() method on setup
   virtual void initialSetup();
+
+  /**
+   * Populates the various data structures needed to control the output
+   */
+  virtual void init();
 
   /**
    * Handles logic for determining if a step should be output
