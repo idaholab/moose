@@ -79,7 +79,9 @@ class LocalListingCommand(command.CommandComponent):
         code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                          language=self.settings['language'], content=content)
 
-        if flt is not parent:
+        if flt is parent:
+            code.attributes.update(**self.attributes)
+        else:
             code.name = 'ListingCode' #TODO: Find a better way
 
         return parent
@@ -111,7 +113,9 @@ class FileListingCommand(LocalListingCommand):
         code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                          content=content, language=lang)
 
-        if flt is not parent:
+        if flt is parent:
+            code.attributes.update(**self.attributes)
+        else:
             code.name = 'ListingCode' #TODO: Find a better way
 
         # Add bottom modal
