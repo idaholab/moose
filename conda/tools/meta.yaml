@@ -11,6 +11,7 @@ source:
 build:
   number: {{ build }}
   skip: true                 # [win]
+  noarch: python
 
 requirements:
   host:
