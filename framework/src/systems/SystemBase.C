@@ -133,7 +133,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _computing_scaling_jacobian(false),
     _computing_scaling_residual(false),
     _automatic_scaling(false),
-    _verbose(false)
+    _verbose(false),
+    _solution_states_initialized(false)
 {
 }
 
@@ -1372,6 +1373,8 @@ SystemBase::initSolutionState()
     state = std::max(state, var->oldestSolutionStateRequested());
 
   needSolutionState(state);
+
+  _solution_states_initialized = true;
 }
 
 std::string

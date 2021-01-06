@@ -878,6 +878,14 @@ public:
   void addScalingVector();
 #endif
 
+  /**
+   * Whether or not the solution states have been initialized via initSolutionState()
+   *
+   * After the solution states have been initialized, additional solution
+   * states cannot be added.
+   */
+  bool solutionStatesInitialized() const { return _solution_states_initialized; }
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -952,6 +960,9 @@ protected:
 
   /// True if printing out additional information
   bool _verbose;
+
+  /// Whether or not the solution states have been initialized
+  bool _solution_states_initialized;
 
 private:
   /**
