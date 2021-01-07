@@ -77,9 +77,9 @@ class ReaderComponent(Component, mixins.ReaderObject):
         the default settings for the component, see core.py for examples.
         """
         settings = dict()
-        settings['style'] = ('', "The style settings that are passed to rendered HTML tag.")
-        settings['class'] = ('', "The class settings to be passed to rendered HTML tag.")
-        settings['id'] = ('', "The class settings to be passed to the rendered tag.")
+        settings['style'] = (None, "The style settings that are passed to rendered HTML tag.")
+        settings['class'] = (None, "The class settings to be passed to rendered HTML tag.")
+        settings['id'] = (None, "The class settings to be passed to the rendered tag.")
         return settings
 
     def __init__(self):
@@ -135,16 +135,20 @@ class ReaderComponent(Component, mixins.ReaderObject):
         This property is only available from within the createToken method, it returns None when
         called externally.
         """
+        out = dict()
         if self.__settings:
-            return {'style':self.settings['style'].strip(),
-                    'id':self.settings['id'].strip(),
-                    'class':self.settings['class'].strip()}
-        return dict()
+            if self.settings['style'] is not None:
+                out['style'] = self.settings['style'].strip()
+            if self.settings['id'] is not None:
+                out['id'] = self.settings['id'].strip()
+            if self.settings['class'] is not None:
+                out['class'] = self.settings['class'].strip()
+        return out
 
     @property
     def settings(self):
         """
-        Retrun a copy of the settings, without the setting descriptions.
+        Return a copy of the settings, without the setting descriptions.
         """
         return self.__settings
 

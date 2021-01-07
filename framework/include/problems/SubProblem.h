@@ -731,6 +731,11 @@ public:
                                    bool to_mesh = true);
 
   /**
+   * Remove an algebraic ghosting functor from this problem's DofMaps
+   */
+  void removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf);
+
+  /**
    * Automatic scaling setter
    * @param automatic_scaling A boolean representing whether we are performing automatic scaling
    */

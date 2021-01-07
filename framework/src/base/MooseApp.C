@@ -1946,44 +1946,96 @@ MooseApp::hasRelationshipManager(const std::string & name) const
                       }) != _relationship_managers.end();
 }
 
+namespace
+{
+void
+donateForWhom(const RelationshipManager & donor, RelationshipManager & acceptor)
+{
+  auto & existing_for_whom = acceptor.forWhom();
+
+  // Take all the for_whoms from the donor, and give them to the acceptor
+  for (auto & fw : donor.forWhom())
+  {
+    if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
+        existing_for_whom.end())
+      acceptor.addForWhom(fw);
+  }
+}
+}
+
 bool
-MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager)
+MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 {
   // We don't need Geometric-only RelationshipManagers when we run with
   // ReplicatedMesh unless we are splitting the mesh.
   if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
-      (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
-       !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
-         relationship_manager->isType(Moose::RelationshipManagerType::COUPLING))))
+      (new_rm->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
+       !(new_rm->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
+         new_rm->isType(Moose::RelationshipManagerType::COUPLING))))
     return false;
 
   bool add = true;
-  for (const auto & rm : _relationship_managers)
+
+  std::set<std::shared_ptr<RelationshipManager>> rms_to_erase;
+
+  for (const auto & existing_rm : _relationship_managers)
   {
-    if (*rm == *relationship_manager)
+    if (*existing_rm >= *new_rm)
     {
       add = false;
-
-      auto & existing_for_whom = rm->forWhom();
-
-      // Since the existing object is going to cover this one
-      // Pass along who is needing it
-      for (auto & fw : relationship_manager->forWhom())
-      {
-        if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
-            existing_for_whom.end())
-          rm->addForWhom(fw);
-      }
-
+      donateForWhom(*new_rm, *existing_rm);
       break;
     }
+    // The new rm did not provide less or the same amount/type of ghosting as the existing rm, but
+    // what about the other way around?
+    else if (*new_rm >= *existing_rm)
+      rms_to_erase.emplace(existing_rm);
   }
 
   if (add)
-    _relationship_managers.emplace_back(relationship_manager);
+  {
+    _relationship_managers.emplace(new_rm);
+    for (const auto & rm_to_erase : rms_to_erase)
+    {
+      donateForWhom(*rm_to_erase, *new_rm);
+      removeRelationshipManager(rm_to_erase);
+    }
+  }
 
   // Inform the caller whether the object was added or not
   return add;
+}
+
+void
+MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
+{
+  auto * mesh = _action_warehouse.mesh().get();
+  if (mesh->getMeshPtr())
+    mesh->getMesh().remove_ghosting_functor(*rm);
+
+  auto & displaced_mesh = _action_warehouse.displacedMesh();
+  if (displaced_mesh)
+  {
+    mooseAssert(displaced_mesh->getMeshPtr(),
+                "The displaced mesh gets added late in the game. It should definitely have a mesh "
+                "base attached to it");
+    displaced_mesh->getMesh().remove_ghosting_functor(*rm);
+  }
+
+  if (_executioner)
+  {
+    auto & problem = _executioner->feProblem();
+    problem.removeAlgebraicGhostingFunctor(*rm);
+
+    if (auto * dp = problem.getDisplacedProblem().get())
+      dp->removeAlgebraicGhostingFunctor(*rm);
+
+    auto & dof_map = problem.getNonlinearSystemBase().dofMap();
+    dof_map.remove_coupling_functor(*rm);
+  }
+
+  _factory.releaseSharedObjects(*rm);
+  _relationship_managers.erase(rm);
 }
 
 void
@@ -2195,20 +2247,6 @@ MooseApp::getRelationshipManagerInfo() const
   }
 
   return info_strings;
-}
-
-void
-MooseApp::dofMapReinitForRMs()
-{
-  for (auto & rm : _relationship_managers)
-    rm->dofmap_reinit();
-}
-
-void
-MooseApp::meshReinitForRMs()
-{
-  for (auto & rm : _relationship_managers)
-    rm->mesh_reinit();
 }
 
 void

@@ -95,6 +95,7 @@
 #include "MooseVariableFV.h"
 #include "FVBoundaryCondition.h"
 #include "Reporter.h"
+#include "ADUtils.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -4778,6 +4779,16 @@ FEProblemBase::createQRules(
 void
 FEProblemBase::setCoupling(Moose::CouplingType type)
 {
+  if (_trust_user_coupling_matrix)
+  {
+    if (_coupling != Moose::COUPLING_CUSTOM)
+      mooseError("Someone told us (the FEProblemBase) to trust the user coupling matrix, but we "
+                 "haven't been provided a coupling matrix!");
+
+    // We've been told to trust the user coupling matrix, so we're going to leave things alone
+    return;
+  }
+
   _coupling = type;
 }
 
@@ -4785,16 +4796,25 @@ void
 FEProblemBase::setCouplingMatrix(CouplingMatrix * cm)
 {
   // TODO: Deprecate method
-
-  _coupling = Moose::COUPLING_CUSTOM;
+  setCoupling(Moose::COUPLING_CUSTOM);
   _cm.reset(cm);
 }
 
 void
 FEProblemBase::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm)
 {
-  _coupling = Moose::COUPLING_CUSTOM;
+  setCoupling(Moose::COUPLING_CUSTOM);
   _cm = std::move(cm);
+}
+
+void
+FEProblemBase::trustUserCouplingMatrix()
+{
+  if (_coupling != Moose::COUPLING_CUSTOM)
+    mooseError("Someone told us (the FEProblemBase) to trust the user coupling matrix, but we "
+               "haven't been provided a coupling matrix!");
+
+  _trust_user_coupling_matrix = true;
 }
 
 void
@@ -4839,7 +4859,7 @@ FEProblemBase::setNonlocalCouplingMatrix()
 }
 
 bool
-FEProblemBase::areCoupled(unsigned int ivar, unsigned int jvar)
+FEProblemBase::areCoupled(unsigned int ivar, unsigned int jvar) const
 {
   return (*_cm)(ivar, jvar);
 }
@@ -4863,6 +4883,12 @@ FEProblemBase::init()
     return;
 
   TIME_SECTION(_init_timer);
+
+  // If we have AD and we are doing global AD indexing, then we should by default set the matrix
+  // coupling to full. If the user has told us to trust their coupling matrix, then this call will
+  // not do anything
+  if (haveADObjects() && Moose::globalADIndexing())
+    setCoupling(Moose::COUPLING_FULL);
 
   unsigned int n_vars = _nl->nVariables();
   {

@@ -20,13 +20,13 @@ TEST_F(PorousFlowBrineCO2Test, name) { EXPECT_EQ("brine-co2", _fs->fluidStateNam
  */
 TEST_F(PorousFlowBrineCO2Test, indices)
 {
-  EXPECT_EQ(2, _fs->numPhases());
-  EXPECT_EQ(3, _fs->numComponents());
-  EXPECT_EQ(0, _fs->aqueousPhaseIndex());
-  EXPECT_EQ(1, _fs->gasPhaseIndex());
-  EXPECT_EQ(0, _fs->aqueousComponentIndex());
-  EXPECT_EQ(1, _fs->gasComponentIndex());
-  EXPECT_EQ(2, _fs->saltComponentIndex());
+  EXPECT_EQ((unsigned int)2, _fs->numPhases());
+  EXPECT_EQ((unsigned int)3, _fs->numComponents());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousPhaseIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasPhaseIndex());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousComponentIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasComponentIndex());
+  EXPECT_EQ((unsigned int)2, _fs->saltComponentIndex());
 }
 
 /*

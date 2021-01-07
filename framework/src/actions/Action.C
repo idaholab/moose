@@ -93,7 +93,7 @@ Action::timedAct()
   act();
 }
 
-void
+bool
 Action::addRelationshipManager(
     Moose::RelationshipManagerType /*input_rm_type*/,
     const InputParameters & moose_object_pars,
@@ -125,30 +125,34 @@ Action::addRelationshipManager(
 
   rm_params.set<MooseMesh *>("mesh") = _mesh.get();
 
-  if (rm_params.areAllRequiredParamsValid())
-  {
-    auto rm_obj = _factory.create<RelationshipManager>(rm_name, new_name, rm_params);
-
-    // Delete the resources created on behalf of the RM if it ends up not being added to the App.
-    if (!_app.addRelationshipManager(rm_obj))
-      _factory.releaseSharedObjects(*rm_obj);
-    else // we added it
-      unique_object_id++;
-  }
-  else
+  if (!rm_params.areAllRequiredParamsValid())
     mooseError("Missing required parameters for RelationshipManager " + rm_name + " for object " +
                name());
+
+  auto rm_obj = _factory.create<RelationshipManager>(rm_name, new_name, rm_params);
+
+  const bool added = _app.addRelationshipManager(rm_obj);
+
+  // Delete the resources created on behalf of the RM if it ends up not being added to the App.
+  if (!added)
+    _factory.releaseSharedObjects(*rm_obj);
+  else // we added it
+    unique_object_id++;
+
+  return added;
 }
 
 void Action::addRelationshipManagers(Moose::RelationshipManagerType) {}
 
-void
+bool
 Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
                                 const InputParameters & moose_object_pars)
 {
   typedef RelationshipManager RM;
 
   const auto & buildable_types = moose_object_pars.getBuildableRelationshipManagerTypes();
+
+  bool added = false;
 
   for (const auto & buildable_type : buildable_types)
   {
@@ -171,21 +175,29 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
     auto sys_type = (is_algebraic || is_coupleable) ? Moose::RMSystemType::NONLINEAR
                                                     : Moose::RMSystemType::NONE;
 
-    addRelationshipManager(
-        input_rm_type, moose_object_pars, rm_name, rm_type, rm_input_parameter_func, sys_type);
+    added = addRelationshipManager(input_rm_type,
+                                   moose_object_pars,
+                                   rm_name,
+                                   rm_type,
+                                   rm_input_parameter_func,
+                                   sys_type) ||
+            added;
 
     if (is_algebraic)
     {
       auto duplicate_rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
       sys_type = Moose::RMSystemType::AUXILIARY;
-      addRelationshipManager(input_rm_type,
-                             moose_object_pars,
-                             rm_name,
-                             duplicate_rm_type,
-                             rm_input_parameter_func,
-                             sys_type);
+      added = addRelationshipManager(input_rm_type,
+                                     moose_object_pars,
+                                     rm_name,
+                                     duplicate_rm_type,
+                                     rm_input_parameter_func,
+                                     sys_type) ||
+              added;
     }
   }
+
+  return added;
 }
 
 /// DEPRECATED METHODS

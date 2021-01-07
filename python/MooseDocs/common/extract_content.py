@@ -16,8 +16,8 @@ from .exceptions import MooseDocsException
 def extractContentSettings():
     """Settings for extractContent function"""
     settings = dict()
-    settings['prefix'] = (None, "Text to include prior to each line of the included text.")
-    settings['suffix'] = ('', "Text to include after each line of the included text.")
+    settings['prepend'] = (None, "Text to include prior to each line of the included text.")
+    settings['append'] = ('', "Text to include after each line of the included text.")
     settings['header'] = (None, "Text to include prior to the included text.")
     settings['header-newlines'] = (1, "The number of newlines after the header.")
     settings['footer'] = ('', "Text to include after the included text.")
@@ -114,13 +114,13 @@ def prepareContent(content, settings):
         replace = r'{}\1'.format(' '*int(settings['indent']))
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
-    # Prefix/suffix
-    if settings['prefix'] is not None:
-        replace = r'{}\1'.format(settings['prefix'])
+    # prepend/append
+    if settings['prepend'] is not None:
+        replace = r'{}\1'.format(settings['prepend'])
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
-    if settings['suffix'] is not None:
-        replace = r'\1{}'.format(settings['suffix'])
+    if settings['append'] is not None:
+        replace = r'\1{}'.format(settings['append'])
         content = re.sub(r'^(.*?)$', replace, content, flags=re.MULTILINE|re.UNICODE)
 
     if settings['header'] is not None:

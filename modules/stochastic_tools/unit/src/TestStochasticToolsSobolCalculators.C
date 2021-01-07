@@ -160,7 +160,7 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
-    EXPECT_EQ(sobol.size(), 14);
+    EXPECT_EQ(sobol.size(), (std::size_t)14);
     EXPECT_NEAR(sobol[0], 0.154, 1e-2);
     EXPECT_NEAR(sobol[1], 0.154, 1e-2);
     EXPECT_NEAR(sobol[2], 0.154, 1e-2);
@@ -187,7 +187,7 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
-    EXPECT_EQ(sobol.size(), 8);
+    EXPECT_EQ(sobol.size(), (std::size_t)8);
     EXPECT_NEAR(sobol[0], 0.154, 1e-2);
     EXPECT_NEAR(sobol[1], 0.154, 1e-2);
     EXPECT_NEAR(sobol[2], 0.154, 1e-2);
@@ -206,7 +206,7 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
-    EXPECT_EQ(sobol.size(), 44);
+    EXPECT_EQ(sobol.size(), (std::size_t)44);
     EXPECT_NEAR(sobol[0], 0.037, 1e-2);
     EXPECT_NEAR(sobol[1], 0.037, 1e-2);
     EXPECT_NEAR(sobol[2], 0.037, 1e-2);
@@ -253,7 +253,7 @@ TEST(StochasticTools, Sobol_Analytical)
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
-    EXPECT_EQ(sobol.size(), 44);
+    EXPECT_EQ(sobol.size(), (std::size_t)44);
     EXPECT_NEAR(sobol[8], 0.550, 1e-2);
     EXPECT_NEAR(sobol[9], 0.550, 1e-2);
     EXPECT_NEAR(sobol[10], 0.050, 1e-2);

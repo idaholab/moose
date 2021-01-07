@@ -579,15 +579,15 @@ TEST(PertinentGeochemicalSystemTest, names1)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.basis_species_index.size(), 6);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)6);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)9);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.kin_species_index.size(), 3);
+  ASSERT_EQ(mgd.kin_species_index.size(), (std::size_t)3);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
 }
@@ -613,15 +613,15 @@ TEST(PertinentGeochemicalSystemTest, names2)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.basis_species_index.size(), 6);
+  ASSERT_EQ(mgd.basis_species_index.size(), (std::size_t)6);
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)7);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.kin_species_index.size(), 5);
+  ASSERT_EQ(mgd.kin_species_index.size(), (std::size_t)5);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
 }
@@ -822,7 +822,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     "e-");
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd1.surface_complexation_info.size(), 0);
+  ASSERT_EQ(mgd1.surface_complexation_info.size(), (std::size_t)0);
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
   // >(s)FeO-, >(s)FeOCa+, e-
@@ -837,7 +837,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd2.surface_complexation_info.count("Fe(OH)3(ppd)"), 1);
+  ASSERT_EQ(mgd2.surface_complexation_info.count("Fe(OH)3(ppd)"), (std::size_t)1);
   ASSERT_EQ(mgd2.surface_complexation_info["Fe(OH)3(ppd)"].surface_area, 600.0);
   ASSERT_EQ(mgd2.surface_complexation_info["Fe(OH)3(ppd)"].sorption_sites[">(s)FeOH"], 0.005);
   ASSERT_EQ(mgd2.surface_complexation_info["Fe(OH)3(ppd)"].sorption_sites[">(w)FeOH"], 0.2);
@@ -855,7 +855,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     "e-");
   ModelGeochemicalDatabase mgd3 = model3.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd3.surface_complexation_info.count("Goethite"), 1);
+  ASSERT_EQ(mgd3.surface_complexation_info.count("Goethite"), (std::size_t)1);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].surface_area, 60.0);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].sorption_sites[">(s)FeOH"], 0.05);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].sorption_sites[">(w)FeOH"], 0.222);
@@ -924,8 +924,8 @@ TEST(PertinentGeochemicalSystemTest, surfaceSorptionBuilding)
       database, {"H2O", "H+", "Ca++", "HCO3-"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgdC = modelC.modelGeochemicalDatabase();
 
-  EXPECT_EQ(mgdC.surface_sorption_name.size(), 0);
-  EXPECT_EQ(mgdC.surface_sorption_area.size(), 0);
+  EXPECT_EQ(mgdC.surface_sorption_name.size(), (std::size_t)0);
+  EXPECT_EQ(mgdC.surface_sorption_area.size(), (std::size_t)0);
   for (unsigned j = 0; j < mgdC.eqm_species_name.size(); ++j)
     EXPECT_EQ(mgdC.surface_sorption_related[j], false);
 
@@ -939,22 +939,22 @@ TEST(PertinentGeochemicalSystemTest, surfaceSorptionBuilding)
                                     "O2(aq)",
                                     "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
-  EXPECT_EQ(mgd2.surface_complexation_info.count("Goethite"), 1);
-  EXPECT_EQ(mgd2.surface_sorption_name.size(), 1);
+  EXPECT_EQ(mgd2.surface_complexation_info.count("Goethite"), (std::size_t)1);
+  EXPECT_EQ(mgd2.surface_sorption_name.size(), (std::size_t)1);
   EXPECT_EQ(mgd2.surface_sorption_name[0], "Goethite");
-  EXPECT_EQ(mgd2.surface_sorption_area.size(), 1);
+  EXPECT_EQ(mgd2.surface_sorption_area.size(), (std::size_t)1);
   EXPECT_EQ(mgd2.surface_sorption_area[0], 60.0);
   EXPECT_EQ(mgd2.surface_sorption_related.size(), mgd2.eqm_species_name.size());
   EXPECT_EQ(mgd2.surface_sorption_number.size(), mgd2.eqm_species_name.size());
   // Eqm species are: OH- >(s)FeO- Fe(OH)3(ppd)fake Goethite
-  EXPECT_EQ(mgd2.eqm_species_index.count(">(s)FeO-"), 1);
+  EXPECT_EQ(mgd2.eqm_species_index.count(">(s)FeO-"), (std::size_t)1);
   const unsigned posn = mgd2.eqm_species_index.at(">(s)FeO-");
   for (unsigned j = 0; j < mgd2.eqm_species_name.size(); ++j)
     if (j == posn)
       EXPECT_TRUE(mgd2.surface_sorption_related[j]);
     else
       EXPECT_FALSE(mgd2.surface_sorption_related[j]);
-  EXPECT_EQ(mgd2.surface_sorption_number[posn], 0);
+  EXPECT_EQ(mgd2.surface_sorption_number[posn], (unsigned int)0);
 }
 
 /// Test that the fugacity coefficients are correctly recorded
@@ -975,7 +975,7 @@ TEST(PertinentGeochemicalSystemTest, GasChi)
                                     "e-");
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd1.gas_chi.size(), 0);
+  ASSERT_EQ(mgd1.gas_chi.size(), (std::size_t)0);
 
   PertinentGeochemicalSystem model2(database,
                                     {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"},
@@ -988,7 +988,7 @@ TEST(PertinentGeochemicalSystemTest, GasChi)
                                     "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd2.gas_chi.count("CH4(g)"), 1);
+  ASSERT_EQ(mgd2.gas_chi.count("CH4(g)"), (std::size_t)1);
   ASSERT_EQ(mgd2.gas_chi["CH4(g)"][0], -537.779);
   ASSERT_EQ(mgd2.gas_chi["CH4(g)"][1], 1.54946);
   ASSERT_EQ(mgd2.gas_chi["CH4(g)"][2], -.000927827);
@@ -1016,9 +1016,9 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)7);
   for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "Calcite"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
   for (const auto & sp : {"CO2(aq)",
@@ -1138,7 +1138,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)9);
   for (const auto & sp : {"CO2(aq)",
                           "CO3--",
                           "OH-",
@@ -1148,7 +1148,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           ">(s)FeO-",
                           "Fe(OH)3(ppd)fake",
                           "CH4(g)fake"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
   for (const auto & sp : {"CO2(aq)",
@@ -1235,9 +1235,9 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)6);
   for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
   for (const auto & sp : {"CO2(aq)",
@@ -1400,10 +1400,10 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
       "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
+  ASSERT_EQ(mgd.eqm_species_index.size(), (std::size_t)8);
   for (const auto & sp :
        {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", ">(s)FeO-", ">(s)FeOCa+", "Calcite"})
-    ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
+    ASSERT_EQ(mgd.eqm_species_index.count(sp), (std::size_t)1);
 }
 
 /// Test that PertinentGeochemicalSystem correctly identifies minerals
@@ -1554,8 +1554,8 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
       "e-");
   ModelGeochemicalDatabase mgd_no_redox = model_no_redox.modelGeochemicalDatabase();
 
-  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 1);
-  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 1);
+  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), (unsigned)1);
+  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), (unsigned)1);
 
   PertinentGeochemicalSystem model_redox(
       database,
@@ -1573,8 +1573,8 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
 
   // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not
   // have a pair
-  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 3);
-  EXPECT_EQ(mgd_redox.redox_log10K.m(), 3);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), (unsigned)3);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), (unsigned)3);
 
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
@@ -1711,7 +1711,7 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
 
   const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
 
-  EXPECT_EQ(mgd.kin_rate.size(), 1);
+  EXPECT_EQ(mgd.kin_rate.size(), (std::size_t)1);
   EXPECT_EQ(mgd.kin_rate[0].kinetic_species_index, mgd.kin_species_index.at("CH4(aq)"));
   EXPECT_EQ(mgd.kin_rate[0].description.intrinsic_rate_constant, 1.0);
   EXPECT_EQ(mgd.kin_rate[0].description.area_quantity, 2.0);
@@ -1733,7 +1733,7 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
   KineticRateUserDescription ratec("Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 5.0, 4.0, 3.0, 2.0);
   model.addKineticRate(ratec);
 
-  EXPECT_EQ(mgd.kin_rate.size(), 2);
+  EXPECT_EQ(mgd.kin_rate.size(), (std::size_t)2);
   EXPECT_EQ(mgd.kin_rate[1].kinetic_species_index, mgd.kin_species_index.at("Calcite"));
   EXPECT_EQ(mgd.kin_rate[1].description.intrinsic_rate_constant, 7.0);
   EXPECT_EQ(mgd.kin_rate[1].description.area_quantity, 6.0);
@@ -1830,8 +1830,8 @@ TEST(PertinentGeochemicalSystemTest, getIndexOfOriginalBasisSpecies)
     ASSERT_TRUE(msg.find("species OH- is not in the original basis") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   };
-  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H2O"), 0);
-  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H+"), 1);
+  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H2O"), (unsigned)0);
+  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H+"), (unsigned)1);
 }
 
 /// Test originalBasisNames
@@ -1860,12 +1860,12 @@ TEST(PertinentGeochemicalSystemTest, allMinerals)
 
   for (const auto & species : mgd2.basis_species_index)
     ASSERT_EQ(mgd2.basis_species_mineral[species.second], false);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite"), 0);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite_asdf"), 0);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)fake"), 0);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)"), 1);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Goethite"), 1);
-  EXPECT_EQ(mgd2.eqm_species_index.count("Something"), 1);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite"), (std::size_t)0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite_asdf"), (std::size_t)0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)fake"), (std::size_t)0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)"), (std::size_t)1);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Goethite"), (std::size_t)1);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Something"), (std::size_t)1);
   for (const auto & species : mgd2.kin_species_index)
     if (species.first == "Fe(OH)3(ppd)fake")
       ASSERT_EQ(mgd2.kin_species_mineral[species.second], true);

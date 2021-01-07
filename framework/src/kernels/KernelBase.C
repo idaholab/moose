@@ -47,6 +47,13 @@ KernelBase::validParams()
 
   params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
+
+  // Kernels always couple within their element
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters &, InputParameters & rm_params) {
+                                  rm_params.set<unsigned short>("layers") = 0;
+                                });
   return params;
 }
 

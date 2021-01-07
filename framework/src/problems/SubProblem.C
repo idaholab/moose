@@ -938,6 +938,16 @@ SubProblem::addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebra
 }
 
 void
+SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
+{
+  EquationSystems & eq = es();
+  auto n_sys = eq.n_systems();
+
+  for (MooseIndex(n_sys) i = 0; i < n_sys; ++i)
+    eq.get_system(i).get_dof_map().remove_algebraic_ghosting_functor(algebraic_gf);
+}
+
+void
 SubProblem::automaticScaling(bool automatic_scaling)
 {
   systemBaseNonlinear().automaticScaling(automatic_scaling);

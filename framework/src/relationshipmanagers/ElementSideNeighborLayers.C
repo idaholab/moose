@@ -76,7 +76,7 @@ ElementSideNeighborLayers::getInfo() const
 // the LHS ("this" object) in MooseApp::addRelationshipManager is the existing RelationshipManager
 // object to which we are comparing the rhs to determine whether it should get added
 bool
-ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
+ElementSideNeighborLayers::operator>=(const RelationshipManager & rhs) const
 {
   const auto * rm = dynamic_cast<const ElementSideNeighborLayers *>(&rhs);
   if (!rm)
@@ -84,33 +84,26 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   else
     // We use a >= comparison instead of == for _layers because if we already have more ghosting
     // than the new RM provides, then that's an indication that we should *not* add the new one
-    return _layers >= rm->_layers && isType(rm->_rm_type) && _system_type == rm->_system_type &&
-           _use_point_neighbors == rm->_use_point_neighbors;
+    return (_layers >= rm->_layers) && (_use_point_neighbors == rm->_use_point_neighbors) &&
+           baseGreaterEqual(*rm);
 }
 
-namespace
-{
 template <typename Functor>
 void
-initFunctor(Functor & functor, MooseApp & app, unsigned short layers)
+ElementSideNeighborLayers::initFunctor(Functor & functor)
 {
-  functor.set_n_levels(layers);
+  functor.set_n_levels(_layers);
 
-  // Need to see if there are periodic BCs - if so we need to dig them out
-  auto executioner_ptr = app.getExecutioner();
-
-  if (executioner_ptr)
+  if (_dof_map)
   {
-    auto & fe_problem = executioner_ptr->feProblem();
-    auto & nl_sys = fe_problem.getNonlinearSystemBase();
-    auto & dof_map = nl_sys.dofMap();
-    auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
+    // Need to see if there are periodic BCs - if so we need to dig them out
+    auto periodic_boundaries_ptr = _dof_map->get_periodic_boundaries();
 
     mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
 
     functor.set_periodic_boundaries(periodic_boundaries_ptr);
+    functor.set_dof_coupling(_dof_map->_dof_coupling);
   }
-}
 }
 
 void
@@ -119,13 +112,13 @@ ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
   if (_use_point_neighbors)
   {
     auto functor = libmesh_make_unique<PointNeighborCoupling>();
-    initFunctor(*functor, _app, _layers);
+    initFunctor(*functor);
     _functor = std::move(functor);
   }
   else
   {
     auto functor = libmesh_make_unique<DefaultCoupling>();
-    initFunctor(*functor, _app, _layers);
+    initFunctor(*functor);
     _functor = std::move(functor);
   }
 }

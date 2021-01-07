@@ -165,12 +165,6 @@ protected:
    */
   virtual bool onInterval();
 
-  /**
-   * Initialization method.
-   * This populates the various data structures needed to control the output
-   */
-  virtual void initialSetup();
-
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
 
@@ -233,9 +227,6 @@ protected:
 
   /// Flag for only executing at sync times
   bool _sync_only;
-
-  /// True if init() has been called
-  bool _initialized;
 
   /// Flag for disabling output
   bool _allow_output;

@@ -119,6 +119,12 @@ RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
          Moose::RelationshipManagerType::COUPLING;
 }
 
+bool
+RelationshipManager::baseGreaterEqual(const RelationshipManager & rhs) const
+{
+  return isType(rhs._rm_type) && _system_type == rhs._system_type;
+}
+
 Moose::RelationshipManagerType RelationshipManager::geo_and_alg =
     Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
 

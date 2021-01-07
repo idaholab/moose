@@ -93,10 +93,6 @@ public:
   }
 
 protected:
-  /**
-   * Adds the printing of system information to the init() method
-   */
-  void init();
 
   /**
    * Print the input file at the beginning of the simulation

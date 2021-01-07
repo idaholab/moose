@@ -63,8 +63,9 @@ private:
    *                                requesting MooseObject's validParams function
    * @param sys_type A RMSystemType that can be used to limit the systems and consequent dof_maps
    *                 that the RM can be attached to
+   * @return Whether a relationship manager was added
    */
-  void
+  bool
   addRelationshipManager(Moose::RelationshipManagerType input_rm_type,
                          const InputParameters & moose_object_pars,
                          std::string rm_name,
@@ -82,8 +83,9 @@ protected:
    *        RelationshipManager as early as you'd like. In these cases, your DistributedMesh may
    *        consume more memory during the problem setup.
    * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
+   * @return Whether a relationship manager was added
    */
-  void addRelationshipManagers(Moose::RelationshipManagerType when_type,
+  bool addRelationshipManagers(Moose::RelationshipManagerType when_type,
                                const InputParameters & moose_object_pars);
 
 public:

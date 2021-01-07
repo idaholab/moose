@@ -653,7 +653,7 @@ TEST(GeochemicalDatabaseReaderTest, mineralSpeciesNames)
                          "Something",
                          "problematic_sorber"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 7);
+  EXPECT_EQ(names.size(), (std::size_t)7);
 }
 
 TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
@@ -663,7 +663,7 @@ TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
   std::vector<std::string> names = database.secondarySpeciesNames();
   for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "e-"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 7);
+  EXPECT_EQ(names.size(), (std::size_t)7);
 }
 
 TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
@@ -673,7 +673,7 @@ TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
   std::vector<std::string> names = database.redoxCoupleNames();
   for (const auto & n : {"(O-phth)--", "Am++++", "CH4(aq)", "Fe+++", "StoiCheckRedox"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 5);
+  EXPECT_EQ(names.size(), (std::size_t)5);
 }
 
 TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
@@ -683,7 +683,7 @@ TEST(GeochemicalDatabaseReaderTest, surfaceSpeciesNames)
   std::vector<std::string> names = database.surfaceSpeciesNames();
   for (const auto & n : {">(s)FeO-", ">(s)FeOCa+"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 2);
+  EXPECT_EQ(names.size(), (std::size_t)2);
 }
 
 TEST(GeochemicalDatabaseReaderTest, getSpeciesData)

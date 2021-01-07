@@ -70,8 +70,6 @@ CouplingFunctorCheckAction::act()
   auto & dgs = nl.getDGKernelWarehouse();
   auto & iks = nl.getInterfaceKernelWarehouse();
 
-  auto size = _app.relationshipManagers().size();
-
   // to reduce typing
   auto algebraic = Moose::RelationshipManagerType::ALGEBRAIC;
   auto coupling = Moose::RelationshipManagerType::COUPLING;
@@ -82,16 +80,13 @@ CouplingFunctorCheckAction::act()
     // We are going to add the algebraic ghosting and coupling functors one at a time because then
     // we can keep track of whether we need to redistribute the dofs or not
 
-    // Flag to indicate where we need to call dofmap_reinit() on our ghosting functors. If
-    // DofMap::reinit gets called then we can toggle this to false
-    bool need_ghosting_reinit = true;
-
     // Add the algebraic ghosting functors if we are running in parallel
     if (_communicator.size() > 1)
     {
-      addRelationshipManagers(algebraic, RelationshipManager::oneLayerGhosting(algebraic));
+      const bool added =
+          addRelationshipManagers(algebraic, RelationshipManager::oneLayerGhosting(algebraic));
 
-      if (size != _app.relationshipManagers().size())
+      if (added)
       {
         // If you didn't do the ghosting with your own actions, you're going to pay the price now.
         // We have to reinit all the DofMaps so we can be sure that we've ghosted the necessary
@@ -99,35 +94,28 @@ CouplingFunctorCheckAction::act()
         CONTROLLED_CONSOLE_TIMED_PRINT(
             0, 1, "Reinitializing vectors because of late algebraic ghosting");
 
-        // Reassign the size because we're going to call addRelationshipManagers again for COUPLING
-        size = _app.relationshipManagers().size();
-
         // Attach the algebraic ghosting functors to the DofMaps
         _app.attachRelationshipManagers(algebraic);
 
         redistributeDofs(*_problem);
         if (auto displaced_problem = _problem->getDisplacedProblem())
           redistributeDofs(*displaced_problem);
-
-        // DofMap::reinit calls through to the ghosting functors dofmap_reinit method, so we're
-        // covered
-        need_ghosting_reinit = false;
       }
     }
 
     // Add the coupling functor. This plays a role regardless of whether we are running serially or
     // in parallel
-    addRelationshipManagers(coupling, RelationshipManager::oneLayerGhosting(coupling));
-    if (size != _app.relationshipManagers().size())
+    const bool added =
+        addRelationshipManagers(coupling, RelationshipManager::oneLayerGhosting(coupling));
+    if (added)
     {
       CONTROLLED_CONSOLE_TIMED_PRINT(
           0, 1, "Reinitializing sparsity pattern because of late coupling addition");
 
+      // Along with attaching this coupling functor the the DofMap, we will make sure that the
+      // DofMap coupling matrix gets attached to the coupling functor. The latter operation happens
+      // when we call RelationshipManager::init
       _app.attachRelationshipManagers(coupling);
-
-      if (need_ghosting_reinit)
-        // Make sure that coupling matrices are attached to the coupling functors
-        _app.dofMapReinitForRMs();
 
       // Reinit the libMesh (Implicit)System. This re-computes the sparsity pattern and then
       // applies it to the ImplicitSystem's matrices. Note that does NOT make a call to

@@ -84,18 +84,31 @@ Similarly, if 'end' is omitted the snippet will include the remainder of the fil
 
 ## Input File Content id=moose-input
 
-Like for C++ files, [MOOSE] input files also have additional capability, mainly the "block" setting
-(see [example-listing-input] for a complete list). Including the block name the included content
-will be limited to the content matching the supplied name. Notice that the supplied name may be
-approximate; however, if it is not unique only the first match will appear.
+Like C++ files, [MOOSE] input files also have additional capability, mainly the "block" and "remove"
+settings (see [hit-listing-settings] for a complete list). The included content will be limited to
+the input block matching the supplied name. Notice that the supplied name may be approximate;
+however, if it is not unique only the first match will appear. Similarly, input file blocks may be
+removed from the displayed content. In addition to block names, the "remove" setting also accepts
+the names of individual input parameters. However, the *full* path to the parameter must be
+specified. [example-listing-input] demonstrates proper use of the `block` and `remove` syntax.
 
-!devel! example id=example-listing-input caption=Example use of "block" setting for input files.
+!devel! example id=example-listing-input caption=Example use of "block" and "remove" settings for input files.
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
          block=Kernels
-         id=input
+         id=input-block
          caption=Code listing of [MOOSE] input file block.
+
+!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
+         remove=left Executioner/petsc_options_iname Executioner/petsc_options_value
+         id=input-remove
+         caption=Code listing of a [MOOSE] input file with blocks and parameters removed.
 !devel-end!
 
-!devel settings module=MooseDocs.extensions.listing object=InputListingCommand
+!alert note title=The "block" and "remove" settings apply to all HIT formatted files.
+The settings given in [hit-listing-settings] are available to all [!ac](HIT) formatted listings, including
+[test specification files](python/TestHarness.md).
 
-[MOOSE]: www.mooseframework.org
+!devel settings module=MooseDocs.extensions.listing
+                object=InputListingCommand
+                id=hit-listing-settings
+                caption=Settings available for input file listings.

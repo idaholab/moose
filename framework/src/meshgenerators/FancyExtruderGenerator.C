@@ -562,5 +562,7 @@ FancyExtruderGenerator::generate()
     }
   }
 
+  mesh->set_isnt_prepared();
+
   return mesh;
 }

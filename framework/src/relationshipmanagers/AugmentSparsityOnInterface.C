@@ -220,14 +220,14 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 }
 
 bool
-AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
+AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
 {
   if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
   {
     if (_primary_boundary_name == asoi->_primary_boundary_name &&
         _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
-        _secondary_subdomain_name == asoi->_secondary_subdomain_name && isType(asoi->_rm_type))
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name && baseGreaterEqual(*asoi))
       return true;
   }
   return false;

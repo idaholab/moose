@@ -10,4 +10,11 @@
     design = 'FancyExtruderGenerator.md'
     issues = '#13276 #3554 #5634'
   [../]
+  [prepare_mesh]
+    type = 'RunApp'
+    input = need-neighbors.i
+    requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
+    issues = '#15944 #15936 #15823'
+    design = 'FancyExtruderGenerator.md'
+  []
 []

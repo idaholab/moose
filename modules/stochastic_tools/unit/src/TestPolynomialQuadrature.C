@@ -93,8 +93,8 @@ TEST(PolynomialQuadrature, hermite)
     std::vector<Real> wq;
     clenshaw_curtis(10, xq, wq);
 
-    EXPECT_EQ(11, xq.size());
-    EXPECT_EQ(11, wq.size());
+    EXPECT_EQ((std::size_t)11, xq.size());
+    EXPECT_EQ((std::size_t)11, wq.size());
 
     EXPECT_NEAR(xq[0], -1.0000000000000000e+00, tol);
     EXPECT_NEAR(xq[1], -9.5105651629515353e-01, tol);

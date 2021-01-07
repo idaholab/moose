@@ -6,6 +6,10 @@
   elem_type = quad9
 []
 
+[Problem]
+  error_on_jacobian_nonzero_reallocation = true
+[]
+
 [Variables]
   [./u]
   [../]
@@ -86,11 +90,12 @@
 []
 
 [Preconditioning]
+  active = ''
   [./smp]
     type = SMP
-    full = true
   [../]
 []
+
 
 [Executioner]
   type = Steady

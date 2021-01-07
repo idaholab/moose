@@ -39,17 +39,6 @@ SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params)
 {
 }
 
-bool
-SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
-{
-  bool prepared = mesh->prepared();
-
-  if (!prepared)
-    mesh->prepare();
-
-  return prepared;
-}
-
 void
 SetupMeshCompleteAction::act()
 {
@@ -116,9 +105,9 @@ SetupMeshCompleteAction::act()
   else
   {
     // Prepare the mesh (may occur multiple times)
-    completeSetup(_mesh.get());
+    _mesh->prepare();
 
     if (_displaced_mesh)
-      completeSetup(_displaced_mesh.get());
+      _displaced_mesh->prepare();
   }
 }

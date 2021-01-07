@@ -61,13 +61,13 @@ ElementPointNeighborLayers::getInfo() const
 }
 
 bool
-ElementPointNeighborLayers::operator==(const RelationshipManager & rhs) const
+ElementPointNeighborLayers::operator>=(const RelationshipManager & rhs) const
 {
   const auto * rm = dynamic_cast<const ElementPointNeighborLayers *>(&rhs);
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && isType(rm->_rm_type);
+    return _layers >= rm->_layers && baseGreaterEqual(*rm);
 }
 
 void

@@ -268,7 +268,7 @@ TEST(GeochemicalSolverTest, solve1)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check that equilibrium molality is set correctly
@@ -399,15 +399,15 @@ TEST(GeochemicalSolverTest, solve2)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)11);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 0);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)0);
 
   // check that the constraints are satisfied
   for (unsigned i = 0; i < egs.getNumInBasis(); ++i)
@@ -675,13 +675,13 @@ TEST(GeochemicalSolverTest, solve3)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 1);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)11);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)1);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -975,7 +975,7 @@ TEST(GeochemicalSolverTest, solve3_restore)
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // retrieve the molalities, and set them into egs: this should result in no change if the
@@ -1009,7 +1009,7 @@ TEST(GeochemicalSolverTest, solve3_restore)
   solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not changed
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_EQ(abs_residual, old_residual);
 
   // Now use constraints_from_molalities = true
@@ -1020,7 +1020,7 @@ TEST(GeochemicalSolverTest, solve3_restore)
   solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not increased
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
 
   // now check the copy-assignment of GeochemicalSystem
@@ -1184,13 +1184,13 @@ TEST(GeochemicalSolverTest, solve4)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 14);
-  EXPECT_EQ(egs.getNumRedox(), 2);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)14);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)2);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -1510,7 +1510,7 @@ TEST(GeochemicalSolverTest, solve4_restore)
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // retrieve the molalities, and set them into egs: this should result in no change if the
@@ -1544,7 +1544,7 @@ TEST(GeochemicalSolverTest, solve4_restore)
 
   // check that the soler thinks this is truly a solution and the residual has not changed (up to
   // precision-loss)
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
 
   // Now use constraints_from_molalities = true
@@ -1555,7 +1555,7 @@ TEST(GeochemicalSolverTest, solve4_restore)
   solver0.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check that the soler thinks this is truly a solution and the residual has not increased
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, old_residual);
 }
 
@@ -1630,13 +1630,13 @@ TEST(GeochemicalSolverTest, solve5)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
-  EXPECT_EQ(egs.getNumInBasis(), 10);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 1);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)10);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)1);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
   // check that the constraints are satisfied
@@ -1890,7 +1890,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
   const Real old_residual = abs_residual;
 
   // check converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // now setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles to the solution
@@ -1913,7 +1913,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
       names, molal, com_false);
 
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, 2.0 * old_residual);
 
   // Now use constraints_from_molalities = true
@@ -1923,7 +1923,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
 
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
-  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(tot_iter, (unsigned)0);
   EXPECT_LE(abs_residual, 2.0 * old_residual);
 
   // now check the copy-assignment operator of GeochemicalSystem
@@ -2008,7 +2008,7 @@ TEST(GeochemicalSolverTest, solve_addH)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -2031,7 +2031,7 @@ TEST(GeochemicalSolverTest, solve_addH)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -2046,7 +2046,7 @@ TEST(GeochemicalSolverTest, solve_addH)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-12);
 
   // check Bulk is as expected
@@ -2193,7 +2193,7 @@ TEST(GeochemicalSolverTest, setRampMaxIonicStrength)
                            10,
                            true);
 
-  ASSERT_EQ(solver.getRampMaxIonicStrength(), 10);
+  ASSERT_EQ(solver.getRampMaxIonicStrength(), (unsigned)10);
   try
   {
     solver.setRampMaxIonicStrength(101);
@@ -2207,7 +2207,7 @@ TEST(GeochemicalSolverTest, setRampMaxIonicStrength)
         << "Failed with unexpected error message: " << msg;
   }
   solver.setRampMaxIonicStrength(21);
-  ASSERT_EQ(solver.getRampMaxIonicStrength(), 21);
+  ASSERT_EQ(solver.getRampMaxIonicStrength(), (unsigned)21);
 }
 
 /// Solve case that involves kinetic species with zero rates (so kinetic species should have no impact except to modify the bulk composition)
@@ -2261,15 +2261,15 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 2);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)2);
 
   // check that kinetic moles have not changed (kinetic rates are zero)
   for (unsigned k = 0; k < egs.getNumKinetic(); ++k)
@@ -2447,15 +2447,15 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 10.0, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 2);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)2);
 
   // check activity products and log10K are ordered as calculated above
   EXPECT_GT(egs.log10KineticActivityProduct(index_something),
@@ -2627,15 +2627,15 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
   solver.solveSystem(egs, ss, tot_iter, abs_residual, 1.0E4, mole_additions, dmole_additions);
 
   // check Newton has converged
-  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(tot_iter, (unsigned)100);
   EXPECT_LE(abs_residual, 1.0E-15);
 
   // check numbers are correct
-  EXPECT_EQ(egs.getNumInBasis(), 4);
-  EXPECT_EQ(egs.getNumRedox(), 0);
-  EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
+  EXPECT_EQ(egs.getNumInBasis(), (unsigned)4);
+  EXPECT_EQ(egs.getNumRedox(), (unsigned)0);
+  EXPECT_EQ(egs.getNumSurfacePotentials(), (unsigned)0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
-  EXPECT_EQ(egs.getNumKinetic(), 1);
+  EXPECT_EQ(egs.getNumKinetic(), (unsigned)1);
 
   // check activity products and log10K are ordered as calculated above
   const unsigned index_something = 0;
