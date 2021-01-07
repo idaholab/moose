@@ -22,7 +22,7 @@ public:
   virtual bool converged() override;
   virtual void initialSetup() override;
   void computeWij(int iz);
-  void computeSumWij(double SumSumWij, int iz);
+  void computeSumWij(int iz);
   void computeMdot(int iz);
   void computeEnthalpy(int iz);
   void computeProperties(int iz);
@@ -41,9 +41,6 @@ protected:
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * mdot_soln;
   SolutionHandle * SumWij_soln;
-  SolutionHandle * SumWijh_soln;
-  SolutionHandle * SumWijPrimeDhij_soln;
-  SolutionHandle * SumWijPrimeDUij_soln;
   SolutionHandle * P_soln;
   SolutionHandle * DP_soln;
   SolutionHandle * h_soln;
