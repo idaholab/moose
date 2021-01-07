@@ -13,9 +13,7 @@
 InputParameters
 INSFVFlowBC::validParams()
 {
-  auto params = emptyInputParameters();
-  params.registerSystemAttributeName("INSFVFlowBC");
-  return params;
+  return emptyInputParameters();
 }
 
 INSFVFlowBC::INSFVFlowBC(const InputParameters &) {}

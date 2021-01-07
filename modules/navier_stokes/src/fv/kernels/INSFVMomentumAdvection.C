@@ -19,6 +19,7 @@
 #include "INSFVNoSlipWallBC.h"
 #include "INSFVSlipWallBC.h"
 #include "INSFVSymmetryBC.h"
+#include "INSFVAttributes.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -115,8 +116,23 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   {
     auto & vec_of_coeffs_map = _rc_a_coeffs[&_app];
     vec_of_coeffs_map.resize(libMesh::n_threads());
+    _app.theWarehouse().registerAttribute<AttribINSFVBCs>("insfvbcs", 0);
   }
 
+  if (getParam<bool>("force_boundary_execution"))
+    paramError("force_boundary_execution",
+               "Do not use the force_boundary_execution parameter to control execution of INSFV "
+               "advection objects");
+
+  if (!getParam<std::vector<BoundaryName>>("boundaries_to_force").empty())
+    paramError("boundaries_to_force",
+               "Do not use the boundaries_to_force parameter to control execution of INSFV "
+               "advection objects");
+}
+
+void
+INSFVMomentumAdvection::initialSetup()
+{
   std::set<BoundaryID> all_connected_boundaries;
   const auto & blk_ids = blockRestricted() ? blockIDs() : _mesh.meshSubdomains();
   for (const auto blk_id : blk_ids)
@@ -136,12 +152,12 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   {
     unsigned int bc_types_added = 0;
     bc_types_added += setupFlowBoundaries(bnd_id);
+    bc_types_added += setupBoundaries<INSFVNoSlipWallBC>(
+        bnd_id, INSFVBCs::INSFVNoSlipWallBC, _no_slip_wall_boundaries);
     bc_types_added +=
-        setupBoundaries<INSFVNoSlipWallBC>(bnd_id, "INSFVNoSlipWallBC", _no_slip_wall_boundaries);
+        setupBoundaries<INSFVSlipWallBC>(bnd_id, INSFVBCs::INSFVSlipWallBC, _slip_wall_boundaries);
     bc_types_added +=
-        setupBoundaries<INSFVSlipWallBC>(bnd_id, "INSFVSlipWallBC", _slip_wall_boundaries);
-    bc_types_added +=
-        setupBoundaries<INSFVSymmetryBC>(bnd_id, "INSFVSymmetryBC", _symmetry_boundaries);
+        setupBoundaries<INSFVSymmetryBC>(bnd_id, INSFVBCs::INSFVSymmetryBC, _symmetry_boundaries);
 
     if (bc_types_added != 1)
       mooseError("Each boundary in an INSFV simulation must be covered by exactly one type of the "
@@ -156,16 +172,6 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   if (all_connected_boundaries != _all_boundaries)
     mooseError("We should have complete coverage of all connected boundaries in object ",
                this->name());
-
-  if (getParam<bool>("force_boundary_execution"))
-    paramError("force_boundary_execution",
-               "Do not use the force_boundary_execution parameter to control execution of INSFV "
-               "advection objects");
-
-  if (!getParam<std::vector<BoundaryName>>("boundaries_to_force").empty())
-    paramError("boundaries_to_force",
-               "Do not use the boundaries_to_force parameter to control execution of INSFV "
-               "advection objects");
 }
 
 bool
@@ -176,8 +182,9 @@ INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
   this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribSystem>("INSFVFlowBC")
+      .template condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
       .template condition<AttribBoundaries>(bnd_id)
+      .template condition<AttribINSFVBCs>(INSFVBCs::INSFVFlowBC)
       .queryInto(flow_bcs);
 
   if (!flow_bcs.empty())
@@ -206,6 +213,31 @@ INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
   }
 
   return !flow_bcs.empty();
+}
+
+template <typename T>
+bool
+INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
+                                        const INSFVBCs bc_type,
+                                        std::set<BoundaryID> & bnd_ids)
+{
+  std::vector<T *> bcs;
+
+  this->_subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
+      .template condition<AttribBoundaries>(bnd_id)
+      .template condition<AttribINSFVBCs>(bc_type)
+      .queryInto(bcs);
+
+  if (!bcs.empty())
+  {
+    bnd_ids.insert(bnd_id);
+    _all_boundaries.insert(bnd_id);
+  }
+
+  return !bcs.empty();
 }
 
 bool

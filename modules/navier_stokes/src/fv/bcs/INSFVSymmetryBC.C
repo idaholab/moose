@@ -13,9 +13,7 @@
 InputParameters
 INSFVSymmetryBC::validParams()
 {
-  auto params = emptyInputParameters();
-  params.registerSystemAttributeName("INSFVSymmetryBC");
-  return params;
+  return emptyInputParameters();
 }
 
 INSFVSymmetryBC::INSFVSymmetryBC(const InputParameters &) {}

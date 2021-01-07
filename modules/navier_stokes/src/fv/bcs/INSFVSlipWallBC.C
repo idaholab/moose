@@ -13,9 +13,7 @@
 InputParameters
 INSFVSlipWallBC::validParams()
 {
-  auto params = FVFluxBC::validParams();
-  params.registerSystemAttributeName("INSFVSlipWallBC");
-  return params;
+  return FVFluxBC::validParams();
 }
 
 INSFVSlipWallBC::INSFVSlipWallBC(const InputParameters & params) : FVFluxBC(params) {}

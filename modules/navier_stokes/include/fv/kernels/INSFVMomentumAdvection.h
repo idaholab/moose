@@ -13,7 +13,7 @@
 #include "TheWarehouse.h"
 #include "SubProblem.h"
 #include "MooseApp.h"
-#include "Attributes.h"
+#include "INSFVAttributes.h"
 
 #include <vector>
 #include <set>
@@ -30,6 +30,7 @@ class INSFVMomentumAdvection : public FVMatAdvection
 public:
   static InputParameters validParams();
   INSFVMomentumAdvection(const InputParameters & params);
+  void initialSetup() override;
 
 protected:
   /**
@@ -119,9 +120,7 @@ private:
    *  @return Whether we added the \p bc_id to \p bnd_ids
    */
   template <typename T>
-  bool setupBoundaries(const BoundaryID bnd_id,
-                       const std::string & bc_type,
-                       std::set<BoundaryID> & bnd_ids);
+  bool setupBoundaries(const BoundaryID bnd_id, INSFVBCs bc_type, std::set<BoundaryID> & bnd_ids);
 
   /**
    * erases boundaries in \p bnd_ids which are actually interfaces between blocks over which we are
@@ -136,27 +135,3 @@ private:
                             std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
       _rc_a_coeffs;
 };
-
-template <typename T>
-bool
-INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
-                                        const std::string & bc_type,
-                                        std::set<BoundaryID> & bnd_ids)
-{
-  std::vector<T *> bcs;
-
-  this->_subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>(bc_type)
-      .template condition<AttribBoundaries>(bnd_id)
-      .queryInto(bcs);
-
-  if (!bcs.empty())
-  {
-    bnd_ids.insert(bnd_id);
-    _all_boundaries.insert(bnd_id);
-  }
-
-  return !bcs.empty();
-}

@@ -16,7 +16,6 @@ InputParameters
 INSFVNoSlipWallBC::validParams()
 {
   auto params = FVDirichletBC::validParams();
-  params.registerSystemAttributeName("INSFVNoSlipWallBC");
   params.set<Real>("value") = 0;
   return params;
 }

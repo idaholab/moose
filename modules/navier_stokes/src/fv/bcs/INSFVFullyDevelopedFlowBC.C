@@ -13,9 +13,7 @@
 InputParameters
 INSFVFullyDevelopedFlowBC::validParams()
 {
-  auto params = INSFVFlowBC::validParams();
-  params.registerSystemAttributeName("INSFVFullyDevelopedFlowBC");
-  return params;
+  return INSFVFlowBC::validParams();
 }
 
 INSFVFullyDevelopedFlowBC::INSFVFullyDevelopedFlowBC(const InputParameters & params)
