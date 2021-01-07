@@ -8,7 +8,8 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm taoblmvm");
+  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm taoblmvm taobncg taobqnls "
+                            "taobnls taobntr taogpcg");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -91,6 +92,21 @@ OptimizeSolve::taoSolve()
       break;
     case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
       ierr = TaoSetType(_tao, TAOBLMVM);
+      break;
+    case TaoSolverEnum::BOUNDED_CONJUGATE_GRADIENT:
+      ierr = TaoSetType(_tao, TAOBNCG);
+      break;
+    case TaoSolverEnum::BOUNDED_QUASI_NEWTON_LINE_SEARCH:
+      ierr = TaoSetType(_tao, TAOBQNLS);
+      break;
+    case TaoSolverEnum::BOUNDED_NEWTON_LINE_SEARCH:
+      ierr = TaoSetType(_tao, TAOBNLS);
+      break;
+    case TaoSolverEnum::BOUNDED_NEWTON_TRUST_REGION:
+      ierr = TaoSetType(_tao, TAOBNTR);
+      break;
+    case TaoSolverEnum::GRADIENT_PROJECTION_CONJUGATE_GRADIENT:
+      ierr = TaoSetType(_tao, TAOGPCG);
       break;
     default:
       mooseError("Invalid Tao solve type");
