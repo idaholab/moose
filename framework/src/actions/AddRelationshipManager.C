@@ -12,6 +12,7 @@
 #include "DisplacedProblem.h"
 
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
+registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm_final");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_coupling_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
@@ -32,7 +33,8 @@ void
 AddRelationshipManager::act()
 {
   Moose::RelationshipManagerType rm_type;
-  if (_current_task == "attach_geometric_rm" || _current_task == "add_geometric_rm")
+  if (_current_task == "attach_geometric_rm" || _current_task == "add_geometric_rm" ||
+      _current_task == "attach_geometric_rm_final")
     rm_type = Moose::RelationshipManagerType::GEOMETRIC;
   else if (_current_task == "attach_algebraic_rm" || _current_task == "add_algebraic_rm")
     rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
@@ -46,6 +48,9 @@ AddRelationshipManager::act()
     for (const auto & action_ptr : all_action_ptrs)
       action_ptr->addRelationshipManagers(rm_type);
   }
+  // Inform MooseApp that is is the final chance to attach geometric RMs
+  else if (_current_task == "attach_geometric_rm_final")
+    _app.attachRelationshipManagers(rm_type, true);
   else
     _app.attachRelationshipManagers(rm_type);
 }

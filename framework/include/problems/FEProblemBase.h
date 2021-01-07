@@ -424,6 +424,15 @@ public:
   virtual void init() override;
   virtual void solve() override;
 
+  /**
+   * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}. That is,
+   * the number of evaluable elements does NOT necessarily equal to the number of local and
+   * algebraic ghosting elements. For example, if using a Lagrange basis for all variables,
+   * if a non-local, non-algebraically-ghosted element is surrounded by neighbors which are
+   * local or algebraically ghosted, then all the nodal (Lagrange) degrees of freedom associated
+   * with the non-local, non-algebraically-ghosted element will be evaluable, and hence that
+   * element will be considered evaluable.
+   */
   const ConstElemRange & getEvaluableElementRange();
 
   /**

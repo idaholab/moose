@@ -244,6 +244,7 @@ public:
                          const dof_id_type /*ny*/,
                          const dof_id_type /*nz*/,
                          const MeshBase & /*mesh*/,
+                         const std::set<dof_id_type> & /*current_elems*/,
                          std::set<dof_id_type> & /*ghost_elems*/)
   {
     mooseError("getGhostNeighbors not implemented for this element type in "
@@ -329,6 +330,12 @@ protected:
 
   /// Whether or not to partition mesh linearly
   bool _linear_partition;
+
+  /// Number of element side neighbor layers
+  /// While most of applications in moose require one layer of side neighbors,
+  /// phase field simulation with grain tracker needs two layers. This parameter
+  /// allow us to reserve an arbitrary number of side neighbors
+  unsigned _num_side_layers;
 };
 
 template <>
@@ -521,28 +528,31 @@ void DistributedRectilinearMeshGenerator::getIndices<Hex8>(const dof_id_type nx,
                                                            dof_id_type & k);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type nz,
-                                                              const MeshBase & mesh,
-                                                              std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(const dof_id_type nx,
-                                                              const dof_id_type ny,
-                                                              const dof_id_type nz,
-                                                              const MeshBase & mesh,
-                                                              std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Quad4>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
-void
-DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(const dof_id_type nx,
-                                                             const dof_id_type ny,
-                                                             const dof_id_type nz,
-                                                             const MeshBase & mesh,
-                                                             std::set<dof_id_type> & ghost_elems);
+void DistributedRectilinearMeshGenerator::getGhostNeighbors<Hex8>(
+    const dof_id_type nx,
+    const dof_id_type ny,
+    const dof_id_type nz,
+    const MeshBase & mesh,
+    const std::set<dof_id_type> & current_elems,
+    std::set<dof_id_type> & ghost_elems);
 
 template <>
 void DistributedRectilinearMeshGenerator::scaleNodalPositions<Edge2>(dof_id_type nx,
