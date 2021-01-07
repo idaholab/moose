@@ -72,12 +72,17 @@
     [template]
       type = PythonUnitTest
       input = test_template.py
-      detail = "support template files, and"
+      detail = "template files,"
     []
     [devel]
       type = PythonUnitTest
       input = test_devel.py
-      detail = "support creating syntax examples."
+      detail = "creating syntax examples, and"
+    []
+    [ifelse]
+      type = PythonUnitTest
+      input = test_ifelse.py
+      detail = "conditional operations."
     []
   []
 []
