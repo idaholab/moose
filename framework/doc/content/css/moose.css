@@ -72,7 +72,7 @@ main {
 .tabs .tab a:hover, .tabs .tab a.active {
 	background-color: transparent;
   color: var(--inl-blue);
-}rend
+}
 
 .moose-html-rendered-tab{
   background-color:#F5F6CE;
@@ -93,6 +93,7 @@ a {
 
 .tabs .indicator {
     background-color: var(--inl-blue);
+    height:4px;
 }
 
 .card-content img{
@@ -102,6 +103,10 @@ a {
 .card .card-title{
     font-weight:100;
     font-size:130%;
+}
+
+.card .card-content{
+    padding:0;
 }
 
 .moose-exception {
@@ -394,7 +399,8 @@ blockquote {
 }
 
 .moose-caption{
-  font-size:100%;
+    font-size:100%;
+    margin:0;
 }
 
 .moose-caption-heading{
@@ -1033,6 +1039,7 @@ div.moose-mega-menu-content{
    background: var(--darkmode-back);
    color: var(--darkmode-fore);
  }
+
  /* Google Custom Search (CSE) */
  .cse .gsc-control-cse, .gsc-control-cse {
    background-color: var(--darkmode-back) !important;
@@ -1111,7 +1118,7 @@ div.moose-mega-menu-content{
    background-color: var(--darkmode-back);
  }
  .card {
-   background-color: var(--darkmode-card);
+   background-color: transparent;
  }
  .card .card-reveal {
    background-color: var(--darkmode-card);
@@ -1119,13 +1126,6 @@ div.moose-mega-menu-content{
  }
  .moose-card div.card-image{
     background-color:var(--darkmode-image-card);
- }
- .card .card-content{
-    padding:10px;
-    background-color: var(--darkmode-card);
- }
- .card-image{
-    background-color: var(--darkmode-card);
  }
  .collection.with-header .collection-header {
    color: white;
@@ -1199,4 +1199,15 @@ div.moose-mega-menu-content{
    background:var(--darkmode-card) !important;
    color:white;
  }
+
+ .tabs{
+     background-color:var(--dark-navbar);
+ }
+
+ .tabs .tab a:hover,
+ .tabs .tab a.active,
+ .tabs .tab a {
+     background-color: transparent;
+     color: white;
+}
 }

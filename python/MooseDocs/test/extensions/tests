@@ -67,12 +67,17 @@
     [gallery]
       type = PythonUnitTest
       input = test_gallery.py
-      detail = "displaying image galleries, and"
+      detail = "displaying image galleries,"
     []
     [template]
       type = PythonUnitTest
       input = test_template.py
-      detail = "support template files."
+      detail = "support template files, and"
+    []
+    [devel]
+      type = PythonUnitTest
+      input = test_devel.py
+      detail = "support creating syntax examples."
     []
   []
 []
