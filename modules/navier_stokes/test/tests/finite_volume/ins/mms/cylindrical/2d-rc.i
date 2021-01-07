@@ -126,18 +126,18 @@ rho=1.1
 []
 
 [FVBCs]
-  [diri_u]
-    type = FVFunctionDirichletBC
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'left right top bottom'
     variable = u
     function = 'exact_u'
-    boundary = 'left right top bottom'
   []
 
-  [diri_v]
-    type = FVFunctionDirichletBC
+  [no-slip-wall-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'left right top bottom'
     variable = v
     function = 'exact_v'
-    boundary = 'left right top bottom'
   []
 []
 

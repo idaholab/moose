@@ -48,9 +48,6 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    no_slip_wall_boundaries = 'right'
-    slip_wall_boundaries = 'left'
   []
 
   [u_advection]
@@ -65,9 +62,6 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    no_slip_wall_boundaries = 'right'
-    slip_wall_boundaries = 'left'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -93,9 +87,6 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    no_slip_wall_boundaries = 'right'
-    slip_wall_boundaries = 'left'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -111,29 +102,58 @@ velocity_interp_method='average'
 []
 
 [FVBCs]
-  [inlet-wall-u]
-    type = FVDirichletBC
-    boundary = 'bottom right'
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'bottom'
     variable = u
-    value = 0
+    function = 0
   []
   [inlet-v]
-    type = FVDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
-    value = 1
+    function = 1
+  []
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'right'
+    variable = u
+    function = 0
   []
   [no-slip-wall-v]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     boundary = 'right'
     variable = v
-    value = 0
+    function = 0
   []
-  [outlet_p]
-    type = FVDirichletBC
+  [outlet-p]
+    type = INSFVOutletPressureBC
     boundary = 'top'
     variable = pressure
-    value = 0
+    function = 0
+  []
+  [axis-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [axis-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
+  []
+  [axis-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'left'
+    variable = pressure
   []
 []
 
@@ -144,6 +164,19 @@ velocity_interp_method='average'
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
+  []
+[]
+
+[Postprocessors]
+  [in]
+    type = SideIntegralVariablePostprocessor
+    variable = v
+    boundary = 'bottom'
+  []
+  [out]
+    type = SideIntegralVariablePostprocessor
+    variable = v
+    boundary = 'top'
   []
 []
 

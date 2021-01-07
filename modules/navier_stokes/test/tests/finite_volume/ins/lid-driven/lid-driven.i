@@ -66,7 +66,6 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [mean_zero_pressure]
     type = FVScalarLagrangeMultiplier
@@ -83,7 +82,6 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [u_viscosity]
@@ -108,7 +106,6 @@ rho=1
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
 
   [v_viscosity]
@@ -127,26 +124,25 @@ rho=1
 
 [FVBCs]
   [top_x]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     variable = u
-    value = 1
     boundary = 'top'
+    function = 1
   []
 
   [no_slip_x]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     variable = u
-    value = 0
     boundary = 'left right bottom'
+    function = 0
   []
 
   [no_slip_y]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     variable = v
-    value = 0
     boundary = 'left right top bottom'
+    function = 0
   []
-
 []
 
 [Materials]

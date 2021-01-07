@@ -57,8 +57,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    slip_wall_boundaries = 'top bottom'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -78,8 +76,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    slip_wall_boundaries = 'top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -110,8 +106,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    slip_wall_boundaries = 'top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -146,8 +140,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    slip_wall_boundaries = 'top bottom'
   []
   [temp_forcing]
     type = FVBodyForce
@@ -158,14 +150,26 @@ velocity='velocity'
 
 [FVBCs]
   [inlet-u]
-    type = FVFunctionDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
     function = 'exact_u'
   []
-  [inlet-and-walls-v]
-    type = FVFunctionDirichletBC
-    boundary = 'left top bottom'
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = v
+    function = 'exact_v'
+  []
+  [walls-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = u
+    function = 'exact_u'
+  []
+  [walls-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
     variable = v
     function = 'exact_v'
   []
@@ -176,7 +180,7 @@ velocity='velocity'
     function = 'exact_t'
   []
   [outlet_p]
-    type = FVFunctionDirichletBC
+    type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = 'exact_p'

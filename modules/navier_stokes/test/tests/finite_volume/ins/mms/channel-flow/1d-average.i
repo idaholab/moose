@@ -82,13 +82,13 @@ velocity_interp_method='average'
 
 [FVBCs]
   [inlet_u]
-    type = FVFunctionDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
     function = 'exact_u'
   []
   [outlet_p]
-    type = FVFunctionDirichletBC
+    type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = 'exact_p'

@@ -1,15 +1,6 @@
 [Tests]
   issues = '#15640'
   design = 'navier_stokes/fv.md'
-  [1d-average]
-    type = PythonUnitTest
-    input = test.py
-    test_case = Test1DAverage
-    method = '!dbg'
-  requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 1D cylindrical coordinates, using an average interpolation scheme, and demonstrate second order convergence in the velocity variable and zeroth order convergence in the pressure variable because of the checkerboard pattern.'
-    ad_indexing_type = 'global'
-    required_python_packages = 'pandas matplotlib'
-  []
   [2d-rc-diri]
     type = PythonUnitTest
     input = test.py

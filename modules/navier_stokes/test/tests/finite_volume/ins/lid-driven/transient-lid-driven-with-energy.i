@@ -85,7 +85,6 @@ advected_interp_method = 'average'
     pressure = pressure
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [mean_zero_pressure]
     type = FVScalarLagrangeMultiplier
@@ -110,7 +109,6 @@ advected_interp_method = 'average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -141,7 +139,6 @@ advected_interp_method = 'average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -176,30 +173,29 @@ advected_interp_method = 'average'
     v = v
     mu = ${mu}
     rho = ${rho}
-    no_slip_wall_boundaries = 'left right top bottom'
   []
 []
 
 [FVBCs]
   [top_x]
-    type = FVFunctionDirichletBC
+    type = INSFVNoSlipWallBC
     variable = u
-    function = 'lid_function'
     boundary = 'top'
+    function = 'lid_function'
   []
 
   [no_slip_x]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     variable = u
-    value = 0
     boundary = 'left right bottom'
+    function = 0
   []
 
   [no_slip_y]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     variable = v
-    value = 0
     boundary = 'left right top bottom'
+    function = 0
   []
 
   [T_hot]

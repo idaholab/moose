@@ -58,8 +58,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    no_slip_wall_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -79,8 +77,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    no_slip_wall_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -111,8 +107,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    no_slip_wall_boundaries = 'left right'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -147,8 +141,6 @@ velocity='velocity'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    no_slip_wall_boundaries = 'left right'
   []
   [temp_forcing]
     type = FVBodyForce
@@ -158,29 +150,64 @@ velocity='velocity'
 []
 
 [FVBCs]
-  [axis-inlet-wall-u]
-    type = FVFunctionDirichletBC
-    boundary = 'left bottom right'
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'bottom'
     variable = u
     function = 'exact_u'
   []
   [inlet-v]
-    type = FVFunctionDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
     function = 'exact_v'
+  []
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'right'
+    variable = u
+    function = 'exact_u'
+  []
+  [no-slip-wall-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'right'
+    variable = v
+    function = 'exact_v'
+  []
+  [outlet-p]
+    type = INSFVOutletPressureBC
+    boundary = 'top'
+    variable = pressure
+    function = 'exact_p'
+  []
+  [axis-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [axis-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
+  []
+  [axis-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'left'
+    variable = pressure
   []
   [axis-inlet-wall-t]
     type = FVFunctionDirichletBC
     boundary = 'left bottom right'
     variable = temperature
     function = 'exact_t'
-  []
-  [outlet_p]
-    type = FVFunctionDirichletBC
-    boundary = 'top'
-    variable = pressure
-    function = 'exact_p'
   []
 []
 

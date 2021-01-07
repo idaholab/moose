@@ -2,21 +2,6 @@ import mms
 import unittest
 from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
-class Test1DAverage(unittest.TestCase):
-    def test(self):
-        labels = ['L2u', 'L2p']
-        df1 = mms.run_spatial('1d-average.i', 7, y_pp=labels)
-
-        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
-        fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
-        fig.save('1d-average.png')
-        for key,value in fig.label_to_slope.items():
-            print("%s, %f" % (key, value))
-            if key == 'L2p':
-                self.assertTrue(fuzzyAbsoluteEqual(value, 0., .05))
-            else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .05))
-
 class Test2DRC(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']

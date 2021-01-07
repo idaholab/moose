@@ -2,7 +2,6 @@ mu=1.1
 rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
-force_boundary_execution=true
 
 [Mesh]
   [gen]
@@ -49,8 +48,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    slip_wall_boundaries = 'left right'
   []
   [mass_forcing]
     type = FVBodyForce
@@ -70,8 +67,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    slip_wall_boundaries = 'left right'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -102,8 +97,6 @@ force_boundary_execution=true
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    slip_wall_boundaries = 'left right'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -124,23 +117,58 @@ force_boundary_execution=true
 []
 
 [FVBCs]
-  [axis-inlet-wall-u]
-    type = FVFunctionDirichletBC
-    boundary = 'left bottom right'
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'bottom'
     variable = u
     function = 'exact_u'
   []
   [inlet-v]
-    type = FVFunctionDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
     function = 'exact_v'
   []
-  [outlet_p]
-    type = FVFunctionDirichletBC
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'right'
+    variable = u
+    function = 'exact_u'
+  []
+  [no-slip-wall-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'right'
+    variable = v
+    function = 'exact_v'
+  []
+  [outlet-p]
+    type = INSFVOutletPressureBC
     boundary = 'top'
     variable = pressure
     function = 'exact_p'
+  []
+  [axis-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [axis-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
+  []
+  [axis-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'left'
+    variable = pressure
   []
 []
 

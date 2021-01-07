@@ -48,8 +48,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    slip_wall_boundaries = 'right left'
   []
 
   [u_advection]
@@ -64,8 +62,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    slip_wall_boundaries = 'right left'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -91,8 +87,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'bottom top'
-    slip_wall_boundaries = 'right left'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -108,23 +102,56 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
-  [inlet-wall-u]
-    type = FVDirichletBC
-    boundary = 'bottom right'
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'bottom'
     variable = u
-    value = 0
+    function = 0
   []
   [inlet-v]
-    type = FVDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
-    value = 1
+    function = 1
   []
-  [outlet_p]
-    type = FVDirichletBC
+  [free-slip-wall-u]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'right'
+    variable = u
+  []
+  [free-slip-wall-v]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'right'
+    variable = v
+  []
+  [outlet-p]
+    type = INSFVOutletPressureBC
     boundary = 'top'
     variable = pressure
-    value = 0
+    function = 0
+  []
+  [axis-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [axis-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
+  []
+  [axis-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'left'
+    variable = pressure
   []
 []
 

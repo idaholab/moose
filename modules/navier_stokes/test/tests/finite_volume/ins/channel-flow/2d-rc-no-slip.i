@@ -47,8 +47,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    no_slip_wall_boundaries = 'top bottom'
   []
 
   [u_advection]
@@ -63,8 +61,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    no_slip_wall_boundaries = 'top bottom'
   []
   [u_viscosity]
     type = FVDiffusion
@@ -90,8 +86,6 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'left right'
-    no_slip_wall_boundaries = 'top bottom'
   []
   [v_viscosity]
     type = FVDiffusion
@@ -108,28 +102,34 @@ velocity_interp_method='rc'
 
 [FVBCs]
   [inlet-u]
-    type = FVDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    value = 1
+    function = '1'
+  []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'left'
+    variable = v
+    function = '0'
   []
   [walls-u]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     boundary = 'top bottom'
     variable = u
-    value = 0
+    function = 0
   []
-  [inlet-and-walls-v]
-    type = FVDirichletBC
-    boundary = 'left top bottom'
+  [walls-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
     variable = v
-    value = 0
+    function = 0
   []
   [outlet_p]
-    type = FVDirichletBC
+    type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    value = 0
+    function = '0'
   []
 []
 

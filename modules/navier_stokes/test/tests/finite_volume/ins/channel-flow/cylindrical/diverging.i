@@ -2,9 +2,6 @@ mu=1
 rho=1
 advected_interp_method='average'
 velocity_interp_method='rc'
-penalty=1e6
-# we can think of the axis as a slip wall boundary, no normal velocity and no viscous shear
-slip_wall_boundaries = 'left'
 
 [Mesh]
   file = diverging.msh
@@ -43,8 +40,6 @@ slip_wall_boundaries = 'left'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    slip_wall_boundaries = ${slip_wall_boundaries}
   []
 
   [u_advection]
@@ -59,8 +54,6 @@ slip_wall_boundaries = 'left'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
-    slip_wall_boundaries = ${slip_wall_boundaries}
   []
   [u_viscosity]
     type = FVDiffusion
@@ -86,9 +79,7 @@ slip_wall_boundaries = 'left'
     v = v
     mu = ${mu}
     rho = ${rho}
-    flow_boundaries = 'top bottom'
     # we can think of the axis as a slip wall boundary, no normal velocity and no viscous shear
-    slip_wall_boundaries = ${slip_wall_boundaries}
   []
   [v_viscosity]
     type = FVDiffusion
@@ -104,55 +95,70 @@ slip_wall_boundaries = 'left'
 []
 
 [FVBCs]
-  active = 'inlet-u inlet-v free-slip-wall-u free-slip-wall-v'
+  active = 'inlet-u inlet-v free-slip-wall-u free-slip-wall-v outlet-p axis-u axis-v'
 
   [inlet-u]
-    type = FVDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = u
-    value = 0
+    function = 0
   []
   [inlet-v]
-    type = FVDirichletBC
+    type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
-    value = 1
+    function = 1
   []
   [free-slip-wall-u]
-    type = INSFVPenaltyFreeSlipBC
+    type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = u
-    momentum_component = x
-    u = u
-    v = v
-    penalty = ${penalty}
   []
   [free-slip-wall-v]
-    type = INSFVPenaltyFreeSlipBC
+    type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = v
-    momentum_component = y
-    u = u
-    v = v
-    penalty = ${penalty}
   []
   [no-slip-wall-u]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     boundary = 'right'
     variable = u
-    value = 0
+    function = 0
   []
   [no-slip-wall-v]
-    type = FVDirichletBC
+    type = INSFVNoSlipWallBC
     boundary = 'right'
     variable = v
-    value = 0
+    function = 0
   []
   [outlet-p]
-    type = FVDirichletBC
+    type = INSFVOutletPressureBC
     boundary = 'top'
     variable = pressure
-    value = 0
+    function = 0
+  []
+  [axis-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [axis-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'left'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
+  []
+  [axis-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'left'
+    variable = pressure
   []
 []
 

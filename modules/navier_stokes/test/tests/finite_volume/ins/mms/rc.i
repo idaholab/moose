@@ -5,7 +5,6 @@ velocity_interp_method='rc'
 [GlobalParams]
   force_boundary_execution = false
   two_term_boundary_expansion = false
-  no_slip_wall_boundaries = 'left right top bottom'
 []
 
 [Mesh]
@@ -131,16 +130,17 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
-  [u_diri]
-    type = FVFunctionDirichletBC
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'left right top bottom'
     variable = u
-    boundary = 'top bottom left right'
     function = 'exact_u'
   []
-  [v_diri]
-    type = FVFunctionDirichletBC
+
+  [no-slip-wall-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'left right top bottom'
     variable = v
-    boundary = 'top bottom left right'
     function = 'exact_v'
   []
 []
@@ -204,7 +204,7 @@ velocity_interp_method='rc'
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      200                lu           NONZERO'
+  petsc_options_value = 'asm      30                lu           NONZERO'
   nl_rel_tol = 1e-12
 []
 
