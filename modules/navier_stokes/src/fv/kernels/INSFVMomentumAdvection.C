@@ -20,6 +20,7 @@
 #include "INSFVSlipWallBC.h"
 #include "INSFVSymmetryBC.h"
 #include "INSFVAttributes.h"
+#include "MooseUtils.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
@@ -182,7 +183,6 @@ INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
   this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
       .template condition<AttribBoundaries>(bnd_id)
       .template condition<AttribINSFVBCs>(INSFVBCs::INSFVFlowBC)
       .queryInto(flow_bcs);
@@ -226,7 +226,6 @@ INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
   this->_subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribInterfaces>(Interfaces::BoundaryRestrictable)
       .template condition<AttribBoundaries>(bnd_id)
       .template condition<AttribINSFVBCs>(bc_type)
       .queryInto(bcs);
@@ -369,16 +368,27 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff, &elem_velocity, &mu, this](const Elem & /*functor_elem*/,
-                                                            const Elem * const neighbor,
-                                                            const FaceInfo * const fi,
-                                                            const Point & surface_vector,
-                                                            Real /*coord*/,
-                                                            const bool /*elem_has_info*/) {
+  auto action_functor = [&coeff, &elem_velocity, &mu, &elem, this](
+                            const Elem & libmesh_dbg_var(functor_elem),
+                            const Elem * const neighbor,
+                            const FaceInfo * const fi,
+                            const Point & surface_vector,
+                            Real libmesh_dbg_var(coord),
+                            const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
+    mooseAssert(&elem == &functor_elem, "Elems don't match");
 
-    const bool rc_elem_is_fi_elem = (neighbor == fi->neighborPtr());
-    const Point normal = rc_elem_is_fi_elem ? fi->normal() : Point(-fi->normal());
+    const Point normal = elem_has_info ? fi->normal() : Point(-fi->normal());
+    const Point & rc_centroid = elem_has_info ? fi->elemCentroid() : fi->neighborCentroid();
+#ifndef NDEBUG
+    for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+      mooseAssert(
+          coord == 0
+              ? true
+              : MooseUtils::absoluteFuzzyEqual(
+                    normal(i), (surface_vector / (fi->faceArea() * coord))(i), libMesh::TOLERANCE),
+          "Let's make sure our normal is what we think it is");
+#endif
 
     // Unless specified otherwise, "elem" here refers to the element we're computing the
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
@@ -397,7 +407,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
         // Need to account for viscous shear stress from wall
         for (const auto i : make_range(_dim))
           coeff(i) += mu * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) *
+                      std::abs((fi->faceCentroid() - rc_centroid) * normal) *
                       (1 - normal(i) * normal(i));
 
         // No flow normal to wall, so no contribution to coefficient from the advection term
@@ -409,7 +419,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
         // normal outflow, so our contribution to the coefficient is zero
         return;
 
-      if (_fully_developed_flow_boundaries.find(bc_id) != _fully_developed_flow_boundaries.end())
+      if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
       {
         ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
         if (_v_var)
@@ -417,34 +427,38 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
         if (_w_var)
           face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-        const auto advection_coeffs = Moose::FV::interpCoeffs(
-            _advected_interp_method, *fi, rc_elem_is_fi_elem, face_velocity);
+        const auto advection_coeffs =
+            Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
         ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
+
+        if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
+          // We are not on a fully developed flow boundary, so we have a viscous term contribution.
+          // This term is slightly modified relative to the internal face term. Instead of the
+          // distance between elem and neighbor centroid, we just have the distance between the elem
+          // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
+          // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
+          // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
+          temp_coeff += mu * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
 
         // For flow boundaries, the coefficient addition is the same for every velocity component
         for (const auto i : make_range(_dim))
           coeff(i) += temp_coeff;
 
-        // The gradient of each velocity component in the normal direction is zero for fully
-        // developed flows. We do not have any boundary flux from the viscous term
         return;
       }
 
       if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
       {
-        // Moukealled eqns. 15.154 - 15.156
+        // Moukalled eqns. 15.154 - 15.156
         for (const auto i : make_range(_dim))
           coeff(i) += 2. * mu * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - fi->elemCentroid()) * normal) * normal(i) *
-                      normal(i);
+                      std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
 
         return;
       }
     }
 
-    // Else we are on an internal face or we are on a non-developed flow boundary, in which case
-    // there are no modifications to the coefficients like there are for other types of boundary
-    // conditions
+    // Else we are on an internal face
 
     ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
     if (_v_var)
@@ -458,12 +472,12 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
                            elem_velocity,
                            neighbor_velocity,
                            *fi,
-                           rc_elem_is_fi_elem);
+                           elem_has_info);
 
     // we are only interested in the interpolation coefficient for the Rhie-Chow element,
     // so we just use the 'first' member of the returned pair
     const auto advection_coeffs =
-        Moose::FV::interpCoeffs(_advected_interp_method, *fi, rc_elem_is_fi_elem, interp_v);
+        Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, interp_v);
     ADReal temp_coeff = _rho * interp_v * surface_vector * advection_coeffs.first;
 
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
