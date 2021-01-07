@@ -126,7 +126,7 @@ if [[ "$kind" == "app" ]]; then
     echo "         cd $dir"
     echo "         git remote add origin https://github.com/YourGitHubUserName/$dstnamelow"
     echo '         git commit -m "initial commit"'
-    echo "         git push -u origin master"
+    echo "         git push -u origin main"
     echo ""
     echo "To automatically enforce MOOSE C++ code style in your commits, run:"
     echo ""
