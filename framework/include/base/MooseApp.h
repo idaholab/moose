@@ -718,7 +718,8 @@ public:
    * Note: Geometric relationship managers that are supposed to be attached late
    * will be attached when Algebraic are attached.
    */
-  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
+                                  bool attach_geometric_rm_final = false);
 
   /**
    * Attach geometric relationship managers to the given \p MeshBase object. This API is designed to

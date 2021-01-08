@@ -107,11 +107,40 @@
   [./mesh_adaptivity]
     type = 'Exodiff'
     input = 'voronoi_adaptivity.i'
-    exodiff = 'voronoi_adaptivity_out.e'
+    exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
     min_parallel = 2
     requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations on a mesh generated in parallel.'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348'
+  [../]
+
+  [./mesh_adaptivity_voronoi]
+    type = 'Exodiff'
+    input = 'voronoi_adaptivity.i'
+    exodiff = 'voronoi_adaptivity_out.e voronoi_adaptivity_out.e-s002'
+    min_parallel = 2
+    prereq = 'mesh_adaptivity'
+    cli_args ='UserObjects/voronoi/type=PolycrystalVoronoi'
+    requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations using PolycrystalVoronoi UO on a mesh generated in parallel.'
+    design = 'DistributedRectilinearMeshGenerator.md'
+    issues = '#15348  #16143'
+  [../]
+
+  [./mesh_adaptivity_ghost]
+    type = 'Exodiff'
+    input = 'voronoi_adaptivity_ghost.i'
+    exodiff = 'voronoi_adaptivity_ghost_out.e voronoi_adaptivity_ghost_out.e-s002'
+    # We want to check evaluable ghosting elements, and so we need to use the same
+    # partitioner.
+    min_parallel = 3
+    max_parallel = 3
+    # For regression tests, we use linear partitioner that should not be used in production run.
+    # We will receive a mooseWarning when using linear partitioner.
+    # Linear partitioner produces machine independent results
+    allow_warnings = true
+    requirement = 'The system shall be able to apply mesh adaptivity and output evaluable and ghosting elements using distributed generator'
+    design = 'DistributedRectilinearMeshGenerator.md'
+    issues = '#15348  #16143'
   [../]
 
   [./voronoi_columnar_3D]

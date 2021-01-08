@@ -94,15 +94,20 @@ ElementSideNeighborLayers::initFunctor(Functor & functor)
 {
   functor.set_n_levels(_layers);
 
-  if (_dof_map)
+  // Need to see if there are periodic BCs - if so we need to dig them out
+  auto executioner_ptr = _app.getExecutioner();
+
+  if (executioner_ptr)
   {
-    // Need to see if there are periodic BCs - if so we need to dig them out
-    auto periodic_boundaries_ptr = _dof_map->get_periodic_boundaries();
+    auto & fe_problem = executioner_ptr->feProblem();
+    auto & nl_sys = fe_problem.getNonlinearSystemBase();
+    auto & dof_map = nl_sys.dofMap();
+    auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
 
     mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
 
     functor.set_periodic_boundaries(periodic_boundaries_ptr);
-    functor.set_dof_coupling(_dof_map->_dof_coupling);
+    functor.set_dof_coupling(dof_map._dof_coupling);
   }
 }
 

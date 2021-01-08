@@ -40,6 +40,7 @@
 #include "JsonInputFileFormatter.h"
 #include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
+#include "ProxyRelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
@@ -1966,13 +1967,18 @@ donateForWhom(const RelationshipManager & donor, RelationshipManager & acceptor)
 bool
 MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
 {
-  // We don't need Geometric-only RelationshipManagers when we run with
-  // ReplicatedMesh unless we are splitting the mesh.
-  if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
-      (new_rm->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
-       !(new_rm->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
-         new_rm->isType(Moose::RelationshipManagerType::COUPLING))))
-    return false;
+  // We prefer to always add geometric RMs. There is no hurt to add RMs for replicated mesh
+  // since MeshBase::delete_remote_elements{} is a no-op (empty) for replicated mesh.
+  // The motivation here is that MooseMesh::_use_distributed_mesh may not be properly set
+  // at the time we are adding geometric relationship managers. We deleted the following
+  // old logic to add all geometric RMs regardless of there is a distributed mesh or not.
+  // Otherwise, all geometric RMs will be improperly ignored for a distributed mesh generator.
+
+  // if (!_action_warehouse.mesh()->isDistributedMesh() && !_split_mesh &&
+  //    (relationship_manager->isType(Moose::RelationshipManagerType::GEOMETRIC) &&
+  //     !(relationship_manager->isType(Moose::RelationshipManagerType::ALGEBRAIC) ||
+  //       relationship_manager->isType(Moose::RelationshipManagerType::COUPLING))))
+  //  return false;
 
   bool add = true;
 
@@ -2072,10 +2078,15 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
 }
 
 void
-MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
+MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
+                                     bool attach_geometric_rm_final)
 {
   for (auto & rm : _relationship_managers)
   {
+    // RM is already attached, and we do not need to handle this on the final stage
+    if (rm->attachGeometricEarly() && attach_geometric_rm_final)
+      continue;
+
     if (rm->isType(rm_type))
     {
       if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
@@ -2083,7 +2094,9 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         // The problem is not built yet - so the ActionWarehouse currently owns the mesh
         MooseMesh * const mesh = _action_warehouse.mesh().get();
 
-        if (!rm->attachGeometricEarly())
+        // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
+        // geometric RMs. Therefore, we need to attach them.
+        if (!rm->attachGeometricEarly() && !attach_geometric_rm_final)
         {
           // Will attach them later (during algebraic). But also, we need to tell the mesh that we
           // shouldn't be deleting remote elements yet
@@ -2098,7 +2111,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
           rm->init(mesh_base);
           mesh_base.add_ghosting_functor(*rm);
 
-          if (_action_warehouse.displacedMesh())
+          // In the final stage, if there is a displaced mesh, we need to
+          // clone ghosting functors for displacedMesh
+          if (attach_geometric_rm_final && _action_warehouse.displacedMesh())
+          {
+            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
+            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+          }
+          else if (_action_warehouse.displacedMesh())
             mooseError("Theh displaced mesh should not yet exist at the time that we are attaching "
                        "geometric relationship managers.");
         }

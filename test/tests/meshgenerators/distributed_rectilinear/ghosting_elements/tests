@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#16143'
+  design = 'DistributedRectilinearMeshGenerator.md'
+
+  [num_layers]
+    type = 'Exodiff'
+    input = 'num_layers.i'
+    min_parallel = 3
+    max_parallel = 3
+    exodiff = 'num_layers_out.e'
+    # There is a warning when use linear partitioner. It is design on the purpose.
+    # We therefore ignore warning messages here
+    allow_warnings = true
+    requirement = "The system shall generate an arbitrary number of layers of side neighbors using DistributedRectilinearMeshGenerator."
+  []
+[]
