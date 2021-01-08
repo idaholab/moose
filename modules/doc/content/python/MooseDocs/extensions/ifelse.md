@@ -42,7 +42,7 @@ The documentation contains 'MooseApp' information.
 !devel example id=if-false caption=Single "if" command, when the function returns `False` the
                                    content is ignored.
 !if function=hasMooseApp('UnknownApp')
-The documentation contains 'UnkownApp' information.
+The documentation contains 'UnknownApp' information.
 
 It is possible to flip the state of the return value and create an "if not" statement by prefixing
 the function with an exclamation mark, as shown in [if-not].
@@ -50,7 +50,7 @@ the function with an exclamation mark, as shown in [if-not].
 !devel example id=if-not
                caption=Single "if not" statement, when the function returns `False` the content is displayed.
 !if function=!hasMooseApp('UnknownApp')
-The documentation does not contain 'UnkownApp' information.
+The documentation does not contain 'UnknownApp' information.
 
 The input to the "function" setting is expected to a function that is available within the
 modules loaded by the extension. The function must accept the `IfElseExtension` object as the
