@@ -785,6 +785,17 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   mooseAssert(volume_set && volume > 0, "We should have set the volume");
   grad_b /= volume;
 
+  const auto coord_system = this->_subproblem.getCoordSystem(elem->subdomain_id());
+  if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
+  {
+    const auto r_coord = this->_subproblem.getAxisymmetricRadialCoord();
+    grad_b(r_coord) -= elem_value / elem->centroid()(r_coord);
+  }
+
+  mooseAssert(coord_system != Moose::CoordinateSystemType::COORD_RSPHERICAL,
+              "We have not yet implemented the correct translation from gradient to divergence for "
+              "spherical coordinates yet.");
+
   mooseAssert(ebf_faces.size() < UINT_MAX,
               "You've created a mystical element that has more faces than can be held by unsigned "
               "int. I applaud you.");
@@ -838,17 +849,6 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     for (const auto j : make_range(num_ebfs))
       _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
   }
-
-  const auto coord_system = this->_subproblem.getCoordSystem(elem->subdomain_id());
-  if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
-  {
-    const auto r_coord = this->_subproblem.getAxisymmetricRadialCoord();
-    grad(r_coord) -= elem_value / elem->centroid()(r_coord);
-  }
-
-  mooseAssert(coord_system != Moose::CoordinateSystemType::COORD_RSPHERICAL,
-              "We have not yet implemented the correct translation from gradient to divergence for "
-              "spherical coordinates yet.");
 
   return grad;
 }
