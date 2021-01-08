@@ -13,6 +13,10 @@
 #include "FVUtils.h"
 #include "MooseError.h"
 #include "SubProblem.h"
+#include "INSFVNoSlipWallBC.h"
+#include "INSFVAttributes.h"
+#include "SystemBase.h"
+#include "FVDirichletBCBase.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/vector_value.h"
@@ -163,9 +167,13 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
         // 1
         grad_b += surface_vector * elem_value;
     }
+    else if (isInternalFace(*fi))
+      grad_b += surface_vector * getInternalFaceValue(neighbor, *fi, elem_value);
     else
-      // We are not on an ebf, so we just use our getFaceValue method
-      grad_b += surface_vector * getFaceValue(neighbor, *fi, elem_value);
+    {
+      mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+      grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi);
+    }
 
     if (!volume_set)
     {
@@ -306,4 +314,73 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
               "spherical coordinates yet.");
 
   return grad;
+}
+
+std::pair<bool, const INSFVNoSlipWallBC *>
+INSFVVelocityVariable::getNoSlipWallBC(const FaceInfo & fi) const
+{
+  std::vector<INSFVNoSlipWallBC *> bcs;
+
+  this->_subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribINSFVBCs>(INSFVBCs::INSFVNoSlipWallBC)
+      .template condition<AttribBoundaries>(fi.boundaryIDs())
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVar>(_var_num)
+      .template condition<AttribSysNum>(this->_sys.number())
+      .queryInto(bcs);
+
+  mooseAssert(bcs.size() <= 1,
+              "cannot have multiple no slip wall BCs on the same boundary for the same variable");
+
+  const bool has_no_slip_wall_bc = bcs.size() > 0;
+
+  if (has_no_slip_wall_bc)
+  {
+    mooseAssert(bcs[0], "The INSFVNoSlipWallBC is null!");
+
+    return std::make_pair(true, bcs[0]);
+  }
+  else
+    return std::make_pair(false, nullptr);
+}
+
+bool
+INSFVVelocityVariable::isDirichletBoundaryFace(const FaceInfo & fi) const
+{
+  return MooseVariableFVReal::isDirichletBoundaryFace(fi) || getNoSlipWallBC(fi).first;
+}
+
+const ADReal &
+INSFVVelocityVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
+{
+  mooseAssert(isDirichletBoundaryFace(fi),
+              "This function should only be called on Dirichlet boundary faces.");
+
+  auto pr = _face_to_value.emplace(&fi, 0);
+
+  if (!pr.second)
+    // Insertion didn't happen...we already have a value ready to go
+    return pr.first->second;
+
+  ADReal & value = pr.first->second;
+
+  const auto & diri_pr = getDirichletBC(fi);
+  if (diri_pr.first)
+  {
+    const FVDirichletBCBase & bc = *diri_pr.second;
+    value = ADReal(bc.boundaryValue(fi));
+    return value;
+  }
+
+  const auto & no_slip_wall_pr = getNoSlipWallBC(fi);
+  if (no_slip_wall_pr.first)
+  {
+    const INSFVNoSlipWallBC & bc = *no_slip_wall_pr.second;
+    value = ADReal(bc.boundaryValue(fi));
+    return value;
+  }
+
+  mooseError("We should never get here");
 }
