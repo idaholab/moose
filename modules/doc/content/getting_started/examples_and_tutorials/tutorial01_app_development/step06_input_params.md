@@ -91,10 +91,7 @@ The parameters will be retrieved by the constructor method and used to set the v
 
 Do not modify any other parts of `DarcyPressure.C`. Now, recompile the application:
 
-```bash
-cd ~/projects/babbler
-make -j4
-```
+!include commands/make.md
 
 ### Input File id=input-demo
 
@@ -134,7 +131,7 @@ git add src/kernels/DarcyPressure.C problems/pressure_diffusion.i
 Now, commit and push the changes to the remote repository:
 
 ```bash
-git commit -m 'Defined "permeability" and "viscosity" input parameters'
+git commit -m 'defined "permeability" and "viscosity" input parameters'
 git push
 ```
 

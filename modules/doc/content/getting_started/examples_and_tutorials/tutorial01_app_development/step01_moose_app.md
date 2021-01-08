@@ -26,16 +26,13 @@ cd ~/projects
 ./moose/scripts/stork.sh Babbler # substitute "Babbler" for some other name, if desired
 ```
 
-This will create directory, `~/projects/babbler`, that contains a new MOOSE application. The terminal will also prompt the user to initialize the new application as a GitHub repository, which will be discussed in the [#git] section.
+This will create a directory, `~/projects/babbler`, that contains a new MOOSE application. The terminal will also prompt the user to initialize the new application as a GitHub repository, which will be discussed in the [#git] section.
 
 ### Compile the Application Executable id=make
 
 C++ is a compiled language. Therefore, the application code must be first transcribed into a single binary file. During this transcription, the code will be optimized for speed and data allocation. To compile the new application, run the following commands in a terminal (the number following "`make -j`" should be less than, or equal to, the number of CPUs available):
 
-```bash
-cd ~/projects/babbler
-make -j4
-```
+!include commands/make.md
 
 This will create an executable (binary) file called `babbler-opt` in the application root directory that can be used to run simulations. In addition to the application code, the above command will also compile code available from [`moose/framework`](https://github.com/idaholab/moose/tree/master/framework). A MOOSE-based application always has the full power of MOOSE plus its own.
 
@@ -48,14 +45,11 @@ Each time a change is made to a C++ file, the application will need to be recomp
 
 MOOSE applications have a testing system to quickly verify that the executable was built properly and that the source code is performing as expected. It works by running a simulation and comparing the output to expected results. Once the `babbler-opt` executable exists, a simple test can be ran:
 
-```bash
-cd ~/projects/babbler
-./run_tests -j4
-```
+!include commands/run_tests.md
 
 If the test passed, the terminal output should look something like that shown below.
 
-```bash
+```
 test:kernels/simple_diffusion.test ...................... OK
 ------------------------------------------------------------
 Ran 1 tests in 0.3 seconds.

@@ -84,10 +84,7 @@ Here, the header file for this object was included. Next, the `registerMooseObje
 
 Since the source code has been modified, the executable must be recompiled:
 
-```bash
-cd ~/projects/babbler
-make -j4
-```
+!include commands/make.md
 
 ### Input File id=input-demo
 
@@ -106,7 +103,7 @@ cd ~/projects/babbler/problems
 
 ### Results id=result-demo
 
-Visualize the solution with PEACOCK and verify that it resembles that which is shown in [results]:
+Visualize the solution with PEACOCK and confirm that it resembles that which is shown in [results]:
 
 ```bash
 cd ~/projects/babbler/problems
@@ -134,7 +131,7 @@ git add include/kernels/ src/kernels/ problems/pressure_diffusion.i
 Now, commit and push the changes to the remote repository:
 
 ```bash
-git commit -m "Created kernel to solve Darcy pressure and updated the problem input file"
+git commit -m "developed kernel to solve Darcy pressure and updated the problem input file"
 git push
 ```
 
