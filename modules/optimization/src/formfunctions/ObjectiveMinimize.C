@@ -20,7 +20,7 @@ ObjectiveMinimize::computeAndCheckObjective(bool multiapp_passed)
 
   if (multiapp_passed)
   {
-    for (auto i = 0; i < _parameters.size(); ++i)
+    for (unsigned int i = 0; i < _parameters.size(); ++i)
     {
       for (auto & val : *_parameters[i])
       {
