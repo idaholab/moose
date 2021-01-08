@@ -509,18 +509,28 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                   : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
               "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
 
-  if (!_face_info->isBoundary() || _velocity_interp_method == Moose::FV::InterpMethod::Average)
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info, true);
-  else
+  if (_face_info->isBoundary())
   {
-    mooseAssert(_velocity_interp_method == Moose::FV::InterpMethod::RhieChow,
-                "I don't know another velocity interpolation method at this time");
-    mooseAssert(_face_info->isBoundary(), "We should be along a boundary");
-    v = elem_is_elem_one ? elem_v : neighbor_v;
+    // In my mind there should only be about one bc_id per FaceInfo
+    mooseAssert(_face_info->boundaryIDs().size() == 1,
+                "I think some of my logic might depend on my implicit assumption that we have "
+                "one boundary ID at most per face");
+    mooseAssert(_flow_boundaries.find(*_face_info->boundaryIDs().begin()) != _flow_boundaries.end(),
+                "INSFV*Advection flux kernel objects should only execute on flow boundaries");
+
+    v(0) = _u_var->getBoundaryFaceValue(*_face_info);
+    if (_v_var)
+      v(1) = _v_var->getBoundaryFaceValue(*_face_info);
+    if (_w_var)
+      v(2) = _w_var->getBoundaryFaceValue(*_face_info);
+
+    return;
   }
 
-  if (m != Moose::FV::InterpMethod::RhieChow)
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, v, elem_v, neighbor_v, *_face_info, true);
+
+  if (m == Moose::FV::InterpMethod::Average)
     return;
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
