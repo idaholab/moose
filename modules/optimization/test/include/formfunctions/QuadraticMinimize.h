@@ -13,7 +13,7 @@ public:
   static InputParameters validParams();
   QuadraticMinimize(const InputParameters & parameters);
 
-  virtual Real computeObjective() override;
+  virtual Real computeAndCheckObjective(bool /*multiapp_passed*/) override;
   virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
   virtual void computeHessian(libMesh::PetscMatrix<Number> & hessian) override;
 

@@ -21,7 +21,7 @@ QuadraticMinimize::QuadraticMinimize(const InputParameters & parameters)
 }
 
 Real
-QuadraticMinimize::computeObjective()
+QuadraticMinimize::computeAndCheckObjective(bool /*multiapp_passed*/)
 {
   Real obj = _result;
   unsigned int i = 0;

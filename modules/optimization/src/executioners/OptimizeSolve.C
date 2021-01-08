@@ -228,11 +228,13 @@ OptimizeSolve::objectiveFunction()
   _form_function->updateParameters(*_parameters.get());
 
   _problem.execute(EXEC_FORWARD);
-  _problem.execMultiApps(EXEC_FORWARD);
+  bool multiapp_passed = true;
+  if (!_problem.execMultiApps(EXEC_FORWARD))
+    multiapp_passed = false;
   if (_solve_on.contains(EXEC_FORWARD))
     _inner_solve->solve();
 
-  return _form_function->computeObjective();
+  return _form_function->computeAndCheckObjective(multiapp_passed);
 }
 
 void
@@ -241,7 +243,8 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
   _form_function->updateParameters(*_parameters.get());
 
   _problem.execute(EXEC_ADJOINT);
-  _problem.execMultiApps(EXEC_ADJOINT);
+  if (!_problem.execMultiApps(EXEC_ADJOINT))
+    mooseError("Adjoint solve multiapp failed!");
   if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
 
@@ -254,7 +257,8 @@ OptimizeSolve::hessianFunction(libMesh::PetscMatrix<Number> & hessian)
   _form_function->updateParameters(*_parameters.get());
 
   _problem.execute(EXEC_HESSIAN);
-  _problem.execMultiApps(EXEC_HESSIAN);
+  if (!_problem.execMultiApps(EXEC_HESSIAN))
+    mooseError("Hessian solve multiapp failed!");
   if (_solve_on.contains(EXEC_HESSIAN))
     _inner_solve->solve();
 
@@ -274,7 +278,7 @@ OptimizeSolve::variableBounds(Tao tao)
   libMesh::PetscVector<Number> xu(_my_comm, sz);
 
   // copy values from upper and lower bounds to xl and xu
-  for (auto i = 0; i < sz; ++i)
+  for (unsigned int i = 0; i < sz; ++i)
   {
     xl.set(i, lower_bounds[i]);
     xu.set(i, upper_bounds[i]);

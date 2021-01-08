@@ -34,10 +34,10 @@ public:
   virtual std::vector<Real> computeDefaultBounds(Real val);
 
   /**
-   * Function to compute objective.
+   * Function to compute objective and handle a failed solve.
    * This is the last function called in objective routine
    */
-  virtual Real computeObjective() = 0;
+  virtual Real computeAndCheckObjective(bool solver_converged);
 
   /**
    * Function to compute gradient.
@@ -82,6 +82,15 @@ protected:
   /// Bounds of the parameters
   const std::vector<Real> _lower_bounds;
   const std::vector<Real> _upper_bounds;
+
+  /// vector of misfit data
+  const std::vector<Real> & _misfit;
+
+  /**
+   * Function to compute objective.
+   * This is the last function called in objective routine
+   */
+  virtual Real computeObjective();
 
 private:
   /**

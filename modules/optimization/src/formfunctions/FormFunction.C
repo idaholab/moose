@@ -10,6 +10,11 @@ FormFunction::validParams()
   params.addRequiredParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
+  params.addParam<ReporterName>(
+      "misfit_computed",
+      "Name of reporter value containing difference between measured and calculated point values.");
+  params.addParam<ReporterValueName>(
+      "misfit_name", "Reporter value to create if 'misfit_computed' does not exist.");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Initial condition for each parameter values, default is 0.");
   params.addParam<std::vector<Real>>(
@@ -30,7 +35,8 @@ FormFunction::FormFunction(const InputParameters & parameters)
                       : computeDefaultBounds(-std::numeric_limits<double>::infinity())),
     _upper_bounds(isParamValid("upper_bounds")
                       ? getParam<std::vector<Real>>("upper_bounds")
-                      : computeDefaultBounds(std::numeric_limits<double>::infinity()))
+                      : computeDefaultBounds(std::numeric_limits<double>::infinity())),
+    _misfit(getDataValueHelper("misfit_computed", "misfit_name"))
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
@@ -103,4 +109,24 @@ FormFunction::computeDefaultBounds(Real val)
   for (auto i : index_range(vec))
     vec[i] = val;
   return vec;
+}
+
+Real
+FormFunction::computeAndCheckObjective(bool multiapp_passed)
+{
+  if (!multiapp_passed)
+    mooseError("Forward solve multiapp failed!");
+  return computeObjective();
+}
+
+Real
+FormFunction::computeObjective()
+{
+  Real val = 0;
+  for (auto & misfit : _misfit)
+    val += misfit * misfit;
+
+  val = 0.5 * val;
+
+  return val;
 }

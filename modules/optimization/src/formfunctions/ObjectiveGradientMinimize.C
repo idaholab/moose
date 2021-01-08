@@ -6,11 +6,6 @@ InputParameters
 ObjectiveGradientMinimize::validParams()
 {
   InputParameters params = FormFunction::validParams();
-  params.addParam<ReporterName>(
-      "misfit_computed",
-      "Name of reporter value containing difference between measured and calculated point values.");
-  params.addParam<ReporterValueName>(
-      "misfit_name", "Reporter value to create if 'adjoint_data_computed' does not exist.");
 
   params.addParam<ReporterName>("adjoint_data_computed",
                                 "Name of reporter value containing adjoint point values.");
@@ -21,21 +16,9 @@ ObjectiveGradientMinimize::validParams()
 
 ObjectiveGradientMinimize::ObjectiveGradientMinimize(const InputParameters & parameters)
   : FormFunction(parameters),
-    _misfit(getDataValueHelper("misfit_computed", "misfit_name")),
+
     _adjoint_data(getDataValueHelper("adjoint_data_computed", "adjoint_data_name"))
 {
-}
-
-Real
-ObjectiveGradientMinimize::computeObjective()
-{
-  Real val = 0;
-  for (auto & misfit : _misfit)
-    val += misfit * misfit;
-
-  val = 0.5 * val;
-
-  return val;
 }
 
 void
