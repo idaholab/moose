@@ -17,7 +17,7 @@ InputParameters
 FVFluxBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
-  params += MaterialPropertyInterface::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
   params.registerSystemAttributeName("FVFluxBC");
 
   // FVFluxBCs always rely on Boundary MaterialData
@@ -28,8 +28,9 @@ FVFluxBC::validParams()
 
 FVFluxBC::FVFluxBC(const InputParameters & parameters)
   : FVBoundaryCondition(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, /*nodal=*/false, /*is_fv=*/true),
-    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(
+        this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _u(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor())
 {

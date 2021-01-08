@@ -10,15 +10,15 @@
 #pragma once
 
 #include "FVBoundaryCondition.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MaterialPropertyInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "TwoMaterialPropertyInterface.h"
 #include "FVUtils.h"
 
 // Provides an interface for computing residual contributions from finite
 // volume numerical fluxes computed on faces to neighboring elements.
 class FVFluxBC : public FVBoundaryCondition,
-                 public CoupleableMooseVariableDependencyIntermediateInterface,
-                 public MaterialPropertyInterface
+                 public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                 public TwoMaterialPropertyInterface
 {
 public:
   FVFluxBC(const InputParameters & parameters);
