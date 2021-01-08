@@ -117,7 +117,6 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   {
     auto & vec_of_coeffs_map = _rc_a_coeffs[&_app];
     vec_of_coeffs_map.resize(libMesh::n_threads());
-    _app.theWarehouse().registerAttribute<AttribINSFVBCs>("insfvbcs", 0);
   }
 
   if (getParam<bool>("force_boundary_execution"))
