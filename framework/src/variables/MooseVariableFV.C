@@ -517,34 +517,108 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
 }
 
 template <typename OutputType>
-const ADReal &
-MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
+bool
+MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 {
-  mooseAssert(fi.faceType(this->name()) == FaceInfo::VarFaceNeighbors::ELEM ||
-                  fi.faceType(this->name()) == FaceInfo::VarFaceNeighbors::NEIGHBOR,
-              "If we are on a boundary face, then the variable should only be defined on one side "
-              "of the FaceInfo");
+  const bool is_internal_face = fi.faceType(this->name()) == FaceInfo::VarFaceNeighbors::BOTH;
+  mooseAssert(is_internal_face == (this->hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
+                                   this->hasBlocks(fi.neighborPtr()->subdomain_id())),
+              "Sanity checking whether we are indeed an internal face");
+  return is_internal_face;
+}
 
-  // Check to see whether it's already in our cache
-  {
-    auto it = _face_to_value.find(&fi);
-    if (it != _face_to_value.end())
-      return it->second;
-  }
+template <typename OutputType>
+const ADReal &
+MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
+                                                  const FaceInfo & fi,
+                                                  const ADReal & elem_value) const
+{
+  mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
-  // Do we have a Dirichlet condition?
-  const auto & diri_pr = getDirichletBC(fi);
-  if (diri_pr.first)
-  {
-    const auto & pr = _face_to_value.emplace(&fi, diri_pr.second->boundaryValue(fi));
-    mooseAssert(pr.second, "This should have inserted a new key-value pair");
+  auto pr = _face_to_value.emplace(&fi, 0);
+
+  if (!pr.second)
+    // Insertion didn't happen...we already have a value ready to go
     return pr.first->second;
+
+  ADReal & value = pr.first->second;
+
+  if (_use_extended_stencil)
+  {
+    ADReal numerator = 0, denominator = 0;
+
+    for (const Node * const vertex : fi.vertices())
+    {
+      auto distance = (*vertex - fi.faceCentroid()).norm();
+
+      numerator += getVertexValue(*vertex) / distance;
+      denominator += 1. / distance;
+    }
+
+    value = numerator / denominator;
+  }
+  else
+  {
+    // Compact stencil
+    ADReal neighbor_value = getElemValue(neighbor);
+
+    value = Moose::FV::linearInterpolation(
+        elem_value, neighbor_value, fi, neighbor == fi.neighborPtr());
   }
 
-  //
-  // No Dirichlet conditions so we extrapolate a face value from the element/cell centroid
-  // information
-  //
+  return value;
+}
+
+template <typename OutputType>
+bool
+MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi) const
+{
+  const auto & pr = getDirichletBC(fi);
+
+  // First member of this pair indicates whether we have a DirichletBC
+  return pr.first;
+}
+
+template <typename OutputType>
+const ADReal &
+MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
+{
+  mooseAssert(isDirichletBoundaryFace(fi),
+              "This function should only be called on Dirichlet boundary faces.");
+
+  auto pr = _face_to_value.emplace(&fi, 0);
+
+  if (!pr.second)
+    // Insertion didn't happen...we already have a value ready to go
+    return pr.first->second;
+
+  ADReal & value = pr.first->second;
+
+  const auto & diri_pr = getDirichletBC(fi);
+
+  mooseAssert(diri_pr.first,
+              "This functor should only be called if we are on a Dirichlet boundary face.");
+
+  const FVDirichletBCBase & bc = *diri_pr.second;
+
+  value = ADReal(bc.boundaryValue(fi));
+
+  return value;
+}
+
+template <typename OutputType>
+bool
+MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
+{
+  return !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+}
+
+template <typename OutputType>
+const ADReal &
+MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
+{
+  mooseAssert(isExtrapolatedBoundaryFace(fi),
+              "This function should only be called on extrapolated boundary faces");
 
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
@@ -571,84 +645,22 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
-bool
-MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
-{
-  const auto & face_type = fi.faceType(this->name());
-
-  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
-              "I'm concerned that if you're calling this method with a FaceInfo that doesn't have "
-              "this variable defined on either side, that you are doing something dangerous.");
-
-  // If we're defined on both sides of the face, then we're not a boundary face
-  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    return false;
-
-  const auto & pr = getDirichletBC(fi);
-
-  // First member of this pair indicates whether we have a DirichletBC. If we do, then we are not an
-  // extrapolated boundary face
-  return !pr.first;
-}
-
-template <typename OutputType>
 const ADReal &
-MooseVariableFV<OutputType>::getFaceValue(const Elem * const neighbor,
-                                          const FaceInfo & fi,
-                                          const ADReal & elem_value) const
+MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 {
-  mooseAssert(!isExtrapolatedBoundaryFace(fi),
-              "This function should not be called if we're on an extrapolated boundary face.");
+  mooseAssert(!isInternalFace(fi), "We need to be on a boundary face, duh");
 
-  auto pr = _face_to_value.emplace(&fi, 0);
+  // Check to see whether it's already in our cache
+  auto it = _face_to_value.find(&fi);
+  if (it != _face_to_value.end())
+    return it->second;
 
-  if (!pr.second)
-    // Insertion didn't happen...we already have a value ready to go
-    return pr.first->second;
+  if (isDirichletBoundaryFace(fi))
+    return getDirichletBoundaryFaceValue(fi);
+  else if (isExtrapolatedBoundaryFace(fi))
+    return getExtrapolatedBoundaryFaceValue(fi);
 
-  ADReal & value = pr.first->second;
-
-  // Are we on a boundary or an interface beyond which our variable doesn't exist?
-  if (!neighbor || !this->hasBlocks(neighbor->subdomain_id()))
-  {
-    const auto & diri_pr = getDirichletBC(fi);
-
-    mooseAssert(diri_pr.first,
-                "This functor should only be called if we are not on an extrapolated boundary "
-                "face. If we don't have a neighbor or the neighbor doesn't have this "
-                "variable, then we *must* have a Dirichlet BC");
-
-    const FVDirichletBCBase & bc = *diri_pr.second;
-
-    value = ADReal(bc.boundaryValue(fi));
-  }
-  else
-  {
-    if (_use_extended_stencil)
-    {
-      ADReal numerator = 0, denominator = 0;
-
-      for (const Node * const vertex : fi.vertices())
-      {
-        auto distance = (*vertex - fi.faceCentroid()).norm();
-
-        numerator += getVertexValue(*vertex) / distance;
-        denominator += 1. / distance;
-      }
-
-      value = numerator / denominator;
-    }
-    else
-    {
-      // Compact stencil
-      ADReal neighbor_value = getElemValue(neighbor);
-
-      value = Moose::FV::linearInterpolation(
-          elem_value, neighbor_value, fi, neighbor == fi.neighborPtr());
-    }
-  }
-
-  return value;
+  mooseError("Unknown boundary face type!");
 }
 
 template <typename OutputType>
@@ -739,9 +751,13 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
         // element centroid value as the face value (one-term expansion) in the RHS of eqn. 1
         grad_b += surface_vector * elem_value;
     }
+    else if (isInternalFace(*fi))
+      grad_b += surface_vector * getInternalFaceValue(neighbor, *fi, elem_value);
     else
-      // We are not on an ebf, so we just use our getFaceValue method
-      grad_b += surface_vector * getFaceValue(neighbor, *fi, elem_value);
+    {
+      mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+      grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi);
+    }
 
     if (!volume_set)
     {
