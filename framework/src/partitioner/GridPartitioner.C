@@ -132,25 +132,26 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
     {
       coordy = centroid(1);
       mooseAssert(coordy >= min(1) && coordy <= max(1),
-                  "element is outside of bounding box along x direction");
+                  "element is outside of bounding box along y direction");
     }
     if (dim == 3)
     {
       coordz = centroid(2);
       mooseAssert(coordz >= min(2) && coordz <= max(2),
-                  "element is outside of bounding box along x direction");
+                  "element is outside of bounding box along z direction");
     }
 
     // Compute processor coordinates
+    j = k = 0;
     i = (coordx - min(0)) / hx;
     if (dim >= 2)
       j = (coordy - min(1)) / hy;
     if (dim == 3)
       k = (coordz - min(2)) / hz;
 
-    mooseAssert(i < nx && i >= 0, "Index caculation is wrong along x direction");
-    mooseAssert(j < ny && j >= 0, "Index caculation is wrong along y direction");
-    mooseAssert(k < ny && k >= 0, "Index caculation is wrong along z direction");
+    mooseAssert(i < nx, "Index caculation is wrong along x direction");
+    mooseAssert(j < ny, "Index caculation is wrong along y direction");
+    mooseAssert(k < nz, "Index caculation is wrong along z direction");
     // Assign processor ID to current element
     elem_ptr->processor_id() = k * nx * ny + j * nx + i;
   }
