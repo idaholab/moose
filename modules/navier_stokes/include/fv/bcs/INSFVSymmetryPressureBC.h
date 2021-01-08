@@ -7,13 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "INSFVSymmetryBC.h"
-#include "InputParameters.h"
 
-InputParameters
-INSFVSymmetryBC::validParams()
+class InputParameters;
+
+class INSFVSymmetryPressureBC : public INSFVSymmetryBC
 {
-  return FVFluxBC::validParams();
-}
+public:
+  static InputParameters validParams();
+  INSFVSymmetryPressureBC(const InputParameters & params);
 
-INSFVSymmetryBC::INSFVSymmetryBC(const InputParameters & params) : FVFluxBC(params) {}
+protected:
+  ADReal computeQpResidual() override;
+};

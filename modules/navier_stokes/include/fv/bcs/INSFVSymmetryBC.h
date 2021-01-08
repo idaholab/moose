@@ -9,9 +9,11 @@
 
 #pragma once
 
+#include "FVFluxBC.h"
+
 class InputParameters;
 
-class INSFVSymmetryBC
+class INSFVSymmetryBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();

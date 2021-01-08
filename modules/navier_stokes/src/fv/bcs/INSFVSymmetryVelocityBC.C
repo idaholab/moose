@@ -7,20 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVNoSlipWallBC.h"
-#include "Function.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
-#include "FaceInfo.h"
+#include "INSFVSymmetryVelocityBC.h"
 
-#include "libmesh/vector_value.h"
-
-registerMooseObject("NavierStokesApp", INSFVNoSlipWallBC);
+registerMooseObject("NavierStokesApp", INSFVSymmetryVelocityBC);
 
 InputParameters
-INSFVNoSlipWallBC::validParams()
+INSFVSymmetryVelocityBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = INSFVSymmetryBC::validParams();
   params.addClassDescription(
       "Implements a free slip boundary condition using a penalty formulation.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
@@ -32,14 +26,11 @@ INSFVNoSlipWallBC::validParams()
       momentum_component,
       "The component of the momentum equation that this BC applies to.");
   params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
-  params.addRequiredParam<FunctionName>("u_wall", "The wall velocity in the x-direction.");
-  params.addParam<FunctionName>("v_wall", 0, "The wall velocity in the y-direction.");
-  params.addParam<FunctionName>("w_wall", 0, "The wall velocity in the z-direction.");
   return params;
 }
 
-INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params)
-  : FVFluxBC(params),
+INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
+  : INSFVSymmetryBC(params),
     _u_elem(adCoupledValue("u")),
     _v_elem(adCoupledValue("v")),
     _w_elem(adCoupledValue("w")),
@@ -49,10 +40,7 @@ INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params)
     _comp(getParam<MooseEnum>("momentum_component")),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _dim(_subproblem.mesh().dimension()),
-    _u_wall(getFunction("u_wall")),
-    _v_wall(getFunction("v_wall")),
-    _w_wall(getFunction("w_wall"))
+    _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -62,7 +50,7 @@ INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params)
 }
 
 ADReal
-INSFVNoSlipWallBC::computeQpResidual()
+INSFVSymmetryVelocityBC::computeQpResidual()
 {
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
   const Point & cell_centroid =
@@ -76,40 +64,14 @@ INSFVNoSlipWallBC::computeQpResidual()
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
 
-  // See Moukalled 15.123. Recall that we multiply by the area in the base class, so S_b ->
+  // See Moukalled 15.150. Recall that we multiply by the area in the base class, so S_b ->
   // _normal.norm() here
 
-  std::vector<ADReal> delta_vel;
-  delta_vel.push_back((u_C[_qp] - _u_wall.value(_t, _face_info->faceCentroid())));
-  ADReal delta_vel_dot_n = delta_vel[0] * _normal(0);
+  ADReal v_dot_n = u_C[_qp] * _normal(0);
   if (_dim > 1)
-  {
-    delta_vel.push_back((v_C[_qp] - _v_wall.value(_t, _face_info->faceCentroid())));
-    delta_vel_dot_n += delta_vel[1] * _normal(1);
-  }
+    v_dot_n += v_C[_qp] * _normal(1);
   if (_dim > 2)
-  {
-    delta_vel.push_back((w_C[_qp] - _w_wall.value(_t, _face_info->faceCentroid())));
-    delta_vel_dot_n += delta_vel[2] * _normal(2);
-  }
+    v_dot_n += w_C[_qp] + _normal(2);
 
-  return mu_b[_qp] * _normal.norm() / d_perpendicular *
-         (delta_vel[_comp] - delta_vel_dot_n * _normal(_comp));
-  ;
-}
-
-Real
-INSFVNoSlipWallBC::boundaryValue(const FaceInfo & fi) const
-{
-  switch (_comp)
-  {
-    case 0:
-      return _u_wall.value(_t, fi.faceCentroid());
-    case 1:
-      return _v_wall.value(_t, fi.faceCentroid());
-    case 2:
-      return _w_wall.value(_t, fi.faceCentroid());
-    default:
-      mooseError("Unrecognized comp ", _comp);
-  }
+  return 2. * mu_b[_qp] * _normal.norm() / d_perpendicular * v_dot_n * _normal(_comp);
 }

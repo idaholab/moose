@@ -9,16 +9,13 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "INSFVSymmetryBC.h"
 
-class Function;
-
-class INSFVNoSlipWallBC : public FVFluxBC
+class INSFVSymmetryVelocityBC : public INSFVSymmetryBC
 {
 public:
   static InputParameters validParams();
-  INSFVNoSlipWallBC(const InputParameters & params);
-  Real boundaryValue(const FaceInfo & fi) const;
+  INSFVSymmetryVelocityBC(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
@@ -47,11 +44,4 @@ protected:
 
   /// The mesh dimension
   const unsigned int _dim;
-
-  /// The wall velocity in the x-direction
-  const Function & _u_wall;
-  /// The wall velocity in the y-direction
-  const Function & _v_wall;
-  /// The wall velocity in the z-direction
-  const Function & _w_wall;
 };
