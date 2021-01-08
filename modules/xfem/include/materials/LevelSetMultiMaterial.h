@@ -62,7 +62,7 @@ protected:
   const std::string _prop_name;
 
   /// map of keys to material property
-  std::map<unsigned int, const GenericMaterialProperty<T, is_ad> *> _prop_map;
+  std::unordered_map<unsigned int, const GenericMaterialProperty<T, is_ad> *> _prop_map;
 
   /// the global material property
   GenericMaterialProperty<T, is_ad> & _prop;
@@ -71,7 +71,7 @@ protected:
   std::shared_ptr<XFEM> _xfem;
 
   /// map of keys to base name
-  std::map<unsigned int, const std::string> _base_name_map;
+  std::unordered_map<unsigned int, const std::string> _base_name_map;
 
   /// current mapped material property
   const GenericMaterialProperty<T, is_ad> * _mapped_prop;
