@@ -35,6 +35,9 @@ class Pattern(object):
         self.regex = regex
         self.function = function
 
+    def __str__(self):
+        return '{}: re={}; func={}'.format(self.name, self.regex, self.function)
+
 class Grammar(object):
     """
     Defines a generic Grammar that contains the Token objects necessary to build an
@@ -97,7 +100,7 @@ class Grammar(object):
         out = []
         for obj in self.__patterns:
             out.append(str(obj))
-        return 'Grammar:\n' + ', '.join(out)
+        return 'Grammar:\n' + '\n'.join(out)
 
 class LexerInformation(object):
     """
