@@ -14,10 +14,14 @@ def findall(node, func=None, method=None, **kwargs):
     """
     Find all nodes matching the supplied function.
 
-    Input:
-        node[moosetree.Node]: The node from which to begin the search.
-        func[]: A function that returns True/False.
-        method[Scheme]: The method for searching, see iterator.py
+    The root for the search is provided in *node*. A search is conducted by calling *func* at each
+    descendant of the root node. If this function evaluates to `True` the resulting node object is
+    added to the list of nodes that is returned.
+
+    The search *method* defaults to a breath first search, but any IterMethod can be supplied.
+
+    If a function is not provided then the default for *func* is used, which checks that the supplied
+    keyword arguments match the attributes of the node.
     """
     if (func is None) and (kwargs):
         func = lambda n: any(n.attributes.get(key, None)==value for key, value in kwargs.items())
@@ -25,20 +29,26 @@ def findall(node, func=None, method=None, **kwargs):
 
 def find(node, func=None, method=None, **kwargs):
     """
-    Find single node matching the supplied function.
-
-    Input:
-        node[moosetree.Node]: The node from which to begin the search.
-        func[]: A function that returns True/False.
-        method[Scheme]: The method for searching, see iterator.py
+    Operates in the same fashion as "findall"; however, if a match is found the search is terminated
+    and the node is returned.
     """
     if (func is None) and (kwargs):
         func = lambda n: any(n.attributes.get(key, None)==value for key, value in kwargs.items())
     nodes = list(iterate(node, func, True, method))
     return nodes[0] if nodes else None
 
-def iterate(node, func=lambda n: True, abort_on_find=False, method=None):
-    """Function for performing tree iteration."""
+def iterate(node, func=None, abort_on_find=False, method=None):
+    """
+    Iterates over the descendants of *node*.
+
+    The search *method* defaults to a breath first search, but any IterMethod can be supplied. The
+    iteration can be limited to certain nodes by defining *func*. This function is evaluated at
+    each node during iteration and only nodes that result in `True` are considered. If
+    *abort_on_find* is set to `True` the iteration will stop after the first evaluation of the
+    function that is `True.
+    """
+    if func is None:
+        func = lambda n: True
 
     if (method is None) or (method == IterMethod.BREADTH_FIRST):
         return __breadthfirst_iterate(node, func, abort_on_find)

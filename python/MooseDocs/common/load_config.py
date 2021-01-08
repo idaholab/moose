@@ -48,7 +48,8 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.template',
                       'MooseDocs.extensions.comment',
                       'MooseDocs.extensions.special',
-                      'MooseDocs.extensions.ifelse']
+                      'MooseDocs.extensions.ifelse',
+                      'MooseDocs.extensions.pysyntax']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
