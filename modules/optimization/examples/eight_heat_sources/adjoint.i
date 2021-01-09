@@ -79,7 +79,7 @@
 
 [VectorPostprocessors]
   [point_source]
-    type = ConstantVectorPostprocessor
+    type = ParConstantVectorPostprocessor
     vector_names = 'x y z value'
     value = '0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
              0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9
