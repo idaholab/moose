@@ -3,8 +3,8 @@
   design = 'modules/peridynamics/PeridynamicsMesh.md'
   [./initial_run]
     type = 'Exodiff'
-    input = '2D_mesh_restartable_HNOSPD.i'
-    exodiff = '2D_mesh_restartable_HNOSPD_out.e'
+    input = '2D_mesh_restartable_H1NOSPD.i'
+    exodiff = '2D_mesh_restartable_H1NOSPD_out.e'
     map = false
     requirement = 'PeridynamicsMesh shall be able to save extra unconventional
                    mesh data for peridynamics models.'
@@ -12,8 +12,8 @@
 
   [./restart_run]
     type = 'Exodiff'
-    input = '2D_mesh_restartable_HNOSPD_second.i'
-    exodiff = '2D_mesh_restartable_HNOSPD_second_out.e'
+    input = '2D_mesh_restartable_H1NOSPD_second.i'
+    exodiff = '2D_mesh_restartable_H1NOSPD_second_out.e'
     map = false
     prereq = initial_run
     skip = 'PD does not support restart yet'

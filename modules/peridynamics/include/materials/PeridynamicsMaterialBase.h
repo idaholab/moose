@@ -32,9 +32,9 @@ protected:
   PeridynamicsMesh & _pdmesh;
   const unsigned int _dim;
   const unsigned int _nnodes;
-  std::vector<Real> _horiz_rad;
+  std::vector<Real> _horizon_radius;
   std::vector<Real> _node_vol;
-  std::vector<Real> _horiz_vol;
+  std::vector<Real> _horizon_vol;
 
   RealGradient _origin_vec;
   ///@}

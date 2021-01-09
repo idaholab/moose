@@ -30,6 +30,6 @@ ComputeSmallStrainConstantHorizonMaterialBPD::ComputeSmallStrainConstantHorizonM
 void
 ComputeSmallStrainConstantHorizonMaterialBPD::computePeridynamicsParams()
 {
-  _Cij = 0.5 * (6.0 * _dim * _bulk_modulus / (M_PI * std::pow(_horiz_rad[0], _dim + 1)) +
-                6.0 * _dim * _bulk_modulus / (M_PI * std::pow(_horiz_rad[1], _dim + 1)));
+  _Cij = 0.5 * (6.0 * _dim * _bulk_modulus / (M_PI * std::pow(_horizon_radius[0], _dim + 1)) +
+                6.0 * _dim * _bulk_modulus / (M_PI * std::pow(_horizon_radius[1], _dim + 1)));
 }

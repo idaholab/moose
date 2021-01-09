@@ -17,7 +17,7 @@ ComputePlaneSmallStrainNOSPD::validParams()
   InputParameters params = ComputeSmallStrainNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
-      "for peridynamic correspondence model under planar small strain assumptions");
+      "for peridynamic correspondence models under planar small strain assumptions");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar out-of-plane strain variable for generalized plane strain");

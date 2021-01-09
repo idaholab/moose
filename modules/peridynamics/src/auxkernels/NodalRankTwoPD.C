@@ -164,7 +164,7 @@ NodalRankTwoPD::computeRankTwoTensors()
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
     {
       Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
-      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+      vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
       origin_vec = *neighbor_nb - *_pdmesh.nodePtr(_current_node->id());
 
       for (unsigned int k = 0; k < _dim; ++k)
@@ -182,7 +182,7 @@ NodalRankTwoPD::computeRankTwoTensors()
     }
 
   // finalize the deformation gradient tensor
-  if (!MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
+  if (shape.det() != 0.)
   {
     dgrad *= shape.inverse();
 

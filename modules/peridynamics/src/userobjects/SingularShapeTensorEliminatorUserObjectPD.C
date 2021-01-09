@@ -118,7 +118,7 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
     for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
       if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       {
-        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+        vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
         origin_vec_nb = *_pdmesh.nodePtr(neighbors[nb]) - *elem->node_ptr(nd);
         weight_nb = horizon_nd / origin_vec_nb.norm();
 
@@ -127,7 +127,7 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
             shape_tensor(k, l) += weight_nb * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
       }
 
-    if (MooseUtils::absoluteFuzzyEqual(shape_tensor.det(), 0.0))
+    if (shape_tensor.det() == 0.)
       singular = true;
   }
 

@@ -34,7 +34,8 @@ PeridynamicsKernelBase::PeridynamicsKernelBase(const InputParameters & parameter
     _nnodes(2),
     _node_vol(_nnodes),
     _dg_vol_frac(_nnodes),
-    _horiz_rad(_nnodes)
+    _horizon_radius(_nnodes),
+    _horizon_vol(_nnodes)
 {
 }
 
@@ -43,15 +44,17 @@ PeridynamicsKernelBase::prepare()
 {
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
-    _node_vol[nd] = _pdmesh.getPDNodeVolume(_current_elem->node_id(nd));
+    _node_vol[nd] = _pdmesh.getNodeVolume(_current_elem->node_id(nd));
     dof_id_type id_ji_in_ij =
         _pdmesh.getNeighborIndex(_current_elem->node_id(nd), _current_elem->node_id(1 - nd));
-    _dg_vol_frac[nd] = _pdmesh.getDefGradVolFraction(_current_elem->node_id(nd), id_ji_in_ij);
-    _horiz_rad[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));
+    _dg_vol_frac[nd] =
+        _pdmesh.getHorizonSubsetVolumeFraction(_current_elem->node_id(nd), id_ji_in_ij);
+    _horizon_radius[nd] = _pdmesh.getHorizon(_current_elem->node_id(nd));
+    _horizon_vol[nd] = _pdmesh.getHorizonVolume(_current_elem->node_id(nd));
   }
 
-  _origin_vec = _pdmesh.getPDNodeCoord(_current_elem->node_id(1)) -
-                _pdmesh.getPDNodeCoord(_current_elem->node_id(0));
+  _origin_vec = _pdmesh.getNodeCoord(_current_elem->node_id(1)) -
+                _pdmesh.getNodeCoord(_current_elem->node_id(0));
   _bond_status = _bond_status_var->getElementalValue(_current_elem);
 }
 

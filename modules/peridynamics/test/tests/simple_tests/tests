@@ -5,7 +5,7 @@
     exodiff = '2D_regularD_constH_BPD.e'
     map = false
     requirement = 'ComputeSmallStrainConstantHorizonMaterialBPD shall provide
-                   the correct micro-modulus for bond-based mechanics model using regular mesh.'
+                   the correct micro-modulus for the bond-based mechanics model using regular mesh.'
     design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialBPD.md'
     issues = '#11561'
   [../]
@@ -15,7 +15,7 @@
     exodiff = '2D_regularD_variableH_BPD.e'
     map = false
     requirement = 'ComputeSmallStrainVariableHorizonMaterialBPD shall provide
-                   the correct micro-modulus for bond-based mechanics model using regular mesh.'
+                   the correct micro-modulus for the bond-based mechanics model using regular mesh.'
     design = 'modules/peridynamics/ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
   [../]
@@ -24,9 +24,9 @@
     input = '2D_regularD_constH_OSPD.i'
     exodiff = '2D_regularD_constH_OSPD.e'
     map = false
-    requirement = 'SmallStrainConstantHorizoOSBPD shall provide the correct micro-modulus
-                   for ordinary state-based mechanics model using regular mesh.'
-    design = 'modules/peridynamics/SmallStrainConstantHorizoOSBPD.md'
+    requirement = 'ComputeSmallStrainConstantHorizonMaterialOSPD shall provide the correct micro-modulus
+                   for the ordinary state-based mechanics model using regular mesh.'
+    design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
   [./2D_regularD_variableH_OSPD]
@@ -35,7 +35,7 @@
     exodiff = '2D_regularD_variableH_OSPD.e'
     map = false
     requirement = 'ComputeSmallStrainVariableHorizonMaterialOSPD shall provide the
-                   correct micro-modulus for ordinary state-based mechanics model using regular mesh.'
+                   correct micro-modulus for the ordinary state-based mechanics model using regular mesh.'
     design = 'modules/peridynamics/ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
@@ -45,7 +45,7 @@
     exodiff = '2D_irregularD_variableH_BPD.e'
     map = false
     requirement = 'ComputeSmallStrainVariableHorizonMaterialBPD shall provide the
-                   correct micro-modulus for bond-based mechanics model using irregular mesh.'
+                   correct micro-modulus for the bond-based mechanics model using irregular mesh.'
     design = 'modules/peridynamics/ComputeSmallStrainVariableHorizonMaterialBPD.md'
     issues = '#11561'
   [../]
@@ -55,27 +55,28 @@
     exodiff = '2D_irregularD_variableH_OSPD.e'
     map = false
     requirement = 'ComputeSmallStrainVariableHorizonMaterialOSPD shall provide the
-                   correct micro-modulus for ordinary state-based mechanics model using irregular mesh.'
+                   correct micro-modulus for the ordinary state-based mechanics model using irregular mesh.'
     design = 'modules/peridynamics/ComputeSmallStrainVariableHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
-  [./2D_small_strain_HNOSPD]
+  [./2D_small_strain_H1NOSPD]
     type = 'Exodiff'
-    input = '2D_small_strain_HNOSPD.i'
-    exodiff = '2D_small_strain_HNOSPD.e'
+    input = '2D_small_strain_H1NOSPD.i'
+    exodiff = '2D_small_strain_H1NOSPD.e'
     map = false
     requirement = 'ComputePlaneSmallStrainNOSPD shall provide the correct strain
-                   for non-ordinary state-based mechanics model.'
+                   for Form I of the horizon stabilized peridynamic correspondence model.'
     design = 'modules/peridynamics/ComputePlaneSmallStrainNOSPD.md'
     issues = '#11561'
   [../]
-  [./2D_finite_strain_HNOSPD]
+  [./2D_finite_strain_H1NOSPD]
     type = 'Exodiff'
-    input = '2D_finite_strain_HNOSPD.i'
-    exodiff = '2D_finite_strain_HNOSPD.e'
+    input = '2D_finite_strain_H1NOSPD.i'
+    exodiff = '2D_finite_strain_H1NOSPD.e'
     map = false
     requirement = 'ComputePlaneFiniteStrainNOSPD shall provide the correct strain
-                   increment and rotation increment for non-ordinary state-based mechanics model.'
+                   increment and rotation increment for Form II of the horizon stabilized
+                   peridynamic correspondence model.'
     design = 'modules/peridynamics/ComputePlaneFiniteStrainNOSPD.md'
     issues = '#11561'
   [../]
