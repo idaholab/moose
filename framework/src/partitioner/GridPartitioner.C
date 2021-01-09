@@ -26,21 +26,12 @@ GridPartitioner::validParams()
 {
   // These two are in this order because they are from different systems
   // so you have to apply _this_ system's second to override the base
-  InputParameters params = GeneratedMesh::validParams();
-  params += MoosePartitioner::validParams();
+  InputParameters params = MoosePartitioner::validParams();
 
-  // These are suppressed because they're going to get set programmatically
-  params.suppressParameter<MooseEnum>("elem_type");
-  params.suppressParameter<Real>("xmin");
-  params.suppressParameter<Real>("ymin");
-  params.suppressParameter<Real>("zmin");
-  params.suppressParameter<Real>("xmax");
-  params.suppressParameter<Real>("ymax");
-  params.suppressParameter<Real>("zmax");
-  params.suppressParameter<MooseEnum>("dim");
-
-  params.set<MooseEnum>("parallel_type") = "REPLICATED";
-  params.set<MooseEnum>("partitioner") = "LINEAR";
+  // Users specify how many processors they need along each direction
+  params.addParam<unsigned int>("nx", 1, "Number of processors in the X direction");
+  params.addParam<unsigned int>("ny", 1, "Number of processors in the Y direction");
+  params.addParam<unsigned int>("nz", 1, "Number of processors in the Z direction");
 
   params.addClassDescription("Create a uniform grid that overlays the mesh to be partitioned.  "
                              "Assign all elements within each cell of the grid to the same "
@@ -65,71 +56,103 @@ GridPartitioner::clone() const
 void
 GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
-  // First: build the GeneratedMesh
-
-  auto & factory = _app.getFactory();
+  // By default, there are one processor along each direction
+  // nx: the number of processors along x direction
+  // ny: the number of processors along y direction
+  // nz: the number of processors along z direction
+  unsigned int nx = 1, ny = 1, nz = 1;
 
   // Figure out the physical bounds of the given mesh
   auto bounding_box = MeshTools::create_bounding_box(mesh);
   const auto & min = bounding_box.min();
   const auto & max = bounding_box.max();
 
-  // Fill up a parameters object from the parameters for this class
-  auto params = factory.getValidParams("GeneratedMesh");
-  params.applyParameters(_pars);
-
   auto dim = mesh.mesh_dimension();
-  params.set<MooseEnum>("dim") = dim;
-
   //  Need to make sure the number of cells in the grid matches the number of procs to partition for
-  auto num_cells = getParam<unsigned int>("nx");
+  nx = getParam<unsigned int>("nx");
 
   if (dim >= 2)
-    num_cells *= getParam<unsigned int>("ny");
+    ny = getParam<unsigned int>("ny");
 
   if (dim == 3)
-    num_cells *= getParam<unsigned int>("nz");
+    nz = getParam<unsigned int>("nz");
 
   // We should compute a balanced factorization so
   // that we can assign proper processors to each direction.
   // I just want to make grid partitioner smarter.
-  if (num_cells != mesh.n_partitions())
+  if ((nx * ny * nz) != mesh.n_partitions())
   {
     // Anybody knows we are living in a 3D space.
     int dims[] = {0, 0, 0};
     MPI_Dims_create(mesh.n_partitions(), dim, dims);
 
-    params.set<unsigned int>("nx") = dims[0];
+    nx = dims[0];
     if (dim >= 2)
-      params.set<unsigned int>("ny") = dims[1];
+      ny = dims[1];
     if (dim == 3)
-      params.set<unsigned int>("nz") = dims[2];
+      nz = dims[2];
   }
 
-  params.set<Real>("xmin") = min(0);
-  params.set<Real>("ymin") = min(1);
-  params.set<Real>("zmin") = min(2);
+  // hx: grid interval along x direction
+  // hy: grid interval along y direction
+  // hz: grid interval along z direction
+  // Lx: domain length along x direction
+  // Ly: domain length along y direction
+  // Lz: domain length along z direction
+  Real hx = 1., hy = 1., hz = 1., Lx = 1., Ly = 1., Lz = 1.;
+  Lx = max(0) - min(0);
+  hx = Lx / nx;
+  if (dim >= 2)
+  {
+    Ly = max(1) - min(1);
+    hy = Ly / ny;
+  }
 
-  params.set<Real>("xmax") = max(0);
-  params.set<Real>("ymax") = max(1);
-  params.set<Real>("zmax") = max(2);
+  if (dim == 3)
+  {
+    Lz = max(2) - min(2);
+    hz = Lz / nz;
+  }
 
-  auto grid_mesh_ptr = _app.getFactory().create<MooseMesh>("GeneratedMesh", name() + "_gm", params);
-  grid_mesh_ptr->init();
-
-  auto point_locator_ptr = grid_mesh_ptr->getPointLocator();
+  // Processor coordinates along x, y, z directions
+  unsigned int k = 0, j = 0, i = 0;
+  // Coordinates for current element centroid
+  Real coordx = 0, coordy = 0, coordz = 0;
 
   // Loop over all of the elements in the given mesh
   for (auto & elem_ptr : mesh.active_element_ptr_range())
   {
     // Find the element it lands in in the GeneratedMesh
-    auto grid_elem_ptr = (*point_locator_ptr)(elem_ptr->centroid());
+    auto centroid = elem_ptr->centroid();
 
-    // True if we found something
-    if (grid_elem_ptr)
-      // Assign the _id_ of the cell to the processor_id
-      elem_ptr->processor_id() = grid_elem_ptr->id();
-    else // Should never happen (seriously - we create bounding boxes that should disallow this!
-      mooseError("GridPartitioner unable to locate element within the grid!");
+    coordx = centroid(0);
+    mooseAssert(coordx >= min(0) && coordy <= max(0),
+                "element is outside of bounding box along x direction");
+    if (dim >= 2)
+    {
+      coordy = centroid(1);
+      mooseAssert(coordy >= min(1) && coordy <= max(1),
+                  "element is outside of bounding box along y direction");
+    }
+    if (dim == 3)
+    {
+      coordz = centroid(2);
+      mooseAssert(coordz >= min(2) && coordz <= max(2),
+                  "element is outside of bounding box along z direction");
+    }
+
+    // Compute processor coordinates
+    j = k = 0;
+    i = (coordx - min(0)) / hx;
+    if (dim >= 2)
+      j = (coordy - min(1)) / hy;
+    if (dim == 3)
+      k = (coordz - min(2)) / hz;
+
+    mooseAssert(i < nx, "Index caculation is wrong along x direction");
+    mooseAssert(j < ny, "Index caculation is wrong along y direction");
+    mooseAssert(k < nz, "Index caculation is wrong along z direction");
+    // Assign processor ID to current element
+    elem_ptr->processor_id() = k * nx * ny + j * nx + i;
   }
 }
