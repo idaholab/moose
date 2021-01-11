@@ -90,14 +90,14 @@ protected:
    * Function to compute objective.
    * This is the last function called in objective routine
    */
-  virtual Real computeObjective();
+  Real computeObjective();
 
-private:
   /**
    * Function to set parameters.
    * This is the first function called in objective/gradient/hessian routine
    */
-  void updateParameters(const libMesh::PetscVector<Number> & x);
+  virtual void updateParameters(const libMesh::PetscVector<Number> & x);
 
+private:
   friend class OptimizeSolve;
 };

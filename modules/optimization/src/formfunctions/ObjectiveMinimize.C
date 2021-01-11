@@ -16,33 +16,54 @@ ObjectiveMinimize::ObjectiveMinimize(const InputParameters & parameters) : FormF
 Real
 ObjectiveMinimize::computeAndCheckObjective(bool multiapp_passed)
 {
-  Real objective_value = std::numeric_limits<double>::max();
+  Real objective_value = FormFunction::computeObjective();
+  if (_bound_adjustment > 0.0)
+    objective_value += _bound_adjustment;
 
-  if (multiapp_passed)
+  if (!multiapp_passed)
+    objective_value = std::numeric_limits<double>::max();
+
+  return objective_value;
+}
+
+void
+ObjectiveMinimize::updateParameters(const libMesh::PetscVector<Number> & x)
+{
+  _bound_adjustment = 0.0;
+  dof_id_type n = 0;
+  for (unsigned int i = 0; i < _parameters.size(); ++i)
   {
-    for (unsigned int i = 0; i < _parameters.size(); ++i)
+    for (auto & val : *_parameters[i])
     {
-      for (auto & val : *_parameters[i])
+      Real value_from_tao = x(n++);
+      if (value_from_tao < _lower_bounds[i])
       {
-        if (val > _lower_bounds[i] && val < _upper_bounds[i])
-
-        {
-          objective_value = FormFunction::computeObjective();
-        }
-        else
-        {
-          objective_value = std::numeric_limits<double>::max();
-          mooseWarning("Optimization Parameters out of bounds.   Parameter Value = ",
-                       val,
-                       ";  lower_bound = ",
-                       _lower_bounds[i],
-                       ";  upper_bound = ",
-                       _upper_bounds[i]);
-          return objective_value;
-        }
+        mooseWarning("Tao Optimization Parameters out of bounds.  System will be solved using the "
+                     "lower bound and the objective will be altered accordingly."
+                     "\nTao Parameter Value = ",
+                     value_from_tao,
+                     ";  lower_bound = ",
+                     _lower_bounds[i]);
+        val = _lower_bounds[i];
+        Real diff = value_from_tao - _lower_bounds[i];
+        _bound_adjustment += diff * diff;
+      }
+      else if (value_from_tao > _upper_bounds[i])
+      {
+        mooseWarning("Tao Optimization Parameters out of bounds.  System will be solved using the "
+                     "upper bound and the objective will be altered accordingly."
+                     "\nTao Parameter Value = ",
+                     value_from_tao,
+                     ";  upper_bound = ",
+                     _upper_bounds[i]);
+        val = _upper_bounds[i];
+        Real diff = value_from_tao - _upper_bounds[i];
+        _bound_adjustment += diff * diff;
+      }
+      else
+      {
+        val = value_from_tao;
       }
     }
   }
-
-  return objective_value;
 }
