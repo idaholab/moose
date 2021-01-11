@@ -64,7 +64,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -72,7 +72,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeDerivative(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) = 0;
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should

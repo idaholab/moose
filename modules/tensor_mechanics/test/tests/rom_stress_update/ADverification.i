@@ -122,66 +122,67 @@
     strain = FINITE
     add_variables = true
     generate_output = 'vonmises_stress'
+    use_automatic_differentiation = true
   [../]
 []
 
 [BCs]
   [./symmx]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmy]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmz]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./pressure_x]
-    type = Pressure
+    type = ADPressure
     variable = disp_x
     component = 0
     boundary = right
     function = vmJ2_fcn
-    factor = 0.5e6
+    constant = 0.5e6
   [../]
   [./pressure_y]
-    type = Pressure
+    type = ADPressure
     variable = disp_y
     component = 1
     boundary = top
     function = vmJ2_fcn
-    factor = -0.5e6
+    constant = -0.5e6
   [../]
   [./pressure_z]
-    type = Pressure
+    type = ADPressure
     variable = disp_z
     component = 2
     boundary = front
     function = vmJ2_fcn
-    factor = -0.5e6
+    constant = -0.5e6
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e11
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ComputeMultipleInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = SS316HLAROMANCEStressUpdateTest
+    type = ADSS316HLAROMANCEStressUpdateTest
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true

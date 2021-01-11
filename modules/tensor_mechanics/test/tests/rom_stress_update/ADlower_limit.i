@@ -52,64 +52,65 @@ disp = 1.0053264195e6
   [./all]
     strain = FINITE
     add_variables = true
+    use_automatic_differentiation = true
     generate_output = vonmises_stress
   [../]
 []
 
 [BCs]
   [./symmy]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./pressure_x]
-    type = Pressure
+    type = ADPressure
     variable = disp_x
     component = 0
     boundary = right
-    factor = ${disp}
+    constant = ${disp}
   [../]
   [./pressure_y]
-    type = Pressure
+    type = ADPressure
     variable = disp_y
     component = 1
     boundary = top
-    factor = -${disp}
+    constant = -${disp}
   [../]
   [./pressure_z]
-    type = Pressure
+    type = ADPressure
     variable = disp_z
     component = 2
     boundary = front
-    factor = -${disp}
+    constant = -${disp}
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 3.30e11
     poissons_ratio = 0.3
   [../]
   [./stress]
-    type = ComputeMultipleInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
   [../]
   [./rom_stress_prediction]
-    type = SS316HLAROMANCEStressUpdateTest
+    type = ADSS316HLAROMANCEStressUpdateTest
     temperature = temperature
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
