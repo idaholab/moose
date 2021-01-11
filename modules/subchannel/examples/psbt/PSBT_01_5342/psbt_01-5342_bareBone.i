@@ -60,7 +60,7 @@ P_out = 14709975.0 # Pa
 
 [ICs]
   [S_IC]
-    type = FlowAreaIC
+    type = QuadFlowAreaIC
     variable = S
   []
 

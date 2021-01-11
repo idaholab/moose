@@ -1,18 +1,18 @@
-#include "FlowAreaIC.h"
+#include "QuadFlowAreaIC.h"
 
-registerMooseObject("SubChannelApp", FlowAreaIC);
+registerMooseObject("SubChannelApp", QuadFlowAreaIC);
 
 InputParameters
-FlowAreaIC::validParams()
+QuadFlowAreaIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
   return params;
 }
 
-FlowAreaIC::FlowAreaIC(const InputParameters & params) : QuadSubChannelBaseIC(params) {}
+QuadFlowAreaIC::QuadFlowAreaIC(const InputParameters & params) : QuadSubChannelBaseIC(params) {}
 
 Real
-FlowAreaIC::value(const Point & p)
+QuadFlowAreaIC::value(const Point & p)
 {
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
