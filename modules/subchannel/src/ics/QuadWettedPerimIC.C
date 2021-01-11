@@ -1,18 +1,20 @@
-#include "WettedPerimIC.h"
+#include "QuadWettedPerimIC.h"
 #include "QuadSubChannelMesh.h"
 
-registerMooseObject("SubChannelApp", WettedPerimIC);
+registerMooseObject("SubChannelApp", QuadWettedPerimIC);
 
 InputParameters
-WettedPerimIC::validParams()
+QuadWettedPerimIC::validParams()
 {
   return QuadSubChannelBaseIC::validParams();
 }
 
-WettedPerimIC::WettedPerimIC(const InputParameters & params) : QuadSubChannelBaseIC(params) {}
+QuadWettedPerimIC::QuadWettedPerimIC(const InputParameters & params) : QuadSubChannelBaseIC(params)
+{
+}
 
 Real
-WettedPerimIC::value(const Point & p)
+QuadWettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
   auto pitch = _mesh.getPitch();
