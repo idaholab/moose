@@ -2,7 +2,7 @@
 
 #include "ExternalProblem.h"
 #include "SubChannelApp.h"
-#include "SubChannelMesh.h"
+#include "SubChannelMeshBase.h"
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -37,7 +37,7 @@ protected:
   Eigen::MatrixXd Wij_global_old;
   Eigen::MatrixXd WijPrime_global;
   const Real _g_grav;
-  SubChannelMesh & _subchannel_mesh;
+  SubChannelMeshBase & _subchannel_mesh;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * mdot_soln;
   SolutionHandle * SumWij_soln;

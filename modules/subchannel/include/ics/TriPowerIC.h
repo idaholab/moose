@@ -17,7 +17,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  TriSubChannelMesh & _mesh;
   /// total power of the fuel assembly
   Real _power;
   /// number of lines

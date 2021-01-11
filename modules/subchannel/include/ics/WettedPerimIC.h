@@ -11,9 +11,6 @@ public:
   WettedPerimIC(const InputParameters & params);
   Real value(const Point & p) override;
 
-protected:
-  SubChannelMesh & _mesh;
-
 public:
   static InputParameters validParams();
 };

@@ -15,7 +15,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  SubChannelMesh & _mesh;
   Real _power;
   unsigned int _numberoflines;
   std::string _filename;

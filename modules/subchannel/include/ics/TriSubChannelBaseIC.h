@@ -13,11 +13,6 @@ public:
   TriSubChannelBaseIC(const InputParameters & params);
 
 protected:
-  /**
-   * Find the channel indice of the subchannel containing a given point.
-   */
-  unsigned int index_point(const Point & p) const;
-
   TriSubChannelMesh & _mesh;
 
 public:
