@@ -2,11 +2,11 @@
 
 #include "SubChannelMeshBase.h"
 
-class SubChannelMesh : public SubChannelMeshBase
+class QuadSubChannelMesh : public SubChannelMeshBase
 {
 public:
-  SubChannelMesh(const InputParameters & parameters);
-  SubChannelMesh(const SubChannelMesh & other_mesh);
+  QuadSubChannelMesh(const InputParameters & parameters);
+  QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh);
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
 

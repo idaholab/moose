@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FileOutput.h"
-#include "SubChannelMesh.h"
+#include "QuadSubChannelMesh.h"
 #include <Eigen/Dense>
 
 /**
@@ -14,7 +14,7 @@ public:
   virtual void output(const ExecFlagType & type) override;
 
 protected:
-  SubChannelMesh & _mesh;
+  QuadSubChannelMesh & _mesh;
   Eigen::MatrixXd _exitValue;
   const VariableName & _variable;
   const Real & _height;

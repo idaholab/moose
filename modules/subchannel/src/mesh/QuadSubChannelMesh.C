@@ -1,14 +1,14 @@
-#include "SubChannelMesh.h"
+#include "QuadSubChannelMesh.h"
 
 #include <cmath>
 
 #include "libmesh/edge_edge2.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("SubChannelApp", SubChannelMesh);
+registerMooseObject("SubChannelApp", QuadSubChannelMesh);
 
 InputParameters
-SubChannelMesh::validParams()
+QuadSubChannelMesh::validParams()
 {
   InputParameters params = SubChannelMeshBase::validParams();
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
@@ -19,7 +19,7 @@ SubChannelMesh::validParams()
   return params;
 }
 
-SubChannelMesh::SubChannelMesh(const InputParameters & params)
+QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
   : SubChannelMeshBase(params),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
@@ -119,7 +119,7 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
   }
 }
 
-SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
+QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
   : SubChannelMeshBase(other_mesh),
     _nx(other_mesh._nx),
     _ny(other_mesh._ny),
@@ -138,13 +138,13 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
 }
 
 std::unique_ptr<MooseMesh>
-SubChannelMesh::safeClone() const
+QuadSubChannelMesh::safeClone() const
 {
-  return libmesh_make_unique<SubChannelMesh>(*this);
+  return libmesh_make_unique<QuadSubChannelMesh>(*this);
 }
 
 void
-SubChannelMesh::buildMesh()
+QuadSubChannelMesh::buildMesh()
 {
   UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(getMesh());
   mesh.clear();
@@ -205,7 +205,7 @@ SubChannelMesh::buildMesh()
 }
 
 unsigned int
-SubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
+QuadSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 {
   unsigned int i = (p(0) + 0.5 * _pitch) / _pitch;
   unsigned int j = (p(1) + 0.5 * _pitch) / _pitch;

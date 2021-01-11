@@ -4,7 +4,7 @@ mass_flux_in = ${fparse 1e+6 * 4.90 / 3600.}
 P_out = 16583045.15 # Pa
 
 [Mesh]
-  type = SubChannelMesh
+  type = QuadSubChannelMesh
   nx = 6
   ny = 6
   max_dz = 0.02

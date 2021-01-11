@@ -10,12 +10,12 @@ registerMooseObject("SubChannelApp", DetailedSubChannelMesh);
 InputParameters
 DetailedSubChannelMesh::validParams()
 {
-  InputParameters params = SubChannelMesh::validParams();
+  InputParameters params = QuadSubChannelMesh::validParams();
   return params;
 }
 
 DetailedSubChannelMesh::DetailedSubChannelMesh(const InputParameters & parameters)
-  : SubChannelMesh(parameters)
+  : QuadSubChannelMesh(parameters)
 {
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SubChannelMesh.h"
+#include "QuadSubChannelMesh.h"
 
-class DetailedSubChannelMesh : public SubChannelMesh
+class DetailedSubChannelMesh : public QuadSubChannelMesh
 {
 public:
   DetailedSubChannelMesh(const InputParameters & parameters);
