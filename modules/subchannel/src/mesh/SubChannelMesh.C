@@ -38,6 +38,25 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
   double possitive_flow = 1.0;
   double negative_flow = -1.0;
 
+  _subch_type.resize(_n_channels);
+  for (unsigned int iy = 0; iy < _ny; iy++)
+  {
+    for (unsigned int ix = 0; ix < _nx; ix++)
+    {
+      unsigned int i_ch = _nx * iy + ix;
+      bool is_corner = (ix == 0 && iy == 0) || (ix == _nx - 1 && iy == 0) ||
+                       (ix == 0 && iy == _ny - 1) || (ix == _nx - 1 && iy == _ny - 1);
+      bool is_edge = (ix == 0 || iy == 0 || ix == _nx - 1 || iy == _ny - 1);
+
+      if (is_corner)
+        _subch_type[i_ch] = EChannelType::CORNER;
+      else if (is_edge)
+        _subch_type[i_ch] = EChannelType::EDGE;
+      else
+        _subch_type[i_ch] = EChannelType::CENTER;
+    }
+  }
+
   // Index the east-west gaps.
   unsigned int i_gap = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
@@ -185,10 +204,10 @@ SubChannelMesh::buildMesh()
   mesh.prepare_for_use();
 }
 
-std::pair<unsigned int, unsigned int>
+unsigned int
 SubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 {
   unsigned int i = (p(0) + 0.5 * _pitch) / _pitch;
   unsigned int j = (p(1) + 0.5 * _pitch) / _pitch;
-  return {i, j};
+  return j * _nx + i;
 }

@@ -3,6 +3,14 @@
 #include <vector>
 #include "MooseMesh.h"
 
+/// Enum for describing the center, edge and corner subchannels or gap types
+enum class EChannelType
+{
+  CENTER,
+  EDGE,
+  CORNER
+};
+
 /**
  * Base class for subchannel meshes
  */
@@ -68,6 +76,16 @@ public:
    * Return heated length
    */
   virtual const Real & getHeatedLength() const { return _heated_length; }
+
+  /**
+   * Return a subchannel index for a given physical point `p`
+   */
+  virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const = 0;
+
+  /**
+   * Return the type of the subchannel for given subchannel index
+   */
+  virtual EChannelType getSubchannelType(unsigned int index) const = 0;
 
 protected:
   /// number of axial nodes

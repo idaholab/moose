@@ -3,14 +3,6 @@
 #include <vector>
 #include "SubChannelMeshBase.h"
 
-/// Enum for describing the center, edge and corner subchannels or gap types
-enum class ETriChannelType
-{
-  CENTER,
-  EDGE,
-  CORNER
-};
-
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
  */
@@ -62,15 +54,12 @@ public:
     return _sign_id_crossflow_map;
   }
 
-  /**
-   * Return a subchannel index for a given physical point `p`
-   */
-  virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const;
+  virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
 
-  /**
-   * Return the type of the subchannel for a given subchannel index
-   */
-  virtual ETriChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
+  virtual EChannelType getSubchannelType(unsigned int index) const override
+  {
+    return _subch_type[index];
+  }
 
 protected:
   /// number of rings of fuel rods
@@ -113,9 +102,9 @@ protected:
   /// number of gaps
   unsigned int _n_gaps;
   /// subchannel type
-  std::vector<ETriChannelType> _subch_type;
+  std::vector<EChannelType> _subch_type;
   /// gap type
-  std::vector<ETriChannelType> _gap_type;
+  std::vector<EChannelType> _gap_type;
 
 public:
   static InputParameters validParams();

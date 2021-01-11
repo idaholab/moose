@@ -116,11 +116,9 @@ PowerIC::value(const Point & p)
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
   // Determine which subchannel this point is in.
-  auto inds = _mesh.getSubchannelIndexFromPoint(p);
-  // x index
-  auto i = inds.first;
-  // y index
-  auto j = inds.second;
+  auto idx = _mesh.getSubchannelIndexFromPoint(p);
+  unsigned int i = idx % nx;
+  unsigned int j = idx / nx;
   // Compute and return the estimated channel axial heat rate per channel
   // Corners contact 1/4 of a  one pin
   if (i == 0 && j == 0)

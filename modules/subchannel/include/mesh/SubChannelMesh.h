@@ -35,10 +35,12 @@ public:
   const Real & getRodDiameter() const { return _rod_diameter; }
   const Real & getGap() const { return _gap; }
 
-  /**
-   * Return an index pair (row, column) for a given physical point `p`
-   */
-  std::pair<unsigned int, unsigned int> getSubchannelIndexFromPoint(const Point & p) const;
+  unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
+
+  virtual EChannelType getSubchannelType(unsigned int index) const override
+  {
+    return _subch_type[index];
+  }
 
 protected:
   unsigned int _nx;
@@ -58,6 +60,8 @@ protected:
   /// vector map of gap size (m)
   std::vector<double> _gij_map;
   Real _max_dz;
+  /// subchannel type
+  std::vector<EChannelType> _subch_type;
 
 public:
   static InputParameters validParams();

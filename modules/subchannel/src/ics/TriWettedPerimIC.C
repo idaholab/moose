@@ -27,11 +27,11 @@ TriWettedPerimIC::value(const Point & p)
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
 
-  if (subch_type == ETriChannelType::CENTER)
+  if (subch_type == EChannelType::CENTER)
   {
     return 0.5 * rod_circumference + 0.5 * wire_circumference;
   }
-  else if (subch_type == ETriChannelType::EDGE)
+  else if (subch_type == EChannelType::EDGE)
   {
     return 0.5 * rod_circumference + 0.5 * wire_circumference + pitch;
   }
