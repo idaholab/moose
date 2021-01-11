@@ -2,7 +2,7 @@
 
 #include "InitialCondition.h"
 
-class SubChannelMesh;
+class QuadSubChannelMesh;
 
 /**
  * An abstract class for ICs
@@ -13,7 +13,7 @@ public:
   SubChannelBaseIC(const InputParameters & params);
 
 protected:
-  SubChannelMesh & _mesh;
+  QuadSubChannelMesh & _mesh;
 
 public:
   static InputParameters validParams();

@@ -1,7 +1,7 @@
 T_in = 359.15
 
 [Mesh]
-  type = SubChannelMesh
+  type = QuadSubChannelMesh
   nx = 6
   ny = 6
   max_dz = 0.02

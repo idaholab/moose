@@ -1,5 +1,5 @@
 [Mesh]
-  type = SubChannelMesh
+  type = QuadSubChannelMesh
   nx = 3
   ny = 3
   heated_length = 1

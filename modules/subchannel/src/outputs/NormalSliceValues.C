@@ -17,7 +17,7 @@ NormalSliceValues::validParams()
 
 NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
   : FileOutput(parameters),
-    _mesh(dynamic_cast<SubChannelMesh &>(*_mesh_ptr)),
+    _mesh(dynamic_cast<QuadSubChannelMesh &>(*_mesh_ptr)),
     _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
