@@ -21,6 +21,7 @@ ShaftConnectedPump1PhaseUserObject::validParams()
   params.addRequiredParam<Real>("volumetric_rated", "Rated pump volumetric flow rate [m^3/s]");
   params.addRequiredParam<Real>("head_rated", "Rated pump head [m]");
   params.addRequiredParam<Real>("torque_rated", "Rated pump torque [N-m]");
+  params.addRequiredParam<Real>("density_rated", "Rated pump fluid density [kg/m^3]");
   params.addRequiredParam<Real>("speed_cr_fr", "Pump speed threshold for friction [-]");
   params.addRequiredParam<Real>("tau_fr_const", "Pump friction constant [N-m]");
   params.addRequiredParam<std::vector<Real>>("tau_fr_coeff", "Friction coefficients [N-m]");
@@ -51,6 +52,7 @@ ShaftConnectedPump1PhaseUserObject::ShaftConnectedPump1PhaseUserObject(
     _volumetric_rated(getParam<Real>("volumetric_rated")),
     _head_rated(getParam<Real>("head_rated")),
     _torque_rated(getParam<Real>("torque_rated")),
+    _density_rated(getParam<Real>("density_rated")),
     _speed_cr_fr(getParam<Real>("speed_cr_fr")),
     _tau_fr_const(getParam<Real>("tau_fr_const")),
     _tau_fr_coeff(getParam<std::vector<Real>>("tau_fr_coeff")),
@@ -170,11 +172,16 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dzt_drhoA = dwt_drhoA * _torque_rated;
     Real dzt_drhouA = dwt_drhouA * _torque_rated;
 
-    // _hydraulic_torque = -(alpha * alpha + nu * nu) * wt * _torque_rated;
-    _hydraulic_torque = -y * zt;
-    Real dtau_hyd_domega = -(dy_domega * zt + y * dzt_domega);
-    Real dtau_hyd_drhoA = -(dy_drhoA * zt + y * dzt_drhoA);
-    Real dtau_hyd_drhouA = -(dy_drhouA * zt + y * dzt_drhouA);
+    // Real homologous_torque = -(alpha * alpha + nu * nu) * wt * _torque_rated;
+    Real homologous_torque = -y * zt;
+    _hydraulic_torque = homologous_torque * ((_rhoV[0] / _volume) / _density_rated);
+    Real dtau_hyd_drhoV = homologous_torque * ((1.0 / _volume) / _density_rated);
+    Real dtau_hyd_domega =
+        -(dy_domega * zt + y * dzt_domega) * ((_rhoV[0] / _volume) / _density_rated);
+    Real dtau_hyd_drhoA =
+        -(dy_drhoA * zt + y * dzt_drhoA) * ((_rhoV[0] / _volume) / _density_rated);
+    Real dtau_hyd_drhouA =
+        -(dy_drhouA * zt + y * dzt_drhouA) * ((_rhoV[0] / _volume) / _density_rated);
 
     Real zh = wh * _head_rated;
     Real dzh_domega = dwh_domega * _head_rated;
@@ -232,6 +239,7 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     const Real S_energy = -(_hydraulic_torque + _friction_torque) * _omega[0];
     const Real dS_energy_drhoA = -dtau_hyd_drhoA * _omega[0];
     const Real dS_energy_drhouA = -dtau_hyd_drhouA * _omega[0];
+    const Real dS_energy_drhoV = -dtau_hyd_drhoV * _omega[0];
     const Real dS_energy_domega =
         -(_hydraulic_torque + _friction_torque) - (dtau_hyd_domega + dtau_fr_domega) * _omega[0];
 
@@ -252,6 +260,8 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     _residual[VolumeJunction1Phase::RHOVV_INDEX] -= S_momentum(1);
     _residual[VolumeJunction1Phase::RHOWV_INDEX] -= S_momentum(2);
 
+    _residual_jacobian_scalar_vars[VolumeJunction1Phase::RHOEV_INDEX](
+        0, VolumeJunction1Phase::RHOV_INDEX) -= dS_energy_drhoV;
     _residual_jacobian_omega_var[VolumeJunction1Phase::RHOEV_INDEX](0, 0) -= dS_energy_domega;
 
     const RealVectorValue rhovelV_index(VolumeJunction1Phase::RHOUV_INDEX,
@@ -293,6 +303,7 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     _torque += _hydraulic_torque + _friction_torque;
     _torque_jacobian_omega_var(0, 0) = dtau_hyd_domega + dtau_fr_domega;
     _torque_jacobian_scalar_vars.zero();
+    _torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX) = dtau_hyd_drhoV;
 
     _moi_jacobian_omega_var(0, 0) = dmoi_domega;
     _moi_jacobian_scalar_vars.zero();
