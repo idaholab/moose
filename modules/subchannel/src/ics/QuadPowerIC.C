@@ -1,14 +1,14 @@
-#include "PowerIC.h"
+#include "QuadPowerIC.h"
 #include "Function.h"
 #include "QuadSubChannelMesh.h"
 
 using namespace std;
 using namespace Eigen;
 
-registerMooseObject("SubChannelApp", PowerIC);
+registerMooseObject("SubChannelApp", QuadPowerIC);
 
 InputParameters
-PowerIC::validParams()
+QuadPowerIC::validParams()
 {
   InputParameters params = QuadSubChannelBaseIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
@@ -23,7 +23,7 @@ PowerIC::validParams()
   return params;
 }
 
-PowerIC::PowerIC(const InputParameters & params)
+QuadPowerIC::QuadPowerIC(const InputParameters & params)
   : QuadSubChannelBaseIC(params),
     _power(getParam<Real>("power")),
     _numberoflines(0),
@@ -76,7 +76,7 @@ PowerIC::PowerIC(const InputParameters & params)
 }
 
 void
-PowerIC::initialSetup()
+QuadPowerIC::initialSetup()
 {
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
@@ -111,7 +111,7 @@ PowerIC::initialSetup()
 }
 
 Real
-PowerIC::value(const Point & p)
+QuadPowerIC::value(const Point & p)
 {
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
