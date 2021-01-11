@@ -81,13 +81,16 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
     _disp_var.push_back(getVar("displacements", i));
 
   _Cijkl.zero();
-  if (_rank_two_tensor == "stress" && !isParamValid("youngs_modulus") &&
-      !isParamValid("poissons_ratio"))
-    mooseError("Both Young's modulus and Poisson's ratio must be provided for stress calculation");
-  else if (_rank_two_tensor == "stress")
+  if (_rank_two_tensor == "stress")
   {
-    _youngs_modulus = getParam<Real>("youngs_modulus");
-    _poissons_ratio = getParam<Real>("poissons_ratio");
+    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
+      mooseError(
+          "Both Young's modulus and Poisson's ratio must be provided for stress calculation");
+    else
+    {
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+      _poissons_ratio = getParam<Real>("poissons_ratio");
+    }
 
     std::vector<Real> iso_const(2);
     iso_const[0] = _youngs_modulus * _poissons_ratio /
@@ -103,12 +106,15 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
   else if (_has_temp)
     _alpha = getParam<Real>("thermal_expansion_coeff");
 
-  if (_output_type == "component" && !(isParamValid("index_i") || isParamValid("index_j")))
-    mooseError("The output_type is 'component', but no 'index_i' and 'index_j' are provided!");
-  else if (_output_type == "component")
+  if (_output_type == "component")
   {
-    _i = getParam<unsigned int>("index_i");
-    _j = getParam<unsigned int>("index_j");
+    if (!isParamValid("index_i") || !isParamValid("index_j"))
+      mooseError("The output_type is 'component', both 'index_i' and 'index_j' must be provided!");
+    else
+    {
+      _i = getParam<unsigned int>("index_i");
+      _j = getParam<unsigned int>("index_j");
+    }
   }
 
   if (_output_type == "scalar" && !isParamValid("scalar_type"))
