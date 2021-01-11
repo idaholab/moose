@@ -70,7 +70,7 @@ P_out = 14709975.0 # Pa
   []
 
   [q_prime_IC]
-    type = PowerIC
+    type = QuadPowerIC
     variable = q_prime
     power = 0.41e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile

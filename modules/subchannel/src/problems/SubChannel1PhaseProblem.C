@@ -401,7 +401,7 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
     }
     else
     {
-      // note use of trapezoidal rule concistent with axial power rate calculation (PowerIC.C)
+      // note use of trapezoidal rule concistent with axial power rate calculation (QuadPowerIC.C)
       h_out = std::pow(mdot_in, -1) *
               (mdot_in * h_in - SumWijh - SumWijPrimeDhij +
                ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0);
