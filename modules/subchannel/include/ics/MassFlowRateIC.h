@@ -3,7 +3,7 @@
 #include "InitialCondition.h"
 
 /**
- * Computes mass float rate from specifiec mass flux and cross-sectional area
+ * Computes mass float rate from specified mass flux and cross-sectional area
  */
 class MassFlowRateIC : public InitialCondition
 {
