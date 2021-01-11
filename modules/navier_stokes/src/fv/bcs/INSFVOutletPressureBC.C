@@ -15,13 +15,13 @@ registerMooseObject("NavierStokesApp", INSFVOutletPressureBC);
 InputParameters
 INSFVOutletPressureBC::validParams()
 {
-  InputParameters params = FVDirichletBC::validParams();
+  InputParameters params = FVFunctionDirichletBC::validParams();
   params += INSFVFullyDevelopedFlowBC::validParams();
   return params;
 }
 
 INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
-  : FVDirichletBC(params), INSFVFullyDevelopedFlowBC(params)
+  : FVFunctionDirichletBC(params), INSFVFullyDevelopedFlowBC(params)
 {
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
     paramError(
