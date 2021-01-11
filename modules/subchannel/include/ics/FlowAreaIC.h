@@ -1,12 +1,12 @@
 #pragma once
 
-#include "SubChannelBaseIC.h"
+#include "QuadSubChannelBaseIC.h"
 #include "QuadSubChannelMesh.h"
 
 /**
  * This class calculates the area of the subchannel
  */
-class FlowAreaIC : public SubChannelBaseIC
+class FlowAreaIC : public QuadSubChannelBaseIC
 {
 public:
   FlowAreaIC(const InputParameters & params);

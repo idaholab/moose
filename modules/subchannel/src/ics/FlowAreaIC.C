@@ -5,11 +5,11 @@ registerMooseObject("SubChannelApp", FlowAreaIC);
 InputParameters
 FlowAreaIC::validParams()
 {
-  InputParameters params = SubChannelBaseIC::validParams();
+  InputParameters params = QuadSubChannelBaseIC::validParams();
   return params;
 }
 
-FlowAreaIC::FlowAreaIC(const InputParameters & params) : SubChannelBaseIC(params) {}
+FlowAreaIC::FlowAreaIC(const InputParameters & params) : QuadSubChannelBaseIC(params) {}
 
 Real
 FlowAreaIC::value(const Point & p)

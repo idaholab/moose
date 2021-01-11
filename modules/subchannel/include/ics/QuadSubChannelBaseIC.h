@@ -5,12 +5,12 @@
 class QuadSubChannelMesh;
 
 /**
- * An abstract class for ICs
+ * An abstract class for ICs for quadrilateral subchannels
  */
-class SubChannelBaseIC : public InitialCondition
+class QuadSubChannelBaseIC : public InitialCondition
 {
 public:
-  SubChannelBaseIC(const InputParameters & params);
+  QuadSubChannelBaseIC(const InputParameters & params);
 
 protected:
   QuadSubChannelMesh & _mesh;

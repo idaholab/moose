@@ -10,7 +10,7 @@ registerMooseObject("SubChannelApp", PowerIC);
 InputParameters
 PowerIC::validParams()
 {
-  InputParameters params = SubChannelBaseIC::validParams();
+  InputParameters params = QuadSubChannelBaseIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
   params.addRequiredParam<std::string>(
       "filename",
@@ -24,7 +24,7 @@ PowerIC::validParams()
 }
 
 PowerIC::PowerIC(const InputParameters & params)
-  : SubChannelBaseIC(params),
+  : QuadSubChannelBaseIC(params),
     _power(getParam<Real>("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
