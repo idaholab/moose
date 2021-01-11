@@ -128,7 +128,7 @@ TriPowerIC::value(const Point & p)
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
   Real sum = 0.0;
-  if (subch_type == ETriChannelType::CENTER)
+  if (subch_type == EChannelType::CENTER)
   {
     for (unsigned int j = 0; j < 3; j++)
     {
@@ -138,7 +138,7 @@ TriPowerIC::value(const Point & p)
     }
     return sum;
   }
-  else if (subch_type == ETriChannelType::EDGE)
+  else if (subch_type == EChannelType::EDGE)
   {
     for (unsigned int j = 0; j < 2; j++)
     {
@@ -148,7 +148,7 @@ TriPowerIC::value(const Point & p)
     }
     return sum;
   }
-  else if (subch_type == ETriChannelType::CORNER)
+  else if (subch_type == EChannelType::CORNER)
   {
     auto rod_idx = _mesh.getRodIndex(i, 0);
     sum = 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *

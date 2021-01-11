@@ -17,26 +17,16 @@ FlowAreaIC::value(const Point & p)
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
   auto gap = _mesh.getGap();
-  auto nx = _mesh.getNx();
-  auto ny = _mesh.getNy();
 
   // Compute the flow area for a standard channel (one that touches 4 pins).
   auto rod_area = 0.25 * M_PI * rod_diameter * rod_diameter;
   auto standard_area = pitch * pitch - rod_area;
 
-  // Determine which channel this point is in and if that channel lies at an edge or corner of the
-  // assembly.
-  auto inds = _mesh.getSubchannelIndexFromPoint(p);
-  auto i = inds.first;
-  auto j = inds.second;
-  bool is_corner = (i == 0 && j == 0) || (i == nx - 1 && j == 0) || (i == 0 && j == ny - 1) ||
-                   (i == nx - 1 && j == ny - 1);
-  bool is_edge = (i == 0 || j == 0 || i == nx - 1 || j == ny - 1);
-
-  // Compute and return the channel area.
-  if (is_corner)
+  auto i = _mesh.getSubchannelIndexFromPoint(p);
+  auto subch_type = _mesh.getSubchannelType(i);
+  if (subch_type == EChannelType::CORNER)
     return standard_area * 0.25 + pitch * gap + gap * gap;
-  else if (is_edge)
+  else if (subch_type == EChannelType::EDGE)
     return standard_area * 0.5 + pitch * gap;
   else
     return standard_area;

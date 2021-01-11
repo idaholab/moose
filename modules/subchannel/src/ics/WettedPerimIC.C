@@ -18,23 +18,16 @@ WettedPerimIC::value(const Point & p)
   auto pitch = _mesh.getPitch();
   auto rod_diameter = _mesh.getRodDiameter();
   auto gap = _mesh.getGap();
-  auto nx = _mesh.getNx();
-  auto ny = _mesh.getNy();
   auto rod_circumference = M_PI * rod_diameter;
 
   // Determine which channel this point is in and if that channel lies at an
   // edge or corner of the assembly.
-  auto inds = _mesh.getSubchannelIndexFromPoint(p);
-  auto i = inds.first;
-  auto j = inds.second;
-  bool is_corner = (i == 0 && j == 0) || (i == nx - 1 && j == 0) || (i == 0 && j == ny - 1) ||
-                   (i == nx - 1 && j == ny - 1);
-  bool is_edge = (i == 0 || j == 0 || i == nx - 1 || j == ny - 1);
-
+  auto i = _mesh.getSubchannelIndexFromPoint(p);
+  auto subch_type = _mesh.getSubchannelType(i);
   // Compute and return the wetted perimeter.
-  if (is_corner)
+  if (subch_type == EChannelType::CORNER)
     return 0.25 * rod_circumference + pitch + 2 * gap;
-  else if (is_edge)
+  else if (subch_type == EChannelType::EDGE)
     return 0.5 * rod_circumference + pitch;
   else
     return rod_circumference;

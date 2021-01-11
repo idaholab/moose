@@ -170,7 +170,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
             0.5 * (_rod_position[_rods_in_rings[i][j]][1] + _rod_position[_rods_in_rings[i][0]][1]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][0]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
-        _gap_type[kgap] = ETriChannelType::CENTER;
+        _gap_type[kgap] = EChannelType::CENTER;
         kgap = kgap + 1;
       }
       else
@@ -183,7 +183,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
                             _rod_position[_rods_in_rings[i][j + 1]][1]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j + 1]);
-        _gap_type[kgap] = ETriChannelType::CENTER;
+        _gap_type[kgap] = EChannelType::CENTER;
         kgap = kgap + 1;
       }
 
@@ -207,9 +207,9 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
       _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
       _gap_to_rod_map[kgap].push_back(_rods_in_rings[i - 1][l0]);
-      _gap_type[kgap] = ETriChannelType::CENTER;
+      _gap_type[kgap] = EChannelType::CENTER;
       kgap = kgap + 1;
-      _subch_type[k] = ETriChannelType::CENTER;
+      _subch_type[k] = EChannelType::CENTER;
       k = k + 1;
 
     } // for j
@@ -241,10 +241,10 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       if (i == _nrings - 1)
       {
         // add  edges
-        _subch_type[k] = ETriChannelType::EDGE; // an edge subchannel is created
+        _subch_type[k] = EChannelType::EDGE; // an edge subchannel is created
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
-        _gap_type[kgap] = ETriChannelType::EDGE;
+        _gap_type[kgap] = EChannelType::EDGE;
         _chan_to_gap_map[k].push_back(kgap);
         kgap = kgap + 1;
         k = k + 1;
@@ -254,7 +254,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
           // generate a corner subchannel, generate the additional gap and fix chan_to_gap_map
           _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
           _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
-          _gap_type[kgap] = ETriChannelType::CORNER;
+          _gap_type[kgap] = EChannelType::CORNER;
 
           // corner subchannel
           _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
@@ -262,7 +262,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
           _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
           _chan_to_gap_map[k].push_back(kgap - 1);
           _chan_to_gap_map[k].push_back(kgap);
-          _subch_type[k] = ETriChannelType::CORNER;
+          _subch_type[k] = EChannelType::CORNER;
 
           kgap = kgap + 1;
           k = k + 1;
@@ -288,9 +288,9 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i + 1][l0]);
-        _gap_type[kgap] = ETriChannelType::CENTER;
+        _gap_type[kgap] = EChannelType::CENTER;
         kgap = kgap + 1;
-        _subch_type[k] = ETriChannelType::CENTER;
+        _subch_type[k] = EChannelType::CENTER;
         k = k + 1;
       } // if
     }   // for j
@@ -300,11 +300,11 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    if (_subch_type[i] == ETriChannelType::CENTER)
+    if (_subch_type[i] == EChannelType::CENTER)
     {
       for (unsigned int j = 0; j < _n_gaps; j++)
       {
-        if (_gap_type[j] == ETriChannelType::CENTER)
+        if (_gap_type[j] == EChannelType::CENTER)
         {
           if (((_subchannel_to_rod_map[i][0] == _gap_to_rod_map[j][0]) &&
                (_subchannel_to_rod_map[i][1] == _gap_to_rod_map[j][1])) ||
@@ -332,11 +332,11 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         }
       } // for j
     }
-    else if (_subch_type[i] == ETriChannelType::EDGE)
+    else if (_subch_type[i] == EChannelType::EDGE)
     {
       for (unsigned int j = 0; j < _n_gaps; j++)
       {
-        if (_gap_type[j] == ETriChannelType::CENTER)
+        if (_gap_type[j] == EChannelType::CENTER)
         {
           if (((_subchannel_to_rod_map[i][0] == _gap_to_rod_map[j][0]) &&
                (_subchannel_to_rod_map[i][1] == _gap_to_rod_map[j][1])) ||
@@ -353,7 +353,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       icorner = 0;
       for (unsigned int k = 0; k < _n_channels; k++)
       {
-        if (_subch_type[k] == ETriChannelType::CORNER &&
+        if (_subch_type[k] == EChannelType::CORNER &&
             _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[k][0])
         {
           _chan_to_gap_map[i].push_back(_chan_to_gap_map[k][1]);
@@ -364,7 +364,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
       for (unsigned int k = 0; k < _n_channels; k++)
       {
-        if (_subch_type[k] == ETriChannelType::CORNER &&
+        if (_subch_type[k] == EChannelType::CORNER &&
             _subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[k][0])
         {
           _chan_to_gap_map[i].push_back(_chan_to_gap_map[k][1] + 1);
@@ -386,7 +386,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   {
     for (unsigned int i = 0; i < _n_channels; i++)
     {
-      if (_subch_type[i] == ETriChannelType::CENTER || _subch_type[i] == ETriChannelType::EDGE)
+      if (_subch_type[i] == EChannelType::CENTER || _subch_type[i] == EChannelType::EDGE)
       {
         if ((j == _chan_to_gap_map[i][0]) || (j == _chan_to_gap_map[i][1]) ||
             (j == _chan_to_gap_map[i][2]))
@@ -404,7 +404,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
           }
         }
       }
-      else if (_subch_type[i] == ETriChannelType::CORNER)
+      else if (_subch_type[i] == EChannelType::CORNER)
       {
         if ((j == _chan_to_gap_map[i][0]) || (j == _chan_to_gap_map[i][1]))
         {
@@ -428,18 +428,18 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
   for (unsigned int j = 0; j < _n_gaps; j++)
   {
-    if (_gap_type[j] == ETriChannelType::CENTER)
+    if (_gap_type[j] == EChannelType::CENTER)
     {
       _gij_map[j] = _pitch - _rod_diameter;
     }
-    else if (_gap_type[j] == ETriChannelType::EDGE || _gap_type[j] == ETriChannelType::CORNER)
+    else if (_gap_type[j] == EChannelType::EDGE || _gap_type[j] == EChannelType::CORNER)
     {
       _gij_map[j] = _duct_to_rod_gap;
     }
   }
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    if (_subch_type[i] == ETriChannelType::CENTER || _subch_type[i] == ETriChannelType::EDGE)
+    if (_subch_type[i] == EChannelType::CENTER || _subch_type[i] == EChannelType::EDGE)
     {
       for (unsigned int k = 0; k < 3; k++)
       {
@@ -470,7 +470,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         } // j
       }   // k
     }
-    else if (_subch_type[i] == ETriChannelType::CORNER)
+    else if (_subch_type[i] == EChannelType::CORNER)
     {
       for (unsigned int k = 0; k < 2; k++)
       {
@@ -506,7 +506,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   // set the subchannel positions
   for (unsigned int i = 0; i < _n_channels; i++)
   {
-    if (_subch_type[i] == ETriChannelType::CENTER)
+    if (_subch_type[i] == EChannelType::CENTER)
     {
       _subchannel_position[i][0] = (_rod_position[_subchannel_to_rod_map[i][0]][0] +
                                     _rod_position[_subchannel_to_rod_map[i][1]][0] +
@@ -517,11 +517,11 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
                                     _rod_position[_subchannel_to_rod_map[i][2]][1]) /
                                    3.0;
     }
-    else if (_subch_type[i] == ETriChannelType::EDGE)
+    else if (_subch_type[i] == EChannelType::EDGE)
     {
       for (unsigned int j = 0; j < _n_channels; j++)
       {
-        if (_subch_type[j] == ETriChannelType::CENTER &&
+        if (_subch_type[j] == EChannelType::CENTER &&
             ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][0] &&
               _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][1]) ||
              (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
@@ -530,7 +530,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
           x0 = _rod_position[_subchannel_to_rod_map[j][2]][0];
           y0 = _rod_position[_subchannel_to_rod_map[j][2]][1];
         }
-        else if (_subch_type[j] == ETriChannelType::CENTER &&
+        else if (_subch_type[j] == EChannelType::CENTER &&
                  ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][0] &&
                    _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][2]) ||
                   (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
@@ -539,7 +539,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
           x0 = _rod_position[_subchannel_to_rod_map[j][1]][0];
           y0 = _rod_position[_subchannel_to_rod_map[j][1]][1];
         }
-        else if (_subch_type[j] == ETriChannelType::CENTER &&
+        else if (_subch_type[j] == EChannelType::CENTER &&
                  ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
                    _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][2]) ||
                   (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
@@ -558,7 +558,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
       } // j
     }
-    else if (_subch_type[i] == ETriChannelType::CORNER)
+    else if (_subch_type[i] == EChannelType::CORNER)
     {
       x0 = _rod_position[0][0];
       y0 = _rod_position[0][1];
