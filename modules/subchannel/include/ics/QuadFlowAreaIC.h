@@ -4,12 +4,12 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * This class calculates the area of the subchannel
+ * This class calculates the cross-sectional flow area of the quadrilateral subchannel
  */
-class FlowAreaIC : public QuadSubChannelBaseIC
+class QuadFlowAreaIC : public QuadSubChannelBaseIC
 {
 public:
-  FlowAreaIC(const InputParameters & params);
+  QuadFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
 
 public:
