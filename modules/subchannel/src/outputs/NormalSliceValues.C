@@ -21,7 +21,7 @@ NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
     _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
-  _exitValue.resize(_mesh._ny, _mesh._nx);
+  _exitValue.resize(_mesh.getNy(), _mesh.getNx());
 }
 
 void
@@ -29,44 +29,49 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
 {
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
 
-  if (_height >= _mesh._heated_length)
+  auto nodes = _mesh.getNodes();
+  auto nz = _mesh.getNumOfAxialNodes();
+  auto z_grid = _mesh.getZGrid();
+  auto n_channels = _mesh.getNumOfChannels();
+
+  if (_height >= _mesh.getHeatedLength())
   {
-    for (unsigned int i_ch = 0; i_ch < _mesh._n_channels; i_ch++)
+    for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
     {
-      auto * node = _mesh._nodes[i_ch][_mesh._nz];
-      unsigned int i = (i_ch / _mesh._nx);   // row
-      unsigned int j = i_ch - i * _mesh._nx; // column
+      auto * node = nodes[i_ch][nz];
+      unsigned int i = (i_ch / _mesh.getNx());   // row
+      unsigned int j = i_ch - i * _mesh.getNx(); // column
       _exitValue(i, j) = val_soln(node);
     }
   }
   else
   {
-    for (unsigned int iz = 0; iz < _mesh._nz + 1; iz++)
+    for (unsigned int iz = 0; iz < nz + 1; iz++)
     {
-      if (_height > _mesh._z_grid[iz])
+      if (_height > z_grid[iz])
         ;
-      else if (std::fabs(_height - _mesh._z_grid[iz]) < 1e-6)
+      else if (std::fabs(_height - z_grid[iz]) < 1e-6)
       {
-        for (unsigned int i_ch = 0; i_ch < _mesh._n_channels; i_ch++)
+        for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {
-          auto * node = _mesh._nodes[i_ch][iz];
-          unsigned int i = (i_ch / _mesh._nx);   // row
-          unsigned int j = i_ch - i * _mesh._nx; // column
+          auto * node = nodes[i_ch][iz];
+          unsigned int i = (i_ch / _mesh.getNx());   // row
+          unsigned int j = i_ch - i * _mesh.getNx(); // column
           _exitValue(i, j) = val_soln(node);
         }
         break;
       }
       else
       {
-        for (unsigned int i_ch = 0; i_ch < _mesh._n_channels; i_ch++)
+        for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {
-          auto * node_out = _mesh._nodes[i_ch][iz];
-          auto * node_in = _mesh._nodes[i_ch][iz - 1];
-          unsigned int i = (i_ch / _mesh._nx);   // row
-          unsigned int j = i_ch - i * _mesh._nx; // column
+          auto * node_out = nodes[i_ch][iz];
+          auto * node_in = nodes[i_ch][iz - 1];
+          unsigned int i = (i_ch / _mesh.getNx());   // row
+          unsigned int j = i_ch - i * _mesh.getNx(); // column
           _exitValue(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *
-                                                     (_height - _mesh._z_grid[iz - 1]) /
-                                                     (_mesh._z_grid[iz] - _mesh._z_grid[iz - 1]);
+                                                     (_height - z_grid[iz - 1]) /
+                                                     (z_grid[iz] - z_grid[iz - 1]);
         }
         break;
       }

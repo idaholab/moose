@@ -10,64 +10,25 @@ registerMooseObject("SubChannelApp", SubChannelMesh);
 InputParameters
 SubChannelMesh::validParams()
 {
-  InputParameters params = MooseMesh::validParams();
-  params.set<MooseEnum>("dim") = "3";
+  InputParameters params = SubChannelMeshBase::validParams();
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
-  params.addRequiredParam<Real>("max_dz", "The maximum element height [m]");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
-  params.addRequiredParam<Real>("heated_length", "Heated length [m]");
-  params.addRequiredParam<std::vector<Real>>("spacer_z",
-                                             "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addRequiredParam<std::vector<Real>>(
-      "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   return params;
 }
 
 SubChannelMesh::SubChannelMesh(const InputParameters & params)
-  : MooseMesh(params),
+  : SubChannelMeshBase(params),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _n_channels(_nx * _ny),
     _n_gaps((_nx - 1) * _ny + (_ny - 1) * _nx),
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
-    _gap(getParam<Real>("gap")),
-    _heated_length(getParam<Real>("heated_length")),
-    _spacer_z(getParam<std::vector<Real>>("spacer_z")),
-    _spacer_k(getParam<std::vector<Real>>("spacer_k")),
-    _max_dz(getParam<Real>("max_dz"))
+    _gap(getParam<Real>("gap"))
 {
-
-  // Define the node placement along the z-axis.
-  std::vector<Real> block_sizes;
-  if (_spacer_z.size() > 0 && _spacer_z[0] != 0)
-  {
-    block_sizes.push_back(_spacer_z[0]);
-  }
-  for (unsigned int i = 1; i < _spacer_z.size(); i++)
-  {
-    block_sizes.push_back(_spacer_z[i] - _spacer_z[i - 1]);
-  }
-  constexpr Real GRID_TOL = 1e-4;
-  if (_spacer_z.size() > 0 && _spacer_z.back() < _heated_length - GRID_TOL)
-  {
-    block_sizes.push_back(_heated_length - _spacer_z.back());
-  }
-  _z_grid.push_back(0.0);
-  for (auto block_size : block_sizes)
-  {
-    int n = 1;
-    while (n * _max_dz < block_size)
-      ++n;
-    Real dz = block_size / n;
-    for (int i = 0; i < n; i++)
-      _z_grid.push_back(_z_grid.back() + dz);
-  }
-  _nz = _z_grid.size() - 1;
-
   // Resize the gap-to-channel and channel-to-gap maps.
   _gap_to_chan_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
@@ -140,26 +101,20 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
 }
 
 SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
-  : MooseMesh(other_mesh),
+  : SubChannelMeshBase(other_mesh),
     _nx(other_mesh._nx),
     _ny(other_mesh._ny),
-    _nz(other_mesh._nz),
     _n_channels(other_mesh._n_channels),
     _n_gaps(other_mesh._n_gaps),
     _pitch(other_mesh._pitch),
     _rod_diameter(other_mesh._rod_diameter),
     _gap(other_mesh._gap),
-    _heated_length(other_mesh._heated_length),
-    _z_grid(other_mesh._z_grid),
-    _spacer_z(other_mesh._spacer_z),
-    _spacer_k(other_mesh._spacer_k),
     _nodes(other_mesh._nodes),
     _gapnodes(other_mesh._gapnodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
     _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
-    _gij_map(other_mesh._gij_map),
-    _max_dz(other_mesh._max_dz)
+    _gij_map(other_mesh._gij_map)
 {
 }
 
@@ -228,4 +183,12 @@ SubChannelMesh::buildMesh()
   boundary_info.nodeset_name(0) = "inlet";
   boundary_info.nodeset_name(1) = "outlet";
   mesh.prepare_for_use();
+}
+
+std::pair<unsigned int, unsigned int>
+SubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
+{
+  unsigned int i = (p(0) + 0.5 * _pitch) / _pitch;
+  unsigned int j = (p(1) + 0.5 * _pitch) / _pitch;
+  return {i, j};
 }

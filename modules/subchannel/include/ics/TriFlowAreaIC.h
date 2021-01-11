@@ -14,9 +14,6 @@ public:
   TriFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
 
-protected:
-  TriSubChannelMesh & _mesh;
-
 public:
   static InputParameters validParams();
 };

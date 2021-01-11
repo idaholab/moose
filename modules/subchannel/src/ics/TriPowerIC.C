@@ -22,18 +22,19 @@ TriPowerIC::validParams()
 
 TriPowerIC::TriPowerIC(const InputParameters & params)
   : TriSubChannelBaseIC(params),
-    _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh())),
     _power(getParam<Real>("power")),
     _numberoflines(0),
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
-  _power_dis.resize(_mesh._nrods);
-  _pin_power_correction.resize(_mesh._nrods);
-  _ref_power.resize(_mesh._nrods);
-  _ref_qprime.resize(_mesh._nrods);
-  _estimate_power.resize(_mesh._nrods);
-  for (unsigned int i = 0; i < _mesh._nrods; i++)
+  auto n_rods = _mesh.getNumOfRods();
+
+  _power_dis.resize(n_rods);
+  _pin_power_correction.resize(n_rods);
+  _ref_power.resize(n_rods);
+  _ref_qprime.resize(n_rods);
+  _estimate_power.resize(n_rods);
+  for (unsigned int i = 0; i < n_rods; i++)
   {
     _power_dis[i] = 0.0;
     _pin_power_correction[i] = 1.0;
@@ -52,8 +53,8 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
   if (inFile.fail() && !inFile.eof())
     mooseError(name(), ": Non numerical input at line: ", _numberoflines);
 
-  if (_numberoflines != _mesh._nrods)
-    mooseError(name(), ": Radial profile file doesn't have correct size: ", _mesh._nrods);
+  if (_numberoflines != n_rods)
+    mooseError(name(), ": Radial profile file doesn't have correct size: ", n_rods);
   inFile.close();
 
   inFile.open(_filename);
@@ -66,22 +67,22 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
   inFile.close();
   Real sum = 0.0;
 
-  for (unsigned int i = 0; i < _mesh._nrods; i++)
+  for (unsigned int i = 0; i < n_rods; i++)
   {
     sum = sum + _power_dis[i];
   }
   // full pin (100%) power of one pin [W]
   auto fpin_power = _power / sum;
   // actual pin power [W]
-  for (unsigned int i = 0; i < _mesh._nrods; i++)
+  for (unsigned int i = 0; i < n_rods; i++)
   {
     _ref_power[i] = _power_dis[i] * fpin_power;
   }
 
   // Convert the actual pin power to a linear heat rate [W/m]
-  auto heated_length = _mesh._heated_length;
+  auto heated_length = _mesh.getHeatedLength();
 
-  for (unsigned int i = 0; i < _mesh._nrods; i++)
+  for (unsigned int i = 0; i < n_rods; i++)
   {
     _ref_qprime[i] = _ref_power[i] / heated_length;
   }
@@ -90,19 +91,23 @@ TriPowerIC::TriPowerIC(const InputParameters & params)
 void
 TriPowerIC::initialSetup()
 {
-  _estimate_power.resize(_mesh._nrods);
+  auto n_rods = _mesh.getNumOfRods();
+  auto nz = _mesh.getNumOfAxialNodes();
+  auto z_grid = _mesh.getZGrid();
 
-  for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++)
+  _estimate_power.resize(n_rods);
+
+  for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
     // Compute the height of this element.
-    auto dz = _mesh._z_grid[iz] - _mesh._z_grid[iz - 1];
+    auto dz = z_grid[iz] - z_grid[iz - 1];
     // Compute axial location of nodes.
-    auto z2 = _mesh._z_grid[iz];
-    auto z1 = _mesh._z_grid[iz - 1];
+    auto z2 = z_grid[iz];
+    auto z1 = z_grid[iz - 1];
     Point p1(0, 0, z1);
     Point p2(0, 0, z2);
     // cycle through pins
-    for (unsigned int i_pin = 0; i_pin < _mesh._nrods; i_pin++)
+    for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
     {
       // use of trapezoidal rule  to calculate local power
       _estimate_power[i_pin] += _ref_qprime[i_pin] *
@@ -110,7 +115,7 @@ TriPowerIC::initialSetup()
                                 dz / 2.0;
     }
   }
-  for (unsigned int i_pin = 0; i_pin < _mesh._nrods; i_pin++)
+  for (unsigned int i_pin = 0; i_pin < n_rods; i_pin++)
   {
     _pin_power_correction[i_pin] = _ref_power[i_pin] / _estimate_power[i_pin];
   }
@@ -120,32 +125,34 @@ Real
 TriPowerIC::value(const Point & p)
 {
   // Determine which subchannel this point is in.
-  auto i = index_point(p);
+  auto i = _mesh.getSubchannelIndexFromPoint(p);
+  auto subch_type = _mesh.getSubchannelType(i);
   Real sum = 0.0;
-  if (_mesh._subch_type[i] == TriSubChannelMesh::CENTER)
+  if (subch_type == ETriChannelType::CENTER)
   {
     for (unsigned int j = 0; j < 3; j++)
     {
-      sum = sum + 1.0 / 6.0 * _ref_qprime[_mesh._subchannel_to_rod_map[i][j]] *
-                      _pin_power_correction[_mesh._subchannel_to_rod_map[i][j]] *
+      auto rod_idx = _mesh.getRodIndex(i, j);
+      sum = sum + 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
                       _axial_heat_rate.value(_t, p);
     }
     return sum;
   }
-  else if (_mesh._subch_type[i] == TriSubChannelMesh::EDGE)
+  else if (subch_type == ETriChannelType::EDGE)
   {
     for (unsigned int j = 0; j < 2; j++)
     {
-      sum = sum + 1.0 / 4.0 * _ref_qprime[_mesh._subchannel_to_rod_map[i][j]] *
-                      _pin_power_correction[_mesh._subchannel_to_rod_map[i][j]] *
+      auto rod_idx = _mesh.getRodIndex(i, j);
+      sum = sum + 1.0 / 4.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
                       _axial_heat_rate.value(_t, p);
     }
     return sum;
   }
-  else if (_mesh._subch_type[i] == TriSubChannelMesh::CORNER)
+  else if (subch_type == ETriChannelType::CORNER)
   {
-    sum = 1.0 / 6.0 * _ref_qprime[_mesh._subchannel_to_rod_map[i][0]] *
-          _pin_power_correction[_mesh._subchannel_to_rod_map[i][0]] * _axial_heat_rate.value(_t, p);
+    auto rod_idx = _mesh.getRodIndex(i, 0);
+    sum = 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
+          _axial_heat_rate.value(_t, p);
     return sum;
   }
 

@@ -9,31 +9,29 @@ TriWettedPerimIC::validParams()
   return TriSubChannelBaseIC::validParams();
 }
 
-TriWettedPerimIC::TriWettedPerimIC(const InputParameters & params)
-  : TriSubChannelBaseIC(params), _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh()))
-{
-}
+TriWettedPerimIC::TriWettedPerimIC(const InputParameters & params) : TriSubChannelBaseIC(params) {}
 
 Real
 TriWettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
-  auto pitch = _mesh._pitch;
-  auto rod_diameter = _mesh._rod_diameter;
+  auto pitch = _mesh.getPitch();
+  auto rod_diameter = _mesh.getRodDiameter();
   auto wire_diameter = pitch - rod_diameter;
   auto rod_circumference = libMesh::pi * rod_diameter;
   auto wire_circumference = libMesh::pi * wire_diameter;
-  auto gap = _mesh._duct_to_rod_gap;
+  auto gap = _mesh.getDuctToRodGap();
 
   // given the channel number, i, it computes the wetted perimeter of
   // the subchannel based on the subchannel type: CENTER, EDGE or CORNER.
-  auto i = index_point(p);
+  auto i = _mesh.getSubchannelIndexFromPoint(p);
+  auto subch_type = _mesh.getSubchannelType(i);
 
-  if (_mesh._subch_type[i] == TriSubChannelMesh::CENTER)
+  if (subch_type == ETriChannelType::CENTER)
   {
     return 0.5 * rod_circumference + 0.5 * wire_circumference;
   }
-  else if (_mesh._subch_type[i] == TriSubChannelMesh::EDGE)
+  else if (subch_type == ETriChannelType::EDGE)
   {
     return 0.5 * rod_circumference + 0.5 * wire_circumference + pitch;
   }
