@@ -1,0 +1,9 @@
+# Website
+
+cd projects/modules
+make -j50
+
+cd doc
+./moosedocs.py build --serve --fast # the fast will help things while you are writing
+
+http://127.0.0.1:8000/getting_started/examples_and_tutorials/tutorial02_multiapps/index.html
