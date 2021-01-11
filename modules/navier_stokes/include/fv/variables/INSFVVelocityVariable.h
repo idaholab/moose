@@ -21,17 +21,8 @@ public:
 
   static InputParameters validParams();
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   using INSFVVariable::adGradSln;
   const VectorValue<ADReal> & adGradSln(const Elem * const elem) const override;
-
-protected:
-  bool isDirichletBoundaryFace(const FaceInfo & fi) const override;
-
-  const ADReal & getDirichletBoundaryFaceValue(const FaceInfo & fi) const override;
-
-  /**
-   * @return a pair with the first item indicating whether there is a no slip wall bc for the
-   * passed-in \p fi and the second item pointing to the corresponding bc object if true
-   */
-  std::pair<bool, const INSFVNoSlipWallBC *> getNoSlipWallBC(const FaceInfo & fi) const;
+#endif
 };

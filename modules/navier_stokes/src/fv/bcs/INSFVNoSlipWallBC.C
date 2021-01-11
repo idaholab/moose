@@ -20,96 +20,16 @@ registerMooseObject("NavierStokesApp", INSFVNoSlipWallBC);
 InputParameters
 INSFVNoSlipWallBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
-  params.addClassDescription(
-      "Implements a free slip boundary condition using a penalty formulation.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", 0, "The velocity in the y direction.");
-  params.addCoupledVar("w", 0, "The velocity in the z direction.");
-  MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addRequiredParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this BC applies to.");
-  params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
-  params.addRequiredParam<FunctionName>("u_wall", "The wall velocity in the x-direction.");
-  params.addParam<FunctionName>("v_wall", 0, "The wall velocity in the y-direction.");
-  params.addParam<FunctionName>("w_wall", 0, "The wall velocity in the z-direction.");
+  InputParameters params = FVFunctionDirichletBC::validParams();
+  params.addClassDescription("Implements a no slip boundary condition.");
   return params;
 }
 
-INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params)
-  : FVFluxBC(params),
-    _u_elem(adCoupledValue("u")),
-    _v_elem(adCoupledValue("v")),
-    _w_elem(adCoupledValue("w")),
-    _u_neighbor(adCoupledNeighborValue("u")),
-    _v_neighbor(adCoupledNeighborValue("v")),
-    _w_neighbor(adCoupledNeighborValue("w")),
-    _comp(getParam<MooseEnum>("momentum_component")),
-    _mu_elem(getADMaterialProperty<Real>("mu")),
-    _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _dim(_subproblem.mesh().dimension()),
-    _u_wall(getFunction("u_wall")),
-    _v_wall(getFunction("v_wall")),
-    _w_wall(getFunction("w_wall"))
+INSFVNoSlipWallBC::INSFVNoSlipWallBC(const InputParameters & params) : FVFunctionDirichletBC(params)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-}
-
-ADReal
-INSFVNoSlipWallBC::computeQpResidual()
-{
-  const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-  const Point & cell_centroid =
-      use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const auto & u_C = use_elem ? _u_elem : _u_neighbor;
-  const auto & v_C = use_elem ? _v_elem : _v_neighbor;
-  const auto & w_C = use_elem ? _w_elem : _w_neighbor;
-
-  // FIXME: interpolate mu to the boundary
-  const auto & mu_b = use_elem ? _mu_elem : _mu_neighbor;
-
-  const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
-
-  // See Moukalled 15.123. Recall that we multiply by the area in the base class, so S_b ->
-  // _normal.norm() here
-
-  std::vector<ADReal> delta_vel;
-  delta_vel.push_back((u_C[_qp] - _u_wall.value(_t, _face_info->faceCentroid())));
-  ADReal delta_vel_dot_n = delta_vel[0] * _normal(0);
-  if (_dim > 1)
-  {
-    delta_vel.push_back((v_C[_qp] - _v_wall.value(_t, _face_info->faceCentroid())));
-    delta_vel_dot_n += delta_vel[1] * _normal(1);
-  }
-  if (_dim > 2)
-  {
-    delta_vel.push_back((w_C[_qp] - _w_wall.value(_t, _face_info->faceCentroid())));
-    delta_vel_dot_n += delta_vel[2] * _normal(2);
-  }
-
-  return mu_b[_qp] * _normal.norm() / d_perpendicular *
-         (delta_vel[_comp] - delta_vel_dot_n * _normal(_comp));
-  ;
-}
-
-Real
-INSFVNoSlipWallBC::boundaryValue(const FaceInfo & fi) const
-{
-  switch (_comp)
-  {
-    case 0:
-      return _u_wall.value(_t, fi.faceCentroid());
-    case 1:
-      return _v_wall.value(_t, fi.faceCentroid());
-    case 2:
-      return _w_wall.value(_t, fi.faceCentroid());
-    default:
-      mooseError("Unrecognized comp ", _comp);
-  }
 }

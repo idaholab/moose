@@ -249,16 +249,14 @@ INSFVMomentumAdvection::skipForBoundary(const FaceInfo & fi) const
   if (flux_pr.first)
     return true;
 
-  // If we have dirichlet bcs then we don't skip.
-  if (_var.getDirichletBC(fi).first)
-    return false;
-
-  // Finally if we have a flow boundary, we don't skip. Mass and momentum are transported via
-  // advection across boundaries
+  // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
+  // momentum are transported via advection across boundaries
   for (const auto bc_id : fi.boundaryIDs())
     if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
       return false;
 
+  // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
+  // should not contribute any advective flux
   return true;
 }
 
@@ -516,7 +514,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                 "I think some of my logic might depend on my implicit assumption that we have "
                 "one boundary ID at most per face");
     mooseAssert(_flow_boundaries.find(*_face_info->boundaryIDs().begin()) != _flow_boundaries.end(),
-                "INSFV*Advection flux kernel objects should only execute on flow boundaries");
+                "INSFV*Advection flux kernel objects should only execute on flow boundaries.");
 
     v(0) = _u_var->getBoundaryFaceValue(*_face_info);
     if (_v_var)
