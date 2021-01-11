@@ -18,7 +18,7 @@
 
 [ICs]
   [w_perim_IC]
-    type = WettedPerimIC
+    type = QuadWettedPerimIC
     variable = w_perim
   []
 []

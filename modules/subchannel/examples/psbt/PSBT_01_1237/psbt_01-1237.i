@@ -67,7 +67,7 @@ P_out = 4.923e6 # Pa
   []
 
   [w_perim_IC]
-    type = WettedPerimIC
+    type = QuadWettedPerimIC
     variable = w_perim
   []
 
