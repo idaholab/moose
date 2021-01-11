@@ -6,10 +6,10 @@ registerMooseObject("SubChannelApp", WettedPerimIC);
 InputParameters
 WettedPerimIC::validParams()
 {
-  return SubChannelBaseIC::validParams();
+  return QuadSubChannelBaseIC::validParams();
 }
 
-WettedPerimIC::WettedPerimIC(const InputParameters & params) : SubChannelBaseIC(params) {}
+WettedPerimIC::WettedPerimIC(const InputParameters & params) : QuadSubChannelBaseIC(params) {}
 
 Real
 WettedPerimIC::value(const Point & p)

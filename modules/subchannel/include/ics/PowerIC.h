@@ -1,13 +1,13 @@
 #pragma once
 
-#include "SubChannelBaseIC.h"
+#include "QuadSubChannelBaseIC.h"
 #include <Eigen/Dense>
 
 /**
  * Sets the axial heat rate for each pin according to a radial power distribution
  * and a user defined axial power shape.
  */
-class PowerIC : public SubChannelBaseIC
+class PowerIC : public QuadSubChannelBaseIC
 {
 public:
   PowerIC(const InputParameters & params);
