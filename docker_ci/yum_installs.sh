@@ -1,16 +1,14 @@
 #!/bin/bash
 
-# Enable powertools if present
-PT_REPO=/etc/yum.repos.d/CentOS-PowerTools.repo
-if [ -f $PT_REPO ]; then
-  sed -i 's|^enabled=0|enabled=1|g' $PT_REPO
-fi
+# Update package lists
+yum update -y
+
+# Enable powertools repo
+yum install -y dnf-plugins-core
+yum config-manager --set-enabled powertools
 
 # Needed for subsequent yum installs to work
 touch /var/lib/rpm/*
-
-# Update package lists
-yum update -y
 
 # Install packages
 yum install -y \
