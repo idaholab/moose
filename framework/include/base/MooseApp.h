@@ -708,11 +708,13 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+private:
   /**
    * Purge this relationship manager from meshes and DofMaps and finally from us
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+public:
   /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
@@ -974,6 +976,8 @@ protected:
   bool _check_input;
 
   std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
+
+  std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
 
   /// The library, registration method and the handle to the method
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;

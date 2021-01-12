@@ -2025,7 +2025,9 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
     mooseAssert(displaced_mesh->getMeshPtr(),
                 "The displaced mesh gets added late in the game. It should definitely have a mesh "
                 "base attached to it");
-    displaced_mesh->getMesh().remove_ghosting_functor(*rm);
+    auto it = _undisp_to_disp_rms.find(rm.get());
+    if (it != _undisp_to_disp_rms.end())
+      displaced_mesh->getMesh().remove_ghosting_functor(*it->second);
   }
 
   if (_executioner)
@@ -2034,7 +2036,11 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
     problem.removeAlgebraicGhostingFunctor(*rm);
 
     if (auto * dp = problem.getDisplacedProblem().get())
-      dp->removeAlgebraicGhostingFunctor(*rm);
+    {
+      auto it = _undisp_to_disp_rms.find(rm.get());
+      if (it != _undisp_to_disp_rms.end())
+        dp->removeAlgebraicGhostingFunctor(*it->second);
+    }
 
     auto & dof_map = problem.getNonlinearSystemBase().dofMap();
     dof_map.remove_coupling_functor(*rm);
@@ -2127,6 +2133,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
                 &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
           clone_rm->init(disp_mesh_base, disp_nl_dof_map);
           disp_mesh_base.add_ghosting_functor(clone_gf);
+          _undisp_to_disp_rms.emplace(rm.get(), clone_gf);
         }
         else if (_action_warehouse.displacedMesh())
           mooseError("The displaced mesh should not yet exist at the time that we are attaching "
@@ -2143,15 +2150,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       // Ensure that the relationship manager is initialized
       rm->init(problem.mesh().getMesh(), &undisp_nl_dof_map);
 
-      std::shared_ptr<GhostingFunctor> clone_rm = nullptr;
+      std::shared_ptr<GhostingFunctor> clone_gf = nullptr;
       if (_action_warehouse.displacedMesh())
       {
-        clone_rm = rm->clone();
+        clone_gf = rm->clone();
         const DofMap * const disp_nl_dof_map =
             problem.getDisplacedProblem()
                 ? &problem.getDisplacedProblem()->systemBaseNonlinear().dofMap()
                 : nullptr;
-        static_cast<RelationshipManager *>(clone_rm.get())
+        static_cast<RelationshipManager *>(clone_gf.get())
             ->init(_action_warehouse.displacedMesh()->getMesh(), disp_nl_dof_map);
       }
 
@@ -2164,8 +2171,11 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           undisp_nl_dof_map.add_coupling_functor(*rm, /*to_mesh = */ false);
 
         else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
-          problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_rm,
+        {
+          problem.getDisplacedProblem()->addAlgebraicGhostingFunctor(clone_gf,
                                                                      /*to_mesh = */ false);
+          _undisp_to_disp_rms.emplace(rm.get(), clone_gf);
+        }
       }
       else // undisplaced
       {
