@@ -111,22 +111,15 @@ protected:
 
 private:
   /**
-   *  @return Whether we added the \p bc_id to \p _flow_boundaries
+   * Query for \p INSFVBCs::INSFVFlowBC on \p bc_id and add if query successful
    */
-  bool setupFlowBoundaries(BoundaryID bnd_id);
+  void setupFlowBoundaries(BoundaryID bnd_id);
 
   /**
-   * @param bc_type The string identifier of the type of bc we should be querying for
-   *  @return Whether we added the \p bc_id to \p bnd_ids
+   * Query for \p INSFVBCs on \p bc_id and add if query successful
    */
   template <typename T>
-  bool setupBoundaries(const BoundaryID bnd_id, INSFVBCs bc_type, std::set<BoundaryID> & bnd_ids);
-
-  /**
-   * erases boundaries in \p bnd_ids which are actually interfaces between blocks over which we are
-   * defined
-   */
-  void eraseInterfaces(std::set<BoundaryID> & bnd_ids);
+  void setupBoundaries(const BoundaryID bnd_id, INSFVBCs bc_type, std::set<BoundaryID> & bnd_ids);
 
   /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
   /// the vector is equal to the number of threads in the simulation. We maintain a map from

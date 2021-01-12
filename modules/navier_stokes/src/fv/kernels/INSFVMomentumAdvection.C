@@ -143,39 +143,17 @@ INSFVMomentumAdvection::initialSetup()
       all_connected_boundaries.insert(bnd_id);
   }
 
-  // Ok we now have all the connected boundaries figured out, but there's an issue. Perhaps the user
-  // has multiple blocks over which our INSFV physics are defined for whatever reason. Then the
-  // interface boundary should not be considered a boundary here. We must erase it. E.g. when we are
-  // done all_connected_boundaries should only hold our INSFV physics's "true" boundaries
-  eraseInterfaces(all_connected_boundaries);
-
   for (const auto bnd_id : all_connected_boundaries)
   {
-    unsigned int bc_types_added = 0;
-    bc_types_added += setupFlowBoundaries(bnd_id);
-    bc_types_added += setupBoundaries<INSFVNoSlipWallBC>(
+    setupFlowBoundaries(bnd_id);
+    setupBoundaries<INSFVNoSlipWallBC>(
         bnd_id, INSFVBCs::INSFVNoSlipWallBC, _no_slip_wall_boundaries);
-    bc_types_added +=
-        setupBoundaries<INSFVSlipWallBC>(bnd_id, INSFVBCs::INSFVSlipWallBC, _slip_wall_boundaries);
-    bc_types_added +=
-        setupBoundaries<INSFVSymmetryBC>(bnd_id, INSFVBCs::INSFVSymmetryBC, _symmetry_boundaries);
-
-    if (bc_types_added != 1)
-      mooseError("Each boundary in an INSFV simulation must be covered by exactly one type of the "
-                 "following boundary condition types: INSFVFlowBC, INSFVNoSlipWallBC, "
-                 "INSFVSlipWallBC, INSFVSymmetryBC. However, the boundary '",
-                 const_cast<MooseMesh &>(_mesh).getBoundaryName(bnd_id),
-                 "' is covered by ",
-                 bc_types_added,
-                 " different types.");
+    setupBoundaries<INSFVSlipWallBC>(bnd_id, INSFVBCs::INSFVSlipWallBC, _slip_wall_boundaries);
+    setupBoundaries<INSFVSymmetryBC>(bnd_id, INSFVBCs::INSFVSymmetryBC, _symmetry_boundaries);
   }
-
-  if (all_connected_boundaries != _all_boundaries)
-    mooseError("We should have complete coverage of all connected boundaries in object ",
-               this->name());
 }
 
-bool
+void
 INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
 {
   std::vector<INSFVFlowBC *> flow_bcs;
@@ -211,12 +189,10 @@ INSFVMomentumAdvection::setupFlowBoundaries(const BoundaryID bnd_id)
     _flow_boundaries.insert(bnd_id);
     _all_boundaries.insert(bnd_id);
   }
-
-  return !flow_bcs.empty();
 }
 
 template <typename T>
-bool
+void
 INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
                                         const INSFVBCs bc_type,
                                         std::set<BoundaryID> & bnd_ids)
@@ -235,8 +211,6 @@ INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
     bnd_ids.insert(bnd_id);
     _all_boundaries.insert(bnd_id);
   }
-
-  return !bcs.empty();
 }
 
 bool
@@ -259,49 +233,6 @@ INSFVMomentumAdvection::skipForBoundary(const FaceInfo & fi) const
   // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
   // should not contribute any advective flux
   return true;
-}
-
-void
-INSFVMomentumAdvection::eraseInterfaces(std::set<BoundaryID> & bnd_ids)
-{
-  std::set<BoundaryID> bnd_ids_to_erase;
-
-  for (const auto bnd_id : bnd_ids)
-  {
-    const auto & sub_ids = _mesh.getBoundaryConnectedBlocks(bnd_id);
-    if (sub_ids.size() > 1)
-      mooseError("I'm sorry but for current sanity checking in INSFV, a sideset may only run over "
-                 "one subdomain");
-    mooseAssert(sub_ids.size() == 1,
-                "How did we register "
-                    << bnd_id
-                    << " as a boundary ID when it doesn't appear to be attached to anything?");
-
-    const auto & union_sub_neighbor_ids = _mesh.getInterfaceConnectedBlocks(bnd_id);
-    std::set<SubdomainID> neighbor_ids;
-    std::set_difference(union_sub_neighbor_ids.begin(),
-                        union_sub_neighbor_ids.end(),
-                        sub_ids.begin(),
-                        sub_ids.end(),
-                        std::inserter(neighbor_ids, neighbor_ids.begin()));
-
-    if (neighbor_ids.empty())
-      // We must be along a true boundary
-      continue;
-
-    if (neighbor_ids.size() > 1)
-      mooseError("I'm sorry but for current sanity checking in INSFV, all elements on the "
-                 "neighboring side of a sideset should have the same SubdomainID");
-
-    const auto sub_id = *sub_ids.begin();
-    const auto neigh_id = *neighbor_ids.begin();
-
-    if (this->hasBlocks(std::set<SubdomainID>({sub_id, neigh_id})))
-      bnd_ids_to_erase.insert(bnd_id);
-  }
-
-  for (const auto erase_id : bnd_ids_to_erase)
-    bnd_ids.erase(erase_id);
 }
 
 const VectorValue<ADReal> &
@@ -454,6 +385,10 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
 
         return;
       }
+
+      mooseError("The INSFVMomentumAdvection object ",
+                 this->name(),
+                 " is not completely bounded by INSFVBCs. Please examine your FVBCs block.");
     }
 
     // Else we are on an internal face
