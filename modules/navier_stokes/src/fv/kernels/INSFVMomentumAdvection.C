@@ -90,19 +90,20 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
 #endif
 
   if (!_p_var)
-    mooseError("the pressure must be a finite volume variable.");
+    paramError("pressure", "the pressure must be a INSFVPressureVariable.");
 
   if (!_u_var)
-    mooseError("the u velocity must be a finite volume variable.");
+    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 
   if (_dim >= 2 && !_v_var)
-    mooseError(
-        "In two or more dimensions, the v velocity must be supplied and it must be a finite volume "
-        "variable.");
+    paramError("v",
+               "In two or more dimensions, the v velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
 
   if (_dim >= 3 && !params.isParamValid("w"))
-    mooseError("In three-dimensions, the w velocity must be supplied and it must be a finite "
-               "volume variable.");
+    paramError("w",
+               "In three-dimensions, the w velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
 
   const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
   if (velocity_interp_method == "average")

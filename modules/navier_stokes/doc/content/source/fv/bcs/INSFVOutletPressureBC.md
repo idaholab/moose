@@ -7,7 +7,7 @@ variable. `INSFVOutletPressureBC` also inherits from `INSFVFullyDevelopedBC`
 which allows modifications to the coefficients used to compute the Rhie-Chow
 interpolation in [`INSFVMomentumAdvection`](INSFVMomentumAdvection.md). When
 applying a `INSFVOutletPressureBC` for the pressure, no `FVBCs` should be given
-for the velocity on the same `boundary`. In this way a zero vicous flux is
+for the velocity on the same `boundary`. In this way a zero viscous flux is
 implicitly applied for the velocity on the `boundary`.
 
 !syntax parameters /FVBCs/INSFVOutletPressureBC

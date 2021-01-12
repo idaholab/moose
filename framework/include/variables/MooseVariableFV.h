@@ -280,7 +280,7 @@ public:
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
-   * \p adGradlnSln(const Elem * const) resulting in infinite recursion
+   * \p adGradSln(const Elem * const) resulting in infinite recursion
    * @param elem The element for which to retrieve the gradient
    * @return The gradient at the element centroid
    */
