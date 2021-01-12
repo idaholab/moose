@@ -242,7 +242,7 @@ INSFVMomentumAdvection::setupBoundaries(const BoundaryID bnd_id,
 bool
 INSFVMomentumAdvection::skipForBoundary(const FaceInfo & fi) const
 {
-  if (!fi.isBoundary())
+  if (!onBoundary(fi))
     return false;
 
   // If we have flux bcs then we do skip
@@ -392,7 +392,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
 
-    if (fi->isBoundary())
+    if (onBoundary(*fi))
     {
       // In my mind there should only be about one bc_id per FaceInfo
       mooseAssert(fi->boundaryIDs().size() == 1,
@@ -508,7 +508,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                   : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
               "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
 
-  if (_face_info->isBoundary())
+  if (onBoundary(*_face_info))
   {
     // In my mind there should only be about one bc_id per FaceInfo
     mooseAssert(_face_info->boundaryIDs().size() == 1,

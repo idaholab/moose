@@ -58,6 +58,14 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     _boundaries_to_force.insert(_mesh.getBoundaryID(name));
 }
 
+bool
+FVFluxKernel::onBoundary(const FaceInfo & fi) const
+{
+  const bool internal =
+      fi.neighborPtr() && hasBlocks(fi.elemSubdomainID()) && hasBlocks(fi.neighborSubdomainID());
+  return !internal;
+}
+
 // Note the lack of quadrature point loops in the residual/jacobian compute
 // functions. This is because finite volumes currently only works with
 // constant monomial elements. We only have one quadrature point regardless of
@@ -66,7 +74,7 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
 bool
 FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
 {
-  if (!fi.isBoundary() || _force_boundary_execution)
+  if (_force_boundary_execution || !onBoundary(fi))
     return false;
 
   for (const auto bnd_to_force : _boundaries_to_force)

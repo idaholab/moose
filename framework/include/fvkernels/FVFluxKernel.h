@@ -86,6 +86,11 @@ protected:
   /// face including elem+neighbor cell centroids, cell volumes, face area, etc.
   const FaceInfo * _face_info = nullptr;
 
+  /**
+   * Return whether the supplied face is on a boundary of this object's execution
+   */
+  bool onBoundary(const FaceInfo & fi) const;
+
 private:
   /// Computes the Jacobian contribution for every coupled variable.
   ///
