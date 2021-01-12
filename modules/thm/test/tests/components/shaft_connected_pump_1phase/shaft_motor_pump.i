@@ -45,6 +45,7 @@ dt = 1.e-2
     tau_fr_const = 0
     head = head_fcn
     torque_hydraulic = torque_fcn
+    density_rated = 124.2046
   []
 
   [pipe]

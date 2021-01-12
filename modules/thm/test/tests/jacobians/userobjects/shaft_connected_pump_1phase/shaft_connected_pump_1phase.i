@@ -71,6 +71,7 @@
     inlet = inlet
     outlet = outlet
     pump_name = pump
+    density_rated = 4
   []
 []
 
