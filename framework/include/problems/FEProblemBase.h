@@ -314,6 +314,8 @@ public:
    */
   void bumpVolumeQRuleOrder(Order order, SubdomainID block);
 
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
+
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
    */

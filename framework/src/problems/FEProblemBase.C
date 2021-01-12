@@ -4722,6 +4722,10 @@ FEProblemBase::updateMaxQps()
   }
 
   unsigned int max_qpts = getMaxQps();
+  if (max_qpts > Moose::constMaxQpsPerElem)
+    mooseError("Max quadrature points per element assumptions made in some code (e.g.  Coupleable "
+               "and MaterialPropertyInterface classes) have been violated.\n Complain to Moose "
+               "developers to allow constMaxQpsPerElem to be increased.");
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // the highest available order in libMesh is 43
@@ -4745,6 +4749,18 @@ FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 
   if (_displaced_problem)
     _displaced_problem->bumpVolumeQRuleOrder(order, block);
+
+  updateMaxQps();
+}
+
+void
+FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpAllQRuleOrder(order, block);
+
+  if (_displaced_problem)
+    _displaced_problem->bumpAllQRuleOrder(order, block);
 
   updateMaxQps();
 }

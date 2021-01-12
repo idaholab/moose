@@ -40,7 +40,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _coupleable_neighbor(_c_parameters.have_parameter<bool>("_neighbor")
                              ? _c_parameters.get<bool>("_neighbor")
                              : false),
-    _coupleable_max_qps(_c_fe_problem.getMaxQps()),
+    _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
     _obj(moose_object)
 {

@@ -23,6 +23,6 @@ public:
 
   NumElemQPs(const InputParameters & parameters);
   virtual ~NumElemQPs();
-  virtual Real computeIntegral();
-  virtual Real computeQpIntegral();
+  virtual Real computeIntegral() override;
+  virtual Real computeQpIntegral() override;
 };

@@ -119,6 +119,13 @@ DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 }
 
 void
+DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpAllQRuleOrder(order, block);
+}
+
+void
 DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)

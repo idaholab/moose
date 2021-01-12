@@ -15,7 +15,9 @@
     csvdiff = 'block-order_out.csv'
 
     requirement = 'The system shall support the ability to manually specify'
-                  ' the quadrature order used for numerical integration on a per-block basis.'
+                  ' the quadrature order used for numerical integration on a per-block basis'
+                  ' with face quadrature between blocks preferring the higher-order between'
+                  ' the two sides.'
     issues = '#14055'
     design = 'Quadrature/index.md'
   [../]
@@ -38,6 +40,16 @@
                   ' volumetric and side quadrature orders used for'
                   ' numerical integration on the entire mesh.'
     issues = '#3380'
+    design = 'Quadrature/index.md'
+  [../]
+  [./material-bumps-block-order]
+    type = CSVDiff
+    input = 'material_with_order.i'
+    csvdiff = 'material_with_order_out.csv'
+
+    requirement = 'The system shall support the ability to allow object code to increase'
+                  ' the quadrature order used for numerical integration on a per-block basis.'
+    issues = '#14055 #15072'
     design = 'Quadrature/index.md'
   [../]
 []
