@@ -58,6 +58,7 @@
     tau_fr_const = 0
     head = head_fcn
     torque_hydraulic = torque_fcn
+    density_rated = 1
   []
 
   [fch2]

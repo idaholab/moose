@@ -34,7 +34,7 @@ public:
 
   std::string getInfo() const override;
 
-  virtual bool operator==(const RelationshipManager & other) const override;
+  virtual bool operator>=(const RelationshipManager & rhs) const override;
 
 protected:
   virtual void internalInit() override;

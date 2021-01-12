@@ -62,6 +62,7 @@ $H$ and $\tau_{\text{hydraulic}}$, are defined by means of an empirical homologo
 | $Q_{R}$ | [!param](/Components/ShaftConnectedPump1Phase/volumetric_rated) |
 | $H_{R}$ | [!param](/Components/ShaftConnectedPump1Phase/head_rated) |
 | $\tau_{R}$ | [!param](/Components/ShaftConnectedPump1Phase/torque_rated) |
+| $\rho_{R}$ | [!param](/Components/ShaftConnectedPump1Phase/density_rated) |
 
 Parameters for the homologous pump curves are defined as:
 
@@ -125,7 +126,7 @@ The input parameters [!param](/Components/ShaftConnectedPump1Phase/head) and [!p
 H = (\alpha^{2} + \nu^{2}) * W_{H} * H_{R}
 
 !equation
-\tau_{\text{hydraulic}} = (\alpha^{2} + \nu^{2}) * W_{T} * \tau_{R}
+\tau_{\text{hydraulic}} = (\alpha^{2} + \nu^{2}) * W_{T} * \tau_{R} * \frac{\rho_{\text{pump}}}{\rho_{R}}
 
 ### Friction torque id=friction
 

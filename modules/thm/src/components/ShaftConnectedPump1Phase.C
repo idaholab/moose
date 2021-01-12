@@ -25,6 +25,7 @@ ShaftConnectedPump1Phase::validParams()
   params.addRequiredParam<Real>("volumetric_rated", "Rated pump volumetric flow rate [m^3/s]");
   params.addRequiredParam<Real>("head_rated", "Rated pump head [m]");
   params.addRequiredParam<Real>("torque_rated", "Rated pump torque [N-m]");
+  params.addRequiredParam<Real>("density_rated", "Rated pump fluid density [kg/m^3]");
   params.addRequiredParam<Real>("speed_cr_fr", "Pump speed threshold for friction [-]");
   params.addRequiredParam<Real>("tau_fr_const", "Pump friction constant [N-m]");
   params.addRequiredParam<std::vector<Real>>("tau_fr_coeff", "Pump friction coefficients [N-m]");
@@ -51,6 +52,7 @@ ShaftConnectedPump1Phase::ShaftConnectedPump1Phase(const InputParameters & param
     _volumetric_rated(getParam<Real>("volumetric_rated")),
     _head_rated(getParam<Real>("head_rated")),
     _torque_rated(getParam<Real>("torque_rated")),
+    _density_rated(getParam<Real>("density_rated")),
     _speed_cr_fr(getParam<Real>("speed_cr_fr")),
     _tau_fr_const(getParam<Real>("tau_fr_const")),
     _tau_fr_coeff(getParam<std::vector<Real>>("tau_fr_coeff")),
@@ -120,6 +122,7 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("volumetric_rated") = _volumetric_rated;
     params.set<Real>("head_rated") = _head_rated;
     params.set<Real>("torque_rated") = _torque_rated;
+    params.set<Real>("density_rated") = _density_rated;
     params.set<Real>("speed_cr_fr") = _speed_cr_fr;
     params.set<Real>("tau_fr_const") = _tau_fr_const;
     params.set<std::vector<Real>>("tau_fr_coeff") = _tau_fr_coeff;

@@ -56,6 +56,8 @@ protected:
   const Real & _head_rated;
   /// Rated pump torque
   const Real & _torque_rated;
+  /// Rated pump density
+  const Real & _density_rated;
   /// Pump speed threshold for friction
   const Real & _speed_cr_fr;
   /// Pump friction constant
