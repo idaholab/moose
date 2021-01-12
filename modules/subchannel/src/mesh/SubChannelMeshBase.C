@@ -5,6 +5,8 @@ SubChannelMeshBase::validParams()
 {
   InputParameters params = MooseMesh::validParams();
   params.set<MooseEnum>("dim") = "3";
+  params.addRequiredParam<Real>("pitch", "Pitch [m]");
+  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addRequiredParam<std::vector<Real>>("spacer_z",
                                              "Axial location of spacers/vanes/mixing_vanes [m]");
@@ -19,7 +21,9 @@ SubChannelMeshBase::SubChannelMeshBase(const InputParameters & params)
     _heated_length(getParam<Real>("heated_length")),
     _spacer_z(getParam<std::vector<Real>>("spacer_z")),
     _spacer_k(getParam<std::vector<Real>>("spacer_k")),
-    _max_dz(getParam<Real>("max_dz"))
+    _max_dz(getParam<Real>("max_dz")),
+    _pitch(getParam<Real>("pitch")),
+    _rod_diameter(getParam<Real>("rod_diameter"))
 {
   // Define the node placement along the z-axis.
   std::vector<Real> block_sizes;
@@ -56,6 +60,8 @@ SubChannelMeshBase::SubChannelMeshBase(const SubChannelMeshBase & other_mesh)
     _z_grid(other_mesh._z_grid),
     _spacer_z(other_mesh._spacer_z),
     _spacer_k(other_mesh._spacer_k),
-    _max_dz(other_mesh._max_dz)
+    _max_dz(other_mesh._max_dz),
+    _pitch(other_mesh._pitch),
+    _rod_diameter(other_mesh._rod_diameter)
 {
 }

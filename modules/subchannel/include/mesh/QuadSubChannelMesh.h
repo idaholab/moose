@@ -32,7 +32,6 @@ public:
   const unsigned int & getNx() const { return _nx; }
   const unsigned int & getNy() const { return _ny; }
 
-  const Real & getRodDiameter() const { return _rod_diameter; }
   const Real & getGap() const { return _gap; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
@@ -48,8 +47,6 @@ protected:
   unsigned int _n_channels;
   /// Number of gaps per layer
   unsigned int _n_gaps;
-  Real _pitch;
-  Real _rod_diameter;
   Real _gap;
   std::vector<std::vector<Node *>> _nodes;
   std::vector<std::vector<Node *>> _gapnodes;

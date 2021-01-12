@@ -13,8 +13,6 @@ QuadSubChannelMesh::validParams()
   InputParameters params = SubChannelMeshBase::validParams();
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
-  params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
   return params;
 }
@@ -25,8 +23,6 @@ QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
     _ny(getParam<unsigned int>("ny")),
     _n_channels(_nx * _ny),
     _n_gaps((_nx - 1) * _ny + (_ny - 1) * _nx),
-    _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
     _gap(getParam<Real>("gap"))
 {
   // Resize the gap-to-channel and channel-to-gap maps.
@@ -125,8 +121,6 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _ny(other_mesh._ny),
     _n_channels(other_mesh._n_channels),
     _n_gaps(other_mesh._n_gaps),
-    _pitch(other_mesh._pitch),
-    _rod_diameter(other_mesh._rod_diameter),
     _gap(other_mesh._gap),
     _nodes(other_mesh._nodes),
     _gapnodes(other_mesh._gapnodes),
