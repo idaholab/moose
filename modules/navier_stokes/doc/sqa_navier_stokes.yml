@@ -1,0 +1,8 @@
+directories:
+    - ${MOOSE_DIR}/modules/navier_stokes/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/modules/navier_stokes/doc/sqa_reports.yml

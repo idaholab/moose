@@ -117,4 +117,7 @@ def file_is_stub(filename):
     # Current alert method
     elif '!alert! construction title=Undocumented' in content:
         return True
+    # Even more current alert method
+    elif '!alert construction title=Undocumented' in content:
+        return True
     return False
