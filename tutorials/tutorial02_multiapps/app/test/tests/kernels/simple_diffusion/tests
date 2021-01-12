@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+  []
+[]

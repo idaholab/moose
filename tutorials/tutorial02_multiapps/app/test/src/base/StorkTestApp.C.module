@@ -1,0 +1,61 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+#include "MultiAppTutTestApp.h"
+#include "MultiAppTutApp.h"
+#include "Moose.h"
+#include "AppFactory.h"
+#include "MooseSyntax.h"
+
+InputParameters
+MultiAppTutTestApp::validParams()
+{
+  InputParameters params = MultiAppTutApp::validParams();
+  return params;
+}
+
+MultiAppTutTestApp::MultiAppTutTestApp(InputParameters parameters) : MooseApp(parameters)
+{
+  MultiAppTutTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
+}
+
+MultiAppTutTestApp::~MultiAppTutTestApp() {}
+
+void
+MultiAppTutTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+{
+  MultiAppTutApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"MultiAppTutTestApp"});
+    Registry::registerActionsTo(af, {"MultiAppTutTestApp"});
+  }
+}
+
+void
+MultiAppTutTestApp::registerApps()
+{
+  registerApp(MultiAppTutApp);
+  registerApp(MultiAppTutTestApp);
+}
+
+/***************************************************************************************************
+ *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
+ **************************************************************************************************/
+// External entry point for dynamic application loading
+extern "C" void
+MultiAppTutTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  MultiAppTutTestApp::registerAll(f, af, s);
+}
+extern "C" void
+MultiAppTutTestApp__registerApps()
+{
+  MultiAppTutTestApp::registerApps();
+}
