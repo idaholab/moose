@@ -60,6 +60,6 @@
   [sub_app]
     type = TransientMultiApp
     positions = '0 0 0'
-    input_files = '01_sub.i'
+    input_files = '01_sub_sublimit.i'
   []
 []

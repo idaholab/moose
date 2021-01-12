@@ -38,7 +38,7 @@
 
 [Executioner]
   type = Transient
-  end_time = 5
+  end_time = 2
   dt = 1
 
   solve_type = 'PJFNK'
