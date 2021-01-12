@@ -30,22 +30,25 @@ public:
     return _subchannel_to_rod_map[channel_idx][neighbor_idx];
   }
 
-  virtual const std::vector<std::vector<Node *>> & getNodes() const override { return _nodes; }
+  virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const override
+  {
+    return _nodes[i_chan][iz];
+  }
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
-  virtual const std::vector<std::pair<unsigned int, unsigned int>> &
-  getGapToChannelMap() const override
+  virtual const std::pair<unsigned int, unsigned int> &
+  getGapNeighborChannels(unsigned int i_gap) const override
   {
-    return _gap_to_chan_map;
+    return _gap_to_chan_map[i_gap];
   }
-  virtual const std::vector<std::vector<unsigned int>> & getChannelToGapMap() const override
+  virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const override
   {
-    return _chan_to_gap_map;
+    return _chan_to_gap_map[i_chan];
   }
   virtual const std::vector<double> & getGapMap() const override { return _gij_map; }
-  virtual const std::vector<std::vector<double>> & getSignCrossflowMap() const override
+  virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const override
   {
-    return _sign_id_crossflow_map;
+    return _sign_id_crossflow_map[i_chan][i_local];
   }
 
   virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
@@ -54,6 +57,8 @@ public:
   {
     return _subch_type[index];
   }
+
+  virtual Real getGapWidth(unsigned int gap_index) const override { return _gij_map[gap_index]; }
 
 protected:
   /// number of rings of fuel rods
