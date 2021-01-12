@@ -110,7 +110,13 @@ RelationshipManager::isCoupling(Moose::RelationshipManagerType input_rm)
 bool
 RelationshipManager::baseGreaterEqual(const RelationshipManager & rhs) const
 {
-  return isType(rhs._rm_type);
+  // !attach early = attach late
+  // If we are supposed to be attached late, then we should take precedence over the rhs. You can
+  // think of this as being >= because we if we are attaching late, then we are asking that *all*
+  // elements be geometrically ghosted during the initial mesh preparation phase. We will only allow
+  // remote elements to be deleted later on after addition of late geomeric ghosting functors (at
+  // the same time as algebraic and coupling)
+  return isType(rhs._rm_type) && (!_attach_geometric_early >= !rhs._attach_geometric_early);
 }
 
 Moose::RelationshipManagerType RelationshipManager::geo_and_alg =
