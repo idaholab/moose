@@ -31,9 +31,9 @@ public:
   virtual const unsigned int & getNumOfAxialNodes() const { return _nz; }
 
   /**
-   * Get the mesh nodes
+   * Get the mesh node for a given channel index and elevation index
    */
-  virtual const std::vector<std::vector<Node *>> & getNodes() const = 0;
+  virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const = 0;
 
   /**
    * Return the number of channels per layer
@@ -46,16 +46,15 @@ public:
   virtual const unsigned int & getNumOfGapsPerLayer() const = 0;
 
   /**
-   * Return a vector of pair of subchannel indices for all gaps at a subchannel level.
-   * The index pair stores the subchannel indices of the channels associated with a gap
+   * Return a pair of subchannel indices for a given gap index
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int>> & getGapToChannelMap() const = 0;
+  virtual const std::pair<unsigned int, unsigned int> &
+  getGapNeighborChannels(unsigned int i_gap) const = 0;
 
   /**
-   * Return a vector of gap indices associated with a channel
-   * For each channel index we get a vector of gap indices
+   * Return a vector of gap indices for a given channel index
    */
-  virtual const std::vector<std::vector<unsigned int>> & getChannelToGapMap() const = 0;
+  virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const = 0;
 
   /**
    * Return a map with gap sizes
@@ -73,9 +72,9 @@ public:
   virtual const Real & getRodDiameter() const { return _rod_diameter; }
 
   /**
-   * Return a map of signs for the cross flow
+   * Return a signs for the cross flow given a subchannel index and local neighbor index
    */
-  virtual const std::vector<std::vector<double>> & getSignCrossflowMap() const = 0;
+  virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const = 0;
 
   /**
    * Return heated length
@@ -91,6 +90,11 @@ public:
    * Return the type of the subchannel for given subchannel index
    */
   virtual EChannelType getSubchannelType(unsigned int index) const = 0;
+
+  /**
+   * Return gap width for a given gap index
+   */
+  virtual Real getGapWidth(unsigned int gap_index) const = 0;
 
 protected:
   /// number of axial nodes

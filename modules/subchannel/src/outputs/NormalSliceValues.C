@@ -29,7 +29,6 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
 {
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
 
-  auto nodes = _mesh.getNodes();
   auto nz = _mesh.getNumOfAxialNodes();
   auto z_grid = _mesh.getZGrid();
   auto n_channels = _mesh.getNumOfChannels();
@@ -38,7 +37,7 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
   {
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
     {
-      auto * node = nodes[i_ch][nz];
+      auto * node = _mesh.getChannelNode(i_ch, nz);
       unsigned int i = (i_ch / _mesh.getNx());   // row
       unsigned int j = i_ch - i * _mesh.getNx(); // column
       _exitValue(i, j) = val_soln(node);
@@ -54,7 +53,7 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
       {
         for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {
-          auto * node = nodes[i_ch][iz];
+          auto * node = _mesh.getChannelNode(i_ch, iz);
           unsigned int i = (i_ch / _mesh.getNx());   // row
           unsigned int j = i_ch - i * _mesh.getNx(); // column
           _exitValue(i, j) = val_soln(node);
@@ -65,8 +64,8 @@ NormalSliceValues::output(const ExecFlagType & /*type*/)
       {
         for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
         {
-          auto * node_out = nodes[i_ch][iz];
-          auto * node_in = nodes[i_ch][iz - 1];
+          auto * node_out = _mesh.getChannelNode(i_ch, iz);
+          auto * node_in = _mesh.getChannelNode(i_ch, iz - 1);
           unsigned int i = (i_ch / _mesh.getNx());   // row
           unsigned int j = i_ch - i * _mesh.getNx(); // column
           _exitValue(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *

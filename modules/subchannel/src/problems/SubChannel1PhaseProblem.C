@@ -139,11 +139,8 @@ SubChannel1PhaseProblem::computeFrictionFactor(double Re)
 void
 SubChannel1PhaseProblem::computeWij(int iz)
 {
-  auto nodes = _subchannel_mesh.getNodes();
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-  auto gap_to_chan_map = _subchannel_mesh.getGapToChannelMap();
-  auto gij_map = _subchannel_mesh.getGapMap();
   const Real & pitch = _subchannel_mesh.getPitch();
 
   Wij = Wij_global.col(iz);
@@ -151,12 +148,13 @@ SubChannel1PhaseProblem::computeWij(int iz)
   auto dz = z_grid[iz] - z_grid[iz - 1];
   for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
   {
-    unsigned int i_ch = gap_to_chan_map[i_gap].first;
-    unsigned int j_ch = gap_to_chan_map[i_gap].second;
-    auto * node_in_i = nodes[i_ch][iz - 1];
-    auto * node_out_i = nodes[i_ch][iz];
-    auto * node_in_j = nodes[j_ch][iz - 1];
-    auto * node_out_j = nodes[j_ch][iz];
+    auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+    unsigned int i_ch = chans.first;
+    unsigned int j_ch = chans.second;
+    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+    auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
     auto rho_i = (*rho_soln)(node_in_i);
     auto rho_j = (*rho_soln)(node_in_j);
     auto T_i = (*T_soln)(node_in_i);
@@ -165,8 +163,8 @@ SubChannel1PhaseProblem::computeWij(int iz)
     auto Si = (*S_flow_soln)(node_in_i);
     // area of channel j
     auto Sj = (*S_flow_soln)(node_in_j);
-    // crossflow area between channels i,j dz*(pitch - rod diameter)
-    auto Sij = dz * gij_map[i_gap];
+    // crossflow area between channels i,j dz*gap_width
+    auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
     // hydraulic diameter in the ij direction
     auto Lij = pitch;
     // total local form loss in the ij direction
@@ -274,20 +272,15 @@ SubChannel1PhaseProblem::computeWij(int iz)
 void
 SubChannel1PhaseProblem::computeSumWij(int iz)
 {
-  auto nodes = _subchannel_mesh.getNodes();
-  auto gap_to_chan_map = _subchannel_mesh.getGapToChannelMap();
-  auto chan_to_gap_map = _subchannel_mesh.getChannelToGapMap();
-  auto sign_id_crossflow_map = _subchannel_mesh.getSignCrossflowMap();
-
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
-    auto * node_out = nodes[i_ch][iz];
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
     double SumWij = 0.0;
     // Calculate sum of crossflow into channel i from channels j around i
     unsigned int counter = 0;
-    for (auto i_gap : chan_to_gap_map[i_ch])
+    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
     {
-      SumWij += sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz);
+      SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz);
       counter++;
     }
     // The total crossflow coming out of cell i [kg/sec]
@@ -299,16 +292,14 @@ void
 SubChannel1PhaseProblem::computeMdot(int iz)
 {
   auto z_grid = _subchannel_mesh.getZGrid();
-  auto nodes = _subchannel_mesh.getNodes();
-
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // go through the channels of the level.
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     // Start with applying mass-conservation equation & energy - conservation equation
     // Find the nodes for the top and bottom of this element.
-    auto * node_in = nodes[i_ch][iz - 1];
-    auto * node_out = nodes[i_ch][iz];
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
     // Copy the variables at the inlet (bottom) of this element.
     auto mdot_in = (*mdot_soln)(node_in);
     auto volume = dz * (*S_flow_soln)(node_in);
@@ -343,19 +334,15 @@ SubChannel1PhaseProblem::computeMdot(int iz)
 void
 SubChannel1PhaseProblem::computeEnthalpy(int iz)
 {
-  auto nodes = _subchannel_mesh.getNodes();
-  auto gap_to_chan_map = _subchannel_mesh.getGapToChannelMap();
-  auto chan_to_gap_map = _subchannel_mesh.getChannelToGapMap();
   auto z_grid = _subchannel_mesh.getZGrid();
-  auto sign_id_crossflow_map = _subchannel_mesh.getSignCrossflowMap();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // go through the channels of the level.
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     // Start with applying mass-conservation equation & energy - conservation equation
     // Find the nodes for the top and bottom of this element.
-    auto * node_in = nodes[i_ch][iz - 1];
-    auto * node_out = nodes[i_ch][iz];
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
     // Copy the variables at the inlet (bottom) of this element.
     auto mdot_in = (*mdot_soln)(node_in);
     auto h_in = (*h_soln)(node_in); // J/kg
@@ -366,13 +353,14 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
     double SumWijPrimeDhij = 0.0;
     // Calculate sum of crossflow into channel i from channels j around i
     unsigned int counter = 0;
-    for (auto i_gap : chan_to_gap_map[i_ch])
+    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
     {
-      unsigned int ii_ch = gap_to_chan_map[i_gap].first;
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int ii_ch = chans.first;
       // i is always the smallest and first index in the mapping
-      unsigned int jj_ch = gap_to_chan_map[i_gap].second;
-      auto * node_in_i = nodes[ii_ch][iz - 1];
-      auto * node_in_j = nodes[jj_ch][iz - 1];
+      unsigned int jj_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
       // Define donor enthalpy (is gonna change)
       auto h_star = 0.0;
       if ((*P_soln)(node_in_i) > (*P_soln)(node_in_j))
@@ -384,7 +372,7 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
         h_star = (*h_soln)(node_in_j);
       }
       // take care of the sign by applying the map, use donor cell
-      SumWijh += sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz) * h_star;
+      SumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * h_star;
       SumWijPrimeDhij += WijPrime_global(i_gap, iz) *
                          (2 * (*h_soln)(node_in) - (*h_soln)(node_in_j) - (*h_soln)(node_in_i));
       counter++;
@@ -420,13 +408,11 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
 void
 SubChannel1PhaseProblem::computeProperties(int iz)
 {
-  auto nodes = _subchannel_mesh.getNodes();
-
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     // Find the nodes for the top and bottom of this element.
-    auto * node_in = nodes[i_ch][iz - 1];
-    auto * node_out = nodes[i_ch][iz];
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
     auto T_out = _fp->T_from_p_h((*P_soln)(node_out), (*h_soln)(node_out));
     auto rho_out = _fp->rho_from_p_T((*P_soln)(node_out), T_out);
     T_soln->set(node_out, T_out);     // Kelvin
@@ -443,18 +429,14 @@ SubChannel1PhaseProblem::computeProperties(int iz)
 void
 SubChannel1PhaseProblem::computeDP(int iz)
 {
-  auto nodes = _subchannel_mesh.getNodes();
   auto z_grid = _subchannel_mesh.getZGrid();
-  auto gap_to_chan_map = _subchannel_mesh.getGapToChannelMap();
-  auto chan_to_gap_map = _subchannel_mesh.getChannelToGapMap();
-  auto sign_id_crossflow_map = _subchannel_mesh.getSignCrossflowMap();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // Sweep through the channels of level
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     // Find the nodes for the top and bottom of this element.
-    auto * node_in = nodes[i_ch][iz - 1];
-    auto * node_out = nodes[i_ch][iz];
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
     auto rho_in = (*rho_soln)(node_in);
     auto rho_out = (*rho_soln)(node_out);
     auto T_in = (*T_soln)(node_in);
@@ -474,14 +456,15 @@ SubChannel1PhaseProblem::computeDP(int iz)
     auto C_T = 1.0; // Turbulent modeling parameter
 
     unsigned int counter = 0;
-    for (auto i_gap : chan_to_gap_map[i_ch])
+    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
     {
-      unsigned int ii_ch = gap_to_chan_map[i_gap].first;
-      unsigned int jj_ch = gap_to_chan_map[i_gap].second;
-      auto * node_in_i = nodes[ii_ch][iz - 1];
-      auto * node_in_j = nodes[jj_ch][iz - 1];
-      auto * node_out_i = nodes[ii_ch][iz];
-      auto * node_out_j = nodes[jj_ch][iz];
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int ii_ch = chans.first;
+      unsigned int jj_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+      auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
+      auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
       auto rho_i = (*rho_soln)(node_in_i);
       auto rho_j = (*rho_soln)(node_in_j);
       auto Si = (*S_flow_soln)(node_in_i);
@@ -496,7 +479,8 @@ SubChannel1PhaseProblem::computeDP(int iz)
         U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
       }
 
-      CrossFlow_Term += sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz) * U_star;
+      CrossFlow_Term +=
+          _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * U_star;
 
       Turbulent_Term += WijPrime_global(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
                                                       (*mdot_soln)(node_out_j) / Sj / rho_j -
@@ -533,7 +517,6 @@ SubChannel1PhaseProblem::externalSolve()
   _console << "Executing subchannel solver\n";
 
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
-  auto nodes = _subchannel_mesh.getNodes();
 
   Eigen::MatrixXd PCYCLES(nz, 2);
   // Initialize
@@ -604,8 +587,8 @@ SubChannel1PhaseProblem::externalSolve()
       {
         for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
         {
-          auto * node_out = nodes[i_ch][iz];
-          auto * node_in = nodes[i_ch][iz - 1];
+          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
           // update Pressure solution
           P_soln->set(node_in, (*P_soln)(node_out) + (*DP_soln)(node_out));
         }
