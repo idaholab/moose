@@ -22,11 +22,6 @@ public:
   virtual const unsigned int & getNumOfRods() const { return _nrods; }
 
   /**
-   * Return rod diame`ter
-   */
-  virtual const Real & getRodDiameter() const { return _rod_diameter; }
-
-  /**
    * Return rod index given subchannel index and local neighbor index
    */
   virtual const unsigned int & getRodIndex(const unsigned int channel_idx,
@@ -48,7 +43,6 @@ public:
     return _chan_to_gap_map;
   }
   virtual const std::vector<double> & getGapMap() const override { return _gij_map; }
-  virtual const Real & getPitch() const override { return _pitch; }
   virtual const std::vector<std::vector<double>> & getSignCrossflowMap() const override
   {
     return _sign_id_crossflow_map;
@@ -66,10 +60,6 @@ protected:
   unsigned int _nrings;
   /// number of subchannels
   unsigned int _n_channels;
-  /// Distance between the neighbor fuel rods, pitch
-  Real _pitch;
-  /// fuel rod diameter
-  Real _rod_diameter;
   /// the distance between flat surfaces of the duct facing each other
   Real _flat_to_flat;
   /// the gap thickness between the duct and peripheral fuel rods

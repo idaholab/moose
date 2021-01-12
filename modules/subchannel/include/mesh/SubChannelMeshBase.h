@@ -65,7 +65,12 @@ public:
   /**
    * Return the pitch between 2 subchannels
    */
-  virtual const Real & getPitch() const = 0;
+  virtual const Real & getPitch() const { return _pitch; }
+
+  /**
+   * Return rod diameter
+   */
+  virtual const Real & getRodDiameter() const { return _rod_diameter; }
 
   /**
    * Return a map of signs for the cross flow
@@ -100,6 +105,10 @@ protected:
   const std::vector<Real> & _spacer_k;
   /// max allowed axial node size
   Real _max_dz;
+  /// Distance between the neighbor fuel rods, pitch
+  Real _pitch;
+  /// fuel rod diameter
+  Real _rod_diameter;
 
 public:
   static InputParameters validParams();

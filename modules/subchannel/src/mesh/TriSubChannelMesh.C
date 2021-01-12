@@ -14,16 +14,12 @@ TriSubChannelMesh::validParams()
   params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
-  params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   return params;
 }
 
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   : SubChannelMeshBase(params),
     _nrings(getParam<unsigned int>("nrings")),
-    _pitch(getParam<Real>("pitch")),
-    _rod_diameter(getParam<Real>("rod_diameter")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _duct_to_rod_gap(0.5 *
                      (_flat_to_flat - (_nrings - 1) * _pitch * std::sqrt(3.0) - _rod_diameter))
@@ -580,8 +576,6 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
   : SubChannelMeshBase(other_mesh),
     _n_channels(other_mesh._n_channels),
-    _pitch(other_mesh._pitch),
-    _rod_diameter(other_mesh._rod_diameter),
     _nodes(other_mesh._nodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
