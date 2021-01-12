@@ -106,7 +106,7 @@
               'moving_bimaterial_finite_strain_out.e-s003'
     map = false
     unique_id = true
-    prereq = moving_bimaterials
+    prereq = moving_bimaterials_finite_strain
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
                   'at finite strain where a moving material interface is defined by an XFEM surface, '
                   'which is defined by a prescribed level set field, while using the automatic '
