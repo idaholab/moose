@@ -88,8 +88,7 @@
   [moving_bimaterials_finite_strain]
     type = Exodiff
     input = moving_bimaterial_finite_strain.i
-    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002 '
-              'moving_bimaterial_finite_strain_out.e-s003'
+    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
@@ -102,8 +101,7 @@
   [moving_ad_bimaterials_finite_strain]
     type = Exodiff
     input = moving_ad_bimaterial_finite_strain.i
-    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002 '
-              'moving_bimaterial_finite_strain_out.e-s003'
+    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002'
     map = false
     unique_id = true
     prereq = moving_bimaterials_finite_strain
