@@ -10,6 +10,7 @@
 import sys
 import itertools
 import platform
+import time
 import os, re, inspect, errno, copy, json
 import shlex
 from . import RaceChecker
@@ -821,7 +822,7 @@ class TestHarness:
         outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
         outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
-        outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
+        outputgroup.add_argument("--json", action="store_true", dest="json", help="Dump the parameters for the testers in JSON Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
         outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
@@ -937,8 +938,8 @@ class TestHarness:
         return
 
     def preRun(self):
-        if self.options.yaml:
-            self.factory.printYaml("Tests")
+        if self.options.json:
+            self.factory.dumpJSON("Tests")
             sys.exit(0)
         elif self.options.dump:
             self.factory.printDump("Tests")

@@ -9,7 +9,8 @@
 
 import os, sys
 import inspect
-
+import json
+import time
 class Factory:
     def __init__(self):
         self.objects = {}   # The registered Objects array
@@ -78,34 +79,19 @@ class Factory:
             print("  [../]\n")
         print("[]")
 
+    def dumpJSON(self, root_node_name):
+        with open('testoutput.json', 'w') as file:
+            out = {}
+            for name, object in sorted(self.objects.items()):
+                out[name]= {}
+                params = self.validParams(name)
+                for key in sorted(params.desc):
+                    if params.isValid(key):
+                        out[name][key] = {}
+                        out[name][key]["default"] = params[key]
+                        out[name][key]["description"] = params.getDescription(key)
+            
+            file.write(json.dumps(out, indent=4, sort_keys=True))
+            print("JSON dumped to moose/test/testoutput.json")
 
-    def printYaml(self, root_node_name):
-        print("**START YAML DATA**")
-        print("- name: /" + root_node_name)
-        print("  description: !!str")
-        print("  type:")
-        print("  parameters:")
-        print("  subblocks:")
-
-        for name, object in self.objects.items():
-            print("  - name: /" + root_node_name + "/ + name")
-            print("    description:")
-            print("    type:")
-            print("    parameters:")
-
-            params = self.validParams(name)
-            for key in params.valid:
-                required = 'No'
-                if params.isRequired(key):
-                    required = 'Yes'
-                default = ''
-                if params.isValid(key):
-                    default = str(params[key])
-
-                print("    - name: " + key)
-                print("      required: " + required)
-                print("      default: !!str " + default)
-                print("      description: |")
-                print("        " + params.getDescription(key))
-
-        print("**END YAML DATA**")
+       
