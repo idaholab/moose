@@ -74,6 +74,7 @@
 - Each solve is spread out in parallel to make the most efficient use of computing resources
 - Efficiently ties together multiple team’s codes
 - MOOSE-wrapped, external applications can exist anywhere in this hierarchy
+- Apps do NOT know they are running within the MultiApp hierarchy!
 !col-end!
 
 !col width=50%
