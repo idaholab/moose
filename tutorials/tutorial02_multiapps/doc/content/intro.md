@@ -81,3 +81,27 @@
        style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !row-end!
+
+!---
+
+## Transfers
+
+- Transfers allow you to move data between MultiApps
+- Three main catergories of Transfers exist in MOOSE:
+
+  - Field Mapping
+
+    - L2 Projection, Interpolation, Evaluation
+
+  - “Postprocessed” Spatial Data
+
+    - e.g.: Layered Integrals and Averages, Assembly Averaged Data, etc.
+
+  - Scalar Transfer
+
+    - Postprocessor values (Integrals, Averages, Point Evaluations, etc.)
+    - Can be transferred as a scalar or interpolated into a field.
+    - Useful for multi-scale
+
+- All Transfers are agnostic of dimension (if it makes sense!)
+- When transferring to or from a MultiApp a single Transfer will actually transfer to or from ALL sub-apps in that Multi-App simultaneously.
