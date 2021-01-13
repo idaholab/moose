@@ -180,6 +180,8 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
                 "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                 "for a number of dof indices equal to  1");
 
+    mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                "Out of bounds access in derivative vector.");
     _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
     accumulateTaggedLocalMatrix();

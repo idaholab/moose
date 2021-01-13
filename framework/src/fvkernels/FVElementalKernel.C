@@ -68,6 +68,8 @@ FVElementalKernel::computeJacobian()
     prepareMatrixTag(_assembly, _var.number(), _var.number());
     auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
     auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
+    mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                "Out of bounds access in derivative vector.");
     _local_ke(0, 0) += residual.derivatives()[ad_offset];
     accumulateTaggedLocalMatrix();
   };
@@ -114,6 +116,8 @@ FVElementalKernel::computeOffDiagJacobian()
                   "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                   "for a number of dof indices equal to  1");
 
+      mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
+                  "Out of bounds access in derivative vector.");
       _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
       accumulateTaggedLocalMatrix();
