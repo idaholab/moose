@@ -59,9 +59,10 @@
 [MultiApps]
   [sub_app]
     type = TransientMultiApp
-    positions = '0 0 0'
-    input_files = '03_sub_subcycle.i'
-    sub_cycling = true
-#    output_sub_cycles = true
+    positions   = '0 0 0  1 0 0  2 0 0'
+#    positions_file = 04_positions.txt
+    input_files = '04_sub1_multiple.i'
+#    input_files = '04_sub1_multiple.i  04_sub2_multiple.i 04_sub3_multiple.i'
+#    output_in_position = true
   []
 []

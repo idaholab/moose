@@ -6,45 +6,40 @@
 []
 
 [Variables]
-  [u]
+  [v]
   []
 []
 
 [Kernels]
   [diff]
     type = Diffusion
-    variable = u
-  []
-  [force]
-    type = BodyForce
-    variable = u
-    value = 1.
+    variable = v
   []
   [td]
     type = TimeDerivative
-    variable = u
+    variable = v
   []
 []
 
 [BCs]
   [left]
     type = DirichletBC
-    variable = u
+    variable = v
     boundary = left
     value = 0
   []
   [right]
     type = DirichletBC
-    variable = u
+    variable = v
     boundary = right
-    value = 0
+    value = 2
   []
 []
 
 [Executioner]
   type = Transient
   end_time = 2
-  dt = 1.
+  dt = 1
 
   solve_type = 'PJFNK'
 
@@ -54,14 +49,4 @@
 
 [Outputs]
   exodus = true
-[]
-
-[MultiApps]
-  [sub_app]
-    type = TransientMultiApp
-    positions = '0 0 0'
-    input_files = '03_sub_subcycle.i'
-    sub_cycling = true
-#    output_sub_cycles = true
-  []
 []
