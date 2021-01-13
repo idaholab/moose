@@ -919,11 +919,10 @@ SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 }
 
 void
-SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
-  auto n_sys = eq.n_systems();
-  eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  const auto n_sys = eq.n_systems();
 
   auto pr = _root_alg_gf_to_sys_clones.emplace(
       &algebraic_gf, std::vector<std::shared_ptr<GhostingFunctor>>(n_sys - 1));
@@ -942,27 +941,27 @@ SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_
 }
 
 void
+SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+{
+  EquationSystems & eq = es();
+  const auto n_sys = eq.n_systems();
+  if (!n_sys)
+    return;
+
+  eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
+  cloneAlgebraicGhostingFunctor(algebraic_gf, to_mesh);
+}
+
+void
 SubProblem::addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
-  auto n_sys = eq.n_systems();
+  const auto n_sys = eq.n_systems();
+  if (!n_sys)
+    return;
 
   eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
-
-  auto pr = _root_alg_gf_to_sys_clones.emplace(
-      algebraic_gf.get(), std::vector<std::shared_ptr<GhostingFunctor>>(n_sys - 1));
-  mooseAssert(pr.second, "We are adding a duplicate algebraic ghosting functor");
-  auto & clones_vec = pr.first->second;
-
-  for (MooseIndex(n_sys) i = 1; i < n_sys; ++i)
-  {
-    DofMap & dof_map = eq.get_system(i).get_dof_map();
-    std::shared_ptr<GhostingFunctor> clone_alg_gf = algebraic_gf->clone();
-    std::dynamic_pointer_cast<RelationshipManager>(clone_alg_gf)
-        ->init(*algebraic_gf->get_mesh(), &dof_map);
-    dof_map.add_algebraic_ghosting_functor(clone_alg_gf, to_mesh);
-    clones_vec[i - 1] = clone_alg_gf;
-  }
+  cloneAlgebraicGhostingFunctor(*algebraic_gf, to_mesh);
 }
 
 void

@@ -2142,6 +2142,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     }
     else // rm_type is algebraic or coupling
     {
+      if (!_executioner)
+        mooseError("We must have an executioner by now or else we do not have to data to add "
+                   "algebraic or coupling functors to in MooseApp::attachRelationshipManagers");
+
       // Now we've built the problem, so we can use it
       auto & problem = _executioner->feProblem();
       auto & undisp_nl = problem.systemBaseNonlinear();

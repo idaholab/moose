@@ -719,6 +719,19 @@ public:
    */
   virtual const CouplingMatrix * couplingMatrix() const = 0;
 
+private:
+  /**
+   * Creates (n_sys - 1) clones of the provided algebraic ghosting functor (corresponding to the
+   * nonlinear system algebraic ghosting functor), initializes the clone with the appropriate
+   * DofMap, and then adds the clone to said DofMap
+   * @param algebraic_gf the (nonlinear system's) algebraic ghosting functor to clone
+   * @param to_mesh whether the clone should be added to the corresponding DofMap's underyling
+   * MeshBase (the underlying MeshBase will be the same for every system held by this object's
+   * EquationSystems object)
+   */
+  void cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+
+public:
   /**
    * Add an algebraic ghosting functor to this problem's DofMaps
    */
