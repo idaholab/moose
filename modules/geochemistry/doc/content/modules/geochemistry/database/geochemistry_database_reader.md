@@ -114,7 +114,7 @@ To eliminate useless information, the Reader expects the user to supply the foll
 
 1. A list of basis components relevant to their problem.  These components must be chosen from the "basis species" in the database, the sorbing sites and the decoupled redox states that are in disequilibrium (if any).  In the Geochemists Workbench [!citep](bethke_2007), the basis is specified implicitly through the user providing [swap](swap.md) information, initial pH, initial free concentration, initial bulk concentration, a basis component involved in charge balance, etc.  However, for unambigious clarity, `geochemistry` demands that the user specify the basis components, before specifying swaps, initial conditions, etc.
 
-2. A list of species whose dynamics are governed by [kinetic rate laws](kinetics.md).  These can include:
+2. A list of species whose dynamics are governed by [kinetic rate laws](theory/index.md).  These can include:
 
 - redox pairs that are decoupled (so are in disequilibrium);
 - minerals that slowly precipitate or dissolve;

@@ -12,11 +12,11 @@ Here
 
 - $\mu$ \[J.mol$^{-1}$\] is the chemical potential
 - $\mu^{0}$ \[J.mol$^{-1}$\] is a constant
-- $f^{0}$ \[Pa\] is the gas fugacity at 1$\,$atm (or it might be $1\,\mathrm{bar}=10^{5}\,\mathrm{Pa}$ but I think the fugacity is not so precisely known that this small difference matters) and the temperature of interest
+- $f^{0}$ \[bar\] is the gas fugacity at 1$\,$atm (or it might be $1\,\mathrm{bar}=10^{5}\,\mathrm{Pa}$ but I think the fugacity is not so precisely known that this small difference matters) and the temperature of interest
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature
 - $\log$ is the natural logarithm
-- $f$ \[Pa\] is the gas-species fugacity.
+- $f$ \[bar\] is the gas-species fugacity.
 
 The gas-species fugacity is
 \begin{equation}
@@ -25,9 +25,9 @@ f = \chi P_{\mathrm{partial}} = \chi x P
 Here
 
 - $\chi$ \[dimensionless\] is the fugacity coefficient for the gas species
-- $P_{\mathrm{partial}}$ \[Pa\] is the gas-species partial pressure
+- $P_{\mathrm{partial}}$ \[bar\] is the gas-species partial pressure
 - $x$ \[dimensionless\] is the mole fraction of the gas species within the gas mixture
-- $P$ \[Pa\] is the total gas-mixture pressure
+- $P$ \[bar\] is the total gas-mixture pressure
 
 For ideal gases with ideal mixing, $\chi=1$.  Hence, for a pure gas (that is, $x=1$), $f=P$, so $\mu = \mu^{0} + RT\log P/P_{0}$, where $P_{0}$ is 1$\,$atm and $\mu^{0}$ is the chemical potential at 1$\,$atm.
 

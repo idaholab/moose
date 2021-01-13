@@ -4,7 +4,7 @@ This Kernel implements the PDE fragment
 \begin{equation}
 \nabla(\phi D\nabla c) \ ,
 \end{equation}
-which is part of the [transport](transport.md) equations.  Here
+which is part of the [transport](theory/index.md) equations.  Here
 
 - $\phi$ is the porosity, which may be a fixed real number or may be an `AuxVariable` that is spatially-dependent
 - $D$ is the hydrodynamic dispersion tensor (called `tensor_coeff` in the input file)
