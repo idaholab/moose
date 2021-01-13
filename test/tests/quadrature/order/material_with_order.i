@@ -1,4 +1,5 @@
 [Mesh]
+  parallel_type = REPLICATED
   [cmg]
     type = CartesianMeshGenerator
     dim = 2
