@@ -92,5 +92,3 @@ class Factory:
             
             file.write(json.dumps(out, indent=4, sort_keys=True))
             print("JSON dumped to moose/test/testoutput.json")
-
-       
