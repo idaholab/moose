@@ -10,7 +10,6 @@
 import os, sys
 import inspect
 import json
-import time
 class Factory:
     def __init__(self):
         self.objects = {}   # The registered Objects array
