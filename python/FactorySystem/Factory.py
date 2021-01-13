@@ -62,9 +62,7 @@ class Factory:
 
         for name, object in sorted(self.objects.items()):
             print("  [./" + name + "]")
-
             params = self.validParams(name)
-
             for key in sorted(params.desc):
                 default = ''
                 if params.isValid(key):
@@ -89,6 +87,6 @@ class Factory:
                         out[name][key] = {}
                         out[name][key]["default"] = params[key]
                         out[name][key]["description"] = params.getDescription(key)
-            
+
             file.write(json.dumps(out, indent=4, sort_keys=True))
             print("JSON dumped to moose/test/testoutput.json")
