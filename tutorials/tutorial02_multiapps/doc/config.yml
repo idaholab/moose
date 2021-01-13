@@ -9,6 +9,8 @@ Content:
             - css/**
             - js/**
             - bib/**
+    large_media:
+        root_dir: ${MOOSE_DIR}/large_media
 
 Renderer:
     type: MooseDocs.base.RevealRenderer
