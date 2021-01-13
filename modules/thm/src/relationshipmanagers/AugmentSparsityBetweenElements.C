@@ -61,5 +61,9 @@ AugmentSparsityBetweenElements::operator()(const MeshBase::const_element_iterato
 bool
 AugmentSparsityBetweenElements::operator>=(const RelationshipManager & rhs) const
 {
-  return baseGreaterEqual(rhs);
+  const auto * const rm = dynamic_cast<const AugmentSparsityBetweenElements *>(&rhs);
+  if (!rm)
+    return false;
+
+  return (_elem_map == rm->_elem_map) && baseGreaterEqual(rhs);
 }
