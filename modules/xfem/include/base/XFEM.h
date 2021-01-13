@@ -458,7 +458,7 @@ private:
    * @param cut_elem    The element being cut
    * @param gcuo        The GeometricCutUserObject for the cut
    */
-  bool getElemConsistentSideBoolean(const Elem * parent_elem,
-                                    const Elem * cut_elem,
-                                    const GeometricCutUserObject * gcuo) const;
+  bool getElementSideRelativeToInterface(const Elem * parent_elem,
+                                         const Elem * cut_elem,
+                                         const GeometricCutUserObject * gcuo) const;
 };

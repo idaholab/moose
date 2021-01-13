@@ -995,9 +995,9 @@ XFEM::healMesh()
           _healed_cuts.emplace(elem1, _geometric_cuts[i]);
           if ((*_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
           {
-            if (getElemConsistentSideBoolean(elem1, elem1, _geometric_cuts[i]))
+            if (getElementSideRelativeToInterface(elem1, elem1, _geometric_cuts[i]))
               storeMaterialPropertiesForElements(elem1, elem1, elem2);
-            else if (getElemConsistentSideBoolean(elem2, elem2, _geometric_cuts[i]))
+            else if (getElementSideRelativeToInterface(elem2, elem2, _geometric_cuts[i]))
               storeMaterialPropertiesForElements(elem1, elem2, elem1);
             else
               mooseError("Could not determine which element is on the positive side of the "
@@ -1374,7 +1374,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
           hmpit_older != _healed_material_properties_older.end())
       {
         const GeometricCutUserObject * gcuo = getGeometricCutForElem(parent_elem);
-        if (getElemConsistentSideBoolean(parent_elem, libmesh_elem, gcuo))
+        if (getElementSideRelativeToInterface(parent_elem, libmesh_elem, gcuo))
         {
           mooseAssert(!_healed_material_properties_used[parent_elem].first,
                       "revisting a healed material properties");
@@ -1439,7 +1439,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         (!hmpuit.second.first || !hmpuit.second.second))
     {
       const GeometricCutUserObject * gcuo = _healed_cuts[elem];
-      if (getElemConsistentSideBoolean(elem, elem, gcuo))
+      if (getElementSideRelativeToInterface(elem, elem, gcuo))
         setMaterialPropertiesForElement(elem,
                                         elem,
                                         _healed_material_properties[elem].first,
@@ -2186,9 +2186,9 @@ XFEM::setMaterialPropertiesForElement(
 }
 
 bool
-XFEM::getElemConsistentSideBoolean(const Elem * parent_elem,
-                                   const Elem * cut_elem,
-                                   const GeometricCutUserObject * gcuo) const
+XFEM::getElementSideRelativeToInterface(const Elem * parent_elem,
+                                        const Elem * cut_elem,
+                                        const GeometricCutUserObject * gcuo) const
 {
   const Node * node = parent_elem->node_ptr(0);
   unsigned int cut_side_id = gcuo->getCutSideID(node);
