@@ -5,12 +5,18 @@ www.mooseframework.org
 
 !---
 
-!include problem_statement.md
+!include intro.md
 
 !---
 
-!include step01_subapps.md
+!include step01_multiapps.md
 
 !---
+
+!include step02_transfers.md
+
+!---
+
+!include step03_coupling.md
 
 !bibtex bibliography title-level=1
