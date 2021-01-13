@@ -1,15 +1,8 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 10
-
-  xmin = -0.05
-  xmax = 0.05
-  ymin = -0.05
-  ymax = 0.05
-  zmax = 3
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -18,9 +11,7 @@
 []
 
 [AuxVariables]
-  [u_integral]
-    order = CONSTANT
-    family = MONOMIAL
+  [ut]
   []
 []
 
@@ -36,16 +27,16 @@
 []
 
 [BCs]
-  [front]
+  [left]
     type = DirichletBC
     variable = v
-    boundary = front
+    boundary = left
     value = 0
   []
-  [back]
+  [right]
     type = DirichletBC
     variable = v
-    boundary = back
+    boundary = right
     value = 1
   []
 []
@@ -65,12 +56,9 @@
   exodus = true
 []
 
-[UserObjects]
-  [layered_average]
-    type = NearestPointLayeredAverage
-    points = '0 0 0'
-    direction = z
-    num_layers = 4
+[Postprocessors]
+  [average_v]
+    type = ElementAverageValue
     variable = v
   []
 []
