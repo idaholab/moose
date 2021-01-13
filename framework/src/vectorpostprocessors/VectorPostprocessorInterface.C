@@ -193,7 +193,7 @@ VectorPostprocessorInterface::getVectorPostprocessorContextByNameHelper(
 
   // Retrieve the VectorPostprocessorContext which contains the scattered value to be referenced
   const ReporterContextBase * context_ptr =
-      _vpi_feproblem.getReporterData().getReporterContextBaseHelper(r_name);
+      _vpi_feproblem.getReporterData().getReporterContextBase(r_name);
   auto vpp_context_ptr =
       dynamic_cast<const VectorPostprocessorContext<VectorPostprocessorValue> *>(context_ptr);
   mooseAssert(vpp_context_ptr != nullptr, "Failed to get the VectorPostprocessorContext");
