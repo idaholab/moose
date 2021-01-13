@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "ADLAROMANCEStressUpdateBase.h"
+#include "LAROMANCEStressUpdateBase.h"
 
-class SS316HLAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase
+template <bool is_ad>
+class SS316HLAROMANCEStressUpdateTestTempl : public LAROMANCEStressUpdateBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters);
+  SS316HLAROMANCEStressUpdateTestTempl(const InputParameters & parameters);
 
 protected:
   virtual std::vector<std::vector<std::vector<ROMInputTransform>>> getTransform() override;
@@ -26,3 +27,6 @@ protected:
 
   virtual Real romStrainCutoff() override { return 1.0e-10; }
 };
+
+typedef SS316HLAROMANCEStressUpdateTestTempl<false> SS316HLAROMANCEStressUpdateTest;
+typedef SS316HLAROMANCEStressUpdateTestTempl<true> ADSS316HLAROMANCEStressUpdateTest;

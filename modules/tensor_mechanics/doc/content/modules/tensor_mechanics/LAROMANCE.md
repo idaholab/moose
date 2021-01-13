@@ -2,17 +2,17 @@
 
 ## Description
 
-The `ADLAROMANCEStressUpdateBase` class computes the creep rate of materials by sampling a Los Alamos Reduced Order
+The `LAROMANCEStressUpdateBase` class computes the creep rate of materials by sampling a Los Alamos Reduced Order
 Model Applied to Nonlinear Constitutive Equations (LAROMANCE) formulated
-via calibration with lower-length scale simulations. `ADLAROMANCEStressUpdateBase` utilizes the exact same techniques
+via calibration with lower-length scale simulations. `LAROMANCEStressUpdateBase` utilizes the exact same techniques
 utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) including the radial
-return method implemented in [ADRadialReturnStressUpdate](/ADRadialReturnStressUpdate.md), however
+return method implemented in [RadialReturnStressUpdate](/RadialReturnStressUpdate.md), however
 in place of a traditional power-law creep model, a ROM is sampled to determine the creep rate as a
 function of temperature, defect concentrations, the von Mises trial stress, and an environmental
 factor. In addition, lower-length scale information, here cell dislocations and cell wall dislocations,
 are evolved as determined by the ROM.
 
-`ADLAROMANCEStressUpdateBase` provides the necessary math and implementation for ROMs provided in
+`LAROMANCEStressUpdateBase` provides the necessary math and implementation for ROMs provided in
 the correct `LAROMANCE` model format, which essentially includes the necessary material specific
 data. An example of how to implement the necessary data is provided in `SS316HLAROMANCEStressUpdateTest`.
 
@@ -170,7 +170,7 @@ where $l_1$ and $l_2$ are the limits for tiles 1 and 2 over which the strain is 
 ### ROM Input Windows
 
 Due to the nature of formulating the ROM, the input values are limited to a window of applicability,
-outside of which, the ROM can no longer be guaranteed to be valid. `ADLAROMANCEStressUpdateBase` handles
+outside of which, the ROM can no longer be guaranteed to be valid. `LAROMANCEStressUpdateBase` handles
 these limits for some of the coupled state variables internally via input parameters for each input
 that allow for error handling or extrapolation.
 If the input values are to be extrapolated, a sigmoidal function is utilized
@@ -181,12 +181,12 @@ and thus must be within the window of applicability at the start of the simulati
 
 ## Writing a LAROMANCE Stress Update Material
 
-While `ADLAROMANCEStressUpdateBase` contains the necessary algorithms contained to evaluate the ROM,
+While `LAROMANCEStressUpdateBase` contains the necessary algorithms contained to evaluate the ROM,
 the material specific `LAROMANCE` data is contained in inherited classes.
 Within the `tensor_mechanics` module, a test object `SS316HLAROMANCEStressUpdateTest` is included as
 an example of how a ROM can be formulated. Note that `SS316HLAROMANCEStressUpdateTest` is only a
 test object located in `tensor_mechanics/test/src/`, and is not actively updated nor validated, but
-rather included in order to verify the math contained in `ADLAROMANCEStressUpdateBase`. The
+rather included in order to verify the math contained in `LAROMANCEStressUpdateBase`. The
 material specific ROMs provided in specific MOOSE applications should be utilized, which consists of
 the input limits, input transformations, and Legendre polynomials. Derived classes must overwrite
 the four virtual methods:
@@ -207,7 +207,7 @@ Additionally, new `LAROMANCE` models can override four input parameter defaults 
 - +initial_wall_dislocation_density+: Cell wall (locked) dislocation density initial value.
 - +max_relative_wall_dislocation_increment+: Maximum increment of cell wall (locked) dislocation density initial value.
 
-`ADLAROMANCEStressUpdateBase` derived classes must be run in conjunction with an inelastic strain return mapping stress
+`LAROMANCEStressUpdateBase` derived classes must be run in conjunction with an inelastic strain return mapping stress
 calculator such as [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md).
 
 !bibtex bibliography

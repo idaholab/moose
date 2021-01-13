@@ -1,26 +1,14 @@
 [Tests]
   [./rom]
-    issues = '#14046'
+    issues = '#14046 #16520'
     design = '/LAROMANCE.md'
-    requirement = 'The system shall compute a creep rate based on a reduced order model'
+    requirement = 'The system shall compute a creep rate based on a reduced order model '
     [./3d]
       type = 'CSVDiff'
       input = '3d.i'
       csvdiff = '3d_out.csv'
       detail = 'in 3D.'
       petsc_version = '>=3.9.0'
-      allow_test_objects = true
-    [../]
-    [./3d-jac]
-      type = 'PetscJacobianTester'
-      input = '3d.i'
-      prereq = 'rom/3d'
-      ratio_tol = 5e-7
-      method = 'opt'
-      cli_args = 'Executioner/num_steps=2'
-      difference_tol = 1
-      run_sim = True
-      detail = 'in 3D and compute a perfect Jacobian.'
       allow_test_objects = true
     [../]
 
@@ -32,24 +20,13 @@
       petsc_version = '>=3.9.0'
       allow_test_objects = true
     [../]
-    [./2drz-jac]
-      type = 'PetscJacobianTester'
-      input = '2drz.i'
-      method = 'opt'
-      prereq = 'rom/2drz'
-      ratio_tol = 5e-7
-      difference_tol = 1
-      cli_args = 'Executioner/num_steps=2'
-      run_sim = True
-      detail = 'in 2DRz and compute a perfect Jacobian.'
-      allow_test_objects = true
-    [../]
 
     [./verification]
       type = 'CSVDiff'
       input = 'verification.i'
       csvdiff = 'verification_1e-3_out.csv'
       petsc_version = '>=3.9.0'
+      cli_args = 'Executioner/dt=1e-3 Outputs/file_base=verification_1e-3_out'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters.'
@@ -76,6 +53,93 @@
     [./lower_limit_extrapolated]
       type = 'CSVDiff'
       input = lower_limit.i
+      csvdiff = extrapolated_out.csv
+      cli_args = 'temp=500 disp=0.5e6 Outputs/file_base=extrapolated_out'
+      allow_test_objects = true
+      detail = 'below the lower temperature limit and extrapolate correctly.'
+    [../]
+  [../]
+  [./ADrom]
+    issues = '#14046'
+    design = '/LAROMANCE.md'
+    requirement = 'The system shall compute a creep rate based on a reduced order model using AD '
+    [./3d]
+      type = 'CSVDiff'
+      input = 'AD3d.i'
+      csvdiff = '3d_out.csv'
+      cli_args = 'Outputs/file_base=3d_out'
+      detail = 'in 3D.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    [../]
+    [./3d-jac]
+      type = 'PetscJacobianTester'
+      input = 'AD3d.i'
+      prereq = 'ADrom/3d'
+      ratio_tol = 5e-7
+      method = 'opt'
+      cli_args = 'Executioner/num_steps=2'
+      difference_tol = 1
+      run_sim = True
+      detail = 'in 3D and compute a perfect Jacobian.'
+      allow_test_objects = true
+    [../]
+
+    [./2drz]
+      type = 'CSVDiff'
+      input = 'AD2drz.i'
+      csvdiff = '2drz_out.csv'
+      cli_args = 'Outputs/file_base=2drz_out'
+      detail = 'in 2DRz.'
+      petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    [../]
+    [./2drz-jac]
+      type = 'PetscJacobianTester'
+      input = 'AD2drz.i'
+      method = 'opt'
+      prereq = 'ADrom/2drz'
+      ratio_tol = 5e-7
+      difference_tol = 1
+      cli_args = 'Executioner/num_steps=2'
+      run_sim = True
+      detail = 'in 2DRz and compute a perfect Jacobian.'
+      allow_test_objects = true
+    [../]
+
+    [./verification]
+      type = 'CSVDiff'
+      input = 'ADverification.i'
+      csvdiff = 'verification_1e-3_out.csv'
+      petsc_version = '>=3.9.0'
+      cli_args = 'Executioner/dt=1e-3 Outputs/file_base=verification_1e-3_out'
+      max_parallel = 1
+      allow_test_objects = true
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters.'
+    [../]
+    [./verification_heavy]
+      type = 'CSVDiff'
+      input = 'ADverification.i'
+      csvdiff = 'verification_1e-5_out.csv'
+      heavy = true
+      petsc_version = '>=3.9.0'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=verification_1e-5_out'
+      max_parallel = 1
+      allow_test_objects = true
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters.'
+    [../]
+
+    [./lower_limit]
+      type = 'CSVDiff'
+      input = ADlower_limit.i
+      csvdiff = lower_limit_out.csv
+      cli_args = 'Outputs/file_base=lower_limit_out'
+      allow_test_objects = true
+      detail = 'at the lower temperature limit.'
+    [../]
+    [./lower_limit_extrapolated]
+      type = 'CSVDiff'
+      input = ADlower_limit.i
       csvdiff = extrapolated_out.csv
       cli_args = 'temp=500 disp=0.5e6 Outputs/file_base=extrapolated_out'
       allow_test_objects = true
