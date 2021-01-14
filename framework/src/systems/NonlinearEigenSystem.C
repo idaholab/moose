@@ -25,7 +25,6 @@
 #include "MooseVariableScalar.h"
 #include "ResidualObject.h"
 
-#include "libmesh/eigen_system.h"
 #include "libmesh/libmesh_config.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/sparse_matrix.h"
@@ -99,9 +98,8 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 }
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
-  : NonlinearSystemBase(
-        eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
-    _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
+  : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<EigenSystem>(name), name),
+    _eigen_sys(eigen_problem.es().get_system<EigenSystem>(name)),
     _eigen_problem(eigen_problem),
     _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
@@ -113,7 +111,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   sys().attach_assemble_function(Moose::assemble_matrix);
 
   SlepcEigenSolver<Number> * solver =
-      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(_transient_sys.eigen_solver.get());
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(_eigen_sys.eigen_solver.get());
 
   if (!solver)
     mooseError("A slepc eigen solver is required");
@@ -223,7 +221,7 @@ NonlinearEigenSystem::solve()
 
   // We apply initial guess for only nonlinear solver
   if (_eigen_problem.isNonlinearEigenvalueSolver())
-    _transient_sys.set_initial_space(solution());
+    _eigen_sys.set_initial_space(solution());
 
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
@@ -256,28 +254,28 @@ void
 NonlinearEigenSystem::attachSLEPcCallbacks()
 {
   // Tell libmesh not close matrices before solve
-  _transient_sys.get_eigen_solver().set_close_matrix_before_solve(false);
+  _eigen_sys.get_eigen_solver().set_close_matrix_before_solve(false);
 
   // Matrix A
-  if (_transient_sys.has_matrix_A())
+  if (_eigen_sys.has_matrix_A())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_matrix_A()).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_A()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
   }
 
   // Matrix B
-  if (_transient_sys.has_matrix_B())
+  if (_eigen_sys.has_matrix_B())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_matrix_B()).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
 
   // Shell matrix A
-  if (_transient_sys.has_shell_matrix_A())
+  if (_eigen_sys.has_shell_matrix_A())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_matrix_A()).mat();
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_A()).mat();
 
     // Attach callbacks for nonlinear eigenvalue solver
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
@@ -287,9 +285,9 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   }
 
   // Shell matrix B
-  if (_transient_sys.has_shell_matrix_B())
+  if (_eigen_sys.has_shell_matrix_B())
   {
-    Mat mat = static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_matrix_B()).mat();
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_matrix_B()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
 
@@ -298,18 +296,17 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   }
 
   // Preconditioning matrix
-  if (_transient_sys.has_precond_matrix())
+  if (_eigen_sys.has_precond_matrix())
   {
-    Mat mat = static_cast<PetscMatrix<Number> &>(_transient_sys.get_precond_matrix()).mat();
+    Mat mat = static_cast<PetscMatrix<Number> &>(_eigen_sys.get_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
 
   // Shell preconditioning matrix
-  if (_transient_sys.has_shell_precond_matrix())
+  if (_eigen_sys.has_shell_precond_matrix())
   {
-    Mat mat =
-        static_cast<PetscShellMatrix<Number> &>(_transient_sys.get_shell_precond_matrix()).mat();
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(_eigen_sys.get_shell_precond_matrix()).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
@@ -330,7 +327,7 @@ NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 bool
 NonlinearEigenSystem::converged()
 {
-  return _transient_sys.get_n_converged();
+  return _eigen_sys.get_n_converged();
 }
 
 unsigned int
@@ -369,7 +366,7 @@ SNES
 NonlinearEigenSystem::getSNES()
 {
   SlepcEigenSolver<Number> * solver =
-      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_transient_sys.eigen_solver));
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
 
   if (!solver)
     mooseError("There is no a eigen solver");
@@ -429,7 +426,7 @@ NonlinearEigenSystem::getConvergedEigenvalue(dof_id_type n) const
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
-  return _transient_sys.get_eigenvalue(n);
+  return _eigen_sys.get_eigenvalue(n);
 }
 
 std::pair<Real, Real>
@@ -440,7 +437,7 @@ NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n) const
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
 
-  return _transient_sys.get_eigenpair(n);
+  return _eigen_sys.get_eigenpair(n);
 }
 
 void
