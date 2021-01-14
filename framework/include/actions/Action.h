@@ -71,7 +71,7 @@ private:
                          std::string rm_name,
                          Moose::RelationshipManagerType rm_type,
                          Moose::RelationshipManagerInputParameterCallback rm_input_parameter_func,
-                         Moose::RMSystemType sys_type);
+                         Moose::RMSystemType sys_type = Moose::RMSystemType::NONE);
 
 protected:
   /**

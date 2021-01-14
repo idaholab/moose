@@ -708,11 +708,20 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+private:
   /**
-   * Purge this relationship manager from meshes and DofMaps and finally from us
+   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
+   * private because only this object knows when we should remove relationship managers: when we are
+   * adding relationship managers to this object's storage, we perform an operator>= comparison
+   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
+   * not add the new RM because the comparison indicates that we would gain no new coverage.
+   * However, if no comparison return true, then we add the new RM and we turn the comparison
+   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
+   * preexisting RMs using this method
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
+public:
   /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
@@ -974,6 +983,12 @@ protected:
   bool _check_input;
 
   std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
+
+  /// A map from undisplaced relationship managers to their displaced clone (stored as the base
+  /// GhostingFunctor). Anytime we clone in attachRelationshipManagers we create a map entry from
+  /// the cloned undisplaced relationship manager to its displaced clone counterpart. We leverage
+  /// this map when removing relationship managers/ghosting functors
+  std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
 
   /// The library, registration method and the handle to the method
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;

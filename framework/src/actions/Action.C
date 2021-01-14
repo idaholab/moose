@@ -100,7 +100,7 @@ Action::addRelationshipManager(
     std::string rm_name,
     Moose::RelationshipManagerType rm_type,
     Moose::RelationshipManagerInputParameterCallback rm_input_parameter_func,
-    Moose::RMSystemType sys_type)
+    Moose::RMSystemType)
 {
   // These need unique names
   static unsigned int unique_object_id = 0;
@@ -110,14 +110,8 @@ Action::addRelationshipManager(
 
   auto rm_params = _factory.getValidParams(rm_name);
   rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
-  rm_params.set<Moose::RMSystemType>("system_type") = sys_type;
 
-  auto for_whom = name();
-  if (sys_type == Moose::RMSystemType::NONLINEAR)
-    for_whom += "_nl";
-  else if (sys_type == Moose::RMSystemType::AUXILIARY)
-    for_whom += "_aux";
-  rm_params.set<std::string>("for_whom") = for_whom;
+  rm_params.set<std::string>("for_whom") = name();
 
   // If there is a callback for setting the RM parameters let's use it
   if (rm_input_parameter_func)
@@ -148,8 +142,6 @@ bool
 Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
                                 const InputParameters & moose_object_pars)
 {
-  typedef RelationshipManager RM;
-
   const auto & buildable_types = moose_object_pars.getBuildableRelationshipManagerTypes();
 
   bool added = false;
@@ -160,41 +152,9 @@ Action::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type,
     auto & rm_type = std::get<1>(buildable_type);
     auto rm_input_parameter_func = std::get<2>(buildable_type);
 
-    // If we have an algebraic ghosting functor, then we are going to duplicate the
-    // RelationshipManager object. This makes bookkeeping for relationship manager coverage more
-    // straightforward, i.e. when we are deciding whether to add an algebraic relationship manager,
-    // we can easily check whether a given System/DofMap is already covered or not. If we have an
-    // object that is strictly a coupling functor, we will not duplicate it and we will apply it
-    // just to the NonlinearSystem(Base). Duplicating RMs for the DofMaps is also very important for
-    // ensuring that a non-null CouplingMatrix (reflecting coupling in the nonlinear system) doesn't
-    // get applied to the auxiliary system
-
-    bool is_algebraic = RM::isAlgebraic(rm_type);
-    bool is_coupleable = RM::isCoupling(rm_type);
-
-    auto sys_type = (is_algebraic || is_coupleable) ? Moose::RMSystemType::NONLINEAR
-                                                    : Moose::RMSystemType::NONE;
-
-    added = addRelationshipManager(input_rm_type,
-                                   moose_object_pars,
-                                   rm_name,
-                                   rm_type,
-                                   rm_input_parameter_func,
-                                   sys_type) ||
+    added = addRelationshipManager(
+                input_rm_type, moose_object_pars, rm_name, rm_type, rm_input_parameter_func) ||
             added;
-
-    if (is_algebraic)
-    {
-      auto duplicate_rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
-      sys_type = Moose::RMSystemType::AUXILIARY;
-      added = addRelationshipManager(input_rm_type,
-                                     moose_object_pars,
-                                     rm_name,
-                                     duplicate_rm_type,
-                                     rm_input_parameter_func,
-                                     sys_type) ||
-              added;
-    }
   }
 
   return added;
