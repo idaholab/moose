@@ -155,6 +155,10 @@ class RenderLinkBase(components.RenderComponent):
             else:
                 link['class'] = 'moose-error'
                 tokens.String(link, content=url)
+                msg = "Unable to locate local heading with URL '{}'".format(url)
+                LOG.error(common.report_error(msg, page.source,
+                                              token.info.line if token.info else None,
+                                              token.info[0] if token.info else token.text()))
         else:
             token.copyToToken(link)
 

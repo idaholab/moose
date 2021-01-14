@@ -14,7 +14,7 @@ import collections
 import logging
 
 import mooseutils
-from .get_requirements import get_requirements
+from .get_requirements import get_requirements_from_tests
 from .check_requirements import check_requirements, RequirementLogHelper
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
@@ -55,7 +55,7 @@ class SQARequirementReport(SQAReport):
                 raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
 
         # Build Requirement objects and remove directory based dict
-        req_dict = get_requirements(directories, specs.split())
+        req_dict = get_requirements_from_tests(directories, specs.split())
         requirements = []
         for values in req_dict.values():
             requirements += values

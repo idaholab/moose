@@ -150,3 +150,10 @@ def git_committers(loc=os.getcwd(), *args):
         items = line.split("\t", 1)
         counts[items[1]] = int(items[0])
     return counts
+
+def git_localpath(filename):
+    """
+    Return the path from the root of the repository.
+    """
+    root = git_root_dir(os.path.dirname(filename))
+    return os.path.relpath(filename, root)

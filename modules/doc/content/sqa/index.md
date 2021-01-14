@@ -21,7 +21,8 @@ The software quality documents for MOOSE are listed below:
 - [System Requirement Specification (SRS)](sqa/moose_srs.md)
 - [Requirements Traceability Matrix (RTM)](sqa/moose_rtm.md)
 - [System Design Description (SDD)](sqa/moose_sdd.md)
-- [Verification and Validation Report](sqa/moose_vvr.md)
+- [Verification and Validation Report (VVR)](sqa/moose_vvr.md)
+- [Failure Analysis Report (FAR)](sqa/moose_far.md)
 
 The following link(s) may also be of interest when creating documentation related to software
 quality.

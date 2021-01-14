@@ -34,7 +34,7 @@ class RequirementLogHelper(LogHelper):
         line = mooseutils.colorText(str(line if (line is not None) else req.line), 'CYAN', colored=RequirementLogHelper.COLOR_TEXT)
         return '{}:{}:{}\n'.format(filename, name, line)
 
-def check_requirements(requirements, file_list=None, color_text=True, allowed_collections=None, **kwargs):
+def check_requirements(requirements, file_list=None, color_text=True, allowed_collections=None, allowed_classifications=None, **kwargs):
     """
     Tool for checking Requirement for deficiencies
     """
@@ -88,7 +88,7 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
 
     # Setup allowed collections
     if allowed_collections is None:
-        allowed_collections = set(moosesqa.MOOSESQA_COLLECTIONS.keys())
+        allowed_collections = set(moosesqa.MOOSESQA_COLLECTIONS)
 
     # Storage container for duplicate detection
     requirement_dict = collections.defaultdict(set)

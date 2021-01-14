@@ -1,0 +1,19 @@
+[Tests]
+  [single]
+    requirement = "A simple requirement"
+    issues = "#1234"
+    design = "file.md"
+  []
+
+  [group]
+    requirement = "A group requirement"
+    issues = "#4321"
+    design = "other.md"
+    [a]
+      detail = 'a'
+    []
+    [b]
+      detail = 'b'
+    []
+  []
+[]

@@ -1,4 +1,4 @@
-!template load file=srs.md.template category=framework project=Framework
+!template load file=srs.md.template project=Framework
 
 !template! item key=system-purpose
 !include sqa/system_purpose.md
@@ -76,39 +76,21 @@ each addition to the MOOSE framework or its modules.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
 - 100 GB disk space
 - C++11 compatible compiler (GCC, Clang)
-- Python 2.6+
+- Python 3.6+
 - Git
 !template-end!
 
-!template! item key=functional-requirements
-!sqa requirements link=False category={{category}}
-!template-end!
+!template item key=functional-requirements
+!sqa requirements link=False collections=FUNCTIONAL category=framework
 
-!template! item key=useability-requirements
-!sqa requirements-matrix prefix=U
-- The system will be command-line and input file driven.
-- The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed.
-- The system shall provide diagnostics when the input file fails to parse, or the format is incorrect.
-- The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions.
-!template-end!
+!template item key=usability-requirements
+!sqa requirements link=False collections=USABILITY category=framework
 
-!template! item key=performance-requirements
-!sqa requirements-matrix prefix=P
-- The system will support multi-process distributed memory execution.
-- The system will support multi-process shared memory execution.
-- The system will support execution on Unix-based laptops.
-- The system will support execution on Unix-based workstation systems.
-- The system will support execution on large Unix-based cluster systems.
-!template-end!
+!template item key=performance-requirements
+!sqa requirements link=False collections=PERFORMANCE category=framework
 
-!template! item key=system-interfaces
-!sqa requirements-matrix prefix=S
-- The system shall support POSIX compliant systems.
-- The system shall support the Message Passing Interface (MPI) standard.
-- The system shall support POSIX ``pthreads''.
-- The system shall support Intel Threaded Building Blocks (TBB) interface.
-- The system shall support the OpenMP threading interface.
-!template-end!
+!template item key=system-interfaces-requirements
+!sqa requirements link=False collections=SYSTEM category=framework
 
 !template! item key=human-system-integration
 [!ac](MOOSE) is a command line driven application which conforms to all standard terminal
@@ -199,18 +181,4 @@ teams follow the [!ac](NQA-1) standards.
 No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) source code. However,
 some [!ac](MOOSE)-based applications maybe be export controlled in which case all export control restrictions must
 be adhered to when packaging and shipping media.
-!template-end!
-
-!template! item key=requirement-collections-intro
-A "collection" is a grouping of requirements that are serving a similar purpose. For example, the
-"FAILURE_ANALYSIS" collection is comprised of requirements that perform checks for simulation
-failures. The following table lists the names and descriptions of the available collections.
-
-!sqa collections-list caption=List of requirement "collections" names and descriptions.
-
-The following is a complete list of each requirement that has been assigned to a collection.
-!template-end!
-
-!template! item key=requirement-collections
-!sqa collections category={{category}} link=False
 !template-end!

@@ -1,4 +1,4 @@
-[Tests]
+[Tests] # NOTE: This file is used for testing by the python/moosesqa package
   group = 'Box Marker'
   design = "/Markers/index.md /BoxMarker.md"
   issues = '#1275'

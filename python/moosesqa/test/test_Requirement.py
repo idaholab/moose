@@ -14,7 +14,7 @@ from moosesqa import Requirement, Detail, TestSpecification
 
 class TestTestSpecification(unittest.TestCase):
     def testInit(self):
-        kwargs = dict(name='name', path='path', filename='filename', line=1, type='Exodiff',
+        kwargs = dict(name='name', filename='filename', line=1, type='Exodiff',
                       prerequisites=set(['p0', 'p1']), skip=False, deleted=False)
 
         spec = TestSpecification(**kwargs)
@@ -34,7 +34,7 @@ class TestTestSpecification(unittest.TestCase):
 
 class TestRequirement(unittest.TestCase):
     def testInit(self):
-        kwargs = dict(name='name', path='path', filename='filename', line=1, label='label',
+        kwargs = dict(name='name', filename='filename', line=1, label='label',
                       requirement='requirement', requirement_line=2,
                       design=['design'], design_line=3,
                       issues=['issues'], issues_line=4,
@@ -105,6 +105,13 @@ class TestRequirement(unittest.TestCase):
         self.assertEqual(len(req.collections), 1)
         self.assertEqual(req.collections, {'andrew'})
 
+    def testClassification(self):
+        req = Requirement()
+        self.assertIsNone(req.classification)
+
+        req = Requirement(classification='andrew')
+        self.assertEqual(req.classification, 'andrew')
+
     def testNames(self):
         req = Requirement()
         self.assertEqual(len(req.names), 0)
@@ -120,7 +127,7 @@ class TestRequirement(unittest.TestCase):
 
 class TestDetail(unittest.TestCase):
     def testInit(self):
-        kwargs = dict(name='name', path='path', filename='filename', line=1)
+        kwargs = dict(name='name', filename='filename', line=1)
 
         spec = Detail(**kwargs)
         for key, value in kwargs.items():

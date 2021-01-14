@@ -113,4 +113,4 @@ Follow the MOOSE standards for [contributing code and documentation](MooseDocs/g
 ## Software Quality
 
 The Tensor Mechanics module follows strict software quality guidelines, refer to
-[tensor_mechanics/sqa/index.md] for more information.
+[Tensor Mechanics SQA](tensor_mechanics/sqa/index.md) for more information.
