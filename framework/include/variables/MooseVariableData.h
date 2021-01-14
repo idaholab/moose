@@ -478,6 +478,12 @@ public:
     return _matrix_tag_u[tag];
   }
 
+  /**
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
+   */
+  unsigned int oldestSolutionStateRequested() const;
+
 private:
   /**
    * Helper methods for assigning nodal values from their corresponding solution values (dof

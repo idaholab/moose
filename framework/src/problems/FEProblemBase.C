@@ -641,6 +641,16 @@ FEProblemBase::initialSetup()
 
   addExtraVectors();
 
+  // Setup the solution states (current, old, etc) in each system based on
+  // its default and the states requested of each of its variables
+  _nl->initSolutionState();
+  _aux->initSolutionState();
+  if (getDisplacedProblem())
+  {
+    getDisplacedProblem()->nlSys().initSolutionState();
+    getDisplacedProblem()->auxSys().initSolutionState();
+  }
+
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
   dof_id_type max_var_n_dofs_per_elem;

@@ -16,7 +16,4 @@ DumpObjectsNonlinearSystem::DumpObjectsNonlinearSystem(FEProblemBase & problem,
         problem, problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
     _dummy(nullptr)
 {
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
 }

@@ -67,6 +67,8 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   // FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
   _problem.transient(true);
+  _problem.getNonlinearSystemBase().needSolutionState(2);
+  _fe_problem.getAuxiliarySystem().needSolutionState(2);
 
   // we want to tell the App about what our system time is (in case anyone else is interested).
   Real system_time = getParam<Real>("time");

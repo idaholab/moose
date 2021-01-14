@@ -166,6 +166,20 @@ protected:
   /// This callback is used for AuxKernelTempls that need to perform a per-element calculation
   virtual void precalculateValue() {}
 
+  /**
+   * Retrieves the old value of the variable that this AuxKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const typename OutputTools<ComputeValueType>::VariableValue & uOld() const;
+
+  /**
+   * Retrieves the older value of the variable that this AuxKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const typename OutputTools<ComputeValueType>::VariableValue & uOlder() const;
+
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
   /// System this kernel is part of
@@ -184,12 +198,6 @@ protected:
 
   /// Holds the solution at current quadrature points
   const typename OutputTools<ComputeValueType>::VariableValue & _u;
-
-  /// Holds the previous solution at the current quadrature point.
-  const typename OutputTools<ComputeValueType>::VariableValue & _u_old;
-
-  /// Holds the t-2 solution at the current quadrature point.
-  const typename OutputTools<ComputeValueType>::VariableValue & _u_older;
 
   /// Holds the the test functions
   const typename OutputTools<ComputeValueType>::VariableTestValue & _test;

@@ -22,7 +22,7 @@ AccumulateAux::validParams()
 }
 
 AccumulateAux::AccumulateAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _values(coupledValues("accumulate_from_variable"))
+  : AuxKernel(parameters), _values(coupledValues("accumulate_from_variable")), _u_old(uOld())
 {
 }
 

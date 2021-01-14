@@ -27,6 +27,7 @@ NewmarkAccelAux::NewmarkAccelAux(const InputParameters & parameters)
     _disp_old(coupledValueOld("displacement")),
     _disp(coupledValue("displacement")),
     _vel_old(coupledValueOld("velocity")),
+    _u_old(uOld()),
     _beta(getParam<Real>("beta"))
 {
 }

@@ -25,6 +25,7 @@ NewmarkVelAux::NewmarkVelAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _accel_old(coupledValueOld("acceleration")),
     _accel(coupledValue("acceleration")),
+    _u_old(uOld()),
     _gamma(getParam<Real>("gamma"))
 {
 }

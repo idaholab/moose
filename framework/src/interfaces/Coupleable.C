@@ -19,6 +19,7 @@
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
+    _c_type(_c_parameters.get<std::string>("_type")),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _new_to_deprecated_coupled_vars(_c_parameters.getNewToDeprecatedVarMap()),
     _c_nodal(nodal),
@@ -1549,8 +1550,8 @@ Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp) con
 const ADVectorVariableSecond &
 adCoupledVectorSecond(const std::string & /*var_name*/, unsigned int /*comp = 0*/)
 {
-  mooseError(
-      "Automatic differentiation using second derivatives of vector variables is not implemented.");
+  mooseError("Automatic differentiation using second derivatives of vector variables is not "
+             "implemented.");
 }
 
 const ADVariableValue &
