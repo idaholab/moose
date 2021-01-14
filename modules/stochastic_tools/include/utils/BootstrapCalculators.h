@@ -19,6 +19,7 @@ class MooseRandom;
 
 namespace StochasticTools
 {
+template <typename InType, typename OutType>
 class Calculator;
 class BootstrapCalculator;
 
@@ -59,10 +60,10 @@ public:
    * Compute the bootstrap confidence level intervals.
    * @param data Vector of data from which statistics are to be computed
    * @param calc Calculator object defining the statistic to be computed
-   * @param is_distributed Flag indicating if the data is distributed in parallel
+   * @param is_distributed Flag indicating if the dMuata is distributed in parallel
    */
   virtual std::vector<Real> compute(const std::vector<Real> & data,
-                                    const Calculator & calc,
+                                    const Calculator<std::vector<Real>, Real> & calc,
                                     const bool is_distributed) const = 0;
 
   ///@{
@@ -75,8 +76,9 @@ public:
 
 protected:
   // Compute Bootstrap estimates of a statistic
-  std::vector<Real>
-  computeBootstrapEstimates(const std::vector<Real> &, const Calculator &, const bool) const;
+  std::vector<Real> computeBootstrapEstimates(const std::vector<Real> &,
+                                              const Calculator<std::vector<Real>, Real> &,
+                                              const bool) const;
 
   // Randomly shuffle a vector of data
   std::vector<Real> shuffle(const std::vector<Real> &, MooseRandom &, const bool) const;
@@ -105,8 +107,9 @@ public:
              unsigned int replicates,
              unsigned int seed);
 
-  virtual std::vector<Real>
-  compute(const std::vector<Real> &, const Calculator &, const bool) const override;
+  virtual std::vector<Real> compute(const std::vector<Real> &,
+                                    const Calculator<std::vector<Real>, Real> &,
+                                    const bool) const override;
 };
 
 /*
@@ -120,12 +123,15 @@ public:
                            unsigned int replicates,
                            unsigned int seed);
 
-  virtual std::vector<Real>
-  compute(const std::vector<Real> &, const Calculator &, const bool) const override;
+  virtual std::vector<Real> compute(const std::vector<Real> &,
+                                    const Calculator<std::vector<Real>, Real> &,
+                                    const bool) const override;
 
 private:
   // Compute the acceleration, see Efron and Tibshirani (2003), Ch. 14, Eq. 14.15, p 186.
-  Real acceleration(const std::vector<Real> &, const Calculator &, const bool) const;
+  Real acceleration(const std::vector<Real> &,
+                    const Calculator<std::vector<Real>, Real> &,
+                    const bool) const;
 };
 
 } // namespace

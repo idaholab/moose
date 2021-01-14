@@ -39,7 +39,7 @@ private:
   const ReporterProducerEnum & _data_mode;
 
   /// Storage for the Calculator object for the desired stat, this is created in constructor
-  std::unique_ptr<const StochasticTools::Calculator> _calc_ptr;
+  std::unique_ptr<const StochasticTools::Calculator<std::vector<T>, T>> _calc_ptr;
 
   /// Storage for the BootstrapCalculator for the desired confidence interval calculations (optional)
   const StochasticTools::BootstrapCalculator * _ci_calc_ptr;

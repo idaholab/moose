@@ -66,7 +66,7 @@ BootstrapCalculator::BootstrapCalculator(const libMesh::ParallelObject & other,
 
 std::vector<Real>
 BootstrapCalculator::computeBootstrapEstimates(const std::vector<Real> & data,
-                                               const Calculator & calc,
+                                               const Calculator<std::vector<Real>, Real> & calc,
                                                const bool is_distributed) const
 {
   MooseRandom generator;
@@ -198,7 +198,7 @@ Percentile::Percentile(const libMesh::ParallelObject & other,
 
 std::vector<Real>
 Percentile::compute(const std::vector<Real> & data,
-                    const Calculator & calc,
+                    const Calculator<std::vector<Real>, Real> & calc,
                     const bool is_distributed) const
 {
   // Bootstrap estimates
@@ -228,7 +228,7 @@ BiasCorrectedAccelerated::BiasCorrectedAccelerated(const libMesh::ParallelObject
 
 std::vector<Real>
 BiasCorrectedAccelerated::compute(const std::vector<Real> & data,
-                                  const Calculator & calc,
+                                  const Calculator<std::vector<Real>, Real> & calc,
                                   const bool is_distributed) const
 {
   if (is_distributed)
@@ -263,7 +263,7 @@ BiasCorrectedAccelerated::compute(const std::vector<Real> & data,
 
 Real
 BiasCorrectedAccelerated::acceleration(const std::vector<Real> & data,
-                                       const Calculator & calc,
+                                       const Calculator<std::vector<Real>, Real> & calc,
                                        const bool is_distributed) const
 {
   // Jackknife statistics
