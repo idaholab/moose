@@ -117,8 +117,7 @@ Settings, as listed in [heading-settings], are be applied after the heading titl
 
 !devel example caption=Use of settings within heading. id=heading-multiline
 ## A Heading May Span
-
-Multiple Lines (this is useful if they are really long)
+   Multiple Lines (this is useful if they are really long)
    style=font-size:15pt
    id=level-two
 
@@ -155,7 +154,6 @@ item by two spaces, as shown in [unordered-nested-example].
   ```
 
 - Another item
-!devel-end!
 
 
 - Foo
@@ -163,7 +161,7 @@ item by two spaces, as shown in [unordered-nested-example].
   ```
   bar
   ```
-
+!devel-end!
 
 As mentioned above, lists can contain lists, which can contain lists, etc. A sub-list, which is a
 list in a list, is created by creating by indenting with at the level of the list item which is
