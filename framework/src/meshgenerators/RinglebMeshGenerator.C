@@ -60,6 +60,8 @@ RinglebMeshGenerator::RinglebMeshGenerator(const InputParameters & parameters)
     _outer_wall_bid(getParam<boundary_id_type>("outer_wall_bid")),
     _triangles(getParam<bool>("triangles"))
 {
+  declareMeshProperty("use_distributed_mesh", false);
+
   // catch likely user errors
   if (_kmax <= _kmin)
     mooseError("RinglebMesh: kmax must be greater than kmin");

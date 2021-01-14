@@ -16,6 +16,9 @@
 #include "Factory.h"
 #include "AddMeshGeneratorAction.h"
 
+#include <functional>
+#include <algorithm>
+
 registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
 registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
 registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
@@ -295,7 +298,27 @@ SetupMeshAction::act()
         _mesh->setMeshBase(std::move(mesh_base));
       }
       else
+      {
+        const auto & mg_names = _app.getMeshGeneratorNames();
+        std::vector<bool> use_dm;
+        for (const auto & mg_name : mg_names)
+          if (hasMeshProperty("use_distributed_mesh", mg_name))
+            use_dm.push_back(getMeshProperty<bool>("use_distributed_mesh", mg_name));
+
+        if (!use_dm.empty())
+        {
+          if (std::adjacent_find(use_dm.begin(), use_dm.end(), std::not_equal_to<bool>()) !=
+              use_dm.end())
+            mooseError("You cannot use mesh generators that set different values of the mesh "
+                       "property 'use_distributed_mesh' within the same simulation.");
+
+          const auto ptype = use_dm.front() ? MooseMesh::ParallelType::DISTRIBUTED
+                                            : MooseMesh::ParallelType::REPLICATED;
+          _mesh->setParallelType(ptype);
+        }
+
         _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+      }
     }
   }
 

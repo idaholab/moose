@@ -49,6 +49,7 @@ ImageMeshGenerator::ImageMeshGenerator(const InputParameters & parameters)
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
 {
+  declareMeshProperty("use_distributed_mesh", false);
 }
 
 std::unique_ptr<MeshBase>
