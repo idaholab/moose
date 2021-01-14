@@ -7,8 +7,6 @@
     xmax = 40
     ymax = 40
   []
-  # This parameter is used for restart
-  parallel_type = DISTRIBUTED
 []
 
 [GlobalParams]

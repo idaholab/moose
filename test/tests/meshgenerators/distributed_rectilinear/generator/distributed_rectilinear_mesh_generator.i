@@ -5,8 +5,6 @@
     nx = 100
     ny = 100
   []
-  # Only need when do recover
-  parallel_type = distributed
 []
 
 [Variables]
