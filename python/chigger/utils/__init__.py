@@ -137,7 +137,7 @@ def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     """
     Runs ImageMagic convert to create an animate gif from a series of images.
     """
-    filenames = glob.glob(pattern)
+    filenames = sorted(glob.glob(pattern))
     delay = [delay]*len(filenames)
     delay[-1] = restart_delay
     cmd = ['convert']
