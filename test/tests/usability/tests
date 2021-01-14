@@ -1,0 +1,71 @@
+[Tests]
+  # These tests intentionally use 'command' to demonstrate the command-line usability.
+  issues = "#16410"
+  design = "sqa/non_functional.md"
+  collections = USABILITY
+  [command-line]
+    requirement = "The system will be operated using a command-line interface that"
+    [empty]
+      type = RunCommand
+      method = opt
+      command = "../../moose_test-opt"
+
+      detail = "reports the available options in non are provided and"
+    []
+    [flags]
+      type = RunCommand
+      method = opt
+      command = "../../moose_test-opt --help"
+
+      detail = "accepts defined command-line flags."
+    []
+  []
+  [input]
+    requirement = "The system will be operated using"
+    [input_file]
+      type = RunCommand
+      method = opt
+      command = "../../moose_test-opt -i input.i"
+
+      detail = "an input file and"
+    []
+    [command_line]
+      type = RunCommand
+      method = opt
+      command = "../../moose_test-opt -i input.i Mesh/uniform_refine=1"
+
+      detail = "command-line options."
+    []
+  []
+
+  # The following tests do not use RunCommand, but use the 'command' parameter to deomonstrate
+  # the actual command being run for usability. The application of mpiexec by RunApp/Exception
+  # is not designed to be used with 'command', so 'max_parallel' is set to one.
+  [message]
+    type = RunApp
+    method = opt
+    command = "../../moose_test-opt -i input.i invalid_command=1"
+    expect_out = "unused parameter 'invalid_command'"
+    max_parallel = 1
+
+    requirement = "The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed."
+  []
+  [diagnostic]
+    type = RunException
+    method = opt
+    command = "../../moose_test-opt -i bad.i"
+    expect_err = "bad.i:13: missing closing '\[\]' for section"
+    max_parallel = 1
+
+    requirement = "The system shall provide diagnostics when the input file fails to parse, or the format is incorrect."
+  []
+  [normal]
+    type = RunApp
+    method = opt
+    command = "../../moose_test-opt -i input.i"
+    expect_out = "Framework Information"
+    max_parallel = 1
+
+    requirement = "The system will provide on screen information about the simulation characteristics of the solves under normal operating conditions."
+  []
+[]

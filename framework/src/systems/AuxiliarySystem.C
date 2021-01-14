@@ -35,7 +35,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
   : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _fe_problem(subproblem),
-    _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
+    _sys(subproblem.es().add_system<ExplicitSystem>(name)),
     _current_solution(NULL),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _solution_previous_nl(NULL),
@@ -74,10 +74,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
     dof_map.set_implicit_neighbor_dofs(false);
   }
-
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
 }
 
 AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }

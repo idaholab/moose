@@ -49,11 +49,11 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
     _displacements(getParam<std::vector<std::string>>("displacements")),
     _displaced_nl(*this,
                   _mproblem.getNonlinearSystemBase(),
-                  _mproblem.getNonlinearSystemBase().name(),
+                  "displaced_" + _mproblem.getNonlinearSystemBase().name(),
                   Moose::VAR_NONLINEAR),
     _displaced_aux(*this,
                    _mproblem.getAuxiliarySystem(),
-                   _mproblem.getAuxiliarySystem().name(),
+                   "displaced_" + _mproblem.getAuxiliarySystem().name(),
                    Moose::VAR_AUXILIARY),
     _geometric_search_data(*this, _mesh),
     _eq_init_timer(registerTimedSection("eq::init", 2)),
@@ -116,6 +116,13 @@ DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->bumpVolumeQRuleOrder(order, block);
+}
+
+void
+DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpAllQRuleOrder(order, block);
 }
 
 void

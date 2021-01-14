@@ -72,7 +72,7 @@ DT2::preExecute()
   _u_saved = &nl_sys.add_vector("u_saved", false, GHOSTED);
   _u_older_saved = &nl_sys.add_vector("u_older_saved", false, GHOSTED);
 
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
+  auto & aux_sys = _fe_problem.getAuxiliarySystem().sys();
   _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
   _aux_saved = &aux_sys.add_vector("aux_saved", false, GHOSTED);
   _aux_older_saved = &aux_sys.add_vector("aux_older_saved", false, GHOSTED);
@@ -82,14 +82,15 @@ void
 DT2::preSolve()
 {
   NonlinearSystemBase & nl_sys = _fe_problem.getNonlinearSystemBase();
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
+  auto & aux = _fe_problem.getAuxiliarySystem();
+  auto & aux_sys = aux.sys();
 
   // save solution vectors
   *_u_saved = *nl_sys.currentSolution();
   *_u_older_saved = nl_sys.solutionOlder();
 
   *_aux_saved = *aux_sys.current_local_solution;
-  *_aux_older_saved = *aux_sys.older_local_solution;
+  *_aux_older_saved = aux.solutionOlder();
 
   _u_saved->close();
   _u_older_saved->close();
@@ -102,7 +103,8 @@ DT2::step()
 {
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   System & nl_sys = nl.system();
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
+  auto & aux = _fe_problem.getAuxiliarySystem();
+  auto & aux_sys = aux.sys();
 
   // solve the problem with full dt
   _fe_problem.solve();
@@ -188,15 +190,15 @@ DT2::step()
       nl.solutionOlder() = *_u_saved;
 
       *aux_sys.current_local_solution = *_aux1;
-      *aux_sys.old_local_solution = *_aux1;
-      *aux_sys.older_local_solution = *_aux_saved;
+      aux.solutionOld() = *_aux1;
+      aux.solutionOlder() = *_aux_saved;
 
       nl_sys.current_local_solution->close();
       nl.solutionOld().close();
       nl.solutionOlder().close();
       aux_sys.current_local_solution->close();
-      aux_sys.old_local_solution->close();
-      aux_sys.older_local_solution->close();
+      aux.solutionOld().close();
+      aux.solutionOlder().close();
     }
   }
 }
@@ -229,7 +231,8 @@ DT2::rejectStep()
 
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   System & nl_sys = nl.system();
-  TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
+  auto & aux = _fe_problem.getAuxiliarySystem();
+  auto & aux_sys = aux.sys();
 
   // recover initial state
   *nl_sys.current_local_solution = *_u_saved;
@@ -237,15 +240,15 @@ DT2::rejectStep()
   nl.solutionOlder() = *_u_older_saved;
 
   *aux_sys.current_local_solution = *_aux_saved;
-  *aux_sys.old_local_solution = *_aux_saved;
-  *aux_sys.older_local_solution = *_aux_older_saved;
+  aux.solutionOld() = *_aux_saved;
+  aux.solutionOlder() = *_aux_older_saved;
 
   nl_sys.solution->close();
   nl.solutionOld().close();
   nl.solutionOlder().close();
   aux_sys.solution->close();
-  aux_sys.old_local_solution->close();
-  aux_sys.older_local_solution->close();
+  aux.solutionOld().close();
+  aux.solutionOlder().close();
 }
 
 bool

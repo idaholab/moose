@@ -31,7 +31,3 @@
 [index.md exact=True]
 
 [Home](index.md exact=True)
-
-## Incorrect Bookmark
-
-[core.md#wrong]

@@ -4,4 +4,4 @@
 
 The following is a complete list of documented C++ source.
 
-!content location=source
+!content list location=source

@@ -86,39 +86,24 @@ includes:
 - The steps to validate the test result including any acceptance criteria.
 !template-end!
 
-## System Requirements id=system-requirements
+## System Requirements Traceability id=system-requirements
 
-### Requirements Traceability Matrix id=requirements-traceability-matrix
+### Functional Requirements id=functional-requirements
 
-!template! field key=requirements-traceability-matrix
-This section of the specification should contain all of the requirements to a level of detail
-sufficient to enable designers to design a system to satisfy those requirements, and testers to test
-that the system satisfies those requirements. Be sure to define the system security
-requirements. Examples of such requirements are data privacy, user access, user privilege, export
-control, system configuration, event logging and communications.
+!template field key=functional-requirements
+Include the tracebility matrix for functional requirements.
 
-1. Requirements must be stated in the form to be:
-  - Correct
-  - Unambiguous
-  - Complete
-  - Consistent
-  - Verifiable
-  - Traceable.
-1. Requirements must be uniquely identifiable.
-1. Requirements should be cross-referenced to earlier documents that relate (e.g., business
-   requirements).
-1. Careful attention should be given to organizing the requirements to maximize readability.
-1. Requirements should address functionality, usability, performance, system interfaces, reliability,
-   and security.
-!template-end!
+### Usability Requirements id=usability-requirements
 
+!template field key=usability-requirements
+Include the tracebility matrix for usability requirements.
 
-## Requirement Collections id=requirement-collections
+### Performance Requirements id=performance-requirements
 
-!template field key=requirement-collections-intro required=False
+!template field key=performance-requirements
+Include the tracebility matrix for performance requirements.
 
-!template! field key=requirement-collections
-This section should contain lists of requirement collections, where a "collection" is simply a
-grouping of requirements that are related in some fashion. For example, all tests for error handling
-could be grouped into a "failure analysis" collection.
-!template-end!
+### System Interface Requirements id=performance-requirements
+
+!template field key=system-interfaces-requirements
+Include the tracebility matrix for system interface requirements.

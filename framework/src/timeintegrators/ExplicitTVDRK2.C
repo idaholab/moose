@@ -28,7 +28,8 @@ ExplicitTVDRK2::validParams()
 ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _stage(1),
-    _residual_old(_nl.addVector("residual_old", false, GHOSTED))
+    _residual_old(_nl.addVector("residual_old", false, GHOSTED)),
+    _solution_older(_sys.solutionState(2))
 {
   mooseInfo("ExplicitTVDRK2 and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");

@@ -91,8 +91,8 @@ compute_postcheck(const NumericVector<Number> & old_soln,
 
 NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : NonlinearSystemBase(
-        fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
-    _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
+        fe_problem, fe_problem.es().add_system<NonlinearImplicitSystem>(name), name),
+    _nl_implicit_sys(fe_problem.es().get_system<NonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
     _use_coloring_finite_difference(false)
@@ -106,7 +106,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 
 #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> * petsc_solver =
-      static_cast<PetscNonlinearSolver<Real> *>(_transient_sys.nonlinear_solver.get());
+      static_cast<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
   if (petsc_solver)
   {
     petsc_solver->set_residual_zero_out(false);
@@ -114,10 +114,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     petsc_solver->use_default_monitor(false);
   }
 #endif
-
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
 }
 
 NonlinearSystem::~NonlinearSystem() {}
@@ -129,7 +125,7 @@ NonlinearSystem::init()
 
   if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors
-    _transient_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
+    _nl_implicit_sys.add_matrix<DiagonalMatrix>("scaling_matrix");
 }
 
 void
@@ -141,17 +137,17 @@ NonlinearSystem::solve()
   // hurt to do this multiple times, it is just setting a pointer.
   if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution() ||
       _fe_problem.needsPreviousNewtonIteration())
-    _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
+    _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
     CONSOLE_TIMED_PRINT("Computing initial residual")
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
-    _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);
+    _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
     _computing_initial_residual = false;
-    _transient_sys.rhs->close();
-    _initial_residual_before_preset_bcs = _transient_sys.rhs->l2_norm();
+    _nl_implicit_sys.rhs->close();
+    _initial_residual_before_preset_bcs = _nl_implicit_sys.rhs->l2_norm();
     if (_compute_initial_residual_before_preset_bcs)
       _console << "Initial residual before setting preset BCs: "
                << _initial_residual_before_preset_bcs << '\n';
@@ -187,13 +183,13 @@ NonlinearSystem::solve()
 
   if (_use_finite_differenced_preconditioner)
   {
-    _transient_sys.nonlinear_solver->fd_residual_object = &_fd_residual_functor;
+    _nl_implicit_sys.nonlinear_solver->fd_residual_object = &_fd_residual_functor;
     setupFiniteDifferencedPreconditioner();
   }
 
 #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*_transient_sys.nonlinear_solver);
+      static_cast<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
@@ -209,14 +205,14 @@ NonlinearSystem::solve()
   else
   {
     system().solve();
-    _n_iters = _transient_sys.n_nonlinear_iterations();
+    _n_iters = _nl_implicit_sys.n_nonlinear_iterations();
 #ifdef LIBMESH_HAVE_PETSC
     _n_linear_iters = solver.get_total_linear_iterations();
 #endif
   }
 
   // store info about the solve
-  _final_residual = _transient_sys.final_nonlinear_residual();
+  _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
 #ifdef LIBMESH_HAVE_PETSC
   if (_use_coloring_finite_difference)
@@ -244,12 +240,12 @@ NonlinearSystem::stopSolve()
   // should make PETSc return DIVERGED_NANORINF the next time it does
   // a reduction.  We'll write to the first local dof on every
   // processor that has any dofs.
-  _transient_sys.rhs->close();
+  _nl_implicit_sys.rhs->close();
 
-  if (_transient_sys.rhs->local_size())
-    _transient_sys.rhs->set(_transient_sys.rhs->first_local_index(),
-                            std::numeric_limits<Real>::quiet_NaN());
-  _transient_sys.rhs->close();
+  if (_nl_implicit_sys.rhs->local_size())
+    _nl_implicit_sys.rhs->set(_nl_implicit_sys.rhs->first_local_index(),
+                              std::numeric_limits<Real>::quiet_NaN());
+  _nl_implicit_sys.rhs->close();
 
   // Clean up by getting other vectors into a valid state for a
   // (possible) subsequent solve.  There may be more than just
@@ -288,13 +284,13 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
 {
 #if LIBMESH_HAVE_PETSC
   // Make sure that libMesh isn't going to override our preconditioner
-  _transient_sys.nonlinear_solver->jacobian = nullptr;
+  _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
   PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
-      static_cast<PetscNonlinearSolver<Number> *>(_transient_sys.nonlinear_solver.get());
+      static_cast<PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
 
   PetscMatrix<Number> * petsc_mat =
-      static_cast<PetscMatrix<Number> *>(&_transient_sys.get_system_matrix());
+      static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
   SNESSetJacobian(petsc_nonlinear_solver->snes(),
                   petsc_mat->mat(),
@@ -313,22 +309,22 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 {
 #ifdef LIBMESH_HAVE_PETSC
   // Make sure that libMesh isn't going to override our preconditioner
-  _transient_sys.nonlinear_solver->jacobian = nullptr;
+  _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
   PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> &>(*_transient_sys.nonlinear_solver);
+      dynamic_cast<PetscNonlinearSolver<Number> &>(*_nl_implicit_sys.nonlinear_solver);
 
   // Pointer to underlying PetscMatrix type
   PetscMatrix<Number> * petsc_mat =
-      dynamic_cast<PetscMatrix<Number> *>(&_transient_sys.get_system_matrix());
+      dynamic_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
   // This variable is only needed for PETSC < 3.2.0
   PetscVector<Number> * petsc_vec =
-      dynamic_cast<PetscVector<Number> *>(_transient_sys.solution.get());
+      dynamic_cast<PetscVector<Number> *>(_nl_implicit_sys.solution.get());
 #endif
 
-  Moose::compute_jacobian(*_transient_sys.current_local_solution, *petsc_mat, _transient_sys);
+  Moose::compute_jacobian(*_nl_implicit_sys.current_local_solution, *petsc_mat, _nl_implicit_sys);
 
   if (!petsc_mat)
     mooseError("Could not convert to Petsc matrix.");
@@ -409,7 +405,7 @@ NonlinearSystem::converged()
   if (_fe_problem.hasException())
     return false;
 
-  return _transient_sys.nonlinear_solver->converged;
+  return _nl_implicit_sys.nonlinear_solver->converged;
 }
 
 void
@@ -421,13 +417,13 @@ NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 void
 NonlinearSystem::computeScalingJacobian()
 {
-  _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, _scaling_matrix);
+  _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, _scaling_matrix);
 }
 
 void
 NonlinearSystem::computeScalingResidual()
 {
-  _fe_problem.computeResidualSys(_transient_sys, *_current_solution, RHS());
+  _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, RHS());
 }
 
 SNES

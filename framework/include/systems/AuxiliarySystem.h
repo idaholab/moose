@@ -151,7 +151,7 @@ public:
     return _solution_previous_nl;
   }
 
-  virtual TransientExplicitSystem & sys() { return _sys; }
+  virtual ExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
@@ -183,7 +183,7 @@ protected:
 
   FEProblemBase & _fe_problem;
 
-  TransientExplicitSystem & _sys;
+  ExplicitSystem & _sys;
 
   /// solution vector from nonlinear solver
   mutable const NumericVector<Number> * _current_solution;
@@ -256,9 +256,4 @@ protected:
   friend class ComputeNodalKernelBCJacobiansThread;
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
-  NumericVector<Number> & solutionOldInternal() const override { return *_sys.old_local_solution; }
-  NumericVector<Number> & solutionOlderInternal() const override
-  {
-    return *_sys.older_local_solution;
-  }
 };

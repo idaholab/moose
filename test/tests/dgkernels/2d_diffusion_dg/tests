@@ -35,8 +35,6 @@
     requirement = 'When objects that need one layer of coupling (like DGKernels) are added via action, we shall ensure that we have added a proper relationship manager and thus incur no mallocs during calls to MatSetValues. We will not apply algebraic ghosting nor reinitialize system vectors in serial, but we will reinitialize the matrix sparsity'
     mesh_mode = replicated
     max_parallel = 1
-    absent_out = 'Reinitializing vectors'
-    expect_out = 'Reinitializing sparsity'
   []
   [proper_ghosting_with_action_parallel]
     type = 'Exodiff'
@@ -47,7 +45,6 @@
     requirement = 'When objects that need one layer of coupling (like DGKernels) are added via action, we shall ensure that we have added a proper relationship manager and thus incur no mallocs during calls to MatSetValues. We will also apply algebraic ghosting in parallel which will require reinitializing the system; the sparsity pattern will also have to be reinitialized'
     mesh_mode = replicated
     min_parallel = 2
-    expect_out = 'Reinitializing vectors.*?\nReinitializing sparsity'
     cli_args = 'Outputs/file_base=no_mallocs_with_action_parallel'
   []
   [no_additional_rms]
@@ -69,8 +66,6 @@
     design = 'RelationshipManager.md'
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no mallocs. Sparsity will be reinitialized but not vectors'
     mesh_mode = distributed
-    expect_out = 'Reinitializing sparsity'
-    absent_out = 'Reinitializing vectors'
     max_parallel = 1
   []
   [proper_ghosting_with_action_parallel_distributed]
@@ -82,7 +77,6 @@
     design = 'RelationshipManager.md'
     requirement = 'This test shall have one more rm than its replicated counter part because of the geometric-only GhostPointNeighbors rm, also demonstrating no mallocs. Sparsity and vectors will both be reinitialized'
     mesh_mode = distributed
-    expect_out = 'Reinitializing vectors.*?\nReinitializing sparsity'
     min_parallel = 2
   []
   [no_additional_rms_distributed]

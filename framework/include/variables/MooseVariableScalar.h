@@ -53,8 +53,8 @@ public:
    */
   const ADVariableValue & adSln() const;
 
-  VariableValue & slnOld() { return _u_old; }
-  VariableValue & slnOlder() { return _u_older; }
+  VariableValue & slnOld();
+  VariableValue & slnOlder();
   VariableValue & vectorTagSln(TagID tag)
   {
     _need_vector_tag_u[tag] = true;
@@ -141,6 +141,12 @@ public:
 
   void insert(NumericVector<Number> & soln);
 
+  /**
+   * The oldest solution state that is requested for this variable
+   * (0 = current, 1 = old, 2 = older, etc).
+   */
+  unsigned int oldestSolutionStateRequested() const;
+
 protected:
   /// The value of scalar variable
   VariableValue _u;
@@ -170,6 +176,11 @@ protected:
   bool _need_u_dotdot_old;
   bool _need_du_dot_du;
   bool _need_du_dotdot_du;
+
+  /// Whether or not the old solution is needed
+  bool _need_u_old;
+  /// Whether or not the older solution is needed
+  bool _need_u_older;
 
   /// Whether any dual number calculations are needed
   mutable bool _need_dual;

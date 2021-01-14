@@ -120,6 +120,10 @@ class Test(unittest.TestCase):
         self.assertTrue(counts['Andrew E. Slaughter'] > 0)
         self.assertEqual(n_with_blank, sum(list(counts.values())))
 
+    def testGitLocalPath(self):
+        filename = os.path.abspath(__file__)
+        local = mooseutils.git_localpath(filename)
+        self.assertEqual(local, 'python/mooseutils/tests/test_gitutils.py')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

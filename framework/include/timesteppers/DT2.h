@@ -61,4 +61,3 @@ protected:
   /// maximum increase ratio
   Real _max_increase;
 };
-

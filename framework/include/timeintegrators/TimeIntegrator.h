@@ -180,7 +180,6 @@ protected:
   /// solution vectors
   const NumericVector<Number> * const & _solution;
   const NumericVector<Number> & _solution_old;
-  const NumericVector<Number> & _solution_older;
   //
   int & _t_step;
   //

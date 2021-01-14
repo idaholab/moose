@@ -163,3 +163,27 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
             page[pages.Source]: The source object representing the content
         """
         pass
+
+    def setAttribute(self, *args):
+        """
+        Set a global attribute to be communicated across processors.
+
+        This is designed to be called from the <pre/post><Read/Tokenize/Render/Write> methods
+        """
+        self.translator.executioner.setGlobalAttribute(*args)
+
+    def getAttribute(self, *args):
+        """
+        Get a global attribute to be communicated across processors.
+
+        This is designed to be called from the <pre/post><Read/Tokenize/Render/Write> methods
+        """
+        return self.translator.executioner.getGlobalAttribute(*args)
+
+    def getAttributeItems(self):
+        """
+        Return an iterator to the global attributes to be communicated across processors.
+
+        This is designed to be called from the <pre/post><Read/Tokenize/Render/Write> methods
+        """
+        return self.translator.executioner.getGlobalAttributeItems()

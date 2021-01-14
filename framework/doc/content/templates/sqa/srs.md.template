@@ -139,7 +139,7 @@ Define specific acronyms.
 !template-end!
 
 
-### System Requirements id=system-requirements
+## System Requirements id=system-requirements
 
 !template field key=system-requirements required=False
 
@@ -181,17 +181,13 @@ testers to test that the system satisfies those requirements.
 
 List each function and its defining requirements here. For each function that is defined, one or more
 requirements are then described that define the functionality. The requirements should be as
-objective and measurable as possible.  Use one of the following examples as a guide for formatting
-the requirements.
+objective and measurable as possible.
 
 !template-end!
 
-!template! field
-      key=useability-requirements
-!template field-begin
+### Usability Requirements
 
-## Usability Requirements
-
+!template! field key=usability-requirements
 Define usability requirements. Usability requirements and objectives for the system or service
 include measurable effectiveness, efficiency, and satisfaction criteria in specific contexts of
 use. For example:
@@ -200,9 +196,7 @@ use. For example:
 | - | - |
 | U1.1 | Users shall be able to point-and-click a date rather than typing a date into a text field or selecting month, day, and year independently. |
 | U1.2 | Users shall select values from a list of valid values instead of having to type a value into a text field |
-
 !template-end!
-
 
 ### Performace Requirements id=performance-requirements
 
@@ -228,10 +222,9 @@ For example:
 
 !template-end!
 
-
 ### System Interfaces id=system-interfaces
 
-!template! field key=system-interfaces
+!template! field key=system-interfaces-requirements
 
 Specify requirements for interfaces among system elements and with external entities. Interfaces
 among system elements should include interfaces with the human element. Interfaces with external
@@ -365,13 +358,3 @@ transported within its intended operational context.
 Provide the verification approaches and methods planned to qualify the system or system element. The
 information items for verification are recommended to be given in a parallel manner with the
 information items in Subsections 3.1 through 3.13.
-
-## Requirement Collections id=requirement-collections
-
-!template field key=requirement-collections-intro required=False
-
-!template! field key=requirement-collections
-This section should contain lists of requirement collections, where a "collection" is simply a
-grouping of requirements that are related in some fashion. For example, all tests for error handling
-could be grouped into a "failure analysis" collection.
-!template-end!

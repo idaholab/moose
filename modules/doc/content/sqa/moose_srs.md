@@ -13,12 +13,18 @@ is detailed in the files listed below.
 
 !template item key=requirements-intro
 
-!template item key=requirements
+!template item key=functional-requirements
 All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](SRS) documents, please
 refer to the documents listed in [#dependencies].
 
-!template item key=requirement-collections-intro
+!template item key=usability-requirements
+All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](SRS) documents, please
+refer to the documents listed in [#dependencies].
 
-!template item key=requirement-collections
-All of the requirement collections for [!ac](MOOSE) are provided in the dependent [!ac](RTM)
-documents, please refer to the documents listed in [#dependencies].
+!template item key=performance-requirements
+All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](SRS) documents, please
+refer to the documents listed in [#dependencies].
+
+!template item key=system-requirements
+All of the requirements for [!ac](MOOSE) are provided in the dependent [!ac](SRS) documents, please
+refer to the documents listed in [#dependencies].

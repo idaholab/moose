@@ -20,7 +20,7 @@
     color:red;
 }
 
-.moose-sqa-items a:not(:last-child):after{
+.moose-sqa-items *:not(:last-child):after{
     content:"; "
 }
 

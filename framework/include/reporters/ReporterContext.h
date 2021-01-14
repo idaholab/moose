@@ -165,6 +165,19 @@ public:
   virtual void addConsumerMode(ReporterMode mode, const std::string & object_name) override;
 
 protected:
+  /// For broadcasting values if it is of fundamental type
+  template <typename Q = T>
+  typename std::enable_if<MooseUtils::canBroadcast<Q>::value, void>::type broadcast()
+  {
+    this->comm().broadcast(this->_state.value());
+  }
+  /// Error if trying to broadcast not fundamental type
+  template <typename Q = T>
+  typename std::enable_if<!MooseUtils::canBroadcast<Q>::value, void>::type broadcast()
+  {
+    mooseError("Can only broadcast fundamental types.");
+  }
+
   /// The state on which this context object operates
   ReporterState<T> & _state;
 
@@ -259,7 +272,7 @@ ReporterContext<T>::finalize()
 
   // Perform desired auto parallel operation
   if (auto_operation == ReporterContext::AutoOperation::BROADCAST)
-    this->comm().broadcast(this->_state.value());
+    this->broadcast();
 }
 
 template <typename T>
@@ -343,7 +356,7 @@ ReporterBroadcastContext<T>::finalize()
                  " mode, which is not supported. The mode must be UNSET or REPLICATED.");
   }
 
-  this->comm().broadcast(this->_state.value());
+  this->broadcast();
 }
 
 /**

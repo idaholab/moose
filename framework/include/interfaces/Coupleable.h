@@ -1004,6 +1004,8 @@ protected:
 
   /// The name of the object this interface is part of
   const std::string & _c_name;
+  /// The type of the object this interface is part of
+  const std::string & _c_type;
 
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;

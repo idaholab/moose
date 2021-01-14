@@ -132,10 +132,6 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 
   _B_tag = eigen_problem.addMatrixTag("Eigen");
 
-  /// Forcefully init the default solution states to match those available in libMesh
-  /// Must be called here because it would call virtuals in the parent class
-  solutionState(_default_solution_states);
-
   // By default, _precond_tag and _A_tag will share the same
   // objects. If we want to include eigen contributions to
   // the preconditioning matrix, and then _precond_tag will

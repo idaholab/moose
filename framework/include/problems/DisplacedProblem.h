@@ -64,6 +64,7 @@ public:
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   void bumpVolumeQRuleOrder(Order order, SubdomainID block);
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
   virtual void solve() override;

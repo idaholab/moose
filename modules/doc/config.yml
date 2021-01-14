@@ -117,6 +117,8 @@ Extensions:
                 repo: idaholab/moose
     MooseDocs.extensions.template:
         active: True
+        args:
+            company: Ford # used for example in python/MooseDocs/extensions/template.md
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/doc/sqa_reports.yml

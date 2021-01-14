@@ -28,5 +28,6 @@ protected:
 
   const VariableValue & _accel_old;
   const VariableValue & _accel;
+  const VariableValue & _u_old;
   Real _gamma;
 };

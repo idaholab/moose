@@ -38,20 +38,16 @@ public:
   RelationshipManager(const RelationshipManager & other);
 
   /**
-   * Called before this RM is attached.  Will only be called once.
+   * Called before this RM is attached
    */
-  void init(const MeshBase & mesh)
-  {
-    if (!_inited)
-    {
-      internalInitWithMesh(mesh);
-      set_mesh(&mesh);
-    }
-    _inited = true;
-  }
+  void init(const MeshBase & mesh, const DofMap * dof_map = nullptr);
 
   /**
-   * Whether or not this RM has been inited
+   * Whether or not this RM has been inited. NOTE that this just indicates that the \p init method
+   * has been called at least once. Conceivably this could have been during the early geometric
+   * setup phase and if this relationship manager is also algebraic/coupling, we are not assured
+   * that this RelationshipManager is fully initialized until the \p init call during the
+   * algebraic/coupling/late-geometric setup phase
    */
   bool inited() { return _inited; }
 
@@ -126,11 +122,6 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
-  /**
-   * Set the dof map
-   */
-  void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
-
 protected:
   /**
    * Called before this RM is attached.  Only called once
@@ -146,7 +137,7 @@ protected:
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
-  const DofMap * _dof_map;
+  const DofMap * _dof_map = nullptr;
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that
@@ -162,9 +153,6 @@ protected:
 
   /// Which system this should go to (undisplaced or displaced)
   const bool _use_displaced_mesh;
-
-  /// What type of systems this RM can be applied to
-  const Moose::RMSystemType _system_type;
 
 public:
   /**

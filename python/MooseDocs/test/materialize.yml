@@ -62,6 +62,7 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+
     MooseDocs.extensions.civet:
         active: False
         test_results_cache: '/tmp/civet/jobs'

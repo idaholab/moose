@@ -577,6 +577,25 @@ Assembly::bumpVolumeQRuleOrder(Order volume_order, SubdomainID block)
 }
 
 void
+Assembly::bumpAllQRuleOrder(Order order, SubdomainID block)
+{
+  auto & qdefault = _qrules[Moose::ANY_BLOCK_ID];
+  mooseAssert(qdefault.size() > 0, "default quadrature must be initialized before order bumps");
+
+  unsigned int ndims = _mesh_dimension + 1; // must account for 0-dimensional quadrature.
+  auto & qvec = _qrules[block];
+  if (qvec.size() != ndims || !qvec[0].vol)
+    createQRules(qdefault[0].vol->type(), order, order, order, block);
+  else if (qvec[0].vol->get_order() < order || qvec[0].face->get_order() < order)
+    createQRules(qvec[0].vol->type(),
+                 std::max(order, qvec[0].arbitrary_vol->get_order()),
+                 std::max(order, qvec[0].vol->get_order()),
+                 std::max(order, qvec[0].face->get_order()),
+                 block);
+  // otherwise do nothing - quadrature order is already as high as requested
+}
+
+void
 Assembly::createQRules(
     QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
 {
@@ -637,8 +656,9 @@ void
 Assembly::setLowerQRule(QBase * qrule, unsigned int dim)
 {
   // The lower-dimensional quadrature rule matches the face quadrature rule
-  _const_current_qrule_face = _const_current_qrule_lower = _current_qrule_face =
-      _current_qrule_lower = qrule;
+  setFaceQRule(qrule, dim);
+
+  _const_current_qrule_lower = _current_qrule_lower = qrule;
 
   for (auto & it : _fe_lower[dim])
     it.second->attach_quadrature_rule(qrule);
@@ -1883,6 +1903,19 @@ Assembly::reinitFVFace(const FaceInfo & fi)
         FEMap::map(_current_side_elem->dim(), _current_side_elem, ref_points[qp]);
 }
 
+QBase *
+Assembly::qruleFace(const Elem * elem, unsigned int side)
+{
+  return qruleFaceHelper<QBase>(elem, side, [](QRules & q) { return q.face.get(); });
+}
+
+ArbitraryQuadrature *
+Assembly::qruleArbitraryFace(const Elem * elem, unsigned int side)
+{
+  return qruleFaceHelper<ArbitraryQuadrature>(
+      elem, side, [](QRules & q) { return q.arbitrary_face.get(); });
+}
+
 void
 Assembly::reinit(const Elem * elem, unsigned int side)
 {
@@ -1894,18 +1927,16 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   _current_elem_volume_computed = false;
   _current_side_volume_computed = false;
 
-  unsigned int elem_dimension = _current_elem->dim();
-
-  // Make sure the qrule is the right one
-  if (_current_qrule_face != qrules(elem_dimension).face.get())
-  {
-    _current_qrule_face = qrules(elem_dimension).face.get();
-    setFaceQRule(_current_qrule_face, elem_dimension);
-  }
+  unsigned int elem_dimension = elem->dim();
 
   if (_current_side_elem)
     delete _current_side_elem;
   _current_side_elem = elem->build_side_ptr(side).release();
+
+  //// Make sure the qrule is the right one
+  auto rule = qruleFace(elem, side);
+  if (_current_qrule_face != rule)
+    setFaceQRule(rule, elem_dimension);
 
   reinitFEFace(elem, side);
 
@@ -1925,7 +1956,7 @@ Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> 
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  _current_qrule_arbitrary_face = qrules(elem_dimension).arbitrary_face.get();
+  _current_qrule_arbitrary_face = qruleArbitraryFace(elem, side);
 
   // Make sure the qrule is the right one
   if (_current_qrule_face != _current_qrule_arbitrary_face)
@@ -2003,17 +2034,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
   // Attach the quadrature rules
   if (pts)
   {
-    ArbitraryQuadrature * face_rule = qrules(elem_dim).arbitrary_face.get();
+    auto face_rule = qruleArbitraryFace(elem, elem_side);
     face_rule->setPoints(*pts);
     setFaceQRule(face_rule, elem_dim);
   }
   else
   {
-    if (_current_qrule_face != qrules(elem_dim).face.get())
-    {
-      _current_qrule_face = qrules(elem_dim).face.get();
-      setFaceQRule(_current_qrule_face, elem_dim);
-    }
+    auto rule = qruleFace(elem, elem_side);
+    if (_current_qrule_face != rule)
+      setFaceQRule(rule, elem_dim);
   }
 
   // reinit face

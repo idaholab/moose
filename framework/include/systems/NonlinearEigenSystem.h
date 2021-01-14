@@ -165,16 +165,6 @@ public:
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
 
-  NumericVector<Number> & solutionOldInternal() const override
-  {
-    return *_transient_sys.old_local_solution;
-  }
-
-  NumericVector<Number> & solutionOlderInternal() const override
-  {
-    return *_transient_sys.older_local_solution;
-  }
-
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 

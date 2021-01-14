@@ -317,8 +317,8 @@ addActionTypes(Syntax & syntax)
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
                            " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
-                           "(init_problem)"
                            "(coupling_functor_check)"
+                           "(init_problem)"
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)");

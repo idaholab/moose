@@ -719,6 +719,19 @@ public:
    */
   virtual const CouplingMatrix * couplingMatrix() const = 0;
 
+private:
+  /**
+   * Creates (n_sys - 1) clones of the provided algebraic ghosting functor (corresponding to the
+   * nonlinear system algebraic ghosting functor), initializes the clone with the appropriate
+   * DofMap, and then adds the clone to said DofMap
+   * @param algebraic_gf the (nonlinear system's) algebraic ghosting functor to clone
+   * @param to_mesh whether the clone should be added to the corresponding DofMap's underyling
+   * MeshBase (the underlying MeshBase will be the same for every system held by this object's
+   * EquationSystems object)
+   */
+  void cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+
+public:
   /**
    * Add an algebraic ghosting functor to this problem's DofMaps
    */
@@ -886,6 +899,12 @@ private:
 
   // Contains properties consumed by objects, see addConsumedPropertyName
   std::map<MooseObjectName, std::set<std::string>> _consumed_material_properties;
+
+  /// A map from a root algebraic ghosting functor, e.g. the ghosting functor passed into \p
+  /// removeAlgebraicGhostingFunctor, to its clones in other systems, e.g. systems other than system
+  /// 0
+  std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
+      _root_alg_gf_to_sys_clones;
 
   friend class Restartable;
 };

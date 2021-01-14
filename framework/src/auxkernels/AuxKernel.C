@@ -111,8 +111,6 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
         _tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
     _u(_nodal ? _var.nodalValueArray() : _var.sln()),
-    _u_old(_nodal ? _var.nodalValueOldArray() : _var.slnOld()),
-    _u_older(_nodal ? _var.nodalValueOlderArray() : _var.slnOlder()),
 
     _test(_var.phi()),
     _assembly(_subproblem.assembly(_tid)),
@@ -430,6 +428,32 @@ AuxKernelTempl<RealEigenVector>::compute()
       _var.setDofValues(_local_sol);
     }
   }
+}
+
+template <typename ComputeValueType>
+const typename OutputTools<ComputeValueType>::VariableValue &
+AuxKernelTempl<ComputeValueType>::uOld() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOld().\n\n",
+               "Make sure to call uOld() within the object constructor.");
+
+  return _nodal ? _var.nodalValueOldArray() : _var.slnOld();
+}
+
+template <typename ComputeValueType>
+const typename OutputTools<ComputeValueType>::VariableValue &
+AuxKernelTempl<ComputeValueType>::uOlder() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOlder().\n\n",
+               "Make sure to call uOlder() within the object constructor.");
+
+  return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
 }
 
 // Explicitly instantiates the two versions of the AuxKernelTempl class

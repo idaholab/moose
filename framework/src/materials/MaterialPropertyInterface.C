@@ -76,7 +76,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
     auto & default_property = _default_real_properties.back();
 
     // resize to accommodate maximum number of qpoints
-    auto nqp = _mi_feproblem.getMaxQps();
+    auto nqp = Moose::constMaxQpsPerElem;
     default_property->resize(nqp);
 
     // set values for all qpoints to the given default
@@ -104,7 +104,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
     auto & default_property = _default_ad_real_properties.back();
 
     // resize to accommodate maximum number of qpoints
-    auto nqp = _mi_feproblem.getMaxQps();
+    auto nqp = Moose::constMaxQpsPerElem;
     default_property->resize(nqp);
 
     // set values for all qpoints to the given default
@@ -138,7 +138,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
     auto & default_property = _default_real_vector_properties.back();
 
     // resize to accomodate maximum number obf qpoints
-    auto nqp = _mi_feproblem.getMaxQps();
+    auto nqp = Moose::constMaxQpsPerElem;
     default_property->resize(nqp);
 
     // set values for all qpoints to the given default
@@ -167,7 +167,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
     auto & default_property = _default_ad_real_vector_properties.back();
 
     // resize to accomodate maximum number obf qpoints
-    auto nqp = _mi_feproblem.getMaxQps();
+    auto nqp = Moose::constMaxQpsPerElem;
     default_property->resize(nqp);
 
     // set values for all qpoints to the given default

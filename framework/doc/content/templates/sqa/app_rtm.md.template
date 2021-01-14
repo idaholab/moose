@@ -12,7 +12,9 @@ documentation and associated test case.
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](RTM) for {{app}} is dependent upon the following documents.
 
+!template! field key=dependencies required=False
 !sqa dependencies suffix=rtm category={{category}}
+!template-end!
 
 ## Requirements
 
@@ -20,12 +22,26 @@ the [!ac](RTM) for {{app}} is dependent upon the following documents.
 The following is a complete list for all the functional requirements including links to the
 design documents and test cases for {{app}}.
 
-!template field key=requirements required=False
-!sqa requirements link=True category={{category}}
+### Functional Requirements
 
-## Requirement Collections id=requirement-collections
+!template! field key=functional-requirements required=False
+!sqa requirements link=True collections=FUNCTIONAL category={{category}}
+!template-end!
 
-!template field key=requirement-collections-intro required=False
+### Usability Requirements
 
-!template field key=requirement-collections required=False
-!sqa collections category={{category}}
+!template! field key=usability-requirements required=False
+!sqa requirements link=True collections=USABILITY category={{category}}
+!template-end!
+
+### Performance Requirements
+
+!template! field key=performance-requirements required=False
+!sqa requirements link=True collections=PERFORMANCE category={{category}}
+!template-end!
+
+### System Requirements
+
+!template! field key=system-requirements required=False
+!sqa requirements link=True collections=SYSTEM category={{category}}
+!template-end!

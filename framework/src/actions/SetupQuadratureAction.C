@@ -66,6 +66,6 @@ SetupQuadratureAction::act()
     _problem->createQRules(_type,
                            _order,
                            Moose::stringToEnum<Order>(_custom_orders[i]),
-                           _side_order,
+                           Moose::stringToEnum<Order>(_custom_orders[i]),
                            _custom_blocks[i]);
 }
