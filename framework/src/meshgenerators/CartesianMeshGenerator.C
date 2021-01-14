@@ -227,7 +227,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 CartesianMeshGenerator::generate()
 {
-  auto mesh = buildReplicatedMesh(2);
+  auto mesh = buildMeshBaseObject();
 
   // switching on MooseEnum to generate the reference mesh
   // Note: element type is fixed
