@@ -98,7 +98,7 @@ Each application will march forward in time together, solve, and output
 
 !---
 
-## 02_sub.i
+## 01_sub.i
 
 !listing step01_multiapps/01_sub.i
 
