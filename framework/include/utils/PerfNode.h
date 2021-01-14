@@ -18,6 +18,7 @@
 
 #include "MooseTypes.h"
 
+#include <chrono>
 #include <map>
 
 class PerfNode
@@ -121,4 +122,3 @@ protected:
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
 };
-
