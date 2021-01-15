@@ -50,8 +50,10 @@ AnnularMeshGenerator::validParams()
                         "Maximum angle, measured in degrees anticlockwise from x axis.  If "
                         "dmin=0 and dmax=360 an annular mesh is created.  "
                         "Otherwise, only a sector of an annulus is created");
-  params.addRangeCheckedParam<Real>(
-      "growth_r", 1.0, "growth_r>0.0", "The ratio of radial sizes of successive rings of elements");
+  params.addRangeCheckedParam<Real>("growth_r",
+                                    1.0,
+                                    "growth_r!=0.0",
+                                    "The ratio of radial sizes of successive rings of elements");
   params.addParam<SubdomainID>(
       "quad_subdomain_id", 0, "The subdomain ID given to the QUAD4 elements");
   params.addParam<SubdomainID>("tri_subdomain_id",
@@ -83,7 +85,8 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
                                                                                           : false),
     _growth_r(getParam<Real>("growth_r")),
     _len(_growth_r == 1.0 ? (_rmax - _rmin) / _nr
-                          : (_rmax - _rmin) * (1.0 - _growth_r) / (1.0 - std::pow(_growth_r, _nr))),
+                          : (_rmax - _rmin) * (1.0 - std::abs(_growth_r)) /
+                                (1.0 - std::pow(std::abs(_growth_r), _nr))),
     _full_annulus(_dmin == 0.0 && _dmax == 360),
     _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
     _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
@@ -143,7 +146,12 @@ AnnularMeshGenerator::generate()
     if (layer_num == 1)
       current_r = _rmin; // account for precision loss
     else
-      current_r -= _len * std::pow(_growth_r, layer_num - 1);
+    {
+      if (_growth_r > 0)
+        current_r -= _len * std::pow(_growth_r, layer_num - 1);
+      else
+        current_r -= _len * std::pow(std::abs(_growth_r), _nr - layer_num);
+    }
 
     // add node at angle = _dmin
     nodes[node_id] = mesh->add_point(Point(current_r * std::cos(_dmin * M_PI / 180.0),

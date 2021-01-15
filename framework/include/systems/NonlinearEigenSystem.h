@@ -14,7 +14,6 @@
 #include "NonlinearSystemBase.h"
 #include "SlepcEigenSolverConfiguration.h"
 
-#include "libmesh/transient_system.h"
 #include "libmesh/eigen_system.h"
 
 // forward declarations
@@ -73,7 +72,7 @@ public:
    *
    * @return The number of converged eigenvalues
    */
-  unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
+  unsigned int getNumConvergedEigenvalues() const { return _eigen_sys.get_n_converged(); };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
@@ -83,7 +82,7 @@ public:
    */
   virtual SNES getSNES() override;
 
-  TransientEigenSystem & sys() { return _transient_sys; }
+  EigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -168,7 +167,7 @@ protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  TransientEigenSystem & _transient_sys;
+  EigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;

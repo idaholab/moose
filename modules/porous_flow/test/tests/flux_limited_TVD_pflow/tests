@@ -321,6 +321,7 @@
     max_threads = 3
     prereq = 'pffltvd_1D_threads pffltvd_1D_adaptivity'
     threading = '!pthreads'
+    skip = '#14558'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D for PorousFlow simulations when mesh adaptivity is used, and when more than 1 thread is used'
