@@ -1063,3 +1063,15 @@ DisplacedProblem::couplingMatrix() const
 {
   return _mproblem.couplingMatrix();
 }
+
+bool
+DisplacedProblem::computingScalingJacobian() const
+{
+  return _mproblem.computingScalingJacobian();
+}
+
+bool
+DisplacedProblem::computingScalingResidual() const
+{
+  return _mproblem.computingScalingResidual();
+}

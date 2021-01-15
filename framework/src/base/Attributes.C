@@ -416,6 +416,8 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::ShapeSideUserObject       * (dynamic_cast<const ShapeSideUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::Postprocessor             * (dynamic_cast<const Postprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::BlockRestrictable         * (dynamic_cast<const BlockRestrictable *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::BoundaryRestrictable      * (dynamic_cast<const BoundaryRestrictable *>(obj) != nullptr);
   // clang-format on
 }
 

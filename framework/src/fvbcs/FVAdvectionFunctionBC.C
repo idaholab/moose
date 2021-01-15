@@ -57,6 +57,7 @@ FVAdvectionFunctionBC::computeQpResidual()
       _u[_qp],
       _exact_solution.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid()),
       _velocity,
-      *_face_info);
+      *_face_info,
+      true);
   return _normal * _velocity * u_face;
 }

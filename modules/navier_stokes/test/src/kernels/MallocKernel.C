@@ -26,7 +26,7 @@ MallocKernel::jacobianSetup()
   auto & sys_mat = _sys.getMatrix(_sys.systemMatrixTag());
 
   // Add to an off-diagional
-  sys_mat.add(0, 1, 0);
+  sys_mat.add(0, sys_mat.n() - 1, 0);
 }
 
 Real

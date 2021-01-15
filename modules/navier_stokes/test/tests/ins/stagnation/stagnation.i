@@ -31,8 +31,9 @@
   nl_max_its = 15
   nl_rel_tol = 1.e-9
 
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = 'asm      2               ilu          4'
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart'
+  petsc_options_value = 'asm      2               lu           NONZERO                   1000'
+  line_search = none
 []
 
 [Variables]

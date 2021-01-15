@@ -282,6 +282,8 @@ private:
   std::vector<std::shared_ptr<MaterialBase>> _neigh_sub_neigh_face_mats;
 
   const bool _do_jacobian;
+  const bool _scaling_jacobian;
+  const bool _scaling_residual;
   unsigned int _num_cached = 0;
 
   using ThreadedFaceLoop<RangeType>::_fe_problem;
@@ -296,13 +298,19 @@ template <typename RangeType>
 ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
                                                     const std::set<TagID> & tags)
   : ThreadedFaceLoop<RangeType>(fe_problem, tags),
-    _do_jacobian(fe_problem.currentlyComputingJacobian())
+    _do_jacobian(fe_problem.currentlyComputingJacobian()),
+    _scaling_jacobian(fe_problem.computingScalingJacobian()),
+    _scaling_residual(fe_problem.computingScalingResidual())
 {
 }
 
 template <typename RangeType>
 ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split)
-  : ThreadedFaceLoop<RangeType>(x, split), _fv_vars(x._fv_vars), _do_jacobian(x._do_jacobian)
+  : ThreadedFaceLoop<RangeType>(x, split),
+    _fv_vars(x._fv_vars),
+    _do_jacobian(x._do_jacobian),
+    _scaling_jacobian(x._scaling_jacobian),
+    _scaling_residual(x._scaling_residual)
 {
 }
 
@@ -367,6 +375,19 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
+  // We don't want to do bcs when computing a scaling Jacobian or residual because they might
+  // introduce things like penalty factors
+  mooseAssert(
+      !_do_jacobian ? !_scaling_jacobian : true,
+      "If we're computing the residual, then we definitely shouldn't be computing a scaling "
+      "Jacobian.");
+  mooseAssert(_do_jacobian ? !_scaling_residual : true,
+              "If we're computing the Jacobian, then we definitely shouldn't be computing a "
+              "scaling residual");
+
+  if (_scaling_jacobian || _scaling_residual)
+    return;
+
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
@@ -676,6 +697,37 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::pre()
 {
+  std::vector<FVFluxBC *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(bcs);
+
+  std::vector<FVFluxKernel *> kernels;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(kernels);
+
+  if (_do_jacobian)
+  {
+    for (auto * bc : bcs)
+      bc->jacobianSetup();
+    for (auto * kernel : kernels)
+      kernel->jacobianSetup();
+  }
+  else
+  {
+    for (auto * bc : bcs)
+      bc->residualSetup();
+    for (auto * kernel : kernels)
+      kernel->residualSetup();
+  }
+
   // Clear variables
   _fv_vars.clear();
   _elem_sub_fv_vars.clear();
