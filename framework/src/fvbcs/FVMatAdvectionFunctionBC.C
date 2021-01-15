@@ -52,7 +52,9 @@ FVMatAdvectionFunctionBC::FVMatAdvectionFunctionBC(const InputParameters & param
     _adv_quant(isParamValid("advected_quantity")
                    ? getADMaterialProperty<Real>("advected_quantity").get()
                    : _u),
-    _flux_variable_exact_solution(getFunction("flux_variable_exact_solution")),
+    _flux_variable_exact_solution(isParamValid("flux_variable_exact_solution")
+                                      ? &getFunction("flux_variable_exact_solution")
+                                      : nullptr),
     _vel_x_exact_solution(getFunction("vel_x_exact_solution")),
     _vel_y_exact_solution(
         isParamValid("vel_y_exact_solution") ? &getFunction("vel_y_exact_solution") : nullptr),
@@ -84,7 +86,13 @@ FVMatAdvectionFunctionBC::computeQpResidual()
   ADReal flux_var_face;
   ADRealVectorValue v_face;
 
-  Real flux_var_ghost = _flux_variable_exact_solution.value(
+  mooseAssert(
+      _flux_variable_exact_solution,
+      "_flux_variable_exact_solution is null in FVMatAdvectionFunctionBC::computeQpResidual. Did "
+      "you suppress the flux_variable_exact_solution parameter in your derived class and forget to "
+      "override computeQpResidual?");
+
+  Real flux_var_ghost = _flux_variable_exact_solution->value(
       _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
   RealVectorValue v_ghost(
       _vel_x_exact_solution.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid()),
@@ -95,9 +103,14 @@ FVMatAdvectionFunctionBC::computeQpResidual()
                                   _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid())
                             : 0);
 
-  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info);
+  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info, true);
 
-  interpolate(
-      _advected_interp_method, flux_var_face, _adv_quant[_qp], flux_var_ghost, v_face, *_face_info);
+  interpolate(_advected_interp_method,
+              flux_var_face,
+              _adv_quant[_qp],
+              flux_var_ghost,
+              v_face,
+              *_face_info,
+              true);
   return _normal * v_face * flux_var_face;
 }

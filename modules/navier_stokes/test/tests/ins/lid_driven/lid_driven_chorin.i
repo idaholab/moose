@@ -255,16 +255,20 @@ solve_type = 'NEWTON'
 
   line_search = 'none'
 
-  nl_rel_tol = 1e-5
+  nl_rel_tol = 1e-12
   nl_max_its = 6
-  l_tol = 1e-6
   l_max_its = 300
   start_time = 0.0
   num_steps = 5
+
+  automatic_scaling = true
+  verbose = true
+  compute_scaling_once = false
 []
 
-
-
+[Debug]
+  show_var_residual_norms = true
+[]
 
 [Outputs]
   file_base = lid_driven_chorin_out

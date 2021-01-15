@@ -1617,11 +1617,23 @@ public:
   }
 
   /**
+   * This method is only meant to be called if MOOSE is configured to use global AD indexing.
+   * This simply caches the derivative values for the corresponding column indices for the provided
+   * \p matrix_tags. If called when using local AD indexing, this method will simply error
+   */
+  void processDerivatives(const ADReal & residual,
+                          dof_id_type dof_index,
+                          const std::set<TagID> & matrix_tags);
+
+  /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
    * simply caches the derivative values for the corresponding column indices for the provided
-   * \p matrix_tags. If not using global indexing, then the user must provide a functor which
-   * takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives to be
-   * processed, the \p row_index corresponding to the row index of the matrices that values
+   * \p matrix_tags. Note that this single dof overload will not call \p
+   * DofMap::constraint_element_matrix.
+   *
+   * If not using global indexing, then the user must provide a
+   * functor which takes three arguments: the <tt>ADReal residual</tt> that contains the derivatives
+   * to be processed, the \p row_index corresponding to the row index of the matrices that values
    * should be added to, and the \p matrix_tags specifying the matrices that will  be added into
    */
   template <typename LocalFunctor>
@@ -1633,11 +1645,13 @@ public:
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
    * method simply caches the derivative values for the corresponding column indices for the
-   * provided \p matrix_tags. If not using global indexing, then the user must provide a functor
-   * which takes three arguments: the <tt>std::vector<ADReal> residuals</tt> that contains the
-   * derivatives to be processed, the <tt>std::vector<dof_id_type>row_indices</tt> corresponding to
-   * the row indices of the matrices that values should be added to, and the \p matrix_tags
-   * specifying the matrices that will  be added into
+   * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.
+   *
+   * If not using global indexing, then the user must provide a functor which takes three arguments:
+   * the <tt>std::vector<ADReal> residuals</tt> that contains the derivatives to be processed, the
+   * <tt>std::vector<dof_id_type>row_indices</tt> corresponding to the row indices of the matrices
+   * that values should be added to, and the \p matrix_tags specifying the matrices that will be
+   * added into
    */
   template <typename LocalFunctor>
   void processDerivatives(const std::vector<ADReal> & residuals,
@@ -2647,6 +2661,32 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+inline void
+Assembly::processDerivatives(const ADReal & residual,
+                             const dof_id_type row_index,
+                             const std::set<TagID> & matrix_tags)
+{
+  const auto & derivs = residual.derivatives();
+
+  const auto & column_indices = derivs.nude_indices();
+  const auto & values = derivs.nude_data();
+
+  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
+
+  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+
+  for (std::size_t i = 0; i < column_indices.size(); ++i)
+    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
+}
+#else
+inline void
+Assembly::processDerivatives(const ADReal &, const dof_id_type, const std::set<TagID> &)
+{
+  mooseError("This method should not be used if using local AD indexing");
+}
+#endif
+
 template <typename LocalFunctor>
 void
 Assembly::processDerivatives(const ADReal & residual,
@@ -2659,18 +2699,7 @@ Assembly::processDerivatives(const ADReal & residual,
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  const auto & derivs = residual.derivatives();
-
-  const auto & column_indices = derivs.nude_indices();
-  const auto & values = derivs.nude_data();
-
-  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
-
-  const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
-  for (std::size_t i = 0; i < column_indices.size(); ++i)
-    cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
-
+  processDerivatives(residual, row_index, matrix_tags);
 #else
   local_functor(residual, row_index, matrix_tags);
 #endif

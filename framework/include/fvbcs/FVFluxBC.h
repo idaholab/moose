@@ -10,15 +10,15 @@
 #pragma once
 
 #include "FVBoundaryCondition.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MaterialPropertyInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "TwoMaterialPropertyInterface.h"
 #include "FVUtils.h"
 
 // Provides an interface for computing residual contributions from finite
 // volume numerical fluxes computed on faces to neighboring elements.
 class FVFluxBC : public FVBoundaryCondition,
-                 public CoupleableMooseVariableDependencyIntermediateInterface,
-                 public MaterialPropertyInterface
+                 public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                 public TwoMaterialPropertyInterface
 {
 public:
   FVFluxBC(const InputParameters & parameters);
@@ -35,9 +35,21 @@ protected:
 
   const unsigned int _qp = 0;
   const ADVariableValue & _u;
+  const ADVariableValue & _u_neighbor;
   // TODO: add gradients once we have reconstruction.
   ADRealVectorValue _normal;
   const FaceInfo * _face_info = nullptr;
+
+  /**
+   * @return the value of u at the cell centroid on the subdomain on which u is defined. E.g. u is
+   * defined on either the FaceInfo elem or FacInfo neighbor subdomain
+   */
+  const ADReal & uOnUSub() const;
+
+  /**
+   * @return the value of u at the ghost cell centroid
+   */
+  const ADReal & uOnGhost() const;
 
 private:
   /// Computes the Jacobian contribution for every coupled variable.

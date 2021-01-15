@@ -18,7 +18,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/compare_types.h"
 
-#include <utility>
+#include <tuple>
 
 template <typename>
 class MooseVariableFV;
@@ -44,78 +44,112 @@ enum class InterpMethod
 };
 
 /**
- * A simple linear interpolation of values between cell centers to a cell face
+ * Produce the interpolation coefficients in the equation:
+ *
+ * \phi_f = c_1 * \phi_{F1} + c_2 * \phi_{F2}
+ *
+ * A couple of examples: if we are doing an average interpolation with
+ * an orthogonal regular grid, then the pair will be (0.5, 0.5). If we are doing an
+ * upwind interpolation with the velocity facing outward from the F1 element,
+ * then the pair will be (1.0, 0.0).
+ *
+ * @param m The interpolation method
+ * @param fi The face information
+ * @param one_is_elem Whether fi.elem() == F1
+ * @param advector The advecting velocity. Not relevant for an Average interpolation
+ * @return a pair where the first Real is c_1 and the second Real is c_2
  */
-template <typename T, typename T2>
-typename libMesh::CompareTypes<T, T2>::supertype
-linearInterpolation(const T & elem_value, const T2 & neighbor_value, const FaceInfo & fi)
-{
-  return fi.gC() * elem_value + (1. - fi.gC()) * neighbor_value;
-}
-
-/**
- * A simple linear interpolation of values between cell centers to a cell face
- */
-template <typename T, typename T2>
-libMesh::VectorValue<typename libMesh::CompareTypes<T, T2>::supertype>
-linearInterpolation(const libMesh::VectorValue<T> & elem_value,
-                    const libMesh::VectorValue<T2> & neighbor_value,
-                    const FaceInfo & fi)
-{
-  return fi.gC() * elem_value + (1. - fi.gC()) * neighbor_value;
-}
-
-/// Provides interpolation of face values for non-advection-specific purposes
-/// (although it can/will still be used by advective kernels sometimes).  The
-/// interpolated value is stored in result.  This should be called when a
-/// face value needs to be computed using elem and neighbor information (e.g. a
-/// material property, solution value, etc.).  elem and neighbor represent the
-/// property/value to compute the face value for.
-template <typename T, typename T2, typename T3>
-void
-interpolate(InterpMethod m, T & result, const T2 & elem, const T3 & neighbor, const FaceInfo & fi)
+template <typename Vector = RealVectorValue>
+std::pair<Real, Real>
+interpCoeffs(const InterpMethod m,
+             const FaceInfo & fi,
+             const bool one_is_elem,
+             const Vector advector = Vector())
 {
   switch (m)
   {
     case InterpMethod::Average:
-      result = linearInterpolation(elem, neighbor, fi);
+    {
+      if (one_is_elem)
+        return std::make_pair(fi.gC(), 1. - fi.gC());
+      else
+        return std::make_pair(1. - fi.gC(), fi.gC());
+    }
+
+    case InterpMethod::Upwind:
+    {
+      if ((advector * fi.normal() > 0) == one_is_elem)
+        return std::make_pair(1., 0.);
+      else
+        return std::make_pair(0., 1.);
+    }
+
+    default:
+      mooseError("Unrecognized interpolation method");
+  }
+}
+
+/**
+ * A simple linear interpolation of values between cell centers to a cell face. The \p one_is_elem
+ * parameter indicates whether value1 corresponds to the FaceInfo elem value; else it corresponds to
+ * the FaceInfo neighbor value
+ */
+template <typename T, typename T2>
+typename libMesh::CompareTypes<T, T2>::supertype
+linearInterpolation(const T & value1,
+                    const T2 & value2,
+                    const FaceInfo & fi,
+                    const bool one_is_elem)
+{
+  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+  return coeffs.first * value1 + coeffs.second * value2;
+}
+
+/// Provides interpolation of face values for non-advection-specific purposes (although it can/will
+/// still be used by advective kernels sometimes). The interpolated value is stored in result.
+/// This should be called when a face value needs to be computed from two neighboring
+/// cells/elements. value1 and value2 represent the cell property/values from which to compute the
+/// face value. The \p one_is_elem parameter indicates whether value1 corresponds to the FaceInfo
+/// elem value; else it corresponds to the FaceInfo neighbor value
+template <typename T, typename T2, typename T3>
+void
+interpolate(InterpMethod m,
+            T & result,
+            const T2 & value1,
+            const T3 & value2,
+            const FaceInfo & fi,
+            const bool one_is_elem)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+      result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
     default:
       mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
   }
 }
 
-/// Provides interpolation of face values for advective flux kernels.  This
-/// should be called by advective kernels when a u_face value is needed from
-/// u_elem and u_neighbor.  The interpolated value is stored in result.  elem
-/// and neighbor represent the property/value being advected in the elem and
-/// neighbor elements respectively.  advector represents the vector quantity at
-/// the face that is doing the advecting (e.g. the flow velocity at the
-/// face); this value often will have been computed using a call to the
-/// non-advective interpolate function.
+/// Provides interpolation of face values for advective flux kernels.  This should be called by
+/// advective kernels when a face value is needed from two neighboring cells/elements.  The
+/// interpolated value is stored in result. value1 and value2 represent the two neighboring advected
+/// cell property/values. advector represents the vector quantity at the face that is doing the
+/// advecting (e.g. the flow velocity at the face); this value often will have been computed using a
+/// call to the non-advective interpolate function. The \p one_is_elem parameter indicates whether
+/// value1 corresponds to the FaceInfo elem value; else it corresponds to the FaceInfo neighbor
+/// value
 template <typename T, typename T2, typename T3, typename Vector>
 void
 interpolate(InterpMethod m,
             T & result,
-            const T2 & elem,
-            const T3 & neighbor,
+            const T2 & value1,
+            const T3 & value2,
             const Vector & advector,
-            const FaceInfo & fi)
+            const FaceInfo & fi,
+            const bool one_is_elem)
 {
-  switch (m)
-  {
-    case InterpMethod::Average:
-      result = linearInterpolation(elem, neighbor, fi);
-      break;
-    case InterpMethod::Upwind:
-      if (advector * fi.normal() > 0)
-        result = elem;
-      else
-        result = neighbor;
-      break;
-    default:
-      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
-  }
+  const auto coeffs = interpCoeffs(m, fi, one_is_elem, advector);
+  result = coeffs.first * value1 + coeffs.second * value2;
 }
 
 template <typename ActionFunctor>
@@ -215,8 +249,23 @@ ADReal gradUDotNormal(const T & elem_value,
                       const FaceInfo & face_info,
                       const MooseVariableFV<Real> & fv_var);
 
+/**
+ * This utility determines element one and element two given a \p FaceInfo \p fi and variable \p
+ * var. You may ask what in the world "element one" and "element two" means, and that would be a
+ * very good question. What it means is: a variable will *always* have degrees of freedom on element
+ * one. A variable may or may not have degrees of freedom on element two. So we are introducing a
+ * second terminology here. FaceInfo geometric objects have element-neighbor pairs. These
+ * element-neighbor pairs are purely geometric and have no relation to the algebraic system of
+ * variables. The elem1-elem2 notation introduced here is based on dof/algebraic information and may
+ * very well be different from variable to variable, e.g. elem1 may correspond to the FaceInfo elem
+ * for one variable (and correspondingly elem2 will be the FaceInfo neighbor), but elem1 may
+ * correspond to the FaceInfo neighbor for another variable (and correspondingly for *that* variable
+ * elem2 will be the FaceInfo elem).
+ * @return A tuple, where the first item is elem1, the second item is elem2, and the third item is a
+ * boolean indicating whether elem1 corresponds to the FaceInfo elem
+ */
 template <typename OutputType>
-std::pair<const Elem *, const Elem *>
+std::tuple<const Elem *, const Elem *, bool>
 determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & var)
 {
   auto ft = fi.faceType(var.name());
@@ -249,7 +298,7 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
   mooseAssert(elem_one, "This elem should be non-null!");
   const Elem * const elem_two = one_is_elem ? fi.neighborPtr() : &fi.elem();
 
-  return std::make_pair(elem_one, elem_two);
+  return std::make_tuple(elem_one, elem_two, one_is_elem);
 }
 }
 

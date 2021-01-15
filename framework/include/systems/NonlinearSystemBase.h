@@ -747,7 +747,6 @@ protected:
    */
   virtual void postAddResidualObject(ResidualObject &) {}
 
-protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
   /// solution vector from nonlinear solver

@@ -132,7 +132,8 @@ AddVariableAction::init()
 
   // Determine the MooseVariable type
   bool is_fv = _moose_object_pars.get<bool>("fv");
-  _type = determineType(_fe_type, _components, is_fv);
+  if (_type == "MooseVariableBase")
+    _type = determineType(_fe_type, _components, is_fv);
   if (is_fv)
     _problem->needFV();
 

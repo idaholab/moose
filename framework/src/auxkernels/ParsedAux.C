@@ -47,7 +47,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
 
   // coupled field variables
   for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getVar("args", i)->name();
+    variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
