@@ -1,0 +1,8 @@
+[Tests]
+  [taolmvm]
+    type = CSVDiff
+    rel_err = 0.1
+    input = master.i
+    csvdiff = forward_vertical_0001.csv
+  []
+[]
