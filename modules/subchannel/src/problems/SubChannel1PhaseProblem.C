@@ -361,13 +361,13 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
       unsigned int jj_ch = chans.second;
       auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
       auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-      // Define donor enthalpy (is gonna change)
+      // Define donor enthalpy
       auto h_star = 0.0;
-      if ((*P_soln)(node_in_i) > (*P_soln)(node_in_j))
+      if (Wij_global(i_gap, iz) > 0.0)
       {
         h_star = (*h_soln)(node_in_i);
       }
-      if ((*P_soln)(node_in_i) < (*P_soln)(node_in_j))
+      else
       {
         h_star = (*h_soln)(node_in_j);
       }
@@ -600,6 +600,18 @@ SubChannel1PhaseProblem::externalSolve()
       PCYCLES(axial_level - 1, 1) = PError;
     }
   }
+  auto Powerin = 0.0;
+  auto Powerout = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, nz);
+    Powerin += (*mdot_soln)(node_in) * (*h_soln)(node_in);
+    Powerout += (*mdot_soln)(node_out) * (*h_soln)(node_out);
+  }
+
+  _console << "Power is :\n" << Powerout - Powerin;
+
   // update old crossflow matrix
   Wij_global_old = Wij_global;
   // Save Wij_global
