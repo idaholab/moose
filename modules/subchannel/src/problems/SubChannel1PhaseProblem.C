@@ -180,22 +180,21 @@ SubChannel1PhaseProblem::computeWij(int iz)
     auto DPij_out = (*P_soln)(node_out_i) - (*P_soln)(node_out_j);
     auto DPij_in = (*P_soln)(node_in_i) - (*P_soln)(node_in_j);
     auto DPij = (1 - asp) * (DPij_out + DPi - DPj) + asp * DPij_in;
-    auto sign = -2.0 * signbit(DPij_in) + 1.0;
 
-    // Figure out donor cell density,mu (is gonna change)
+    // Figure out donor cell density,mu
     auto rho_star = 0.0;
     auto mu_star = 0.0;
-    if (sign == 1.0)
+    if (Wij_global(i_gap, iz) > 0.0)
     {
       rho_star = rho_i;
       mu_star = _fp->mu_from_rho_T(rho_i, T_i);
     }
-    else if (sign == 0.0)
+    else if (Wij_global(i_gap, iz) == 0.0)
     {
-      Wij(i_gap) = 0.0;
-      continue;
+      rho_star = (rho_i + rho_j) / 2.0;
+      mu_star = (_fp->mu_from_rho_T(rho_j, T_j) + _fp->mu_from_rho_T(rho_i, T_i)) / 2.0;
     }
-    else if (sign == -1.0)
+    else
     {
       rho_star = rho_j;
       mu_star = _fp->mu_from_rho_T(rho_j, T_j);
