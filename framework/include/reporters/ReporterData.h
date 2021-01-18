@@ -188,13 +188,6 @@ public:
   std::set<ReporterName> getUndeclaredNames() const;
 
   /**
-   * Writes all Reporter values to the supplied JSON node for output to a file.
-   *
-   * @see JSONOutput
-   */
-  void store(nlohmann::json & json) const;
-
-  /**
    * Perform integrity check for get/declare calls
    */
   void check() const;
@@ -238,6 +231,12 @@ public:
    */
   void addConsumerMode(ReporterMode mode, const std::string & object_name);
 
+  /**
+   * Helper method for returning the ReporterContextBase object, if it exists.
+   * @param reporter_name Object/data name for the Reporter value
+   */
+  const ReporterContextBase * getReporterContextBase(const ReporterName & reporter_name) const;
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;
@@ -253,13 +252,6 @@ private:
   template <typename T>
   ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare);
   friend class VectorPostprocessorInterface;
-
-  /**
-   * Helper method for returning the ReporterContextBase object, if it exists.
-   * @param reporter_name Object/data name for the Reporter value
-   */
-  const ReporterContextBase *
-  getReporterContextBaseHelper(const ReporterName & reporter_name) const;
 
   /**
    * Helper for registering data with the MooseApp to avoid cyclic includes
@@ -338,7 +330,7 @@ template <typename T>
 bool
 ReporterData::hasReporterValue(const ReporterName & reporter_name) const
 {
-  auto ptr = getReporterContextBaseHelper(reporter_name);
+  auto ptr = getReporterContextBase(reporter_name);
   if (ptr != nullptr)
   {
     auto context = dynamic_cast<const ReporterContext<T> *>(ptr);
@@ -352,7 +344,7 @@ const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const std::size_t time_index) const
 {
-  auto ptr = getReporterContextBaseHelper(reporter_name);
+  auto ptr = getReporterContextBase(reporter_name);
   if (ptr == nullptr)
     mooseError("The desired Reporter value '", reporter_name, "' does not exist.");
   auto context_ptr = static_cast<const ReporterContext<T> *>(ptr);
