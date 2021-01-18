@@ -80,13 +80,11 @@ class Factory:
         with open('testoutput.json', 'w') as file:
             out = {}
             for name, object in sorted(self.objects.items()):
-                out[name]= {}
+                out[name] = {}
                 params = self.validParams(name)
                 for key in sorted(params.desc):
                     if params.isValid(key):
-                        out[name][key] = {}
-                        out[name][key]["default"] = params[key]
-                        out[name][key]["description"] = params.getDescription(key)
+                        out[name][key] = {"default" : params[key], "description" : params.getDescription(key)}
 
             file.write(json.dumps(out, indent=4, sort_keys=True))
             print("JSON dumped to moose/test/testoutput.json")
