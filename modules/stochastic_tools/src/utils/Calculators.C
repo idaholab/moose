@@ -198,15 +198,20 @@ makeCalculator(const MooseEnumItem & item, const libMesh::ParallelObject & other
   return nullptr;
 }
 
-template class Calculator<std::vector<Real>, Real>;
-template class Mean<std::vector<Real>, Real>;
-template class Max<std::vector<Real>, Real>;
-template class Min<std::vector<Real>, Real>;
-template class Sum<std::vector<Real>, Real>;
-template class StdDev<std::vector<Real>, Real>;
-template class StdErr<std::vector<Real>, Real>;
-template class Ratio<std::vector<Real>, Real>;
-template class L2Norm<std::vector<Real>, Real>;
-template std::unique_ptr<const Calculator<std::vector<Real>, Real>> makeCalculator<std::vector<Real>, Real>(const MooseEnumItem &, const libMesh::ParallelObject &);
+#define createCalculators(InType, OutType)                                                         \
+  template class Calculator<InType, OutType>;                                                      \
+  template class Mean<InType, OutType>;                                                            \
+  template class Max<InType, OutType>;                                                             \
+  template class Min<InType, OutType>;                                                             \
+  template class Sum<InType, OutType>;                                                             \
+  template class StdDev<InType, OutType>;                                                          \
+  template class StdErr<InType, OutType>;                                                          \
+  template class Ratio<InType, OutType>;                                                           \
+  template class L2Norm<InType, OutType>;                                                          \
+  template std::unique_ptr<const Calculator<InType, OutType>> makeCalculator<InType, OutType>(     \
+      const MooseEnumItem &, const libMesh::ParallelObject &)
+
+createCalculators(std::vector<Real>, Real);
+createCalculators(std::vector<int>, Real);
 
 } // StocasticTools namespace

@@ -15,6 +15,7 @@
 
 #include "nlohmann/json.h"
 
+
 /**
  * ReporterContext that utilizes a Calculator object to compute its value and confidence levels
  */

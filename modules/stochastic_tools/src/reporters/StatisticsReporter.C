@@ -27,9 +27,12 @@ StatisticsReporter::validParams()
   params.addClassDescription(
       "Compute statistical values of a given VectorPostprocessor objects and vectors.");
 
-  params.addRequiredParam<std::vector<VectorPostprocessorName>>(
+  params.addParam<std::vector<VectorPostprocessorName>>(
       "vectorpostprocessors",
       "List of VectorPostprocessor(s) to utilized for statistic computations.");
+
+  params.addParam<std::vector<ReporterName>>(
+      "reporters", "List of Reporter values to utilized for statistic computations.");
 
   MultiMooseEnum stats = StochasticTools::makeCalculatorEnum();
   params.addRequiredParam<MultiMooseEnum>(
@@ -73,26 +76,57 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
         StochasticTools::makeBootstrapCalculator(ci_method, *this, ci_levels, replicates, seed);
   }
 
-  // Stats for VPP
-  const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
-  for (const auto & vpp_name : vpp_names)
+  // Stats for Reporters
+  if (isParamValid("reporters"))
   {
-    const VectorPostprocessor & vpp_object =
-        _fe_problem.getVectorPostprocessorObjectByName(vpp_name);
-    const std::set<std::string> & vpp_vectors = vpp_object.getVectorNames();
-    for (const auto & vec_name : vpp_vectors)
+    const auto & reporter_names = getParam<std::vector<ReporterName>>("reporters");
+    for (const auto & r_name : reporter_names)
     {
-      ReporterName r_name(vpp_name, vec_name);
       const auto & data = getReporterValueByName<std::vector<Real>>(r_name);
       const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
+
       for (const auto & item : compute_stats)
       {
-        const std::string s_name = vpp_name + "::" + vec_name + "_" + item.name();
-        declareValueByName<Real, ReporterStatisticsContext>(
-            s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
+
+        const std::string s_name = r_name.getCombinedName() + "_" + item.name();
+        if (hasReporterValueByName<std::vector<Real>>(r_name))
+          declareValueByName<Real, ReporterStatisticsContext>(
+              s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
+        else
+          paramError("reporters",
+                     "The reporter value '",
+                     r_name,
+                     "' is not a type supported by the StatisticsReporter.");
       }
     }
   }
+
+  // Stats for VPP
+  else if (isParamValid("vectorpostprocessors"))
+  {
+    const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
+    for (const auto & vpp_name : vpp_names)
+    {
+      const VectorPostprocessor & vpp_object =
+          _fe_problem.getVectorPostprocessorObjectByName(vpp_name);
+      const std::set<std::string> & vpp_vectors = vpp_object.getVectorNames();
+      for (const auto & vec_name : vpp_vectors)
+      {
+        ReporterName r_name(vpp_name, vec_name);
+        const auto & data = getReporterValueByName<std::vector<Real>>(r_name);
+        const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
+        for (const auto & item : compute_stats)
+        {
+          const std::string s_name = vpp_name + "::" + vec_name + "_" + item.name();
+          declareValueByName<Real, ReporterStatisticsContext>(
+              s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
+        }
+      }
+    }
+  }
+
+  else
+    mooseError("The 'vectorpostprocessors' and/or 'reporters' parameters must be defined.");
 }
 
 std::vector<Real>
