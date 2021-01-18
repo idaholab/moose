@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeochemicalDatabaseReader.h"
+#include "GeochemicalDatabaseValidator.h"
 
 #include "MooseUtils.h"
 #include "Conversion.h"
@@ -22,10 +23,14 @@ GeochemicalDatabaseReader::GeochemicalDatabaseReader(
   : _filename(filename)
 {
   read(_filename);
+  validate(_filename, _root);
+
   if (reexpress_free_electron)
     reexpressFreeElectron();
+
   if (use_piecewise_interpolation && _root["Header"].contains("logk model"))
     _root["Header"]["logk model"] = "piecewise-linear";
+
   if (remove_all_extrapolated_secondary_species)
     removeExtrapolatedSecondarySpecies();
 
@@ -35,13 +40,22 @@ GeochemicalDatabaseReader::GeochemicalDatabaseReader(
 }
 
 void
-GeochemicalDatabaseReader::read(FileName filename)
+GeochemicalDatabaseReader::read(const FileName filename)
 {
   MooseUtils::checkFileReadable(filename);
 
   // Read the JSON database
   std::ifstream jsondata(filename);
   jsondata >> _root;
+}
+
+void
+GeochemicalDatabaseReader::validate(const FileName filename, const nlohmann::json & db)
+{
+  // Validate the JSON database so that we don't have to check array sizes,
+  // check for conversion issues, etc when extracting data using get methods
+  GeochemicalDatabaseValidator dbv(filename, db);
+  dbv.validate();
 }
 
 void

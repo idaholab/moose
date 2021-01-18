@@ -19,6 +19,25 @@ TEST(GeochemicalDatabaseReaderTest, filename)
   EXPECT_EQ(database.filename(), "database/moose_testdb.json");
 }
 
+TEST(GeochemicalDatabaseReaderTest, faultyDB)
+{
+  // Test that the database validator throws an error when a faulty
+  // database is read (the full range of validation errors are tested
+  // in GeochemicalDatabaseValidatorTest.C)
+  try
+  {
+    GeochemicalDatabaseReader database("database/faultydbs/missing_header.json");
+  }
+  catch (const std::exception & err)
+  {
+    const std::string msg = "The MOOSE database database/faultydbs/missing_header.json does not "
+                            "have a required \"Header\" field";
+
+    std::size_t pos = std::string(err.what()).find(msg);
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+}
+
 TEST(GeochemicalDatabaseReaderTest, getActivityModel)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");

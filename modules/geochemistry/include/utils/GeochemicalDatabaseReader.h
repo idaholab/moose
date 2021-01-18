@@ -232,8 +232,16 @@ public:
 
   /**
    * Parse the thermodynamic database
+   * @param filename Name of thermodynamic database file
    */
-  void read(FileName filename);
+  void read(const FileName filename);
+
+  /**
+   * Validate the thermodynamic database
+   * @param filename Name of thermodynamic database file
+   * @param db JSON database read from filename
+   */
+  void validate(const FileName filename, const nlohmann::json & db);
 
   /**
    * Sometimes the free electron's equilibrium reaction is defined in terms of O2(g) which is not a
@@ -244,19 +252,19 @@ public:
 
   /**
    * Get the activity model type
-   * @retrun activity model
+   * @return activity model
    */
   std::string getActivityModel() const;
 
   /**
    * Get the fugacity model type
-   * @retrun fugacity model
+   * @return fugacity model
    */
   std::string getFugacityModel() const;
 
   /**
    * Get the equilibrium constant model type
-   * @retrun equilibrium constant model
+   * @return equilibrium constant model
    */
   std::string getLogKModel() const;
 
