@@ -79,6 +79,7 @@
   [../]
   [./temperature]
     initial_condition = 70
+    scaling = 1e-4
   [../]
 []
 
@@ -243,7 +244,6 @@
   type = Transient
   solve_type = NEWTON
   end_time = 1e4
-  automatic_scaling = true
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-5
   [./TimeStepper]
