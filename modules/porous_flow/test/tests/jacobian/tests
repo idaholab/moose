@@ -810,7 +810,6 @@
     difference_tol = 1e10
     cli_args = '-mat_fd_type ds Executioner/num_steps=1'
     threading = '!pthreads'
-    petsc_version = '>=3.9.0'
     requirement = "PorousFlow shall compute all Jacobian entries of all Kernels"
     issues = '#6845 #10167'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
