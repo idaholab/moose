@@ -93,7 +93,7 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
                            : std::vector<Real>(_num_models, true)),
     _consistent_tangent_operator(_num_models),
     _cycle_models(getParam<bool>("cycle_models")),
-    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
+    _matl_timestep_limit(declareProperty<Real>(_base_name + "matl_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
     _all_models_isotropic(true),
     _damage_model(isParamValid("damage_model")
