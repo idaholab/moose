@@ -8,6 +8,5 @@
     requirement = 'The system shall output all boundary and subdomain connections.'
     design = 'MooseMesh.md'
     issues = '#14971 #15019'
-    recover = false
   []
 []
