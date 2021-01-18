@@ -54,7 +54,7 @@
                 'pbc_adaptivity_out.e-s0005.4.3'
       # We use "linear_partition=true" here, so that the tests are platform independent
       cli_args = 'Outputs/hide="pid" Outputs/nemesis=true Outputs/exodus=false '
-                 'Mesh/dmg/linear_partition=true'
+                 'Mesh/dmg/partition="linear"'
       allow_warnings = true
       max_parallel = 4
       min_parallel = 4

@@ -9,7 +9,7 @@
     dim = 2
     nx = 10
     ny = 10
-    linear_partition=true
+    partition="linear"
     num_side_layers = 2
   []
 []
