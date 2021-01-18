@@ -4733,9 +4733,12 @@ FEProblemBase::updateMaxQps()
 
   unsigned int max_qpts = getMaxQps();
   if (max_qpts > Moose::constMaxQpsPerElem)
-    mooseError("Max quadrature points per element assumptions made in some code (e.g.  Coupleable "
-               "and MaterialPropertyInterface classes) have been violated.\n Complain to Moose "
-               "developers to allow constMaxQpsPerElem to be increased.");
+    mooseError("Max quadrature points per element assumptions made in some code (e.g.  Coupleable ",
+               "and MaterialPropertyInterface classes) have been violated.\n",
+               "Complain to Moose developers to have constMaxQpsPerElem increased from ",
+               Moose::constMaxQpsPerElem,
+               " to ",
+               max_qpts);
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // the highest available order in libMesh is 43

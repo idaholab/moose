@@ -195,7 +195,7 @@ namespace Moose
 /// up with some overkill complex mechanism for dynamically resizing them.
 /// Eventually, we may need or implement that more sophisticated mechanism and
 /// will no longer need this.
-const size_t constMaxQpsPerElem = 100;
+const size_t constMaxQpsPerElem = 216;
 
 // These are used by MooseVariableData and MooseVariableDataFV
 enum SolutionState
