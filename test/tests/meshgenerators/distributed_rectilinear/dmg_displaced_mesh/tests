@@ -52,7 +52,7 @@
                pbc_adaptivity_out.e-s0005.4.0 '
                 'pbc_adaptivity_out.e-s0005.4.1 pbc_adaptivity_out.e-s0005.4.2 '
                 'pbc_adaptivity_out.e-s0005.4.3'
-      # We use "linear_partition=true" here, so that the tests are platform independent
+      # We use 'partition=linear' here, so that the tests are platform independent
       cli_args = 'Outputs/hide="pid" Outputs/nemesis=true Outputs/exodus=false '
                  'Mesh/dmg/partition="linear"'
       allow_warnings = true
