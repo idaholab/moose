@@ -446,7 +446,7 @@ class TestHarness:
         output = ''
         # Print what ever status the tester has at the time
         if self.options.verbose or (job.isFail() and not self.options.quiet):
-            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n'
+            output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n' + ('Input File: ' + job.getTestDir() + job.getInputFile() if job.getInputFile() != None else 'No input file provided.')
             output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n')
