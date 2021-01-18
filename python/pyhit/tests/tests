@@ -14,4 +14,12 @@
     issues = '#15889'
     requirement = "MOOSE python utilities shall include a tool for tokenizing HIT files."
   []
+
+  [examples]
+    type = PythonUnitTest
+    input = test_examples.py
+
+    issues = '#16622'
+    requirement = "The system shall include examples for reading, writing, and manipulating input file syntax using python."
+  []
 []

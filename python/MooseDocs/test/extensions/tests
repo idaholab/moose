@@ -1,7 +1,7 @@
 [Tests]
   [all]
     design = 'MooseDocs/index.md'
-    issues = '#6699 #9638 #12049 #13567 #13611 #15232 #15927'
+    issues = '#6699 #9638 #12049 #13567 #13611 #15232 #15927 #16622'
 
     requirement = "The system shall include documentation tools that provide support for"
     [core]
@@ -77,12 +77,17 @@
     [devel]
       type = PythonUnitTest
       input = test_devel.py
-      detail = "creating syntax examples, and"
+      detail = "creating syntax examples,"
     []
     [ifelse]
       type = PythonUnitTest
       input = test_ifelse.py
-      detail = "conditional operations."
+      detail = "conditional operations, and"
+    []
+    [pysyntax]
+      type = PythonUnitTest
+      input = test_pysyntax.py
+      detail = "automatically retrieving python syntax."
     []
   []
 []

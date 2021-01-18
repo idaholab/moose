@@ -295,8 +295,22 @@ h6 {
     margin-bottom:6px;
 }
 
+h1 + p,
+h2 + p,
+h3 + p,
+h4 + p,
+h5 + p,
+h6 + pg{
+    margin-top:0;
+}
+
 ul {
      margin-left:1.5rem;
+}
+
+div.moose-pysyntax-class .moose-pysyntax-member-heading,
+div.moose-pysyntax-class .moose-pysyntax-member-heading ~ *{
+    margin-left:40px;
 }
 
 /* SEARCH RESULTS */
