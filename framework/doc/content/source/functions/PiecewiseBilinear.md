@@ -13,9 +13,9 @@ will be the radial coordinate and time.
 
 The csv file `data_file` format expected is:
 
-* first line holds the `x` values.
-* each subsequent line holds the `y` value then the list of `z` values for this `y` and
-all values of `x`.
+- first line holds the `x` values.
+- each subsequent line holds the `y` value then the list of `z` values for this `y` and
+  all values of `x`.
 
 The csv file `data_file` may be substituted by specifying the `x`, `y` and `z` parameters.
 
