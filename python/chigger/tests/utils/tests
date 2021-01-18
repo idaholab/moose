@@ -4,4 +4,9 @@
     input = test_get_active_filenames.py
     display_required = true
   []
+  [animate]
+    type = PythonUnitTest
+    input = test_animate.py
+    display_required = true
+  []
 []
