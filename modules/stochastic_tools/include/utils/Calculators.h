@@ -38,14 +38,18 @@ MultiMooseEnum makeCalculatorEnum();
  *
  * Explicit instantiations are generated in the C file.
  */
-template <typename InType = std::vector<Real>, typename OutType = Real>
+template <typename InType, typename OutType>
 class Calculator : public libMesh::ParallelObject
 {
 public:
-  Calculator(const libMesh::ParallelObject &, const std::string & name);
+  Calculator(const libMesh::ParallelObject & other, const std::string & name)
+    : libMesh::ParallelObject(other), _name(name)
+  {
+  }
+
   virtual ~Calculator() = default;
   virtual OutType compute(const InType &, bool) const = 0;
-  const std::string & name() const;
+  const std::string & name() const { return _name; }
 
 private:
   const std::string _name;

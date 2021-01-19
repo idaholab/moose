@@ -94,16 +94,14 @@ protected:
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
   T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
 
-  // template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  // T & declareValue(const std::string & param_name, Args &&... args0);
-  // template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  // T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args0);
-
+  template <typename T, typename S, typename... Args>
+  T & declareValue(const std::string & param_name, Args &&... args);
+  template <typename T, typename S, typename... Args>
+  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args);
   template <typename T, typename S, typename... Args>
   T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
   template <typename T, typename S, typename... Args>
   T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
-
   ///@}
 
 private:
@@ -124,11 +122,24 @@ template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValue(const std::string & param_name, Args &&... args)
 {
-  const ReporterValueName & value_name = _reporter_params.get<ReporterValueName>(param_name);
-  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+  return declareValue<T, S<T>>(param_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
+T &
+Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
+{
+  return declareValue<T, S<T>>(param_name, mode, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValue(const std::string & param_name, Args &&... args)
+{
+  return declareValue<T, S>(param_name, REPORTER_MODE_UNSET, args...);
+}
+
+template <typename T, typename S, typename... Args>
 T &
 Reporter::declareValue(const std::string & param_name, ReporterMode mode, Args &&... args)
 {
@@ -140,7 +151,7 @@ template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... args)
 {
-  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+  return declareValueByName<T, S<T>>(value_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
@@ -149,9 +160,7 @@ Reporter::declareValueByName(const ReporterValueName & value_name,
                              ReporterMode mode,
                              Args &&... args)
 {
-  ReporterName state_name(_reporter_name, value_name);
-  buildOutputHideVariableList({state_name.getCombinedName()});
-  return _reporter_data.declareReporterValue<T, S<T>>(state_name, mode, args...);
+  return declareValueByName<T, S<T>>(value_name, mode, args...);
 }
 
 template <typename T, typename S, typename... Args>

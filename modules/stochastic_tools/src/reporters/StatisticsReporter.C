@@ -59,61 +59,34 @@ StatisticsReporter::validParams()
 }
 
 StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
-  : GeneralReporter(parameters)
+  : GeneralReporter(parameters),
+    _compute_stats(getParam<MultiMooseEnum>("compute")),
+    _ci_method(getParam<MooseEnum>("ci_method")),
+    _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
+                                    : std::vector<Real>()),
+    _ci_replicates(getParam<unsigned int>("ci_replicates")),
+    _ci_seed(getParam<unsigned int>("ci_seed"))
 {
-  // Statistics to be computed
-  const auto & compute_stats = getParam<MultiMooseEnum>("compute");
-
-  // Bootstrap CI
-  std::unique_ptr<const StochasticTools::BootstrapCalculator> ci_calculator = nullptr;
-  const MooseEnum & ci_method = getParam<MooseEnum>("ci_method");
-  if (ci_method.isValid())
-  {
-    std::vector<Real> ci_levels = computeLevels(getParam<std::vector<Real>>("ci_levels"));
-    unsigned int replicates = getParam<unsigned int>("ci_replicates");
-    unsigned int seed = getParam<unsigned int>("ci_seed");
-    //_ci_calculator =
-       //    StochasticTools::makeBootstrapCalculator(ci_method, *this, ci_levels, replicates, seed);
-  }
-
   // Stats for Reporters
   if (isParamValid("reporters"))
   {
-    std::vector<ReporterName> unsupported_types;
+    std::vector<std::string> unsupported_types;
     const auto & reporter_names = getParam<std::vector<ReporterName>>("reporters");
     for (const auto & r_name : reporter_names)
     {
-      const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
-
       if (hasReporterValueByName<std::vector<Real>>(r_name))
-      {
-        for (const auto & item : compute_stats)
-        {
-          const std::string s_name = r_name.getCombinedName() + "_" + item.name();
-          const auto & data = getReporterValueByName<std::vector<Real>>(r_name);
-          declareValueByName<Real, ReporterStatisticsContext<std::vector<Real>, Real>>(
-            s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
-        }
-      }
-
+        declareValueHelper<std::vector<Real>, Real, Real>(r_name);
       else if (hasReporterValueByName<std::vector<int>>(r_name))
-      {
-        for (const auto & item : compute_stats)
-        {
-          const std::string s_name = r_name.getCombinedName() + "_" + item.name();
-          const auto & data = getReporterValueByName<std::vector<int>>(r_name);
-          declareValueByName<Real, ReporterStatisticsContext<std::vector<int>, Real>>(
-            s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
-        }
-      }
-
+        declareValueHelper<std::vector<int>, Real, Real>(r_name);
       else
-        unsupported_types.emplace_back(r_name);
-      }
+        unsupported_types.emplace_back(r_name.getCombinedName());
+    }
 
     if (!unsupported_types.empty())
       paramError("reporters",
-                 "The following reporter value(s) do not have a type supported by the StatisticsReporter:\n", MooseUtils::join(unsupported_types, ", "));
+                 "The following reporter value(s) do not have a type supported by the "
+                 "StatisticsReporter:\n",
+                 MooseUtils::join(unsupported_types, ", "));
   }
 
   // Stats for VPP
@@ -128,14 +101,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
       for (const auto & vec_name : vpp_vectors)
       {
         ReporterName r_name(vpp_name, vec_name);
-        const auto & data = getReporterValueByName<std::vector<Real>>(r_name);
-        const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
-        for (const auto & item : compute_stats)
-        {
-          const std::string s_name = vpp_name + "::" + vec_name + "_" + item.name();
-          declareValueByName<Real, ReporterStatisticsContext<std::vector<Real>, Real>>(
-              s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
-        }
+        declareValueHelper<std::vector<Real>, Real, Real>(r_name);
       }
     }
   }

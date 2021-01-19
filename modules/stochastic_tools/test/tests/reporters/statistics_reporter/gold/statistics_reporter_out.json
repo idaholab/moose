@@ -4,6 +4,18 @@
             "reporters": [
                 {
                     "object_name": "const",
+                    "type": "std::vector<int>",
+                    "value": [
+                        100,
+                        200,
+                        300,
+                        400,
+                        500
+                    ],
+                    "value_name": "int"
+                },
+                {
+                    "object_name": "const",
                     "type": "std::vector<double>",
                     "value": [
                         2.0,
@@ -12,63 +24,119 @@
                         8.0,
                         10.0
                     ],
-                    "value_name": "const"
+                    "value_name": "real"
                 },
                 {
                     "object_name": "stats",
                     "stat": "MAX",
                     "type": "double",
-                    "value": 10.0,
-                    "value_name": "const/const_MAX"
+                    "value": 500.0,
+                    "value_name": "const/int_MAX"
                 },
                 {
                     "object_name": "stats",
                     "stat": "MEAN",
                     "type": "double",
-                    "value": 6.0,
-                    "value_name": "const/const_MEAN"
+                    "value": 300.0,
+                    "value_name": "const/int_MEAN"
                 },
                 {
                     "object_name": "stats",
                     "stat": "MIN",
                     "type": "double",
-                    "value": 2.0,
-                    "value_name": "const/const_MIN"
+                    "value": 100.0,
+                    "value_name": "const/int_MIN"
                 },
                 {
                     "object_name": "stats",
                     "stat": "NORM2",
                     "type": "double",
-                    "value": 14.832396974191326,
-                    "value_name": "const/const_NORM2"
+                    "value": 741.6198487095663,
+                    "value_name": "const/int_NORM2"
                 },
                 {
                     "object_name": "stats",
                     "stat": "RATIO",
                     "type": "double",
                     "value": 5.0,
-                    "value_name": "const/const_RATIO"
+                    "value_name": "const/int_RATIO"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "STDDEV",
+                    "type": "double",
+                    "value": 158.11388300841898,
+                    "value_name": "const/int_STDDEV"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "STDERR",
+                    "type": "double",
+                    "value": 70.71067811865476,
+                    "value_name": "const/int_STDERR"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "SUM",
+                    "type": "double",
+                    "value": 1500.0,
+                    "value_name": "const/int_SUM"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "MAX",
+                    "type": "double",
+                    "value": 10.0,
+                    "value_name": "const/real_MAX"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "MEAN",
+                    "type": "double",
+                    "value": 6.0,
+                    "value_name": "const/real_MEAN"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "MIN",
+                    "type": "double",
+                    "value": 2.0,
+                    "value_name": "const/real_MIN"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "NORM2",
+                    "type": "double",
+                    "value": 14.832396974191326,
+                    "value_name": "const/real_NORM2"
+                },
+                {
+                    "object_name": "stats",
+                    "stat": "RATIO",
+                    "type": "double",
+                    "value": 5.0,
+                    "value_name": "const/real_RATIO"
                 },
                 {
                     "object_name": "stats",
                     "stat": "STDDEV",
                     "type": "double",
                     "value": 3.1622776601683795,
-                    "value_name": "const/const_STDDEV"
+                    "value_name": "const/real_STDDEV"
                 },
                 {
                     "object_name": "stats",
                     "stat": "STDERR",
                     "type": "double",
                     "value": 1.4142135623730951,
-                    "value_name": "const/const_STDERR"
+                    "value_name": "const/real_STDERR"
                 },
                 {
                     "object_name": "stats",
                     "stat": "SUM",
                     "type": "double",
                     "value": 30.0,
-                    "value_name": "const/const_SUM"
+                    "value_name": "const/real_SUM"
                 }
             ],
             "time": 2.0,

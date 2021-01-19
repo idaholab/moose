@@ -25,21 +25,6 @@ makeCalculatorEnum()
   return MultiMooseEnum("min=0 max=1 sum=2 mean=3 stddev=4 norm2=5 ratio=6 stderr=7");
 }
 
-// CALCULATOR //////////////////////////////////////////////////////////////////////////////////
-template <typename InType, typename OutType>
-Calculator<InType, OutType>::Calculator(const libMesh::ParallelObject & other,
-                                        const std::string & name)
-  : libMesh::ParallelObject(other), _name(name)
-{
-}
-
-template <typename InType, typename OutType>
-const std::string &
-Calculator<InType, OutType>::name() const
-{
-  return _name;
-}
-
 // MEAN ////////////////////////////////////////////////////////////////////////////////////////////
 template <typename InType, typename OutType>
 OutType

@@ -7,56 +7,56 @@
                     "stat": "MAX",
                     "type": "double",
                     "value": 5.0,
-                    "value_name": "const::value_MAX"
+                    "value_name": "const/value_MAX"
                 },
                 {
                     "object_name": "stats",
                     "stat": "MEAN",
                     "type": "double",
                     "value": 3.0,
-                    "value_name": "const::value_MEAN"
+                    "value_name": "const/value_MEAN"
                 },
                 {
                     "object_name": "stats",
                     "stat": "MIN",
                     "type": "double",
                     "value": 1.0,
-                    "value_name": "const::value_MIN"
+                    "value_name": "const/value_MIN"
                 },
                 {
                     "object_name": "stats",
                     "stat": "NORM2",
                     "type": "double",
                     "value": 7.416198487095663,
-                    "value_name": "const::value_NORM2"
+                    "value_name": "const/value_NORM2"
                 },
                 {
                     "object_name": "stats",
                     "stat": "RATIO",
                     "type": "double",
                     "value": 5.0,
-                    "value_name": "const::value_RATIO"
+                    "value_name": "const/value_RATIO"
                 },
                 {
                     "object_name": "stats",
                     "stat": "STDDEV",
                     "type": "double",
                     "value": 1.5811388300841898,
-                    "value_name": "const::value_STDDEV"
+                    "value_name": "const/value_STDDEV"
                 },
                 {
                     "object_name": "stats",
                     "stat": "STDERR",
                     "type": "double",
                     "value": 0.7071067811865476,
-                    "value_name": "const::value_STDERR"
+                    "value_name": "const/value_STDERR"
                 },
                 {
                     "object_name": "stats",
                     "stat": "SUM",
                     "type": "double",
                     "value": 15.0,
-                    "value_name": "const::value_SUM"
+                    "value_name": "const/value_SUM"
                 }
             ],
             "time": 2.0,
