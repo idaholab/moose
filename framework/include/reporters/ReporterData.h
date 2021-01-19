@@ -154,7 +154,7 @@ public:
    * directly because the state is often created prior to the declaration that dictates how the
    * produced value shall be computed. Thus, the reason for the separate ReporterContext objects.
    */
-  template <typename T, template <typename> class S, typename... Args>
+  template <typename T, typename S, typename... Args>
   T & declareReporterValue(const ReporterName & reporter_name,
                            const ReporterMode & mode,
                            Args &&... args);
@@ -308,7 +308,7 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
   return state_ref.value(time_index);
 }
 
-template <typename T, template <typename> class S, typename... Args>
+template <typename T, typename S, typename... Args>
 T &
 ReporterData::declareReporterValue(const ReporterName & reporter_name,
                                    const ReporterMode & mode,
@@ -321,7 +321,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
 
   // Create the ReporterContext
-  auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
+  auto context_ptr = libmesh_make_unique<S>(_app, state_ref, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
 
   // Locate the insert position (see comment for _context_ptrs in ReporterData.h))

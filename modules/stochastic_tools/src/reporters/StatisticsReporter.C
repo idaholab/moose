@@ -90,7 +90,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
 
         const std::string s_name = r_name.getCombinedName() + "_" + item.name();
         if (hasReporterValueByName<std::vector<Real>>(r_name))
-          declareValueByName<Real, ReporterStatisticsContext>(
+          declareValueByName<Real, ReporterStatisticsContext<std::vector<Real>, Real>>(
               s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
         else
           paramError("reporters",
@@ -118,7 +118,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
         for (const auto & item : compute_stats)
         {
           const std::string s_name = vpp_name + "::" + vec_name + "_" + item.name();
-          declareValueByName<Real, ReporterStatisticsContext>(
+          declareValueByName<Real, ReporterStatisticsContext<std::vector<Real>, Real>>(
               s_name, REPORTER_MODE_ROOT, data, mode, item, _ci_calculator.get());
         }
       }

@@ -86,13 +86,24 @@ protected:
    * on how the data system operates for Reporter values.
    */
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & param_name, Args &&... args0);
+  T & declareValue(const std::string & param_name, Args &&... args);
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args0);
+  T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args);
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValueByName(const ReporterValueName & value_name, Args &&... args0);
+  T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args0);
+  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
+
+  // template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  // T & declareValue(const std::string & param_name, Args &&... args0);
+  // template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  // T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args0);
+
+  template <typename T, typename S, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
+  template <typename T, typename S, typename... Args>
+  T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
+
   ///@}
 
 private:
@@ -133,6 +144,24 @@ Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... ar
 }
 
 template <typename T, template <typename> class S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name,
+                             ReporterMode mode,
+                             Args &&... args)
+{
+  ReporterName state_name(_reporter_name, value_name);
+  buildOutputHideVariableList({state_name.getCombinedName()});
+  return _reporter_data.declareReporterValue<T, S<T>>(state_name, mode, args...);
+}
+
+template <typename T, typename S, typename... Args>
+T &
+Reporter::declareValueByName(const ReporterValueName & value_name, Args &&... args)
+{
+  return declareValueByName<T, S>(value_name, REPORTER_MODE_UNSET, args...);
+}
+
+template <typename T, typename S, typename... Args>
 T &
 Reporter::declareValueByName(const ReporterValueName & value_name,
                              ReporterMode mode,

@@ -19,13 +19,13 @@
 /**
  * ReporterContext that utilizes a Calculator object to compute its value and confidence levels
  */
-template <typename T>
-class ReporterStatisticsContext : public ReporterContext<T>
+template <typename InType, typename OutType>
+class ReporterStatisticsContext : public ReporterContext<OutType>
 {
 public:
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
-                            ReporterState<T> & state,
-                            const std::vector<T> & data,
+                            ReporterState<OutType> & state,
+                            const InType & data,
                             const ReporterProducerEnum & mode,
                             const MooseEnumItem & stat,
                             const StochasticTools::BootstrapCalculator * ci_calc);
@@ -34,53 +34,53 @@ public:
 
 private:
   /// Data used for the statistic calculation
-  const std::vector<T> & _data;
+  const InType & _data;
 
   /// Mode in which the above data was produced
   const ReporterProducerEnum & _data_mode;
 
   /// Storage for the Calculator object for the desired stat, this is created in constructor
-  std::unique_ptr<const StochasticTools::Calculator<std::vector<T>, T>> _calc_ptr;
+  std::unique_ptr<const StochasticTools::Calculator<InType, OutType>> _calc_ptr;
 
   /// Storage for the BootstrapCalculator for the desired confidence interval calculations (optional)
   const StochasticTools::BootstrapCalculator * _ci_calc_ptr;
 
   /// The results
-  std::vector<T> _ci_results;
+  std::vector<OutType> _ci_results;
 };
 
-template <typename T>
-ReporterStatisticsContext<T>::ReporterStatisticsContext(
+template <typename InType, typename OutType>
+ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const libMesh::ParallelObject & other,
-    ReporterState<T> & state,
-    const std::vector<T> & data,
+    ReporterState<OutType> & state,
+    const InType & data,
     const ReporterProducerEnum & mode,
     const MooseEnumItem & stat,
     const StochasticTools::BootstrapCalculator * ci_calc)
-  : ReporterContext<T>(other, state),
+  : ReporterContext<OutType>(other, state),
     _data(data),
     _data_mode(mode),
-    _calc_ptr(StochasticTools::makeCalculator(stat, other)),
+    _calc_ptr(StochasticTools::makeCalculator<InType, OutType>(stat, other)),
     _ci_calc_ptr(ci_calc)
 {
 }
 
-template <typename T>
+template <typename InType, typename OutType>
 void
-ReporterStatisticsContext<T>::finalize()
+ReporterStatisticsContext<InType, OutType>::finalize()
 {
   this->_state.value() = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
-  ReporterContext<T>::finalize();
+  ReporterContext<OutType>::finalize();
 
   if (_ci_calc_ptr)
     _ci_results = _ci_calc_ptr->compute(_data, *_calc_ptr, _data_mode == REPORTER_MODE_DISTRIBUTED);
 }
 
-template <typename T>
+template <typename InType, typename OutType>
 void
-ReporterStatisticsContext<T>::store(nlohmann::json & json) const
+ReporterStatisticsContext<InType, OutType>::store(nlohmann::json & json) const
 {
-  ReporterContext<T>::store(json);
+  ReporterContext<OutType>::store(json);
   json["stat"] = _calc_ptr->name();
   if (_ci_calc_ptr)
     json["confidence_intervals"] = {{"method", _ci_calc_ptr->name()},
