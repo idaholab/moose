@@ -264,7 +264,7 @@ ADComputeSmearedCrackingStress::computeQpStress()
     }
 
     // Since the other inelastic models are inactive, they will not limit the time step
-    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+    _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
 
     // update _local_elasticity_tensor based on cracking state in previous time step
     updateLocalElasticityTensor();

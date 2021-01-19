@@ -156,7 +156,7 @@ protected:
   /// whether to cycle through the models, using only one model per timestep
   const bool _cycle_models;
 
-  MaterialProperty<Real> & _matl_timestep_limit;
+  MaterialProperty<Real> & _material_timestep_limit;
 
   /**
    * Rank four symmetric identity tensor

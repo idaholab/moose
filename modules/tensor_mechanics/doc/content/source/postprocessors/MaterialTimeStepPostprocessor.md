@@ -61,7 +61,7 @@ Initially the value of the maximum time step size is set to `std::numeric_limits
 Once the inelastic material model begins to calculate inelastic strain, the value
 of the allowable time step size varies with the inelastic strain computation.
 
-The limiting time step size is stored within a material property called `matl_timestep_limit`.
+The limiting time step size is stored within a material property called `material_timestep_limit`.
 This material property can be set up either by the
 [ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) model (for creep
 or plastic strains) or the [ComputeDamageStress](/ComputeDamageStress.md) for
