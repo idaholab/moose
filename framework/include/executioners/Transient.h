@@ -99,6 +99,12 @@ public:
   virtual Real getTime() { return _time; };
 
   /**
+   * Get the current target time
+   * @return target time
+   */
+  virtual Real getTargetTime() { return _target_time; }
+
+  /**
    * Set the current time.
    */
   virtual void setTime(Real t) { _time = t; };
