@@ -136,6 +136,7 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     _linear_partition(getParam<bool>("linear_partition")),
     _num_side_layers(getParam<unsigned>("num_side_layers"))
 {
+  declareMeshProperty("use_distributed_mesh", true);
 }
 
 template <>

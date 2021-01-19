@@ -594,6 +594,10 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       _execute_data["postprocessors"].hide.insert(var_name);
     else if (hasVectorPostprocessorObjectByName(var_name))
       _execute_data["vector_postprocessors"].hide.insert(var_name);
+    else if ((var_name.find("/") != std::string::npos) &&
+             (hasReporterValueByName(ReporterName(var_name))))
+      _execute_data["reporters"].hide.insert(var_name);
+
     else
       unknown.insert(var_name);
   }
@@ -618,7 +622,7 @@ AdvancedOutput::initOutputList(OutputData & data)
   std::set<std::string> & avail = data.available;
   std::set<std::string> & output = data.output;
 
-  // Append the list from OutputInterface objects
+  // Append to the hide list from OutputInterface objects
   std::set<std::string> interface_hide;
   _app.getOutputWarehouse().buildInterfaceHideVariables(name(), interface_hide);
   hide.insert(interface_hide.begin(), interface_hide.end());

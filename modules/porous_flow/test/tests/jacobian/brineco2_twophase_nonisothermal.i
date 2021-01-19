@@ -7,6 +7,8 @@
     dim = 2
     nx = 2
     ny = 2
+    xmax = 10
+    ymax = 10
   [../]
 []
 
@@ -19,10 +21,12 @@
   [./pgas]
   [../]
   [./zi]
+    scaling = 1e-4
   [../]
   [./xnacl]
   [../]
   [./temperature]
+    scaling = 1e-7
   [../]
 []
 
@@ -175,7 +179,6 @@
   dt = 1
   end_time = 1
   nl_abs_tol = 1e-12
-  automatic_scaling = true
 []
 
 [Preconditioning]

@@ -78,10 +78,16 @@ PerfGraph::getNumCalls(const std::string & section_name)
   auto section_it = _section_time.find(section_name);
 
   if (section_it == _section_time.end())
+  {
+    // The section exists but has not ran yet, in which case we can return zero
+    if (_section_name_to_id.count(section_name))
+      return 0;
+
     mooseError(
         "Unknown section_name: ",
         section_name,
         " in PerfGraph::getNumCalls()\nIf you are attempting to retrieve the root use \"Root\".");
+  }
 
   return section_it->second._num_calls;
 }
@@ -94,10 +100,16 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
   auto section_it = _section_time.find(section_name);
 
   if (section_it == _section_time.end())
+  {
+    // The section exists but has not ran yet, in which case we can return zero
+    if (_section_name_to_id.count(section_name))
+      return 0;
+
     mooseError(
         "Unknown section_name: ",
         section_name,
         " in PerfGraph::getTime()\nIf you are attempting to retrieve the root use \"Root\".");
+  }
 
   auto app_time = _section_time_ptrs[0]->_total;
 

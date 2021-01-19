@@ -14,11 +14,13 @@
     vector_names = 'a b c'
     value = '1 1 1; 2 2 2; 3 3 3'
     execute_on = initial
+    #outputs = none
   []
   [to_main_vpp]
     type = ConstantVectorPostprocessor
     vector_names = 'a b c'
     value = '4 4 4; 5 5 5; 6 6 6'
+    #outputs = none
   []
 []
 
@@ -153,6 +155,7 @@
   [out]
     type = JSON
     execute_system_information_on = NONE
+    vectorpostprocessors_as_reporters = true
   []
   execute_on = timestep_end
 []

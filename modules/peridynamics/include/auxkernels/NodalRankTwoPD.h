@@ -52,9 +52,9 @@ protected:
   const bool _plane_stress;
 
   ///@{ material constants
-  const Real _youngs_modulus;
-  const Real _poissons_ratio;
-  const Real _alpha;
+  Real _youngs_modulus;
+  Real _poissons_ratio;
+  Real _alpha;
   ///@}
 
   /// reference temperature
@@ -70,16 +70,14 @@ protected:
   MooseEnum _scalar_type;
 
   ///@{ component index
-  const unsigned int _i;
-  const unsigned int _j;
+  unsigned int _i;
+  unsigned int _j;
   ///@}
 
   ///@{ Points for direction dependent scalar output
   const Point _point1;
   const Point _point2;
   ///@
-
-  bool _singular_shape_tensor;
 
   /// displacement variables
   std::vector<MooseVariable *> _disp_var;

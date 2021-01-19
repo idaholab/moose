@@ -17,7 +17,7 @@
 !col! small=12 medium=6 large=4
 ## [Application Development [!icon!link]](application_development/index.md)
 
-- [Source Pages](source/index.md)
+- [Source Pages](source/index.md exact=True)
 - [Jacobian Definition](/jacobian_definition.md)
 - [Hypre/BoomerAMG Preconditioning](hypre.md)
 - [C++ Utilities](utils/index.md)

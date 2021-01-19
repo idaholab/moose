@@ -75,7 +75,16 @@ JSONOutput::outputReporters()
     }
 
     // Add Reporter values to the current node
-    _reporter_data.store(current_node["reporters"]);
+    for (const auto & combined_name : getReporterOutput())
+    {
+      ReporterName r_name(combined_name);
+      const auto * context_ptr = _reporter_data.getReporterContextBase(r_name);
+      auto & node = current_node["reporters"].emplace_back(); // non-accidental insertion
+      node["object_name"] = context_ptr->name().getObjectName();
+      node["value_name"] = context_ptr->name().getValueName();
+      node["type"] = context_ptr->type();
+      context_ptr->store(node["value"]);
+    }
   }
 }
 

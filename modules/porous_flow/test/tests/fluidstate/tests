@@ -54,7 +54,6 @@
     requirement = 'PorousFlow shall evolve a gas phase as a gas component is added in a nonisothermal water and NCG system'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818 #10167'
-    petsc_version = '>=3.9.0'
   [../]
   [./brineco2]
     type = 'CSVDiff'
@@ -102,7 +101,6 @@
     requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase in a nonisothermal model'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #10167'
-    petsc_version = '>=3.9.0'
   [../]
   [./waterncg_ic]
     type = 'CSVDiff'

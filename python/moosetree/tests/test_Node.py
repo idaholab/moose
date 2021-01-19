@@ -32,7 +32,7 @@ class TestNodeInitTime(unittest.TestCase):
     def testTime(self):
         import mooseutils
 
-        N = 50
+        N = 100
         t0 = mooseutils.run_time(self.createTree, N, TestNodeInitTime.AnytreeNode)
         t1 = mooseutils.run_time(self.createTree, N, moosetree.Node)
         print('\nmoosetree: {}\nanytree: {}'.format(t1, t0))

@@ -22,7 +22,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html)
 
-[Source Code Documentation](source/index.md)
+[Source Code Documentation](source/index.md exact=True)
 
 [Syntax Documentation](syntax/index.md)
 

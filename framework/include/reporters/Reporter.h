@@ -139,5 +139,6 @@ Reporter::declareValueByName(const ReporterValueName & value_name,
                              Args &&... args)
 {
   ReporterName state_name(_reporter_name, value_name);
+  buildOutputHideVariableList({state_name.getCombinedName()});
   return _reporter_data.declareReporterValue<T, S>(state_name, mode, args...);
 }

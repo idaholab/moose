@@ -12,8 +12,6 @@
     linear_partition=true
     num_side_layers = 2
   []
-  # Only need when do recover
-  parallel_type = distributed
 []
 
 [AuxVariables]

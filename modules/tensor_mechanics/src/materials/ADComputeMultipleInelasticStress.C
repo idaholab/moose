@@ -76,7 +76,7 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(getParam<bool>("cycle_models")),
-    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit"))
+    _matl_timestep_limit(declareProperty<Real>(_base_name + "matl_timestep_limit"))
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",

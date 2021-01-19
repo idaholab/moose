@@ -62,6 +62,8 @@ SpiralAnnularMeshGenerator::SpiralAnnularMeshGenerator(const InputParameters & p
     _exterior_bid(getParam<boundary_id_type>("exterior_bid")),
     _initial_delta_r(2 * libMesh::pi * _inner_radius / _nodes_per_ring)
 {
+  declareMeshProperty("use_distributed_mesh", false);
+
   // catch likely user errors
   if (_outer_radius <= _inner_radius)
     mooseError("SpiralAnnularMesh: outer_radius must be greater than inner_radius");

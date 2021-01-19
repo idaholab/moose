@@ -37,20 +37,6 @@ ReporterData::finalize(const std::string & object_name)
   std::for_each(_context_ptrs.begin(), _context_ptrs.end(), func);
 }
 
-void
-ReporterData::store(nlohmann::json & json) const
-{
-  // Write information to JSON object
-  for (const auto & context_ptr : _context_ptrs)
-  {
-    auto & node = json.emplace_back();
-    node["object_name"] = context_ptr->name().getObjectName();
-    node["value_name"] = context_ptr->name().getValueName();
-    node["type"] = context_ptr->type();
-    context_ptr->store(node["value"]);
-  }
-}
-
 bool
 ReporterData::hasReporterValue(const ReporterName & reporter_name) const
 {
@@ -71,7 +57,7 @@ ReporterData::getReporterNames() const
 }
 
 const ReporterContextBase *
-ReporterData::getReporterContextBaseHelper(const ReporterName & reporter_name) const
+ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {
   auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
     return ptr->name() == reporter_name;
@@ -140,7 +126,7 @@ ReporterData::transfer(const ReporterName & from_name,
                        ReporterData & to_data,
                        unsigned int to_index) const
 {
-  const ReporterContextBase * ptr = getReporterContextBaseHelper(from_name);
+  const ReporterContextBase * ptr = getReporterContextBase(from_name);
   if (ptr == nullptr)
     mooseError("Unable to locate Reporter with name:", from_name);
   ptr->transfer(to_data, to_name, to_index);
@@ -149,7 +135,7 @@ ReporterData::transfer(const ReporterName & from_name,
 void
 ReporterData::addConsumerMode(ReporterMode mode, const std::string & object_name)
 {
-  const ReporterContextBase * ptr = getReporterContextBaseHelper(object_name);
+  const ReporterContextBase * ptr = getReporterContextBase(object_name);
   if (ptr == nullptr)
     mooseError("Unable to locate Reporter with name:", object_name);
   const_cast<ReporterContextBase *>(ptr)->addConsumerMode(mode, object_name);
