@@ -1,5 +1,5 @@
-{% set build = 1 %}
-{% set version = "2020.11.24" %}
+{% set build = 0 %}
+{% set version = "2020.12.17" %}
 {% set strbuild = "build_" + build|string %}
 
 {% set sha256 = "f8236c163aebbf8894381b7f71c42f3f3beeff6d8aee69b8a829cd76f7d5bd7a" %}
@@ -28,7 +28,7 @@ requirements:
     - clangxx_osx-64 {{ clangxxosx }}        # [osx]
     - compiler-rt {{ compilerrt }}           # [osx]
     - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                 # [osx]
+    - libllvm11 {{ libllvm }}                # [osx]
     - clang-tools                            # [osx]
     - llvm-openmp {{ llvmopenmp }}           # [osx]
     - gfortran_osx-64 {{ osxfortran }}       # [osx]

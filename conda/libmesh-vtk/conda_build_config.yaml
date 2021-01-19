@@ -29,7 +29,7 @@ mpi:
   - moose-mpich
 
 moose_mpich:
-  - 3.3.2 build_4
+  - 3.3.2 build_5
 
 pin_run_as_build:
   moose_mpich: x.x.x
