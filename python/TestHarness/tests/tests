@@ -2,7 +2,12 @@
     design = 'TestHarness.md'
     issues = '#427'
     parallel_scheduling = True
-
+  [./json]
+    type = PythonUnitTest
+    input = test_JSON.py
+    requirement = "Dump JSON"
+    issues = '#16270'
+  [../]
   [./long_running]
     type = PythonUnitTest
     input = test_LongRunning.py
