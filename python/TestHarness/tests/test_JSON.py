@@ -1,8 +1,10 @@
-import subprocess, os
+import subprocess, os, json, unittest
 from TestHarnessTestCase import TestHarnessTestCase
-
 class TestHarnessTester(TestHarnessTestCase):
     def testJSON(self):
-    	with self.assertRaises(subprocess.CalledProcessError) as cm:
-    		self.runTests('-i', 'json')
-    	self.assertIn('python/testoutput.json', cm.filenameg)
+        output = self.runTests('-i', 'always_ok', '--json')
+        print(os.getcwd(), output)
+        jsonpath = "../../../test/testoutput.json"
+        self.assertTrue(os.path.exists(jsonpath))
+        with open(jsonpath) as f:
+            json.load(f)

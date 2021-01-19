@@ -77,7 +77,7 @@ class Factory:
         print("[]")
 
     def dumpJSON(self, root_node_name):
-        with open('testoutput.json', 'w') as file:
+        with open('../test/testoutput.json', 'w') as file:
             out = {}
             for name, object in sorted(self.objects.items()):
                 out[name] = {}
