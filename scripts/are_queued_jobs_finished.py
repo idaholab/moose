@@ -31,7 +31,7 @@ def hasExited(meta):
     if meta.get('QUEUEING', '') == 'RunPBS':
         job_id = meta['RunPBS']['ID'].split('.')[0]
         qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        qstat_result = qstat_process.communicate()[0]
+        qstat_result = qstat_process.communicate()[0].decode('utf-8')
         job_result = re.findall(r'Exit_status = (\d+)', qstat_result)
         if job_result:
             return True
