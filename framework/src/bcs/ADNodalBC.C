@@ -103,10 +103,7 @@ ADNodalBCTempl<T>::computeJacobian()
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-          mooseAssert(cached_rows[i] < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                      "Out of bounds access in derivative vector.");
-#else
+#ifndef MOOSE_GLOBAL_AD_INDEXING
           mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                       "Out of bounds access in derivative vector.");
 #endif
@@ -150,10 +147,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
           {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-            mooseAssert(cached_col < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                        "Out of bounds access in derivative vector.");
-#else
+#ifndef MOOSE_GLOBAL_AD_INDEXING
             mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                         "Out of bounds access in derivative vector.");
 #endif
@@ -201,10 +195,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-          mooseAssert(scalar_dof_indices[0] < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                      "Out of bounds access in derivative vector.");
-#else
+#ifndef MOOSE_GLOBAL_AD_INDEXING
           mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                       "Out of bounds access in derivative vector.");
 #endif
