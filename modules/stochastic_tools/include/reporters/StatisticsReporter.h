@@ -72,8 +72,8 @@ ReporterStatisticsContext<InType, OutType>::finalize()
   this->_state.value() = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
   ReporterContext<OutType>::finalize();
 
-  if (_ci_calc_ptr)
-    _ci_results = _ci_calc_ptr->compute(_data, *_calc_ptr, _data_mode == REPORTER_MODE_DISTRIBUTED);
+  //if (_ci_calc_ptr)
+     //  _ci_results = _ci_calc_ptr->compute(_data, *_calc_ptr, _data_mode == REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename InType, typename OutType>
