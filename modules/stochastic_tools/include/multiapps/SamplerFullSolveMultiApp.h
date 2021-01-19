@@ -46,6 +46,9 @@ protected:
   std::vector<std::shared_ptr<StochasticToolsTransfer>>
   getActiveStochasticToolsTransfers(Transfer::DIRECTION direction);
 
+  /// Bool to activate subapp reset at each time step of the transient mainapp
+  const bool & _reset_subapp_transient;
+
 private:
   /**
    * Helper method for running in mode='batch'

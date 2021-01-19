@@ -36,7 +36,10 @@ SamplerFullSolveMultiApp::validParams()
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
       "'batch' creates one sub-application for each processor and re-executes for each row.");
-
+  params.addParam<bool>(
+      "reset_subapp_transient",
+      false,
+      "Bool to activate subapp reset at each time step of the transient mainapp.");
   return params;
 }
 
@@ -46,6 +49,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _sampler(SamplerInterface::getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
+    _reset_subapp_transient(getParam<bool>("reset_subapp_transient")),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
     _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
@@ -76,11 +80,18 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
   mooseAssert(_my_num_apps, _sampler.getNumberOfLocalRows());
 
   bool last_solve_converged = true;
+
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
   else
+  {
+    // Resets the subapps after each time step of the transient mainapp
+    if (_reset_subapp_transient)
+      initialSetup();
+
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+  }
   return last_solve_converged;
 }
 
@@ -91,6 +102,10 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
   // Value to return
   bool last_solve_converged = true;
+
+  // Resets the subapps after each time step of the transient mainapp
+  if (_reset_subapp_transient)
+    initialSetup();
 
   // List of active relevant Transfer objects
   std::vector<std::shared_ptr<StochasticToolsTransfer>> to_transfers =

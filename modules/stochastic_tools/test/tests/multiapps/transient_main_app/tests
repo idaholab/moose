@@ -1,0 +1,30 @@
+[Tests]
+  design = 'SamplerFullSolveMultiApp.md'
+  issues = '#16476'
+
+  [main]
+    requirement = "The system shall be able to reset the subapp for every time step of the transient main app when "
+
+    [batch_reset]
+      type = CSVDiff
+      input = main_MC.i
+      csvdiff = 'main_MC_batch_reset.csv'
+      max_parallel = 1
+      cli_args = 'MultiApps/sub/mode=batch-reset Outputs/file_base=main_MC_batch_reset'
+      allow_test_objects = true
+
+      detail = 'the FullSolveMultiApp mode is batch-reset and '
+    []
+    [normal]
+      type = CSVDiff
+      input = main_MC.i
+      csvdiff = 'main_MC_normal.csv'
+      max_parallel = 3
+      min_parallel = 3
+      cli_args = 'MultiApps/sub/mode=normal Outputs/file_base=main_MC_normal'
+      allow_test_objects = true
+
+      detail = 'the FullSolveMultiApp mode is normal.'
+    []
+  []
+[]

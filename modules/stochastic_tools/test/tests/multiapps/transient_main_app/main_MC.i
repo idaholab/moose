@@ -21,6 +21,7 @@
     num_rows = 1
     distributions = 'mu1 mu2'
     execute_on = 'PRE_MULTIAPP_SETUP TIMESTEP_END'
+    seed = 100
   []
 []
 
@@ -30,6 +31,7 @@
     input_files = ../../../../examples/parameter_study/nonlin_diff_react/nonlin_diff_react_sub.i
     sampler = sample
     mode = batch-reset
+    reset_subapp_transient = true
   []
 []
 
@@ -71,10 +73,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 3
 []
 
 [Outputs]
+  file_base = 'main_MC_batch_reset'
   csv = true
   exodus = false
 []
