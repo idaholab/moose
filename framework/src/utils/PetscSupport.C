@@ -659,11 +659,16 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       po.flags.push_back(option);
   }
 
-  std::array<std::string, 2> reason_flags = {{"-snes_converged_reason", "-ksp_converged_reason"}};
+  // the boolean in these pairs denote whether the user has specified any of the reason flags in the
+  // input file
+  std::array<std::pair<bool, std::string>, 2> reason_flags = {
+      {std::make_pair(false, "-snes_converged_reason"),
+       std::make_pair(false, "-ksp_converged_reason")}};
 
-  for (const auto & reason_flag : reason_flags)
-    if (!po.flags.contains(reason_flag))
-      po.flags.push_back(reason_flag);
+  for (auto & reason_flag : reason_flags)
+    if (po.flags.contains(reason_flag.second))
+      // We register the reason option as already existing
+      reason_flag.first = true;
 
   // Check that the name value pairs are sized correctly
   if (petsc_options_inames.size() != petsc_options_values.size())
@@ -789,6 +794,18 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
           po.values[j] = petsc_options_values[i];
     }
   }
+
+#if !PETSC_VERSION_LESS_THAN(3, 14, 0)
+  for (const auto & reason_flag : reason_flags)
+    // Was the option already found in PetscOptions::flags? Or does it exist in PetscOptions::inames
+    // already? If not, then we add our flag
+    if (!reason_flag.first &&
+        (std::find(po.inames.begin(), po.inames.end(), reason_flag.second) == po.inames.end()))
+    {
+      po.inames.push_back(reason_flag.second);
+      po.values.push_back("::failed");
+    }
+#endif
 
   // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold
   // value
@@ -1041,6 +1058,15 @@ disableNonlinearConvergedReason(FEProblemBase & fe_problem)
   auto & petsc_options = fe_problem.getPetscOptions();
 
   petsc_options.flags.erase("-snes_converged_reason");
+
+  auto & inames = petsc_options.inames;
+  auto it = std::find(inames.begin(), inames.end(), "-snes_converged_reason");
+  if (it != inames.end())
+  {
+    const auto pos = std::distance(inames.begin(), it);
+    inames.erase(it);
+    petsc_options.values.erase(petsc_options.values.begin() + pos);
+  }
 }
 
 void
@@ -1049,6 +1075,15 @@ disableLinearConvergedReason(FEProblemBase & fe_problem)
   auto & petsc_options = fe_problem.getPetscOptions();
 
   petsc_options.flags.erase("-ksp_converged_reason");
+
+  auto & inames = petsc_options.inames;
+  auto it = std::find(inames.begin(), inames.end(), "-ksp_converged_reason");
+  if (it != inames.end())
+  {
+    const auto pos = std::distance(inames.begin(), it);
+    inames.erase(it);
+    petsc_options.values.erase(petsc_options.values.begin() + pos);
+  }
 }
 
 } // Namespace PetscSupport
