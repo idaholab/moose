@@ -323,18 +323,7 @@ private:
    * Data structures to store material properties of the children elements prior to heal. These
    * material properties are copied back to the children elements if the healed element is re-cut.
    */
-  std::map<const Elem *,
-           std::pair<HashMap<unsigned int, MaterialProperties>,
-                     HashMap<unsigned int, MaterialProperties>>>
-      _healed_material_properties;
-  std::map<const Elem *,
-           std::pair<HashMap<unsigned int, MaterialProperties>,
-                     HashMap<unsigned int, MaterialProperties>>>
-      _healed_material_properties_old;
-  std::map<const Elem *,
-           std::pair<HashMap<unsigned int, MaterialProperties>,
-                     HashMap<unsigned int, MaterialProperties>>>
-      _healed_material_properties_older;
+  std::map<const Elem *, std::pair<const Elem *, const Elem *>> _healed_elems;
   std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
 
   /// healed geometric cuts
@@ -441,16 +430,11 @@ private:
    * Helper function to store the material properties of a healed element
    * @param parent_elem The parent element
    * @param cut_elem    The element being cut
-   * @param props       The material properties to be set
-   * @param props_old   The old material properties to be set
-   * @param props_older The older material properties to be set
+   * @param elem_from   The element to copy material properties from
    */
-  void setMaterialPropertiesForElement(
-      const Elem * parent_elem,
-      const Elem * cut_elem,
-      const HashMap<unsigned int, MaterialProperties> & props,
-      const HashMap<unsigned int, MaterialProperties> & props_old,
-      const HashMap<unsigned int, MaterialProperties> & props_older) const;
+  void setMaterialPropertiesForElement(const Elem * parent_elem,
+                                       const Elem * cut_elem,
+                                       const Elem * elem_from) const;
 
   /**
    * Determine which side of the element belongs to relative to the cut

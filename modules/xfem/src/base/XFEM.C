@@ -916,9 +916,7 @@ XFEM::healMesh()
   std::vector<std::string> healed_geometric_cuts;
 
   // clear stored material properties
-  _healed_material_properties.clear();
-  _healed_material_properties_old.clear();
-  _healed_material_properties_older.clear();
+  _healed_elems.clear();
   _healed_material_properties_used.clear();
   _healed_cuts.clear();
 
@@ -1366,34 +1364,22 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       // If the parent element was previously healed, copy the stored material properties into the
       // new element. If the parent element wasn't previously healed, copy the parent's material
       // properties into the new element.
-      auto hmpit = _healed_material_properties.find(parent_elem);
-      auto hmpit_old = _healed_material_properties_old.find(parent_elem);
-      auto hmpit_older = _healed_material_properties_older.find(parent_elem);
-      if (hmpit != _healed_material_properties.end() &&
-          hmpit_old != _healed_material_properties_old.end() &&
-          hmpit_older != _healed_material_properties_older.end())
+      auto heit = _healed_elems.find(parent_elem);
+      if (heit != _healed_elems.end())
       {
         const GeometricCutUserObject * gcuo = getGeometricCutForElem(parent_elem);
         if (getElementSideRelativeToInterface(parent_elem, libmesh_elem, gcuo))
         {
           mooseAssert(!_healed_material_properties_used[parent_elem].first,
                       "revisting a healed material properties");
-          setMaterialPropertiesForElement(parent_elem,
-                                          libmesh_elem,
-                                          hmpit->second.first,
-                                          hmpit_old->second.first,
-                                          hmpit_older->second.first);
+          setMaterialPropertiesForElement(parent_elem, libmesh_elem, heit->second.first);
           _healed_material_properties_used[parent_elem].first = true;
         }
         else
         {
           mooseAssert(!_healed_material_properties_used[parent_elem].second,
                       "revisting a healed material properties");
-          setMaterialPropertiesForElement(parent_elem,
-                                          libmesh_elem,
-                                          hmpit->second.second,
-                                          hmpit_old->second.second,
-                                          hmpit_older->second.second);
+          setMaterialPropertiesForElement(parent_elem, libmesh_elem, heit->second.second);
           _healed_material_properties_used[parent_elem].second = true;
         }
       }
@@ -1440,17 +1426,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       const GeometricCutUserObject * gcuo = _healed_cuts[elem];
       if (getElementSideRelativeToInterface(elem, elem, gcuo))
-        setMaterialPropertiesForElement(elem,
-                                        elem,
-                                        _healed_material_properties[elem].first,
-                                        _healed_material_properties_old[elem].first,
-                                        _healed_material_properties_older[elem].first);
+        setMaterialPropertiesForElement(elem, elem, _healed_elems[elem].first);
       else
-        setMaterialPropertiesForElement(elem,
-                                        elem,
-                                        _healed_material_properties[elem].second,
-                                        _healed_material_properties_old[elem].second,
-                                        _healed_material_properties_older[elem].second);
+        setMaterialPropertiesForElement(elem, elem, _healed_elems[elem].second);
     }
   }
 
@@ -2143,36 +2121,18 @@ XFEM::storeMaterialPropertiesForElements(const Elem * parent_elem,
                                          const Elem * elem1,
                                          const Elem * elem2)
 {
-  HashMap<unsigned int, MaterialProperties> elem1_props, elem1_props_old, elem1_props_older,
-      elem2_props, elem2_props_old, elem2_props_older;
-  elem1_props = (*_material_data)[0]->getMaterialPropertyStorage().props().at(elem1);
-  elem2_props = (*_material_data)[0]->getMaterialPropertyStorage().props().at(elem2);
-  elem1_props_old = (*_material_data)[0]->getMaterialPropertyStorage().propsOld().at(elem1);
-  elem2_props_old = (*_material_data)[0]->getMaterialPropertyStorage().propsOld().at(elem2);
-  if ((*_material_data)[0]->getMaterialPropertyStorage().hasOlderProperties())
-  {
-    elem1_props_older = (*_material_data)[0]->getMaterialPropertyStorage().propsOlder().at(elem1);
-    elem2_props_older = (*_material_data)[0]->getMaterialPropertyStorage().propsOlder().at(elem2);
-  }
-  auto props_pair = std::make_pair(elem1_props, elem2_props);
-  auto props_old_pair = std::make_pair(elem1_props_old, elem2_props_old);
-  auto props_older_pair = std::make_pair(elem1_props_older, elem2_props_older);
-  auto props_used = std::make_pair(false, false);
-  _healed_material_properties.emplace(parent_elem, props_pair);
-  _healed_material_properties_old.emplace(parent_elem, props_old_pair);
-  _healed_material_properties_older.emplace(parent_elem, props_older_pair);
-  _healed_material_properties_used.emplace(parent_elem, props_used);
+  auto elem_pair = std::make_pair(elem1, elem2);
+  _healed_elems.emplace(parent_elem, elem_pair);
+  _healed_material_properties_used[parent_elem].first = false;
+  _healed_material_properties_used[parent_elem].second = false;
 }
 
 void
-XFEM::setMaterialPropertiesForElement(
-    const Elem * parent_elem,
-    const Elem * cut_elem,
-    const HashMap<unsigned int, MaterialProperties> & props,
-    const HashMap<unsigned int, MaterialProperties> & props_old,
-    const HashMap<unsigned int, MaterialProperties> & props_older) const
+XFEM::setMaterialPropertiesForElement(const Elem * parent_elem,
+                                      const Elem * cut_elem,
+                                      const Elem * elem_from) const
 {
-  (*_material_data)[0]->copy(*cut_elem, props, props_old, props_older, 0);
+  (*_material_data)[0]->copy(cut_elem, elem_from, 0);
   for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
   {
     std::vector<boundary_id_type> parent_boundary_ids;
@@ -2180,7 +2140,7 @@ XFEM::setMaterialPropertiesForElement(
     for (auto bdid : parent_boundary_ids)
     {
       if (_fe_problem->needBoundaryMaterialOnSide(bdid, 0))
-        (*_bnd_material_data)[0]->copy(*cut_elem, props, props_old, props_older, side);
+        (*_bnd_material_data)[0]->copy(cut_elem, elem_from, side);
     }
   }
 }

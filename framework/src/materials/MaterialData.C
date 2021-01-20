@@ -57,13 +57,9 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 }
 
 void
-MaterialData::copy(const Elem & elem_to,
-                   const HashMap<unsigned int, MaterialProperties> & props,
-                   const HashMap<unsigned int, MaterialProperties> & props_old,
-                   const HashMap<unsigned int, MaterialProperties> & props_older,
-                   unsigned int side)
+MaterialData::copy(const Elem * elem_to, const Elem * elem_from, unsigned int side)
 {
-  _storage.copy(*this, elem_to, props, props_old, props_older, side, _n_qpoints);
+  _storage.copy(*this, elem_to, elem_from, side, _n_qpoints);
 }
 
 void
