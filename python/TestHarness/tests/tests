@@ -236,4 +236,10 @@
     requirement = "TestHarnes shall perform a test after all other tests have passed if specified to do so"
     issues = '#15230'
   []
+  [json_dump]
+    type = PythonUnitTest
+    input = test_JSON.py
+    issues = '#16686'
+    requirement = "The testing system shall support outputting test object parameters to a JSON file."
+  []
 []

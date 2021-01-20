@@ -76,15 +76,18 @@ class Factory:
             print("  [../]\n")
         print("[]")
 
-    def dumpJSON(self, root_node_name):
-        with open('../test/testoutput.json', 'w') as file:
-            out = {}
-            for name, object in sorted(self.objects.items()):
-                out[name] = {}
-                params = self.validParams(name)
-                for key in sorted(params.desc):
-                    if params.isValid(key):
-                        out[name][key] = {"default" : params[key], "description" : params.getDescription(key)}
+    def dumpJSON(self, filename='testoutput.json'):
+        out = {}
+        for name, object in sorted(self.objects.items()):
+            out[name] = {}
+            params = self.validParams(name)
+            for key in sorted(params.desc):
+                if params.isValid(key):
+                    out[name][key] = {"default" : params[key], "description" : params.getDescription(key)}
 
-            file.write(json.dumps(out, indent=4, sort_keys=True))
-            print("JSON dumped to moose/test/testoutput.json")
+        if filename is not None:
+            with open(filename, 'w') as file:
+                file.write(json.dumps(out, indent=4, sort_keys=True))
+                print("JSON dumped to {}".format(filename))
+
+        return out

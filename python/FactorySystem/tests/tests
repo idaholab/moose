@@ -1,0 +1,10 @@
+[Tests]
+  design = 'TestHarness.md'
+  issues = '#13657'
+  [factory]
+    type = PythonUnitTest
+    input = test_Factory.py
+
+    requirement = "The system shall include a utility for building objects in python using a factory design."
+  []
+[]
