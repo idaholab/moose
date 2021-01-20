@@ -115,8 +115,10 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
                 "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                 "for a number of dof indices equal to  1");
 
+#ifndef MOOSE_SPARSE_AD
     mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
                 "Out of bounds access in derivative vector.");
+#endif
     _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
     accumulateTaggedLocalMatrix();

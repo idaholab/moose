@@ -68,8 +68,10 @@ globalDofIndexToDerivative(const ADReal & ad_real,
     for (MooseIndex(global_indices) local_index = 0; local_index < global_indices.size();
          ++local_index)
     {
+#ifndef MOOSE_SPARSE_AD
       mooseAssert(ad_offset + local_index < MOOSE_AD_MAX_DOFS_PER_ELEM,
                   "Out of bounds access in derivative vector.");
+#endif
       ret_val[global_indices[local_index]] = ad_real.derivatives()[ad_offset + local_index];
     }
   }
