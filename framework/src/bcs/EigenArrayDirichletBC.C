@@ -29,10 +29,10 @@ EigenArrayDirichletBC::EigenArrayDirichletBC(const InputParameters & parameters)
 {
 }
 
-RealEigenVector
-EigenArrayDirichletBC::computeQpResidual()
+void
+EigenArrayDirichletBC::computeQpResidual(RealEigenVector & residual)
 {
-  return RealEigenVector::Zero(_var.count());
+  residual.setZero();
 }
 
 RealEigenVector

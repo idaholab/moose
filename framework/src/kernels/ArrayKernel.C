@@ -43,7 +43,8 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters)
     _grad_phi(_assembly.gradPhi(_var)),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _count(_var.count())
+    _count(_var.count()),
+    _work_vector(_count)
 {
   addMooseVariableDependency(mooseVariable());
 
@@ -102,9 +103,11 @@ ArrayKernel::computeResidual()
     initQpResidual();
     for (_i = 0; _i < _test.size(); _i++)
     {
-      _work_vector = computeQpResidual() * _JxW[_qp] * _coord[_qp];
+      _work_vector.setZero();
+      computeQpResidual(_work_vector);
       mooseAssert(_work_vector.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
+      _work_vector *= _JxW[_qp] * _coord[_qp];
       _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), _work_vector);
     }
   }

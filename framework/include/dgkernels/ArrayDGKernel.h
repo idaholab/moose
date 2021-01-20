@@ -65,9 +65,9 @@ public:
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual on
-   * neighboring element.
+   * neighboring element. Residual to be filled in \p residual.
    */
-  virtual RealEigenVector computeQpResidual(Moose::DGResidualType type) = 0;
+  virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian on
@@ -142,4 +142,8 @@ protected:
   const std::vector<Eigen::Map<RealDIMValue>> & _array_normals;
   /// Number of components of the array variable
   const unsigned int _count;
+
+private:
+  /// Work vector for residual computation
+  RealEigenVector _work_vector;
 };
