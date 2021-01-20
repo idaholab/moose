@@ -46,6 +46,7 @@
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
 #include "Attributes.h"
 #include "MooseApp.h"
+#include "CommonOutputAction.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -911,12 +912,12 @@ MooseApp::setupOptions()
     // Setup the AppFileBase for use by the Outputs or other systems that need output file info
     {
       // Extract the CommonOutputAction
-      const auto & common_actions = _action_warehouse.getActionListByName("common_output");
-
-      const Action * common = *common_actions.begin();
+      const auto common_actions = _action_warehouse.getActions<CommonOutputAction>();
+      mooseAssert(common_actions.size() <= 1, "Should not be more than one CommonOutputAction");
+      const Action * common = common_actions.empty() ? nullptr : *common_actions.begin();
 
       // If file_base is set in CommonOutputAction through parsing input, obtain the file_base
-      if (common->isParamValid("file_base"))
+      if (common && common->isParamValid("file_base"))
       {
         _output_file_base = common->getParam<std::string>("file_base");
         _file_base_set_by_user = true;
