@@ -393,7 +393,9 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
 
       mooseError("The INSFVMomentumAdvection object ",
                  this->name(),
-                 " is not completely bounded by INSFVBCs. Please examine your FVBCs block.");
+                 " is not completely bounded by INSFVBCs. Please examine surface ",
+                 bc_id,
+                 " and your FVBCs blocks.");
     }
 
     // Else we are on an internal face

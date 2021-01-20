@@ -32,7 +32,7 @@ velocity_interp_method='average'
   []
   [diverging_mesh]
     type = FileMeshGenerator
-    file = 'expansion_quad.e'
+    file = 'straight.e'
   []
 []
 
@@ -44,7 +44,7 @@ velocity_interp_method='average'
 [Variables]
   [u]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 0
   []
   [v]
     type = INSFVVelocityVariable

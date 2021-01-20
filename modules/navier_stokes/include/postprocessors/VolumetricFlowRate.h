@@ -26,7 +26,6 @@ public:
   VolumetricFlowRate(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpIntegral() override;
 
   /// Whether FV variables are used, for all variables

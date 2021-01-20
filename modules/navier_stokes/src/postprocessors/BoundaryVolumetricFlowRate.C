@@ -16,14 +16,16 @@ InputParameters
 BoundaryVolumetricFlowRate::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
-  params.addClassDescription("Computes the volumetric flow rate of an advected quantity through an external boundary.");
+  params.addClassDescription(
+      "Computes the volumetric flow rate of an advected quantity through an external boundary.");
   params.addParam<bool>("fv", false, "Whether finite volume variables are used");
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
-  params.addCoupledVar("advected_variable",0, "The advected variable quantity of which to study the flow");
-  params.addParam<MaterialPropertyName>("advected_mat_prop", 0,
-                                        "The advected material property of which to study the flow");
+  params.addCoupledVar(
+      "advected_variable", 0, "The advected variable quantity of which to study the flow");
+  params.addParam<MaterialPropertyName>(
+      "advected_mat_prop", 0, "The advected material property of which to study the flow");
   return params;
 }
 
@@ -37,8 +39,10 @@ BoundaryVolumetricFlowRate::BoundaryVolumetricFlowRate(const InputParameters & p
     _advected_material_property(getADMaterialProperty<Real>("advected_mat_prop"))
 {
   /// Check that at most one advected quantity has been provided
-  mooseAssert(!parameters.isParamSetByUser("advected_variable") || !parameters.isParamSetByUser("advected_mat_prop"),
-      "VolumetricFlowRatePostprocessor should be provided either an advected variable or an advected material property");
+  mooseAssert(!parameters.isParamSetByUser("advected_variable") ||
+                  !parameters.isParamSetByUser("advected_mat_prop"),
+              "VolumetricFlowRatePostprocessor should be provided either an advected variable or "
+              "an advected material property");
 }
 
 Real
@@ -53,35 +57,52 @@ BoundaryVolumetricFlowRate::computeQpIntegral()
     mooseAssert(fi->isBoundary(), "BoundaryVolumetricFlowRate should only be used at boundaries");
 
     /// Obtain the variable names from the parameters
-    const auto & velx_name = parameters().getParamHelper("vel_x", parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName> > *>(0));
-    const auto & vely_name = parameters().getParamHelper("vel_y", parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName> > *>(0));
-    const auto & velz_name = parameters().getParamHelper("vel_z", parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName> > *>(0));
+    const auto & velx_name = parameters().getParamHelper(
+        "vel_x",
+        parameters(),
+        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
+    const auto & vely_name = parameters().getParamHelper(
+        "vel_y",
+        parameters(),
+        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
+    const auto & velz_name = parameters().getParamHelper(
+        "vel_z",
+        parameters(),
+        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
 
     /// Get face value for velocity
-    const auto & vx_face = velx_name.empty() ? _vel_x[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        &_subproblem.getVariable(_tid, velx_name[0]))->getBoundaryFaceValue(*fi));
+    const auto & vx_face =
+        velx_name.empty() ? _vel_x[_qp]
+                          : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                       &_subproblem.getVariable(_tid, velx_name[0]))
+                                                       ->getBoundaryFaceValue(*fi));
 
-    const auto & vy_face = vely_name.empty() ? _vel_y[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        &_subproblem.getVariable(_tid, vely_name[0]))->getBoundaryFaceValue(*fi));
+    const auto & vy_face =
+        vely_name.empty() ? _vel_y[_qp]
+                          : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                       &_subproblem.getVariable(_tid, vely_name[0]))
+                                                       ->getBoundaryFaceValue(*fi));
 
-    const auto & vz_face = velz_name.empty() ? _vel_z[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        &_subproblem.getVariable(_tid, velz_name[0]))->getBoundaryFaceValue(*fi));
+    const auto & vz_face =
+        velz_name.empty() ? _vel_z[_qp]
+                          : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                       &_subproblem.getVariable(_tid, velz_name[0]))
+                                                       ->getBoundaryFaceValue(*fi));
 
     /// Compute the advected quantity on the face
     Real advected_quantity;
     if (parameters().isParamSetByUser("advected_variable"))
     {
-      const auto & advected_name = parameters().getParamHelper("advected_variable", parameters(),
-          static_cast<std::vector<VariableName, std::allocator<VariableName> > *>(0));
-      advected_quantity = advected_name.empty() ? _advected_variable[_qp] :
-          MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-          &_subproblem.getVariable(_tid, advected_name[0]))->getBoundaryFaceValue(*fi));
+      const auto & advected_name = parameters().getParamHelper(
+          "advected_variable",
+          parameters(),
+          static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
+      advected_quantity =
+          advected_name.empty()
+              ? _advected_variable[_qp]
+              : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                           &_subproblem.getVariable(_tid, advected_name[0]))
+                                           ->getBoundaryFaceValue(*fi));
     }
     else if (parameters().isParamSetByUser("advected_mat_prop"))
     {
@@ -96,10 +117,12 @@ BoundaryVolumetricFlowRate::computeQpIntegral()
   }
   else
 #endif
-    if (parameters().isParamSetByUser("advected_variable"))
-      return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-    else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-    else
-      return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+      if (parameters().isParamSetByUser("advected_variable"))
+    return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
+           _normals[_qp];
+  else if (parameters().isParamSetByUser("advected_mat_prop"))
+    return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+           RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  else
+    return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
 }
