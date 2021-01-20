@@ -46,7 +46,9 @@ StatisticsReporter::validParams()
       "ci_method", ci, "The method to use for computing confidence level intervals.");
 
   params.addParam<std::vector<Real>>(
-      "ci_levels", "A vector of confidence levels to consider, values must be in (0, 0.5].");
+      "ci_levels",
+      std::vector<Real>({0.1, 0.9}),
+      "A vector of confidence levels to consider, values must be in (0, 1).");
   params.addParam<unsigned int>(
       "ci_replicates",
       10000,
@@ -62,11 +64,25 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _compute_stats(getParam<MultiMooseEnum>("compute")),
     _ci_method(getParam<MooseEnum>("ci_method")),
-    _ci_levels(_ci_method.isValid() ? computeLevels(getParam<std::vector<Real>>("ci_levels"))
-                                    : std::vector<Real>()),
+    _ci_levels(getParam<std::vector<Real>>("ci_levels")),
     _ci_replicates(getParam<unsigned int>("ci_replicates")),
     _ci_seed(getParam<unsigned int>("ci_seed"))
 {
+  // CI levels error checking
+  if (_ci_method.isValid())
+  {
+    if (_ci_levels.empty())
+      paramError("ci_levels",
+                 "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be "
+                 "supplied with values in (0, 1).");
+
+    else if (*std::min_element(_ci_levels.begin(), _ci_levels.end()) <= 0)
+      paramError("ci_levels", "The supplied levels must be greater than zero.");
+
+    else if (*std::max_element(_ci_levels.begin(), _ci_levels.end()) >= 1)
+      paramError("ci_levels", "The supplied levels must be less than 1.0");
+  }
+
   // Stats for Reporters
   if (isParamValid("reporters"))
   {
@@ -108,33 +124,4 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
 
   else
     mooseError("The 'vectorpostprocessors' and/or 'reporters' parameters must be defined.");
-}
-
-std::vector<Real>
-StatisticsReporter::computeLevels(const std::vector<Real> & levels_in) const
-{
-  if (levels_in.empty())
-    paramError("ci_levels",
-               "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be "
-               "supplied with values in (0, 0.5].");
-
-  else if (*std::min_element(levels_in.begin(), levels_in.end()) <= 0)
-    paramError("ci_levels", "The supplied levels must be greater than zero.");
-
-  else if (*std::max_element(levels_in.begin(), levels_in.end()) > 0.5)
-    paramError("ci_levels", "The supplied levels must be less than or equal to 0.5");
-
-  std::list<Real> levels_out;
-  for (auto it = levels_in.rbegin(); it != levels_in.rend(); ++it)
-  {
-    if (*it == 0.5)
-      levels_out.push_back(*it);
-
-    else
-    {
-      levels_out.push_front(*it);
-      levels_out.push_back(1 - *it);
-    }
-  }
-  return std::vector<Real>(levels_out.begin(), levels_out.end());
 }

@@ -12,7 +12,6 @@
     reporters = 'const/const'
     compute = 'min max sum mean stddev norm2 ratio stderr'
     ci_method = percentile
-    ci_levels = '0.1 0.5'
   []
 []
 

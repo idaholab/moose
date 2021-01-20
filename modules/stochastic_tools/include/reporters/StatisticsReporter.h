@@ -19,17 +19,17 @@
  * ReporterContext that utilizes a Calculator object to compute its value and confidence levels
  */
 template <typename InType, typename OutType>
-class ReporterStatisticsContext : public ReporterContext<OutType>
+class ReporterStatisticsContext : public ReporterContext<std::pair<OutType, std::vector<OutType>>>
 {
 public:
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
-                            ReporterState<OutType> & state,
+                            ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
                             const InType & data,
                             const ReporterProducerEnum & mode,
                             const MooseEnumItem & stat);
 
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
-                            ReporterState<OutType> & state,
+                            ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
                             const InType & data,
                             const ReporterProducerEnum & mode,
                             const MooseEnumItem & stat,
@@ -54,19 +54,16 @@ private:
   /// Storage for the BootstrapCalculator for the desired confidence interval calculations (optional)
   std::unique_ptr<const StochasticTools::BootstrapCalculator<InType, OutType>> _ci_calc_ptr =
       nullptr;
-
-  /// The results
-  std::vector<OutType> _ci_results;
 };
 
 template <typename InType, typename OutType>
 ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const libMesh::ParallelObject & other,
-    ReporterState<OutType> & state,
+    ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
     const InType & data,
     const ReporterProducerEnum & mode,
     const MooseEnumItem & stat)
-  : ReporterContext<OutType>(other, state),
+  : ReporterContext<std::pair<OutType, std::vector<OutType>>>(other, state),
     _data(data),
     _data_mode(mode),
     _calc_ptr(StochasticTools::makeCalculator<InType, OutType>(stat, other))
@@ -76,7 +73,7 @@ ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
 template <typename InType, typename OutType>
 ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const libMesh::ParallelObject & other,
-    ReporterState<OutType> & state,
+    ReporterState<std::pair<OutType, std::vector<OutType>>> & state,
     const InType & data,
     const ReporterProducerEnum & mode,
     const MooseEnumItem & stat,
@@ -94,22 +91,22 @@ template <typename InType, typename OutType>
 void
 ReporterStatisticsContext<InType, OutType>::finalize()
 {
-  this->_state.value() = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
-  ReporterContext<OutType>::finalize();
+  this->_state.value().first = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
+  ReporterContext<std::pair<OutType, std::vector<OutType>>>::finalize();
 
   if (_ci_calc_ptr)
-    _ci_results = _ci_calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
+    this->_state.value().second =
+        _ci_calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename InType, typename OutType>
 void
 ReporterStatisticsContext<InType, OutType>::store(nlohmann::json & json) const
 {
-  ReporterContext<OutType>::store(json);
+  ReporterContext<std::pair<OutType, std::vector<OutType>>>::store(json);
   json["stat"] = _calc_ptr->name();
   if (_ci_calc_ptr)
     json["confidence_intervals"] = {{"method", _ci_calc_ptr->name()},
-                                    {"values", _ci_results},
                                     {"levels", _ci_calc_ptr->levels()},
                                     {"replicates", _ci_calc_ptr->replicates()},
                                     {"seed", _ci_calc_ptr->seed()}};
@@ -140,22 +137,14 @@ private:
   // CI Method to be computed (optional)
   const MooseEnum & _ci_method;
 
-  // CI levels to be computed (not a ref. by design since these are computed from input parameter)
-  const std::vector<Real> _ci_levels;
+  // CI levels to be computed
+  const std::vector<Real> & _ci_levels;
 
   // Number of CI replicates to use in Bootstrap methods
   const unsigned int & _ci_replicates;
 
   // Random seed for producing CI replicates
   const unsigned int & _ci_seed;
-
-  /**
-   * Helper function for converting confidence levels given in (0, 0.5] into levels in (0, 1).
-   * For example, levels_in = {0.05, 0.1, 0.5} converts to {0.05 0.1, 0.5, 0.9, 0.95}.
-   *
-   * This also performs error checking on the supplied "ci_levels".
-   */
-  std::vector<Real> computeLevels(const std::vector<Real> & levels_in) const;
 
   /**
    * Helper for adding statistic reporter values
@@ -176,17 +165,19 @@ StatisticsReporter::declareValueHelper(const ReporterName & r_name)
   {
     const std::string s_name = r_name.getCombinedName() + "_" + item.name();
     if (_ci_method.isValid())
-      declareValueByName<StatType, ReporterStatisticsContext<InType, OutType>>(s_name,
-                                                                               REPORTER_MODE_ROOT,
-                                                                               data,
-                                                                               mode,
-                                                                               item,
-                                                                               _ci_method,
-                                                                               _ci_levels,
-                                                                               _ci_replicates,
-                                                                               _ci_seed);
+      declareValueByName<std::pair<OutType, std::vector<OutType>>,
+                         ReporterStatisticsContext<InType, OutType>>(s_name,
+                                                                     REPORTER_MODE_ROOT,
+                                                                     data,
+                                                                     mode,
+                                                                     item,
+                                                                     _ci_method,
+                                                                     _ci_levels,
+                                                                     _ci_replicates,
+                                                                     _ci_seed);
     else
-      declareValueByName<StatType, ReporterStatisticsContext<InType, OutType>>(
+      declareValueByName<std::pair<OutType, std::vector<OutType>>,
+                         ReporterStatisticsContext<InType, OutType>>(
           s_name, REPORTER_MODE_ROOT, data, mode, item);
   }
 }
