@@ -539,7 +539,14 @@ class TestHarness:
                              colored=self.options.colored, code=self.options.code )))
 
         else:
-            print(('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time)))
+            num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
+            if num_nonzero_timing > 0:
+                timing_max = max(float(tup[0].getTiming()) for tup in self.test_table)
+                timing_avg = sum(float(tup[0].getTiming()) for tup in self.test_table) / num_nonzero_timing
+            else:
+                timing_max = 0
+                timing_avg = 0
+            print(('Ran %d tests in %.1f seconds. Average test time %.1f seconds, maximum test time %.1f seconds.' % (self.num_passed+self.num_failed, time, timing_avg, timing_max)))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -562,6 +569,25 @@ class TestHarness:
 
             print((util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code )))
+
+            if self.options.longest_jobs:
+                # Sort all jobs by run time
+                sorted_tups = sorted(self.test_table, key=lambda tup: float(tup[0].getTiming()), reverse=True)
+
+                print('\n%d longest running jobs:' % self.options.longest_jobs)
+                print(('-' * (util.TERM_COLS)))
+
+                # Copy the current options and force timing to be true so that
+                # we get times when we call formatResult() below
+                options_with_timing = copy.deepcopy(self.options)
+                options_with_timing.timing = True
+
+                for tup in sorted_tups[0:self.options.longest_jobs]:
+                    job = tup[0]
+                    if not job.isSkip() and float(job.getTiming()) > 0:
+                        print(util.formatResult(job, options_with_timing, caveats=True))
+                if len(sorted_tups) == 0 or float(sorted_tups[0][0].getTiming()) == 0:
+                    print('No jobs were completed.')
 
             # Perform any write-to-disc operations
             self.writeResults()
@@ -777,6 +803,7 @@ class TestHarness:
         parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
         parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
+        parser.add_argument('--longest-jobs', action='store', dest='longest_jobs', type=int, default=0, help='Print the longest running jobs upon completion')
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
         parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='', help='The test specification file to look for')
         parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
