@@ -1,0 +1,19 @@
+[Tests]
+  [run_1]
+    type = RunApp
+    input = good.i
+  []
+  [run_2]
+    type = RunApp
+    input = good.i
+  []
+  [run_skip]
+    type = RunApp
+    skip = skip
+    input = good.i
+  []
+  [run_fail]
+    type = RunCommand
+    command = "false"
+  []
+[]

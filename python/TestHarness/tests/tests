@@ -9,6 +9,12 @@
     requirement = "TestHarness shall report a non-failing status after a predetermined time of no activity"
     issues = '#9280'
   [../]
+  [./longest_jobs]
+    type = PythonUnitTest
+    input = test_LongestJobs.py
+    requirement = "TestHarness shall support the output of the longest running jobs"
+    issues = '#16752'
+  [../]
   [./csvdiffs]
     type = PythonUnitTest
     input = test_CSVDiffs.py
