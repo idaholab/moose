@@ -1,0 +1,12 @@
+[Tests]
+  [test]
+    type = 'RunException'
+    input = 'catch_mesh_generator_exception.i'
+    cli_args = "--mesh-only"
+    expect_err = "Encountered an error when executing the FileMeshGenerator(?s).*Error opening ExodusII mesh file(?s).*bad_file"
+
+    design = 'MeshGenerator.md'
+    issues = '#16762'
+    requirement = "The system shall provide a useful error when failing to execute a MeshGenerator"
+  []
+[]

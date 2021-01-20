@@ -1741,7 +1741,23 @@ MooseApp::executeMeshGenerators()
     {
       auto name = generator->name();
 
-      auto current_mesh = generator->generate();
+      std::unique_ptr<MeshBase> current_mesh = nullptr;
+      try
+      {
+        current_mesh = generator->generate();
+      }
+      catch (std::exception & e)
+      {
+        mooseError("Encountered an error when executing the ",
+                   generator->type(),
+                   " \"",
+                   name,
+                   "\":\n\n",
+                   e.what());
+      }
+
+      if (!current_mesh)
+        mooseError(generator->type(), " \"", name, "\" returned a nullptr mesh object");
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];
