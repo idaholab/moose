@@ -539,7 +539,14 @@ class TestHarness:
                              colored=self.options.colored, code=self.options.code )))
 
         else:
-            print(('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time)))
+            num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
+            if num_nonzero_timing > 0:
+                timing_max = max(float(tup[0].getTiming()) for tup in self.test_table)
+                timing_avg = sum(float(tup[0].getTiming()) for tup in self.test_table) / num_nonzero_timing
+            else:
+                timing_max = 0
+                timing_avg = 0
+            print(('Ran %d tests in %.1f seconds. Average test time %.1f seconds, maximum test time %.1f seconds.' % (self.num_passed+self.num_failed, time, timing_avg, timing_max)))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
