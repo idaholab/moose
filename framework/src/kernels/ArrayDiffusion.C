@@ -45,21 +45,16 @@ ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters)
   }
 }
 
-RealEigenVector
-ArrayDiffusion::computeQpResidual()
+void
+ArrayDiffusion::initQpResidual()
 {
-  if (_d)
-    return _grad_u[_qp] * _array_grad_test[_i][_qp] * (*_d)[_qp];
-
-  else if (_d_array)
+  if (_d_array)
   {
     mooseAssert((*_d_array)[_qp].size() == _var.count(),
                 "diffusion_coefficient size is inconsistent with the number of components of array "
                 "variable");
-    return (*_d_array)[_qp].cwiseProduct(_grad_u[_qp] * _array_grad_test[_i][_qp]);
   }
-
-  else
+  else if (_d_2d_array)
   {
     mooseAssert((*_d_2d_array)[_qp].cols() == _var.count(),
                 "diffusion_coefficient size is inconsistent with the number of components of array "
@@ -67,8 +62,25 @@ ArrayDiffusion::computeQpResidual()
     mooseAssert((*_d_2d_array)[_qp].rows() == _var.count(),
                 "diffusion_coefficient size is inconsistent with the number of components of array "
                 "variable");
-    return (*_d_2d_array)[_qp] * (_grad_u[_qp] * _array_grad_test[_i][_qp]);
   }
+}
+
+void
+ArrayDiffusion::computeQpResidual(RealEigenVector & residual)
+{
+  // WARNING: the noalias() syntax is an Eigen optimization tactic, it avoids creating
+  // a temporary object for the matrix multiplication on the right-hand-side. However,
+  // it should be used with caution because it could cause unintended results,
+  // developers should NOT use it if the vector on the left-hand-side appears on the
+  // right-hand-side, for instance:
+  //   vector = matrix * vector;
+  // See http://eigen.tuxfamily.org/dox/group__TopicAliasing.html for more details.
+  if (_d)
+    residual.noalias() = (*_d)[_qp] * _grad_u[_qp] * _array_grad_test[_i][_qp];
+  else if (_d_array)
+    residual.noalias() = (*_d_array)[_qp].asDiagonal() * _grad_u[_qp] * _array_grad_test[_i][_qp];
+  else
+    residual.noalias() = (*_d_2d_array)[_qp] * _grad_u[_qp] * _array_grad_test[_i][_qp];
 }
 
 RealEigenVector

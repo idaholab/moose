@@ -30,7 +30,7 @@ protected:
   virtual void computeQpStress() override;
 
   /// Property that stores the time step limit
-  MaterialProperty<Real> & _matl_timestep_limit;
+  MaterialProperty<Real> & _material_timestep_limit;
 
   /// Pointer to the damage model
   DamageBase * _damage_model;

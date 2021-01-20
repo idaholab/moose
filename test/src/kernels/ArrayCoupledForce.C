@@ -39,10 +39,10 @@ ArrayCoupledForce::ArrayCoupledForce(const InputParameters & parameters)
     mooseError("We are testing the coupling of a standard variable to an array variable");
 }
 
-RealEigenVector
-ArrayCoupledForce::computeQpResidual()
+void
+ArrayCoupledForce::computeQpResidual(RealEigenVector & residual)
 {
-  return -_coef * (_v[_qp] * _test[_i][_qp]);
+  residual = -_coef * _v[_qp] * _test[_i][_qp];
 }
 
 RealEigenMatrix

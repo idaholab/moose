@@ -151,8 +151,10 @@ ADIntegratedBCTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jvariable.phiSize(); _j++)
     {
+#ifndef MOOSE_SPARSE_AD
       mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
                   "Out of bounds access in derivative vector.");
+#endif
       _local_ke(_i, _j) += _residuals[_i].derivatives()[ad_offset + _j];
     }
   accumulateTaggedLocalMatrix();

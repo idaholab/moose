@@ -76,7 +76,7 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(getParam<bool>("cycle_models")),
-    _matl_timestep_limit(declareProperty<Real>(_base_name + "matl_timestep_limit"))
+    _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit"))
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",
@@ -271,14 +271,14 @@ ADComputeMultipleInelasticStress::updateQpState(
     combined_inelastic_strain_increment +=
         _inelastic_weights[i_rmm] * inelastic_strain_increment[i_rmm];
 
-  _matl_timestep_limit[_qp] = 0.0;
+  _material_timestep_limit[_qp] = 0.0;
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
-    _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
+    _material_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
-  if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
-    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+  if (MooseUtils::absoluteFuzzyEqual(_material_timestep_limit[_qp], 0.0))
+    _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
   else
-    _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
+    _material_timestep_limit[_qp] = 1.0 / _material_timestep_limit[_qp];
 }
 
 void
@@ -302,7 +302,7 @@ ADComputeMultipleInelasticStress::updateQpStateSingleModel(
   computeAdmissibleState(
       model_number, elastic_strain_increment, combined_inelastic_strain_increment);
 
-  _matl_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
+  _material_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
 
   /* propagate internal variables, etc, to this timestep for those inelastic models where
    * "updateState" is not called */

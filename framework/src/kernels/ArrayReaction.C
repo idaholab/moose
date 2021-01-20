@@ -44,18 +44,20 @@ ArrayReaction::ArrayReaction(const InputParameters & parameters)
   }
 }
 
-RealEigenVector
-ArrayReaction::computeQpResidual()
+void
+ArrayReaction::computeQpResidual(RealEigenVector & residual)
 {
+
   if (_r)
-    return (*_r)[_qp] * _u[_qp] * _test[_i][_qp];
+    residual = (*_r)[_qp] * _u[_qp] * _test[_i][_qp];
 
   else if (_r_array)
   {
     mooseAssert((*_r_array)[_qp].size() == _var.count(),
                 "reaction_coefficient size is inconsistent with the number of components of array "
                 "variable");
-    return ((*_r_array)[_qp].array() * _u[_qp].array()) * _test[_i][_qp];
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
+    residual.noalias() = (*_r_array)[_qp].asDiagonal() * _u[_qp] * _test[_i][_qp];
   }
 
   else
@@ -66,7 +68,8 @@ ArrayReaction::computeQpResidual()
     mooseAssert((*_r_2d_array)[_qp].rows() == _var.count(),
                 "reaction_coefficient size is inconsistent with the number of components of array "
                 "variable");
-    return (*_r_2d_array)[_qp] * _u[_qp] * _test[_i][_qp];
+    // WARNING: use noalias() syntax with caution. See ArrayDiffusion.C for more details.
+    residual.noalias() = (*_r_2d_array)[_qp] * _u[_qp] * _test[_i][_qp];
   }
 }
 

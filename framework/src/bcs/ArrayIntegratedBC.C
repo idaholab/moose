@@ -38,7 +38,8 @@ ArrayIntegratedBC::ArrayIntegratedBC(const InputParameters & parameters)
     _phi(_assembly.phiFace(_var)),
     _test(_var.phiFace()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _count(_var.count())
+    _count(_var.count()),
+    _work_vector(_count)
 {
   addMooseVariableDependency(mooseVariable());
 
@@ -89,10 +90,12 @@ ArrayIntegratedBC::computeResidual()
     initQpResidual();
     for (_i = 0; _i < _test.size(); _i++)
     {
-      RealEigenVector residual = _JxW[_qp] * _coord[_qp] * computeQpResidual();
-      mooseAssert(residual.size() == _count,
+      _work_vector.setZero();
+      computeQpResidual(_work_vector);
+      mooseAssert(_work_vector.size() == _count,
                   "Size of local residual is not equal to the number of array variable compoments");
-      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), residual);
+      _work_vector *= _JxW[_qp] * _coord[_qp];
+      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), _work_vector);
     }
   }
 
