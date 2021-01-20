@@ -115,14 +115,21 @@ class Node(moosetree.Node):
             param, text = args
 
         comment = self.__hitparamcomments.get(param, self.__hitblockcomment)
-        if comment is not None:
+        if (comment is not None) and (text is not None):
             comment.setText('# {}'.format(text))
 
-        elif (comment is None) and (param is None):
+        if (comment is not None) and (text is None):
+            if comment is self.__hitblockcomment:
+                self.__hitblockcomment.remove()
+                self.__hitblockcomment = None
+            else:
+                comment.remove()
+
+        elif (comment is None) and (param is None) and (text is not None):
             self.parent.__hitnode.insertChild(self.__hitoffset, hit.NewComment('# {}'.format(text)))
             self.__reinitComments()
 
-        elif (comment is None) and (param is not None):
+        elif (comment is None) and (param is not None) and (text is not None):
             for child in self.__hitnode.children(hit.NodeType.Field):
                 if child.path() == param:
                     child.addChild(hit.NewComment('# {}'.format(text), True))
