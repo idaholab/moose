@@ -900,6 +900,16 @@ public:
   void addJacobianMortar();
 
   /**
+   * Cache *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
+   * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
+   * PrimaryPrimary for mortar-like objects. Primary indicates the interior parent element on the
+   * primary side of the mortar interface. Secondary indicates the interior parent element on the
+   * secondary side of the interface. Lower denotes the lower-dimensional element living on the
+   * secondary side of the mortar interface; it's the boundary face of the \p Secondary element.
+   */
+  void cacheJacobianMortar();
+
+  /**
    * Adds three neighboring element matrices for ivar rows and jvar columns to the global Jacobian
    * matrix.
    */
