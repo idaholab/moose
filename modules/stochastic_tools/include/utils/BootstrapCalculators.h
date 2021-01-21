@@ -45,14 +45,6 @@ public:
                       unsigned int replicates,
                       unsigned int seed,
                       const StochasticTools::Calculator<InType, OutType> & calc);
-  ///@{
-  const std::vector<Real> & levels() const { return _levels; }
-
-  unsigned int replicates() const { return _replicates; }
-
-  unsigned int seed() const { return _seed; }
-
-  ///@}
 
 protected:
   // Compute Bootstrap estimates of a statistic

@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 // Bootstrap CI
+#include "libmesh/auto_ptr.h"
+#include "libmesh/parallel.h"
+#include "libmesh/parallel_sync.h"
 
 #include "Calculators.h"
 #include "BootstrapCalculators.h"
@@ -15,9 +18,6 @@
 #include "MooseError.h"
 #include "MooseRandom.h"
 #include "NormalDistribution.h"
-#include "libmesh/auto_ptr.h"
-#include "libmesh/parallel.h"
-#include "libmesh/parallel_sync.h"
 
 namespace StochasticTools
 {

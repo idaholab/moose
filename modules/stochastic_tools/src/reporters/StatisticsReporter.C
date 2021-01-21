@@ -106,7 +106,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
   }
 
   // Stats for VPP
-  else if (isParamValid("vectorpostprocessors"))
+  if (isParamValid("vectorpostprocessors"))
   {
     const auto & vpp_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
     for (const auto & vpp_name : vpp_names)
@@ -122,6 +122,17 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     }
   }
 
-  else
+  if (!isParamValid("reporters") && !isParamValid("vectorpostprocessors"))
     mooseError("The 'vectorpostprocessors' and/or 'reporters' parameters must be defined.");
+}
+
+void
+StatisticsReporter::store(nlohmann::json & json) const
+{
+  Reporter::store(json);
+  if (_ci_method.isValid())
+    json["confidence_intervals"] = {{"method", _ci_method},
+                                    {"levels", _ci_levels},
+                                    {"replicates", _ci_replicates},
+                                    {"seed", _ci_seed}};
 }

@@ -9,12 +9,13 @@
 
 #include <numeric>
 
+#include "libmesh/auto_ptr.h"
+#include "libmesh/parallel.h"
+
 #include "Statistics.h"
 #include "MooseEnumItem.h"
 #include "MooseError.h"
 #include "MooseRandom.h"
-#include "libmesh/auto_ptr.h"
-#include "libmesh/parallel.h"
 
 namespace StochasticTools
 {

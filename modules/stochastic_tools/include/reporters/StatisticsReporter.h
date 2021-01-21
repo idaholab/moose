@@ -105,11 +105,6 @@ ReporterStatisticsContext<InType, OutType>::store(nlohmann::json & json) const
 {
   ReporterContext<std::pair<OutType, std::vector<OutType>>>::store(json);
   json["stat"] = _calc_ptr->name();
-  if (_ci_calc_ptr)
-    json["confidence_intervals"] = {{"method", _ci_calc_ptr->name()},
-                                    {"levels", _ci_calc_ptr->levels()},
-                                    {"replicates", _ci_calc_ptr->replicates()},
-                                    {"seed", _ci_calc_ptr->seed()}};
 }
 
 /**
@@ -129,6 +124,7 @@ public:
   virtual void execute() final{};
   virtual void initialize() final{};
   virtual void finalize() final{};
+  virtual void store(nlohmann::json & json) const override;
 
 private:
   // Statistics to be computed
@@ -163,7 +159,8 @@ StatisticsReporter::declareValueHelper(const ReporterName & r_name)
   const auto & data = getReporterValueByName<InType>(r_name);
   for (const auto & item : _compute_stats)
   {
-    const std::string s_name = r_name.getCombinedName() + "_" + item.name();
+    const std::string s_name =
+        r_name.getObjectName() + "_" + r_name.getValueName() + "_" + item.name();
     if (_ci_method.isValid())
       declareValueByName<std::pair<OutType, std::vector<OutType>>,
                          ReporterStatisticsContext<InType, OutType>>(s_name,

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "JsonIO.h"
+#include "Reporter.h"
+#include "TheWarehouse.h"
 
 registerMooseObjectAliased("MooseApp", JSONOutput, "JSON");
 
@@ -22,6 +24,8 @@ JSONOutput::validParams()
   params += AdvancedOutput::enableOutputTypes("system_information reporter");
   params.addClassDescription("Output for Reporter values using JSON format.");
   params.set<ExecFlagEnum>("execute_system_information_on", /*quite_mode=*/true) = EXEC_INITIAL;
+  params.addParam<bool>(
+      "use_legacy_reporter_output", false, "Use reporter output that does not group by object.");
   return params;
 }
 
@@ -75,11 +79,43 @@ JSONOutput::outputReporters()
     }
 
     // Add Reporter values to the current node
+    auto & r_node = current_node["reporters"]; // non-accidental insert
     for (const auto & combined_name : getReporterOutput())
     {
       ReporterName r_name(combined_name);
+
+      // Create/get object node
+      auto obj_node_pair = r_node.emplace(r_name.getObjectName(), nlohmann::json());
+      auto & obj_node = *(obj_node_pair.first);
+
+      // If the object node was created insert the class level information
+      if (obj_node_pair.second)
+      {
+        // Query the TheWarehouse for all Reporter objects with the given name. The attributes and
+        // QueryID are used to allow the TheWarehouse::queryInto method be called with the
+        // "show_all" option set to true. This returns all objects, regardless of "enabled" state,
+        // which is what is needed to ensure that output always happens, even if an object is
+        // disabled.
+        std::vector<Reporter *> objs;
+        auto attr = _problem_ptr->theWarehouse()
+                        .query()
+                        .condition<AttribInterfaces>(Interfaces::Reporter)
+                        .condition<AttribName>(r_name.getObjectName())
+                        .attributes();
+        auto qid = _problem_ptr->theWarehouse().queryID(attr);
+        _problem_ptr->theWarehouse().queryInto(qid, objs, true);
+        mooseAssert(objs.size() <= 1,
+                    "Multiple Reporter objects with the same name located, how did you do that?");
+
+        // It is possible to have a Reporter value without a reporter objects (i.e., VPPs, PPs),
+        // which is why objs can be empty.
+        if (!objs.empty())
+          objs.front()->store(obj_node["info"]);
+      }
+
+      // Insert reporter value
       const auto * context_ptr = _reporter_data.getReporterContextBase(r_name);
-      auto & node = current_node["reporters"].emplace_back(); // non-accidental insertion
+      auto & node = obj_node["values"].emplace_back();
       context_ptr->store(node);
     }
   }

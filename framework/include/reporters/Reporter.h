@@ -43,6 +43,7 @@ public:
   static InputParameters validParams();
   Reporter(const InputParameters & parameters);
   virtual ~Reporter() = default;
+  virtual void store(nlohmann::json & json) const;
 
 protected:
   ///@{
