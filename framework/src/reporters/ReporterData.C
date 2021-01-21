@@ -98,17 +98,6 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
 }
 
 bool
-ReporterData::hasReporterWithMode(const ReporterMode & mode) const
-{
-  for (auto & context_ptr : _context_ptrs)
-  {
-    if (context_ptr->getProducerModeEnum() == mode)
-      return true;
-  }
-  return false;
-}
-
-bool
 ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
 {
   for (auto & context_ptr : _context_ptrs)

@@ -57,8 +57,16 @@ JSONOutput::outputSystemInformation()
 void
 JSONOutput::outputReporters()
 {
-  const bool has_distributed = _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED);
-  if (processor_id() == 0 || has_distributed)
+  // Set of ReporterNames for output
+  std::set<ReporterName> r_names;
+  for (const std::string & c_name : getReporterOutput())
+    r_names.emplace(c_name);
+
+  // Is there ANY distributed data
+  _has_distributed = std::any_of(r_names.begin(), r_names.end(), [this](const ReporterName & n) {
+    return _reporter_data.hasReporterWithMode(n.getObjectName(), REPORTER_MODE_DISTRIBUTED);
+  });
+  if (processor_id() == 0 || _has_distributed)
   {
     // Create the current output node
     auto & current_node = _json["time_steps"].emplace_back();
@@ -72,7 +80,7 @@ JSONOutput::outputReporters()
       current_node["nonlinear_iteration"] = _nonlinear_iter;
 
     // Inject processor info
-    if (n_processors() > 1 && has_distributed)
+    if (n_processors() > 1 && _has_distributed)
     {
       _json["part"] = processor_id();
       _json["number_of_parts"] = n_processors();
@@ -80,10 +88,8 @@ JSONOutput::outputReporters()
 
     // Add Reporter values to the current node
     auto & r_node = current_node["reporters"]; // non-accidental insert
-    for (const auto & combined_name : getReporterOutput())
+    for (const auto & r_name : r_names)
     {
-      ReporterName r_name(combined_name);
-
       // Create/get object node
       auto obj_node_pair = r_node.emplace(r_name.getObjectName(), nlohmann::json());
       auto & obj_node = *(obj_node_pair.first);
@@ -124,9 +130,9 @@ JSONOutput::outputReporters()
 void
 JSONOutput::output(const ExecFlagType & type)
 {
+  _has_distributed = false;
   AdvancedOutput::output(type);
-
-  if (processor_id() == 0 || _reporter_data.hasReporterWithMode(REPORTER_MODE_DISTRIBUTED))
+  if (processor_id() == 0 || _has_distributed)
   {
     std::ofstream out(filename().c_str());
     out << std::setw(4) << _json << std::endl;

@@ -195,9 +195,8 @@ public:
   /**
    * Return true if the supplied mode exists in the produced Reporter values
    *
-   * @see JSONOutput.C/h
+   * @see CSV.C/h
    */
-  bool hasReporterWithMode(const ReporterMode & mode) const;
   bool hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const;
 
   /**
