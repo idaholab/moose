@@ -2244,14 +2244,7 @@ MooseMesh::buildMeshBaseObject(unsigned int dim)
 
   std::unique_ptr<MeshBase> mesh;
   if (_use_distributed_mesh)
-  {
     mesh = buildTypedMesh<DistributedMesh>(dim);
-    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
-    {
-      _partitioner_name = "parmetis";
-      _partitioner_overridden = true;
-    }
-  }
   else
     mesh = buildTypedMesh<ReplicatedMesh>(dim);
 
@@ -2281,19 +2274,6 @@ MooseMesh::init()
     mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
 
   TIME_SECTION(_init_timer);
-
-  if (_custom_partitioner_requested)
-  {
-    // Check of partitioner is supplied (not allowed if custom partitioner is used)
-    if (!parameters().isParamSetByAddParam("partitioner"))
-      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
-    // Set custom partitioner
-    if (!_custom_partitioner.get())
-      mooseError("Custom partitioner requested but not set!");
-    getMesh().partitioner().reset(_custom_partitioner.release());
-  }
-  else
-    setPartitionerHelper();
 
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
   {
@@ -2968,9 +2948,15 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
 }
 
 void
-MooseMesh::setPartitionerHelper()
+MooseMesh::setPartitionerHelper(MeshBase * const mesh)
 {
-  setPartitioner(getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
+  if (_use_distributed_mesh && (_partitioner_name != "default" && _partitioner_name != "parmetis"))
+  {
+    _partitioner_name = "parmetis";
+    _partitioner_overridden = true;
+  }
+
+  setPartitioner(mesh ? *mesh : getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
 }
 
 void
