@@ -36,7 +36,8 @@ DerivativeTwoPhaseMaterial::validParams()
   params.addRequiredCoupledVar("eta", "Order parameter");
 
   // Variables with applied tolerances and their tolerance values
-  params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
+  params.addParam<MaterialPropertyName>(
+      "W", 0.0, "Energy barrier for the phase transformation from A to B");
 
   return params;
 }
@@ -54,7 +55,7 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const InputParameters & p
     _dg(getMaterialPropertyDerivative<Real>("g", _eta_name)),
     _d2g(getMaterialPropertyDerivative<Real>("g", _eta_name, _eta_name)),
     _d3g(getMaterialPropertyDerivative<Real>("g", _eta_name, _eta_name, _eta_name)),
-    _W(getParam<Real>("W")),
+    _W(getMaterialProperty<Real>("W")),
     _prop_Fa(getMaterialProperty<Real>("fa_name")),
     _prop_Fb(getMaterialProperty<Real>("fb_name"))
 {
@@ -114,14 +115,14 @@ DerivativeTwoPhaseMaterial::initialSetup()
 Real
 DerivativeTwoPhaseMaterial::computeF()
 {
-  return _h[_qp] * _prop_Fb[_qp] + (1.0 - _h[_qp]) * _prop_Fa[_qp] + _W * _g[_qp];
+  return _h[_qp] * _prop_Fb[_qp] + (1.0 - _h[_qp]) * _prop_Fa[_qp] + _W[_qp] * _g[_qp];
 }
 
 Real
 DerivativeTwoPhaseMaterial::computeDF(unsigned int i_var)
 {
   if (i_var == _eta_var)
-    return _dh[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _dg[_qp];
+    return _dh[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W[_qp] * _dg[_qp];
   else
   {
     unsigned int i = argIndex(i_var);
@@ -133,7 +134,7 @@ Real
 DerivativeTwoPhaseMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
 {
   if (i_var == _eta_var && j_var == _eta_var)
-    return _d2h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _d2g[_qp];
+    return _d2h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W[_qp] * _d2g[_qp];
 
   unsigned int i = argIndex(i_var);
   unsigned int j = argIndex(j_var);
@@ -150,7 +151,7 @@ Real
 DerivativeTwoPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var)
 {
   if (i_var == _eta_var && j_var == _eta_var && k_var == _eta_var)
-    return _d3h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W * _d3g[_qp];
+    return _d3h[_qp] * (_prop_Fb[_qp] - _prop_Fa[_qp]) + _W[_qp] * _d3g[_qp];
 
   unsigned int i = argIndex(i_var);
   unsigned int j = argIndex(j_var);

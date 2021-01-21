@@ -78,5 +78,5 @@ protected:
   std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d3g;
 
   /// Phase transformation energy barrier
-  Real _W;
+  const MaterialProperty<Real> & _W;
 };

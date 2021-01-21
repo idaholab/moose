@@ -17,7 +17,7 @@ KKSACBulkF::validParams()
   InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
                              "includes all terms NOT dependent on chemical potential.");
-  params.addRequiredParam<Real>("w", "Double well height parameter");
+  params.addRequiredParam<MaterialPropertyName>("w", "Double well height parameter");
   params.addParam<MaterialPropertyName>(
       "g_name", "g", "Base name for the double well function g(eta)");
   params.addRequiredParam<MaterialPropertyName>(
@@ -28,7 +28,7 @@ KKSACBulkF::validParams()
 
 KKSACBulkF::KKSACBulkF(const InputParameters & parameters)
   : KKSACBulkBase(parameters),
-    _w(getParam<Real>("w")),
+    _w(getMaterialProperty<Real>("w")),
     _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
     _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name)),
     _prop_Fb(getMaterialProperty<Real>("fb_name")),
@@ -43,10 +43,10 @@ KKSACBulkF::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
-      return -_prop_dh[_qp] * A1 + _w * _prop_dg[_qp];
+      return -_prop_dh[_qp] * A1 + _w[_qp] * _prop_dg[_qp];
 
     case Jacobian:
-      return _phi[_j][_qp] * (-_prop_d2h[_qp] * A1 + _w * _prop_d2g[_qp]);
+      return _phi[_j][_qp] * (-_prop_d2h[_qp] * A1 + _w[_qp] * _prop_d2g[_qp]);
   }
 
   mooseError("Invalid type passed in");

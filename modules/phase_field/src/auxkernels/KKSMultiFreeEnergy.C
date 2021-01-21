@@ -26,7 +26,7 @@ KKSMultiFreeEnergy::validParams()
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "gj_names",
       "Barrier Function Materials that provide g. Place in same order as Fj_names and hj_names!");
-  params.addRequiredParam<Real>("w", "Double well height parameter");
+  params.addRequiredParam<MaterialPropertyName>("w", "Double well height parameter");
   params.addParam<std::vector<MaterialPropertyName>>("kappa_names",
                                                      std::vector<MaterialPropertyName>(),
                                                      "Vector of kappa names corresponding to "
@@ -44,7 +44,7 @@ KKSMultiFreeEnergy::KKSMultiFreeEnergy(const InputParameters & parameters)
     _prop_hj(_num_j),
     _gj_names(getParam<std::vector<MaterialPropertyName>>("gj_names")),
     _prop_gj(_num_j),
-    _w(getParam<Real>("w")),
+    _w(getMaterialProperty<Real>("w")),
     _kappas(_nkappas)
 {
   // Check that same number of Fj, hj, and gj are passed in
@@ -81,7 +81,7 @@ KKSMultiFreeEnergy::computeValue()
   Real total_energy = _additional_free_energy[_qp];
   // Add bulk energy contributions
   for (unsigned int i = 0; i < _num_j; ++i)
-    total_energy += (*_prop_hj[i])[_qp] * (*_prop_Fj[i])[_qp] + _w * (*_prop_gj[i])[_qp];
+    total_energy += (*_prop_hj[i])[_qp] * (*_prop_Fj[i])[_qp] + _w[_qp] * (*_prop_gj[i])[_qp];
 
   // Add interfacial energy of each variable
   for (unsigned int i = 0; i < _nvars; ++i)

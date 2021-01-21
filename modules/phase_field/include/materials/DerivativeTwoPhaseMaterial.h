@@ -60,7 +60,7 @@ protected:
   ///@}
 
   /// Phase transformatuion energy barrier
-  Real _W;
+  const MaterialProperty<Real> & _W;
 
   /// Function value of the A and B phase.
   const MaterialProperty<Real> &_prop_Fa, &_prop_Fb;

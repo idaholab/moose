@@ -30,7 +30,8 @@ DerivativeMultiPhaseBase::validParams()
   // Barrier
   params.addParam<MaterialPropertyName>(
       "g", "g", "Barrier Function Material that provides g(eta_i)");
-  params.addParam<Real>("W", 0.0, "Energy barrier for the phase transformation from A to B");
+  params.addParam<MaterialPropertyName>(
+      "W", 0.0, "Energy barrier for the phase transformation from A to B");
 
   return params;
 }
@@ -54,7 +55,7 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
     _dg(_num_etas),
     _d2g(_num_etas),
     _d3g(_num_etas),
-    _W(getParam<Real>("W"))
+    _W(getMaterialProperty<Real>("W"))
 {
   // check passed in parameter vectors
   if (_num_fi != _num_hi)
@@ -141,5 +142,5 @@ DerivativeMultiPhaseBase::computeF()
   Real F = 0.0;
   for (unsigned n = 0; n < _num_fi; ++n)
     F += (*_hi[n])[_qp] * (*_prop_Fi[n])[_qp];
-  return F + _W * _g[_qp];
+  return F + _W[_qp] * _g[_qp];
 }

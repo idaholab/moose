@@ -47,7 +47,7 @@ DerivativeMultiPhaseMaterial::computeDF(unsigned int i_var)
   const int i_eta = _eta_index[i];
 
   if (i_eta >= 0)
-    return (*_dhi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] + _W * (*_dg[i_eta])[_qp];
+    return (*_dhi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] + _W[_qp] * (*_dg[i_eta])[_qp];
   else
   {
     Real dF = 0.0;
@@ -74,7 +74,7 @@ DerivativeMultiPhaseMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
     // because we assume that hi _only_ depends on eta_i
     Real d2F = (i_eta == j_eta) ? (*_d2hi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] : 0.0;
 
-    return d2F + _W * (*_d2g[i_eta][j_eta])[_qp];
+    return d2F + _W[_qp] * (*_d2g[i_eta][j_eta])[_qp];
   }
 
   // one argument is an eta-variable
@@ -113,7 +113,7 @@ DerivativeMultiPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var,
     Real d3F =
         (i_eta == j_eta && j_eta == k_eta) ? (*_d3hi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] : 0.0;
 
-    return d3F + _W * (*_d3g[i_eta][j_eta][k_eta])[_qp];
+    return d3F + _W[_qp] * (*_d3g[i_eta][j_eta][k_eta])[_qp];
   }
 
   // two arguments are eta-variables

@@ -17,7 +17,7 @@ KKSMultiACBulkF::validParams()
   InputParameters params = KKSMultiACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
                              "includes all terms NOT dependent on chemical potential.");
-  params.addRequiredParam<Real>("wi", "Double well height parameter");
+  params.addRequiredParam<MaterialPropertyName>("wi", "Double well height parameter");
   params.addRequiredParam<MaterialPropertyName>(
       "gi_name", "Base name for the double well function g_i(eta_i)");
   return params;
@@ -25,7 +25,7 @@ KKSMultiACBulkF::validParams()
 
 KKSMultiACBulkF::KKSMultiACBulkF(const InputParameters & parameters)
   : KKSMultiACBulkBase(parameters),
-    _wi(getParam<Real>("wi")),
+    _wi(getMaterialProperty<Real>("wi")),
     _prop_dgi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name)),
     _prop_d2gi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name, _etai_name))
 {
@@ -42,7 +42,7 @@ KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
       for (unsigned int n = 0; n < _num_j; ++n)
         sum += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return sum + _wi * _prop_dgi[_qp];
+      return sum + _wi[_qp] * _prop_dgi[_qp];
 
     case Jacobian:
       // For when this kernel is used in the Lagrange multiplier equation
@@ -54,7 +54,7 @@ KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
       for (unsigned int n = 0; n < _num_j; ++n)
         sum += (*_prop_d2hjdetai2[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return _phi[_j][_qp] * (sum + _wi * _prop_d2gi[_qp]);
+      return _phi[_j][_qp] * (sum + _wi[_qp] * _prop_d2gi[_qp]);
   }
 
   mooseError("Invalid type passed in");
@@ -80,7 +80,7 @@ KKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   // In this case the second derivative of the barrier function contributes
   // to the off-diagonal Jacobian
   if (jvar == _etai_var)
-    sum += _wi * _prop_d2gi[_qp];
+    sum += _wi[_qp] * _prop_d2gi[_qp];
 
   res += _L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
 

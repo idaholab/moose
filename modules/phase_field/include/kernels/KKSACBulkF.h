@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// double well height parameter
-  Real _w;
+  const MaterialProperty<Real> & _w;
 
   /// Derivative of the double well function \f$ \frac d{d\eta} g(\eta) \f$
   const MaterialProperty<Real> & _prop_dg;
