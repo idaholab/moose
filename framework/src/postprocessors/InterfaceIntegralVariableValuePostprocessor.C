@@ -70,12 +70,13 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
     const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
 
     /// Get primary variable on the interface
-    const Real u = MetaPhysicL::raw_value(_fv_variable->getInternalFaceValue(neighbor, *fi, _u[_qp]));
+    const Real u =
+        MetaPhysicL::raw_value(_fv_variable->getInternalFaceValue(neighbor, *fi, _u[_qp]));
 
     /// Get secondary variable on the interface
-    const Real u_neighbor = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        getFieldVar("neighbor_variable", 0))->getInternalFaceValue(neighbor,
-        *fi, _u_neighbor[_qp]));
+    const Real u_neighbor = MetaPhysicL::raw_value(
+        dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("neighbor_variable", 0))
+            ->getInternalFaceValue(neighbor, *fi, _u_neighbor[_qp]));
 
     return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
   }

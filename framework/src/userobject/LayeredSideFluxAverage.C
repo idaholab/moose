@@ -43,7 +43,7 @@ LayeredSideFluxAverage::computeQpIntegral()
     /// Get the gradient of the variable on the face
     const auto & grad_u = _fv_variable->adGradSln(*fi);
 
-    //FIXME Get the diffusion coefficient on the face
+    // FIXME Get the diffusion coefficient on the face
     return -MetaPhysicL::raw_value(_diffusion_coef[_qp] * grad_u * _normals[_qp]);
   }
   else

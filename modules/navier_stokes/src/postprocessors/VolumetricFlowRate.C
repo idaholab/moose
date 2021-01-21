@@ -58,25 +58,33 @@ VolumetricFlowRate::computeQpIntegral()
       mooseError("VolumetricFlowRate should only be used at boundaries");
 
     /// Get face value for velocity
-    const auto & vx_face = !getFieldVar("vel_x", 0) ? _vel_x[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        getFieldVar("vel_x", 0))->getBoundaryFaceValue(*fi));
+    const auto & vx_face = !getFieldVar("vel_x", 0)
+                               ? _vel_x[_qp]
+                               : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                            getFieldVar("vel_x", 0))
+                                                            ->getBoundaryFaceValue(*fi));
 
-    const auto & vy_face = !getFieldVar("vel_y", 0) ? _vel_y[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_y", 0))
-                                                       ->getBoundaryFaceValue(*fi));
+    const auto & vy_face = !getFieldVar("vel_y", 0)
+                               ? _vel_y[_qp]
+                               : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                            getFieldVar("vel_y", 0))
+                                                            ->getBoundaryFaceValue(*fi));
 
-    const auto & vz_face = !getFieldVar("vel_z", 0) ? _vel_z[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_z", 0))
-                                                       ->getBoundaryFaceValue(*fi));
+    const auto & vz_face = !getFieldVar("vel_z", 0)
+                               ? _vel_z[_qp]
+                               : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                            getFieldVar("vel_z", 0))
+                                                            ->getBoundaryFaceValue(*fi));
 
     /// Compute the advected quantity on the face
     Real advected_quantity;
     if (parameters().isParamSetByUser("advected_variable"))
     {
-      advected_quantity = !getFieldVar("advected_variable", 0) ? _advected_variable[_qp] :
-          MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-          getFieldVar("advected_variable", 0))->getBoundaryFaceValue(*fi));
+      advected_quantity = !getFieldVar("advected_variable", 0)
+                              ? _advected_variable[_qp]
+                              : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                           getFieldVar("advected_variable", 0))
+                                                           ->getBoundaryFaceValue(*fi));
     }
     else if (parameters().isParamSetByUser("advected_mat_prop"))
     {
@@ -91,12 +99,12 @@ VolumetricFlowRate::computeQpIntegral()
   }
   else
 #endif
-    if (parameters().isParamSetByUser("advected_variable"))
-      return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
-             _normals[_qp];
-    else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
-             RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-    else
-      return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  if (parameters().isParamSetByUser("advected_variable"))
+    return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
+           _normals[_qp];
+  else if (parameters().isParamSetByUser("advected_mat_prop"))
+    return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+           RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  else
+    return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
 }

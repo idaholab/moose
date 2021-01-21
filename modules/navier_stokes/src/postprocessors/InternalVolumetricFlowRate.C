@@ -46,10 +46,11 @@ InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & p
     _advected_material_property_neighbor(getNeighborADMaterialProperty<Real>("advected_mat_prop"))
 {
   /// Check that at most one advected quantity has been provided
-  mooseAssert(!parameters.isParamSetByUser("advected_variable") ||
-                  !parameters.isParamSetByUser("advected_mat_prop"),
-              "InternalVolumetricFlowRatePostprocessor should be provided either an advected variable or "
-              "an advected material property");
+  mooseAssert(
+      !parameters.isParamSetByUser("advected_variable") ||
+          !parameters.isParamSetByUser("advected_mat_prop"),
+      "InternalVolumetricFlowRatePostprocessor should be provided either an advected variable or "
+      "an advected material property");
 
   using namespace Moose::FV;
 
@@ -80,17 +81,26 @@ InternalVolumetricFlowRate::computeQpIntegral()
 
     /// Get face value for velocity, using the variable's interpolation method
     /// Get face value for velocity
-    const auto & vx_face = !getFieldVar("vel_x", 0) ? _vel_x[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        getFieldVar("vel_x", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
+    const auto & vx_face =
+        !getFieldVar("vel_x", 0)
+            ? _vel_x[_qp]
+            : MetaPhysicL::raw_value(
+                  dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_x", 0))
+                      ->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
-    const auto & vy_face = !getFieldVar("vel_y", 0) ? _vel_y[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        getFieldVar("vel_y", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
+    const auto & vy_face =
+        !getFieldVar("vel_y", 0)
+            ? _vel_y[_qp]
+            : MetaPhysicL::raw_value(
+                  dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_y", 0))
+                      ->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
-    const auto & vz_face = !getFieldVar("vel_z", 0) ? _vel_z[_qp] :
-        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-        getFieldVar("vel_z", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
+    const auto & vz_face =
+        !getFieldVar("vel_z", 0)
+            ? _vel_z[_qp]
+            : MetaPhysicL::raw_value(
+                  dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_z", 0))
+                      ->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
     /// Compute the advected quantity on the face
     Real advected_quantity;
@@ -101,16 +111,24 @@ InternalVolumetricFlowRate::computeQpIntegral()
       // most likely to use
       if (!parameters().isParamSetByUser("advected_interp_method"))
       {
-        advected_quantity = !getFieldVar("advected_variable", 0) ? _advected_variable[_qp] :
-            MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-            getFieldVar("advected_variable", 0))->getInternalFaceValue(neighbor, *fi, _advected_variable[_qp]));
+        advected_quantity =
+            !getFieldVar("advected_variable", 0)
+                ? _advected_variable[_qp]
+                : MetaPhysicL::raw_value(
+                      dynamic_cast<const MooseVariableFV<Real> *>(
+                          getFieldVar("advected_variable", 0))
+                          ->getInternalFaceValue(neighbor, *fi, _advected_variable[_qp]));
       }
       else
       {
         /// Get neighbor value
-        const auto & advected_variable_neighbor = !getFieldVar("advected_variable", 0) ? _advected_variable[_qp] :
-            MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-            getFieldVar("advected_variable", 0))->getNeighborValue(neighbor, *fi, _advected_variable[_qp]));
+        const auto & advected_variable_neighbor =
+            !getFieldVar("advected_variable", 0)
+                ? _advected_variable[_qp]
+                : MetaPhysicL::raw_value(
+                      dynamic_cast<const MooseVariableFV<Real> *>(
+                          getFieldVar("advected_variable", 0))
+                          ->getNeighborValue(neighbor, *fi, _advected_variable[_qp]));
 
         Moose::FV::interpolate(_advected_interp_method,
                                advected_quantity,
@@ -139,12 +157,12 @@ InternalVolumetricFlowRate::computeQpIntegral()
   }
   else
 #endif
-    if (parameters().isParamSetByUser("advected_variable"))
-      return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
-             _normals[_qp];
-    else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
-             RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-    else
-      return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  if (parameters().isParamSetByUser("advected_variable"))
+    return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
+           _normals[_qp];
+  else if (parameters().isParamSetByUser("advected_mat_prop"))
+    return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+           RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  else
+    return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
 }
