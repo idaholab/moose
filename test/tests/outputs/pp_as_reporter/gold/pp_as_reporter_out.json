@@ -1,26 +1,32 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "data",
-                    "type": "double",
-                    "value": 0.0,
-                    "value_name": "value"
+            "reporters": {
+                "data": {
+                    "values": [
+                        {
+                            "name": "value",
+                            "type": "double",
+                            "value": 0.0
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": [
-                {
-                    "object_name": "data",
-                    "type": "double",
-                    "value": 1980.0,
-                    "value_name": "value"
+            "reporters": {
+                "data": {
+                    "values": [
+                        {
+                            "name": "value",
+                            "type": "double",
+                            "value": 1980.0
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 1.0,
             "time_step": 1
         }

@@ -1,14 +1,21 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "initialSetup",
-                    "type": "double",
-                    "value": 1980.0,
-                    "value_name": "value"
+            "reporters": {
+                "initialSetup": {
+                    "info": {
+                        "name": "initialSetup",
+                        "type": "TestDeclareInitialSetupReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "value",
+                            "type": "double",
+                            "value": 1980.0
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 2.0,
             "time_step": 2
         }
