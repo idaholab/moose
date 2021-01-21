@@ -2490,7 +2490,10 @@ MooseMesh::prepared(bool state)
     mooseError("We don't have any right to tell the libmesh mesh that it *is* prepared. Only a "
                "call to prepare_for_use should tell us that");
 
-  _mesh->set_isnt_prepared();
+  // Some people may call this even before we have a MeshBase object. This isn't dangerous really
+  // because when the MeshBase object is born, it knows it's in an unprepared state
+  if (_mesh)
+    _mesh->set_isnt_prepared();
 
   // If the libMesh mesh isn't preparead, then our MooseMesh wrapper is also no longer prepared
   _moose_mesh_prepared = false;
