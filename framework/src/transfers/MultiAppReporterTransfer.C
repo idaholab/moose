@@ -15,7 +15,8 @@ registerMooseObject("MooseApp", MultiAppReporterTransfer);
 InputParameters
 MultiAppReporterTransfer::validParams()
 {
-  InputParameters params = MultiAppReporterTransferBase::validParams();
+  InputParameters params = MultiAppTransfer::validParams();
+  params += ReporterTransferInterface::validParams();
   params.addClassDescription(
       "Transfers reporter data between the main application and sub-application(s).");
   params.addRequiredParam<std::vector<ReporterName>>(
@@ -35,7 +36,8 @@ MultiAppReporterTransfer::validParams()
 }
 
 MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & parameters)
-  : MultiAppReporterTransferBase(parameters),
+  : MultiAppTransfer(parameters),
+    ReporterTransferInterface(parameters),
     _from_reporter_names(getParam<std::vector<ReporterName>>("from_reporters")),
     _to_reporter_names(getParam<std::vector<ReporterName>>("to_reporters")),
     _subapp_index(getParam<unsigned int>("subapp_index"))
@@ -63,39 +65,61 @@ MultiAppReporterTransfer::initialSetup()
 {
   // We need to get a reference to the data now so we can tell ReporterData
   // that we consume a replicated version.
-  // Find proper index
-  int ind;
+  // Find proper FEProblem
+  FEProblemBase * problem_ptr = nullptr;
   if (_directions.contains(TO_MULTIAPP))
-    ind = std::numeric_limits<unsigned int>::max();
-  else if (_subapp_index == std::numeric_limits<unsigned int>::max())
-    ind = 0;
-  else
-    ind = _subapp_index;
+    problem_ptr = &_multi_app->problemBase();
+  else if (_subapp_index == std::numeric_limits<unsigned int>::max() && _multi_app->hasLocalApp(0))
+    problem_ptr = &_multi_app->appProblemBase(0);
+  else if (_multi_app->hasLocalApp(_subapp_index))
+    problem_ptr = &_multi_app->appProblemBase(_subapp_index);
+
   // Tell ReporterData to consume with replicated
-  for (const auto & fn : _from_reporter_names)
-    addReporterTransferMode(fn, REPORTER_MODE_REPLICATED, ind);
+  if (problem_ptr)
+    for (const auto & fn : _from_reporter_names)
+      addReporterTransferMode(fn, REPORTER_MODE_REPLICATED, *problem_ptr);
 }
 
 void
 MultiAppReporterTransfer::executeToMultiapp()
 {
-  for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+  std::vector<unsigned int> indices;
+  if (_subapp_index == std::numeric_limits<unsigned int>::max())
   {
-    if (_subapp_index == std::numeric_limits<unsigned int>::max())
-    {
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
-        this->transferToMultiApp(_from_reporter_names[n], _to_reporter_names[n], i);
-    }
-
-    else
-      this->transferToMultiApp(_from_reporter_names[n], _to_reporter_names[n], _subapp_index);
+    indices.resize(_multi_app->numGlobalApps());
+    std::iota(indices.begin(), indices.end(), 0);
   }
+  else
+    indices = {_subapp_index};
+
+  for (const auto & ind : indices)
+    if (_multi_app->hasLocalApp(ind))
+      for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+        transferReporter(_from_reporter_names[n],
+                         _to_reporter_names[n],
+                         _multi_app->problemBase(),
+                         _multi_app->appProblemBase(ind));
 }
 
 void
 MultiAppReporterTransfer::executeFromMultiapp()
 {
   unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
-  for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
-    this->transferFromMultiApp(_from_reporter_names[n], _to_reporter_names[n], ind);
+  if (_multi_app->hasLocalApp(ind))
+    for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
+      transferReporter(_from_reporter_names[n],
+                       _to_reporter_names[n],
+                       _multi_app->appProblemBase(ind),
+                       _multi_app->problemBase());
+}
+
+void
+MultiAppReporterTransfer::execute()
+{
+  _console << "Beginning " << type() << " " << name() << std::endl;
+  if (_current_direction == FROM_MULTIAPP)
+    executeFromMultiapp();
+  else
+    executeToMultiapp();
+  _console << "Finished " << type() << " " << name() << std::endl;
 }

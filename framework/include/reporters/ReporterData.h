@@ -61,7 +61,7 @@ public:
     friend class VectorPostprocessor;
     friend class VectorPostprocessorInterface;
     friend class PostprocessorInterface;
-    friend class MultiAppReporterTransferBase;
+    friend class ReporterTransferInterface;
   };
 
   ReporterData(MooseApp & moose_app);
@@ -209,7 +209,7 @@ public:
    * This relies on the virtual ReporterContextBase::transfer method to allow this method to
    * operate without knowledge of the type being transferred
    *
-   * see MultiAppReporterTransferBase ReporterContext
+   * see ReporterTransferInterface ReporterContext
    */
   void transfer(const ReporterName & from_name,
                 const ReporterName & to_name,
@@ -226,7 +226,7 @@ public:
    * mark reporter values consumer mode to ensure that the correct parallel operations will
    * occur prior to transfer.
    *
-   * see MultiAppReporterTransferBase ReporterContext
+   * see ReporterTransferInterface ReporterContext
    */
   void addConsumerMode(ReporterMode mode, const std::string & object_name);
 
