@@ -32,7 +32,7 @@ velocity_interp_method='average'
   []
   [diverging_mesh]
     type = FileMeshGenerator
-    file = 'straight.e'
+    file = 'expansion_quad.e'
   []
 []
 
@@ -409,7 +409,7 @@ velocity_interp_method='average'
 [Outputs]
   exodus = false
   csv = true
-  inactive = 'console_mass console_momentum_x console_momentum_y console_energy'
+  inactive = 'conservation_mass console_momentum_x console_momentum_y console_energy'
   [console_mass]
     type = Console
     start_step = 1

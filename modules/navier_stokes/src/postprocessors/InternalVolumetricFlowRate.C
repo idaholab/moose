@@ -76,75 +76,41 @@ InternalVolumetricFlowRate::computeQpIntegral()
       mooseError(
           "Use VolumetricFlowRate instead of InternalVolumetricFlowRate for domain boundaries");
 
-    /// Obtain the variable names from the parameters
-    const auto & velx_name = parameters().getParamHelper(
-        "vel_x",
-        parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
-    const auto & vely_name = parameters().getParamHelper(
-        "vel_y",
-        parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
-    const auto & velz_name = parameters().getParamHelper(
-        "vel_z",
-        parameters(),
-        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
-
     const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
 
     /// Get face value for velocity, using the variable's interpolation method
-    const auto & vx_face =
-        velx_name.empty()
-            ? _vel_x[_qp]
-            : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-                                         &_subproblem.getVariable(_tid, velx_name[0]))
-                                         ->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
+    /// Get face value for velocity
+    const auto & vx_face = !getFieldVar("vel_x", 0) ? _vel_x[_qp] :
+        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+        getFieldVar("vel_x", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
-    const auto & vy_face =
-        vely_name.empty()
-            ? _vel_y[_qp]
-            : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-                                         &_subproblem.getVariable(_tid, vely_name[0]))
-                                         ->getInternalFaceValue(neighbor, *fi, _vel_y[_qp]));
+    const auto & vy_face = !getFieldVar("vel_y", 0) ? _vel_y[_qp] :
+        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+        getFieldVar("vel_y", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
-    const auto & vz_face =
-        velz_name.empty()
-            ? _vel_z[_qp]
-            : MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
-                                         &_subproblem.getVariable(_tid, velz_name[0]))
-                                         ->getInternalFaceValue(neighbor, *fi, _vel_z[_qp]));
+    const auto & vz_face = !getFieldVar("vel_z", 0) ? _vel_z[_qp] :
+        MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+        getFieldVar("vel_z", 0))->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
 
     /// Compute the advected quantity on the face
     Real advected_quantity;
     if (parameters().isParamSetByUser("advected_variable"))
     {
-      const auto & advected_name = parameters().getParamHelper(
-          "advected_variable",
-          parameters(),
-          static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
 
       // If user did not request an interpolation method, use what the kernels are
       // most likely to use
       if (!parameters().isParamSetByUser("advected_interp_method"))
       {
-        advected_quantity =
-            advected_name.empty()
-                ? _advected_variable[_qp]
-                : MetaPhysicL::raw_value(
-                      dynamic_cast<const MooseVariableFV<Real> *>(
-                          &_subproblem.getVariable(_tid, advected_name[0]))
-                          ->getInternalFaceValue(neighbor, *fi, _advected_variable[_qp]));
+        advected_quantity = !getFieldVar("advected_variable", 0) ? _advected_variable[_qp] :
+            MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+            getFieldVar("advected_variable", 0))->getInternalFaceValue(neighbor, *fi, _advected_variable[_qp]));
       }
       else
       {
         /// Get neighbor value
-        const auto & advected_variable_neighbor =
-            advected_name.empty()
-                ? _advected_variable[_qp]
-                : MetaPhysicL::raw_value(
-                      dynamic_cast<const MooseVariableFV<Real> *>(
-                          &_subproblem.getVariable(_tid, advected_name[0]))
-                          ->getNeighborValue(neighbor, *fi, _advected_variable[_qp]));
+        const auto & advected_variable_neighbor = !getFieldVar("advected_variable", 0) ? _advected_variable[_qp] :
+            MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+            getFieldVar("advected_variable", 0))->getNeighborValue(neighbor, *fi, _advected_variable[_qp]));
 
         Moose::FV::interpolate(_advected_interp_method,
                                advected_quantity,
