@@ -54,6 +54,7 @@ BUILD_CONFIG=`cat <<"EOF"
   --download-superlu_dist=1 \
   --with-fortran-bindings=0 \
   --with-sowing=0 \
+  --with-64-bit-indices \
 EOF
 `
 
