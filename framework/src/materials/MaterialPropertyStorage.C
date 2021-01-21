@@ -157,7 +157,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];
 
-    initProps(child_material_data, *child_elem, child_side, n_qpoints);
+    initProps(child_material_data, child_elem, child_side, n_qpoints);
 
     for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
     {
@@ -207,7 +207,7 @@ MaterialPropertyStorage::restrictStatefulProps(
     n_qpoints = qrule_face.n_points();
   }
 
-  initProps(material_data, elem, side, n_qpoints);
+  initProps(material_data, &elem, side, n_qpoints);
 
   // Copy from the child stateful properties
   for (unsigned int qp = 0; qp < coarsening_map.size(); qp++)
@@ -247,7 +247,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
 
-  initProps(material_data, elem, side, n_qpoints);
+  initProps(material_data, &elem, side, n_qpoints);
 
   // copy from storage to material data
   swap(material_data, elem, side);
@@ -267,7 +267,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
   // getMaterialProperty[Old/Older] can potentially trigger a material to
   // become stateful that previously wasn't.  This needs to go after the
   // swapBack.
-  initProps(material_data, elem, side, n_qpoints);
+  initProps(material_data, &elem, side, n_qpoints);
 
   // Copy the properties to Old and Older as needed
   for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
@@ -342,17 +342,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  initProps(material_data, elem_to, side, n_qpoints);
-  for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
-  {
-    for (unsigned int qp = 0; qp < n_qpoints; ++qp)
-    {
-      props(&elem_to, side)[i]->qpCopy(qp, props(&elem_from, side)[i], qp);
-      propsOld(&elem_to, side)[i]->qpCopy(qp, propsOld(&elem_from, side)[i], qp);
-      if (hasOlderProperties())
-        propsOlder(&elem_to, side)[i]->qpCopy(qp, propsOlder(&elem_from, side)[i], qp);
-    }
-  }
+  copy(material_data, &elem_to, &elem_from, side, n_qpoints);
 }
 
 void
@@ -455,42 +445,6 @@ MaterialPropertyStorage::retrievePropertyId(const std::string & prop_name) const
   if (it == _prop_ids.end())
     mooseError("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
   return it->second;
-}
-
-void
-MaterialPropertyStorage::initProps(MaterialData & material_data,
-                                   const Elem & elem,
-                                   unsigned int side,
-                                   unsigned int n_qpoints)
-{
-  material_data.resize(n_qpoints);
-  auto n = _stateful_prop_id_to_prop_id.size();
-
-  // In some special cases, material_data might be larger than n_qpoints
-  if (material_data.isOnlyResizeIfSmaller())
-    n_qpoints = material_data.nQPoints();
-
-  if (props(&elem, side).size() < n)
-    props(&elem, side).resize(n, nullptr);
-  if (propsOld(&elem, side).size() < n)
-    propsOld(&elem, side).resize(n, nullptr);
-  if (propsOlder(&elem, side).size() < n)
-    propsOlder(&elem, side).resize(n, nullptr);
-
-  // init properties (allocate memory. etc)
-  for (unsigned int i = 0; i < n; i++)
-  {
-    auto prop_id = _stateful_prop_id_to_prop_id[i];
-    // duplicate the stateful property in property storage (all three states - we will reuse the
-    // allocated memory there)
-    // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (props(&elem, side)[i] == nullptr)
-      props(&elem, side)[i] = material_data.props()[prop_id]->init(n_qpoints);
-    if (propsOld(&elem, side)[i] == nullptr)
-      propsOld(&elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
-    if (hasOlderProperties() && propsOlder(&elem, side)[i] == nullptr)
-      propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
-  }
 }
 
 void

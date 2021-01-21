@@ -299,13 +299,6 @@ private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
   void initProps(MaterialData & material_data,
-                 const Elem & elem,
-                 unsigned int side,
-                 unsigned int n_qpoints);
-
-  /// Initializes hashmap entries for element and side to proper qpoint and
-  /// property count sizes.
-  void initProps(MaterialData & material_data,
                  const Elem * elem,
                  unsigned int side,
                  unsigned int n_qpoints);

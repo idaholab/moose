@@ -53,7 +53,7 @@ MaterialData::nQPoints()
 void
 MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int side)
 {
-  _storage.copy(*this, elem_to, elem_from, side, _n_qpoints);
+  _storage.copy(*this, &elem_to, &elem_from, side, _n_qpoints);
 }
 
 void
