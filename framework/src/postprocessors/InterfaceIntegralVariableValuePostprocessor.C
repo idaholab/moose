@@ -46,13 +46,40 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
     _grad_u_neighbor(parameters.isParamSetByUser("neighbor_variable")
                          ? coupledNeighborGradient("neighbor_variable")
                          : coupledNeighborGradient("variable")),
-    _interface_value_type(parameters.get<MooseEnum>("interface_value_type"))
+    _interface_value_type(parameters.get<MooseEnum>("interface_value_type")),
+    _fv(_fv_variable)
 {
   addMooseVariableDependency(&mooseVariableField());
+
+  /// Check that the secondary variable is also a finite volume variable
+  if (_fv)
+    if (!getFieldVar("neighbor_variable", 0)->isFV())
+      mooseError("For the InterfaceIntegralVariableValuePostprocessor, if variable "
+                 "is a finite volume variable, so should be neighbor_variable.");
 }
 
 Real
 InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 {
-  return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  if (_fv)
+  {
+    /// Get FaceInfo from the mesh
+    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "We should have a face info");
+    const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
+
+    /// Get primary variable on the interface
+    const Real u = MetaPhysicL::raw_value(_fv_variable->getInternalFaceValue(neighbor, *fi, _u[_qp]));
+
+    /// Get secondary variable on the interface
+    const Real u_neighbor = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+        getFieldVar("neighbor_variable", 0))->getInternalFaceValue(neighbor,
+        *fi, _u_neighbor[_qp]));
+
+    return InterfaceValueTools::getQuantity(_interface_value_type, u, u_neighbor);
+  }
+  else
+#endif
+    return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
 }

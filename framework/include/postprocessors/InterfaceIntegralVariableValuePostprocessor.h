@@ -39,6 +39,9 @@ protected:
 
   /// the type of interface value we want to compute
   const MooseEnum _interface_value_type;
+  /// whether finite volume variables are used
+  const bool _fv;
+
   /// the contribution of a qp to the integral
   virtual Real computeQpIntegral() override;
 };
