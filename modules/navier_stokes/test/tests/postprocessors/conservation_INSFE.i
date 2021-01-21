@@ -86,61 +86,61 @@
 
 [Postprocessors]
   [inlet_mass_constant]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = 1
   []
   [inlet_mass_matprop]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = vel_x
     vel_y = vel_y
     advected_mat_prop = 'rho_ad'
   []
   [mid1_mass]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
   []
   [mid2_mass]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y
   []
   [outlet_mass]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = vel_x
     vel_y = vel_y
   []
 
   [inlet_momentum_x]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_x
   []
   [mid1_momentum_x]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_x
   []
   [mid2_momentum_x]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_x
   []
   [outlet_momentum_x]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = vel_x
     vel_y = vel_y
@@ -148,28 +148,28 @@
   []
 
   [inlet_momentum_y]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_y
   []
   [mid1_momentum_y]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_y
   []
   [mid2_momentum_y]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = vel_x
     vel_y = vel_y
     advected_variable = vel_y
   []
   [outlet_momentum_y]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = vel_x
     vel_y = vel_y

@@ -10,19 +10,20 @@
 #pragma once
 
 // MOOSE includes
-#include "SideIntegralPostprocessor.h"
+#include "InterfaceIntegralPostprocessor.h"
+#include "FVUtils.h"
 
 // Forward Declarations
 
 /**
  * This postprocessor computes the volumetric flow rate through a boundary.
  */
-class BoundaryVolumetricFlowRate : public SideIntegralPostprocessor
+class InternalVolumetricFlowRate : public InterfaceIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  BoundaryVolumetricFlowRate(const InputParameters & parameters);
+  InternalVolumetricFlowRate(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
@@ -38,4 +39,8 @@ protected:
   /// Advected quantities
   const VariableValue & _advected_variable;
   const ADMaterialProperty<Real> & _advected_material_property;
+  const ADMaterialProperty<Real> & _advected_material_property_neighbor;
+
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
 };

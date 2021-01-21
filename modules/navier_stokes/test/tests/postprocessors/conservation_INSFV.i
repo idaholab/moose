@@ -253,7 +253,7 @@ velocity_interp_method='average'
 
 [Postprocessors]
   [inlet_mass_variable]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -261,7 +261,7 @@ velocity_interp_method='average'
     fv = true
   []
   [inlet_mass_constant]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -269,7 +269,7 @@ velocity_interp_method='average'
     fv = true
   []
   [inlet_mass_matprop]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -277,7 +277,7 @@ velocity_interp_method='average'
     fv = true
   []
   [mid1_mass]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
@@ -285,7 +285,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [mid2_mass]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
@@ -293,7 +293,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [outlet_mass]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = u
     vel_y = v
@@ -301,7 +301,7 @@ velocity_interp_method='average'
   []
 
   [inlet_momentum_x]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -309,7 +309,7 @@ velocity_interp_method='average'
     fv = true
   []
   [mid1_momentum_x]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
@@ -318,7 +318,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [mid2_momentum_x]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
@@ -327,7 +327,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [outlet_momentum_x]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = u
     vel_y = v
@@ -336,7 +336,7 @@ velocity_interp_method='average'
   []
 
   [inlet_momentum_y]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -344,7 +344,7 @@ velocity_interp_method='average'
     fv = true
   []
   [mid1_momentum_y]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
@@ -353,7 +353,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [mid2_momentum_y]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
@@ -362,7 +362,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [outlet_momentum_y]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = u
     vel_y = v
@@ -371,7 +371,7 @@ velocity_interp_method='average'
   []
 
   [inlet_advected_energy]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
@@ -379,7 +379,7 @@ velocity_interp_method='average'
     fv = true
   []
   [mid1_advected_energy]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
@@ -388,7 +388,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [mid2_advected_energy]
-    type = VolumetricFlowRate
+    type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
@@ -397,7 +397,7 @@ velocity_interp_method='average'
     advected_interp_method = ${advected_interp_method}
   []
   [outlet_advected_energy]
-    type = BoundaryVolumetricFlowRate
+    type = VolumetricFlowRate
     boundary = top
     vel_x = u
     vel_y = v
