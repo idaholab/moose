@@ -34,6 +34,7 @@ registerActions(Syntax & syntax)
   registerTask("THM:add_component_physics", true);
   registerTask("THM:integrity_check", true);
   registerTask("THM:control_data_integrity_check", true);
+  registerTask("THM:preconditioning_integrity_check", true);
   registerTask("THM:setup_quadrature", true);
   registerTask("THM:debug_action", false);
   registerTask("THM:print_component_loops", false);
@@ -69,6 +70,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_output_aux_variables", "THM:add_component_physics");
     syntax.addDependency("add_periodic_bc", "THM:add_variables");
     syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
+    syntax.addDependency("THM:preconditioning_integrity_check", "check_integrity");
   }
   catch (CyclicDependencyException<std::string> & e)
   {
