@@ -175,7 +175,8 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
                                                    const bool is_distributed) const
 {
   if (is_distributed)
-    mooseError("BiasCorrectedAccelerated does not work with distributed data at this time.");
+    mooseError("Due to the computational demands, the BiasCorrectedAccelerated does not work with "
+               "distributed data.");
 
   // Bootstrap estimates
   const std::vector<OutType> values = this->computeBootstrapEstimates(data, is_distributed);

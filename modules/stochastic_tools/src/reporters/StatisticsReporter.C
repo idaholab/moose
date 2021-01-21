@@ -122,8 +122,11 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     }
   }
 
-  if (!isParamValid("reporters") && !isParamValid("vectorpostprocessors"))
-    mooseError("The 'vectorpostprocessors' and/or 'reporters' parameters must be defined.");
+  if ((!isParamValid("reporters") && !isParamValid("vectorpostprocessors")) ||
+      (getParam<std::vector<ReporterName>>("reporters").empty() &&
+       getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors").empty()))
+    mooseError(
+        "The 'vectorpostprocessors' and/or 'reporters' parameters must be defined and non-empty.");
 }
 
 void

@@ -1,0 +1,72 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "stats": {
+                    "info": {
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "const_value_MAX",
+                            "stat": "MAX",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                5.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_value_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                3.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_value_MIN",
+                            "stat": "MIN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_value_NORM2",
+                            "stat": "NORM2",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                7.416198487095663,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_value_STDDEV",
+                            "stat": "STDDEV",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.5811388300841898,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "const_value_SUM",
+                            "stat": "SUM",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                15.0,
+                                []
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
