@@ -9,8 +9,6 @@
 
 #include "INSFVMomentumPressure.h"
 
-#include "NS.h"
-
 registerMooseObject("NavierStokesApp", INSFVMomentumPressure);
 
 InputParameters
