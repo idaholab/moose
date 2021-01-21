@@ -29,6 +29,13 @@
     requirement = "MOOSE shall allow taking averages of the flux of variables along a coordinate axis in layers on a boundary"
   [../]
 
+  [./flux_average_fv]
+    type = 'Exodiff'
+    input = 'layered_side_flux_average_fv.i'
+    exodiff = 'layered_side_flux_average_fv_out.e'
+    requirement = "MOOSE shall allow taking averages of the diffusive flux of finite volume variables along a coordinate axis in layers on a boundary"
+  [../]
+
   [./layered_side_average_error_check]
     type = RunException
     input = 'layered_side_average.i'

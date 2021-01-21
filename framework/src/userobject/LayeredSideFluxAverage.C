@@ -33,5 +33,28 @@ LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameter
 Real
 LayeredSideFluxAverage::computeQpIntegral()
 {
-  return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  if (_fv)
+  {
+    /// Get the face info
+    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "We should have a face info");
+
+    /// Obtain the variable names from the parameters
+    const auto & var_name = parameters().getParamHelper(
+        "variable",
+        parameters(),
+        static_cast<std::vector<VariableName, std::allocator<VariableName>> *>(0));
+
+    /// Get the gradient of the variable on the face
+    const auto & grad_u = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFV<Real> *>(
+                                                     &_subproblem.getVariable(_tid, var_name[0]))
+                                                     ->adGradSln(*fi));
+
+    //FIXME Get the diffusion coefficient on the face
+    return -_diffusion_coef[_qp] * grad_u * _normals[_qp];
+  }
+  else
+#endif
+    return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
 }

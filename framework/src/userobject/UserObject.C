@@ -37,7 +37,6 @@ UserObject::validParams()
                         "In the case where this UserObject is depended upon by an initial "
                         "condition, allow it to be executed twice during the initial setup (once "
                         "before the IC and again after mesh adaptivity (if applicable).");
-
   params.declareControllable("enable");
 
   params.registerBase("UserObject");
