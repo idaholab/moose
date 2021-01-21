@@ -362,7 +362,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
                               unsigned int side,
                               unsigned int n_qpoints)
 {
-  initProps(material_data, *elem_to, side, n_qpoints);
+  initProps(material_data, elem_to, side, n_qpoints);
   for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
   {
     for (unsigned int qp = 0; qp < n_qpoints; ++qp)
@@ -490,5 +490,41 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
       propsOld(&elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
     if (hasOlderProperties() && propsOlder(&elem, side)[i] == nullptr)
       propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
+  }
+}
+
+void
+MaterialPropertyStorage::initProps(MaterialData & material_data,
+                                   const Elem * elem,
+                                   unsigned int side,
+                                   unsigned int n_qpoints)
+{
+  material_data.resize(n_qpoints);
+  auto n = _stateful_prop_id_to_prop_id.size();
+
+  // In some special cases, material_data might be larger than n_qpoints
+  if (material_data.isOnlyResizeIfSmaller())
+    n_qpoints = material_data.nQPoints();
+
+  if (props(elem, side).size() < n)
+    props(elem, side).resize(n, nullptr);
+  if (propsOld(elem, side).size() < n)
+    propsOld(elem, side).resize(n, nullptr);
+  if (propsOlder(elem, side).size() < n)
+    propsOlder(elem, side).resize(n, nullptr);
+
+  // init properties (allocate memory. etc)
+  for (unsigned int i = 0; i < n; i++)
+  {
+    auto prop_id = _stateful_prop_id_to_prop_id[i];
+    // duplicate the stateful property in property storage (all three states - we will reuse the
+    // allocated memory there)
+    // also allocating the right amount of memory, so we do not have to resize, etc.
+    if (props(elem, side)[i] == nullptr)
+      props(elem, side)[i] = material_data.props()[prop_id]->init(n_qpoints);
+    if (propsOld(elem, side)[i] == nullptr)
+      propsOld(elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
+    if (hasOlderProperties() && propsOlder(elem, side)[i] == nullptr)
+      propsOlder(elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }
