@@ -2,8 +2,8 @@
 
 !syntax description /Postprocessors/VolumetricFlowRate
 
-!syntax parameters /Postprocessors/VolumetricFlowRate
+!syntax parameters /Postprocessors/BoundaryVolumetricFlowRate
 
-!syntax inputs /Postprocessors/VolumetricFlowRate
+!syntax inputs /Postprocessors/BoundaryVolumetricFlowRate
 
-!syntax children /Postprocessors/VolumetricFlowRate
+!syntax children /Postprocessors/BoundaryVolumetricFlowRate

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'BoundaryVolumetricFlowRate.md VolumetricFlowRate.md'
+  design = 'VolumetricFlowRate.md InternalVolumetricFlowRate.md'
   issues = '#16169 #16585'
   [fe]
     type = CSVDiff

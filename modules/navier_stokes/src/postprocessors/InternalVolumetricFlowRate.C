@@ -157,7 +157,7 @@ InternalVolumetricFlowRate::computeQpIntegral()
   }
   else
 #endif
-  if (parameters().isParamSetByUser("advected_variable"))
+      if (parameters().isParamSetByUser("advected_variable"))
     return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
            _normals[_qp];
   else if (parameters().isParamSetByUser("advected_mat_prop"))
