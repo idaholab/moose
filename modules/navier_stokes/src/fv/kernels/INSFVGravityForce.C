@@ -7,28 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMomentumPressure.h"
+#include "INSFVGravityForce.h"
 
-registerMooseObject("NavierStokesApp", INSFVMomentumPressure);
+registerMooseObject("NavierStokesApp", INSFVGravityForce);
 
 InputParameters
-INSFVMomentumPressure::validParams()
+INSFVGravityForce::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription(
-      "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
-  params.addRequiredCoupledVar("p", "The pressure");
-  MooseEnum momentum_component("x=0 y=1 z=2", "x");
+  params.addClassDescription("Computes a body force due to gravity.");
+  params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+  params.addRequiredParam<Real>("rho", "The value for the density");
+  params.declareControllable("rho");
   return params;
 }
 
-INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
+INSFVGravityForce::INSFVGravityForce(const InputParameters & params)
   : FVElementalKernel(params),
-    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("p", 0))),
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _rho(getParam<Real>("rho")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -36,19 +38,10 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-
-  if (!_p_var)
-    paramError("p", "p must be a finite volume variable");
 }
 
 ADReal
-INSFVMomentumPressure::computeQpResidual()
+INSFVGravityForce::computeQpResidual()
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#else
-  return _p_var->adGradSln(_current_elem)(_index);
-#endif
+  return -_rho * _gravity(_index);
 }
