@@ -80,7 +80,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
                ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
                      _tid, params.get<std::vector<VariableName>>("w").front()))
                : nullptr),
-    _rho(params.get<Real>("rho")),
+    _rho(getParam<Real>("rho")),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
