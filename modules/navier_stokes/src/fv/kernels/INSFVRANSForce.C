@@ -65,13 +65,27 @@ INSFVRANSForce::INSFVRANSForce(const InputParameters & params)
 ADReal
 INSFVRANSForce::computeQpResidual()
 {
-  Real mixing_len = _mixing_len[_qp];
+  constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+
+  // Compute the normalized velocity gradient.  This is evaluated as
+  // sqrt( nabla^2 u + nabla^2 v + nabla^2 w )
+  auto grad_u = _u_var->adGradSln(*_face_info);
+  ADReal velocity_gradient = grad_u(0) * grad_u(0);
+  if (_dim >= 2) {
+    auto grad_v = _v_var->adGradSln(*_face_info);
+    velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0)
+      + grad_v(1) * grad_v(1);
+    if (_dim >= 3) {
+      auto grad_w = _w_var->adGradSln(*_face_info);
+      velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2)
+        + grad_w(0) * grad_w(0) + grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
+    }
+  }
+  velocity_gradient = std::sqrt(velocity_gradient + offset);
 
   // Compute the eddy diffusivitiy
-  // TODO: Why are there nan's in the grad_u.norm() derivative terms?  In the
-  // meantime, just use the value.
-  ADReal grad_u_norm = _var.adGradSln(*_face_info).norm().value();
-  ADReal eddy_diff = grad_u_norm * mixing_len * mixing_len;
+  Real mixing_len = _mixing_len[_qp];
+  ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
 
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
