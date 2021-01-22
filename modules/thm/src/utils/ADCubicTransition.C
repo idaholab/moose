@@ -1,11 +1,12 @@
-#include "CubicTransition.h"
+#include "ADCubicTransition.h"
 #include "MooseError.h"
+#include "ADReal.h"
 
-#include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
+#include "DenseMatrix.h"
 
-CubicTransition::CubicTransition(const Real & x_center, const Real & transition_width)
-  : SmoothTransition(x_center, transition_width),
+ADCubicTransition::ADCubicTransition(const ADReal & x_center, const ADReal & transition_width)
+  : ADSmoothTransition(x_center, transition_width),
 
     _A(0.0),
     _B(0.0),
@@ -17,14 +18,14 @@ CubicTransition::CubicTransition(const Real & x_center, const Real & transition_
 }
 
 void
-CubicTransition::initialize(const Real & f1_end_value,
-                            const Real & f2_end_value,
-                            const Real & df1dx_end_value,
-                            const Real & df2dx_end_value)
+ADCubicTransition::initialize(const ADReal & f1_end_value,
+                              const ADReal & f2_end_value,
+                              const ADReal & df1dx_end_value,
+                              const ADReal & df2dx_end_value)
 {
   // compute cubic polynomial coefficients
 
-  DenseMatrix<Real> mat(4, 4);
+  DenseMatrix<ADReal> mat(4, 4);
 
   mat(0, 0) = std::pow(_x1, 3);
   mat(0, 1) = std::pow(_x1, 2);
@@ -46,13 +47,13 @@ CubicTransition::initialize(const Real & f1_end_value,
   mat(3, 2) = 1.0;
   mat(3, 3) = 0.0;
 
-  DenseVector<Real> rhs(4);
+  DenseVector<ADReal> rhs(4);
   rhs(0) = f1_end_value;
   rhs(1) = f2_end_value;
   rhs(2) = df1dx_end_value;
   rhs(3) = df2dx_end_value;
 
-  DenseVector<Real> coefs(4);
+  DenseVector<ADReal> coefs(4);
   mat.lu_solve(rhs, coefs);
 
   _A = coefs(0);
@@ -63,8 +64,8 @@ CubicTransition::initialize(const Real & f1_end_value,
   _initialized = true;
 }
 
-Real
-CubicTransition::value(const Real & x, const Real & f1, const Real & f2) const
+ADReal
+ADCubicTransition::value(const ADReal & x, const ADReal & f1, const ADReal & f2) const
 {
   mooseAssert(_initialized, "initialize() must be called.");
 
@@ -74,17 +75,4 @@ CubicTransition::value(const Real & x, const Real & f1, const Real & f2) const
     return f2;
   else
     return _A * std::pow(x, 3) + _B * std::pow(x, 2) + _C * x + _D;
-}
-
-Real
-CubicTransition::derivative(const Real & x, const Real & df1dx, const Real & df2dx) const
-{
-  mooseAssert(_initialized, "initialize() must be called.");
-
-  if (x <= _x1)
-    return df1dx;
-  else if (x >= _x2)
-    return df2dx;
-  else
-    return 3.0 * _A * std::pow(x, 2) + 2.0 * _B * x + _C;
 }
