@@ -57,5 +57,6 @@
     requirement = 'The system shall be able to model the effect of Reynolds stress on the momentum equations using a mixing length model'
     ad_indexing_type = 'global'
     design = 'navier_stokes/rans_theory.md'
+    issues = '#16794'
   []
 []

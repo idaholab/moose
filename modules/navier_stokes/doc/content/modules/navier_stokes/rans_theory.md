@@ -144,33 +144,7 @@ turbulent pressure instead of the thermodynamic pressure
   \label{eq:boussinesq2}
 \end{equation}
 
-Note that for the special case of spatially-constant viscosity, the viscous
-force contribution to the momentum equation can expressed in the simplified
-Laplacian form,
-\begin{equation}
-  \left( \nabla \cdot \bm{\tau} \right)_x = \mu \nabla^2 v_x
-\end{equation}
-
-Similarly, the divergence of the Reynolds stress is presently modeled in
-MOOSE in an analogous Laplacian form,
-\begin{equation}
-  -\nabla \cdot \rho \overline{ v_x' \bm{v}' } = \mu_t \nabla^2 \overline{v_x}
-\end{equation}
-This Laplacian model cannot be considered equivalent to the previous model which
-includes a $\nabla \bm{v} + \left( \nabla \bm{v} \right)^T$ term
-($\mu_t$ is far from constant in most problems of interest), neverthless, it can
-still be expected to provide useful results given a well-tuned model for
-$\mu_t$.
-
-Other velocity components can be substituted in for $v_x$ in the preceding
-analysis to find the Reynolds stress contribution for the conservation of linear
-momentum in the $y$- and $z$-directions,
-\begin{equation}
-  -\nabla \cdot \rho \overline{ v_y' \bm{v}' } = \mu_t \nabla^2 \overline{v_y}
-\end{equation}
-\begin{equation}
-  -\nabla \cdot \rho \overline{ v_z' \bm{v}' } = \mu_t \nabla^2 \overline{v_z}
-\end{equation}
+This stress model is implemented in the [INSFVMixingLengthReynoldsStress](source/fv/kernels/INSFVMixingLengthReynoldsStress.md) kernel.
 
 ## Turbulent energy transfer
 
