@@ -75,7 +75,6 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     DependencyResolverInterface(),
     Restartable(this, "MaterialBases"),
     MeshChangedInterface(parameters),
-
     // The false flag disables the automatic call buildOutputVariableHideList;
     // for MaterialBase objects the hide lists are handled by MaterialBaseOutputAction
     OutputInterface(parameters, false),
@@ -84,6 +83,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
                     parameters.get<THREAD_ID>("_tid"),
                     false),
     ElementIDInterface(this),
+    GeometricSearchInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),

@@ -32,6 +32,7 @@
 #include "MaterialData.h"
 #include "MathUtils.h"
 #include "Assembly.h"
+#include "GeometricSearchInterface.h"
 
 // forward declarations
 class MaterialBase;
@@ -61,7 +62,8 @@ class MaterialBase : public MooseObject,
                      public MeshChangedInterface,
                      public OutputInterface,
                      public RandomInterface,
-                     public ElementIDInterface
+                     public ElementIDInterface,
+                     protected GeometricSearchInterface
 {
 public:
   static InputParameters validParams();
