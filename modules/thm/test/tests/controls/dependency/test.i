@@ -65,7 +65,7 @@
 
 [ControlLogic]
   [./set_inlet_value_ctrl]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = inlet
     parameter = T0
     value = T_inlet_ctrl:value

@@ -1,10 +1,10 @@
-#include "SetRealValueControl.h"
+#include "SetComponentRealValueControl.h"
 #include "Function.h"
 
-registerMooseObject("THMApp", SetRealValueControl);
+registerMooseObject("THMApp", SetComponentRealValueControl);
 
 InputParameters
-SetRealValueControl::validParams()
+SetComponentRealValueControl::validParams()
 {
   InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("component", "The name of the component to be controlled.");
@@ -15,7 +15,7 @@ SetRealValueControl::validParams()
   return params;
 }
 
-SetRealValueControl::SetRealValueControl(const InputParameters & parameters)
+SetComponentRealValueControl::SetComponentRealValueControl(const InputParameters & parameters)
   : THMControl(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
@@ -25,7 +25,7 @@ SetRealValueControl::SetRealValueControl(const InputParameters & parameters)
 }
 
 void
-SetRealValueControl::execute()
+SetComponentRealValueControl::execute()
 {
   setControllableValueByName<Real>(_ctrl_param_name, _value);
 }

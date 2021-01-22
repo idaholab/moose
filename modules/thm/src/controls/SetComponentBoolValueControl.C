@@ -1,9 +1,9 @@
-#include "SetBoolValueControl.h"
+#include "SetComponentBoolValueControl.h"
 
-registerMooseObject("THMApp", SetBoolValueControl);
+registerMooseObject("THMApp", SetComponentBoolValueControl);
 
 InputParameters
-SetBoolValueControl::validParams()
+SetComponentBoolValueControl::validParams()
 {
   InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("component", "The name of the component to be controlled.");
@@ -15,7 +15,7 @@ SetBoolValueControl::validParams()
   return params;
 }
 
-SetBoolValueControl::SetBoolValueControl(const InputParameters & parameters)
+SetComponentBoolValueControl::SetComponentBoolValueControl(const InputParameters & parameters)
   : THMControl(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
@@ -25,7 +25,7 @@ SetBoolValueControl::SetBoolValueControl(const InputParameters & parameters)
 }
 
 void
-SetBoolValueControl::execute()
+SetComponentBoolValueControl::execute()
 {
   setControllableValueByName<bool>(_ctrl_param_name, _value);
 }

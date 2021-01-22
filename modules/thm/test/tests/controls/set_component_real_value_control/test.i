@@ -1,4 +1,4 @@
-# This is testing that the values set by SetRealValueControl are used.
+# This is testing that the values set by SetComponentRealValueControl are used.
 # Function T0_fn prescribes values for T0 at inlet. We output the function
 # values via a postprocessor `T_fn` and the inlet values via another
 # postprocessor `T_ctrl`. Those two values have to be equal.
@@ -63,7 +63,7 @@
   [../]
 
   [./set_inlet_value]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = inlet
     parameter = T0
     value = T_inlet_fn:value

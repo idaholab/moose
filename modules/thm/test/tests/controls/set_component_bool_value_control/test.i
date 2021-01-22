@@ -1,4 +1,4 @@
-# This is testing that the values set by SetBoolValueControl are used.
+# This is testing that the values set by SetComponentBoolValueControl are used.
 # The `trip_ctrl` component produces a boolean value that is set in the
 # `turbine` component to switch it on/off.
 
@@ -91,7 +91,7 @@
   [../]
 
   [./set_comp_value]
-    type = SetBoolValueControl
+    type = SetComponentBoolValueControl
     component = turbine
     parameter = on
     value = trip_ctrl:state
