@@ -249,16 +249,20 @@ class HTMLRenderer(Renderer):
         html.Tag(head, 'meta', charset="UTF-8", close=False)
         return html.Tag(root, 'body')
 
-    def addJavaScript(self, key, filename, location='_end', head=False, **kwargs):
+    def addJavaScript(self, name, filename, location='_end', head=False, puid=None, **kwargs):
         """Add a javascript dependency."""
+        key = (name, puid)
         if head:
-            self.__head_javascript.add(key, (filename, kwargs), location)
-        else:
+            if key not in self.__head_javascript:
+                self.__head_javascript.add(key, (filename, kwargs), location)
+        elif key not in self.__javascript:
             self.__javascript.add(key, (filename, kwargs), location)
 
-    def addCSS(self, key, filename, location='_end', **kwargs):
+    def addCSS(self, name, filename, location='_end', puid=None, **kwargs):
         """Add a CSS dependency."""
-        self.__css.add(key, (filename, kwargs), location)
+        key = (name, puid)
+        if key not in self.__css:
+            self.__css.add(key, (filename, kwargs), location)
 
     def postRender(self, page, result):
         """Insert CSS/JS dependencies into html node tree."""
@@ -284,14 +288,17 @@ class HTMLRenderer(Renderer):
             if key not in self.__css:
                 self.addCSS(key, css)
 
-        for name, kwargs in self.__css:
-            html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
+        for (key, puid), (name, kwargs) in self.__css.items():
+            if ((puid is None) or (puid == page.uid)):
+                html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
 
-        for name, kwargs in self.__head_javascript:
-            html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
+        for (key, puid), (name, kwargs)  in self.__head_javascript.items():
+            if ((puid is None) or (puid == page.uid)):
+                html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
 
-        for name, kwargs in self.__javascript:
-            html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
+        for (key, puid), (name, kwargs)  in self.__javascript.items():
+            if ((puid is None) or (puid == page.uid)):
+                html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
 
 class MaterializeRenderer(HTMLRenderer):
     """
