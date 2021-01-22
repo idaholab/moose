@@ -254,7 +254,7 @@ rawValueEqualityHelper(std::vector<std::vector<T1>> & out, const std::vector<std
   for (MooseIndex(in) i = 0; i < in.size(); ++i)
   {
     out[i].resize(in[i].size());
-    for (MooseIndex(in[i].size()) j = 0; j < in[i].size(); ++j)
+    for (MooseIndex(in[i]) j = 0; j < in[i].size(); ++j)
       out[i][j] = MetaPhysicL::raw_value(in[i][j]);
   }
 }

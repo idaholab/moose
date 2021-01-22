@@ -138,10 +138,27 @@ public:
    * @param elem_to Element to copy data to
    * @param elem_from Element to copy data from
    * @param side Side number (elemental material properties have this equal to zero)
+   * @param n_qpoints number of quadrature points to work with
    */
   void copy(MaterialData & material_data,
             const Elem & elem_to,
             const Elem & elem_from,
+            unsigned int side,
+            unsigned int n_qpoints);
+
+  /**
+   * Copy material properties from elem_from to elem_to.
+   * Similar to the other method but using pointers to elements instead of references.
+   *
+   * @param material_data MaterialData object to work with
+   * @param elem_to Pointer to the element to copy data to
+   * @param elem_from Pointer to the element to copy data from
+   * @param side Side number (elemental material properties have this equal to zero)
+   * @param n_qpoints number of quadrature points to work with
+   */
+  void copy(MaterialData & material_data,
+            const Elem * elem_to,
+            const Elem * elem_from,
             unsigned int side,
             unsigned int n_qpoints);
 
@@ -282,7 +299,7 @@ private:
   /// Initializes hashmap entries for element and side to proper qpoint and
   /// property count sizes.
   void initProps(MaterialData & material_data,
-                 const Elem & elem,
+                 const Elem * elem,
                  unsigned int side,
                  unsigned int n_qpoints);
 

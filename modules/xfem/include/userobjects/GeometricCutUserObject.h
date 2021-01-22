@@ -182,6 +182,20 @@ public:
    */
   bool shouldHealMesh() const { return _heal_always; };
 
+  /**
+   * Get an unsigned integer telling which side the node belongs to relative to the cut.
+   * The returned ID contains no physical meaning, but should be consistent through out the
+   * simulation.
+   * @param node Pointer to the node
+   * @return an unsigned int indicating the side
+   */
+  virtual unsigned int getCutSideID(const Node * /*node*/) const
+  {
+    mooseError("Objects that inherit from GeometricCutUserObject should override the "
+               "getCutSideID method");
+    return 0;
+  }
+
 protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
