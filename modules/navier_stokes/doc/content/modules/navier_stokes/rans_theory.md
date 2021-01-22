@@ -304,17 +304,30 @@ where $d$ is the wall-distance and $k$ is known as the von Kármán constant.  A
 von Kármán of $k = 0.42$ is often used for the near-wall region
 [!citep](todreas2011_ch10).
 
-This mixing length is implemented in the [WallDistanceMixingLengthAux](source/auxkernels/WallDistanceMixingLengthAux.md) auxilary kernel.
+This mixing length is implemented in the [WallDistanceMixingLengthAux](source/auxkernels/WallDistanceMixingLengthAux.md)
+auxiliary kernel. Note that the wall-distance calculation can be expensive for
+large meshes. If the mesh is constant in time, this cost can be amortized by
+setting the `execute_on` parameter to `initial` so that the wall distance is
+computed only once at the beginning of the simulation.
 
 ## Tuning the mixing length
 
 In practice, the mixing length distribution is highly problem-dependent. There
-are also known defficiencies with the mixing length model itself. For example,
+are also known deficiencies with the mixing length model itself. For example,
 this model predicts no turbulent mixing where the velocity gradient is zero.
 
 Consequently, we recommend that users compare results generated with this model
 against reference solutions (either from experiment or from software with higher
 fidelity models). These comparisons can also be used to tune an appropriate
 mixing length model to the system of interest.
+
+The examples directory includes a simple circular pipe problem and shows how $k$
+can be tuned so that the simulated pressure drop matches a correlation. Also
+note that other MOOSE auxkernels can be used to implement different mixing
+length models. For example, if the near-wall region and the core region of the
+pipe are assigned to different mesh blocks, then a `WallDistanceMixingLengthAux`
+can be combined with a `ConstantAux` to model a mixing length that is
+proportional to the wall-distance in the near-wall region and constant
+elsewhere.
 
 !bibtex bibliography
