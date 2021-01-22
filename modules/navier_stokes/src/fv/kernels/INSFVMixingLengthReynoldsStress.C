@@ -7,12 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVRANSForce.h"
+#include "INSFVMixingLengthReynoldsStress.h"
+#include "INSFVVelocityVariable.h"
 
-registerMooseObject("NavierStokesApp", INSFVRANSForce);
+registerMooseObject("NavierStokesApp", INSFVMixingLengthReynoldsStress);
 
 InputParameters
-INSFVRANSForce::validParams()
+INSFVMixingLengthReynoldsStress::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes the force due to the Reynolds stress "
@@ -31,7 +32,7 @@ INSFVRANSForce::validParams()
   return params;
 }
 
-INSFVRANSForce::INSFVRANSForce(const InputParameters & params)
+INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputParameters & params)
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
@@ -63,7 +64,7 @@ INSFVRANSForce::INSFVRANSForce(const InputParameters & params)
 }
 
 ADReal
-INSFVRANSForce::computeQpResidual()
+INSFVMixingLengthReynoldsStress::computeQpResidual()
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 

@@ -11,12 +11,12 @@
 
 #include "FVFluxKernel.h"
 
-class INSFVRANSForce : public FVFluxKernel
+class INSFVMixingLengthReynoldsStress : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
 
-  INSFVRANSForce(const InputParameters & params);
+  INSFVMixingLengthReynoldsStress(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
