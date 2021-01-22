@@ -1,10 +1,10 @@
-#include "TimeFunctionControl.h"
+#include "TimeFunctionComponentControl.h"
 #include "Function.h"
 
-registerMooseObject("THMApp", TimeFunctionControl);
+registerMooseObject("THMApp", TimeFunctionComponentControl);
 
 InputParameters
-TimeFunctionControl::validParams()
+TimeFunctionComponentControl::validParams()
 {
   InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("component",
@@ -16,7 +16,7 @@ TimeFunctionControl::validParams()
   return params;
 }
 
-TimeFunctionControl::TimeFunctionControl(const InputParameters & parameters)
+TimeFunctionComponentControl::TimeFunctionComponentControl(const InputParameters & parameters)
   : THMControl(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
@@ -26,7 +26,7 @@ TimeFunctionControl::TimeFunctionControl(const InputParameters & parameters)
 }
 
 void
-TimeFunctionControl::execute()
+TimeFunctionComponentControl::execute()
 {
   Real value = _function.value(_t, Point());
   setControllableValueByName<Real>(_ctrl_param_name, value);

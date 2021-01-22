@@ -70,14 +70,14 @@
 
 [ControlLogic]
   [./inlet_m_dot_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = m_dot
     function = inlet_m_dot_fn
   [../]
 
   [./inlet_T_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = T
     function = inlet_T_fn

@@ -52,7 +52,7 @@
 
 [ControlLogic]
   [./p0_fn_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = p0
     function = p0_fn
