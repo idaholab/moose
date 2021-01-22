@@ -21,6 +21,19 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// the dimension of the simulation
+  const unsigned int _dim;
+
+  /// index x|y|z
+  const unsigned int _axis_index;
+
+  /// x-velocity
+  const INSFVVelocityVariable * const _u_var;
+  /// y-velocity
+  const INSFVVelocityVariable * const _v_var;
+  /// z-velocity
+  const INSFVVelocityVariable * const _w_var;
+
   /// Density
   const Real & _rho;
 

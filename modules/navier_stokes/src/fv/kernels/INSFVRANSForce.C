@@ -17,17 +17,49 @@ INSFVRANSForce::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes the force due to the Reynolds stress "
     "term in the incompressible Reynolds-averaged Navier-Stokes equations.");
+  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
+  params.addCoupledVar("v", "The velocity in the y direction.");
+  params.addCoupledVar("w", "The velocity in the z direction.");
   params.addParam<Real>("rho", "fluid density");
   params.addRequiredCoupledVar("mixing_length", "Turbulent eddy mixing length.");
+  MooseEnum momentum_component("x=0 y=1 z=2", "x");
+  params.addRequiredParam<MooseEnum>(
+      "momentum_component",
+      momentum_component,
+      "The component of the momentum equation that this kernel applies to.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 INSFVRANSForce::INSFVRANSForce(const InputParameters & params)
   : FVFluxKernel(params),
+    _dim(_subproblem.mesh().dimension()),
+    _axis_index(getParam<MooseEnum>("momentum_component")),
+    _u_var(dynamic_cast<const INSFVVelocityVariable *>(
+        &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("u").front()))),
+    _v_var(params.isParamValid("v")
+               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
+                     _tid, params.get<std::vector<VariableName>>("v").front()))
+               : nullptr),
+    _w_var(params.isParamValid("w")
+               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
+                     _tid, params.get<std::vector<VariableName>>("w").front()))
+               : nullptr),
     _rho(getParam<Real>("rho")),
     _mixing_len(coupledValue("mixing_length"))
 {
+  if (!_u_var)
+    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
+
+  if (_dim >= 2 && !_v_var)
+    paramError("v",
+               "In two or more dimensions, the v velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
+
+  if (_dim >= 3 && !_w_var)
+    paramError("w",
+               "In three-dimensions, the w velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
 }
 
 ADReal
@@ -41,7 +73,15 @@ INSFVRANSForce::computeQpResidual()
   ADReal grad_u_norm = _var.adGradSln(*_face_info).norm().value();
   ADReal eddy_diff = grad_u_norm * mixing_len * mixing_len;
 
+  // Compute the dot product of the strain rate tensor and the normal vector
+  // aka (grad_v + grad_v^T) * n_hat
+  ADReal norm_strain_rate = gradUDotNormal();
+  norm_strain_rate += _u_var->adGradSln(*_face_info)(_axis_index) * _normal(0);
+  norm_strain_rate += _dim >= 2 ?
+    _v_var->adGradSln(*_face_info)(_axis_index) * _normal(1) : 0;
+  norm_strain_rate += _dim >= 3 ?
+    _w_var->adGradSln(*_face_info)(_axis_index) * _normal(2) : 0;
+
   // Return the turbulent stress contribution to the momentum equation
-  auto dudn = gradUDotNormal();
-  return -1 * _rho * eddy_diff * dudn;
+  return -1 * _rho * eddy_diff * norm_strain_rate;
 }
