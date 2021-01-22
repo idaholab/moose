@@ -189,7 +189,7 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
   const Real bias = NormalDistribution::quantile(count / this->_replicates, 0, 1);
 
   // Compute Acceleration, Efron and Tibshirani (2003), Eq. 14.15, p. 186
-  const Real acc = acceleration(data, is_distributed);
+  const Real acc = data.empty() ? 0. : acceleration(data, is_distributed);
 
   // Compute intervals, Efron and Tibshirani (2003), Eq. 14.10, p. 185
   std::vector<OutType> output;
@@ -206,7 +206,7 @@ BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data,
 }
 
 template <typename InType, typename OutType>
-OutType
+Real
 BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
                                                         const bool is_distributed) const
 {
@@ -226,7 +226,7 @@ BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
   }
 
   // Compute jackknife sum, Ch. 11, Eq. 11.4, p. 141
-  OutType theta_dot = std::accumulate(theta_i.begin(), theta_i.end(), 0.);
+  Real theta_dot = std::accumulate(theta_i.begin(), theta_i.end(), 0.);
   theta_dot /= count;
 
   // Acceleration, Ch. 14, Eq. 14.15, p. 185

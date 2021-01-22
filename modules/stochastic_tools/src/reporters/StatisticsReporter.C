@@ -91,9 +91,9 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     for (const auto & r_name : reporter_names)
     {
       if (hasReporterValueByName<std::vector<Real>>(r_name))
-        declareValueHelper<std::vector<Real>, Real, Real>(r_name);
+        declareValueHelper<std::vector<Real>, Real>(r_name);
       else if (hasReporterValueByName<std::vector<int>>(r_name))
-        declareValueHelper<std::vector<int>, Real, Real>(r_name);
+        declareValueHelper<std::vector<int>, Real>(r_name);
       else
         unsupported_types.emplace_back(r_name.getCombinedName());
     }
@@ -117,7 +117,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
       for (const auto & vec_name : vpp_vectors)
       {
         ReporterName r_name(vpp_name, vec_name);
-        declareValueHelper<std::vector<Real>, Real, Real>(r_name);
+        declareValueHelper<std::vector<Real>, Real>(r_name);
       }
     }
   }
@@ -139,3 +139,36 @@ StatisticsReporter::store(nlohmann::json & json) const
                                     {"replicates", _ci_replicates},
                                     {"seed", _ci_seed}};
 }
+
+template <typename InType, typename OutType>
+void
+StatisticsReporter::declareValueHelper(const ReporterName & r_name)
+{
+  const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
+  const auto & data = getReporterValueByName<InType>(r_name);
+  for (const auto & item : _compute_stats)
+  {
+    const std::string s_name =
+        r_name.getObjectName() + "_" + r_name.getValueName() + "_" + item.name();
+    if (_ci_method.isValid())
+      declareValueByName<std::pair<OutType, std::vector<OutType>>,
+                         ReporterStatisticsContext<InType, OutType>>(s_name,
+                                                                     REPORTER_MODE_ROOT,
+                                                                     data,
+                                                                     mode,
+                                                                     item,
+                                                                     _ci_method,
+                                                                     _ci_levels,
+                                                                     _ci_replicates,
+                                                                     _ci_seed);
+    else
+      declareValueByName<std::pair<OutType, std::vector<OutType>>,
+                         ReporterStatisticsContext<InType, OutType>>(
+          s_name, REPORTER_MODE_ROOT, data, mode, item);
+  }
+}
+
+template void
+StatisticsReporter::declareValueHelper<std::vector<Real>, Real>(const ReporterName & r_name);
+template void
+StatisticsReporter::declareValueHelper<std::vector<int>, Real>(const ReporterName & r_name);

@@ -89,7 +89,7 @@ public:
 
 private:
   // Compute the acceleration, see Efron and Tibshirani (2003), Ch. 14, Eq. 14.15, p 186.
-  OutType acceleration(const InType &, const bool) const;
+  Real acceleration(const InType &, const bool) const;
 };
 
 template <typename InType, typename OutType>

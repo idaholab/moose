@@ -91,12 +91,16 @@ template <typename InType, typename OutType>
 void
 ReporterStatisticsContext<InType, OutType>::finalize()
 {
-  this->_state.value().first = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
-  ReporterContext<std::pair<OutType, std::vector<OutType>>>::finalize();
+  if (_data_mode == REPORTER_MODE_DISTRIBUTED || this->processor_id() == 0)
+  {
+    this->_state.value().first = _calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
 
-  if (_ci_calc_ptr)
-    this->_state.value().second =
-        _ci_calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
+    if (_ci_calc_ptr)
+      this->_state.value().second =
+          _ci_calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
+  }
+
+  ReporterContext<std::pair<OutType, std::vector<OutType>>>::finalize();
 }
 
 template <typename InType, typename OutType>
@@ -147,34 +151,6 @@ private:
    *
    * @param r_name ReporterName of the data from which the statistics will be computed
    */
-  template <typename InType, typename OutType, typename StatType>
+  template <typename InType, typename OutType>
   void declareValueHelper(const ReporterName & r_name);
 };
-
-template <typename InType, typename OutType, typename StatType>
-void
-StatisticsReporter::declareValueHelper(const ReporterName & r_name)
-{
-  const auto & mode = _fe_problem.getReporterData().getReporterMode(r_name);
-  const auto & data = getReporterValueByName<InType>(r_name);
-  for (const auto & item : _compute_stats)
-  {
-    const std::string s_name =
-        r_name.getObjectName() + "_" + r_name.getValueName() + "_" + item.name();
-    if (_ci_method.isValid())
-      declareValueByName<std::pair<OutType, std::vector<OutType>>,
-                         ReporterStatisticsContext<InType, OutType>>(s_name,
-                                                                     REPORTER_MODE_ROOT,
-                                                                     data,
-                                                                     mode,
-                                                                     item,
-                                                                     _ci_method,
-                                                                     _ci_levels,
-                                                                     _ci_replicates,
-                                                                     _ci_seed);
-    else
-      declareValueByName<std::pair<OutType, std::vector<OutType>>,
-                         ReporterStatisticsContext<InType, OutType>>(
-          s_name, REPORTER_MODE_ROOT, data, mode, item);
-  }
-}

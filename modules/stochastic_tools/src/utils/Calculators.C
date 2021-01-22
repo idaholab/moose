@@ -31,17 +31,14 @@ template <typename InType, typename OutType>
 OutType
 Mean<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_count, local_sum;
-  local_count = data.size();
-  local_sum = std::accumulate(data.begin(), data.end(), 0.);
-
+  auto local_count = data.size();
+  auto local_sum = std::accumulate(data.begin(), data.end(), 0.);
   if (is_distributed)
   {
     this->_communicator.sum(local_count);
     this->_communicator.sum(local_sum);
   }
-
-  return local_sum / local_count;
+  return data.empty() ? 0. : local_sum / local_count;
 }
 
 // MIN /////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,8 +46,8 @@ template <typename InType, typename OutType>
 OutType
 Min<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_min;
-  local_min = *std::min_element(data.begin(), data.end());
+  auto local_min = data.empty() ? std::numeric_limits<OutType>::max()
+                                : *std::min_element(data.begin(), data.end());
   if (is_distributed)
     this->_communicator.min(local_min);
   return local_min;
@@ -61,8 +58,8 @@ template <typename InType, typename OutType>
 OutType
 Max<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_max;
-  local_max = *std::max_element(data.begin(), data.end());
+  auto local_max = data.empty() ? std::numeric_limits<OutType>::min()
+                                : *std::max_element(data.begin(), data.end());
   if (is_distributed)
     this->_communicator.max(local_max);
   return local_max;
@@ -73,8 +70,7 @@ template <typename InType, typename OutType>
 OutType
 Sum<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_sum = 0.;
-  local_sum = std::accumulate(data.begin(), data.end(), 0.);
+  auto local_sum = std::accumulate(data.begin(), data.end(), 0.);
   if (is_distributed)
     this->_communicator.sum(local_sum);
   return local_sum;
@@ -85,8 +81,8 @@ template <typename InType, typename OutType>
 OutType
 StdDev<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real count = data.size();
-  Real sum = std::accumulate(data.begin(), data.end(), 0.);
+  auto count = data.size();
+  auto sum = std::accumulate(data.begin(), data.end(), 0.);
 
   if (is_distributed)
   {
@@ -94,8 +90,8 @@ StdDev<InType, OutType>::compute(const InType & data, bool is_distributed) const
     this->_communicator.sum(sum);
   }
 
-  Real mean = sum / count;
-  Real sum_of_squares = std::accumulate(
+  auto mean = sum / count;
+  auto sum_of_squares = std::accumulate(
       data.begin(), data.end(), 0., [&mean](Real running_value, Real current_value) {
         return running_value + std::pow(current_value - mean, 2);
       });
@@ -110,7 +106,7 @@ template <typename InType, typename OutType>
 OutType
 StdErr<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real count = data.size();
+  auto count = data.size();
   if (is_distributed)
     this->_communicator.sum(count);
   return StdDev<InType, OutType>::compute(data, is_distributed) / std::sqrt(count);
@@ -121,17 +117,15 @@ template <typename InType, typename OutType>
 OutType
 Ratio<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_max = std::numeric_limits<Real>::min();
-  Real local_min = std::numeric_limits<Real>::max();
-  local_min = *std::min_element(data.begin(), data.end());
-  local_max = *std::max_element(data.begin(), data.end());
-
+  auto local_max = data.empty() ? std::numeric_limits<OutType>::min()
+                                : *std::max_element(data.begin(), data.end());
+  auto local_min = data.empty() ? std::numeric_limits<OutType>::max()
+                                : *std::min_element(data.begin(), data.end());
   if (is_distributed)
   {
     this->_communicator.min(local_min);
     this->_communicator.max(local_max);
   }
-
   return local_min != 0. ? local_max / local_min : 0.;
 }
 
@@ -140,8 +134,8 @@ template <typename InType, typename OutType>
 OutType
 L2Norm<InType, OutType>::compute(const InType & data, bool is_distributed) const
 {
-  Real local_sum =
-      std::accumulate(data.begin(), data.end(), 0., [](Real running_value, Real current_value) {
+  auto local_sum = std::accumulate(
+      data.begin(), data.end(), 0., [](OutType running_value, OutType current_value) {
         return running_value + std::pow(current_value, 2);
       });
 
