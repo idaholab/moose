@@ -22,7 +22,7 @@ PINSFVMassTimeDerivative::validParams()
       "This kernel is not required if the porosity is constant in time.");
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
-  params.addRequiredCoupledVar("porosity", "Porosity variable");
+  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   return params;
 }
