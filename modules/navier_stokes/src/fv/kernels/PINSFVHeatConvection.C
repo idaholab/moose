@@ -1,4 +1,4 @@
-#include "PINSFVEnergyConvection.h"
+#include "PINSFVHeatConvection.h"
 
 registerMooseObject("MooseApp", PINSFVEnergyConvection);
 
