@@ -38,6 +38,13 @@ public:
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
+  /**
+   * If the levelset value is positive, return 1, otherwise return 0.
+   * @param node Pointer to the node
+   * @return an unsigned int indicating the side
+   */
+  virtual unsigned int getCutSideID(const Node * node) const override;
+
 protected:
   /// The variable number of the level set variable we using to define the cuts
   const unsigned int _level_set_var_number;
