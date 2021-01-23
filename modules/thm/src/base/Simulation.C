@@ -13,6 +13,12 @@
 #include "TerminateControl.h"
 #include "THMMesh.h"
 #include "RelationshipManager.h"
+#include "NonlinearSystemBase.h"
+#include "TimeIntegrator.h"
+#include "ExplicitTimeIntegrator.h"
+#include "ExplicitEuler.h"
+#include "ExplicitRK2.h"
+#include "ExplicitTVDRK2.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -601,6 +607,41 @@ Simulation::setupMesh()
     return;
 
   setupCoordinateSystem();
+}
+
+void
+Simulation::couplingMatrixIntegrityCheck() const
+{
+  if (!_fe_problem.shouldSolve())
+    return;
+
+  const TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
+  // Yes, this is horrible. Don't ask why...
+  if ((dynamic_cast<const ExplicitTimeIntegrator *>(ti) != nullptr) ||
+      (dynamic_cast<const ExplicitEuler *>(ti) != nullptr) ||
+      (dynamic_cast<const ExplicitRK2 *>(ti) != nullptr) ||
+      (dynamic_cast<const ExplicitTVDRK2 *>(ti) != nullptr))
+    return;
+
+  const CouplingMatrix * cm = _fe_problem.couplingMatrix();
+  if (cm == nullptr)
+    mooseError("Coupling matrix does not exists. Something really bad happened.");
+
+  bool full = true;
+  for (unsigned int i = 0; i < cm->size(); i++)
+    for (unsigned int j = 0; j < cm->size(); j++)
+      full &= (*cm)(i, j);
+
+  if (!full)
+    mooseError(
+        "Single matrix preconditioning with full coupling is required to run. Please, check that "
+        "your input file has the following preconditioning block:\n\n"
+        "[Preconditioning]\n"
+        "  [pc]\n"
+        "    type = SMP\n"
+        "    full = true\n"
+        "  []\n"
+        "[].\n");
 }
 
 void

@@ -43,6 +43,8 @@
     input = 'sod_shock_tube.i'
     exodiff = 'sod_shock_tube_be.e'
     cli_args = '
+      Preconditioning/pc/type=SMP
+      Preconditioning/pc/full=true
       Executioner/scheme=implicit-euler
       Executioner/solve_type=PJFNK
       Executioner/num_steps=5
