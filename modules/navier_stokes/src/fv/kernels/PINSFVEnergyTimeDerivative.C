@@ -40,8 +40,8 @@ PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & p
 ADReal
 PINSFVEnergyTimeDerivative::computeQpResidual()
 {
-  //FIXME Neglecting time derivative of _cp
-  //FIXME Use VarMat instead?
+  // FIXME Neglecting time derivative of _cp
+  // FIXME Possibly use a VarMat instead of querying variables as parameters
   return (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * _rho * _cp[_qp] * FVTimeKernel::computeQpResidual() +
      (_is_solid ? - _eps_dot[_qp] : _eps_dot[_qp]) * _rho * _cp[_qp] * _u[_qp];
 }
