@@ -99,11 +99,6 @@ class TestStorage(unittest.TestCase):
         self.assertIn(1, storage)
         self.assertIn(2, storage)
 
-        # wrong type
-        with self.assertRaises(TypeError) as cm:
-            1.2 in storage
-        self.assertIn("The supplied type must be 'int'", str(cm.exception))
-
         # not in
         self.assertNotIn('five', storage)
         self.assertNotIn(42, storage)

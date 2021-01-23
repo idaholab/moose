@@ -105,11 +105,7 @@ class Storage(object):
         """
         if isinstance(key, int):
             return key < len(self._keys)
-        elif isinstance(key, str):
-            return key in self._keys
-
-        raise TypeError("The supplied type must be 'int' or 'str' but {} given." \
-                        .format(type(key).__name__))
+        return key in self._keys
 
     def __iter__(self):
         """
@@ -123,3 +119,10 @@ class Storage(object):
         Return the number of items stored.
         """
         return len(self._keys)
+
+    def items(self):
+        """
+        Return key, value iterator items.
+        """
+        for key, obj in zip(self._keys, self._objects):
+            yield key, obj

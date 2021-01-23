@@ -10,6 +10,7 @@ import sys
 import re
 import uuid
 import moosetree
+from .. import common
 from ..base import components, renderers
 from ..tree import tokens, html, latex
 from . import command, core, floats
@@ -53,16 +54,7 @@ class KatexExtension(command.CommandExtension):
         renderer.add('LatexInlineEquation', RenderLatexEquation())
         renderer.add('ShortcutLink', RenderEquationLink())
 
-        if isinstance(renderer, renderers.HTMLRenderer):
-            renderer.addCSS('katex', "contrib/katex/katex.min.css")
-            renderer.addCSS('katex_moose', "css/katex_moose.css")
-            renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
-
-            if self.get('macros', None):
-                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
-                self.macros = '{' + mc + '}'
-
-        elif isinstance(renderer, renderers.LatexRenderer):
+        if isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
             if self.get('macros', None):
                 for k, v in self.get('macros').items():
@@ -85,6 +77,17 @@ class KatexExtension(command.CommandExtension):
                                   link='#{}'.format(node['bookmark']))
 
         page['labels'] = labels
+
+        if common.has_tokens(ast, 'LatexBlockEquation', 'LatexInlineEquation'):
+            renderer = self.translator.renderer
+            if isinstance(renderer, renderers.HTMLRenderer):
+                renderer.addCSS('katex', "contrib/katex/katex.min.css", puid=page.uid)
+                renderer.addCSS('katex_moose', "css/katex_moose.css", puid=page.uid)
+                renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True, puid=page.uid)
+
+                if self.get('macros', None):
+                    mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
+                    self.macros = '{' + mc + '}'
 
 class KatexBlockEquationCommand(command.CommandComponent):
     COMMAND = 'equation'
