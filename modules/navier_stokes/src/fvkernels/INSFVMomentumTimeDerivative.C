@@ -18,7 +18,7 @@ INSFVMomentumTimeDerivative::validParams()
 {
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
-      "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
+      "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
   return params;
