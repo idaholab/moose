@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMassAdvection.h"
+#include "PINSFVVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMassAdvection);
 
@@ -22,5 +23,7 @@ PINSFVMassAdvection::validParams()
 PINSFVMassAdvection::PINSFVMassAdvection(const InputParameters & params)
   : INSFVMassAdvection(params)
 {
-  //TODO Check variable type
+  if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
+    mooseError("PINSFVMassAdvection may only be used with a superficial advective velocity, "
+        "of variable type PINSFVVelocityVariable.");
 }
