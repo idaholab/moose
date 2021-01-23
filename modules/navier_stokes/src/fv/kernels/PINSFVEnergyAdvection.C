@@ -30,4 +30,5 @@ PINSFVEnergyAdvection::PINSFVEnergyAdvection(const InputParameters & params)
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  //TODO Add check that velocity is superficial velocity
 }

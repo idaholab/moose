@@ -25,9 +25,9 @@ protected:
   /// the heat conductivity
   const ADMaterialProperty<Real> & _cp;
   /// the porosity
-  const ADVariableValue & _eps;
+  const VariableValue & _eps;
   /// the time derivative of the porosity
-  const ADVariableValue & _eps_dot;
+  const VariableValue & _eps_dot;
   /// whether this kernel is being used for a solid or a fluid temperature
   const bool _is_solid;
 };
