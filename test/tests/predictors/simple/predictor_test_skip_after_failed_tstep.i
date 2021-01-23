@@ -1,4 +1,4 @@
-# The purpose of this test is to test the simple predictor. 
+# The purpose of this test is to test the simple predictor.
 # The test is adjusted to produce a failed time step.
 # The predictor option 'skip_after_failed_timestep' should suppress a prediction
 # after the failed time step.
