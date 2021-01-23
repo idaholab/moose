@@ -8,8 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumTimeDerivative.h"
-
-#include "NS.h"
+#include "PINSFVVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumTimeDerivative);
 
@@ -25,5 +24,7 @@ PINSFVMomentumTimeDerivative::validParams()
 PINSFVMomentumTimeDerivative::PINSFVMomentumTimeDerivative(const InputParameters & params)
   : INSFVMomentumTimeDerivative(params)
 {
-  //TODO Check the variable type
+  if (!dynamic_cast<PINSFVVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumTimeDerivative may only be used with a superficial velocity, "
+        "of variable type PINSFVVelocityVariable.");
 }
