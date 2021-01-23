@@ -13,14 +13,6 @@
   [../]
 []
 
-[Functions]
-  [./right_bc]
-    # Flux BC for computing the analytical solution in the postprocessor
-    type = ParsedFunction
-    value = exp(y)+1
-  [../]
-[]
-
 [FVKernels]
   [./diff]
     type = FVDiffusion
@@ -37,23 +29,23 @@
     value = 0
   [../]
   [./right]
-    type = FVDiffusionFunctionBC
+    type = FVDirichletBC
     variable = u
     boundary = right
-    function = right_bc
+    value = 1
   [../]
 []
 
 [Materials]
   [./mat_props]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     block = 0
     prop_names = diffusivity
     prop_values = 2
   [../]
 
   [./mat_props_bnd]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     boundary = right
     prop_names = diffusivity
     prop_values = 1
@@ -62,12 +54,11 @@
 
 [Postprocessors]
   [./avg_flux_right]
-    # Computes -\int(exp(y)+1) from 0 to 1 which is -2.718281828
+    # Computes flux integral on the boundary, which should be -1
     type = SideFluxAverage
     variable = u
     boundary = right
     diffusivity = diffusivity
-    fv = true
   [../]
 []
 
@@ -76,6 +67,10 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Problem]
+  kernel_coverage_check = false
 []
 
 [Outputs]

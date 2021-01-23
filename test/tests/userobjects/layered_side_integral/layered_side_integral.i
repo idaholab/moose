@@ -8,9 +8,6 @@
 
 [Variables]
   [./u]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
   [../]
 []
 
@@ -21,23 +18,22 @@
   [../]
 []
 
-[FVKernels]
+[Kernels]
   [./diff]
-    type = FVDiffusion
+    type = Diffusion
     variable = u
-    coeff = 1
   [../]
 []
 
-[FVBCs]
+[BCs]
   [./bottom]
-    type = FVDirichletBC
+    type = DirichletBC
     variable = u
     boundary = bottom
     value = 0
   [../]
   [./top]
-    type = FVDirichletBC
+    type = DirichletBC
     variable = u
     boundary = top
     value = 1
@@ -64,15 +60,10 @@
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Executioner]
   type = Steady
 []
 
 [Outputs]
-  file_base = fv_out
   exodus = true
 []

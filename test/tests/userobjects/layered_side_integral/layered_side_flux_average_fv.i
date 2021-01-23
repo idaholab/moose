@@ -55,7 +55,7 @@
 
 [Materials]
   [./gcm]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_values = 2
     prop_names = diffusivity
     boundary = 'right top'
@@ -71,12 +71,15 @@
     variable = u
     execute_on = linear
     boundary = top
-    fv = true
   [../]
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Problem]
+  kernel_coverage_check = false
 []
 
 [Outputs]

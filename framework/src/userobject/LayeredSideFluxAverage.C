@@ -17,6 +17,8 @@ InputParameters
 LayeredSideFluxAverage::validParams()
 {
   InputParameters params = LayeredSideIntegral::validParams();
+  params.addClassDescription("Computes the diffusive flux of a variable on layers alongside "
+                             "a boundary.");
   params.addRequiredParam<std::string>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");

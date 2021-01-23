@@ -52,7 +52,7 @@
       csvdiff = diverging_INSFV_tri_xy.csv
       abs_zero = 1e-8
       detail = 'with a triangular mesh in XY geometry.'
-      cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy'"
+      cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy' GlobalParams/two_term_boundary_expansion=false"
       ad_indexing_type = 'global'
     []
     [fv_quad_xy_rc]
