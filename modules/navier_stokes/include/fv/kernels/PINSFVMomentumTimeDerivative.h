@@ -9,14 +9,11 @@
 
 #pragma once
 
-#include "INSFVMassAdvection.h"
+#include "INSFVMomentumTimeDerivative.h"
 
-/**
- * A flux kernel transporting mass in porous media across cell faces
- */
-class PINSFVMassAdvection : public INSFVMassAdvection
+class PINSFVMomentumTimeDerivative : public INSFVMomentumTimeDerivative
 {
 public:
   static InputParameters validParams();
-  PINSFVMassAdvection(const InputParameters & params);
+  PINSFVMomentumTimeDerivative(const InputParameters & params);
 };
