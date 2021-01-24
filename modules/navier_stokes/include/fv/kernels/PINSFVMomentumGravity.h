@@ -9,17 +9,16 @@
 
 #pragma once
 
-#include "INSFVBoussinesqBodyForce.h"
+#include "INSFVGravityForce.h"
 
 /**
- * Imposes a Boussinesq force on the momentum equation. Useful for modeling natural convection
- * within an incompressible Navier-Stokes approximation in porous media
+ * Imposes a gravitational force on the momentum equation in porous media.
  */
-class PINSFVBoussinesqBodyForce : public INSFVBoussinesqBodyForce
+class PINSFVMomentumGravity : public INSFVGravityForce
 {
 public:
   static InputParameters validParams();
-  PINSFVBoussinesqBodyForce(const InputParameters & params);
+  PINSFVMomentumGravity(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVBoussinesqBodyForce.h"
+#include "PINSFVMomentumBoussinesq.h"
 
-registerMooseObject("NavierStokesApp", PINSFVBoussinesqBodyForce);
+registerMooseObject("NavierStokesApp", PINSFVMomentumBoussinesq);
 
 InputParameters
-PINSFVBoussinesqBodyForce::validParams()
+PINSFVMomentumBoussinesq::validParams()
 {
   InputParameters params = INSFVBoussinesqBodyForce::validParams();
   params.addClassDescription("Computes a body force for natural convection buoyancy in porous media.");
@@ -21,13 +21,13 @@ PINSFVBoussinesqBodyForce::validParams()
   return params;
 }
 
-PINSFVBoussinesqBodyForce::PINSFVBoussinesqBodyForce(const InputParameters & params)
+PINSFVMomentumBoussinesq::PINSFVMomentumBoussinesq(const InputParameters & params)
   : INSFVBoussinesqBodyForce(params), _eps(coupledValue("porosity"))
 {
 }
 
 ADReal
-PINSFVBoussinesqBodyForce::computeQpResidual()
+PINSFVMomentumBoussinesq::computeQpResidual()
 {
   return _eps[_qp] * INSFVBoussinesqBodyForce::computeQpResidual();
 }
