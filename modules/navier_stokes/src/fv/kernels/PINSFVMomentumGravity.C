@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVGravityForce.h"
+#include "PINSFVMomentumGravity.h"
 
-registerMooseObject("NavierStokesApp", PINSFVGravityForce);
+registerMooseObject("NavierStokesApp", PINSFVMomentumGravity);
 
 InputParameters
-PINSFVGravityForce::validParams()
+PINSFVMomentumGravity::validParams()
 {
   InputParameters params = INSFVGravityForce::validParams();
   params.addClassDescription("Computes a body force due to gravity on fluid in porous media.");
@@ -21,13 +21,13 @@ PINSFVGravityForce::validParams()
   return params;
 }
 
-PINSFVGravityForce::PINSFVGravityForce(const InputParameters & params)
+PINSFVMomentumGravity::PINSFVMomentumGravity(const InputParameters & params)
   : INSFVGravityForce(params), _eps(coupledValue("porosity"))
 {
 }
 
 ADReal
-PINSFVGravityForce::computeQpResidual()
+PINSFVMomentumGravity::computeQpResidual()
 {
   return _eps[_qp] * INSFVGravityForce::computeQpResidual();
 }

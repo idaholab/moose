@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVDiffusion.h"
+#include "FVFluxKernel.h"
 
 /**
  * A flux kernel diffusion of momentum in porous media across cell faces
@@ -33,4 +33,6 @@ protected:
   const VariableValue & _eps_neighbor;
   /// the porosity gradient
   const VariableGradient & _grad_eps;
+  /// the neighbor porosity gradient
+  const VariableGradient & _grad_eps_neighbor;
 };
