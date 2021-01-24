@@ -12,23 +12,25 @@
 #include "FVDiffusion.h"
 
 /**
- * A flux kernel diffusion energy in porous media across cell faces
+ * A flux kernel diffusion of momentum in porous media across cell faces
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel
+class PINSFVMomentumDiffusion : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
-  PINSFVEnergyDiffusion(const InputParameters & params);
+  PINSFVMomentumDiffusion(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// the thermal conductivity
-  const ADMaterialProperty<Real> & _k_elem;
-  /// the neighbor element thermal conductivity
-  const ADMaterialProperty<Real> & _k_neighbor;
+  /// the viscosity
+  const ADMaterialProperty<Real> & _mu_elem;
+  /// the neighbor element viscosity
+  const ADMaterialProperty<Real> & _mu_neighbor;
   /// the porosity
   const VariableValue & _eps;
   /// the neighbor element porosity
   const VariableValue & _eps_neighbor;
+  /// the porosity gradient
+  const VariableGradient & _grad_eps;
 };
