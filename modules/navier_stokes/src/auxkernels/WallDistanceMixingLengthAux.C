@@ -17,8 +17,7 @@ InputParameters
 WallDistanceMixingLengthAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addParam<std::vector<BoundaryName>>("walls",
-    "Boundaries that correspond to solid walls");
+  params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
   params.addParam<Real>("von_karman_const", 0.4, "");
   return params;
 }
@@ -34,21 +33,22 @@ Real
 WallDistanceMixingLengthAux::computeValue()
 {
   // Get references to the Moose and libMesh mesh objects
-  const MooseMesh & m_mesh {_subproblem.mesh()};
-  const MeshBase & l_mesh {m_mesh.getMesh()};
+  const MooseMesh & m_mesh{_subproblem.mesh()};
+  const MeshBase & l_mesh{m_mesh.getMesh()};
 
   // Get the ids of the wall boundaries
-  std::vector<BoundaryID> vec_ids =
-    m_mesh.getBoundaryIDs(_wall_boundary_names, true);
+  std::vector<BoundaryID> vec_ids = m_mesh.getBoundaryIDs(_wall_boundary_names, true);
 
   // Loop over all boundaries
   Real min_sq_dist = 1e9;
   auto bnd_to_elem_map = m_mesh.getBoundariesToElems();
-  for (BoundaryID bid : vec_ids) {
+  for (BoundaryID bid : vec_ids)
+  {
     // Loop over all boundary elements and find the distance to the closest one
     auto bnd_elems = bnd_to_elem_map[bid];
-    for (dof_id_type elem_id : bnd_elems) {
-      const Elem & elem {l_mesh.elem_ref(elem_id)};
+    for (dof_id_type elem_id : bnd_elems)
+    {
+      const Elem & elem{l_mesh.elem_ref(elem_id)};
       Point bnd_pos = elem.centroid();
       Real sq_dist = (bnd_pos - _q_point[_qp]).norm_sq();
       min_sq_dist = std::min(min_sq_dist, sq_dist);

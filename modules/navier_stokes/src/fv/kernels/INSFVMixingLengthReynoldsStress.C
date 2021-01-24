@@ -16,8 +16,9 @@ InputParameters
 INSFVMixingLengthReynoldsStress::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addClassDescription("Computes the force due to the Reynolds stress "
-    "term in the incompressible Reynolds-averaged Navier-Stokes equations.");
+  params.addClassDescription(
+      "Computes the force due to the Reynolds stress term in the incompressible"
+      " Reynolds-averaged Navier-Stokes equations.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
@@ -72,14 +73,15 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   // sqrt( nabla^2 u + nabla^2 v + nabla^2 w )
   auto grad_u = _u_var->adGradSln(*_face_info);
   ADReal velocity_gradient = grad_u(0) * grad_u(0);
-  if (_dim >= 2) {
+  if (_dim >= 2)
+  {
     auto grad_v = _v_var->adGradSln(*_face_info);
-    velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0)
-      + grad_v(1) * grad_v(1);
-    if (_dim >= 3) {
+    velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0) + grad_v(1) * grad_v(1);
+    if (_dim >= 3)
+    {
       auto grad_w = _w_var->adGradSln(*_face_info);
-      velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2)
-        + grad_w(0) * grad_w(0) + grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
+      velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2) + grad_w(0) * grad_w(0) +
+                           grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
     }
   }
   velocity_gradient = std::sqrt(velocity_gradient + offset);
@@ -92,10 +94,8 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   // aka (grad_v + grad_v^T) * n_hat
   ADReal norm_strain_rate = gradUDotNormal();
   norm_strain_rate += _u_var->adGradSln(*_face_info)(_axis_index) * _normal(0);
-  norm_strain_rate += _dim >= 2 ?
-    _v_var->adGradSln(*_face_info)(_axis_index) * _normal(1) : 0;
-  norm_strain_rate += _dim >= 3 ?
-    _w_var->adGradSln(*_face_info)(_axis_index) * _normal(2) : 0;
+  norm_strain_rate += _dim >= 2 ? _v_var->adGradSln(*_face_info)(_axis_index) * _normal(1) : 0;
+  norm_strain_rate += _dim >= 3 ? _w_var->adGradSln(*_face_info)(_axis_index) * _normal(2) : 0;
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * _rho * eddy_diff * norm_strain_rate;
