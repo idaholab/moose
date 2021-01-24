@@ -27,8 +27,8 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
   _k_elem(getADMaterialProperty<Real>("k")),
   _k_neighbor(getNeighborADMaterialProperty<Real>("k")),
-  _eps(adCoupledValue("porosity")),
-  _eps_neighbor(adCoupledNeighborValue("porosity"))
+  _eps(coupledValue("porosity")),
+  _eps_neighbor(coupledNeighborValue("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
