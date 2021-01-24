@@ -52,4 +52,13 @@
     design = 'KKSMultiACBulkC.md'
     requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
   [../]
+
+  [./kks_barrier_height_material]
+    type = 'Exodiff'
+    input = 'kks_barrier_height_material.i'
+    exodiff = 'kks_barrier_height_material_out.e'
+    issues = '#16778'
+    design = 'KKS.md'
+    requirement = 'A spatially-varying barrier height shall be provided as a material'
+  [../]
 []
