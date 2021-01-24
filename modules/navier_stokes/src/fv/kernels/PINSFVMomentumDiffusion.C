@@ -29,7 +29,8 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
   _eps(coupledValue("porosity")),
   _eps_neighbor(coupledNeighborValue("porosity")),
-  _grad_eps(coupledGradient("porosity"))
+  _grad_eps(coupledGradient("porosity")),
+  _grad_eps_neighbor(coupledNeighborGradient("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
@@ -59,7 +60,7 @@ PINSFVMomentumDiffusion::computeQpResidual()
   /// First term of residual
   ADReal residual = mu_eps_face * dudn;
 
-  /// Compute the diffusion driven by the porosity gradient
+  // /// Compute the diffusion driven by the porosity gradient
   // /// Interpolate viscosity divided by squared porosity on the face
   // ADReal mu_eps2_face;
   // interpolate(Moose::FV::InterpMethod::Average,
@@ -69,15 +70,29 @@ PINSFVMomentumDiffusion::computeQpResidual()
   //             *_face_info,
   //             true);
   //
-  // /// Compute velocity on the face
-  //  ADReal v;
-  //  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
+  // /// Compute velocity on the face //FIXME Interpolate with the others?
+  //  ADRealVectorValue v_face;
+  //  // this->interpolate(_velocity_interp_method, v_face, _vel_elem[_qp], _vel_neighbor[_qp]);
+  //  interpolate(_velocity_interp_method,
+  //              v_face,
+  //              _vel_elem[_qp],
+  //              _vel_neighbor[_qp],
+  //              *_face_info,
+  //              true);
   //
   // /// Compute porosity gradient on the face
-  // RealVectorValue grad_eps = Moose::FV::gradUDotNormal(_mu_elem[_qp], _mu_neighbor[_qp], *_face_info, _var);
+  // RealVectorValue grad_eps;
+  // interpolate(Moose::FV::InterpMethod::Average,
+  //             grad_eps,
+  //             _grad_eps[_qp],
+  //             _grad_eps_neighbor[_qp],
+  //             *_face_info,
+  //             true);
   //
   // /// Add second residual term
-  // residual -= mu_eps2_face * v_face * grad_eps;
+  // residual -= mu_eps2_face * ADRealVectorValue(v_face(0) * grad_eps(0),
+  //                                              v_face(1) * grad_eps(1),
+  //                                              v_face(2) * grad_eps(2)) * _normal;
 
   return -residual;
 }
