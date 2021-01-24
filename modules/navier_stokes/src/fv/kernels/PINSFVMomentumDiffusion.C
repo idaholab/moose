@@ -17,7 +17,7 @@ PINSFVMomentumDiffusion::validParams()
   auto params = FVFluxKernel::validParams();
   params.addClassDescription("Viscous diffusion term in the porous media incompressible Navier-Stokes "
                              "momentum equation.");
-  params.addRequiredCoupledVar("porosity", "Porosity variable");
+  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -32,8 +32,8 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   _grad_eps(coupledGradient("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
+             "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
 }
@@ -70,7 +70,8 @@ PINSFVMomentumDiffusion::computeQpResidual()
   //             true);
   //
   // /// Compute velocity on the face
-  //
+  //  ADReal v;
+  //  this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
   //
   // /// Compute porosity gradient on the face
   // RealVectorValue grad_eps = Moose::FV::gradUDotNormal(_mu_elem[_qp], _mu_neighbor[_qp], *_face_info, _var);
