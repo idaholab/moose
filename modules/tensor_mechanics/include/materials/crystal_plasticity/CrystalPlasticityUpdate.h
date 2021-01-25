@@ -125,7 +125,6 @@ protected:
   void calculateConstitutivePlasticDeformationGradientDerivative(
       RankFourTensor & dfpinvdpk2,
       std::vector<RankTwoTensor> & schmid_tensor,
-      const unsigned int & number_dislocation_systems,
       unsigned int slip_model_number = 0);
 
   ///@{Calculates the tangent moduli for use as a preconditioner, using the elastic or elastic-plastic option as specified by the user
@@ -135,7 +134,7 @@ protected:
   ///@}
 
   /// performs the line search update
-  bool lineSearchUpdate(const Real rnorm_prev, const RankTwoTensor);
+  bool lineSearchUpdate(const Real & rnorm_prev, const RankTwoTensor & dpk2);
 
   /**
    * Computes the Schmid tensor (m x n) for the original (reference) crystal
@@ -192,8 +191,8 @@ protected:
    * This virtual method is called to set the constitutive internal state variables
    * current value and the previous substep value to the old property value for
    * the start of the stress convergence while loop.
-   **/
-  virtual void setInitialConstitutiveVariableValues(){};
+   */
+  virtual void setInitialConstitutiveVariableValues() {}
 
   /**
    * This virtual method is called to set the current constitutive internal state
@@ -202,7 +201,7 @@ protected:
    * substep is taken, this method sets the current constitutive internal state
    * variable value to the old value.
    */
-  virtual void setSubstepConstitutiveVariableValues(){};
+  virtual void setSubstepConstitutiveVariableValues() {}
 
   /**
    * Stores the current value of the constitutive internal state variables into
@@ -211,16 +210,18 @@ protected:
    * material property is used as the previous substep value in the associated
    * setSubstepConstitutiveVariableValues method in the next substep (if taken).
    */
-  virtual void updateSubstepConstitutiveVariableValues(){};
+  virtual void updateSubstepConstitutiveVariableValues() {}
 
-  /*
+  /**
    * This virtual method is called to calculate the total slip system slip
    * increment based on the constitutive model defined in the child class.
    * This method must be overwritten in the child class.
    */
   virtual void
   calculateConstitutiveEquivalentSlipIncrement(RankTwoTensor & /*equivalent_slip_increment*/,
-                                               bool & /*error_tolerance*/){};
+                                               bool & /*error_tolerance*/)
+  {
+  }
 
   /*
    * This virtual method is called to find the derivative of the slip increment
@@ -229,19 +230,21 @@ protected:
    * in the child class.
    */
   virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & /*dslip_dtau*/,
-                                                   unsigned int /*slip_model_number*/ = 0){};
+                                                   unsigned int /*slip_model_number*/ = 0)
+  {
+  }
 
   /*
    * Finalizes the values of the state variables and slip system resistance
    * for the current timestep after convergence has been reached.
    */
-  virtual void updateConstitutiveSlipSystemResistanceAndVariables(bool & /*error_tolerance*/){};
+  virtual void updateConstitutiveSlipSystemResistanceAndVariables(bool & /*error_tolerance*/) {}
 
   /*
    * Determines if the state variables, e.g. defect densities, have converged
    * by comparing the change in the values over the iteration period.
    */
-  virtual bool areConstitutiveStateVariablesConverged() { return true; };
+  virtual bool areConstitutiveStateVariablesConverged() { return true; }
 
   /// optional parameter to define several mechanical systems on the same block, e.g. multiple phases
   const std::string _base_name;
@@ -301,8 +304,12 @@ protected:
   /// Line search bisection method maximum iteration number
   unsigned int _line_search_max_iterations;
 
-  /// Line search method
-  MooseEnum _line_search_method;
+  /// strain formulation
+  enum class LineSearchMethod
+  {
+    CutHalf,
+    Bisection
+  } _line_search_method;
 
   ///@{Plastic deformation gradient RankTwoTensor for the crystal
   MaterialProperty<RankTwoTensor> & _plastic_deformation_gradient;

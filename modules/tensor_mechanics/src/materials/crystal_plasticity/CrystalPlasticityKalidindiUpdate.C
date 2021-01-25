@@ -47,6 +47,10 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
   // resize local caching vectors used for substepping
   _previous_substep_slip_resistance.resize(_number_slip_systems);
   _slip_resistance_before_update.resize(_number_slip_systems);
+
+  // resize vectors used in the consititutive slip hardening
+  _hb.resize(_number_slip_systems);
+  _slip_system_resistance_increment.resize(_number_slip_systems);
 }
 
 void
@@ -172,16 +176,15 @@ CrystalPlasticityKalidindiUpdate::updateSubstepConstitutiveVariableValues()
 void
 CrystalPlasticityKalidindiUpdate::calculateSlipSystemResistance(bool & error_tolerance)
 {
-  std::vector<Real> hb(_number_slip_systems);
-  std::vector<Real> slip_system_resistance_increment(_number_slip_systems);
-  Real qab;
-
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
-    hb[i] = _h * std::pow(std::abs(1.0 - _slip_system_resistance[_qp][i] / _tau_sat), _gss_a);
+    // Clear out increment from the previous iteration
+    _slip_system_resistance_increment[i] = 0.0;
+
+    _hb[i] = _h * std::pow(std::abs(1.0 - _slip_system_resistance[_qp][i] / _tau_sat), _gss_a);
     const Real hsign = 1.0 - _slip_system_resistance[_qp][i] / _tau_sat;
     if (hsign < 0.0)
-      hb[i] *= -1.0;
+      _hb[i] *= -1.0;
   }
 
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
@@ -193,24 +196,24 @@ CrystalPlasticityKalidindiUpdate::calculateSlipSystemResistance(bool & error_tol
       jplane = j / 3;
 
       if (iplane == jplane) // self vs. latent hardening
-        qab = 1.0;
+        _slip_system_resistance_increment[i] +=
+            std::abs(_slip_increment[_qp][j]) * _hb[j]; // q_{ab} = 1.0 for self hardening
       else
-        qab = _r;
-
-      slip_system_resistance_increment[i] += std::abs(_slip_increment[_qp][j]) * qab * hb[j];
+        _slip_system_resistance_increment[i] +=
+            std::abs(_slip_increment[_qp][j]) * _r * _hb[j]; // latent hardenign
     }
   }
 
   // Now perform the check to see if the slip system should be updated
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
-    slip_system_resistance_increment[i] *= _substep_dt;
+    _slip_system_resistance_increment[i] *= _substep_dt;
     if (_previous_substep_slip_resistance[i] < _zero_tol &&
-        slip_system_resistance_increment[i] < 0.0)
+        _slip_system_resistance_increment[i] < 0.0)
       _slip_system_resistance[_qp][i] = _previous_substep_slip_resistance[i];
     else
       _slip_system_resistance[_qp][i] =
-          _previous_substep_slip_resistance[i] + slip_system_resistance_increment[i];
+          _previous_substep_slip_resistance[i] + _slip_system_resistance_increment[i];
 
     if (_slip_system_resistance[_qp][i] < 0.0)
       error_tolerance = true;

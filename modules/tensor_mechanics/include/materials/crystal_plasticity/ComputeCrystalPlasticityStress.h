@@ -30,7 +30,8 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  /* Calls the user-specified crystal plasticity stress update materials
+  /**
+   *Calls the user-specified crystal plasticity stress update materials
    * which compute and return the stress and jacobian preconditioner
    */
   virtual void computeQpStress() override;

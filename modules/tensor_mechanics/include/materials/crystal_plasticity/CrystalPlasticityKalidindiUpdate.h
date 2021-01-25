@@ -39,7 +39,7 @@ protected:
    * Sets the value of the current and previous substep iteration slip system
    * resistance to the old value at the start of the PK2 stress convergence
    * while loop.
-   **/
+   */
   virtual void setInitialConstitutiveVariableValues() override;
 
   /**
@@ -110,6 +110,15 @@ protected:
    * caching vectors will also be required.
    */
   std::vector<Real> _slip_resistance_before_update;
+
+  /**
+   * Slip system interaction matrix used to calculate the hardening contributions
+   * from the self and latent slip systems, from Kalidindi et al (1992).
+   */
+  std::vector<Real> _hb;
+
+  /// Increment of increased resistance for each slip system
+  std::vector<Real> _slip_system_resistance_increment;
 
   ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
   const Real _r;
