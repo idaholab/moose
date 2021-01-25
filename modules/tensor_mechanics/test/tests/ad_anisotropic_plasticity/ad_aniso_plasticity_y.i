@@ -150,7 +150,7 @@
 
   [trial_plasticity]
     type = ADTransverselyIsotropicPlasticityStressUpdate
-    hardening_constant = 10000.0
+    hardening_constant = 2000.0
     yield_stress = 0.001
     # F G H L M N
     hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
@@ -204,11 +204,11 @@
 [Executioner]
   type = Transient
 
-  solve_type = PJFNK
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = '101                asm      lu'
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
-  nl_rel_tol = 1e-09
+  nl_rel_tol = 1e-11
   nl_abs_tol = 1.0e-14
   l_max_its = 90
   num_steps = 25
@@ -219,9 +219,9 @@
     growth_factor = 1.05
     cutback_factor = 0.5
     timestep_limiting_postprocessor = matl_ts_min
-    dt = 1e-6
-    time_t = '0 6.38 10'
-    time_dt = '1e-6 1.0e-5 1.0e-5'
+    dt = 1e-5
+    time_t = '0 3.2e-5 10'
+    time_dt = '1e-5 1.0e-7 1.0e-7'
   []
   start_time = 0
   automatic_scaling = true

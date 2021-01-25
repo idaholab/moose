@@ -13,16 +13,15 @@
 #include "ADGeneralizedReturnMappingSolution.h"
 
 /**
- * ADRadialReturnStressUpdate computes the radial return stress increment for
- * an isotropic elastic-viscoplasticity model after interating on the difference
- * between new and old trial stress increments.  This radial return mapping class
- * acts as a base class for the radial return creep and plasticity classes / combinations.
+ * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
+ * anisotropic (Hill-like) creep and plasticity.  This radial return mapping class
+ * acts as a base class for the radial return creep and plasticity classes/combinations.
  * The stress increment computed by ADRadialReturnStressUpdate is used by
  * ComputeMultipleInelasticStress which computes the elastic stress for finite
- * strains.  This return mapping class is acceptable for finite strains but not
- * total strains.
- * This class is based on the Elasto-viscoplasticity algorithm in F. Dunne and N.
- * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
+ * strains.
+ * This class is based on the algorithm in Versino, D, Bennett, KC. Generalized
+ * radial return mapping algorithm for anisotropic von Mises plasticity framed in material
+ * eigenspace. Int J Numer Methods Eng. 2018. 116. 202 222
  */
 
 #include "MooseTypes.h"
@@ -125,6 +124,9 @@ protected:
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
+   * @param delta_gamma Plastic multiplier
+   * @param stress Cauchy stress
+   * @param stress_dev Deviatoric part of Cauchy stress
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
@@ -133,6 +135,9 @@ protected:
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
+   * @param stress Cauchy stress
+   * @param stress_dev Deviatoric part of Cauchy stress
+   * @param delta_gamma Plastic multiplier
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
@@ -148,8 +153,10 @@ protected:
   /// 2 * shear modulus
   ADReal _two_shear_modulus;
 
+  /// Equivalent creep/plastic strain
   ADMaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
+
+  /// Maximum inelastic strain increment for (next) time step prescription
   Real _max_inelastic_increment;
-  const bool _apply_strain;
 };

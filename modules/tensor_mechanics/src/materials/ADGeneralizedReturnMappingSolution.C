@@ -188,25 +188,9 @@ ADGeneralizedReturnMappingSolution::internalSolve(const ADDenseVector & stress_d
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
-    if (false)
-    {
-      Moose::out << "**_residual: " << MetaPhysicL::raw_value(_residual) << "\n";
-      //    Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
-      //    Moose::out << "reference_residual: " << reference_residual << "\n";
-    }
-
     scalar_increment = -_residual / computeDerivative(stress_dev, stress_new, delta_gamma);
     delta_gamma = scalar_old + scalar_increment;
 
-    if (false)
-    {
-      //    Moose::out << "delta_gamma: " << delta_gamma << "\n";
-      Moose::out << "_iteration: " << MetaPhysicL::raw_value(_iteration) << "\n";
-      Moose::out << "delta_gamma: " << delta_gamma << "\n";
-
-      //    Moose::out << "scalar_old: " << scalar_old << "\n";
-      //    Moose::out << "scalar_increment: " << scalar_increment << "\n";
-    }
     if (_check_range)
       checkPermissibleRange(delta_gamma,
                             scalar_increment,
@@ -300,12 +284,6 @@ bool
 ADGeneralizedReturnMappingSolution::converged(const ADReal & ad_residual, const Real & reference)
 {
   const Real residual = MetaPhysicL::raw_value(ad_residual);
-  // Not sure about abs below
-  //  Moose::out << "In converged: (residual): " << (residual) << "\n";
-  //  Moose::out << "In converged: std::abs(residual): " << std::abs(residual) << "\n";
-  //  Moose::out << "In converged: reference: " << reference << "\n";
-  //  Moose::out << "In converged: _relative_tolerance: " << _relative_tolerance << "\n";
-
   return (std::abs(residual) <= _absolute_tolerance ||
           std::abs(residual / reference) <= _relative_tolerance);
 }

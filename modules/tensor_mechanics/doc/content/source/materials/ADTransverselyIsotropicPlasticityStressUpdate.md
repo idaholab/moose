@@ -20,7 +20,7 @@ The effective plastic strain increment is obtained within the framework of a gen
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_anisotropic_plasticity/anis_plasticity_test_experiment.i block=Materials/trial_plasticity
+!listing modules/tensor_mechanics/test/tests/ad_anisotropic_plasticity/ad_aniso_plasticity_y.i block=Materials/trial_plasticity
 
 !syntax parameters /Materials/ADTransverselyIsotropicPlasticityStressUpdate
 

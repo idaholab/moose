@@ -279,8 +279,6 @@ ADComputeMultipleInelasticStress::updateQpState(
            (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
            _num_models != 1);
 
-  //  Moose::out << "counter number in ComputeMultipleInelasticStress is: " << counter << "\n";
-
   if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
     mooseException(
