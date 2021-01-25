@@ -1,14 +1,39 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 3
-  ny = 3
-  nz = 3
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 3
+
+    # Original verification nx = 10, ny = 2, nz = 2
+    nx = 10
+    ny = 2
+    nz = 2
+    xmin = 0.0
+    ymin = 0.0
+    zmin = 0.0
+
+    xmax = 10.0
+    ymax = 1.0
+    zmax = 1.0
+  []
+  [./corner_node]
+    type = ExtraNodesetGenerator
+    new_boundary = '100'
+    nodes = '3 69'
+    input = gen
+  [../]
+  [./corner_node_2]
+    type = ExtraNodesetGenerator
+    new_boundary = '101'
+    nodes = '4 47'
+    input = corner_node
+  [../]
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
+  order = FIRST
+  family = LAGRANGE
 []
 
 [AuxVariables]
@@ -28,7 +53,11 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [elastic_strain_yy]
+  [stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [elastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -69,10 +98,17 @@
     index_i = 1
     index_j = 1
   []
-  [elastic_strain_yy]
+  [elastic_strain_xx]
     type = ADRankTwoAux
     rank_two_tensor = elastic_strain
-    variable = elastic_strain_yy
+    variable = elastic_strain_xx
+    index_i = 1
+    index_j = 1
+  []
+  [sigma_xx]
+    type = ADRankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
     index_i = 1
     index_j = 1
   []
@@ -81,8 +117,8 @@
 [Functions]
   [pull]
     type = PiecewiseLinear
-    x = '0 1e3 1e8'
-    y = '0 1e2 1e2'
+    x = '0 1e1 1e8'
+    y = '0 -4e2 -4e2'
   []
 []
 
@@ -100,32 +136,30 @@
 
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 206800
-    poissons_ratio = 0.3
+    youngs_modulus = 70000
+    poissons_ratio = 0.25
   []
-
-  #  [stress_]
-  #     type = ADComputeFiniteStrainElasticStress
-  #  []
 
   [elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_plasticity"
     max_iterations = 50
-    absolute_tolerance = 1e-09
+    absolute_tolerance = 1e-16
   []
 
   [trial_plasticity]
     type = ADTransverselyIsotropicPlasticityStressUpdate
-    # internal_solve_output_on = always
+    hardening_constant = 2000.0
+    yield_stress = 0.001 # was 200 for verification
+
     # F G H L M N
-    hardening_constant = 4000
-    yield_stress = 2.0
-    hill_constants = "1.0 4.0 5.0 0.5 0.5 0.5"
+    hill_constants = "0.5829856 0.364424 0.6342174 2.0691375 2.3492325 1.814589"
     absolute_tolerance = 1e-14
+    relative_tolerance = 1e-12
     base_name = trial_plasticity
     internal_solve_full_iteration_history = true
-    max_inelastic_increment = 1.0e-6
+    max_inelastic_increment = 2.0e-6
+    internal_solve_output_on = on_error
   []
 []
 
@@ -133,27 +167,27 @@
   [no_disp_x]
     type = ADDirichletBC
     variable = disp_x
-    boundary = bottom
+    boundary = left
     value = 0.0
   []
 
   [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
-    boundary = bottom
+    boundary = 100
     value = 0.0
   []
 
   [no_disp_z]
     type = ADDirichletBC
     variable = disp_z
-    boundary = bottom
+    boundary = 101
     value = 0.0
   []
 
   [Pressure]
     [Side1]
-      boundary = top
+      boundary = right
       function = pull
     []
   []
@@ -170,23 +204,24 @@
 [Executioner]
   type = Transient
 
-  solve_type = NEWTON
+  solve_type = PJFNK
   petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
   petsc_options_value = '101                asm      lu'
 
   nl_rel_tol = 1e-07
   nl_abs_tol = 1.0e-14
   l_max_its = 90
-  num_steps = 40
-  # dt = 5.0e0
+  num_steps = 25
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 30
     iteration_window = 9
-    growth_factor = 1.0
+    growth_factor = 1.05
     cutback_factor = 0.5
     timestep_limiting_postprocessor = matl_ts_min
-    dt = 5.0e-1
+    dt = 1.0e-5
+    time_t = '0 3.4e-5 10'
+    time_dt = '1.0e-5 1.0e-7 1.0e-7'
   []
   start_time = 0
   automatic_scaling = true
@@ -219,13 +254,23 @@
     type = NumNonlinearIterations
     outputs = console
   []
-  [plasticity_strain]
-    type = ElementAverageValue
-    variable = plasticity_strain_yy
+  [plasticity_strain_xx]
+    type = ElementalVariableValue
+    variable = plasticity_strain_xx
+    execute_on = 'TIMESTEP_END'
+    elementid = 39
   []
-  [elastic_strain]
-    type = ElementAverageValue
-    variable = elastic_strain_yy
+  [elastic_strain_xx]
+    type = ElementalVariableValue
+    variable = elastic_strain_xx
+    execute_on = 'TIMESTEP_END'
+    elementid = 39
+  []
+  [sigma_xx]
+    type = ElementalVariableValue
+    variable = stress_xx
+    execute_on = 'TIMESTEP_END'
+    elementid = 39
   []
 []
 
