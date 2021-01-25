@@ -16,7 +16,8 @@ ADTransverselyIsotropicCreepStressUpdate::validParams()
 {
   InputParameters params = ADAnisotropicReturnCreepStressUpdateBase::validParams();
   params.addClassDescription(
-      "This class uses the stress update material in a radial return isotropic power law creep "
+      "This class uses the stress update material in a generalized radial return anisotropic power "
+      "law creep "
       "model.  This class can be used in conjunction with other creep and plasticity materials for "
       "more complex simulations.");
 
@@ -66,6 +67,7 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
   const Real M = _hill_constants[4];
   const Real N = _hill_constants[5];
 
+  // Build Hill tensor or anisotropy matrix
   ADDenseMatrix hill_tensor(6, 6);
   hill_tensor(0, 0) = G + H;
   hill_tensor(1, 1) = F + H;
@@ -111,7 +113,6 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
   qsigma_square += 2 * M * stress_new(5) * stress_new(5);
   qsigma_square += 2 * N * stress_new(3) * stress_new(3);
 
-  // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
   const ADReal creep_rate =
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
@@ -119,6 +120,7 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
   // Return iteration difference between creep strain and inelastic strain multiplier
   return creep_rate * _dt - delta_gamma;
 }
+
 Real
 ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
     const ADDenseVector & effective_trial_stress,
@@ -155,7 +157,6 @@ ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
   qsigma_square += 2 * M * stress_new(5) * stress_new(5);
   qsigma_square += 2 * N * stress_new(3) * stress_new(3);
 
-  // moose assert > 0
   qsigma_square = std::sqrt(qsigma_square);
   _qsigma = qsigma_square;
 
@@ -233,6 +234,7 @@ ADTransverselyIsotropicCreepStressUpdate::computeStressFinalize(
     ADRankTwoTensor & /*stress_new*/,
     const ADDenseVector & /*stress_dev*/)
 {
+  // No need to compute anything here, stress does not change.
 }
 
 Real

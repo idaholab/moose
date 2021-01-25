@@ -53,7 +53,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticity
 {
   _hill_constants = getParam<std::vector<Real>>("hill_constants");
 
-  // Hill constants, some constraints apply (user-driven now)
+  // Hill constants, some constraints apply
   const Real F = _hill_constants[0];
   const Real G = _hill_constants[1];
   const Real H = _hill_constants[2];
@@ -93,10 +93,8 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
 
-  _yield_condition = 10.0;
+  _yield_condition = 1.0; // Some positive value
   _yield_condition = -computeResidual(stress_dev, stress_dev, 0.0);
-
-  //  Moose::out << "Initial yield: " << _yield_condition << "\n";
 }
 
 ADReal
@@ -226,8 +224,6 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecompositi
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       A(index_i, index_j) = hill_tensor(index_i, index_j);
-
-  //  Moose::out << "Print A matrix: " << MetaPhysicL::raw_value(A) << "\n";
 
   Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es(A);
 

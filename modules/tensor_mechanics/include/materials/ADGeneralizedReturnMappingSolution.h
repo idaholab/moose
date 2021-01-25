@@ -17,7 +17,7 @@
 class ConsoleStream;
 
 /**
- * Base class that provides capability for Newton return mapping
+ * Base class that provides capability for Newton generalized (anisotropic) return mapping
  * iterations on a single variable
  */
 class ADGeneralizedReturnMappingSolution

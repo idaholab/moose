@@ -12,8 +12,8 @@
 #include "ADGeneralizedRadialReturnStressUpdate.h"
 
 /**
- * This class provides baseline functionallity for creep models based on the stress update material
- * in a radial return isotropic creep calculations.
+ * This class provides baseline functionality for plasticity models based on the stress update
+ * material in a generalized (Hill-like) radial return calculations.
  */
 class ADAnisotropicReturnPlasticityStressUpdateBase : public ADGeneralizedRadialReturnStressUpdate
 {
@@ -47,13 +47,16 @@ protected:
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
+   * @param stress Cauchy stress tensor
+   * @param stress_dev Deviatoric part of the Cauchy stress tensor
+   * @param delta_gamma Plastic multiplier
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
                                      const ADRankTwoTensor & /*stress*/,
                                      const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/) override;
 
-  /// Plasticity strain material property
+  /// Plasticity strain tensor material property
   ADMaterialProperty<RankTwoTensor> & _plasticity_strain;
   const MaterialProperty<RankTwoTensor> & _plasticity_strain_old;
 };

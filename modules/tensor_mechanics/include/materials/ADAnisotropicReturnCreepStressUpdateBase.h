@@ -12,8 +12,8 @@
 #include "ADGeneralizedRadialReturnStressUpdate.h"
 
 /**
- * This class provides baseline functionallity for creep models based on the stress update material
- * in a radial return isotropic creep calculations.
+ * This class provides baseline functionality for anisotropic (Hill-like) plasticity and creep
+ * models based on the stress update material in a generalized radial return framework.
  */
 class ADAnisotropicReturnCreepStressUpdateBase : public ADGeneralizedRadialReturnStressUpdate
 {
@@ -53,7 +53,7 @@ protected:
                                      const ADDenseVector & /*stress_dev*/,
                                      const ADReal & /*delta_gamma*/) override;
 
-  /// Creep strain material property
+  /// Creep strain tensor material property
   ADMaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };

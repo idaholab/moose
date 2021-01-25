@@ -29,8 +29,6 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addRequiredParam<std::string>(
       "effective_inelastic_strain_name",
       "Name of the material property that stores the effective inelastic strain");
-  params.addParam<bool>("apply_strain", false, "Flag to apply strain. Used for testing.");
-  params.addParamNamesToGroup("effective_inelastic_strain_name apply_strain", "Advanced");
   return params;
 }
 
@@ -42,8 +40,7 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
-    _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
-    _apply_strain(getParam<bool>("apply_strain"))
+    _max_inelastic_increment(getParam<Real>("max_inelastic_increment"))
 {
 }
 
@@ -102,39 +99,15 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
       computeStrainFinalize(inelastic_strain_increment, stress_new, stress_dev, delta_gamma);
     else
       inelastic_strain_increment.zero();
-    //    if (_qp == 0)
-    //    {
-    //      Moose::out << "inelastic_strain_increment: "
-    //                 << MetaPhysicL::raw_value(inelastic_strain_increment) << "\n";
-    //      Moose::out << "strain_increment: " << MetaPhysicL::raw_value(elastic_strain_increment)
-    //                 << "\n";
-    //    }
   }
   else
     inelastic_strain_increment.zero();
 
   elastic_strain_increment -= inelastic_strain_increment;
 
-  /// FIXME
   // stress_new = elasticity_tensor * (elastic_strain_increment + elastic_strain_old);
 
-  if (false)
-  {
-    Moose::out << "delta_gamma: " << delta_gamma << "\n";
-    Moose::out << "plastic_strain_increment: " << MetaPhysicL::raw_value(inelastic_strain_increment)
-               << "\n";
-    Moose::out << "elastic_strain_increment: " << MetaPhysicL::raw_value(elastic_strain_increment)
-               << "\n";
-  }
   computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
-
-  //  if (_qp == 0)
-  //  {
-  //    Moose::out << "End of RM: inelastic_strain_increment: "
-  //               << MetaPhysicL::raw_value(inelastic_strain_increment) << "\n";
-  //    Moose::out << "End of RM: strain_increment: "
-  //               << MetaPhysicL::raw_value(elastic_strain_increment) << "\n";
-  //  }
 }
 
 Real

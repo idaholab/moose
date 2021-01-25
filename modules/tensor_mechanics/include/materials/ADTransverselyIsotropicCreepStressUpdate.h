@@ -12,7 +12,7 @@
 #include "ADAnisotropicReturnCreepStressUpdateBase.h"
 
 /**
- * This class uses the stress update material in an anisotropic return isotropic creep
+ * This class uses the stress update material for an anisotropic creep
  * model.  This class is one of the basic radial return constitutive models; more complex
  * constitutive models combine creep and plasticity.
  *
@@ -56,20 +56,28 @@ protected:
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
+   * @param stress Cauchy stresss tensor
+   * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
+   * @param delta_gamma Generalized radial return's plastic multiplier
+   *
    */
-  virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
-                                     const ADRankTwoTensor & /*stress*/,
-                                     const ADDenseVector & /*stress_dev*/,
-                                     const ADReal & /*delta_gamma*/) override;
+  virtual void computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
+                                     const ADRankTwoTensor & stress,
+                                     const ADDenseVector & stress_dev,
+                                     const ADReal & delta_gamma) override;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
+   * @param delta_gamma Generalized radial return's plastic multiplier
+   * @param stress Cauchy stresss tensor
+   * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
+
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
-                                     const ADDenseVector & /*stress_dev*/) override;
+                                     const ADDenseVector & stress_dev) override;
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;

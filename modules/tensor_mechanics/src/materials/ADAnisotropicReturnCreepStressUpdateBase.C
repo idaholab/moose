@@ -14,11 +14,6 @@ ADAnisotropicReturnCreepStressUpdateBase::validParams()
 {
   InputParameters params = ADGeneralizedRadialReturnStressUpdate::validParams();
 
-  params.addDeprecatedParam<std::string>(
-      "creep_prepend",
-      "",
-      "String that is prepended to the creep_strain Material Property",
-      "This has been replaced by the 'base_name' parameter");
   params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
 
   return params;
