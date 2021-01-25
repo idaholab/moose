@@ -50,6 +50,12 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _rho(getParam<Real>("rho")),
     _mixing_len(coupledValue("mixing_length"))
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
+
   if (!_u_var)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 
@@ -67,6 +73,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 ADReal
 INSFVMixingLengthReynoldsStress::computeQpResidual()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   // Compute the normalized velocity gradient.  This is evaluated as
@@ -99,4 +106,9 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * _rho * eddy_diff * norm_strain_rate;
+
+#else
+  return 0;
+
+#endif
 }
