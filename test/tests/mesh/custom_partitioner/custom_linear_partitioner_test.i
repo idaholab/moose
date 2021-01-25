@@ -8,17 +8,19 @@
 
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
 
-  nx = 10
-  ny = 100
+    nx = 10
+    ny = 100
 
-  xmin = 0.0
-  xmax = 1.0
+    xmin = 0.0
+    xmax = 1.0
 
-  ymin = 0.0
-  ymax = 10.0
+    ymin = 0.0
+    ymax = 10.0
+  []
 
   # Custom linear partitioner
   [./Partitioner]
