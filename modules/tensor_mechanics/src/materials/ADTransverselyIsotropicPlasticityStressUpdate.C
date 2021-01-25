@@ -20,7 +20,6 @@ ADTransverselyIsotropicPlasticityStressUpdate::validParams()
       "model.  This class can be used in conjunction with other creep and plasticity materials for "
       "more complex simulations.");
 
-  // Linear strain hardening parameters
   params.addRequiredParam<Real>("hardening_constant",
                                 "Hardening constant (H) for anisotropic plasticity");
   params.addRequiredParam<Real>("yield_stress",
@@ -159,7 +158,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeReferenceResidual(
     const ADReal & /*residual*/,
     const ADReal & /*scalar_effective_inelastic_strain*/)
 {
-  // Residual already normalized for anisotropic plasticity.
+  // Equation is already normalized.
   return 1.0;
 }
 
@@ -182,18 +181,12 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeResidual(
   ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_slope = computeHardeningDerivative();
 
-  ADReal s_y = computeHardeningValue(delta_gamma, omega) * _hardening_slope + _yield_stress;
-  //  Moose::out << "omega: " << omega << "\n";
-  //  Moose::out << "s_y: " << s_y << "\n";
+  // Hardening variable is \alpha isotropic hardening for now.
+  _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
+  ADReal s_y = _hardening_slope * _hardening_variable[_qp] + _yield_stress;
 
   ADReal residual = 0.0;
   residual = s_y / omega - 1.0;
-
-  //  Moose::out << "in The residual is: " << residual << "\n";
-  //  Moose::out << "In residual The s_y is: " << s_y << "\n";
-  //  Moose::out << "in residual The omega is: " << omega << "\n";
-
-  // mooseError("Stopping artificially for debugging.");
 
   return residual;
 }
@@ -211,7 +204,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeDerivative(
   ADReal omega = computeOmega(delta_gamma, _stress_np1);
   _hardening_slope = computeHardeningDerivative();
 
-  ADReal sy = computeHardeningValue(delta_gamma, omega) * _hardening_slope + _yield_stress;
+  ADReal sy = _hardening_slope * computeHardeningValue(delta_gamma, omega) + _yield_stress;
   ADReal sy_alpha = _hardening_slope;
 
   ADReal omega_gamma;
@@ -246,15 +239,6 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecompositi
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
       _eigenvectors_hill(index_i, index_j) = es.eigenvectors()(index_i, index_j);
-
-  //  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-  //    Moose::out << "eigenvalues: " << _eigenvalues_hill(index_i) << "\n";
-  //
-  //  for (unsigned int index_i = 0; index_i < dimension; index_i++)
-  //    for (unsigned int index_j = 0; index_j < dimension; index_j++)
-  //      Moose::out << "eigenvectors print: " << _eigenvectors_hill(index_i, index_j) << "\n";
-
-  //  mooseError("Artificially stopping the simulation");
 }
 
 ADReal
@@ -284,11 +268,6 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
   hill_stress.scale(delta_gamma);
   inelasticStrainIncrement_vector = hill_stress;
 
-  if (false)
-  {
-    Moose::out << "stress_dev for strain: " << MetaPhysicL::raw_value(stress_dev) << "\n";
-    Moose::out << "hill_stress for strain: " << MetaPhysicL::raw_value(hill_stress) << "\n";
-  }
   inelasticStrainIncrement(0, 0) = inelasticStrainIncrement_vector(0);
   inelasticStrainIncrement(1, 1) = inelasticStrainIncrement_vector(1);
   inelasticStrainIncrement(2, 2) = inelasticStrainIncrement_vector(2);
@@ -299,9 +278,26 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
   inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
       inelasticStrainIncrement_vector(5);
 
-  if (false)
-    Moose::out << "inelasticStrainIncrement for strain: "
-               << MetaPhysicL::raw_value(inelasticStrainIncrement) << "\n";
+  // Calculate appropriate equivalent plastic strain
+  const Real F = _hill_constants[0];
+  const Real G = _hill_constants[1];
+  const Real H = _hill_constants[2];
+  const Real L = _hill_constants[3];
+  const Real M = _hill_constants[4];
+  const Real N = _hill_constants[5];
+
+  ADReal eq_plastic_strain_inc = (F * Utility::pow<2>(inelasticStrainIncrement(0, 0)) +
+                                  G * Utility::pow<2>(inelasticStrainIncrement(1, 1)) +
+                                  H * Utility::pow<2>(inelasticStrainIncrement(2, 2))) /
+                                     (F * G + F * H + G * H) +
+                                 2.0 * Utility::pow<2>(inelasticStrainIncrement(1, 2)) / L +
+                                 2.0 * Utility::pow<2>(inelasticStrainIncrement(2, 0)) / M +
+                                 2.0 * Utility::pow<2>(inelasticStrainIncrement(0, 1)) / N;
+
+  if (eq_plastic_strain_inc > 0.0)
+    eq_plastic_strain_inc = std::sqrt(eq_plastic_strain_inc);
+
+  _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + eq_plastic_strain_inc;
 
   ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);

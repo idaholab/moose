@@ -61,7 +61,7 @@ ADGeneralizedReturnMappingSolution::ADGeneralizedReturnMappingSolution(
     _bracket_solution(false),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
-    _max_its(10), // More than 10 would point to an issue.
+    _max_its(8), // More than 8 would point to an issue.
     _internal_solve_full_iteration_history(
         parameters.get<bool>("internal_solve_full_iteration_history")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
