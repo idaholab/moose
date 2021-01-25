@@ -58,15 +58,6 @@ HierarchicalGridPartitioner::HierarchicalGridPartitioner(const InputParameters &
     _ny_procs(getParam<unsigned int>("ny_procs")),
     _nz_procs(getParam<unsigned int>("nz_procs"))
 {
-  const auto dim = _mesh.getMesh().spatial_dimension();
-  if (_ny_procs == 0 && dim > 1)
-    paramError("ny_procs", "Required for ", dim, "D meshes");
-  if (_ny_nodes == 0 && dim > 1)
-    paramError("ny_nodes", "Required for ", dim, "D meshes");
-  if (_nz_procs == 0 && dim == 3)
-    paramError("nz_procs", "Required for 3D meshes");
-  if (_nz_nodes == 0 && dim == 3)
-    paramError("nz_nodes", "Required for 3D meshes");
 }
 
 HierarchicalGridPartitioner::~HierarchicalGridPartitioner() {}
@@ -80,6 +71,16 @@ HierarchicalGridPartitioner::clone() const
 void
 HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
+  const auto dim = mesh.spatial_dimension();
+  if (_ny_procs == 0 && dim > 1)
+    paramError("ny_procs", "Required for ", dim, "D meshes");
+  if (_ny_nodes == 0 && dim > 1)
+    paramError("ny_nodes", "Required for ", dim, "D meshes");
+  if (_nz_procs == 0 && dim == 3)
+    paramError("nz_procs", "Required for 3D meshes");
+  if (_nz_nodes == 0 && dim == 3)
+    paramError("nz_nodes", "Required for 3D meshes");
+
   auto total_nodes = _nx_nodes;
 
   if (mesh.spatial_dimension() >= 2)

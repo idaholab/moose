@@ -1,5 +1,8 @@
 [Mesh]
-  file = test_subdomain_partitioner.e
+  [file]
+    type = FileMeshGenerator
+    file = test_subdomain_partitioner.e
+  []
 
   [./Partitioner]
     type = LibmeshPartitioner
