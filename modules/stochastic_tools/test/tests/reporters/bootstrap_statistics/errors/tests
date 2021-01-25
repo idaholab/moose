@@ -20,7 +20,7 @@
       cli_args = "Reporters/stats/ci_levels='0'"
       expect_err = "The supplied levels must be greater than zero"
 
-      detail = "the confidence level intervals are omitted;"
+      detail = "the confidence level intervals are less than or equal to zero;"
     []
 
     [ci_levels_one]
@@ -29,7 +29,7 @@
       cli_args = "Reporters/stats/ci_levels='1'"
       expect_err = "The supplied levels must be less than 1\.0"
 
-      detail = "the confidence level intervals are out of range;"
+      detail = "the confidence level intervals are greater than or equal to one;"
     []
 
     [no_input]
