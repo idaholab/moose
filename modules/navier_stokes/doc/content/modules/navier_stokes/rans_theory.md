@@ -144,7 +144,7 @@ turbulent pressure instead of the thermodynamic pressure
   \label{eq:boussinesq2}
 \end{equation}
 
-This stress model is implemented in the [INSFVMixingLengthReynoldsStress](source/fv/kernels/INSFVMixingLengthReynoldsStress.md) kernel.
+This stress model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md) kernel.
 
 ## Turbulent energy transfer
 
@@ -259,14 +259,14 @@ This model is useful for analysis of simple geometries, but it is inconvenient
 to apply for general meshes where the walls may take an arbitrary shape.  This
 is because there is no clear way to define directions parallel and perpendicular
 to the wall in the general case (e.g. consider a mesh cell with walls on two
-sides).  Consequnetly, a different model is adopted here which uses a normalized
+sides).  Consequently, a different model is adopted here which uses a normalized
 isotropic velocity gradient,
 \begin{equation}
   \epsilon_m = -l_m^2 \sqrt{ \nabla v_x \cdot \nabla v_x
   + \nabla v_y \cdot \nabla v_y + \nabla v_z \cdot \nabla v_z}
 \end{equation}
 
-This diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fv/kernels/INSFVMixingLengthReynoldsStress.md) kernel.
+This diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md) kernel.
 
 A model is then needed for the mixing length itself. One popular choice is to
 assume the mixing length is proportional to the distance from the nearest wall,

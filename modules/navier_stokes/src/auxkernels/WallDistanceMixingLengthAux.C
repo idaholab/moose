@@ -9,7 +9,7 @@
 
 #include "WallDistanceMixingLengthAux.h"
 
-registerMooseObject("MooseApp", WallDistanceMixingLengthAux);
+registerMooseObject("NavierStokesApp", WallDistanceMixingLengthAux);
 
 defineLegacyParams(WallDistanceMixingLengthAux);
 
@@ -17,6 +17,8 @@ InputParameters
 WallDistanceMixingLengthAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Computes the turbulent mixing length by assuming that it is "
+                             "proportional to the distance from the nearest wall.");
   params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
   params.addParam<Real>("von_karman_const", 0.4, "");
   return params;

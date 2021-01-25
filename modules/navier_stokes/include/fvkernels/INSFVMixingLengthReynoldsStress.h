@@ -11,6 +11,9 @@
 
 #include "FVFluxKernel.h"
 
+// Forward declare variable class
+class INSFVVelocityVariable;
+
 class INSFVMixingLengthReynoldsStress : public FVFluxKernel
 {
 public:
