@@ -18,7 +18,7 @@
 
 #include <numeric>
 
-registerMooseObject("StochasticToolsApp", Statistics);
+registerADMooseObjectDeprecated("StochasticToolsApp", Statistics, "07/01/2021 12:00");
 
 InputParameters
 Statistics::validParams()
