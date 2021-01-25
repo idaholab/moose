@@ -105,10 +105,7 @@ public:
    * @param subdomain_id Subdomain of the variable
    * @param scaling_factor Scaling factor for the variable
    */
-  void addSimVariable(bool nl,
-                      const VariableName & name,
-                      FEType type,
-                      Real scaling_factor = 1.);
+  void addSimVariable(bool nl, const VariableName & name, FEType type, Real scaling_factor = 1.);
   void addSimVariable(bool nl,
                       const VariableName & name,
                       FEType type,
@@ -188,6 +185,11 @@ public:
    * Check the integrity of the control data
    */
   virtual void controlDataIntegrityCheck();
+
+  /**
+   * Check integrity of coupling matrix used by the preconditioner
+   */
+  virtual void couplingMatrixIntegrityCheck() const;
 
   /**
    * Query if control data with name 'name' exists
