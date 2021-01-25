@@ -8,7 +8,7 @@
 The `FiniteStrainCPSlipRateRes` model is not actively developed.
 Use of the [FiniteStrainUObasedCP](/FiniteStrainUObasedCP.md) crystal plasticity
 system or the [ComputeCrystalPlasticityStress](/ComputeCrystalPlasticityStress.md)
-system are recommend instead.
+system is recommend instead.
 
 In `FiniteStrainCPSlipRateRes` the convergence of the crystal plasticity strain
 and stress response is determined with respect to the slip rate on each slip

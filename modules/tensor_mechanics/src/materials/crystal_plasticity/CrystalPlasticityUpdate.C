@@ -66,9 +66,9 @@ CrystalPlasticityUpdate::validParams()
   params.addParam<Real>("line_search_tol", 0.5, "Line search bisection method tolerance");
   params.addParam<unsigned int>(
       "line_search_maxiter", 20, "Line search bisection method maximum number of iteration");
-  MooseEnum line_search_method("CUT_HALF BISECTION", "CUT_HALF");
+  MooseEnum lineSearchType("CUT_HALF BISECTION", "CUT_HALF");
   params.addParam<MooseEnum>(
-      "line_search_method", line_search_method, "The method used in line search");
+      "line_search_method", lineSearchType, "The method used in line search");
 
   return params;
 }
@@ -97,7 +97,7 @@ CrystalPlasticityUpdate::CrystalPlasticityUpdate(const InputParameters & paramet
     _min_line_search_step_size(getParam<Real>("min_line_search_step_size")),
     _line_search_tolerance(getParam<Real>("line_search_tol")),
     _line_search_max_iterations(getParam<unsigned int>("line_search_maxiter")),
-    _line_search_method(getParam<MooseEnum>("line_search_method")),
+    _line_search_method(getParam<MooseEnum>("line_search_method").getEnum<LineSearchMethod>()),
     _plastic_deformation_gradient(declareProperty<RankTwoTensor>("fp")),
     _plastic_deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("fp")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
@@ -447,17 +447,16 @@ void
 CrystalPlasticityUpdate::calculateTotalPlasticDeformationGradientDerivative(
     RankFourTensor & dfpinvdpk2)
 {
-  calculateConstitutivePlasticDeformationGradientDerivative(
-      dfpinvdpk2, _flow_direction[_qp], _number_slip_systems);
+  calculateConstitutivePlasticDeformationGradientDerivative(dfpinvdpk2, _flow_direction[_qp]);
 }
 
 void
 CrystalPlasticityUpdate::calculateConstitutivePlasticDeformationGradientDerivative(
     RankFourTensor & dfpinvdpk2,
     std::vector<RankTwoTensor> & schmid_tensor,
-    const unsigned int & number_dislocation_systems,
     unsigned int /*slip_model_number*/)
 {
+  const unsigned int number_dislocation_systems = schmid_tensor.size();
   std::vector<Real> dslip_dtau(number_dislocation_systems, 0.0);
   std::vector<RankTwoTensor> dtaudpk2(number_dislocation_systems);
   std::vector<RankTwoTensor> dfpinvdslip(number_dislocation_systems);
@@ -517,7 +516,7 @@ CrystalPlasticityUpdate::elastoPlasticTangentModuli(RankFourTensor & jacobian_mu
 
   tan_mod += dsigdpk2dfe;
 
-  Real je = _elastic_deformation_gradient.det();
+  auto je = _elastic_deformation_gradient.det();
   if (je > 0.0)
     tan_mod /= je;
 
@@ -537,82 +536,77 @@ CrystalPlasticityUpdate::elasticTangentModuli(RankFourTensor & jacobian_mult)
 }
 
 bool
-CrystalPlasticityUpdate::lineSearchUpdate(const Real rnorm_prev, const RankTwoTensor dpk2)
+CrystalPlasticityUpdate::lineSearchUpdate(const Real & rnorm_prev, const RankTwoTensor & dpk2)
 {
-  switch (_line_search_method)
+  if (_line_search_method == LineSearchMethod::CutHalf)
   {
-    case 0: // CUT_HALF
+    Real rnorm;
+    Real step = 1.0;
+
+    do
     {
-      Real rnorm;
-      Real step = 1.0;
-
-      do
-      {
-        _pk2[_qp] = _pk2[_qp] - step * dpk2;
-        step /= 2.0;
-        _pk2[_qp] = _pk2[_qp] + step * dpk2;
-
-        calcResidual();
-        rnorm = _residual_tensor.L2norm();
-      } while (rnorm > rnorm_prev && step > _min_line_search_step_size);
-
-      // has norm improved or is the step still above minumum search step size?
-      return (rnorm <= rnorm_prev || step > _min_line_search_step_size);
-    }
-
-    case 1: // BISECTION
-    {
-      unsigned int count = 0;
-      Real step_a = 0.0;
-      Real step_b = 1.0;
-      Real step = 1.0;
-      Real s_m = 1000.0;
-      Real rnorm = 1000.0;
+      _pk2[_qp] = _pk2[_qp] - step * dpk2;
+      step /= 2.0;
+      _pk2[_qp] = _pk2[_qp] + step * dpk2;
 
       calcResidual();
-      Real s_b = _residual_tensor.doubleContraction(dpk2);
-      Real rnorm1 = _residual_tensor.L2norm();
-      _pk2[_qp] = _pk2[_qp] - dpk2;
-      calcResidual();
-      Real s_a = _residual_tensor.doubleContraction(dpk2);
-      Real rnorm0 = _residual_tensor.L2norm();
-      _pk2[_qp] = _pk2[_qp] + dpk2;
+      rnorm = _residual_tensor.L2norm();
+    } while (rnorm > rnorm_prev && step > _min_line_search_step_size);
 
-      if ((rnorm1 / rnorm0) < _line_search_tolerance || s_a * s_b > 0)
-      {
-        calcResidual();
-        return true;
-      }
-
-      while ((rnorm / rnorm0) > _line_search_tolerance && count < _line_search_max_iterations)
-      {
-        _pk2[_qp] = _pk2[_qp] - step * dpk2;
-        step = 0.5 * (step_b + step_a);
-        _pk2[_qp] = _pk2[_qp] + step * dpk2;
-        calcResidual();
-        s_m = _residual_tensor.doubleContraction(dpk2);
-        rnorm = _residual_tensor.L2norm();
-
-        if (s_m * s_a < 0.0)
-        {
-          step_b = step;
-          s_b = s_m;
-        }
-        if (s_m * s_b < 0.0)
-        {
-          step_a = step;
-          s_a = s_m;
-        }
-        count++;
-      }
-
-      // below tolerance and max iterations?
-      return ((rnorm / rnorm0) < _line_search_tolerance && count < _line_search_max_iterations);
-    }
-
-    default:
-      mooseError("Line search method is not provided.");
+    // has norm improved or is the step still above minumum search step size?
+    return (rnorm <= rnorm_prev || step > _min_line_search_step_size);
   }
+  else if (_line_search_method == LineSearchMethod::Bisection)
+  {
+    unsigned int count = 0;
+    Real step_a = 0.0;
+    Real step_b = 1.0;
+    Real step = 1.0;
+    Real s_m = 1000.0;
+    Real rnorm = 1000.0;
+
+    calcResidual();
+    auto s_b = _residual_tensor.doubleContraction(dpk2);
+    auto rnorm1 = _residual_tensor.L2norm();
+    _pk2[_qp] = _pk2[_qp] - dpk2;
+    calcResidual();
+    auto s_a = _residual_tensor.doubleContraction(dpk2);
+    auto rnorm0 = _residual_tensor.L2norm();
+    _pk2[_qp] = _pk2[_qp] + dpk2;
+
+    if ((rnorm1 / rnorm0) < _line_search_tolerance || s_a * s_b > 0)
+    {
+      calcResidual();
+      return true;
+    }
+
+    while ((rnorm / rnorm0) > _line_search_tolerance && count < _line_search_max_iterations)
+    {
+      _pk2[_qp] = _pk2[_qp] - step * dpk2;
+      step = 0.5 * (step_b + step_a);
+      _pk2[_qp] = _pk2[_qp] + step * dpk2;
+      calcResidual();
+      s_m = _residual_tensor.doubleContraction(dpk2);
+      rnorm = _residual_tensor.L2norm();
+
+      if (s_m * s_a < 0.0)
+      {
+        step_b = step;
+        s_b = s_m;
+      }
+      if (s_m * s_b < 0.0)
+      {
+        step_a = step;
+        s_a = s_m;
+      }
+      count++;
+    }
+
+    // below tolerance and max iterations?
+    return ((rnorm / rnorm0) < _line_search_tolerance && count < _line_search_max_iterations);
+  }
+  else
+    mooseError("Line search method is not provided.");
 }
 
 void
