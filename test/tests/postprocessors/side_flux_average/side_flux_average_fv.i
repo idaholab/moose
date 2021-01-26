@@ -67,6 +67,10 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-14
+  l_abs_tol = 1e-14
+  l_tol = 1e-6
 []
 
 [Problem]

@@ -70,6 +70,10 @@
 
 [Executioner]
   type = Steady
+  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-14
+  l_abs_tol = 1e-14
+  l_tol = 1e-6
 []
 
 [Outputs]
