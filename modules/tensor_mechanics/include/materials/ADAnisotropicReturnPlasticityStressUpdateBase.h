@@ -29,12 +29,8 @@ public:
    * @return The computed strain energy rate density
    */
   virtual Real
-  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & /*stress*/,
-                                 const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
-  {
-    mooseError(
-        "The computation of strain energy rate density needs to be implemented by a child class");
-  }
+  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
+                                 const ADMaterialProperty<RankTwoTensor> & strain_rate) = 0;
 
 protected:
   virtual void initQpStatefulProperties() override;

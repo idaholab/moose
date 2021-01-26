@@ -59,7 +59,6 @@ protected:
    * @param stress Cauchy stresss tensor
    * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
    * @param delta_gamma Generalized radial return's plastic multiplier
-   *
    */
   virtual void computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADRankTwoTensor & stress,
@@ -72,7 +71,6 @@ protected:
    * @param delta_gamma Generalized radial return's plastic multiplier
    * @param stress Cauchy stresss tensor
    * @param stress_dev Deviatoric partt of the Cauchy stresss tensor
-
    */
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
