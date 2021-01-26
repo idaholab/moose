@@ -23,8 +23,8 @@ TEST(ADFparserTest, JITCompile)
   fparser.JITCompile();
 
   ADReal v[2] = {1.5, 2.5};
-  v[0].derivatives()[0] = 1;
-  v[1].derivatives()[1] = 1;
+  Moose::derivInsert(v[0].derivatives(), 0, 1);
+  Moose::derivInsert(v[1].derivatives(), 1, 1);
 
   // evaluate parsed function
   auto p = fparser.Eval(v);
