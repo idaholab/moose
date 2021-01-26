@@ -148,18 +148,6 @@ Unfortunately, any errors incurred during the above step is going to be beyond t
 Proceed only if PETSc completed successfully.
 
 !alert! note
-If you plan to run large-scale simulation, we recommend building petsc with 64-bit indices.
-This can be accomplished with the following:
-
-```bash
-cd ~/offline/moose
-
-unset PETSC_DIR PETSC_ARCH
-./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads --prefix=$HOME/libs/petsc --download-mumps=0 --with-64-bit-indices=1
-```
-!alert-end!
-
-!alert! note
 If you prefer to install PETSc in place (moose/petsc), then you need to take out `--prefix`, that is,
 
 ```bash

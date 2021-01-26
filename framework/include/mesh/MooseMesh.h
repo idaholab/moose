@@ -32,6 +32,7 @@
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
+#include "libmesh/partitioner.h"
 
 // forward declaration
 class MooseMesh;
@@ -1245,7 +1246,7 @@ protected:
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
-  void setPartitionerHelper();
+  void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
   // true if the _face_info member needs to be rebuilt/updated.
@@ -1566,6 +1567,19 @@ MooseMesh::buildTypedMesh(unsigned int dim)
 
   mesh->allow_remote_element_removal(_allow_remote_element_removal);
   _app.attachRelationshipManagers(*mesh, *this);
+
+  if (_custom_partitioner_requested)
+  {
+    // Check of partitioner is supplied (not allowed if custom partitioner is used)
+    if (!parameters().isParamSetByAddParam("partitioner"))
+      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
+    // Set custom partitioner
+    if (!_custom_partitioner.get())
+      mooseError("Custom partitioner requested but not set!");
+    mesh->partitioner().reset(_custom_partitioner.release());
+  }
+  else
+    setPartitionerHelper(mesh.get());
 
   return mesh;
 }

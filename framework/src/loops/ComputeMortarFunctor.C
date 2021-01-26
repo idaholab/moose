@@ -196,6 +196,7 @@ ComputeMortarFunctor::operator()()
     _fe_problem.reinitMaterialsBoundary(
         _secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
 
+    num_cached++;
     if (!_fe_problem.currentlyComputingJacobian())
     {
       for (auto && mc : _mortar_constraints)
@@ -205,8 +206,6 @@ ComputeMortarFunctor::operator()()
       _assembly.cacheResidualNeighbor();
       _assembly.cacheResidualLower();
 
-      num_cached++;
-
       if (num_cached % 20 == 0)
         _assembly.addCachedResiduals();
     }
@@ -215,19 +214,16 @@ ComputeMortarFunctor::operator()()
       for (auto && mc : _mortar_constraints)
         mc->computeJacobian(_has_primary);
 
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-      // No caching for local AD indexing currently. Add caching if this shows up in profiling
-      _assembly.addJacobianMortar();
-#endif
+      _assembly.cacheJacobianMortar();
+
+      if (num_cached % 20 == 0)
+        _assembly.addCachedJacobian();
     }
   } // end for loop over elements
 
-  // Make sure any remaining cached residuals get added
+  // Make sure any remaining cached residuals/Jacobians get added
   if (!_fe_problem.currentlyComputingJacobian())
     _assembly.addCachedResiduals();
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  // We do cache Jacobians when doing global AD indexing
   else
     _assembly.addCachedJacobian();
-#endif
 }

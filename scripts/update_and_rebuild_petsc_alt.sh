@@ -47,6 +47,6 @@ cd $SCRIPT_DIR
 sh $SCRIPT_DIR/update_and_rebuild_petsc.sh $* \
   --skip-submodule-update \
   --download-strumpack=0 \
-  --download-hypre=git://https://github.com/hypre-space/hypre.git
-
+  --download-hypre=git://https://github.com/hypre-space/hypre.git \
+  --with-64-bit-indices=0 \
 exit 0

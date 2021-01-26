@@ -297,13 +297,18 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
   if (_w_var)
     elem_velocity(2) = _w_var->getElemValue(&elem);
 
-  auto action_functor = [&coeff, &elem_velocity, &mu, &elem, this](
-                            const Elem & libmesh_dbg_var(functor_elem),
-                            const Elem * const neighbor,
-                            const FaceInfo * const fi,
-                            const Point & surface_vector,
-                            Real libmesh_dbg_var(coord),
-                            const bool elem_has_info) {
+  auto action_functor = [&coeff,
+                         &elem_velocity,
+                         &mu,
+#ifndef NDEBUG
+                         &elem,
+#endif
+                         this](const Elem & libmesh_dbg_var(functor_elem),
+                               const Elem * const neighbor,
+                               const FaceInfo * const fi,
+                               const Point & surface_vector,
+                               Real libmesh_dbg_var(coord),
+                               const bool elem_has_info) {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
 

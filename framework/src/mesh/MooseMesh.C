@@ -2244,14 +2244,7 @@ MooseMesh::buildMeshBaseObject(unsigned int dim)
 
   std::unique_ptr<MeshBase> mesh;
   if (_use_distributed_mesh)
-  {
     mesh = buildTypedMesh<DistributedMesh>(dim);
-    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
-    {
-      _partitioner_name = "parmetis";
-      _partitioner_overridden = true;
-    }
-  }
   else
     mesh = buildTypedMesh<ReplicatedMesh>(dim);
 
@@ -2281,19 +2274,6 @@ MooseMesh::init()
     mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
 
   TIME_SECTION(_init_timer);
-
-  if (_custom_partitioner_requested)
-  {
-    // Check of partitioner is supplied (not allowed if custom partitioner is used)
-    if (!parameters().isParamSetByAddParam("partitioner"))
-      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
-    // Set custom partitioner
-    if (!_custom_partitioner.get())
-      mooseError("Custom partitioner requested but not set!");
-    getMesh().partitioner().reset(_custom_partitioner.release());
-  }
-  else
-    setPartitionerHelper();
 
   if (_app.isRecovering() && _allow_recovery && _app.isUltimateMaster())
   {
@@ -2510,7 +2490,10 @@ MooseMesh::prepared(bool state)
     mooseError("We don't have any right to tell the libmesh mesh that it *is* prepared. Only a "
                "call to prepare_for_use should tell us that");
 
-  _mesh->set_isnt_prepared();
+  // Some people may call this even before we have a MeshBase object. This isn't dangerous really
+  // because when the MeshBase object is born, it knows it's in an unprepared state
+  if (_mesh)
+    _mesh->set_isnt_prepared();
 
   // If the libMesh mesh isn't preparead, then our MooseMesh wrapper is also no longer prepared
   _moose_mesh_prepared = false;
@@ -2968,9 +2951,15 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
 }
 
 void
-MooseMesh::setPartitionerHelper()
+MooseMesh::setPartitionerHelper(MeshBase * const mesh)
 {
-  setPartitioner(getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
+  if (_use_distributed_mesh && (_partitioner_name != "default" && _partitioner_name != "parmetis"))
+  {
+    _partitioner_name = "parmetis";
+    _partitioner_overridden = true;
+  }
+
+  setPartitioner(mesh ? *mesh : getMesh(), _partitioner_name, _use_distributed_mesh, _pars, *this);
 }
 
 void
