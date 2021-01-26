@@ -188,7 +188,6 @@ Console::Console(const InputParameters & parameters)
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
   const auto & actions = awh.getActionListByName("common_output");
-  mooseAssert(actions.size() == 1, "Should be only one common_output Action");
   Action * common_action = *actions.begin();
 
   // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user

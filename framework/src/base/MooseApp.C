@@ -912,7 +912,6 @@ MooseApp::setupOptions()
     {
       // Extract the CommonOutputAction
       const auto & common_actions = _action_warehouse.getActionListByName("common_output");
-      mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
 
       const Action * common = *common_actions.begin();
 
