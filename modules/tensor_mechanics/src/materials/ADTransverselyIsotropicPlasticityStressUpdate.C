@@ -234,7 +234,7 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecompositi
 
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      _eigenvectors_hill(index_i, index_j) = es.eigenvectors()(index_i, index_j);
+      _eigenvectors_hill(index_i, index_j) = v(index_i, index_j);
 }
 
 ADReal

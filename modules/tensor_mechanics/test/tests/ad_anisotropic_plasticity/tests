@@ -20,6 +20,7 @@
     type = 'CSVDiff'
     abs_zero = 1.0e-9
     rel_err = 1.0e-5
+    heavy = true
     input = 'ad_aniso_plasticity_x.i'
     csvdiff = 'ad_aniso_plasticity_x_out.csv'
     requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified verification problem along x axis'
@@ -29,6 +30,7 @@
     type = 'CSVDiff'
     abs_zero = 1.0e-9
     rel_err = 1.0e-5
+    heavy = true
     input = 'ad_aniso_plasticity_y.i'
     csvdiff = 'ad_aniso_plasticity_y_out.csv'
     requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified verification problem along y axis'
