@@ -242,7 +242,7 @@ ClaimRays::verifyClaiming()
       // Already existed in the map
       if (!emplace_pair.second)
       {
-        // If it already exits but has not been claimed yet, set it to being claimed
+        // If it already exists but has not been claimed yet, set it to being claimed
         if (claimed_rays && !emplace_pair.first->second)
           emplace_pair.first->second = true;
         // Otherwise, it is being doubly generated/claimed
@@ -274,7 +274,7 @@ ClaimRays::verifyClaiming()
   // The mapping (filled on rank 0) from Ray ID -> (processor id, claiming status)
   std::map<RayID, std::vector<std::pair<processor_id_type, char>>> global_map;
 
-  // Functor for reciving the generation/claiming information
+  // Functor for receiving the generation/claiming information
   auto receive_functor =
       [&global_map](processor_id_type pid,
                     const std::vector<std::pair<RayID, char>> & id_claimed_pairs) {
