@@ -29,17 +29,17 @@
 []
 
 [Postprocessors]
-  [./max_c]
-    type = NodalMaxValue
-    variable = c
-    execute_on = 'initial timestep_end'
+  [./dt]
+    type = TimestepSize
   [../]
 []
 
 [UserObjects]
   [./arnold]
     type = Terminator
-    expression = 'max_c < 0.5'
+    expression = 'dt > 20'
+    fail_mode = SOFT
+    execute_on = TIMESTEP_END
   [../]
 []
 
@@ -68,8 +68,10 @@
   type = Transient
   dt = 100
   num_steps = 6
+  nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  exodus = true
+  csv = true
+  print_linear_residuals = false
 []

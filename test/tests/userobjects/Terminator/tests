@@ -1,13 +1,21 @@
 [Tests]
   design = 'Terminator.md'
-  issues = '#3735'
 
-  [./test]
+  [./terminator]
     type = 'Exodiff'
     input = 'terminator.i'
     exodiff = 'terminator_out.e'
     group = 'requirements'
 
+    issues = '#3735'
     requirement = "The system shall be able to terminate the execution of a solve based on post-processing calculations performed within the simulation."
+  [../]
+  [./terminator_soft]
+    type = 'CSVDiff'
+    input = 'terminator_soft.i'
+    csvdiff = 'terminator_soft_out.csv'
+    group = 'requirements'
+    issues = '#16452'
+    requirement = "The system shall be able to terminate abort the current step in a solve based on post-processing calculations performed within the simulation to cut the timestep."
   [../]
 []
