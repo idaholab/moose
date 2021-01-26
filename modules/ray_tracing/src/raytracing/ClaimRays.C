@@ -24,21 +24,30 @@ ClaimRays::ClaimRays(RayTracingStudy & study,
                      const std::vector<std::shared_ptr<Ray>> & rays,
                      std::vector<std::shared_ptr<Ray>> & local_rays,
                      const bool do_exchange)
-  : _mesh(mesh),
-    _comm(_mesh.getMesh().comm()),
-    _pid(_comm.rank()),
+  : ParallelObject(study.comm()),
+    MeshChangedInterface(study.parameters()),
+    _mesh(mesh),
+    _pid(comm().rank()),
     _do_exchange(do_exchange),
     _study(study),
     _rays(rays),
-    _local_rays(local_rays)
+    _local_rays(local_rays),
+    _needs_init(true)
 {
 }
 
 void
 ClaimRays::claim()
 {
+  if (_needs_init)
+  {
+    init();
+    _needs_init = false;
+  }
+
   preClaim();
 
+  // Clear these as we're about to fill
   _local_rays.clear();
 
   // Grab the point locator
@@ -48,10 +57,14 @@ ClaimRays::claim()
   // Exchange: filter Rays into processors that _may_ claim them
   std::unordered_map<processor_id_type, std::vector<std::shared_ptr<Ray>>> rays_to_send;
   if (_do_exchange)
-    for (auto & ray : _rays)
-      for (processor_id_type pid = 0; pid < _comm.size(); ++pid)
-        if (_inflated_bboxes[pid].contains_point(ray->currentPoint()))
-          rays_to_send[pid].push_back(ray);
+    for (processor_id_type pid = 0; pid < comm().size(); ++pid)
+      if (_pid != pid)
+      {
+        const BoundingBox & pid_bbox = inflatedBoundingBox(pid);
+        for (auto & ray : _rays)
+          if (pid_bbox.contains_point(ray->currentPoint()))
+            rays_to_send[pid].push_back(ray);
+      }
 
   // Functor for possibly claiming a vector of Rays
   auto claim_functor = [&](processor_id_type /* pid */,
@@ -60,12 +73,16 @@ ClaimRays::claim()
       possiblyClaim(ray);
   };
 
-  // Send the relevant Rays to everyone and then claim
+  // Send the relevant Rays to everyone and then attempt to claim the ones that we receive
   if (_do_exchange)
-    Parallel::push_parallel_packed_range(_comm, rays_to_send, &_study, claim_functor);
-  // Already have the relevant Rays, just claim
-  else
-    claim_functor(_pid, _rays);
+    Parallel::push_parallel_packed_range(comm(), rays_to_send, &_study, claim_functor);
+
+  // Attempt to claim the locally generated rays in _rays
+  claim_functor(_pid, _rays);
+
+  // Verify the claiming if the study so desires
+  if (_study.verifyRays())
+    verifyClaiming();
 
   postClaim();
 }
@@ -153,35 +170,28 @@ ClaimRays::init()
 }
 
 void
+ClaimRays::meshChanged()
+{
+  _needs_init = true;
+}
+
+void
 ClaimRays::buildBoundingBoxes()
 {
   // Local bounding box
-  _bbox = MeshTools::create_local_bounding_box(_mesh.getMesh());
-  _global_bbox = _bbox;
+  const auto bbox = MeshTools::create_local_bounding_box(_mesh.getMesh());
 
   // Gather the bounding boxes of all processors
-  std::vector<std::pair<Point, Point>> bb_points = {static_cast<std::pair<Point, Point>>(_bbox)};
-  _comm.allgather(bb_points, true);
-  _inflated_bboxes.resize(_comm.size());
-  for (processor_id_type pid = 0; pid < _comm.size(); ++pid)
+  std::vector<std::pair<Point, Point>> bb_points = {static_cast<std::pair<Point, Point>>(bbox)};
+  comm().allgather(bb_points, true);
+
+  // Inflate the local bboxes by a bit and store
+  _inflated_bboxes.resize(comm().size());
+  for (processor_id_type pid = 0; pid < comm().size(); ++pid)
   {
     BoundingBox pid_bbox = static_cast<BoundingBox>(bb_points[pid]);
     pid_bbox.scale(0.01);
     _inflated_bboxes[pid] = pid_bbox;
-    _global_bbox.union_with(pid_bbox);
-  }
-
-  // Find intersecting (neighbor) bounding boxes
-  _inflated_neighbor_bboxes.clear();
-  for (processor_id_type pid = 0; pid < _comm.size(); ++pid)
-  {
-    // Skip this processor
-    if (pid == _pid)
-      continue;
-    // Insert if the searched processor's bbox intersects my bbox
-    const auto & pid_bbox = _inflated_bboxes[pid];
-    if (_bbox.intersects(pid_bbox))
-      _inflated_neighbor_bboxes.emplace_back(pid, pid_bbox);
   }
 }
 
@@ -208,4 +218,95 @@ ClaimRays::buildPointNeighbors()
       }
     }
   }
+}
+
+void
+ClaimRays::verifyClaiming()
+{
+  // NOTE for all of the following: we use char here in place of bool.
+  // This is because bool is not instantiated as a StandardType in
+  // TIMPI due to the fun of std::vector<bool>
+
+  // Map from Ray ID -> whether or not it was generated (false) or
+  // claimed/possibly also generated (true)
+  std::map<RayID, char> local_map;
+  auto add_to_local_map = [this, &local_map](const std::vector<std::shared_ptr<Ray>> & rays,
+                                             const bool claimed_rays) {
+    for (const auto & ray : rays)
+    {
+      const auto id = getID(ray);
+
+      // Try to insert into the map
+      auto emplace_pair = local_map.emplace(id, claimed_rays);
+
+      // Already existed in the map
+      if (!emplace_pair.second)
+      {
+        // If it already exits but has not been claimed yet, set it to being claimed
+        if (claimed_rays && !emplace_pair.first->second)
+          emplace_pair.first->second = true;
+        // Otherwise, it is being doubly generated/claimed
+        else
+          mooseError("ClaimRays for ",
+                     _study.errorPrefix(),
+                     ": Ray with ID ",
+                     id,
+                     " was ",
+                     claimed_rays ? "claimed" : "generated",
+                     " multiple times on pid ",
+                     _pid,
+                     "\n\n",
+                     ray->getInfo());
+      }
+    }
+  };
+
+  // Build the local_map
+  add_to_local_map(_rays, false);
+  add_to_local_map(_local_rays, true);
+
+  // Build the structure to send the local generation/claiming information to rank 0
+  std::map<processor_id_type, std::vector<std::pair<RayID, char>>> send_info;
+  send_info.emplace(std::piecewise_construct,
+                    std::forward_as_tuple(0),
+                    std::forward_as_tuple(local_map.begin(), local_map.end()));
+
+  // The mapping (filled on rank 0) from Ray ID -> (processor id, claiming status)
+  std::map<RayID, std::vector<std::pair<processor_id_type, char>>> global_map;
+
+  // Functor for reciving the generation/claiming information
+  auto receive_functor =
+      [&global_map](processor_id_type pid,
+                    const std::vector<std::pair<RayID, char>> & id_claimed_pairs) {
+        for (const auto & id_claimed_pair : id_claimed_pairs)
+          global_map[id_claimed_pair.first].emplace_back(pid, id_claimed_pair.second);
+      };
+
+  // Send claiming information to rank 0
+  Parallel::push_parallel_vector_data(comm(), send_info, receive_functor);
+
+  // Rank 0 will make sure everything looks good
+  if (_pid == 0)
+    for (const auto & id_pairs_pair : global_map)
+    {
+      const RayID id = id_pairs_pair.first;
+      const std::vector<std::pair<processor_id_type, char>> & pid_claimed_pairs =
+          id_pairs_pair.second;
+
+      std::vector<processor_id_type> claimed_pids;
+      for (const auto & pid_claimed_pair : pid_claimed_pairs)
+        if (pid_claimed_pair.second)
+          claimed_pids.push_back(pid_claimed_pair.first);
+
+      if (claimed_pids.size() == 0)
+        mooseError("ClaimRays for ", _study.name(), ": Failed to claim the Ray with ID ", id);
+      if (claimed_pids.size() > 1)
+      {
+        std::stringstream oss;
+        oss << "ClaimRays for " << _study.name() << ": The Ray with ID " << id
+            << " was claimed on processors ";
+        std::copy(claimed_pids.begin(), claimed_pids.end(), std::ostream_iterator<RayID>(oss, " "));
+        mooseError(oss.str());
+      }
+    }
 }
