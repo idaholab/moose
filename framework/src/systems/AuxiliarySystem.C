@@ -101,6 +101,8 @@ AuxiliarySystem::addExtraVectors()
 void
 AuxiliarySystem::initialSetup()
 {
+  SystemBase::initialSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
@@ -129,6 +131,8 @@ AuxiliarySystem::initialSetup()
 void
 AuxiliarySystem::timestepSetup()
 {
+  SystemBase::timestepSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
@@ -144,6 +148,8 @@ AuxiliarySystem::timestepSetup()
 void
 AuxiliarySystem::subdomainSetup()
 {
+  SystemBase::subdomainSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
@@ -159,6 +165,8 @@ AuxiliarySystem::subdomainSetup()
 void
 AuxiliarySystem::jacobianSetup()
 {
+  SystemBase::jacobianSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
@@ -174,6 +182,8 @@ AuxiliarySystem::jacobianSetup()
 void
 AuxiliarySystem::residualSetup()
 {
+  SystemBase::residualSetup();
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);

@@ -172,12 +172,17 @@ void
 MooseVariableBase::scalingFactor(const std::vector<Real> & factor)
 {
   _scaling_factor = factor;
+}
 
+void
+MooseVariableBase::initialSetup()
+{
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (!_sys.hasVector("scaling_factors") &&
-      std::find_if(factor.begin(), factor.end(), [](const Real element) {
+  // Currently the scaling vector is only used through AD residual computing objects
+  if (_subproblem.haveADObjects() && !_sys.hasVector("scaling_factors") &&
+      std::find_if(_scaling_factor.begin(), _scaling_factor.end(), [](const Real element) {
         return !MooseUtils::absoluteFuzzyEqual(element, 1.);
-      }) != factor.end())
+      }) != _scaling_factor.end())
     _sys.addScalingVector();
 #endif
 }

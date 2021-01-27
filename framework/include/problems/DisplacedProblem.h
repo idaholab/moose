@@ -333,6 +333,9 @@ public:
 
   bool computingScalingResidual() const override final;
 
+  virtual void initialSetup();
+  virtual void timestepSetup();
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

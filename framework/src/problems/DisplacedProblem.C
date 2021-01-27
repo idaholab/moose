@@ -1075,3 +1075,17 @@ DisplacedProblem::computingScalingResidual() const
 {
   return _mproblem.computingScalingResidual();
 }
+
+void
+DisplacedProblem::initialSetup()
+{
+  _displaced_nl.initialSetup();
+  _displaced_aux.initialSetup();
+}
+
+void
+DisplacedProblem::timestepSetup()
+{
+  _displaced_nl.timestepSetup();
+  _displaced_aux.timestepSetup();
+}

@@ -46,11 +46,11 @@ public:
 
   virtual void addExtraVectors() override;
 
-  virtual void initialSetup();
-  virtual void timestepSetup();
-  virtual void subdomainSetup();
-  virtual void residualSetup();
-  virtual void jacobianSetup();
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override;
+  virtual void subdomainSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
   virtual void updateActive(THREAD_ID tid);
 
   virtual void addVariable(const std::string & var_type,
