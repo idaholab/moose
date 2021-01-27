@@ -6971,11 +6971,11 @@ FEProblemBase::addOutput(const std::string & object_type,
 }
 
 void
-FEProblemBase::haveADObjects(bool have_ad_objects)
+FEProblemBase::haveADObjects(const bool have_ad_objects)
 {
   _have_ad_objects = have_ad_objects;
   if (_displaced_problem)
-    _displaced_problem->haveADObjects(have_ad_objects);
+    _displaced_problem->SubProblem::haveADObjects(have_ad_objects);
 }
 
 const SystemBase &

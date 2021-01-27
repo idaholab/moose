@@ -336,6 +336,9 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
+  using SubProblem::haveADObjects;
+  void haveADObjects(bool have_ad_objects) override;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;
