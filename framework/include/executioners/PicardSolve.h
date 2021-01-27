@@ -81,6 +81,9 @@ public:
    */
   bool autoAdvance() const;
 
+  /// mark the current solve as failed due to external conditions
+  void failStep() { _fail_step = true; }
+
 protected:
   /**
    * Perform one Picard iteration or a full solve.
@@ -175,4 +178,7 @@ private:
   /// The value of auto_advance set by the user for handling advancement of sub-applications in
   /// multi-app contexts
   const bool _auto_advance_user_value;
+
+  /// force the current step to fail, triggering are repeat with a cut dt
+  bool _fail_step;
 };
