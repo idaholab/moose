@@ -121,6 +121,7 @@ RepeatableRayStudyBase::meshChanged()
 {
   RayTracingStudy::meshChanged();
 
+  // Need to reclaim after this
   _should_claim_rays = true;
 
   // Invalidate all of the old starting info because we can't be sure those elements still exist
@@ -140,16 +141,9 @@ void
 RepeatableRayStudyBase::claimRaysInternal()
 {
   TIME_SECTION(_claim_rays_timer);
+  CONSOLE_TIMED_PRINT("Claiming rays");
 
-  {
-    CONSOLE_TIMED_PRINT("Initializing ray claiming object");
-    _claim_rays.init();
-  }
-
-  {
-    CONSOLE_TIMED_PRINT("Claiming rays");
-    _claim_rays.claim();
-  }
+  _claim_rays.claim();
 }
 
 void
