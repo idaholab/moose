@@ -35,7 +35,6 @@ AdamsPredictor::AdamsPredictor(const InputParameters & parameters)
     _tmp_previous_solution(_nl.addVector("tmp_previous_solution", true, GHOSTED)),
     _tmp_residual_old(_nl.addVector("tmp_residual_old", true, GHOSTED)),
     _tmp_third_vector(_nl.addVector("tmp_third_vector", true, GHOSTED)),
-    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
     _dt_older(declareRestartableData<Real>("dt_older", 0)),
     _dtstorage(declareRestartableData<Real>("dtstorage", 0))
 {
@@ -44,14 +43,14 @@ AdamsPredictor::AdamsPredictor(const InputParameters & parameters)
 void
 AdamsPredictor::timestepSetup()
 {
-  // if the time step number hasn't changed then do nothing
-  if (_t_step == _t_step_old)
+  Predictor::timestepSetup();
+
+  // if the time step number hasn't changed (=repeated timestep) then do nothing
+  if (_is_repeated_timestep)
     return;
 
   // Otherwise move back the previous old solution and copy the current old solution,
   // This will probably not work with DT2, but I don't need to get it to work with dt2.
-  _t_step_old = _t_step;
-
   _older_solution.localize(_oldest_solution);
   // Set older solution to hold the previous old solution
   _current_old_solution.localize(_older_solution);
