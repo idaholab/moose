@@ -31,7 +31,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
 {
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-  // Turbulent crossflow
+  // Turbulent crossflow (stuff that live on the gaps)
   WijPrime.resize(n_gaps);
   Wij.resize(n_gaps);
   Wij_old.resize(n_gaps);
@@ -139,10 +139,16 @@ SubChannel1PhaseProblem::computeFF(double Re)
 void
 SubChannel1PhaseProblem::computeWij(int iz)
 {
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute crossflow in the inlet of the assembly it lives from node 1 "
+               "upwards, Axial Level = : ",
+               iz);
+  }
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   const Real & pitch = _subchannel_mesh.getPitch();
-
   Wij = Wij_global.col(iz);
   Wij_old = Wij_global_old.col(iz);
   auto dz = z_grid[iz] - z_grid[iz - 1];
@@ -168,7 +174,7 @@ SubChannel1PhaseProblem::computeWij(int iz)
     // hydraulic diameter in the ij direction
     auto Lij = pitch;
     // total local form loss in the ij direction
-    auto Kij = 481.759;
+    auto Kij = 481.759; // this will change
     //        2.0 *
     //        std::pow((1.0 - std::pow(Lij, 2.0) / std::pow(Lij -
     //        _subchannel_mesh._rod_diameter, 2.0)),
@@ -210,24 +216,12 @@ SubChannel1PhaseProblem::computeWij(int iz)
     // Set inertia terms to zero
     Term_out = 0.0;
     Term_in = 0.0;
-    // Calculation of Turbulent Crossflow
-    double abeta = 0.08; // thermal diffusion coefficient
-    WijPrime(i_gap) = abeta * 0.5 *
-                      (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
-                        (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
-                       (Si + Sj)) *
-                      Sij; // Kg/sec
-    // INITIAL GUESS (eventually the continue statement will be removed)
+
     auto Wijguess = 0.0;
-    if (Wij(i_gap) == 0.0)
-    {
-      if (isTransient())
-        Wijguess = Wij(i_gap);
-      else
-        Wijguess = Wij_global(i_gap, iz - 1);
-    }
+    if (isTransient())
+      Wijguess = Wij(i_gap);
     else
-      continue;
+      Wijguess = Wij_global(i_gap, iz - 1);
 
     auto newton_error = 1.0;
     auto newton_tolerance = 1e-10;
@@ -260,11 +254,10 @@ SubChannel1PhaseProblem::computeWij(int iz)
       Wijguess = Wijguess - Residual / (derivative + 1e-10);
       newton_error = std::abs(Residual);
     }
-    // apply global sign to crossflow
+    // Wij has a global sign at this point (Positive is from the lower index subchannel to the
+    // higher index)
     Wij(i_gap) = Wijguess;
   }
-  // Update global Matrix
-  WijPrime_global.col(iz) = WijPrime;
   Wij_global.col(iz) = Wij;
 }
 
@@ -331,8 +324,58 @@ SubChannel1PhaseProblem::computeMdot(int iz)
 }
 
 void
+SubChannel1PhaseProblem::computeWijPrime(int iz)
+{
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute turbulent crossflow in the inlet of the assembly it lives from node "
+               "1 upwards, Axial Level = : ",
+               iz);
+  }
+  auto z_grid = _subchannel_mesh.getZGrid();
+  unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
+  auto dz = z_grid[iz] - z_grid[iz - 1];
+  for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+  {
+    auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+    unsigned int i_ch = chans.first;
+    unsigned int j_ch = chans.second;
+    auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+    auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+    // area of channel i
+    auto Si = (*S_flow_soln)(node_in_i);
+    // area of channel j
+    auto Sj = (*S_flow_soln)(node_in_j);
+    // crossflow area between channels i,j dz*gap_width
+    auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+    // Calculation of Turbulent Crossflow
+    for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
+    {
+      double abeta = 0.08; // thermal diffusion coefficient
+      WijPrime(i_gap) = abeta * 0.5 *
+                        (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
+                          (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
+                         (Si + Sj)) *
+                        Sij; // Kg/sec
+    }
+  }
+  // Update global Matrix
+  WijPrime_global.col(iz) = WijPrime;
+}
+
+void
 SubChannel1PhaseProblem::computeDP(int iz)
 {
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute Pressure drop at the inlet of the assembly, it exists for nodes 1 "
+               "and above, Axial Level = : ",
+               iz);
+  }
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // Sweep through the channels of level
@@ -374,11 +417,12 @@ SubChannel1PhaseProblem::computeDP(int iz)
       auto Si = (*S_flow_soln)(node_in_i);
       auto Sj = (*S_flow_soln)(node_in_j);
       auto U_star = 0.0;
-      if ((*P_soln)(node_in_i) > (*P_soln)(node_in_j))
+      // figure out donor axial velocity
+      if (Wij_global(i_gap, iz) > 0.0)
       {
         U_star = (*mdot_soln)(node_out_i) / Si / rho_i;
       }
-      if ((*P_soln)(node_in_i) < (*P_soln)(node_in_j))
+      else
       {
         U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
       }
@@ -431,8 +475,6 @@ SubChannel1PhaseProblem::computeP(int iz)
 void
 SubChannel1PhaseProblem::computeH(int iz)
 {
-  auto z_grid = _subchannel_mesh.getZGrid();
-  auto dz = z_grid[iz] - z_grid[iz - 1];
   if (iz == 0)
   {
     for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
@@ -442,6 +484,8 @@ SubChannel1PhaseProblem::computeH(int iz)
     }
     return;
   }
+  auto z_grid = _subchannel_mesh.getZGrid();
+  auto dz = z_grid[iz] - z_grid[iz - 1];
   // go through the channels of the level.
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
