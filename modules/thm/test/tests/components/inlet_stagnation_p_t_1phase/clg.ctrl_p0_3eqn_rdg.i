@@ -63,7 +63,7 @@
 
 [ControlLogic]
   [./set_inlet_value]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = p0
     function = inlet_p0_fn

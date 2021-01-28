@@ -4,10 +4,10 @@
 
 class Function;
 
-class TimeFunctionControl : public THMControl
+class TimeFunctionComponentControl : public THMControl
 {
 public:
-  TimeFunctionControl(const InputParameters & parameters);
+  TimeFunctionComponentControl(const InputParameters & parameters);
 
   virtual void execute();
 

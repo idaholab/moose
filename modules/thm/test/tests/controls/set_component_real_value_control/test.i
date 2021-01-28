@@ -1,13 +1,7 @@
-# This is testing that controls are executed in the correct order
-#
-# If controls are executed in the right order, then T_inlet_ctrl
-# reads the value of temperature (T = 345 K) from a function. Then
-# this value is set into the BC and then is it sampled by a
-# postprocessor whose value is then written into a CSV file.
-#
-# If controls were executed in the wrong order, we would sample the
-# stagnation temperature function at time t = 0, which would give
-# T = 360 K back, and we would see this value in the CSV file instead.
+# This is testing that the values set by SetComponentRealValueControl are used.
+# Function T0_fn prescribes values for T0 at inlet. We output the function
+# values via a postprocessor `T_fn` and the inlet values via another
+# postprocessor `T_ctrl`. Those two values have to be equal.
 
 [GlobalParams]
   initial_p = 100.e3
@@ -45,7 +39,7 @@
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe1:in'
     p0 = 100.e3
-    T0 = 355.
+    T0 = 350.
   [../]
   [./outlet]
     type = Outlet1Phase
@@ -55,29 +49,33 @@
 []
 
 [Functions]
-  # Stagnation temperature in time
   [./T0_fn]
     type = PiecewiseLinear
-    x = '0   1e-5'
-    y = '360 345'
+    x = '0 1'
+    y = '350 345'
   [../]
 []
 
 [ControlLogic]
-  [./set_inlet_value_ctrl]
+  [./T_inlet_fn]
+    type = GetFunctionValueControl
+    function = T0_fn
+  [../]
+
+  [./set_inlet_value]
     type = SetComponentRealValueControl
     component = inlet
     parameter = T0
-    value = T_inlet_ctrl:value
-  [../]
-
-  [./T_inlet_ctrl]
-    type = GetFunctionValueControl
-    function = T0_fn
+    value = T_inlet_fn:value
   [../]
 []
 
 [Postprocessors]
+  [./T_fn]
+    type = FunctionValuePostprocessor
+    function = T0_fn
+  [../]
+
   [./T_ctrl]
     type = RealComponentParameterValuePostprocessor
     component = inlet
@@ -94,10 +92,7 @@
 
 [Executioner]
   type = Transient
-
-  start_time = 0
-  dt = 1e-5
-  num_steps = 1
+  dt = 0.1
   abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
@@ -108,6 +103,9 @@
 
   l_tol = 1e-3
   l_max_its = 5
+
+  start_time = 0.0
+  end_time = 1
 []
 
 [Outputs]

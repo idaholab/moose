@@ -65,14 +65,14 @@
 
 [ControlLogic]
   [./inlet_vel_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = vel
     function = inlet_vel_fn
   [../]
 
   [./inlet_T_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = inlet
     parameter = T
     function = inlet_T_fn

@@ -91,7 +91,7 @@
 
 [ControlLogic]
   [./pipe_T_wall_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = ht_pipe1
     parameter = T_wall
     function = T_wall_fn

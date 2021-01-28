@@ -67,7 +67,7 @@
 
 [ControlLogic]
   [./outlet_p_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = outlet
     parameter = p
     function = outlet_p_fn

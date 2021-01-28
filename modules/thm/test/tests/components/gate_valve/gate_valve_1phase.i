@@ -147,13 +147,13 @@ delta_t_open = 0.1
 
 [ControlLogic]
   [./pipe2_valve_control]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = pipe2_valve
     parameter = open_area_fraction
     function = pipe2_open_fn
   [../]
   [./pipe3_valve_control]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = pipe3_valve
     parameter = open_area_fraction
     function = pipe3_open_fn
