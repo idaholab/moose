@@ -1,3 +1,5 @@
+# INSProjection
+
 !syntax description /Kernels/INSProjection
 
 !syntax parameters /Kernels/INSProjection

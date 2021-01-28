@@ -1,3 +1,5 @@
+# NSEnergyInviscidSpecifiedDensityAndVelocityBC
+
 !syntax description /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC
 
 !syntax parameters /BCs/NSEnergyInviscidSpecifiedDensityAndVelocityBC

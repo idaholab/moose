@@ -1,3 +1,5 @@
+# NSGravityPower
+
 !syntax description /Kernels/NSGravityPower
 
 !syntax parameters /Kernels/NSGravityPower

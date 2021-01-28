@@ -1,3 +1,5 @@
+# NSThermalBC
+
 !syntax description /BCs/NSThermalBC
 
 !syntax parameters /BCs/NSThermalBC

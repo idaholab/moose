@@ -1,3 +1,5 @@
+# NSMachAux
+
 !syntax description /AuxKernels/NSMachAux
 
 !syntax parameters /AuxKernels/NSMachAux
