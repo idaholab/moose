@@ -57,14 +57,25 @@
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840'
   [../]
-  [./out_of_plane_pressure]
+  [./out_of_plane_pressure_function]
     type = 'Exodiff'
     input = 'out_of_plane_pressure.i'
     exodiff = 'out_of_plane_pressure_out.e'
     abs_zero = 1e-9
-    requirement = 'The system shall support setting the out-of-plane pressure for generalized plane strain problems'
+    requirement = 'The system shall support setting the out-of-plane pressure using a function for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'
     issues = '#7840'
+  [../]
+  [./out_of_plane_pressure_material]
+    type = 'Exodiff'
+    input = 'out_of_plane_pressure.i'
+    exodiff = 'out_of_plane_pressure_out.e'
+    cli_args = 'Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Modules/TensorMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material' 
+    abs_zero = 1e-9
+    requirement = 'The system shall support setting the out-of-plane pressure using a material property for generalized plane strain problems'
+    design = 'GeneralizedPlaneStrainAction.md'
+    issues = '#17250'
+#    prereq = out_of_plane_pressure_function
   [../]
   [./generalized_plane_strain_scalar_vector]
     type = 'Exodiff'

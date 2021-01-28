@@ -8,7 +8,7 @@ For a given scalar out-of-plane strain variable, the equilibrium condition in th
 \begin{equation}
 	\int_{A}{\sigma_{zz}dA} = \bar{N}_{zz}
 \end{equation}
-where $\bar{N}_{zz}$ is an applied force or integrated stress.  Thus, the residual corresponding to the scalar out-of-plane strain variable is
+where $\bar{N}_{zz}$ is an externally applied force.  Thus, the residual corresponding to the scalar out-of-plane strain variable is
 \begin{equation}
 	R = \int_{A}{\sigma_{zz}dA} - \bar{N}_{zz}
 \end{equation}
@@ -16,6 +16,8 @@ and the corresponding diagonal jacobian is
 \begin{equation}
 	K_{zz} = \frac{\partial R_{zz}}{\partial \epsilon_{zz}} = \int_{A}{\frac{\partial \sigma_{zz}}{\partial \epsilon_{zz}}dA} = \int_{A}{C_{2222}dA}
 \end{equation}
+
+The externally applied force, $\bar{N}_{zz}$, can be imposed as the integral of a pressure applied over the area. This pressure can be imposed using either a function (using the `out_of_plane_pressure_function` parameter), or a material property (using the `out_of_plane_pressure_material` parameter).
 
 The reference residual value used by [GeneralizedPlaneStrainReferenceResidual](/GeneralizedPlaneStrainReferenceResidual.md) is computed as
 \begin{equation}

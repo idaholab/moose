@@ -43,7 +43,7 @@ ParsedMaterialBase::validParams()
 
   // Function expression
   params.addRequiredParam<std::string>("function",
-                                       "FParser function expression for the phase free energy");
+                                       "FParser function expression for the parsed material");
 
   return params;
 }
