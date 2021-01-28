@@ -156,6 +156,21 @@ public:
   const std::vector<MooseVariableScalar *> & scalars() const;
 
   /**
+   * Call initialSetup for all variables
+   */
+  void initialSetup();
+
+  /**
+   * Call timestepSetup for all variables
+   */
+  void timestepSetup();
+
+  /**
+   * Call subdomainSetup for all variables
+   */
+  void subdomainSetup();
+
+  /**
    * Call residualSetup for all variables
    */
   void residualSetup();
