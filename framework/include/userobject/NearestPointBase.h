@@ -38,6 +38,12 @@ nearestPointBaseValidParams()
                             "set of 3 values in that file will represent a Point.  "
                             "This and 'points' cannot be both supplied.");
 
+  MooseEnum distnorm("point=0 radius=1", "point");
+  params.addParam<MooseEnum>(
+      "dist_norm", distnorm, "To specify whether the distance is defined based on point or radius");
+  MooseEnum axis("x=0 y=1 z=2", "z");
+  params.addParam<MooseEnum>("axis", axis, "The axis around which the radius is determined");
+
   // Add in the valid parameters
   params += validParams<UserObjectType>();
 
@@ -92,6 +98,11 @@ protected:
   std::vector<Point> _points;
   std::vector<std::shared_ptr<UserObjectType>> _user_objects;
 
+  // To specify whether the distance is defined based on point or radius
+  const unsigned int _dist_norm;
+  // The axis around which the radius is determined
+  const unsigned int _axis;
+
   // The list of InputParameter objects. This is a list because these cannot be copied (or moved).
   std::list<InputParameters> _sub_params;
 
@@ -104,8 +115,15 @@ protected:
 
 template <typename UserObjectType, typename BaseType>
 NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParameters & parameters)
-  : BaseType(parameters)
+  : BaseType(parameters),
+    _dist_norm(this->template getParam<MooseEnum>("dist_norm")),
+    _axis(this->template getParam<MooseEnum>("axis"))
 {
+  if (this->template getParam<MooseEnum>("dist_norm") != "radius" &&
+      parameters.isParamSetByUser("axis"))
+    this->template paramError("axis",
+                              "'axis' should only be set if 'dist_norm' is set to 'radius'");
+
   fillPoints();
 
   _user_objects.reserve(_points.size());
@@ -229,7 +247,27 @@ NearestPointBase<UserObjectType, BaseType>::nearestUserObject(const Point & p) c
   {
     const auto & current_point = it.value();
 
-    Real current_distance = (p - current_point).norm();
+    Real current_distance;
+    if (_dist_norm == 0)
+      // the distance is computed using standard norm
+      current_distance = (p - current_point).norm();
+    else
+    {
+      // the distance is to be computed based on radii
+      // in that case, we need to determine the 2 coordinate indices
+      // that define the radius
+      unsigned int i = 0;
+      unsigned int j = 1;
+
+      if (_axis == 0)
+        i = 2;
+      else if (_axis == 1)
+        j = 2;
+
+      current_distance = std::abs(
+          std::sqrt(p(i) * p(i) + p(j) * p(j)) -
+          std::sqrt(current_point(i) * current_point(i) + current_point(j) * current_point(j)));
+    }
 
     if (current_distance < closest_distance)
     {
