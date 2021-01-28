@@ -335,6 +335,15 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
 {
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
+  if (iz == 0)
+  {
+    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      h_soln->set(node, _fp->h_from_p_T((*P_soln)(node), (*T_soln)(node)));
+    }
+    return;
+  }
   // go through the channels of the level.
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
