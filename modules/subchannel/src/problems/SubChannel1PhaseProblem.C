@@ -416,6 +416,19 @@ SubChannel1PhaseProblem::computeDP(int iz)
 }
 
 void
+SubChannel1PhaseProblem::computeP(int iz)
+{
+  // Calculate pressure in the inlet of the cell assuming known outlet
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    // update Pressure solution
+    P_soln->set(node_in, (*P_soln)(node_out) + (*DP_soln)(node_out));
+  }
+}
+
+void
 SubChannel1PhaseProblem::computeEnthalpy(int iz)
 {
   auto z_grid = _subchannel_mesh.getZGrid();
