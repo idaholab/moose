@@ -98,16 +98,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
       ++optional_var_index_counter;
     }
   }
-
-  _default_value_zero.resize(_coupleable_max_qps, 0);
-  _default_gradient.resize(_coupleable_max_qps);
-  _default_second.resize(_coupleable_max_qps);
-  _default_vector_value_zero.resize(_coupleable_max_qps);
-  _default_vector_gradient.resize(_coupleable_max_qps);
-  _default_vector_curl.resize(_coupleable_max_qps);
-  _ad_default_gradient.resize(_coupleable_max_qps);
-  _ad_default_second.resize(_coupleable_max_qps);
-  _ad_default_vector_gradient.resize(_coupleable_max_qps);
 }
 
 bool
@@ -727,7 +717,10 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -749,7 +742,10 @@ Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -771,7 +767,10 @@ Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -793,7 +792,10 @@ Coupleable::coupledDotDotOld(const std::string & var_name, unsigned int comp) co
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -815,7 +817,10 @@ Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp) co
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_value_zero.resize(_coupleable_max_qps);
     return _default_vector_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -828,7 +833,10 @@ Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_value_zero.resize(_coupleable_max_qps);
     return _default_vector_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -841,7 +849,10 @@ Coupleable::coupledVectorDotOld(const std::string & var_name, unsigned int comp)
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_value_zero.resize(_coupleable_max_qps);
     return _default_vector_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -854,7 +865,10 @@ Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int co
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_value_zero.resize(_coupleable_max_qps);
     return _default_vector_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -867,7 +881,10 @@ Coupleable::coupledVectorDotDu(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -880,7 +897,10 @@ Coupleable::coupledVectorDotDotDu(const std::string & var_name, unsigned int com
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -981,7 +1001,10 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1003,7 +1026,10 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) con
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1025,7 +1051,10 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp) con
 {
   const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1038,7 +1067,10 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1051,7 +1083,10 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
 
   if (!_coupleable_neighbor)
@@ -1065,7 +1100,10 @@ Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int
   const auto * var = getVar(var_name, comp);
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1078,7 +1116,10 @@ Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::GradientDot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1091,7 +1132,10 @@ Coupleable::coupledGradientDotDot(const std::string & var_name, unsigned int com
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_gradient.resize(_coupleable_max_qps);
     return _default_gradient;
+  }
   checkFuncType(var_name, VarType::GradientDot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1104,7 +1148,10 @@ Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int com
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_gradient.resize(_coupleable_max_qps);
     return _default_vector_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1117,7 +1164,10 @@ Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int 
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_gradient.resize(_coupleable_max_qps);
     return _default_vector_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1130,7 +1180,10 @@ Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned in
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_gradient.resize(_coupleable_max_qps);
     return _default_vector_gradient;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
 
   if (!_coupleable_neighbor)
@@ -1182,7 +1235,10 @@ Coupleable::coupledCurl(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_curl.resize(_coupleable_max_qps);
     return _default_vector_curl;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1195,7 +1251,10 @@ Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp) cons
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_curl.resize(_coupleable_max_qps);
     return _default_vector_curl;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1208,7 +1267,10 @@ Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp) co
 {
   const auto * var = getVectorVar(var_name, comp);
   if (!var)
+  {
+    _default_vector_curl.resize(_coupleable_max_qps);
     return _default_vector_curl;
+  }
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
 
   if (!_coupleable_neighbor)
@@ -1221,7 +1283,10 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_second.resize(_coupleable_max_qps);
     return _default_second;
+  }
   checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1234,7 +1299,10 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp) co
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_second.resize(_coupleable_max_qps);
     return _default_second;
+  }
   checkFuncType(var_name, VarType::Second, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1247,7 +1315,10 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_second.resize(_coupleable_max_qps);
     return _default_second;
+  }
   checkFuncType(var_name, VarType::Second, FuncAge::Older);
 
   if (!_coupleable_neighbor)
@@ -1261,7 +1332,10 @@ Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int c
   const auto * var = getVar(var_name, comp);
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
+  {
+    _default_second.resize(_coupleable_max_qps);
     return _default_second;
+  }
   checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1365,7 +1439,10 @@ Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
@@ -1378,7 +1455,10 @@ Coupleable::coupledNodalDotOld(const std::string & var_name, unsigned int comp) 
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1391,7 +1471,10 @@ Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int com
 {
   const auto * var = getVar(var_name, comp);
   if (!var)
+  {
+    _default_value_zero.resize(_coupleable_max_qps, 0);
     return _default_value_zero;
+  }
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
 
   if (!_coupleable_neighbor)
@@ -1655,18 +1738,21 @@ Coupleable::getADDefaultVectorValue(const std::string & var_name) const
 const ADVariableGradient &
 Coupleable::getADDefaultGradient() const
 {
+  _ad_default_gradient.resize(_coupleable_max_qps);
   return _ad_default_gradient;
 }
 
 const ADVectorVariableGradient &
 Coupleable::getADDefaultVectorGradient() const
 {
+  _ad_default_vector_gradient.resize(_coupleable_max_qps);
   return _ad_default_vector_gradient;
 }
 
 const ADVariableSecond &
 Coupleable::getADDefaultSecond() const
 {
+  _ad_default_second.resize(_coupleable_max_qps);
   return _ad_default_second;
 }
 
