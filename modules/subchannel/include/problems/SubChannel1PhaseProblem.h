@@ -25,6 +25,7 @@ public:
   void computeWij(int iz);
   void computeSumWij(int iz);
   void computeMdot(int iz);
+  void computeWijPrime(int iz);
   void computeDP(int iz);
   void computeP(int iz);
   void computeH(int iz);
