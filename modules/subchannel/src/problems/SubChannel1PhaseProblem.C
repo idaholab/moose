@@ -264,6 +264,13 @@ SubChannel1PhaseProblem::computeWij(int iz)
 void
 SubChannel1PhaseProblem::computeSumWij(int iz)
 {
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute sum of crossflows in the inlet of the assembly it lives from node 1 "
+               "upwards, Axial Level = : ",
+               iz);
+  }
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -275,7 +282,7 @@ SubChannel1PhaseProblem::computeSumWij(int iz)
       SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz);
       counter++;
     }
-    // The total crossflow coming out of cell i [kg/sec]
+    // The net crossflow coming out of cell i [kg/sec]
     SumWij_soln->set(node_out, SumWij);
   }
 }
@@ -283,6 +290,13 @@ SubChannel1PhaseProblem::computeSumWij(int iz)
 void
 SubChannel1PhaseProblem::computeMdot(int iz)
 {
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute massflow in the inlet of the assembly it lives from node 1 "
+               "upwards, Axial Level = : ",
+               iz);
+  }
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
   // go through the channels of the level.
@@ -462,6 +476,14 @@ SubChannel1PhaseProblem::computeDP(int iz)
 void
 SubChannel1PhaseProblem::computeP(int iz)
 {
+  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
+  if (iz == nz)
+  {
+    mooseError(name(),
+               " Can't compute Pressure in the outlet of the assembly it lives from node nz - 1 "
+               "downwards, Axial Level = : ",
+               iz);
+  }
   // Calculate pressure in the inlet of the cell assuming known outlet
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
