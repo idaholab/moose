@@ -331,6 +331,91 @@ SubChannel1PhaseProblem::computeMdot(int iz)
 }
 
 void
+SubChannel1PhaseProblem::computeDP(int iz)
+{
+  auto z_grid = _subchannel_mesh.getZGrid();
+  auto dz = z_grid[iz] - z_grid[iz - 1];
+  // Sweep through the channels of level
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    // Find the nodes for the top and bottom of this element.
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto rho_in = (*rho_soln)(node_in);
+    auto rho_out = (*rho_soln)(node_out);
+    auto T_in = (*T_soln)(node_in);
+    auto S = (*S_flow_soln)(node_in);
+    auto w_perim = (*w_perim_soln)(node_in);
+    // hydraulic diameter in the i direction
+    auto Dh_i = 4.0 * S / w_perim;
+    auto Time_Term =
+        ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / dt() -
+        dz * 2 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / dt();
+
+    auto Mass_Term1 = std::pow((*mdot_soln)(node_out), 2.0) * (1 / S / rho_out - 1 / S / rho_in);
+    auto Mass_Term2 = -2 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
+
+    auto CrossFlow_Term = 0.0;
+    auto Turbulent_Term = 0.0;
+    auto C_T = 1.0; // Turbulent modeling parameter
+
+    unsigned int counter = 0;
+    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+    {
+      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+      unsigned int ii_ch = chans.first;
+      unsigned int jj_ch = chans.second;
+      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+      auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
+      auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
+      auto rho_i = (*rho_soln)(node_in_i);
+      auto rho_j = (*rho_soln)(node_in_j);
+      auto Si = (*S_flow_soln)(node_in_i);
+      auto Sj = (*S_flow_soln)(node_in_j);
+      auto U_star = 0.0;
+      if ((*P_soln)(node_in_i) > (*P_soln)(node_in_j))
+      {
+        U_star = (*mdot_soln)(node_out_i) / Si / rho_i;
+      }
+      if ((*P_soln)(node_in_i) < (*P_soln)(node_in_j))
+      {
+        U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
+      }
+
+      CrossFlow_Term +=
+          _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * U_star;
+
+      Turbulent_Term += WijPrime_global(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
+                                                      (*mdot_soln)(node_out_j) / Sj / rho_j -
+                                                      (*mdot_soln)(node_out_i) / Si / rho_i);
+      counter++;
+    }
+    Turbulent_Term *= C_T;
+
+    auto mu = _fp->mu_from_rho_T(rho_in, T_in);
+    auto Re = (((*mdot_soln)(node_in) / S) * Dh_i / mu);
+    auto fi = computeFrictionFactor(Re);
+    auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
+                         (S * (*rho_soln)(node_out));
+    auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
+    auto DP = 0.0;
+    if (isTransient())
+    {
+      DP = std::pow(S, -1.0) * (Time_Term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
+                                Turbulent_Term + Friction_Term + Gravity_Term); // Pa
+    }
+    else
+    {
+      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term +
+                                Friction_Term + Gravity_Term); // Pa
+    }
+    // update solution
+    DP_soln->set(node_out, DP);
+  }
+}
+
+void
 SubChannel1PhaseProblem::computeEnthalpy(int iz)
 {
   auto z_grid = _subchannel_mesh.getZGrid();
@@ -431,91 +516,6 @@ SubChannel1PhaseProblem::computeProperties(int iz)
       h_soln->set(node_in, _fp->h_from_p_T((*P_soln)(node_in), (*T_soln)(node_in)));
       rho_soln->set(node_in, _fp->rho_from_p_T((*P_soln)(node_in), (*T_soln)(node_in)));
     }
-  }
-}
-
-void
-SubChannel1PhaseProblem::computeDP(int iz)
-{
-  auto z_grid = _subchannel_mesh.getZGrid();
-  auto dz = z_grid[iz] - z_grid[iz - 1];
-  // Sweep through the channels of level
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-  {
-    // Find the nodes for the top and bottom of this element.
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    auto rho_in = (*rho_soln)(node_in);
-    auto rho_out = (*rho_soln)(node_out);
-    auto T_in = (*T_soln)(node_in);
-    auto S = (*S_flow_soln)(node_in);
-    auto w_perim = (*w_perim_soln)(node_in);
-    // hydraulic diameter in the i direction
-    auto Dh_i = 4.0 * S / w_perim;
-    auto Time_Term =
-        ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / dt() -
-        dz * 2 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / dt();
-
-    auto Mass_Term1 = std::pow((*mdot_soln)(node_out), 2.0) * (1 / S / rho_out - 1 / S / rho_in);
-    auto Mass_Term2 = -2 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
-
-    auto CrossFlow_Term = 0.0;
-    auto Turbulent_Term = 0.0;
-    auto C_T = 1.0; // Turbulent modeling parameter
-
-    unsigned int counter = 0;
-    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-    {
-      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-      unsigned int ii_ch = chans.first;
-      unsigned int jj_ch = chans.second;
-      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-      auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
-      auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-      auto rho_i = (*rho_soln)(node_in_i);
-      auto rho_j = (*rho_soln)(node_in_j);
-      auto Si = (*S_flow_soln)(node_in_i);
-      auto Sj = (*S_flow_soln)(node_in_j);
-      auto U_star = 0.0;
-      if ((*P_soln)(node_in_i) > (*P_soln)(node_in_j))
-      {
-        U_star = (*mdot_soln)(node_out_i) / Si / rho_i;
-      }
-      if ((*P_soln)(node_in_i) < (*P_soln)(node_in_j))
-      {
-        U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
-      }
-
-      CrossFlow_Term +=
-          _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * U_star;
-
-      Turbulent_Term += WijPrime_global(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
-                                                      (*mdot_soln)(node_out_j) / Sj / rho_j -
-                                                      (*mdot_soln)(node_out_i) / Si / rho_i);
-      counter++;
-    }
-    Turbulent_Term *= C_T;
-
-    auto mu = _fp->mu_from_rho_T(rho_in, T_in);
-    auto Re = (((*mdot_soln)(node_in) / S) * Dh_i / mu);
-    auto fi = computeFrictionFactor(Re);
-    auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
-                         (S * (*rho_soln)(node_out));
-    auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
-    auto DP = 0.0;
-    if (isTransient())
-    {
-      DP = std::pow(S, -1.0) * (Time_Term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
-                                Turbulent_Term + Friction_Term + Gravity_Term); // Pa
-    }
-    else
-    {
-      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term +
-                                Friction_Term + Gravity_Term); // Pa
-    }
-    // update solution
-    DP_soln->set(node_out, DP);
   }
 }
 
