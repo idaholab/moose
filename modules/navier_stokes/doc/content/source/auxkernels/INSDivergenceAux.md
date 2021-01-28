@@ -1,3 +1,5 @@
+# INSDivergenceAux
+
 !syntax description /AuxKernels/INSDivergenceAux
 
 !syntax parameters /AuxKernels/INSDivergenceAux

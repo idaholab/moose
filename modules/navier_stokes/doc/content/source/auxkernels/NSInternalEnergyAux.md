@@ -1,3 +1,5 @@
+# NSInternalEnergyAux
+
 !syntax description /AuxKernels/NSInternalEnergyAux
 
 !syntax parameters /AuxKernels/NSInternalEnergyAux

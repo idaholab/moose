@@ -1,3 +1,5 @@
+# INSChorinPredictor
+
 !syntax description /Kernels/INSChorinPredictor
 
 !syntax parameters /Kernels/INSChorinPredictor

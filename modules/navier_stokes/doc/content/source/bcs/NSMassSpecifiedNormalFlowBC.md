@@ -1,3 +1,5 @@
+# NSMassSpecifiedNormalFlowBC
+
 !syntax description /BCs/NSMassSpecifiedNormalFlowBC
 
 !syntax parameters /BCs/NSMassSpecifiedNormalFlowBC
