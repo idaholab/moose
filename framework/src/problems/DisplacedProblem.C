@@ -1075,3 +1075,24 @@ DisplacedProblem::computingScalingResidual() const
 {
   return _mproblem.computingScalingResidual();
 }
+
+void
+DisplacedProblem::initialSetup()
+{
+  _displaced_nl.initialSetup();
+  _displaced_aux.initialSetup();
+}
+
+void
+DisplacedProblem::timestepSetup()
+{
+  _displaced_nl.timestepSetup();
+  _displaced_aux.timestepSetup();
+}
+
+void
+DisplacedProblem::haveADObjects(const bool have_ad_objects)
+{
+  _have_ad_objects = have_ad_objects;
+  _mproblem.SubProblem::haveADObjects(have_ad_objects);
+}

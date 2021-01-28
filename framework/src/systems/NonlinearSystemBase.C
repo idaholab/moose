@@ -260,6 +260,8 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  SystemBase::initialSetup();
+
   {
     CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
 
@@ -352,6 +354,8 @@ NonlinearSystemBase::initialSetup()
 void
 NonlinearSystemBase::timestepSetup()
 {
+  SystemBase::timestepSetup();
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.timestepSetup(tid);
@@ -1400,9 +1404,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
-NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
+NonlinearSystemBase::residualSetup()
 {
-  TIME_SECTION(_compute_residual_internal_timer);
+  SystemBase::residualSetup();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1415,12 +1419,19 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _element_dampers.residualSetup(tid);
     _nodal_dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
-    _vars[tid].residualSetup();
   }
   _scalar_kernels.residualSetup();
   _constraints.residualSetup();
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
+}
+
+void
+NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
+{
+  TIME_SECTION(_compute_residual_internal_timer);
+
+  residualSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -2320,6 +2331,29 @@ NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 }
 
 void
+NonlinearSystemBase::jacobianSetup()
+{
+  SystemBase::jacobianSetup();
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    _kernels.jacobianSetup(tid);
+    _nodal_kernels.jacobianSetup(tid);
+    _dirac_kernels.jacobianSetup(tid);
+    if (_doing_dg)
+      _dg_kernels.jacobianSetup(tid);
+    _interface_kernels.jacobianSetup(tid);
+    _element_dampers.jacobianSetup(tid);
+    _nodal_dampers.jacobianSetup(tid);
+    _integrated_bcs.jacobianSetup(tid);
+  }
+  _scalar_kernels.jacobianSetup();
+  _constraints.jacobianSetup();
+  _general_dampers.jacobianSetup();
+  _nodal_bcs.jacobianSetup();
+}
+
+void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
   // Make matrix ready to use
@@ -2354,24 +2388,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 #endif // LIBMESH_HAVE_PETSC
   }
 
-  // jacobianSetup /////
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.jacobianSetup(tid);
-    _nodal_kernels.jacobianSetup(tid);
-    _dirac_kernels.jacobianSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.jacobianSetup(tid);
-    _interface_kernels.jacobianSetup(tid);
-    _element_dampers.jacobianSetup(tid);
-    _nodal_dampers.jacobianSetup(tid);
-    _integrated_bcs.jacobianSetup(tid);
-    _vars[tid].jacobianSetup();
-  }
-  _scalar_kernels.jacobianSetup();
-  _constraints.jacobianSetup();
-  _general_dampers.jacobianSetup();
-  _nodal_bcs.jacobianSetup();
+  jacobianSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
@@ -3537,7 +3554,7 @@ NonlinearSystemBase::assembleScalingVector()
     for (const auto * const field_var : field_variables)
     {
       mooseAssert(field_var->count() == 1,
-                  "Contact Robert Carlsen and tell him to make this work for array variables.");
+                  "Contact Alex Lindsay and tell him to make this work for array variables.");
       dof_map.dof_indices(elem, dof_indices, field_var->number());
       for (const auto dof : dof_indices)
         scaling_vector.set(dof, field_var->scalingFactor());
@@ -3546,7 +3563,7 @@ NonlinearSystemBase::assembleScalingVector()
   for (const auto * const scalar_var : scalar_variables)
   {
     mooseAssert(scalar_var->count() == 1,
-                "Contact Robert Carlsen and tell him to make this work for array variables.");
+                "Contact Alex Lindsay and tell him to make this work for array variables.");
     dof_map.SCALAR_dof_indices(dof_indices, scalar_var->number());
     for (const auto dof : dof_indices)
       scaling_vector.set(dof, scalar_var->scalingFactor());

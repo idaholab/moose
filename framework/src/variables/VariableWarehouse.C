@@ -235,6 +235,27 @@ VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_numb
 }
 
 void
+VariableWarehouse::initialSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->initialSetup();
+}
+
+void
+VariableWarehouse::timestepSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->timestepSetup();
+}
+
+void
+VariableWarehouse::subdomainSetup()
+{
+  for (auto & pair : _all_objects)
+    pair.second->subdomainSetup();
+}
+
+void
 VariableWarehouse::jacobianSetup()
 {
   for (auto & pair : _all_objects)

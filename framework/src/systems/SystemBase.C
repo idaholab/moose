@@ -1513,6 +1513,41 @@ SystemBase::computingScalingJacobian() const
   return _subproblem.computingScalingJacobian();
 }
 
+void
+SystemBase::initialSetup()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].initialSetup();
+}
+
+void
+SystemBase::timestepSetup()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].timestepSetup();
+}
+
+void
+SystemBase::subdomainSetup()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].subdomainSetup();
+}
+
+void
+SystemBase::residualSetup()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].residualSetup();
+}
+
+void
+SystemBase::jacobianSetup()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].jacobianSetup();
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

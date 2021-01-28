@@ -911,6 +911,10 @@ FEProblemBase::initialSetup()
   // Auxilary variable initialSetup calls
   _aux->initialSetup();
 
+  if (_displaced_problem)
+    // initialSetup for displaced systems
+    _displaced_problem->initialSetup();
+
   _nl->setSolution(*(_nl->system().current_local_solution.get()));
 
   // Update the nearest node searches (has to be called after the problem is all set up)
@@ -1160,6 +1164,10 @@ FEProblemBase::timestepSetup()
 
   _aux->timestepSetup();
   _nl->timestepSetup();
+
+  if (_displaced_problem)
+    // timestepSetup for displaced systems
+    _displaced_problem->timestepSetup();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
@@ -6963,11 +6971,11 @@ FEProblemBase::addOutput(const std::string & object_type,
 }
 
 void
-FEProblemBase::haveADObjects(bool have_ad_objects)
+FEProblemBase::haveADObjects(const bool have_ad_objects)
 {
   _have_ad_objects = have_ad_objects;
   if (_displaced_problem)
-    _displaced_problem->haveADObjects(have_ad_objects);
+    _displaced_problem->SubProblem::haveADObjects(have_ad_objects);
 }
 
 const SystemBase &

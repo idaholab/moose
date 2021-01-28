@@ -865,6 +865,13 @@ public:
    */
   bool solutionStatesInitialized() const { return _solution_states_initialized; }
 
+  /// Setup Functions
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  virtual void subdomainSetup();
+  virtual void residualSetup();
+  virtual void jacobianSetup();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
