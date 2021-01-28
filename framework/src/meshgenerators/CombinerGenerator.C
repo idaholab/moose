@@ -42,29 +42,103 @@ CombinerGenerator::validParams()
       "be left blank or N positions must be given.  If 1 input was given then this MUST be "
       "provided.");
 
+  params.addParam<std::vector<FileName>>(
+      "positions_file", "Alternative way to provide the position of each given mesh.");
+
   return params;
 }
 
 CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _positions(getParam<std::vector<Point>>("positions"))
+    _positions(getParam<std::vector<Point>>("positions")),
+    _positions_file(getParam<std::vector<FileName>>("positions_file"))
 {
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
 
-  if (_input_names.size() == 1 && _positions.empty())
-    paramError("positions",
-               "If only one input mesh is given, then 'positions' must also be supplied");
+  if (!_positions.empty() && !_positions_file.empty())
+    mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in "
+               "CombinerGenerator ",
+               _name);
 
-  if (_positions.size() && (_input_names.size() != 1) && (_input_names.size() != _positions.size()))
-    paramError("positions",
-               "If more than one input mesh is provided then the number of positions provided must "
-               "exactly match the number of input meshes.");
+  if (_input_names.size() == 1)
+    if (_positions.empty() && _positions_file.empty())
+      paramError("positions",
+                 "If only one input mesh is given, then 'positions' or 'positions_file' must also "
+                 "be supplied");
+
+  if (_input_names.size() != 1)
+    if (_positions.size() && (_input_names.size() != _positions.size()))
+      paramError(
+          "positions",
+          "If more than one input mesh is provided then the number of positions provided must "
+          "exactly match the number of input meshes.");
 
   // Grab the input mesh references as pointers
   for (auto & input_name : _input_names)
     _meshes.push_back(&getMeshByName(input_name));
+}
+
+void
+CombinerGenerator::fillPositions()
+{
+  if (isParamValid("positions"))
+    _generator_positions = _positions;
+  else if (isParamValid("positions_file"))
+  {
+    for (unsigned int p_file_it = 0; p_file_it < _positions_file.size(); p_file_it++)
+    {
+      std::string positions_file = _positions_file[p_file_it];
+
+      std::vector<Real> positions_vec;
+
+      // Read the file on the root processor then broadcast it
+      if (processor_id() == 0)
+      {
+        MooseUtils::checkFileReadable(positions_file);
+
+        std::ifstream is(positions_file.c_str());
+        std::istream_iterator<Real> begin(is), end;
+        positions_vec.insert(positions_vec.begin(), begin, end);
+
+        if (positions_vec.size() % LIBMESH_DIM != 0)
+          mooseError("Number of entries in 'positions_file' ",
+                     positions_file,
+                     " must be divisible by ",
+                     LIBMESH_DIM,
+                     " in CombinerGenerator ",
+                     name());
+      }
+
+      // Bradcast the vector to all processors
+      std::size_t num_positions = positions_vec.size();
+      _communicator.broadcast(num_positions);
+      positions_vec.resize(num_positions);
+      _communicator.broadcast(positions_vec);
+
+      if (_input_names.size() != 1)
+      {
+        auto n_pos = num_positions / LIBMESH_DIM;
+        if (n_pos && (_input_names.size() != n_pos))
+          paramError("positions_file",
+                     "If more than one input mesh is provided then the number of positions must "
+                     "exactly match the number of input meshes.");
+      }
+
+      for (unsigned int i = 0; i < positions_vec.size(); i += LIBMESH_DIM)
+      {
+        Point position;
+
+        // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely
+        // untested!
+        for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+          position(j) = positions_vec[i + j];
+
+        _generator_positions.push_back(position);
+      }
+    }
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -73,6 +147,8 @@ CombinerGenerator::generate()
   // Two cases:
   // 1. Multiple input meshes and optional positions
   // 2. One input mesh and multiple positions
+
+  fillPositions();
 
   // Case 1
   if (_meshes.size() != 1)
@@ -92,10 +168,12 @@ CombinerGenerator::generate()
         paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
 
       // Move It
-      if (_positions.size())
+      if (_generator_positions.size())
       {
-        MeshTools::Modification::translate(
-            *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
+        MeshTools::Modification::translate(*other_mesh,
+                                           _generator_positions[i](0),
+                                           _generator_positions[i](1),
+                                           _generator_positions[i](2));
       }
 
       copyIntoMesh(*mesh, *other_mesh);
@@ -118,8 +196,10 @@ CombinerGenerator::generate()
     if (!final_mesh)
       mooseError("Unable to copy mesh!");
 
-    MeshTools::Modification::translate(
-        *final_mesh, _positions[0](0), _positions[0](1), _positions[0](2));
+    MeshTools::Modification::translate(*final_mesh,
+                                       _generator_positions[0](0),
+                                       _generator_positions[0](1),
+                                       _generator_positions[0](2));
 
     // Here's the way this is going to work:
     // I'm going to make one more copy of the input_mesh so that I can move it and copy it in
@@ -138,11 +218,13 @@ CombinerGenerator::generate()
     if (!translated_mesh)
       mooseError("Unable to copy mesh!");
 
-    for (MooseIndex(_meshes) i = 1; i < _positions.size(); ++i)
+    for (MooseIndex(_meshes) i = 1; i < _generator_positions.size(); ++i)
     {
       // Move
-      MeshTools::Modification::translate(
-          *translated_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
+      MeshTools::Modification::translate(*translated_mesh,
+                                         _generator_positions[i](0),
+                                         _generator_positions[i](1),
+                                         _generator_positions[i](2));
 
       // Copy into final mesh
       copyIntoMesh(*final_mesh, *translated_mesh);

@@ -36,6 +36,17 @@ Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner_multi_translate.png style=width:75%;
 
+Alternatively, the same displacement vectors can be supplied in a file with the `positions_file` option. The above mesh can equivalently be generated with the following.
+
+!listing moose/test/tests/meshgenerators/combiner_generator/combiner_multi_input_translate_from_file.i
+         block=Mesh
+
+where the `positions.txt` file contains the floating point triplets.
+
+!listing moose/test/tests/meshgenerators/combiner_generator/positions.txt
+
+The same restrictions on `positions` also apply to the number of entries in `position_file`.
+
 ### 3. Copy a Single Input Multiple Times With Translations
 
 The final option is to provide exactly one `inputs` but specify multiple `positions`.  This will cause the single input to be copied multiple times with the position of each copy specified by the `positions` parameter.  For example
@@ -46,6 +57,8 @@ The final option is to provide exactly one `inputs` but specify multiple `positi
 Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner.png style=width:75%;
+
+Again, the same capability can be achieved with the `positions_file` option.
 
 !syntax parameters /Mesh/CombinerGenerator
 
