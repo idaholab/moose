@@ -21,14 +21,15 @@ public:
   virtual void syncSolutions(Direction direction) override;
   virtual bool converged() override;
   virtual void initialSetup() override;
-  double computeFrictionFactor(double Re);
+  double computeFF(double Re);
   void computeWij(int iz);
   void computeSumWij(int iz);
   void computeMdot(int iz);
   void computeDP(int iz);
   void computeP(int iz);
-  void computeEnthalpy(int iz);
-  void computeProperties(int iz);
+  void computeH(int iz);
+  void computeT(int iz);
+  void computeRho(int iz);
 
 protected:
   Eigen::VectorXd Wij;
