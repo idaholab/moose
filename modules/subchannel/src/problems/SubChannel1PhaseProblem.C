@@ -111,7 +111,7 @@ SubChannel1PhaseProblem::converged()
 }
 
 double
-SubChannel1PhaseProblem::computeFrictionFactor(double Re)
+SubChannel1PhaseProblem::computeFF(double Re)
 {
   double a, b;
   if (Re < 1)
@@ -395,7 +395,7 @@ SubChannel1PhaseProblem::computeDP(int iz)
 
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Re = (((*mdot_soln)(node_in) / S) * Dh_i / mu);
-    auto fi = computeFrictionFactor(Re);
+    auto fi = computeFF(Re);
     auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
                          (S * (*rho_soln)(node_out));
     auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
@@ -429,7 +429,7 @@ SubChannel1PhaseProblem::computeP(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeEnthalpy(int iz)
+SubChannel1PhaseProblem::computeH(int iz)
 {
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
@@ -512,23 +512,32 @@ SubChannel1PhaseProblem::computeEnthalpy(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeProperties(int iz)
+SubChannel1PhaseProblem::computeT(int iz)
+{
+  if (iz == 0)
+  {
+    mooseError(name(),
+               " Can't compute temperature in the inlet of the assembly, it's a boundary "
+               "condition, Axial Level = : ",
+               iz);
+  }
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto T = _fp->T_from_p_h((*P_soln)(node), (*h_soln)(node));
+    T_soln->set(node, T); // Kelvin
+  }
+}
+
+void
+SubChannel1PhaseProblem::computeRho(int iz)
 {
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
-    // Find the nodes for the top and bottom of this element.
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    auto T_out = _fp->T_from_p_h((*P_soln)(node_out), (*h_soln)(node_out));
-    auto rho_out = _fp->rho_from_p_T((*P_soln)(node_out), T_out);
-    T_soln->set(node_out, T_out);     // Kelvin
-    rho_soln->set(node_out, rho_out); // Kg/m3
-    // Update the solution vectors at the inlet of the whole assembly.
-    if (iz == 1)
-    {
-      h_soln->set(node_in, _fp->h_from_p_T((*P_soln)(node_in), (*T_soln)(node_in)));
-      rho_soln->set(node_in, _fp->rho_from_p_T((*P_soln)(node_in), (*T_soln)(node_in)));
-    }
+    // Find the node
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto rho = _fp->rho_from_p_T((*P_soln)(node), (*T_soln)(node));
+    rho_soln->set(node, rho); // Kg/m3
   }
 }
 
@@ -539,88 +548,6 @@ SubChannel1PhaseProblem::externalSolve()
 
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
 
-  Eigen::MatrixXd PCYCLES(nz, 2);
-  // Initialize
-  PCYCLES.setZero();
-  auto Ptol = 1E-10, Mtol = 1E-10;
-  // nz level calculations
-  for (unsigned int axial_level = 1; axial_level < nz + 1; axial_level++)
-  {
-    _console << "AXIAL LEVEL: " << axial_level << std::endl;
-    double PError = 1.0;
-    unsigned int stencilSize = 5;
-    int max_axial_cycles = 200;
-    int axial_cycles = 0;
-    int max_level_cycles = 200;
-    int bottom_limiter;
-    while (PError > Ptol && axial_cycles <= max_axial_cycles)
-    {
-      if (axial_level < stencilSize)
-        bottom_limiter = 1;
-      else
-        bottom_limiter = axial_level - stencilSize + 1;
-      axial_cycles++;
-      PCYCLES(axial_level - 1, 0) = axial_cycles;
-      if (axial_cycles == max_axial_cycles)
-      {
-        mooseError(name(), " Pressure loop didn't converge, axial_cycles: ", axial_cycles);
-      }
-      // L2 norm of old pressure solution vector
-      auto P_L2norm_old = P_soln->L2norm();
-      // Sweep upwards through the channels.
-      for (unsigned int iz = bottom_limiter; iz < axial_level + 1; iz++)
-      {
-        double MError = 1.0;
-        int level_cycles = 0;
-        // Lateral Loop... crossflow calculation
-        while (MError > Mtol && (level_cycles <= max_level_cycles))
-        {
-          level_cycles++;
-          if (level_cycles == max_level_cycles)
-          {
-            mooseError(name(), " Level loop didn't converge, level_cycles: ", level_cycles);
-          }
-          // L2 norm of old mass flow solution vector
-          auto mdot_L2norm_old = mdot_soln->L2norm();
-          // Calculate crossflow between channel i-j using crossflow momentum equation
-          computeWij(iz);
-          // calculate Sum of crossflow per channel
-          computeSumWij(iz);
-          // Calculate mass flow
-          computeMdot(iz);
-          // Calculate enthalpy
-          computeEnthalpy(iz);
-          // Update fluid Properties
-          computeProperties(iz);
-          // Calculate Error per level
-          auto mdot_L2norm_new = mdot_soln->L2norm();
-          MError = std::abs((mdot_L2norm_new - mdot_L2norm_old) / (mdot_L2norm_old + 1E-14));
-        }
-        // Populate Pressure Drop vector
-        computeDP(iz);
-      }
-      // At this point we reach the top of the oscillating stencil and now backsolve
-      if (axial_level == nz)
-        bottom_limiter = 1;
-      // Calculate pressure everywhere (in the stencil) using the axial momentum equation
-      // Sweep downwards through the channels level by level
-      for (int iz = axial_level; iz > bottom_limiter - 1; iz--) // nz calculations
-      {
-        for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          // update Pressure solution
-          P_soln->set(node_in, (*P_soln)(node_out) + (*DP_soln)(node_out));
-        }
-      }
-      //      // Calculate pressure Error
-      auto P_L2norm_new = P_soln->L2norm();
-      PError = std::abs((P_L2norm_new - P_L2norm_old) / (P_L2norm_old + 1E-14));
-      _console << "- PError: " << PError << std::endl;
-      PCYCLES(axial_level - 1, 1) = PError;
-    }
-  }
   auto Powerin = 0.0;
   auto Powerout = 0.0;
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
