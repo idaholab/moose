@@ -15,7 +15,7 @@ This is a list of [basis components](basis.md) relevant to the [aqueous equilibr
 - No member must appear more than once in this list;
 - These components must be chosen from the "basis species" in the [database](geochemistry/database/index.md), the [sorbing sites](equilibrium.md) (if any) and the decoupled redox states that are in [disequilibrium](basis.md) (if any).
 
-Any [redox pair](basis.md) that is not in this list or the [`kinetic_redox`](kinetics.md) list, will be assumed to be at equilibrium with the aqueous solution and will be considered a [secondary species](basis.md).
+Any [redox pair](basis.md) that is not in this list or the [`kinetic_redox`](theory/index.md) list, will be assumed to be at equilibrium with the aqueous solution and will be considered a [secondary species](basis.md).
 
 All these species, except H2O, may be later swapped out of this list, either by a manual user-prescribed [swap](swap.md) (and replaced by a mineral or a gas of fixed fugacity, for instance), or during the numerical solve.  For simple examples of this swap, see [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md)
 
@@ -49,7 +49,7 @@ This list comprises all the gases that are in the simulation: all others are eli
 
 ## kinetic_minerals
 
-This is a list of minerals that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
+This is a list of minerals that whose dynamics are governed by a [rate law](theory/index.md).  These are not in equilibrium with the aqueous solution.
 
 - The list can only include the "minerals" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.
@@ -62,7 +62,7 @@ These minerals can never be [swapped](swap.md) into the basis, nor can they be "
 
 ## kinetic_redox
 
-This is a list of [redox pairs](basis.md) that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
+This is a list of [redox pairs](basis.md) that whose dynamics are governed by a [rate law](theory/index.md).  These are not in equilibrium with the aqueous solution.
 
 - The list can only include the "redox couples" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.
@@ -73,7 +73,7 @@ These species can never be [swapped](swap.md) into the basis.
 
 ## kinetic_surface_species
 
-This is a list of [surface sorbing species](basis.md) that whose dynamics are governed by a [rate law](kinetics.md).  These are not in equilibrium with the aqueous solution.
+This is a list of [surface sorbing species](basis.md) that whose dynamics are governed by a [rate law](theory/index.md).  These are not in equilibrium with the aqueous solution.
 
 - The list can only include the "surface species" in the [database file](geochemistry/database/index.md).
 - No member can appear more than once in this list.

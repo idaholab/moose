@@ -12,7 +12,7 @@ The geochemistry module is designed to interface easily with the porous-flow mod
 
 !media geotes_weber_tensleep_3D.png caption=Temperature, porosity, pH and free volume of Quartz after 90 days of injection in a 3D reactive-transport model.  id=geotes_wt_3Da.fig
 
-- [Theory, numerical solution technique, computational aspects and the database](geochemistry/theory/index.md)
+- [Theory, numerical solution technique and computational aspects](geochemistry/theory/index.md)
 - [Examples](geochemistry/tests_and_examples/index.md)
 - [Description of input-file objects](geochemistry/systems.md)
 - [A to Z index of these webpages](geochemistry/contents.md)
