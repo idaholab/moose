@@ -32,7 +32,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
   /// Fill the offset positions for each mesh
-  virtual void fillPositions();
+  void fillPositions();
 
 protected:
   /**

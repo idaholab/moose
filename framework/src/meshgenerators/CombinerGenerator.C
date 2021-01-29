@@ -11,6 +11,7 @@
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "DelimitedFileReader.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/unstructured_mesh.h"
@@ -91,49 +92,35 @@ CombinerGenerator::fillPositions()
     {
       std::string positions_file = _positions_file[p_file_it];
 
-      std::vector<Real> positions_vec;
+      MooseUtils::DelimitedFileReader file(positions_file, &_communicator);
+      file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+      file.read();
 
-      // Read the file on the root processor then broadcast it
-      if (processor_id() == 0)
-      {
-        MooseUtils::checkFileReadable(positions_file);
-
-        std::ifstream is(positions_file.c_str());
-        std::istream_iterator<Real> begin(is), end;
-        positions_vec.insert(positions_vec.begin(), begin, end);
-
-        if (positions_vec.size() % LIBMESH_DIM != 0)
-          mooseError("Number of entries in 'positions_file' ",
-                     positions_file,
-                     " must be divisible by ",
-                     LIBMESH_DIM,
-                     " in CombinerGenerator ",
-                     name());
-      }
-
-      // Bradcast the vector to all processors
-      std::size_t num_positions = positions_vec.size();
-      _communicator.broadcast(num_positions);
-      positions_vec.resize(num_positions);
-      _communicator.broadcast(positions_vec);
+      const std::vector<std::vector<double>> & data = file.getData();
 
       if (_input_names.size() != 1)
-      {
-        auto n_pos = num_positions / LIBMESH_DIM;
-        if (n_pos && (_input_names.size() != n_pos))
+        if (data.size() && (_input_names.size() != data.size()))
           paramError("positions_file",
                      "If more than one input mesh is provided then the number of positions must "
                      "exactly match the number of input meshes.");
-      }
 
-      for (unsigned int i = 0; i < positions_vec.size(); i += LIBMESH_DIM)
+      if (file.numEntries() % LIBMESH_DIM != 0)
+        mooseError("Number of entries in 'positions_file' ",
+                   positions_file,
+                   " must be divisible by ",
+                   LIBMESH_DIM,
+                   " in CombinerGenerator ",
+                   name());
+
+
+      for (unsigned int i = 0; i < data.size(); ++i)
       {
         Point position;
 
         // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely
         // untested!
         for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-          position(j) = positions_vec[i + j];
+          position(j) = data[i][j];
 
         _generator_positions.push_back(position);
       }
