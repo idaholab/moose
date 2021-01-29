@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
+#include "shuffle.h"
 #include "DenseMatrix.h"
 #include "MooseObject.h"
 #include "MooseRandom.h"
@@ -47,6 +47,12 @@ class Sampler : public MooseObject,
                 public SamplerInterface
 {
 public:
+  enum class SampleMode
+  {
+    GLOBAL = 0,
+    LOCAL = 1
+  };
+
   static InputParameters validParams();
   Sampler(const InputParameters & parameters);
 
@@ -161,8 +167,8 @@ protected:
    * These methods should not be called directly, each is automatically called by the public
    * getGlobalSamples() or getLocalSamples() methods.
    */
-  virtual void sampleSetUp() {}
-  virtual void sampleTearDown() {}
+  virtual void sampleSetUp(const SampleMode /*mode*/){}
+  virtual void sampleTearDown(const SampleMode /*mode*/){}
   ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
@@ -197,7 +203,17 @@ protected:
    * TODO: This should be updated if the If the random number generator is updated to type that
    * supports native advancing.
    */
-  virtual void advanceGenerators(dof_id_type count);
+  virtual void advanceGenerators(const dof_id_type count);
+  virtual void advanceGenerator(const unsigned int seed_index, const dof_id_type count);
+  void setAutoAdvanceGenerators(const bool state);
+
+  /**
+   * Helper for shuffling a vector of data in-place; the default assumes data is distributed
+   *
+   * NOTE: This will advance the generator by the size of the supplied vector.
+   */
+  template <typename T>
+  void shuffle(std::vector<T> & data, const std::size_t seed_index = 0, bool is_distributed = true);
 
   //@{
   /**
@@ -244,6 +260,11 @@ private:
    **/
   void checkReinitStatus() const;
 
+  /**
+   * Advance method for internal use that considers the auto advance flag.
+   */
+  void advanceGeneratorsInternal(const dof_id_type count);
+
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
 
@@ -289,6 +310,9 @@ private:
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
 
+  /// Flag for disabling automatic generator advancing
+  bool _auto_advance_generators;
+
   ///@{
   /// PrefGraph timers
   const PerfID _perf_get_global_samples;
@@ -300,3 +324,11 @@ private:
   const PerfID _perf_advance_generator;
   ///@}
 };
+
+template <typename T>
+void
+Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, bool is_distributed)
+{
+  StochasticTools::shuffle<T>(
+      data, _generator, seed_index, is_distributed ? &_communicator : nullptr);
+}

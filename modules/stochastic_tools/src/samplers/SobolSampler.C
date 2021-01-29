@@ -53,7 +53,7 @@ SobolSampler::SobolSampler(const InputParameters & parameters)
 }
 
 void
-SobolSampler::sampleSetUp()
+SobolSampler::sampleSetUp(const Sampler::SampleMode)
 {
   TIME_SECTION(_perf_sample_setup);
 
@@ -105,7 +105,7 @@ SobolSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 }
 
 void
-SobolSampler::sampleTearDown()
+SobolSampler::sampleTearDown(const Sampler::SampleMode)
 {
   TIME_SECTION(_perf_sample_teardown);
 

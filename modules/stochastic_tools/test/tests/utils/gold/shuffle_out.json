@@ -1,0 +1,27 @@
+{
+    "time_steps": [
+        {
+            "reporters": [
+                {
+                    "object_name": "test",
+                    "type": "std::vector<int>",
+                    "value": [
+                        6,
+                        3,
+                        8,
+                        7,
+                        2,
+                        4,
+                        1,
+                        5,
+                        9,
+                        0
+                    ],
+                    "value_name": "data"
+                }
+            ],
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

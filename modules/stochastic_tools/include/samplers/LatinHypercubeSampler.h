@@ -13,6 +13,10 @@
 
 /**
  * A class used to perform Monte Carlo Sampling
+ *
+ * WARNING! This Sampler manages the generators advancement for parallel operation manually. All the
+ *          calls to get random values from the generators occur in sampleSetUp. At the end of
+ *          sampleSetUp all the generators should be in the final state.
  */
 class LatinHypercubeSampler : public Sampler
 {
@@ -22,38 +26,16 @@ public:
   LatinHypercubeSampler(const InputParameters & parameters);
 
 protected:
-  virtual void sampleSetUp() override;
-  virtual void sampleTearDown() override;
+  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
-  /// Distribution names
-  const std::vector<DistributionName> & _distribution_names;
-
-  /// Number of intervals for each distribution
-  const std::vector<unsigned int> & _num_bins_input;
-
-  /// Upper limit to probability for each distribution
-  const std::vector<Real> & _upper_limits_input;
-
-  /// Lower limit to probability for each distribution
-  const std::vector<Real> & _lower_limits_input;
-
-  /// Portion of probability within each bin for each distribution
-  std::vector<Real> _size_bins;
-
 private:
-  ///@{
-  /// Bin sizes and limits for each distribution; these are populated during sample setup so in the
-  /// future each can be controlled
-  std::vector<unsigned int> _num_bins;
+  // Probability values for each distribution
+  std::vector<std::vector<Real>> _probabilities;
 
-  /// Upper limit to probability for each distribution
-  std::vector<Real> _upper_limits;
-
-  /// Lower limit to probability for each distribution
-  std::vector<Real> _lower_limits;
-  ///@}
+  // toggle for local/global data access in computeSample
+  bool _is_local;
 };

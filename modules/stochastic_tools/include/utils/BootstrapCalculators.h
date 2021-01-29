@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
+#include "shuffle.h"
 #include "MooseTypes.h"
 #include "MooseObject.h"
 #include <vector>
@@ -51,7 +51,7 @@ protected:
   std::vector<OutType> computeBootstrapEstimates(const InType &, const bool) const;
 
   // Randomly shuffle a vector of data
-  InType shuffle(const InType &, MooseRandom &, const bool) const;
+  InType resample(const InType &, MooseRandom &, const bool) const;
 
   // Confidence levels to compute in range (0, 1)
   const std::vector<Real> _levels;
