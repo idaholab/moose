@@ -35,7 +35,6 @@
     type = LatinHypercube
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     num_rows = 6560
-    num_bins = 10
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
