@@ -50,6 +50,9 @@ protected:
   const bool & _reset_subapp_transient;
 
 private:
+  /// Storage to check whether the subapp is being called the first time
+  bool _solved_once;
+
   /**
    * Helper method for running in mode='batch'
    * */

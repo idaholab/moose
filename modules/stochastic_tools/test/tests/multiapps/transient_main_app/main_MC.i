@@ -30,8 +30,8 @@
     type = SamplerFullSolveMultiApp
     input_files = ../../../../examples/parameter_study/nonlin_diff_react/nonlin_diff_react_sub.i
     sampler = sample
-    mode = batch-reset
-    reset_subapp_transient = true
+    mode = normal
+    reset_subapp_transient = false
   []
 []
 
@@ -42,7 +42,7 @@
     sampler = sample
     parameters = 'Kernels/nonlin_function/mu1 Kernels/nonlin_function/mu2'
     to_control = 'stochastic'
-    check_multiapp_execute_on = false
+    check_multiapp_execute_on = true
   []
   [data]
     type = MultiAppReporterTransfer
@@ -77,7 +77,7 @@
 []
 
 [Outputs]
-  file_base = 'main_MC_batch_reset'
+  file_base = 'main_MC_normal_true'
   csv = true
   exodus = false
 []

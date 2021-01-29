@@ -38,7 +38,7 @@ SamplerFullSolveMultiApp::validParams()
       "'batch' creates one sub-application for each processor and re-executes for each row.");
   params.addParam<bool>(
       "reset_subapp_transient",
-      false,
+      true,
       "Bool to activate subapp reset at each time step of the transient mainapp.");
   return params;
 }
@@ -50,6 +50,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
     _reset_subapp_transient(getParam<bool>("reset_subapp_transient")),
+    _solved_once(false),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
     _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
@@ -87,11 +88,14 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
   else
   {
     // Resets the subapps after each time step of the transient mainapp
-    if (_reset_subapp_transient)
+    if (_reset_subapp_transient && _solved_once)
       initialSetup();
 
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
   }
+
+  _solved_once = true;
+
   return last_solve_converged;
 }
 
@@ -104,7 +108,7 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
   bool last_solve_converged = true;
 
   // Resets the subapps after each time step of the transient mainapp
-  if (_reset_subapp_transient)
+  if (_reset_subapp_transient && _solved_once)
     initialSetup();
 
   // List of active relevant Transfer objects
