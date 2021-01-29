@@ -1,3 +1,5 @@
+# INSCompressibilityPenalty
+
 !syntax description /Kernels/INSCompressibilityPenalty
 
 !syntax parameters /Kernels/INSCompressibilityPenalty

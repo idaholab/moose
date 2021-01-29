@@ -1,3 +1,5 @@
+# NSVelocityAux
+
 !syntax description /AuxKernels/NSVelocityAux
 
 !syntax parameters /AuxKernels/NSVelocityAux

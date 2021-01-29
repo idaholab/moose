@@ -1,3 +1,5 @@
+# INSMass
+
 !syntax description /Kernels/INSMass
 
 !syntax parameters /Kernels/INSMass

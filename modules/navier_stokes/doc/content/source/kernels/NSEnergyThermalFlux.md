@@ -1,3 +1,5 @@
+# NSEnergyThermalFlux
+
 !syntax description /Kernels/NSEnergyThermalFlux
 
 !syntax parameters /Kernels/NSEnergyThermalFlux

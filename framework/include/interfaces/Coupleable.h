@@ -1062,22 +1062,22 @@ protected:
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
    */
-  VariableValue _default_value_zero;
+  mutable VariableValue _default_value_zero;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VariableGradient _default_gradient;
+  mutable VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealVectorValue> _ad_default_gradient;
+  mutable MooseArray<ADRealVectorValue> _ad_default_gradient;
 
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
-  MooseArray<ADRealTensorValue> _ad_default_vector_gradient;
+  mutable MooseArray<ADRealTensorValue> _ad_default_vector_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VariableSecond _default_second;
+  mutable VariableSecond _default_second;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealTensorValue> _ad_default_second;
+  mutable MooseArray<ADRealTensorValue> _ad_default_second;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -1105,13 +1105,13 @@ protected:
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
    */
-  VectorVariableValue _default_vector_value_zero;
+  mutable VectorVariableValue _default_vector_value_zero;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VectorVariableGradient _default_vector_gradient;
+  mutable VectorVariableGradient _default_vector_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  VectorVariableCurl _default_vector_curl;
+  mutable VectorVariableCurl _default_vector_curl;
 
   /**
    * This will always be zero because the default values for optionally coupled variables is always

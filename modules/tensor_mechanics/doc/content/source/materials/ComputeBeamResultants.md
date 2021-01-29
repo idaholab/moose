@@ -1,4 +1,4 @@
-#ComputeBeamResultants
+# ComputeBeamResultants
 
 !syntax description /Materials/ComputeBeamResultants
 
