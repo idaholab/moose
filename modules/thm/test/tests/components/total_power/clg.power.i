@@ -45,7 +45,7 @@
 
 [ControlLogic]
   [./reactor_power_control]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = total_power
     parameter = power
     function = decayheatcurve

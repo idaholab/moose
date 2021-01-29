@@ -68,7 +68,7 @@
   [../]
 
   [./set_outlet_value]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = outlet
     parameter = p
     value = outlet_p_fn:value

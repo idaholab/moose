@@ -48,7 +48,7 @@
 
 [ControlLogic]
   [./set_inlet_value]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = inlet
     parameter = T0
     value = wrong         # this does not exist

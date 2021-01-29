@@ -80,8 +80,6 @@
 
   start_time = 0.0
   end_time = 5
-
-  automatic_scaling = true
 []
 
 [Outputs]

@@ -121,21 +121,21 @@ pout = 7e6
 
 [ControlLogic]
   [set_core_inlet_pressure]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = core_top_bc
     parameter = p
     value = core_inlet_pressure
   []
 
   [set_core_outlet_mdot]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = core_bottom_bc
     parameter = m_dot
     value = core_outlet_mdot
   []
 
   [set_core_outlet_temperature]
-    type = SetRealValueControl
+    type = SetComponentRealValueControl
     component = core_bottom_bc
     parameter = T
     value = core_outlet_temperature

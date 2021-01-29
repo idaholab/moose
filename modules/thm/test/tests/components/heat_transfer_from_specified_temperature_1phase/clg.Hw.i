@@ -91,7 +91,7 @@
 
 [ControlLogic]
   [./pipe_Hw_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = ht_pipe1
     parameter = Hw
     function = Hw_fn

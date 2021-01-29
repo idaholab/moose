@@ -83,7 +83,7 @@
 
 [ControlLogic]
   [./W_dot_ctrl]
-    type = TimeFunctionControl
+    type = TimeFunctionComponentControl
     component = turbine
     parameter = power
     function = W_dot_fn
