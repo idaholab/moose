@@ -18,7 +18,7 @@
   [sample]
     type = LatinHypercube
     distributions = 'a b'
-    num_samples = 10
+    num_rows = 10
     seed = 1980
     execute_on = 'INITIAL TIMESTEP_END'
   []
