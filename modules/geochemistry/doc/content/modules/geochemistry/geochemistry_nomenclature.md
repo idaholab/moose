@@ -113,16 +113,19 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | Symbol | Units | Physical description |
 | --- | --- | --- |
 | $\rightleftharpoons$ | - | Denotes an equilibrium reaction, for instance $B \rightleftharpoons 3C + 2D$ |
-| $A_{w}$ | - | Label for water.
-| $A_{i}$ | - | Label for aqueous [basis species](basis.md).  This is a label, not a quantity.  For example, one of the $A_{i}$ might be Na$^{+}$.
-| $A_{j}$ | - | Label for other aqueous species, which are called the "secondary" species.
-| $A_{k}$ | - | Label for minerals in the equilibrium system of reactions that appear in the [basis](basis.md).
-| $A_{\bar{k}}$ | - | Labels for components that are governed by a [kinetic rate](kinetics.md).  These are a subset of the $A_{l}$. |
-| $A_{l}$ | - | Label for all minerals, even those that do not exist in the equilibrium system.  This might include minerals whose reactions are kinetically controlled.
-| $A_{m}$ | - | Label for gases of known fugacity that appear in the [basis](basis.md).
+| $A_{w}$ | - | Label for water. |
+| $A_{i}$ | - | Label for aqueous [basis species](basis.md).  This is a label, not a quantity.  For example, one of the $A_{i}$ might be Na$^{+}$.  This includes decoupled non-kinetically-controlled alternative oxidation states as well as minerals that have zero precipitate. |
+| $A_{j}$ | - | Label for other aqueous species in equilibrium with the basis, which are called the "secondary" species.  Included in this set are all coupled redox species and minerals that are not precipitated, but not species involved in sorption. |
+| $A_{\bar{j}}$ | - | Redox species that are governed by kinetics |
+| $A_{k}$ | - | Label for precipitated minerals in the equilibrium system of reactions.  These will appear in the [basis](basis.md).
+| $A_{\bar{k}}$ | - | Label for all components that are governed by a [kinetic rate](theory/index.md).  This is a union of $A_{\bar{j}}$, $A_{\bar{l}}$ and $A_{\bar{q}}$. |
+| $A_{l}$ | - | Label for all minerals, including those in $A_{j}$ and $A_{k}$ and even those that are kinetically controlled.
+| $A_{\bar{l}}$ | - | Label for all minerals that are kinetically controlled.
+| $A_{m}$ | - | Label for gases of known fugacity, so these will appear in the [basis](basis.md).
 | $A_{n}$ | - | Label for all gases.
-| $A_{q}$ | - | Label for sorbed species.  These do not get transported --- they are surface complexes.
-| $A_{p}$ | - | Label for sorbing sites.
+| $A_{q}$ | - | Label for sorbed species in equilibrium with the aqueous solution.  These are combintations of basis species that have adsorbed onto sorbing sites on minerals, making a surface complex.  The mass-action equations can be more complicated than for $A_{j}$ and $A_{l}$.  These do not get transported. |
+| $A_{\bar{q}}$ | - | Label for sorbed species that are kinetically controlled. |
+| $A_{p}$ | - | Label for sorbing sites, so these appear in the basis.  In the Langmuir approach there is just one of these, and all sorbing species compete to sorb.  In the surface-complexation approach there are $N_{p}\geq 1$ of these.
 | $a$ | - | Activity.  For species in equilibrium reactions $a = \gamma m/m_{\mathrm{ref}}$, where $\gamma$ is the activity coefficient, $m$ is the molality, and $m_{\mathrm{ref}}=1\,$mol.kg$^{-1}$. |
 | $C$ | mol.m$^{-3}$ | Concentration of a component per volume of aqueous solution (the concentration of component per volume of porous skeleton is $\phi C$) |
 | $C_{T,\ast}$ | mol.m$^{-3}$ | Concentration of mobile component per volume of aqueous solution |
@@ -134,7 +137,7 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $I$ | mol.kg$^{-1}$ | Ionic strength: $I = \frac{1}{2}\sum_{i}m_{i}z_{i}^{2}$, where the sum runs over the free ions in the solution, so neutral complexes are not counted. |
 | $I_{s}$ | mol.kg$^{-1}$ | Stiochiometric ionic strength: $I_{s} = \frac{1}{2}\sum_{i}m_{i}z_{i}^{2}$.  Here, complete dissociation of complexes is assumed, and then the sum runs over all ions in the hypothetical solution. |
 | $K$ | - | Equilibrium constant for a reaction |
-| $m$ | mol.kg$^{-1}$ | Molality |
+| $m$ | mol.kg$^{-1}$ | Molality.  The molality of unoccupied sorption sites is $m_{p}$. |
 | $M$ | mol | Moles of a component |
 | $\mu$ | J.mol$^{-1}$ | Chemical potential: $\mu = \partial G/\partial n$ --- the derivative of the free energy, $G$, with respect to the number of moles of that species, with all other things (temperature, number of moles of other species) held constant |
 | $n$ | kg | Mass of a component.  For instance, $n_{w}$ is the mass of solvent water |
@@ -147,8 +150,8 @@ Here $R$ is the gas constant, $T$ is the temperature (in Kelvin), $F$ is the Far
 | $N_{p}$ | - | Number of basis sorbing sites $A_{p}$ |
 | $\nu$ | - | Stoichiometric coefficient |
 | $Q_{l}$ | - | [Activity product](equilibrium.md) for mineral $l$.  This is used to construct the saturation index for the mineral |
-| $r_{\bar{k}}$ | mol.s$^{-1}$ | [Reaction rate](kinetics.md) for kinetic species $A_{\bar{k}}$ |
-| $R_{\bar{k}}$ | mol.s$^{-1}$.m$^{-3}$ | Reaction rate [per volume of aqueous solution](transport.md) for kinetic species $A_{\bar{k}}$ |
+| $r_{\bar{k}}$ | mol.s$^{-1}$ | [Reaction rate](theory/index.md) for kinetic species $A_{\bar{k}}$ |
+| $R_{\bar{k}}$ | mol.s$^{-1}$.m$^{-3}$ | Reaction rate [per volume of aqueous solution](theory/index.md) for kinetic species $A_{\bar{k}}$ |
 | SI$_{l}$ | - | [Saturation index](equilibrium.md) for mineral $l$.  The mineral is supersaturated if this is positive, and undersaturated if it is negative |
 | $z$ | - | Charge number of a substance |
 

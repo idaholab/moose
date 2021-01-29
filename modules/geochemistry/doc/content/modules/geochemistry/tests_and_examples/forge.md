@@ -122,7 +122,7 @@ The analysis of the previous section produced a water that is in equilibrium wit
 - The analysis revealed that [table:model_mineralogy] may not be in equilibrium because Illite dissolves.  Perhaps this does not matter greatly as Illite's mass fraction is only about 2%.
 - The model did not include Laumontite and Zoisite since they are more stable than Anorthite, which appears in appreciable fractions in the X-ray analysis.
 
-Presumably all these minerals are controlled by [kinetic reactions](kinetics.md), and using kinetics may result in quite different results.  Therefore, this section performs an analysis of the in-situ reservoir kinetics to act as a baseline for the reactive-transport simulations.
+Presumably all these minerals are controlled by [kinetic reactions](theory/index.md), and using kinetics may result in quite different results.  Therefore, this section performs an analysis of the in-situ reservoir kinetics to act as a baseline for the reactive-transport simulations.
 
 In this presentation, kinetic rates are modelled using the formula
 \begin{equation}
