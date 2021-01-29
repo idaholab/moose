@@ -43,14 +43,8 @@ protected:
   /// The mesh generators to use
   const std::vector<MeshGeneratorName> & _input_names;
 
-  /// The (offsets) positions for each mesh if specified as a vector of points
-  const std::vector<Point> & _positions;
-
-  /// The (offsets) positions for each mesh if specified as vector of points in file
-  const std::vector<FileName> & _positions_file;
-
-  /// The (offset) positions for each mesh
-  std::vector<Point> _generator_positions;
+  /// The (offsets) positions for each mesh
+  std::vector<Point> _positions;
 
   // Holds pointers to the mesh smart pointers (to be populated later).
   std::vector<std::unique_ptr<MeshBase> *> _meshes;

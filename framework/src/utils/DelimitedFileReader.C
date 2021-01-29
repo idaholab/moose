@@ -97,9 +97,6 @@ DelimitedFileReader::read()
   // Process "row" formatted data
   if (_format_flag == FormatFlag::ROWS)
   {
-    // For "row" formatted data, n_cols now represents the number of rows
-    mooseAssert(raw.size() % n_cols == 0,
-                "The raw data is not evenly divisible by the number of rows.");
     std::vector<double>::iterator start = raw.begin();
     for (std::size_t j = 0; j < n_cols; ++j)
     {

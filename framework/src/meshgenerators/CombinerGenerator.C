@@ -50,31 +50,21 @@ CombinerGenerator::validParams()
 }
 
 CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _positions(getParam<std::vector<Point>>("positions")),
-    _positions_file(getParam<std::vector<FileName>>("positions_file"))
+  : MeshGenerator(parameters), _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
 {
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
 
-  if (!_positions.empty() && !_positions_file.empty())
+  if (isParamValid("positions") && isParamValid("positions_file"))
     mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in "
                "CombinerGenerator ",
                _name);
 
   if (_input_names.size() == 1)
-    if (_positions.empty() && _positions_file.empty())
+    if (!isParamValid("positions") && !isParamValid("positions_file"))
       paramError("positions",
                  "If only one input mesh is given, then 'positions' or 'positions_file' must also "
                  "be supplied");
-
-  if (_input_names.size() != 1)
-    if (_positions.size() && (_input_names.size() != _positions.size()))
-      paramError(
-          "positions",
-          "If more than one input mesh is provided then the number of positions provided must "
-          "exactly match the number of input meshes.");
 
   // Grab the input mesh references as pointers
   for (auto & input_name : _input_names)
@@ -85,14 +75,32 @@ void
 CombinerGenerator::fillPositions()
 {
   if (isParamValid("positions"))
-    _generator_positions = _positions;
+  {
+    _positions = getParam<std::vector<Point>>("positions");
+
+    // the check in the constructor wont catch error where the user sets positions = ''
+    if ((_input_names.size() == 1) && _positions.empty())
+      paramError("positions", "If only one input mesh is given, then 'positions' cannot be empty.");
+
+    if (_input_names.size() != 1)
+      if (_positions.size() && (_input_names.size() != _positions.size()))
+        paramError(
+            "positions",
+            "If more than one input mesh is provided then the number of positions provided must "
+            "exactly match the number of input meshes.");
+  }
   else if (isParamValid("positions_file"))
   {
-    for (unsigned int p_file_it = 0; p_file_it < _positions_file.size(); p_file_it++)
-    {
-      std::string positions_file = _positions_file[p_file_it];
+    std::vector<FileName> positions_file = getParam<std::vector<FileName>>("positions_file");
 
-      MooseUtils::DelimitedFileReader file(positions_file, &_communicator);
+    // the check in the constructor wont catch error where the user sets positions_file = ''
+    if ((_input_names.size() == 1) && positions_file.empty())
+      paramError("positions_file",
+                 "If only one input mesh is given, then 'positions_file' cannot be empty.");
+
+    for (const auto & f : positions_file)
+    {
+      MooseUtils::DelimitedFileReader file(f, &_communicator);
       file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
       file.read();
 
@@ -106,12 +114,11 @@ CombinerGenerator::fillPositions()
 
       if (file.numEntries() % LIBMESH_DIM != 0)
         mooseError("Number of entries in 'positions_file' ",
-                   positions_file,
+                   f,
                    " must be divisible by ",
                    LIBMESH_DIM,
                    " in CombinerGenerator ",
                    name());
-
 
       for (unsigned int i = 0; i < data.size(); ++i)
       {
@@ -122,7 +129,7 @@ CombinerGenerator::fillPositions()
         for (unsigned int j = 0; j < LIBMESH_DIM; j++)
           position(j) = data[i][j];
 
-        _generator_positions.push_back(position);
+        _positions.push_back(position);
       }
     }
   }
@@ -155,12 +162,10 @@ CombinerGenerator::generate()
         paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
 
       // Move It
-      if (_generator_positions.size())
+      if (_positions.size())
       {
-        MeshTools::Modification::translate(*other_mesh,
-                                           _generator_positions[i](0),
-                                           _generator_positions[i](1),
-                                           _generator_positions[i](2));
+        MeshTools::Modification::translate(
+            *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
       }
 
       copyIntoMesh(*mesh, *other_mesh);
@@ -183,10 +188,8 @@ CombinerGenerator::generate()
     if (!final_mesh)
       mooseError("Unable to copy mesh!");
 
-    MeshTools::Modification::translate(*final_mesh,
-                                       _generator_positions[0](0),
-                                       _generator_positions[0](1),
-                                       _generator_positions[0](2));
+    MeshTools::Modification::translate(
+        *final_mesh, _positions[0](0), _positions[0](1), _positions[0](2));
 
     // Here's the way this is going to work:
     // I'm going to make one more copy of the input_mesh so that I can move it and copy it in
@@ -205,13 +208,11 @@ CombinerGenerator::generate()
     if (!translated_mesh)
       mooseError("Unable to copy mesh!");
 
-    for (MooseIndex(_meshes) i = 1; i < _generator_positions.size(); ++i)
+    for (MooseIndex(_meshes) i = 1; i < _positions.size(); ++i)
     {
       // Move
-      MeshTools::Modification::translate(*translated_mesh,
-                                         _generator_positions[i](0),
-                                         _generator_positions[i](1),
-                                         _generator_positions[i](2));
+      MeshTools::Modification::translate(
+          *translated_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
 
       // Copy into final mesh
       copyIntoMesh(*final_mesh, *translated_mesh);
