@@ -9,9 +9,9 @@
 
 #include "TestShuffle.h"
 #include "MooseRandom.h"
-#include "shuffle.h"
+#include "Shuffle.h"
 
-registerMooseObject("StochasticToolsTestApp", TestShuffle);
+registerMooseObject("MooseTestApp", TestShuffle);
 
 InputParameters
 TestShuffle::validParams()
@@ -58,24 +58,24 @@ TestShuffle::execute()
   const auto test_type = getParam<MooseEnum>("test_type");
   if (test_type == "swap")
   {
-    StochasticTools::swap(vec, 1, 2, _communicator); // both on 0
-    StochasticTools::swap(vec, 8, 7, _communicator); // both on 1
-    StochasticTools::swap(vec, 3, 9, _communicator); // 0 -> 1
-    StochasticTools::swap(vec, 5, 0, _communicator); // 1 -> 0
+    MooseUtils::swap(vec, 1, 2, _communicator); // both on 0
+    MooseUtils::swap(vec, 8, 7, _communicator); // both on 1
+    MooseUtils::swap(vec, 3, 9, _communicator); // 0 -> 1
+    MooseUtils::swap(vec, 5, 0, _communicator); // 1 -> 0
   }
   else if (test_type == "shuffle")
   {
     MooseRandom generator;
     generator.seed(0, 1980);
     generator.saveState();
-    StochasticTools::shuffle<int>(vec, generator, _communicator);
+    MooseUtils::shuffle<int>(vec, generator, _communicator);
   }
   else if (test_type == "resample")
   {
     MooseRandom generator;
     generator.seed(0, 1980);
     generator.saveState();
-    vec = StochasticTools::resample<int>(vec, generator, _communicator);
+    vec = MooseUtils::resample<int>(vec, generator, _communicator);
   }
 
   // Store the vector as ReporterValue, it is automatically gathered

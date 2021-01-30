@@ -18,7 +18,7 @@
 #include <iterator>
 #include <algorithm>
 
-namespace StochasticTools
+namespace MooseUtils
 {
 ///@{
 /**
@@ -118,10 +118,10 @@ std::vector<T> resample(const std::vector<T> & data,
 
 template <typename T>
 void
-StochasticTools::swap(std::vector<T> & data,
-                      const std::size_t idx0,
-                      const std::size_t idx1,
-                      const libMesh::Parallel::Communicator * comm_ptr)
+MooseUtils::swap(std::vector<T> & data,
+                 const std::size_t idx0,
+                 const std::size_t idx1,
+                 const libMesh::Parallel::Communicator * comm_ptr)
 {
   if (!comm_ptr || comm_ptr->size() == 1)
   {
@@ -189,7 +189,7 @@ StochasticTools::swap(std::vector<T> & data,
     Parallel::push_parallel_vector_data(*comm_ptr, returns, recv_functor);
 
     if (idx0_rank == rank && idx1_rank == rank)
-      StochasticTools::swap(data, idx0_local_idx, idx1_local_idx);
+      MooseUtils::swap(data, idx0_local_idx, idx1_local_idx);
 
     else if (idx0_rank == rank)
     {
@@ -206,10 +206,10 @@ StochasticTools::swap(std::vector<T> & data,
 
 template <typename T>
 void
-StochasticTools::shuffle(std::vector<T> & data,
-                         MooseRandom & generator,
-                         const std::size_t seed_index,
-                         const libMesh::Parallel::Communicator * comm_ptr)
+MooseUtils::shuffle(std::vector<T> & data,
+                    MooseRandom & generator,
+                    const std::size_t seed_index,
+                    const libMesh::Parallel::Communicator * comm_ptr)
 {
   // REPLICATED data
   if (!comm_ptr || comm_ptr->size() == 1)
@@ -218,7 +218,7 @@ StochasticTools::shuffle(std::vector<T> & data,
     for (std::size_t i = n_global - 1; i > 0; --i)
     {
       auto j = generator.randl(seed_index, 0, i);
-      StochasticTools::swap(data, i, j, nullptr);
+      MooseUtils::swap(data, i, j, nullptr);
     }
   }
 
@@ -279,7 +279,7 @@ StochasticTools::shuffle(std::vector<T> & data,
       Parallel::push_parallel_vector_data(*comm_ptr, returns, recv_functor);
 
       if (idx0_rank == rank && idx1_rank == rank)
-        StochasticTools::swap(data, idx0_local_idx, idx1_local_idx);
+        MooseUtils::swap(data, idx0_local_idx, idx1_local_idx);
 
       else if (idx0_rank == rank)
       {
@@ -297,10 +297,10 @@ StochasticTools::shuffle(std::vector<T> & data,
 
 template <typename T>
 std::vector<T>
-StochasticTools::resample(const std::vector<T> & data,
-                          MooseRandom & generator,
-                          const std::size_t seed_index,
-                          const libMesh::Parallel::Communicator * comm_ptr)
+MooseUtils::resample(const std::vector<T> & data,
+                     MooseRandom & generator,
+                     const std::size_t seed_index,
+                     const libMesh::Parallel::Communicator * comm_ptr)
 {
   // Size of the local input data
   const std::size_t n_local = data.size();
@@ -387,66 +387,64 @@ StochasticTools::resample(const std::vector<T> & data,
 
 template <typename T>
 void
-StochasticTools::swap(std::vector<T> & data,
-                      const std::size_t idx0,
-                      const std::size_t idx1,
-                      const libMesh::Parallel::Communicator & comm)
+MooseUtils::swap(std::vector<T> & data,
+                 const std::size_t idx0,
+                 const std::size_t idx1,
+                 const libMesh::Parallel::Communicator & comm)
 {
-  StochasticTools::swap<T>(data, idx0, idx1, &comm);
+  MooseUtils::swap<T>(data, idx0, idx1, &comm);
 }
 
 template <typename T>
 void
-StochasticTools::shuffle(std::vector<T> & data,
-                         MooseRandom & generator,
-                         const std::size_t seed_index)
+MooseUtils::shuffle(std::vector<T> & data, MooseRandom & generator, const std::size_t seed_index)
 {
-  return StochasticTools::shuffle(data, generator, seed_index, nullptr);
+  return MooseUtils::shuffle(data, generator, seed_index, nullptr);
 }
 
 template <typename T>
 void
-StochasticTools::shuffle(std::vector<T> & data,
-                         MooseRandom & generator,
-                         const libMesh::Parallel::Communicator & comm)
+MooseUtils::shuffle(std::vector<T> & data,
+                    MooseRandom & generator,
+                    const libMesh::Parallel::Communicator & comm)
 {
-  return StochasticTools::shuffle(data, generator, 0, &comm);
+  return MooseUtils::shuffle(data, generator, 0, &comm);
 }
 
 template <typename T>
 void
-StochasticTools::shuffle(std::vector<T> & data,
-                         MooseRandom & generator,
-                         const std::size_t seed_index,
-                         const libMesh::Parallel::Communicator & comm)
+MooseUtils::shuffle(std::vector<T> & data,
+                    MooseRandom & generator,
+                    const std::size_t seed_index,
+                    const libMesh::Parallel::Communicator & comm)
 {
-  return StochasticTools::shuffle(data, generator, seed_index, &comm);
+  return MooseUtils::shuffle(data, generator, seed_index, &comm);
 }
 
 template <typename T>
 std::vector<T>
-StochasticTools::resample(const std::vector<T> & data,
-                          MooseRandom & generator,
-                          const std::size_t seed_index)
+MooseUtils::resample(const std::vector<T> & data,
+                     MooseRandom & generator,
+                     const std::size_t seed_index)
 {
-  return StochasticTools::resample(data, generator, seed_index, nullptr);
+  return MooseUtils::resample(data, generator, seed_index, nullptr);
 }
 
 template <typename T>
 std::vector<T>
-StochasticTools::resample(const std::vector<T> & data,
-                          MooseRandom & generator,
-                          const libMesh::Parallel::Communicator & comm)
+MooseUtils::resample(const std::vector<T> & data,
+                     MooseRandom & generator,
+                     const libMesh::Parallel::Communicator & comm)
 {
-  return StochasticTools::resample(data, generator, 0, &comm);
+  return MooseUtils::resample(data, generator, 0, &comm);
 }
 
 template <typename T>
 std::vector<T>
-StochasticTools::resample(const std::vector<T> & data,
-                          MooseRandom & generator,
-                          const std::size_t seed_index,
-                          const libMesh::Parallel::Communicator & comm)
+MooseUtils::resample(const std::vector<T> & data,
+                     MooseRandom & generator,
+                     const std::size_t seed_index,
+                     const libMesh::Parallel::Communicator & comm)
 {
-  return StochasticTools::resample(data, generator, seed_index, &comm);
+  return MooseUtils::resample(data, generator, seed_index, &comm);
 }

@@ -7,25 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "gtest/gtest.h"
-#include <vector>
-#include "Calculators.h"
 #include "MooseRandom.h"
-#include "shuffle.h"
+#include "Shuffle.h"
 #include "libmesh/communicator.h"
+#include <vector>
 
-using namespace StochasticTools;
+using namespace MooseUtils;
 
-TEST(StochasticTools, swap)
+TEST(MooseUtils, swap)
 {
   std::vector<int> x = {0, 1, 2, 3, 4};
-  StochasticTools::swap(x, 2, 4);
+  MooseUtils::swap(x, 2, 4);
   EXPECT_EQ(x, std::vector<int>({0, 1, 4, 3, 2}));
 
-  StochasticTools::swap(x, 0, 3);
+  MooseUtils::swap(x, 0, 3);
   EXPECT_EQ(x, std::vector<int>({3, 1, 4, 0, 2}));
 }
 
-TEST(StochasticTools, shuffle)
+TEST(MooseUtils, shuffle)
 {
   MooseRandom generator;
   generator.seed(0, 1980);
@@ -45,23 +44,9 @@ TEST(StochasticTools, shuffle)
     shuffle<int>(x, generator, 1);
     EXPECT_EQ(x, gold_1949);
   }
-
-  Parallel::Communicator comm;
-  generator.restoreState();
-  {
-    std::vector<int> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    shuffle<int>(x, generator, comm);
-    EXPECT_EQ(x, gold_1980);
-  }
-
-  {
-    std::vector<int> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    shuffle<int>(x, generator, 1, comm);
-    EXPECT_EQ(x, gold_1949);
-  }
 }
 
-TEST(StochasticTools, resample)
+TEST(MooseUtils, resample)
 {
   MooseRandom generator;
   generator.seed(0, 1980);
@@ -72,18 +57,9 @@ TEST(StochasticTools, resample)
   const std::vector<int> gold_1949 = {9, 2, 5, 2, 0, 7, 1, 2, 1, 1};
 
   std::vector<int> out;
-  out = resample<int>(x, generator, nullptr, 0);
+  out = resample<int>(x, generator);
   EXPECT_EQ(out, gold_1980);
 
-  out = resample<int>(x, generator, nullptr, 1);
+  out = resample<int>(x, generator, 1);
   EXPECT_EQ(out, gold_1949);
-
-  /*
-  Parallel::Communicator comm;
-  out = resample<int>(x, generator, &comm, 0);
-  EXPECT_EQ(out, gold_1980);
-
-  out = resample<int>(x, generator, &comm, 1);
-  EXPECT_EQ(out, gold_1949);
-  */
 }

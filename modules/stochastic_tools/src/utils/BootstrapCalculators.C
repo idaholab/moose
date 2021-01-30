@@ -13,7 +13,7 @@
 
 #include "Calculators.h"
 #include "BootstrapCalculators.h"
-#include "shuffle.h"
+#include "Shuffle.h"
 #include "MooseEnumItem.h"
 #include "MooseEnum.h"
 #include "MooseError.h"

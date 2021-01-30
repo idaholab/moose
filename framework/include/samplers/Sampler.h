@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-#include "shuffle.h"
+#include "Shuffle.h"
 #include "DenseMatrix.h"
 #include "MooseObject.h"
 #include "MooseRandom.h"
@@ -329,6 +329,5 @@ template <typename T>
 void
 Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, bool is_distributed)
 {
-  StochasticTools::shuffle<T>(
-      data, _generator, seed_index, is_distributed ? &_communicator : nullptr);
+  MooseUtils::shuffle<T>(data, _generator, seed_index, is_distributed ? &_communicator : nullptr);
 }
