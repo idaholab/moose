@@ -25,16 +25,16 @@ struct MooseADWrapperStruct<Real, true>
   typedef ADReal type;
 };
 
-template <template <typename> class W>
-struct MooseADWrapperStruct<W<Real>, true>
+template <template <typename> class W, typename T, bool is_ad>
+struct MooseADWrapperStruct<W<T>, is_ad>
 {
-  typedef W<ADReal> type;
+  typedef W<typename MooseADWrapperStruct<T, is_ad>::type> type;
 };
 
-template <template <typename> class W>
-struct MooseADWrapperStruct<std::vector<W<Real>>, true>
+template <typename T, bool is_ad>
+struct MooseADWrapperStruct<std::vector<T>, is_ad>
 {
-  typedef std::vector<W<ADReal>> type;
+  typedef std::vector<typename MooseADWrapperStruct<T, is_ad>::type> type;
 };
 
 template <typename T, bool is_ad>

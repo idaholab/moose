@@ -20,6 +20,7 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/int_range.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -158,11 +159,6 @@ public:
   const MooseADWrapper<T, is_ad> & operator[](const unsigned int i) const { return _value[i]; }
 
   /**
-   *
-   */
-  virtual void swap(PropertyValue * rhs) override;
-
-  /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
    *
    * @param to_qp The quadrature point in _this_ Property that you want to copy to.
@@ -196,6 +192,8 @@ public:
       mooseError("Retrieving a material property name before it's set.");
     return _name;
   }
+
+  void swap(PropertyValue * rhs) override;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -243,20 +241,7 @@ rawValueEqualityHelper(std::vector<T1> & out, const std::vector<T2> & in)
 {
   out.resize(in.size());
   for (MooseIndex(in) i = 0; i < in.size(); ++i)
-    out[i] = MetaPhysicL::raw_value(in[i]);
-}
-
-template <typename T1, typename T2>
-void
-rawValueEqualityHelper(std::vector<std::vector<T1>> & out, const std::vector<std::vector<T2>> & in)
-{
-  out.resize(in.size());
-  for (MooseIndex(in) i = 0; i < in.size(); ++i)
-  {
-    out[i].resize(in[i].size());
-    for (MooseIndex(in[i]) j = 0; j < in[i].size(); ++j)
-      out[i][j] = MetaPhysicL::raw_value(in[i][j]);
-  }
+    rawValueEqualityHelper(out[i], in[i]);
 }
 }
 }
@@ -305,14 +290,6 @@ MaterialPropertyBase<T, is_ad>::resize(int n)
 
 template <typename T, bool is_ad>
 inline void
-MaterialPropertyBase<T, is_ad>::swap(PropertyValue * rhs)
-{
-  mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(rhs)->_value);
-}
-
-template <typename T, bool is_ad>
-inline void
 MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
                                        PropertyValue * rhs,
                                        const unsigned int from_qp)
@@ -342,6 +319,40 @@ MaterialPropertyBase<T, is_ad>::load(std::istream & stream)
 {
   for (unsigned int i = 0; i < size(); i++)
     loadHelper(stream, _value[i], NULL);
+}
+
+template <typename T, bool is_ad>
+inline void
+MaterialPropertyBase<T, is_ad>::swap(PropertyValue * rhs)
+{
+  mooseAssert(rhs, "Assigning nullptr?");
+
+  // If we're the same
+  if (rhs->isAD() == is_ad)
+  {
+    this->_value.swap(cast_ptr<MaterialPropertyBase<T, is_ad> *>(rhs)->_value);
+    return;
+  }
+
+  // We may call this function when doing swap between MaterialData material properties (you can
+  // think of these as the current element properties) and MaterialPropertyStorage material
+  // properties (these are the stateful material properties that we store for *every* element). We
+  // never store ADMaterialProperty in stateful storage (e.g. MaterialPropertyStorage) for memory
+  // resource reasons; instead we keep a regular MaterialProperty version of it. Hence we do have a
+  // need to exchange data between the AD and regular copies which we implement below. The below
+  // is obviously not a swap, for which you cannot identify a giver and receiver. Instead the below
+  // has a clear giver and receiver. The giver is the object passed in as the rhs. The receiver is
+  // *this* object. This directionality, although not conceptually appropriate given the method
+  // name, *is* appropriate to how this method is used in practice. See shallowCopyData and
+  // shallowCopyDataBack in MaterialPropertyStorage.C
+
+  auto * different_type_prop = dynamic_cast<MaterialPropertyBase<T, !is_ad> *>(rhs);
+  mooseAssert(different_type_prop,
+              "Wrong material property type T in MaterialPropertyBase<T, is_ad>::swap");
+
+  this->resize(different_type_prop->size());
+  for (const auto qp : make_range(this->size()))
+    moose::internal::rawValueEqualityHelper(this->_value[qp], (*different_type_prop)[qp]);
 }
 
 template <typename T>
@@ -453,11 +464,13 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
 }
 
 // Scalar Init Helper Function
-template <typename T>
+template <template <typename> class DerivedMaterialProperty, typename T>
 PropertyValue *
-_init_helper(int size, T * /*prop*/)
+_init_helper(int size, DerivedMaterialProperty<T> * /*prop*/)
 {
-  T * copy = new T;
+  // This function is used to initialize stateful material properties. We *never* want to create a
+  // stateful AD material property because it is too memory intensive
+  MaterialProperty<T> * copy = new MaterialProperty<T>;
   copy->resize(size);
   return copy;
 }
