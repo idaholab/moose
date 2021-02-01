@@ -5,7 +5,7 @@
 /**
  * Base class for smooth transitions between two functions of one variable
  */
-class SmoothTransition
+class ADSmoothTransition
 {
 public:
   /**
@@ -14,7 +14,7 @@ public:
    * @param[in] x_center   Center point of transition
    * @param[in] transition_width   Width of transition
    */
-  SmoothTransition(const Real & x_center, const Real & transition_width);
+  ADSmoothTransition(const ADReal & x_center, const ADReal & transition_width);
 
   /**
    * Computes the transition value
@@ -23,26 +23,26 @@ public:
    * @param[in] f1   Left function
    * @param[in] f2   Right function
    */
-  virtual Real value(const Real & x, const Real & f1, const Real & f2) const = 0;
+  virtual ADReal value(const ADReal & x, const ADReal & f1, const ADReal & f2) const = 0;
 
   /**
    * Returns the coordinate of the left end of the transition
    */
-  const Real & leftEnd() const { return _x1; }
+  const ADReal & leftEnd() const { return _x1; }
 
   /**
    * Returns the coordinate of the right end of the transition
    */
-  const Real & rightEnd() const { return _x2; }
+  const ADReal & rightEnd() const { return _x2; }
 
 protected:
   /// Center point of transition
-  const Real _x_center;
+  const ADReal _x_center;
   /// Width of transition
-  const Real _transition_width;
+  const ADReal _transition_width;
 
   /// Left end point of transition
-  const Real _x1;
+  const ADReal _x1;
   /// Right end point of transition
-  const Real _x2;
+  const ADReal _x2;
 };

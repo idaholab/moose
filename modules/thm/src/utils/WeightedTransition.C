@@ -19,20 +19,6 @@ WeightedTransition::value(const Real & x, const Real & f1, const Real & f2) cons
   }
 }
 
-ADReal
-WeightedTransition::value(const ADReal & x, const ADReal & f1, const ADReal & f2) const
-{
-  if (x <= _x1)
-    return f1;
-  else if (x >= _x2)
-    return f2;
-  else
-  {
-    const ADReal w = 0.5 * (std::cos(M_PI / (_x2 - _x1) * (x - _x1)) + 1.0);
-    return w * f1 + (1.0 - w) * f2;
-  }
-}
-
 Real
 WeightedTransition::derivative(
     const Real & x, const Real & f1, const Real & f2, const Real & df1dx, const Real & df2dx) const

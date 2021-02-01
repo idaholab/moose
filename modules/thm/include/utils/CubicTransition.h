@@ -17,7 +17,6 @@ public:
   CubicTransition(const Real & x_center, const Real & transition_width);
 
   virtual Real value(const Real & x, const Real & f1, const Real & f2) const override;
-  virtual ADReal value(const ADReal & x, const ADReal & f1, const ADReal & f2) const override;
 
   /**
    * Computes the derivative of the transition value
