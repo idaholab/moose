@@ -13,11 +13,12 @@
 
 #include "libmesh/mesh_base.h"
 
-template <>
+registerMooseObject("XFEMApp", XFEMElemPairMaterialManager);
+
 InputParameters
-validParams<XFEMElemPairMaterialManager>()
+XFEMElemPairMaterialManager::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Manage the execution of stateful materials on extra QPs");
   params.addRequiredParam<std::vector<std::string>>("material_names",
                                                     "List of recompute material objects manage");
@@ -152,7 +153,7 @@ void
 XFEMElemPairMaterialManager::execute()
 {
   // fetch all variable dependencies
-  std::set<MooseVariable *> var_dependencies;
+  std::set<MooseVariableFieldBase *> var_dependencies;
   for (auto & material : _materials)
   {
     auto & material_var_dependencies = material->getMooseVariableDependencies();
@@ -182,7 +183,7 @@ XFEMElemPairMaterialManager::execute()
     auto & item_old = (*_map_old)[extra_qps.first];
     auto & item_older = (*_map_older)[extra_qps.first];
 
-    auto n_old_extra_qps = 0;
+    unsigned int n_old_extra_qps = 0;
     if (item.size() > 0)
     {
       n_old_extra_qps = item[0]->size();

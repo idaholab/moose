@@ -13,11 +13,12 @@
 
 #include "libmesh/mesh_base.h"
 
-template <>
+registerMooseObject("XFEMApp", XFEMMaterialManager);
+
 InputParameters
-validParams<XFEMMaterialManager>()
+XFEMMaterialManager::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Manage the execution of stateful materials on extra QPs");
   params.addRequiredParam<std::vector<std::string>>("material_names",
                                                     "List of recompute material objects manage");
@@ -108,7 +109,7 @@ void
 XFEMMaterialManager::execute()
 {
   // fetch all variable dependencies
-  std::set<MooseVariable *> var_dependencies;
+  std::set<MooseVariableFEBase *> var_dependencies;
   for (auto & material : _materials)
   {
     auto & material_var_dependencies = material->getMooseVariableDependencies();
