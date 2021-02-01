@@ -409,7 +409,7 @@ velocity_interp_method='average'
 [Outputs]
   exodus = false
   csv = true
-  inactive = 'conservation_mass console_momentum_x console_momentum_y console_energy'
+  inactive = 'console_mass console_momentum_x console_momentum_y console_energy'
   [console_mass]
     type = Console
     start_step = 1

@@ -43,8 +43,8 @@ SideIntegralVariableUserObject::computeQpIntegral()
     /// We should be at the edge of the domain
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
-    if (!fi->isBoundary())
-      mooseError("SideIntegralVariableUserObject should only be used at boundaries");
+    mooseAssert(fi->isBoundary(),
+                "SideIntegralVariableUserObject should only be used at boundaries");
 
     return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
   }

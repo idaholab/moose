@@ -48,6 +48,8 @@ SideIntegralVariablePostprocessor::computeQpIntegral()
   {
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have an fi");
+    mooseAssert(fi->isBoundary(),
+                "SideIntegralVariablePostprocessor should only be used at boundaries");
     return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
   }
   else

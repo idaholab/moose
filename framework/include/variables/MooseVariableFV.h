@@ -457,8 +457,8 @@ public:
                           const ADReal & elem_value) const;
 
   /**
-   * Compute the solution value on an internal face, using linear interpolation or interpolating
-   * from vertex values, depending on the stencil.
+   * Compute or retrieve from cache the solution value on an internal face, using linear
+   * interpolation or interpolating from vertex values, depending on the stencil.
    * @param neighbor The \p neighbor element that is on the other side of the FaceInfo
    * @param fi The face information object
    * @param elem_value The solution value on the "element". This value may be used for computing the

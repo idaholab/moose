@@ -36,8 +36,14 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 
+  /// Velocity components for finite volume
+  const MooseVariableFV<Real> * const _fv_vel_x;
+  const MooseVariableFV<Real> * const _fv_vel_y;
+  const MooseVariableFV<Real> * const _fv_vel_z;
+
   /// Advected quantities
   const VariableValue & _advected_variable;
+  const MooseVariableFV<Real> * const _fv_advected_variable;
   const ADMaterialProperty<Real> & _advected_material_property;
   const ADMaterialProperty<Real> & _advected_material_property_neighbor;
 
