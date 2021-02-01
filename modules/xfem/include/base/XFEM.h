@@ -295,7 +295,6 @@ public:
     return _elem_pair_unique_id_map;
   }
 
-private:
   void getFragmentEdges(const Elem * elem,
                         EFAElement2D * CEMElem,
                         std::vector<std::vector<Point>> & frag_edges) const;

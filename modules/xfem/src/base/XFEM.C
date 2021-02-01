@@ -1207,15 +1207,15 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       for (auto & it : _sibling_elems[_geometric_cuts[m]->getInterfaceID()])
       {
-        if (parent_elem == it->first)
+        if (parent_elem == it.first)
         {
-          temp_elem_pair_unique_id_map[it->first->unique_id()] = libmesh_elem;
-          it->first = libmesh_elem;
+          temp_elem_pair_unique_id_map[it.first->unique_id()] = libmesh_elem;
+          it.first = libmesh_elem;
         }
-        else if (parent_elem == it->second)
+        else if (parent_elem == it.second)
         {
-          temp_elem_pair_unique_id_map[it->second->unique_id()] = libmesh_elem;
-          it->second = libmesh_elem;
+          temp_elem_pair_unique_id_map[it.second->unique_id()] = libmesh_elem;
+          it.second = libmesh_elem;
         }
       }
     }
@@ -1338,12 +1338,11 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
       for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
       {
-        std::vector<boundary_id_type> parent_elem_boundary_ids =
-            _mesh->boundary_info->boundary_ids(parent_elem, side);
-        std::vector<boundary_id_type>::iterator it_bd = parent_elem_boundary_ids.begin();
-        for (; it_bd != parent_elem_boundary_ids.end(); ++it_bd)
+        _mesh->boundary_info->boundary_ids(parent_elem, side, parent_boundary_ids);
+        for (auto & bd : parent_boundary_ids)
         {
-          if (_fe_problem->needMaterialOnSide(*it_bd, 0))
+          // TODO: interface or boundary material?
+          if (_fe_problem->needBoundaryMaterialOnSide(bd, 0))
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
         }
       }

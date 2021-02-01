@@ -5,23 +5,23 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMELEMPAIRMATERIALMANAGER_H
-#define XFEMELEMPAIRMATERIALMANAGER_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "ElementPairQPProvider.h"
+
+class XFEM;
 
 /**
  * Manage the history of stateful extra QP material properties. This is sooper-dee-dooper
  * experimental!
  * The extra QP points are obtained from ElementPairLocator
  */
-
-class XFEM;
-
 class XFEMElemPairMaterialManager : public GeneralUserObject, public ElementPairQPProvider
 {
 public:
+  static InputParameters validParams();
+
   XFEMElemPairMaterialManager(const InputParameters & parameters);
   ~XFEMElemPairMaterialManager();
 
@@ -77,7 +77,7 @@ protected:
   //@}
 
   ///@{ Materials managed by this object and their properties
-  std::vector<Material *> _materials;
+  std::vector<MaterialBase *> _materials;
   MaterialProperties _properties;
   ///@}
 
@@ -98,9 +98,6 @@ protected:
   /// map from property names to indes into _props etc.
   std::map<std::string, unique_id_type> _managed_properties;
 };
-
-template <>
-InputParameters validParams<XFEMElemPairMaterialManager>();
 
 template <typename T>
 const MaterialProperty<T> &
@@ -134,5 +131,3 @@ XFEMElemPairMaterialManager::getMaterialPropertyOlder(const std::string & name) 
 
   return *prop;
 }
-
-#endif // XFEMELEMPAIRMATERIALMANAGER_H

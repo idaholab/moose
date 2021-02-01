@@ -8,11 +8,12 @@
 #include "XFEMElementPairQPProvider.h"
 #include "GeometricSearchData.h"
 
-template <>
+registerMooseObject("XFEMApp", XFEMElementPairQPProvider);
+
 InputParameters
-validParams<XFEMElementPairQPProvider>()
+XFEMElementPairQPProvider::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Set up a list of discrete point to evaluate material properties on "
                              "using the XFEMMaterialManager");
   return params;
@@ -34,8 +35,8 @@ void
 XFEMElementPairQPProvider::timestepSetup()
 {
   // We have to clear map because old element in the map might be replaced with new one when XFEM
-  // modifies mesh. Not efficient but easy way to do is the refresh map at every timestep. The
-  // ordering of quadature points for each element needs to be remained, otherwise the
+  // modifies mesh. Not efficient but easy way to do is the refresh map at every time step. The
+  // ordering of quadrature points for each element needs to be remained, otherwise the
   // XFEMElemPairMaterialManager will fetch the wrong item.
 
   _extra_qp_map.clear();

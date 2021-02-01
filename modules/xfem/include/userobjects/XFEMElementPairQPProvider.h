@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMELEMENTPAIRQPPROVIDER_H
-#define XFEMELEMENTPAIRQPPROVIDER_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "ElementPairQPProvider.h"
@@ -14,15 +13,14 @@
 
 class XFEMElementPairQPProvider;
 
-template <>
-InputParameters validParams<XFEMElementPairQPProvider>();
-
 /**
  * Provides test QPs for testing XFEMMaterialManager
  */
 class XFEMElementPairQPProvider : public GeneralUserObject, public ElementPairQPProvider
 {
 public:
+  static InputParameters validParams();
+
   XFEMElementPairQPProvider(const InputParameters & parameters);
 
   virtual void initialSetup() override;
@@ -48,5 +46,3 @@ protected:
   std::map<unique_id_type, std::pair<const Elem *, const Elem *>> _elem_pair_map;
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * _element_pair_locators;
 };
-
-#endif // XFEMELEMENTPAIRQPPROVIDER_H
