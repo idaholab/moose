@@ -30,6 +30,6 @@ protected:
   virtual void postExecuteStudy() override;
 
 private:
-  bool _executed_once;
-  std::vector<std::shared_ptr<Ray>> _banked_rays;
+  bool & _executed_once;
+  std::vector<std::shared_ptr<Ray>> & _banked_rays;
 };
