@@ -1,0 +1,33 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16848'
+
+  [tests]
+    requirement = 'The RayTracingStudy shall return a useful error when'
+    [duplicate_ray]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/add_duplicate_ray=true'
+      allow_test_objects = true
+      expect_err = 'Multiple shared_ptrs were found that point to the same Ray'
+      detail = 'the same ray is added to be traced multiple times,'
+    []
+    [local_non_unique_id]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/add_local_non_unique_id_ray=true'
+      allow_test_objects = true
+      expect_err = 'Multiple Rays exist with ID 0 on processor'
+      detail = 'local rays that have the same ID are added to be traced,'
+    []
+    [global_non_unique_id]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/add_global_non_unique_id_ray=true'
+      allow_test_objects = true
+      min_parallel = 2
+      expect_err = 'Ray with ID 0 exists on ranks'
+      detail = 'and rays that have the same ID on different processors are added to be traced.'
+    []
+  []
+[]
