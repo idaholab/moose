@@ -23,14 +23,12 @@ SmoothTransitionTestMaterial::SmoothTransitionTestMaterial(const InputParameters
     _transition_type(getParam<MooseEnum>("transition_type")),
 
     _var(coupledValue("var")),
-    _ad_var(adCoupledValue("var")),
 
     _cubic_transition(0.0, 1.0),
     _weighted_transition(0.0, 1.0),
 
     _matprop(declareProperty<Real>("mymatprop")),
-    _dmatprop_dvar(declarePropertyDerivativeTHM<Real>("mymatprop", "var")),
-    _ad_matprop(declareADProperty<Real>("myadmatprop"))
+    _dmatprop_dvar(declarePropertyDerivativeTHM<Real>("mymatprop", "var"))
 {
   const Real & x1 = _cubic_transition.leftEnd();
   const Real & x2 = _cubic_transition.rightEnd();
@@ -41,19 +39,16 @@ void
 SmoothTransitionTestMaterial::computeQpProperties()
 {
   const Real & x = _var[_qp];
-  const ADReal & ad_x = _ad_var[_qp];
 
   if (_transition_type == "cubic")
   {
     _matprop[_qp] = _cubic_transition.value(x, f1(x), f2(x));
     _dmatprop_dvar[_qp] = _cubic_transition.derivative(x, df1dx(x), df2dx(x));
-    _ad_matprop[_qp] = _cubic_transition.value(ad_x, ad_f1(ad_x), ad_f2(ad_x));
   }
   else if (_transition_type == "weighted")
   {
     _matprop[_qp] = _weighted_transition.value(x, f1(x), f2(x));
     _dmatprop_dvar[_qp] = _weighted_transition.derivative(x, f1(x), f2(x), df1dx(x), df2dx(x));
-    _ad_matprop[_qp] = _weighted_transition.value(ad_x, ad_f1(ad_x), ad_f2(ad_x));
   }
 }
 
@@ -65,18 +60,6 @@ SmoothTransitionTestMaterial::f1(const Real & x) const
 
 Real
 SmoothTransitionTestMaterial::f2(const Real & x) const
-{
-  return -0.5 * std::pow(x - 1, 2) + 1;
-}
-
-ADReal
-SmoothTransitionTestMaterial::ad_f1(const ADReal & x) const
-{
-  return 2 * x + 2;
-}
-
-ADReal
-SmoothTransitionTestMaterial::ad_f2(const ADReal & x) const
 {
   return -0.5 * std::pow(x - 1, 2) + 1;
 }
