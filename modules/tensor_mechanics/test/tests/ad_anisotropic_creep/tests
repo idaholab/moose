@@ -1,23 +1,24 @@
 [Tests]
   design = 'TensorMechanicsPlasticOrthotropic.md'
   issues = '#16016'
-  [./anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test]
+  [anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test]
     type = 'Exodiff'
     input = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test.i'
     exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test_out.e'
     heavy = true
     min_parallel = 2
     custom_cmp = 'generalized.exodiff'
-    requirement = 'Moose shall be capable of simulating materials that exhibit anisotropic creep with material time step.'
-  [../]
+    requirement = 'Moose shall be capable of simulating materials that exhibit anisotropic creep '
+                  'with material time step.'
+  []
 
-  [./anis_mech_hill_tensor_creep_small_tiny_step_test]
+  [anis_mech_hill_tensor_creep_small_tiny_step_test]
     type = 'Exodiff'
     input = 'anis_mech_hill_tensor_creep_small_tiny_step_test.i'
     exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_test_out.e'
     requirement = 'Moose shall be capable of simulating materials that exhibit anisotropic creep.'
-    min_parallel = 2 
+    min_parallel = 2
     custom_cmp = 'generalized.exodiff'
     heavy = true
-  [../]
+  []
 []

@@ -29,9 +29,10 @@ ADTransverselyIsotropicCreepStressUpdate::validParams()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
-  params.addRequiredParam<std::vector<Real>>("hill_constants",
-                                             "Hill material constants in order: F, "
-                                             "G, H, L, M, N");
+  params.addRequiredRangeCheckedParam<std::vector<Real>>("hill_constants",
+                                                         "hill_constants_size = 6",
+                                                         "Hill material constants in order: F, "
+                                                         "G, H, L, M, N");
 
   return params;
 }
@@ -60,12 +61,12 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
   _hill_constants = getParam<std::vector<Real>>("hill_constants");
 
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   // Build Hill tensor or anisotropy matrix
   ADDenseMatrix hill_tensor(6, 6);
@@ -99,12 +100,12 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
     const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
   qsigma_square += G * (stress_new(2) - stress_new(0)) * (stress_new(2) - stress_new(0));
@@ -142,12 +143,12 @@ ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
     const ADReal & /*delta_gamma*/)
 {
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   // Equivalent deviatoric stress function.
   ADReal qsigma_square = F * (stress_new(1) - stress_new(2)) * (stress_new(1) - stress_new(2));
@@ -174,12 +175,12 @@ ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
     const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   // Equivalent deviatoric stress function.
   ADReal qsigma_square = F * (stress(1, 1) - stress(2, 2)) * (stress(1, 1) - stress(2, 2));

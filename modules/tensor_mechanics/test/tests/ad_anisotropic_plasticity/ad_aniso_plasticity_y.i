@@ -16,18 +16,18 @@
     ymax = 10.0
     zmax = 1.0
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = '100'
     nodes = '4 10'
     input = gen
-  [../]
-  [./corner_node_2]
+  []
+  [corner_node_2]
     type = ExtraNodesetGenerator
     new_boundary = '101'
     nodes = '1 67'
     input = corner_node
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -126,9 +126,8 @@
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
-    add_variables = true
-    incremental = true
-    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy stress_yy'
+    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy '
+                      'stress_yy'
     use_automatic_differentiation = true
   []
 []
@@ -172,7 +171,7 @@
   []
 
   [no_disp_y]
-    type =ADDirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
@@ -190,14 +189,6 @@
       boundary = top
       function = pull
     []
-  []
-
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 

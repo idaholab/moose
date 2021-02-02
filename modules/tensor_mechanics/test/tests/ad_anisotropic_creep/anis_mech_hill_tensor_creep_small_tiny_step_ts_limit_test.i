@@ -97,16 +97,6 @@
     C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
   []
 
-  #  [./elasticity_tensor]
-  #      type = ADComputeIsotropicElasticityTensor
-  #      youngs_modulus = 206800
-  #      poissons_ratio = 0.0
-  #    [../]
-
-  #  [stress_]
-  #     type = ADComputeFiniteStrainElasticStress
-  #  []
-
   [elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_creep trial_creep_two"
@@ -120,7 +110,6 @@
     n_exponent = 5
     m_exponent = 0
     activation_energy = 0
-    # internal_solve_output_on = always
     # F G H L M N
     hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5
@@ -133,7 +122,6 @@
     n_exponent = 5
     m_exponent = 0
     activation_energy = 0
-    # internal_solve_output_on = always
     # F G H L M N
     hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5

@@ -25,9 +25,10 @@ ADTransverselyIsotropicPlasticityStressUpdate::validParams()
   params.addRequiredParam<Real>("yield_stress",
                                 "Yield stress (constant value) for anisotropic plasticity");
 
-  params.addRequiredParam<std::vector<Real>>("hill_constants",
-                                             "Hill material constants in order: F, "
-                                             "G, H, L, M, N");
+  params.addRequiredRangeCheckedParam<std::vector<Real>>("hill_constants",
+                                                         "hill_constants_size = 6",
+                                                         "Hill material constants in order: F, "
+                                                         "G, H, L, M, N");
 
   return params;
 }
@@ -54,12 +55,12 @@ ADTransverselyIsotropicPlasticityStressUpdate::ADTransverselyIsotropicPlasticity
   _hill_constants = getParam<std::vector<Real>>("hill_constants");
 
   // Hill constants, some constraints apply
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   _hill_tensor.zero();
 
@@ -218,7 +219,7 @@ void
 ADTransverselyIsotropicPlasticityStressUpdate::computeHillTensorEigenDecomposition(
     ADDenseMatrix & hill_tensor)
 {
-  unsigned int dimension = hill_tensor.n();
+  const unsigned int dimension = hill_tensor.n();
 
   AnisotropyMatrix A;
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
@@ -275,12 +276,12 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
       inelasticStrainIncrement_vector(5);
 
   // Calculate appropriate equivalent plastic strain
-  const Real F = _hill_constants[0];
-  const Real G = _hill_constants[1];
-  const Real H = _hill_constants[2];
-  const Real L = _hill_constants[3];
-  const Real M = _hill_constants[4];
-  const Real N = _hill_constants[5];
+  const Real & F = _hill_constants[0];
+  const Real & G = _hill_constants[1];
+  const Real & H = _hill_constants[2];
+  const Real & L = _hill_constants[3];
+  const Real & M = _hill_constants[4];
+  const Real & N = _hill_constants[5];
 
   ADReal eq_plastic_strain_inc = (F * Utility::pow<2>(inelasticStrainIncrement(0, 0)) +
                                   G * Utility::pow<2>(inelasticStrainIncrement(1, 1)) +

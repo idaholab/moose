@@ -2,8 +2,6 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
-
-    # Original verification nx = 10, ny = 2, nz = 2
     nx = 10
     ny = 2
     nz = 2
@@ -15,18 +13,18 @@
     ymax = 1.0
     zmax = 1.0
   []
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = '100'
     nodes = '3 69'
     input = gen
-  [../]
-  [./corner_node_2]
+  []
+  [corner_node_2]
     type = ExtraNodesetGenerator
     new_boundary = '101'
     nodes = '4 47'
     input = corner_node
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -125,9 +123,8 @@
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
-    add_variables = true
-    incremental = true
-    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy stress_yy'
+    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy '
+                      'stress_yy'
     use_automatic_differentiation = true
   []
 []
@@ -192,13 +189,6 @@
     []
   []
 
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
 []
 
 [Executioner]

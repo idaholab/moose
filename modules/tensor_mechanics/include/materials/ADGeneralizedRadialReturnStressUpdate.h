@@ -11,19 +11,6 @@
 
 #include "StressUpdateBase.h"
 #include "ADGeneralizedReturnMappingSolution.h"
-
-/**
- * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
- * anisotropic (Hill-like) creep and plasticity.  This radial return mapping class
- * acts as a base class for the radial return creep and plasticity classes/combinations.
- * The stress increment computed by ADRadialReturnStressUpdate is used by
- * ComputeMultipleInelasticStress which computes the elastic stress for finite
- * strains.
- * This class is based on the algorithm in Versino, D, Bennett, KC. Generalized
- * radial return mapping algorithm for anisotropic von Mises plasticity framed in material
- * eigenspace. Int J Numer Methods Eng. 2018. 116. 202 222
- */
-
 #include "MooseTypes.h"
 
 #include <Eigen/Core>
@@ -45,6 +32,17 @@ struct cast_impl<ADReal, int>
 
 typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
 typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
+
+/**
+ * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
+ * anisotropic (Hill-like) creep and plasticity. This generalized radial return mapping class
+ * acts as a base class for the radial return of anisotropic creep and plasticity
+ * classes/combinations. The stress increment computed by ADGeneralizedRadialReturnStressUpdate is
+ * used by ComputeMultipleInelasticStress which computes the elastic stress for finite strains. This
+ * class is based on the algorithm in Versino, D, Bennett, KC. Generalized radial return mapping
+ * algorithm for anisotropic von Mises plasticity framed in material eigenspace. Int J Numer Methods
+ * Eng. 2018. 116. 202 222
+ */
 
 class ADGeneralizedRadialReturnStressUpdate : public ADStressUpdateBase,
                                               public ADGeneralizedReturnMappingSolution
@@ -139,13 +137,10 @@ protected:
    * @param stress_dev Deviatoric part of Cauchy stress
    * @param delta_gamma Plastic multiplier
    */
-  virtual void computeStrainFinalize(ADRankTwoTensor & /*inelasticStrainIncrement*/,
-                                     const ADRankTwoTensor & /*stress*/,
-                                     const ADDenseVector & /*stress_dev*/,
-                                     const ADReal & /*delta_gamma*/)
-  {
-    mooseError("computeStrainFinalize needs to be implemented by a child class.");
-  }
+  virtual void computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
+                                     const ADRankTwoTensor & stress,
+                                     const ADDenseVector & stress_dev,
+                                     const ADReal & delta_gamma) = 0;
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
