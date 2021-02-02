@@ -83,7 +83,9 @@ RayTracingStudy::validParams()
   params.addParam<bool>(
       "verify_rays",
       true,
-      "Whether or not to verify if Rays have valid information before being traced.");
+      "Whether or not to verify the generated Rays. This includes checking their "
+      "starting information and the uniqueness of Rays before and after execution. This is also "
+      "used by derived studies for more specific verification.");
   params.addParam<bool>("verify_trace_intersections",
                         true,
                         "Whether or not to verify the trace intersections in devel and dbg modes. "
@@ -810,18 +812,19 @@ RayTracingStudy::executeStudy()
       _generation_time = std::chrono::steady_clock::now() - generation_start_time;
     }
 
-#ifndef NDEBUG
     // At this point, nobody is working so this is good time to make sure
-    // Ray IDs are unique across all processors in the working buffer
-    verifyUniqueRayIDs(_parallel_ray_study->workBuffer().begin(),
+    // Rays are unique across all processors in the working buffer
+    if (verifyRays())
+    {
+      verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
                        _parallel_ray_study->workBuffer().end(),
-                       /* global = */ true,
                        /* error_suffix = */ "after generateRays()");
 
-    verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
-                     _parallel_ray_study->workBuffer().end(),
-                     /* error_suffix = */ "after generateRays()");
-#endif
+      verifyUniqueRayIDs(_parallel_ray_study->workBuffer().begin(),
+                         _parallel_ray_study->workBuffer().end(),
+                         /* global = */ true,
+                         /* error_suffix = */ "after generateRays()");
+    }
 
     if (_need_to_associate_registered_rays)
     {
@@ -844,18 +847,21 @@ RayTracingStudy::executeStudy()
 
   _execution_time = std::chrono::steady_clock::now() - _execution_start_time;
 
-#ifndef NDEBUG
-  // Outside of debug, _ray_bank always holds all of the Rays that have ended on this processor
-  // We can use this as a global point to check for unique IDs for every Ray that has traced
-  verifyUniqueRayIDs(_ray_bank.begin(),
-                     _ray_bank.end(),
-                     /* global = */ true,
+  if (verifyRays())
+  {
+    verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
+                     _parallel_ray_study->workBuffer().end(),
                      /* error_suffix = */ "after tracing completed");
 
-  verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
-                   _parallel_ray_study->workBuffer().end(),
-                   /* error_suffix = */ "after tracing completed");
+#ifndef NDEBUG
+    // Outside of debug, _ray_bank always holds all of the Rays that have ended on this processor
+    // We can use this as a global point to check for unique IDs for every Ray that has traced
+    verifyUniqueRayIDs(_ray_bank.begin(),
+                       _ray_bank.end(),
+                       /* global = */ true,
+                       /* error_suffix = */ "after tracing completed");
 #endif
+  }
 
   // Update counters from the threaded trace objects
   for (const auto & tr : _threaded_trace_ray)
@@ -1438,68 +1444,74 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
                                     const bool global,
                                     const std::string & error_suffix) const
 {
-  // Check our local Rays first
-  std::unordered_map<RayID, const Ray *> my_id_map;
-  for (auto it = begin; it != end; ++it)
+  // Determine the unique set of Ray IDs on this processor,
+  // and if not locally unique throw an error. Once we build this set,
+  // we will send it to rank 0 to verify globally
+  std::set<RayID> local_rays;
+  for (const std::shared_ptr<Ray> & ray : as_range(begin, end))
   {
-    const std::shared_ptr<Ray> & ray = *it;
     mooseAssert(ray, "Null ray");
 
-    const auto emplace = my_id_map.emplace(ray->id(), ray.get());
-    const bool found = !emplace.second;
-
-    if (found)
+    // Try to insert into the set; the second entry in the pair
+    // will be false if it was not inserted
+    if (!local_rays.insert(ray->id()).second)
     {
-      const Ray * other_ray = emplace.first->second;
-      mooseError(_error_prefix,
-                 ":\nMultiple Rays exist with ID ",
-                 ray->id(),
-                 " on processor ",
-                 _pid,
-                 " ",
-                 error_suffix,
-                 "\n\nOffending Ray information:\n\n",
-                 ray->getInfo(),
-                 "\n",
-                 other_ray->getInfo());
-    }
-  }
-
-  if (global)
-  {
-    // Package our IDs to send to all processors
-    std::vector<RayID> my_ids;
-    my_ids.reserve(my_id_map.size());
-    for (const auto & id_ray_pair : my_id_map)
-      my_ids.push_back(id_ray_pair.first);
-    std::map<processor_id_type, std::vector<RayID>> send_ids;
-    for (processor_id_type pid = 0; pid < n_processors(); ++pid)
-      if (pid != _pid)
-        send_ids.emplace(pid, my_ids);
-
-    // Verify other processor's Rays against ours
-    const auto check_ids = [this, &my_id_map, &error_suffix](processor_id_type pid,
-                                                             const std::vector<RayID> & ids) {
-      for (const RayID id : ids)
-      {
-        const auto find = my_id_map.find(id);
-        if (find != my_id_map.end())
-        {
-          const Ray * ray = find->second;
+      for (const std::shared_ptr<Ray> & other_ray : as_range(begin, end))
+        if (ray.get() != other_ray.get() && ray->id() == other_ray->id())
           mooseError(_error_prefix,
-                     ":\nA Ray with ID ",
-                     id,
-                     " exists on processors ",
-                     pid,
-                     " and ",
+                     ":\nMultiple Rays exist with ID ",
+                     ray->id(),
+                     " on processor ",
                      _pid,
                      " ",
                      error_suffix,
-                     "\n\nLocal offending Ray information:\n",
-                     ray->getInfo());
-        }
+                     "\n\nOffending Ray information:\n\n",
+                     ray->getInfo(),
+                     "\n",
+                     other_ray->getInfo());
+
+      mooseError(_error_prefix,
+                 "Duplicated shared pointers to the same local Ray were found ",
+                 error_suffix,
+                 "\n\n",
+                 ray->getInfo());
+    }
+  }
+
+  // Send IDs from all procs to rank 0 and verify on rank 0
+  if (global)
+  {
+    // Package our local IDs and send to rank 0
+    std::map<processor_id_type, std::vector<RayID>> send_ids;
+    send_ids.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(0),
+                     std::forward_as_tuple(local_rays.begin(), local_rays.end()));
+    local_rays.clear();
+
+    // Mapping on rank 0 from ID -> processor ID
+    std::map<RayID, processor_id_type> global_map;
+
+    // Verify another processor's IDs against the global map on rank 0
+    const auto check_ids = [this, &global_map, &error_suffix](processor_id_type pid,
+                                                              const std::vector<RayID> & ids) {
+      for (const RayID id : ids)
+      {
+        const auto emplace_pair = global_map.emplace(id, pid);
+
+        // Means that this ID already exists in the map
+        if (!emplace_pair.second)
+          mooseError(_error_prefix,
+                     ": Ray with ID ",
+                     id,
+                     " exists on ranks ",
+                     emplace_pair.first->second,
+                     " and ",
+                     pid,
+                     "\n",
+                     error_suffix);
       }
     };
+
     Parallel::push_parallel_vector_data(_communicator, send_ids, check_ids);
   }
 }
@@ -1510,17 +1522,13 @@ RayTracingStudy::verifyUniqueRays(const std::vector<std::shared_ptr<Ray>>::const
                                   const std::string & error_suffix)
 {
   std::set<const Ray *> rays;
-  for (auto it = begin; it != end; ++it)
-  {
-    const std::shared_ptr<Ray> & ray = *it;
-
+  for (const std::shared_ptr<Ray> & ray : as_range(begin, end))
     if (!rays.insert(ray.get()).second) // false if not inserted into rays
       mooseError(_error_prefix,
                  ":\nMultiple shared_ptrs were found that point to the same Ray ",
                  error_suffix,
                  "\n\nOffending Ray:\n",
                  ray->getInfo());
-  }
 }
 
 void

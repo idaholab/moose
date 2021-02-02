@@ -79,4 +79,6 @@ private:
   PerfID _claim_rays_timer;
   /// Timing for defining rays
   PerfID _define_rays_timer;
+  /// Timing for verifying rays
+  PerfID _verify_replicated_rays;
 };
