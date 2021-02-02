@@ -54,6 +54,9 @@ private:
   // Flag indicating a solve has occured
   bool _solved_once;
 
+  // Sampler size, to test if the MultiApp object needs to be re-initialize
+  dof_id_type _number_of_sampler_rows;
+
   ///@{
   /// PrefGraph timers
   const PerfID _perf_solve_step;

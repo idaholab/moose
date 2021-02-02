@@ -1,0 +1,99 @@
+[Tests]
+  issues = '#16842'
+  design = "Samplers/index.md SamplerFullSolveMultiApp.md"
+  [no_change]
+    requirement = "The system shall support generating random samples of data"
+    [constant]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_constant_size_out.json
+      allow_test_objects = true
+      cli_args = "Samplers/dynamic/increment_rows=0 Outputs/file_base=main_constant_size_out"
+
+      detail = "that remain constant in size and"
+    []
+    [dynamic]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      allow_test_objects = true
+
+      detail = "that are dynamic in size."
+    []
+  []
+  [errors]
+    requirement = "The system shall error when the expected size of a sampler is altered and accessed prior to initialization by accessing the"
+    [getGlobalSamples]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getGlobalSamples'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the global sample matrix;"
+    []
+    [getLocalSamples]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getLocalSamples'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local sample matrix;"
+    []
+    [getNextLocalRow]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getNextLocalRow'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local sample matrix row;"
+    []
+    [getNumberOfRows]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getNumberOfRows'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the total row count;"
+    []
+    [getNumberOfLocalRows]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getNumberOfLocalRows'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local row count;"
+    []
+    [getLocalRowBegin]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getLocalRowBegin'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the first local row index;"
+    []
+    [getLocalRowEnd]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getLocalRowEnd'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the last local row index;"
+    []
+    [getNumberOfCols]
+      type = RunException
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'Samplers/dynamic/error_check=reinit_getNumberOfCols'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the column count."
+    []
+  []
+[]

@@ -168,8 +168,8 @@ protected:
    * These methods should not be called directly, each is automatically called by the public
    * getGlobalSamples() or getLocalSamples() methods.
    */
-  virtual void sampleSetUp(){};
-  virtual void sampleTearDown(){};
+  virtual void sampleSetUp() {}
+  virtual void sampleTearDown() {}
   ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
@@ -206,16 +206,32 @@ protected:
    */
   virtual void advanceGenerators(dof_id_type count);
 
-private:
+  //@{
   /**
-   * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
-   * the DenseMatrix rows for parallel distribution. A separate method is required so that the
+   * Callbacks for before and after execute.
+   *
+   * These were added to support of dynamic sampler sizes. Recall that execute is simply to advance
+   * the state of the generator such that the next sample will be unique. These methods allow
+   * operations before and after the call to generator advancement.
+   */
+  virtual void executeSetUp(){};
+  virtual void executeTearDown(){};
+  ///@}
+
+private:
+  ///@{
+  /**
+   * Functions called by MOOSE to setup the Sampler for use. The primary purpose is to partition
+   * the DenseMatrix rows for parallel distribution. A separate methods are required so that the
    * set methods can be called within the constructors of child objects, see
-   * FEProblemBase::addSampler method.
+   * FEProblemBase::addSampler method. The reinit was added to support re-partitioning to allow
+   * for dynamic changes in sampler size.
    *
    * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
    */
-  void init();
+  void init();   // sets up MooseRandom
+  void reinit(); // partitions sampler output
+  ///@}
   friend void FEProblemBase::addSampler(const std::string & type,
                                         const std::string & name,
                                         InputParameters & parameters);
@@ -229,6 +245,11 @@ private:
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
+
+  /**
+   * Helper function for reinit() errors.
+   **/
+  void checkReinitStatus() const;
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
@@ -259,6 +280,9 @@ private:
 
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
+
+  /// Flag to indicate if the reinit method should be called during execute
+  bool _needs_reinit;
 
   /// Flag for initial execute to allow the first set of random numbers to be always be the same
   bool _has_executed;
