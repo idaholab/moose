@@ -66,11 +66,11 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid"'
+    cli_args = 'Mesh/allow_renumbering=false Outputs/hide="pid"'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
-
+    rel_err = 1e-5 # distributed mesh causes small diffs
     executable_pattern = 'external_petsc_solver*'
     requirement = "MOOSE shall be able to run the PETSc external solver as master."
   []
@@ -83,6 +83,7 @@
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
+    rel_err = 1e-5 # distributed mesh causes small diffs
     prereq = 'petsc_as_master'
 
     executable_pattern = 'external_petsc_solver*'
@@ -97,6 +98,7 @@
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
+    rel_err = 1e-5 # distributed mesh causes small diffs
     prereq = 'petsc_as_master_sub_cycling'
 
     executable_pattern = 'external_petsc_solver*'
