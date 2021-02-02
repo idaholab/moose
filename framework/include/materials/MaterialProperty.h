@@ -63,17 +63,6 @@ public:
   virtual bool isAD() = 0;
 
   /**
-   * Creates a regular material property, copying any existing qp values from this
-   */
-  virtual PropertyValue * makeRegularProperty() = 0;
-
-  /**
-   * Creates an AD material property, copying any existing qp *values* from this. Derivative
-   * information is zeroed
-   */
-  virtual PropertyValue * makeADProperty() = 0;
-
-  /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
    * Important note: this copy operation loses AD derivative information if either this
    * or the rhs is not an AD material property
@@ -122,9 +111,6 @@ public:
   virtual ~MaterialPropertyBase() {}
 
   bool isAD() override { return is_ad; }
-
-  PropertyValue * makeRegularProperty() override;
-  PropertyValue * makeADProperty() override;
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -244,34 +230,6 @@ rawValueEqualityHelper(std::vector<T1> & out, const std::vector<T2> & in)
     rawValueEqualityHelper(out[i], in[i]);
 }
 }
-}
-
-template <typename T, bool is_ad>
-PropertyValue *
-MaterialPropertyBase<T, is_ad>::makeRegularProperty()
-{
-  auto * new_prop = new MaterialProperty<T>;
-
-  new_prop->resize(this->size());
-
-  for (MooseIndex(_value) i = 0; i < _value.size(); ++i)
-    moose::internal::rawValueEqualityHelper((*new_prop)[i], _value[i]);
-
-  return new_prop;
-}
-
-template <typename T, bool is_ad>
-PropertyValue *
-MaterialPropertyBase<T, is_ad>::makeADProperty()
-{
-  auto * new_prop = new ADMaterialProperty<T>;
-
-  new_prop->resize(this->size());
-
-  for (MooseIndex(_value) i = 0; i < _value.size(); ++i)
-    moose::internal::rawValueEqualityHelper((*new_prop)[i], _value[i]);
-
-  return new_prop;
 }
 
 template <typename T, bool is_ad>
