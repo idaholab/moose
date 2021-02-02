@@ -46,6 +46,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _sampler(SamplerInterface::getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
     _local_batch_app_index(0),
+    _solved_once(false),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
     _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
@@ -68,6 +69,13 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     init(_sampler.getNumberOfRows());
 }
 
+void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+{
+  // Reinitialize app to original state prior to solve, if a solve has occured
+  if (_solved_once && _mode == StochasticTools::MultiAppMode::NORMAL)
+    initialSetup();
+}
+
 bool
 SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
@@ -81,6 +89,9 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
   else
     last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+
+  _solved_once = true;
+
   return last_solve_converged;
 }
 
@@ -91,6 +102,10 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
 
   // Value to return
   bool last_solve_converged = true;
+
+  // Reinitialize app to original state prior to solve, if a solve has occured
+  if (_solved_once)
+    initialSetup();
 
   // List of active relevant Transfer objects
   std::vector<std::shared_ptr<StochasticToolsTransfer>> to_transfers =

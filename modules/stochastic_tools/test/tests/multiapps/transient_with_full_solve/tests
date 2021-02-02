@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#16476'
+  design = 'SamplerFullSolveMultiApp.md'
+  [repeat]
+    requirement = "The system shall support performing complete solves within a sub-application that "
+                  "include perturbed inputs that yield repeatable results"
+    [normal]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+
+      detail = "using normal operation;"
+    []
+    [batch-restore]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      cli_args = MultiApps/runner/mode=batch-restore
+
+      detail = "using in memory backup operation;"
+    []
+
+    [batch-reset]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_out.json
+      cli_args = MultiApps/runner/mode=batch-reset
+
+      detail = "using reset operation."
+    []
+  []
+
+  [new]
+    requirement = "The system shall support performing complete solves within a sub-application that "
+                  "include perturbed inputs that yield changing results"
+    [normal]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_new_out.json
+      cli_args = "Outputs/file_base=main_new_out Samplers/dynamic/execute_on='INITIAL TIMESTEP_END'"
+
+      detail = "using normal operation;"
+    []
+    [batch-restore]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_new_out.json
+      cli_args = "MultiApps/runner/mode=batch-restore Outputs/file_base=main_new_out "
+                 "Samplers/dynamic/execute_on='INITIAL TIMESTEP_END'"
+
+      detail = "using in memory backup operation;"
+    []
+
+    [batch-reset]
+      type = JSONDiff
+      input = main.i
+      jsondiff = main_new_out.json
+      cli_args = "MultiApps/runner/mode=batch-reset Outputs/file_base=main_new_out "
+                 "Samplers/dynamic/execute_on='INITIAL TIMESTEP_END'"
+
+      detail = "using reset operation."
+    []
+  []
+[]
