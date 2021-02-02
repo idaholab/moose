@@ -280,10 +280,10 @@ public:
   void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method);
 
   ///@{ Vector-less fill API functions. See docs of the corresponding ...FromInputVector methods
-  void fillGeneralIsotropic(T i0, T i1, T i2);
-  void fillAntisymmetricIsotropic(T i0);
-  void fillSymmetricIsotropic(T i0, T i1);
-  void fillSymmetricIsotropicEandNu(T E, T nu);
+  void fillGeneralIsotropic(const T & i0, const T & i1, const T & i2);
+  void fillAntisymmetricIsotropic(const T & i0);
+  void fillSymmetricIsotropic(const T & i0, const T & i1);
+  void fillSymmetricIsotropicEandNu(const T & E, const T & nu);
   ///@}
 
   /// Inner product of the major transposed tensor with a rank two tensor
@@ -322,7 +322,8 @@ protected:
    * Lame constant)
    *                la+2mu la la la+2mu la la+2mu mu mu mu
    */
-  void fillSymmetric9FromInputVector(const std::vector<T> & input);
+  template <typename T2>
+  void fillSymmetric9FromInputVector(const T2 & input);
 
   /**
    * fillSymmetric21FromInputVector takes either 21 inputs to fill in
@@ -332,7 +333,8 @@ protected:
    *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
    * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
    */
-  void fillSymmetric21FromInputVector(const std::vector<T> & input);
+  template <typename T2>
+  void fillSymmetric21FromInputVector(const T2 & input);
 
   /**
    * fillAntisymmetricFromInputVector takes 6 inputs to fill the
