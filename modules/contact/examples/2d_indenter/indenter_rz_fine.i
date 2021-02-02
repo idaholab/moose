@@ -34,6 +34,9 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
+
+  # For NodalVariableValue to work with distributed mesh
+  allow_renumbering = false
 [../]
 
 [Functions]

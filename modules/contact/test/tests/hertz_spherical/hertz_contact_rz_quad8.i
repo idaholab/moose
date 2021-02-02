@@ -37,6 +37,7 @@
 [Mesh]#Comment
   file = hertz_contact_rz_quad8.e
   displacements = 'disp_x disp_y'
+  allow_renumbering = false
 [] # Mesh
 
 [Functions]

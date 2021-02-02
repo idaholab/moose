@@ -8,6 +8,7 @@
     rel_err = 1e-4
     cli_args = 'Contact/leftright/use_dual=false Outputs/file_base=mortar_contact_out'
     requirement = 'The system shall converge and match the solution produced by standard mortar contact.'
+    mesh_mode = REPLICATED
   []
   [std_contact]
     type = 'CSVDiff'
@@ -16,5 +17,6 @@
     rel_err = 1e-4
     cli_args = 'Contact/leftright/use_dual=false Outputs/file_base=mortar_contact_out'
     requirement = 'The system shall converge and match the solution produced by dual mortar contact.'
+    mesh_mode = REPLICATED
   []
 []
