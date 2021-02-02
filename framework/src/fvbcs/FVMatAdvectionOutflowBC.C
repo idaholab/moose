@@ -23,23 +23,58 @@ FVMatAdvectionOutflowBC::validParams()
       "is acting on");
   params.addClassDescription(
       "Outflow boundary condition taking the advected quantity from a material property");
+  MooseEnum advected_interp_method("average upwind", "upwind");
+
+  params.addParam<MooseEnum>("advected_interp_method",
+                             advected_interp_method,
+                             "The interpolation to use for the advected quantity. Options are "
+                             "'upwind' and 'average', with the default being 'upwind'.");
   return params;
 }
 
 FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
-    _vel(getADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant(isParamValid("advected_quantity")
-                   ? &getADMaterialProperty<Real>("advected_quantity").get()
-                   : &_u)
+    _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
+    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
+    _adv_quant_elem(isParamValid("advected_quantity")
+                        ? getADMaterialProperty<Real>("advected_quantity").get()
+                        : _u),
+    _adv_quant_neighbor(isParamValid("advected_quantity")
+                            ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
+                            : _u_neighbor)
 {
+  using namespace Moose::FV;
+
+  const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
+  if (advected_interp_method == "average")
+    _advected_interp_method = InterpMethod::Average;
+  else if (advected_interp_method == "upwind")
+    _advected_interp_method = InterpMethod::Upwind;
+  else
+    mooseError("Unrecognized interpolation type ",
+               static_cast<std::string>(advected_interp_method));
 }
 
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  mooseAssert(_normal * _vel[_qp] >= 0,
+  ADRealVectorValue v;
+  ADReal adv_quant_boundary;
+
+  using namespace Moose::FV;
+
+  // Currently only Average is supported for the velocity
+  interpolate(InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
+
+  interpolate(_advected_interp_method,
+              adv_quant_boundary,
+              _adv_quant_elem[_qp],
+              _adv_quant_neighbor[_qp],
+              v,
+              *_face_info,
+              true);
+  mooseAssert(_normal * v >= 0,
               "This boundary condition is for outflow but the flow is in the opposite direction of "
               "the boundary normal");
-  return _normal * _vel[_qp] * (*_adv_quant)[_qp];
+  return _normal * v * adv_quant_boundary;
 }
