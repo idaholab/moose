@@ -25,7 +25,6 @@
 []
 
 [Postprocessors]
-  active = ''
   [total_rays_started]
     type = RayTracingStudyResult
     study = study

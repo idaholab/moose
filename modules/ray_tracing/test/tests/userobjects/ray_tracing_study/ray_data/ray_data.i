@@ -100,7 +100,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 3
+  num_steps = 2
 []
 
 [Problem]
