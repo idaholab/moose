@@ -1,6 +1,6 @@
 [Tests]
   design = 'RepeatableRayStudyBase.md'
-  issues = '#11631'
+  issues = '#16028 #16848'
   [test]
     requirement = 'The RepeatableRayStudyBase shall support the'
     [checkpoint]
@@ -21,6 +21,49 @@
       delete_output_before_running = false
       recover = false
       detail = 'shall be capable of restarting from the output data.'
+    []
+  []
+
+  [non_unique_id_error]
+    requirement = 'The RepeatableRayStudyBase shall return a useful error when a ray is added with a non-unique ID.'
+    type = 'RunException'
+    input = 'errors.i'
+    cli_args = 'UserObjects/study/create_non_unique_id_rays=true'
+    allow_test_objects = true
+    expect_err = 'Multiple Rays exist with ID 0 on processor'
+  []
+
+  [replicated_errors]
+    requirement = 'The RepeatableRayStudyBase shall return a useful error with replicated ray functionality when'
+    [additional]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/create_additional_ray_pid=1'
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      expect_err = 'The size of _rays on rank 1 does not match the size of rays on rank 0.'
+      detail = 'additional rays are created in a non-replicated manner on a subset of processors,'
+    []
+    [non_replicated_id]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/create_non_replicated_id_ray_pid=1'
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      expect_err = 'A Ray was found on rank 1 with an ID that does not exist on rank 0.'
+      detail = 'a ray exists with a non-replicated ID on a processor,'
+    []
+    [non_replicated]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/create_non_replicated_ray_pid=1'
+      min_parallel = 2
+      max_parallel = 2
+      allow_test_objects = true
+      expect_err = 'A Ray was found on rank 1 that does not exist on rank 0.'
+      detail = 'and a non-replicated ray exists on a processor.'
     []
   []
 []

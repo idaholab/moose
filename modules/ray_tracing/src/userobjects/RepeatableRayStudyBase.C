@@ -45,7 +45,8 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
     _should_claim_rays(
         declareRestartableData<bool>("claim_after_define_rays", _claim_after_define_rays)),
     _claim_rays_timer(registerTimedSection("claimRays", 1)),
-    _define_rays_timer(registerTimedSection("defineRays", 1))
+    _define_rays_timer(registerTimedSection("defineRays", 1)),
+    _verify_replicated_rays(registerTimedSection("verifyReplicatedRays", 2))
 {
   if (!_claim_after_define_rays && getParam<bool>("_define_rays_replicated"))
     mooseWarning(_error_prefix,
@@ -197,48 +198,77 @@ RepeatableRayStudyBase::defineRaysInternal()
   }
 
   // Sanity checks on if the Rays are actually replicated
-  if (_define_rays_replicated)
+  if (_define_rays_replicated && verifyRays())
     verifyReplicatedRays();
 }
 
 void
 RepeatableRayStudyBase::verifyReplicatedRays()
 {
-  // First, verify that our _rays have unique IDs beacuse we will do mapping based on Ray ID
-  verifyUniqueRayIDs(
-      _rays.begin(), _rays.end(), /* global = */ false, "in _rays after calling defineRays().");
+  TIME_SECTION(_verify_replicated_rays);
+  CONSOLE_TIMED_PRINT("Verifying replicated rays");
 
   const std::string error_suffix =
       "\n\nThe Rays added in defineRays() must be replicated across all processors\nwith the "
       "private param '_define_rays_replicated' == true.";
 
-#ifndef NDEBUG
-  // The Rays that non-root procs will send to root
-  std::unordered_map<processor_id_type, std::vector<std::shared_ptr<Ray>>> send_to_root;
-  // The map of RayID -> Ray on the root proc for comparison with other procs
-  std::unordered_map<RayID, const Ray *> root_ray_map;
-  // Ship our Rays to send to root
-  if (_pid != 0)
-  {
-    auto & entry = send_to_root[0];
-    entry.reserve(_rays.size());
-    for (const auto & ray : _rays)
-      entry.emplace_back(ray);
-  }
-  // Root will create a map of its Rays for comparison with others
-  else
-    for (const auto & ray : _rays)
-      root_ray_map.emplace(ray->id(), ray.get());
+  // First, verify that our _rays have unique IDs beacuse we will do mapping based on Ray ID
+  verifyUniqueRayIDs(_rays.begin(),
+                     _rays.end(),
+                     /* global = */ false,
+                     "in _rays after calling defineRays()." + error_suffix);
 
-  auto compare_functor = [&](processor_id_type pid,
-                             const std::vector<std::shared_ptr<Ray>> & rays) {
-    for (const auto & ray : rays)
+  // Tag for sending rays from rank 0 -> all other ranks
+  const auto tag = comm().get_unique_tag();
+
+  // Send a copy of the rays on rank 0 to all other processors for verification
+  if (_pid == 0)
+  {
+    std::vector<Parallel::Request> requests(n_processors() - 1);
+    auto request_it = requests.begin();
+
+    for (processor_id_type pid = 0; pid < n_processors(); ++pid)
+      if (pid != 0)
+        comm().send_packed_range(
+            pid, (RayTracingStudy *)this, _rays.begin(), _rays.end(), *request_it++, tag);
+
+    Parallel::wait(requests);
+  }
+  // All other processors will receive and verify that their rays match the rays on rank 0
+  else
+  {
+    // Map of RayID -> Ray for comparison from the Rays on rank 0 to the local rays
+    std::unordered_map<RayID, const Ray *> ray_map;
+    ray_map.reserve(_rays.size());
+    for (const auto & ray : _rays)
+      ray_map.emplace(ray->id(), ray.get());
+
+    // Receive the duplicated rays from rank 0
+    std::vector<std::shared_ptr<Ray>> rank_0_rays;
+    rank_0_rays.reserve(_rays.size());
+    comm().receive_packed_range(0,
+                                (RayTracingStudy *)this,
+                                std::back_inserter(rank_0_rays),
+                                (std::shared_ptr<Ray> *)nullptr,
+                                tag);
+
+    // The sizes better match
+    if (rank_0_rays.size() != _rays.size())
+      mooseError(_error_prefix,
+                 ": The size of _rays on rank ",
+                 _pid,
+                 " does not match the size of rays on rank 0.",
+                 error_suffix);
+
+    // Make sure we have a matching local ray for each ray from rank 0
+    for (const auto & ray : rank_0_rays)
     {
-      const auto find = root_ray_map.find(ray->id());
-      if (find == root_ray_map.end())
+      const auto find = ray_map.find(ray->id());
+      if (find == ray_map.end())
         mooseError(_error_prefix,
-                   ": A non-replicated Ray was found on pid ",
-                   pid,
+                   ": A Ray was found on rank ",
+                   _pid,
+                   " with an ID that does not exist on rank 0.",
                    error_suffix,
                    "\n\n",
                    ray->getInfo());
@@ -247,27 +277,15 @@ RepeatableRayStudyBase::verifyReplicatedRays()
       if (*root_ray != *ray)
       {
         mooseError(_error_prefix,
-                   ": A non-replicated Ray was found on pid ",
-                   pid,
+                   ": A Ray was found on rank ",
+                   _pid,
+                   " that does not exist on rank 0.",
                    error_suffix,
-                   "\n\nOffending Ray information:\n\n",
+                   "\n\nLocal ray:\n\n",
                    ray->getInfo(),
-                   "\n",
+                   "\n\nRank 0 ray:\n\n",
                    root_ray->getInfo());
       }
     }
-  };
-  Parallel::push_parallel_packed_range(
-      _comm, send_to_root, (RayTracingStudy *)this, compare_functor);
-#endif
-
-  std::vector<std::size_t> proc_sizes;
-  comm().gather(0, _rays.size(), proc_sizes);
-  if (_pid == 0)
-    for (processor_id_type pid = 0; pid < n_processors(); ++pid)
-      if (proc_sizes[pid] != _rays.size())
-        mooseError(_error_prefix,
-                   ": The size of _rays after defineRays() are not the same on processor ",
-                   pid,
-                   error_suffix);
+  }
 }
