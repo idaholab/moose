@@ -563,17 +563,17 @@ ADReal
 INSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
-  ADReal u_interface;
+  ADReal adv_quant_interface;
 
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
   Moose::FV::interpolate(_advected_interp_method,
-                         u_interface,
+                         adv_quant_interface,
                          _adv_quant_elem[_qp],
                          _adv_quant_neighbor[_qp],
                          v,
                          *_face_info,
                          true);
-  return _normal * v * u_interface;
+  return _normal * v * adv_quant_interface;
 }
 
 void

@@ -29,4 +29,24 @@
     design = 'INSFVScalarFieldAdvection.md'
     issues = '#16732'
   []
+  [momentum-outflow-bcs]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip-outflow-bcs.i
+    exodiff = 2d-rc-no-slip-outflow-bcs_out.e
+    requirement = 'The system shall be able to use flux boundary conditions for the momentum and match results produced by using flux kernels.'
+    design = 'INSFVMomentumAdvectionOutflowBC.md'
+    issues = '#16854'
+    ad_indexing_type = 'global'
+    abs_zero = 2e-9
+  []
+  [extrapolated-outlet-pressure]
+    type = 'Exodiff'
+    input = 2d-rc-no-slip-extrapolated-outlet-pressure.i
+    exodiff = 2d-rc-no-slip-extrapolated-outlet-pressure_out.e
+    requirement = 'The system shall be able to extrapolate a pressure value at a fully developed outflow boundary and use a mean pressure approach to eliminate the nullspace for the pressure.'
+    design = 'INSFVMassAdvectionOutflowBC.md'
+    issues = '#16854'
+    ad_indexing_type = 'global'
+    abs_zero = 3e-9
+  []
 []
