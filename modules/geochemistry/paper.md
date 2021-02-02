@@ -16,7 +16,7 @@ authors:
     orcid: 0000-0003-1192-9328
     affiliation: 2
   - name: Robert Podgorney
-    orcid: 0000-0003-4354-4967 TODO
+    orcid: 0000-0003-4354-4967
     affiliation: 2
 affiliations:
   - name: CSIRO (Commonwealth Scientific and Industrial Research Organisation)
@@ -29,7 +29,7 @@ bibliography: paper.bib
 
 # Summary
 
-Geochemical models are chemical models of natural waters and other aqueous solutions within the Earth's subsurface.  Such models are used to understand water chemistry and its interaction with the subsurface in many areas of practical interest, for example, geothermal wells and reservoirs, contaminant flow through aquifers, ore creation and mining techniques, petroleum and gas exploitation, and rock diagenesis.  The models are frequently extremely complicated, with thousands of interacting chemical species, and often require computer software to find the chemical concentrations.
+Geochemical models are used to understand the chemistry of natural waters and other aqueous solutions and their interaction with minerals in many areas of practical interest, for example, geothermal wells and reservoirs, contaminant flow through aquifers, ore creation and mining techniques, petroleum and gas exploitation, and rock diagenesis.  The models are frequently extremely complicated, with thousands of interacting chemical species, and often require computer software to find the chemical concentrations.
 
 Reactive transport simulations involve predicting the flow of chemical-species and temperature in a spatial domain (such as an aquifer) in addition to solving a chemical model at each point, at each time, in the domain.  Such models are used to explore spatio-temporal dependence of concentration, precipitation, dissolution, sorption, etc, and often require significant computational resources.  Deformation of the subsurface in response to the chemistry and flows can be considered as well, greatly increasing the complexity of the models.
 
@@ -37,17 +37,17 @@ The MOOSE geochemistry module enables users to solve such models.
 
 # Statement of need
 
-Numerical modeling is essential to solve increasingly complicated problems, where the interplay between different physics, perhaps acting at different scales, is important.  For instance, understanding the impact of subsurface CO$_{2}$ injection (in carbon sequestration projects) can involve assessing the water-chemistry and rock-mineral changes resulting from temperature changes and the presence of CO$_{2}$, how these changes impact the porosity and permeability of the subsurface, and how the subsurface deforms and possibly fractures due to the injection.  Another example is understanding ore deposition, which can involve assessing how fluid and heat flows interact with geochemistry within shear bands within the Earth's crust.  Similar remarks hold for hydraulic fracturing, aquifer thermal energy storage, in-situ leaching, and petroleum/gas extraction using enhanced recovery techniques.
+Numerical modeling is essential to solve increasingly complicated problems, where the interplay between different physics, perhaps acting at different scales, is important.  For instance, understanding the impact of subsurface CO$_{2}$ injection (in carbon sequestration projects) can involve assessing the water-chemistry and rock-mineral changes resulting from temperature changes and the presence of CO$_{2}$, how these changes impact the porosity and permeability of the subsurface, and how the subsurface deforms and possibly fractures due to the injection.  Another example is understanding ore deposition, which can involve assessing how fluid and heat flows interact with geochemistry within shear bands within the Earth's crust.  Similar remarks hold for hydraulic fracturing, aquifer thermal energy storage, in-situ leaching, and fossil fuel extraction using enhanced recovery techniques.
 
 In the past, most researchers have often answered such questions using separate models, or loosely-coupled models solved using multiple software packages.  The MOOSE geochemistry module introduced here allows researchers to perform stand-alone geochemical modelling, but also draw upon the power of other MOOSE modules to solve complicated coupled transport, geomechanical and geochemical models using a single code.
 
 # Existing software
 
-A number of commercial and free (open or closed source) packages can solve reactive-transport models.  Some of these are: [CrunchFlow](https://www.netl.doe.gov/sites/default/files/netl-file/CrunchFlow-Manual.pdf) [@beisman2015]; [EQ3/6](https://www-gs.llnl.gov/energy-homeland-security/geochemistry) [@eq36]; the [Geochemist's Workbench](https://www.gwb.com/); [MIN3P](https://www.min3p.com/) [@su2020; @maher2019]; [OpenGeoSys](https://www.opengeosys.org/) [@kolditz2012; @bilke2019]; [PHREEQC](https://www.usgs.gov/software/phreeqc-version-3/) [@pankhurst1995; @pankhurst1999] and [PHAST](https://www.usgs.gov/software/phast-a-computer-program-simulating-groundwater-flow-solute-transport-and-multicomponent) [@pankhurst2010] and [HP1 and HP2](https://www.pc-progress.com/en/Default.aspx?h3d2-hp2); [PHT3D](http://www.pht3d.org/); [Reaktoro](https://reaktoro.org/) [@leal]; and [TOUGHREACT](https://tough.lbl.gov/software/toughreact/) [@xu2004].  Many of these have been developed over decades by teams of researchers, so have sophisticated reaction-modelling capabilities, along with well-established GUIs to assist in model creation and the analysis of results.  Many of them have been used in hundreds of studies by thousands of researchers.
+A number of commercial and free (open or closed source) packages can solve reactive-transport models.  Some of these are: [CrunchFlow](https://www.netl.doe.gov/sites/default/files/netl-file/CrunchFlow-Manual.pdf) [@beisman2015]; [EQ3/6](https://www-gs.llnl.gov/energy-homeland-security/geochemistry) [@eq36]; the [Geochemist's Workbench](https://www.gwb.com/) [@bethke_2007]; [MIN3P](https://www.min3p.com/) [@su2020; @maher2019]; [OpenGeoSys](https://www.opengeosys.org/) [@kolditz2012; @bilke2019]; [PHREEQC](https://www.usgs.gov/software/phreeqc-version-3/) [@pankhurst1995; @pankhurst1999]; [PHAST](https://www.usgs.gov/software/phast-a-computer-program-simulating-groundwater-flow-solute-transport-and-multicomponent) [@pankhurst2010]; [HP2](https://www.pc-progress.com/en/Default.aspx?h3d2-lib-hp2) [@simunek2012]; [Reaktoro](https://reaktoro.org/) [@leal]; and [TOUGHREACT](https://tough.lbl.gov/software/toughreact/) [@xu2004].  Many of these have been developed over decades by teams of researchers, and have sophisticated reaction-modelling capabilities, along with well-established GUIs to assist in model creation and the analysis of results.  Many of them have been used in hundreds of studies by thousands of researchers.
 
 # Overview and comparisons with other software
 
-The geochemistry module is built upon, and provided as part of, the open-source, massively parallel, fully implicit multiphysics simulation framework MOOSE (Multiphysics Object-Oriented Simulation Environment) [@permann2020moose].  MOOSE is an open-source library from the Idaho National Laboratory that provides a high-level interface to the libMesh finite element library [@libmesh] and PETSc nonlinear solvers [@petsc-web-page; @petsc-user-ref; @petsc-efficient].  MOOSE and the geochemistry module follow [strict quality controls](https://mooseframework.org/sqa/index.html).  The geochemistry module's [test suite](https://mooseframework.inl.gov/application_development/test_system.html) contains over 350 tests, ranging from simple unit tests to fully-fledged benchmarks against other codes.
+The geochemistry module is built upon, and provided as part of, the open-source, massively parallel, fully implicit multiphysics simulation framework MOOSE (Multiphysics Object-Oriented Simulation Environment) [@permann2020moose].  MOOSE is an open-source library from Idaho National Laboratory that provides a high-level interface to the libMesh finite element library [@libmesh] and PETSc nonlinear solvers [@petsc-web-page; @petsc-user-ref; @petsc-efficient].  MOOSE and the geochemistry module follow [strict quality controls](https://mooseframework.org/sqa/index.html).  The geochemistry module's [test suite](https://mooseframework.inl.gov/application_development/test_system.html) contains over 350 tests, ranging from simple unit tests to fully-fledged benchmarks against other codes.
 
 As outlined in this article, the MOOSE geochemistry module can solve models involving aqueous geochemistry, including aqueous equilibrium, oxidation-reduction, sorption and surface complexation, dissolution-precipitation and gas buffering.  One aspect that makes the geochemistry module different to the codes mentioned above is the ease of coupling additional physics to the geochemical functionality.  In particular, when used in conjuction with the MOOSE PorousFlow module [@Wilkins2020], sophisticated reactive-transport simulations may be performed, including multi-phase and unsaturated fluid flows, high-precision equations of state for fluids, dynamic porosity and permeability distributions, and sophisticated numerical stabilization.  Geomechanics may also be incorporated by using MOOSE's TensorMechanics module, to explore the interplay between geomechanical stresses and strains, and fluids, heat and reactions.  Fracturing of the skeleton material may also be included using MOOSE's XFEM module [@jiang2020ceramic; @zhang2018modified].  An additional advantage of MOOSE is that its beautifully-designed APIs allow for easy modification of existing physics, or the addition of new physics.
 
@@ -73,9 +73,9 @@ The geochemical database defines the possible scope of geochemical models and in
 The user may select from the database a subset of chemical components and reactions that are relevant for their particular model.  These are:
 
 - aqueous species in equilibrium;
-- minerals in equilibrium with the aqueous solution that may precipitate or dissolve;
-- dissolved gases and gases in equilibrium with an external buffer such as the atmosphere;
-- species in alternative oxidation states (redox couples) that may be in equilibrium or disequilibrium with the aqueous solution;
+- minerals in equilibrium with the aqueous solution that may precipitate or dissolve (a subset of all possible minerals may be chosen, and a user-supplied list of minerals may be prevented from precipitating);
+- dissolved gases and gases in equilibrium with an external buffer such as the atmosphere (a subset of all possible gases may be used);
+- species in alternative oxidation states (redox couples), and the user may set individual couples to be in equilibrium or disequilibrium with the aqueous solution;
 - sorbed species in equilibrium with the aqueous solution, and are governed by a Langmuir approach or a surface-complexation approach that accounts for the electrical state of the porous-skeleton surface and how it varies with pH, ionic strength and solution composition;
 - minerals, redox species and sorbed species whose dynamics are governed by kinetic rates.  Rates are sums of terms that may be dependent on the mass of kinetic species, a specific surface area, promoting-species molality or activity, a temperature-dependent Arrhenius term, and the activity-product and equilibrium constant of the kinetic species.  The approach allows acid-neutral-alkali promotion as listed in the correlations prepared by @palandri to be used in geochemistry models, as well as many other types of rates.
 
@@ -91,7 +91,7 @@ A constraint must be supplied by the user for each member of the equilibrium bas
 - For water: the mass of solvent water, or the total bulk mole number, or the activity;
 - For aqueous basis species: the free molality, the total bulk number, or the activity (so that pH may be controlled, for instance);
 - For precipitated minerals: the free (precipitated) mole number, or the total bulk mole number;
-- Fugacity for gases with fixed fugacity;
+- For gases with fixed fugacity: fugacity
 - For sorbing sites: the free molality of unoccupied sites, or the total bulk mole number.
 
 In addition, all kinetic species must be provided with an initial mole number.
@@ -109,7 +109,10 @@ The following reaction paths are available in the geochemistry module:
 - Removing mineral masses at the end of each time-step (called "flow-through" by @bethke_2007)
 - Adding pure H$_{2}$O and removing an equal mass of water components and solutes it contains (called "flush" by @bethke_2007).
 
-Combinations of these may be used.  For instance, changing temperature while controlling species activity.
+Combinations of these may be used.  For instance, changing temperature while controlling species activity. 
+
+[//]: # (reviewer question: Is there any way to suppress certain reactions, particularly, suppressing some redox reactions, and minerals to get involved?  Andy replies: yes, i've added extra text to the "Types of species and reactions" section, above, to explain this.)
+
 
 ## Mathematical solution strategy
 
@@ -135,31 +138,35 @@ It is easy to use multiple sub-steps within (1) and/or (2) if desired.  The oper
 
 Nevertheless, rudimentary transport capability has been included in the geochemistry module, which models Darcy flow of the species' mobile concentrations, with hydrodynamic dispersion.  It is assumed that precipitated minerals, sorbed species and sorption sites are immobile.  The temperature, porosity, Darcy flux vector and dispersion tensor are fixed by the user.  All of these may vary spatially and temporally, but the geochemistry module provides them with no dynamics (in contrast with the PorousFlow module, where temperature evolution is governed by an advection-diffusion equation, for instance).  An operator-splitting method may be used to provide the mathematical solution, as described above.
 
-# Computation aspects
+# Computational aspects
 
-Spatially-varying geochemistry simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node.  On the other hand, ignoring transport, they are almost embarrasingly parallel, so may be solved efficiently using a large number of processors.  Even reactive-transport models scale well with multiple processors, since multi-component flow in porous media is essentially multiple coupled diffusion equations.  \autoref{fig:scaling_eg} shows an example of scaling in which a model of fixed size is run on multiple processors.  Further experiments involving memory usage, solver choices and cpu-scaling can be found in the [online documentation](https://mooseframework.org/modules/geochemistry/theory/compute_efficiencies.html).
+Spatially-varying geochemistry simulations use a large amount of memory since they store information about a complete geochemical system at each finite-element node.  On the other hand, ignoring transport, they are almost embarrasingly parallel, and can be solved efficiently using a large number of processors.  Even reactive-transport models scale well with multiple processors, since multi-component flow in porous media is essentially multiple coupled diffusion equations.  \autoref{fig:scaling_eg} shows an example of scaling in which a model of fixed size is run on multiple processors.  Further experiments involving memory usage, solver choices and cpu-scaling can be found in the [online documentation](https://mooseframework.org/modules/geochemistry/theory/compute_efficiencies.html).
 
 ![CPU time required to solve a reactive-transport simulation using the PorousFlow and geochemistry modules.\label{fig:scaling_eg}](joss_paper_scaling.png){ width=60% }
 
 # Example: cooling with feldspars
 
-One of the geochemistry [tests and examples](https://mooseframework.org/modules/geochemistry/tests_and_examples/index.html) involves slowly cooling an aqueous solution from 300$^{\circ}$C to 25$^{\circ}$C.  The aqueous solution is in equilibrium contact with the feldspars albite, maximum microcline, muscovite and quartz.  This example is documented in section 14.1 of @bethke_2007.  \autoref{fig:feldspar_eg} shows the comparison between MOOSE's geochemistry module and the Geochemist's Workbench software.
+One of the geochemistry [tests and examples](https://mooseframework.org/modules/geochemistry/tests_and_examples/index.html) involves slowly cooling an aqueous solution from 300$^{\circ}$C to 25$^{\circ}$C.  The aqueous solution is in equilibrium contact with the feldspars albite, maximum microcline, muscovite and quartz.  This example is documented in Section 14.1 of @bethke_2007.  \autoref{fig:feldspar_eg} shows the comparison of the results from MOOSE's geochemistry module and the Geochemist's Workbench.
 
 ![Precipitated volumes as a function of temperature when an aqueous solution in contact with feldspars is cooled.\label{fig:feldspar_eg}](joss_paper_feldspar.png){ width=60% }
 
 # Example: reactive transport in an aquifer thermal energy storage scenario
 
-It has been proposed to use the Weber-Tensleep formation in the USA to store renewably-generated, high-temperature water, for later use in electricity generation [@seedling; @osti_1524048].  During the storage phase, formation water is produced from the reservoir, heated to 160$^{\circ}$C under pressure, and re-injected.  The cycle is reversed during electricity generation.  A [3D reactive transport study](https://mooseframework.org/modules/geochemistry/tests_and_examples/geotes_weber_tensleep.html) assessing potential precipitates in the engineering equipment, and mineralogy changes around the hot-water injection well, is provided by the authors as one of the geochemistry module examples.
+The Weber-Tensleep Formation in the USA has been proposed to store renewably-generated, high-temperature water, for later use in electricity generation [@seedling; @osti_1524048].  During the storage phase, formation water from the reservoir is produced, heated to 160$^{\circ}$C under pressure, and re-injected.  The cycle is reversed during electricity generation.  A [3D reactive transport study](https://mooseframework.org/modules/geochemistry/tests_and_examples/geotes_weber_tensleep.html) assessing potential precipitates in the engineering equipment, and mineralogy changes around the hot-water injection well in the deep reservoir, is provided by the authors as one of the geochemistry module examples.
 
-The major ions in the Weber-Tensleep formation water are Cl$^{-}$, Na$^{+}$, SO$_{4}^{2-}$, HCO$_{3}^{-}$, K$^{+}$, Ca$^{2+}$ and HS$^{-}$, with a host of additional minor ions.  The pH is around 6.5, the ionic strength is around 1.7$\,$mol.kg$^{-1}$, and the temperature around 90$^{\circ}$C.  The observed mineralogy involves quartz (80\%), K-feldspar (8\%), Calcite (5\%), Siderite and Dolomite (each 2\%), Fe-chlorite and Illite (each 1\%) and a host of trace minerals.
+The major ions in the Weber-Tensleep Formation water are Cl$^{-}$, Na$^{+}$, SO$_{4}^{2-}$, HCO$_{3}^{-}$, K$^{+}$, Ca$^{2+}$ and HS$^{-}$, with a host of additional minor ions.  The pH is around 6.5, the ionic strength is around 1.7$\,$mol.kg$^{-1}$ (which is close to the limit of 3$\,$mol.kg$^{-1}$ for the Debye-Huckel activity model [@bethke_2007]), and the temperature around 90$^{\circ}$C.  The observed mineralogy involves quartz (80\%), K-feldspar (8\%), Calcite (5\%), Siderite and Dolomite (each 2\%), Fe-chlorite and Illite (each 1\%) and a host of trace minerals.
+
+[//]: # (reviewer comment: this (the ionic strength) could exceed the comfortable/applicable limit of D-H/B-t dot models. Unless Pitzer/HMW capability is implemented, people will have questions when this module is used for a high IS system.  Andy replies: i agree, and have added a comment above.)
 
 The 3D MOOSE model of the hot-water injection involves coupling a model of the heat exchanger to a model of transport to the geochemical model of the reservoir.  These three models are loosely coupled using MOOSE's "multiapp" approach, using the geochemistry and PorousFlow modules.  The coupled modelling reveals that anhydrite is the main precipitate in the heat exchanger, that illite and kaolinite dissolve around the injection well, and that K-feldspar and quartz precipitate around the injection well.  \autoref{fig:weber_tensleep_eg} shows some 3D contours of the Weber-Tensleep aquifer.
 
 ![Temperature, free volume of Quartz, and porosity after 90 days of hot water injection in the 3D coupled model.\label{fig:weber_tensleep_eg}](joss_paper_weber_tensleep.png)
 
 
-# Acknowledgements - TODO
+# Acknowledgements
 
-Funding for the development was provided by the Idaho National Laboratory - TODO check correct wording.  The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc).
+The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc). The mnuscript review provided by Ghanashyam (Hari) Neupane is also greatly appreciated.
+
+This research made use of the resources of the High Performance Computing Center at Idaho National Laboratory, which is supported by the Office of Nuclear Energy of the U.S. Department of Energy and the Nuclear Science User Facilities under Contract No. DE-AC07-05ID14517.
 
 # References
