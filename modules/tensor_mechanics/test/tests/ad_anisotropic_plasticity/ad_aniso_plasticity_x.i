@@ -30,8 +30,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
-  order = FIRST
-  family = LAGRANGE
 []
 
 [AuxVariables]
@@ -39,35 +37,20 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [plasticity_strain_xx]
+  [plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   []
-  [plasticity_strain_xy]
+  [plastic_strain_xy]
     order = CONSTANT
     family = MONOMIAL
   []
-  [plasticity_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [elastic_strain_xx]
+  [plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   []
 []
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
-[]
+
 [AuxKernels]
   [hydrostatic_stress]
     type = ADRankTwoScalarAux
@@ -77,29 +60,22 @@
   []
   [plasticity_strain_xx]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
-    variable = plasticity_strain_xx
+    rank_two_tensor = trial_plasticity_plastic_strain
+    variable = plastic_strain_xx
     index_i = 0
     index_j = 0
   []
   [plasticity_strain_xy]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
-    variable = plasticity_strain_xy
+    rank_two_tensor = trial_plasticity_plastic_strain
+    variable = plastic_strain_xy
     index_i = 0
     index_j = 1
   []
   [plasticity_strain_yy]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
-    variable = plasticity_strain_yy
-    index_i = 1
-    index_j = 1
-  []
-  [elastic_strain_xx]
-    type = ADRankTwoAux
-    rank_two_tensor = elastic_strain
-    variable = elastic_strain_xx
+    rank_two_tensor = trial_plasticity_plastic_strain
+    variable = plastic_strain_yy
     index_i = 1
     index_j = 1
   []
@@ -123,9 +99,9 @@
 [Modules/TensorMechanics/Master]
   [all]
     strain = FINITE
-    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy '
-                      'stress_yy'
+    generate_output = 'elastic_strain_xx stress_xx'
     use_automatic_differentiation = true
+    add_variables = true
   []
 []
 
@@ -246,7 +222,7 @@
   []
   [plasticity_strain_xx]
     type = ElementalVariableValue
-    variable = plasticity_strain_xx
+    variable = plastic_strain_xx
     execute_on = 'TIMESTEP_END'
     elementid = 39
   []

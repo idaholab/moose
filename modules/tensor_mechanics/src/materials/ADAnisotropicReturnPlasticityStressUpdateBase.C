@@ -22,8 +22,8 @@ ADAnisotropicReturnPlasticityStressUpdateBase::validParams()
 ADAnisotropicReturnPlasticityStressUpdateBase::ADAnisotropicReturnPlasticityStressUpdateBase(
     const InputParameters & parameters)
   : ADGeneralizedRadialReturnStressUpdate(parameters),
-    _plasticity_strain(declareADProperty<RankTwoTensor>(_base_name + "plasticity_strain")),
-    _plasticity_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "plasticity_strain"))
+    _plasticity_strain(declareADProperty<RankTwoTensor>(_base_name + "plastic_strain")),
+    _plasticity_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "plastic_strain"))
 {
 }
 
