@@ -68,17 +68,13 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _p_var(dynamic_cast<const INSFVPressureVariable *>(
-        &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("pressure").front()))),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(
-        &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("u").front()))),
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("pressure", 0))),
+    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
-                     _tid, params.get<std::vector<VariableName>>("v").front()))
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
                : nullptr),
     _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
-                     _tid, params.get<std::vector<VariableName>>("w").front()))
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _rho(getParam<Real>("rho")),
     _dim(_subproblem.mesh().dimension())
