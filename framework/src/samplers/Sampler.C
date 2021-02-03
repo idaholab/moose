@@ -306,6 +306,8 @@ Sampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
     std::vector<Real> row(_n_cols, 0);
     computeSampleRow(i, row);
     mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    mooseAssert(!_needs_reinit,
+                "Changing the size of the sample must not occur during matrix access.");
     std::copy(row.begin(), row.end(), matrix.get_values().begin() + i * _n_cols);
   }
 }
@@ -321,6 +323,8 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
     std::vector<Real> row(_n_cols, 0);
     computeSampleRow(i, row);
     mooseAssert(row.size() == _n_cols, "The row of sample data is not sized correctly.");
+    mooseAssert(!_needs_reinit,
+                "Changing the size of the sample must not occur during matrix access.");
     std::copy(
         row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
   }
@@ -333,7 +337,11 @@ Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
   TIME_SECTION(_perf_sample_row);
 
   for (dof_id_type j = 0; j < _n_cols; ++j)
+  {
     data[j] = computeSample(i, j);
+    mooseAssert(!_needs_reinit,
+                "Changing the size of the sample must not occur during matrix access.");
+  }
 }
 
 void

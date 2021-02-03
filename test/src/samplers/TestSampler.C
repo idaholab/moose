@@ -20,8 +20,11 @@ TestSampler::validParams()
   params.addParam<dof_id_type>("num_rows", 14, "Number of rows.");
   params.addParam<dof_id_type>("num_cols", 8, "Number of columns.");
 
-  MooseEnum error_tests("call_set_number_of_rows call_set_number_of_cols call_set_number_of_seeds "
-                        "set_number_of_seeds_to_zero");
+  MooseEnum error_tests(
+      "call_set_number_of_rows call_set_number_of_cols call_set_number_of_seeds "
+      "set_number_of_seeds_to_zero reinit_getGlobalSamples reinit_getLocalSamples "
+      "reinit_getNextLocalRow reinit_getNumberOfRows reinit_getNumberOfCols "
+      "reinit_getNumberOfLocalRows reinit_getLocalRowBegin reinit_getLocalRowEnd");
   params.addParam<MooseEnum>(
       "error_test", error_tests, "Options for making this class force errors.");
   return params;
@@ -36,6 +39,31 @@ TestSampler::TestSampler(const InputParameters & parameters)
   setNumberOfCols(getParam<dof_id_type>("num_cols"));
   if (_error_test == "set_number_of_seeds_to_zero")
     setNumberOfRandomSeeds(0);
+}
+
+void
+TestSampler::executeSetUp()
+{
+  if (_error_test.isValid())
+  {
+    setNumberOfRows(getNumberOfRows() + 1);
+    if (_error_test == "reinit_getGlobalSamples")
+      getGlobalSamples();
+    else if (_error_test == "reinit_getLocalSamples")
+      getLocalSamples();
+    else if (_error_test == "reinit_getNextLocalRow")
+      getNextLocalRow();
+    else if (_error_test == "reinit_getNumberOfRows")
+      getNumberOfRows();
+    else if (_error_test == "reinit_getNumberOfLocalRows")
+      getNumberOfLocalRows();
+    else if (_error_test == "reinit_getNumberOfCols")
+      getNumberOfCols();
+    else if (_error_test == "reinit_getLocalRowBegin")
+      getLocalRowBegin();
+    else if (_error_test == "reinit_getLocalRowEnd")
+      getLocalRowEnd();
+  }
 }
 
 Real

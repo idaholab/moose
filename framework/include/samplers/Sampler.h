@@ -214,8 +214,8 @@ protected:
    * the state of the generator such that the next sample will be unique. These methods allow
    * operations before and after the call to generator advancement.
    */
-  virtual void executeSetUp(){};
-  virtual void executeTearDown(){};
+  virtual void executeSetUp() {}
+  virtual void executeTearDown() {}
   ///@}
 
 private:

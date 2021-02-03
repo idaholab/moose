@@ -14,11 +14,11 @@ class TestSampler : public Sampler
 {
 public:
   static InputParameters validParams();
-
   TestSampler(const InputParameters & parameters);
+  virtual void executeSetUp() override;
 
 protected:
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
 private:
   const bool _use_rand;

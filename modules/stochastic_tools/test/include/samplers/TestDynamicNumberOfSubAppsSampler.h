@@ -19,6 +19,5 @@ public:
   void executeSetUp() override;
 
 protected:
-  const MooseEnum & _error_check;
   const dof_id_type _increment_rows;
 };
