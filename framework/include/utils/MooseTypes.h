@@ -36,6 +36,8 @@
 #include <type_traits>
 #include <functional>
 
+#include <Eigen/Eigenvalues>
+
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
 #define MooseSharedNamespace std
@@ -234,6 +236,21 @@ struct DOFType<RealVectorValue>
   typedef Real type;
 };
 } // namespace Moose
+
+namespace Eigen
+{
+namespace internal
+{
+template <>
+struct cast_impl<ADReal, int>
+{
+  static inline int run(const ADReal & x) { return static_cast<int>(MetaPhysicL::raw_value(x)); }
+};
+} // namespace internal
+} // namespace Eigen
+
+typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
 
 template <typename OutputType>
 struct OutputTools

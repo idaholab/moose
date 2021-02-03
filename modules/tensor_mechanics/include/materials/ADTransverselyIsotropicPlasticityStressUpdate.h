@@ -31,7 +31,8 @@ public:
                                  const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
 
 protected:
-  virtual void computeStressInitialize(const ADDenseVector & effective_trial_stress,
+  virtual void computeStressInitialize(const ADDenseVector & stress_dev,
+                                       const ADDenseVector & stress,
                                        const ADRankFourTensor & elasticity_tensor) override;
   virtual ADReal computeResidual(const ADDenseVector & effective_trial_stress,
                                  const ADDenseVector & stress_new,
@@ -105,4 +106,6 @@ protected:
   ADReal _yield_stress;
   ADDenseMatrix _hill_tensor;
   ADDenseVector _stress_np1;
+  /// 2 * shear modulus
+  ADReal _two_shear_modulus;
 };

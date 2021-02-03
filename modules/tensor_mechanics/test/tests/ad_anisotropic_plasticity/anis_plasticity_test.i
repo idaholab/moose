@@ -49,21 +49,21 @@
   []
   [plasticity_strain_xx]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
+    rank_two_tensor = trial_plasticity_plastic_strain
     variable = plasticity_strain_xx
     index_i = 0
     index_j = 0
   []
   [plasticity_strain_xy]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
+    rank_two_tensor = trial_plasticity_plastic_strain
     variable = plasticity_strain_xy
     index_i = 0
     index_j = 1
   []
   [plasticity_strain_yy]
     type = ADRankTwoAux
-    rank_two_tensor = trial_plasticity_plasticity_strain
+    rank_two_tensor = trial_plasticity_plastic_strain
     variable = plasticity_strain_yy
     index_i = 1
     index_j = 1

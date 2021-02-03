@@ -88,11 +88,15 @@ ADTransverselyIsotropicPlasticityStressUpdate::propagateQpStatefulProperties()
 
 void
 ADTransverselyIsotropicPlasticityStressUpdate::computeStressInitialize(
-    const ADDenseVector & stress_dev, const ADRankFourTensor & /*elasticity_tensor*/)
+    const ADDenseVector & stress_dev,
+    const ADDenseVector & /*stress*/,
+    const ADRankFourTensor & elasticity_tensor)
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+
+  _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   _yield_condition = 1.0; // Some positive value
   _yield_condition = -computeResidual(stress_dev, stress_dev, 0.0);
@@ -269,11 +273,11 @@ ADTransverselyIsotropicPlasticityStressUpdate::computeStrainFinalize(
   inelasticStrainIncrement(1, 1) = inelasticStrainIncrement_vector(1);
   inelasticStrainIncrement(2, 2) = inelasticStrainIncrement_vector(2);
   inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) =
-      inelasticStrainIncrement_vector(3);
+      inelasticStrainIncrement_vector(3) / 2.0;
   inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
-      inelasticStrainIncrement_vector(4);
+      inelasticStrainIncrement_vector(4) / 2.0;
   inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
-      inelasticStrainIncrement_vector(5);
+      inelasticStrainIncrement_vector(5) / 2.0;
 
   // Calculate appropriate equivalent plastic strain
   const Real & F = _hill_constants[0];

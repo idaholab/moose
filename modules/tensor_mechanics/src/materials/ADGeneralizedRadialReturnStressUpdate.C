@@ -84,11 +84,10 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
   stress_dev(4) = deviatoric_trial_stress(1, 2);
   stress_dev(5) = deviatoric_trial_stress(0, 2);
 
-  computeStressInitialize(stress_dev, elasticity_tensor);
+  computeStressInitialize(stress_dev, stress_new_vector, elasticity_tensor);
 
   // Use Newton iteration to determine a plastic multiplier variable
   ADReal delta_gamma = 0.0;
-  _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(stress_dev).l2_norm(), 0.0))
