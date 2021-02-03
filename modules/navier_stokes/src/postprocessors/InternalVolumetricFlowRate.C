@@ -54,8 +54,8 @@ InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & p
   if (parameters.isParamSetByUser("advected_variable") &&
       parameters.isParamSetByUser("advected_mat_prop"))
     mooseError(
-      "InternalVolumetricFlowRatePostprocessor should be provided either an advected variable or "
-      "an advected material property");
+        "InternalVolumetricFlowRatePostprocessor should be provided either an advected variable or "
+        "an advected material property");
 
   using namespace Moose::FV;
 
@@ -105,7 +105,6 @@ InternalVolumetricFlowRate::computeQpIntegral()
     Real advected_quantity;
     if (parameters().isParamSetByUser("advected_variable"))
     {
-
       // If user did not request an interpolation method, use what the kernels are
       // most likely to use
       if (!parameters().isParamSetByUser("advected_interp_method"))

@@ -120,7 +120,7 @@ VolumetricFlowRate::computeQpIntegral()
     else if (parameters().isParamSetByUser("advected_mat_prop"))
     {
       /// FIXME The material property would need to be computed on the face #16809
-      /// This requires knowing the neighbor value, MaterialInterface cant do that
+      /// This requires knowing the neighbor value, (1)MaterialInterface cant do that
       advected_quantity = MetaPhysicL::raw_value(_advected_material_property[_qp]);
     }
     else

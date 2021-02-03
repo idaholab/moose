@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
+#include "FVUtils.h"
 
 // Forward Declarations
 

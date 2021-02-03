@@ -259,6 +259,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = advected_density
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [inlet_mass_constant]
     type = VolumetricFlowRate
@@ -267,6 +268,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = ${rho}
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [inlet_mass_matprop]
     type = VolumetricFlowRate
@@ -298,6 +300,7 @@ velocity_interp_method='average'
     vel_x = u
     vel_y = v
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
 
   [inlet_momentum_x]
@@ -307,6 +310,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = u
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [mid1_momentum_x]
     type = InternalVolumetricFlowRate
@@ -333,6 +337,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = u
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
 
   [inlet_momentum_y]
@@ -342,6 +347,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = v
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [mid1_momentum_y]
     type = InternalVolumetricFlowRate
@@ -368,6 +374,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_variable = v
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
 
   [inlet_advected_energy]
@@ -385,7 +392,6 @@ velocity_interp_method='average'
     vel_y = v
     advected_mat_prop = 'rho_cp_temp'
     fv = true
-    advected_interp_method = ${advected_interp_method}
   []
   [mid2_advected_energy]
     type = InternalVolumetricFlowRate
@@ -394,7 +400,6 @@ velocity_interp_method='average'
     vel_y = v
     advected_mat_prop = 'rho_cp_temp'
     fv = true
-    advected_interp_method = ${advected_interp_method}
   []
   [outlet_advected_energy]
     type = VolumetricFlowRate
