@@ -103,19 +103,19 @@ The same distributions with normally distributed uncertain parameters are shown 
 The estimated mean values of the QoIs with the corresponding confidence intervals
 are presented below assuming uniformly distributed parameters:
 
-$\overline{u}_{min} = -1.3482,\,95\%\, CI[-1.3487, -1.3478]$
+$\overline{u}_{min} = -1.3481,\,95\%\, CI[-1.3485, -1.3476]$
 
-$\overline{u}_{max} = 0.8398,\,95\%\, CI[0.8373, 0.8421]$
+$\overline{u}_{max} = 0.8406,\,95\%\, CI[0.8383, 0.8430]$
 
-$\overline{u}_{avg} = -0.1321,\,95\%\, CI[-0.1328, -0.1313]$
+$\overline{u}_{avg} = -0.1318,\,95\%\, CI[-0.1325, -0.1311]$
 
 The same statistics for the normally distributed parameters are the following:
 
-$\overline{u}_{min} = -1.3487,\,95\%\, CI[-1.3491, -1.3483]$
+$\overline{u}_{min} = -1.3486,\,95\%\, CI[-1.3490, -1.3482]$
 
-$\overline{u}_{max} = 0.8373,\,95\%\, CI[0.8352, 0.8394]$
+$\overline{u}_{max} = 0.8379,\,95\%\, CI[0.8359, 0.8400]$
 
-$\overline{u}_{avg} = -0.1328,\,95\%\, CI[-0.1334, -0.1321]$
+$\overline{u}_{avg} = -0.1326,\,95\%\, CI[-0.1332, -0.1319]$
 
 !plot histogram filename=stochastic_tools/parameter_study/nonlin_diff_react/nonlin_diff_react_master_uniform_out_results_0002.csv
                 vectors=results:min

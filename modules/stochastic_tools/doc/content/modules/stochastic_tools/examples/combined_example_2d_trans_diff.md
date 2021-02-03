@@ -192,18 +192,19 @@ and in [statistical_moments_min] for the minimum temperature of the system.
 !table id=statistical_moments_max caption=The mean and standard deviation of the maximum temperature obtained using the surrogates and a reference full-order model.
 | Model | Number of samples | Mean | 95% CI | Std. Dev. | 95% CI |
 | :- | - | - | - | - | - |
-| Full-order model (reference) | 2,000 | 396.70 | \[395.84, 397.58\] | 23.21 | \[22.70, 23.69\] |
-| Polynomial Chaos Surrogate | 100,000 | 396.76 | \[396.65, 396.90\] | 22.85 | \[22.78, 22.92\] |
-| Polynomial Regression Surrogate | 100,000 | 396.78 | \[396.65, 396.90\] | 22.84 | \[22.77, 22.91\] |
-| Nearest Point Surrogate | 100,000 | 396.86 | \[396.73, 396.99\] | 23.56 | \[23.49, 23.63\] |
+| Full-order model (reference) | 2,000 | 396.74 | \[395.90, 397.58\] | 22.86 | \[22.36, 23.33\] |
+| Nearest Point Surrogate | 100,000 | 396.87 | \[396.74, 396.99\] | 23.57 | \[23.50, 23.64\] |
+| Polynomial Chaos Surrogate | 100,000 | 396.77 | \[396.65, 396.88\] | 22.85 | \[22.78, 22.92\] |
+| Polynomial Regression Surrogate | 100,000 | 396.77 | \[396.65, 396.88\] | 22.85 | \[22.78, 22.93\] |
+
 
 !table id=statistical_moments_min caption=The mean and standard deviation of the minimum temperature obtained using the surrogates and a reference full-order model.
 | Model | Number of samples | Mean | 95% CI | Std. Dev. | 95% CI |
 | :- | - | - | - | - | - |
-| Full-order model (reference) | 2,000 | 261.34 | \[260.64, 262.06\] | 19.14 | \[18.78, 19.48\] |
-| Polynomial Chaos Surrogate | 100,000 | 260.61 | \[260.50, 260.71\] | 19.07 | \[19.02, 19.11\] |
-| Polynomial Regression Surrogate | 100,000 | 260.61 | \[260.51, 260.71\] | 19.07 | \[19.02, 19.11\] |
-| Nearest Point Surrogate | 100,000 | 260.62 | \[260.51, 260.72\] | 19.63 | \[19.57, 19.68\] |
+| Full-order model (reference) | 2,000 | 260.66 | \[259.94, 261.38\] | 19.30 | \[18.96, 19.64\] |
+| Nearest Point Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.77 | \[19.72, 19.82\] |
+| Polynomial Chaos Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.17 | \[19.12, 19.21\] |
+| Polynomial Regression Surrogate | 100,000 | 260.46 | \[260.36, 260.56\] | 19.17 | \[19.12, 19.22\] |
 
 Even though there are small differences in the mean values, it can be concluded that all three of the surrogates managed to
 give the correct answer. The differences between the full-order model and surrogates are statistically insignificant.
