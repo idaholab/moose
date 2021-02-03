@@ -288,7 +288,7 @@
     type = CrystalPlasticityStateVariable
     variable_size = 12
     groups = '0 4 8 12'
-    group_values = '60.8e3 60.8e3 60.8e3'
+    group_values = '60.8 60.8 60.8' #strength units in MPa
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
   [../]
