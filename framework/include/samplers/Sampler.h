@@ -48,13 +48,7 @@ class Sampler : public MooseObject,
 {
 public:
   static InputParameters validParams();
-
   Sampler(const InputParameters & parameters);
-
-  // DEPRECATED, DO NOT USE
-  virtual std::vector<DenseMatrix<Real>> sample();
-  std::vector<DenseMatrix<Real>> getSamples();
-  double rand(unsigned int index = 0);
 
   // The public members define the API that is exposed to application developers that are using
   // Sampler objects to perform calculations, so be very careful when adding items here since
@@ -152,14 +146,13 @@ protected:
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
-  // TODO: Restore this pure virtual after application are updated to new interface
   /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
 
   ///@{
   /**

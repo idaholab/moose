@@ -30,8 +30,6 @@ Sampler::validParams()
   params.registerBase("Sampler");
   params.registerSystemAttributeName("Sampler");
 
-  params.addParam<bool>("legacy_support", true, "Disables errors for legacy API support.");
-
   // Define the allowable limits for data returned by getSamples/getLocalSamples/getNextLocalRow
   // to prevent system for going over allowable limits. The DenseMatrix object uses unsigned int
   // for size definition, so as start the limits will be based the max of unsigned int. Note,
@@ -415,39 +413,4 @@ Sampler::checkReinitStatus() const
                "It is recommended that calls to 'setNumberOfRows()/Columns() occur within the "
                "Sampler::executeSetUp() method; this will ensure that the reinitialize is handled "
                "correctly. Have a nice day.");
-}
-
-// DEPRECATED: Everything below should removed when apps are updated to new syntax
-std::vector<DenseMatrix<Real>>
-Sampler::sample()
-{
-  return std::vector<DenseMatrix<Real>>();
-}
-
-std::vector<DenseMatrix<Real>>
-Sampler::getSamples()
-{
-  mooseDoOnce(mooseDeprecated(
-      "getSamples is being removed, use getNextLocalRow, getLocalSamples, or getGlobalSamples."));
-
-  _generator.restoreState();
-  sampleSetUp();
-  std::vector<DenseMatrix<Real>> output = sample();
-  sampleTearDown();
-
-  mooseAssert(output.size() > 0,
-              "It is not acceptable to return an empty vector of sample matrices.");
-
-  return output;
-}
-
-// TODO: Remove this and restore to pure virtual when deprecated syntax is removed
-Real Sampler::computeSample(dof_id_type, dof_id_type) { return 0.0; }
-
-double
-Sampler::rand(const unsigned int index)
-{
-  mooseDoOnce(mooseDeprecated("rand(() is being removed, use getRand()"));
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
-  return _generator.rand(index);
 }
