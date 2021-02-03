@@ -83,6 +83,10 @@
   background-color: var(--alert-construction);
 }
 
+.moose-alert-construction .moose-alert-content{
+  background-color: var(--alert-construction-content);
+}
+
 .moose-alert-title-brand{
   text-transform: uppercase;
   padding-right: 1ex;

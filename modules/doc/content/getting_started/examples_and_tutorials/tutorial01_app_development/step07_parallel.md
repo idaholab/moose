@@ -65,7 +65,7 @@ MOOSE includes a tool for evaluating performance: [PerfGraphOutput.md]. This ena
 There is an entire field of science about [!ac](HPC) and massively parallel processing. Although it is a valuable one, a formal discussion cannot be made here. One concept worth mentioning is [scalable parallelism](https://en.wikipedia.org/wiki/Scalable_parallelism), which refers to software that performs at the same level for larger problems that use more processes as it does for smaller problems that use fewer processes. In MOOSE, selecting a number of processes based on the number of [!ac](DOFs) in the system is a simple way to try and achieve scalability.
 
 !alert tip title=Try to target 20,000 [!ac](DOFs)-per-process
-MOOSE developers tend to agree that 20,000 is the ideal number of [!ac](DOFs) that a single process may be responsible for. This value is reported as "`Num Local DOFs`" in the terminal printout at the beginning of every execution.
+MOOSE developers tend to agree that 20,000 is the ideal number of [!ac](DOFs) that a single process may be responsible for. This value is reported as "`Num Local DOFs`" in the terminal printout at the beginning of every execution. There are, of course, some exceptions; if a problem exhibits speedup with less than 20,000 [!ac](DOFs)/process, then just use that.
 
 *For more information about application performance, please visit the [application_development/performance_benchmarking.md] page.*
 
