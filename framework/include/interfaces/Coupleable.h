@@ -942,6 +942,14 @@ protected:
                                                  unsigned int comp = 0) const;
 
   /**
+   * Returns DoFs in the current solution vector of all of a coupled variable's components for the
+   * local element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValues(const std::string & var_name) const;
+
+  /**
    * Returns DoFs in the old solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -951,6 +959,14 @@ protected:
                                                     unsigned int comp = 0) const;
 
   /**
+   * Returns DoFs in the old solution vector of all of a coupled variable's components for the local
+   * element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValuesOld(const std::string & var_name) const;
+
+  /**
    * Returns DoFs in the older solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -958,6 +974,23 @@ protected:
    */
   virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
                                                       unsigned int comp = 0) const;
+
+  /**
+   * Returns DoFs in the older solution vector of all of a coupled variable's components for the
+   * local element
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   */
+  std::vector<const VariableValue *> coupledAllDofValuesOlder(const std::string & var_name) const;
+
+  /**
+   * Returns DoFs in the current solution vector of a coupled array variable for the local element
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a VariableValue for the DoFs of the coupled variable
+   */
+  virtual const ArrayVariableValue & coupledArrayDofValues(const std::string & var_name,
+                                                           unsigned int comp = 0) const;
   // coupled-dof-values-end
 
   /**
