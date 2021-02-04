@@ -33,12 +33,8 @@ INSFVMassAdvectionOutflowBC::INSFVMassAdvectionOutflowBC(const InputParameters &
     INSFVFullyDevelopedFlowBC(params),
     _rho(getParam<Real>("rho")),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _v_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))),
+    _w_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -64,6 +60,7 @@ INSFVMassAdvectionOutflowBC::INSFVMassAdvectionOutflowBC(const InputParameters &
 ADReal
 INSFVMassAdvectionOutflowBC::computeQpResidual()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
   if (_v_var)
     v(1) = _v_var->getBoundaryFaceValue(*_face_info);
@@ -74,4 +71,9 @@ INSFVMassAdvectionOutflowBC::computeQpResidual()
               "This boundary condition is for outflow but the flow is in the opposite direction of "
               "the boundary normal");
   return _normal * v * _rho;
+#else
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#endif
 }
