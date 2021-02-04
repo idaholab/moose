@@ -93,22 +93,11 @@ XFEMCohesiveConstraint::computeQpResidual(Moose::DGResidualType type)
   Real stiffness_deg = _stiffness; // Initializing stiffness
   Real alpha = 1.0e5;
 
-  // Calculating Normal and tengential tractions on crack surface:
+  // Calculating Normal and tangential tractions on crack surface:
   Real t_n = 0.0;
-
-  // std::cout << "separation = " << delta_m_n << ", max_normal_separation = " <<
-  // max_normal_separation
-  //           << ", delta_0 = " << delta_0 << ", delta_f = " << delta_f << std::endl;
-
-  // std::cout << "delta_0 = " << delta_0 << ", delta_f = " << delta_f
-  //           << ", max_normal_separation = " << max_normal_separation << std::endl;
 
   if (max_normal_separation < delta_0)
   {
-    // std::cout << "max_normal_separation < delta_0"
-    //           << ", delta_m_n = " << delta_m_n << std::endl;
-    // std::cout << "max_normal_separation = " << max_normal_separation << ", delta_0 = " << delta_0
-    //           << std::endl;
     if (delta_m_n < 0.0)
       t_n = alpha * delta_m_n;
     else if (delta_m_n >= 0.0 && delta_m_n <= delta_0)
@@ -120,8 +109,6 @@ XFEMCohesiveConstraint::computeQpResidual(Moose::DGResidualType type)
   }
   else if (max_normal_separation >= delta_0 && max_normal_separation < delta_f)
   {
-    // std::cout << "max_normal_separation >= delta_0 && max_normal_separation < delta_f" <<
-    // std::endl;
     if (delta_m_n < 0.0)
       t_n = alpha * (delta_m_n - 0.0);
     else if (delta_m_n >= 0.0 && delta_m_n <= max_normal_separation)
@@ -139,22 +126,12 @@ XFEMCohesiveConstraint::computeQpResidual(Moose::DGResidualType type)
   }
   else if (max_normal_separation >= delta_f)
   {
-    // std::cout << "max_normal_separation >= delta_f" << std::endl;
     t_n = 0.0;
   }
-
-  // std::cout << "max_normal_separation = " << max_normal_separation << ", delta_m_n = " <<
-  // delta_m_n
-  //           << ", tn = " << t_n << std::endl;
 
   // Rotating traction vector {t_n} to {t_x, t_y}:
   Real t_y = R[0][0] * t_n;
   Real t_x = R[1][0] * t_n;
-
-  // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>> " << std::endl;
-  // std::cout << "t_x = " << t_x << ", t_y = " << t_y << std::endl;
-  // std::cout << "R1 = " << R[0][0] << ", " << R[0][1] << std::endl;
-  // std::cout << "R2 = " << R[1][0] << ", " << R[1][1] << std::endl;
 
   Real t_i = 0.0;
   if (_component == 0)
@@ -174,12 +151,7 @@ XFEMCohesiveConstraint::computeQpResidual(Moose::DGResidualType type)
       r += t_i * _test_neighbor[_i][_qp];
       break;
   }
-  // std::cout << "t_i = " << t_i << std::endl;
-  // std::cout << "normal = " << _interface_normal << std::endl;
-  // std::cout << "delta_m_n = " << delta_m_n << ", r[" << _component << "] = " << r << std::endl;
-  // std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
-  // const_cast<ComputeCohesiveTraction &>(_comp_trac).setSeparation(delta_m_n);
-  // _traction[_qp] = r;
+
   return r;
 }
 

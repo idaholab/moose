@@ -46,7 +46,7 @@ void
 MaximumNormalSeparation::computeQpProperties()
 {
   Point interface_normal(0, 0, 0);
-  Real normal_distance;
+  Real normal_distance = _max_normal_separation_old[_qp];
 
   GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -74,11 +74,8 @@ MaximumNormalSeparation::computeQpProperties()
 
     if (findIter != elem_pairs.end())
     {
-      // std::cout << "find current elem id = " << (findIter->first)->id()
-      //           << ", find neighbor id = " << (findIter->second)->id() << std::endl;
       const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem_pair);
       interface_normal = info._elem1_normal;
-      // std::cout << "normal = " << info._elem1_normal << std::endl;
       normal_distance = interface_normal(0) * (_disp_x_neighbor[_qp] - _disp_x[_qp]) +
                         interface_normal(1) * (_disp_y_neighbor[_qp] - _disp_y[_qp]);
     }
@@ -91,17 +88,11 @@ MaximumNormalSeparation::computeQpProperties()
                         interface_normal(1) * (_disp_y_neighbor[_qp] - _disp_y[_qp]);
     }
     else
-    {
       mooseError("element pair is not found.");
-    }
   }
-  // std::cout << "current elem id = " << _current_elem->id()
-  //           << ", neighbor id = " << (_assembly.neighbor())->id() << std::endl;
 
   if (normal_distance > _max_normal_separation_old[_qp])
     _max_normal_separation[_qp] = normal_distance;
-  else
-    _max_normal_separation[_qp] = _max_normal_separation_old[_qp];
 }
 
 void

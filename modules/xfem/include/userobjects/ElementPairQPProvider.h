@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef ELEMENTPAIRQPPROVIDER_H
-#define ELEMENTPAIRQPPROVIDER_H
+#pragma once
 
 class ElementPairQPProvider;
 
@@ -24,5 +23,3 @@ public:
   virtual const std::map<unique_id_type, std::pair<const Elem *, const Elem *>> &
   getElementPairMap() const = 0;
 };
-
-#endif // ELEMENTPAIRQPPROVIDER_H

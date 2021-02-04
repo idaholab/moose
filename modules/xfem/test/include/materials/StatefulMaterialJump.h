@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef STATEFULMATERIALJUMP_H
-#define STATEFULMATERIALJUMP_H
+#pragma once
 
 #include "Material.h"
 
@@ -35,5 +34,3 @@ protected:
   const VariableValue & _u;
   const VariableValue & _u_neighbor;
 };
-
-#endif // STATEFULMATERIALJUMP_H

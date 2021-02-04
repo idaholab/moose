@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMCOHESIVECONSTRAINT_H
-#define XFEMCOHESIVECONSTRAINT_H
+#pragma once
 
 // MOOSE includes
 #include "XFEMMaterialManagerConstraint.h"
@@ -66,5 +65,3 @@ protected:
 
   const std::string _base_name;
 };
-
-#endif /* XFEMCOHESIVECONSTRAINT_H */

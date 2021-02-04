@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMMATERIALMANAGERCONSTRAINT_H
-#define XFEMMATERIALMANAGERCONSTRAINT_H
+#pragma once
 
 #include "ElemElemConstraint.h"
 #include "XFEMElemPairMaterialManager.h"
@@ -56,5 +55,3 @@ XFEMMaterialManagerConstraint::getMaterialPropertyOlder(const std::string & name
 {
   return &_manager.getMaterialPropertyOlder<T>(name);
 }
-
-#endif // XFEMMATERIALMANAGERCONSTRAINT_H

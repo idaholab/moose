@@ -23,7 +23,7 @@ XFEMMaterialManager::validParams()
   params.addRequiredParam<std::vector<std::string>>("material_names",
                                                     "List of recompute material objects manage");
   params.addRequiredParam<UserObjectName>("extra_qps", "Object that provides the extra QPs");
-  params.set<MultiMooseEnum>("execute_on") = "initial linear";
+  params.set<ExecFlagEnum>("execute_on") = "initial linear";
   return params;
 }
 
@@ -37,8 +37,6 @@ XFEMMaterialManager::XFEMMaterialManager(const InputParameters & parameters)
 void
 XFEMMaterialManager::initialSetup()
 {
-  std::cout << "XFEMMaterialManager::initialSetup()\n";
-
   // get MaterialData entries for all listed material properties
   for (auto name : getParam<std::vector<std::string>>("material_names"))
   {

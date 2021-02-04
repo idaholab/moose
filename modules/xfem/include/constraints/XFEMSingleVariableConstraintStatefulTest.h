@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMEQUALVALUECONSTRAINTSTATEFULTEST_H
-#define XFEMEQUALVALUECONSTRAINTSTATEFULTEST_H
+#pragma once
 
 // MOOSE includes
 #include "XFEMMaterialManagerConstraint.h"
@@ -59,5 +58,3 @@ protected:
   const MaterialProperty<Real> * _prop_jump;
   const MaterialProperty<Real> * _prop_jump_old;
 };
-
-#endif /* XFEMEQUALVALUECONSTRAINTSTATEFULTEST_H_ */

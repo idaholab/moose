@@ -58,14 +58,6 @@ XFEMSingleVariableConstraintStatefulTest::reinitConstraintQuadrature(
 Real
 XFEMSingleVariableConstraintStatefulTest::computeQpResidual(Moose::DGResidualType type)
 {
-  // std::cout << "elem id = " << _current_elem->id() << ", neighbor id = " << _neighbor_elem->id()
-  //           << " jump = " << (*_prop_jump)[_qp] << ", jump_old = " << (*_prop_jump_old)[_qp]
-  //           << std::endl;
-
-  std::cout << "elem id = " << _current_elem->id() << ", point = " << (_current_elem->point(0))(1)
-            << ", jump = " << (*_prop_jump)[_qp] << ", jump_old = " << (*_prop_jump_old)[_qp]
-            << std::endl;
-
   Real r = 0;
 
   // switch (type)

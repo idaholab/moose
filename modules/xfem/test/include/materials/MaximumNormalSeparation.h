@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef MAXIMUMNORMALSEPARATION_H
-#define MAXIMUMNORMALSEPARATION_H
+#pragma once
 
 #include "Material.h"
 
@@ -37,5 +36,3 @@ protected:
   const VariableValue & _disp_y;
   const VariableValue & _disp_y_neighbor;
 };
-
-#endif // MAXIMUMNORMALSEPARATION_H

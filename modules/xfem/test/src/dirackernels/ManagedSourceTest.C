@@ -34,8 +34,8 @@ ManagedSourceTest::initialSetup()
 Real
 ManagedSourceTest::computeQpResidual()
 {
-  std::cout << "elem " << _current_elem << " point " << _qp << ':' << _q_point[_qp]
-            << " prop1=" << (*_prop1)[_qp] << " prop3=" << (*_prop3)[_qp] << '\n';
+  _console << "elem " << _current_elem << " point " << _qp << ':' << _q_point[_qp]
+           << " prop1=" << (*_prop1)[_qp] << " prop3=" << (*_prop3)[_qp] << '\n';
   return 0.0;
 }
 
