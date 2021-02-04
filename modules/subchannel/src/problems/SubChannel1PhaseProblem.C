@@ -217,11 +217,23 @@ SubChannel1PhaseProblem::computeWij(int iz)
     Term_out = 0.0;
     Term_in = 0.0;
 
+    //    auto Wijguess = 0.0;
+    //    if (isTransient())
+    //      Wijguess = Wij(i_gap);
+    //    else
+    //      Wijguess = Wij_global(i_gap, iz - 1);
+
+    // INITIAL GUESS (eventually the continue statement will be removed)
     auto Wijguess = 0.0;
-    if (isTransient())
-      Wijguess = Wij(i_gap);
+    if (Wij(i_gap) == 0.0)
+    {
+      if (isTransient())
+        Wijguess = Wij(i_gap);
+      else
+        Wijguess = Wij_global(i_gap, iz - 1);
+    }
     else
-      Wijguess = Wij_global(i_gap, iz - 1);
+      continue;
 
     auto newton_error = 1.0;
     auto newton_tolerance = 1e-10;
@@ -614,18 +626,90 @@ SubChannel1PhaseProblem::externalSolve()
 
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
 
-  auto Powerin = 0.0;
-  auto Powerout = 0.0;
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  Eigen::MatrixXd PCYCLES(nz, 2);
+  // Initialize
+  PCYCLES.setZero();
+  auto Ptol = 1E-10, Mtol = 1E-10;
+  // nz level calculations
+  for (unsigned int axial_level = 1; axial_level < nz + 1; axial_level++)
   {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, nz);
-    Powerin += (*mdot_soln)(node_in) * (*h_soln)(node_in);
-    Powerout += (*mdot_soln)(node_out) * (*h_soln)(node_out);
+    _console << "AXIAL LEVEL: " << axial_level << std::endl;
+    double PError = 1.0;
+    unsigned int stencilSize = 5;
+    int max_axial_cycles = 200;
+    int axial_cycles = 0;
+    int max_level_cycles = 200;
+    int bottom_limiter;
+    while (PError > Ptol && axial_cycles <= max_axial_cycles)
+    {
+      if (axial_level < stencilSize)
+        bottom_limiter = 1;
+      else
+        bottom_limiter = axial_level - stencilSize + 1;
+      axial_cycles++;
+      PCYCLES(axial_level - 1, 0) = axial_cycles;
+      if (axial_cycles == max_axial_cycles)
+      {
+        mooseError(name(), " Pressure loop didn't converge, axial_cycles: ", axial_cycles);
+      }
+      // L2 norm of old pressure solution vector
+      auto P_L2norm_old = P_soln->L2norm();
+      // Sweep upwards through the channels.
+      for (unsigned int iz = bottom_limiter; iz < axial_level + 1; iz++)
+      {
+        double MError = 1.0;
+        int level_cycles = 0;
+        // Lateral Loop... crossflow calculation
+        while (MError > Mtol && (level_cycles <= max_level_cycles))
+        {
+          level_cycles++;
+          if (level_cycles == max_level_cycles)
+          {
+            mooseError(name(), " Level loop didn't converge, level_cycles: ", level_cycles);
+          }
+          // L2 norm of old mass flow solution vector
+          auto mdot_L2norm_old = mdot_soln->L2norm();
+          // Calculate crossflow between channel i-j using crossflow momentum equation
+          computeWij(iz);
+          // calculate Sum of crossflow per channel
+          computeSumWij(iz);
+          // Calculate mass flow
+          computeMdot(iz);
+          // Calculate enthalpy (Rho and H need to be updated at the inlet to (TODO))
+          computeH(iz);
+          // Update Temperature
+          computeT(iz);
+          // Update Density
+          computeRho(iz);
+          // Calculate Error per level
+          auto mdot_L2norm_new = mdot_soln->L2norm();
+          MError = std::abs((mdot_L2norm_new - mdot_L2norm_old) / (mdot_L2norm_old + 1E-14));
+        }
+        // Populate Pressure Drop vector
+        computeDP(iz);
+      }
+      // At this point we reach the top of the oscillating stencil and now backsolve
+      if (axial_level == nz)
+        bottom_limiter = 1;
+      // Calculate pressure everywhere (in the stencil) using the axial momentum equation
+      // Sweep downwards through the channels level by level
+      for (int iz = axial_level; iz > bottom_limiter - 1; iz--) // nz calculations
+      {
+        for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+        {
+          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+          // update Pressure solution
+          P_soln->set(node_in, (*P_soln)(node_out) + (*DP_soln)(node_out));
+        }
+      }
+      //      // Calculate pressure Error
+      auto P_L2norm_new = P_soln->L2norm();
+      PError = std::abs((P_L2norm_new - P_L2norm_old) / (P_L2norm_old + 1E-14));
+      _console << "- PError: " << PError << std::endl;
+      PCYCLES(axial_level - 1, 1) = PError;
+    }
   }
-
-  _console << "Power is :\n" << Powerout - Powerin;
-
   // update old crossflow matrix
   Wij_global_old = Wij_global;
   // Save Wij_global
