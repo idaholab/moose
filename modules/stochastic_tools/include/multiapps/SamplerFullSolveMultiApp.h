@@ -22,10 +22,9 @@ class SamplerFullSolveMultiApp : public FullSolveMultiApp, public SamplerInterfa
 {
 public:
   static InputParameters validParams();
-
   SamplerFullSolveMultiApp(const InputParameters & parameters);
-
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
+  virtual void preTransfer(Real dt, Real target_time) override;
 
 protected:
   /// Sampler to utilize for creating MultiApps
@@ -51,6 +50,9 @@ private:
    * Helper method for running in mode='batch'
    * */
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
+
+  // Flag indicating a solve has occured
+  bool _solved_once;
 
   ///@{
   /// PrefGraph timers

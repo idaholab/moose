@@ -22,6 +22,10 @@
 
 [Some Code](controls/RealFunctionControl.C)
 
+### Source with language
+
+[/test/run_tests language=python]
+
 ## Optional Links
 
 [this is optional](not_a_real_file_name.md optional=True)

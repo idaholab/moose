@@ -55,7 +55,7 @@ class AutoLinkExtension(Extension):
         renderer.add('AutoLink', RenderAutoLink())
         renderer.add('SourceLink', RenderSourceLink())
 
-def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False, exact=False):
+def createTokenHelper(key, parent, info, page, optional, exact, language, use_key_in_modal=False):
     match = PAGE_LINK_RE.search(info[key])
     bookmark = match.group('bookmark')[1:] if match.group('bookmark') else None
     filename = match.group('filename')
@@ -81,7 +81,7 @@ def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=
             src_link = SourceLink(parent)
             src = str(source[0])
             content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR, src)))
-            code = core.Code(None, language=common.get_language(src), content=content)
+            code = core.Code(None, language=language or common.get_language(src), content=content)
             local = src.replace(MooseDocs.ROOT_DIR, '')
             link = floats.create_modal_link(src_link, content=code, title=local)
             if use_key_in_modal:
@@ -101,13 +101,15 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
         settings = core.ShortcutLinkInline.defaultSettings()
         settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
         settings['exact'] = (False, "Enable/disable exact match for markdown file.")
+        settings['language'] = (None, "The language used for source file syntax highlighting.")
         return settings
 
     def createToken(self, parent, info, page):
         token = createTokenHelper('key', parent, info, page,
-                                  use_key_in_modal=True,
                                   optional=self.settings['optional'],
-                                  exact=self.settings['exact'])
+                                  exact=self.settings['exact'],
+                                  language=self.settings['language'],
+                                  use_key_in_modal=True)
         if token is None:
             return core.ShortcutLinkInline.createToken(self, parent, info, page)
         return token
@@ -123,11 +125,12 @@ class PageLinkComponent(core.LinkInline):
         settings = core.LinkInline.defaultSettings()
         settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
         settings['exact'] = (False, "Enable/disable exact match for markdown file.")
+        settings['language'] = (None, "The language used for source file syntax highlighting.")
         return settings
 
     def createToken(self, parent, info, page):
         token = createTokenHelper('url', parent, info, page, optional=self.settings['optional'],
-                                  exact=self.settings['exact'])
+                                  exact=self.settings['exact'], language=self.settings['language'])
         if token is None:
             return core.LinkInline.createToken(self, parent, info, page)
         return token

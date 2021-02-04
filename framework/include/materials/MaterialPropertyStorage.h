@@ -124,7 +124,7 @@ public:
    * properties are
    * reused for computing current properties. This is called when solve succeeded.
    */
-  void shift(const FEProblemBase & fe_problem);
+  void shift();
 
   /**
    * Copy material properties from elem_from to elem_to. Thread safe.

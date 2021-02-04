@@ -9,6 +9,7 @@
 - [How do I build my own libMesh with VTK?](faq/faq_build_libmesh-vtk.md)
 - [How do I build my own PETSc?](faq/faq_build_petsc.md)
 - [Where is the stiffness matrix?](help/faq/what_is_fem.md)
+- [How do I execute MOOSE in parallel?](getting_started/examples_and_tutorials/tutorial01_app_development/step07_parallel.md)
 
 
 ### Mailing lists:
