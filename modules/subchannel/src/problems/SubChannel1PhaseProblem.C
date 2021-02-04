@@ -675,6 +675,8 @@ SubChannel1PhaseProblem::externalSolve()
           computeSumWij(iz);
           // Calculate mass flow
           computeMdot(iz);
+          // Calculate turbulent crossflow
+          computeWijPrime(iz);
           // Calculate enthalpy (Rho and H need to be updated at the inlet to (TODO))
           computeH(iz);
           // Update Temperature
