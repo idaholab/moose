@@ -15,4 +15,3 @@ This is the default message, it is great.
 
 !template field key=field-without-item
 This item should be supplied, if it isn't then you get an error.
-!template-end!

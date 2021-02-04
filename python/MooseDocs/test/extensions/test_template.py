@@ -45,7 +45,7 @@ class TestTemplate(MooseDocsTestCase):
         self.assertToken(ast(5), 'TemplateField', size=0)
         self.assertToken(ast(6), 'Heading', size=7)
         self.assertToken(ast(7), 'TemplateField', size=1)
-        self.assertToken(ast(7,0), 'Paragraph', size=35)
+        self.assertToken(ast(7,0), 'Paragraph', size=29)
         self.assertToken(ast(8), 'TemplateItem', size=1)
         self.assertToken(ast(8,0), 'Paragraph', size=22)
 
@@ -70,7 +70,7 @@ class TestTemplate(MooseDocsTestCase):
 
         self.assertHTMLTag(res(6), 'h2', size=7)
         self.assertEqual(res(6).text(), 'Field with Missing Replacement')
-        self.assertHTMLTag(res(7), 'div', size=3)
+        self.assertHTMLTag(res(7), 'div', size=2)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

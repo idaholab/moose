@@ -39,6 +39,7 @@ Extensions:
     MooseDocs.extensions.config: default
     MooseDocs.extensions.content: default
     MooseDocs.extensions.pysyntax: default
+    MooseDocs.extensions.modal: default
     MooseDocs.extensions.graph:
         draft: True
     MooseDocs.extensions.heading: default

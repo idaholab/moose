@@ -422,7 +422,7 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
             self.createHeading(parent, page)
             ul = core.UnorderedList(parent, class_='moose-list-{}'.format(self.SUBCOMMAND))
             for filename in attr:
-                filename = os.path.join(MooseDocs.ROOT_DIR, str(filename))
+                filename = os.path.abspath(os.path.join(MooseDocs.ROOT_DIR, str(filename)))
                 li = core.ListItem(ul)
                 modal.ModalSourceLink(li, src=filename)
 
