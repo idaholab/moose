@@ -23,7 +23,7 @@ For example, the following runs the application with 4 threads:
 
 ```bash
 cd ~/projects/babbler
-./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i --n-threads 4
+./babbler-opt -i test/tests/kernels/simple_diffusion/simple_diffusion.i --n-threads=4
 ```
 
 It is possible to use both [!ac](MPI) and threading. This is accomplished by combining the two

@@ -4,8 +4,8 @@ The first step of this tutorial is to create a custom MOOSE application. The app
 
 ## Create a GitHub Account
 
-Development of [!ac](MOOSE) is facilitated by [GitHub](https://github.com). It is recommend that applications
-also use GitHub if possible. Thus, the reader is encourgaged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
+Development of [!ac](MOOSE) is facilitated by [GitHub]. It is recommend that applications
+also use GitHub if possible. Thus, the reader is encouraged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
 
 ## Run the Stork Script and Initialize the New Application id=stork
 
@@ -86,6 +86,11 @@ As changes to the application are made, and more `push` commands are ran, it may
 
 ```bash
 ssh-keygen -t rsa -C YourEmail
+```
+
+When the terminal prompts about where to save the key, just hit enter to use the default file (`~/.ssh/id_rsa.pub`). When it asks whether to overwrite the file, enter "`y`" and when it asks for a passphrase, leave it blank or else the key will require it every time it is used, which defeats its purpose here. Finally, the SSH key is setup and can be printed to the terminal:
+
+```bash
 cat ~/.ssh/id_rsa.pub
 ```
 

@@ -40,7 +40,7 @@ The `run_tests` script accepts the "`-j <n>`" argument for specifying the number
 
 ## Demonstration id=demo
 
-This demonstration will show how to create the [three test setup items](#setup) that were mentioned earlier in order to have an official test of the `DarcyPressure` kernel. But, first, notice that the weak form requires that $\mu_{f} \ne 0$:
+This demonstration will show how to create the [three test setup items](#setup) that were mentioned earlier in order to have an official test of the `DarcyPressure` kernel. But, first, notice that the weak form requires that $\mu_{f} \; {=}\mathllap{\small{/}\,} \; 0$:
 
 !equation
 (\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
@@ -71,7 +71,7 @@ From now on, if a user tries to input `viscosity = 0`, the message printed to th
 
 ### Input File id=input-demo
 
-The simple diffusion test is a great example of a regression test that is simple, cheap, and provides sufficient verification of the class being tested, i.e., `Diffusion`. Specifically, it creates very few objects besides a `Diffusion` one, the mesh is course enough to produce a number of [!ac](DOFs) that can be solved in almost no time, but fine enough to result in a fairly complex system of equations, and the correct solution to the [!ac](BVP) (zero on the left and unity on the right) is obvious, because the geometry (a 1-by-1 square) is a direct mapping of it. Therefore, to make matters easy, the `simple_diffusion.i` file will be copied and then modified to use a `DarcyPressure` object.
+The simple diffusion test is a great example of a regression test that is simple, cheap, and provides sufficient verification of the class being tested, i.e., `Diffusion`. Specifically, it creates very few objects besides a `Diffusion` one, the mesh is coarse enough to produce a number of [!ac](DOFs) that can be solved in almost no time, but fine enough to result in a fairly complex system of equations, and the correct solution to the [!ac](BVP) (zero on the left and unity on the right) is obvious, because the geometry (a 1-by-1 square) is a direct mapping of it. Therefore, to make matters easy, the `simple_diffusion.i` file will be copied and then modified to use a `DarcyPressure` object.
 
 Start by creating a directory to store test files related to the `DarcyPressure` class:
 
@@ -92,7 +92,7 @@ Execute the input file in [darcy-kernel-test], confirm that the solver completes
 cd ~/projects/babbler/test/tests/kernels/darcy_pressure
 ../../../../babbler-opt -i darcy_pressure_test.i
 
-Next, create a file named `zero_viscosity_error.i` in the same folder and add the inputs given in [darcy-error-test]. Here, `viscosity = 0` was input to deliberately incur the expected error. Also, since no actual [!ac](FE) problem is going to be solved, the `"solve"` parameter was set `false` in the `[Problem]` block, which will increase performance by not processing tasks that are unnecessary for this particular test.
+Next, create a file named `zero_viscosity_error.i` in the same folder and add the inputs given in [darcy-error-test]. Here, `viscosity = 0` was input to deliberately incur the expected error. Also, since no actual [!ac](FE) problem is going to be solved, the `"solve"` parameter was set to `false` in the `[Problem]` block, which will increase performance by not processing tasks that are unnecessary for this particular test.
 
 !listing tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/darcy_pressure/zero_viscosity_error.i
          link=False
@@ -107,7 +107,7 @@ cd ~/projects/babbler/test/tests/kernels/darcy_pressure
 
 ### Results id=result-demo
 
-Vizualize the results of the `darcy_pressure_test.i` input file with PEACOCK:
+Visualize the results of the `darcy_pressure_test.i` input file with PEACOCK:
 
 !listing language=bash
 cd ~/projects/babbler/test/tests/kernels/darcy_pressure
@@ -116,7 +116,7 @@ peacock -r darcy_pressure_test_out.e
 Confirm that the solution resembles that which is shown in [results]. Notice that the solution satisfies the BVP: $p(0, y) = 0$ and $p(1, y) = 1$, $\forall \, y \in [0, 1]$. Also, notice that the solution directly maps to the spatial coordinates along the $x$-direction as expected. This result is clearly indicated by the contour colors displayed by [results]. Thus, one may declare that the solution is good and, therefore, that the `DarcyPressure` class is functioning properly.
 
 !media tutorial01_app_development/step08_result.png
-       style=width:68%;margin-left:auto;margin-right:auto;
+       style=width:64%;margin-left:auto;margin-right:auto;
        id=results
        caption=Rendering of the solution produced by the `DarcyPressure` test.
 
@@ -141,7 +141,7 @@ Finally, all tests, including the new ones, can be run by `TestHarness`:
 
 !include commands/run_tests.md
 
-If the test passed, the terminal output should look something like that shown below.
+If the tests passed, the terminal output should look something like that shown below.
 
 ```
 test:kernels/darcy_pressure.test .......................................................................... OK
