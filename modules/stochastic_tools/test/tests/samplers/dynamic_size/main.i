@@ -23,10 +23,18 @@
   num_steps = 2
 []
 
-[MultiApps]
-  [runner]
-    type = SamplerTransientMultiApp
+[VectorPostprocessors]
+  [sample]
+    type = SamplerData
     sampler = dynamic
-    
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
+[Outputs]
+  [out]
+    type = JSON
+    execute_system_information_on = NONE
+    vectorpostprocessors_as_reporters = true
   []
 []

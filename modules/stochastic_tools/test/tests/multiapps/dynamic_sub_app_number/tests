@@ -1,24 +1,34 @@
 [Tests]
   issues = '#16842'
   design = "Samplers/index.md SamplerFullSolveMultiApp.md"
-  [no_change]
-    requirement = "The system shall support generating random samples of data"
-    [constant]
-      type = JSONDiff
-      input = main.i
-      jsondiff = main_constant_size_out.json
-      allow_test_objects = true
-      cli_args = "Samplers/dynamic/increment_rows=0 Outputs/file_base=main_constant_size_out"
 
-      detail = "that remain constant in size and"
-    []
-    [dynamic]
+  [dynamic]
+    requirement = "The system shall support the modification of the number of complete sub-application simulations performed with"
+    [normal]
       type = JSONDiff
       input = main.i
+      allow_test_objects = true
       jsondiff = main_out.json
-      allow_test_objects = true
 
-      detail = "that are dynamic in size."
+      detail = "normal execution,"
+    []
+    [batch-restore]
+      type = JSONDiff
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/runner/mode=batch-restore'
+      jsondiff = main_out.json
+
+      detail = "batch execution with memory-based restoring, and"
+    []
+    [batch-reset]
+      type = JSONDiff
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/runner/mode=batch-reset'
+      jsondiff = main_out.json
+
+      detail = "batch execution with reset-based restoring."
     []
   []
 []
