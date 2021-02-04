@@ -83,24 +83,24 @@ InternalVolumetricFlowRate::computeQpIntegral()
         !fi->isBoundary(),
         "Use VolumetricFlowRate instead of InternalVolumetricFlowRate for domain boundaries");
 
-    const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
+    const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
 
     // Get face value for velocity
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     const auto & vx_face =
-        !getFieldVar("vel_x", 0)
-            ? _vel_x[_qp]
-            : MetaPhysicL::raw_value(_fv_vel_x->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]));
+        _fv_vel_x
+            ? MetaPhysicL::raw_value(_fv_vel_x->getInternalFaceValue(neighbor, *fi, _vel_x[_qp]))
+            : _vel_x[_qp];
 
     const auto & vy_face =
-        !getFieldVar("vel_y", 0)
-            ? _vel_y[_qp]
-            : MetaPhysicL::raw_value(_fv_vel_y->getInternalFaceValue(neighbor, *fi, _vel_y[_qp]));
+        _fv_vel_y
+            ? MetaPhysicL::raw_value(_fv_vel_y->getInternalFaceValue(neighbor, *fi, _vel_y[_qp]))
+            : _vel_y[_qp];
 
     const auto & vz_face =
-        !getFieldVar("vel_z", 0)
-            ? _vel_z[_qp]
-            : MetaPhysicL::raw_value(_fv_vel_z->getInternalFaceValue(neighbor, *fi, _vel_z[_qp]));
+        _fv_vel_z
+            ? MetaPhysicL::raw_value(_fv_vel_z->getInternalFaceValue(neighbor, *fi, _vel_z[_qp]))
+            : _vel_z[_qp];
 
     // Compute the advected quantity on the face
     Real advected_quantity;
@@ -108,10 +108,9 @@ InternalVolumetricFlowRate::computeQpIntegral()
     {
       // Get neighbor value
       const auto & advected_variable_neighbor =
-          !getFieldVar("advected_variable", 0)
-              ? _advected_variable[_qp]
-              : MetaPhysicL::raw_value(_fv_advected_variable->getNeighborValue(
-                    neighbor, *fi, _advected_variable[_qp]));
+          _fv_advected_variable ? MetaPhysicL::raw_value(_fv_advected_variable->getNeighborValue(
+                                      neighbor, *fi, _advected_variable[_qp]))
+                                : _advected_variable[_qp];
 
       Moose::FV::interpolate(_advected_interp_method,
                              advected_quantity,
