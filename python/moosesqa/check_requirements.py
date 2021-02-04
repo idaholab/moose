@@ -240,7 +240,8 @@ def _check_requirement(req, logger, file_list, allowed_collections):
         # Test for duplicate details
         details_dict = collections.defaultdict(set)
         for detail in req.details:
-            details_dict[detail.detail].add(detail)
+            if detail.detail is not None:
+                details_dict[detail.detail].add(detail)
         for txt, value in details_dict.items():
             if len(value) > 1:
                 msg = 'Duplicate details found:'
