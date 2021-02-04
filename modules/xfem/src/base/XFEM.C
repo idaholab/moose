@@ -1346,23 +1346,23 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
         }
       }
-    }
 
-    // Store solution for all elements affected by XFEM
-    storeSolutionForElement(libmesh_elem,
-                            parent_elem,
-                            nl,
-                            _cached_solution,
-                            current_solution,
-                            old_solution,
-                            older_solution);
-    storeSolutionForElement(libmesh_elem,
-                            parent_elem,
-                            aux,
-                            _cached_aux_solution,
-                            current_aux_solution,
-                            old_aux_solution,
-                            older_aux_solution);
+      // Store solution for all elements affected by XFEM
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              nl,
+                              _cached_solution,
+                              current_solution,
+                              old_solution,
+                              older_solution);
+      storeSolutionForElement(libmesh_elem,
+                              parent_elem,
+                              aux,
+                              _cached_aux_solution,
+                              current_aux_solution,
+                              old_aux_solution,
+                              older_aux_solution);
+    }
 
     // The crack tip origin map is stored before cut, thus the elem should be updated with new
     // element.
