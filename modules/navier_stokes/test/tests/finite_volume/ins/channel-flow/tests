@@ -47,6 +47,6 @@
     design = 'INSFVMassAdvectionOutflowBC.md'
     issues = '#16854'
     ad_indexing_type = 'global'
-    abs_zero = 3e-9
+    abs_zero = 6e-9
   []
 []
