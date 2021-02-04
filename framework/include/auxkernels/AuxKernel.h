@@ -239,6 +239,9 @@ protected:
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
 
+  /// Flag indicating if this aux kernel is boundary restricted
+  const bool _boundary_restricted;
+
   /// Quadrature point index
   unsigned int _qp;
 

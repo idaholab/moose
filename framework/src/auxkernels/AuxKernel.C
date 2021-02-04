@@ -19,6 +19,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
+#include "libmesh/boundary_info.h"
 
 defineLegacyParams(AuxKernel);
 defineLegacyParams(VectorAuxKernel);
@@ -129,7 +130,8 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _current_node(_assembly.node()),
     _current_boundary_id(_assembly.currentBoundaryID()),
-    _solution(_aux_sys.solution())
+    _solution(_aux_sys.solution()),
+    _boundary_restricted(boundaryRestricted())
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
@@ -138,6 +140,31 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
+
+  if (_boundary_restricted && !isNodal())
+  {
+    // when the variable is elemental and this aux kernel operates on boundaries,
+    // we need to check that no elements are visited more than once through visiting
+    // all the sides on the boundaries
+    auto boundaries = _mesh.getMesh().get_boundary_info().build_side_list();
+    std::set<dof_id_type> elements;
+    for (const auto & t : boundaries)
+    {
+      if (hasBoundary(std::get<2>(t)))
+      {
+        const auto eid = std::get<0>(t);
+        const auto stat = elements.insert(eid);
+        if (!stat.second) // already existed in the set
+          mooseError(
+              "Boundary restricted auxiliary kernel '",
+              name(),
+              "' has element (id=",
+              eid,
+              ") connected with more than one boundary sides.\nRefer to the AuxKernel "
+              "documentation on boundary restricted aux kernels for understanding this error.");
+      }
+    }
+  }
 }
 
 template <typename ComputeValueType>
@@ -353,9 +380,12 @@ AuxKernelTempl<ComputeValueType>::compute()
             _local_ke(i, j) += t * _test[j][_qp];
         }
 
-      // mass matrix is always SPD
+      // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);
-      _local_ke.cholesky_solve(_local_re, _local_sol);
+      if (_boundary_restricted)
+        _local_ke.svd_solve(_local_re, _local_sol);
+      else
+        _local_ke.cholesky_solve(_local_re, _local_sol);
 
       _var.setDofValues(_local_sol);
     }
@@ -420,7 +450,12 @@ AuxKernelTempl<RealEigenVector>::compute()
       {
         for (unsigned int j = 0; j < _n_local_dofs; ++j)
           re(j) = _local_re(j)(i);
-        _local_ke.cholesky_solve(re, sol);
+
+        if (_boundary_restricted)
+          _local_ke.svd_solve(re, sol);
+        else
+          _local_ke.cholesky_solve(re, sol);
+
         for (unsigned int j = 0; j < _n_local_dofs; ++j)
           _local_sol(j)(i) = sol(j);
       }
