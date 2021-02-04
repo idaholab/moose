@@ -43,11 +43,11 @@ SideFluxIntegralTempl<is_ad>::computeQpIntegral()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
-    /// Get the face info
+    // Get the face info
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
 
-    /// Get the gradient of the variable on the face
+    // Get the gradient of the variable on the face
     const auto & grad_u = MetaPhysicL::raw_value(_fv_variable->adGradSln(*fi));
 
     // FIXME Get the diffusion coefficient on the face, see #16809

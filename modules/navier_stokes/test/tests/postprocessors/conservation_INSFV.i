@@ -219,7 +219,7 @@ velocity_interp_method='average'
     function = 0
   []
   [inlet_temp]
-    type = FVDirichletBC
+    type = FVNeumannBC
     boundary = 'bottom'
     variable = temperature
     value = 300

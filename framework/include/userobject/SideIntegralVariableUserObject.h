@@ -40,5 +40,5 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
   /// Whether FV variables are used
-  bool _fv;
+  const bool _fv;
 };

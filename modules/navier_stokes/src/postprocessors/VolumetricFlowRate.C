@@ -44,20 +44,20 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _fv_vel_x(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_x", 0))),
     _fv_vel_y(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_y", 0))),
     _fv_vel_z(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_z", 0))),
+    _advected_variable_supplied(parameters.isParamSetByUser("advected_variable")),
     _advected_variable(coupledValue("advected_variable")),
     _fv_advected_variable(
         dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
+    _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
     _advected_material_property(getADMaterialProperty<Real>("advected_mat_prop"))
 {
-  /// Check that at most one advected quantity has been provided
-  if (parameters.isParamSetByUser("advected_variable") &&
-      parameters.isParamSetByUser("advected_mat_prop"))
+  // Check that at most one advected quantity has been provided
+  if (_advected_variable_supplied && _advected_mat_prop_supplied)
     mooseError("VolumetricFlowRatePostprocessor should be provided either an advected variable "
                "or an advected material property");
 
-  /// Check that the user isn't trying to get face values for material properties
-  if (parameters.isParamSetByUser("advected_interp_method") &&
-      parameters.isParamSetByUser("advected_mat_prop"))
+  // Check that the user isn't trying to get face values for material properties
+  if (parameters.isParamSetByUser("advected_interp_method") && _advected_mat_prop_supplied)
     mooseWarning("Advected quantity interpolation methods are currently unavailable for "
                  "advected material properties.");
 
@@ -79,12 +79,11 @@ VolumetricFlowRate::computeQpIntegral()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
-    /// We should be at the edge of the domain
+    // We should be at the edge of the domain
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
-    mooseAssert(fi->isBoundary(), "VolumetricFlowRate should only be used at boundaries");
 
-    /// Get face value for velocity
+    // Get face value for velocity
     const auto & vx_face = !getFieldVar("vel_x", 0)
                                ? _vel_x[_qp]
                                : MetaPhysicL::raw_value(_fv_vel_x->getBoundaryFaceValue(*fi));
@@ -97,12 +96,12 @@ VolumetricFlowRate::computeQpIntegral()
                                ? _vel_z[_qp]
                                : MetaPhysicL::raw_value(_fv_vel_z->getBoundaryFaceValue(*fi));
 
-    /// Compute the advected quantity on the face
+    // Compute the advected quantity on the face
     Real advected_quantity;
-    if (parameters().isParamSetByUser("advected_variable"))
+    if (_advected_variable_supplied)
     {
-      /// Get neighbor value
-      const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
+      // Get neighbor value
+      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
       const auto & advected_variable_neighbor =
           !getFieldVar("advected_variable", 0)
               ? _advected_variable[_qp]
@@ -117,10 +116,10 @@ VolumetricFlowRate::computeQpIntegral()
                              *fi,
                              true);
     }
-    else if (parameters().isParamSetByUser("advected_mat_prop"))
+    else if (_advected_mat_prop_supplied)
     {
-      /// FIXME The material property would need to be computed on the face #16809
-      /// This requires knowing the neighbor value, (1)MaterialInterface cant do that
+      // FIXME The material property would need to be computed on the face #16809
+      // This requires knowing the neighbor value, (1)MaterialInterface cant do that
       advected_quantity = MetaPhysicL::raw_value(_advected_material_property[_qp]);
     }
     else
@@ -130,12 +129,14 @@ VolumetricFlowRate::computeQpIntegral()
   }
   else
 #endif
-      if (parameters().isParamSetByUser("advected_variable"))
-    return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
-           _normals[_qp];
-  else if (parameters().isParamSetByUser("advected_mat_prop"))
-    return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
-           RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
-  else
-    return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  {
+    if (_advected_variable_supplied)
+      return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
+             _normals[_qp];
+    else if (_advected_mat_prop_supplied)
+      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+             RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+    else
+      return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
+  }
 }

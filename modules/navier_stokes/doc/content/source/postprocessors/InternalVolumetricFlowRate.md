@@ -1,3 +1,5 @@
+# InternalVolumetricFlowRate
+
 !syntax description /Postprocessors/InternalVolumetricFlowRate
 
 !syntax parameters /Postprocessors/InternalVolumetricFlowRate

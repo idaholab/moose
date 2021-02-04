@@ -40,7 +40,7 @@ protected:
   /// the type of interface value we want to compute
   const MooseEnum _interface_value_type;
   /// the fv variable for the neighbor variable
-  const MooseVariableFV<Real> * _neighbor_fv_variable;
+  const MooseVariableFV<Real> * const _neighbor_fv_variable;
   /// whether finite volume variables are used
   const bool _fv;
 

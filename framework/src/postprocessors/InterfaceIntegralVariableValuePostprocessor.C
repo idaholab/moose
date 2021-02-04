@@ -55,11 +55,11 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
 {
   addMooseVariableDependency(&mooseVariableField());
 
-  /// Primary and secondary variable should both be finite volume variables or both not be
+  // Primary and secondary variable should both be of a similar variable type
   if ((_fv && !getFieldVar("neighbor_variable", 0)->isFV()) ||
       (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
-    mooseError("For the InterfaceIntegralVariableValuePostprocessor, if variable "
-               "is a finite volume variable, so should be neighbor_variable.");
+    mooseError("For the InterfaceIntegralVariableValuePostprocessor, variable and "
+               "neighbor_variable should be of a similar variable type.");
 }
 
 Real
@@ -68,19 +68,19 @@ InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_fv)
   {
-    /// Get FaceInfo from the mesh
+    // Get FaceInfo from the mesh
     const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
     mooseAssert(fi, "We should have a face info");
-    const Elem * neighbor = _current_elem->neighbor_ptr(_current_side);
+    const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
 
-    /// If both variables are different, assume this is a boundary for both variables
+    // If both variables are different, assume this is a boundary for both variables
     Real u, u_neighbor;
     if (_fv_variable != _neighbor_fv_variable)
     {
       u = MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
       u_neighbor = MetaPhysicL::raw_value(_neighbor_fv_variable->getBoundaryFaceValue(*fi));
     }
-    /// If only one variable is specified, assume this is an internal interface
+    // If only one variable is specified, assume this is an internal interface
     // FIXME Make sure getInternalFaceValue uses the right interpolation method, see #16585
     else
     {

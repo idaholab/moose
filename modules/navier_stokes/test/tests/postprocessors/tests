@@ -33,7 +33,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy.csv
       abs_zero = 1e-8
-      detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property.'
+      detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property,'
       ad_indexing_type = 'global'
       cli_args = "Outputs/file_base='diverging_INSFV_quad_xy'"
     []
@@ -42,7 +42,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_rz.csv
       abs_zero = 1e-8
-      detail = 'with a quadrilateral mesh in RZ geometry.'
+      detail = 'with a quadrilateral mesh in RZ geometry,'
       cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_INSFV_quad_rz'"
       ad_indexing_type = 'global'
     []
@@ -51,7 +51,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_tri_xy.csv
       abs_zero = 1e-8
-      detail = 'with a triangular mesh in XY geometry.'
+      detail = 'with a triangular mesh in XY geometry,'
       cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy' GlobalParams/two_term_boundary_expansion=false"
       ad_indexing_type = 'global'
     []
@@ -60,7 +60,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy_rc.csv
       abs_zero = 1e-8
-      detail = 'with Rhie Chow velocity interpolation.'
+      detail = 'with Rhie Chow velocity interpolation,'
       cli_args = "velocity_interp_method='rc' Outputs/file_base='diverging_INSFV_quad_xy_rc'"
       ad_indexing_type = 'global'
     []
@@ -69,7 +69,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
-      detail = 'with upwind interpolation of advected quantities.'
+      detail = 'with upwind interpolation of advected quantities,'
       cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind'"
       ad_indexing_type = 'global'
     []
@@ -78,7 +78,7 @@
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
-      detail = 'with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
+      detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
       ad_indexing_type = 'global'
     []
