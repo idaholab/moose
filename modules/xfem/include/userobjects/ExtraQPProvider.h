@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef EXTRAQPPROVIDER_H
-#define EXTRAQPPROVIDER_H
+#pragma once
 
 class ExtraQPProvider;
 
@@ -21,5 +20,3 @@ class ExtraQPProvider
 public:
   virtual const std::map<dof_id_type, std::vector<Point>> & getExtraQPMap() const = 0;
 };
-
-#endif // EXTRAQPPROVIDER_H

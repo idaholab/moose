@@ -1188,9 +1188,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     Elem * parent_elem = _mesh->elem_ptr(parent_id);
 
-    if (new_elements[i]->getParent()->numChildren() == 1)
-      std::cout << "new_elements[i]->getParent()->numChildren() = "
-                << new_elements[i]->getParent()->numChildren() << std::endl;
+    // if (new_elements[i]->getParent()->numChildren() == 1)
+    //   _console << "new_elements[i]->getParent()->numChildren() = "
+    //            << new_elements[i]->getParent()->numChildren() << std::endl;
 
     // Elem * libmesh_elem = NULL;
     // if (new_elements[i]->getParent()->numChildren() == 1)
@@ -1550,11 +1550,11 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   // for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
   // {
   //   Elem * elem = *elem_it;
-  //   std::cout << "elem id = " << elem->id() << std::endl;
+  //   _console << "elem id = " << elem->id() << std::endl;
   //   for (unsigned int i = 0; i < 4; i++)
   //   {
   //     Node * node = elem->get_node(i);
-  //     std::cout << node->id() << ", node->old_dof_object = " << (node->old_dof_object == NULL)
+  //     _console << node->id() << ", node->old_dof_object = " << (node->old_dof_object == NULL)
   //               << std::endl;
   //   }
   // }
@@ -1595,8 +1595,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
        it != temp_elem_pair_unique_id_map.end();
        ++it)
   {
-    std::cout << "old unique id = " << it->first << ", new unique id = " << it->second->unique_id()
-              << std::endl;
+    _console << "old unique id = " << it->first << ", new unique id = " << it->second->unique_id()
+             << std::endl;
     _elem_pair_unique_id_map[it->first] = it->second->unique_id();
   }
 

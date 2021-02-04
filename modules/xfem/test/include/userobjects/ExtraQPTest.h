@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef EXTRAQPTEST_H
-#define EXTRAQPTEST_H
+#pragma once
 
 #include "GeneralUserObject.h"
 #include "ExtraQPProvider.h"
@@ -41,5 +40,3 @@ protected:
   MooseMesh & _mesh;
   std::vector<Point> _points;
 };
-
-#endif // EXTRAQPTEST_H

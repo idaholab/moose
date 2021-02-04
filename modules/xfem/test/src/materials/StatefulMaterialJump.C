@@ -39,9 +39,6 @@ StatefulMaterialJump::resetQpProperties()
 void
 StatefulMaterialJump::computeQpProperties()
 {
-  // Real old_value = _prop_old[_qp];
-  //_prop[_qp] = _u[_qp] - _u_neighbor[_qp];
-  // std::cout << "prop[" << _qp << "] = " << _prop[_qp] << std::endl;
   _prop[_qp] = _prop_old[_qp] + 0.1 * _t;
 }
 

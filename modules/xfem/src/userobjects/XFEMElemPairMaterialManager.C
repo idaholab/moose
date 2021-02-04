@@ -24,7 +24,7 @@ XFEMElemPairMaterialManager::validParams()
                                                     "List of recompute material objects manage");
   params.addRequiredParam<UserObjectName>("element_pair_qps",
                                           "Object that provides the extra QPs for element pair.");
-  params.set<MultiMooseEnum>("execute_on") = "initial linear";
+  params.set<ExecFlagEnum>("execute_on") = "initial linear";
   return params;
 }
 
@@ -105,24 +105,13 @@ XFEMElemPairMaterialManager::rewind()
 void
 XFEMElemPairMaterialManager::initialize()
 {
-  std::cout << "============> BEFORE id = ";
-  for (auto key_id : *_map)
-  {
-    std::cout << key_id.first << ", ";
-  }
-  std::cout << std::endl;
-
   for (std::map<unique_id_type, unique_id_type>::iterator it = (*_elem_pair_unique_id_map).begin();
        it != (*_elem_pair_unique_id_map).end();
        ++it)
   {
-    std::cout << "XFEMElemPairMaterialManager --> old unique id = " << it->first
-              << ", new unique id = " << it->second << std::endl;
-
     auto it_delete_map = (*_map).find(it->first);
     if (it_delete_map != (*_map).end())
     {
-      std::cout << "MAP find item : " << it->first << std::endl;
       std::swap((*_map)[it->second], it_delete_map->second);
       (*_map).erase(it_delete_map);
     }
@@ -141,12 +130,6 @@ XFEMElemPairMaterialManager::initialize()
       (*_map_older).erase(it_delete_map_older);
     }
   }
-  std::cout << "============> AFTER id = ";
-  for (auto key_id : *_map)
-  {
-    std::cout << key_id.first << ", ";
-  }
-  std::cout << std::endl;
 }
 
 void
@@ -161,16 +144,6 @@ XFEMElemPairMaterialManager::execute()
   }
 
   _fe_problem.setActiveElementalMooseVariables(var_dependencies, 0);
-
-  std::cout << "XFEMElemPairMaterialManager map size = " << _map->size() << std::endl;
-  std::cout << "_extra_qp_map size = " << _extra_qp_map.size() << std::endl;
-
-  std::cout << "id = ";
-  for (auto key_id : *_map)
-  {
-    std::cout << key_id.first << ", ";
-  }
-  std::cout << std::endl;
 
   // loop over all elements that have extra QPs
   for (auto extra_qps : _extra_qp_map)
@@ -226,12 +199,6 @@ XFEMElemPairMaterialManager::execute()
 
     const Elem * elem1 = _elem_pair_map.at(extra_qps.first).first;
     const Elem * elem2 = _elem_pair_map.at(extra_qps.first).second;
-
-    std::cout << "elem1 unique id = " << elem1->unique_id()
-              << ", elem 2 unique id = " << elem2->unique_id() << std::endl;
-
-    // std::cout << "elem 1 =========================================== " << *elem1 << std::endl;
-    // std::cout << "elem 2 =========================================== " << *elem2 << std::endl;
 
     // reinit the element
     _fe_problem.setCurrentSubdomainID(elem1, 0 /* tid */);

@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef STATEFULTESTMATERIAL_H
-#define STATEFULTESTMATERIAL_H
+#pragma once
 
 #include "Material.h"
 
@@ -32,5 +31,3 @@ protected:
   const MaterialProperty<Real> & _prop_old;
   const MaterialProperty<Real> & _prop1_old;
 };
-
-#endif // STATEFULTESTMATERIAL_H

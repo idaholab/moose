@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef MANAGEDSOURCETEST_H
-#define MANAGEDSOURCETEST_H
+#pragma once
 
 #include "XFEMMaterialManagerDiracKernel.h"
 
@@ -33,5 +32,3 @@ protected:
   const MaterialProperty<Real> * _prop1;
   const MaterialProperty<Real> * _prop3;
 };
-
-#endif // MANAGEDSOURCETEST_H

@@ -5,8 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMMATERIALMANAGERDIRACKERNEL_H
-#define XFEMMATERIALMANAGERDIRACKERNEL_H
+#pragma once
 
 #include "DiracKernel.h"
 #include "XFEMMaterialManager.h"
@@ -58,5 +57,3 @@ XFEMMaterialManagerDiracKernel::getMaterialPropertyOlder(const std::string & nam
 {
   return &_manager.getMaterialPropertyOlder<T>(name);
 }
-
-#endif // XFEMMATERIALMANAGERDIRACKERNEL_H
