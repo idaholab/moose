@@ -232,7 +232,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             if node.get('render', True):
                 self.translator.renderer.render(result, ast, node)
             self.translator.executePageMethod('postRender', node, args=(result,))
-
         return result
 
     def write(self, node, result):

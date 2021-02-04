@@ -22,7 +22,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
-from . import command, core, floats, table, autolink, materialicon
+from . import command, core, floats, table, autolink, materialicon, modal
 
 LOG = logging.getLogger(__name__)
 
@@ -241,7 +241,7 @@ class AppSyntaxExtension(command.CommandExtension):
         return node
 
     def extend(self, reader, renderer):
-        self.requires(core, floats, table, autolink, materialicon)
+        self.requires(core, floats, table, autolink, materialicon, modal)
 
         self.addCommand(reader, SyntaxDescriptionCommand())
         self.addCommand(reader, SyntaxParametersCommand())
@@ -422,18 +422,10 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
             self.createHeading(parent, page)
             ul = core.UnorderedList(parent, class_='moose-list-{}'.format(self.SUBCOMMAND))
             for filename in attr:
-                filename = str(filename)
+                filename = os.path.join(MooseDocs.ROOT_DIR, str(filename))
                 li = core.ListItem(ul)
-                lang = common.get_language(filename)
-                content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR,
-                                                                           filename)))
-                code = core.Code(None, language=lang, content=content)
-                link = floats.create_modal_link(li,
-                                                url=filename,
-                                                content=code,
-                                                title=filename,
-                                                string=filename)
-                link.name = 'SyntaxLink'
+                modal.ModalSourceLink(li, src=filename)
+
         return parent
 
 class SyntaxInputsCommand(SyntaxChildrenCommand):

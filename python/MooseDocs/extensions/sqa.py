@@ -28,7 +28,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
-from . import core, command, floats, autolink, civet, appsyntax, table
+from . import core, command, floats, autolink, civet, appsyntax, table, modal
 
 LOG = logging.getLogger(__name__)
 
@@ -248,7 +248,7 @@ class SQAExtension(command.CommandExtension):
         return self.__counts[key]
 
     def extend(self, reader, renderer):
-        self.requires(core, command, autolink, floats, table)
+        self.requires(core, command, autolink, floats, table, modal)
 
         for ext in self.translator.extensions:
             if ext.name == 'civet':
@@ -378,10 +378,7 @@ class SQARequirementsCommand(command.CommandComponent):
                 for spec in req.specifications:
                     if p.count > 2:
                         tokens.String(p, content=', ')
-                    c = core.Paragraph(None)
-                    core.Code(c, language='text', content=spec.text)
-                    tokens.String(c, content=spec.local)
-                    floats.create_modal_link(p, title=spec.name, string=spec.name, content=c)
+                    s = modal.ModalLink(p, string=spec.name, content=core.Code(None, content=spec.text))
 
             if self.settings.get('link-design', False) and req.design:
                 SQARequirementDesign(item, filename=req.filename, design=req.design,
@@ -610,8 +607,7 @@ class SQAReportCommand(command.CommandComponent):
                 tokens.String(p, content='Specification(s): ')
                 for spec in req.specifications:
                     p = SQARequirementSpecification(item, spec_name=req.name)
-                floats.create_modal_link(p, title=req.name, string=req.name,
-                                         content=core.Code(None, language='text', content=content))
+                    s = modal.ModalSourceLink(p, string=spec.name, content=core.Code(None, content=content))
 
             if token['link_design'] and req.design:
                 SQARequirementDesign(item, filename=req.filename, design=req.design,
