@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
-class Transient;
+
 namespace libMesh
 {
 class EquationSystems;
@@ -45,11 +45,9 @@ protected:
   unsigned int & _num_local_elem;
   unsigned int & _num_local_node;
 
-  // Used to allow for optional declare
-  unsigned int _dummy_unsigned_int = 0;
-
   // Helper to perform optional declaration based on "_items"
-  unsigned int & declareHelper(const std::string & item_name, const ReporterMode mode);
+  template <typename T>
+  T & declareHelper(const std::string & item_name, const ReporterMode mode);
 
 private:
   const libMesh::EquationSystems & _equation_systems;
@@ -57,3 +55,11 @@ private:
   const libMesh::System & _aux_system;
   const libMesh::MeshBase & _mesh;
 };
+
+template <typename T>
+T &
+MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
+{
+  return (!_items.isValid() || _items.contains(item_name)) ? declareValueByName<T>(item_name, mode)
+                                                           : declareUnusedValue<T>();
+}

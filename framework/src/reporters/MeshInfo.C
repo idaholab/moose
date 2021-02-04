@@ -9,7 +9,6 @@
 
 #include "MeshInfo.h"
 #include "SubProblem.h"
-#include "Transient.h"
 #include "libmesh/system.h"
 #include "libmesh/equation_systems.h"
 
@@ -34,16 +33,18 @@ MeshInfo::validParams()
 MeshInfo::MeshInfo(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _items(getParam<MultiMooseEnum>("items")),
-    _num_dofs(declareHelper("num_dofs", REPORTER_MODE_REPLICATED)),
-    _num_dofs_nl(declareHelper("num_dofs_nonlinear", REPORTER_MODE_REPLICATED)),
-    _num_dofs_aux(declareHelper("num_dofs_auxiliary", REPORTER_MODE_REPLICATED)),
-    _num_elem(declareHelper("num_elements", REPORTER_MODE_REPLICATED)),
-    _num_node(declareHelper("num_nodes", REPORTER_MODE_REPLICATED)),
-    _num_local_dofs(declareHelper("num_local_dofs", REPORTER_MODE_DISTRIBUTED)),
-    _num_local_dofs_nl(declareHelper("num_dofs_local_nonlinear", REPORTER_MODE_DISTRIBUTED)),
-    _num_local_dofs_aux(declareHelper("num_dofs_local_auxiliary", REPORTER_MODE_DISTRIBUTED)),
-    _num_local_elem(declareHelper("num_local_elements", REPORTER_MODE_DISTRIBUTED)),
-    _num_local_node(declareHelper("num_local_nodes", REPORTER_MODE_DISTRIBUTED)),
+    _num_dofs(declareHelper<unsigned int>("num_dofs", REPORTER_MODE_REPLICATED)),
+    _num_dofs_nl(declareHelper<unsigned int>("num_dofs_nonlinear", REPORTER_MODE_REPLICATED)),
+    _num_dofs_aux(declareHelper<unsigned int>("num_dofs_auxiliary", REPORTER_MODE_REPLICATED)),
+    _num_elem(declareHelper<unsigned int>("num_elements", REPORTER_MODE_REPLICATED)),
+    _num_node(declareHelper<unsigned int>("num_nodes", REPORTER_MODE_REPLICATED)),
+    _num_local_dofs(declareHelper<unsigned int>("num_local_dofs", REPORTER_MODE_DISTRIBUTED)),
+    _num_local_dofs_nl(
+        declareHelper<unsigned int>("num_dofs_local_nonlinear", REPORTER_MODE_DISTRIBUTED)),
+    _num_local_dofs_aux(
+        declareHelper<unsigned int>("num_dofs_local_auxiliary", REPORTER_MODE_DISTRIBUTED)),
+    _num_local_elem(declareHelper<unsigned int>("num_local_elements", REPORTER_MODE_DISTRIBUTED)),
+    _num_local_node(declareHelper<unsigned int>("num_local_nodes", REPORTER_MODE_DISTRIBUTED)),
     _equation_systems(_fe_problem.es()),
     _nonlinear_system(_fe_problem.es().get_system("nl0")),
     _aux_system(_fe_problem.es().get_system("aux0")),
@@ -64,12 +65,4 @@ MeshInfo::execute()
   _num_local_dofs = _num_local_dofs_nl + _num_local_dofs_aux;
   _num_local_node = _mesh.n_local_nodes();
   _num_local_elem = _mesh.n_local_elem();
-}
-
-unsigned int &
-MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
-{
-  return (!_items.isValid() || _items.contains(item_name))
-             ? declareValueByName<unsigned int>(item_name, mode)
-             : _dummy_unsigned_int;
 }
