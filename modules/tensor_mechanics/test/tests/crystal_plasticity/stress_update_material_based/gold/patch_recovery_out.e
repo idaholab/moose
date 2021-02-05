@@ -1,0 +1,1 @@
+../../user_object_based/gold/patch_recovery_out.e

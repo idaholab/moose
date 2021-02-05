@@ -68,17 +68,13 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
     _mu_elem(getADMaterialProperty<Real>("mu")),
     _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
-    _p_var(dynamic_cast<const INSFVPressureVariable *>(
-        &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("pressure").front()))),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(
-        &_subproblem.getVariable(_tid, params.get<std::vector<VariableName>>("u").front()))),
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("pressure", 0))),
+    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
-                     _tid, params.get<std::vector<VariableName>>("v").front()))
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
                : nullptr),
     _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
-                     _tid, params.get<std::vector<VariableName>>("w").front()))
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _rho(getParam<Real>("rho")),
     _dim(_subproblem.mesh().dimension())
@@ -563,17 +559,17 @@ ADReal
 INSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
-  ADReal u_interface;
+  ADReal adv_quant_interface;
 
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
   Moose::FV::interpolate(_advected_interp_method,
-                         u_interface,
+                         adv_quant_interface,
                          _adv_quant_elem[_qp],
                          _adv_quant_neighbor[_qp],
                          v,
                          *_face_info,
                          true);
-  return _normal * v * u_interface;
+  return _normal * v * adv_quant_interface;
 }
 
 void

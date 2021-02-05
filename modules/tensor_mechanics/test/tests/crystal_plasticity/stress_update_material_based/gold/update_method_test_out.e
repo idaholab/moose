@@ -1,0 +1,1 @@
+../../user_object_based/gold/test_out.e

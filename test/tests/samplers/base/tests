@@ -102,21 +102,25 @@
 
   [errors]
     requirement = "The system shall include a random number sampling system that errors"
+    issues = '#13906 #16482'
+
     [setNumberOfRows]
       type = RunException
       input = errors.i
-      expect_err = "The 'setNumberOfRows\(\)' method can not"
+      expect_err = "Changing the size of the sample must not occur during matrix access"
       cli_args = "Samplers/sample/error_test=call_set_number_of_rows"
+      method = 'DBG DEVEL' # message from assert
 
-      detail = "if the number of rows is set after object construction,"
+      detail = "if the number of rows is altered during sample access,"
     []
     [setNumberOfCols]
       type = RunException
       input = errors.i
-      expect_err = "The 'setNumberOfCols\(\)' method can not"
+      expect_err = "Changing the size of the sample must not occur during matrix access"
       cli_args = "Samplers/sample/error_test=call_set_number_of_cols"
+      method = 'DBG DEVEL' # message from assert
 
-      detail = "if the number of cols is set after object construction,"
+      detail = "if the number of columns is altered during sample access,"
     []
     [setNumberOfRandomSeeds]
       type = RunException
@@ -174,6 +178,82 @@
       cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getNextLocalRow"
 
       detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed."
+    []
+  []
+
+  [reinit_errors]
+    requirement = "The system shall error when the expected size of a sampler is altered and accessed prior to initialization by accessing the"
+    [getGlobalSamples]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getGlobalSamples'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the global sample matrix;"
+    []
+    [getLocalSamples]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getLocalSamples'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local sample matrix;"
+    []
+    [getNextLocalRow]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getNextLocalRow'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local sample matrix row;"
+    []
+    [getNumberOfRows]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getNumberOfRows'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the total row count;"
+    []
+    [getNumberOfLocalRows]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getNumberOfLocalRows'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the local row count;"
+    []
+    [getLocalRowBegin]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getLocalRowBegin'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the first local row index;"
+    []
+    [getLocalRowEnd]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getLocalRowEnd'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the last local row index;"
+    []
+    [getNumberOfCols]
+      type = RunException
+      input = errors.i
+      allow_test_objects = true
+      cli_args = 'Samplers/sample/error_test=reinit_getNumberOfCols'
+      expect_err = "A call to '.*?' was made after initialization"
+
+      detail = "the column count."
     []
   []
 []

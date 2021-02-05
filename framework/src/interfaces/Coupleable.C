@@ -1495,6 +1495,13 @@ Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp) co
   return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
+std::vector<const VariableValue *>
+Coupleable::coupledAllDofValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledDofValues(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
 const VariableValue &
 Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp) const
 {
@@ -1508,6 +1515,13 @@ Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp)
   return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
 }
 
+std::vector<const VariableValue *>
+Coupleable::coupledAllDofValuesOld(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledDofValuesOld(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
 const VariableValue &
 Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int comp) const
 {
@@ -1519,6 +1533,28 @@ Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int com
   if (!_coupleable_neighbor)
     return var->dofValuesOlder();
   return var->dofValuesOlderNeighbor();
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledAllDofValuesOlder(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) {
+    return &coupledDofValuesOlder(var_name, comp);
+  };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+const ArrayVariableValue &
+Coupleable::coupledArrayDofValues(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return *getDefaultArrayValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
+  return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
 void
