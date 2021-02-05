@@ -17,7 +17,7 @@
     time_end_cut = 0.0
   [../]
   [./manager]
-    type = XFEMElemPairMaterialManager
+    type = XFEMElementPairMaterialManager
     material_names = 'material1'
   [../]
 []

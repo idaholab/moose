@@ -13,7 +13,7 @@ template <>
 InputParameters validParams<ElementPairQPProvider>();
 
 /**
- * Provide a list of extra QPs to be evaluated using the XFEMElemPairMaterialManager
+ * Provide a list of extra QPs to be evaluated using the XFEMElementPairMaterialManager
  * The key of the map is the min(elem1->unique_id(),elem2->unique_id())
  */
 class ElementPairQPProvider

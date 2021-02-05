@@ -7,7 +7,7 @@
 
 #include "XFEMMaterialManagerConstraint.h"
 
-#include "XFEMElemPairMaterialManager.h"
+#include "XFEMElementPairMaterialManager.h"
 #include "MooseMesh.h"
 
 template <>
@@ -15,12 +15,13 @@ InputParameters
 validParams<XFEMMaterialManagerConstraint>()
 {
   InputParameters params = validParams<ElemElemConstraint>();
-  params.addRequiredParam<UserObjectName>("manager", "XFEMElemPairMaterialManager object");
+  params.addRequiredParam<UserObjectName>("manager", "XFEMElementPairMaterialManager object");
   return params;
 }
 
 XFEMMaterialManagerConstraint::XFEMMaterialManagerConstraint(const InputParameters & parameters)
-  : ElemElemConstraint(parameters), _manager(getUserObject<XFEMElemPairMaterialManager>("manager"))
+  : ElemElemConstraint(parameters),
+    _manager(getUserObject<XFEMElementPairMaterialManager>("manager"))
 {
 }
 

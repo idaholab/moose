@@ -12,8 +12,7 @@
 #include "ElementPairInfo.h"
 #include "FEProblem.h"
 
-// // libMesh includes
-// #include "libMesh/quadrature.h"
+registerMooseObject("XFEMApp", XFEMCohesiveConstraint);
 
 template <>
 InputParameters
@@ -54,8 +53,6 @@ XFEMCohesiveConstraint::initialSetup()
 {
   _max_normal_separation_old = getMaterialPropertyOld<Real>(_base_name + "max_normal_separation");
 }
-
-XFEMCohesiveConstraint::~XFEMCohesiveConstraint() {}
 
 void
 XFEMCohesiveConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)

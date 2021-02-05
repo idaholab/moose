@@ -21,7 +21,7 @@
     type = XFEMElementPairQPProvider
   [../]
   [./manager]
-    type = XFEMElemPairMaterialManager
+    type = XFEMElementPairMaterialManager
     material_names = 'material1'
     element_pair_qps = pair_qps
   [../]
