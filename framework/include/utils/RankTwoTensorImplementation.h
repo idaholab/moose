@@ -972,7 +972,12 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
   RankTwoMatrix self;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      self(i, j) = (*this)(i, j);
+    {
+      auto & v = self(i, j);
+      v = (*this)(i, j);
+      if (i != j && MooseUtils::absoluteFuzzyEqual(v, 0.0))
+        v.value() = 0.0;
+    }
 
   Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es(self);
 
