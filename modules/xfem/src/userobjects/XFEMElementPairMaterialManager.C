@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "XFEMElemPairMaterialManager.h"
+#include "XFEMElementPairMaterialManager.h"
 #include "XFEM.h"
 #include "MooseMesh.h"
 #include "Material.h"
@@ -13,10 +13,10 @@
 
 #include "libmesh/mesh_base.h"
 
-registerMooseObject("XFEMApp", XFEMElemPairMaterialManager);
+registerMooseObject("XFEMApp", XFEMElementPairMaterialManager);
 
 InputParameters
-XFEMElemPairMaterialManager::validParams()
+XFEMElementPairMaterialManager::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Manage the execution of stateful materials on extra QPs");
@@ -28,7 +28,7 @@ XFEMElemPairMaterialManager::validParams()
   return params;
 }
 
-XFEMElemPairMaterialManager::XFEMElemPairMaterialManager(const InputParameters & parameters)
+XFEMElementPairMaterialManager::XFEMElementPairMaterialManager(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_fe_problem.mesh().getMesh()),
     _extra_qp_map(getUserObject<ElementPairQPProvider>("element_pair_qps").getExtraQPMap()),
@@ -39,7 +39,7 @@ XFEMElemPairMaterialManager::XFEMElemPairMaterialManager(const InputParameters &
 }
 
 void
-XFEMElemPairMaterialManager::initialSetup()
+XFEMElementPairMaterialManager::initialSetup()
 {
   // get MaterialData entries for all listed material properties
   for (auto name : getParam<std::vector<std::string>>("material_names"))
@@ -73,7 +73,7 @@ XFEMElemPairMaterialManager::initialSetup()
 }
 
 void
-XFEMElemPairMaterialManager::timestepSetup()
+XFEMElementPairMaterialManager::timestepSetup()
 {
   // roll the history forward
   if (_fe_problem.converged())
@@ -83,7 +83,7 @@ XFEMElemPairMaterialManager::timestepSetup()
   }
 }
 
-XFEMElemPairMaterialManager::~XFEMElemPairMaterialManager()
+XFEMElementPairMaterialManager::~XFEMElementPairMaterialManager()
 {
   // destroy extra QP stateful property storage
   for (auto & item : *_map)
@@ -95,7 +95,7 @@ XFEMElemPairMaterialManager::~XFEMElemPairMaterialManager()
 }
 
 void
-XFEMElemPairMaterialManager::rewind()
+XFEMElementPairMaterialManager::rewind()
 {
   // got back a time step (note: use of older is unreliable)
   _map.swap(_map_older);
@@ -103,7 +103,7 @@ XFEMElemPairMaterialManager::rewind()
 }
 
 void
-XFEMElemPairMaterialManager::initialize()
+XFEMElementPairMaterialManager::initialize()
 {
   for (std::map<unique_id_type, unique_id_type>::iterator it = (*_elem_pair_unique_id_map).begin();
        it != (*_elem_pair_unique_id_map).end();
@@ -133,7 +133,7 @@ XFEMElemPairMaterialManager::initialize()
 }
 
 void
-XFEMElemPairMaterialManager::execute()
+XFEMElementPairMaterialManager::execute()
 {
   // fetch all variable dependencies
   std::set<MooseVariableFieldBase *> var_dependencies;
@@ -224,12 +224,12 @@ XFEMElemPairMaterialManager::execute()
 }
 
 void
-XFEMElemPairMaterialManager::finalize()
+XFEMElementPairMaterialManager::finalize()
 {
 }
 
 void
-XFEMElemPairMaterialManager::swapInProperties(unique_id_type elem_id)
+XFEMElementPairMaterialManager::swapInProperties(unique_id_type elem_id)
 {
   auto & item = (*_map)[elem_id];
   auto & item_old = (*_map_old)[elem_id];
@@ -245,7 +245,7 @@ XFEMElemPairMaterialManager::swapInProperties(unique_id_type elem_id)
 }
 
 void
-XFEMElemPairMaterialManager::swapOutProperties(unique_id_type elem_id)
+XFEMElementPairMaterialManager::swapOutProperties(unique_id_type elem_id)
 {
   auto & item = (*_map)[elem_id];
   auto & item_old = (*_map_old)[elem_id];
@@ -261,19 +261,19 @@ XFEMElemPairMaterialManager::swapOutProperties(unique_id_type elem_id)
 }
 
 void
-XFEMElemPairMaterialManager::swapInProperties(unique_id_type elem_id) const
+XFEMElementPairMaterialManager::swapInProperties(unique_id_type elem_id) const
 {
-  const_cast<XFEMElemPairMaterialManager *>(this)->swapInProperties(elem_id);
+  const_cast<XFEMElementPairMaterialManager *>(this)->swapInProperties(elem_id);
 }
 
 void
-XFEMElemPairMaterialManager::swapOutProperties(unique_id_type elem_id) const
+XFEMElementPairMaterialManager::swapOutProperties(unique_id_type elem_id) const
 {
-  const_cast<XFEMElemPairMaterialManager *>(this)->swapOutProperties(elem_id);
+  const_cast<XFEMElementPairMaterialManager *>(this)->swapOutProperties(elem_id);
 }
 
 unsigned int
-XFEMElemPairMaterialManager::materialPropertyIndex(const std::string & name) const
+XFEMElementPairMaterialManager::materialPropertyIndex(const std::string & name) const
 {
   auto it = _managed_properties.find(name);
   if (it == _managed_properties.end())

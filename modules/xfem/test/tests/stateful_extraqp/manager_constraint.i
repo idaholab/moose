@@ -22,7 +22,7 @@
 
 [UserObjects]
   [./manager]
-    type = XFEMElemPairMaterialManager
+    type = XFEMElementPairMaterialManager
     material_names = 'material1'
   [../]
 []

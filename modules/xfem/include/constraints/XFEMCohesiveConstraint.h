@@ -22,7 +22,6 @@ class XFEMCohesiveConstraint : public XFEMMaterialManagerConstraint
 {
 public:
   XFEMCohesiveConstraint(const InputParameters & parameters);
-  virtual ~XFEMCohesiveConstraint();
 
 protected:
   /**

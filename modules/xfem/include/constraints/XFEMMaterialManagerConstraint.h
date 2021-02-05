@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ElemElemConstraint.h"
-#include "XFEMElemPairMaterialManager.h"
+#include "XFEMElementPairMaterialManager.h"
 
 /**
  * ElemElemConstraint that utilizes the XFEMMaterialManager
@@ -29,7 +29,7 @@ public:
   const MaterialProperty<T> * getMaterialPropertyOlder(const std::string & name) const;
 
 protected:
-  const XFEMElemPairMaterialManager & _manager;
+  const XFEMElementPairMaterialManager & _manager;
 };
 
 template <>

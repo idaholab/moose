@@ -17,13 +17,13 @@ class XFEM;
  * experimental!
  * The extra QP points are obtained from ElementPairLocator
  */
-class XFEMElemPairMaterialManager : public GeneralUserObject, public ElementPairQPProvider
+class XFEMElementPairMaterialManager : public GeneralUserObject, public ElementPairQPProvider
 {
 public:
   static InputParameters validParams();
 
-  XFEMElemPairMaterialManager(const InputParameters & parameters);
-  ~XFEMElemPairMaterialManager();
+  XFEMElementPairMaterialManager(const InputParameters & parameters);
+  ~XFEMElementPairMaterialManager();
 
   virtual void timestepSetup() override;
   virtual void initialSetup() override;
@@ -101,7 +101,7 @@ protected:
 
 template <typename T>
 const MaterialProperty<T> &
-XFEMElemPairMaterialManager::getMaterialProperty(const std::string & name) const
+XFEMElementPairMaterialManager::getMaterialProperty(const std::string & name) const
 {
   auto prop = dynamic_cast<MaterialProperty<T> *>(_props[materialPropertyIndex(name)]);
   if (prop == nullptr)
@@ -112,7 +112,7 @@ XFEMElemPairMaterialManager::getMaterialProperty(const std::string & name) const
 
 template <typename T>
 const MaterialProperty<T> &
-XFEMElemPairMaterialManager::getMaterialPropertyOld(const std::string & name) const
+XFEMElementPairMaterialManager::getMaterialPropertyOld(const std::string & name) const
 {
   auto prop = dynamic_cast<MaterialProperty<T> *>(_props_old[materialPropertyIndex(name)]);
   if (prop == nullptr)
@@ -123,7 +123,7 @@ XFEMElemPairMaterialManager::getMaterialPropertyOld(const std::string & name) co
 
 template <typename T>
 const MaterialProperty<T> &
-XFEMElemPairMaterialManager::getMaterialPropertyOlder(const std::string & name) const
+XFEMElementPairMaterialManager::getMaterialPropertyOlder(const std::string & name) const
 {
   auto prop = dynamic_cast<MaterialProperty<T> *>(_props_older[materialPropertyIndex(name)]);
   if (prop == nullptr)

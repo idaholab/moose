@@ -14,8 +14,8 @@ InputParameters
 XFEMElementPairQPProvider::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Set up a list of discrete point to evaluate material properties on "
-                             "using the XFEMMaterialManager");
+  params.addClassDescription("Set up a list of discrete points to evaluate material properties on "
+                             "using the XFEMElementPairMaterialManager");
   return params;
 }
 
@@ -37,7 +37,7 @@ XFEMElementPairQPProvider::timestepSetup()
   // We have to clear map because old element in the map might be replaced with new one when XFEM
   // modifies mesh. Not efficient but easy way to do is the refresh map at every time step. The
   // ordering of quadrature points for each element needs to be remained, otherwise the
-  // XFEMElemPairMaterialManager will fetch the wrong item.
+  // XFEMElementPairMaterialManager will fetch the wrong item.
 
   _extra_qp_map.clear();
   _elem_pair_map.clear();
