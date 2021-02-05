@@ -1,5 +1,11 @@
 % Package definitions
 %
+% 02/05/2021 v1.29a Logan Harbour (logan.harbour@inl.gov)
+%    - The package xwatermark has a dependency, catoptions, that is no longer supported
+%      with the packages available on CTAN as of this date. For now... don't allow the DRAFT
+%      option until someone fixes it. This is hopefully just temprorary, but it's worth
+%      adding a note about.
+
     % The version and date of this file
     \newcommand\INLreportVersionOnly{ v1.28 }		% leave the spaces before and after version
     \newcommand\INLreportVersionDate{2007/12/13}	% Date has to bis this format!
@@ -14,7 +20,8 @@
     \RequirePackage{ifthen}
     \RequirePackage{color}
     \RequirePackage{graphicx}
-    \RequirePackage[printwatermark]{xwatermark}
+    % Not compatible with current latex, see notes for v1.29a
+    % \RequirePackage[printwatermark]{xwatermark}
 
     % Variables
     \newboolean{relaxedINL}
@@ -157,6 +164,7 @@
 	}
 
   \ifthenelse{\boolean{INLdraft}}{%
+    \PackageError{xwatermark}{Draft option not currently supported due to new latex incompatibility}{See notes for v1.29a in INLReport.cls for more info}
     \g@addto@macro{\@title}{\space (DRAFT)}%
     \newwatermark[allpages,color=gray!33,angle=53,scale=4,xpos=-20,ypos=0]{DRAFT}%
   }{}
