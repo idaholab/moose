@@ -15,6 +15,7 @@ LOG = logging.getLogger(__name__)
 
 @mooseutils.addProperty('base', ptype=str)                  # set by Translator::init
 @mooseutils.addProperty('source', ptype=str, required=True) # supplied source file/directory
+@mooseutils.addProperty('external', ptype=bool, default=False) # set by get_content.py used by appsyntax.py
 class Page(mooseutils.AutoPropertyMixin):
     """
     Base class for input content that defines the methods called by the translator.
