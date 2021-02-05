@@ -22,4 +22,11 @@
 
     requirement = "The system shall include a utility for displaying the application syntax tree."
   []
+  [build]
+    type = PythonUnitTest
+    input = test_build.py
+    issues = '#16807'
+
+    requirement = "The system shall include a utility for converting markdown documentation to other formats."
+  []
 []

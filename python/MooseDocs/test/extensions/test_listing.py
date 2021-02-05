@@ -12,7 +12,7 @@ import unittest
 import logging
 from MooseDocs import MOOSE_DIR, common, base
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, floats, include, listing
+from MooseDocs.extensions import core, command, floats, include, listing, modal
 logging.basicConfig()
 
 def extractContent(filename, opts=dict()):
@@ -23,7 +23,7 @@ def extractContent(filename, opts=dict()):
     return content
 
 class TestListingNumbers(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, include, listing]
+    EXTENSIONS = [core, command, floats, include, listing, modal]
 
     # also testing a listing from an '!include' file and referencing its id number chronologically
     SHORTCUTS = ['one', 'two', 'three']
@@ -108,7 +108,7 @@ class TestListingNumbers(MooseDocsTestCase):
             self.assertLatexString(res(j,0), content=s)
 
 class TestListingCaptions(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing]
+    EXTENSIONS = [core, command, floats, listing, modal]
     CODE = ['no caption',
             'caption with inline content',
             'caption with prefix and number']
@@ -265,7 +265,7 @@ class TestListingCaptions(MooseDocsTestCase):
         self.assertLatexString(res(4,0), content='file1')
 
 class TestListingWithSpace(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing]
+    EXTENSIONS = [core, command, floats, listing, modal]
 
     # tests !listing! command for rendering code with empty lines and also setting max-height
     CODE = ('#include <stdio.h>\n\n'
@@ -311,7 +311,7 @@ class TestListingWithSpace(MooseDocsTestCase):
         self.assertLatexString(res(0,0), content=self.CODE.strip('\n'))
 
 class TestListingLanguage(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing]
+    EXTENSIONS = [core, command, floats, listing, modal]
     CODE = 'void function();'
     TEXT = '!listing language=c++\n' + CODE
 
@@ -344,7 +344,7 @@ class TestListingLanguage(MooseDocsTestCase):
         self.assertLatexString(res(0,0), content=self.CODE.strip('\n'))
 
 class TestFileListing(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing]
+    EXTENSIONS = [core, command, floats, listing, modal]
     FILE = 'framework/src/kernels/Diffusion.C'
 
     # Test 0: Display a C++ source file (excluding MOOSE header) and hide modal link
@@ -366,17 +366,10 @@ class TestFileListing(MooseDocsTestCase):
                          string='Listing 1')
 
         ast = self.tokenize(self.TEXT[1])
-        self.assertSize(ast, 3)
+        self.assertSize(ast, 2)
         self.assertToken(ast(0), 'Code', content=self.CODE[1], style='max-height:92px;',
                          language='cpp')
-        self.assertToken(ast(1), 'ListingLink', size=1, class_='modal-trigger',
-                         url='#{}'.format(ast(2)['bookmark']), string='({})'.format(self.FILE))
-        self.assertEqual(ast(1)['data-tooltip'], self.FILE)
-        self.assertToken(ast(2), 'ModalLink', size=2, url=self.FILE)
-        self.assertToken(ast(2,0), 'ModalLinkTitle', size=1, string=MOOSE_DIR + '/' + self.FILE)
-        self.assertToken(ast(2,1), 'ModalLinkContent', size=1)
-        self.assertToken(ast(2,1,0), 'Code', language='cpp',
-                         content=extractContent(self.FILE, opts={'strip-header': False}))
+        self.assertToken(ast(1), 'ModalSourceLink', size=0)
 
     def testHTML(self):
         _, res = self.execute(self.TEXT[0])
@@ -391,8 +384,7 @@ class TestFileListing(MooseDocsTestCase):
         ast, res = self.execute(self.TEXT[1])
         self.assertHTMLTag(res, 'body', size=2)
         self._assertHTML(res(0), 'max-height:92px;', self.CODE[1])
-        self.assertHTMLTag(res(1), 'a', size=1, class_='modal-trigger',
-                           href='#{}'.format(ast(2)['bookmark']))
+        self.assertHTMLTag(res(1), 'span', size=1, class_='moose-source-filename')
         self.assertHTMLString(res(1,0), content='({})'.format(self.FILE))
 
     def testMaterialize(self):
@@ -409,17 +401,9 @@ class TestFileListing(MooseDocsTestCase):
         ast, res = self.execute(self.TEXT[1], renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=3, class_='moose-content')
         self._assertHTML(res(0), 'max-height:92px;', self.CODE[1])
-        self.assertHTMLTag(res(1), 'a', size=1, class_='modal-trigger',
-                           href='#{}'.format(ast(2)['bookmark']))
+        self.assertHTMLTag(res(1), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
         self.assertHTMLString(res(1,0), content='({})'.format(self.FILE))
-        self.assertHTMLTag(res(2), 'div', size=2, class_='modal moose-modal', id=ast(2)['bookmark'])
-        self.assertHTMLTag(res(2,0), 'div', size=2, class_='modal-content')
-        self.assertHTMLTag(res(2,0,0), 'h4', size=1)
-        self.assertHTMLString(res(2,0,0,0), content=MOOSE_DIR + '/' + self.FILE)
-        self._assertHTML(res(2,0,1), '', extractContent(self.FILE, opts={'strip-header': False}))
-        self.assertHTMLTag(res(2,1), 'div', size=1, class_='modal-footer')
-        self.assertHTMLTag(res(2,1,0), 'a', size=1, class_='modal-close btn-flat')
-        self.assertHTMLString(res(2,1,0,0), content='Close')
+        self.assertHTMLTag(res(2), 'div', class_='moose-modal modal')
 
     def _assertHTML(self, res, style, content):
         self.assertHTMLTag(res, 'pre', size=1, class_='moose-pre', style=style)
@@ -444,13 +428,15 @@ class TestFileListing(MooseDocsTestCase):
         self.assertLatexString(res(1,0), content=self.CODE[0].strip('\n'))
 
         ast, res = self.execute(self.TEXT[1], renderer=base.LatexRenderer())
-        self.assertSize(res, 1)
+        self.assertSize(res, 2)
         self.assertLatexEnvironment(res(0), 'verbatim', size=1, escape=False, after_begin='\n',
                                     before_end='\n', info=ast.info)
         self.assertLatexString(res(0,0), content=self.CODE[1].strip('\n'))
+        self.assertLatexString(res(1), content='(framework/src/kernels/Diffusion.C)')
+
 
 class TestInputListing(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, listing]
+    EXTENSIONS = [core, command, floats, listing, modal]
     FILE = ['test/tests/kernels/simple_diffusion/simple_diffusion.i',
             'test/tests/kernels/simple_diffusion/tests']
     FILE = [FILE[0], FILE[1], FILE[0], FILE[1], FILE[0]]
@@ -486,20 +472,13 @@ class TestInputListing(MooseDocsTestCase):
 
     def testAST(self):
         ast = self.tokenize(self.TEXT[0])
-        self.assertSize(ast, 3)
+        self.assertSize(ast, 2)
         self.assertToken(ast(0), 'Listing', size=3)
         self.assertToken(ast(0,0), 'FloatCaption', key='prfx', prefix='xxxxx', number=1)
         self.assertToken(ast(0,1), 'ListingCode', content=self.CODE[0], style='max-height:350px;',
                          language='text')
-        self.assertToken(ast(0,2), 'ListingLink', size=1, class_='modal-trigger',
-                         url='#{}'.format(ast(1)['bookmark']), string='({})'.format(self.FILE[0]))
-        self.assertEqual(ast(0,2)['data-tooltip'], self.FILE[0])
-        self.assertToken(ast(1), 'ModalLink', size=2, url=self.FILE[0])
-        self.assertToken(ast(1,0), 'ModalLinkTitle', size=1, string=MOOSE_DIR + '/' + self.FILE[0])
-        self.assertToken(ast(1,1), 'ModalLinkContent', size=1)
-        self.assertToken(ast(1,1,0), 'Code', language='text',
-                         content=extractContent(self.FILE[0], opts={'strip-header': False}))
-        self.assertToken(ast(2), 'Shortcut', size=1, key='prfx', link='#prfx', string='Xxxxx 1')
+        self.assertToken(ast(0,2), 'ModalSourceLink', size=0)
+        self.assertToken(ast(1), 'Shortcut', size=1, key='prfx', link='#prfx', string='Xxxxx 1')
 
         ast = self.tokenize(self.TEXT[1])
         self.assertSize(ast, 1)
@@ -507,17 +486,10 @@ class TestInputListing(MooseDocsTestCase):
 
         for i in range(2, 5):
             ast = self.tokenize(self.TEXT[i])
-            self.assertSize(ast, 3)
+            self.assertSize(ast, 2)
             self.assertToken(ast(0), 'Code', content=self.CODE[i], style='max-height:350px;',
                              language='text')
-            self.assertToken(ast(1), 'ListingLink', size=1, class_='modal-trigger',
-                             url='#{}'.format(ast(2)['bookmark']), string='({})'.format(self.FILE[i]))
-            self.assertEqual(ast(1)['data-tooltip'], self.FILE[i])
-            self.assertToken(ast(2), 'ModalLink', size=2, url=self.FILE[i])
-            self.assertToken(ast(2,0), 'ModalLinkTitle', size=1, string=MOOSE_DIR + '/' + self.FILE[i])
-            self.assertToken(ast(2,1), 'ModalLinkContent', size=1)
-            self.assertToken(ast(2,1,0), 'Code', language='text',
-                             content=extractContent(self.FILE[i], opts={'strip-header': False}))
+            self.assertToken(ast(1), 'ModalSourceLink', size=0)
 
     def testHTML(self):
         ast, res = self.execute(self.TEXT[0])
@@ -528,8 +500,7 @@ class TestInputListing(MooseDocsTestCase):
         self.assertHTMLString(res(0,0,0,0), content='xxxxx 1: ')
         self.assertHTMLTag(res(0,0,1), 'span', class_='moose-caption-text')
         self._assertHTML(res(0,1), 'max-height:350px;', self.CODE[0])
-        self.assertHTMLTag(res(0,2), 'a', size=1, class_='modal-trigger',
-                           href='#{}'.format(ast(1)['bookmark']))
+        self.assertHTMLTag(res(0,2), 'span', size=1, class_='moose-source-filename')
         self.assertHTMLString(res(0,2,0), content='({})'.format(self.FILE[0]))
 
         _, res = self.execute(self.TEXT[1])
@@ -540,8 +511,7 @@ class TestInputListing(MooseDocsTestCase):
             ast, res = self.execute(self.TEXT[i])
             self.assertHTMLTag(res, 'body', size=2)
             self._assertHTML(res(0), 'max-height:350px;', self.CODE[i])
-            self.assertHTMLTag(res(1), 'a', size=1, class_='modal-trigger',
-                               href='#{}'.format(ast(2)['bookmark']))
+            self.assertHTMLTag(res(1), 'span', size=1, class_='moose-source-filename')
             self.assertHTMLString(res(1,0), content='({})'.format(self.FILE[i]))
 
     def testMaterialize(self):
@@ -554,17 +524,8 @@ class TestInputListing(MooseDocsTestCase):
         self.assertHTMLString(res(0,0,0,0,0), content='xxxxx 1: ')
         self.assertHTMLTag(res(0,0,0,1), 'span', class_='moose-caption-text')
         self._assertHTML(res(0,0,1), 'max-height:350px;', self.CODE[0])
-        self.assertHTMLTag(res(0,0,2), 'a', size=1, class_='modal-trigger',
-                           href='#{}'.format(ast(1)['bookmark']))
+        self.assertHTMLTag(res(0,0,2), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
         self.assertHTMLString(res(0,0,2,0), content='({})'.format(self.FILE[0]))
-        self.assertHTMLTag(res(1), 'div', size=2, class_='modal moose-modal', id=ast(1)['bookmark'])
-        self.assertHTMLTag(res(1,0), 'div', size=2, class_='modal-content')
-        self.assertHTMLTag(res(1,0,0), 'h4', size=1)
-        self.assertHTMLString(res(1,0,0,0), content=MOOSE_DIR + '/' + self.FILE[0])
-        self._assertHTML(res(1,0,1), '', extractContent(self.FILE[0], opts={'strip-header': False}))
-        self.assertHTMLTag(res(1,1), 'div', size=1, class_='modal-footer')
-        self.assertHTMLTag(res(1,1,0), 'a', size=1, class_='modal-close btn-flat')
-        self.assertHTMLString(res(1,1,0,0), content='Close')
 
         _, res = self.execute(self.TEXT[1], renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=1, class_='moose-content')
@@ -574,17 +535,8 @@ class TestInputListing(MooseDocsTestCase):
             ast, res = self.execute(self.TEXT[i], renderer=base.MaterializeRenderer())
             self.assertHTMLTag(res, 'div', size=3, class_='moose-content')
             self._assertHTML(res(0), 'max-height:350px;', self.CODE[i])
-            self.assertHTMLTag(res(1), 'a', size=1, class_='modal-trigger',
-                               href='#{}'.format(ast(2)['bookmark']))
+            self.assertHTMLTag(res(1), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
             self.assertHTMLString(res(1,0), content='({})'.format(self.FILE[i]))
-            self.assertHTMLTag(res(2), 'div', size=2, class_='modal moose-modal', id=ast(2)['bookmark'])
-            self.assertHTMLTag(res(2,0), 'div', size=2, class_='modal-content')
-            self.assertHTMLTag(res(2,0,0), 'h4', size=1)
-            self.assertHTMLString(res(2,0,0,0), content=MOOSE_DIR + '/' + self.FILE[i])
-            self._assertHTML(res(2,0,1), '', extractContent(self.FILE[i], opts={'strip-header': False}))
-            self.assertHTMLTag(res(2,1), 'div', size=1, class_='modal-footer')
-            self.assertHTMLTag(res(2,1,0), 'a', size=1, class_='modal-close btn-flat')
-            self.assertHTMLString(res(2,1,0,0), content='Close')
 
     def _assertHTML(self, res, style, content):
         self.assertHTMLTag(res, 'pre', size=1, class_='moose-pre', style=style)
@@ -608,7 +560,6 @@ class TestInputListing(MooseDocsTestCase):
 
         for i in range(1, 5):
             ast, res = self.execute(self.TEXT[i], renderer=base.LatexRenderer())
-            self.assertSize(res, 1)
             self.assertLatexEnvironment(res(0), 'verbatim', size=1, escape=False, after_begin='\n',
                                         before_end='\n', info=ast.info)
             self.assertLatexString(res(0,0), content=self.CODE[i].strip('\n'))

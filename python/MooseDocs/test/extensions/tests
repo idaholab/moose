@@ -82,12 +82,17 @@
     [ifelse]
       type = PythonUnitTest
       input = test_ifelse.py
-      detail = "conditional operations, and"
+      detail = "conditional operations, "
     []
     [pysyntax]
       type = PythonUnitTest
       input = test_pysyntax.py
-      detail = "automatically retrieving python syntax."
+      detail = "automatically retrieving python syntax, and"
+    []
+    [modal]
+      type = PythonUnitTest
+      input = test_modal.py
+      detail = "create modal website content."
     []
   []
 []

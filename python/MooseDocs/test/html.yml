@@ -44,6 +44,7 @@ Extensions:
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pysyntax: default
+    MooseDocs.extensions.modal: default
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.civet:

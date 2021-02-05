@@ -11,6 +11,7 @@ import copy
 import re
 from .regex import regex
 from .exceptions import MooseDocsException
+from .parse_settings import get_settings_as_dict
 
 
 def extractContentSettings():
