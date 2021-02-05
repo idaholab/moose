@@ -25,6 +25,5 @@ protected:
 
   /// porosity
   const VariableValue & _eps;
-  /// porosity gradient
-  const VariableGradient & _grad_eps;
+  const VariableValue & _eps_neighbor;
 };
