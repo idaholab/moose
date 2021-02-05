@@ -858,6 +858,7 @@ dataLoad(std::istream & stream, Backup *& backup, void * context)
 
 void dataLoad(std::istream & stream, Point & p, void * context);
 
+#ifndef TIMPI_HAVE_STRING_PACKING
 /**
  * The following methods are specializations for using the libMesh::Parallel::packed_range_*
  * routines
@@ -927,3 +928,5 @@ public:
 } // namespace Parallel
 
 } // namespace libMesh
+
+#endif
