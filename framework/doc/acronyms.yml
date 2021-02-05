@@ -7,7 +7,7 @@ DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
 DOF: degree-of-freedom
 DOFs: degrees-of-freedom
-FE: Finite Element
+FE: finite element
 FEM: Finite Element Method
 GMRES: Gernalized Minimum Residual Method
 GUI: graphical user interface
@@ -36,3 +36,5 @@ SRS: Software Requirement Specification
 STP: Software Test Plan
 VVR: Verification and Validation Report
 FAR: Failure Analysis Report
+QP: quadrature point
+QPs: quadarature points
