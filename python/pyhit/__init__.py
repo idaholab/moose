@@ -1,3 +1,6 @@
+import os
+import subprocess
+
 try:
     from . import hit
 except:
