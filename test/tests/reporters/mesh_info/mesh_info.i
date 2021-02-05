@@ -7,6 +7,13 @@
     nx = 10
     ny = 10
   []
+
+  # For consistent partitioning across platforms
+  [Partitioner]
+    type = GridPartitioner
+    nx = 2
+    ny = 1
+  []
 []
 
 [Adaptivity]

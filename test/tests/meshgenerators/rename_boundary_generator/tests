@@ -1,66 +1,99 @@
 [Tests]
   design = 'meshgenerators/RenameBoundaryGenerator.md'
-  issues = '#11640 #14128'
+  issues = '#11640 #14128 #16885'
 
   [rename]
-    requirement = 'The shall be able to rename or renumber mesh boundaries prior to running the simulation:'
+    requirement = 'The system shall be able to rename or renumber mesh boundaries by:'
 
-    [ids_only]
-      type = 'Exodiff'
+    [all_ids]
+      type = JSONDiff
       input = 'rename_boundary.i'
-      cli_args = 'Mesh/rename/old_boundary_id="0 1" Mesh/rename/new_boundary_id="10 0" --mesh-only'
-      exodiff = 'rename_boundary_in.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
+      cli_args = 'Mesh/rename/old_boundary="0 1 3 2"
+                  Mesh/rename/new_boundary="1 2 4 3"
+                  Outputs/file_base=all_ids_out'
+      jsondiff = 'all_ids_out.json'
 
-      detail = 'by identifying both old and new boundaries by ID,'
+      detail = 'identifying both old and new boundaries by ID,'
     []
 
     [old_ids_new_names]
-      type = 'Exodiff'
+      type = JSONDiff
       input = 'rename_boundary.i'
-      cli_args = 'Mesh/rename/old_boundary_id="0 1" Mesh/rename/new_boundary_name="new_bottom new_right" --mesh-only'
-      exodiff = 'rename_boundary_in.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
-      prereq = 'rename/ids_only'
+      cli_args = 'Mesh/rename/old_boundary="0 1"
+                  Mesh/rename/new_boundary="new_bottom new_right"
+                  Outputs/file_base=old_ids_new_names_out'
+      jsondiff = 'old_ids_new_names_out.json'
 
-      detail = 'by identifying old boundaries by ID and new boundaries by name,'
+      detail = 'identifying old boundaries by ID and new boundaries by name,'
     []
 
     [old_names_new_ids]
-      type = 'Exodiff'
+      type = JSONDiff
       input = 'rename_boundary.i'
-      cli_args = 'Mesh/rename/old_boundary_name="bottom right" Mesh/rename/new_boundary_id="10 0" --mesh-only'
-      exodiff = 'rename_boundary_in.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
-      prereq = 'rename/old_ids_new_names'
+      cli_args = 'Mesh/rename/old_boundary="bottom left"
+                  Mesh/rename/new_boundary="10 0"
+                  Outputs/file_base=old_names_new_ids_out'
+      jsondiff = 'old_names_new_ids_out.json'
 
-      detail = 'by identifying old boundaries by name and new boundaries by ID, and'
+      detail = 'identifying old boundaries by name and new boundaries by ID, and'
     []
 
-    [names_only]
-      type = 'Exodiff'
+    [all_names]
+      type = JSONDiff
       input = 'rename_boundary.i'
-      cli_args = 'Mesh/rename/old_boundary_name="bottom right" Mesh/rename/new_boundary_name="new_bottom new_right" --mesh-only'
-      exodiff = 'rename_boundary_in.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
-      prereq = 'rename/old_names_new_ids'
+      cli_args = 'Mesh/rename/old_boundary="bottom right left top"
+                  Mesh/rename/new_boundary="new_bottom new_right new_left new_top"
+                  Outputs/file_base=all_names_out'
+      jsondiff = 'all_names_out.json'
 
-      detail = 'by identifying both old and new boundaries by name.'
+      detail = 'identifying both old and new boundaries by name,'
+    []
+
+    [mixed]
+      type = JSONDiff
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary="bottom 2 right 3"
+                  Mesh/rename/new_boundary="10 new_left new_right 4"
+                  Outputs/file_base=mixed_out'
+      jsondiff = 'mixed_out.json'
+
+      detail = 'and by identifying boundaries by both id and name.'
     []
   []
 
-  [error_check]
-    type = 'RunException'
+  [merge]
+    type = JSONDiff
     input = 'rename_boundary.i'
-    cli_args = 'Mesh/rename/old_boundary_id="42 0 1" Mesh/rename/new_boundary_id="0 1 2" --mesh-only'
-    mesh_mode = 'REPLICATED'
-    recover = false
-    expect_err = 'The following boundary IDs were requested to be renamed, but do not exist: \d+'
+    cli_args = 'Mesh/rename/old_boundary="bottom 1 2 left"
+                Mesh/rename/new_boundary="top_and_bottom top_and_bottom 2 2"
+                Outputs/file_base=merge_out'
+    jsondiff = 'merge_out.json'
 
-    requirement = 'The system shall throw and error when renaming boundaries when an existing boundary cannot be found on the mesh.'
+    requirement = 'The system shall be able to merge boundaries in a mesh.'
+  []
+
+  [errors]
+    requirement = 'The system shall throw a reasonable error:'
+
+    [missing]
+      type = RunException
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary="0 42 bad_boundary"
+                  Mesh/rename/new_boundary="1 2 3"
+                  --mesh-only'
+      expect_err = 'The following boundaries were requested to be renamed, but do not exist: 42 bad_boundary'
+
+      detail = 'when old boundaries are provided that do not exist within the mesh'
+    []
+    [inconsistent_size]
+      type = RunException
+      input = 'rename_boundary.i'
+      cli_args = 'Mesh/rename/old_boundary="0"
+                  Mesh/rename/new_boundary="1 2"
+                  --mesh-only'
+      expect_err = "Must be the same length as 'old_boundary'"
+
+      detail = 'and when the provided old and new boundaries are not the same length.'
+    []
   []
 []
