@@ -25,7 +25,7 @@ PINSFVMomentumAdvection::validParams()
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
   _eps(coupledValue("porosity")),
-  _grad_eps(coupledGradient("porosity"))
+  _eps_neighbor(coupledNeighborValue("porosity"))
 {
   if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
@@ -35,13 +35,21 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
 ADReal
 PINSFVMomentumAdvection::computeQpResidual()
 {
-  ADReal residual = INSFVMomentumAdvection::computeQpResidual() / _eps[_qp];
+  /// TODO optimize to avoid interpolating velocity twice
+  ADRealVectorValue v_face;
+  this->interpolate(_velocity_interp_method, v_face, _vel_elem[_qp], _vel_neighbor[_qp]);
 
-  /// Add porosity gradient term
-  //FIXME Should be an ElementalKernel ?
-  residual += _rho * ADRealVectorValue(_vel_elem[_qp](0) * _vel_elem[_qp](0),
-      _vel_elem[_qp](1) * _vel_elem[_qp](1), _vel_elem[_qp](2) * _vel_elem[_qp](2))
-   * (-_grad_eps[_qp] / _eps[_qp] / _eps[_qp]);
+  /// Compute face porosity gradient
+  Real eps_face;
+  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                         eps_face,
+                         _eps[_qp],
+                         _eps_neighbor[_qp],
+                         v_face,
+                         *_face_info,
+                         true);
+
+  ADReal residual = INSFVMomentumAdvection::computeQpResidual() / eps_face;
 
   return residual;
 }
