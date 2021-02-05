@@ -48,5 +48,6 @@
     issues = '#16854'
     ad_indexing_type = 'global'
     abs_zero = 6e-9
+    cli_args = '-pc_type lu -sub_pc_factor_shift_type NONZERO'
   []
 []
