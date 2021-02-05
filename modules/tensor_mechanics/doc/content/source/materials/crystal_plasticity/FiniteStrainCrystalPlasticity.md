@@ -7,7 +7,7 @@
 !alert warning
 The `FiniteStrainCrystalPlasticity` model is not actively developed.
 Use of the [FiniteStrainUObasedCP](/FiniteStrainUObasedCP.md) crystal plasticity
-system or the [ComputeCrystalPlasticityStress](/ComputeCrystalPlasticityStress.md)
+system or the [ComputeMultipleCrystalPlasticityStress](/ComputeMultipleCrystalPlasticityStress.md)
 system are recommend instead.
 
 Constitutive models are used to calculate the plastic slip rate.

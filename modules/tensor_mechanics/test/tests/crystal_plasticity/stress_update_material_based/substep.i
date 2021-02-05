@@ -49,7 +49,7 @@
   [./gss]
     type = MaterialStdVectorAux
     variable = gss
-    property = slip_system_resistance
+    property = slip_resistance
     index = 0
     execute_on = timestep_end
   [../]
@@ -89,15 +89,15 @@
     fill_method = symmetric9
   [../]
   [./stress]
-    type = ComputeCrystalPlasticityStress
-    crystal_plasticity_update_model = 'trial_xtalpl'
+    type = ComputeMultipleCrystalPlasticityStress
+    crystal_plasticity_models = 'trial_xtalpl'
+    tan_mod_type = exact
+    maximum_substep_iteration = 10
   [../]
   [./trial_xtalpl]
     type = CrystalPlasticityKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
-    tan_mod_type = exact
-    maximum_substep_iteration = 10
     resistance_tol = 1.0e-2
   [../]
 []

@@ -81,14 +81,14 @@
     fill_method = symmetric9
   [../]
   [./stress]
-    type = ComputeCrystalPlasticityStress
-    crystal_plasticity_update_model = 'trial_xtalpl'
+    type = ComputeMultipleCrystalPlasticityStress
+    crystal_plasticity_models = 'trial_xtalpl'
+    tan_mod_type = exact
   [../]
   [./trial_xtalpl]
     type = CrystalPlasticityKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
-    tan_mod_type = exact
   [../]
 []
 
