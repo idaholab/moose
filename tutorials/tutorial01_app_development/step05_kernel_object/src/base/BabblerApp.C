@@ -12,6 +12,9 @@ BabblerApp::validParams()
   // Do not use legacy DirichletBC, that is, set DirichletBC default for preset = true
   params.set<bool>("use_legacy_dirichlet_bc") = false;
 
+  // Do not use legacy material output, i.e., output properties on INITIAL as well as TIMESTEP_END
+  params.set<bool>("use_legacy_material_output") = false;
+
   return params;
 }
 
