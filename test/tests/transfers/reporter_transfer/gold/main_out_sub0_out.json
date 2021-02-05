@@ -1,83 +1,105 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "from_sub_pp",
-                    "type": "double",
-                    "value": 3.1415926,
-                    "value_name": "value"
+            "reporters": {
+                "from_sub_pp": {
+                    "values": [
+                        {
+                            "name": "value",
+                            "type": "double",
+                            "value": 3.1415926
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_sub_rep",
-                    "type": "int",
-                    "value": 10,
-                    "value_name": "int"
+                "from_sub_rep": {
+                    "info": {
+                        "name": "from_sub_rep",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "int",
+                            "type": "int",
+                            "value": 10
+                        },
+                        {
+                            "name": "str",
+                            "type": "std::string",
+                            "value": "twenty"
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_sub_rep",
-                    "type": "std::string",
-                    "value": "twenty",
-                    "value_name": "str"
+                "from_sub_vpp": {
+                    "values": [
+                        {
+                            "name": "a",
+                            "type": "std::vector<double>",
+                            "value": [
+                                30.0,
+                                30.0,
+                                30.0
+                            ]
+                        },
+                        {
+                            "name": "b",
+                            "type": "std::vector<double>",
+                            "value": [
+                                40.0,
+                                40.0,
+                                40.0
+                            ]
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_sub_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        30.0,
-                        30.0,
-                        30.0
-                    ],
-                    "value_name": "a"
+                "to_sub_pp": {
+                    "values": [
+                        {
+                            "name": "value",
+                            "type": "double",
+                            "value": 2.0
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_sub_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        40.0,
-                        40.0,
-                        40.0
-                    ],
-                    "value_name": "b"
+                "to_sub_rep": {
+                    "info": {
+                        "name": "to_sub_rep",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "int",
+                            "type": "int",
+                            "value": 1
+                        },
+                        {
+                            "name": "str",
+                            "type": "std::string",
+                            "value": "five"
+                        }
+                    ]
                 },
-                {
-                    "object_name": "to_sub_pp",
-                    "type": "double",
-                    "value": 2.0,
-                    "value_name": "value"
-                },
-                {
-                    "object_name": "to_sub_rep",
-                    "type": "int",
-                    "value": 1,
-                    "value_name": "int"
-                },
-                {
-                    "object_name": "to_sub_rep",
-                    "type": "std::string",
-                    "value": "five",
-                    "value_name": "str"
-                },
-                {
-                    "object_name": "to_sub_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        3.0,
-                        4.0
-                    ],
-                    "value_name": "a"
-                },
-                {
-                    "object_name": "to_sub_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        2.0,
-                        2.0,
-                        2.0
-                    ],
-                    "value_name": "b"
+                "to_sub_vpp": {
+                    "values": [
+                        {
+                            "name": "a",
+                            "type": "std::vector<double>",
+                            "value": [
+                                3.0,
+                                4.0
+                            ]
+                        },
+                        {
+                            "name": "b",
+                            "type": "std::vector<double>",
+                            "value": [
+                                2.0,
+                                2.0,
+                                2.0
+                            ]
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 1.0,
             "time_step": 1
         }

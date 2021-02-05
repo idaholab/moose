@@ -1,123 +1,133 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "from_main_rep",
-                    "type": "int",
-                    "value": 1,
-                    "value_name": "int"
+            "reporters": {
+                "from_main_rep": {
+                    "info": {
+                        "name": "from_main_rep",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "int",
+                            "type": "int",
+                            "value": 1
+                        },
+                        {
+                            "name": "num",
+                            "type": "double",
+                            "value": 2.0
+                        },
+                        {
+                            "name": "str",
+                            "type": "std::string",
+                            "value": "five"
+                        },
+                        {
+                            "name": "vec",
+                            "type": "std::vector<double>",
+                            "value": [
+                                3.0,
+                                4.0
+                            ]
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_main_rep",
-                    "type": "double",
-                    "value": 2.0,
-                    "value_name": "num"
+                "from_main_vpp": {
+                    "values": [
+                        {
+                            "name": "a",
+                            "type": "std::vector<double>",
+                            "value": [
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        {
+                            "name": "b",
+                            "type": "std::vector<double>",
+                            "value": [
+                                2.0,
+                                2.0,
+                                2.0
+                            ]
+                        },
+                        {
+                            "name": "c",
+                            "type": "std::vector<double>",
+                            "value": [
+                                3.0,
+                                3.0,
+                                3.0
+                            ]
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_main_rep",
-                    "type": "std::string",
-                    "value": "five",
-                    "value_name": "str"
+                "to_main_rep": {
+                    "info": {
+                        "name": "to_main_rep",
+                        "type": "ConstantReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "int",
+                            "type": "int",
+                            "value": 10
+                        },
+                        {
+                            "name": "num",
+                            "type": "double",
+                            "value": 3.1415926
+                        },
+                        {
+                            "name": "str",
+                            "type": "std::string",
+                            "value": "twenty"
+                        },
+                        {
+                            "name": "vec",
+                            "type": "std::vector<double>",
+                            "value": [
+                                30.0,
+                                30.0,
+                                30.0
+                            ]
+                        }
+                    ]
                 },
-                {
-                    "object_name": "from_main_rep",
-                    "type": "std::vector<double>",
-                    "value": [
-                        3.0,
-                        4.0
-                    ],
-                    "value_name": "vec"
-                },
-                {
-                    "object_name": "from_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "value_name": "a"
-                },
-                {
-                    "object_name": "from_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        2.0,
-                        2.0,
-                        2.0
-                    ],
-                    "value_name": "b"
-                },
-                {
-                    "object_name": "from_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        3.0,
-                        3.0,
-                        3.0
-                    ],
-                    "value_name": "c"
-                },
-                {
-                    "object_name": "to_main_rep",
-                    "type": "int",
-                    "value": 10,
-                    "value_name": "int"
-                },
-                {
-                    "object_name": "to_main_rep",
-                    "type": "double",
-                    "value": 3.1415926,
-                    "value_name": "num"
-                },
-                {
-                    "object_name": "to_main_rep",
-                    "type": "std::string",
-                    "value": "twenty",
-                    "value_name": "str"
-                },
-                {
-                    "object_name": "to_main_rep",
-                    "type": "std::vector<double>",
-                    "value": [
-                        30.0,
-                        30.0,
-                        30.0
-                    ],
-                    "value_name": "vec"
-                },
-                {
-                    "object_name": "to_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        30.0,
-                        30.0,
-                        30.0
-                    ],
-                    "value_name": "a"
-                },
-                {
-                    "object_name": "to_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        40.0,
-                        40.0,
-                        40.0
-                    ],
-                    "value_name": "b"
-                },
-                {
-                    "object_name": "to_main_vpp",
-                    "type": "std::vector<double>",
-                    "value": [
-                        6.0,
-                        6.0,
-                        6.0
-                    ],
-                    "value_name": "c"
+                "to_main_vpp": {
+                    "values": [
+                        {
+                            "name": "a",
+                            "type": "std::vector<double>",
+                            "value": [
+                                30.0,
+                                30.0,
+                                30.0
+                            ]
+                        },
+                        {
+                            "name": "b",
+                            "type": "std::vector<double>",
+                            "value": [
+                                40.0,
+                                40.0,
+                                40.0
+                            ]
+                        },
+                        {
+                            "name": "c",
+                            "type": "std::vector<double>",
+                            "value": [
+                                6.0,
+                                6.0,
+                                6.0
+                            ]
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 1.0,
             "time_step": 1
         }

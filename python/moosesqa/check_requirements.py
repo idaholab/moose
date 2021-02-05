@@ -60,7 +60,6 @@ def check_requirements(requirements, file_list=None, color_text=True, allowed_co
     kwargs.setdefault('log_top_level_detail', log_default)
     kwargs.setdefault('log_missing_detail', log_default)
     kwargs.setdefault('log_empty_detail', log_default)
-    kwargs.setdefault('log_deprecated_detail', log_default)
     kwargs.setdefault('log_extra_requirement', log_default)
     kwargs.setdefault('log_extra_design', log_default)
     kwargs.setdefault('log_extra_issues', log_default)
@@ -203,7 +202,7 @@ def _check_requirement(req, logger, file_list, allowed_collections):
                 logger.log('log_extra_collections', detail, "Extra 'collections' supplied", line=detail.collections_line)
 
             if hasattr(detail, 'deprecated') and detail.deprecated:
-                logger.log('log_detail_deprecated', detail, "Sub-block with 'deprecated' supplied", line=detail.issues_line)
+                logger.log('log_deprecated_detail', detail, "Sub-block with 'deprecated' supplied", line=detail.issues_line)
 
         # Test format of 'issues'
         if req.issues is not None:

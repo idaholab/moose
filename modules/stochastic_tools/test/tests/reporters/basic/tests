@@ -1,0 +1,52 @@
+[Tests]
+  issues = '#16584'
+  design = 'reporters/StatisticsReporter.md'
+
+  [vpp]
+    requirement = "The system shall support the calculation of statistics using"
+
+    [statistics]
+      type = JSONDiff
+      input = statistics_vpp.i
+      jsondiff = statistics_vpp_out.json
+
+      detail = "vectors of data from the postprocessing system and include"
+    []
+
+    [ci]
+      type = JSONDiff
+      input = statistics_vpp_ci.i
+      jsondiff = statistics_vpp_ci_out.json
+
+      detail = "confidence level intervals for statistics calculations."
+    []
+  []
+
+  [reporters]
+    requirement = "The system shall support the calculation of statistics using"
+
+    [statistics]
+      type = JSONDiff
+      input = statistics_reporter.i
+      jsondiff = statistics_reporter_out.json
+
+      detail = "vector of data from the reporting system; including"
+    []
+    [ci]
+      type = JSONDiff
+      input = statistics_reporter_ci.i
+      jsondiff = statistics_reporter_ci_out.json
+
+      detail = "confidence level intervals for statistics calculations"
+    []
+
+    [error]
+      type = RunException
+      input = statistics_reporter_error.i
+      expect_err = "The following reporter value\(s\) do not have a type supported by the StatisticsReporter:\n"
+                   "\s+const/const"
+
+      detail = "and error if the supplied type is not supported."
+    []
+  []
+[]

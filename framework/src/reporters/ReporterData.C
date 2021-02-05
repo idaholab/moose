@@ -98,17 +98,6 @@ ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> dat
 }
 
 bool
-ReporterData::hasReporterWithMode(const ReporterMode & mode) const
-{
-  for (auto & context_ptr : _context_ptrs)
-  {
-    if (context_ptr->getProducerModeEnum() == mode)
-      return true;
-  }
-  return false;
-}
-
-bool
 ReporterData::hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const
 {
   for (auto & context_ptr : _context_ptrs)
@@ -139,4 +128,13 @@ ReporterData::addConsumerMode(ReporterMode mode, const std::string & object_name
   if (ptr == nullptr)
     mooseError("Unable to locate Reporter with name:", object_name);
   const_cast<ReporterContextBase *>(ptr)->addConsumerMode(mode, object_name);
+}
+
+const ReporterProducerEnum &
+ReporterData::getReporterMode(const ReporterName & reporter_name) const
+{
+  const ReporterContextBase * ptr = getReporterContextBase(reporter_name);
+  if (ptr == nullptr)
+    mooseError("Unable to locate Reporter with name:", reporter_name);
+  return ptr->getProducerModeEnum();
 }

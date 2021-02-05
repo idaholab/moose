@@ -1,28 +1,23 @@
 [Tests]
-  issues = '#11217'
-  design = 'Statistics.md'
+  [replicated]
+    type = 'CSVDiff'
+    input = 'statistics.i'
+    csvdiff = 'statistics_out_stats_0001.csv'
+    allow_test_objects = true
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
+  []
 
-  [tests]
-    requirement = 'The system shall be capable of computing the statics of a data vector of that'
-
-    [replicated]
-      type = 'CSVDiff'
-      input = 'statistics.i'
-      csvdiff = 'statistics_out_stats_0001.csv'
-      allow_test_objects = true
-
-      detail = 'is replicated and'
-    []
-
-    [distributed]
-      type = 'CSVDiff'
-      input = 'statistics_distributed.i'
-      csvdiff = 'statistics_distributed_out_stats_0001.csv'
-      min_parallel = 3
-      max_parallel = 3
-      allow_test_objects = true
-
-      detail = 'distributed.'
-    []
+  [distributed]
+    type = 'CSVDiff'
+    input = 'statistics_distributed.i'
+    csvdiff = 'statistics_distributed_out_stats_0001.csv'
+    min_parallel = 3
+    max_parallel = 3
+    allow_test_objects = true
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
   []
 []

@@ -154,7 +154,7 @@ public:
    * directly because the state is often created prior to the declaration that dictates how the
    * produced value shall be computed. Thus, the reason for the separate ReporterContext objects.
    */
-  template <typename T, template <typename> class S, typename... Args>
+  template <typename T, typename S, typename... Args>
   T & declareReporterValue(const ReporterName & reporter_name,
                            const ReporterMode & mode,
                            Args &&... args);
@@ -193,11 +193,10 @@ public:
   void check() const;
 
   /**
-   * Return true if the supplied mode exists in the produced Repoter values
+   * Return true if the supplied mode exists in the produced Reporter values
    *
-   * @see JSONOutput.C/h
+   * @see CSV.C/h
    */
-  bool hasReporterWithMode(const ReporterMode & mode) const;
   bool hasReporterWithMode(const std::string & obj_name, const ReporterMode & mode) const;
 
   /**
@@ -236,6 +235,13 @@ public:
    * @param reporter_name Object/data name for the Reporter value
    */
   const ReporterContextBase * getReporterContextBase(const ReporterName & reporter_name) const;
+
+  /**
+   * Return the ReporterProducerEnum for an existing ReporterValue
+   * @param reporter_name The name of the reporter value, which includes the object name and the
+   *                      data name.
+   */
+  const ReporterProducerEnum & getReporterMode(const ReporterName & reporter_name) const;
 
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
@@ -301,7 +307,7 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
   return state_ref.value(time_index);
 }
 
-template <typename T, template <typename> class S, typename... Args>
+template <typename T, typename S, typename... Args>
 T &
 ReporterData::declareReporterValue(const ReporterName & reporter_name,
                                    const ReporterMode & mode,
@@ -314,7 +320,7 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
 
   // Create the ReporterContext
-  auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
+  auto context_ptr = libmesh_make_unique<S>(_app, state_ref, args...);
   context_ptr->init(mode); // initialize the mode, see ContextReporter
 
   // Locate the insert position (see comment for _context_ptrs in ReporterData.h))

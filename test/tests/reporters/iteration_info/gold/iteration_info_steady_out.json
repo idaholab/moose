@@ -1,62 +1,70 @@
 {
     "time_steps": [
         {
-            "reporters": [
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 0,
-                    "value_name": "num_linear_iterations"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 0,
-                    "value_name": "num_nonlinear_iterations"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "double",
-                    "value": 0.0,
-                    "value_name": "time"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 0,
-                    "value_name": "timestep"
+            "reporters": {
+                "iteration_info": {
+                    "info": {
+                        "name": "iteration_info",
+                        "type": "IterationInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "num_linear_iterations",
+                            "type": "unsigned int",
+                            "value": 0
+                        },
+                        {
+                            "name": "num_nonlinear_iterations",
+                            "type": "unsigned int",
+                            "value": 0
+                        },
+                        {
+                            "name": "time",
+                            "type": "double",
+                            "value": 0.0
+                        },
+                        {
+                            "name": "timestep",
+                            "type": "unsigned int",
+                            "value": 0
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": [
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 1,
-                    "value_name": "num_linear_iterations"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 1,
-                    "value_name": "num_nonlinear_iterations"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "double",
-                    "value": 0.0,
-                    "value_name": "time"
-                },
-                {
-                    "object_name": "iteration_info",
-                    "type": "unsigned int",
-                    "value": 1,
-                    "value_name": "timestep"
+            "reporters": {
+                "iteration_info": {
+                    "info": {
+                        "name": "iteration_info",
+                        "type": "IterationInfo"
+                    },
+                    "values": [
+                        {
+                            "name": "num_linear_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
+                        {
+                            "name": "num_nonlinear_iterations",
+                            "type": "unsigned int",
+                            "value": 1
+                        },
+                        {
+                            "name": "time",
+                            "type": "double",
+                            "value": 0.0
+                        },
+                        {
+                            "name": "timestep",
+                            "type": "unsigned int",
+                            "value": 1
+                        }
+                    ]
                 }
-            ],
+            },
             "time": 1.0,
             "time_step": 1
         }
