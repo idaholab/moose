@@ -3,7 +3,7 @@
   issues = '#14409 #16584'
 
   [percentile]
-    requirement = "The system shall support computing percentile confidence level intervals of statics"
+    requirement = "The system shall support computing percentile confidence level intervals of statistics"
 
     [basic]
       type = JSONDiff

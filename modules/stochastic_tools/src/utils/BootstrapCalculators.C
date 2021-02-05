@@ -266,7 +266,7 @@ makeBootstrapCalculator(const MooseEnum & item,
   return ptr;
 }
 
-#define createBootstrapCalulators(InType, OutType)                                                 \
+#define createBootstrapCalculators(InType, OutType)                                                \
   template class Percentile<InType, OutType>;                                                      \
   template class BiasCorrectedAccelerated<InType, OutType>;                                        \
   template std::unique_ptr<const BootstrapCalculator<InType, OutType>>                             \
@@ -277,7 +277,7 @@ makeBootstrapCalculator(const MooseEnum & item,
                                            unsigned int,                                           \
                                            const StochasticTools::Calculator<InType, OutType> &)
 
-createBootstrapCalulators(std::vector<Real>, Real);
-createBootstrapCalulators(std::vector<int>, Real);
+createBootstrapCalculators(std::vector<Real>, Real);
+createBootstrapCalculators(std::vector<int>, Real);
 
 } // namespace

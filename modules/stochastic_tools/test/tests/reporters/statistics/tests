@@ -3,7 +3,7 @@
   design = 'StatisticsReporter.md'
 
   [tests]
-    requirement = 'The system shall be capable of computing the statics of a data vector that'
+    requirement = 'The system shall be capable of computing the statistics of a data vector that'
 
     [replicated]
       type = 'JSONDiff'

@@ -3,7 +3,7 @@
   issues = '#14409 #16584'
 
   [bca]
-    requirement = "The system shall support computing bias corrected and accelerated confidence level intervals of statics"
+    requirement = "The system shall support computing bias corrected and accelerated confidence level intervals of statistics"
 
     [basic]
       type = JSONDiff
