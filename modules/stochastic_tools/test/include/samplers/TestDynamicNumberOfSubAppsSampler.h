@@ -6,21 +6,18 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
-#include "Sampler.h"
+#include "MonteCarloSampler.h"
 
-class TestSampler : public Sampler
+class TestDynamicNumberOfSubAppsSampler : public MonteCarloSampler
 {
 public:
   static InputParameters validParams();
-  TestSampler(const InputParameters & parameters);
-  virtual void executeSetUp() override;
+  TestDynamicNumberOfSubAppsSampler(const InputParameters & parameters);
+  void executeSetUp() override;
 
 protected:
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-
-private:
-  const bool _use_rand;
-  const MooseEnum _error_test;
+  const dof_id_type _increment_rows;
 };

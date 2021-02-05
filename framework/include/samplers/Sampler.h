@@ -48,13 +48,7 @@ class Sampler : public MooseObject,
 {
 public:
   static InputParameters validParams();
-
   Sampler(const InputParameters & parameters);
-
-  // DEPRECATED, DO NOT USE
-  virtual std::vector<DenseMatrix<Real>> sample();
-  std::vector<DenseMatrix<Real>> getSamples();
-  double rand(unsigned int index = 0);
 
   // The public members define the API that is exposed to application developers that are using
   // Sampler objects to perform calculations, so be very careful when adding items here since
@@ -152,14 +146,13 @@ protected:
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
-  // TODO: Restore this pure virtual after application are updated to new interface
   /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index);
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
 
   ///@{
   /**
@@ -168,8 +161,8 @@ protected:
    * These methods should not be called directly, each is automatically called by the public
    * getGlobalSamples() or getLocalSamples() methods.
    */
-  virtual void sampleSetUp(){};
-  virtual void sampleTearDown(){};
+  virtual void sampleSetUp() {}
+  virtual void sampleTearDown() {}
   ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
@@ -206,16 +199,32 @@ protected:
    */
   virtual void advanceGenerators(dof_id_type count);
 
-private:
+  //@{
   /**
-   * Function called by MOOSE to setup the Sampler for use. The primary purpose is to partition
-   * the DenseMatrix rows for parallel distribution. A separate method is required so that the
+   * Callbacks for before and after execute.
+   *
+   * These were added to support of dynamic sampler sizes. Recall that execute is simply to advance
+   * the state of the generator such that the next sample will be unique. These methods allow
+   * operations before and after the call to generator advancement.
+   */
+  virtual void executeSetUp() {}
+  virtual void executeTearDown() {}
+  ///@}
+
+private:
+  ///@{
+  /**
+   * Functions called by MOOSE to setup the Sampler for use. The primary purpose is to partition
+   * the DenseMatrix rows for parallel distribution. A separate methods are required so that the
    * set methods can be called within the constructors of child objects, see
-   * FEProblemBase::addSampler method.
+   * FEProblemBase::addSampler method. The reinit was added to support re-partitioning to allow
+   * for dynamic changes in sampler size.
    *
    * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
    */
-  void init();
+  void init();   // sets up MooseRandom
+  void reinit(); // partitions sampler output
+  ///@}
   friend void FEProblemBase::addSampler(const std::string & type,
                                         const std::string & name,
                                         InputParameters & parameters);
@@ -229,6 +238,11 @@ private:
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
+
+  /**
+   * Helper function for reinit() errors.
+   **/
+  void checkReinitStatus() const;
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
@@ -259,6 +273,9 @@ private:
 
   /// Flag to indicate if the init method for this class was called
   bool _initialized;
+
+  /// Flag to indicate if the reinit method should be called during execute
+  bool _needs_reinit;
 
   /// Flag for initial execute to allow the first set of random numbers to be always be the same
   bool _has_executed;

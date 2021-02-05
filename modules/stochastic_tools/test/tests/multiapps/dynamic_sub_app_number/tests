@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#16842'
+  design = "Samplers/index.md SamplerFullSolveMultiApp.md"
+
+  [dynamic]
+    requirement = "The system shall support the modification of the number of complete sub-application simulations performed with"
+    [normal]
+      type = JSONDiff
+      input = main.i
+      allow_test_objects = true
+      jsondiff = main_out.json
+
+      detail = "normal execution,"
+    []
+    [batch-restore]
+      type = JSONDiff
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/runner/mode=batch-restore'
+      jsondiff = main_out.json
+
+      detail = "batch execution with memory-based restoring, and"
+    []
+    [batch-reset]
+      type = JSONDiff
+      input = main.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/runner/mode=batch-reset'
+      jsondiff = main_out.json
+
+      detail = "batch execution with reset-based restoring."
+    []
+  []
+[]

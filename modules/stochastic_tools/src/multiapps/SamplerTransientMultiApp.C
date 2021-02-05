@@ -47,10 +47,10 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler")),
     _mode(getParam<MooseEnum>("mode").getEnum<StochasticTools::MultiAppMode>()),
+    _number_of_sampler_rows(_sampler.getNumberOfRows()),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
     _perf_initial_setup(registerTimedSection("initialSetup", 2))
-
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
   {
@@ -97,6 +97,10 @@ bool
 SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   TIME_SECTION(_perf_solve_step);
+
+  if (_sampler.getNumberOfRows() != _number_of_sampler_rows)
+    mooseError("The size of the sampler has changed; SamplerTransientMultiApp object do not "
+               "support dynamic Sampler output.");
 
   bool last_solve_converged = true;
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)

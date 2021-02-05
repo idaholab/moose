@@ -63,6 +63,9 @@ private:
   /// in case that changes in the future or in child classes
   std::vector<std::vector<std::shared_ptr<Backup>>> _batch_backup;
 
+  /// Store the number of rows initialized, if this changes error because it doesn't make sense
+  const dof_id_type _number_of_sampler_rows;
+
   ///@{
   /// PrefGraph timers
   const PerfID _perf_solve_step;

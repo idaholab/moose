@@ -36,7 +36,6 @@ SamplerFullSolveMultiApp::validParams()
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
       "'batch' creates one sub-application for each processor and re-executes for each row.");
-
   return params;
 }
 
@@ -67,13 +66,26 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
   }
   else
     init(_sampler.getNumberOfRows());
+
+  _number_of_sampler_rows = _sampler.getNumberOfRows();
 }
 
 void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 {
-  // Reinitialize app to original state prior to solve, if a solve has occured
-  if (_solved_once && _mode == StochasticTools::MultiAppMode::NORMAL)
-    initialSetup();
+  if (_mode == StochasticTools::MultiAppMode::NORMAL)
+  {
+    // Reinitialize MultiApp size
+    const auto num_rows = _sampler.getNumberOfRows();
+    if (num_rows != _number_of_sampler_rows)
+    {
+      init(_sampler.getNumberOfRows());
+      _number_of_sampler_rows = num_rows;
+    }
+
+    // Reinitialize app to original state prior to solve, if a solve has occured
+    if (_solved_once)
+      initialSetup();
+  }
 }
 
 bool
@@ -84,6 +96,7 @@ SamplerFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
   mooseAssert(_my_num_apps, _sampler.getNumberOfLocalRows());
 
   bool last_solve_converged = true;
+
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     last_solve_converged = solveStepBatch(dt, target_time, auto_advance);
