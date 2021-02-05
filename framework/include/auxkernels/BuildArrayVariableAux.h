@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class BuildArrayVariableAux;
-
-template <>
-InputParameters validParams<BuildArrayVariableAux>();
-
 class BuildArrayVariableAux : public ArrayAuxKernel
 {
 public:
@@ -26,5 +21,5 @@ public:
 protected:
   virtual RealEigenVector computeValue() override;
 
-  std::vector<const MooseVariableFieldBase *> _component_vars;
+  std::vector<const VariableValue *> _component_vars;
 };

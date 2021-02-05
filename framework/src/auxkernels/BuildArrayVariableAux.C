@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", BuildArrayVariableAux);
 
-defineLegacyParams(BuildArrayVariableAux);
-
 InputParameters
 BuildArrayVariableAux::validParams()
 {
@@ -39,40 +37,38 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
                var_names.size(),
                " component variables were specified.");
 
-  // Get pointers to each of the component vars
+  // Get pointers to each of the component VariableValues
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
   for (VariableName name : var_names)
-    _component_vars.push_back(&_subproblem.getVariable(tid, name));
+  {
+    const MooseVariableFieldBase & var_base = _subproblem.getVariable(tid, name);
+
+    // Check the FEType of the component var
+    if ((var_base.feType().family != FEFamily::MONOMIAL) ||
+        (var_base.feType().order != Order::CONSTANT))
+      mooseError("BuildArrayVariableAux only supports constant monomial variables");
+
+    // Try casting to the appropriate type and store the VariableValue
+    if (const MooseVariableField<Real> * var =
+            dynamic_cast<const MooseVariableField<Real> *>(&var_base))
+      _component_vars.push_back(&var->sln());
+    else
+      mooseError("BuildArrayVariableAux only supports variables of type MooseVariableField<Real>");
+  }
 
   // Check the FEType of the output variable
   if ((_var.feType().family != FEFamily::MONOMIAL) || (_var.feType().order != Order::CONSTANT))
     mooseError("BuildArrayVariableAux only supports constant monomial variables");
-
-  // Check the FEType of the component vars
-  for (auto var : _component_vars)
-  {
-    if ((var->feType().family != FEFamily::MONOMIAL) || (var->feType().order != Order::CONSTANT))
-      mooseError("BuildArrayVariableAux only supports constant monomial variables");
-  }
 }
 
 RealEigenVector
 BuildArrayVariableAux::computeValue()
 {
-  // This function assumes that DoFs are indexed by element and that there is
-  // only 1 DoF per element, i.e. that all variables are constant monomials.
-  constexpr unsigned int fe_comp{0};
-
   // Get the value of each component
   std::vector<Real> component_vals;
   component_vals.reserve(_component_vars.size());
   for (auto var : _component_vars)
-  {
-    unsigned int sys_num = var->sys().number();
-    unsigned int var_num = var->number();
-    dof_id_type component_dof = _current_elem->dof_number(sys_num, var_num, fe_comp);
-    component_vals.push_back(var->sys().solution()(component_dof));
-  }
+    component_vals.push_back((*var)[_qp]);
 
   // Convert the output to an Eigen matrix and return
   RealEigenVector out;
