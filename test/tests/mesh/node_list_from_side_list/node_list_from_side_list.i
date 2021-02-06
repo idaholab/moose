@@ -8,8 +8,8 @@
   [rename]
     type = RenameBoundaryGenerator
     input = gen
-    old_boundary_name = 'left'
-    new_boundary_name = 'renamed_left'
+    old_boundary = 'left'
+    new_boundary = 'renamed_left'
   []
 []
 
