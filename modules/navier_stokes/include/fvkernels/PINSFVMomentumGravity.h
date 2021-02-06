@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "INSFVGravityForce.h"
+#include "INSFVMomentumGravity.h"
 
 /**
  * Imposes a gravitational force on the momentum equation in porous media.
  */
-class PINSFVMomentumGravity : public INSFVGravityForce
+class PINSFVMomentumGravity : public INSFVMomentumGravity
 {
 public:
   static InputParameters validParams();

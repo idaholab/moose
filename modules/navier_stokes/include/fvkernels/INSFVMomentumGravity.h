@@ -14,11 +14,11 @@
 /**
  * Imposes a gravitational force on the momentum equation
  */
-class INSFVGravityForce : public FVElementalKernel
+class INSFVMomentumGravity : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  INSFVGravityForce(const InputParameters & params);
+  INSFVMomentumGravity(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
