@@ -28,7 +28,8 @@ SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParame
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable"))
+    _grad_u(coupledGradient("variable")),
+    _fv(_fv_variable)
 {
   addMooseVariableDependency(&mooseVariableField());
 }
@@ -36,5 +37,16 @@ SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParame
 Real
 SideIntegralVariableUserObject::computeQpIntegral()
 {
-  return _u[_qp];
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  if (_fv)
+  {
+    // We should be at the edge of the domain for this variable
+    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "We should have a face info");
+
+    return MetaPhysicL::raw_value(_fv_variable->getBoundaryFaceValue(*fi));
+  }
+  else
+#endif
+    return _u[_qp];
 }

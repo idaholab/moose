@@ -17,6 +17,8 @@ InputParameters
 LayeredSideFluxAverage::validParams()
 {
   InputParameters params = LayeredSideIntegral::validParams();
+  params.addClassDescription("Computes the diffusive flux of a variable on layers alongside "
+                             "a boundary.");
   params.addRequiredParam<std::string>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");
@@ -33,5 +35,20 @@ LayeredSideFluxAverage::LayeredSideFluxAverage(const InputParameters & parameter
 Real
 LayeredSideFluxAverage::computeQpIntegral()
 {
-  return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  if (_fv)
+  {
+    // Get the face info
+    const FaceInfo * const fi = _mesh.faceInfo(_current_elem, _current_side);
+    mooseAssert(fi, "We should have a face info");
+
+    // Get the gradient of the variable on the face
+    const auto & grad_u = _fv_variable->adGradSln(*fi);
+
+    // FIXME Get the diffusion coefficient on the face, see #16809
+    return -MetaPhysicL::raw_value(_diffusion_coef[_qp] * grad_u * _normals[_qp]);
+  }
+  else
+#endif
+    return -_diffusion_coef[_qp] * _grad_u[_qp] * _normals[_qp];
 }

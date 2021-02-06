@@ -648,7 +648,7 @@ template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 {
-  mooseAssert(!isInternalFace(fi), "We need to be on a boundary face, duh");
+  mooseAssert(!isInternalFace(fi), "A boundary face value has been requested on an internal face.");
 
   // Check to see whether it's already in our cache
   auto it = _face_to_value.find(&fi);
