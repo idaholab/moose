@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step07_parallel.md
+                    next=tutorial01_app_development/step09_mat_props.md
+                    margin-bottom=0px
+
 # Step 8: Write a Regression Test
 
 When developing software for scientific computation, it is prudent to maintain an archive of certified solutions. This way, developers can easily check that their application continues to produce good results as the source code expands and refactors. This step introduces the [application_development/test_system.md], which provides tools for developing [*Regression Tests*](https://en.wikipedia.org/wiki/Regression_testing) based on input files and their outputs. For the demonstration, two different tests of the `DarcyPressure` class will be created using this system.

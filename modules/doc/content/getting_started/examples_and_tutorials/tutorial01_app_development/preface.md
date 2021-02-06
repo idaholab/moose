@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/index.md
+                    next=tutorial01_app_development/problem_statement.md
+                    margin-bottom=0px
+
 # Preface
 
 ## Navigation
@@ -7,7 +11,7 @@ Jump around page sections by using the header links provided on the right table:
 !media tutorial01_app_development/scrollspy.png
        style=width:25%;display:block;height:auto;margin-left:auto;margin-right:auto;
 
-Flip through pages with the "[!icon!arrow_back] +Previous+" and "+Next+ [!icon!arrow_forward]" buttons located at the end of the page:
+Flip through pages with the "[!icon!arrow_back] +Previous+" and "+Next+ [!icon!arrow_forward]" buttons located at the start and end of the page:
 
 !media tutorial01_app_development/pagination.png
        style=width:84%;display:block;margin-left:auto;margin-right:auto;

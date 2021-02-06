@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step01_moose_app.md
+                    next=tutorial01_app_development/step03_moose_object.md
+                    margin-bottom=0px
+
 # Step 2: Write an Input File
 
 In this step, the concept of an input file is introduced. These files provide the means for controlling [!ac](FE) simulations with MOOSE. To demonstrate this concept, a steady-state diffusion of pressure from one end of the pipe, between the pressure vessels, to the other (see the [tutorial01_app_development/problem_statement.md] page) will be considered. The goal, here, is to create an input file that solves this simple [!ac](BVP). This problem is detailed in the [#demo] section, but, first, some basic information regarding input files and their execution are provided. As for many steps of this tutorial, concepts will be introduced and a hands-on demonstration will follow.

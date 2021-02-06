@@ -29,7 +29,8 @@ AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6,
                                  hide=[], no_prefix=[], no_count=[])
-PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False)
+PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False,
+                                  margins=['24px', '24px'])
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -220,6 +221,8 @@ class PaginationCommand(command.CommandComponent):
         settings['previous'] = (None, "The previous markdown page to navigate to.")
         settings['next'] = (None, "The next markdown page to navigate to.")
         settings['use_title'] = (False, "Use the title of the page for the hyperlink text.")
+        settings['margin-top'] = ('24px', "The top margin of the buttons.")
+        settings['margin-bottom'] = ('24px', "The bottom margin of the buttons.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -227,10 +230,12 @@ class PaginationCommand(command.CommandComponent):
             msg = "At least one: a 'previous' page or a 'next' page is required for the !content pagination command."
             raise exceptions.MooseDocsException(msg)
 
+        margins = [self.settings['margin-top'], self.settings['margin-bottom']]
         return PaginationToken(parent,
                                previous=self.settings['previous'],
                                next=self.settings['next'],
-                               use_title=self.settings['use_title'])
+                               use_title=self.settings['use_title'],
+                               margins=margins)
 
 class RenderContentToken(components.RenderComponent):
 
@@ -425,7 +430,8 @@ class RenderContentOutline(components.RenderComponent):
 
 class RenderPagination(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='moose-content-pagination')
+        style = 'margin-top:{};margin-bottom:{};'.format(*token['margins'])
+        div = html.Tag(parent, 'div', class_='moose-content-pagination', style=style)
 
         if token['previous'] is not None:
             link = self.createHTMLHelper(div, token, page, 'previous')
@@ -433,7 +439,8 @@ class RenderPagination(components.RenderComponent):
             link = self.createHTMLHelper(div, token, page, 'next')
 
     def createMaterialize(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='moose-content-pagination')
+        style = 'margin-top:{};margin-bottom:{};'.format(*token['margins'])
+        div = html.Tag(parent, 'div', class_='moose-content-pagination', style=style)
 
         if token['previous'] is not None:
             link = self.createHTMLHelper(div, token, page, 'previous')

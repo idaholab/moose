@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/problem_statement.md
+                    next=tutorial01_app_development/step02_input_file.md
+                    margin-bottom=0px
+
 # Step 1: Create a Custom MOOSE Application
 
 The first step of this tutorial is to create a custom MOOSE application. The application will contain the customized C++ objects created as part of this tutorial for solving the desired problem.

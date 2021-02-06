@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step05_kernel_object.md
+                    next=tutorial01_app_development/step07_parallel.md
+                    margin-bottom=0px
+
 # Step 6: Define a Set of Input Parameters
 
 This step introduces the class used to a define a unique set of parameters for a `MooseObject`. The values for these parameters can be specified by users via input files. For the demonstration, the `DarcyPressure` class, which was created in the [previous step](tutorial01_app_development/step05_kernel_object.md#source-demo), will be modified to accept any arbitrary real number for the `_permeability` and `_viscosity` variables. Then, the values for $K$ and $\mu_{f}$ will be specified in the input file.

@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step06_input_params.md
+                    next=tutorial01_app_development/step08_test_harness.md
+                    margin-bottom=0px
+
 # Step 7: Execute in Parallel
 
 A major objective of MOOSE is performance. This step briefly introduces parallel processing and demonstrates the basic commands used for running a MOOSE application in parallel. A few basic tips on how to evaluate and improve performance are given.
