@@ -8,11 +8,11 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 10
-    ymin = -1
-    ymax = 1
-    nx = 100
-    ny = 20
+    xmax = 5
+    ymin = 0
+    ymax = 2
+    nx = 20
+    ny = 10
   []
 []
 
@@ -28,7 +28,7 @@ velocity_interp_method='rc'
   []
   [v]
     type = PINSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 1e-6
   []
   [pressure]
     type = INSFVPressureVariable
@@ -40,7 +40,7 @@ velocity_interp_method='rc'
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    initial_condition = 0.9
+    initial_condition = 1
   []
 []
 
@@ -116,6 +116,7 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
+  inactive = 'symmetry-u symmetry-v symmetry-p no-slip-u no-slip-v inlet-p'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -128,17 +129,52 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [walls-u]
+
+  [slip-u]
     type = INSFVNaturalFreeSlipBC
     boundary = 'top bottom'
     variable = u
   []
-  [walls-v]
+  [slip-v]
     type = INSFVNaturalFreeSlipBC
     boundary = 'top bottom'
     variable = v
   []
-  [outlet_p]
+
+  [no-slip-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = u
+  []
+  [no-slip-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
+    variable = v
+  []
+
+  [symmetry-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = u
+  []
+  [symmetry-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = v
+  []
+  [symmetry-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
+
+  [inlet-p]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = pressure
+    function = 1
+  []
+  [outlet-p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
@@ -162,14 +198,15 @@ velocity_interp_method='rc'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-14
+[]
+
+# Some basic Postprocessors to visually examine the solution
+[Postprocessors]
+
 []
 
 [Outputs]
   exodus = true
-  csv = true
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []
