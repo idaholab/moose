@@ -21,7 +21,7 @@ PINSFVMomentumDiffusion::validParams()
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addRequiredParam<MooseEnum>(
+  params.addParam<MooseEnum>(
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
@@ -47,12 +47,20 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (_smooth_porosity_gradient && !params.isParamSetByUser("momentum_component"))
+    mooseError("The momentum component parameter is required for modeling the porosity "
+               "gradient contribution in the momentum diffusion term.");
 }
 
 ADReal
 PINSFVMomentumDiffusion::computeQpResidual()
 {
-  //TODO: Rewrite with fluid velocity once AuxVariables support AD
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
+             "the configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#else
+  // TODO: Rewrite with fluid velocity once AuxVariables support AD
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
@@ -93,4 +101,5 @@ PINSFVMomentumDiffusion::computeQpResidual()
   }
 
   return -residual;
+#endif
 }
