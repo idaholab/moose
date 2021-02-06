@@ -28,7 +28,7 @@ PINSFVMassTimeDerivative::validParams()
 }
 
 PINSFVMassTimeDerivative::PINSFVMassTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params), _rho(getParam<Real>("rho")), _eps_dot(adCoupledDot("porosity"))
+  : FVTimeKernel(params), _rho(getParam<Real>("rho")), _eps_dot(coupledDot("porosity"))
 {
 }
 

@@ -35,17 +35,16 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
 ADReal
 PINSFVMomentumAdvection::computeQpResidual()
 {
-  /// TODO optimize to avoid interpolating velocity twice
-  ADRealVectorValue v_face;
-  this->interpolate(_velocity_interp_method, v_face, _vel_elem[_qp], _vel_neighbor[_qp]);
+  // TODO optimize to avoid interpolating velocity twice
+  // ADRealVectorValue v_face;
+  // this->interpolate(_velocity_interp_method, v_face, _vel_elem[_qp], _vel_neighbor[_qp]);
 
-  /// Compute face porosity gradient
+  // Compute face porosity gradient
   Real eps_face;
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                          eps_face,
                          _eps[_qp],
                          _eps_neighbor[_qp],
-                         v_face,
                          *_face_info,
                          true);
 
