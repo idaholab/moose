@@ -31,8 +31,17 @@ protected:
   const VariableValue & _eps;
   /// the neighbor element porosity
   const VariableValue & _eps_neighbor;
-  /// the porosity gradient
-  const VariableGradient & _grad_eps;
-  /// the neighbor porosity gradient
-  const VariableGradient & _grad_eps_neighbor;
+
+  /// Which momentum component this kernel applies to
+  const int _index;
+
+  /// Velocity as material properties
+  const ADMaterialProperty<RealVectorValue> & _vel_elem;
+  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
+
+  /// the porosity as a variable to be able to compute face values
+  const MooseVariableFVReal * const _eps_var;
+
+  /// Whether to add the porosity gradient term, only for continuous porosity
+  const bool _smooth_porosity_gradient;
 };
