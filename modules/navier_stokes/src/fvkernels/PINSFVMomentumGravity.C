@@ -14,7 +14,7 @@ registerMooseObject("NavierStokesApp", PINSFVMomentumGravity);
 InputParameters
 PINSFVMomentumGravity::validParams()
 {
-  InputParameters params = INSFVGravityForce::validParams();
+  InputParameters params = INSFVMomentumGravity::validParams();
   params.addClassDescription("Computes a body force due to gravity on fluid in porous media.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
@@ -22,12 +22,12 @@ PINSFVMomentumGravity::validParams()
 }
 
 PINSFVMomentumGravity::PINSFVMomentumGravity(const InputParameters & params)
-  : INSFVGravityForce(params), _eps(coupledValue("porosity"))
+  : INSFVMomentumGravity(params), _eps(coupledValue("porosity"))
 {
 }
 
 ADReal
 PINSFVMomentumGravity::computeQpResidual()
 {
-  return _eps[_qp] * INSFVGravityForce::computeQpResidual();
+  return _eps[_qp] * INSFVMomentumGravity::computeQpResidual();
 }

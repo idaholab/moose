@@ -14,7 +14,7 @@ registerMooseObject("NavierStokesApp", PINSFVMomentumBoussinesq);
 InputParameters
 PINSFVMomentumBoussinesq::validParams()
 {
-  InputParameters params = INSFVBoussinesqBodyForce::validParams();
+  InputParameters params = INSFVMomentumBoussinesq::validParams();
   params.addClassDescription("Computes a body force for natural convection buoyancy in porous media.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
@@ -22,12 +22,12 @@ PINSFVMomentumBoussinesq::validParams()
 }
 
 PINSFVMomentumBoussinesq::PINSFVMomentumBoussinesq(const InputParameters & params)
-  : INSFVBoussinesqBodyForce(params), _eps(coupledValue("porosity"))
+  : INSFVMomentumBoussinesq(params), _eps(coupledValue("porosity"))
 {
 }
 
 ADReal
 PINSFVMomentumBoussinesq::computeQpResidual()
 {
-  return _eps[_qp] * INSFVBoussinesqBodyForce::computeQpResidual();
+  return _eps[_qp] * INSFVMomentumBoussinesq::computeQpResidual();
 }

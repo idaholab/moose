@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "INSFVBoussinesqBodyForce.h"
+#include "INSFVMomentumBoussinesq.h"
 
 /**
  * Imposes a Boussinesq force on the momentum equation. Useful for modeling natural convection
  * within an incompressible Navier-Stokes approximation in porous media
  */
-class PINSFVMomentumBoussinesq : public INSFVBoussinesqBodyForce
+class PINSFVMomentumBoussinesq : public INSFVMomentumBoussinesq
 {
 public:
   static InputParameters validParams();
