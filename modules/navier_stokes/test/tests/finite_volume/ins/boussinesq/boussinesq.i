@@ -142,7 +142,7 @@ temp_ref=${fparse hot_temp / 2.}
     p = pressure
   []
   [u_buoyancy]
-    type = INSFVBoussinesqBodyForce
+    type = INSFVMomentumBoussinesq
     variable = u
     temperature = T
     gravity = '0 -1 0'
@@ -151,7 +151,7 @@ temp_ref=${fparse hot_temp / 2.}
     momentum_component = 'x'
   []
   [u_gravity]
-    type = INSFVGravityForce
+    type = INSFVMomentumGravity
     variable = u
     gravity = '0 -1 0'
     rho = ${rho}
@@ -183,7 +183,7 @@ temp_ref=${fparse hot_temp / 2.}
     p = pressure
   []
   [v_buoyancy]
-    type = INSFVBoussinesqBodyForce
+    type = INSFVMomentumBoussinesq
     variable = v
     temperature = T
     gravity = '0 -1 0'
@@ -192,7 +192,7 @@ temp_ref=${fparse hot_temp / 2.}
     momentum_component = 'y'
   []
   [v_gravity]
-    type = INSFVGravityForce
+    type = INSFVMomentumGravity
     variable = v
     gravity = '0 -1 0'
     rho = ${rho}

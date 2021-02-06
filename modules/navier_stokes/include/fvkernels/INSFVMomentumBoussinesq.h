@@ -15,11 +15,11 @@
  * Imposes a Boussinesq force on the momentum equation. Useful for modeling natural convection
  * within an incompressible Navier-Stokes approximation
  */
-class INSFVBoussinesqBodyForce : public FVElementalKernel
+class INSFVMomentumBoussinesq : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  INSFVBoussinesqBodyForce(const InputParameters & params);
+  INSFVMomentumBoussinesq(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
