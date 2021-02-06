@@ -3473,8 +3473,8 @@ FEProblemBase::initPostprocessorData(const std::string & name)
 {
   ReporterName r_name(name, "value");
   if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
-    _reporter_data.declareReporterValue<PostprocessorValue, ReporterContext>(r_name,
-                                                                             REPORTER_MODE_UNSET);
+    _reporter_data.declareReporterValue<PostprocessorValue, ReporterContext<PostprocessorValue>>(
+        r_name, REPORTER_MODE_UNSET);
 }
 
 const PostprocessorValue &

@@ -31,7 +31,8 @@ enum class Interfaces
   VectorPostprocessor = 1 << 11,
   InterfaceUserObject = 1 << 12,
   BlockRestrictable = 1 << 13,
-  BoundaryRestrictable = 1 << 14
+  BoundaryRestrictable = 1 << 14,
+  Reporter = 1 << 15
 };
 
 template <>

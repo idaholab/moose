@@ -13,14 +13,14 @@ import unittest
 import logging
 from MooseDocs import common, base, tree
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse
+from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal
 logging.basicConfig()
 
 def testFunction(ext, value):
     return value
 
 class TestHasMooseApp(MooseDocsTestCase):
-    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse]
+    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal]
 
     def setupExtension(self, ext):
         sys.path.append(os.path.dirname(__file__))
@@ -115,7 +115,6 @@ class TestStatements(MooseDocsTestCase):
     def testIfElifElse(self):
         # True/True
         ast = self.tokenize("!if function=testFunction(True)\ncontent\n\n!elif function=testFunction(True)\nelif\n\n!else\nelse")
-        print(ast)
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=3)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeneralReporter.h"
-class Transient;
+
 namespace libMesh
 {
 class EquationSystems;
@@ -30,6 +30,16 @@ public:
   virtual void finalize() override {}
   virtual void execute() override;
 
+  /**
+   * Helper struct for defining information about a single sideset.
+   */
+  struct SidesetInfo
+  {
+    BoundaryID id;
+    std::string name;
+    std::vector<std::pair<dof_id_type, unsigned int>> sides;
+  };
+
 protected:
   const MultiMooseEnum & _items;
 
@@ -44,12 +54,14 @@ protected:
   unsigned int & _num_local_dofs_aux;
   unsigned int & _num_local_elem;
   unsigned int & _num_local_node;
-
-  // Used to allow for optional declare
-  unsigned int _dummy_unsigned_int = 0;
+  std::map<BoundaryID, SidesetInfo> & _local_sidesets;
+  std::map<BoundaryID, SidesetInfo> & _local_sideset_elems;
+  std::map<BoundaryID, SidesetInfo> & _sidesets;
+  std::map<BoundaryID, SidesetInfo> & _sideset_elems;
 
   // Helper to perform optional declaration based on "_items"
-  unsigned int & declareHelper(const std::string & item_name, const ReporterMode mode);
+  template <typename T>
+  T & declareHelper(const std::string & item_name, const ReporterMode mode);
 
 private:
   const libMesh::EquationSystems & _equation_systems;
@@ -57,3 +69,15 @@ private:
   const libMesh::System & _aux_system;
   const libMesh::MeshBase & _mesh;
 };
+
+template <typename T>
+T &
+MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
+{
+  return (!_items.isValid() || _items.contains(item_name)) ? declareValueByName<T>(item_name, mode)
+                                                           : declareUnusedValue<T>();
+}
+
+void to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo> & sidesets);
+void dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);
+void dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);

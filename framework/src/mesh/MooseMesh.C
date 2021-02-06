@@ -20,6 +20,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
+#include "MooseMeshUtils.h"
 
 #include <utility>
 
@@ -1143,13 +1144,7 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
   if (boundary_name == "ANY_BOUNDARY_ID")
     mooseError("Please use getBoundaryIDs() when passing \"ANY_BOUNDARY_ID\"");
 
-  BoundaryID id = Moose::INVALID_BOUNDARY_ID;
-  std::istringstream ss(boundary_name);
-
-  if (!(ss >> id))
-    id = getMesh().get_boundary_info().get_id_by_name(boundary_name);
-
-  return id;
+  return MooseMeshUtils::getBoundaryID(boundary_name, getMesh());
 }
 
 const Elem *

@@ -4,12 +4,12 @@ import unittest
 import logging
 
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax
+from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, modal
 from MooseDocs import base
 logging.basicConfig()
 
 class AppSyntaxTestCase(MooseDocsTestCase):
-    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax]
+    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, modal]
 
     def setupExtension(self, ext):
         if ext is appsyntax:
@@ -189,6 +189,8 @@ class TestChildren(AppSyntaxTestCase):
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
+
+        self.assertSize(ast, 2)
         self.assertToken(ast(0), 'Heading', size=3, level=2)
         self.assertToken(ast(0,0), 'Word', content=u'Child')
         self.assertToken(ast(0,1), 'Space', count=1)
@@ -196,15 +198,14 @@ class TestChildren(AppSyntaxTestCase):
 
         self.assertToken(ast(1), 'UnorderedList', class_='moose-list-children')
         self.assertToken(ast(1,0), 'ListItem', size=1)
-        self.assertToken(ast(1,0,0), 'SyntaxLink', size=1)
-
-        self.assertToken(ast(2), 'ModalLink')
+        self.assertToken(ast(1,0,0), 'ModalSourceLink', size=0)
 
 class TestInputs(AppSyntaxTestCase):
     TEXT = "!syntax inputs /Kernels/Diffusion"
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
+        self.assertSize(ast, 2)
         self.assertToken(ast(0), 'Heading', size=3, level=2)
         self.assertToken(ast(0,0), 'Word', content=u'Input')
         self.assertToken(ast(0,1), 'Space', count=1)
@@ -212,9 +213,7 @@ class TestInputs(AppSyntaxTestCase):
 
         self.assertToken(ast(1), 'UnorderedList', class_='moose-list-inputs')
         self.assertToken(ast(1,0), 'ListItem', size=1)
-        self.assertToken(ast(1,0,0), 'SyntaxLink', size=1)
-
-        self.assertToken(ast(2), 'ModalLink')
+        self.assertToken(ast(1,0,0), 'ModalSourceLink', size=0)
 
 class TestComplete(AppSyntaxTestCase):
     TEXT = "!syntax complete"

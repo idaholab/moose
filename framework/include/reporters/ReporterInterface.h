@@ -69,6 +69,11 @@ protected:
    */
   bool hasReporterValue(const std::string & param_name) const;
   bool hasReporterValueByName(const ReporterName & reporter_name) const;
+  template <typename T>
+  bool hasReporterValue(const std::string & param_name) const;
+  template <typename T>
+  bool hasReporterValueByName(const ReporterName & reporter_name) const;
+
   ///@}
 
   /**
@@ -129,4 +134,19 @@ ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
 {
   addReporterDependencyHelper(reporter_name);
   return _ri_reporter_data.getReporterValue<T>(reporter_name, _ri_name, mode, time_index);
+}
+
+template <typename T>
+bool
+ReporterInterface::hasReporterValue(const std::string & param_name) const
+{
+  const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
+  return hasReporterValueByName<T>(reporter_name);
+}
+
+template <typename T>
+bool
+ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) const
+{
+  return _ri_reporter_data.hasReporterValue<T>(reporter_name);
 }

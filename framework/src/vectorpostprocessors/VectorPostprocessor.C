@@ -79,7 +79,8 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
 
   ReporterName r_name(_vpp_name, vector_name);
   return _vpp_fe_problem->getReporterData(ReporterData::WriteKey())
-      .declareReporterValue<VectorPostprocessorValue, VectorPostprocessorContext>(r_name, mode);
+      .declareReporterValue<VectorPostprocessorValue,
+                            VectorPostprocessorContext<VectorPostprocessorValue>>(r_name, mode);
 }
 
 const std::set<std::string> &

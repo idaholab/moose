@@ -33,3 +33,10 @@ Reporter::Reporter(const InputParameters & parameters)
     _reporter_data(_reporter_fe_problem.getReporterData(ReporterData::WriteKey()))
 {
 }
+
+void
+Reporter::store(nlohmann::json & json) const
+{
+  json["name"] = _reporter_name;
+  json["type"] = _reporter_params.get<std::string>("_type");
+}

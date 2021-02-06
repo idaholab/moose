@@ -56,7 +56,7 @@
       cli_args = "Samplers/sample/upper_limits='0 2'"
       expect_err = "The items in 'upper_limits' must be in the range \[0,1\]"
 
-      detail = "when the number of upper probability limit differs from the number of distribution;"
+      detail = "when the upper probability differs from the allowable range;"
     []
     [lower_limits_range]
       type = RunException
@@ -64,7 +64,7 @@
       cli_args = "Samplers/sample/lower_limits='0 2'"
       expect_err = "The items in 'lower_limits' must be in the range \[0,1\]"
 
-      detail = "when the number of lower probability limit differs from the number of distribution; and"
+      detail = "when the lower probability differs from the allowable range; and"
     []
     [lower_greater_than_upper]
       type = RunException

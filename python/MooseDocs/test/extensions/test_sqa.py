@@ -15,13 +15,13 @@ import collections
 import itertools
 import moosesqa
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, floats, autolink, heading, civet, sqa, table
+from MooseDocs.extensions import core, command, floats, autolink, heading, civet, sqa, table, modal
 from MooseDocs import base
 from MooseDocs.tree import pages
 logging.basicConfig()
 
 class TestSQARequirementsAST(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -37,15 +37,14 @@ class TestSQARequirementsAST(MooseDocsTestCase):
     def testASTSpecLink(self):
         text = "!sqa requirements category=Demo link=True link-spec=True link-design=False link-issues=False link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
-
         self._assertAST_common(ast(0))
-        self.assertSize(ast, 18)
-        for i in range(1, 13):
-            self.assertToken(ast(i), 'ModalLink')
+        self._assertAST_tree(ast(1))
 
-        self._assertAST_tree(ast(13))
-        for i in range(14, 18):
-            self.assertToken(ast(i), 'ModalLink')
+        for i in range(1, 4):
+            self.assertToken(ast(0,i,1), 'Paragraph', size=2)
+            self.assertToken(ast(0,i,1,0), 'String', content='Specification(s): ')
+            self.assertToken(ast(0,i,1,1), 'ModalLink')
+            self.assertEqual(ast(0,i,1,1)['content'].name, 'Code')
 
     def testASTDesignLink(self):
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=True link-issues=False link-prerequisites=False link-collections=False link-types=False"
@@ -155,7 +154,7 @@ class TestSQARequirementsAST(MooseDocsTestCase):
             self.assertToken(ast(i+5)(0)(4), 'Word', size=0, content=s)
 
 class TestSQAVerificationAndValidation(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -208,7 +207,7 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(2)(2)(3), 'AutoLink', page='bibtex.md')
 
 class TestSQARequirementsCrossReference(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
     NodeProxy = collections.namedtuple('NodeProxy', 'local')
 
     def setupExtension(self, ext):
@@ -221,7 +220,7 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
     def testCommand(self, mock_find_page):
         text = "!sqa cross-reference category=Demo"
         ast = self.tokenize(text)
-        self.assertSize(ast, 19)
+        self.assertSize(ast, 3)
         self.assertToken(ast(0), 'SQARequirementMatrix', size=7)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo', size=1)
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='core.md', size=0)
@@ -234,13 +233,13 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
 
         self.assertToken(ast(0)(1)(1), 'Paragraph', size=2)
         self.assertToken(ast(0)(1)(1)(0), 'String', content='Specification(s): ')
-        self.assertToken(ast(0)(1)(1)(1), 'Link', size=1, string='r0')
+        self.assertToken(ast(0)(1)(1)(1), 'ModalLink', size=1, string='r0')
 
         self.assertToken(ast(0)(1)(2), 'SQARequirementDesign', size=0, design=['core.md'])
         self.assertToken(ast(0)(1)(3), 'SQARequirementIssues', size=0, issues=['#1234'])
 
 class TestSQADependencies(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -260,7 +259,7 @@ class TestSQADependencies(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='sqa/Demo2_foo.md', optional=True, warning=True)
 
 class TestSQADependenciesWithConfig(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -281,7 +280,7 @@ class TestSQADependenciesWithConfig(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='sqa/Demo2_foo.md', optional=True, warning=True)
 
 class TestSQADocument(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -296,7 +295,7 @@ class TestSQADocument(MooseDocsTestCase):
         self.assertToken(ast(0), 'AutoLink', page='sqa/Demo_foo.md', optional=True, warning=True)
 
 class TestSQARequirementsRender(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:
@@ -584,7 +583,7 @@ class TestSQARequirementsRender(MooseDocsTestCase):
         self.assertLatex(res(0), 'Command', 'section*', string='F1:~')
 
 class TestSQARequiremetnsWithCollectionsAndTypesAST(MooseDocsTestCase):
-    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table]
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
 
     def setupExtension(self, ext):
         if ext == sqa:

@@ -17,4 +17,15 @@
     issues = '#15944 #15936 #15823'
     design = 'FancyExtruderGenerator.md'
   []
+  [extruder_then_parsed_gen_sideset]
+    type = 'Exodiff'
+    input = fancy_extruder_then_parsed_gen_sideset.i
+    cli_args = '--mesh-only'
+    exodiff = 'fancy_extruder_then_parsed_gen_sideset_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to use the result from FancyExtruderGenerator in subsequent mesh generators'
+    design = 'FancyExtruderGenerator.md'
+    issues = '#16902'
+  []
 []

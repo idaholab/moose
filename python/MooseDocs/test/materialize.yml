@@ -47,6 +47,7 @@ Extensions:
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pdf: default
     MooseDocs.extensions.pysyntax: default
+    MooseDocs.extensions.modal: default
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:

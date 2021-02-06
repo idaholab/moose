@@ -30,6 +30,7 @@ def make_extension(**kwargs):
 
 
 Section = tokens.newToken('Section')
+
 Word = tokens.newToken('Word', content='')
 Space = tokens.newToken('Space', count=1)
 Break = tokens.newToken('Break', count=1)

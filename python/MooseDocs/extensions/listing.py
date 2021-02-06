@@ -15,7 +15,7 @@ from .. import common
 from ..common import exceptions
 from ..base import LatexRenderer
 from ..tree import tokens, latex
-from . import core, command, floats
+from . import core, command, floats, modal
 
 Listing = tokens.newToken('Listing', floats.Float)
 ListingCode = tokens.newToken('ListingCode', core.Code)
@@ -37,7 +37,7 @@ class ListingExtension(command.CommandExtension):
         return config
 
     def extend(self, reader, renderer):
-        self.requires(core, command, floats)
+        self.requires(core, command, floats, modal)
         self.addCommand(reader, LocalListingCommand())
         self.addCommand(reader, FileListingCommand())
         self.addCommand(reader, InputListingCommand())
@@ -93,8 +93,8 @@ class FileListingCommand(LocalListingCommand):
     @staticmethod
     def defaultSettings():
         settings = LocalListingCommand.defaultSettings()
+        settings['link'] = (True, "Show the complete file via a link; overridden by SourceExtension")
         settings.update(common.extractContentSettings())
-        settings['link'] = (None, "Include a link to the filename after the listing.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -118,27 +118,8 @@ class FileListingCommand(LocalListingCommand):
         else:
             code.name = 'ListingCode' #TODO: Find a better way
 
-        # Add bottom modal
-        link = self.settings['link']
-        link = link if link is not None else self.extension['modal-link']
-        if link:
-            rel_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
-
-            # Get the complete file
-            content = common.read(filename)
-            settings = common.get_settings_as_dict(common.extractContentSettings())
-            settings['strip-header'] = False
-            content, _ = common.extractContent(content, settings)
-
-            # Create modal for display the files a popup
-            code = core.Code(None, language=lang, content=content)
-            link = floats.create_modal_link(flt,
-                                            url=str(rel_filename),
-                                            content=code,
-                                            title=str(filename),
-                                            string='({})'.format(rel_filename))
-            link.name = 'ListingLink'
-            link['data-tooltip'] = str(rel_filename)
+        if self.settings['link']:
+            modal.ModalSourceLink(flt, src=filename)
 
         return parent
 

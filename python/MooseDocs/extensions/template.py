@@ -148,7 +148,7 @@ class RenderTemplateField(components.RenderComponent):
         pass
 
     def createMaterialize(self, parent, token, page):
-        self._renderField(parent, token, page, True)
+        self._renderField(parent, token, page)
 
     def createLatex(self, parent, token, page):
         self._renderField(parent, token, page, False)
@@ -184,29 +184,19 @@ class RenderTemplateField(components.RenderComponent):
         filename = page.local
         key = token['key']
         err = alert.AlertToken(None, brand='error')
-        alert_title = alert.AlertTitle(err,
-                                       brand='error',
+        alert_title = alert.AlertTitle(err, icon_name='error', brand='error',
                                        string='Missing Template Item: "{}"'.format(key))
         alert_content = alert.AlertContent(err, brand='error')
         token.copyToToken(alert_content)
 
-        if modal_flag:
-            modal_content = tokens.Token(None)
-            core.Paragraph(modal_content,
-                           string="The document must include the \"{0}\" template item, this can "\
-                           "be included by add adding the following to the markdown " \
-                           "file ({1}):".format(key, filename))
+        core.Paragraph(alert_content,
+                       string="The document must include the \"{0}\" template item, this can "\
+                       "be included by add adding the following to the markdown " \
+                       "file ({1}):".format(key, filename))
 
-            core.Code(modal_content,
-                      content="!template! item key={0}\nInclude text (in MooseDocs format) " \
-                      "regarding the \"{0}\" template item here.\n" \
-                      "!template-end!".format(key))
-
-            link = floats.create_modal_link(alert_title,
-                                            title='Missing Template Item "{}"'.format(key),
-                                            content=modal_content)
-            materialicon.Icon(link, icon='help_outline',
-                              class_='small',
-                              style='float:right;color:white;margin-bottom:5px;')
+        core.Code(alert_content,
+                  content="!template! item key={0}\nInclude text (in MooseDocs format) " \
+                  "regarding the \"{0}\" template item here.\n" \
+                  "!template-end!".format(key))
 
         self.renderer.render(parent, err, page)

@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#11217 #16584'
+  design = 'StatisticsReporter.md'
+
+  [tests]
+    requirement = 'The system shall be capable of computing the statistics of a data vector that'
+
+    [replicated]
+      type = 'JSONDiff'
+      input = 'statistics.i'
+      jsondiff = 'statistics_out.json'
+      allow_test_objects = true
+
+      detail = 'is replicated and'
+    []
+
+    [distributed]
+      type = 'JSONDiff'
+      input = 'statistics_distributed.i'
+      jsondiff = 'statistics_distributed_out.json'
+      min_parallel = 3
+      max_parallel = 3
+      allow_test_objects = true
+
+      detail = 'distributed.'
+    []
+  []
+[]

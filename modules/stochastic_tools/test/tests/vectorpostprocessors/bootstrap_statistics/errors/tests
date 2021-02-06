@@ -1,35 +1,35 @@
 [Tests]
-  design = Statistics.md
-  issues = '#14409'
+  [no_ci_levels]
+    type = RunException
+    input = error.i
+    cli_args = "VectorPostprocessors/stats/ci_levels=''"
+    expect_err = "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be "
+                 "supplied with values in \(0, 0.5\]"
 
-  [errors]
-    requirement = "The system shall error when computing confidence level intervals when"
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
+  []
 
-    [no_ci_levels]
-      type = RunException
-      input = error.i
-      cli_args = "VectorPostprocessors/stats/ci_levels=''"
-      expect_err = "If the 'ci_method' parameter is supplied then the 'ci_levels' must also be supplied with values in \(0, 0.5\]"
+  [ci_levels_zero]
+    type = RunException
+    input = error.i
+    cli_args = "VectorPostprocessors/stats/ci_levels='0'"
+    expect_err = "The supplied levels must be greater than zero"
 
-      detail = "the confidence level intervals are omitted;"
-    []
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
+  []
 
-    [ci_levels_zero]
-      type = RunException
-      input = error.i
-      cli_args = "VectorPostprocessors/stats/ci_levels='0'"
-      expect_err = "The supplied levels must be greater than zero"
+  [ci_levels_one]
+    type = RunException
+    input = error.i
+    cli_args = "VectorPostprocessors/stats/ci_levels='1'"
+    expect_err = "The supplied levels must be less than or equal to 0\.5"
 
-      detail = "the confidence level intervals are omitted;"
-    []
-
-    [ci_levels_one]
-      type = RunException
-      input = error.i
-      cli_args = "VectorPostprocessors/stats/ci_levels='1'"
-      expect_err = "The supplied levels must be less than or equal to 0\.5"
-
-      detail = "the confidence level intervals are out of range."
-    []
+    allow_deprecated = true
+    no_error_deprecated = true
+    deprecated = true # SQA
   []
 []

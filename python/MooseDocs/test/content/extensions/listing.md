@@ -101,7 +101,7 @@ Remove the `issues` and `design` parameters:
 !listing moose/test/tests/kernels/simple_diffusion/tests
          remove=/Tests/test/issues Tests/test/design
 
-Extract the `[BCs]` block then remove the `[left]` block and the `value` parameter:   
+Extract the `[BCs]` block then remove the `[left]` block and the `value` parameter:
 
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
          block=BCs
