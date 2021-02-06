@@ -40,26 +40,17 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
 ADReal
 PINSFVEnergyDiffusion::computeQpResidual()
 {
-  /// Interpolate thermal conductivity on the face
-  ADReal k_face;
+  // Interpolate thermal conductivity times porosity on the face
+  ADReal k_eps_face;
   interpolate(Moose::FV::InterpMethod::Average,
-              k_face,
-              _k_elem[_qp],
-              _k_neighbor[_qp],
+              k_eps_face,
+              _k_elem[_qp] * _eps[_qp],
+              _k_neighbor[_qp] * _eps_neighbor[_qp],
               *_face_info,
               true);
 
-  /// Compute porosity on the face
-  ADReal eps_face;
-  interpolate(Moose::FV::InterpMethod::Average,
-              eps_face,
-              _eps[_qp],
-              _eps_neighbor[_qp],
-              *_face_info,
-              true);
-
-  /// Compute the temperature gradient dotted with the surface normal
+  // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();
 
-  return - eps_face * k_face * dTdn;
+  return - k_eps_face * dTdn;
 }

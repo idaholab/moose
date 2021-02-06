@@ -23,5 +23,5 @@ protected:
   /// the density
   const Real & _rho;
   /// the time derivative of the porosity
-  const ADVariableValue & _eps_dot;
+  const VariableValue & _eps_dot;
 };
