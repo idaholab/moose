@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class WallDistanceMixingLengthAux;
-
-template <>
-InputParameters validParams<WallDistanceMixingLengthAux>();
-
 class WallDistanceMixingLengthAux : public AuxKernel
 {
 public:

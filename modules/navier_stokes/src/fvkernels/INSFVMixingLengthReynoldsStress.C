@@ -76,9 +76,8 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  // Compute the normalized velocity gradient.  This is evaluated as
-  // sqrt( nabla^2 u + nabla^2 v + nabla^2 w )
-  auto grad_u = _u_var->adGradSln(*_face_info);
+  // Compute the normalized velocity gradient.
+  const auto & grad_u = _u_var->adGradSln(*_face_info);
   ADReal velocity_gradient = grad_u(0) * grad_u(0);
   if (_dim >= 2)
   {

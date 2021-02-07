@@ -15,8 +15,8 @@ procedure. In this procedure, all of the relevant variables are decomposed into
 an average value and a fluctuating value. For example, velocity will be
 decomposed as $\bm{v} = \overline{\bm{v}} + \bm{v}'$ where $\overline{\bm{v}}$
 is the average value and $\bm{v}'$ is the fluctuating component. It is difficult
-to rigorously define what is meant by ``average'' and what is meant by
-``fluctuating'', but these concepts can be roughly defined as: the average
+to rigorously define what is meant by "average" and what is meant by
+"fluctuating", but these concepts can be roughly defined as: the average
 component is the component that we intend to explicitly resolve with the
 numerical solver and the fluctuating component is the remainder which varies on
 a scale that is smaller than the solver mesh size and/or faster than the solver
