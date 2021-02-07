@@ -245,9 +245,8 @@ velocity_interp_method='average'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  # preconditioner chosen for repeatability, for performance use asm or others
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      200                lu           NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
 []

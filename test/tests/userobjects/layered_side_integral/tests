@@ -13,6 +13,7 @@
     input = 'layered_side_integral_fv.i'
     exodiff = 'layered_side_integral_fv_out.e'
     requirement = "MOOSE shall correctly compute layered integrals of finite volume variables along a specified boundary."
+    ad_indexing_type = 'global'
   [../]
 
   [./average]
@@ -34,6 +35,7 @@
     input = 'layered_side_flux_average_fv.i'
     exodiff = 'layered_side_flux_average_fv_out.e'
     requirement = "MOOSE shall allow taking averages of the diffusive flux of finite volume variables along a coordinate axis in layers on a boundary."
+    ad_indexing_type = 'global'
   [../]
 
   [./layered_side_average_error_check]
