@@ -5,6 +5,8 @@
     input = 'grain_motion.i'
     exodiff = 'grain_motion_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./grain_forcedensity]
@@ -19,6 +21,8 @@
     input = 'grain_motion2.i'
     exodiff = 'grain_motion2_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./grain_motion_faux]
@@ -26,6 +30,8 @@
     input = 'grain_motion_fauxGT.i'
     exodiff = 'grain_motion_fauxGT_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./grain_appliedforcedensity]
@@ -33,6 +39,8 @@
     input = 'grain_appliedforcedensity.i'
     exodiff = 'grain_appliedforcedensity_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./grain_forcesum]
@@ -47,6 +55,8 @@
     input = 'grain_maskedforce.i'
     exodiff = 'grain_maskedforce_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./polycrystal_action]
@@ -54,6 +64,8 @@
     input = 'polycrystal_action.i'
     exodiff = 'polycrystal_action_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./euler_angles_updater]
@@ -61,6 +73,8 @@
     input = 'update_orientation.i'
     exodiff = 'update_orientation_out.e'
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 
   [./euler_angles_updater_check]
@@ -69,5 +83,7 @@
     csvdiff = 'update_orientation_verify_out_angle_check_0001.csv'
     rel_err = 1.e-3
     allow_warnings = true
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 []
