@@ -14,7 +14,7 @@ registerMooseObject("NavierStokesApp", PINSFVMomentumFriction);
 InputParameters
 PINSFVMomentumFriction::validParams()
 {
-  InputParameters params = INSFVGravityForce::validParams();
+  InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a friction force term on fluid in porous media in the "
                              "Navier Stokes i-th momentum equation.");
   params.addRequiredRangeCheckedParam<unsigned int>("component",
