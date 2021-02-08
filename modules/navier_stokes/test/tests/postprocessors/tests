@@ -23,9 +23,8 @@
     csvdiff =  straight_INSFV.csv
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
-    cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV'"
+    cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu -pc_factor_shift_type NONZERO"
     ad_indexing_type = 'global'
-    skip = '#16918'
   []
   [fv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
