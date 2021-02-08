@@ -1,5 +1,9 @@
-mu=1.1
-rho=1.1
+mu=1
+rho=1
+k=1e-3
+cp=1
+u_inlet=1
+T_inlet=200
 advected_interp_method='average'
 velocity_interp_method='rc'
 
@@ -8,11 +12,11 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 5
+    xmax = 10
     ymin = 0
-    ymax = 1
-    nx = 20
-    ny = 10
+    ymax = 2
+    nx = 100
+    ny = 20
   []
 []
 
@@ -22,7 +26,7 @@ velocity_interp_method='rc'
 []
 
 [Variables]
-  inactive = 'lambda'
+  inactive = 'temp_solid'
   [u]
     type = PINSFVVelocityVariable
     initial_condition = 1
@@ -34,13 +38,23 @@ velocity_interp_method='rc'
   [pressure]
     type = INSFVPressureVariable
   []
-  [lambda]
-    family = SCALAR
-    order = FIRST
+  [temperature]
+    type = INSFVEnergyVariable
+  []
+  [temp_solid]
+    family = 'MONOMIAL'
+    order = 'CONSTANT'
+    fv = true
   []
 []
 
 [AuxVariables]
+  [temp_solid]
+    family = 'MONOMIAL'
+    order = 'CONSTANT'
+    fv = true
+    initial_condition = 100
+  []
   [porosity]
     family = MONOMIAL
     order = CONSTANT
@@ -50,7 +64,7 @@ velocity_interp_method='rc'
 []
 
 [FVKernels]
-  inactive = 'mean-pressure'
+  inactive = 'solid_energy_diffusion solid_energy_convection'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -120,21 +134,57 @@ velocity_interp_method='rc'
     porosity = porosity
   []
 
-  [mean-pressure]
-    type = FVScalarLagrangeMultiplier
-    variable = pressure
-    lambda = lambda
-    phi0 = 0.01
+  [energy_advection]
+    type = PINSFVEnergyAdvection
+    variable = temperature
+    vel = 'velocity'
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
+  []
+  [energy_diffusion]
+    type = PINSFVEnergyDiffusion
+    k = ${k}
+    variable = temperature
+    porosity = porosity
+  []
+  [energy_convection]
+    type = PINSFVEnergyConvection
+    variable = temperature
+    is_solid = false
+    temp_fluid = temperature
+    temp_solid = temp_solid
+    h_solid_fluid = 'h_cv'
+    porosity = porosity
+  []
+
+  [solid_energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = temp_solid
+  []
+  [solid_energy_convection]
+    type = PINSFVEnergyConvection
+    variable = temp_solid
+    is_solid = true
+    temp_fluid = temperature
+    temp_solid = temp_solid
+    h_solid_fluid = 'h_cv'
+    porosity = porosity
   []
 []
 
 [FVBCs]
-  inactive = 'symmetry-u symmetry-v symmetry-p no-slip-u no-slip-v inlet-p outlet-p-novalue outlet-u outlet-v'
+  inactive = 'heated-side'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = '1'
+    function = ${u_inlet}
   []
   [inlet-v]
     type = INSFVInletVelocityBC
@@ -142,35 +192,30 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [inlet-p]
-    type = INSFVOutletPressureBC
+  [inlet-T]
+    type = FVNeumannBC
+    variable = temperature
+    value = ${fparse u_inlet * rho * cp * T_inlet}
     boundary = 'left'
-    variable = pressure
-    function = 1
-  []
-
-  [free-slip-u]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
-    variable = u
-  []
-  [free-slip-v]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
-    variable = v
   []
 
   [no-slip-u]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = u
     function = 0
   []
   [no-slip-v]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = v
     function = 0
+  []
+  [heated-side]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = 'temp_solid'
+    value = 150
   []
 
   [symmetry-u]
@@ -205,51 +250,31 @@ velocity_interp_method='rc'
     variable = pressure
     function = 0
   []
-  [outlet-p-novalue]
-    type = INSFVMassAdvectionOutflowBC
-    boundary = 'right'
-    variable = pressure
-    u = u
-    v = v
-    rho = ${rho}
-  []
-  [outlet-u]
-    type = INSFVMomentumAdvectionOutflowBC
-    boundary = 'right'
-    variable = u
-    vel = velocity
-    u = u
-    v = v
-  []
-  [outlet-v]
-    type = INSFVMomentumAdvectionOutflowBC
-    boundary = 'right'
-    variable = v
-    vel = velocity
-    u = u
-    v = v
-  []
 []
 
 [Materials]
+  [const]
+    type = ADGenericConstantMaterial
+    prop_names = 'cp h_cv'
+    prop_values = '${cp} 1'
+  []
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
+    temperature = 'temperature'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  # Executioner chosen for repeatability, consider asm or others for performance
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-11
-  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-12
 []
 
 # Some basic Postprocessors to visually examine the solution
@@ -264,8 +289,18 @@ velocity_interp_method='rc'
     variable = u
     boundary = 'right'
   []
+  [outlet-temp]
+    type = SideIntegralVariablePostprocessor
+    variable = temperature
+    boundary = 'right'
+  []
+  [solid-temp]
+    type = ElementAverageValue
+    variable = temp_solid
+  []
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []

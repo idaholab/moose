@@ -1,0 +1,120 @@
+[Tests]
+  issues = '#16756'
+  design = 'navier_stokes/pinsfv.md'
+  [free-slip]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a porous media channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc'"
+  []
+  [free-slip-rz]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-rz_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a porous media cylindrical channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
+    ad_indexing_type = 'global'
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-rz'"
+  []
+  [no-slip]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/inactive='free-slip-u free-slip-v symmetry-u symmetry-v symmetry-p inlet-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip'"
+  []
+  [no-slip-pressure-driven]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-delta-pressure_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/inactive='inlet-u inlet-v free-slip-u free-slip-v symmetry-u symmetry-v symmetry-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip-delta-pressure'"
+  []
+  [no-slip-pressure-average]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-mean-pressure_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a set mean pressure; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Variables/inactive='' FVKernels/inactive='' FVBCs/inactive='free-slip-u free-slip-v symmetry-u symmetry-v symmetry-p inlet-p outlet-p' Outputs/file_base='rc-no-slip-mean-pressure'"
+  []
+  [no-slip-average]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-average-velocity_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel using an average interpolation for velocity; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "velocity_interp_method='average' FVBCs/inactive='free-slip-u free-slip-v symmetry-u symmetry-v symmetry-p inlet-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip-average-velocity'"
+  []
+  [no-slip-match]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-match-insfv_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a porosity of 1; specifically, it should match a regular INSFV simulation results.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "AuxVariables/porosity/initial_condition=1 FVBCs/inactive='free-slip-u free-slip-v symmetry-u symmetry-v symmetry-p inlet-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip-match-insfv'"
+  []
+  [symmetry]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-symmetry_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/inactive='free-slip-u free-slip-v inlet-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip-symmetry'"
+  []
+  [symmetry-rz]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = rc-no-slip-rz-symmetry_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a cylindrical porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/inactive='free-slip-u free-slip-v inlet-p outlet-p-novalue outlet-u outlet-v' Outputs/file_base='rc-no-slip-symmetry-rz'"
+  []
+  [heated]
+    type = 'Exodiff'
+    input = 2d-rc-heated.i
+    exodiff = rc-heated_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium.'
+    ad_indexing_type = 'global'
+    design = 'INSFVScalarFieldAdvection.md'
+    cli_args = "Outputs/file_base='rc-heated'"
+  []
+  [heated-rz]
+    type = 'Exodiff'
+    input = 2d-rc-heated.i
+    exodiff = rc-heated-rz_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium in rz geometry.'
+    ad_indexing_type = 'global'
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
+  []
+  [heated-solid-fluid]
+    type = 'Exodiff'
+    input = 2d-rc-heated.i
+    exodiff = rc-heated-solid-fluid_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium, modeling both fluid and solid temperature.'
+    ad_indexing_type = 'global'
+    cli_args = "Variables/inactive='' AuxVariables/inactive='temp_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+  []
+[]
