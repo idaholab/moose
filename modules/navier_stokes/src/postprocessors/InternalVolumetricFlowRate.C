@@ -82,6 +82,7 @@ InternalVolumetricFlowRate::computeQpIntegral()
     mooseAssert(
         !fi->isBoundary(),
         "Use VolumetricFlowRate instead of InternalVolumetricFlowRate for domain boundaries");
+    const bool current_elem_is_fi_elem = (_current_elem == &fi->elem());
 
     const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
 
@@ -118,7 +119,7 @@ InternalVolumetricFlowRate::computeQpIntegral()
                              MetaPhysicL::raw_value(advected_variable_neighbor),
                              RealVectorValue(vx_face, vy_face, vz_face),
                              *fi,
-                             true);
+                             current_elem_is_fi_elem);
     }
     else if (_advected_mat_prop_supplied)
     {
@@ -129,7 +130,7 @@ InternalVolumetricFlowRate::computeQpIntegral()
                              MetaPhysicL::raw_value(_advected_material_property_neighbor[_qp]),
                              RealVectorValue(vx_face, vy_face, vz_face),
                              *fi,
-                             true);
+                             current_elem_is_fi_elem);
     }
     else
       advected_quantity = 1;
