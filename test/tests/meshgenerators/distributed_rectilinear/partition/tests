@@ -8,7 +8,7 @@
     min_parallel = 3
     max_parallel = 3
     exodiff = 'squarish_partition_out.e'
-    requirement = "The system shall be able to generate squarish partition for a 2D distributed generated mesh using 3 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 2D distributed generated mesh using 3 processors."
   []
 
   [2D_4]
@@ -18,7 +18,7 @@
     max_parallel = 4
     exodiff = 'squarish_partition_out_4.e'
     cli_args = 'Outputs/file_base="squarish_partition_out_4"'
-    requirement = "The system shall be able to generate squarish partition for a 2D distributed generated mesh using 4 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 2D distributed generated mesh using 4 processors."
   []
 
   [2D_6]
@@ -28,7 +28,7 @@
     max_parallel = 6
     exodiff = 'squarish_partition_out_6.e'
     cli_args = 'Outputs/file_base="squarish_partition_out_6"'
-    requirement = "The system shall be able to generate squarish partition for a 2D distributed generated mesh using 6 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 2D distributed generated mesh using 6 processors."
   []
 
   [1D_3]
@@ -38,7 +38,7 @@
     max_parallel = 3
     exodiff = 'squarish_partition_out_1D_3.e'
     cli_args = 'Mesh/gmg/dim=1 Outputs/file_base="squarish_partition_out_1D_3"'
-    requirement = "The system shall be able to generate squarish partition for a 1D distributed generated mesh using 3 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 1D distributed generated mesh using 3 processors."
   []
 
   [1D_4]
@@ -48,7 +48,7 @@
     max_parallel = 4
     exodiff = 'squarish_partition_out_1D_4.e'
     cli_args = 'Mesh/gmg/dim=1 Outputs/file_base="squarish_partition_out_1D_4"'
-    requirement = "The system shall be able to generate squarish partition for a 1D distributed generated mesh using 4 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 1D distributed generated mesh using 4 processors."
   []
 
   [3D_3]
@@ -58,7 +58,7 @@
     max_parallel = 3
     exodiff = 'squarish_partition_out_3D_3.e'
     cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nz=10 Outputs/file_base="squarish_partition_out_3D_3"'
-    requirement = "The system shall be able to generate squarish partition for a 3D distributed generated mesh using 3 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 3D distributed generated mesh using 3 processors."
   []
 
   [3D_4]
@@ -68,7 +68,7 @@
     max_parallel = 4
     exodiff = 'squarish_partition_out_3D_4.e'
     cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nz=10  Outputs/file_base="squarish_partition_out_3D_4"'
-    requirement = "The system shall be able to generate squarish partition for a 3D distributed generated mesh using 4 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 3D distributed generated mesh using 4 processors."
   []
 
   [3D_8]
@@ -78,7 +78,7 @@
     max_parallel = 8
     exodiff = 'squarish_partition_out_3D_8.e'
     cli_args = 'Mesh/gmg/dim=3 Mesh/gmg/nz=10  Outputs/file_base="squarish_partition_out_3D_8"'
-    requirement = "The system shall be able to generate squarish partition for a 3D distributed generated mesh using 8 processors"
+    requirement = "The system shall be able to generate a squarish partition for a 3D distributed generated mesh using 8 processors."
   []
 
 []

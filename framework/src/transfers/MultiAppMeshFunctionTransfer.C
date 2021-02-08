@@ -131,10 +131,10 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
             {
               // <system id, node id>
               std::pair<unsigned int, dof_id_type> key(i_to, node->id());
-              // <pid, <key>> --> point id
+              // map a tuple of pid, problem id and node id to point id
               // point id is counted from zero
               point_index_map[i_proc][key] = outgoing_points[i_proc].size();
-              // pid --> points
+              // map pid to points
               outgoing_points[i_proc].push_back(*node + _to_positions[i_to]);
               point_found = true;
             }
@@ -206,7 +206,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   }
 
   // Get the local bounding boxes for current processor.
-  // There could be more than one boxes because the number of local apps
+  // There could be more than one box because of the number of local apps
   // can be larger than one
   std::vector<BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
   {
@@ -262,32 +262,33 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
    * In that case, we'll try to use the value from the app with the lowest id.
    */
 
-  // Fill values and app ids for comming points
-  // We are responsible to compute values for these comming points
+  // Fill values and app ids for incoming points
+  // We are responsible to compute values for these incoming points
   auto gather_functor =
       [this, &local_meshfuns, &local_bboxes](
           processor_id_type /*pid*/,
-          const std::vector<Point> & coming_points,
-          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_comming_points) {
-        vals_ids_for_comming_points.resize(coming_points.size(), std::make_pair(OutOfMeshValue, 0));
-        for (MooseIndex(coming_points.size()) i_pt = 0; i_pt < coming_points.size(); ++i_pt)
+          const std::vector<Point> & incoming_points,
+          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points) {
+        vals_ids_for_incoming_points.resize(incoming_points.size(),
+                                            std::make_pair(OutOfMeshValue, 0));
+        for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
         {
-          Point pt = coming_points[i_pt];
+          Point pt = incoming_points[i_pt];
 
           // Loop until we've found the lowest-ranked app that actually contains
           // the quadrature point.
           for (MooseIndex(_from_problems.size()) i_from = 0;
                i_from < _from_problems.size() &&
-               vals_ids_for_comming_points[i_pt].first == OutOfMeshValue;
+               vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
                ++i_from)
           {
             if (local_bboxes[i_from].contains_point(pt))
             {
               // Use mesh funciton to compute interpolation values
-              vals_ids_for_comming_points[i_pt].first =
+              vals_ids_for_incoming_points[i_pt].first =
                   (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
               // Record problem ID as well
-              vals_ids_for_comming_points[i_pt].second = _local2global_map[i_from];
+              vals_ids_for_incoming_points[i_pt].second = _local2global_map[i_from];
             }
           }
         }

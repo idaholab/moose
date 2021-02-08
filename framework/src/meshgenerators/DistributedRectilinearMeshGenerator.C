@@ -874,10 +874,8 @@ DistributedRectilinearMeshGenerator::paritionSquarely<Edge2>(const dof_id_type n
 
   istarts[0] = 0;
   for (processor_id_type pid = 0; pid < num_procs; pid++)
-  {
     // Partition mesh evenly. The extra elements are assigned to the front processors
     istarts[pid + 1] = istarts[pid] + (nx / num_procs + ((nx % num_procs) > pid));
-  }
 }
 
 template <>
@@ -924,17 +922,13 @@ DistributedRectilinearMeshGenerator::paritionSquarely<Quad4>(const dof_id_type n
 
   istarts[0] = 0;
   for (processor_id_type pxid = 0; pxid < px; pxid++)
-  {
     // Partition elements evenly along x direction
     istarts[pxid + 1] = istarts[pxid] + nx / px + ((nx % px) > pxid);
-  }
 
   jstarts[0] = 0;
   for (processor_id_type pyid = 0; pyid < py; pyid++)
-  {
     // Partition elements evenly along y direction
     jstarts[pyid + 1] = jstarts[pyid] + (ny / py + ((ny % py) > pyid));
-  }
 }
 
 template <>
@@ -992,24 +986,18 @@ DistributedRectilinearMeshGenerator::paritionSquarely<Hex8>(const dof_id_type nx
 
   istarts[0] = 0;
   for (processor_id_type pxid = 0; pxid < px; pxid++)
-  {
     // Partition mesh evenly along x direction
     istarts[pxid + 1] = istarts[pxid] + nx / px + ((nx % px) > pxid);
-  }
 
   jstarts[0] = 0;
   for (processor_id_type pyid = 0; pyid < py; pyid++)
-  {
     // Partition mesh evenly along y direction
     jstarts[pyid + 1] = jstarts[pyid] + (ny / py + ((ny % py) > pyid));
-  }
 
   kstarts[0] = 0;
   for (processor_id_type pzid = 0; pzid < pz; pzid++)
-  {
     // Partition mesh evenly along z direction
     kstarts[pzid + 1] = kstarts[pzid] + (nz / pz + ((nz % pz) > pzid));
-  }
 }
 
 template <typename T>
@@ -1148,14 +1136,10 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
     }
   }
   else if (_partition_method == "graph")
-  {
     PetscExternalPartitioner::partitionGraph(
         comm, graph, {}, {}, num_procs, _num_parts_per_compute_node, _part_package, partition_vec);
-  }
   else
-  {
     mooseError("Unsupported partition method " + _partition_method);
-  }
 
   mooseAssert(partition_vec.size() == num_local_elems, " Invalid partition was generateed ");
 

@@ -6,8 +6,6 @@
     ny = 30
     partition = square
   []
-  # Only need when do recover
-  parallel_type = distributed
 []
 
 [Variables]
