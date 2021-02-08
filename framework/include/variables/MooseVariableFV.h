@@ -143,14 +143,9 @@ public:
     mooseError("phiLowerSize not supported by MooseVariableFVBase");
   }
 
-  virtual void computeElemValuesFace() override final
-  {
-    // mooseError("computeElemValuesFace not supported by MooseVariableFVBase");
-  }
-  virtual void computeNeighborValuesFace() override final
-  {
-    // mooseError("computeNeighborValuesFace not supported by MooseVariableFVBase");
-  }
+  virtual void computeElemValuesFace() override final;
+  virtual void computeNeighborValuesFace() override final;
+
   virtual void computeNeighborValues() override final
   {
     // mooseError("computeNeighborValues not supported by MooseVariableFVBase");
