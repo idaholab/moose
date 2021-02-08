@@ -142,10 +142,8 @@ SubChannel1PhaseProblem::computeWij(int iz)
   if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute crossflow quantities at the inlet of the assembly. They live from "
-               "node iz = 1 and "
-               "upwards, Axial Level = : ",
-               iz);
+               ": Cannot compute crossflow quantities at the inlet of the assembly. Boundary "
+               "conditions are applied here");
   }
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -273,11 +271,10 @@ SubChannel1PhaseProblem::computeSumWij(int iz)
 {
   if (iz == 0)
   {
-    mooseError(name(),
-               " Can't compute crossflow quantities at the inlet of the assembly. They live from "
-               "node iz = 1 and "
-               "upwards, Axial Level = : ",
-               iz);
+    mooseError(
+        name(),
+        ": Cannot compute sum of crossflow quantities at the inlet of the assembly. Boundary "
+        "conditions are applied here");
   }
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -301,10 +298,8 @@ SubChannel1PhaseProblem::computeMdot(int iz)
   if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute massflow in the inlet of the assembly it's a boundary condition, "
-               "lives from node 1 "
-               " upwards, Axial Level = : ",
-               iz);
+               ": Cannot compute massflow at the inlet of the assembly. Boundary conditions are "
+               "applied here");
   }
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
@@ -352,9 +347,8 @@ SubChannel1PhaseProblem::computeWijPrime(int iz)
   if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute turbulent crossflow in the inlet of the assembly it lives from node "
-               " 1 upwards, Axial Level = : ",
-               iz);
+               ": Cannot compute crossflow quantities at the inlet of the assembly. Boundary "
+               "conditions are applied here");
   }
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -395,9 +389,8 @@ SubChannel1PhaseProblem::computeDP(int iz)
   if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute Pressure drop at the inlet of the assembly, it exists for nodes 1 "
-               " and above, Axial Level = : ",
-               iz);
+               ": Cannot compute pressure drop at the inlet of the assembly. Boundary conditions "
+               "are applied here");
   }
   auto z_grid = _subchannel_mesh.getZGrid();
   auto dz = z_grid[iz] - z_grid[iz - 1];
@@ -485,15 +478,13 @@ SubChannel1PhaseProblem::computeDP(int iz)
 void
 SubChannel1PhaseProblem::computeP(int iz)
 {
-  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
-  if (iz == nz)
+  if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute Pressure in the outlet of the assembly, that's a boundary "
-               "condition, it lives from node nz - 1 "
-               " downwards, Axial Level = : ",
-               iz);
+               ": Cannot compute pressure at the outlet of the assembly. Boundary conditions are "
+               "applied here");
   }
+  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   // Calculate pressure in the inlet of the cell assuming known outlet
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -592,9 +583,8 @@ SubChannel1PhaseProblem::computeT(int iz)
   if (iz == 0)
   {
     mooseError(name(),
-               " Can't compute temperature in the inlet of the assembly, it's a boundary "
-               " condition, Axial Level = : ",
-               iz);
+               ": Cannot compute temperature at the inlet of the assembly. Boundary conditions are "
+               "applied here");
   }
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
