@@ -26,7 +26,7 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
-        reports:
-        categories:!include modules/fluid_properties/doc/sqa_reports.yml
+        reports: !include modules/fluid_properties/doc/sqa_reports.yml
+        categories:
             framework: !include framework/doc/sqa_framework.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml

@@ -29,4 +29,11 @@
 
     requirement = "The system shall include a utility for converting markdown documentation to other formats."
   []
+  [init]
+    type = PythonUnitTest
+    input = test_init.py
+    issues = '#16868'
+
+    requirement = "The system shall include a utility for initialize documentation items."
+  []
 []
