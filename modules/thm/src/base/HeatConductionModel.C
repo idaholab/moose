@@ -18,10 +18,10 @@ HeatConductionModel::validParams()
 
 registerMooseObject("THMApp", HeatConductionModel);
 
-const std::string HeatConductionModel::DENSITY = "rho_solid";
+const std::string HeatConductionModel::DENSITY = "density";
 const std::string HeatConductionModel::TEMPERATURE = "T_solid";
-const std::string HeatConductionModel::THERMAL_CONDUCTIVITY = "k_solid";
-const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "cp_solid";
+const std::string HeatConductionModel::THERMAL_CONDUCTIVITY = "thermal_conductivity";
+const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "specific_heat";
 
 FEType HeatConductionModel::_fe_type(FIRST, LAGRANGE);
 
