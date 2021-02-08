@@ -21,6 +21,13 @@
     custom_cmp = 'phy.sub_discretization.exodiff'
   [../]
 
+  [inner_radial_boundary]
+    type = CSVDiff
+    input = 'inner_radial_boundary.i'
+    csvdiff = 'inner_radial_boundary_out_test_vpp_0000.csv'
+    recover = false
+  []
+
   [./2nd_order]
     type = 'RunApp'
     input = '2nd_order.i'
