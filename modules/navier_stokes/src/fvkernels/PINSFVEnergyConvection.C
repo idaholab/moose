@@ -1,4 +1,4 @@
-#include "PINSFVHeatConvection.h"
+#include "PINSFVEnergyConvection.h"
 
 registerMooseObject("MooseApp", PINSFVEnergyConvection);
 
@@ -7,7 +7,8 @@ PINSFVEnergyConvection::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements the solid-fluid convection term.");
-  params.addRequiredParam<MaterialPropertyName>("h_fs", "Name of the convective heat transfer coefficient");
+  params.addRequiredCoupledVar("porosity", "Porosity variable");
+  params.addRequiredParam<MaterialPropertyName>("h_solid_fluid", "Name of the convective heat transfer coefficient");
   params.addRequiredParam<bool>("is_solid", "Kernel for the fluid or solid temperature ?");
   params.addRequiredCoupledVar("temp_fluid", "Fluid temperature");
   params.addRequiredCoupledVar("temp_solid", "Solid temperature");
@@ -16,6 +17,7 @@ PINSFVEnergyConvection::validParams()
 
 PINSFVEnergyConvection::PINSFVEnergyConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
+  _eps(coupledValue("porosity")),
   _h_solid_fluid(getADMaterialProperty<Real>("h_solid_fluid")),
   _temp_fluid(adCoupledValue("temp_fluid")),
   _temp_solid(adCoupledValue("temp_solid")),
@@ -26,5 +28,8 @@ PINSFVEnergyConvection::PINSFVEnergyConvection(const InputParameters & parameter
 ADReal
 PINSFVEnergyConvection::computeQpResidual()
 {
-  return (2 * _is_solid - 1) * _h_solid_fluid[_qp] * (_temp_fluid[_qp] - _temp_solid[_qp]);
+  if (_is_solid)
+    return -_h_solid_fluid[_qp] * (_temp_fluid[_qp] - _temp_solid[_qp]);
+  else
+    return _eps[_qp] * _h_solid_fluid[_qp] * (_temp_fluid[_qp] - _temp_solid[_qp]);
 }
