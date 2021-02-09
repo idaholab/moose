@@ -445,6 +445,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                   ? elem_one == &_face_info->elem() && elem_two == _face_info->neighborPtr()
                   : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
               "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
+  mooseAssert(elem_is_elem_one, "FVFluxKernel elem should coincide with the faceInfo elem.")
 
   if (onBoundary(*_face_info))
   {
