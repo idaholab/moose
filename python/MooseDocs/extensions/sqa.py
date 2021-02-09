@@ -165,7 +165,7 @@ class SQAExtension(command.CommandExtension):
         # Report for the entire app (e.g, moose/modules/doc)
         general_reports = self.get('reports')
         if general_reports is not None:
-            self.__reports['__empty__'] = moosesqa.get_sqa_reports(general_reports)
+            self.__reports['_empty_'] = moosesqa.get_sqa_reports(general_reports)
 
         # The following attempts to save computation time by avoiding re-computing the application
         # syntax for each report. This is done by extracting the syntax from the appsyntax extension
@@ -556,7 +556,7 @@ class SQAReportCommand(command.CommandComponent):
         return config
 
     def createToken(self, parent, info, page):
-        category = self.settings.get('category') or  '__empty__'
+        category = self.settings.get('category') or '_empty_'
         doc_reports, req_reports, app_reports = self.extension.reports(category)
         core.Heading(parent, string='Software Quality Status Report(s)', level=2)
         SQADocumentReportToken(parent, reports=doc_reports)
