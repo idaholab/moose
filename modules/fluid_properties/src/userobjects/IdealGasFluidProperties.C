@@ -138,6 +138,15 @@ IdealGasFluidProperties::c_from_p_T(Real /*p*/, Real T) const
   return std::sqrt(_cp * _R * T / (_cv * _molar_mass));
 }
 
+void
+IdealGasFluidProperties::c_from_p_T(
+    const Real /*p*/, const Real T, Real & c, Real & dc_dp, Real & dc_dT) const
+{
+  c = std::sqrt(_cp * _R * T / (_cv * _molar_mass));
+  dc_dp = 0;
+  dc_dT = 0.5 / c * _cp * _R / (_cv * _molar_mass);
+}
+
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
 
 void
