@@ -12,7 +12,7 @@
     zmin = 0
     zmax = 0
     elem_type = QUAD4
-    linear_partition = true
+    partition = linear
   []
 []
 
