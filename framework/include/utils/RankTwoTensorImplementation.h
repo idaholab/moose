@@ -971,15 +971,16 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
   typedef Eigen::Matrix<ADReal, N, N, Eigen::DontAlign> RankTwoMatrix;
   RankTwoMatrix self;
   for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
+    for (unsigned int j = i; j < N; ++j)
     {
-      auto & v = self(i, j);
+      auto & v = self(j, i);
       v = (*this)(i, j);
       if (i != j && MooseUtils::absoluteFuzzyEqual(v, 0.0))
         v.value() = 0.0;
     }
 
-  Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es(self);
+  Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es;
+  es.computeDirect(self);
 
   auto lambda = es.eigenvalues();
   eigvals.resize(N);
