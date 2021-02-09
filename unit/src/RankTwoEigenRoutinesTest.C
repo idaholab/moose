@@ -181,6 +181,56 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_consiste
     }
 }
 
+TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_finite_difference)
+{
+  const Real eps = 1e-8;
+  std::vector<ADRankTwoTensor> tests{{-7.1, 2.3, 5.7, -1.4, -5.1, 1.2},
+                                     {1, 1.01, 1.02, 0, 0.01, 0.02}};
+  // the test will fail for the following tensors, which result in degenerate derivatives
+  // {1,1, 1, 0, 0, 0},
+  // {2, 2, 1, 0, 0, 0},
+  // {1, 1, 1, 1, 1, 1}};
+  for (const auto & T : tests)
+  {
+    ADRankTwoTensor T1 = T;
+
+    // set component derivatives
+    unsigned int dd = 0;
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        Moose::derivInsert(T1(i, j).derivatives(), dd++, 1);
+    T1 = (T1 + T1.transpose()) * 0.5;
+
+    ADRankTwoTensor E1, E2;
+    std::vector<ADReal> e1, e2;
+    T1.symmetricEigenvaluesEigenvectors(e1, E1);
+
+    // probe all derivatives
+    dd = 0;
+    RankTwoTensor dT;
+    for (unsigned int ii = 0; ii < 3; ++ii)
+      for (unsigned int jj = 0; jj < 3; ++jj)
+      {
+        ADRankTwoTensor T2 = T;
+        T2(ii, jj) += eps;
+        T2 = (T2 + T2.transpose()) * 0.5;
+
+        T2.symmetricEigenvaluesEigenvectors(e2, E2);
+
+        for (unsigned int i = 0; i < 3; ++i)
+          EXPECT_NEAR(e1[i].derivatives()[dd], MetaPhysicL::raw_value(e2[i] - e1[i]) / eps, 1e-5);
+
+        for (unsigned int i = 0; i < 3; ++i)
+          for (unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(E1(i, j).derivatives()[dd],
+                        MetaPhysicL::raw_value(E2(i, j) - E1(i, j)) / eps,
+                        1e-5);
+
+        dd++;
+      }
+  }
+}
+
 TEST(RankTwoEigenRoutines, dsymmetricEigenvalues)
 {
   RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
