@@ -30,7 +30,5 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  MooseEnum _transform;
-  RealVectorValue _vector_value;
+  const MooseEnum _transform;
 };
-
