@@ -143,14 +143,9 @@ public:
     mooseError("phiLowerSize not supported by MooseVariableFVBase");
   }
 
-  virtual void computeElemValuesFace() override final
-  {
-    // mooseError("computeElemValuesFace not supported by MooseVariableFVBase");
-  }
-  virtual void computeNeighborValuesFace() override final
-  {
-    // mooseError("computeNeighborValuesFace not supported by MooseVariableFVBase");
-  }
+  virtual void computeElemValuesFace() override final;
+  virtual void computeNeighborValuesFace() override final;
+
   virtual void computeNeighborValues() override final
   {
     // mooseError("computeNeighborValues not supported by MooseVariableFVBase");
@@ -456,18 +451,24 @@ public:
                           const FaceInfo & fi,
                           const ADReal & elem_value) const;
 
-protected:
   /**
-   * @return whether \p fi is an internal face for this variable
-   */
-  bool isInternalFace(const FaceInfo & fi) const;
-
-  /**
+   * Compute or retrieve from cache the solution value on an internal face, using linear
+   * interpolation or interpolating from vertex values, depending on the stencil.
+   * @param neighbor The \p neighbor element that is on the other side of the FaceInfo
+   * @param fi The face information object
+   * @param elem_value The solution value on the "element". This value may be used for computing the
+   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
    * @return the face value on the internal face associated with \p fi
    */
   const ADReal & getInternalFaceValue(const Elem * const neighbor,
                                       const FaceInfo & fi,
                                       const ADReal & elem_value) const;
+
+protected:
+  /**
+   * @return whether \p fi is an internal face for this variable
+   */
+  bool isInternalFace(const FaceInfo & fi) const;
 
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable

@@ -113,6 +113,7 @@
     csvdiff = 'gray_lambert_cavity_automatic_vf_out.csv'
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject'
     design = 'ViewFactorObjectSurfaceRadiation.md'
+    mesh_mode = REPLICATED
   [../]
 
   [./gray_lambert_cavity_automatic_vf_3D]
@@ -121,5 +122,6 @@
     csvdiff = 'gray_lambert_cavity_automatic_vf_3D_out.csv'
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces when the view factors are provided by a userobject'
     design = 'ViewFactorObjectSurfaceRadiation.md'
+    mesh_mode = REPLICATED
   [../]
 []

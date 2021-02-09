@@ -1,0 +1,3 @@
+time,inlet_mass_constant,inlet_mass_matprop,inlet_momentum_x,inlet_momentum_y,mid1_mass,mid1_momentum_x,mid1_momentum_y,mid2_mass,mid2_momentum_x,mid2_momentum_y,outlet_mass,outlet_momentum_x,outlet_momentum_y
+0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,-0.93333333333333,-0.93333333333333,0,-0.92,0.93330557308471,-4.099749578994e-16,1.045293799404,0.9333334568173,-4.4061650049777e-16,1.0453337063302,0.93333333250502,4.3987764085435e-18,1.0453333313422

@@ -25,6 +25,9 @@
     type = CombinerGenerator
     inputs = 'left right'
   [../]
+
+  # For consistency with distributed mesh
+  allow_renumbering = false
 []
 
 [UserObjects]

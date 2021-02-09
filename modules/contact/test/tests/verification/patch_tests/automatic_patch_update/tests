@@ -18,6 +18,7 @@
     expect_err = "Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted set of elements. Increase the ghosting_patch_size parameter in the mesh block and try again."
     prereq = sliding_blocks
     min_parallel=2
+    mesh_mode = REPLICATED
     requirement = "The Contact system shall enforce that the nearest neighbor
                    node is inside the ghosted set of elements."
   [../]

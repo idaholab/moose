@@ -3,12 +3,16 @@
     type = 'Exodiff'
     input = '2species.i'
     exodiff = '2species_out.e'
+    # Diffs with parallel that aren't worth customizing tolerances over
+    max_parallel = 1
   [../]
   [./2species_without_action]
     type = 'Exodiff'
     input = '2species_without_action.i'
     exodiff = '2species_out.e'
     prereq = 2species
+    # Diffs with parallel that aren't worth customizing tolerances over
+    max_parallel = 1
   [../]
   [./calcite_precipitation]
     type = 'CSVDiff'

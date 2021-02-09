@@ -7,6 +7,7 @@
     exodiff = 'radiative_transfer_action_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
     petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
   [../]
 
   [./radiative_transfer_action_bnd_names]
@@ -20,6 +21,7 @@
     requirement = 'The system shall allow specifying boundary names and ids in the radiative heat transfer action'
     issues = '#15843'
     petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
   [../]
 
   [./radiative_transfer_no_action]
@@ -28,6 +30,7 @@
     exodiff = 'radiative_transfer_no_action_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
     petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
   [../]
 
   [./radiative_transfer_action_external_boundary]
@@ -36,5 +39,6 @@
     exodiff = 'radiative_transfer_action_external_boundary_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
     petsc_version = '>=3.9.4'
+    mesh_mode = REPLICATED
   [../]
 []

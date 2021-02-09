@@ -8,6 +8,8 @@
     # mooseWarning()
     allow_warnings = True
     check_input = True
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
   [./AC_CH_advection_constforce_rect]
     type = RunApp
@@ -17,6 +19,9 @@
     # mooseWarning()
     allow_warnings = True
     check_input = True
+
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
@@ -26,5 +31,7 @@
     # mooseWarning()
     allow_warnings = True
     check_input = True
+    # NonlocalKernel not compatible with distributed mesh
+    mesh_mode = REPLICATED
   [../]
 []

@@ -15,7 +15,7 @@
 []
 
 [AuxVariables]
-  [./layered_integral]
+  [./layered_side_flux_average]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -45,34 +45,51 @@
 []
 
 [AuxKernels]
-  [./liaux]
+  [./lsfa]
     type = SpatialUserObjectAux
-    variable = layered_integral
-    boundary = right
-    user_object = layered_integral
+    variable = layered_side_flux_average
+    boundary = top
+    user_object = layered_side_flux_average
+  [../]
+[]
+
+[Materials]
+  [./gcm]
+    type = GenericConstantMaterial
+    prop_values = 2
+    prop_names = diffusivity
+    boundary = 'right top'
   [../]
 []
 
 [UserObjects]
-  [./layered_integral]
-    type = LayeredSideIntegral
+  [./layered_side_flux_average]
+    type = LayeredSideFluxAverage
     direction = y
-    num_layers = 3
+    diffusivity = diffusivity
+    num_layers = 1
     variable = u
     execute_on = linear
-    boundary = right
+    boundary = top
   [../]
+[]
+
+[Executioner]
+  type = Steady
+  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-14
+  l_abs_tol = 1e-14
+  l_tol = 1e-6
 []
 
 [Problem]
   kernel_coverage_check = false
 []
 
-[Executioner]
-  type = Steady
+[Outputs]
+  exodus = true
 []
 
-[Outputs]
-  file_base = fv_out
-  exodus = true
+[Debug]
+  show_material_props = true
 []

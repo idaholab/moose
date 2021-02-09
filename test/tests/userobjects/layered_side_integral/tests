@@ -1,32 +1,41 @@
 [Tests]
-  design = 'userobject/LayeredSideIntegral.md'
+  design = 'userobject/LayeredSideIntegral.md userobject/LayeredSideAverage.md'
   issues = '#1289 #16099'
   [./test]
     type = 'Exodiff'
-    input = 'layered_side_integral_test.i'
-    exodiff = 'out.e'
-    requirement = "MOOSE shall correctly compute layered integrals along a specified boundary"
+    input = 'layered_side_integral.i'
+    exodiff = 'layered_side_integral_out.e'
+    requirement = "MOOSE shall correctly compute layered integrals along a specified boundary."
   [../]
 
   [./fv_test]
     type = 'Exodiff'
-    input = 'layered_side_integral_fv_test.i'
-    exodiff = 'fv_out.e'
-    requirement = "MOOSE shall correctly compute layered integrals of finite volume variables along a specified boundary"
+    input = 'layered_side_integral_fv.i'
+    exodiff = 'layered_side_integral_fv_out.e'
+    requirement = "MOOSE shall correctly compute layered integrals of finite volume variables along a specified boundary."
+    ad_indexing_type = 'global'
   [../]
 
   [./average]
     type = 'Exodiff'
     input = 'layered_side_average.i'
     exodiff = 'layered_side_average_out.e'
-    requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers on a boundary"
+    requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers on a boundary."
   [../]
 
   [./flux_average]
     type = 'Exodiff'
     input = 'layered_side_flux_average.i'
     exodiff = 'layered_side_flux_average_out.e'
-    requirement = "MOOSE shall allow taking averages of the flux of variables along a coordinate axis in layers on a boundary"
+    requirement = "MOOSE shall allow taking averages of the flux of variables along a coordinate axis in layers on a boundary."
+  [../]
+
+  [./flux_average_fv]
+    type = 'Exodiff'
+    input = 'layered_side_flux_average_fv.i'
+    exodiff = 'layered_side_flux_average_fv_out.e'
+    requirement = "MOOSE shall allow taking averages of the diffusive flux of finite volume variables along a coordinate axis in layers on a boundary."
+    ad_indexing_type = 'global'
   [../]
 
   [./layered_side_average_error_check]
@@ -34,6 +43,6 @@
     input = 'layered_side_average.i'
     cli_args = 'UserObjects/layered_side_average/block=0'
     expect_err = "Both block and boundary cannot be specified in LayeredSideIntegral. If you want to define the geometric bounds of the layers from a specified block set layer_bounding_block instead."
-    requirement = "MOOSE shall not allow both the block and boundary parameter to be specified for layered side integrals"
+    requirement = "MOOSE shall not allow both the block and boundary parameter to be specified for layered side integrals."
   [../]
 []

@@ -1,9 +1,16 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  construct_node_list_from_side_list = false
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+  []
+  [rename]
+    type = RenameBoundaryGenerator
+    input = gen
+    old_boundary = 'left'
+    new_boundary = 'renamed_left'
+  []
 []
 
 [Variables]

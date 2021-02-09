@@ -1,11 +1,18 @@
 [Tests]
+  design = 'SideFluxAverage.md'
   [./test]
     type = 'Exodiff'
     input = 'side_flux_average.i'
     exodiff = 'side_flux_average_out.e'
-
-    design = 'SideFluxAverage.md'
     issues = '#2201'
     requirement = 'The system shall be capable of computing the average of the integral through a specified boundary on the mesh.'
+  [../]
+  [./test_fv]
+    type = 'Exodiff'
+    input = 'side_flux_average_fv.i'
+    exodiff = 'side_flux_average_fv_out.e'
+    issues = '#2201 #16099'
+    requirement = 'The system shall be capable of computing the average of the diffusive flux integral of a finite volume variable through a specified boundary on the mesh.'
+    ad_indexing_type = 'global'
   [../]
 []

@@ -8,5 +8,6 @@
     requirement = 'The system shall assign a value of 1 for the derivative of abs(0) in order to avoid singular Jacobians in frictional mortar contact.'
     expect_out = '0 of 41 singular values'
     absent_out = '[1-9]+[0-9]* of 41 singular values'
+    mesh_mode = REPLICATED
   []
 []

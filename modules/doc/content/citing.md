@@ -24,7 +24,7 @@ keywords = {Framework, Finite-element, Parallel, Multiphysics, Multiscale}
 }
 ```
 
-If this application uses the MultApp system, please also cite the following.
+If this application uses the MultiApp system, please also cite the following.
 
 ```
 @article{gaston2015physics,
@@ -40,6 +40,26 @@ publisher = {Elsevier}
 }
 ```
 
+## Testing and/or Documentation
+
+If you are utilizing [!ac](CIVET) for testing or [MooseDocs](python/MooseDocs/index.md) for
+documentation, please also cite the following.
+
+```
+@article{slaughter2021continuous,
+author    = {Andrew E. Slaughter and Cody J.Permann and Jason M. Miller and Brian K. Alger and Stephen R. Novascone},
+title     = {Continuous Integration, In-Code Documentation, and Automation for Nuclear Quality Assurance Conformance},
+journal   = {Nuclear Technology},
+volume    = {0},
+number    = {0},
+pages     = {1--8},
+year      = {2021},
+publisher = {Taylor & Francis},
+doi       = {10.1080/00295450.2020.1826804},
+url       = {https://doi.org/10.1080/00295450.2020.1826804}
+}
+```
+
 ## Modules
 
 If you are using a physics module for your application, please cite the appropriate references
@@ -47,7 +67,7 @@ as listed here.
 
 ### Navier-Stokes
 
-If you use the incompressible portion of the Navier Stokes module, please cite:
+If you use the incompressible portion of the Navier-Stokes module, please cite:
 
 ```
 @article{peterson2018overview,
