@@ -259,6 +259,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     allow_test_objects = true
+    max_parallel = 1
     requirement = 'HorizonStabilizedFormISmallStrainMechanicsNOSPD shall provide the accurate residual
                    and jacobian for horizon-stabilized small-strain non-ordinary
                    state-based peridynamic mechanics model with arbitrarily broken bonds.'

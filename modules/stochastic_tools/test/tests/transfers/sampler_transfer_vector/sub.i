@@ -1,7 +1,18 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 10
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 10
+  []
+
+  # Give the far left element a block so that we can
+  # grab its value
+  [left_elem_block]
+    type = ParsedSubdomainMeshGenerator
+    input = gmg
+    combinatorial_geometry = 'x < 0.1'
+    block_id = 1
+  []
 []
 
 [Variables]
@@ -89,24 +100,24 @@
 
 [Postprocessors]
   [left_bc]
-    type = NodalVariableValue
+    type = PointValue
+    point = '0 0 0'
     variable = u
-    nodeid = 0
   []
   [right_bc]
-    type = NodalVariableValue
+    type = PointValue
+    point = '1 0 0'
     variable = u
-    nodeid = 10
   []
   [prop_a]
-    type = ElementalVariableValue
+    type = ElementAverageValue
     variable = prop_a
-    elementid = 0
+    block = 1
   []
   [prop_b]
-    type = ElementalVariableValue
+    type = ElementAverageValue
     variable = prop_b
-    elementid = 0
+    block = 1
   []
 []
 

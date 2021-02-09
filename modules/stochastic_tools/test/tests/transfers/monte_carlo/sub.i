@@ -52,13 +52,13 @@
 
 [Postprocessors]
   [left_bc]
-    type = NodalVariableValue
-    nodeid = 0
+    type = PointValue
+    point = '0 0 0'
     variable = u
   []
   [right_bc]
-    type = NodalVariableValue
-    nodeid = 10
+    type = PointValue
+    point = '1 0 0'
     variable = u
   []
 []

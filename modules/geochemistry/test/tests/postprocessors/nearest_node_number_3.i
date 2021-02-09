@@ -6,6 +6,9 @@
   ny = 1
   nx = 4
   xmax = 8
+
+  # For consistency with distributed mesh
+  allow_renumbering = false
 []
 
 [Adaptivity]
