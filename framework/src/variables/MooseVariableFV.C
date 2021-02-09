@@ -310,6 +310,22 @@ MooseVariableFV<OutputType>::computeElemValues()
 
 template <typename OutputType>
 void
+MooseVariableFV<OutputType>::computeElemValuesFace()
+{
+  _element_data->setGeometry(Moose::Face);
+  _element_data->computeValues();
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::computeNeighborValuesFace()
+{
+  _neighbor_data->setGeometry(Moose::Face);
+  _neighbor_data->computeValues();
+}
+
+template <typename OutputType>
+void
 MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
 {
   _element_data->setGeometry(Moose::Face);
