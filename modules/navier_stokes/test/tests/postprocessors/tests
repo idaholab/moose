@@ -35,7 +35,7 @@
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property,'
       ad_indexing_type = 'global'
-      cli_args = "velocity_interp_method='rc' Outputs/file_base='diverging_INSFV_quad_xy'"
+      cli_args = "Outputs/file_base='diverging_INSFV_quad_xy'"
     []
     [fv_quad_rz]
       type = CSVDiff
@@ -70,7 +70,7 @@
       csvdiff = diverging_INSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
-      cli_args = "velocity_interp_method='rc' advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind'"
+      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind'"
       ad_indexing_type = 'global'
     []
     [fv_quad_xy_noslip]
@@ -79,7 +79,7 @@
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
-      cli_args = "velocity_interp_method='rc' FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip' -pc_type lu -pc_factor_shift_type NONZERO"
+      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip' -pc_type lu -pc_factor_shift_type NONZERO"
       ad_indexing_type = 'global'
     []
   []
