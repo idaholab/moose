@@ -131,15 +131,12 @@ ConservedVarMaterial::computeQpProperties()
 
   _e[_qp] = _rhoE[_qp] / _rho[_qp] - (_velocity[_qp] * _velocity[_qp]) / 2;
 
-  Real dummy = 0;
   Real dTdvol = 0;
   Real dTde = 0;
   Real dpdvol = 0;
   Real dpde = 0;
   _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _e[_qp]);
   _pressure[_qp] = _fluid.p_from_v_e(_v[_qp], _e[_qp]);
-  _fluid.T_from_v_e(MetaPhysicL::raw_value(_v[_qp]), MetaPhysicL::raw_value(_e[_qp]), dummy, dTdvol, dTde);
-  _fluid.p_from_v_e(MetaPhysicL::raw_value(_v[_qp]), MetaPhysicL::raw_value(_e[_qp]), dummy, dpdvol, dpde);
 
   _enthalpy[_qp] = (_rhoE[_qp] + _pressure[_qp]) / _rho[_qp];
 
