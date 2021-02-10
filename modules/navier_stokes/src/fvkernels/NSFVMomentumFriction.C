@@ -18,11 +18,11 @@ NSFVMomentumFriction::validParams()
 
   params.addClassDescription("Implements a basic linear or quadratic friction model as "
                              "a volumetric force, for example for the X-momentum equation: "
-                             "F_x = - C * |v_x| (^2). The linear dependence "
-                             "is expected for laminar flow, while the quadratic dependence "
+                             "F_x = - C * v_x. A linear dependence "
+                             "is expected for laminar flow, while a quadratic dependence "
                              "is more common for turbulent flow.");
-  params.addParam<MaterialPropertyName>(
-      "linear_coef_name", "Linear friction coefficient name as a material property");
+  params.addParam<MaterialPropertyName>("linear_coef_name",
+                                        "Linear friction coefficient name as a material property");
   params.addParam<MaterialPropertyName>(
       "quadratic_coef_name", "Quadratic friction coefficient name as a material property");
   return params;
@@ -30,10 +30,12 @@ NSFVMomentumFriction::validParams()
 
 NSFVMomentumFriction::NSFVMomentumFriction(const InputParameters & parameters)
   : FVElementalKernel(parameters),
-    _linear_friction_matprop(
-        isParamValid("linear_coef_name") ? &getADMaterialProperty<Real>("linear_coef_name") : nullptr),
-    _quadratic_friction_matprop(
-        isParamValid("quadratic_coef_name") ? &getADMaterialProperty<Real>("quadratic_coef_name") : nullptr),
+    _linear_friction_matprop(isParamValid("linear_coef_name")
+                                 ? &getADMaterialProperty<Real>("linear_coef_name")
+                                 : nullptr),
+    _quadratic_friction_matprop(isParamValid("quadratic_coef_name")
+                                    ? &getADMaterialProperty<Real>("quadratic_coef_name")
+                                    : nullptr),
     _use_linear_friction_matprop(isParamValid("linear_coef_name"))
 {
   // Check that one and at most one friction coefficient has been provided
@@ -46,7 +48,7 @@ ADReal
 NSFVMomentumFriction::computeQpResidual()
 {
   if (_use_linear_friction_matprop)
-    return (*_linear_friction_matprop)[_qp] * std::abs(_u[_qp]);
+    return (*_linear_friction_matprop)[_qp] * _u[_qp];
   else
-    return (*_quadratic_friction_matprop)[_qp] * std::pow(_u[_qp], 2);
+    return (*_quadratic_friction_matprop)[_qp] * _u[_qp] * std::abs(_u[_qp]);
 }

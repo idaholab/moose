@@ -6,19 +6,20 @@ InputParameters
 NSFVEnergyAmbientConvection::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Implements a solid-fluid ambient convection term "
+  params.addClassDescription(
+      "Implements a solid-fluid ambient convection term "
       "proportional to the difference between the fluid and ambient temperatures : "
       "$\alpha (T_{fluid} - T_{ambient})$.");
   params.addRequiredParam<MaterialPropertyName>("alpha",
-      "Name of the convective heat transfer coefficient");
+                                                "Name of the convective heat transfer coefficient");
   params.addRequiredCoupledVar("T_ambient", "Solid ambient temperature");
   return params;
 }
 
 NSFVEnergyAmbientConvection::NSFVEnergyAmbientConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
-  _alpha(getADMaterialProperty<Real>("alpha")),
-  _temp_ambient(adCoupledValue("T_ambient"))
+    _alpha(getADMaterialProperty<Real>("alpha")),
+    _temp_ambient(adCoupledValue("T_ambient"))
 {
 }
 
