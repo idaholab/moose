@@ -117,4 +117,14 @@
     issues = '#14642'
     requirement = "The system shall allow convergence check with the convergence of a user defined postprocessor."
   [../]
+  [./postprocessor_convergence_history]
+    type = 'RunApp'
+    input = 'picard_custom_postprocessor.i'
+    cli_args = 'Executioner/direct_pp_value=true Outputs/file_base=picard_custom_pp_history_out'
+    expect_out = '9 Picard unorm_err'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#16940'
+    requirement = "The system shall show the Picard convergence history of a user defined postprocessor that is used for convergence check."
+  [../]
 []
