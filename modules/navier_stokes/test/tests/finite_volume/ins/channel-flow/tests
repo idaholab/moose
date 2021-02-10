@@ -66,6 +66,7 @@
     requirement = 'The system shall be able to model linear volumetric friction in a channel.'
     issues = '#16872'
     ad_indexing_type = 'global'
+    design = 'NSFVMomentumFriction.md'
   []
   [quadratic-friction]
     type = 'Exodiff'
@@ -75,6 +76,7 @@
     issues = '#16872'
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear v_friction_linear'"
+    design = 'NSFVMomentumFriction.md'
   []
   [ambient-convection]
     type = 'Exodiff'
@@ -83,5 +85,6 @@
     requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
     issues = '#16948'
     ad_indexing_type = 'global'
+    design = 'NSFVEnergyAmbientConvection.md'
   []
 []
