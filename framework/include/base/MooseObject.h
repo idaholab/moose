@@ -136,8 +136,23 @@ public:
   template <typename... Args>
   void paramInfo(const std::string & param, Args... args) const;
 
+  /**
+   * Emits an error prefixed with object name and type.
+   */
   template <typename... Args>
   [[noreturn]] void mooseError(Args &&... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, errorPrefix("error"), std::forward<Args>(args)...);
+    std::string msg = oss.str();
+    callMooseErrorRaw(msg, &_app);
+  }
+
+  /**
+   * Emits an error without the prefixing included in mooseError().
+   */
+  template <typename... Args>
+  [[noreturn]] void mooseErrorNonPrefixed(Args &&... args) const
   {
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
@@ -145,8 +160,21 @@ public:
     callMooseErrorRaw(msg, &_app);
   }
 
+  /**
+   * Emits a warning prefixed with object name and type.
+   */
   template <typename... Args>
   void mooseWarning(Args &&... args) const
+  {
+    moose::internal::mooseWarningStream(
+        _console, errorPrefix("warning"), std::forward<Args>(args)...);
+  }
+
+  /**
+   * Emits a warning without the prefixing included in mooseWarning().
+   */
+  template <typename... Args>
+  void mooseWarningNonPrefixed(Args &&... args) const
   {
     moose::internal::mooseWarningStream(_console, std::forward<Args>(args)...);
   }
@@ -162,6 +190,13 @@ public:
   {
     moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...);
   }
+
+  /**
+   * A descriptive prefix for errors for this object:
+   *
+   * The following <error_type> occurred in the object "<name>", of type "<type>".
+   */
+  std::string errorPrefix(const std::string & error_type) const;
 
 protected:
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
@@ -214,7 +249,8 @@ template <typename... Args>
 MooseObject::paramError(const std::string & param, Args... args) const
 {
   Moose::show_trace = false;
-  mooseError(paramErrorMsg(param, std::forward<Args>(args)...));
+  std::string msg = paramErrorMsg(param, std::forward<Args>(args)...);
+  callMooseErrorRaw(msg, &_app);
   Moose::show_trace = true;
 }
 
