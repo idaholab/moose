@@ -27,6 +27,9 @@ WallDistanceMixingLengthAux::WallDistanceMixingLengthAux(const InputParameters &
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _von_karman_const(getParam<Real>("von_karman_const"))
 {
+  const MeshBase & mesh = _subproblem.mesh().getMesh();
+  if (!mesh.is_replicated())
+    mooseError("WallDistanceMixingLengthAux only supports replicated meshes");
 }
 
 Real
