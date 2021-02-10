@@ -38,7 +38,7 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
     _eps(coupledValue(nms::porosity)),
 
     _pressure(getADMaterialProperty<Real>(nms::pressure)),
-    _rhoE(getADMaterialProperty<Real>(nms::rho_et)),
+    _rhoE(getADMaterialProperty<Real>(nms::total_energy_density)),
     _T_fluid(getADMaterialProperty<Real>(nms::T_fluid)),
     _rho(getADMaterialProperty<Real>(nms::density)),
     _speed(getADMaterialProperty<Real>(nms::speed)),

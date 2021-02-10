@@ -36,8 +36,8 @@ HLLCUserObject::HLLCUserObject(const InputParameters & parameters)
     _pressure_neighbor(getNeighborADMaterialProperty<Real>(nms::pressure)),
     _rho_elem(getADMaterialProperty<Real>(nms::density)),
     _rho_neighbor(getNeighborADMaterialProperty<Real>(nms::density)),
-    _e_elem(getADMaterialProperty<Real>(nms::e)),
-    _e_neighbor(getNeighborADMaterialProperty<Real>(nms::e))
+    _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
+    _specific_internal_energy_neighbor(getNeighborADMaterialProperty<Real>(nms::specific_internal_energy))
 {
 }
 
@@ -62,7 +62,7 @@ HLLCUserObject::execute()
   const ADReal u1 = _speed_elem[_qp];
   const ADReal q1 = fi.normal() * _vel_elem[_qp];
   const ADReal v1 = 1.0 / rho1;
-  const ADReal e1 = _e_elem[_qp];
+  const ADReal e1 = _specific_internal_energy_elem[_qp];
   const ADReal E1 = e1 + 0.5 * u1 * u1;
   const ADReal p1 = _pressure_elem[_qp];
   const ADReal H1 = E1 + p1 / rho1;
@@ -72,7 +72,7 @@ HLLCUserObject::execute()
   const ADReal u2 = _speed_neighbor[_qp];
   const ADReal q2 = fi.normal() * _vel_neighbor[_qp];
   const ADReal v2 = 1.0 / rho2;
-  const ADReal e2 = _e_neighbor[_qp];
+  const ADReal e2 = _specific_internal_energy_neighbor[_qp];
   const ADReal E2 = e2 + 0.5 * u2 * u2;
   const ADReal p2 = _pressure_neighbor[_qp];
   const ADReal H2 = E2 + p2 / rho2;

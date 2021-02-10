@@ -49,14 +49,14 @@ protected:
   const SinglePhaseFluidProperties & _fluid;
 
   ///@{ material properties on the elem side of the boundary
-  const ADMaterialProperty<Real> & _e_elem;
+  const ADMaterialProperty<Real> & _specific_internal_energy_elem;
   const ADMaterialProperty<RealVectorValue> & _vel_elem;
   const ADMaterialProperty<Real> & _speed_elem;
   const ADMaterialProperty<Real> & _rho_elem;
   const ADMaterialProperty<Real> & _pressure_elem;
   ///@}
 
-  const ADMaterialProperty<Real> & _rhoE_elem;
+  const ADMaterialProperty<Real> & _rho_et_elem;
 
   ///@{ the wave speeds
   ADReal _SL;
@@ -71,6 +71,6 @@ protected:
   ADReal _normal_speed_boundary;
   ADReal _rho_boundary;
   ADRealVectorValue _vel_boundary;
-  ADReal _e_boundary;
+  ADReal _specific_internal_energy_boundary;
   ///@}
 };

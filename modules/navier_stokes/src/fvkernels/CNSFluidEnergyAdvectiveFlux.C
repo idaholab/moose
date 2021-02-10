@@ -23,9 +23,9 @@ defineADValidParams(CNSFluidEnergyAdvectiveFlux,
 CNSFluidEnergyAdvectiveFlux::CNSFluidEnergyAdvectiveFlux(
     const InputParameters & parameters)
   : AdvectiveFluxKernel(parameters),
-    _enthalpy(getADMaterialProperty<Real>(nms::enthalpy)),
+    _specific_total_enthalpy(getADMaterialProperty<Real>(nms::specific_total_enthalpy)),
     _momentum(getADMaterialProperty<RealVectorValue>(nms::momentum)),
-    _grad_rho_et(getADMaterialProperty<RealVectorValue>(nms::grad(nms::rho_et))),
+    _grad_rho_et(getADMaterialProperty<RealVectorValue>(nms::grad(nms::total_energy_density))),
     _grad_pressure(getADMaterialProperty<RealVectorValue>(nms::grad(nms::pressure)))
 {
 }
@@ -33,23 +33,23 @@ CNSFluidEnergyAdvectiveFlux::CNSFluidEnergyAdvectiveFlux(
 ADReal
 CNSFluidEnergyAdvectiveFlux::advectedField()
 {
-  return _enthalpy[_qp];
+  return _specific_total_enthalpy[_qp];
 }
 
 ADReal
 CNSFluidEnergyAdvectiveFlux::strongResidual()
 {
-  ADRealVectorValue grad_enthalpy = (_grad_rho_et[_qp] + _grad_pressure[_qp]) / _rho[_qp] -
-    _enthalpy[_qp] / _rho[_qp] * _grad_rho[_qp];
-  ADRealVectorValue grad_rho_enthalpy = _rho[_qp] * grad_enthalpy + _enthalpy[_qp] * _grad_rho[_qp];
+  ADRealVectorValue grad_specific_total_enthalpy = (_grad_rho_et[_qp] + _grad_pressure[_qp]) / _rho[_qp] -
+    _specific_total_enthalpy[_qp] / _rho[_qp] * _grad_rho[_qp];
+  ADRealVectorValue grad_total_enthalpy_density = _rho[_qp] * grad_specific_total_enthalpy + _specific_total_enthalpy[_qp] * _grad_rho[_qp];
 
-  ADReal value = _eps[_qp] * _rho[_qp] * _enthalpy[_qp] * velocityDivergence() +
-    _velocity[_qp] * (_eps[_qp] * grad_rho_enthalpy + _rho[_qp] * _enthalpy[_qp] * _grad_eps[_qp]);
+  ADReal value = _eps[_qp] * _rho[_qp] * _specific_total_enthalpy[_qp] * velocityDivergence() +
+    _velocity[_qp] * (_eps[_qp] * grad_total_enthalpy_density + _rho[_qp] * _specific_total_enthalpy[_qp] * _grad_eps[_qp]);
 
   if (_assembly.coordSystem() == Moose::COORD_RZ)
   {
     Real r = _q_point[_qp](_rz_coord);
-    value += _eps[_qp] * _enthalpy[_qp] * _momentum[_qp](_rz_coord) / r;
+    value += _eps[_qp] * _specific_total_enthalpy[_qp] * _momentum[_qp](_rz_coord) / r;
   }
 
   return value;

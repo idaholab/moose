@@ -52,13 +52,13 @@ NSInitialCondition::value(const Point & /*p*/)
 
   // TODO: The internal energy could be computed by the IdealGasFluidProperties.
   const Real e_initial = _fp.cv() * _initial_temperature;
-  const Real E_initial = e_initial + 0.5 * _initial_velocity.norm_sq();
+  const Real et_initial = e_initial + 0.5 * _initial_velocity.norm_sq();
   const Real v_initial = 1. / rho_initial;
 
-  if (_var.name() == NS::enthalpy)
-    return E_initial + _initial_pressure / rho_initial;
+  if (_var.name() == NS::specific_total_enthalpy)
+    return et_initial + _initial_pressure / rho_initial;
 
-  if (_var.name() == NS::internal_energy)
+  if (_var.name() == NS::specific_internal_energy)
     return e_initial;
 
   if (_var.name() == NS::mach_number)
@@ -79,8 +79,8 @@ NSInitialCondition::value(const Point & /*p*/)
   if (_var.name() == NS::momentum_z)
     return rho_initial * _initial_velocity(2);
 
-  if (_var.name() == NS::total_energy)
-    return rho_initial * E_initial;
+  if (_var.name() == NS::total_energy_density)
+    return rho_initial * et_initial;
 
   if (_var.name() == NS::specific_volume)
     return v_initial;

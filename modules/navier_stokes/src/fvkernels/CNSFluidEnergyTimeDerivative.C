@@ -22,12 +22,12 @@ defineADValidParams(CNSFluidEnergyTimeDerivative,
 CNSFluidEnergyTimeDerivative::CNSFluidEnergyTimeDerivative(
     const InputParameters & parameters)
   : TimeDerivativeKernel(parameters),
-    _drhoE_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::rho_et)))
+    _drho_et_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::total_energy_density)))
 {
 }
 
 ADReal
 CNSFluidEnergyTimeDerivative::timeDerivative()
 {
-  return _drhoE_dt[_qp];
+  return _drho_et_dt[_qp];
 }

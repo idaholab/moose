@@ -2,41 +2,6 @@
 
 #include "ADMaterial.h"
 
-#define usingVarMaterialBaseMembers                                                      \
-  using TransientInterface::_is_transient;                                               \
-  using VarMaterialBase::_fluid;                                          \
-  using VarMaterialBase::_rho;                                            \
-  using VarMaterialBase::_rhoE;                                           \
-  using VarMaterialBase::_momentum;                                       \
-  using VarMaterialBase::_enthalpy;                                       \
-  using VarMaterialBase::_e;                                              \
-  using VarMaterialBase::_v;                                              \
-  using VarMaterialBase::_T_fluid;                                        \
-  using VarMaterialBase::_pressure;                                       \
-  using VarMaterialBase::_speed;                                          \
-  using VarMaterialBase::_velocity;                                       \
-  using VarMaterialBase::_grad_rho;                                       \
-  using VarMaterialBase::_grad_rhoE;                                      \
-  using VarMaterialBase::_grad_rho_u;                                     \
-  using VarMaterialBase::_grad_rho_v;                                     \
-  using VarMaterialBase::_grad_rho_w;                                     \
-  using VarMaterialBase::_grad_vel_x;                                     \
-  using VarMaterialBase::_grad_vel_y;                                     \
-  using VarMaterialBase::_grad_vel_z;                                     \
-  using VarMaterialBase::_grad_T_fluid;                                   \
-  using VarMaterialBase::_grad_pressure;                                  \
-  using VarMaterialBase::_drho_dt;                                        \
-  using VarMaterialBase::_drhoE_dt;                                       \
-  using VarMaterialBase::_drho_u_dt;                                      \
-  using VarMaterialBase::_drho_v_dt;                                      \
-  using VarMaterialBase::_drho_w_dt;                                      \
-  using VarMaterialBase::_dT_dt;                                          \
-  using VarMaterialBase::_grad_grad_T_fluid;                              \
-  using VarMaterialBase::_grad_grad_vel_x;                                \
-  using VarMaterialBase::_grad_grad_vel_y;                                \
-  using VarMaterialBase::_grad_grad_vel_z;                                \
-  using VarMaterialBase::computeSpeed
-
 class VarMaterialBase;
 class SinglePhaseFluidProperties;
 
@@ -80,17 +45,15 @@ protected:
   /// density
   ADMaterialProperty<Real> & _rho;
 
-  /// total fluid energy
-  ADMaterialProperty<Real> & _rhoE;
-
   /// momentum
   ADMaterialProperty<RealVectorValue> & _momentum;
 
-  /// total enthalpy
-  ADMaterialProperty<Real> & _enthalpy;
+  ADMaterialProperty<Real> & _specific_internal_energy;
+  ADMaterialProperty<Real> & _specific_total_energy;
+  ADMaterialProperty<Real> & _total_energy_density;
 
-  /// internal energy
-  ADMaterialProperty<Real> & _e;
+  ADMaterialProperty<Real> & _specific_total_enthalpy;
+  ADMaterialProperty<Real> & _total_enthalpy_density;
 
   /// specific volume
   ADMaterialProperty<Real> & _v;
@@ -111,7 +74,7 @@ protected:
   ADMaterialProperty<RealVectorValue> & _grad_rho;
 
   /// total fluid energy gradient
-  ADMaterialProperty<RealVectorValue> & _grad_rhoE;
+  ADMaterialProperty<RealVectorValue> & _grad_rho_et;
 
   /// $x$-component of momentum gradient
   ADMaterialProperty<RealVectorValue> & _grad_rho_u;
@@ -141,7 +104,7 @@ protected:
   ADMaterialProperty<Real> & _drho_dt;
 
   /// total fluid energy time derivative
-  ADMaterialProperty<Real> & _drhoE_dt;
+  ADMaterialProperty<Real> & _drho_et_dt;
 
   /// $x$-component of momentum time derivative
   ADMaterialProperty<Real> & _drho_u_dt;

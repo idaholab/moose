@@ -30,7 +30,7 @@ NSMachAux::validParams()
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // Only required in 3D...
   params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
-  params.addRequiredCoupledVar(NS::internal_energy, "internal energy");
+  params.addRequiredCoupledVar(NS::specific_internal_energy, "internal energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
 
@@ -43,7 +43,7 @@ NSMachAux::NSMachAux(const InputParameters & parameters)
     _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
     _specific_volume(coupledValue(NS::specific_volume)),
-    _internal_energy(coupledValue(NS::internal_energy)),
+    _specific_internal_energy(coupledValue(NS::specific_internal_energy)),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
@@ -52,5 +52,5 @@ Real
 NSMachAux::computeValue()
 {
   return RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]).norm() /
-         _fp.c_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
+         _fp.c_from_v_e(_specific_volume[_qp], _specific_internal_energy[_qp]);
 }

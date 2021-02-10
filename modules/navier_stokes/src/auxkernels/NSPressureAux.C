@@ -27,7 +27,7 @@ NSPressureAux::validParams()
   params.addClassDescription("Nodal auxiliary variable, for computing pressure at the nodes.");
   // Mark variables as required
   params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
-  params.addRequiredCoupledVar(NS::internal_energy, "internal energy");
+  params.addRequiredCoupledVar(NS::specific_internal_energy, "internal energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
 
@@ -37,7 +37,7 @@ NSPressureAux::validParams()
 NSPressureAux::NSPressureAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _specific_volume(coupledValue(NS::specific_volume)),
-    _internal_energy(coupledValue(NS::internal_energy)),
+    _specific_internal_energy(coupledValue(NS::specific_internal_energy)),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
   mooseDeprecated("The NSPressureAux aux kernel has been replaced by the "
@@ -47,5 +47,5 @@ NSPressureAux::NSPressureAux(const InputParameters & parameters)
 Real
 NSPressureAux::computeValue()
 {
-  return _fp.p_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
+  return _fp.p_from_v_e(_specific_volume[_qp], _specific_internal_energy[_qp]);
 }

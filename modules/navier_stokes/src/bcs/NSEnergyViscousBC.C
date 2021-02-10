@@ -36,7 +36,7 @@ NSEnergyViscousBC::NSEnergyViscousBC(const InputParameters & parameters)
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_E;
+  _gradU[4] = &_grad_rho_et;
 }
 
 Real

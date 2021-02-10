@@ -23,44 +23,44 @@ CNSFVHLLCFluidEnergyStagnationInletBC::validParams()
 
 CNSFVHLLCFluidEnergyStagnationInletBC::CNSFVHLLCFluidEnergyStagnationInletBC(
     const InputParameters & parameters)
-  : CNSFVHLLCStagnationInletBC(parameters), _h_elem(getADMaterialProperty<Real>(nms::enthalpy))
+  : CNSFVHLLCStagnationInletBC(parameters), _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
 {
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::fluxElem()
 {
-  return _normal_speed_elem * _rho_elem[_qp] * _h_elem[_qp];
+  return _normal_speed_elem * _rho_elem[_qp] * _ht_elem[_qp];
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::fluxBoundary()
 {
-  return _normal_speed_boundary * _rho_boundary * _h_boundary;
+  return _normal_speed_boundary * _rho_boundary * _ht_boundary;
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::hllcElem()
 {
-  return _e_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
+  return _specific_internal_energy_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
                                                                 (_SL - _normal_speed_elem));
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::hllcBoundary()
 {
-  return _e_boundary + (_SM - _normal_speed_boundary) *
+  return _specific_internal_energy_boundary + (_SM - _normal_speed_boundary) *
                            (_SM + _p_boundary / _rho_boundary / (_SL - _normal_speed_boundary));
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::conservedVariableElem()
 {
-  return _e_elem[_qp] * _rho_elem[_qp];
+  return _specific_internal_energy_elem[_qp] * _rho_elem[_qp];
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::conservedVariableBoundary()
 {
-  return _e_boundary * _rho_boundary;
+  return _specific_internal_energy_boundary * _rho_boundary;
 }

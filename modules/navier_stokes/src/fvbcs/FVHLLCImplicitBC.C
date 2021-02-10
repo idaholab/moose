@@ -27,7 +27,7 @@ CNSFVHLLCImplicitBC::preComputeWaveSpeed()
   _normal_speed_boundary = _normal_speed_elem;
   _rho_boundary = _rho_elem[_qp];
   _vel_boundary = _vel_elem[_qp];
-  _e_boundary = _e_elem[_qp];
+  _specific_internal_energy_boundary = _specific_internal_energy_elem[_qp];
 }
 
 ADReal

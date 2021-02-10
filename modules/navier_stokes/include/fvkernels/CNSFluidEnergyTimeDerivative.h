@@ -27,7 +27,7 @@ public:
 protected:
   virtual ADReal timeDerivative() override;
 
-  /// time derivative of total fluid energy
-  const ADMaterialProperty<Real> & _drhoE_dt;
+  /// time derivative of total fluid energy density
+  const ADMaterialProperty<Real> & _drho_et_dt;
 
 };

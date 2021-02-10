@@ -34,7 +34,7 @@ NSIntegratedBC::validParams()
   params.addRequiredCoupledVar(NS::momentum_x, "x-momentum");
   params.addCoupledVar(NS::momentum_y, "y-momentum"); // only required in >= 2D
   params.addCoupledVar(NS::momentum_z, "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(NS::total_energy_density, "total energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
   params.addParam<Real>("specified_pressure", 0.0, "The specified pressure for this boundary");
@@ -52,20 +52,20 @@ NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters)
     _rho_u(coupledValue(NS::momentum_x)),
     _rho_v(_mesh.dimension() >= 2 ? coupledValue(NS::momentum_y) : _zero),
     _rho_w(_mesh.dimension() == 3 ? coupledValue(NS::momentum_z) : _zero),
-    _rho_E(coupledValue(NS::total_energy)),
+    _rho_et(coupledValue(NS::total_energy_density)),
 
     _grad_rho(coupledGradient(NS::density)),
     _grad_rho_u(coupledGradient(NS::momentum_x)),
     _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(NS::momentum_y) : _grad_zero),
     _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(NS::momentum_z) : _grad_zero),
-    _grad_rho_E(coupledGradient(NS::total_energy)),
+    _grad_rho_et(coupledGradient(NS::total_energy_density)),
 
     // Variable numberings
     _rho_var_number(coupled(NS::density)),
     _rhou_var_number(coupled(NS::momentum_x)),
     _rhov_var_number(_mesh.dimension() >= 2 ? coupled(NS::momentum_y) : libMesh::invalid_uint),
     _rhow_var_number(_mesh.dimension() == 3 ? coupled(NS::momentum_z) : libMesh::invalid_uint),
-    _rhoE_var_number(coupled(NS::total_energy)),
+    _rho_et_var_number(coupled(NS::total_energy_density)),
 
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
     _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
@@ -79,7 +79,7 @@ bool
 NSIntegratedBC::isNSVariable(unsigned var)
 {
   if (var == _rho_var_number || var == _rhou_var_number || var == _rhov_var_number ||
-      var == _rhow_var_number || var == _rhoE_var_number)
+      var == _rhow_var_number || var == _rho_et_var_number)
     return true;
   else
     return false;
@@ -105,7 +105,7 @@ NSIntegratedBC::mapVarNumber(unsigned var)
     mapped_var_number = 2;
   else if (var == _rhow_var_number)
     mapped_var_number = 3;
-  else if (var == _rhoE_var_number)
+  else if (var == _rho_et_var_number)
     mapped_var_number = 4;
   else
     mooseError("Invalid var!");

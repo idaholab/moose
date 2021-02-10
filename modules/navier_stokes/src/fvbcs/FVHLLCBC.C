@@ -24,12 +24,12 @@ CNSFVHLLCBC::validParams()
 CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
-    _e_elem(getADMaterialProperty<Real>(nms::e)),
+    _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
     _vel_elem(getADMaterialProperty<RealVectorValue>(nms::velocity)),
     _speed_elem(getADMaterialProperty<Real>(nms::speed)),
     _rho_elem(getADMaterialProperty<Real>(nms::density)),
     _pressure_elem(getADMaterialProperty<Real>(nms::pressure)),
-    _rhoE_elem(getADMaterialProperty<Real>(nms::rho_et))
+    _rho_et_elem(getADMaterialProperty<Real>(nms::total_energy_density))
 {
 }
 
@@ -41,10 +41,10 @@ CNSFVHLLCBC::computeQpResidual()
 
   const auto & wave_speeds = CNSFVHLLC::waveSpeed(_rho_elem[_qp],
                                                _vel_elem[_qp],
-                                               _e_elem[_qp],
+                                               _specific_internal_energy_elem[_qp],
                                                _rho_boundary,
                                                _vel_boundary,
-                                               _e_boundary,
+                                               _specific_internal_energy_boundary,
                                                _fluid,
                                                _normal);
   _SL = wave_speeds[0];

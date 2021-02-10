@@ -32,9 +32,6 @@ namespace NS
   static const std::string superficial_momentum_y = "superficial_rhov";
   static const std::string superficial_momentum_z = "superficial_rhow";
 
-  static const std::string total_energy = "rhoE";
-  static const std::string rho_et = "rho_et";
-
   static const std::string velocity = "velocity";
   static const std::string velocity_x = "vel_x";
   static const std::string velocity_y = "vel_y";
@@ -44,13 +41,21 @@ namespace NS
   static const std::string superficial_velocity_z = "superficial_vel_z";
   static const std::string pressure = "pressure";
   static const std::string temperature = "temperature";
-  static const std::string enthalpy = "enthalpy";
+
+  static const std::string specific_internal_energy = "e";
+  static const std::string specific_total_energy = "et";
+  static const std::string internal_energy_density = "rho_e";
+  static const std::string total_energy_density = "rho_et";
+
+  static const std::string specific_enthalpy = "h";
+  static const std::string specific_total_enthalpy = "ht";
+  static const std::string enthalpy_density = "rho_h";
+  static const std::string total_enthalpy_density = "rho_ht";
+
   static const std::string mach_number = "Mach";
-  static const std::string internal_energy = "internal_energy";
   static const std::string specific_volume = "specific_volume";
 
   static const std::string momentum = "momentum";
-  static const std::string e = "e";
   static const std::string v = "v";
   static const std::string acceleration = "acceleration";
   static const std::string fluid = "fp";

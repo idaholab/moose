@@ -38,7 +38,7 @@ NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputPara
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_E;
+  _gradU[4] = &_grad_rho_et;
 }
 
 Real
@@ -130,7 +130,7 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
           + dFdp * _test[_i][_qp];
     }
 
-    else if (jvar == _rhoE_var_number)
+    else if (jvar == _rho_et_var_number)
     {
       // Pressure term Jacobian
       return dFdp * _test[_i][_qp];

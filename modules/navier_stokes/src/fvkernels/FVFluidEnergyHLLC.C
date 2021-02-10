@@ -24,34 +24,34 @@ CNSFVFluidEnergyHLLC::validParams()
 
 CNSFVFluidEnergyHLLC::CNSFVFluidEnergyHLLC(const InputParameters & params)
   : CNSFVHLLC(params),
-    _h_elem(getADMaterialProperty<Real>(nms::enthalpy)),
-    _h_neighbor(getNeighborADMaterialProperty<Real>(nms::enthalpy))
+    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy)),
+    _ht_neighbor(getNeighborADMaterialProperty<Real>(nms::specific_total_enthalpy))
 {
 }
 
 ADReal
 CNSFVFluidEnergyHLLC::fluxElem()
 {
-  return _normal_speed_elem * _rho_elem[_qp] * _h_elem[_qp];
+  return _normal_speed_elem * _rho_elem[_qp] * _ht_elem[_qp];
 }
 
 ADReal
 CNSFVFluidEnergyHLLC::fluxNeighbor()
 {
-  return _normal_speed_neighbor * _rho_neighbor[_qp] * _h_neighbor[_qp];
+  return _normal_speed_neighbor * _rho_neighbor[_qp] * _ht_neighbor[_qp];
 }
 
 ADReal
 CNSFVFluidEnergyHLLC::hllcElem()
 {
-  return _rhoE_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
+  return _rho_et_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
                                                                 (_SL - _normal_speed_elem));
 }
 
 ADReal
 CNSFVFluidEnergyHLLC::hllcNeighbor()
 {
-  return _rhoE_neighbor[_qp] / _rho_neighbor[_qp] +
+  return _rho_et_neighbor[_qp] / _rho_neighbor[_qp] +
          (_SM - _normal_speed_neighbor) *
              (_SM + _pressure_neighbor[_qp] / _rho_neighbor[_qp] / (_SR - _normal_speed_neighbor));
 }
@@ -59,11 +59,11 @@ CNSFVFluidEnergyHLLC::hllcNeighbor()
 ADReal
 CNSFVFluidEnergyHLLC::conservedVariableElem()
 {
-  return _rhoE_elem[_qp];
+  return _rho_et_elem[_qp];
 }
 
 ADReal
 CNSFVFluidEnergyHLLC::conservedVariableNeighbor()
 {
-  return _rhoE_neighbor[_qp];
+  return _rho_et_neighbor[_qp];
 }

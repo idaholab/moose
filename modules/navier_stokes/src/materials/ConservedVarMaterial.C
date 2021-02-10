@@ -25,7 +25,7 @@ defineADValidParams(
     ConservedVarMaterial,
     VarMaterialBase,
     params.addRequiredCoupledVar(nms::density, "density");
-    params.addRequiredCoupledVar(nms::rho_et, "total fluid energy");
+    params.addRequiredCoupledVar(nms::total_energy_density, "total fluid energy");
     params.addRequiredCoupledVar(nms::momentum_x, "rhou");
     params.addCoupledVar(nms::momentum_y, "rhov");
     params.addCoupledVar(nms::momentum_z, "rhow");
@@ -40,12 +40,12 @@ using MetaPhysicL::raw_value;
 ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
   : VarMaterialBase(params),
     _var_rho(adCoupledValue(nms::density)),
-    _var_rhoE(adCoupledValue(nms::rho_et)),
+    _var_total_energy_density(adCoupledValue(nms::total_energy_density)),
     _var_rho_u(adCoupledValue(nms::momentum_x)),
     _var_rho_v(isCoupled(nms::momentum_y) ? adCoupledValue(nms::momentum_y) : _ad_zero),
     _var_rho_w(isCoupled(nms::momentum_z) ? adCoupledValue(nms::momentum_z) : _ad_zero),
     _var_grad_rho(adCoupledGradient(nms::density)),
-    _var_grad_rhoE(adCoupledGradient(nms::rho_et)),
+    _var_grad_rho_et(adCoupledGradient(nms::total_energy_density)),
     _var_grad_rho_u(adCoupledGradient(nms::momentum_x)),
     _var_grad_rho_v(isCoupled(nms::momentum_y) ? adCoupledGradient(nms::momentum_y) : _ad_grad_zero),
     _var_grad_rho_w(isCoupled(nms::momentum_z) ? adCoupledGradient(nms::momentum_z) : _ad_grad_zero),
@@ -54,7 +54,7 @@ ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
     _var_grad_grad_rho_v(isCoupled(nms::momentum_y) ? adCoupledSecond(nms::momentum_y) : _ad_second_zero),
     _var_grad_grad_rho_w(isCoupled(nms::momentum_z) ? adCoupledSecond(nms::momentum_z) : _ad_second_zero),
     _var_rho_dot(_is_transient ? adCoupledDot(nms::density) : _ad_zero),
-    _var_rhoE_dot(_is_transient ? adCoupledDot(nms::rho_et) : _ad_zero),
+    _var_rho_et_dot(_is_transient ? adCoupledDot(nms::total_energy_density) : _ad_zero),
     _var_rho_u_dot(_is_transient ? adCoupledDot(nms::momentum_x) : _ad_zero),
     _var_rho_v_dot(isCoupled(nms::momentum_y) && _is_transient ? adCoupledDot(nms::momentum_y)
                                                           : _ad_zero),
@@ -70,7 +70,7 @@ bool
 ConservedVarMaterial::coupledAuxiliaryVariables() const
 {
   auto & sys = _fe_problem.getAuxiliarySystem();
-  return sys.hasVariable(nms::density) || sys.hasVariable(nms::rho_et) || sys.hasVariable(nms::momentum_x) ||
+  return sys.hasVariable(nms::density) || sys.hasVariable(nms::total_energy_density) || sys.hasVariable(nms::momentum_x) ||
       sys.hasVariable(nms::momentum_y) || sys.hasVariable(nms::momentum_z);
 }
 
@@ -78,17 +78,17 @@ void
 ConservedVarMaterial::setNonlinearProperties()
 {
   _rho[_qp] = _var_rho[_qp];
-  _rhoE[_qp] = _var_rhoE[_qp];
+  _total_energy_density[_qp] = _var_total_energy_density[_qp];
   _momentum[_qp] = {_var_rho_u[_qp], _var_rho_v[_qp], _var_rho_w[_qp]};
 
   _grad_rho[_qp] = _var_grad_rho[_qp];
-  _grad_rhoE[_qp] = _var_grad_rhoE[_qp];
+  _grad_rho_et[_qp] = _var_grad_rho_et[_qp];
   _grad_rho_u[_qp] = _var_grad_rho_u[_qp];
   _grad_rho_v[_qp] = _var_grad_rho_v[_qp];
   _grad_rho_w[_qp] = _var_grad_rho_w[_qp];
 
   _drho_dt[_qp] = _var_rho_dot[_qp];
-  _drhoE_dt[_qp] = _var_rhoE_dot[_qp];
+  _drho_et_dt[_qp] = _var_rho_et_dot[_qp];
   _drho_u_dt[_qp] = _var_rho_u_dot[_qp];
   _drho_v_dt[_qp] = _var_rho_v_dot[_qp];
   _drho_w_dt[_qp] = _var_rho_w_dot[_qp];
@@ -129,18 +129,19 @@ ConservedVarMaterial::computeQpProperties()
   _grad_grad_vel_z[_qp] = (_var_grad_grad_rho_w[_qp] - outer_product(_grad_rho[_qp], _grad_vel_z[_qp]) -
     outer_product(_grad_vel_z[_qp], _grad_rho[_qp]) - _velocity[_qp](2) * _var_grad_grad_rho[_qp]) / _rho[_qp];
 
-  _e[_qp] = _rhoE[_qp] / _rho[_qp] - (_velocity[_qp] * _velocity[_qp]) / 2;
+  _specific_internal_energy[_qp] = _total_energy_density[_qp] / _rho[_qp] - (_velocity[_qp] * _velocity[_qp]) / 2;
 
   Real dTdvol = 0;
   Real dTde = 0;
   Real dpdvol = 0;
   Real dpde = 0;
-  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _e[_qp]);
-  _pressure[_qp] = _fluid.p_from_v_e(_v[_qp], _e[_qp]);
+  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _specific_total_energy[_qp]);
+  _pressure[_qp] = _fluid.p_from_v_e(_v[_qp], _specific_total_energy[_qp]);
 
-  _enthalpy[_qp] = (_rhoE[_qp] + _pressure[_qp]) / _rho[_qp];
+  _specific_total_enthalpy[_qp] = (_total_energy_density[_qp] + _pressure[_qp]) / _rho[_qp];
+  _total_enthalpy_density[_qp] = _rho[_qp] * _specific_total_enthalpy[_qp];
 
-  auto grad_e = _grad_rhoE[_qp] * _v[_qp] + _rhoE[_qp] * grad_vol - _velocity[_qp](0) * _grad_vel_x[_qp] -
+  auto grad_e = _grad_rho_et[_qp] * _v[_qp] + _total_energy_density[_qp] * grad_vol - _velocity[_qp](0) * _grad_vel_x[_qp] -
                 _velocity[_qp](1) * _grad_vel_y[_qp] - _velocity[_qp](2) * _grad_vel_z[_qp];
 
   _grad_T_fluid[_qp] = grad_vol * dTdvol + grad_e * dTde;
@@ -149,7 +150,7 @@ ConservedVarMaterial::computeQpProperties()
   auto dvelx_dt = (_drho_u_dt[_qp] - _velocity[_qp](0) * _drho_dt[_qp]) / _rho[_qp];
   auto dvely_dt = (_drho_v_dt[_qp] - _velocity[_qp](1) * _drho_dt[_qp]) / _rho[_qp];
   auto dvelz_dt = (_drho_w_dt[_qp] - _velocity[_qp](2) * _drho_dt[_qp]) / _rho[_qp];
-  auto de_dt = _drhoE_dt[_qp] / _rho[_qp] - _rhoE[_qp] / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp] -
+  auto de_dt = _drho_et_dt[_qp] / _rho[_qp] - _total_energy_density[_qp] / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp] -
     (_velocity[_qp](0) * dvelx_dt + _velocity[_qp](1) * dvely_dt + _velocity[_qp](2) * dvelz_dt);
   auto dvol_dt = -1 / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp];
   _dT_dt[_qp] = dTde * de_dt + dTdvol * dvol_dt;

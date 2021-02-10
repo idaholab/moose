@@ -37,8 +37,8 @@ protected:
 
   virtual ADReal strongResidual() override;
 
-  /// total enthalpy
-  const ADMaterialProperty<Real> & _enthalpy;
+  /// specific total enthalpy
+  const ADMaterialProperty<Real> & _specific_total_enthalpy;
 
   /// momentum
   const ADMaterialProperty<RealVectorValue> & _momentum;

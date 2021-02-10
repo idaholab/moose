@@ -30,7 +30,7 @@ protected:
   virtual Real computeValue();
 
   const VariableValue & _specific_volume;
-  const VariableValue & _internal_energy;
+  const VariableValue & _specific_internal_energy;
 
   // Fluid properties
   const IdealGasFluidProperties & _fp;

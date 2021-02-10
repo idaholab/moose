@@ -26,6 +26,6 @@ protected:
   virtual ADReal hllcElem() override;
   virtual ADReal conservedVariableElem() override;
 
-  /// enthalpy material property on elem side
-  const ADMaterialProperty<Real> & _h_elem;
+  /// specific total enthalpy material property on elem side
+  const ADMaterialProperty<Real> & _ht_elem;
 };

@@ -52,12 +52,12 @@ NSSUPGEnergy::computeQpResidual()
       _strong_residuals[_qp][1], _strong_residuals[_qp][2], _strong_residuals[_qp][3]);
 
   // 1.) The mass-residual term:
-  Real mass_coeff = (0.5 * (gam - 1.0) * velmag2 - _enthalpy[_qp]) * U_grad_phi;
+  Real mass_coeff = (0.5 * (gam - 1.0) * velmag2 - _specific_total_enthalpy[_qp]) * U_grad_phi;
 
   mass_term = _tauc[_qp] * mass_coeff * _strong_residuals[_qp][0];
 
   // 2.) The momentum-residual term:
-  Real mom_term1 = _enthalpy[_qp] * (_grad_test[_i][_qp] * Ru);
+  Real mom_term1 = _specific_total_enthalpy[_qp] * (_grad_test[_i][_qp] * Ru);
   Real mom_term2 = (1.0 - gam) * U_grad_phi * (vel * Ru);
 
   mom_term = _taum[_qp] * (mom_term1 + mom_term2);
@@ -76,7 +76,7 @@ Real
 NSSUPGEnergy::computeQpJacobian()
 {
   // This is the energy equation, so pass the on-diagonal variable number.
-  return computeJacobianHelper(_rhoE_var_number);
+  return computeJacobianHelper(_rho_et_var_number);
 }
 
 Real
@@ -116,7 +116,7 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
     // Art. Diffusion matrix for taum-proportional term = (diag(H) + (1-gam)*S) * A_{ell}
     //
     RealTensorValue mom_mat;
-    mom_mat(0, 0) = mom_mat(1, 1) = mom_mat(2, 2) = _enthalpy[_qp];    // (diag(H)
+    mom_mat(0, 0) = mom_mat(1, 1) = mom_mat(2, 2) = _specific_total_enthalpy[_qp];    // (diag(H)
     mom_mat += (1. - gam) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
     mom_mat = mom_mat * _calA[_qp][mapped_var_number];                 // * A_{ell}
     Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j);
@@ -144,7 +144,7 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
         // Art. Diffusion matrix for tauc-proportional term = (0.5*(gam-1.)*velmag2 - H)*C_m
         //
         RealTensorValue mass_mat =
-            (0.5 * (gam - 1.) * velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
+            (0.5 * (gam - 1.) * velmag2 - _specific_total_enthalpy[_qp]) * _calC[_qp][m_local];
         mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j);
 
         // Don't even need to break, no other cases to fall through to...
