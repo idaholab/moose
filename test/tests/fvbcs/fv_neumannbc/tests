@@ -13,8 +13,8 @@
     type = RunException
     input = 'fv_neumannbc.i'
     cli_args = "FVBCs/inactive=''"
-    expect_err = 'A FVFluxBC is being triggered on an internal face with centroid'
-    requirement = 'The system shall error out if FVFluxBC, in this case a FVNeumannBC, are used internally.'
+    expect_err = 'A FVFluxBC is being triggered on an internal face'
+    requirement = 'The system shall error out if a finite volume flux boundary condition, in this case a finite volume Neumann boundary condition, is used inside the domain.'
   []
   [fvbcs_disconnected_from_variable]
     design = 'FVNeumannBC.md'
@@ -23,6 +23,6 @@
     input = 'fv_neumannbc.i'
     expect_err = 'A FVFluxBC is being triggered on a face which does not connect to a block with the relevant finite volume variable.'
     cli_args = "Mesh/mesh/subdomain_id='1 2'"
-    requirement = 'The system shall error out if FVFluxBC are used on a mesh face that is not connected to an element with the corresponding finite volume variable.'
+    requirement = 'The system shall error out if a finite volume flux boundary condition is used on a mesh element face that is not connected to an element with the corresponding finite volume variable.'
   []
 []
