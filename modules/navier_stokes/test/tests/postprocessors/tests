@@ -88,7 +88,7 @@
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
-      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip' -pc_type lu -pc_factor_shift_type NONZERO"
+      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
       ad_indexing_type = 'global'
     []
   []

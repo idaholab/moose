@@ -638,7 +638,6 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
 
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
-  mooseAssert(std::get<2>(tup), "MooseVariableFV and FaceInfo element disagree!");
 
   if (_two_term_boundary_expansion)
   {
@@ -883,7 +882,6 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   const Elem * const elem_one = std::get<0>(tup);
   const Elem * const elem_two = std::get<1>(tup);
   const bool elem_one_is_fi_elem = std::get<2>(tup);
-  mooseAssert(elem_one_is_fi_elem, "MooseVariableFV and FaceInfo element disagree!");
 
   const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
 
@@ -934,7 +932,6 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
   mooseAssert(elem_is_elem_one ? elem_one == &fi.elem() && elem_two == fi.neighborPtr()
                                : elem_one == fi.neighborPtr() && elem_two == &fi.elem(),
               "The determineElemOneAndTwo utility got the elem_is_elem_one value wrong.");
-  mooseAssert(elem_is_elem_one, "MooseVariableFV and FaceInfo element disagree!");
 
   const ADReal elem_one_value = getElemValue(elem_one);
   const ADReal elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
