@@ -12,9 +12,9 @@ von_karman_const = 0.22
 # numbers.
 
 # This model has been non-dimensionalized. The diameter (D), density (rho), and
-# bulk velocity (bulk_u) are all considered unity. (Note that the diameter is
-# set by the mesh; modifying the D parameter in this file alone will not work.)
+# bulk velocity (bulk_u) are all considered unity.
 D = 1
+total_len = ${fparse 40 * D}
 rho = 1
 bulk_u = 1
 
@@ -25,7 +25,7 @@ mu = ${fparse rho * bulk_u * D / Re}
 # Here the DeltaP will be evaluted by using a postprocessor to find the pressure
 # at a point that is 10 diameters away from the outlet. (The outlet pressure is
 # set to zero.)
-L = 10
+L = ${fparse 10 * D}
 
 # We will use the McAdams correlation to find the Darcy friction factor. Note
 # that this correlation is valid for fully developed flow in smooth circular
@@ -40,9 +40,40 @@ advected_interp_method='upwind'
 velocity_interp_method='rc'
 
 [Mesh]
-  [fmg]
-    type = FileMeshGenerator
-    file = 'mesh/pipe.msh'
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = ${total_len}
+    ymin = 0
+    ymax = ${fparse 0.5 * D}
+    nx = 200
+    ny = 40
+    bias_y = ${fparse 1 / 1.2}
+  []
+  [rename1]
+    type = RenameBoundaryGenerator
+    input = gen
+    old_boundary = 'left'
+    new_boundary = 'inlet'
+  []
+  [rename2]
+    type = RenameBoundaryGenerator
+    input = rename1
+    old_boundary = 'right'
+    new_boundary = 'outlet'
+  []
+  [rename3]
+    type = RenameBoundaryGenerator
+    input = rename2
+    old_boundary = 'bottom'
+    new_boundary = 'symmetry'
+  []
+  [rename4]
+    type = RenameBoundaryGenerator
+    input = rename3
+    old_boundary = 'top'
+    new_boundary = 'wall'
   []
 []
 
@@ -245,13 +276,14 @@ velocity_interp_method='rc'
   petsc_options_value = 'lu'
   line_search = 'none'
   nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 []
 
 [Postprocessors]
   [delta_P]
     type = PointValue
     variable = 'pressure'
-    point = '30 0 0'
+    point = '${fparse total_len - L} 0 0'
   []
   [reference_delta_P]
     type = Receiver
