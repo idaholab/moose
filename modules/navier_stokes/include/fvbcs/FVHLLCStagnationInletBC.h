@@ -40,5 +40,5 @@ protected:
   ADReal _p_boundary;
 
   /// enthalpy on the boundary side
-  ADReal _h_boundary;
+  ADReal _ht_boundary;
 };

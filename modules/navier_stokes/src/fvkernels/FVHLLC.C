@@ -27,10 +27,10 @@ CNSFVHLLC::CNSFVHLLC(const InputParameters & params)
   : FVFluxKernel(params),
     _fluid(dynamic_cast<FEProblemBase *>(&_subproblem)
                ->getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
-    _e_elem(getADMaterialProperty<Real>(nms::e)),
-    _e_neighbor(getNeighborADMaterialProperty<Real>(nms::e)),
-    _rhoE_elem(getADMaterialProperty<Real>(nms::rho_et)),
-    _rhoE_neighbor(getNeighborADMaterialProperty<Real>(nms::rho_et)),
+    _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
+    _specific_internal_energy_neighbor(getNeighborADMaterialProperty<Real>(nms::specific_internal_energy)),
+    _rho_et_elem(getADMaterialProperty<Real>(nms::total_energy_density)),
+    _rho_et_neighbor(getNeighborADMaterialProperty<Real>(nms::total_energy_density)),
     _vel_elem(getADMaterialProperty<RealVectorValue>(nms::velocity)),
     _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(nms::velocity)),
     _speed_elem(getADMaterialProperty<Real>(nms::speed)),
@@ -101,10 +101,10 @@ CNSFVHLLC::computeQpResidual()
   _normal_speed_neighbor = _normal * _vel_neighbor[_qp];
   const auto & wave_speeds = waveSpeed(_rho_elem[_qp],
                                        _vel_elem[_qp],
-                                       _e_elem[_qp],
+                                       _specific_internal_energy_elem[_qp],
                                        _rho_neighbor[_qp],
                                        _vel_neighbor[_qp],
-                                       _e_neighbor[_qp],
+                                       _specific_internal_energy_neighbor[_qp],
                                        _fluid,
                                        _normal);
   _SL = wave_speeds[0];

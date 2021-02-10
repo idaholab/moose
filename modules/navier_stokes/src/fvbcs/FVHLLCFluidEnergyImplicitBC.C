@@ -23,25 +23,25 @@ CNSFVHLLCFluidEnergyImplicitBC::validParams()
 
 CNSFVHLLCFluidEnergyImplicitBC::CNSFVHLLCFluidEnergyImplicitBC(const InputParameters & parameters)
   : CNSFVHLLCImplicitBC(parameters),
-    _h_elem(getADMaterialProperty<Real>(nms::enthalpy))
+    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
 {
 }
 
 ADReal
 CNSFVHLLCFluidEnergyImplicitBC::fluxElem()
 {
-  return _normal_speed_elem * _rho_elem[_qp] * _h_elem[_qp];
+  return _normal_speed_elem * _rho_elem[_qp] * _ht_elem[_qp];
 }
 
 ADReal
 CNSFVHLLCFluidEnergyImplicitBC::hllcElem()
 {
-  return _rhoE_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
+  return _rho_et_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
                                                                 (_SL - _normal_speed_elem));
 }
 
 ADReal
 CNSFVHLLCFluidEnergyImplicitBC::conservedVariableElem()
 {
-  return _rhoE_elem[_qp];
+  return _rho_et_elem[_qp];
 }

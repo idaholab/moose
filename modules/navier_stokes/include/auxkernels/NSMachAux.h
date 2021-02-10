@@ -34,7 +34,7 @@ protected:
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
   const VariableValue & _specific_volume;
-  const VariableValue & _internal_energy;
+  const VariableValue & _specific_internal_energy;
 
   // Fluid properties
   const SinglePhaseFluidProperties & _fp;

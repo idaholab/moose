@@ -8,38 +8,38 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Navier-Stokes includes
-#include "NSEnthalpyAux.h"
+#include "NSSpecificTotalEnthalpyAux.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSEnthalpyAux);
+registerMooseObject("NavierStokesApp", NSSpecificTotalEnthalpyAux);
 
 InputParameters
-NSEnthalpyAux::validParams()
+NSSpecificTotalEnthalpyAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Nodal auxiliary variable, for computing enthalpy at the nodes.");
   // Mark variables as required
   params.addRequiredCoupledVar(NS::density, "density");
-  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(NS::total_energy_density, "total energy");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
 
   return params;
 }
 
-NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters)
+NSSpecificTotalEnthalpyAux::NSSpecificTotalEnthalpyAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _rho(coupledValue(NS::density)),
-    _rhoE(coupledValue(NS::total_energy)),
+    _rho_et(coupledValue(NS::total_energy_density)),
     _pressure(coupledValue(NS::pressure))
 {
-  mooseDeprecated("The NSEnthalpyAux auxiliary kernel has been replaced by the EnthalpyAux "
+  mooseDeprecated("The NSSpecificTotalEnthalpyAux auxiliary kernel has been replaced by the SpecificTotalEnthalpyAux "
                   "auxiliary kernel");
 }
 
 Real
-NSEnthalpyAux::computeValue()
+NSSpecificTotalEnthalpyAux::computeValue()
 {
   // H = (rho*E + P) / rho
-  return (_rhoE[_qp] + _pressure[_qp]) / _rho[_qp];
+  return (_rho_et[_qp] + _pressure[_qp]) / _rho[_qp];
 }

@@ -57,8 +57,8 @@ CNSFVHLLCStagnationInletBC::preComputeWaveSpeed()
       _stagnation_pressure * std::pow(_stagnation_temperature / T_inlet, -gamma / (gamma - 1.));
 
   // Compute total energy from stagnation values.
-  _e_boundary = _cv[_qp] * T_inlet + 0.5 * speed_sq;
+  _specific_internal_energy_boundary = _cv[_qp] * T_inlet + 0.5 * speed_sq;
 
   _rho_boundary = _fluid.rho_from_p_T(_p_boundary, T_inlet);
-  _h_boundary = _e_boundary + _p_boundary / _rho_boundary;
+  _ht_boundary = _specific_internal_energy_boundary + _p_boundary / _rho_boundary;
 }

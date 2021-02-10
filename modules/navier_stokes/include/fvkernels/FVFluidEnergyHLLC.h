@@ -36,7 +36,7 @@ protected:
   ///@}
 
   ///@{ enthalpies left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _h_elem;
-  const ADMaterialProperty<Real> & _h_neighbor;
+  const ADMaterialProperty<Real> & _ht_elem;
+  const ADMaterialProperty<Real> & _ht_neighbor;
   ///@}
 };

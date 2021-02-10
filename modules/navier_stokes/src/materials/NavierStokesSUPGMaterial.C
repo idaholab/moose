@@ -80,21 +80,21 @@ NavierStokesSUPGMaterial::NavierStokesSUPGMaterial(const InputParameters & param
     // nonlinear variables
     _rho(getADMaterialProperty<Real>(nms::density)),
     _momentum(getADMaterialProperty<RealVectorValue>(nms::momentum)),
-    _rho_et(getADMaterialProperty<Real>(nms::rho_et)),
+    _rho_et(getADMaterialProperty<Real>(nms::total_energy_density)),
 
     // nonlinear variables - space derivatives
     _grad_rho(getADMaterialProperty<RealVectorValue>(nms::grad(nms::density))),
     _grad_rho_u(getADMaterialProperty<RealVectorValue>(nms::grad(nms::momentum_x))),
     _grad_rho_v(getADMaterialProperty<RealVectorValue>(nms::grad(nms::momentum_y))),
     _grad_rho_w(getADMaterialProperty<RealVectorValue>(nms::grad(nms::momentum_z))),
-    _grad_rho_et(getADMaterialProperty<RealVectorValue>(nms::grad(nms::rho_et))),
+    _grad_rho_et(getADMaterialProperty<RealVectorValue>(nms::grad(nms::total_energy_density))),
 
     // nonlinear variables - time derivatives
     _drho_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::density))),
     _drhou_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::momentum_x))),
     _drhov_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::momentum_y))),
     _drhow_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::momentum_z))),
-    _drhoEt_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::rho_et))),
+    _drhoEt_dt(getADMaterialProperty<Real>(nms::time_deriv(nms::total_energy_density))),
 
     // auxiliary variables
     _velocity(getADMaterialProperty<RealVectorValue>(nms::velocity)),
@@ -107,8 +107,8 @@ NavierStokesSUPGMaterial::NavierStokesSUPGMaterial(const InputParameters & param
     _eps(coupledValue(nms::porosity)),
     _grad_eps(coupledGradient(nms::porosity)),
     _p(getADMaterialProperty<Real>(nms::pressure)),
-    _enthalpy(getADMaterialProperty<Real>(nms::enthalpy)),
-    _e(getADMaterialProperty<Real>(nms::e)),
+    _specific_total_enthalpy(getADMaterialProperty<Real>(nms::specific_total_enthalpy)),
+    _specific_total_energy(getADMaterialProperty<Real>(nms::specific_internal_energy)),
     _v(getADMaterialProperty<Real>(nms::v)),
     _speed(getADMaterialProperty<Real>(nms::speed)),
 
@@ -176,7 +176,7 @@ NavierStokesSUPGMaterial::computeIdealGasdPdT()
   // When we know we're dealing with an ideal gas EOS, we can use
   // simplified expressions for _dP and _dT.
   ADReal gamma = _fluid_ideal_gas->gamma();
-  ADReal cv = _fluid->cv_from_v_e(_v[_qp], _e[_qp]);
+  ADReal cv = _fluid->cv_from_v_e(_v[_qp], _specific_total_energy[_qp]);
   ADReal coeff = 1. / (_rho[_qp] * cv);
   _dT.resize(_N);
   _dP.resize(_N);
@@ -237,11 +237,11 @@ NavierStokesSUPGMaterial::computeSinglePhasedPdT()
 
   // Get partial derivatives of p wrt (v,e) from the EOS object.
   ADReal dummy = 0, dp_dv = 0, dp_de = 0;
-  _fluid->p_from_v_e(_v[_qp], _e[_qp], dummy, dp_dv, dp_de);
+  _fluid->p_from_v_e(_v[_qp], _specific_total_energy[_qp], dummy, dp_dv, dp_de);
 
   // Get partial derivatives of T wrt (v,e) from the EOS object.
   ADReal dT_dv = 0, dT_de = 0;
-  _fluid->T_from_v_e(_v[_qp], _e[_qp], dummy, dT_dv, dT_de);
+  _fluid->T_from_v_e(_v[_qp], _specific_total_energy[_qp], dummy, dT_dv, dT_de);
 
   // Compute _dT and _dP using partial derivative formula
   for (unsigned int i = 0; i < _N; ++i)
@@ -262,7 +262,7 @@ NavierStokesSUPGMaterial::computeEnthalpyDerivatives()
 
   // total energy partial derivative components, which are only present
   // for the density and energy derivatives
-  _dh[0] += -_enthalpy[_qp] / _rho[_qp];
+  _dh[0] += -_specific_total_enthalpy[_qp] / _rho[_qp];
   _dh[_N - 1] += 1.0 / _rho[_qp];
 }
 
@@ -288,13 +288,13 @@ NavierStokesSUPGMaterial::computeA()
     if (_fluid_energy_eqn)
     {
       // row corresponding to the fluid energy equation - each row has a
-      // momentum * d(enthalpy) contribution. The columns corresponding to the
-      // momentum equation(s) also have an enthalpy * d(momentum) contribution.
+      // momentum * d(specific_total_enthalpy) contribution. The columns corresponding to the
+      // momentum equation(s) also have an specific_total_enthalpy * d(momentum) contribution.
       for (unsigned int k = 0; k < _N; ++k)
         _A[_qp][i](_N - 1, k) = _rho[_qp] * _velocity[_qp](i) * _dh[k];
 
       for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
-        _A[_qp][i](_N - 1, k) += d(k - 1) * _enthalpy[_qp];
+        _A[_qp][i](_N - 1, k) += d(k - 1) * _specific_total_enthalpy[_qp];
     }
 
     if (_momentum_eqn)
@@ -326,7 +326,7 @@ NavierStokesSUPGMaterial::computeF()
 
     _F[_qp][i](0) = _rho[_qp] * _velocity[_qp](i);
 
-    _F[_qp][i](_N - 1) = _rho[_qp] * _velocity[_qp](i) * _enthalpy[_qp];
+    _F[_qp][i](_N - 1) = _rho[_qp] * _velocity[_qp](i) * _specific_total_enthalpy[_qp];
 
     for (unsigned int k = 1; k < _mesh_dim + 1; ++k)
       _F[_qp][i](k) = _rho[_qp] * _velocity[_qp](i) * _velocity[_qp](k - 1) + delta(k - 1, i) * _p[_qp];
@@ -523,7 +523,7 @@ NavierStokesSUPGMaterial::computeQpProperties()
   if (_fluid_energy_eqn)
     (this->*_single_phase_dP_and_dT)();
 
-  // Compute derivatives of enthalpy with respect to conservation variables. This
+  // Compute derivatives of specific_total_enthalpy with respect to conservation variables. This
   // function fills in the _dh vector
   if (_fluid_energy_eqn)
     computeEnthalpyDerivatives();
@@ -601,11 +601,11 @@ NavierStokesSUPGMaterial::printState()
   // EOS objects.
   if (_fluid != nullptr)
   {
-    Moose::out << "cv = " << _fluid->cv_from_v_e(_v[_qp], _e[_qp]) << "\n";
+    Moose::out << "cv = " << _fluid->cv_from_v_e(_v[_qp], _specific_total_energy[_qp]) << "\n";
     if (_fluid_ideal_gas)
       Moose::out << "gamma = " << _fluid_ideal_gas->gamma() << "\n";
   }
-  Moose::out << "enthalpy = " << _enthalpy[_qp] << "\n";
+  Moose::out << "specific_total_enthalpy = " << _specific_total_enthalpy[_qp] << "\n";
   Moose::out << "T_fluid = " << _T_fluid[_qp] << "\n";
 }
 

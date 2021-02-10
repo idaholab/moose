@@ -39,21 +39,21 @@ protected:
   const VariableValue & _rho_u;
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
-  const VariableValue & _rho_E;
+  const VariableValue & _rho_et;
 
   // Gradients
   const VariableGradient & _grad_rho;
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
-  const VariableGradient & _grad_rho_E;
+  const VariableGradient & _grad_rho_et;
 
   // Variable numberings
   unsigned _rho_var_number;
   unsigned _rhou_var_number;
   unsigned _rhov_var_number;
   unsigned _rhow_var_number;
-  unsigned _rhoE_var_number;
+  unsigned _rho_et_var_number;
 
   // Integrated BC can use Mat. properties...
   const MaterialProperty<Real> & _dynamic_viscosity;

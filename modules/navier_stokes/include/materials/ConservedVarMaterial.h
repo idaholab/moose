@@ -38,14 +38,14 @@ protected:
 private:
   // nonlinear solution fields of density, total fluid energy, and momentum
   const ADVariableValue & _var_rho;
-  const ADVariableValue & _var_rhoE;
+  const ADVariableValue & _var_total_energy_density;
   const ADVariableValue & _var_rho_u;
   const ADVariableValue & _var_rho_v;
   const ADVariableValue & _var_rho_w;
 
   // gradients of nonlinear solution fields
   const ADVariableGradient & _var_grad_rho;
-  const ADVariableGradient & _var_grad_rhoE;
+  const ADVariableGradient & _var_grad_rho_et;
   const ADVariableGradient & _var_grad_rho_u;
   const ADVariableGradient & _var_grad_rho_v;
   const ADVariableGradient & _var_grad_rho_w;
@@ -58,7 +58,7 @@ private:
 
   // time derivatives of nonlinear solution fields
   const ADVariableValue & _var_rho_dot;
-  const ADVariableValue & _var_rhoE_dot;
+  const ADVariableValue & _var_rho_et_dot;
   const ADVariableValue & _var_rho_u_dot;
   const ADVariableValue & _var_rho_v_dot;
   const ADVariableValue & _var_rho_w_dot;

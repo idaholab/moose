@@ -21,30 +21,30 @@ NSEnergyInviscidFlux::validParams()
 {
   InputParameters params = NSKernel::validParams();
   params.addClassDescription("This class computes the inviscid part of the energy flux.");
-  params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
+  params.addRequiredCoupledVar(NS::specific_total_enthalpy, "specific total enthalpy");
   return params;
 }
 
 NSEnergyInviscidFlux::NSEnergyInviscidFlux(const InputParameters & parameters)
-  : NSKernel(parameters), _enthalpy(coupledValue(NS::enthalpy))
+  : NSKernel(parameters), _specific_total_enthalpy(coupledValue(NS::specific_total_enthalpy))
 {
 }
 
 Real
 NSEnergyInviscidFlux::computeQpResidual()
 {
-  // H = total enthalpy = E + P/rho
-  // => rho * u * H = rho * u ( E + P/rho)
-  //                =       u ( rho*E + P)
+  // ht = specific total enthalpy = et + p/rho
+  // => rho * u * ht = rho * u ( et + p/rho)
+  //                =       u ( rho*et + p)
 
   // velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  // Multiply vector U by the scalar value (rho*E + P) to get rho * U * H
+  // Multiply vector U by the scalar value (rho*et + P) to get rho * U * ht
   // vel *= (_u[_qp] + _pressure[_qp]);
 
-  // Multiply velocity vector by the scalar (rho * H)
-  vel *= (_rho[_qp] * _enthalpy[_qp]);
+  // Multiply velocity vector by the scalar (rho * ht)
+  vel *= (_rho[_qp] * _specific_total_enthalpy[_qp]);
 
   // Return -1 * vel * grad(phi_i)
   return -(vel * _grad_test[_i][_qp]);
@@ -53,7 +53,7 @@ NSEnergyInviscidFlux::computeQpResidual()
 Real
 NSEnergyInviscidFlux::computeQpJacobian()
 {
-  // Derivative of this kernel wrt rho*E
+  // Derivative of this kernel wrt rho*et
   const RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Ratio of specific heats
@@ -76,7 +76,7 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
     // Derivative wrt density
     if (jvar == _rho_var_number)
-      return -((0.5 * (gam - 1) * V2 - _enthalpy[_qp]) * _phi[_j][_qp] *
+      return -((0.5 * (gam - 1) * V2 - _specific_total_enthalpy[_qp]) * _phi[_j][_qp] *
                (vel * _grad_test[_i][_qp]));
 
     // Derivatives wrt momentums
@@ -93,8 +93,8 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
       // Scale the velocity vector by the scalar (1-gamma)*vel(jlocal)
       vel *= (1.0 - gam) * vel(jlocal);
 
-      // Add in the enthalpy in the jlocal'th entry
-      vel(jlocal) += _enthalpy[_qp];
+      // Add in the specific_total_enthalpy in the jlocal'th entry
+      vel(jlocal) += _specific_total_enthalpy[_qp];
 
       // Return -1 * (vel * grad(phi_i)) * phi_j
       return -(vel * _grad_test[_i][_qp]) * _phi[_j][_qp];

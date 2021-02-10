@@ -82,7 +82,7 @@ TauMaterial::TauMaterial(const InputParameters & parameters)
            ? &getADMaterialProperty<Real>(nms::v)
            : nullptr),
     _e(_advective_limit == combined || _advective_limit == compressible
-           ? &getADMaterialProperty<Real>(nms::e)
+           ? &getADMaterialProperty<Real>(nms::specific_internal_energy)
            : nullptr),
 
     // these material properties are only needed if the diffusive component exists

@@ -24,17 +24,17 @@
  * where P(U) = (gamma-1)*(U_4 - (1/2)*(U_1^2 + U_2^2 + U_3^2)/U_0)
  * is the pressure.
  */
-class NSEnthalpyAux : public AuxKernel
+class NSSpecificTotalEnthalpyAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  NSEnthalpyAux(const InputParameters & parameters);
+  NSSpecificTotalEnthalpyAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
   const VariableValue & _rho;
-  const VariableValue & _rhoE;
+  const VariableValue & _rho_et;
   const VariableValue & _pressure;
 };

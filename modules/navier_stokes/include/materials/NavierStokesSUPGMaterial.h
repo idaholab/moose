@@ -27,7 +27,7 @@ protected:
   void computeIdealGasdPdT();
   void computeSinglePhasedPdT();
 
-  /// Compute partial derivatives of enthalpy w.r.t. conservation variables
+  /// Compute partial derivatives of specific_total_enthalpy w.r.t. conservation variables
   void computeEnthalpyDerivatives();
 
   // functions for computing some of the materials (to simplify source code)
@@ -134,11 +134,11 @@ protected:
   /// pressure
   const ADMaterialProperty<Real> & _p;
 
-  /// enthalpy
-  const ADMaterialProperty<Real> & _enthalpy;
+  /// specific_total_enthalpy
+  const ADMaterialProperty<Real> & _specific_total_enthalpy;
 
   /// specific internal energy
-  const ADMaterialProperty<Real> & _e;
+  const ADMaterialProperty<Real> & _specific_total_energy;
 
   /// specific volume
   const ADMaterialProperty<Real> & _v;

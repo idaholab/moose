@@ -53,7 +53,7 @@ NSTemperatureDerivs<T>::get_grad(unsigned i)
   const Real U1 = _data._rho_u[_data._qp];
   const Real U2 = _data._rho_v[_data._qp];
   const Real U3 = _data._rho_w[_data._qp];
-  const Real U4 = _data._rho_E[_data._qp];
+  const Real U4 = _data._rho_et[_data._qp];
 
   const Real rho2 = U0 * U0;
   const Real mom2 = U1 * U1 + U2 * U2 + U3 * U3;
@@ -91,7 +91,7 @@ NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
   const Real U1 = _data._rho_u[_data._qp];
   const Real U2 = _data._rho_v[_data._qp];
   const Real U3 = _data._rho_w[_data._qp];
-  const Real U4 = _data._rho_E[_data._qp];
+  const Real U4 = _data._rho_et[_data._qp];
 
   const Real rho2 = U0 * U0;
   const Real rho3 = rho2 * U0;

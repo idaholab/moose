@@ -64,12 +64,12 @@ protected:
   const SinglePhaseFluidProperties & _fluid;
 
   ///@{ internal energies left == elem, right == neighbor
-  const ADMaterialProperty<Real> & _e_elem;
-  const ADMaterialProperty<Real> & _e_neighbor;
+  const ADMaterialProperty<Real> & _specific_internal_energy_elem;
+  const ADMaterialProperty<Real> & _specific_internal_energy_neighbor;
   ///@}
 
-  const ADMaterialProperty<Real> & _rhoE_elem;
-  const ADMaterialProperty<Real> & _rhoE_neighbor;
+  const ADMaterialProperty<Real> & _rho_et_elem;
+  const ADMaterialProperty<Real> & _rho_et_neighbor;
 
   ///@{ velocities left == elem, right == neighbor
   const ADMaterialProperty<RealVectorValue> & _vel_elem;
