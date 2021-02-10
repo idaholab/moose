@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "CrackFrontPointsProvider.h"
+#include "XFEMAppTypes.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
@@ -189,7 +190,7 @@ public:
    * @param node Pointer to the node
    * @return an unsigned int indicating the side
    */
-  virtual unsigned int getCutSideID(const Node * /*node*/) const
+  virtual GeometricCutSubdomainID getCutSubdomainID(const Node * /*node*/) const
   {
     mooseError("Objects that inherit from GeometricCutUserObject should override the "
                "getCutSideID method");

@@ -323,8 +323,9 @@ private:
    * Data structures to store material properties of the children elements prior to heal. These
    * material properties are copied back to the children elements if the healed element is re-cut.
    */
-  std::map<const Elem *, std::pair<const Elem *, const Elem *>> _healed_elems;
-  std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
+  std::map<const Elem *, std::map<const GeometricCutSubdomainID, const Elem *>> _healed_elems;
+  std::map<const Elem *, std::map<const GeometricCutSubdomainID, bool>>
+      _healed_material_properties_used;
 
   /// healed geometric cuts
   std::map<const Elem *, const GeometricCutUserObject *> _healed_cuts;
@@ -423,8 +424,8 @@ private:
    * @param elem2       The second child element
    */
   void storeMaterialPropertiesForElements(const Elem * parent_elem,
-                                          const Elem * elem1,
-                                          const Elem * elem2);
+                                          const std::vector<const Elem *> & elems,
+                                          const GeometricCutUserObject * gcuo);
 
   /**
    * Helper function to store the material properties of a healed element
@@ -434,15 +435,15 @@ private:
    */
   void setMaterialPropertiesForElement(const Elem * parent_elem,
                                        const Elem * cut_elem,
-                                       const Elem * elem_from) const;
+                                       const GeometricCutUserObject * gcuo);
 
   /**
-   * Determine which side of the element belongs to relative to the cut
+   * Determine which cut subdomain of the element belongs to relative to the cut
    * @param parent_elem The parent element
    * @param cut_elem    The element being cut
    * @param gcuo        The GeometricCutUserObject for the cut
    */
-  bool getElementSideRelativeToInterface(const Elem * parent_elem,
-                                         const Elem * cut_elem,
-                                         const GeometricCutUserObject * gcuo) const;
+  GeometricCutSubdomainID getGeometricCutSubdomainID(const Elem * parent_elem,
+                                                     const Elem * cut_elem,
+                                                     const GeometricCutUserObject * gcuo) const;
 };
