@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FVElementalKernel.h"
-#include "libmesh/parsed_fem_function.h"
+
 /**
  * Implements a linear or quadratic friction term for the momentum equation.
  */
@@ -26,17 +26,10 @@ protected:
 
 protected:
 
-  /// The linear friction factor for laminar flow
-  const Real _linear_friction_coef;
   /// The linear friction factor for laminar flow as a material property
   const ADMaterialProperty<Real> * const _linear_friction_matprop;
-  /// The quadratic friction factor for turbulent flow
-  const Real _quadratic_friction_coef;
   /// The quadratic friction factor for turbulent flow as a material property
   const ADMaterialProperty<Real> * const _quadratic_friction_matprop;
   /// Booleans to select the right model
-  const bool _use_linear_friction_coefficient;
   const bool _use_linear_friction_matprop;
-  const bool _use_quadratic_friction_coefficient;
-  const bool _use_quadratic_friction_matprop;
 };
