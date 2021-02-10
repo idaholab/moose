@@ -10,11 +10,7 @@
 #include "GeneralUserObject.h"
 #include "ExtraQPProvider.h"
 
-class ExtraQPTest;
 class MooseMesh;
-
-template <>
-InputParameters validParams<ExtraQPTest>();
 
 /**
  * Provides test QPs for testing XFEMMaterialManager
@@ -22,6 +18,8 @@ InputParameters validParams<ExtraQPTest>();
 class ExtraQPTest : public GeneralUserObject, public ExtraQPProvider
 {
 public:
+  static InputParameters validParams();
+
   ExtraQPTest(const InputParameters & parameters);
 
   virtual void initialSetup() override;

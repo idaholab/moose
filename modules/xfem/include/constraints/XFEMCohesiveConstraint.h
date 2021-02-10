@@ -10,17 +10,12 @@
 // MOOSE includes
 #include "XFEMMaterialManagerConstraint.h"
 #include "MooseMesh.h"
-// #include "ComputeCohesiveTraction.h"
-
-// Forward Declarations
-class XFEMCohesiveConstraint;
-
-template <>
-InputParameters validParams<XFEMCohesiveConstraint>();
 
 class XFEMCohesiveConstraint : public XFEMMaterialManagerConstraint
 {
 public:
+  static InputParameters validParams();
+
   XFEMCohesiveConstraint(const InputParameters & parameters);
 
 protected:
@@ -50,12 +45,8 @@ protected:
   /// Strain energy release rate
   Real _Gc;
 
-  const VariableValue & _disp_x;
-  const VariableValue & _disp_x_neighbor;
-  const VariableValue & _disp_y;
-  const VariableValue & _disp_y_neighbor;
-  // const VariableValue & _disp_z;
-  // const VariableValue & _disp_z_neighbor;
+  const std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp_neighbor;
 
   const unsigned int _component;
   // const ComputeCohesiveTraction & _comp_trac;

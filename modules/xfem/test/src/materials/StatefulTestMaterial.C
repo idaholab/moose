@@ -7,11 +7,12 @@
 
 #include "StatefulTestMaterial.h"
 
-template <>
+registerMooseObject("XFEMTestApp", StatefulTestMaterial);
+
 InputParameters
-validParams<StatefulTestMaterial>()
+StatefulTestMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("");
   return params;
 }

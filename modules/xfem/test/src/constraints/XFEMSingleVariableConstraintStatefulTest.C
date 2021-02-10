@@ -6,23 +6,23 @@
 /****************************************************************/
 
 #include "XFEMSingleVariableConstraintStatefulTest.h"
-
-// MOOSE includes
 #include "Assembly.h"
 #include "ElementPairInfo.h"
 #include "FEProblem.h"
 
 #include "libmesh/quadrature.h"
 
-template <>
+registerMooseObject("XFEMTestApp", XFEMSingleVariableConstraintStatefulTest);
+
 InputParameters
-validParams<XFEMSingleVariableConstraintStatefulTest>()
+XFEMSingleVariableConstraintStatefulTest::validParams()
 {
-  InputParameters params = validParams<XFEMMaterialManagerConstraint>();
+  InputParameters params = XFEMMaterialManagerConstraint::validParams();
+  params.addClassDescription("Material manager base test constraint");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same block");
-  params.addParam<Real>("alpha", 100, "Stablization parameter in Nitsche's formulation.");
+  params.addParam<Real>("alpha", 100, "Stabilization parameter in Nitsche's formulation.");
   params.addParam<Real>("jump", 0, "Jump at the interface.");
   params.addParam<Real>("jump_flux", 0, "Flux jump at the interface.");
   return params;
@@ -37,8 +37,6 @@ XFEMSingleVariableConstraintStatefulTest::XFEMSingleVariableConstraintStatefulTe
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
 }
-
-XFEMSingleVariableConstraintStatefulTest::~XFEMSingleVariableConstraintStatefulTest() {}
 
 void
 XFEMSingleVariableConstraintStatefulTest::initialSetup()
@@ -60,29 +58,6 @@ XFEMSingleVariableConstraintStatefulTest::computeQpResidual(Moose::DGResidualTyp
 {
   Real r = 0;
 
-  // switch (type)
-  // {
-  //   case Moose::Element:
-  //     r -= (0.5 * _grad_u[_qp] * _interface_normal +
-  //           0.5 * _grad_u_neighbor[_qp] * _interface_normal) *
-  //          _test[_i][_qp];
-  //     r -= ((*_prop_jump)[_qp]) * 0.5 * _grad_test[_i][_qp] * _interface_normal;
-  //     r +=
-  //         0.5 * _grad_test[_i][_qp] * _interface_normal * _jump + 0.5 * _test[_i][_qp] *
-  //         _jump_flux;
-  //     r += _alpha * ((*_prop_jump)[_qp] - _jump) * _test[_i][_qp];
-  //     break;
-  //
-  //   case Moose::Neighbor:
-  //     r += (0.5 * _grad_u[_qp] * _interface_normal +
-  //           0.5 * _grad_u_neighbor[_qp] * _interface_normal) *
-  //          _test_neighbor[_i][_qp];
-  //     r -= ((*_prop_jump)[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal;
-  //     r += 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal * _jump +
-  //          0.5 * _test_neighbor[_i][_qp] * _jump_flux;
-  //     r -= _alpha * ((*_prop_jump)[_qp] - _jump) * _test_neighbor[_i][_qp];
-  //     break;
-  // }
   switch (type)
   {
     case Moose::Element:

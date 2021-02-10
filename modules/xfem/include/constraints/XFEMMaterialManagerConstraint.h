@@ -16,6 +16,8 @@
 class XFEMMaterialManagerConstraint : public ElemElemConstraint
 {
 public:
+  static InputParameters validParams();
+
   XFEMMaterialManagerConstraint(const InputParameters & parameters);
 
   virtual void computeResidual();

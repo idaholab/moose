@@ -9,17 +9,14 @@
 
 #include "Material.h"
 
-class StatefulTestMaterial;
-
-template <>
-InputParameters validParams<StatefulTestMaterial>();
-
 /**
  *
  */
 class StatefulTestMaterial : public Material
 {
 public:
+  static InputParameters validParams();
+
   StatefulTestMaterial(const InputParameters & parameters);
 
 protected:

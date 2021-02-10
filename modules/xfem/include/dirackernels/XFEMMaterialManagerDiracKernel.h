@@ -16,6 +16,8 @@
 class XFEMMaterialManagerDiracKernel : public DiracKernel
 {
 public:
+  static InputParameters validParams();
+
   XFEMMaterialManagerDiracKernel(const InputParameters & parameters);
 
   virtual void addPoints() final;
@@ -33,9 +35,6 @@ public:
 protected:
   const XFEMMaterialManager & _manager;
 };
-
-template <>
-InputParameters validParams<XFEMMaterialManagerDiracKernel>();
 
 template <typename T>
 const MaterialProperty<T> *
