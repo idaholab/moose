@@ -46,7 +46,7 @@ ADReal
 NSFVMomentumFriction::computeQpResidual()
 {
   if (_use_linear_friction_matprop)
-    return -(*_linear_friction_matprop)[_qp] * std::abs(_u[_qp]);
+    return (*_linear_friction_matprop)[_qp] * std::abs(_u[_qp]);
   else
-    return -(*_quadratic_friction_matprop)[_qp] * std::pow(_u[_qp], 2);
+    return (*_quadratic_friction_matprop)[_qp] * std::pow(_u[_qp], 2);
 }
