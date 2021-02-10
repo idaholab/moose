@@ -132,6 +132,9 @@
 [Executioner]
   type = Steady
   solve_type = Newton
+  nl_rel_tol = 1E-12
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'NONZERO'
 []
 
 [Outputs]
