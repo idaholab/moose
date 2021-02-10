@@ -34,6 +34,6 @@
     input = test_init.py
     issues = '#16868'
 
-    requirement = "The system shall include a utility for initialize documentation items."
+    requirement = "The system shall include a utility to initialize documentation items."
   []
 []

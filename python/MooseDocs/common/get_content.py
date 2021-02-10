@@ -185,7 +185,6 @@ def get_content(items, in_ext):
     roots = set()
     nodes = dict()
     for root, filename, external in get_files(items, in_ext):
-        #print('GET_CONTENT:', filename, external)
         roots.add(root)
         key = filename.replace(root, '').strip('/')
         parts = key.split('/')
