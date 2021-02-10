@@ -9,17 +9,14 @@
 
 #include "Material.h"
 
-class StatefulMaterialJump;
-
-template <>
-InputParameters validParams<StatefulMaterialJump>();
-
 /**
  *
  */
 class StatefulMaterialJump : public Material
 {
 public:
+  static InputParameters validParams();
+
   StatefulMaterialJump(const InputParameters & parameters);
 
 protected:

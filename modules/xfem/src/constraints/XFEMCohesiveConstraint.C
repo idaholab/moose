@@ -14,19 +14,18 @@
 
 registerMooseObject("XFEMApp", XFEMCohesiveConstraint);
 
-template <>
 InputParameters
-validParams<XFEMCohesiveConstraint>()
+XFEMCohesiveConstraint::validParams()
 {
-  InputParameters params = validParams<XFEMMaterialManagerConstraint>();
+  InputParameters params = XFEMMaterialManagerConstraint::validParams();
+  params.addClassDescription("Enforce a cohesive zone traction-separation-law.");
   params.addParam<Real>("stiffness", 9.6628, "Initial stiffness.");
   params.addParam<Real>("max_traction", 11.75, "Max traction.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same block");
   params.addParam<Real>("Gc", 82.2478, "Strain energy release rate.");
-  params.addCoupledVar("disp_x", "Coupled displacement in x");
-  params.addCoupledVar("disp_y", "Coupled displacement in y");
+  params.addRequiredCoupledVar("displacements", "Names of the displacement variables to couple");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
@@ -39,10 +38,8 @@ XFEMCohesiveConstraint::XFEMCohesiveConstraint(const InputParameters & parameter
     _stiffness(getParam<Real>("stiffness")),
     _max_traction(getParam<Real>("max_traction")),
     _Gc(getParam<Real>("Gc")),
-    _disp_x(coupledValue("disp_x")),
-    _disp_x_neighbor(coupledNeighborValue("disp_x")),
-    _disp_y(coupledValue("disp_y")),
-    _disp_y_neighbor(coupledNeighborValue("disp_y")),
+    _disp(coupledValues("displacements")),
+    _disp_neighbor(coupledNeighborValues("displacements")),
     _component(getParam<unsigned int>("component")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
@@ -78,14 +75,14 @@ XFEMCohesiveConstraint::computeQpResidual(Moose::DGResidualType type)
   R[1][1] = std::cos(theta);
 
   // Calculating normal separation:
-  Real delta_m_n = (_disp_x_neighbor[_qp] - _disp_x[_qp]) * _interface_normal(0) +
-                   (_disp_y_neighbor[_qp] - _disp_y[_qp]) * _interface_normal(1);
+  Real delta_m_n = ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) * _interface_normal(0) +
+                   ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]) * _interface_normal(1);
 
   // Point interface_tangent(_interface_normal(1), -_interface_normal(0), 0);
   //
   // // Calculating tangential separation:
-  // Real delta_m_t = (_disp_x_neighbor[_qp] - _disp_x[_qp]) * interface_tangent(0) +
-  //                  (_disp_y_neighbor[_qp] - _disp_y[_qp]) * interface_tangent(1);
+  // Real delta_m_t = ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) * interface_tangent(0) +
+  //                  ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]) * interface_tangent(1);
 
   Real stiffness_deg = _stiffness; // Initializing stiffness
   Real alpha = 1.0e5;
@@ -170,14 +167,14 @@ XFEMCohesiveConstraint::computeQpJacobian(Moose::DGJacobianType type)
   R[1][1] = std::cos(theta);
 
   // Calculating normal separation:
-  Real delta_m_n = (_disp_x_neighbor[_qp] - _disp_x[_qp]) * _interface_normal(0) +
-                   (_disp_y_neighbor[_qp] - _disp_y[_qp]) * _interface_normal(1);
+  Real delta_m_n = ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) * _interface_normal(0) +
+                   ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]) * _interface_normal(1);
 
   // Point interface_tangent(_interface_normal(1), -_interface_normal(0), 0);
   //
   // // Calculating tangential separation:
-  // Real delta_m_t = (_disp_x_neighbor[_qp] - _disp_x[_qp]) * interface_tangent(0) +
-  //                  (_disp_y_neighbor[_qp] - _disp_y[_qp]) * interface_tangent(1);
+  // Real delta_m_t = ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) * interface_tangent(0) +
+  //                  ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]) * interface_tangent(1);
 
   Real factor = _stiffness; // jacobian factor
   Real alpha = 1.0e5;

@@ -9,11 +9,7 @@
 
 #include "XFEMMaterialManagerDiracKernel.h"
 
-class ManagedSourceTest;
 class XFEMMaterialManager;
-
-template <>
-InputParameters validParams<ManagedSourceTest>();
 
 /**
  * Stateful point source test kernel for the XFEMMaterialManager
@@ -21,6 +17,8 @@ InputParameters validParams<ManagedSourceTest>();
 class ManagedSourceTest : public XFEMMaterialManagerDiracKernel
 {
 public:
+  static InputParameters validParams();
+
   ManagedSourceTest(const InputParameters & parameters);
 
   virtual void initialSetup() override;

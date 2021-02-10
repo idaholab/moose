@@ -10,14 +10,14 @@
 #include "GeometricSearchData.h"
 #include "ElementPairLocator.h"
 
-template <>
+registerMooseObject("XFEMTestApp", MaximumNormalSeparation);
+
 InputParameters
-validParams<MaximumNormalSeparation>()
+MaximumNormalSeparation::validParams()
 {
-  InputParameters params = validParams<Material>();
-  params.addClassDescription("");
-  params.addRequiredCoupledVar("disp_x", "Name of the variable to couple");
-  params.addRequiredCoupledVar("disp_y", "Name of the variable to couple");
+  InputParameters params = Material::validParams();
+  params.addClassDescription("Compute the separation between neighboring elements");
+  params.addRequiredCoupledVar("displacements", "Names of the displacement variables to couple");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same block");
@@ -29,10 +29,8 @@ MaximumNormalSeparation::MaximumNormalSeparation(const InputParameters & paramet
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _max_normal_separation(declareProperty<Real>(_base_name + "max_normal_separation")),
     _max_normal_separation_old(getMaterialPropertyOld<Real>(_base_name + "max_normal_separation")),
-    _disp_x(coupledValue("disp_x")),
-    _disp_x_neighbor(coupledNeighborValue("disp_x")),
-    _disp_y(coupledValue("disp_y")),
-    _disp_y_neighbor(coupledNeighborValue("disp_y"))
+    _disp(coupledValues("displacements")),
+    _disp_neighbor(coupledNeighborValues("displacements"))
 {
 }
 
@@ -76,16 +74,16 @@ MaximumNormalSeparation::computeQpProperties()
     {
       const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem_pair);
       interface_normal = info._elem1_normal;
-      normal_distance = interface_normal(0) * (_disp_x_neighbor[_qp] - _disp_x[_qp]) +
-                        interface_normal(1) * (_disp_y_neighbor[_qp] - _disp_y[_qp]);
+      normal_distance = interface_normal(0) * ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) +
+                        interface_normal(1) * ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]);
     }
     else if (findIter2 != elem_pairs.end())
     {
       const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem_pair2);
       interface_normal = info._elem2_normal;
       // mooseError("element pair found in opposite way");
-      normal_distance = interface_normal(0) * (_disp_x_neighbor[_qp] - _disp_x[_qp]) +
-                        interface_normal(1) * (_disp_y_neighbor[_qp] - _disp_y[_qp]);
+      normal_distance = interface_normal(0) * ((*_disp_neighbor[0])[_qp] - (*_disp[0])[_qp]) +
+                        interface_normal(1) * ((*_disp_neighbor[1])[_qp] - (*_disp[1])[_qp]);
     }
     else
       mooseError("element pair is not found.");

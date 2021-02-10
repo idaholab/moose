@@ -9,17 +9,14 @@
 
 #include "Material.h"
 
-class MaximumNormalSeparation;
-
-template <>
-InputParameters validParams<MaximumNormalSeparation>();
-
 /**
  *
  */
 class MaximumNormalSeparation : public Material
 {
 public:
+  static InputParameters validParams();
+
   MaximumNormalSeparation(const InputParameters & parameters);
 
 protected:
@@ -31,8 +28,6 @@ protected:
   MaterialProperty<Real> & _max_normal_separation;
   const MaterialProperty<Real> & _max_normal_separation_old;
 
-  const VariableValue & _disp_x;
-  const VariableValue & _disp_x_neighbor;
-  const VariableValue & _disp_y;
-  const VariableValue & _disp_y_neighbor;
+  const std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp_neighbor;
 };

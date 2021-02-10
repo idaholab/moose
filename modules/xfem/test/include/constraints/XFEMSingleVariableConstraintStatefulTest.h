@@ -7,24 +7,17 @@
 
 #pragma once
 
-// MOOSE includes
 #include "XFEMMaterialManagerConstraint.h"
 #include "MooseMesh.h"
-
-// Forward Declarations
-class XFEMSingleVariableConstraintStatefulTest;
-
-template <>
-InputParameters validParams<XFEMSingleVariableConstraintStatefulTest>();
 
 class XFEMSingleVariableConstraintStatefulTest : public XFEMMaterialManagerConstraint
 {
 public:
+  static InputParameters validParams();
+
   XFEMSingleVariableConstraintStatefulTest(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-
-  virtual ~XFEMSingleVariableConstraintStatefulTest();
 
 protected:
   /**

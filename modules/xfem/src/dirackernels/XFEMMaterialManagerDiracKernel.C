@@ -10,11 +10,10 @@
 #include "XFEMMaterialManager.h"
 #include "MooseMesh.h"
 
-template <>
 InputParameters
-validParams<XFEMMaterialManagerDiracKernel>()
+XFEMMaterialManagerDiracKernel::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<UserObjectName>("manager", "XFEMMaterialManager object");
   return params;
 }

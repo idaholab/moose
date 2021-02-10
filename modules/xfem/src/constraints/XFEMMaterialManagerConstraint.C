@@ -10,11 +10,10 @@
 #include "XFEMElementPairMaterialManager.h"
 #include "MooseMesh.h"
 
-template <>
 InputParameters
-validParams<XFEMMaterialManagerConstraint>()
+XFEMMaterialManagerConstraint::validParams()
 {
-  InputParameters params = validParams<ElemElemConstraint>();
+  InputParameters params = ElemElemConstraint::validParams();
   params.addRequiredParam<UserObjectName>("manager", "XFEMElementPairMaterialManager object");
   return params;
 }

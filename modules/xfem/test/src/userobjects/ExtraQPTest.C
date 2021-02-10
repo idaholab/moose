@@ -8,11 +8,12 @@
 #include "ExtraQPTest.h"
 #include "MooseMesh.h"
 
-template <>
+registerMooseObject("XFEMTestApp", ExtraQPTest);
+
 InputParameters
-validParams<ExtraQPTest>()
+ExtraQPTest::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("Set up a list of discrete point to evaluate material properties on "
                              "using the XFEMMaterialManager");
   params.addRequiredParam<std::vector<Point>>("points", "List of extra QP points");

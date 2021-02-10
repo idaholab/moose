@@ -10,11 +10,12 @@
 #include "XFEMMaterialManager.h"
 #include "MooseMesh.h"
 
-template <>
+registerMooseObject("XFEMTestApp", ManagedSourceTest);
+
 InputParameters
-validParams<ManagedSourceTest>()
+ManagedSourceTest::validParams()
 {
-  InputParameters params = validParams<XFEMMaterialManagerDiracKernel>();
+  InputParameters params = XFEMMaterialManagerDiracKernel::validParams();
   params.addClassDescription("Tests the XFEMMaterialManager");
   return params;
 }

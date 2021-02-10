@@ -7,11 +7,12 @@
 
 #include "StatefulMaterialJump.h"
 
-template <>
+registerMooseObject("XFEMTestApp", StatefulMaterialJump);
+
 InputParameters
-validParams<StatefulMaterialJump>()
+StatefulMaterialJump::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("");
   params.addRequiredCoupledVar("u", "Name of the variable to couple");
   params.addParam<std::string>("base_name",

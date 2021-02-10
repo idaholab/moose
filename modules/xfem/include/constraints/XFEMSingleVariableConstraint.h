@@ -14,9 +14,7 @@
 #include "MooseMesh.h"
 
 // Forward Declarations
-
 class XFEM;
-
 class Function;
 
 class XFEMSingleVariableConstraint : public ElemElemConstraint
