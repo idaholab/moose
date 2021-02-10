@@ -22,9 +22,12 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
-registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
+// TIMPI includes
+#include "timpi/communicator.h"
+#include "timpi/parallel_sync.h"
 
 defineLegacyParams(MultiAppMeshFunctionTransfer);
+registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
 
 InputParameters
 MultiAppMeshFunctionTransfer::validParams()
@@ -57,24 +60,9 @@ MultiAppMeshFunctionTransfer::execute()
 
   getAppInfo();
 
-  _send_points.resize(_var_size);
-  _send_evals.resize(_var_size);
-  _send_ids.resize(_var_size);
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);
-
-  // Make sure all our sends succeeded.
-  for (unsigned int i = 0; i < _var_size; ++i)
-    for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-    {
-      if (i_proc == processor_id())
-        continue;
-      _send_points[i][i_proc].wait();
-      _send_evals[i][i_proc].wait();
-      if (_current_direction == FROM_MULTIAPP)
-        _send_ids[i][i_proc].wait();
-    }
 
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 
@@ -100,11 +88,12 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
 
-  std::vector<std::vector<Point>> outgoing_points(n_processors());
-  std::vector<std::map<std::pair<unsigned int, dof_id_type>, dof_id_type>> point_index_map(
-      n_processors());
-  // point_index_map[i_to, element_id] = index
-  // outgoing_points[index] is the first quadrature point in element
+  // Point locations needed to send to from-domain
+  // processor to points
+  std::map<processor_id_type, std::vector<Point>> outgoing_points;
+  // <processor, <system_id, node_i>> --> point_id
+  std::map<processor_id_type, std::map<std::pair<unsigned int, dof_id_type>, dof_id_type>>
+      point_index_map;
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
@@ -140,8 +129,12 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           {
             if (bboxes[i_from].contains_point(*node + _to_positions[i_to]))
             {
+              // <system id, node id>
               std::pair<unsigned int, dof_id_type> key(i_to, node->id());
+              // map a tuple of pid, problem id and node id to point id
+              // point id is counted from zero
               point_index_map[i_proc][key] = outgoing_points[i_proc].size();
+              // map pid to points
               outgoing_points[i_proc].push_back(*node + _to_positions[i_to]);
               point_found = true;
             }
@@ -212,12 +205,9 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
   }
 
-  /**
-   * Request point evaluations from other processors and handle requests sent to
-   * this processor.
-   */
-
-  // Get the local bounding boxes.
+  // Get the local bounding boxes for current processor.
+  // There could be more than one box because of the number of local apps
+  // can be larger than one
   std::vector<BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
   {
     // Find the index to the first of this processor's local bounding boxes.
@@ -265,72 +255,6 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     local_meshfuns.push_back(from_func);
   }
 
-  // Send points to other processors.
-  std::vector<std::vector<Real>> incoming_evals(n_processors());
-  std::vector<std::vector<unsigned int>> incoming_app_ids(n_processors());
-  _send_points[i].resize(n_processors());
-  for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-  {
-    if (i_proc == processor_id())
-      continue;
-
-    _communicator.send(i_proc, outgoing_points[i_proc], _send_points[i][i_proc]);
-  }
-
-  // Receive points from other processors, evaluate mesh functions at those
-  // points, and send the values back.
-  _send_evals[i].resize(n_processors());
-  _send_ids[i].resize(n_processors());
-
-  // Create these here so that they live the entire life of this function
-  // and are NOT reused per processor.
-  std::vector<std::vector<Real>> processor_outgoing_evals(n_processors());
-
-  for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-  {
-    std::vector<Point> incoming_points;
-    if (i_proc == processor_id())
-      incoming_points = outgoing_points[i_proc];
-    else
-      _communicator.receive(i_proc, incoming_points);
-
-    std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
-    outgoing_evals.resize(incoming_points.size(), OutOfMeshValue);
-
-    std::vector<unsigned int> outgoing_ids(incoming_points.size(), -1); // -1 = largest unsigned int
-    for (unsigned int i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
-    {
-      Point pt = incoming_points[i_pt];
-
-      // Loop until we've found the lowest-ranked app that actually contains
-      // the quadrature point.
-      for (unsigned int i_from = 0;
-           i_from < _from_problems.size() && outgoing_evals[i_pt] == OutOfMeshValue;
-           ++i_from)
-      {
-        if (local_bboxes[i_from].contains_point(pt))
-        {
-          outgoing_evals[i_pt] = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
-          if (_current_direction == FROM_MULTIAPP)
-            outgoing_ids[i_pt] = _local2global_map[i_from];
-        }
-      }
-    }
-
-    if (i_proc == processor_id())
-    {
-      incoming_evals[i_proc] = outgoing_evals;
-      if (_current_direction == FROM_MULTIAPP)
-        incoming_app_ids[i_proc] = outgoing_ids;
-    }
-    else
-    {
-      _communicator.send(i_proc, outgoing_evals, _send_evals[i][i_proc]);
-      if (_current_direction == FROM_MULTIAPP)
-        _communicator.send(i_proc, outgoing_ids, _send_ids[i][i_proc]);
-    }
-  }
-
   /**
    * Gather all of the evaluations, pick out the best ones for each point, and
    * apply them to the solution vector.  When we are transferring from
@@ -338,15 +262,59 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
    * In that case, we'll try to use the value from the app with the lowest id.
    */
 
-  for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-  {
-    if (i_proc == processor_id())
-      continue;
+  // Fill values and app ids for incoming points
+  // We are responsible to compute values for these incoming points
+  auto gather_functor =
+      [this, &local_meshfuns, &local_bboxes](
+          processor_id_type /*pid*/,
+          const std::vector<Point> & incoming_points,
+          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points) {
+        vals_ids_for_incoming_points.resize(incoming_points.size(),
+                                            std::make_pair(OutOfMeshValue, 0));
+        for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
+        {
+          Point pt = incoming_points[i_pt];
 
-    _communicator.receive(i_proc, incoming_evals[i_proc]);
-    if (_current_direction == FROM_MULTIAPP)
-      _communicator.receive(i_proc, incoming_app_ids[i_proc]);
-  }
+          // Loop until we've found the lowest-ranked app that actually contains
+          // the quadrature point.
+          for (MooseIndex(_from_problems.size()) i_from = 0;
+               i_from < _from_problems.size() &&
+               vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
+               ++i_from)
+          {
+            if (local_bboxes[i_from].contains_point(pt))
+            {
+              // Use mesh funciton to compute interpolation values
+              vals_ids_for_incoming_points[i_pt].first =
+                  (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
+              // Record problem ID as well
+              vals_ids_for_incoming_points[i_pt].second = _local2global_map[i_from];
+            }
+          }
+        }
+      };
+
+  // Incoming values and APP ids for outgoing points
+  std::map<processor_id_type, std::vector<std::pair<Real, unsigned int>>> incoming_vals_ids;
+  // Copy data out to incoming_vals_ids
+  auto action_functor =
+      [&incoming_vals_ids](
+          processor_id_type pid,
+          const std::vector<Point> & /*my_outgoing_points*/,
+          const std::vector<std::pair<Real, unsigned int>> & vals_ids_for_outgoing_points) {
+        // This lamda function might be called multiple times
+        incoming_vals_ids[pid].reserve(vals_ids_for_outgoing_points.size());
+        // Copy data for processor 'pid'
+        std::copy(vals_ids_for_outgoing_points.begin(),
+                  vals_ids_for_outgoing_points.end(),
+                  std::back_inserter(incoming_vals_ids[pid]));
+      };
+
+  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
+  // Hopefully, pull_parallel_vector_data will not mess up this
+  const std::pair<Real, unsigned int> * ex = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(
+      comm(), outgoing_points, gather_functor, action_functor, ex);
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
@@ -384,27 +352,31 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         unsigned int lowest_app_rank = libMesh::invalid_uint;
         Real best_val = 0.;
         bool point_found = false;
-        for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
+        for (auto & group : incoming_vals_ids)
         {
           // Skip this proc if the node wasn't in it's bounding boxes.
           std::pair<unsigned int, dof_id_type> key(i_to, node->id());
-          if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
+          // Make sure point_index_map has data for corresponding pid
+          mooseAssert(point_index_map.find(group.first) != point_index_map.end(),
+                      "Point index map does not have data for processor group.first");
+          if (point_index_map[group.first].find(key) == point_index_map[group.first].end())
             continue;
-          unsigned int i_pt = point_index_map[i_proc][key];
+
+          auto i_pt = point_index_map[group.first][key];
 
           // Ignore this proc if it's app has a higher rank than the
           // previously found lowest app rank.
           if (_current_direction == FROM_MULTIAPP)
           {
-            if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
+            if (group.second[i_pt].second >= lowest_app_rank)
               continue;
           }
 
           // Ignore this proc if the point was actually outside its meshes.
-          if (incoming_evals[i_proc][i_pt] == OutOfMeshValue)
+          if (group.second[i_pt].first == OutOfMeshValue)
             continue;
 
-          best_val = incoming_evals[i_proc][i_pt];
+          best_val = group.second[i_pt].first;
           point_found = true;
         }
 
@@ -459,28 +431,28 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           unsigned int lowest_app_rank = libMesh::invalid_uint;
           Real best_val = 0;
           bool point_found = false;
-          for (unsigned int i_proc = 0; i_proc < incoming_evals.size(); ++i_proc)
+          for (auto & group : incoming_vals_ids)
           {
             // Skip this proc if the elem wasn't in it's bounding boxes.
             std::pair<unsigned int, dof_id_type> key(i_to, point_ids[offset]);
-            if (point_index_map[i_proc].find(key) == point_index_map[i_proc].end())
+            if (point_index_map[group.first].find(key) == point_index_map[group.first].end())
               continue;
 
-            unsigned int i_pt = point_index_map[i_proc][key];
+            unsigned int i_pt = point_index_map[group.first][key];
 
             // Ignore this proc if it's app has a higher rank than the
             // previously found lowest app rank.
             if (_current_direction == FROM_MULTIAPP)
             {
-              if (incoming_app_ids[i_proc][i_pt] >= lowest_app_rank)
+              if (group.second[i_pt].second >= lowest_app_rank)
                 continue;
             }
 
             // Ignore this proc if the point was actually outside its meshes.
-            if (incoming_evals[i_proc][i_pt] == OutOfMeshValue)
+            if (group.second[i_pt].first == OutOfMeshValue)
               continue;
 
-            best_val = incoming_evals[i_proc][i_pt];
+            best_val = group.second[i_pt].first;
             point_found = true;
           }
 
