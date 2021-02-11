@@ -326,71 +326,70 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
 
     if (onBoundary(*fi))
     {
-      // In my mind there should only be about one bc_id per FaceInfo
-      mooseAssert(fi->boundaryIDs().size() == 1,
-                  "I think some of my logic might depend on my implicit assumption that we have "
-                  "one boundary ID at most per face");
-      const auto bc_id = *fi->boundaryIDs().begin();
-
-      if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
+      // Find the boundary id that has an associated INSFV boundary condition
+      // if a face has more than one bc_id
+      for (const auto bc_id : fi->boundaryIDs())
       {
-        // Need to account for viscous shear stress from wall
-        for (const auto i : make_range(_dim))
-          coeff(i) += mu * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - rc_centroid) * normal) *
-                      (1 - normal(i) * normal(i));
+        if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
+        {
+          // Need to account for viscous shear stress from wall
+          for (const auto i : make_range(_dim))
+            coeff(i) += mu * surface_vector.norm() /
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) *
+                        (1 - normal(i) * normal(i));
 
-        // No flow normal to wall, so no contribution to coefficient from the advection term
-        return;
-      }
+          // No flow normal to wall, so no contribution to coefficient from the advection term
+          return;
+        }
 
-      if (_slip_wall_boundaries.find(bc_id) != _slip_wall_boundaries.end())
-        // In the case of a slip wall we neither have viscous shear stress from the wall nor
-        // normal outflow, so our contribution to the coefficient is zero
-        return;
+        if (_slip_wall_boundaries.find(bc_id) != _slip_wall_boundaries.end())
+          // In the case of a slip wall we neither have viscous shear stress from the wall nor
+          // normal outflow, so our contribution to the coefficient is zero
+          return;
 
-      if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
-      {
-        ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
-        if (_v_var)
-          face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
-        if (_w_var)
-          face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
+        if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
+        {
+          ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
+          if (_v_var)
+            face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
+          if (_w_var)
+            face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-        const auto advection_coeffs =
-            Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
-        ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
+          const auto advection_coeffs =
+              Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
+          ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
 
-        if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
-          // We are not on a fully developed flow boundary, so we have a viscous term contribution.
-          // This term is slightly modified relative to the internal face term. Instead of the
-          // distance between elem and neighbor centroid, we just have the distance between the elem
-          // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
-          // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
-          // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
-          temp_coeff += mu * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
+          if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
+            // We are not on a fully developed flow boundary, so we have a viscous term contribution.
+            // This term is slightly modified relative to the internal face term. Instead of the
+            // distance between elem and neighbor centroid, we just have the distance between the elem
+            // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
+            // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
+            // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
+            temp_coeff += mu * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
 
-        // For flow boundaries, the coefficient addition is the same for every velocity component
-        for (const auto i : make_range(_dim))
-          coeff(i) += temp_coeff;
+          // For flow boundaries, the coefficient addition is the same for every velocity component
+          for (const auto i : make_range(_dim))
+            coeff(i) += temp_coeff;
 
-        return;
-      }
+          return;
+        }
 
-      if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
-      {
-        // Moukalled eqns. 15.154 - 15.156
-        for (const auto i : make_range(_dim))
-          coeff(i) += 2. * mu * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
+        if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
+        {
+          // Moukalled eqns. 15.154 - 15.156
+          for (const auto i : make_range(_dim))
+            coeff(i) += 2. * mu * surface_vector.norm() /
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
 
-        return;
+          return;
+        }
       }
 
       mooseError("The INSFVMomentumAdvection object ",
                  this->name(),
-                 " is not completely bounded by INSFVBCs. Please examine surface ",
-                 bc_id,
+                 " is not completely bounded by INSFVBCs. Please examine sideset ",
+                 *fi->boundaryIDs().begin(),
                  " and your FVBCs blocks.");
     }
 
@@ -449,13 +448,6 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 
   if (onBoundary(*_face_info))
   {
-    // In my mind there should only be about one bc_id per FaceInfo
-    mooseAssert(_face_info->boundaryIDs().size() == 1,
-                "I think some of my logic might depend on my implicit assumption that we have "
-                "one boundary ID at most per face");
-    mooseAssert(_flow_boundaries.find(*_face_info->boundaryIDs().begin()) != _flow_boundaries.end(),
-                "INSFV*Advection flux kernel objects should only execute on flow boundaries.");
-
     v(0) = _u_var->getBoundaryFaceValue(*_face_info);
     if (_v_var)
       v(1) = _v_var->getBoundaryFaceValue(*_face_info);
