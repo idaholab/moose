@@ -856,12 +856,6 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 #endif
 #endif
 
-  if (_need_ad_u)
-    assignForAllQps(_ad_zero, _ad_u, nqp);
-
-  if (_need_ad_grad_u)
-    assignForAllQps(_ad_zero, _ad_grad_u, nqp);
-
   if (_need_ad_second_u)
     assignForAllQps(0, _ad_second_u, nqp);
 
@@ -889,6 +883,16 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 
   if (_need_ad_u)
     assignForAllQps(_ad_dof_values[0], _ad_u, nqp);
+
+  if (_need_ad_grad_u)
+    assignForAllQps(
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        _var.adGradSln(_elem),
+#else
+        _ad_zero,
+#endif
+        _ad_grad_u,
+        nqp);
 
   if (_need_ad_u_dot && _time_integrator)
     assignForAllQps(_ad_dofs_dot[0], _ad_u_dot, nqp);
