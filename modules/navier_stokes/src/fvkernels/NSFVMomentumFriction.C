@@ -9,7 +9,7 @@
 
 #include "NSFVMomentumFriction.h"
 
-registerMooseObject("MooseApp", NSFVMomentumFriction);
+registerMooseObject("NavierStokesApp", NSFVMomentumFriction);
 
 InputParameters
 NSFVMomentumFriction::validParams()

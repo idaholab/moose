@@ -1,6 +1,6 @@
 #include "NSFVEnergyAmbientConvection.h"
 
-registerMooseObject("MooseApp", NSFVEnergyAmbientConvection);
+registerMooseObject("NavierStokesApp", NSFVEnergyAmbientConvection);
 
 InputParameters
 NSFVEnergyAmbientConvection::validParams()
