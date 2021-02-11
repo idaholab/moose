@@ -1,0 +1,20 @@
+[Tests]
+  design = 'TensorMechanicsPlasticOrthotropic.md'
+  issues = '#16016'
+
+  [ad_aniso_plasticity_x_one_ref]
+    type = 'CSVDiff'
+    input = 'ad_aniso_plasticity_x_one_ref.i'
+    csvdiff = 'ad_aniso_plasticity_x_one_ref_out.csv'
+    heavy = true
+    requirement =  'Anisotropic plasticity and anisotropic elastoplasticity must give almost identical results if elastic behavior is isotropic -- plastic anisotropy'
+  []
+
+  [ad_aniso_plasticity_x_one]
+    type = 'CSVDiff'
+    input = 'ad_aniso_plasticity_x_one.i'
+    csvdiff = 'ad_aniso_plasticity_x_one_out.csv'
+    heavy = true
+    requirement = 'Anisotropic plasticity and anisotropic elastoplasticity must give almost identical results if elastic behavior is isotropic -- elastoplastic anisotropy'
+  []
+[]
