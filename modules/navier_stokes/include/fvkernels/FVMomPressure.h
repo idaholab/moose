@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVElementalKernel.h"
 
-class CNSFVMomPressure : public FVFluxKernel
+class CNSFVMomPressure : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
@@ -24,14 +24,7 @@ protected:
   // const VariableValue & _eps;
   const Real _eps;
 
-  const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
-
-  /// The pressure on the elem
-  const ADMaterialProperty<Real> & _pressure_elem;
-
-  /// The pressure on the neighbor
-  const ADMaterialProperty<Real> & _pressure_neighbor;
+  const ADMaterialProperty<RealVectorValue> & _grad_pressure;
 
   /// index x|y|z
   unsigned int _index;
