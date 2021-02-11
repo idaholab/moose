@@ -1,0 +1,8 @@
+# validate this file:
+#   curl --data-binary @.codecov.yml https://codecov.io/validate
+
+# Silence comments for now
+comment: off
+
+codecov:
+  strict_yaml_branch: next # Always use the config from next
