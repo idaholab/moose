@@ -18,7 +18,7 @@ registerADMooseObject("NavierStokesApp", CNSFVMomPressure);
 InputParameters
 CNSFVMomPressure::validParams()
 {
-  InputParameters params = FVFluxKernel::validParams();
+  InputParameters params = FVElementalKernel::validParams();
   params.addParam<Real>(NS::porosity, 1, "porosity");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>("momentum_component",
@@ -28,12 +28,9 @@ CNSFVMomPressure::validParams()
 }
 
 CNSFVMomPressure::CNSFVMomPressure(const InputParameters & params)
-  : FVFluxKernel(params),
+  : FVElementalKernel(params),
     _eps(getParam<Real>(nms::porosity)),
-    _vel_elem(getADMaterialProperty<RealVectorValue>(nms::velocity)),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(nms::velocity)),
-    _pressure_elem(getADMaterialProperty<Real>(nms::pressure)),
-    _pressure_neighbor(getNeighborADMaterialProperty<Real>(nms::pressure)),
+    _grad_pressure(getADMaterialProperty<RealVectorValue>(nms::grad(nms::pressure))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 }
@@ -41,16 +38,5 @@ CNSFVMomPressure::CNSFVMomPressure(const InputParameters & params)
 ADReal
 CNSFVMomPressure::computeQpResidual()
 {
-  ADRealVectorValue v;
-  ADReal p_interface;
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         p_interface,
-                         _pressure_elem[_qp],
-                         _pressure_neighbor[_qp],
-                         v,
-                         *_face_info,
-                         true);
-  return _normal(_index) * p_interface * _eps;
+  return _grad_pressure[_qp](_index);
 }
