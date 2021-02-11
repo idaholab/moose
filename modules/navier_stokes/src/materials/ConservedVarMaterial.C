@@ -133,10 +133,10 @@ ConservedVarMaterial::computeQpProperties()
 
   Real dTdvol = 0;
   Real dTde = 0;
-  Real dpdvol = 0;
-  Real dpde = 0;
-  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _specific_total_energy[_qp]);
-  _pressure[_qp] = _fluid.p_from_v_e(_v[_qp], _specific_total_energy[_qp]);
+  ADReal dpdvol = 0;
+  ADReal dpde = 0;
+  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _specific_internal_energy[_qp]);
+  _fluid.p_from_v_e(_v[_qp], _specific_internal_energy[_qp], _pressure[_qp], dpdvol, dpde);
 
   _specific_total_enthalpy[_qp] = (_total_energy_density[_qp] + _pressure[_qp]) / _rho[_qp];
   _total_enthalpy_density[_qp] = _rho[_qp] * _specific_total_enthalpy[_qp];
