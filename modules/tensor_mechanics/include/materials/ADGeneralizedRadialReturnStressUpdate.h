@@ -94,10 +94,9 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param elasticityTensor     Elasticity tensor
    */
-  virtual void computeStressInitialize(const ADDenseVector & /*effective_trial_stress*/,
-                                       const ADRankFourTensor & /*elasticity_tensor*/)
-  {
-  }
+  virtual void computeStressInitialize(const ADDenseVector & /*stress_dev*/,
+                                       const ADDenseVector & /*stress*/,
+                                       const ADRankFourTensor & /*elasticity_tensor*/) = 0;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
@@ -124,9 +123,6 @@ protected:
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
-
-  /// 2 * shear modulus
-  ADReal _two_shear_modulus;
 
   /// Equivalent creep/plastic strain
   ADMaterialProperty<Real> & _effective_inelastic_strain;

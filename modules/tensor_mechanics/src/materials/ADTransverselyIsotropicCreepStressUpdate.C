@@ -84,11 +84,14 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
 
 void
 ADTransverselyIsotropicCreepStressUpdate::computeStressInitialize(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADRankFourTensor & /*elasticity_tensor*/)
+    const ADDenseVector & /*stress_dev*/,
+    const ADDenseVector & /*stress*/,
+    const ADRankFourTensor & elasticity_tensor)
 {
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
+
+  _two_shear_modulus = 2.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
