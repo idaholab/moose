@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#16758'
+  design = 'navier_stokes/fv.md'
+  [1d-upwind]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DUpwind
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with the addition of diffusion and display first order convergence for all variables when using a first-order upwind scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [1d-average]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DAverage
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with the addition of diffusion and display second order convergence for all variables when using a second-order central difference scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [1d-hllc]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DHLLC
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with the addition of diffusion and display first order convergence for all variables when using a HLLC scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]
