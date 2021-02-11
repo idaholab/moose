@@ -1757,22 +1757,6 @@ public:
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
 #endif
 
-  /**
-   * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
-   * requested an AD material property or whether any suppier has declared an AD material property
-   */
-  void usingADMatProps(bool using_ad_mat_props)
-  {
-    _using_ad_mat_props = using_ad_mat_props;
-    if (_using_ad_mat_props)
-      haveADObjects(true);
-  }
-
-  /**
-   * Whether any object has requested/supplied an AD material property
-   */
-  bool usingADMatProps() const { return _using_ad_mat_props; }
-
   /// Set boolean flag to true to store solution time derivative
   virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
 

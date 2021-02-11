@@ -485,8 +485,6 @@ template <typename T>
 const ADMaterialProperty<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
-  _mi_feproblem.usingADMatProps(true);
-
   checkExecutionStage();
   checkMaterialProperty(name);
 
