@@ -8,6 +8,7 @@
     cli_args = '--mesh-only'
     mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_linear]
@@ -19,6 +20,7 @@
     cli_args = 'Mesh/patch/partitioner=linear --mesh-only generate_radiation_patch_linear.e'
     mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_centroid]
@@ -30,6 +32,7 @@
     cli_args = 'Mesh/patch/partitioner=centroid Mesh/patch/centroid_partitioner_direction=x --mesh-only generate_radiation_patch_centroid.e'
     mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_centroid_error]
@@ -41,6 +44,7 @@
     cli_args = 'Mesh/patch/partitioner=centroid --mesh-only generate_radiation_patch_centroid.e'
     mesh_mode = REPLICATED
     issues = "#14000"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid]
@@ -52,6 +56,7 @@
     cli_args = 'Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid.e'
     mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid_2D]
@@ -63,6 +68,7 @@
     cli_args = 'Mesh/patch/partitioner=grid --mesh-only'
     mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 
   [./generate_radiation_patch_grid_2D_overpart]
@@ -74,5 +80,6 @@
     cli_args = 'Mesh/patch/n_patches=61 Mesh/patch/partitioner=grid --mesh-only generate_radiation_patch_grid_2D_overpart.e'
     mesh_mode = REPLICATED
     issues = "#15829"
+    recover = false
   [../]
 []
