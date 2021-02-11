@@ -443,7 +443,6 @@ template <typename T>
 ADMaterialProperty<T> &
 MaterialBase::declareADPropertyByName(const std::string & prop_name)
 {
-  _fe_problem.usingADMatProps(true);
   registerPropName(prop_name, false, MaterialBase::CURRENT);
   return materialData().declareADProperty<T>(prop_name);
 }
