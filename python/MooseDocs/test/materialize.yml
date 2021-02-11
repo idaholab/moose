@@ -13,6 +13,14 @@ Content:
             - js/*
     test:
         root_dir: python/MooseDocs/test/content
+        content:
+            - "**"
+            - ~/extensions/external.md
+    external:
+        root_dir: python/MooseDocs/test/content
+        external: True
+        content:
+            - extensions/external.md
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -98,7 +106,6 @@ Extensions:
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
         active: True
-
         executable: ${MOOSE_DIR}/test
         remove: !include framework/doc/remove.yml
         includes:

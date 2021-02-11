@@ -24,6 +24,7 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include modules/tensor_mechanics/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml

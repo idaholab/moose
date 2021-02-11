@@ -21,7 +21,8 @@ INL_DOCUMENTS = ['safety_software_determination', 'quality_level_determination',
                  'software_requirements_specification', # Requirements
                  'software_design_description', # Design
                  'software_test_plan', 'requirements_traceablity_matrix', 'asset_management_plan', 'verification_validation_plan', # Testing
-                 'user_manual', 'theory_manual'] # Other
+                 'user_manual', 'theory_manual', # Other
+                 'failure_analysis_report'] # PLN-4005 v8
 
 def get_documents(required_docs=INL_DOCUMENTS, **kwargs):
     """

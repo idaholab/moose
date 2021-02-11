@@ -22,7 +22,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
-from . import command, core, floats, table, autolink, materialicon, modal
+from . import command, core, floats, table, autolink, materialicon, modal, alert
 
 LOG = logging.getLogger(__name__)
 
@@ -79,6 +79,11 @@ LATEX_OBJECT = """
 
 class AppSyntaxExtension(command.CommandExtension):
 
+    EXTERNAL_MESSAGE = "This page is included from an external application and uses syntax that " \
+                       "is not available in the {} application. As such, it is not possible to " \
+                       "extract information such as the description or parameters from the " \
+                       "associated objects or syntax. These aspects of the page are disabled."
+
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
@@ -99,6 +104,8 @@ class AppSyntaxExtension(command.CommandExtension):
         config['alias'] = (None, "Dictionary of syntax aliases.")
         config['unregister'] = ({"Postprocessor":"UserObject/*", "AuxKernel":"Bounds/*"},
                                 "Dictionary of syntax to unregister (key='moose_base', value='parent_syntax')")
+        config['external_icon'] = ('feedback', "Icon name for the alert title when unavailable syntax is located on an external page.")
+        config['external_alert'] = ('warning', "Alert name when unavailable syntax is located on an external page.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -111,6 +118,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
+        self._external_missing_syntax = set() # page.uid
 
         if self['hide'] is not None:
             LOG.warning("The 'hide' option is no longer being used.")
@@ -218,7 +226,7 @@ class AppSyntaxExtension(command.CommandExtension):
     def executable(self):
         return self._app_exe
 
-    def find(self, name, node_type=None):
+    def find(self, name, page, node_type=None):
 
         if name.endswith('<RESIDUAL>'):
             msg = "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it " \
@@ -235,13 +243,25 @@ class AppSyntaxExtension(command.CommandExtension):
             node = self._cache.get(name, None)
 
         if node is None:
-            msg = "'{}' syntax was not recognized."
-            raise exceptions.MooseDocsException(msg, name)
+            if page.external:
+                self._external_missing_syntax.add(page.uid)
+            else:
+                msg = "'{}' syntax was not recognized."
+                raise exceptions.MooseDocsException(msg, name)
 
         return node
 
+    def postTokenize(self, page, ast):
+        if page.uid in self._external_missing_syntax:
+            brand = self.get('external_alert')
+            tok = alert.AlertToken(None, brand=brand)
+            alert.AlertTitle(tok, brand=brand, icon_name=self.get('external_icon'),
+                             string="Disabled Object Syntax")
+            alert.AlertContent(tok, string=self.EXTERNAL_MESSAGE.format(self.apptype))
+            ast.insert(0, tok)
+
     def extend(self, reader, renderer):
-        self.requires(core, floats, table, autolink, materialicon, modal)
+        self.requires(core, floats, table, autolink, materialicon, modal, alert)
 
         self.addCommand(reader, SyntaxDescriptionCommand())
         self.addCommand(reader, SyntaxParametersCommand())
@@ -281,11 +301,18 @@ class SyntaxCommandBase(command.CommandComponent):
                 self.settings['syntax'] = args[0]
 
         if self.settings['syntax']:
-            obj = self.extension.find(self.settings['syntax'], self.NODE_TYPE)
+            obj = self.extension.find(self.settings['syntax'], page, self.NODE_TYPE)
+            if obj is None:
+                return self.createDisabledToken(parent, info, page)
         else:
             obj = self.extension.syntax
 
         return self.createTokenFromSyntax(parent, info, page, obj)
+
+    def createDisabledToken(self, parent, info, page):
+        tag = 'span' if MarkdownReader.INLINE in info else 'p'
+        tok = tokens.DisabledToken(parent, tag=tag, string=self.settings['syntax'])
+        return parent
 
     def createTokenFromSyntax(self, parent, info, page, obj):
         pass
@@ -324,7 +351,6 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
             p = core.Paragraph(parent)
             self.reader.tokenize(p, str(obj.description), page, MarkdownReader.INLINE)
             return parent
-
 
 class SyntaxParametersCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'parameters'
@@ -370,20 +396,28 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
         return parent
 
-class SyntaxParameterCommand(command.CommandComponent):
+class SyntaxParameterCommand(SyntaxCommandBase):
     COMMAND = 'param'
     SUBCOMMAND = None
+    NODE_TYPE = None
 
     @staticmethod
     def defaultSettings():
-        settings = SyntaxCommandHeadingBase.defaultSettings()
+        settings = SyntaxCommandBase.defaultSettings()
         return settings
 
+    def createDisabledToken(self, parent, info, page):
+        tag = 'span' if MarkdownReader.INLINE in info else 'p'
+        tokens.DisabledToken(parent, tag=tag, string=self.settings['_param'])
+        return parent
+
     def createToken(self, parent, info, page):
-
         obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit('/', 1)
+        self.settings['syntax'] = obj_syntax
+        self.settings['_param'] = param_name
+        return SyntaxCommandBase.createToken(self, parent, info, page)
 
-        obj = self.extension.find(obj_syntax)
+    def createTokenFromSyntax(self, parent, info, page, obj):
         parameters = dict()
         if isinstance(obj, moosesyntax.SyntaxNode):
             for action in obj.actions():
@@ -391,6 +425,7 @@ class SyntaxParameterCommand(command.CommandComponent):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
+        param_name = self.settings['_param']
         if param_name not in parameters:
             results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n"
@@ -401,7 +436,6 @@ class SyntaxParameterCommand(command.CommandComponent):
         ParameterToken(parent, parameter=parameters[param_name],
                        string='"{}"'.format(param_name))
         return parent
-
 
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'children'

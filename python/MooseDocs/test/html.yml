@@ -13,6 +13,11 @@ Content:
             - js/*
     test:
         root_dir: python/MooseDocs/test/content
+    external:
+        root_dir: python/MooseDocs/test/content
+        external: True
+        content:
+            - extensions/external.md
 
 Renderer:
     type: MooseDocs.base.HTMLRenderer

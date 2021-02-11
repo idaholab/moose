@@ -16,7 +16,7 @@ import argparse
 import logging
 import mooseutils
 
-from .commands import build, verify, check, generate, syntax
+from .commands import build, verify, check, generate, syntax, init
 from .common import log
 
 def command_line_options():
@@ -42,6 +42,7 @@ def command_line_options():
     verify.command_line_options(subparser, parent)
     generate.command_line_options(subparser, parent)
     syntax.command_line_options(subparser, parent)
+    init.command_line_options(subparser, parent)
 
     return parser.parse_args()
 
@@ -62,6 +63,11 @@ def run():
         errno = generate.main(options)
     elif options.command == 'syntax':
         errno = syntax.main(options)
+    elif options.command == 'init':
+        errno = init.main(options)
+    else:
+        errno = 1
+
 
     handler = logging.getLogger('MooseDocs').handlers[0]
     critical = handler.getCount(logging.CRITICAL)

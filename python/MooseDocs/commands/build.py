@@ -88,7 +88,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         # Determine the directories to watch
         roots = set()
         self._items = common.get_items(self._config.get('Content'))
-        for root, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
+        for root, _, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
             roots.add(root)
 
         for root in roots:

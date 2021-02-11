@@ -692,4 +692,4 @@ class RenderDisabled(components.RenderComponent):
         pass
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'p', class_='moose-disabled')
+        return html.Tag(parent, token['tag'], class_='moose-disabled')

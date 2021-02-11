@@ -13,7 +13,7 @@ from .mooseutils import text_diff, unidiff, text_unidiff, run_profile, list_file
 from .mooseutils import generate_filebase, recursive_update, fuzzyEqual, fuzzyAbsoluteEqual
 from .gitutils import is_git_repo, git_commit, git_commit_message, git_merge_commits, git_ls_files
 from .gitutils import git_root_dir, git_init_submodule, git_submodule_status, git_version
-from .gitutils import git_authors, git_lines, git_committers, git_localpath
+from .gitutils import git_authors, git_lines, git_committers, git_localpath, git_repo
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path
@@ -25,7 +25,7 @@ from .civet_results import get_civet_results
 from .template import apply_template_arguments
 
 try:
-    from .yaml_load import yaml_load
+    from .yaml_load import yaml_load, yaml_write, IncludeYamlFile
 except:
     pass
 

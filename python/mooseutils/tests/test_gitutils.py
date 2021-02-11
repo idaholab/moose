@@ -125,5 +125,26 @@ class Test(unittest.TestCase):
         local = mooseutils.git_localpath(filename)
         self.assertEqual(local, 'python/mooseutils/tests/test_gitutils.py')
 
+    @mock.patch('subprocess.run')
+    def testGitRepo(self, mock_out):
+        mock_out.return_value.stdout = 'origin git@github.com:aeslaughter/moose.git (fetch)\n' \
+                                       'origin git@github.com:aeslaughter/moose.git (push)\n' \
+                                       'upstream git@github.com:idaholab/moose.git (fetch)' \
+                                       'upstream git@github.com:idaholab/moose.git (push)'
+
+        url = mooseutils.git_repo(os.path.dirname(__file__))
+        self.assertEqual(url, 'https://github.com/idaholab/moose')
+
+        url = mooseutils.git_repo(os.path.dirname(__file__), remotes=['origin'])
+        self.assertEqual(url, 'https://github.com/aeslaughter/moose')
+
+        with self.assertRaises(OSError) as e:
+            mooseutils.git_repo('wrong')
+        self.assertEqual(str(e.exception), "The supplied location must be a directory: wrong")
+
+        with self.assertRaises(OSError) as e:
+            mooseutils.git_repo(os.path.dirname(__file__), remotes=['wrong'])
+        self.assertEqual(str(e.exception), "Unable to locate a remote with the name(s): wrong")
+
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

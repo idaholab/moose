@@ -65,7 +65,7 @@ def _find_files(filenames, pattern):
 
 def _doc_import(root_dir, content=None):
     """
-    Cretes a list of files to "include" from patterns.
+    Creates a list of files to "include" from patterns.
 
     Args:
         root_dir[str]: The directory which all other paths should be relative to.
@@ -146,7 +146,7 @@ def get_files(items, in_ext, git_ls_files=True):
             root = os.path.join(MooseDocs.ROOT_DIR, root)
 
         for fname in _doc_import(root, content=value.get('content', None)):
-            filenames.append((root, fname))
+            filenames.append((root, fname, value.get('external', False)))
 
     return filenames
 
@@ -158,11 +158,12 @@ def get_items(options):
             if isinstance(value, dict):
                 items.append(dict(value[list(value.keys())[0]]))
             else:
-                items.append(dict(root_dir=value, content=None))
+                items.append(dict(root_dir=value, content=None, external=False))
     elif isinstance(options, dict):
         for _, value in options.items():
             content = value.get('content', None)
-            items.append(dict(root_dir=value['root_dir'], content=content))
+            external = value.get('external', False)
+            items.append(dict(root_dir=value['root_dir'], content=content, external=external))
 
     return items
 
@@ -183,7 +184,7 @@ def get_content(items, in_ext):
 
     roots = set()
     nodes = dict()
-    for root, filename in get_files(items, in_ext):
+    for root, filename, external in get_files(items, in_ext):
         roots.add(root)
         key = filename.replace(root, '').strip('/')
         parts = key.split('/')
@@ -192,13 +193,16 @@ def get_content(items, in_ext):
         for i in range(1, len(parts)):
             dir_key = os.path.join(*parts[:i])
             if dir_key not in nodes:
-                nodes[dir_key] = pages.Directory(dir_key,
+                nodes[dir_key] = pages.Directory(dir_key, external=external,
                                                  source=os.path.join(root, dir_key))
+
 
         # Create the file node, if it doesn't already exist. This enforces that the first
         # item in the supplied content lists is the page that is rendered.
         if key not in nodes:
             nodes[key] = create_file_page(key, filename, in_ext)
+
+        nodes[key].external = external
 
     # Update the project files
     for root in roots:
