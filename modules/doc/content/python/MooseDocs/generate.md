@@ -35,7 +35,10 @@ that is generated.  For example, see the parameter table for [/BoxMarker.md].
 Secondly, a short description of the class should be supplied in the `addClassDescription`
 function. For example, the [Diffusion](/Diffusion.md) object has the following class description:
 
-!listing framework/src/kernels/Diffusion.C line=addClassDescription
+!listing framework/src/kernels/Diffusion.C
+        start=addClassDescription
+        end=form
+        include-end=True
 
 When the documentation for this object is generated, this string is added to the first portion of the
 page and the system overview table. For example, the [Kernels overview](syntax/Kernels/index.md)
@@ -51,7 +54,7 @@ framework or modules will create a corresponding markdown file, using
 
 The documentation for the classes within MOOSE and the modules are located within the "doc"
 directory where the class is registered: "framework/doc" contains all core MOOSE level objects,
-"modules/tensor_mechanics/doc" contains object for the tensor mechanics modules, etc.
+"modules/tensor_mechanics/doc" contains objects for the tensor mechanics modules, etc.
 
 When adding documentation, the MOOSE modules executable must exist; this is accomplished by using the
 following commands:
@@ -63,14 +66,14 @@ make -j16 # 16 should be replaced by the number of cores on your system
 
 If you are writing a documentation page for a new class with MOOSE or the modules, you can use the
 MooseDocs executable to build a documentation stub for your new class. However, the executable
-for the module must be used. For example, if you add a new class the the tensor mechanics
+for the module must be used. For example, if you add a new class to the tensor mechanics
 module:
 
 ```bash
 cd ~/projects/moose/modules/tensor_mechanics
 make -j12
 cd doc
-./moosedocs.py check --generate
+./moosedocs.py generate TensorMechanicsApp
 ```
 
 To generate pages for the framework, the moose test application can be used as follows.
@@ -79,7 +82,7 @@ To generate pages for the framework, the moose test application can be used as f
 cd ~/projects/moose/test
 make -j12
 cd doc
-./moosedocs.py check --generate
+./moosedocs.py check --generate GENERATE
 ```
 
 This generate command needs to be run only when you add a new object (e.g., Kernel,
@@ -108,7 +111,7 @@ The content added or modified should follow the
 
 In general, media files should be placed within the `content/media` directory within the
 framework or module directories. However, if a large file (>2MB), such as a movie, is needed then
-the "large media" repository should be used. Within MOOSE there is folder, `large_media`, which
+the "large media" repository should be used. Within MOOSE there is a folder, `large_media`, which
 is a submodule. The large file should be added to this repository and the submodule should be
 updated in MOOSE to reflect this change.
 

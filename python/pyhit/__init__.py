@@ -1,6 +1,7 @@
 try:
     from . import hit
 except:
+    import os, subprocess
     testdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'test'))
     subprocess.run(['make', 'hit'], cwd=testdir)
     from . import hit
