@@ -73,8 +73,5 @@ FVMatAdvectionOutflowBC::computeQpResidual()
               v,
               *_face_info,
               true);
-  mooseAssert(_normal * v >= 0,
-              "This boundary condition is for outflow but the flow is in the opposite direction of "
-              "the boundary normal");
   return _normal * v * adv_quant_boundary;
 }
