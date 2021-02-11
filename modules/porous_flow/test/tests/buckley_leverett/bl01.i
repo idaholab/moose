@@ -149,6 +149,7 @@
 
 [Executioner]
   type = Transient
+  solve_type = Newton
   end_time = 50
   [./TimeStepper]
     type = FunctionDT

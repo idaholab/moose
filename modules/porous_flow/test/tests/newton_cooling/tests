@@ -8,7 +8,7 @@
     max_time = 1000
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model transient newton cooling acting on the fluid mass and agree with the analytic solution'
-    issues = '#13155'
+    issues = '#13155 #16953'
     design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   [../]
   [./nc02]
