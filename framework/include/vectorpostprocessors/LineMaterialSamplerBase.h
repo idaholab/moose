@@ -172,6 +172,7 @@ LineMaterialSamplerBase<T>::execute()
     if (!hasBlocks(elem->subdomain_id()))
       continue;
 
+    _subproblem.setCurrentSubdomainID(elem, _tid);
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
 
@@ -205,4 +206,3 @@ LineMaterialSamplerBase<T>::finalize()
 {
   SamplerBase::finalize();
 }
-
