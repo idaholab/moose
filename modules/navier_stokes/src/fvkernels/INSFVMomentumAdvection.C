@@ -359,13 +359,15 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
               Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
           ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
 
-          if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
-            // We are not on a fully developed flow boundary, so we have a viscous term contribution.
-            // This term is slightly modified relative to the internal face term. Instead of the
-            // distance between elem and neighbor centroid, we just have the distance between the elem
-            // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
-            // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
-            // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
+          if (_fully_developed_flow_boundaries.find(bc_id) ==
+              _fully_developed_flow_boundaries.end())
+            // We are not on a fully developed flow boundary, so we have a viscous term
+            // contribution. This term is slightly modified relative to the internal face term.
+            // Instead of the distance between elem and neighbor centroid, we just have the distance
+            // between the elem and face centroid. Specifically, the term below is the result of
+            // Moukalled 8.80, 8.82, and the orthogonal correction approach equation for E_f,
+            // equation 8.89. So relative to the internal face viscous term, we have substituted
+            // eqn. 8.82 for 8.78
             temp_coeff += mu * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
 
           // For flow boundaries, the coefficient addition is the same for every velocity component
@@ -380,7 +382,8 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) co
           // Moukalled eqns. 15.154 - 15.156
           for (const auto i : make_range(_dim))
             coeff(i) += 2. * mu * surface_vector.norm() /
-                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) *
+                        normal(i);
 
           return;
         }
@@ -507,12 +510,8 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
       mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
       neighbor_D(i) = neighbor_volume / neighbor_a(i);
     }
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           face_D,
-                           elem_D,
-                           neighbor_D,
-                           *_face_info,
-                           true);
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
   }
   else
     face_D = elem_D;

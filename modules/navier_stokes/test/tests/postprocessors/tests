@@ -26,15 +26,6 @@
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu -pc_factor_shift_type NONZERO"
     ad_indexing_type = 'global'
   []
-  [fv_straight_different_interpolation]
-    type = CSVDiff
-    input = conservation_INSFV.i
-    csvdiff =  straight_INSFV_different_interpolation.csv
-    abs_zero = 1e-8
-    requirement = 'The system shall be able to compute flow rates and, when using a different interpolation method between kernels and postprocessors, show approximate mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
-    cli_args = "Postprocessors/mid1_momentum_x/advected_interp_method='upwind' Postprocessors/mid2_momentum_x/advected_interp_method='upwind' Postprocessors/mid1_advected_energy/advected_interp_method='upwind' Postprocessors/mid2_advected_energy/advected_interp_method='upwind' Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV_different_interpolation' -pc_type lu -pc_factor_shift_type NONZERO"
-    ad_indexing_type = 'global'
-  []
   [fv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
     [fv_quad_xy]
