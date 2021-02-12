@@ -6285,6 +6285,11 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
+
+  // Since the mesh has changed, we need to make sure that we update any of our
+  // MOOSE-system specific data. libmesh system data has already been updated
+  _nl->update(/*update_libmesh_system=*/false);
+  _aux->update(/*update_libmesh_system=*/false);
 }
 
 void
