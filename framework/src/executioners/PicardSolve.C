@@ -194,6 +194,7 @@ PicardSolve::solve()
   }
 
   Real pp_scaling = 1.0;
+  std::ostringstream pp_history;
 
   for (_picard_it = 0; _picard_it < _picard_max_its; ++_picard_it)
   {
@@ -248,6 +249,11 @@ PicardSolve::solve()
           !getParam<bool>("direct_pp_value"))
         pp_scaling = *_picard_custom_pp;
       pp_new = *_picard_custom_pp;
+
+      auto ppname = getParam<PostprocessorName>("picard_custom_pp");
+      pp_history << std::setw(2) << _picard_it + 1 << " Picard " << ppname << " = "
+                 << Console::outputNorm(std::numeric_limits<Real>::max(), pp_new) << "\n";
+      _console << pp_history.str();
     }
 
     if (solve_converged)

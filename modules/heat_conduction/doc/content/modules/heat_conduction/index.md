@@ -8,7 +8,7 @@ provisions to couple temperature fields to fluid domains through boundary condit
 The heat conduction equation describes the diffusion of heat in a solid or stationary fluid:
 
 \begin{equation}\label{eq:heat_equation}
-  \rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = -\nabla k(t,\vec{x}) \nabla T + \dot{q} ~\text{for}~\vec{x} \in \Omega,
+  \rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t} = \nabla k(t,\vec{x}) \nabla T + \dot{q} ~\text{for}~\vec{x} \in \Omega,
 \end{equation}
 
 where $T$ is temperature, $t$ is time, $\vec{x}$ is the vector of spatial coordinatess, $\rho$ is the density, $c$ is the specific heat capacity, $k$ is the thermal conductivity, $\dot{q}$ is a heat source, and $\Omega$ is the domain. It should be emphasized that for solids the isobaric and isochoric heat capacities, $c_p$ and $c_v$ respectively, are almost identical, while for stagnant fluids $c_v$ should be used.
