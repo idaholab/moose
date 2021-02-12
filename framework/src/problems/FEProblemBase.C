@@ -771,20 +771,6 @@ FEProblemBase::initialSetup()
     }
   }
 
-  // Do this just in case things have been done to the mesh
-  {
-    CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
-    ghostGhostedBoundaries();
-  }
-
-  _mesh.meshChanged();
-
-  if (_displaced_problem)
-  {
-    CONSOLE_TIMED_PRINT("Updating displaced mesh");
-    _displaced_mesh->meshChanged();
-  }
-
   unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
