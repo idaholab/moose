@@ -1,5 +1,6 @@
 [Tests]
   issues = '#16972'
+  design = 'INSFVMomentumAdvection.md INSFVVelocityVariable.md'
   [block_restricted_variables]
     type = 'Exodiff'
     input = 2d-rc.i

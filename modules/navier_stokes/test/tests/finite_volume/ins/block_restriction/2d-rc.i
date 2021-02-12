@@ -6,6 +6,7 @@ velocity_interp_method='rc'
 restricted_blocks = '1'
 
 [Mesh]
+  parallel_type = 'replicated'
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
