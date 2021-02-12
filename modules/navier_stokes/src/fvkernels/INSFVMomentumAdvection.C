@@ -436,15 +436,8 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                                     const ADRealVectorValue & elem_v,
                                     const ADRealVectorValue & neighbor_v)
 {
-  auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
-  const Elem * const elem_one = std::get<0>(tup);
-  const Elem * const elem_two = std::get<1>(tup);
-  const bool elem_is_elem_one = std::get<2>(tup);
-  mooseAssert(elem_is_elem_one
-                  ? elem_one == &_face_info->elem() && elem_two == _face_info->neighborPtr()
-                  : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
-              "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
-  mooseAssert(elem_is_elem_one, "FVFluxKernel elem should coincide with the faceInfo elem.");
+  const Elem * const elem = &_face_info->elem();
+  const Elem * const neighbor = _face_info->neighborPtr();
 
   if (onBoundary(*_face_info))
   {
@@ -471,63 +464,58 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   // along a boundary face
   const VectorValue<ADReal> & unc_grad_p = _p_var->uncorrectedAdGradSln(*_face_info);
 
-  const Point & elem_one_centroid =
-      elem_is_elem_one ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const Point * const elem_two_centroid =
-      elem_two ? (elem_is_elem_one ? &_face_info->neighborCentroid() : &_face_info->elemCentroid())
-               : nullptr;
-  Real elem_one_volume = elem_is_elem_one ? _face_info->elemVolume() : _face_info->neighborVolume();
-  Real elem_two_volume =
-      elem_two ? (elem_is_elem_one ? _face_info->neighborVolume() : _face_info->elemVolume()) : 0;
-
-  const auto & elem_one_mu = elem_is_elem_one ? _mu_elem[_qp] : _mu_neighbor[_qp];
+  const Point & elem_centroid = _face_info->elemCentroid();
+  const Point * const neighbor_centroid = neighbor ? &_face_info->neighborCentroid() : nullptr;
+  Real elem_volume = _face_info->elemVolume();
+  Real neighbor_volume = neighbor ? _face_info->neighborVolume() : 0;
+  const auto & elem_mu = _mu_elem[_qp];
 
   // Now we need to perform the computations of D
-  const VectorValue<ADReal> & elem_one_a = rcCoeff(*elem_one, elem_one_mu);
+  const VectorValue<ADReal> & elem_a = rcCoeff(*elem, elem_mu);
 
-  mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
-                             _subproblem.getCoordSystem(elem_two->subdomain_id())
+  mooseAssert(neighbor ? _subproblem.getCoordSystem(elem->subdomain_id()) ==
+                             _subproblem.getCoordSystem(neighbor->subdomain_id())
                        : true,
               "Coordinate systems must be the same between the two elements");
 
   Real coord;
-  coordTransformFactor(_subproblem, elem_one->subdomain_id(), elem_one_centroid, coord);
+  coordTransformFactor(_subproblem, elem->subdomain_id(), elem_centroid, coord);
 
-  elem_one_volume *= coord;
+  elem_volume *= coord;
 
-  VectorValue<ADReal> elem_one_D = 0;
+  VectorValue<ADReal> elem_D = 0;
   for (const auto i : make_range(_dim))
   {
-    mooseAssert(elem_one_a(i).value() != 0, "We should not be dividing by zero");
-    elem_one_D(i) = elem_one_volume / elem_one_a(i);
+    mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
+    elem_D(i) = elem_volume / elem_a(i);
   }
 
   VectorValue<ADReal> face_D;
 
-  if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
+  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
   {
-    const auto & elem_two_mu = elem_is_elem_one ? _mu_neighbor[_qp] : _mu_elem[_qp];
+    const auto & neighbor_mu = _mu_neighbor[_qp];
 
-    const VectorValue<ADReal> & elem_two_a = rcCoeff(*elem_two, elem_two_mu);
+    const VectorValue<ADReal> & neighbor_a = rcCoeff(*neighbor, neighbor_mu);
 
-    coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
-    elem_two_volume *= coord;
+    coordTransformFactor(_subproblem, neighbor->subdomain_id(), *neighbor_centroid, coord);
+    neighbor_volume *= coord;
 
-    VectorValue<ADReal> elem_two_D = 0;
+    VectorValue<ADReal> neighbor_D = 0;
     for (const auto i : make_range(_dim))
     {
-      mooseAssert(elem_two_a(i).value() != 0, "We should not be dividing by zero");
-      elem_two_D(i) = elem_two_volume / elem_two_a(i);
+      mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
+      neighbor_D(i) = neighbor_volume / neighbor_a(i);
     }
     Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                            face_D,
-                           elem_one_D,
-                           elem_two_D,
+                           elem_D,
+                           neighbor_D,
                            *_face_info,
-                           elem_is_elem_one);
+                           true);
   }
   else
-    face_D = elem_one_D;
+    face_D = elem_D;
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))
