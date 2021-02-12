@@ -157,3 +157,28 @@ def git_localpath(filename):
     """
     root = git_root_dir(os.path.dirname(filename))
     return os.path.relpath(filename, root)
+
+def git_repo(loc=os.getcwd(), remotes=['upstream', 'origin']):
+    """
+    Return URL to repository based on remotes
+    """
+    if not os.path.isdir(loc):
+        raise OSError("The supplied location must be a directory: {}".format(loc))
+
+    lookup = dict()
+    for remote in check_output(['git', 'remote', '-v'], encoding='utf-8', cwd=loc).strip(' \n').split('\n'):
+        name, addr = remote.split(maxsplit=1)
+        lookup[name] = addr
+
+    for remote in remotes:
+        address = lookup.get(remote, None)
+        if address is not None:
+            break
+
+    if address is None:
+        raise OSError("Unable to locate a remote with the name(s): {}".format(', '.join(remotes)))
+
+    if address.startswith('git'):
+        match = re.match(r'git@(?P<host>.*?):(?P<site>.*?)\.git', address)
+        address = 'https://{}/{}'.format(match.group('host'), match.group('site'))
+    return address

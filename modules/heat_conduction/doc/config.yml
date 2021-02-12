@@ -24,6 +24,7 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include modules/heat_conduction/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
             heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml

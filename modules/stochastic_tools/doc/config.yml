@@ -26,6 +26,7 @@ Extensions:
         active: True
     MooseDocs.extensions.sqa:
         active: True
+        reports: !include modules/stochastic_tools/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
             stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml

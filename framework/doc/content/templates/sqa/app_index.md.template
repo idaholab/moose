@@ -7,4 +7,6 @@
 - [!sqa!document category={{category}} suffix=stp](Software Test Plan (STP))
 - [!sqa!document category={{category}} suffix=far](Failure Analysis Report (FAR))
 
-!sqa report category={{category}}
+!template! field key=sqa-report required=False
+!sqa report category=_empty_
+!template-end!

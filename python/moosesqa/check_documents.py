@@ -20,8 +20,9 @@ def check_documents(documents, file_list=None, **kwargs):
     """
 
     # Setup logger, assume the names of the documents with a "log_" prefix are the logging flags (see get_documents)
+    log_default = kwargs.get('log_default', logging.ERROR)
     for doc in documents:
-        kwargs.setdefault("log_" + doc.name, logging.ERROR)
+        kwargs.setdefault("log_" + doc.name, log_default)
     logger = LogHelper(__name__, **kwargs)
 
     # Setup file_list, if not provided

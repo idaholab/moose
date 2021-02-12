@@ -4,16 +4,27 @@ import unittest
 import logging
 
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, modal
+from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, modal, alert
 from MooseDocs import base
 logging.basicConfig()
 
 class AppSyntaxTestCase(MooseDocsTestCase):
-    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, modal]
+    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, modal, alert]
 
     def setupExtension(self, ext):
         if ext is appsyntax:
             return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
+
+class TestExternalPage(AppSyntaxTestCase):
+    def testExternalPage(self):
+        self._MooseDocsTestCase__text.external = True
+        ast = self.tokenize(u"!syntax description /Kernels/Missing")
+        self.assertSize(ast, 2)
+        self.assertToken(ast(0), 'AlertToken', size=2, brand='warning')
+        self.assertToken(ast(0,0),'AlertTitle', size=1, brand='warning', icon_name='feedback', icon=True, prefix=True,
+                         string='Disabled Object Syntax')
+        self.assertToken(ast(0,1),'AlertContent', size=1)
+        self.assertIn("This page is included from an external application", ast(0,1,0)['content'])
 
 class TestDescription(AppSyntaxTestCase):
     def testAST(self):
@@ -237,7 +248,6 @@ class TestList(AppSyntaxTestCase):
         self.assertToken(ast(1), 'SyntaxList')
         self.assertToken(ast(1,0), 'SyntaxListItem', string=u'Moose App')
 
-
 class TestRenderSyntaxList(AppSyntaxTestCase):
 
     @classmethod
@@ -255,9 +265,5 @@ class TestRenderSyntaxList(AppSyntaxTestCase):
     def testMaterialize(self):
         res = self.render(self.AST, renderer=base.MaterializeRenderer())
 
-
-#SyntaxList = tokens.newToken('SyntaxList')
-#SyntaxListItem = tokens.newToken('SyntaxListItem', syntax=u'', group=u'', header=False)
-#SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
 if __name__ == '__main__':
     unittest.main(verbosity=2)

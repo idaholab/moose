@@ -16,11 +16,12 @@ from .LogHelper import LogHelper
 
 def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_prefix='', allow_test_objects=False, **kwargs):
 
-    kwargs.setdefault('log_stub_files', logging.ERROR)
-    kwargs.setdefault('log_duplicate_files', logging.ERROR)
-    kwargs.setdefault('log_missing_description', logging.ERROR)
-    kwargs.setdefault('log_missing_markdown', logging.ERROR)
-    kwargs.setdefault('log_duplicate_files', logging.ERROR)
+    log_default = kwargs.get('log_default', logging.ERROR)
+    kwargs.setdefault('log_stub_files', log_default)
+    kwargs.setdefault('log_duplicate_files', log_default)
+    kwargs.setdefault('log_missing_description', log_default)
+    kwargs.setdefault('log_missing_markdown', log_default)
+    kwargs.setdefault('log_duplicate_files', log_default)
     logger = LogHelper(__name__, **kwargs)
 
     for node in app_syntax.descendants:

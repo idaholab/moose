@@ -13,14 +13,14 @@ import unittest
 import logging
 from MooseDocs import common, base, tree
 from MooseDocs.test import MooseDocsTestCase
-from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal
+from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal, alert
 logging.basicConfig()
 
 def testFunction(ext, value):
     return value
 
 class TestHasMooseApp(MooseDocsTestCase):
-    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal]
+    EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal, alert]
 
     def setupExtension(self, ext):
         sys.path.append(os.path.dirname(__file__))
