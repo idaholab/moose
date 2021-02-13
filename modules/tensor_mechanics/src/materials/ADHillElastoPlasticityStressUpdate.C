@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADTransverselyIsotropicElastoPlasticityStressUpdate.h"
+#include "ADHillElastoPlasticityStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", ADTransverselyIsotropicElastoPlasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADHillElastoPlasticityStressUpdate);
 
 InputParameters
-ADTransverselyIsotropicElastoPlasticityStressUpdate::validParams()
+ADHillElastoPlasticityStressUpdate::validParams()
 {
   InputParameters params = ADAnisotropicReturnPlasticityStressUpdateBase::validParams();
   params.addClassDescription(
@@ -33,8 +33,8 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::validParams()
   return params;
 }
 
-ADTransverselyIsotropicElastoPlasticityStressUpdate::
-    ADTransverselyIsotropicElastoPlasticityStressUpdate(const InputParameters & parameters)
+ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
+    const InputParameters & parameters)
   : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
     _hill_constants(6),
     _qsigma(0.0),
@@ -86,7 +86,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::propagateQpStatefulProperties()
+ADHillElastoPlasticityStressUpdate::propagateQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
@@ -94,7 +94,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::propagateQpStatefulProperti
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStressInitialize(
+ADHillElastoPlasticityStressUpdate::computeStressInitialize(
     const ADDenseVector & stress_dev,
     const ADDenseVector & stress,
     const ADRankFourTensor & /*elasticity_tensor*/)
@@ -120,7 +120,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStressInitialize(
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
+ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
 {
   // Helper method to compute qp matrices required for the elasto-plasticity algorithm.
   _anisotropic_elastic_tensor(0, 0) = (_elasticity_tensor)[_qp](0, 0, 0, 0);
@@ -240,8 +240,8 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeElasticityTensorEige
 }
 
 ADReal
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeOmega(
-    const ADReal & delta_gamma, const ADDenseVector & /*stress_trial*/)
+ADHillElastoPlasticityStressUpdate::computeOmega(const ADReal & delta_gamma,
+                                                 const ADDenseVector & /*stress_trial*/)
 {
   ADDenseVector K(6);
   ADReal omega = 0.0;
@@ -260,7 +260,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeOmega(
 }
 
 Real
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeReferenceResidual(
+ADHillElastoPlasticityStressUpdate::computeReferenceResidual(
     const ADDenseVector & /*effective_trial_stress*/,
     const ADDenseVector & /*stress_new*/,
     const ADReal & /*residual*/,
@@ -271,10 +271,9 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeReferenceResidual(
 }
 
 ADReal
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeResidual(
-    const ADDenseVector & /*stress_dev*/,
-    const ADDenseVector & stress_sigma,
-    const ADReal & delta_gamma)
+ADHillElastoPlasticityStressUpdate::computeResidual(const ADDenseVector & /*stress_dev*/,
+                                                    const ADDenseVector & stress_sigma,
+                                                    const ADReal & delta_gamma)
 {
 
   // If in elastic regime, just return
@@ -303,10 +302,9 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeResidual(
 }
 
 ADReal
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeDerivative(
-    const ADDenseVector & /*stress_dev*/,
-    const ADDenseVector & stress_sigma,
-    const ADReal & delta_gamma)
+ADHillElastoPlasticityStressUpdate::computeDerivative(const ADDenseVector & /*stress_dev*/,
+                                                      const ADDenseVector & stress_sigma,
+                                                      const ADReal & delta_gamma)
 {
   // If in elastic regime, return unit derivative
   if (_yield_condition <= 0.0)
@@ -328,13 +326,12 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeDerivative(
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeDeltaDerivatives(
-    const ADReal & delta_gamma,
-    const ADDenseVector & /*stress_trial*/,
-    const ADReal & sy_alpha,
-    ADReal & omega,
-    ADReal & omega_gamma,
-    ADReal & sy_gamma)
+ADHillElastoPlasticityStressUpdate::computeDeltaDerivatives(const ADReal & delta_gamma,
+                                                            const ADDenseVector & /*stress_trial*/,
+                                                            const ADReal & sy_alpha,
+                                                            ADReal & omega,
+                                                            ADReal & omega_gamma,
+                                                            ADReal & sy_gamma)
 {
   omega_gamma = 0.0;
   sy_gamma = 0.0;
@@ -358,20 +355,20 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeDeltaDerivatives(
 }
 
 ADReal
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeHardeningValue(
-    const ADReal & delta_gamma, const ADReal & omega)
+ADHillElastoPlasticityStressUpdate::computeHardeningValue(const ADReal & delta_gamma,
+                                                          const ADReal & omega)
 {
   return _hardening_variable_old[_qp] + 2.0 * delta_gamma * omega;
 }
 
 ADReal
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeHardeningDerivative()
+ADHillElastoPlasticityStressUpdate::computeHardeningDerivative()
 {
   return _hardening_constant;
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStrainFinalize(
+ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
     ADRankTwoTensor & inelasticStrainIncrement,
     const ADRankTwoTensor & stress,
     const ADDenseVector & stress_dev,
@@ -429,7 +426,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStrainFinalize(
 }
 
 void
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStressFinalize(
+ADHillElastoPlasticityStressUpdate::computeStressFinalize(
     const ADRankTwoTensor & /*plastic_strain_increment*/,
     const ADReal & delta_gamma,
     ADRankTwoTensor & stress_new,
@@ -461,7 +458,7 @@ ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStressFinalize(
 }
 
 Real
-ADTransverselyIsotropicElastoPlasticityStressUpdate::computeStrainEnergyRateDensity(
+ADHillElastoPlasticityStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & /*stress*/,
     const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
 {
