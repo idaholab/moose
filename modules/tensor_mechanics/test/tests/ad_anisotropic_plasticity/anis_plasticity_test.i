@@ -104,7 +104,7 @@
   []
 
   [trial_plasticity]
-    type = ADTransverselyIsotropicPlasticityStressUpdate
+    type = ADHillPlasticityStressUpdate
     # internal_solve_output_on = always
     # F G H L M N
     hardening_constant = 5000

@@ -109,7 +109,7 @@
   []
 
   [trial_plasticity]
-    type = ADTransverselyIsotropicElastoPlasticityStressUpdate
+    type = ADHillElastoPlasticityStressUpdate
     hardening_constant = 2000.0
     yield_stress = 0.001 # was 200 for verification
 

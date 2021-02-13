@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADTransverselyIsotropicCreepStressUpdate.h"
+#include "ADHillCreepStressUpdate.h"
 
-registerMooseObject("TensorMechanicsApp", ADTransverselyIsotropicCreepStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADHillCreepStressUpdate);
 
 InputParameters
-ADTransverselyIsotropicCreepStressUpdate::validParams()
+ADHillCreepStressUpdate::validParams()
 {
   InputParameters params = ADAnisotropicReturnCreepStressUpdateBase::validParams();
   params.addClassDescription(
@@ -37,8 +37,7 @@ ADTransverselyIsotropicCreepStressUpdate::validParams()
   return params;
 }
 
-ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpdate(
-    const InputParameters & parameters)
+ADHillCreepStressUpdate::ADHillCreepStressUpdate(const InputParameters & parameters)
   : ADAnisotropicReturnCreepStressUpdateBase(parameters),
     _has_temp(isParamValid("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
@@ -83,10 +82,9 @@ ADTransverselyIsotropicCreepStressUpdate::ADTransverselyIsotropicCreepStressUpda
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStressInitialize(
-    const ADDenseVector & /*stress_dev*/,
-    const ADDenseVector & /*stress*/,
-    const ADRankFourTensor & elasticity_tensor)
+ADHillCreepStressUpdate::computeStressInitialize(const ADDenseVector & /*stress_dev*/,
+                                                 const ADDenseVector & /*stress*/,
+                                                 const ADRankFourTensor & elasticity_tensor)
 {
   if (_has_temp)
     _exponential = std::exp(-_activation_energy / (_gas_constant * _temperature[_qp]));
@@ -97,10 +95,9 @@ ADTransverselyIsotropicCreepStressUpdate::computeStressInitialize(
 }
 
 ADReal
-ADTransverselyIsotropicCreepStressUpdate::computeResidual(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADDenseVector & stress_new,
-    const ADReal & delta_gamma)
+ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial_stress*/,
+                                         const ADDenseVector & stress_new,
+                                         const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -126,11 +123,10 @@ ADTransverselyIsotropicCreepStressUpdate::computeResidual(
 }
 
 Real
-ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
-    const ADDenseVector & effective_trial_stress,
-    const ADDenseVector & /*stress_new*/,
-    const ADReal & /*residual*/,
-    const ADReal & scalar_effective_inelastic_strain)
+ADHillCreepStressUpdate::computeReferenceResidual(const ADDenseVector & effective_trial_stress,
+                                                  const ADDenseVector & /*stress_new*/,
+                                                  const ADReal & /*residual*/,
+                                                  const ADReal & scalar_effective_inelastic_strain)
 {
   // This is an approximation. Better to have this method in the material model itself, rather than
   // an application-agnostic parent class.
@@ -140,10 +136,9 @@ ADTransverselyIsotropicCreepStressUpdate::computeReferenceResidual(
 }
 
 ADReal
-ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADDenseVector & stress_new,
-    const ADReal & /*delta_gamma*/)
+ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_trial_stress*/,
+                                           const ADDenseVector & stress_new,
+                                           const ADReal & /*delta_gamma*/)
 {
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -171,11 +166,10 @@ ADTransverselyIsotropicCreepStressUpdate::computeDerivative(
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
-    ADRankTwoTensor & inelasticStrainIncrement,
-    const ADRankTwoTensor & stress,
-    const ADDenseVector & stress_dev,
-    const ADReal & delta_gamma)
+ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrainIncrement,
+                                               const ADRankTwoTensor & stress,
+                                               const ADDenseVector & stress_dev,
+                                               const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -232,17 +226,16 @@ ADTransverselyIsotropicCreepStressUpdate::computeStrainFinalize(
 }
 
 void
-ADTransverselyIsotropicCreepStressUpdate::computeStressFinalize(
-    const ADRankTwoTensor & /*creepStrainIncrement*/,
-    const ADReal & /*delta_gamma*/,
-    ADRankTwoTensor & /*stress_new*/,
-    const ADDenseVector & /*stress_dev*/)
+ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & /*creepStrainIncrement*/,
+                                               const ADReal & /*delta_gamma*/,
+                                               ADRankTwoTensor & /*stress_new*/,
+                                               const ADDenseVector & /*stress_dev*/)
 {
   // No need to compute anything here, stress does not change.
 }
 
 Real
-ADTransverselyIsotropicCreepStressUpdate::computeStrainEnergyRateDensity(
+ADHillCreepStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & /*stress*/,
     const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
 {

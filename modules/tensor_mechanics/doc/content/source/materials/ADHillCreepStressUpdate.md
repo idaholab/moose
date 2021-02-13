@@ -1,6 +1,6 @@
 # Transversely Isotropic Creep Stress Update
 
-!syntax description /Materials/ADTransverselyIsotropicCreepStressUpdate
+!syntax description /Materials/ADHillCreepStressUpdate
 
 ## Description
 
@@ -28,10 +28,10 @@ More details on the Hill-type creep material model may be found in [!cite](stewa
 
 !listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/anis_mech_hill_tensor_creep_small_tiny_step_test.i block=Materials/trial_creep
 
-!syntax parameters /Materials/ADTransverselyIsotropicCreepStressUpdate
+!syntax parameters /Materials/ADHillCreepStressUpdate
 
-!syntax inputs /Materials/ADTransverselyIsotropicCreepStressUpdate
+!syntax inputs /Materials/ADHillCreepStressUpdate
 
-!syntax children /Materials/ADTransverselyIsotropicCreepStressUpdate
+!syntax children /Materials/ADHillCreepStressUpdate
 
 !bibtex bibliography

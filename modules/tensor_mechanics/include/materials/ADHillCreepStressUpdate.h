@@ -21,18 +21,18 @@
  * creep based on stress, temperature, and time effects.  This class also
  * computes the creep strain as a stateful material property.
  *
- * This class extends the usage of PowerLawCreep to transversely isotropic (i.e. anisotropic)
+ * This class extends the usage of PowerLawCreep to Hill (i.e. anisotropic)
  * cases. For more information, consult, e.g. Stewart et al, "An anisotropic tertiary creep
  * damage constitutive model for anistropic materials", International Journal of Pressure Vessels
  * and Piping 88 (2011) 356--364.
  */
 
-class ADTransverselyIsotropicCreepStressUpdate : public ADAnisotropicReturnCreepStressUpdateBase
+class ADHillCreepStressUpdate : public ADAnisotropicReturnCreepStressUpdateBase
 {
 public:
   static InputParameters validParams();
 
-  ADTransverselyIsotropicCreepStressUpdate(const InputParameters & parameters);
+  ADHillCreepStressUpdate(const InputParameters & parameters);
 
   virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,

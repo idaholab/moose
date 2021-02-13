@@ -76,7 +76,7 @@
   [../]
 
   [./trial_creep]
-    type = ADTransverselyIsotropicCreepStressUpdate
+    type = ADHillCreepStressUpdate
     coefficient = 1e-24
     n_exponent = 4
     m_exponent = 0

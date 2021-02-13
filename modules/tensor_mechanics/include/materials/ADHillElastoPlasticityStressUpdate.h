@@ -18,13 +18,12 @@
  *
  */
 
-class ADTransverselyIsotropicElastoPlasticityStressUpdate
-  : public ADAnisotropicReturnPlasticityStressUpdateBase
+class ADHillElastoPlasticityStressUpdate : public ADAnisotropicReturnPlasticityStressUpdateBase
 {
 public:
   static InputParameters validParams();
 
-  ADTransverselyIsotropicElastoPlasticityStressUpdate(const InputParameters & parameters);
+  ADHillElastoPlasticityStressUpdate(const InputParameters & parameters);
 
   virtual Real
   computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
