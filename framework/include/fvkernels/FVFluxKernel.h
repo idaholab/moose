@@ -70,12 +70,6 @@ protected:
   const ADVariableValue & _u_elem;
   /// The neighbor solution value of the kernel's _var for the current face.
   const ADVariableValue & _u_neighbor;
-  /// The elem solution gradient of the kernel's _var for the current face.
-  /// This is zero unless higher order reconstruction is used.
-  const ADVariableGradient & _grad_u_elem;
-  /// The neighbor solution gradient of the kernel's _var for the current face.
-  /// This is zero unless higher order reconstruction is used.
-  const ADVariableGradient & _grad_u_neighbor;
 
   /// This is the outward unit normal vector for the face the kernel is currently
   /// operating on.  By convention, this is set to be pointing outward from the
