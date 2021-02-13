@@ -11,13 +11,39 @@
       petsc_version = '>=3.9.0'
       allow_test_objects = true
     [../]
+    [./3d-jac]
+      type = 'PetscJacobianTester'
+      input = '3d.i'
+      prereq = 'rom/3d'
+      ratio_tol = 5e-7
+      method = 'opt'
+      cli_args = 'Executioner/num_steps=2'
+      difference_tol = 1
+      run_sim = True
+      detail = 'in 3D and compute a perfect Jacobian.'
+      allow_test_objects = true
+    [../]
 
-    [./2drz]
+    [./2drzSmall]
       type = 'CSVDiff'
-      input = '2drz.i'
+      input = '2drzSmall.i'
       csvdiff = '2drz_out.csv'
-      detail = 'in 2DRz.'
+      detail = 'in 2DRz using small strain.'
+      cli_args = 'Outputs/file_base=2drz_out'
       petsc_version = '>=3.9.0'
+      allow_test_objects = true
+      rel_err = 2e-5
+    [../]
+    [./2drzSmall-jac]
+      type = 'PetscJacobianTester'
+      input = '2drzSmall.i'
+      method = 'opt'
+      prereq = 'rom/2drzSmall'
+      ratio_tol = 5e-6
+      difference_tol = 1
+      cli_args = 'Executioner/num_steps=2'
+      run_sim = True
+      detail = 'in 2DRz and compute a perfect Jacobian using small strain.'
       allow_test_objects = true
     [../]
 

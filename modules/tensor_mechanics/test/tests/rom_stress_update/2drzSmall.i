@@ -21,7 +21,8 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = FINITE
+    strain = small
+    incremental = true
     add_variables = true
     generate_output = vonmises_stress
   [../]
@@ -67,6 +68,7 @@
   [./stress]
     type = ComputeMultipleInelasticStress
     inelastic_models = rom_stress_prediction
+    tangent_operator = nonlinear
   [../]
   [./rom_stress_prediction]
     type = SS316HLAROMANCEStressUpdateTest
