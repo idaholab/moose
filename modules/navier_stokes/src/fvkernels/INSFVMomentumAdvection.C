@@ -444,6 +444,19 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 
   if (onBoundary(*_face_info))
   {
+#ifndef NDEBUG
+    bool flow_boundary_found = false;
+    for (const auto b_id : _face_info->boundaryIDs())
+      if (_flow_boundaries.find(b_id) != _flow_boundaries.end())
+      {
+        flow_boundary_found = true;
+        break;
+      }
+
+    mooseAssert(flow_boundary_found,
+                "INSFV*Advection flux kernel objects should only execute on flow boundaries.");
+#endif
+
     v(0) = _u_var->getBoundaryFaceValue(*_face_info);
     if (_v_var)
       v(1) = _v_var->getBoundaryFaceValue(*_face_info);
