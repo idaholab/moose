@@ -35,5 +35,6 @@ PINSFVSymmetryVelocityBC::PINSFVSymmetryVelocityBC(const InputParameters & param
 ADReal
 PINSFVSymmetryVelocityBC::computeQpResidual()
 {
-  return _eps[_qp] * INSFVSymmetryVelocityBC::computeQpResidual();
+  // FIXME: Compute the face porosity
+  return INSFVSymmetryVelocityBC::computeQpResidual() / _eps[_qp];
 }
