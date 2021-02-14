@@ -9,14 +9,18 @@
 
 #pragma once
 
-#include "INSFVMassAdvection.h"
+#include "PINSFVMomentumAdvection.h"
 
 /**
  * A flux kernel transporting mass in porous media across cell faces
  */
-class PINSFVMassAdvection : public INSFVMassAdvection
+class PINSFVMassAdvection : public PINSFVMomentumAdvection
 {
 public:
+  // Inherits PINSFVMomentumAdvection to use porosity in Rhie Chow interpolation
   static InputParameters validParams();
   PINSFVMassAdvection(const InputParameters & params);
+
+  protected:
+    ADReal computeQpResidual() override;
 };

@@ -36,12 +36,12 @@ protected:
   /**
    * interpolation overload for the velocity
    */
-  void interpolate(Moose::FV::InterpMethod m,
-                   ADRealVectorValue & interp_v,
-                   const ADRealVectorValue & elem_v,
-                   const ADRealVectorValue & neighbor_v);
+  virtual void interpolate(Moose::FV::InterpMethod m,
+                           ADRealVectorValue & interp_v,
+                           const ADRealVectorValue & elem_v,
+                           const ADRealVectorValue & neighbor_v);
 
-  ADReal computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
 
   void residualSetup() override final { clearRCCoeffs(); }
   void jacobianSetup() override final { clearRCCoeffs(); }
@@ -57,14 +57,14 @@ protected:
    * @param elem The elem to get the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
+  virtual const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
 
   /**
    * method for computing the Rhie-Chow 'a' coefficients for the given elem \p elem
    * @param elem The elem to compute the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const;
+  virtual VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const;
 
   /**
    * Clear the RC 'a' coefficient cache
@@ -109,6 +109,13 @@ protected:
   /// All the BoundaryIDs covered by our different types of INSFVBCs
   std::set<BoundaryID> _all_boundaries;
 
+  /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
+  /// the vector is equal to the number of threads in the simulation. We maintain a map from
+  /// MooseApp pointer to RC coefficients in order to support MultiApp simulations
+  static std::unordered_map<const MooseApp *,
+                            std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
+      _rc_a_coeffs;
+
 private:
   /**
    * Query for \p INSFVBCs::INSFVFlowBC on \p bc_id and add if query successful
@@ -120,11 +127,4 @@ private:
    */
   template <typename T>
   void setupBoundaries(const BoundaryID bnd_id, INSFVBCs bc_type, std::set<BoundaryID> & bnd_ids);
-
-  /// A map from elements to the 'a' coefficients used in the Rhie-Chow interpolation. The size of
-  /// the vector is equal to the number of threads in the simulation. We maintain a map from
-  /// MooseApp pointer to RC coefficients in order to support MultiApp simulations
-  static std::unordered_map<const MooseApp *,
-                            std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
-      _rc_a_coeffs;
 };
