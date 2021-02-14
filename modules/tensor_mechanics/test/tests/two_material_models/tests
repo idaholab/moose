@@ -1,0 +1,12 @@
+[Tests]
+  design = "source/materials/ComputeElasticityTensor.md"
+  issues = "#16992"
+  [./two_materials_in_domain]
+    type = 'Exodiff'
+    input = 'two_materials_in_domain.i'
+    exodiff = 'two_materials_in_domain_out.e'
+    abs_zero = 1e-7
+    requirement = "A simulation can use two materials model in different"
+                  " subdomains"
+  [../]
+[]
