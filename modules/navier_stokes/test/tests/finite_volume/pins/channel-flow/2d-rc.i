@@ -45,7 +45,7 @@ velocity_interp_method='rc'
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    initial_condition = 1
+    initial_condition = 0.5
   []
 []
 
@@ -130,6 +130,7 @@ velocity_interp_method='rc'
 
 [FVBCs]
   inactive = 'symmetry-u symmetry-v symmetry-p no-slip-u no-slip-v inlet-p outlet-p-novalue outlet-u outlet-v'
+  # Possible inlet boundary conditions
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -149,6 +150,7 @@ velocity_interp_method='rc'
     function = 1
   []
 
+  # Possible wall boundary conditions
   [free-slip-u]
     type = INSFVNaturalFreeSlipBC
     boundary = 'top bottom'
@@ -159,7 +161,6 @@ velocity_interp_method='rc'
     boundary = 'top bottom'
     variable = v
   []
-
   [no-slip-u]
     type = INSFVNoSlipWallBC
     boundary = 'top bottom'
@@ -172,7 +173,6 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
     boundary = 'bottom'
@@ -199,6 +199,7 @@ velocity_interp_method='rc'
     variable = pressure
   []
 
+  # Possible outlet boundary conditions
   [outlet-p]
     type = INSFVOutletPressureBC
     boundary = 'right'
@@ -244,9 +245,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  # Executioner chosen for repeatability, consider asm or others for performance
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      200                lu           NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-11
   nl_abs_tol = 1e-14

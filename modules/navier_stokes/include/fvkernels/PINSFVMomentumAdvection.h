@@ -21,7 +21,23 @@ public:
   PINSFVMomentumAdvection(const InputParameters & params);
 
 protected:
-  ADReal computeQpResidual() override;
+  /**
+   * interpolation overload for the velocity
+   */
+  void interpolate(Moose::FV::InterpMethod m,
+                   ADRealVectorValue & interp_v,
+                   const ADRealVectorValue & elem_v,
+                   const ADRealVectorValue & neighbor_v) override;
+
+  virtual ADReal computeQpResidual() override;
+  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
+
+  /**
+   * Returns the Rhie-Chow 'a' coefficient for the requested element \p elem
+   * @param elem The elem to get the Rhie-Chow coefficient for
+   * @param mu The dynamic viscosity
+   */
+  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const override;
 
   /// porosity
   const VariableValue & _eps;
