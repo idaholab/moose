@@ -10,8 +10,6 @@
       type = 'Exodiff'
       input = 'layered_integral_test.i'
       exodiff = 'out.e'
-      group = 'requirements'
-
       detail = 'using 3 layers with'
     []
 
@@ -19,7 +17,6 @@
       type = 'Exodiff'
       input = 'cumulative_layered_integral.i'
       exodiff = 'cumulative_layered_integral_out.e'
-
       detail = 'as a cumulative calculation and'
     []
 
@@ -27,7 +24,6 @@
       type = 'Exodiff'
       input = 'average_sample.i'
       exodiff = 'average_sample_out.e'
-
       detail = 'as an average calculation,'
     []
 
@@ -35,7 +31,6 @@
       type = 'Exodiff'
       input = 'layered_integral_fv_test.i'
       exodiff = 'fv_out.e'
-
       detail = 'and using finite volume variables.'
     []
   []

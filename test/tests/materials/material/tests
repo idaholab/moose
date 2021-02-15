@@ -86,8 +86,6 @@
     input = 'material_test.i'
     exodiff = 'out.e'
     scale_refine = 3
-    group = 'requirements'
-
     requirement = "The system shall support material property calculations that operate on auxiliary "
                   "systems and during volume and surface residual calculations."
   []

@@ -4,7 +4,6 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     scale_refine = 5
-    group = 'requirements'
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
     issues = '#6397'
     design = '/DirichletBC.md'

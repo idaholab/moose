@@ -9,8 +9,6 @@
       type = 'RunApp'
       input = 'restartable_types.i'
       recover = false
-      group = 'requirements'
-
       detail = "writing data to a restart file"
     []
 
@@ -20,8 +18,6 @@
       input = 'restartable_types2.i'
       prereq = serial/first
       recover = false
-      group = 'requirements'
-
       detail = "and restarting the simulation from the restart file."
     []
   []
@@ -35,8 +31,6 @@
       recover = false
       min_parallel = 2
       prereq = serial/second
-      group = 'requirements'
-
       detail = "writing data to a restart file"
     []
 
@@ -47,8 +41,6 @@
       prereq = parallel/first
       min_parallel = 2
       recover = false
-      group = 'requirements'
-
       detail = "and restarting the simulation from the restart file."
     []
   []

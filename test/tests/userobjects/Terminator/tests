@@ -5,8 +5,6 @@
     type = 'Exodiff'
     input = 'terminator.i'
     exodiff = 'terminator_out.e'
-    group = 'requirements'
-
     issues = '#3735'
     requirement = "The system shall be able to terminate the execution of a solve based on post-processing calculations performed within the simulation."
   [../]
@@ -14,7 +12,6 @@
     type = 'CSVDiff'
     input = 'terminator_soft.i'
     csvdiff = 'terminator_soft_out.csv'
-    group = 'requirements'
     issues = '#16452'
     requirement = "The system shall be able to terminate abort the current step in a solve based on post-processing calculations performed within the simulation to cut the timestep."
   [../]
@@ -23,7 +20,6 @@
     allow_warnings = true
     expect_err = "This is an error!"
     input = 'terminator_message.i'
-    group = 'requirements'
     issues = '#17000'
     requirement = "The terminator system shall be able to output a custom info, warning, or error message."
   [../]
@@ -32,7 +28,6 @@
     expect_err = "Setting the error level to ERROR always causes a hard failure."
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=ERROR'
-    group = 'requirements'
     issues = '#17000'
     requirement = "The terminator system shall check the compatibility of the suplied parameters."
   [../]
@@ -41,7 +36,6 @@
     expect_err = "If this parameter is specified a `message` must be supplied as well."
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=INFO'
-    group = 'requirements'
     issues = '#17000'
     requirement = "The terminator system shall check that a message is supplied if required."
   [../]

@@ -9,10 +9,8 @@
       type = 'Exodiff'
       input = 'ie.i'
       exodiff = 'ie_out.e'
-      group = 'requirements'
       use_old_floor = true
       abs_zero = 1e-9
-
       detail = "with and"
     []
 
@@ -21,7 +19,6 @@
       input = 'ie_adapt.i'
       exodiff = 'ie_adapt_out.e-s005'
       group = 'adaptive'
-
       detail = "without mesh adaptivity."
     []
   []
@@ -29,7 +26,6 @@
   [monomials]
     requirement = "The system shall support the use of an implicit Euler solver with discontinuous "
                   "(first-order Monomial) shape functions."
-
     type = 'PetscJacobianTester'
     input = 'ie-monomials.i'
     ratio_tol = 1e-7
