@@ -10,6 +10,8 @@
 #include "IdealGasFluidProperties.h"
 #include "Conversion.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("FluidPropertiesApp", IdealGasFluidProperties);
 
 InputParameters
@@ -66,6 +68,16 @@ IdealGasFluidProperties::p_from_v_e(Real v, Real e) const
   return (_gamma - 1.0) * e / v;
 }
 
+ADReal
+IdealGasFluidProperties::p_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  if (v.value() == 0.0)
+    throw MooseException(name() + ": Invalid value of specific volume detected (v = " +
+                         Moose::stringify(v.value()) + ").");
+
+  return (_gamma - 1.0) * e / v;
+}
+
 void
 IdealGasFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
@@ -78,13 +90,19 @@ void
 IdealGasFluidProperties::p_from_v_e(
     const DualReal & v, const DualReal & e, DualReal & p, DualReal & dp_dv, DualReal & dp_de) const
 {
-  p = SinglePhaseFluidProperties::p_from_v_e(v, e);
+  p = p_from_v_e(v, e);
   dp_dv = -(_gamma - 1.0) * e / v / v;
   dp_de = (_gamma - 1.0) / v;
 }
 
 Real
 IdealGasFluidProperties::T_from_v_e(Real /*v*/, Real e) const
+{
+  return e / _cv;
+}
+
+ADReal
+IdealGasFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & e) const
 {
   return e / _cv;
 }
@@ -101,7 +119,7 @@ void
 IdealGasFluidProperties::T_from_v_e(
     const DualReal & v, const DualReal & e, DualReal & T, DualReal & dT_dv, DualReal & dT_de) const
 {
-  T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  T = T_from_v_e(v, e);
   dT_dv = 0.0;
   dT_de = 1.0 / _cv;
 }
@@ -115,6 +133,19 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
   if (c2 < 0)
     mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
                    Moose::stringify(c2) + ".");
+
+  return std::sqrt(c2);
+}
+
+ADReal
+IdealGasFluidProperties::c_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  const auto T = T_from_v_e(v, e);
+
+  const auto c2 = _gamma * _R_specific * T;
+  if (MetaPhysicL::raw_value(c2) < 0)
+    mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
+                   Moose::stringify(MetaPhysicL::raw_value(c2)) + ".");
 
   return std::sqrt(c2);
 }
@@ -328,6 +359,12 @@ IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
   return p * _molar_mass / (_R * T);
 }
 
+ADReal
+IdealGasFluidProperties::rho_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return p * _molar_mass / (_R * T);
+}
+
 void
 IdealGasFluidProperties::rho_from_p_T(const DualReal & p,
                                       const DualReal & T,
@@ -335,7 +372,7 @@ IdealGasFluidProperties::rho_from_p_T(const DualReal & p,
                                       DualReal & drho_dp,
                                       DualReal & drho_dT) const
 {
-  rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
+  rho = rho_from_p_T(p, T);
   drho_dp = _molar_mass / (_R * T);
   drho_dT = -p * _molar_mass / (_R * T * T);
 }
