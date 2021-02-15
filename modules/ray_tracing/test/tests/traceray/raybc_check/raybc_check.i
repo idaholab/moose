@@ -18,7 +18,6 @@
 
 [RayKernels/null]
   type = NullRayKernel
-  rays = ray
 []
 
 [RayBCs]
@@ -26,7 +25,6 @@
   [top]
     type = NullRayBC
     boundary = top
-    rays = ray
   []
 []
 

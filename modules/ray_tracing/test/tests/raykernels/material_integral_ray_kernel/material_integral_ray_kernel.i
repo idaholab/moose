@@ -64,7 +64,6 @@
     type = MaterialIntegralRayKernel
     study = study
     mat_prop = mat
-    rays = 'diag top_across bottom_across partial'
   []
 []
 

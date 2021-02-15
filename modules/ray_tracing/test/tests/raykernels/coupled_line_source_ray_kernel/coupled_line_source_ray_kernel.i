@@ -63,13 +63,11 @@
     type = CoupledLineSourceRayKernelTest
     variable = u
     coupled = v
-    rays = 'ray1 ray2'
   []
   [source_ad]
     type = ADCoupledLineSourceRayKernelTest
     variable = u
     coupled = v
-    rays = 'ray1 ray2'
   []
 []
 

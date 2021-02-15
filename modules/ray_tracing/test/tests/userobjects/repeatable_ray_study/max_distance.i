@@ -41,10 +41,6 @@
 
 [RayKernels/null]
   type = NullRayKernel
-  rays = 'to_right_distance_kill
-          to_right_bc_kill
-          to_top_corner
-          reflect_a_lot'
 []
 
 [RayBCs]

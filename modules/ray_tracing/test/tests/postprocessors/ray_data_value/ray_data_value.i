@@ -11,7 +11,6 @@
 
 [RayKernels/null]
   type = NullRayKernel
-  rays = 'ray0 ray1'
 []
 
 [UserObjects/study]

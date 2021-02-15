@@ -51,13 +51,11 @@
     type = VariableIntegralRayKernel
     study = study
     variable = u
-    rays = 'diag top_across bottom_across partial'
   []
   [aux_variable_integral]
     type = VariableIntegralRayKernel
     study = study
     variable = aux
-    rays = 'diag top_across bottom_across partial'
   []
 []
 
