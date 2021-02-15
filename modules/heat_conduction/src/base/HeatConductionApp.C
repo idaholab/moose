@@ -48,6 +48,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("add_secondary_flux_vector", false);
   addTaskDependency("add_secondary_flux_vector", "ready_to_init");
   addTaskDependency("init_problem", "add_secondary_flux_vector");
+
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_bc");
@@ -55,10 +56,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_material");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_secondary_flux_vector");
 
-  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_mesh_generator");
+  registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "append_mesh_generator");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "setup_mesh_complete");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_user_object");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_bc");
+  registerSyntaxTask(
+      "RadiationTransferAction", "GrayDiffuseRadiation/*", "add_ray_boundary_condition");
 }
 
 void

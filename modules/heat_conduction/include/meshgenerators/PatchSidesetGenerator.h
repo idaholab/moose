@@ -27,6 +27,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  unsigned int nPatches() const { return _n_patches; }
+
 protected:
   /// returns the name of the _n_patches subdivisions derived from _sideset
   std::vector<BoundaryName> sidesetNameHelper(const std::string & base_name) const;
