@@ -56,10 +56,11 @@ InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostp
   addMooseVariableDependency(&mooseVariableField());
 
   // Primary and secondary variable should both be of a similar variable type
-  if ((_fv && !getFieldVar("neighbor_variable", 0)->isFV()) ||
-      (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
-    mooseError("For the InterfaceIntegralVariableValuePostprocessor, variable and "
-               "neighbor_variable should be of a similar variable type.");
+  if (parameters.isParamSetByUser("neighbor_variable"))
+    if ((_fv && !getFieldVar("neighbor_variable", 0)->isFV()) ||
+        (!_fv && getFieldVar("neighbor_variable", 0)->isFV()))
+      mooseError("For the InterfaceIntegralVariableValuePostprocessor, variable and "
+                 "neighbor_variable should be of a similar variable type.");
 }
 
 Real

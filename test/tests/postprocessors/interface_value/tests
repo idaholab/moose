@@ -49,7 +49,6 @@
     design = 'InterfaceAverageVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647 #16099'
-    skip = '#16149'
     max_threads = 2
   [../]
   [./interface_integral_variable_value_postprocessor_fv_test]
@@ -68,7 +67,6 @@
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647 #16099'
-    skip = '#16149'
     max_threads = 2
   [../]
 []

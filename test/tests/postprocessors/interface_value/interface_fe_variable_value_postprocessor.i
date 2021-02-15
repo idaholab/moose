@@ -105,8 +105,6 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
   []
 []
 
-
-
 [Postprocessors]
   [./diffusivity_average]
     type = ${postprocessor_type}
@@ -153,6 +151,13 @@ postprocessor_type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
+  [../]
+  [./diffusivity_single_variable]
+    type = ${postprocessor_type}
+    interface_value_type = primary
+    variable = diffusivity_1
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]

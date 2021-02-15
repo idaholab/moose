@@ -392,6 +392,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_mat_prop = 'rho_cp_temp'
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [mid2_advected_energy]
     type = InternalVolumetricFlowRate
@@ -400,6 +401,7 @@ velocity_interp_method='average'
     vel_y = v
     advected_mat_prop = 'rho_cp_temp'
     fv = true
+    advected_interp_method = ${advected_interp_method}
   []
   [outlet_advected_energy]
     type = VolumetricFlowRate
