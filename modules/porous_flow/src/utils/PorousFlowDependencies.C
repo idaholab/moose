@@ -22,9 +22,11 @@ PorousFlowDependencies::PorousFlowDependencies()
 
   _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowSinglePhaseBase");
   _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowFullySaturatedDarcyFlow");
+  _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowFullySaturatedAdvectiveFlux");
   _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowMassTimeDerivative");
   _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowMassVolumetricExpansion");
   _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowFullySaturatedHeatAdvection");
+  _deps.insertDependency("PorousFlowFullySaturated", "PorousFlowFullySaturatedUpwindHeatAdvection");
 
   _deps.insertDependency("PorousFlowBasicTHM", "PorousFlowSinglePhaseBase");
   _deps.insertDependency("PorousFlowBasicTHM", "PorousFlowFullySaturatedDarcyBase");
@@ -91,6 +93,9 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowAdvectiveFlux", "mass_fraction_nodal");
   _deps.insertDependency("PorousFlowAdvectiveFlux", "relative_permeability_nodal");
 
+  _deps.insertDependency("PorousFlowFullySaturatedAdvectiveFlux", "PorousFlowDarcyBase");
+  _deps.insertDependency("PorousFlowFullySaturatedAdvectiveFlux", "mass_fraction_nodal");
+
   _deps.insertDependency("PorousFlowBasicAdvection", "darcy_velocity_qp");
 
   _deps.insertDependency("PorousFlowDarcyBase", "permeability_qp");
@@ -134,6 +139,9 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection",
                          "PorousFlowFullySaturatedDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection", "enthalpy_qp");
+
+  _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "PorousFlowDarcyBase");
+  _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "enthalpy_nodal");
 
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative", "biot_modulus_qp");
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative", "thermal_expansion_qp");

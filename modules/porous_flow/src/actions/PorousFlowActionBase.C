@@ -72,11 +72,21 @@ PorousFlowActionBase::validParams()
       flux_limiter_type,
       "Type of flux limiter to use if stabilization=KT.  'None' means that no antidiffusion "
       "will be added in the Kuzmin-Turek scheme");
-  MooseEnum stabilization("Full KT", "Full");
+  MooseEnum stabilization("None Full KT", "Full");
   params.addParam<MooseEnum>("stabilization",
                              stabilization,
                              "Numerical stabilization used.  'Full' means full upwinding.  'KT' "
                              "means FEM-TVD stabilization of Kuzmin-Turek");
+  params.addParam<bool>(
+      "strain_at_nearest_qp",
+      false,
+      "Only relevant for models in which porosity depends on strain.  If true, then when "
+      "calculating nodal porosity that depends on strain, the strain at the nearest quadpoint will "
+      "be used.  This adds a small extra computational burden, and is only necessary for "
+      "simulations involving: (1) elements that are not linear lagrange or (2) certain PorousFlow "
+      "Dirac Kernels (as specified in their documentation).  If you set this to true, you will "
+      "also want to set the same parameter to true for related Kernels and Materials (which is "
+      "probably easiest to do in the GlobalParams block)");
   return params;
 }
 
@@ -95,7 +105,8 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type")),
-    _stabilization(getParam<MooseEnum>("stabilization").getEnum<StabilizationEnum>())
+    _stabilization(getParam<MooseEnum>("stabilization").getEnum<StabilizationEnum>()),
+    _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp"))
 {
   // convert vector of VariableName to vector of VariableName
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -151,6 +162,9 @@ PorousFlowActionBase::act()
 void
 PorousFlowActionBase::addMaterialDependencies()
 {
+  if (_strain_at_nearest_qp)
+    _included_objects.push_back("PorousFlowNearestQp");
+
   // Check to see if there are any other PorousFlow objects like BCs that
   // may require specific versions of materials added using this action
 
@@ -189,6 +203,8 @@ PorousFlowActionBase::addKernels()
 void
 PorousFlowActionBase::addMaterials()
 {
+  if (_strain_at_nearest_qp && _deps.dependsOn(_included_objects, "nearest_qp_nodal"))
+    addNearestQpMaterial();
 }
 
 void
@@ -404,6 +420,22 @@ PorousFlowActionBase::addEffectiveFluidPressureMaterial(bool at_nodes)
 }
 
 void
+PorousFlowActionBase::addNearestQpMaterial()
+{
+  if (_current_task == "add_material")
+  {
+    std::string material_type = "PorousFlowNearestQp";
+    InputParameters params = _factory.getValidParams(material_type);
+
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<bool>("nodal_material") = true;
+
+    std::string material_name = "PorousFlowActionBase_NearestQp";
+    _problem->addMaterial(material_type, material_name, params);
+  }
+}
+
+void
 PorousFlowActionBase::addVolumetricStrainMaterial(const std::vector<VariableName> & displacements,
                                                   bool consistent_with_displaced_mesh)
 {
@@ -426,7 +458,10 @@ PorousFlowActionBase::addSingleComponentFluidMaterial(bool at_nodes,
                                                       bool compute_density_and_viscosity,
                                                       bool compute_internal_energy,
                                                       bool compute_enthalpy,
-                                                      const UserObjectName & fp)
+                                                      const UserObjectName & fp,
+                                                      const MooseEnum & temperature_unit,
+                                                      const MooseEnum & pressure_unit,
+                                                      const MooseEnum & time_unit)
 {
   if (_current_task == "add_material")
   {
@@ -439,6 +474,9 @@ PorousFlowActionBase::addSingleComponentFluidMaterial(bool at_nodes,
     params.set<bool>("compute_internal_energy") = compute_internal_energy;
     params.set<bool>("compute_enthalpy") = compute_enthalpy;
     params.set<UserObjectName>("fp") = fp;
+    params.set<MooseEnum>("temperature_unit") = temperature_unit;
+    params.set<MooseEnum>("pressure_unit") = pressure_unit;
+    params.set<MooseEnum>("time_unit") = time_unit;
 
     std::string material_name = "PorousFlowActionBase_FluidProperties_qp";
     if (at_nodes)
@@ -455,7 +493,8 @@ PorousFlowActionBase::addBrineMaterial(VariableName nacl_brine,
                                        unsigned phase,
                                        bool compute_density_and_viscosity,
                                        bool compute_internal_energy,
-                                       bool compute_enthalpy)
+                                       bool compute_enthalpy,
+                                       const MooseEnum & temperature_unit)
 {
   if (_current_task == "add_material")
   {
@@ -468,6 +507,7 @@ PorousFlowActionBase::addBrineMaterial(VariableName nacl_brine,
     params.set<bool>("compute_density_and_viscosity") = compute_density_and_viscosity;
     params.set<bool>("compute_internal_energy") = compute_internal_energy;
     params.set<bool>("compute_enthalpy") = compute_enthalpy;
+    params.set<MooseEnum>("temperature_unit") = temperature_unit;
 
     std::string material_name = "PorousFlowActionBase_FluidProperties_qp";
     if (at_nodes)
