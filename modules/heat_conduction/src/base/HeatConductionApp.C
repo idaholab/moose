@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "RayTracingApp.h"
 
 InputParameters
 HeatConductionApp::validParams()
@@ -63,6 +64,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 void
 HeatConductionApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  RayTracingApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"HeatConductionApp"});
   Registry::registerActionsTo(af, {"HeatConductionApp"});
   associateSyntaxInner(s, af);
@@ -72,6 +74,7 @@ void
 HeatConductionApp::registerObjects(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjects");
+  RayTracingApp::registerObjects(factory);
   Registry::registerObjectsTo(factory, {"HeatConductionApp"});
 }
 
@@ -79,6 +82,7 @@ void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of associateSyntax");
+  RayTracingApp::associateSyntax(syntax, action_factory);
   Registry::registerActionsTo(action_factory, {"HeatConductionApp"});
   associateSyntaxInner(syntax, action_factory);
 }
