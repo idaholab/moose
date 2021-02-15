@@ -1263,9 +1263,10 @@ SystemBase::addExtraVectors()
 }
 
 void
-SystemBase::update()
+SystemBase::update(const bool update_libmesh_system)
 {
-  system().update();
+  if (update_libmesh_system)
+    system().update();
   std::vector<VariableName> std_field_variables;
   getStandardFieldVariableNames(std_field_variables);
   cacheVarIndicesByFace(std_field_variables);

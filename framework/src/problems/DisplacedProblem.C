@@ -969,6 +969,11 @@ DisplacedProblem::meshChanged()
   // then reinitialize GeometricSearchData such that we have all the correct geometric information
   // for the changed mesh
   updateMesh(/*mesh_changing=*/true);
+
+  // Since the mesh has changed, we need to make sure that we update any of our
+  // MOOSE-system specific data. libmesh system data has already been updated
+  _displaced_nl.update(/*update_libmesh_system=*/false);
+  _displaced_aux.update(/*update_libmesh_system=*/false);
 }
 
 void

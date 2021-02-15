@@ -771,20 +771,6 @@ FEProblemBase::initialSetup()
     }
   }
 
-  // Do this just in case things have been done to the mesh
-  {
-    CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
-    ghostGhostedBoundaries();
-  }
-
-  _mesh.meshChanged();
-
-  if (_displaced_problem)
-  {
-    CONSOLE_TIMED_PRINT("Updating displaced mesh");
-    _displaced_mesh->meshChanged();
-  }
-
   unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
@@ -6285,6 +6271,11 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
+
+  // Since the mesh has changed, we need to make sure that we update any of our
+  // MOOSE-system specific data. libmesh system data has already been updated
+  _nl->update(/*update_libmesh_system=*/false);
+  _aux->update(/*update_libmesh_system=*/false);
 }
 
 void

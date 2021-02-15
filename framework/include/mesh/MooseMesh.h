@@ -266,7 +266,8 @@ public:
    * Calls BoundaryInfo::build_active_side_list
    * @return A container of active (element, side, id) tuples.
    */
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildActiveSideList();
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+  buildActiveSideList() const;
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
@@ -1031,7 +1032,7 @@ public:
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
   /// Accessor for local \p FaceInfo objects
-  const std::vector<const FaceInfo *> & faceInfo()
+  const std::vector<const FaceInfo *> & faceInfo() const
   {
     buildFaceInfo();
     return _face_info;
@@ -1235,26 +1236,37 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
-  /// FaceInfo object storing information for face based loops. This container holds all the \p FaceInfo objects accessible from this process
-  std::vector<FaceInfo> _all_face_info;
-  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id, e.g. the local \p FaceInfo objects
-  std::vector<const FaceInfo *> _face_info;
-
-  /// Map from elem-side pair to FaceInfo
-  std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *> _elem_side_to_face_info;
-
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
   void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
-  // true if the _face_info member needs to be rebuilt/updated.
-  bool _face_info_dirty = true;
+  /// FaceInfo object storing information for face based loops. This container holds all the \p
+  /// FaceInfo objects accessible from this process
+  mutable std::vector<FaceInfo> _all_face_info;
 
-  /// Builds the face info vector that stores meta-data needed for looping
-  /// over and doing calculations based on mesh faces.
-  void buildFaceInfo();
+  /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
+  /// e.g. the local \p FaceInfo objects
+  mutable std::vector<const FaceInfo *> _face_info;
+
+  /// Map from elem-side pair to FaceInfo
+  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, FaceInfo *>
+      _elem_side_to_face_info;
+
+  // true if the _face_info member needs to be rebuilt/updated.
+  mutable bool _face_info_dirty = true;
+
+  /**
+   * Builds the face info vector that stores meta-data needed for looping over and doing
+   * calculations based on mesh faces. We build face information only upon request and only if the
+   * \p _face_info_dirty flag is false, either because this method has yet to be called or
+   * because someone called \p update() indicating the mesh has changed. Face information is only
+   * requested by getters that should appear semantically const. Consequently this method must
+   * also be marked const and so we make it and all associated face information data private to
+   * prevent misuse
+   */
+  void buildFaceInfo() const;
 
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
