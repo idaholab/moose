@@ -1,1 +1,23 @@
-!template load file=stubs/moose_object.md.template name=PerpendicularElectricFieldInterface syntax=/InterfaceKernels/PerpendicularElectricFieldInterface
+# PerpendicularElectricFieldInterface
+
+!alert construction title=Undocumented Class
+The PerpendicularElectricFieldInterface has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+!syntax description /InterfaceKernels/PerpendicularElectricFieldInterface
+
+## Overview
+
+!! Replace these lines with information regarding the PerpendicularElectricFieldInterface object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the PerpendicularElectricFieldInterface object.
+
+!syntax parameters /InterfaceKernels/PerpendicularElectricFieldInterface
+
+!syntax inputs /InterfaceKernels/PerpendicularElectricFieldInterface
+
+!syntax children /InterfaceKernels/PerpendicularElectricFieldInterface

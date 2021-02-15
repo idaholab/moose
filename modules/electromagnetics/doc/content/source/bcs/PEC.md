@@ -1,1 +1,23 @@
-!template load file=stubs/moose_object.md.template name=PEC syntax=/BCs/PEC
+# PEC
+
+!alert construction title=Undocumented Class
+The PEC has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
+
+!syntax description /BCs/PEC
+
+## Overview
+
+!! Replace these lines with information regarding the PEC object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the PEC object.
+
+!syntax parameters /BCs/PEC
+
+!syntax inputs /BCs/PEC
+
+!syntax children /BCs/PEC
