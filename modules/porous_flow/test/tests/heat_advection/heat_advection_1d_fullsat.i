@@ -1,5 +1,6 @@
 # 1phase, heat advecting with a moving fluid
-# Full upwinding is used
+# Full upwinding is used, as implemented by the PorousFlowFullySaturatedUpwindHeatAdvection added
+# In this case, the results should be identical to the case when the PorousFlowHeatAdvection Kernel is used.
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -72,7 +73,7 @@
     variable = temp
   [../]
   [./heat_advection]
-    type = PorousFlowHeatAdvection
+    type = PorousFlowFullySaturatedUpwindHeatAdvection
     variable = temp
   [../]
 []

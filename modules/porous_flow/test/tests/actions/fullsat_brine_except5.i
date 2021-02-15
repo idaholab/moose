@@ -1,6 +1,4 @@
-# Check error when using PorousFlowFullySaturated action,
-# attempting to create a Brine material without any mass
-# fraction variables.
+# Error checking: attempt to use non-standard pressure_unit with PorousFlowBrine
 
 [Mesh]
   type = GeneratedMesh
@@ -15,58 +13,26 @@
 []
 
 [PorousFlowFullySaturated]
-  coupling_type = ThermoHydro
   porepressure = pp
-  temperature = temp
+  temperature = 273.15
+  mass_fraction_vars = nacl
   fluid_properties_type = PorousFlowBrine
+  nacl_name = nacl
+  pressure_unit = MPa
   dictator_name = dictator
+  stabilization = none
 []
 
 [Variables]
   [./pp]
     initial_condition = 20E6
   [../]
-  [./temp]
-    initial_condition = 323.15
-  [../]
   [./nacl]
     initial_condition = 0.1047
   [../]
 []
 
-[Kernels]
-  # All provided by PorousFlowFullySaturated action
-[]
-
-[BCs]
-  [./t_bdy]
-    type = DirichletBC
-    variable = temp
-    boundary = 'left right'
-    value = 323.15
-  [../]
-  [./p_bdy]
-    type = DirichletBC
-    variable = pp
-    boundary = 'left right'
-    value = 20E6
-  [../]
-  [./nacl_bdy]
-    type = DirichletBC
-    variable = nacl
-    boundary = 'left right'
-    value = 0.1047
-  [../]
-[]
-
 [Materials]
-  # Thermal conductivity
-  [./thermal_conductivity]
-    type = PorousFlowThermalConductivityIdeal
-    dry_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-    wet_thermal_conductivity = '3 0 0  0 3 0  0 0 3'
-  [../]
-
   # Specific heat capacity
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
@@ -99,8 +65,4 @@
   solve_type = Newton
   dt = 1
   end_time = 1
-[]
-
-[Outputs]
-  file_base = fullsat_brine_except1
 []

@@ -1,6 +1,5 @@
 # Check error when using PorousFlowFullySaturated action,
-# attempting to set nacl_index to value greater than or
-# equal to number of components.
+# attempting to use both brine and single-component fluids
 
 [Mesh]
   type = GeneratedMesh
@@ -19,9 +18,18 @@
   porepressure = pp
   temperature = temp
   mass_fraction_vars = "nacl"
-  use_brine = true
-  nacl_index = 1
+  fluid_properties_type = PorousFlowBrine
+  nacl_name = nacl
+  fp = simple_fluid
   dictator_name = dictator
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+    [../]
+  [../]
 []
 
 [Variables]

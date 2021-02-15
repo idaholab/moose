@@ -65,6 +65,7 @@
   mass_fraction_vars = tracer_concentration
   number_aqueous_kinetic = 1
   temperature = 283.0
+  stabilization = none # Note to reader: try this with other stabilization and compare the results
 []
 
 [AuxVariables]
@@ -145,7 +146,7 @@
 []
 
 [Materials]
-  [./porosity]
+  [./porosity_mat]
     type = PorousFlowPorosity
     porosity_zero = 0.1
     chemical = true
@@ -171,7 +172,7 @@
     phi0 = 0.1
     poroperm_function = kozeny_carman_phi0
   [../]
-  [./precipitation_dissolution]
+  [./precipitation_dissolution_mat]
     type = PorousFlowAqueousPreDisChemistry
     reference_temperature = 283.0
     activation_energy = 1 # irrelevant because T=Tref

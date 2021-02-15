@@ -1,5 +1,5 @@
 # Check error when using PorousFlowFullySaturated action,
-# attempting to use both brine and single-component fluids
+# attempting to use PorousFlowSingleComponentFluid but with no fp specified
 
 [Mesh]
   type = GeneratedMesh
@@ -19,8 +19,6 @@
   temperature = temp
   mass_fraction_vars = "nacl"
   fluid_properties_type = PorousFlowSingleComponentFluid
-  nacl_name = nacl
-  fp = simple_fluid
   dictator_name = dictator
 []
 
