@@ -186,7 +186,7 @@ class SQAExtension(command.CommandExtension):
             for app_report in reports[2]:
                 app_report.app_syntax = app_syntax
                 app_report.exe_directory = exe_dir
-                app_report.exe_name = exe_name.split('-')[0] if exe_name else None
+                app_report.exe_name = exe_name.rsplit('-', maxsplit=1)[0] if exe_name else None
                 if app_syntax is None:
                     msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
                     LOG.warning(msg)
