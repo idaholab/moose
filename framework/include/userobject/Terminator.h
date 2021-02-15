@@ -53,7 +53,11 @@ public:
   virtual void finalize() override {}
 
 protected:
+  /// handle output of the optional message
+  void handleMessage();
+
   const enum class FailMode { HARD, SOFT } _fail_mode;
+  const enum class ErrorLevel { INFO, WARNING, ERROR, NONE } _error_level;
 
   /// Postprocessor names
   std::vector<std::string> _pp_names;
