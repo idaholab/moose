@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "PolycrystalDislocationKernelAction.h"
+#include "Factory.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("MarmotApp", PolycrystalDislocationKernelAction, "add_kernel");
 

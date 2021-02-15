@@ -15,6 +15,7 @@
 #pragma once
 
 #include "GrainDataTracker.h"
+#include "DislocationDensityFileReader.h"
 
 class GrainTrackerDislocations;
 class DislocationDensityFileReader;
