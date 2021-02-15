@@ -199,25 +199,35 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
 
     ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
         inelasticStrainIncrement, stress, stress_dev, delta_gamma);
+
+    _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+
     return;
   }
 
   // Use Hill-type flow rule to compute the time step inelastic increment.
   const ADReal prefactor = delta_gamma / qsigma_square;
 
+  // Reference for plastic multiplier:
+  // Finite element modelling investigation of the effects of cladding texture on creep in PWR fuel
+  // pins Anna Antoniou, Masters degree, 2015.
+
   inelasticStrainIncrement(0, 0) =
-      prefactor * (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
+      prefactor / std::sqrt(H + G) *
+      (H * (stress(0, 0) - stress(1, 1)) - G * (stress(2, 2) - stress(0, 0)));
   inelasticStrainIncrement(1, 1) =
-      prefactor * (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
+      prefactor / std::sqrt(F + H) *
+      (F * (stress(1, 1) - stress(2, 2)) - H * (stress(0, 0) - stress(1, 1)));
   inelasticStrainIncrement(2, 2) =
-      prefactor * (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
+      prefactor / std::sqrt(F + G) *
+      (G * (stress(2, 2) - stress(0, 0)) - F * (stress(1, 1) - stress(2, 2)));
 
   inelasticStrainIncrement(0, 1) = inelasticStrainIncrement(1, 0) =
-      prefactor * 2.0 * N * stress(0, 1);
+      prefactor / std::sqrt(2 * N) * 2.0 * N * stress(0, 1);
   inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(2, 0) =
-      prefactor * 2.0 * M * stress(0, 2);
+      prefactor / std::sqrt(2 * M) * 2.0 * M * stress(0, 2);
   inelasticStrainIncrement(1, 2) = inelasticStrainIncrement(2, 1) =
-      prefactor * 2.0 * L * stress(1, 2);
+      prefactor / std::sqrt(2 * L) * 2.0 * L * stress(1, 2);
 
   ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);
