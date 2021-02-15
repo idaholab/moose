@@ -16,6 +16,9 @@ InputParameters
 ViewFactorRayBC::validParams()
 {
   InputParameters params = GeneralRayBC::validParams();
+  params.addClassDescription("This ray boundary condition is applied on all sidesets bounding a "
+                             "radiation cavity except symmetry sidesets. It kills rays that hit "
+                             "the sideset and scores the ray for computation of view factors.");
   return params;
 }
 

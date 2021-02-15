@@ -77,11 +77,11 @@
     n_patches = '2 2 2 3'
     partitioners = 'centroid centroid centroid centroid'
     centroid_partitioner_directions = 'x y y x'
-    final_mesh_generator = rename
     temperature = temperature
     adiabatic_boundary = '7'
     fixed_temperature_boundary = '6'
     fixed_boundary_temperatures = '800'
+    view_factor_calculator = analytical
   [../]
 []
 

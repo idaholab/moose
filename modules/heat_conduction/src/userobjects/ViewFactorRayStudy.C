@@ -82,6 +82,11 @@ ViewFactorRayStudy::validParams()
   // Do not need to bank Rays on completion
   params.set<bool>("_bank_rays_on_completion") = false;
 
+  params.addClassDescription(
+      "This ray study is used to compute view factors in cavities with obstruction. It sends out "
+      "rays from surfaces bounding the radiation cavity into a set of directions determined by an "
+      "angular quadrature. The rays are tracked and view factors are computed by determining the "
+      "surface where the ray dies.");
   return params;
 }
 
