@@ -93,8 +93,8 @@
            aux_data_source'
   ray_data_names = 'data'
   ray_aux_data_names = 'aux_data'
-  initial_ray_data = '8'
-  initial_ray_aux_data = '10'
+  initial_ray_data = '0; 0; 0; 0; 8; 0'
+  initial_ray_aux_data = '0; 0; 0; 0; 0; 10'
   execute_on = PRE_KERNELS
 []
 

@@ -39,9 +39,9 @@ protected:
   /// The Ray data indices (if defined)
   const std::vector<RayDataIndex> _ray_data_indices;
   /// The initial Ray data to set (if defined)
-  const std::vector<Real> * const _initial_ray_data;
+  const std::vector<std::vector<Real>> * const _initial_ray_data;
   /// The Ray aux data indices (if defined)
   const std::vector<RayDataIndex> _ray_aux_data_indices;
   /// The initial Ray data to set (if defined)
-  const std::vector<Real> * const _initial_ray_aux_data;
+  const std::vector<std::vector<Real>> * const _initial_ray_aux_data;
 };
