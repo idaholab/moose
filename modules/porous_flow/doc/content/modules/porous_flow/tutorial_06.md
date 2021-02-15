@@ -59,7 +59,7 @@ Broadly speaking, the animation shows the expected behaviour, but what are those
 
 The "stripes" are removed by numerical stabilization, but this comes at a cost.  PorousFlow offers two types of [numerical stabilization](stabilization.md).  [Full-upwinding](upwinding.md) is excellent at eliminating overshoots and undershoots, and the convergence speed is also excellent, but it introduces extra diffusion, so that sharp fronts are not maintained!  On the other hand, [KT stabilization](kt.md) also eliminates overshoots and undershoots and introduces very little or zero extra diffusion so that sharp fronts are maintained as well as without any numerical stabilization, but its convergence speed and runtime are always greater.  Further details regarding the diffusion of fronts may be found in the [numerical diffusion](numerical_diffusion.md) page.
 
-It is not possible to use full-upwinding with the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action, but KT stabilization may be easily introduced:
+Numerical stabilization can be easily included using the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action.  For instance, KT stabilization may be easily introduced:
 
 !listing modules/porous_flow/examples/tutorial/06_KT.i start=[PorousFlowFullySaturated] end=[]
 

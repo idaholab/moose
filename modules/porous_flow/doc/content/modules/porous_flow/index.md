@@ -22,7 +22,7 @@ and geomechanics.
 - [Boundaries](porous_flow/boundaries.md)
 - [Point and line sources and sinks](porous_flow/sinks.md)
 - [Flow models](porous_flow/flow_models.md)
-- [Additional objects](porous_flow/additional_objects.md)
+- [Additional objects (actions, postprocessors, etc)](porous_flow/additional_objects.md)
 - [Full system documentation](porous_flow/systems.md)
 - [A to Z Index](porous_flow/contents.md)
 
