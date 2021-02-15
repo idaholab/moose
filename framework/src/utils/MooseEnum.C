@@ -167,22 +167,6 @@ MooseEnum::operator!=(unsigned short value) const
   return value != _current;
 }
 
-MooseEnum &
-MooseEnum::operator+=(const std::string & name)
-{
-  addEnumerationName(name);
-  checkDeprecated();
-  return *this;
-}
-
-MooseEnum &
-MooseEnum::operator+=(const std::initializer_list<std::string> & names)
-{
-  for (const auto & name : names)
-    *this += name;
-  return *this;
-}
-
 bool
 MooseEnum::compareCurrent(const MooseEnum & other, CompareMode mode) const
 {
