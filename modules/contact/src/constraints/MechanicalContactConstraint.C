@@ -41,10 +41,6 @@ MechanicalContactConstraint::validParams()
                                         "the variable this kernel acts in. (0 for x, "
                                         "1 for y, 2 for z)");
 
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-
   params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -160,28 +156,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
       _vars[i] = coupled("displacements", i);
       _var_objects[i] = getVar("displacements", i);
     }
-  }
-  else
-  {
-    // Legacy parameter scheme for displacements
-    if (isParamValid("disp_x"))
-    {
-      _vars[0] = coupled("disp_x");
-      _var_objects[0] = getVar("disp_x", 0);
-    }
-    if (isParamValid("disp_y"))
-    {
-      _vars[1] = coupled("disp_y");
-      _var_objects[1] = getVar("disp_y", 0);
-    }
-    if (isParamValid("disp_z"))
-    {
-      _vars[2] = coupled("disp_z");
-      _var_objects[2] = getVar("disp_z", 0);
-    }
-
-    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
-                    "will go away with the deprecation of the Solid Mechanics module).");
   }
 
   if (parameters.isParamValid("tangential_tolerance"))

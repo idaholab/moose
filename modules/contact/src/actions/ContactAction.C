@@ -52,10 +52,6 @@ ContactAction::validParams()
   params.addParam<VariableName>("mapped_primary_gap_offset",
                                 "Offset to gap distance mapped from primary side");
 
-  params.addParam<VariableName>("disp_x", "The x displacement");
-  params.addParam<VariableName>("disp_y", "The y displacement");
-  params.addParam<VariableName>("disp_z", "The z displacement");
-
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
