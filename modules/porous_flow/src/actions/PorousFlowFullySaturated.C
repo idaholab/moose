@@ -319,9 +319,7 @@ PorousFlowFullySaturated::addMaterials()
       _deps.dependsOn(_included_objects, "volumetric_strain_nodal"))
     addVolumetricStrainMaterial(_coupled_displacements, true);
 
-  if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
+  if (_deps.dependsOn(_included_objects,
+                      "relative_permeability_qp")) // might be needed by Darcy-velocity Aux
     addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
-
-  if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
-    addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
 }

@@ -14,7 +14,7 @@ The fluid equation is a simplified form of the full [PorousFlow fluid equation](
 \nabla_{i}\left((\rho) k_{ij}\left(\nabla_{j}P - \rho g_{j}\right)/\mu\right)
 \ .
 \end{equation}
-In this equation, the fluid density, $\rho$, appears in parenthases, because the user has the option of including it or not using the `multiply_by_density` flag.  Note that the fluid-mass time derivative is close to linear, and is perfectly linear if `multiply_by_density=false`, and this also almost linearises the flow term.  Extremely good nonlinear convergence should therefore be expected, but there are some knock-on effects that are documented in [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md).
+In this equation, the fluid density, $\rho$, appears in parentheses, because the user has the option of including it or not using the `multiply_by_density` flag.  Note that the fluid-mass time derivative is close to linear, and is perfectly linear if `multiply_by_density=false`, and this also almost linearises the flow term.  Extremely good nonlinear convergence should therefore be expected, but there are some knock-on effects that are documented in [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md).
 
 The term $\alpha_{B}\dot{\epsilon}_{v}$ only appears if the `coupling_type` includes "Mechanical".  The term $A\dot{T}$ only appears if the `coupling_type` includes "Thermo".
 

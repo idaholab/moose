@@ -71,7 +71,7 @@
   [./unsat_except1]
     type = RunException
     input = 'unsat_except1.i'
-    expect_err = 'PorousFlowUnsaturated cannot use no stabilization'
+    expect_err = 'Some stabilization must be used in PorousFlowUnsaturated'
     threading = '!pthreads'
     requirement = "The system shall produce an error if PorousFlowUnsaturated is used with no stabilization."
     issues = "#16841"

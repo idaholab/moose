@@ -76,7 +76,7 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
     _capillary_pressure_name("PorousFlowUnsaturated_CapillaryPressureVG")
 {
   if (_stabilization == StabilizationEnum::None)
-    paramError("stabilization", "PorousFlowUnsaturated cannot use no stabilization");
+    paramError("stabilization", "Some stabilization must be used in PorousFlowUnsaturated");
 }
 
 void

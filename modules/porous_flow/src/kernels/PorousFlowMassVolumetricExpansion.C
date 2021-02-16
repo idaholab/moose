@@ -85,20 +85,6 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(
 Real
 PorousFlowMassVolumetricExpansion::computeQpResidual()
 {
-  /*
-  mooseAssert(_fluid_component < _mass_frac[_i][0].size(),
-              "PorousFlowMassVolumetricExpansion: fluid_component is given as "
-                  << _fluid_component
-                  << " which must be less than the number of fluid components described by the "
-                     "mass-fraction matrix, which is "
-                  << _mass_frac[_i][0].size());
-  unsigned int num_phases = (*_fluid_density)[_i].size();
-  mooseAssert(num_phases == _fluid_saturation[_i].size(),
-              "PorousFlowMassVolumetricExpansion: Size of fluid density = "
-                  << num_phases << " size of fluid saturation = " << _fluid_saturation[_i].size()
-                  << " but both these must be equal to the number of phases in the system");
-  */
-
   Real mass = 0.0;
   for (unsigned ph = 0; ph < _num_phases; ++ph)
   {

@@ -50,6 +50,6 @@ PorousFlowFullySaturatedUpwindHeatAdvection::dmobility(unsigned nodenum,
         _fluid_viscosity[nodenum][phase];
   dm -= _enthalpy[nodenum][phase] * _fluid_density_node[nodenum][phase] *
         _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-        std::pow(_fluid_viscosity[nodenum][phase], 2);
+        Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
   return dm;
 }

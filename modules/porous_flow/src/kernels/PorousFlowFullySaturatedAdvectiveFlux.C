@@ -63,13 +63,13 @@ PorousFlowFullySaturatedAdvectiveFlux::dmobility(unsigned nodenum,
                _fluid_viscosity[nodenum][phase] -
            _mass_fractions[nodenum][phase][_fluid_component] *
                _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-               std::pow(_fluid_viscosity[nodenum][phase], 2);
+               Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
   Real dm = _dmass_fractions_dvar[nodenum][phase][_fluid_component][pvar] *
             _fluid_density_node[nodenum][phase] / _fluid_viscosity[nodenum][phase];
   dm += _mass_fractions[nodenum][phase][_fluid_component] *
         _dfluid_density_node_dvar[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
   dm -= _mass_fractions[nodenum][phase][_fluid_component] * _fluid_density_node[nodenum][phase] *
         _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-        std::pow(_fluid_viscosity[nodenum][phase], 2);
+        Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
   return dm;
 }
