@@ -41,8 +41,6 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     _var(*mooseVariableFV()),
     _u_elem(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor()),
-    _grad_u_elem(_var.adGradSln()),
-    _grad_u_neighbor(_var.adGradSlnNeighbor()),
     _force_boundary_execution(getParam<bool>("force_boundary_execution"))
 {
   addMooseVariableDependency(&_var);

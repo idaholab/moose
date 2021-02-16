@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16972'
+  design = 'INSFVMomentumAdvection.md INSFVVelocityVariable.md'
+  [block_restricted_variables]
+    type = 'Exodiff'
+    input = 2d-rc.i
+    exodiff = 2d-rc_out.e
+    requirement = 'The system shall be able to block-restrict all variables in a heated channel simulation with passive scalar advection.'
+    ad_indexing_type = 'global'
+  []
+[]

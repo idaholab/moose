@@ -63,8 +63,13 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
     prepareVectorTag(_assembly, _var.number());
   else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     prepareVectorTagNeighbor(_assembly, _var.number());
+  else if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+               fi.faceCentroid());
   else
-    mooseError("should never get here");
+    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+               "with the relevant finite volume variable. Its centroid: ",
+               fi.faceCentroid());
 
   _local_re(0) = r;
   accumulateTaggedLocalResidual();
@@ -160,8 +165,13 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
       computeJacobian(Moose::ElementElement, residual);
     else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
       computeJacobian(Moose::NeighborNeighbor, residual);
+    else if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+      mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+                 fi.faceCentroid());
     else
-      mooseError("should never get here");
+      mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+                 "with the relevant finite volume variable. Its centroid: ",
+                 fi.faceCentroid());
   };
 
   _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);

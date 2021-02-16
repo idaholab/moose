@@ -175,7 +175,7 @@ public:
   /**
    * Update the system (doing libMesh magic)
    */
-  virtual void update();
+  virtual void update(bool update_libmesh_system = true);
 
   /**
    * Solve the system (using libMesh magic)

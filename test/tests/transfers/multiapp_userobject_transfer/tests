@@ -53,7 +53,7 @@
     input = 'restricted_elem_master.i'
     exodiff = 'restricted_elem_master_out.e restricted_elem_master_out_ch00.e restricted_elem_master_out_ch10.e'
 
-    requirement = "The system shall transfer user-defined spatial data into block and boundary restricted elemntal variables."
+    requirement = "The system shall transfer user-defined spatial data into block and boundary restricted elemental variables."
     design = "MultiAppUserObjectTransfer.md"
     issues = '#16241'
   []

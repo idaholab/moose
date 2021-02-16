@@ -547,12 +547,12 @@ RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMe
 }
 
 template <typename T>
+template <typename T2>
 void
-RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const std::vector<T> & input)
+RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const T2 & input)
 {
   mooseAssert(input.size() == 9,
               "To use fillSymmetric9FromInputVector, your input must have size 9.");
-
   zero();
 
   (*this)(0, 0, 0, 0) = input[0]; // C1111
@@ -584,8 +584,9 @@ RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const std::vector<T> & inp
   (*this)(0, 1, 1, 0) = input[8];
 }
 template <typename T>
+template <typename T2>
 void
-RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const std::vector<T> & input)
+RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
 {
   mooseAssert(input.size() == 21,
               "To use fillSymmetric21FromInputVector, your input must have size 21.");
@@ -751,7 +752,7 @@ RankFourTensorTempl<T>::fillGeneralIsotropicFromInputVector(const std::vector<T>
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillGeneralIsotropic(T i0, T i1, T i2)
+RankFourTensorTempl<T>::fillGeneralIsotropic(const T & i0, const T & i1, const T & i2)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -780,7 +781,7 @@ RankFourTensorTempl<T>::fillAntisymmetricIsotropicFromInputVector(const std::vec
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillAntisymmetricIsotropic(T i0)
+RankFourTensorTempl<T>::fillAntisymmetricIsotropic(const T & i0)
 {
   fillGeneralIsotropic(0.0, 0.0, i0);
 }
@@ -796,10 +797,17 @@ RankFourTensorTempl<T>::fillSymmetricIsotropicFromInputVector(const std::vector<
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricIsotropic(T lambda, T G)
+RankFourTensorTempl<T>::fillSymmetricIsotropic(const T & lambda, const T & G)
 {
-  fillSymmetric9FromInputVector(
-      {lambda + 2.0 * G, lambda, lambda, lambda + 2.0 * G, lambda, lambda + 2.0 * G, G, G, G});
+  // clang-format off
+  fillSymmetric21FromInputVector(std::array<T,21>
+  {{lambda + 2.0 * G, lambda,           lambda,           0.0, 0.0, 0.0,
+                      lambda + 2.0 * G, lambda,           0.0, 0.0, 0.0,
+                                        lambda + 2.0 * G, 0.0, 0.0, 0.0,
+                                                            G, 0.0, 0.0,
+                                                                 G, 0.0,
+                                                                      G}});
+  // clang-format on
 }
 
 template <typename T>
@@ -817,7 +825,7 @@ RankFourTensorTempl<T>::fillSymmetricIsotropicEandNuFromInputVector(const std::v
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(T E, T nu)
+RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(const T & E, const T & nu)
 {
   // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
   const T & lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
@@ -833,17 +841,21 @@ RankFourTensorTempl<T>::fillAxisymmetricRZFromInputVector(const std::vector<T> &
   mooseAssert(input.size() == 5,
               "To use fillAxisymmetricRZFromInputVector, your input must have size 5.");
 
-  // C1111     C1122     C1133     C2222     C2233=C1133
-  fillSymmetric9FromInputVector({input[0],
-                                 input[1],
-                                 input[2],
-                                 input[0],
-                                 input[2],
-                                 // C3333     C2323     C3131=C2323   C1212
-                                 input[3],
-                                 input[4],
-                                 input[4],
-                                 (input[0] - input[1]) * 0.5});
+  // C1111  C1122     C1133       0         0         0
+  //        C2222  C2233=C1133    0         0         0
+  //                  C3333       0         0         0
+  //                            C2323       0         0
+  //                                   C3131=C2323    0
+  //                                                C1212
+  // clang-format off
+  fillSymmetric21FromInputVector(std::array<T,21>
+  {{input[0],input[1],input[2],      0.0,      0.0, 0.0,
+             input[0],input[2],      0.0,      0.0, 0.0,
+                      input[3],      0.0,      0.0, 0.0,
+                                input[4],      0.0, 0.0,
+                                          input[4], 0.0,
+                                                    (input[0] - input[1]) * 0.5}});
+  // clang-format on
 }
 
 template <typename T>

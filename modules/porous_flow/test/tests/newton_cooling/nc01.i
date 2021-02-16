@@ -136,6 +136,7 @@
 
 [Executioner]
   type = Transient
+  solve_type = Newton
   end_time = 1E8
   dt = 1E6
 []
