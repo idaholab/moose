@@ -394,7 +394,7 @@
 []
 
 [Preconditioning]
-  active = 'mumps'
+  active = 'smp'
   [./smp]
     type = SMP
     full = true
