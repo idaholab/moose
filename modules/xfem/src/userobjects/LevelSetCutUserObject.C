@@ -21,6 +21,10 @@ LevelSetCutUserObject::validParams()
   params.addRequiredParam<VariableName>(
       "level_set_var", "The name of level set variable used to represent the interface");
   params.addClassDescription("XFEM mesh cut by level set function");
+  params.addParam<GeometricCutSubdomainID>(
+      "negative_id", 0, "The ID assigned to the elements with non-positive levelset values");
+  params.addParam<GeometricCutSubdomainID>(
+      "positive_id", 1, "The ID assigned to the elements with positive levelset values");
   return params;
 }
 
@@ -33,8 +37,13 @@ LevelSetCutUserObject::LevelSetCutUserObject(const InputParameters & parameters)
                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
                               .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
-    _solution(*_system.current_local_solution.get())
+    _solution(*_system.current_local_solution.get()),
+    _negative_id(getParam<GeometricCutSubdomainID>("negative_id")),
+    _positive_id(getParam<GeometricCutSubdomainID>("positive_id"))
 {
+  mooseAssert(_negative_id != _positive_id,
+              "LevelSetCutUserObject expects different GeometricCutSubdomainIDs for the "
+              "negative_id and the positive_id.");
 }
 
 bool
@@ -165,9 +174,9 @@ LevelSetCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points
   mooseError("getCrackFrontPoints() is not implemented for this object.");
 }
 
-unsigned int
-LevelSetCutUserObject::getCutSideID(const Node * node) const
+GeometricCutSubdomainID
+LevelSetCutUserObject::getCutSubdomainID(const Node * node) const
 {
   dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
-  return _solution(ls_dof_id) > 0.0 ? 1 : 0;
+  return _solution(ls_dof_id) > 0.0 ? _positive_id : _negative_id;
 }
