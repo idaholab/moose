@@ -2,6 +2,7 @@
 # 1phase, 2-component, constant fluid-bulk, constant viscosity, constant permeability
 # fully saturated with fully-saturated Kernel
 # For better agreement with the analytical solution (ana_pp), just increase nx
+# NOTE: the numerics described by this input file is quite delicate.  Firstly, the steady-state solution does not depend on the mass-fraction distribution, so the mass-fraction variable can assume any values (with the constraint that its integral is the same as the initial condition).  Secondly, because the PorousFlowFullySaturatedDarcyFlow does no upwinding, the steady-state porepressure distribution can contain non-physical oscillations.  The solver choice and mesh choice used below mean the result is as expected, but changing these can produce different results.
 
 [Mesh]
   type = GeneratedMesh
@@ -132,6 +133,9 @@
 [Executioner]
   type = Steady
   solve_type = Newton
+  nl_rel_tol = 1E-12
+  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_value = 'NONZERO'
 []
 
 [Outputs]

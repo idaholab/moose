@@ -311,13 +311,12 @@
   [./eff_stress04]
     type = 'PetscJacobianTester'
     input = 'eff_stress04.i'
-    ratio_tol = 1E-7
+    ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
     threading = '!pthreads'
-    skip = "#12506"
     requirement = "PorousFlow shall compute all Jacobian entries of all Kernels"
-    issues = '#6845'
+    issues = '#6845 #12506'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   [../]
   [./mass_vol_exp01]

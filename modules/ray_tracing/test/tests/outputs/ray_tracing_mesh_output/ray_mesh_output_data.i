@@ -36,7 +36,7 @@
     data_on_cache_traces = true
     aux_data_on_cache_traces = true
     ray_aux_data_names = 'test_aux'
-    initial_ray_aux_data = 1
+    initial_ray_aux_data = '1; 2; 3; 4'
   []
 []
 
@@ -45,7 +45,6 @@
     type = VariableIntegralRayKernel
     study = study
     variable = u
-    rays = 'diag top_across bottom_across partial'
   []
 []
 

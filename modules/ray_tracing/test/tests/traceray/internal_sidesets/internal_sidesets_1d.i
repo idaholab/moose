@@ -31,19 +31,16 @@
   [kill_internal]
     type = KillRayBC
     boundary = 7
-    rays = 'left_in at_left right_in at_right inside_left'
   []
 
   # for testing internal reflect
   [kill_external]
     type = KillRayBC
     boundary = 'left right'
-    rays = 'left_in at_left right_in at_right inside_left'
   []
   [reflect_internal]
     type = ReflectRayBC
     boundary = 7
-    rays = 'left_in at_left right_in at_right inside_left'
   []
 []
 

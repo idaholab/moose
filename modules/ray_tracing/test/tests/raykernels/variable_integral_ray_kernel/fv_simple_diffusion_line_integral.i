@@ -61,7 +61,6 @@
   type = VariableIntegralRayKernel
   study = study
   variable = v
-  rays = 'diag right_up'
 []
 
 [Postprocessors]

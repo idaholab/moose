@@ -32,23 +32,19 @@
     type = NullRayBC
     boundary = top
     study = dummy
-    rays = 'ray'
   []
   [not_a_study]
     type = NullRayBC
     boundary = top
     study = not_a_study
-    rays = 'ray'
   []
   [multiple_studies]
     type = NullRayBC
     boundary = top
-    rays = 'ray'
   []
   [missing_study]
     type = NullRayBC
     boundary = top
-    rays = 'ray'
   []
 []
 

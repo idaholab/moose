@@ -71,7 +71,6 @@
 [RayKernels/u_integral]
   type = VariableIntegralRayKernel
   variable = u
-  rays = 'diag right_up'
 []
 
 [Postprocessors]

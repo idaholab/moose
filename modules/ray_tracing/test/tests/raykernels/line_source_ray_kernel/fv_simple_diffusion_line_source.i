@@ -75,5 +75,4 @@
   type = ADLineSourceRayKernel
   variable = v
   value = 5
-  rays = 'line_source_ray'
 []

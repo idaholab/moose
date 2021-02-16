@@ -30,7 +30,6 @@
   [kill]
     type = KillRayBC
     boundary = right
-    rays = ray
   []
 []
 

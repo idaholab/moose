@@ -29,20 +29,16 @@
   [missing_study_by_name]
     type = NullRayKernel
     study = dummy
-    rays = 'ray'
   []
   [not_a_study]
     type = NullRayKernel
     study = not_a_study
-    rays = 'ray'
   []
   [multiple_studies]
     type = NullRayKernel
-    rays = 'ray'
   []
   [missing_study]
     type = NullRayKernel
-    rays = 'ray'
   []
 []
 
