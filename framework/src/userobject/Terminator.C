@@ -13,6 +13,7 @@
 
 #include "Terminator.h"
 #include "MooseApp.h"
+#include "MooseEnum.h"
 #include "Executioner.h"
 
 registerMooseObject("MooseApp", Terminator);
@@ -31,20 +32,40 @@ Terminator::validParams()
       "FParser expression to process Postprocessor values into a boolean value. "
       "Termination of the simulation occurs when this returns true.");
   MooseEnum failModeOption("HARD SOFT", "HARD");
-  params.addParam<MooseEnum>("fail_mode",
-                             failModeOption,
-                             "Abort entire simulation (HARD) or just the current timestep (SOFT).");
+  params.addParam<MooseEnum>(
+      "fail_mode",
+      failModeOption,
+      "Abort entire simulation (HARD) or just the current time step (SOFT).");
+  params.addParam<std::string>(
+      "message", "An optional message to be output when the termination condition is triggered");
+
+  MooseEnum errorLevel("INFO WARNING ERROR");
+  params.addParam<MooseEnum>(
+      "error_level",
+      errorLevel,
+      "The error level for the message. A level of ERROR will always lead to a hard "
+      "termination of the entire simulation.");
   return params;
 }
 
 Terminator::Terminator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _fail_mode(getParam<MooseEnum>("fail_mode").getEnum<FailMode>()),
+    _error_level(isParamValid("error_level")
+                     ? getParam<MooseEnum>("error_level").getEnum<ErrorLevel>()
+                     : ErrorLevel::NONE),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
     _fp()
 {
+  // sanity check the parameters
+  if (_error_level == ErrorLevel::ERROR && _fail_mode == FailMode::SOFT)
+    paramError("error_level", "Setting the error level to ERROR always causes a hard failure.");
+  if (_error_level != ErrorLevel::NONE && !isParamValid("message"))
+    paramError("error_level",
+               "If this parameter is specified a `message` must be supplied as well.");
+
   // build the expression object
   if (_fp.ParseAndDeduceVariables(_expression, _pp_names) >= 0)
     mooseError(std::string("Invalid function\n" + _expression + "\nin Terminator.\n") +
@@ -61,6 +82,32 @@ Terminator::Terminator(const InputParameters & parameters)
 }
 
 void
+Terminator::handleMessage()
+{
+  if (!isParamValid("message"))
+    return;
+
+  auto message = getParam<std::string>("message");
+  switch (_error_level)
+  {
+    case ErrorLevel::INFO:
+      mooseInfo(message);
+      break;
+
+    case ErrorLevel::WARNING:
+      mooseWarning(message);
+      break;
+
+    case ErrorLevel::ERROR:
+      mooseError(message);
+      break;
+
+    default:
+      break;
+  }
+}
+
+void
 Terminator::execute()
 {
   // copy current Postprocessor values into the FParser parameter buffer
@@ -71,10 +118,14 @@ Terminator::execute()
   if (_fp.Eval(_params.data()) != 0)
   {
     if (_fail_mode == FailMode::HARD)
+    {
+      handleMessage();
       _fe_problem.terminateSolve();
+    }
     else
     {
       _console << name() << " is marking the current solve step as failed.\n";
+      handleMessage();
       getMooseApp().getExecutioner()->picardSolve().failStep();
     }
   }
