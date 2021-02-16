@@ -17,7 +17,6 @@
 [RayBCs/kill]
   type = KillRayBC
   boundary = right
-  rays = ray
 []
 
 [RayKernels]
@@ -25,27 +24,23 @@
     type = ChangeDataRayKernelTest
     data_name = data
     add_value = 1
-    rays = ray
     depends_on = add_10
   []
   [scale_5]
     type = ChangeDataRayKernelTest
     data_name = data
     scale_value = 5
-    rays = ray
     depends_on = scale_9
   []
   [add_10]
     type = ChangeDataRayKernelTest
     data_name = data
     add_value = 10
-    rays = ray
   []
   [scale_9]
     type = ChangeDataRayKernelTest
     data_name = data
     scale_value = 9
-    rays = ray
     depends_on = add_1
   []
 []

@@ -17,7 +17,6 @@
   type = KillRayBC
   boundary = right
   study = study
-  rays = ray
 []
 
 [RayKernels]
@@ -25,7 +24,6 @@
 
   [null]
     type = NullRayKernel
-    rays = ray
   []
 []
 

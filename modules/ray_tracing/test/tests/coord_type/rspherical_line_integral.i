@@ -44,7 +44,6 @@
     type = VariableIntegralRayKernel
     study = study
     variable = u
-    rays = 'ray0'
   []
 []
 

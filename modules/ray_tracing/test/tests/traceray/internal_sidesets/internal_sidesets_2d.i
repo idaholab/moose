@@ -49,34 +49,16 @@
   [kill_internal]
     type = KillRayBC
     boundary = 'interior_top interior_right interior_bottom interior_left'
-    rays = 'to_bottom_left_corner
-            at_top_left_corner
-            to_top_right_corner
-            to_left_offset
-            to_top_center_node
-            inside_to_top'
   []
 
   # for testing internal reflect
   [kill_external]
     type = KillRayBC
     boundary = 'top right bottom left'
-    rays = 'to_bottom_left_corner
-            at_top_left_corner
-            to_top_right_corner
-            to_left_offset
-            to_top_center_node
-            inside_to_top'
   []
   [reflect_internal]
     type = ReflectRayBC
     boundary = 'interior_top interior_right interior_bottom interior_left'
-    rays = 'to_bottom_left_corner
-            at_top_left_corner
-            to_top_right_corner
-            to_left_offset
-            to_top_center_node
-            inside_to_top'
   []
 []
 

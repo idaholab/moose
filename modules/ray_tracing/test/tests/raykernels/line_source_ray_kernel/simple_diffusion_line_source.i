@@ -55,7 +55,6 @@
   type = LineSourceRayKernel
   variable = u
   value = 5
-  rays = 'line_source_ray'
 []
 
 # This isn't used in the test but can be enabled

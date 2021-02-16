@@ -11,7 +11,6 @@
 
 [RayKernels/null]
   type = NullRayKernel
-  rays = 'ray0 ray1'
 []
 
 [UserObjects/study]
@@ -22,9 +21,11 @@
                 0.1 0 0'
   names = 'ray0 ray1'
   ray_data_names = 'data0 data1'
-  initial_ray_data = '1 2'
+  initial_ray_data = '1 2;
+                      3 4'
   ray_aux_data_names = 'aux_data0 aux_data1'
-  initial_ray_aux_data = '3 4'
+  initial_ray_aux_data = '5 6;
+                          7 8'
 []
 
 [Postprocessors]

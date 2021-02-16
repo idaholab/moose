@@ -562,6 +562,13 @@ RayTracingStudy::associateRegisteredRays()
     for (auto & set : _threaded_ray_object_registration[tid])
       set.clear();
 
+  // All of the registered ray names - used when a RayTracingObject did not specify
+  // any Rays so it should be associated with all Rays.
+  std::vector<std::string> all_ray_names;
+  all_ray_names.reserve(_registered_ray_map.size());
+  for (const auto & pair : _registered_ray_map)
+    all_ray_names.push_back(pair.first);
+
   for (auto & rto : getRayTracingObjects())
   {
     const auto object_type = rto->parameters().get<std::string>("_moose_warehouse_system_name");
@@ -573,13 +580,6 @@ RayTracingStudy::associateRegisteredRays()
     const auto tid = params.get<THREAD_ID>("_tid");
     auto & registration = _threaded_ray_object_registration[tid];
 
-    // No ray names but we need them
-    if (ray_names.empty() && _use_ray_registration)
-      mooseError(_error_prefix,
-                 ": ",
-                 rto->errorPrefix(),
-                 " must supply the Rays that it is associated with via the rays parameter.\n",
-                 "This requirement is set by the '_use_ray_registration' private parameter.");
     // Ray names but we don't need them
     if (!ray_names.empty() && !_use_ray_registration)
       mooseError(_error_prefix,
@@ -589,7 +589,7 @@ RayTracingStudy::associateRegisteredRays()
                  "require Ray registration");
 
     // Register each Ray for this object in the registration
-    for (const auto & ray_name : ray_names)
+    for (const auto & ray_name : (ray_names.empty() ? all_ray_names : ray_names))
     {
       const auto id = registeredRayID(ray_name, /* graceful = */ true);
       if (id == DofObject::invalid_id)
