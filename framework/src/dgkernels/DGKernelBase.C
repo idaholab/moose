@@ -124,6 +124,8 @@ DGKernelBase::computeResidual()
 {
   if (!excludeBoundary())
   {
+    precalculateResidual();
+
     // Compute the residual for this element
     computeElemNeighResidual(Moose::Element);
 
@@ -137,6 +139,8 @@ DGKernelBase::computeJacobian()
 {
   if (!excludeBoundary())
   {
+    precalculateJacobian();
+
     // Compute element-element Jacobian
     computeElemNeighJacobian(Moose::ElementElement);
 
@@ -162,6 +166,8 @@ DGKernelBase::computeOffDiagJacobian(const unsigned int jvar_num)
       computeJacobian();
     else
     {
+      precalculateOffDiagJacobian(jvar_num);
+
       // Compute element-element Jacobian
       computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
