@@ -24,9 +24,18 @@ protected:
   ADReal computeQpResidual() override;
 
   /// Momentum equation component (x = 0, y = 1, z = 2)
-  const unsigned int & _component;
+  const unsigned int _component;
+  /// The linear friction factor for laminar flow as a material property
+  const ADMaterialProperty<Real> * const _linear_friction_matprop;
+  /// The quadratic friction factor for turbulent flow as a material property
+  const ADMaterialProperty<Real> * const _quadratic_friction_matprop;
   /// Darcy coefficient
-  const ADMaterialProperty<RealVectorValue> & _cL;
+  const ADMaterialProperty<RealVectorValue> * const _cL;
   /// Forchheimer coefficient
-  const ADMaterialProperty<RealVectorValue> & _cQ;
+  const ADMaterialProperty<RealVectorValue> * const _cQ;
+  /// Booleans to select the right model
+  const bool _use_linear_friction_matprop;
+  const bool _use_quadratic_friction_matprop;
+  const bool _use_Darcy_friction_model;
+  const bool _use_Forchheimer_friction_model;
 };
