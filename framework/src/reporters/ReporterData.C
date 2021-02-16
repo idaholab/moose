@@ -122,6 +122,18 @@ ReporterData::transfer(const ReporterName & from_name,
 }
 
 void
+ReporterData::resize(const ReporterName & name, dof_id_type n)
+{
+  auto func = [name](const std::unique_ptr<ReporterContextBase> & ptr) {
+    return ptr->name() == name;
+  };
+  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
+  if (ptr == _context_ptrs.end())
+    mooseError("Unable to locate Reporter with name:", name);
+  (*ptr)->resize(n);
+}
+
+void
 ReporterData::addConsumerMode(ReporterMode mode, const std::string & object_name)
 {
   const ReporterContextBase * ptr = getReporterContextBase(object_name);

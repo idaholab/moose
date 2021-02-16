@@ -217,6 +217,19 @@ public:
                 unsigned int to_index = 0) const;
 
   /**
+   * Helper for resizing vector reporter data
+   *
+   * @param name The name of the vector reporter value
+   * @param n New size
+   *
+   * This relies on the virtual ReporterContextBase::resize method to allow this method to
+   * operate without knowledge of the type being transferred
+   *
+   * see ReporterTransferInterface ReporterContext
+   */
+  void resize(const ReporterName & name, dof_id_type n);
+
+  /**
    * Helper for performing generic Reporter value transfers.
    * @param mode The desired consumer mode to be attached to reporter
    * @param object_name The reporter name to attach the mode
@@ -376,4 +389,61 @@ ReporterContext<T>::transfer(ReporterData & r_data,
                              unsigned int time_index) const
 {
   r_data.setReporterValue<T>(r_name, _state.value(), time_index);
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterContext<T>::transferToVector(ReporterData & r_data,
+                                     const ReporterName & r_name,
+                                     dof_id_type index,
+                                     unsigned int time_index) const
+{
+  std::vector<T> & vec =
+      const_cast<std::vector<T> &>(r_data.getReporterValue<std::vector<T>>(r_name, time_index));
+
+  if (index >= vec.size())
+    mooseError(
+        "Requested index ", index, " is outside the bounds of the vector reporter value ", r_name);
+  vec[index] = _state.value();
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterGeneralContext<T>::declareClone(ReporterData & r_data,
+                                        const ReporterName & r_name,
+                                        const ReporterMode & mode) const
+{
+  r_data.declareReporterValue<T, ReporterGeneralContext<T>>(r_name, mode);
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterGeneralContext<T>::declareVectorClone(ReporterData & r_data,
+                                              const ReporterName & r_name,
+                                              const ReporterMode & mode) const
+{
+  r_data.declareReporterValue<std::vector<T>, ReporterVectorContext<T>>(r_name, mode);
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterVectorContext<T>::declareClone(ReporterData &,
+                                       const ReporterName &,
+                                       const ReporterMode &) const
+{
+  mooseError("Cannot create clone with ReporterVectorContext.");
+}
+
+// This is defined here to avoid cyclic includes, see ReporterContext.h
+template <typename T>
+void
+ReporterVectorContext<T>::declareVectorClone(ReporterData &,
+                                             const ReporterName &,
+                                             const ReporterMode &) const
+{
+  mooseError("Cannot create clone with ReporterVectorContext.");
 }

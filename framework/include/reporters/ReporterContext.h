@@ -27,6 +27,28 @@ class ReporterData;
  * as provides a link to the stored Reporter value state object.
  *
  * @see Reporter, ReporterData, ReporterState
+ *
+ * This file contains several reporter context types with specific polymophism:
+ *
+ * ReporterContextBase--->ReporterContext<T>
+ *                        |        |
+ *                        |        ReporterGeneralContext<T>
+ *                        |        |        |      |
+ *                        |        |        |      ReporterGatherContext<T>
+ *                        |        |        ReporterScatterContext<T>
+ *                        |        ReporterBroadcastContext<T>
+ *                        |
+ *                        ReporterVectorContext<std::vector<T>>
+ *
+ * When creating a new context, it is generally advisable to derive from ReporterGeneralContext
+ * (@see VectorPostprocessorContext). The reason for the split between ReporterGeneralContext
+ * and ReporterVectorContext is due to the declareVectorClone and resize functionality. If we
+ * were to declare a vector clone in ReporterContext there would be a infinite instatiation of
+ * of vector contexts, which is why this declare is defined in ReporterGeneralContext and an
+ * error is thrown in ReporterVectorContext. There is also no easy way to partially instantiate
+ * a member function (you have to due it for the entire class), which is why the resize is
+ * defined in ReporterVectorContext. That being said, we are always open for improvements,
+ * especially for simplifying the polymophism of these contexts.
  */
 class ReporterContextBase : public libMesh::ParallelObject
 {
@@ -85,6 +107,51 @@ public:
   virtual void transfer(ReporterData & r_data,
                         const ReporterName & r_name,
                         unsigned int time_index = 0) const = 0;
+
+  /**
+   * Helper for enabling generic transfer of Reporter values to a vector
+   * @param r_data The ReporterData on the app that this data is being transferred to
+   * @param r_name The name of the Report being transfered to
+   *
+   * @see ReporterTransferInterface
+   */
+  virtual void transferToVector(ReporterData & r_data,
+                                const ReporterName & r_name,
+                                dof_id_type index,
+                                unsigned int time_index = 0) const = 0;
+
+  /**
+   * Helper for declaring new reporter values based on this context
+   *
+   * @param r_data The ReporterData on the app that this value is being declared
+   * @param r_name The name of the Reporter value being declared
+   * @param mode Reporter mode to declare with
+   *
+   * @see ReporterTransferInterface
+   */
+  virtual void declareClone(ReporterData & r_data,
+                            const ReporterName & r_name,
+                            const ReporterMode & mode) const = 0;
+
+  /**
+   * Helper for declaring new vector reporter values based on this context
+   *
+   * @param r_data The ReporterData on the app that this value is being declared
+   * @param r_name The name of the Reporter value being declared
+   * @param mode Reporter mode to declare with
+   *
+   * @see ReporterTransferInterface
+   */
+  virtual void declareVectorClone(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  const ReporterMode & mode) const = 0;
+
+  /**
+   * Helper for resizing vector data
+   *
+   * @param local_size Number of elements to resize vector to
+   */
+  virtual void resize(dof_id_type local_size) = 0;
 
   /**
    * Helper for enabling generic transfer of Reporter values
@@ -158,6 +225,19 @@ public:
   virtual void transfer(ReporterData & r_data,
                         const ReporterName & r_name,
                         unsigned int time_index = 0) const override;
+
+  /**
+   * Perform type specific transfer to a vector
+   *
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   *       know of a better solution, if you have one please implement it.
+   */
+  virtual void transferToVector(ReporterData & r_data,
+                                const ReporterName & r_name,
+                                dof_id_type index,
+                                unsigned int time_index = 0) const override;
+
+  virtual void resize(dof_id_type local_size) override;
 
   /**
    * Add a consumer mode to the associate ReporterState
@@ -307,11 +387,52 @@ ReporterContext<T>::addConsumerMode(ReporterMode mode, const std::string & objec
   _state.addConsumerMode(mode, object_name);
 }
 
+template <typename T>
+void ReporterContext<T>::resize(dof_id_type)
+{
+  mooseError("Cannot resize non vector-type reporter values.");
+}
+
+template <typename T>
+class ReporterGeneralContext : public ReporterContext<T>
+{
+public:
+  ReporterGeneralContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
+    : ReporterContext<T>(other, state)
+  {
+  }
+  ReporterGeneralContext(const libMesh::ParallelObject & other,
+                         ReporterState<T> & state,
+                         const T & default_value)
+    : ReporterContext<T>(other, state, default_value)
+  {
+  }
+
+  /**
+   * Declare a reporter value of same type as this context.
+   *
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   *       know of a better solution, if you have one please implement it.
+   */
+  virtual void declareClone(ReporterData & r_data,
+                            const ReporterName & r_name,
+                            const ReporterMode & mode) const override;
+  /**
+   * Declare a reporter value that is a vector of the same type as this context.
+   *
+   * NOTE: This is defined in ReporterData.h to avoid cyclic includes that would arise. I don't
+   *       know of a better solution, if you have one please implement it.
+   */
+  virtual void declareVectorClone(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  const ReporterMode & mode) const override;
+};
+
 /**
  * A context that broadcasts the Reporter value from the root processor
  */
 template <typename T>
-class ReporterBroadcastContext : public ReporterContext<T>
+class ReporterBroadcastContext : public ReporterGeneralContext<T>
 {
 public:
   ReporterBroadcastContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
@@ -324,7 +445,7 @@ public:
 template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
                                                       ReporterState<T> & state)
-  : ReporterContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -334,7 +455,7 @@ template <typename T>
 ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObject & other,
                                                       ReporterState<T> & state,
                                                       const T & default_value)
-  : ReporterContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -367,7 +488,7 @@ ReporterBroadcastContext<T>::finalize()
  * A context that scatters the Reporter value from the root processor
  */
 template <typename T>
-class ReporterScatterContext : public ReporterContext<T>
+class ReporterScatterContext : public ReporterGeneralContext<T>
 {
 public:
   ReporterScatterContext(const libMesh::ParallelObject & other,
@@ -389,7 +510,7 @@ template <typename T>
 ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject & other,
                                                   ReporterState<T> & state,
                                                   const std::vector<T> & values)
-  : ReporterContext<T>(other, state), _values(values)
+  : ReporterGeneralContext<T>(other, state), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -400,7 +521,7 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
                                                   ReporterState<T> & state,
                                                   const T & default_value,
                                                   const std::vector<T> & values)
-  : ReporterContext<T>(other, state, default_value), _values(values)
+  : ReporterGeneralContext<T>(other, state, default_value), _values(values)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_ROOT);
@@ -438,7 +559,7 @@ ReporterScatterContext<T>::finalize()
  * A context that gathers the Reporter value to the root processor
  */
 template <typename T>
-class ReporterGatherContext : public ReporterContext<T>
+class ReporterGatherContext : public ReporterGeneralContext<T>
 {
 public:
   ReporterGatherContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
@@ -452,7 +573,7 @@ public:
 template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
                                                 ReporterState<T> & state)
-  : ReporterContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, state)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -462,7 +583,7 @@ template <typename T>
 ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & other,
                                                 ReporterState<T> & state,
                                                 const T & default_value)
-  : ReporterContext<T>(other, state, default_value)
+  : ReporterGeneralContext<T>(other, state, default_value)
 {
   this->_producer_enum.clear();
   this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
@@ -487,4 +608,58 @@ ReporterGatherContext<T>::finalize()
                  " mode, which is not supported. The mode must be UNSET or ROOT.");
   }
   this->comm().gather(0, this->_state.value());
+}
+
+/**
+ * This context is specific for vector types of reporters, mainly for declaring a vector
+ * of the type from another context. As well as resizing the vector of data.
+ *
+ * @see ReporterGeneralContext::declareVectorClone and ReporterTransferInterface
+ */
+template <typename T>
+class ReporterVectorContext : public ReporterContext<std::vector<T>>
+{
+public:
+  ReporterVectorContext(const libMesh::ParallelObject & other,
+                        ReporterState<std::vector<T>> & state);
+  ReporterVectorContext(const libMesh::ParallelObject & other,
+                        ReporterState<std::vector<T>> & state,
+                        const std::vector<T> & default_value);
+
+  /**
+   * This simply throws an error to avoid infinite instantiations.
+   * It is defined in ReporterData.h to avoid cyclic included.
+   */
+  virtual void declareClone(ReporterData & r_data,
+                            const ReporterName & r_name,
+                            const ReporterMode & mode) const override;
+
+  /**
+   * This simply throws an error to avoid infinite instantiations.
+   * It is defined in ReporterData.h to avoid cyclic included.
+   */
+  virtual void declareVectorClone(ReporterData & r_data,
+                                  const ReporterName & r_name,
+                                  const ReporterMode & mode) const override;
+
+  /**
+   * Since we know that the _state value is a vector type, we can resize it based
+   * on @param local_size
+   */
+  virtual void resize(dof_id_type local_size) override { this->_state.value().resize(local_size); }
+};
+
+template <typename T>
+ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                ReporterState<std::vector<T>> & state)
+  : ReporterContext<std::vector<T>>(other, state)
+{
+}
+
+template <typename T>
+ReporterVectorContext<T>::ReporterVectorContext(const libMesh::ParallelObject & other,
+                                                ReporterState<std::vector<T>> & state,
+                                                const std::vector<T> & default_value)
+  : ReporterContext<std::vector<T>>(other, state, default_value)
+{
 }

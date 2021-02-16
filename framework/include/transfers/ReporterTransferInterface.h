@@ -56,4 +56,63 @@ protected:
                         const FEProblemBase & from_problem,
                         FEProblemBase & to_problem,
                         unsigned int time_index = 0);
+
+  /*
+   * Transferring reporter value from one FEProblems to a vector reporter value from another,
+   * mainly used for multiapps.
+   *
+   * @param from_reporter reporter name on main app
+   * @param to_reporter reporter name on sub app
+   * @param from_problem The FEProblem that references the reporter data with the value
+   * @param to_problem The FEProblem that references the reporter data to transfer to
+   * @param index the element index of the vector reporter
+   * @param time_index time index of transfer (default is lastest data)
+   */
+  void transferToVectorReporter(const ReporterName & from_reporter,
+                                const ReporterName & to_reporter,
+                                const FEProblemBase & from_problem,
+                                FEProblemBase & to_problem,
+                                dof_id_type index,
+                                unsigned int time_index = 0);
+
+  /*
+   * Helper for declaring a new reporter value in a FEProblem that is the same type
+   * as the reporter value in another FEProblem.
+   *
+   * @param from_reporter reporter name to clone type
+   * @param to_reporter reporter name of the clone
+   * @param from_problem The FEProblem that references the reporter data with the value
+   * @param to_problem The FEProblem that references the reporter data to declare clone
+   * @param mode ReporterMode to declare value as
+   */
+  void declareClone(const ReporterName & from_reporter,
+                    const ReporterName & to_reporter,
+                    const FEProblemBase & from_problem,
+                    FEProblemBase & to_problem,
+                    const ReporterMode & mode);
+
+  /*
+   * Helper for declaring a new vector reporter value in a FEProblem that contains
+   * the same type as the reporter value in another FEProblem.
+   *
+   * @param from_reporter reporter name to clone type
+   * @param to_reporter reporter name of the vector clone
+   * @param from_problem The FEProblem that references the reporter data with the value
+   * @param to_problem The FEProblem that references the reporter data to declare value
+   * @param mode ReporterMode to declare value as
+   */
+  void declareVectorClone(const ReporterName & from_reporter,
+                          const ReporterName & to_reporter,
+                          const FEProblemBase & from_problem,
+                          FEProblemBase & to_problem,
+                          const ReporterMode & mode);
+
+  /*
+   * Resize vector reporter value
+   *
+   * @param name Name of reporter
+   * @param problem FEProblem that contains the reporter value
+   * @param n New size of vector
+   */
+  void resizeReporter(const ReporterName & name, FEProblemBase & problem, dof_id_type n);
 };

@@ -19,7 +19,8 @@
  * ReporterContext that utilizes a Calculator object to compute its value and confidence levels
  */
 template <typename InType, typename OutType>
-class ReporterStatisticsContext : public ReporterContext<std::pair<OutType, std::vector<OutType>>>
+class ReporterStatisticsContext
+  : public ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>
 {
 public:
   ReporterStatisticsContext(const libMesh::ParallelObject & other,
@@ -63,7 +64,7 @@ ReporterStatisticsContext<InType, OutType>::ReporterStatisticsContext(
     const InType & data,
     const ReporterProducerEnum & mode,
     const MooseEnumItem & stat)
-  : ReporterContext<std::pair<OutType, std::vector<OutType>>>(other, state),
+  : ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>(other, state),
     _data(data),
     _data_mode(mode),
     _calc_ptr(StochasticTools::makeCalculator<InType, OutType>(stat, other))
@@ -100,14 +101,14 @@ ReporterStatisticsContext<InType, OutType>::finalize()
           _ci_calc_ptr->compute(_data, _data_mode == REPORTER_MODE_DISTRIBUTED);
   }
 
-  ReporterContext<std::pair<OutType, std::vector<OutType>>>::finalize();
+  ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>::finalize();
 }
 
 template <typename InType, typename OutType>
 void
 ReporterStatisticsContext<InType, OutType>::store(nlohmann::json & json) const
 {
-  ReporterContext<std::pair<OutType, std::vector<OutType>>>::store(json);
+  ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>::store(json);
   json["stat"] = _calc_ptr->name();
 }
 

@@ -37,3 +37,52 @@ ReporterTransferInterface::transferReporter(const ReporterName & from_reporter,
   ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
   from_data.transfer(from_reporter, to_reporter, to_data, time_index);
 }
+
+void
+ReporterTransferInterface::transferToVectorReporter(const ReporterName & from_reporter,
+                                                    const ReporterName & to_reporter,
+                                                    const FEProblemBase & from_problem,
+                                                    FEProblemBase & to_problem,
+                                                    dof_id_type index,
+                                                    unsigned int time_index)
+{
+  const ReporterData & from_data = from_problem.getReporterData();
+  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
+  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
+  from_context->transferToVector(to_data, to_reporter, index, time_index);
+}
+
+void
+ReporterTransferInterface::declareClone(const ReporterName & from_reporter,
+                                        const ReporterName & to_reporter,
+                                        const FEProblemBase & from_problem,
+                                        FEProblemBase & to_problem,
+                                        const ReporterMode & mode)
+{
+  const ReporterData & from_data = from_problem.getReporterData();
+  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
+  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
+  from_context->declareClone(to_data, to_reporter, mode);
+}
+
+void
+ReporterTransferInterface::declareVectorClone(const ReporterName & from_reporter,
+                                              const ReporterName & to_reporter,
+                                              const FEProblemBase & from_problem,
+                                              FEProblemBase & to_problem,
+                                              const ReporterMode & mode)
+{
+  const ReporterData & from_data = from_problem.getReporterData();
+  ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
+  const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
+  from_context->declareVectorClone(to_data, to_reporter, mode);
+}
+
+void
+ReporterTransferInterface::resizeReporter(const ReporterName & name,
+                                          FEProblemBase & problem,
+                                          dof_id_type n)
+{
+  ReporterData & data = problem.getReporterData(ReporterData::WriteKey());
+  data.resize(name, n);
+}
