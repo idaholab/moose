@@ -21,4 +21,29 @@
     custom_cmp = 'generalized.exodiff'
     heavy = true
   []
+
+  [ad_aniso_creep_x_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_x_3d.i'
+    csvdiff = ad_aniso_creep_x_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the X direction.'
+    min_parallel = 2
+    rel_err = 1.0e-5
+  []
+  [ad_aniso_creep_y_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_y_3d.i'
+    csvdiff = ad_aniso_creep_y_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the Y direction.'
+    min_parallel = 2
+    rel_err = 1.0e-5
+  []
+  [ad_aniso_creep_z_3d]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_z_3d.i'
+    csvdiff = ad_aniso_creep_z_3d_out.csv
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the Z direction.'
+    min_parallel = 2
+    rel_err = 1.0e-5
+  []
 []
