@@ -7,4 +7,13 @@
     design = 'source/bcs/InfiniteCylinderRadiativeBC.md'
     issues = "#13053"
   [../]
+  [./function_radiative_bc]
+    type = Exodiff
+    input = 'function_radiative_bc.i'
+    exodiff = 'function_radiative_bc_out.e'
+    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function."
+    design = 'source/bcs/FunctionRadiativeBC.md'
+    issues = "#13053"
+    mesh_mode = REPLICATED
+  [../]
 []
