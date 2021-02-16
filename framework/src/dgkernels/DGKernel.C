@@ -126,8 +126,11 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     prepareVectorTagNeighbor(_assembly, _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpResidual(type);
     for (_i = 0; _i < test_space.size(); _i++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
+  }
 
   accumulateTaggedLocalResidual();
 
@@ -157,9 +160,12 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
     prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpJacobian(type);
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -196,10 +202,13 @@ DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
     prepareMatrixTagNeighbor(_assembly, _var.number(), jvar.number(), type);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpOffDiagJacobian(type, jvar);
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
         _local_ke(_i, _j) +=
             _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar.number());
+  }
 
   accumulateTaggedLocalMatrix();
 }
