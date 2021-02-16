@@ -12,10 +12,10 @@
 #include "ADAnisotropicReturnPlasticityStressUpdateBase.h"
 
 /**
- * This class uses the stress update material in an anisotropic return isotropic creep
- * model.  This class is one of the basic radial return constitutive models; more complex
- * constitutive models combine creep and plasticity.
- *
+ * This class uses the stress update material in an anisotropic return mapping.
+ * This class is one of the generalized radial return constitutive models based on Hill's criterion;
+ * it assumes and anisotropic elasticity tensor and an anisotropic plastic yield surface.
+ * Constitutive models that combine creep and plasticity can be used.
  */
 
 class ADHillElastoPlasticityStressUpdate : public ADAnisotropicReturnPlasticityStressUpdateBase
@@ -101,6 +101,7 @@ protected:
   ADDenseVector _eigenvalues_hill;
   ADDenseMatrix _eigenvectors_hill;
   ADDenseMatrix _anisotropic_elastic_tensor;
+
   /// Name of the elasticity tensor material property
   const std::string _elasticity_tensor_name;
   /// Anisotropic elasticity tensor material property

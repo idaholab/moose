@@ -12,7 +12,11 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "ElasticityTensorTools.h"
-#include <Eigen/Dense>
+
+#include "libmesh/ignore_warnings.h"
+#include "Eigen/Dense"
+#include "Eigen/Eigenvalues"
+#include "libmesh/restore_warnings.h"
 
 InputParameters
 ADGeneralizedRadialReturnStressUpdate::validParams()

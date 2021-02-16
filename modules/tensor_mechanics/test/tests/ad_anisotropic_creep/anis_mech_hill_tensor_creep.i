@@ -12,60 +12,60 @@
 []
 
 [AuxVariables]
-  [./hydrostatic_stress]
+  [hydrostatic_stress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./hydrostatic_stress]
+  [hydrostatic_stress]
     type = ADRankTwoScalarAux
     variable = hydrostatic_stress
     rank_two_tensor = stress
     scalar_type = Hydrostatic
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = SECOND
     scaling = 1e-10
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = SECOND
     scaling = 1e-10
-  [../]
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = PiecewiseLinear
     x = '0 10e3'
     y = '0 1e-4'
-  [../]
+  []
 []
 
 [Kernels]
-  [./stress_x]
+  [stress_x]
     type = ADStressDivergenceTensors
     component = 0
     variable = disp_x
-  [../]
-  [./stress_y]
+  []
+  [stress_y]
     type = ADStressDivergenceTensors
     component = 1
     variable = disp_y
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy'
     use_automatic_differentiation = true
-  [../]
+  []
 []
 
 [Materials]
@@ -74,13 +74,13 @@
     fill_method = orthotropic
     C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
   []
-  [./elastic_strain]
+  [elastic_strain]
     type = ADComputeMultipleInelasticStress
     inelastic_models = "trial_creep"
     max_iterations = 300
-  [../]
+  []
 
-  [./trial_creep]
+  [trial_creep]
     type = ADHillCreepStressUpdate
     coefficient = 1e-24
     n_exponent = 4
@@ -90,52 +90,52 @@
     # F G H L M N
     hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     base_name = trial_creep
-  [../]
+  []
 
-  [./creep_one]
+  [creep_one]
     type = ADPowerLawCreepStressUpdate
     coefficient = 1e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_one
-  [../]
-  [./creep_nine]
+  []
+  [creep_nine]
     type = ADPowerLawCreepStressUpdate
     coefficient = 9e-24
     n_exponent = 4
     activation_energy = 0
     base_name = creep_nine
-  [../]
+  []
 []
 
 [BCs]
-  [./no_disp_x]
+  [no_disp_x]
     type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
+  []
 
-  [./no_disp_y]
+  [no_disp_y]
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./pull_disp_y]
+  [pull_disp_y]
     type = ADFunctionDirichletBC
     variable = disp_y
     boundary = top
     function = pull
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -155,29 +155,29 @@
 []
 
 [Postprocessors]
-  [./max_disp_x]
+  [max_disp_x]
     type = ElementExtremeValue
     variable = disp_x
-  [../]
-  [./max_disp_y]
+  []
+  [max_disp_y]
     type = ElementExtremeValue
     variable = disp_y
-  [../]
-  [./max_hydro]
+  []
+  [max_hydro]
     type = ElementAverageValue
     variable = hydrostatic_stress
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimestepSize
-  [../]
-  [./num_lin]
+  []
+  [num_lin]
     type = NumLinearIterations
     outputs = console
-  [../]
-  [./num_nonlin]
+  []
+  [num_nonlin]
     type = NumNonlinearIterations
     outputs = console
-  [../]
+  []
 []
 
 [Outputs]
