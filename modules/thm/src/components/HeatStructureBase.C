@@ -329,8 +329,6 @@ HeatStructureBase::buildMesh()
   _outer_bc_id.push_back(_mesh.getNextBoundaryId());
   _boundary_names_inner.push_back(genName(name(), "inner"));
   _boundary_names_outer.push_back(genName(name(), "outer"));
-  _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
-  _mesh.setBoundaryName(_outer_bc_id[0], _boundary_names_outer[0]);
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
@@ -338,16 +336,12 @@ HeatStructureBase::buildMesh()
       _axial_outer_bc_id.push_back(_mesh.getNextBoundaryId());
       _boundary_names_axial_inner.push_back(genName(name(), _axial_region_names[i], "inner"));
       _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
-      _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);
-      _mesh.setBoundaryName(_axial_outer_bc_id[i], _boundary_names_axial_outer[i]);
     }
 
   _start_bc_id.push_back(_mesh.getNextBoundaryId());
   _end_bc_id.push_back(_mesh.getNextBoundaryId());
   _boundary_names_start.push_back(genName(name(), "start"));
   _boundary_names_end.push_back(genName(name(), "end"));
-  _mesh.setBoundaryName(_start_bc_id[0], _boundary_names_start[0]);
-  _mesh.setBoundaryName(_end_bc_id[0], _boundary_names_end[0]);
   if (_names.size() > 1)
     for (unsigned int i = 0; i < _names.size(); i++)
     {
@@ -355,13 +349,10 @@ HeatStructureBase::buildMesh()
       _radial_end_bc_id.push_back(_mesh.getNextBoundaryId());
       _boundary_names_radial_start.push_back(genName(name(), _names[i], "start"));
       _boundary_names_radial_end.push_back(genName(name(), _names[i], "end"));
-      _mesh.setBoundaryName(_radial_start_bc_id[i], _boundary_names_radial_start[i]);
-      _mesh.setBoundaryName(_radial_end_bc_id[i], _boundary_names_radial_end[i]);
       if (i != _names.size() - 1)
       {
         _inner_radial_bc_id.push_back(_mesh.getNextBoundaryId());
         _boundary_names_inner_radial.push_back(genName(name(), _names[i], _names[i + 1]));
-        _mesh.setBoundaryName(_inner_radial_bc_id[i], _boundary_names_inner_radial[i]);
       }
     }
 
@@ -370,6 +361,25 @@ HeatStructureBase::buildMesh()
     build2DMesh2ndOrder();
   else
     build2DMesh();
+
+  _mesh.setBoundaryName(_inner_bc_id[0], _boundary_names_inner[0]);
+  _mesh.setBoundaryName(_outer_bc_id[0], _boundary_names_outer[0]);
+  if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
+    for (unsigned int i = 0; i < _n_sections; i++)
+    {
+      _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);
+      _mesh.setBoundaryName(_axial_outer_bc_id[i], _boundary_names_axial_outer[i]);
+    }
+  _mesh.setBoundaryName(_start_bc_id[0], _boundary_names_start[0]);
+  _mesh.setBoundaryName(_end_bc_id[0], _boundary_names_end[0]);
+  if (_names.size() > 1)
+    for (unsigned int i = 0; i < _names.size(); i++)
+    {
+      _mesh.setBoundaryName(_radial_start_bc_id[i], _boundary_names_radial_start[i]);
+      _mesh.setBoundaryName(_radial_end_bc_id[i], _boundary_names_radial_end[i]);
+      if (i != _names.size() - 1)
+        _mesh.setBoundaryName(_inner_radial_bc_id[i], _boundary_names_inner_radial[i]);
+    }
 }
 
 void
