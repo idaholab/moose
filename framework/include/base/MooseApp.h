@@ -87,6 +87,12 @@ public:
    */
   virtual std::string getPrintableName() const { return "Application"; }
 
+  virtual std::string appBinaryName() const
+  {
+    auto name = Moose::getExecutableName();
+    return name.substr(0, name.find_last_of("-"));
+  }
+
   /**
    * Get the parameters of the object
    * @return The parameters of the object

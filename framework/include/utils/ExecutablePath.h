@@ -21,5 +21,13 @@ namespace Moose
  * normal /proc tree
  */
 std::string getExecutablePath();
+
+/**
+ * This function returns the name of the running executable.
+ * There is not a portable way to do this function implements
+ * this function for Mac OS X and Linux boxes containing a
+ * normal /proc tree
+ */
+std::string getExecutableName();
 }
 
