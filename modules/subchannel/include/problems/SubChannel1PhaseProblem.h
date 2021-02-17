@@ -23,11 +23,13 @@ public:
   virtual void initialSetup() override;
   /// Returns friction factor
   double computeFF(double Re);
+  /// Returns mass flow for a given pressure drop
+  double computeMassFlowForDPDZ(double dpdz, int i_ch);
   /// Computes diversion crossflow per gap for level iz
   void computeWij(int iz);
   /// Computes net diversion crossflow per channel for level iz
   void computeSumWij(int iz);
-  /// Computes massflow per channel for level iz
+  /// Computes mass flow per channel for level iz
   void computeMdot(int iz);
   /// Computes turbulent crossflow per gap for level iz
   void computeWijPrime(int iz);
@@ -41,6 +43,8 @@ public:
   void computeT(int iz);
   /// Computes Density per channel for level iz
   void computeRho(int iz);
+  /// Computes and populates solution vector with Boundary mass flow
+  void enforceZeroDPDZAtInlet();
 
 protected:
   Eigen::VectorXd Wij;
