@@ -25,4 +25,20 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
+  [1d-upwind-no-diffusion]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DUpwindNoDiffusion
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy and display first order convergence for all variables when using a first-order upwind scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [1d-hllc-no-diffusion]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DHLLCNoDiffusion
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy and display first order convergence for all variables when using a HLLC scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
 []
