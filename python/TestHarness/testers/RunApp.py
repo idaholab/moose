@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os
+import re, os, shutil
 from Tester import Tester
 from TestHarness import util
 
@@ -142,7 +142,7 @@ class RunApp(Tester):
         cli_args = list(specs['cli_args'])
 
         # Check for built application
-        if not options.dry_run and not os.path.exists(specs['executable']):
+        if shutil.which(specs['executable']) is None:
             self.setStatus(self.fail, 'Application not found')
             return ''
 

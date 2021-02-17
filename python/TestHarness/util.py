@@ -562,7 +562,10 @@ def getConfigOption(config_files, option, options):
     return option_set
 
 def getMooseConfigOption(moose_dir, option):
-    filenames = [moose_dir + '/framework/include/base/MooseConfig.h']
+    filenames = [
+        moose_dir + '/framework/include/base/MooseConfig.h',
+        moose_dir + '/include/moose/MooseConfig.h',
+        ];
 
     return getConfigOption(filenames, option, MOOSE_OPTIONS)
 

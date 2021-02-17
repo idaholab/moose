@@ -22,6 +22,11 @@ $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
+# install target related stuff
+share_install_dir := $(share_dir)/$(APPLICATION_NAME)
+tests_install_dir := $(share_install_dir)/test
+docs_install_dir := $(share_install_dir)/doc
+
 #
 # Restore parameters
 #
@@ -44,6 +49,7 @@ endif
 TEST_SRC_DIRS    := $(APPLICATION_DIR)/test/src
 SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
+
 
 excluded_srcfiles += main.C
 relative_excluded_srcfiles := $(foreach i, $(excluded_srcfiles), $(shell find $(SRC_DIRS) -name $(i)))
@@ -285,6 +291,7 @@ LIBRARY_SUFFIX :=
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 # If this is a matching module then build the exec, otherwise fall back and use the variable
+want_exec := $(BUILD_EXEC)
 ifneq (,$(MODULE_NAME))
   ifeq ($(MODULE_NAME),$(APPLICATION_NAME))
     all: $(app_EXEC)
@@ -329,6 +336,7 @@ ifeq ($(BUILD_TEST_OBJECTS_LIB),no)
   depend_test_libs :=
   depend_test_libs_flags :=
 else
+
 # Target-specific Variable Values (See GNU-make manual)
 $(app_test_LIB): curr_objs := $(app_test_objects)
 $(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
@@ -393,6 +401,80 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
+
+###### install stuff #############
+
+bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
+binlink = $(tests_install_dir)/$(notdir $(app_EXEC))
+
+test_dir := $(APPLICATION_DIR)
+ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
+	test_dir := $(APPLICATION_DIR)/test
+endif
+
+lib_install_targets = $(foreach lib,$(applibs),install_lib_$(notdir  $(lib)))
+ifneq ($(app_test_LIB),)
+	lib_install_targets += install_lib_$(notdir $(app_test_LIB))
+endif
+
+install_libs: $(lib_install_targets) install_lib_$(notdir $(moose_LIB)) install_lib_$(notdir $(pcre_LIB)) install_lib_$(notdir $(hit_LIB))
+
+install_$(APPLICATION_NAME)_tests: all
+	@echo "Installing tests"
+	@rm -rf $(tests_install_dir)
+	@mkdir -p $(tests_install_dir)
+	@cp -R $(test_dir)/tests $(tests_install_dir)/
+ifneq (,$(wildcard $(APPLICATION_DIR)/testroot))
+	@cp -f $(APPLICATION_DIR)/testroot $(tests_install_dir)/
+else
+ifneq (,$(wildcard $(test_dir)/testroot))
+	@cp -f $(test_dir)/testroot $(tests_install_dir)/
+else
+	@echo "app_name = $(APPLICATION_NAME)" > $(tests_install_dir)/testroot
+endif
+endif
+
+install_lib_$(notdir $(app_LIB)): $(app_LIB) all
+	@echo "Installing $<"
+	@mkdir -p $(lib_install_dir)
+	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
+	@$(eval libdst := $(lib_install_dir)/$(libname))
+	@cp $(dir $<)$(libname) $(libdst)
+	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
+	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
+	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
+	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+
+install_lib_$(notdir $(app_test_LIB)): $(app_test_LIB) all
+	@echo "Installing $<"
+	@mkdir -p $(lib_install_dir)
+	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
+	@$(eval libdst := $(lib_install_dir)/$(libname))
+	@cp $(dir $<)$(libname) $(libdst)
+	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+
+$(binlink): all install_$(APPLICATION_NAME)_tests
+	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
+
+$(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests $(binlink)
+	@echo "Installing $<"
+	@mkdir -p $(bin_install_dir)
+	@cp $< $@
+	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
+	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
+
+ifeq ($(want_exec),yes)
+install_bin: $(bindst)
+else
+install_bin:
+endif
+####### end install stuff ##############
 
 # Clang static analyzer
 sa: $(app_analyzer)
