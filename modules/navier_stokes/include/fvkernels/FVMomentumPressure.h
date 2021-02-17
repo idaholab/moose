@@ -11,17 +11,17 @@
 
 #include "FVElementalKernel.h"
 
-class INSFVMomentumPressure : public FVElementalKernel
+class FVMomentumPressure : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  INSFVMomentumPressure(const InputParameters & params);
+  FVMomentumPressure(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// The pressure variable
-  const MooseVariableFVReal * const _p_var;
+  /// The gradient of the pressure
+  const MooseArray<ADRealVectorValue> & _grad_pressure;
 
   /// index x|y|z
   const unsigned int _index;
