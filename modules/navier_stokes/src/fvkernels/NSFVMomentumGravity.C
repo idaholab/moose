@@ -7,12 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMomentumGravity.h"
+#include "NSFVMomentumGravity.h"
 
-registerMooseObject("NavierStokesApp", INSFVMomentumGravity);
+registerMooseObject("NavierStokesApp", NSFVMomentumGravity);
+registerMooseObjectRenamed("NavierStokesApp",
+                           INSFVMomentumGravity,
+                           "07/01/2021 00:00",
+                           NSFVMomentumGravity);
 
 InputParameters
-INSFVMomentumGravity::validParams()
+NSFVMomentumGravity::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a body force due to gravity.");
@@ -22,26 +26,20 @@ INSFVMomentumGravity::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addRequiredParam<Real>("rho", "The value for the density");
-  params.declareControllable("rho");
+  params.addParam<MaterialPropertyName>(NS::density, NS::density, "The value for the density");
   return params;
 }
 
-INSFVMomentumGravity::INSFVMomentumGravity(const InputParameters & params)
+NSFVMomentumGravity::NSFVMomentumGravity(const InputParameters & params)
   : FVElementalKernel(params),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _rho(getParam<Real>("rho")),
+    _rho(getADMaterialProperty<Real>(NS::density)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 ADReal
-INSFVMomentumGravity::computeQpResidual()
+NSFVMomentumGravity::computeQpResidual()
 {
-  return -_rho * _gravity(_index);
+  return -_rho[_qp] * _gravity(_index);
 }
