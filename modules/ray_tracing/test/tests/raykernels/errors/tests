@@ -1,0 +1,66 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayKernels/index.md'
+
+  [change_direction]
+    requirement = 'The system shall report an error when changing a ray start and/or direction within a RayKernel when'
+
+    [should_not_continue]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "RayKernels/active='kill change_after_kill'"
+      expect_err = "Cannot changeRayStartDirection\(\) for a Ray that should not continue."
+      allow_test_objects = true
+
+      detail = 'the ray was set to not continue by another RayKernel,'
+    []
+    [should_not_continue_at_end]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "UserObjects/active=end_study
+                  RayKernels/active='kill change_after_kill'"
+      expect_err = "It has also hit its user-set end point."
+      allow_test_objects = true
+
+      detail = 'the ray was set to not continue by another RayKernel and it is at its end point,'
+    []
+    [changed_again]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "RayKernels/active='change change_again'"
+      expect_err = "Cannot change a Ray\'s trajectory when its trajectory has already been changed"
+      allow_test_objects = true
+
+      detail = 'the ray\'s trajectory was already changed,'
+    []
+    [end_set]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "UserObjects/active=end_study
+                  UserObjects/end_study/end_points='1 0 0'
+                  RayKernels/active='change'"
+      expect_err = "Cannot change the direction of a Ray whose end point is set upon generation \(via setStartingEndPoint\(\)\)."
+      allow_test_objects = true
+
+      detail = 'the ray\'s end point has been set,'
+    []
+    [out_of_elem]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "RayKernels/active='change_out_of_elem'"
+      expect_err = "is not within the element that the RayKernel was executed on"
+      allow_test_objects = true
+
+      detail = 'the ray\'s start point is not within the current element, and'
+    []
+    [zero_direction]
+      type = RunException
+      input = 'raykernel_errors.i'
+      cli_args = "RayKernels/active='change_zero'"
+      expect_err = "Cannot set zero vector direction for a Ray"
+      allow_test_objects = true
+
+      detail = 'when the ray\'s new direction is set to the zero vector.'
+    []
+  []
+[]

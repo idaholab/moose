@@ -10,6 +10,10 @@
 []
 
 [RayBCs]
+  [kill]
+    type = KillRayBC
+    boundary = 'top'
+  []
   [reflect]
     type = ReflectRayBC
     boundary = 'top right left bottom'

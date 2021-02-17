@@ -77,8 +77,6 @@ RayKernelBase::changeRayStartDirection(const Point & start, const Point & direct
                  ray->getInfo());
   }
 
-  if (!ray->intersections())
-    mooseError("Cannot changeRayStartDirection() for Ray that has not moved");
 
   if (ray->trajectoryChanged())
     mooseError("Cannot change a Ray's trajectory when its trajectory has already been changed\n\n",
@@ -116,13 +114,6 @@ RayKernelBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
-
-  if (_current_elem != ray->currentElem())
-    mooseError("A Ray was added to the buffer mid-trace that does not\n",
-               "start in the same Elem as the ",
-               type(),
-               " that created it\n\n",
-               currentRay()->getInfo());
 
   _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }

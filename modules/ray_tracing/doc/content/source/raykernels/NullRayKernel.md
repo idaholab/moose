@@ -1,6 +1,6 @@
 # NullRayKernel
 
-!syntax parameters /RayKernels/NullRayKernel
+!syntax description /RayKernels/NullRayKernel
 
 !syntax parameters /RayKernels/NullRayKernel
 

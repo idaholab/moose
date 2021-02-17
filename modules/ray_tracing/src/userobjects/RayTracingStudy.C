@@ -26,6 +26,7 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_sync.h"
+#include "libmesh/remote_elem.h"
 
 InputParameters
 RayTracingStudy::validParams()
@@ -243,8 +244,8 @@ RayTracingStudy::initialSetup()
   getRayKernels(ray_kernels, 0);
   for (const auto & rkb : ray_kernels)
     if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.contains(EXEC_PRE_KERNELS))
-      mooseError("Has RayKernel objects that contribute to residuals and Jacobians.",
-                 "\nIn this case, the study should use the execute_on = PRE_KERNELS");
+      mooseError("This study has RayKernel objects that contribute to residuals and Jacobians.",
+                 "\nIn this case, the study must use the execute_on = PRE_KERNELS");
 
   // Build 1D quadrature rule for along a segment
   _segment_qrule =
@@ -357,7 +358,12 @@ RayTracingStudy::verifyDependenciesExist(const std::vector<RayTracingObject *> &
         }
 
       if (!found)
-        rto->paramError("depends_on", "The object '", dep_name, "' does not exist");
+        rto->paramError("depends_on",
+                        "The ",
+                        rto->parameters().get<std::string>("_moose_base"),
+                        " '",
+                        dep_name,
+                        "' does not exist");
     }
 }
 
@@ -410,7 +416,7 @@ RayTracingStudy::internalSidesetSetup()
 
     // Not internal
     const Elem * const neighbor = elem->neighbor_ptr(side);
-    if (!neighbor)
+    if (!neighbor || neighbor == remote_elem)
       continue;
 
     // No RayBCs on this sideset
@@ -891,12 +897,14 @@ RayTracingStudy::executeStudy()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     if (_num_cached[tid] != 0)
     {
+      mooseAssert(_fe_problem.currentlyComputingJacobian() ||
+                      _fe_problem.currentlyComputingResidual(),
+                  "Should not have cached values without Jacobian/residual computation");
+
       if (_fe_problem.currentlyComputingJacobian())
         _fe_problem.addCachedJacobian(tid);
-      else if (_fe_problem.currentlyComputingResidual())
-        _fe_problem.addCachedResidual(tid);
       else
-        mooseError("Should not have cached values without Jacobian/residual computation");
+        _fe_problem.addCachedResidual(tid);
 
       _num_cached[tid] = 0;
     }

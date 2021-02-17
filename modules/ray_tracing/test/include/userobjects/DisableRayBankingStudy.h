@@ -9,18 +9,12 @@
 
 #pragma once
 
-#include "GeneralRayBC.h"
+#include "RepeatableRayStudy.h"
 
-class ChangeDataRayBCTest : public GeneralRayBC
+class DisableRayBankingStudy : public RepeatableRayStudy
 {
 public:
-  ChangeDataRayBCTest(const InputParameters & params);
+  DisableRayBankingStudy(const InputParameters & parameters);
 
   static InputParameters validParams();
-
-  virtual void onBoundary(const unsigned int num_applying) override;
-
-  const RayDataIndex _ray_data_index;
-  const Real _add_value;
-  const Real _scale_value;
 };

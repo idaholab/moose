@@ -11,25 +11,16 @@
 
 #include "GeneralRayBC.h"
 
-/**
- * RayBC that reflects a Ray
- */
-class ReflectRayBC : public GeneralRayBC
+class ChangeRayRayBCTest : public GeneralRayBC
 {
 public:
-  ReflectRayBC(const InputParameters & params);
+  ChangeRayRayBCTest(const InputParameters & params);
 
   static InputParameters validParams();
 
   virtual void onBoundary(const unsigned int num_applying) override;
 
-  /**
-   * Computes the reflected direction given a direction and an outward normal for the surface it
-   * reflects off of.
-   */
-  static Point reflectedDirection(const Point & direction, const Point & normal);
-
-protected:
-  /// Whether or not to emit a warning if a Ray is being reflected on a non-planar side
-  const bool _warn_non_planar;
+  const RayDataIndex _ray_data_index;
+  const Real _add_value;
+  const Real _scale_value;
 };

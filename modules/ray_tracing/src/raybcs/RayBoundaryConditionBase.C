@@ -58,9 +58,6 @@ RayBoundaryConditionBase::changeRayDirection(const Point & direction, const bool
     mooseError("Cannot changeRayDirection() for a Ray that should not continue\n\n",
                ray->getInfo());
 
-  if (!ray->intersections())
-    mooseError("Cannot change direction for Ray that has not moved\n\n", ray->getInfo());
-
   if (!skip_changed_check && ray->trajectoryChanged())
     mooseError("Cannot change direction for a ray whose direction has already been changed\n\n",
                ray->getInfo());
@@ -92,13 +89,6 @@ RayBoundaryConditionBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
-
-  if (_current_elem != ray->currentElem())
-    mooseError("A Ray was added to the buffer mid-trace that does not\n",
-               "start in the same Elem as the ",
-               type(),
-               " that created it\n\n",
-               currentRay()->getInfo());
 
   _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }

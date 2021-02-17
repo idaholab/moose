@@ -112,4 +112,55 @@
       detail = 'nemesis formats.'
     []
   []
+
+  [errors]
+    requirement = 'The system shall report an error when ouputting rays in a mesh format when'
+    design = 'RayTracingMeshOutput.md'
+
+    [no_cached_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'Outputs/rays/output_data=true'
+      expect_err = "In order to output Ray data in output 'rays', the RayTracingStudy 'study' must set data_on_cache_traces = true"
+
+      detail = 'ray data is requested to be output but it is not cached,'
+    []
+    [no_cached_aux_data]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'Outputs/rays/output_aux_data=true'
+      expect_err = "In order to output Ray aux data in output 'rays', the RayTracingStudy 'study' must set aux_data_on_cache_traces = true"
+
+      detail = 'aux data is requested to be output but it is not cached,'
+    []
+    [data_nodal_and_non_nodal]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  Outputs/rays/output_data=true
+                  Outputs/rays/output_data_nodal=true'
+      expect_err = "Either choose output_data = true or output_data_nodal = true, not both."
+
+      detail = 'both nodal and non-nodal data is requested to be output,'
+    []
+    [nodal_no_segments]
+      type = RunException
+      input = 'ray_mesh_output_errors.i'
+      cli_args = 'UserObjects/study/data_on_cache_traces=true
+                  UserObjects/study/segments_on_cache_traces=false
+                  Outputs/rays/output_data_nodal=true'
+      expect_err = "Not supported when study segments_on_cache_traces = false"
+
+      detail = 'and when nodal data is requested to be output but segment-wise information is not cached.'
+    []
+  []
+
+  [no_segments_warning]
+    type = RunException
+    input = 'ray_mesh_output_errors.i'
+    expect_err = "No cached trace segments were found in the study 'study'."
+
+    design = 'RayTracingMeshOutput.md'
+    requirement = 'The system shall report a warning when rays are requested to be output in a mesh format but cached ray inforamtion is not found.'
+  []
 []
