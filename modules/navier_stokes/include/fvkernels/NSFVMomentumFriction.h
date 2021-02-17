@@ -25,10 +25,10 @@ protected:
   ADReal computeQpResidual() override;
 
 protected:
-  /// The linear friction factor for laminar flow as a material property
+  /// The linear friction factor, for laminar flow, as a material property
   const ADMaterialProperty<Real> * const _linear_friction_matprop;
-  /// The quadratic friction factor for turbulent flow as a material property
+  /// The quadratic friction factor, for turbulent flow, as a material property
   const ADMaterialProperty<Real> * const _quadratic_friction_matprop;
-  /// Booleans to select the right model
+  /// Boolean to select the right model
   const bool _use_linear_friction_matprop;
 };

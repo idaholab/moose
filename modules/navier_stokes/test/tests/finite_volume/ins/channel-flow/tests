@@ -59,6 +59,7 @@
     design = 'navier_stokes/rans_theory.md'
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
+  []
   [linear-friction]
     type = 'Exodiff'
     input = 2d-rc-friction.i

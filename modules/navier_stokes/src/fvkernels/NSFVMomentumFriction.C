@@ -18,7 +18,8 @@ NSFVMomentumFriction::validParams()
 
   params.addClassDescription("Implements a basic linear or quadratic friction model as "
                              "a volumetric force, for example for the X-momentum equation: "
-                             "F_x = - C * v_x. A linear dependence "
+                             "$F_x = - C_l * v_x$ and $F_x = - C_q * v_x * |v_x|$ for the linear "
+                             "and quadratic models respectively. A linear dependence "
                              "is expected for laminar flow, while a quadratic dependence "
                              "is more common for turbulent flow.");
   params.addParam<MaterialPropertyName>("linear_coef_name",

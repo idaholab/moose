@@ -2,6 +2,10 @@
 
 #include "FVElementalKernel.h"
 
+/**
+ * Implements a heat transfer term with an ambient medium, proportional to the
+ * difference between the fluid and ambient temperature.
+ */
 class NSFVEnergyAmbientConvection : public FVElementalKernel
 {
 public:
@@ -14,6 +18,6 @@ protected:
 
   /// the convective heat transfer coefficient
   const ADMaterialProperty<Real> & _alpha;
-  /// solid temperature
+  /// the ambient temperature of the medium with which the fluid exchanges heat
   const ADVariableValue & _temp_ambient;
 };
