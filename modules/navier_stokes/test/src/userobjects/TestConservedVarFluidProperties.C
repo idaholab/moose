@@ -7,31 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PressureEqualsDensityFluidProperties.h"
+#include "TestConservedVarFluidProperties.h"
 
-registerMooseObject("NavierStokesTestApp", PressureEqualsDensityFluidProperties);
+registerMooseObject("NavierStokesTestApp", TestConservedVarFluidProperties);
 
 InputParameters
-PressureEqualsDensityFluidProperties::validParams()
+TestConservedVarFluidProperties::validParams()
 {
   InputParameters params = IdealGasFluidProperties::validParams();
   return params;
 }
 
-PressureEqualsDensityFluidProperties::PressureEqualsDensityFluidProperties(
-    const InputParameters & parameters)
+TestConservedVarFluidProperties::TestConservedVarFluidProperties(const InputParameters & parameters)
   : IdealGasFluidProperties(parameters)
 {
 }
 
 ADReal
-PressureEqualsDensityFluidProperties::p_from_v_e(const ADReal & v, const ADReal & /*e*/) const
+TestConservedVarFluidProperties::p_from_v_e(const ADReal & v, const ADReal & /*e*/) const
 {
   return 1 / v;
 }
 
 ADReal
-PressureEqualsDensityFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & /*e*/) const
+TestConservedVarFluidProperties::T_from_v_e(const ADReal & /*v*/, const ADReal & /*e*/) const
 {
   return 1;
 }
