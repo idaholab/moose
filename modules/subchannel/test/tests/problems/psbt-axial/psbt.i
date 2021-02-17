@@ -1,8 +1,9 @@
 T_in = 359.15
 length = 3.658
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+# mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
+mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -21,12 +22,6 @@ P_out = 4.923e6 # Pa
   [mdot]
   []
   [SumWij]
-  []
-  [SumWijh]
-  []
-  [SumWijPrimeDhij]
-  []
-  [SumWijPrimeDUij]
   []
   [P]
   []
@@ -124,10 +119,9 @@ P_out = 4.923e6 # Pa
   []
 
   [mdot_ic]
-    type = MassFlowRateIC
+    type = ConstantIC
     variable = mdot
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = 0.0
   []
 []
 
@@ -147,11 +141,10 @@ P_out = 4.923e6 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = ConstantAux
     variable = mdot
     boundary = inlet
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = ${fparse mass_flow_in / 36.0}
     execute_on = 'timestep_begin'
   []
 []

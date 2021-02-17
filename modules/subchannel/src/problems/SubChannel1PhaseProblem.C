@@ -467,7 +467,8 @@ SubChannel1PhaseProblem::computeDP(int iz)
     }
     else
     {
-      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term +
+      // enabling the turbulent term in the momentum equation produces a radial pressure gradient
+      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term * 0.0 +
                                 Friction_Term + Gravity_Term); // Pa
     }
     // update solution
@@ -484,7 +485,6 @@ SubChannel1PhaseProblem::computeP(int iz)
                ": Cannot compute pressure at the outlet of the assembly. Boundary conditions are "
                "applied here");
   }
-  unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   // Calculate pressure in the inlet of the cell assuming known outlet
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -606,13 +606,108 @@ SubChannel1PhaseProblem::computeRho(int iz)
   }
 }
 
+double
+SubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
+{
+  auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
+  // initialize massflow
+  auto massflow = (*mdot_soln)(node);
+  auto rho = (*rho_soln)(node);
+  auto T = (*T_soln)(node);
+  auto mu = _fp->mu_from_rho_T(rho, T);
+  auto Si = (*S_flow_soln)(node);
+  auto w_perim = (*w_perim_soln)(node);
+  auto Dhi = 4.0 * Si / w_perim;
+  auto max_iter = 10;
+  auto TOL = 1e-6;
+  // Iterate until we find massflow that matches the given dp/dz.
+  auto iter = 0;
+  auto Error = 1.0;
+  while (Error > TOL)
+  {
+    iter += 1;
+    if (iter > max_iter)
+    {
+      mooseError(name(), ": exceeded maximum number of iterations");
+    }
+    auto massflow_old = massflow;
+    auto Rei = ((massflow / Si) * Dhi / mu);
+    auto fi = computeFF(Rei);
+    massflow = sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
+    Error = std::abs((massflow - massflow_old) / massflow_old);
+  }
+  return massflow;
+}
+
+void
+SubChannel1PhaseProblem::enforceZeroDPDZAtInlet()
+{
+  _console << "Applying mass flow boundary condition using uniform Pressure drop at the inlet\n";
+  auto node = _subchannel_mesh.getChannelNode(0, 0);
+  // User defined inlet total Massflow
+  auto MassFlow = (*mdot_soln)(node)*_subchannel_mesh.getNumOfChannels();
+  _console << "User provided total massflow :" << MassFlow << " [kg/sec] \n";
+  // Define vectors of pressure drop and massflow
+  Eigen::VectorXd DPDZi(_subchannel_mesh.getNumOfChannels());
+  Eigen::VectorXd MassFlowi(_subchannel_mesh.getNumOfChannels());
+  MassFlowi.setConstant(MassFlow / _subchannel_mesh.getNumOfChannels());
+  // Calculate Pressure drop for uniform inlet massflow condition
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto rho_in = (*rho_soln)(node_in);
+    auto T_in = (*T_soln)(node_in);
+    auto Si = (*S_flow_soln)(node_in);
+    auto w_perim = (*w_perim_soln)(node_in);
+    auto Dhi = 4.0 * Si / w_perim;
+    auto mu = _fp->mu_from_rho_T(rho_in, T_in);
+    auto Rei = (((*mdot_soln)(node_in) / Si) * Dhi / mu);
+    auto fi = computeFF(Rei);
+    DPDZi(i_ch) =
+        (fi / Dhi) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
+  }
+
+  // Initialize an average pressure drop for uniform inlet condition
+  auto DPDZ = DPDZi.mean();
+  auto Error = 1.0;
+  auto tol = 1e-6;
+  auto iter = 0;
+  auto max_iter = 10;
+  while (Error > tol)
+  {
+    iter += 1;
+    if (iter > max_iter)
+    {
+      mooseError(name(), ": exceeded maximum number of iterations");
+    }
+    auto DPDZ_old = DPDZ;
+    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+    {
+      // update inlet mass flow to achieve DPDZ
+      MassFlowi(i_ch) = computeMassFlowForDPDZ(DPDZ, i_ch);
+    }
+    // Calculate total massflow at the inlet
+    auto MassFlowSum = MassFlowi.sum();
+    // Update the DP/DZ to correct the mass flow rate.
+    DPDZ *= std::pow(MassFlow / MassFlowSum, 2.0);
+    Error = std::abs((DPDZ - DPDZ_old) / DPDZ_old);
+  }
+
+  // Populate solution vector with corrected boundary conditions
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
+    mdot_soln->set(node, MassFlowi(i_ch));
+  }
+  _console << "Done Applying mass flow boundary condition\n";
+}
+
 void
 SubChannel1PhaseProblem::externalSolve()
 {
+  enforceZeroDPDZAtInlet();
   _console << "Executing subchannel solver\n";
-
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
-
   Eigen::MatrixXd PCYCLES(nz, 2);
   // Initialize
   PCYCLES.setZero();

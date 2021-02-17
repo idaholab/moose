@@ -2,6 +2,7 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
+mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -21,12 +22,6 @@ P_out = 4.923e6 # Pa
   []
   [SumWij]
   []
-  [SumWijh]
-  []
-  [SumWijPrimeDhij]
-  []
-  [SumWijPrimeDUij]
-  []
   [P]
   []
   [DP]
@@ -38,8 +33,6 @@ P_out = 4.923e6 # Pa
   [rho]
   []
   [S]
-  []
-  [Sij]
   []
   [w_perim]
   []
@@ -91,9 +84,9 @@ P_out = 4.923e6 # Pa
   []
 
   [DP_ic]
-  type = ConstantIC
-  variable = DP
-  value = 0.0
+    type = ConstantIC
+    variable = DP
+    value = 0.0
   []
 
   [rho_ic]
@@ -113,10 +106,9 @@ P_out = 4.923e6 # Pa
   []
 
   [mdot_ic]
-    type = MassFlowRateIC
+    type = ConstantIC
     variable = mdot
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = 0.0
   []
 []
 
@@ -128,6 +120,7 @@ P_out = 4.923e6 # Pa
     value = ${P_out}
     execute_on = 'timestep_begin'
   []
+
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -135,12 +128,12 @@ P_out = 4.923e6 # Pa
     value = ${T_in}
     execute_on = 'timestep_begin'
   []
+
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = ConstantAux
     variable = mdot
     boundary = inlet
-    area = S
-    mass_flux = ${mass_flux_in}
+    value = ${fparse mass_flow_in / 36.0}
     execute_on = 'timestep_begin'
   []
 []
@@ -155,6 +148,7 @@ P_out = 4.923e6 # Pa
     file_base = "Temp_Out.txt"
     height = 3.658
   []
+
   [mdot_Out_MATRIX]
     type = NormalSliceValues
     variable = mdot
@@ -162,6 +156,7 @@ P_out = 4.923e6 # Pa
     file_base = "mdot_Out.txt"
     height = 3.658
   []
+
   [mdot_In_MATRIX]
     type = NormalSliceValues
     variable = mdot
@@ -203,27 +198,6 @@ P_out = 4.923e6 # Pa
     direction = to_multiapp
     source_variable = SumWij
     variable = SumWij
-  []
-  [xfer_SumWijh]
-    type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
-    direction = to_multiapp
-    source_variable = SumWijh
-    variable = SumWijh
-  []
-  [xfer_SumWijPrimeDhij]
-    type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
-    direction = to_multiapp
-    source_variable = SumWijPrimeDhij
-    variable = SumWijPrimeDhij
-  []
-  [xfer_SumWijPrimeDUij]
-    type = MultiAppNearestNodeTransfer
-    multi_app = prettyMesh
-    direction = to_multiapp
-    source_variable = SumWijPrimeDUij
-    variable = SumWijPrimeDUij
   []
   [xfer_P]
     type = MultiAppNearestNodeTransfer
