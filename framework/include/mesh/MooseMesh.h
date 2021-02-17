@@ -562,7 +562,7 @@ public:
   /**
    * Calls print_info() on the underlying Mesh.
    */
-  void printInfo(std::ostream & os = libMesh::out) const;
+  void printInfo(std::ostream & os = libMesh::out, const unsigned int verbosity = 0) const;
 
   /**
    * Return list of blocks to which the given node belongs.
