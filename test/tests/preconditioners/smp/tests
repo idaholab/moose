@@ -9,8 +9,6 @@
       type = 'Exodiff'
       input = 'smp_single_test.i'
       exodiff = 'smp_single_test_out.e'
-      group = 'requirements'
-
       detail = "without and"
     []
 
@@ -20,7 +18,6 @@
       exodiff = 'smp_single_adapt_test_out.e-s004'
       group = 'adaptive'
       max_parallel = 1
-
       detail = "with mesh adaptivity."
     []
   []
@@ -28,7 +25,6 @@
     type = 'Exodiff'
     input = 'smp_group_test.i'
     exodiff = 'smp_group_test_out.e'
-
     requirement = "The system shall support the ability to group variables when using a single "
                   "matrix preconditioner."
   []

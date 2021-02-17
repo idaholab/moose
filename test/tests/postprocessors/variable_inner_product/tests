@@ -6,8 +6,6 @@
     type = 'CSVDiff'
     input = 'variable_inner_product.i'
     csvdiff = 'variable_inner_product.csv'
-    group = 'requirements'
-
     requirement = 'The system shall include the ability to compute the inner product of two variables.'
   [../]
 []

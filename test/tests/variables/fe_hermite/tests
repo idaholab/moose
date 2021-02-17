@@ -10,8 +10,6 @@
       input = 'hermite-3-1d.i'
       exodiff = 'hermite-3-1d_out.e'
       abs_zero = 1e-07
-      group = 'requirements'
-
       detail = 'in 1D,'
     []
 
@@ -20,7 +18,6 @@
       input = 'hermite-3-2d.i'
       exodiff = 'hermite-3-2d_out.e'
       max_parallel = 1
-
       detail = 'in 2D, and'
     []
 
@@ -30,7 +27,6 @@
       exodiff = 'hermite-3-3d_out.e'
       abs_zero = 1e-07
       valgrind = 'HEAVY'
-
       detail = 'in 3D.'
     []
   []

@@ -992,15 +992,7 @@ XFEM::healMesh()
         {
           _healed_cuts.emplace(elem1, _geometric_cuts[i]);
           if ((*_material_data)[0]->getMaterialPropertyStorage().hasStatefulProperties())
-          {
-            if (getElementSideRelativeToInterface(elem1, elem1, _geometric_cuts[i]))
-              storeMaterialPropertiesForElements(elem1, elem1, elem2);
-            else if (getElementSideRelativeToInterface(elem2, elem2, _geometric_cuts[i]))
-              storeMaterialPropertiesForElements(elem1, elem2, elem1);
-            else
-              mooseError("Could not determine which element is on the positive side of the "
-                         "geometric cut");
-          }
+            storeMaterialPropertiesForElements(elem1, {{elem1, elem2}}, _geometric_cuts[i]);
         }
 
         cutelems_to_delete.insert(elem2->unique_id());
@@ -1368,20 +1360,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       if (heit != _healed_elems.end())
       {
         const GeometricCutUserObject * gcuo = getGeometricCutForElem(parent_elem);
-        if (getElementSideRelativeToInterface(parent_elem, libmesh_elem, gcuo))
-        {
-          mooseAssert(!_healed_material_properties_used[parent_elem].first,
-                      "revisting a healed material properties");
-          setMaterialPropertiesForElement(parent_elem, libmesh_elem, heit->second.first);
-          _healed_material_properties_used[parent_elem].first = true;
-        }
-        else
-        {
-          mooseAssert(!_healed_material_properties_used[parent_elem].second,
-                      "revisting a healed material properties");
-          setMaterialPropertiesForElement(parent_elem, libmesh_elem, heit->second.second);
-          _healed_material_properties_used[parent_elem].second = true;
-        }
+        setMaterialPropertiesForElement(parent_elem, libmesh_elem, gcuo);
       }
       else
       {
@@ -1418,17 +1397,21 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
   // if the healed element is not re-cut, figure out which side of the cut the element belongs
   // to and copy the corresponding material properties into it.
-  for (auto hmpuit : _healed_material_properties_used)
+  for (auto recut_elem_hmp : _healed_material_properties_used)
   {
-    const Elem * elem = hmpuit.first;
-    if (elem->processor_id() == _mesh->processor_id() &&
-        (!hmpuit.second.first || !hmpuit.second.second))
+    const Elem * elem = recut_elem_hmp.first;
+    if (elem->processor_id() == _mesh->processor_id())
     {
-      const GeometricCutUserObject * gcuo = _healed_cuts[elem];
-      if (getElementSideRelativeToInterface(elem, elem, gcuo))
-        setMaterialPropertiesForElement(elem, elem, _healed_elems[elem].first);
-      else
-        setMaterialPropertiesForElement(elem, elem, _healed_elems[elem].second);
+      // check if any material property has been recovered for the re-cut element
+      bool recovered = false;
+      for (auto hmp : recut_elem_hmp.second)
+        if (hmp.second)
+        {
+          recovered = true;
+          break;
+        }
+      if (!recovered)
+        setMaterialPropertiesForElement(elem, elem, _healed_cuts[elem]);
     }
   }
 
@@ -2118,20 +2101,29 @@ XFEM::getGeometricCutForElem(const Elem * elem) const
 
 void
 XFEM::storeMaterialPropertiesForElements(const Elem * parent_elem,
-                                         const Elem * elem1,
-                                         const Elem * elem2)
+                                         const std::vector<const Elem *> & elems,
+                                         const GeometricCutUserObject * gcuo)
 {
-  auto elem_pair = std::make_pair(elem1, elem2);
-  _healed_elems.emplace(parent_elem, elem_pair);
-  _healed_material_properties_used[parent_elem].first = false;
-  _healed_material_properties_used[parent_elem].second = false;
+  for (auto e : elems)
+  {
+    const GeometricCutSubdomainID gcsid = getGeometricCutSubdomainID(e, e, gcuo);
+    _healed_elems[parent_elem].emplace(gcsid, e);
+    _healed_material_properties_used[parent_elem].emplace(gcsid, false);
+  }
 }
 
 void
 XFEM::setMaterialPropertiesForElement(const Elem * parent_elem,
                                       const Elem * cut_elem,
-                                      const Elem * elem_from) const
+                                      const GeometricCutUserObject * gcuo)
 {
+  // find the element to copy data from.
+  const GeometricCutSubdomainID gcsid = getGeometricCutSubdomainID(parent_elem, cut_elem, gcuo);
+  mooseAssert(!_healed_material_properties_used[parent_elem][gcsid],
+              "Revisiting a healed material property.");
+  const Elem * elem_from = _healed_elems[parent_elem][gcsid];
+
+  // copy material properties to the cut element
   (*_material_data)[0]->copy(cut_elem, elem_from, 0);
   for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
   {
@@ -2143,26 +2135,25 @@ XFEM::setMaterialPropertiesForElement(const Elem * parent_elem,
         (*_bnd_material_data)[0]->copy(cut_elem, elem_from, side);
     }
   }
+
+  // mark the parent element's cut subdomain as healed
+  _healed_material_properties_used[parent_elem][gcsid] = true;
 }
 
-bool
-XFEM::getElementSideRelativeToInterface(const Elem * parent_elem,
-                                        const Elem * cut_elem,
-                                        const GeometricCutUserObject * gcuo) const
+GeometricCutSubdomainID
+XFEM::getGeometricCutSubdomainID(const Elem * parent_elem,
+                                 const Elem * cut_elem,
+                                 const GeometricCutUserObject * gcuo) const
 {
-  const Node * node = parent_elem->node_ptr(0);
-  unsigned int cut_side_id = gcuo->getCutSideID(node);
-  bool physical = isPointInsidePhysicalDomain(cut_elem, *node);
+  // Pick any node from the parent element that is inside the physical domain and return its
+  // GeometricCutSubdomainID.
+  for (unsigned int i = 0; i < parent_elem->n_nodes(); i++)
+  {
+    const Node * node = parent_elem->node_ptr(i);
+    if (isPointInsidePhysicalDomain(cut_elem, *node))
+      return gcuo->getCutSubdomainID(node);
+  }
 
-  // TODO: generalize to consider other cut scenarios
-  mooseAssert(cut_side_id == 0 || cut_side_id == 1, "unsupported cut side ID");
-
-  // If the point is in the physical domain and the side ID is 1, then return true.
-  // If the point is in the phantom domain and the side ID is 0, that means the side
-  // ID should be 1 in the physical domain, so we also return true.
-  // Similarly, if the point is in the phantom domain and the side ID is 1, then return
-  // false. If the point is in the physical domain and the side ID is 0, then return false.
-
-  // All the above logic condenses to this comparison.
-  return (cut_side_id == 1) == physical;
+  mooseError("XFEM internal error, none of parent element's nodes are inside the physical domain.");
+  return 0;
 }

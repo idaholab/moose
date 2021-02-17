@@ -255,9 +255,6 @@
     type = Density
     block = '1 2 3 4 5 6 7'
     density = 1.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 

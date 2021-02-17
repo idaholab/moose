@@ -70,10 +70,6 @@ GapHeatTransfer::validParams()
   params.addParam<bool>(
       "warnings", false, "Whether to output warning messages concerning nodes not being found");
 
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-
   params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -124,18 +120,6 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     // modern parameter scheme for displacements
     for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
       _disp_vars[i] = coupled("displacements", i);
-  }
-  else
-  {
-    // Legacy parameter scheme for displacements
-    if (isParamValid("disp_x"))
-      _disp_vars[0] = coupled("disp_x");
-    if (isParamValid("disp_y"))
-      _disp_vars[1] = coupled("disp_y");
-    if (isParamValid("disp_z"))
-      _disp_vars[2] = coupled("disp_z");
-
-    // TODO: these are only used in one Bison test. Deprecate soon!
   }
 
   if (_quadrature)
