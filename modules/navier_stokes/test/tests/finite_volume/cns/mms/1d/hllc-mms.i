@@ -125,7 +125,7 @@
 [Modules]
   [FluidProperties]
     [fp]
-      type = PressureEqualsDensityFluidProperties
+      type = TestConservedVarFluidProperties
     []
   []
 []

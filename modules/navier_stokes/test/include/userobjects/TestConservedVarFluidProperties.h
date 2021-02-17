@@ -14,12 +14,12 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
-class PressureEqualsDensityFluidProperties : public IdealGasFluidProperties
+class TestConservedVarFluidProperties : public IdealGasFluidProperties
 {
 public:
   static InputParameters validParams();
 
-  PressureEqualsDensityFluidProperties(const InputParameters & parameters);
+  TestConservedVarFluidProperties(const InputParameters & parameters);
 
   ADReal p_from_v_e(const ADReal & v, const ADReal & /*e*/) const override;
   ADReal T_from_v_e(const ADReal & /*v*/, const ADReal & /*e*/) const override;
