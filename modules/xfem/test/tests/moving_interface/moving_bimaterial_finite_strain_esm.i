@@ -17,6 +17,11 @@
     level_set_var = ls
     heal_always = true
   []
+  [esm]
+    type = GeometricCutElementSubdomainModifier
+    geometric_cut_userobject = level_set_cut_uo
+    apply_initial_conditions = false
+  []
 []
 
 [Mesh]
@@ -32,17 +37,19 @@
     ymax = 5
     elem_type = QUAD4
   []
-  [left_bottom]
-    type = ExtraNodesetGenerator
-    new_boundary = 'left_bottom'
-    coord = '0 0'
+  [bottom]
+    type = SubdomainBoundingBoxGenerator
     input = generated_mesh
+    block_id = 0
+    bottom_left = '0 0 0'
+    top_right = '5 2.5 0'
   []
-  [left_top]
-    type = ExtraNodesetGenerator
-    new_boundary = 'left_top'
-    coord = '0 5'
-    input = left_bottom
+  [top]
+    type = SubdomainBoundingBoxGenerator
+    input = bottom
+    block_id = 1
+    bottom_left = '0 2.5 0'
+    top_right = '5 5 0'
   []
 []
 
@@ -63,27 +70,15 @@
 [AuxVariables]
   [ls]
   []
-  [a_strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
   []
-  [a_strain_yy]
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
   []
-  [a_strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [b_strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [b_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [b_strain_xy]
+  [strain_xy]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -99,7 +94,6 @@
     order = CONSTANT
     family = MONOMIAL
   []
-
 []
 
 [AuxKernels]
@@ -108,45 +102,24 @@
     variable = ls
     function = ls_func
   []
-  [a_strain_xx]
+  [strain_xx]
     type = RankTwoAux
-    variable = a_strain_xx
-    rank_two_tensor = A_total_strain
+    variable = strain_xx
+    rank_two_tensor = total_strain
     index_i = 0
     index_j = 0
   []
-  [a_strain_yy]
+  [strain_yy]
     type = RankTwoAux
-    variable = a_strain_yy
-    rank_two_tensor = A_total_strain
+    variable = strain_yy
+    rank_two_tensor = total_strain
     index_i = 1
     index_j = 1
   []
-  [a_strain_xy]
+  [strain_xy]
     type = RankTwoAux
-    variable = a_strain_xy
-    rank_two_tensor = A_total_strain
-    index_i = 0
-    index_j = 1
-  []
-  [b_strain_xx]
-    type = RankTwoAux
-    variable = b_strain_xx
-    rank_two_tensor = B_total_strain
-    index_i = 0
-    index_j = 0
-  []
-  [b_strain_yy]
-    type = RankTwoAux
-    variable = b_strain_yy
-    rank_two_tensor = B_total_strain
-    index_i = 1
-    index_j = 1
-  []
-  [b_strain_xy]
-    type = RankTwoAux
-    variable = b_strain_xy
-    rank_two_tensor = B_total_strain
+    variable = strain_xy
+    rank_two_tensor = total_strain
     index_i = 0
     index_j = 1
   []
@@ -235,45 +208,31 @@
 [Materials]
   [elasticity_tensor_A]
     type = ComputeIsotropicElasticityTensor
-    base_name = A
+    block = 1
     youngs_modulus = 1e9
     poissons_ratio = 0.3
   []
   [strain_A]
     type = ComputeFiniteStrain
-    base_name = A
+    block = 1
   []
   [stress_A]
     type = ComputeFiniteStrainElasticStress
-    base_name = A
+    block = 1
   []
   [elasticity_tensor_B]
     type = ComputeIsotropicElasticityTensor
-    base_name = B
+    block = 0
     youngs_modulus = 1e7
     poissons_ratio = 0.3
   []
   [strain_B]
     type = ComputeFiniteStrain
-    base_name = B
+    block = 0
   []
   [stress_B]
     type = ComputeFiniteStrainElasticStress
-    base_name = B
-  []
-  [combined_stress]
-    type = LevelSetBiMaterialRankTwo
-    levelset_positive_base = 'A'
-    levelset_negative_base = 'B'
-    level_set_var = ls
-    prop_name = stress
-  []
-  [combined_jacob_mult]
-    type = LevelSetBiMaterialRankFour
-    levelset_positive_base = 'A'
-    levelset_negative_base = 'B'
-    level_set_var = ls
-    prop_name = Jacobian_mult
+    block = 0
   []
 []
 

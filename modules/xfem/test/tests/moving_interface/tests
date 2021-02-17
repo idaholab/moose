@@ -85,10 +85,12 @@
     design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md'
     issues = '#15437'
   []
-  [moving_bimaterials_finite_strain]
+  [moving_bimaterial_finite_strain]
     type = Exodiff
     input = moving_bimaterial_finite_strain.i
-    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002'
+    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002 '
+              'moving_bimaterial_finite_strain_out.e-s003 moving_bimaterial_finite_strain_out.e-s004 '
+              'moving_bimaterial_finite_strain_out.e-s005'
     map = false
     unique_id = true
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
@@ -98,18 +100,19 @@
              'XFEMSingleVariableConstraint.md'
     issues = '#15817'
   []
-  [moving_ad_bimaterials_finite_strain]
+  [moving_bimaterial_finite_strain_esm]
     type = Exodiff
-    input = moving_ad_bimaterial_finite_strain.i
-    exodiff = 'moving_bimaterial_finite_strain_out.e moving_bimaterial_finite_strain_out.e-s002'
+    input = moving_bimaterial_finite_strain_esm.i
+    exodiff = 'moving_bimaterial_finite_strain_esm_out.e '
+              'moving_bimaterial_finite_strain_esm_out.e-s002 '
+              'moving_bimaterial_finite_strain_esm_out.e-s003 '
+              'moving_bimaterial_finite_strain_esm_out.e-s004 '
+              'moving_bimaterial_finite_strain_esm_out.e-s005'
     map = false
     unique_id = true
-    prereq = moving_bimaterials_finite_strain
-    requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems '
-                  'at finite strain where a moving material interface is defined by an XFEM surface, '
-                  'which is defined by a prescribed level set field, while using the automatic '
-                  'differentiation capability.'
-    design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md'
+    requirement = 'The XFEM module shall provide an ability to modify subdomain IDs based on an XFEM '
+                  'interface.'
+    design = 'GeometricCutElementSubdomainModifier.md'
     issues = '#15817'
   []
   [moving_diffusion]

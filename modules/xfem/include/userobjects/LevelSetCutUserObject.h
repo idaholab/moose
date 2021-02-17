@@ -43,7 +43,7 @@ public:
    * @param node Pointer to the node
    * @return an unsigned int indicating the side
    */
-  virtual GeometricCutSubdomainID getCutSubdomainID(const Node * node) const override;
+  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * node) const override;
 
 protected:
   /// The variable number of the level set variable we using to define the cuts

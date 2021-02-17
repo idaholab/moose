@@ -12,9 +12,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "XFEM.h"
-//#include "XFEMParallel.h"
 #include "DataIO.h"
-#include "XFEMAppTypes.h"
 #include "EFAElement2D.h"
 #include "EFAElement3D.h"
 #include "XFEMElementPairLocator.h"
@@ -30,7 +28,6 @@ GeometricCutUserObject::validParams()
   exec.addAvailableFlags(EXEC_XFEM_MARK);
   params.setDocString("execute_on", exec.getDocString());
   params.set<ExecFlagEnum>("execute_on") = EXEC_XFEM_MARK;
-  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   return params;
 }
@@ -281,4 +278,10 @@ GeometricCutUserObject::finalize()
 
   _marked_elems_2d.clear();
   _marked_elems_3d.clear();
+}
+
+GeometricCutSubdomainID
+GeometricCutUserObject::getGeometricCutSubdomainID(const Elem * elem) const
+{
+  return _xfem->getGeometricCutSubdomainID(this, elem);
 }

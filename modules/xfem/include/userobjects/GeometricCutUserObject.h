@@ -185,17 +185,24 @@ public:
 
   /**
    * Get an unsigned integer telling which side the node belongs to relative to the cut.
-   * The returned ID contains no physical meaning, but should be consistent through out the
+   * The returned ID contains no physical meaning, but should be consistent throughout the
    * simulation.
-   * @param node Pointer to the node
-   * @return an unsigned int indicating the side
+   * @param node   Pointer to the node
+   * @return       An unsigned int indicating the side
    */
-  virtual GeometricCutSubdomainID getCutSubdomainID(const Node * /*node*/) const
+  virtual GeometricCutSubdomainID getGeometricCutSubdomainID(const Node * /*node*/) const
   {
     mooseError("Objects that inherit from GeometricCutUserObject should override the "
-               "getCutSideID method");
+               "getGeometricCutSubdomainID method");
     return 0;
   }
+
+  /**
+   * Get the GeometricCutSubdomainID for the given element.
+   * @param node   Pointer to the element
+   * @return       The GeometricCutSubdomainID
+   */
+  GeometricCutSubdomainID getGeometricCutSubdomainID(const Elem * elem) const;
 
 protected:
   /// Pointer to the XFEM controller object

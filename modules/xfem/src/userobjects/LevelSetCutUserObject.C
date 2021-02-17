@@ -22,9 +22,11 @@ LevelSetCutUserObject::validParams()
       "level_set_var", "The name of level set variable used to represent the interface");
   params.addClassDescription("XFEM mesh cut by level set function");
   params.addParam<GeometricCutSubdomainID>(
-      "negative_id", 0, "The ID assigned to the elements with non-positive levelset values");
+      "negative_id",
+      0,
+      "The GeometricCutSubdomainID corresponding to a non-positive signed distance");
   params.addParam<GeometricCutSubdomainID>(
-      "positive_id", 1, "The ID assigned to the elements with positive levelset values");
+      "positive_id", 1, "The GeometricCutSubdomainID corresponding to a positive signed distance");
   return params;
 }
 
@@ -175,7 +177,7 @@ LevelSetCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points
 }
 
 GeometricCutSubdomainID
-LevelSetCutUserObject::getCutSubdomainID(const Node * node) const
+LevelSetCutUserObject::getGeometricCutSubdomainID(const Node * node) const
 {
   dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
   return _solution(ls_dof_id) > 0.0 ? _positive_id : _negative_id;
