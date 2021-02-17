@@ -39,6 +39,9 @@ velocity_interp_method='rc'
   [pressure]
     type = INSFVPressureVariable
   []
+  [scalar]
+    type = INSFVScalarFieldVariable
+  []
 []
 
 [AuxVariables]
@@ -130,6 +133,31 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     p = pressure
   []
+
+  [scalar_advection]
+    type = INSFVScalarFieldAdvection
+    variable = scalar
+    vel = 'velocity'
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
+  []
+  [scalar_diffusion_rans]
+    type = INSFVMixingLengthScalarDiffusion
+    variable = scalar
+    mixing_length = mixing_len
+    u = u
+    v = v
+  []
+  [scalar_src]
+    type = FVBodyForce
+    variable = scalar
+    value = 0.1
+  []
 []
 
 [AuxKernels]
@@ -172,6 +200,12 @@ velocity_interp_method='rc'
     boundary = 'right'
     variable = pressure
     function = '0'
+  []
+  [inlet_scalar]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = scalar
+    value = 1
   []
 []
 
