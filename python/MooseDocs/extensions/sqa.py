@@ -787,8 +787,8 @@ class RenderSQARequirementDesign(autolink.RenderLinkBase):
 
 class RenderSQARequirementIssues(components.RenderComponent):
 
-    ISSUE_RE = re.compile(r"(?P<key>\w+)?#(?P<issues>[0-9]+)")
-    COMMIT_RE = re.compile(r"(?:(?P<key>\w+):)?(?P<commit>[0-9a-f]{10,40})")
+    ISSUE_RE = re.compile(r"(?P<key>.+)?#(?P<issues>[0-9]+)")
+    COMMIT_RE = re.compile(r"(?:(?P<key>.+):)?(?P<commit>[0-9a-f]{10,40})")
 
     def __urlHelper(self, regex, name, issue, token):
         """Function for creating issue/commit links."""
