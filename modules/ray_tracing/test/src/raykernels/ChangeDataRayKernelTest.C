@@ -28,7 +28,7 @@ ChangeDataRayKernelTest::ChangeDataRayKernelTest(const InputParameters & params)
     _scale_value(getParam<Real>("scale_value"))
 {
   if (params.isParamSetByUser("add_value") && params.isParamSetByUser("scale_value"))
-    mooseError(_error_prefix, ": Cannot add and scale value");
+    mooseError("Cannot add and scale value");
 }
 
 void

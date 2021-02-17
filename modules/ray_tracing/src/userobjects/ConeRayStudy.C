@@ -94,7 +94,7 @@ ConeRayStudy::ConeRayStudy(const InputParameters & parameters)
       paramError("azimuthal_quad_orders", "Must be positive.");
 
   if (_mesh.dimension() == 1)
-    mooseError(_error_prefix, ": Does not support 1D.");
+    mooseError("Does not support 1D.");
 }
 
 void

@@ -170,7 +170,6 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 
     _called_initial_setup(false),
     _need_to_associate_registered_rays(false),
-    _verify_ray_error_prefix("While moving Ray to buffer in " + _error_prefix),
 
     _elem_index_helper(_mesh.getMesh(), name() + "_elem_index")
 {
@@ -197,9 +196,8 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
                  "mix RayKernels that contribute to the Jacobian/residual with those that do not.");
 
     if (_app.useEigenvalue())
-      mooseError(_error_prefix,
-                 ": Execution on residual and Jacobian evaluation\n",
-                 "(execute_on = PRE_KERNELS) is not supported for an eigenvalue solve.");
+      mooseError("Execution on residual and Jacobian evaluation (execute_on = PRE_KERNELS)\n",
+                 "is not supported for an eigenvalue solve.");
   }
 
   resetUniqueRayIDs();
@@ -245,8 +243,7 @@ RayTracingStudy::initialSetup()
   getRayKernels(ray_kernels, 0);
   for (const auto & rkb : ray_kernels)
     if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.contains(EXEC_PRE_KERNELS))
-      mooseError(_error_prefix,
-                 ": Has RayKernel objects that contribute to residuals and Jacobians.",
+      mooseError("Has RayKernel objects that contribute to residuals and Jacobians.",
                  "\nIn this case, the study should use the execute_on = PRE_KERNELS");
 
   // Build 1D quadrature rule for along a segment
@@ -324,7 +321,7 @@ RayTracingStudy::coverageChecks()
     if (!missing.empty() && !ray_kernel_blocks.count(Moose::ANY_BLOCK_ID))
     {
       std::ostringstream error;
-      error << _error_prefix << ": Subdomains { ";
+      error << "Subdomains { ";
       std::copy(missing.begin(), missing.end(), std::ostream_iterator<SubdomainID>(error, " "));
       error << "} do not have RayKernels defined!";
 
@@ -360,16 +357,7 @@ RayTracingStudy::verifyDependenciesExist(const std::vector<RayTracingObject *> &
         }
 
       if (!found)
-      {
-        const auto object_type = rto->parameters().get<std::string>("_moose_warehouse_system_name");
-
-        mooseError(rto->errorPrefix(),
-                   " depends on ",
-                   object_type,
-                   " '",
-                   dep_name,
-                   "' but such an object does not exist");
-      }
+        rto->paramError("depends_on", "The object '", dep_name, "' does not exist");
     }
 }
 
@@ -382,14 +370,12 @@ RayTracingStudy::traceableMeshChecks()
     if (_fe_problem.adaptivity().isOn())
     {
       if (!TraceRayTools::isAdaptivityTraceableElem(elem))
-        mooseError(_error_prefix,
-                   ": Element type ",
+        mooseError("Element type ",
                    Utility::enum_to_string(elem->type()),
                    " is not supported in ray tracing with adaptivity");
     }
     else if (!TraceRayTools::isTraceableElem(elem))
-      mooseError(_error_prefix,
-                 ": Element type ",
+      mooseError("Element type ",
                  Utility::enum_to_string(elem->type()),
                  " is not supported in ray tracing");
   }
@@ -434,8 +420,7 @@ RayTracingStudy::internalSidesetSetup()
       continue;
 
     if (neighbor->subdomain_id() == elem->subdomain_id())
-      mooseError(_error_prefix,
-                 ":\n\nRayBCs exist on internal sidesets that are not bounded by a different",
+      mooseError("RayBCs exist on internal sidesets that are not bounded by a different",
                  "\nsubdomain on each side.",
                  "\n\nIn order to use RayBCs on internal sidesets, said sidesets must have",
                  "\na different subdomain on each side.");
@@ -456,8 +441,7 @@ RayTracingStudy::internalSidesetSetup()
   }
 
   if (!_use_internal_sidesets && _internal_sidesets.size())
-    mooseError(_error_prefix,
-               ":\n\n RayBCs are defined on internal sidesets, but the study is not set to use ",
+    mooseError("RayBCs are defined on internal sidesets, but the study is not set to use ",
                "internal sidesets during tracing.",
                "\n\nSet the parameter use_internal_sidesets = true to enable this capability.");
 }
@@ -495,8 +479,7 @@ RayTracingStudy::nonPlanarSideSetup()
 
         if (!warned)
         {
-          mooseWarning(_error_prefix,
-                       ": The mesh contains non-planar faces.\n\n",
+          mooseWarning("The mesh contains non-planar faces.\n\n",
                        "Ray tracing on non-planar faces is an approximation and may fail.\n\n",
                        "Use at your own risk! You can disable this warning by setting the\n",
                        "parameter 'warn_non_planar' to false.");
@@ -582,23 +565,15 @@ RayTracingStudy::associateRegisteredRays()
 
     // Ray names but we don't need them
     if (!ray_names.empty() && !_use_ray_registration)
-      mooseError(_error_prefix,
-                 ": ",
-                 rto->errorPrefix(),
-                 " has supplied the Rays that it is associated with, but the study does not "
-                 "require Ray registration");
+      rto->paramError("rays",
+                      "Rays cannot be supplied when the study does not require Ray registration");
 
     // Register each Ray for this object in the registration
     for (const auto & ray_name : (ray_names.empty() ? all_ray_names : ray_names))
     {
       const auto id = registeredRayID(ray_name, /* graceful = */ true);
       if (id == DofObject::invalid_id)
-        mooseError(_error_prefix,
-                   ": The Ray '",
-                   ray_name,
-                   "' requested by ",
-                   rto->errorPrefix(),
-                   " is not a registered Ray");
+        rto->paramError("rays", "Supplied ray '", ray_name, "' is not a registered Ray");
       registration[id].insert(rto);
     }
   }
@@ -969,8 +944,7 @@ RayTracingStudy::registerRayDataInternal(const std::string & name, const bool au
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (_called_initial_setup)
-    mooseError(
-        _error_prefix, ": Cannot register Ray ", (aux ? "aux" : ""), " data after initialSetup()");
+    mooseError("Cannot register Ray ", (aux ? "aux" : ""), " data after initialSetup()");
 
   auto & map = aux ? _ray_aux_data_map : _ray_data_map;
   const auto find = map.find(name);
@@ -979,8 +953,7 @@ RayTracingStudy::registerRayDataInternal(const std::string & name, const bool au
 
   auto & other_map = aux ? _ray_data_map : _ray_aux_data_map;
   if (other_map.find(name) != other_map.end())
-    mooseError(_error_prefix,
-               ": Cannot register Ray aux data with name ",
+    mooseError("Cannot register Ray aux data with name ",
                name,
                " because Ray ",
                (aux ? "(non-aux)" : "aux"),
@@ -1022,8 +995,7 @@ RayTracingStudy::getRayDataIndexInternal(const std::string & name,
 
   const auto & other_map = aux ? _ray_data_map : _ray_aux_data_map;
   if (other_map.find(name) != other_map.end())
-    mooseError(_error_prefix,
-               ": Ray data with name '",
+    mooseError("Ray data with name '",
                name,
                "' was not found.\n\n",
                "However, Ray ",
@@ -1034,7 +1006,7 @@ RayTracingStudy::getRayDataIndexInternal(const std::string & name,
                     : "getRayAuxDataIndex()/getRayAuxDataIndices()"),
                "?");
 
-  mooseError(_error_prefix, ": Unknown Ray ", (aux ? "aux" : ""), " data with name ", name);
+  mooseError("Unknown Ray ", (aux ? "aux" : ""), " data with name ", name);
 }
 
 std::vector<RayDataIndex>
@@ -1056,10 +1028,10 @@ RayTracingStudy::getRayDataNameInternal(const RayDataIndex index, const bool aux
   if (aux)
   {
     if (rayAuxDataSize() < index)
-      mooseError(_error_prefix, ": Unknown Ray aux data with index ", index);
+      mooseError("Unknown Ray aux data with index ", index);
   }
   else if (rayDataSize() < index)
-    mooseError(_error_prefix, ": Unknown Ray data with index ", index);
+    mooseError("Unknown Ray data with index ", index);
 
   return aux ? _ray_aux_data_names[index] : _ray_data_names[index];
 }
@@ -1143,7 +1115,7 @@ RayTracingStudy::getRayKernels(std::vector<RayKernelBase *> & result, SubdomainI
   if (!_threaded_cache_ray_kernel[tid].numAttribs())
   {
     if (!_called_initial_setup)
-      mooseError(_error_prefix, "Should not call getRayKernels() before initialSetup()");
+      mooseError("Should not call getRayKernels() before initialSetup()");
 
     auto query = _fe_problem.theWarehouse()
                      .query()
@@ -1195,7 +1167,7 @@ RayTracingStudy::getRayBCs(std::vector<RayBoundaryConditionBase *> & result,
   if (!_threaded_cache_ray_bc[tid].numAttribs())
   {
     if (!_called_initial_setup)
-      mooseError(_error_prefix, "Should not call getRayBCs() before initialSetup()");
+      mooseError("Should not call getRayBCs() before initialSetup()");
 
     auto query = _fe_problem.theWarehouse()
                      .query()
@@ -1266,11 +1238,10 @@ const std::vector<std::shared_ptr<Ray>> &
 RayTracingStudy::rayBank() const
 {
   if (!_bank_rays_on_completion)
-    mooseError(_error_prefix,
-               ": The Ray bank is not available because\n",
-               "the private parameter '_bank_rays_on_completion' is set to false.");
+    mooseError("The Ray bank is not available because the private parameter "
+               "'_bank_rays_on_completion' is set to false.");
   if (currentlyGenerating() || currentlyPropagating())
-    mooseError(_error_prefix, ": Cannot get the Ray bank during generation or propagation.");
+    mooseError("Cannot get the Ray bank during generation or propagation.");
 
   return _ray_bank;
 }
@@ -1279,9 +1250,9 @@ std::shared_ptr<Ray>
 RayTracingStudy::getBankedRay(const RayID ray_id) const
 {
   if (!_bank_rays_on_completion)
-    mooseError(_error_prefix, ": Cannot get a banked Ray with _bank_rays_on_completion = false.");
+    mooseError("Cannot get a banked Ray with _bank_rays_on_completion = false.");
   if (currentlyGenerating() || currentlyPropagating())
-    mooseError(_error_prefix, ": Cannot get the Ray bank during generation or propagation.");
+    mooseError("Cannot get the Ray bank during generation or propagation.");
 
   // This is only a linear search - can be improved on with a map in the future
   // if this is used on a larger scale
@@ -1297,10 +1268,9 @@ RayTracingStudy::getBankedRay(const RayID ray_id) const
   unsigned int have_ray = ray ? 1 : 0;
   _communicator.sum(have_ray);
   if (have_ray == 0)
-    mooseError(_error_prefix, ": Could not find a Ray with the ID ", ray_id, " in the Ray banks.");
+    mooseError("Could not find a Ray with the ID ", ray_id, " in the Ray banks.");
   else if (have_ray > 1)
-    mooseError(
-        _error_prefix, ": Multiple Rays with the ID ", ray_id, " were found in the Ray banks.");
+    mooseError("Multiple Rays with the ID ", ray_id, " were found in the Ray banks.");
 
   return ray;
 }
@@ -1311,8 +1281,7 @@ RayTracingStudy::getBankedRayDataInternal(const RayID ray_id,
                                           const bool aux) const
 {
   if (index >= (aux ? rayAuxDataSize() : rayDataSize()))
-    mooseError(_error_prefix,
-               ": While getting a banked Ray ",
+    mooseError("While getting a banked Ray ",
                (aux ? "aux" : " "),
                " data, the index ",
                index,
@@ -1347,7 +1316,7 @@ RayTracingStudy::registerRay(const std::string & name)
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError(_error_prefix, ": Cannot use registerRay() with Ray registration diabled");
+    mooseError("Cannot use registerRay() with Ray registration diabled");
 
   // This is parallel only for now. We could likely stagger the ID building like we do with
   // the unique IDs, but it would require a sync point which isn't there right now
@@ -1373,7 +1342,7 @@ RayTracingStudy::registeredRayID(const std::string & name, const bool graceful /
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError(_error_prefix, ": Should not use registeredRayID() with Ray registration diabled");
+    mooseError("Should not use registeredRayID() with Ray registration diabled");
 
   const auto search = _registered_ray_map.find(name);
   if (search != _registered_ray_map.end())
@@ -1382,8 +1351,7 @@ RayTracingStudy::registeredRayID(const std::string & name, const bool graceful /
   if (graceful)
     return Ray::INVALID_RAY_ID;
 
-  mooseError(_error_prefix,
-             ": Attempted to obtain ID of registered Ray ",
+  mooseError("Attempted to obtain ID of registered Ray ",
              name,
              ", but a Ray with said name is not registered.");
 }
@@ -1394,14 +1362,13 @@ RayTracingStudy::registeredRayName(const RayID ray_id) const
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError(_error_prefix, ": Should not use registeredRayName() with Ray registration diabled");
+    mooseError("Should not use registeredRayName() with Ray registration diabled");
 
   const auto search = _reverse_registered_ray_map.find(ray_id);
   if (search != _reverse_registered_ray_map.end())
     return search->second;
 
-  mooseError(_error_prefix,
-             ": Attempted to obtain name of registered Ray with ID ",
+  mooseError("Attempted to obtain name of registered Ray with ID ",
              ray_id,
              ", but a Ray with said ID is not registered.");
 }
@@ -1458,8 +1425,7 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
     {
       for (const std::shared_ptr<Ray> & other_ray : as_range(begin, end))
         if (ray.get() != other_ray.get() && ray->id() == other_ray->id())
-          mooseError(_error_prefix,
-                     ":\nMultiple Rays exist with ID ",
+          mooseError("Multiple Rays exist with ID ",
                      ray->id(),
                      " on processor ",
                      _pid,
@@ -1470,8 +1436,7 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
                      "\n",
                      other_ray->getInfo());
 
-      mooseError(_error_prefix,
-                 "Duplicated shared pointers to the same local Ray were found ",
+      mooseError("Duplicated shared pointers to the same local Ray were found ",
                  error_suffix,
                  "\n\n",
                  ray->getInfo());
@@ -1500,8 +1465,7 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
 
         // Means that this ID already exists in the map
         if (!emplace_pair.second)
-          mooseError(_error_prefix,
-                     ": Ray with ID ",
+          mooseError("Ray with ID ",
                      id,
                      " exists on ranks ",
                      emplace_pair.first->second,
@@ -1524,8 +1488,7 @@ RayTracingStudy::verifyUniqueRays(const std::vector<std::shared_ptr<Ray>>::const
   std::set<const Ray *> rays;
   for (const std::shared_ptr<Ray> & ray : as_range(begin, end))
     if (!rays.insert(ray.get()).second) // false if not inserted into rays
-      mooseError(_error_prefix,
-                 ":\nMultiple shared_ptrs were found that point to the same Ray ",
+      mooseError("Multiple shared_ptrs were found that point to the same Ray ",
                  error_suffix,
                  "\n\nOffending Ray:\n",
                  ray->getInfo());
@@ -1571,7 +1534,7 @@ void
 RayTracingStudy::reserveRayBuffer(const std::size_t size)
 {
   if (!currentlyGenerating())
-    mooseError(_error_prefix, ": Can only reserve in Ray buffer during generateRays()");
+    mooseError("Can only reserve in Ray buffer during generateRays()");
 
   _parallel_ray_study->reserveBuffer(size);
 }
@@ -1623,7 +1586,7 @@ RayTracingStudy::subdomainHmax(const SubdomainID subdomain_id) const
 {
   const auto find = _subdomain_hmax.find(subdomain_id);
   if (find == _subdomain_hmax.end())
-    mooseError(_error_prefix, ": Subdomain ", subdomain_id, " not found in subdomain hmax map");
+    mooseError("Subdomain ", subdomain_id, " not found in subdomain hmax map");
   return find->second;
 }
 

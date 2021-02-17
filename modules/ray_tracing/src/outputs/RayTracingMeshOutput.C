@@ -113,12 +113,7 @@ RayTracingMeshOutput::output(const ExecFlagType & type)
   auto num_segments = _study.getCachedTraces().size();
   _communicator.sum(num_segments);
   if (!num_segments)
-    mooseWarning(this->type(),
-                 " '",
-                 name(),
-                 "': No cached trace segments were found in ",
-                 _study.errorPrefix(),
-                 ".");
+    mooseError("No cached trace segments were found in the study '", _study.name(), "'.");
 
   // Build the _inflated_neighbor_bboxes
   buildBoundingBoxes();

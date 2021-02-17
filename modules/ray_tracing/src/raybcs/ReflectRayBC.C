@@ -28,8 +28,7 @@ void
 ReflectRayBC::onBoundary(const unsigned int num_applying)
 {
   if (_study.warnNonPlanar() && _study.sideIsNonPlanar(_current_elem, _current_intersected_side))
-    mooseWarning(_error_prefix,
-                 ": A Ray is being reflected on a non-planar side.\n\n",
+    mooseWarning("A Ray is being reflected on a non-planar side.\n\n",
                  "Ray tracing on elements with non-planar faces is an approximation.\n\n",
                  "The normal used to compute the reflected direction is computed at\n",
                  "the side centroid and may not be valid for a non-planar side.\n\n",

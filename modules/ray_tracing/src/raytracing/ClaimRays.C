@@ -247,16 +247,14 @@ ClaimRays::verifyClaiming()
           emplace_pair.first->second = true;
         // Otherwise, it is being doubly generated/claimed
         else
-          mooseError("ClaimRays for ",
-                     _study.errorPrefix(),
-                     ": Ray with ID ",
-                     id,
-                     " was ",
-                     claimed_rays ? "claimed" : "generated",
-                     " multiple times on pid ",
-                     _pid,
-                     "\n\n",
-                     ray->getInfo());
+          _study.mooseError("Ray with ID ",
+                            id,
+                            " was ",
+                            claimed_rays ? "claimed" : "generated",
+                            " multiple times on pid ",
+                            _pid,
+                            "\n\n",
+                            ray->getInfo());
       }
     }
   };
