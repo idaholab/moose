@@ -7,5 +7,6 @@
     requirement = 'The system shall be able to output detailed mesh information about generated meshes.'
     issues = '#16783'
     recover = false
+    mesh_mode = REPLICATED
   []
 []
