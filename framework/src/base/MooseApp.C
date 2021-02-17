@@ -1741,7 +1741,7 @@ MooseApp::executeMeshGenerators()
     {
       auto name = generator->name();
 
-      auto current_mesh = generator->generate();
+      auto current_mesh = generator->generateInternal();
 
       // Now we need to possibly give this mesh to downstream generators
       auto & outputs = _mesh_generator_outputs[name];
