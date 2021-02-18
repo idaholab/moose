@@ -7,8 +7,9 @@ InputParameters
 validParams<PotentialToFieldAux>()
 {
   InputParameters params = validParams<VariableGradientComponent>();
-  params.addClassDescription("");
-  MooseEnum sign("positive=1 negative=-1");
+  params.addClassDescription("An AuxKernel that calculates the electrostatic electric field given "
+                             "the electrostatic potential.");
+  MooseEnum sign("positive=1 negative=-1", "negative");
   params.addParam<MooseEnum>("sign", sign, "Sign of potential gradient.");
   return params;
 }

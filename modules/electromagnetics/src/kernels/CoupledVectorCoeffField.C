@@ -8,6 +8,9 @@ InputParameters
 validParams<CoupledVectorCoeffField>()
 {
   InputParameters params = validParams<VectorKernel>();
+  params.addClassDescription(
+      "Kernel representing the contribution of the PDE term $cfv$, where $c$ and $f$ are constant "
+      "and function coefficients, respectively, and $v$ is a coupled vector variable.");
   params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
   params.addRequiredCoupledVar("coupled", "Coupled variable.");

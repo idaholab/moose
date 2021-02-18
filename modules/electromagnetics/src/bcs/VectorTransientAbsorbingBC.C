@@ -11,7 +11,7 @@ validParams<VectorTransientAbsorbingBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
   params.addClassDescription("First order transient Absorbing BC from 'Theory and Computation of "
-                             "Electromagnetic Fields' by JM Jin.");
+                             "Electromagnetic Fields' by JM Jin for vector variables.");
   params.addParam<FunctionName>("admittance",
                                 "1/(4*pi*1e-7*3e8)",
                                 "Intrinsic admittance of the infinite medium (default is "

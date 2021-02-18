@@ -7,6 +7,9 @@ InputParameters
 validParams<DielectricBC>()
 {
   InputParameters params = validParams<DiffusionFluxBC>();
+  params.addClassDescription(
+      "A first attempt at defining an electric field condition on a dielectric surface, following "
+      "Maxwell's Equations and Griffith's 'Introduction to Electrodynamics'");
   params.addParam<Real>("epsR_one", 1.0, "Relative Permittivity for computational region");
   params.addParam<Real>("epsR_two", 1.0, "Relative Permittivity for region beyond boundary");
   return params;

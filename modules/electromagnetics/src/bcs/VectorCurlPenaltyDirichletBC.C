@@ -12,6 +12,8 @@ InputParameters
 validParams<VectorCurlPenaltyDirichletBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
+  params.addClassDescription("Dirichlet boundary condition using a penalty method to set the value "
+                             "of a vector variable on a boundary.");
   params.addRequiredParam<Real>("penalty", "The penalty coefficient.");
   params.addParam<FunctionName>("x_exact_soln", 0, "The exact solution for the x component.");
   params.addParam<FunctionName>("y_exact_soln", 0, "The exact solution for the y component.");
