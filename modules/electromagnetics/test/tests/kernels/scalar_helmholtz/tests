@@ -1,0 +1,17 @@
+[Tests]
+  [./coupled_diffusion]
+    type = 'Exodiff'
+    input = 'coupled_diffusion_helmholtz.i'
+    exodiff = 'coupled_diffusion_helmholtz_out.e'
+  [../]
+  [./coupled_field]
+    type = 'Exodiff'
+    input = 'coupled_field_helmholtz.i'
+    exodiff = 'coupled_field_helmholtz_out.e'
+  [../]
+  [./varying_constant]
+    type = 'Exodiff'
+    input = 'varying_constant_helmholtz.i'
+    exodiff = 'varying_constant_helmholtz_out.e'
+  [../]
+[]
