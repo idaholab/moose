@@ -23,7 +23,7 @@
 
   [./block_deleter]
     type = BlockDeletionGenerator
-    block_id = 2
+    block = 2
     input = add_iss_1
   [../]
 []

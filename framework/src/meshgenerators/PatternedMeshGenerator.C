@@ -70,13 +70,21 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
                        " is larger than the the maximum possible index, which is determined by the "
                        "number of MeshGenerators provided in inputs");
 
+  _mesh_ptrs.reserve(_input_names.size());
+  for (auto & input_name : _input_names)
+    _mesh_ptrs.push_back(&getMeshByName(input_name));
+}
+
+std::unique_ptr<MeshBase>
+PatternedMeshGenerator::generate()
+{
   // Reserve spaces for all the meshes
   _meshes.reserve(_input_names.size());
 
   // Read in all of the meshes
   for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
   {
-    std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(getMeshByName(_input_names[i]));
+    std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
     if (!mesh)
       paramError("inputs",
                  "The input mesh '",
@@ -87,11 +95,7 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
                  "Try running without distributed mesh.");
     _meshes.push_back(std::move(mesh));
   }
-}
 
-std::unique_ptr<MeshBase>
-PatternedMeshGenerator::generate()
-{
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
 

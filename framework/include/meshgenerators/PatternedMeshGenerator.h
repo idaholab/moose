@@ -44,7 +44,10 @@ protected:
   /// The pattern, starting with the upper left corner
   const std::vector<std::vector<unsigned int>> & _pattern;
 
-  /// Holds the pointers to the meshes
+  /// Holds pointers to the meshes before they are generated
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+
+  /// Holds the pointers to the input generated meshes
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 
   /// Holds a mesh for each row, these will be stitched together in the end

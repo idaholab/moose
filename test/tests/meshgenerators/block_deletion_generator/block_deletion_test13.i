@@ -10,17 +10,25 @@
     ymax = 4
   []
 
-  [./SubdomainBoundingBox1]
+  [./SubdomainBoundingBox]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
     bottom_left = '0 0 0'
-    top_right = '3 4 1'
+    top_right = '3 3 3'
   [../]
+
+  [rename]
+    type = RenameBlockGenerator
+    input = SubdomainBoundingBox
+    old_block_id = 1
+    new_block_name = 'my_name'
+  []
+
   [./ed0]
     type = BlockDeletionGenerator
-    block = 1
-    input = 'SubdomainBoundingBox1'
+    input = rename
+    block = 'my_name'
   [../]
 []
 
