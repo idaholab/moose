@@ -10,7 +10,8 @@ InputParameters
 validParams<AbsorbingBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-
+  params.addClassDescription("First order Absorbing BC based on 'Theory and Computation of "
+                             "Electromagnetic Fields' by JM Jin for scalar variables.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");
   params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
   MooseEnum component("real imaginary");

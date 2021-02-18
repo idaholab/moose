@@ -11,7 +11,7 @@ validParams<VectorPortBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
   params.addClassDescription("First order Absorbing/Port BC from 'Theory and Computation of "
-                             "Electromagnetic Fields' by JM Jin.");
+                             "Electromagnetic Fields' by JM Jin for vector variables.");
   params.addParam<FunctionName>(
       "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
   MooseEnum component("real imaginary");

@@ -10,7 +10,8 @@ InputParameters
 validParams<PortBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-
+  params.addClassDescription("First order Absorbing/Port BC based on 'Theory and Computation of "
+                             "Electromagnetic Fields' by JM Jin for scalar variables.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");
   params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
   MooseEnum component("real imaginary");
@@ -48,9 +49,9 @@ PortBC::computeQpResidual()
 
   std::complex<double> field(_field_real[_qp], _field_imag[_qp]);
   std::complex<double> func(_func_real.value(_t, _q_point[_qp]),
-                             _func_imag.value(_t, _q_point[_qp]));
+                            _func_imag.value(_t, _q_point[_qp]));
   std::complex<double> profile_func(_profile_func_real.value(_t, _q_point[_qp]),
-                                     _profile_func_imag.value(_t, _q_point[_qp]));
+                                    _profile_func_imag.value(_t, _q_point[_qp]));
   std::complex<double> coeff(_coeff_real, _coeff_imag);
   std::complex<double> jay(0, 1);
 

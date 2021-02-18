@@ -6,7 +6,8 @@ InputParameters
 ElectricalContactTestFunc::validParams()
 {
   InputParameters params = Function::validParams();
-  params.addClassDescription("");
+  params.addClassDescription(
+      "Function used in ElectrostaticContactCondition analytic solution testing.");
   params.addParam<Real>("mechanical_pressure",
                         3000.,
                         "Mechanical pressure uniformly applied at the contact surface area "

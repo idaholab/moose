@@ -8,6 +8,9 @@ InputParameters
 validParams<CoeffField>()
 {
   InputParameters params = validParams<Reaction>();
+  params.addClassDescription(
+      "Kernel representing the contribution of the PDE term $cfu$, where $c$ and $f$ are constant "
+      "and function coefficients, respectively, and $u$ is a scalar variable.");
   params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
   return params;

@@ -8,6 +8,8 @@ InputParameters
 validParams<CoupledFuncDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Represents a coupled Laplacian term with sign and function coefficients.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
   params.addParam<Real>("sign", 1.0, "Sign of Kernel, if it needs to be changed.");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
@@ -27,8 +29,7 @@ CoupledFuncDiffusion::CoupledFuncDiffusion(const InputParameters & parameters)
 Real
 CoupledFuncDiffusion::computeQpResidual()
 {
-  return _sign * _func.value(_t, _q_point[_qp]) * _grad_test[_i][_qp] *
-         _coupled_grad[_qp];
+  return _sign * _func.value(_t, _q_point[_qp]) * _grad_test[_i][_qp] * _coupled_grad[_qp];
 }
 
 Real

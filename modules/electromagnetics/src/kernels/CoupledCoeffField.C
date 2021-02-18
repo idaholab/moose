@@ -8,6 +8,9 @@ InputParameters
 validParams<CoupledCoeffField>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Kernel representing the contribution of the PDE term $cfv$, where $c$ and $f$ are constant "
+      "and function coefficients, respectively, and $v$ is a coupled scalar variable.");
   params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
@@ -40,3 +43,5 @@ CoupledCoeffField::computeQpJacobian()
 {
   return 0;
 }
+
+// TODO: missing off-diagonal Jacobian contribution!

@@ -9,6 +9,8 @@ InputParameters
 validParams<JinSlabCoeffFunc>()
 {
   InputParameters params = validParams<Function>();
+  params.addClassDescription("Function describing a wave incident on a surface at a given angle "
+                             "and wave number, for use in reflection and transmission problems.");
   params.addRequiredParam<Real>("k", "Wave Number");
   params.addRequiredParam<Real>("theta", "Wave Incidence angle, in degrees");
   MooseEnum component("real imaginary");

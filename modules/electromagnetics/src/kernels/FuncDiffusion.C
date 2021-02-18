@@ -8,6 +8,7 @@ InputParameters
 validParams<FuncDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addClassDescription("The Laplacian operator with a function coefficient.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
   return params;
 }
