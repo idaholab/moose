@@ -48,9 +48,14 @@ public:
 
   /**
    * Generate / modify the mesh
-   *
    */
   virtual std::unique_ptr<MeshBase> generate() = 0;
+
+  /**
+   * Internal generation method - this is what is actually called
+   * within MooseApp to execute the MeshGenerator.
+   */
+  std::unique_ptr<MeshBase> generateInternal();
 
   /**
    * Return the MeshGenerators that must run before this MeshGenerator

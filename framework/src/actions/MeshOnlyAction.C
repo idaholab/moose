@@ -36,7 +36,7 @@ MeshOnlyAction::act()
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
-  mesh_ptr->getMesh().print_info();
+  _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2);
 
   bool should_generate = false;
   // If no argument specified or if the argument following --mesh-only starts

@@ -2792,9 +2792,9 @@ MooseMesh::getMesh() const
 }
 
 void
-MooseMesh::printInfo(std::ostream & os) const
+MooseMesh::printInfo(std::ostream & os, const unsigned int verbosity /* = 0 */) const
 {
-  getMesh().print_info(os);
+  getMesh().print_info(os, verbosity);
 }
 
 const std::vector<dof_id_type> &
