@@ -1,6 +1,4 @@
 [Mesh]
-  type = MeshGeneratorMesh
-
   [./cartesian]
     type = CartesianMeshGenerator
     dim = 2
