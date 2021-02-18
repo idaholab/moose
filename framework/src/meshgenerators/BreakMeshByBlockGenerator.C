@@ -35,13 +35,9 @@ BreakMeshByBlockGenerator::validParams()
   params.addParam<bool>("add_transition_interface",
                         true,
                         "If true (default) and block is not empty, a special boundary named "
-                        "interface_transition is generate between listed blocks and other blocks. "
-                        "The transition boundary will not be split if split_interface=true");
-  params.addParam<bool>("split_transition_interface",
-                        false,
-                        "If true (default) and block is not empty, a special boundary named "
-                        "interface_transition is generate between listed blocks and other blocks. "
-                        "The transition boundary will not be split if split_interface=true");
+                        "interface_transition is generate between listed blocks and other blocks.");
+  params.addParam<bool>(
+      "split_transition_interface", false, "Whether to split the transition interface by blocks.");
   params.addParam<BoundaryName>(
       "interface_transition_name",
       "interface_transition",
@@ -65,7 +61,7 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
 
   if (!_add_transition_interface && _split_transition_interface)
     paramError("split_transition_interface",
-               "BreakMeshByBlockGenerator cannot split the transition interface becasue "
+               "BreakMeshByBlockGenerator cannot split the transition interface because "
                "add_transition_interface is false");
 }
 
@@ -244,7 +240,7 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
     if (!_block_restricted || (_block_restricted && !_add_transition_interface))
     {
       // find the appropriate boundary name and id
-      //  given primary and secondary block ID
+      // given primary and secondary block ID
       if (_split_interface)
         findBoundaryNameAndInd(mesh,
                                boundary_side_map.first.first,

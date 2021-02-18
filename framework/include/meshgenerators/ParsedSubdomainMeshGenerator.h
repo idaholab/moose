@@ -31,6 +31,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// mesh to add the subdomain to
   std::unique_ptr<MeshBase> & _input;
 
   /// function expression

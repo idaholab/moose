@@ -17,6 +17,9 @@ class PatchMeshGenerator;
 template <>
 InputParameters validParams<PatchMeshGenerator>();
 
+/*
+ * Mesh generator to generate 2D or 3D mesh patches
+ */
 class PatchMeshGenerator : public MeshGenerator
 {
 public:
@@ -32,7 +35,6 @@ protected:
    *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
-
   void makeQuad4Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
   /*
    *  Make quad8 elements from nodes
@@ -40,13 +42,11 @@ protected:
    *  @param nodes A reference to the vector containing the nodes
    */
   void makeQuad8Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
-
   /*
    *  Make Hex8 elements from nodes
    *  @param mesh A reference to the mesh object
    *  @param nodes A reference to the vector containing the nodes
    */
-
   void makeHex8Elems(MeshBase & mesh, const std::vector<Node *> & nodes);
   /*
    *  Make hex20 elements from nodes

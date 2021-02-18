@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<FancyExtruderGenerator>();
 
 /**
- * Generates a mesh by reading it from an file.
+ * Extrudes a mesh to another dimension
  */
 class FancyExtruderGenerator : public MeshGenerator
 {

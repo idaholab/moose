@@ -39,16 +39,16 @@ AnnularMeshGenerator::validParams()
   params.addDeprecatedParam<Real>(
       "tmax",
       2 * M_PI,
-      "Maximum angle, measured in radians anticlockwise from x axis.  If "
-      "tmin=0 and tmax=2Pi an annular mesh is created.  "
+      "Maximum angle, measured in radians anticlockwise from x axis. If "
+      "tmin=0 and tmax=2Pi an annular mesh is created. "
       "Otherwise, only a sector of an annulus is created",
       "Use dmin instead");
   params.addParam<Real>(
       "dmin", 0.0, "Minimum degree, measured in degrees anticlockwise from x axis");
   params.addParam<Real>("dmax",
                         360.0,
-                        "Maximum angle, measured in degrees anticlockwise from x axis.  If "
-                        "dmin=0 and dmax=360 an annular mesh is created.  "
+                        "Maximum angle, measured in degrees anticlockwise from x axis. If "
+                        "dmin=0 and dmax=360 an annular mesh is created. "
                         "Otherwise, only a sector of an annulus is created");
   params.addRangeCheckedParam<Real>("growth_r",
                                     1.0,
@@ -61,11 +61,11 @@ AnnularMeshGenerator::validParams()
                                "The subdomain ID given to the TRI3 elements "
                                "(these exist only if rmin=0, and they exist "
                                "at the center of the disc");
-  params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements.  For rmin=0: "
-                             "creates a disc mesh of QUAD4 and TRI3 elements.  Boundary sidesets "
-                             "are created at rmax and rmin, and given these names.  If dmin!=0 and "
-                             "dmax!=360, a sector of an annulus or disc is created.  In this case "
-                             "boundary sidesets are also created a dmin and dmax, and "
+  params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements. For rmin=0: "
+                             "creates a disc mesh of QUAD4 and TRI3 elements. Boundary sidesets "
+                             "are created at rmax and rmin, and given these names. If dmin!=0 and "
+                             "dmax!=360, a sector of an annulus or disc is created. In this case "
+                             "boundary sidesets are also created at dmin and dmax, and "
                              "given these names");
 
   return params;
