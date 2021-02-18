@@ -14,6 +14,6 @@
     csvdiff = 'ad_convective_ht_side_integral_out.csv'
     design = 'ConvectiveHeatTransferSideIntegral.md'
     requirement = 'The system shall compute total heat flux from heat transfer coefficient and temperature difference for AD variables'
-    issues = '#14390'
+    issues = '#14390 #17020'
   [../]
 []
