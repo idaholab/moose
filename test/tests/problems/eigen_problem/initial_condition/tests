@@ -20,7 +20,7 @@
     slepc_version = '>=3.13.0'
     cli_args = 'Executioner/free_power_iterations=0 Outputs/file_base=no_free_power'
     issues = '#17026'
-    requirement = "The system shall work correctly when use no free power iteration."
+    requirement = "The system shall support eigenvalue execution without free power iterations."
   [../]
 
   [./inverse_eigenvalue_postprocessor]
