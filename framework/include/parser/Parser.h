@@ -134,6 +134,14 @@ protected:
                           bool in_global,
                           GlobalParamsAction * global_block);
 
+  /// Template method for setting any map type parameter read from the input file or command line
+  template <typename KeyType, typename MappedType>
+  void setMapParameter(const std::string & full_name,
+                       const std::string & short_name,
+                       InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
+                       bool in_global,
+                       GlobalParamsAction * global_block);
+
   /**
    * Sets an input parameter representing a file path using input file data.  The file path is
    * modified to be relative to the directory this application's input file is in.

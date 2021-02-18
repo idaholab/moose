@@ -1236,6 +1236,14 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
           in_global,                                                                               \
           global_params_block)
+#define setmap(key_type, mapped_type)                                                              \
+  else if (par->type() == demangle(typeid(std::map<key_type, mapped_type>).name()))                \
+      setMapParameter(                                                                             \
+          full_name,                                                                               \
+          short_name,                                                                              \
+          dynamic_cast<InputParameters::Parameter<std::map<key_type, mapped_type>> *>(par),        \
+          in_global,                                                                               \
+          global_params_block)
 #define setvectorfpath(ptype)                                                                      \
   else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
       setVectorFilePathParam<ptype>(                                                               \
@@ -1363,6 +1371,10 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(ReporterName, string);
       setvector(ReporterValueName, string);
 
+      // map types
+      setmap(string, Real);
+      setmap(string, string);
+
       // Double indexed types
       setvectorvector(Real);
       setvectorvector(int);
@@ -1408,6 +1420,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 #undef setscalar
 #undef setvector
 #undef setvectorvector
+#undef setmap
     }
   }
 
@@ -1595,6 +1608,111 @@ Parser::setVectorParameter(const std::string & full_name,
     global_block->setVectorParam<T>(short_name).resize(param->get().size());
     for (unsigned int i = 0; i < vec.size(); ++i)
       global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
+  }
+}
+
+template <typename KeyType, typename MappedType>
+void
+Parser::setMapParameter(const std::string & full_name,
+                        const std::string & short_name,
+                        InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
+                        bool in_global,
+                        GlobalParamsAction * global_block)
+{
+  std::map<KeyType, MappedType> the_map;
+  if (_root->find(full_name))
+  {
+    try
+    {
+      const auto & string_vec = _root->param<std::vector<std::string>>(full_name);
+      auto it = string_vec.begin();
+      while (it != string_vec.end())
+      {
+        const auto & string_key = *it;
+        ++it;
+        if (it == string_vec.end())
+        {
+          _errmsg +=
+              hit::errormsg(_input_filename,
+                            _root->find(full_name),
+                            "odd number of entries in string vector for map parameter: ",
+                            full_name,
+                            ". There must be "
+                            "an even number or else you will end up with a key without a value!") +
+              "\n";
+          return;
+        }
+        const auto & string_value = *it;
+        ++it;
+
+        std::pair<KeyType, MappedType> pr;
+        // key
+        try
+        {
+          pr.first = MooseUtils::convert<KeyType>(string_key, true);
+        }
+        catch (std::invalid_argument & /*e*/)
+        {
+          _errmsg += hit::errormsg(_input_filename,
+                                   _root->find(full_name),
+                                   "invalid ",
+                                   demangle(typeid(KeyType).name()),
+                                   " syntax for map parameter ",
+                                   full_name,
+                                   " key: ",
+                                   string_key) +
+                     "\n";
+          return;
+        }
+        // value
+        try
+        {
+          pr.second = MooseUtils::convert<MappedType>(string_value, true);
+        }
+        catch (std::invalid_argument & /*e*/)
+        {
+          _errmsg += hit::errormsg(_input_filename,
+                                   _root->find(full_name),
+                                   "invalid ",
+                                   demangle(typeid(MappedType).name()),
+                                   " syntax for map parameter ",
+                                   full_name,
+                                   " value: ",
+                                   string_value) +
+                     "\n";
+          return;
+        }
+
+        auto insert_pr = the_map.insert(std::move(pr));
+        if (!insert_pr.second)
+        {
+          _errmsg += hit::errormsg(_input_filename,
+                                   _root->find(full_name),
+                                   "Duplicate map entry for map parameter: ",
+                                   full_name,
+                                   ". The key ",
+                                   string_key,
+                                   " appears multiple times.") +
+                     "\n";
+          return;
+        }
+      }
+    }
+    catch (hit::Error & err)
+    {
+      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
+      return;
+    }
+  }
+
+  param->set() = the_map;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    auto & global_map = global_block->setParam<std::map<KeyType, MappedType>>(short_name);
+    for (const auto & pair : the_map)
+      global_map.insert(pair);
   }
 }
 
