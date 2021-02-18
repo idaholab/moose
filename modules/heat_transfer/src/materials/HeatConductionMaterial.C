@@ -91,13 +91,13 @@ HeatConductionMaterialTempl<is_ad>::computeQpProperties()
   {
     if (_temperature[_qp] < *_min_T)
     {
-      mooseWarning("Temperature (",
-                   _temperature[_qp],
-                   ") is below min_T (",
-                   *_min_T,
-                   ") at ",
-                   _q_point[_qp],
-                   ". \nUsing min_T instead of temperature.");
+      mooseDoOnce(mooseWarning("Temperature (",
+                               _temperature[_qp],
+                               ") is below min_T (",
+                               *_min_T,
+                               ") at ",
+                               _q_point[_qp],
+                               ". \nUsing min_T instead of temperature."));
       qp_temperature = *_min_T;
     }
   }
