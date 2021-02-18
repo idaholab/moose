@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'coupled_diffusion_helmholtz.i'
-    exodiff = 'coupled_diffusion_helmholtz_out.e'
-  [../]
-[]

@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'varying_constant_helmholtz.i'
-    exodiff = 'varying_constant_helmholtz_out.e'
-  [../]
-[]
