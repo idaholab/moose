@@ -100,8 +100,4 @@ private:
    * Generate constraints for node to face contact
    */
   void addNodeFaceContact();
-  /**
-   * Get displacement variable names
-   */
-  std::vector<VariableName> getDisplacementVarNames();
 };
