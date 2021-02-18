@@ -1,0 +1,9 @@
+directories:
+    - ${ROOT_DIR}/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repos:
+    default: https://github.com/idaholab/moose
+reports: !include ${MOOSE_DIR}/modules/rdg/doc/sqa_reports.yml

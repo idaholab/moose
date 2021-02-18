@@ -611,5 +611,45 @@ class TestSQARequiremetnsWithCollectionsAndTypesAST(MooseDocsTestCase):
         self.assertToken(ast(0,1), 'SQARequirementMatrixItem', reqname='r0')
         self.assertToken(ast(0,2), 'SQARequirementMatrixItem', reqname='r2')
 
+class TestSQARegex(unittest.TestCase):
+    def testIssue(self):
+        regex = sqa.RenderSQARequirementIssues.ISSUE_RE
+        match = regex.search('#12345')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), None)
+        self.assertEqual(match.group('issues'), '12345')
+
+        match = regex.search('moose#12345')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), 'moose')
+        self.assertEqual(match.group('issues'), '12345')
+
+        match = regex.search('some-app#12345')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), 'some-app')
+        self.assertEqual(match.group('issues'), '12345')
+
+        self.assertIsNone(regex.search('#wrong'))
+
+    def testCommit(self):
+        regex = sqa.RenderSQARequirementIssues.COMMIT_RE
+        match = regex.search('a1b2c3d4e5')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), None)
+        self.assertEqual(match.group('commit'), 'a1b2c3d4e5')
+
+        match = regex.search('moose:a1b2c3d4e5')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), 'moose')
+        self.assertEqual(match.group('commit'), 'a1b2c3d4e5')
+
+        match = regex.search('some-app:a1b2c3d4e5')
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group('key'), 'some-app')
+        self.assertEqual(match.group('commit'), 'a1b2c3d4e5')
+
+        self.assertIsNone(regex.search('wrong'))
+        self.assertIsNone(regex.search('abc123')) # must be at least 10
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

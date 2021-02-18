@@ -133,6 +133,8 @@ Extensions:
             phase_field: !include modules/phase_field/doc/sqa_phase_field.yml
             xfem: !include modules/xfem/doc/sqa_xfem.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
+            rdg: !include modules/rdg/doc/sqa_rdg.yml
+
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects
