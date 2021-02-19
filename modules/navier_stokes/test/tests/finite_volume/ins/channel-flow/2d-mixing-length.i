@@ -16,9 +16,10 @@ velocity_interp_method='rc'
     xmin = 0
     xmax = 5
     ymin = 0
-    ymax = 1
-    nx = 50
-    ny = 40
+    ymax = ${fparse 0.5 * D}
+    nx = 20
+    ny = 10
+    bias_y = ${fparse 1 / 1.2}
   []
 []
 
@@ -184,29 +185,47 @@ velocity_interp_method='rc'
     variable = v
     function = '0'
   []
-  [walls-u]
+  [inlet_scalar]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = scalar
+    value = 1
+  []
+  [wall-u]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = u
     function = 0
   []
-  [walls-v]
+  [wall-v]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = v
     function = 0
+  []
+  [sym-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [sym-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
   []
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
     function = '0'
-  []
-  [inlet_scalar]
-    type = FVDirichletBC
-    boundary = 'left'
-    variable = scalar
-    value = 1
   []
 []
 
