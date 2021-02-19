@@ -1324,7 +1324,7 @@ RayTracingStudy::registerRay(const std::string & name)
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError("Cannot use registerRay() with Ray registration diabled");
+    mooseError("Cannot use registerRay() with Ray registration disabled");
 
   // This is parallel only for now. We could likely stagger the ID building like we do with
   // the unique IDs, but it would require a sync point which isn't there right now
@@ -1350,7 +1350,7 @@ RayTracingStudy::registeredRayID(const std::string & name, const bool graceful /
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError("Should not use registeredRayID() with Ray registration diabled");
+    mooseError("Should not use registeredRayID() with Ray registration disabled");
 
   const auto search = _registered_ray_map.find(name);
   if (search != _registered_ray_map.end())
@@ -1370,7 +1370,7 @@ RayTracingStudy::registeredRayName(const RayID ray_id) const
   Threads::spin_mutex::scoped_lock lock(_spin_mutex);
 
   if (!_use_ray_registration)
-    mooseError("Should not use registeredRayName() with Ray registration diabled");
+    mooseError("Should not use registeredRayName() with Ray registration disabled");
 
   const auto search = _reverse_registered_ray_map.find(ray_id);
   if (search != _reverse_registered_ray_map.end())

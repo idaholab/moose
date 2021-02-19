@@ -107,7 +107,7 @@
       cli_args = 'UserObjects/study/ray_set_direction_again=true'
       expect_err = 'Cannot change a Ray\'s starting direction using Ray::setStartingDirection\(\)'
       allow_test_objects = true
-      detail = 'when setting a ray\'s starting direction multiple times without clearning it,'
+      detail = 'when setting a ray\'s starting direction multiple times without clearing it,'
     []
     [ray_set_zero_direction]
       type = RunException
