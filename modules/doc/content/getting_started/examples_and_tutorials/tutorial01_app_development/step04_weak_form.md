@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step03_moose_object.md
+                    next=tutorial01_app_development/step05_kernel_object.md
+                    margin-bottom=0px
+
 # Step 4: Generate a Weak Form
 
 The first question to ask when presented with a [!ac](PDE) that governs a problem's physics is: "How do I solve this equation?" The MOOSE answer to this question is to use [Galerkin's Method](#galerkin), which involves expressing the *strong form* of a governing [!ac](PDE) in its *weak form*.
@@ -41,7 +45,7 @@ Finally, notice that the second term in [laplace-ibp] is a volume integral whose
 +This is the weak form of the Laplace equation.+ From an application developer's perspective, it is convenient to express a weak form using *inner product notation*, and to identify the MOOSE class that each residual term shall inherit from:
 
 !equation id=laplace-objects
-\underbrace{(\nabla \psi, \nabla u)}_{Kernel} - \underbrace{\langle \psi, \nabla u \cdot \hat{n} \rangle}_{Boundary \, Condition} = 0
+\underbrace{(\nabla \psi, \nabla u)}_{\clap{Kernel}} - \underbrace{\langle \psi, \nabla u \cdot \hat{n} \rangle}_{\clap{Boundary \, Condition}} = 0
 
 ### Procedure for Generating Weak Forms id=procedure
 
@@ -93,7 +97,7 @@ The [#procedure] shall now be applied to this equation. The result of each step 
 7. Express the final weak form using inner product notation.
 
    !equation
-   \underbrace{(\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p)}_{Kernel} - \underbrace{\langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle}_{Boundary \, Condition} = 0
+   \underbrace{(\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p)}_{\clap{\clap{Kernel}}} - \underbrace{\langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle}_{\clap{Boundary \, Condition}} = 0
 
    It is important to become comfortable with this notation for weak form expressions as it shall henceforth be used exclusively.
 

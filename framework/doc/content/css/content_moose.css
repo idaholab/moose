@@ -43,8 +43,6 @@ ul.moose-a-to-z a{
 .moose-content-pagination{
     display: inline-block;
     width: 100%;
-    padding-top: 24px;
-    padding-bottom: 24px;
 }
 .moose-content-next{
     float: right;

@@ -1,3 +1,7 @@
+!content pagination previous=tutorial01_app_development/step02_input_file.md
+                    next=tutorial01_app_development/step04_weak_form.md
+                    margin-bottom=0px
+
 # Step 3: Introduction to MOOSE Objects
 
 In this step, [#objects], and the purposes they serve, will be introduced.

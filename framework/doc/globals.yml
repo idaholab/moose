@@ -3,11 +3,10 @@ PETSc: https://www.mcs.anl.gov/petsc/
 MOOSE: http://www.mooseframework.org
 YAML: http://yaml.org/
 python: https://www.python.org/
-BCs: /BCs/index.md
 AuxVariables: /AuxVariables/index.md
 AuxKernels: /AuxKernels/index.md
 Variables: /Variables/index.md
-BCs: /BCs/index.md
+BCs: syntax/BCs/index.md
 Constraints: /Constraints/index.md
 Kernels: /Kernels/index.md
 Functions: /Functions/index.md
