@@ -905,7 +905,16 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
 {
+  mooseAssert(index == 0, "We only ever have one dof value locally");
   _dof_values[index] = value;
+
+  // Update the qp values as well
+  for (const auto qp : make_range(_u.size()))
+    _u[qp] = value;
+
+  if (_need_ad_u)
+    for (const auto qp : make_range(_ad_u.size()))
+      _ad_u[qp] = value;
 }
 
 template <typename OutputType>
