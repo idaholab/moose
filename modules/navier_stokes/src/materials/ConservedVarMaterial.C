@@ -62,8 +62,11 @@ ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
                                                           : _ad_zero),
     _var_rho_w_dot(isCoupled(NS::momentum_z) && _is_transient ? adCoupledDot(NS::momentum_z)
                                                           : _ad_zero),
-    _var_grad_grad_T_fluid(isCoupled(nms::T_fluid) ? adCoupledSecond(nms::T_fluid)
-                                                   : _ad_second_zero)
+    _var_grad_grad_T_fluid(isCoupled(NS::T_fluid) ? adCoupledSecond(NS::T_fluid)
+                                                   : _ad_second_zero),
+    _have_porosity(isParamValid(NS::porosity)),
+    _epsilon(_have_porosity ? &getMaterialProperty<Real>(NS::porosity) : nullptr),
+    _superficial_velocity(_have_porosity ? &declareADProperty<RealVectorValue>(NS::superficial_velocity) : nullptr)
 {
   warnAuxiliaryVariables();
 }
@@ -156,4 +159,7 @@ ConservedVarMaterial::computeQpProperties()
     (_velocity[_qp](0) * dvelx_dt + _velocity[_qp](1) * dvely_dt + _velocity[_qp](2) * dvelz_dt);
   auto dvol_dt = -1 / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp];
   _dT_dt[_qp] = dTde * de_dt + dTdvol * dvol_dt;
+
+  if (_have_porosity)
+    (*_superficial_velocity)[_qp] = (*_epsilon)[_qp] * _velocity[_qp];
 }

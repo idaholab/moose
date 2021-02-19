@@ -63,4 +63,12 @@ private:
   // optional approximation for stabilization strong residual term
   const ADVariableSecond & _var_grad_grad_T_fluid;
 
+  /// Whether the user provided porosity
+  const bool _have_porosity;
+
+  /// optional porosity
+  const MaterialProperty<Real> * const _epsilon;
+
+  /// superficial velocity
+  ADMaterialProperty<RealVectorValue> * const _superficial_velocity;
 };
