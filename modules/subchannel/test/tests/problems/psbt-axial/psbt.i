@@ -61,7 +61,7 @@ mass_flow_in = 11.522 #kg/sec
 []
 
 [Problem]
-  type = SubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem
   fp = water
 []
 
