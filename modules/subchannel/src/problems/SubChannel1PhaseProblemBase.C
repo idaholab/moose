@@ -1,4 +1,4 @@
-#include "SubChannel1PhaseProblem.h"
+#include "SubChannel1PhaseProblemBase.h"
 #include "SystemBase.h"
 #include "libmesh/petsc_vector.h"
 #include <petscdm.h>
@@ -13,17 +13,15 @@
 #include "SolutionHandle.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("SubChannelApp", SubChannel1PhaseProblem);
-
 InputParameters
-SubChannel1PhaseProblem::validParams()
+SubChannel1PhaseProblemBase::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
 
-SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
+SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters & params)
   : ExternalProblem(params),
     _g_grav(9.87),
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
@@ -45,7 +43,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
 }
 
 void
-SubChannel1PhaseProblem::initialSetup()
+SubChannel1PhaseProblemBase::initialSetup()
 {
   ExternalProblem::initialSetup();
   // Read in Wij_global for null transient only at the first run of externalSolve
@@ -90,7 +88,7 @@ SubChannel1PhaseProblem::initialSetup()
   q_prime_soln = new SolutionHandle(getVariable(0, "q_prime"));
 }
 
-SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
+SubChannel1PhaseProblemBase::~SubChannel1PhaseProblemBase()
 {
   delete mdot_soln;
   delete SumWij_soln;
@@ -105,39 +103,13 @@ SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
 }
 
 bool
-SubChannel1PhaseProblem::converged()
+SubChannel1PhaseProblemBase::converged()
 {
   return true;
 }
 
-double
-SubChannel1PhaseProblem::computeFF(double Re)
-{
-  double a, b;
-  if (Re < 1)
-  {
-    return 64.0;
-  }
-  else if (Re >= 1 and Re < 5000)
-  {
-    a = 64.0;
-    b = -1.0;
-  }
-  else if (Re >= 5000 and Re < 30000)
-  {
-    a = 0.316;
-    b = -0.25;
-  }
-  else
-  {
-    a = 0.184;
-    b = -0.20;
-  }
-  return a * std::pow(Re, b);
-}
-
 void
-SubChannel1PhaseProblem::computeWij(int iz)
+SubChannel1PhaseProblemBase::computeWij(int iz)
 {
   if (iz == 0)
   {
@@ -267,7 +239,7 @@ SubChannel1PhaseProblem::computeWij(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeSumWij(int iz)
+SubChannel1PhaseProblemBase::computeSumWij(int iz)
 {
   if (iz == 0)
   {
@@ -293,7 +265,7 @@ SubChannel1PhaseProblem::computeSumWij(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeMdot(int iz)
+SubChannel1PhaseProblemBase::computeMdot(int iz)
 {
   if (iz == 0)
   {
@@ -342,7 +314,7 @@ SubChannel1PhaseProblem::computeMdot(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeWijPrime(int iz)
+SubChannel1PhaseProblemBase::computeWijPrime(int iz)
 {
   if (iz == 0)
   {
@@ -384,7 +356,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeDP(int iz)
+SubChannel1PhaseProblemBase::computeDP(int iz)
 {
   if (iz == 0)
   {
@@ -455,7 +427,7 @@ SubChannel1PhaseProblem::computeDP(int iz)
 
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Re = (((*mdot_soln)(node_in) / S) * Dh_i / mu);
-    auto fi = computeFF(Re);
+    auto fi = computeFrictionFactor(Re);
     auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
                          (S * (*rho_soln)(node_out));
     auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
@@ -477,7 +449,7 @@ SubChannel1PhaseProblem::computeDP(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeP(int iz)
+SubChannel1PhaseProblemBase::computeP(int iz)
 {
   if (iz == 0)
   {
@@ -496,7 +468,7 @@ SubChannel1PhaseProblem::computeP(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeH(int iz)
+SubChannel1PhaseProblemBase::computeH(int iz)
 {
   if (iz == 0)
   {
@@ -578,7 +550,7 @@ SubChannel1PhaseProblem::computeH(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeT(int iz)
+SubChannel1PhaseProblemBase::computeT(int iz)
 {
   if (iz == 0)
   {
@@ -595,7 +567,7 @@ SubChannel1PhaseProblem::computeT(int iz)
 }
 
 void
-SubChannel1PhaseProblem::computeRho(int iz)
+SubChannel1PhaseProblemBase::computeRho(int iz)
 {
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
@@ -607,7 +579,7 @@ SubChannel1PhaseProblem::computeRho(int iz)
 }
 
 double
-SubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
+SubChannel1PhaseProblemBase::computeMassFlowForDPDZ(double dpdz, int i_ch)
 {
   auto * node = _subchannel_mesh.getChannelNode(i_ch, 0);
   // initialize massflow
@@ -632,7 +604,7 @@ SubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
     }
     auto massflow_old = massflow;
     auto Rei = ((massflow / Si) * Dhi / mu);
-    auto fi = computeFF(Rei);
+    auto fi = computeFrictionFactor(Rei);
     massflow = sqrt(2.0 * Dhi * dpdz * rho * std::pow(Si, 2.0) / fi);
     Error = std::abs((massflow - massflow_old) / massflow_old);
   }
@@ -640,7 +612,7 @@ SubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
 }
 
 void
-SubChannel1PhaseProblem::enforceZeroDPDZAtInlet()
+SubChannel1PhaseProblemBase::enforceZeroDPDZAtInlet()
 {
   _console << "Applying mass flow boundary condition using uniform Pressure drop at the inlet\n";
   auto node = _subchannel_mesh.getChannelNode(0, 0);
@@ -662,7 +634,7 @@ SubChannel1PhaseProblem::enforceZeroDPDZAtInlet()
     auto Dhi = 4.0 * Si / w_perim;
     auto mu = _fp->mu_from_rho_T(rho_in, T_in);
     auto Rei = (((*mdot_soln)(node_in) / Si) * Dhi / mu);
-    auto fi = computeFF(Rei);
+    auto fi = computeFrictionFactor(Rei);
     DPDZi(i_ch) =
         (fi / Dhi) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
   }
@@ -703,7 +675,7 @@ SubChannel1PhaseProblem::enforceZeroDPDZAtInlet()
 }
 
 void
-SubChannel1PhaseProblem::externalSolve()
+SubChannel1PhaseProblemBase::externalSolve()
 {
   enforceZeroDPDZAtInlet();
   _console << "Executing subchannel solver\n";
@@ -805,4 +777,4 @@ SubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
 }
 
-void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}
+void SubChannel1PhaseProblemBase::syncSolutions(Direction /*direction*/) {}

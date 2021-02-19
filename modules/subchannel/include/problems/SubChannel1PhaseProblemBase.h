@@ -6,47 +6,48 @@
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
 
-class SubChannel1PhaseProblem;
+class SubChannel1PhaseProblemBase;
 
 /**
- * This class implements the 1-phase steady state sub channel solver.
+ * Base class for the 1-phase steady state sub channel solver.
  */
-class SubChannel1PhaseProblem : public ExternalProblem
+class SubChannel1PhaseProblemBase : public ExternalProblem
 {
 public:
-  SubChannel1PhaseProblem(const InputParameters & params);
-  virtual ~SubChannel1PhaseProblem();
-  static InputParameters validParams();
+  SubChannel1PhaseProblemBase(const InputParameters & params);
+  virtual ~SubChannel1PhaseProblemBase();
+
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction direction) override;
   virtual bool converged() override;
   virtual void initialSetup() override;
-  /// Returns friction factor
-  double computeFF(double Re);
-  /// Returns mass flow for a given pressure drop
-  double computeMassFlowForDPDZ(double dpdz, int i_ch);
-  /// Computes diversion crossflow per gap for level iz
-  void computeWij(int iz);
-  /// Computes net diversion crossflow per channel for level iz
-  void computeSumWij(int iz);
-  /// Computes mass flow per channel for level iz
-  void computeMdot(int iz);
-  /// Computes turbulent crossflow per gap for level iz
-  void computeWijPrime(int iz);
-  /// Computes Pressure Drop per channel for level iz
-  void computeDP(int iz);
-  /// Computes Pressure per channel for level iz
-  void computeP(int iz);
-  /// Computes Enthalpy per channel for level iz
-  void computeH(int iz);
-  /// Computes Temperature per channel for level iz
-  void computeT(int iz);
-  /// Computes Density per channel for level iz
-  void computeRho(int iz);
-  /// Computes and populates solution vector with Boundary mass flow
-  void enforceZeroDPDZAtInlet();
 
 protected:
+  /// Computes diversion crossflow per gap for level iz
+  virtual void computeWij(int iz);
+  /// Computes net diversion crossflow per channel for level iz
+  virtual void computeSumWij(int iz);
+  /// Computes mass flow per channel for level iz
+  virtual void computeMdot(int iz);
+  /// Returns friction factor
+  virtual double computeFrictionFactor(double Re) = 0;
+  /// Returns mass flow for a given pressure drop
+  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
+  /// Computes turbulent crossflow per gap for level iz
+  virtual void computeWijPrime(int iz);
+  /// Computes Pressure Drop per channel for level iz
+  virtual void computeDP(int iz);
+  /// Computes Pressure per channel for level iz
+  virtual void computeP(int iz);
+  /// Computes Enthalpy per channel for level iz
+  virtual void computeH(int iz);
+  /// Computes Temperature per channel for level iz
+  virtual void computeT(int iz);
+  /// Computes Density per channel for level iz
+  virtual void computeRho(int iz);
+  /// Computes and populates solution vector with Boundary mass flow
+  virtual void enforceZeroDPDZAtInlet();
+
   Eigen::VectorXd Wij;
   Eigen::VectorXd Wij_old;
   Eigen::VectorXd WijPrime;
@@ -66,4 +67,7 @@ protected:
   SolutionHandle * S_flow_soln;
   SolutionHandle * w_perim_soln;
   SolutionHandle * q_prime_soln;
+
+public:
+  static InputParameters validParams();
 };

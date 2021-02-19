@@ -63,7 +63,7 @@ P_out = 4.923e6 # Pa
 []
 
 [Problem]
-  type = SubChannel1PhaseProblem
+  type = LiquidWaterSubChannel1PhaseProblem
   fp = water
 []
 
