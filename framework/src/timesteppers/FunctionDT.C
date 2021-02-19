@@ -27,8 +27,7 @@ FunctionDT::validParams()
   params.addParam<std::vector<Real>>("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor",
                         std::numeric_limits<Real>::max(),
-                        "Maximum ratio of new to previous timestep sizes following a step that "
-                        "required the time step to be cut due to a failed solve.");
+                        "Maximum ratio of new to previous timestep sizes.");
   params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
   // TODO: this can be removed when time_t and time_dt is removed
   params.addParam<bool>("interpolate",
@@ -48,7 +47,6 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
     _time_dt(getParam<std::vector<Real>>("time_dt")),
     _function(nullptr),
     _growth_factor(getParam<Real>("growth_factor")),
-    _cutback_occurred(false),
     _min_dt(getParam<Real>("min_dt")),
     _interpolate(getParam<bool>("interpolate"))
 {
@@ -163,9 +161,8 @@ FunctionDT::computeDT()
   if (local_dt < _min_dt)
     local_dt = _min_dt;
 
-  if (_cutback_occurred && (local_dt > _dt * _growth_factor))
+  if ((local_dt > (_dt * _growth_factor)) && _dt > 0)
     local_dt = _dt * _growth_factor;
-  _cutback_occurred = false;
 
   return local_dt;
 }
@@ -174,11 +171,4 @@ void
 FunctionDT::postStep()
 {
   removeOldKnots();
-}
-
-void
-FunctionDT::rejectStep()
-{
-  _cutback_occurred = true;
-  TimeStepper::rejectStep();
 }
