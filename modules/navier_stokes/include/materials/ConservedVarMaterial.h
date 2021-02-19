@@ -12,10 +12,6 @@
 // Navier-Stokes includes
 #include "VarMaterialBase.h"
 
-class ConservedVarMaterial;
-
-declareADValidParams(ConservedVarMaterial);
-
 /**
  * Material to calculate nonlinear and auxiliary variables as material
  * properties to allow seamless use of different sets of solution
@@ -27,6 +23,7 @@ class ConservedVarMaterial : public VarMaterialBase
 {
 public:
   ConservedVarMaterial(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;

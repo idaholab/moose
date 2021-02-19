@@ -4,50 +4,51 @@
 #include "AuxiliarySystem.h"
 #include "MooseUtils.h"
 
-namespace nms = NS;
-
-defineADValidParams(
-    VarMaterialBase,
-    ADMaterial,
-    params.addRequiredParam<UserObjectName>(nms::fluid, "fluid userobject");
-    params.addClassDescription(
-        "Provides access to nonlinear and aux-like variables independent of formulation"););
+InputParameters
+VarMaterialBase::validParams()
+{
+  auto params = Material::validParams();
+  params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
+  params.addClassDescription(
+      "Provides access to nonlinear and aux-like variables independent of formulation");
+  return params;
+}
 
 VarMaterialBase::VarMaterialBase(const InputParameters & params)
-  : ADMaterial(params),
-    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
-    _rho(declareADProperty<Real>(nms::density)),
-    _momentum(declareADProperty<RealVectorValue>(nms::momentum)),
-    _specific_internal_energy(declareADProperty<Real>(nms::specific_internal_energy)),
-    _specific_total_energy(declareADProperty<Real>(nms::specific_total_energy)),
-    _total_energy_density(declareADProperty<Real>(nms::total_energy_density)),
-    _specific_total_enthalpy(declareADProperty<Real>(nms::specific_total_enthalpy)),
-    _total_enthalpy_density(declareADProperty<Real>(nms::total_enthalpy_density)),
-    _v(declareADProperty<Real>(nms::v)),
-    _T_fluid(declareADProperty<Real>(nms::T_fluid)),
-    _pressure(declareADProperty<Real>(nms::pressure)),
-    _speed(declareADProperty<Real>(nms::speed)),
-    _velocity(declareADProperty<RealVectorValue>(nms::velocity)),
-    _grad_rho(declareADProperty<RealVectorValue>(nms::grad(nms::density))),
-    _grad_rho_et(declareADProperty<RealVectorValue>(nms::grad(nms::total_energy_density))),
-    _grad_rho_u(declareADProperty<RealVectorValue>(nms::grad(nms::momentum_x))),
-    _grad_rho_v(declareADProperty<RealVectorValue>(nms::grad(nms::momentum_y))),
-    _grad_rho_w(declareADProperty<RealVectorValue>(nms::grad(nms::momentum_z))),
-    _grad_vel_x(declareADProperty<RealVectorValue>(nms::grad(nms::velocity_x))),
-    _grad_vel_y(declareADProperty<RealVectorValue>(nms::grad(nms::velocity_y))),
-    _grad_vel_z(declareADProperty<RealVectorValue>(nms::grad(nms::velocity_z))),
-    _grad_T_fluid(declareADProperty<RealVectorValue>(nms::grad(nms::T_fluid))),
-    _grad_pressure(declareADProperty<RealVectorValue>(nms::grad(nms::pressure))),
-    _drho_dt(declareADProperty<Real>(nms::time_deriv(nms::density))),
-    _drho_et_dt(declareADProperty<Real>(nms::time_deriv(nms::total_energy_density))),
-    _drho_u_dt(declareADProperty<Real>(nms::time_deriv(nms::momentum_x))),
-    _drho_v_dt(declareADProperty<Real>(nms::time_deriv(nms::momentum_y))),
-    _drho_w_dt(declareADProperty<Real>(nms::time_deriv(nms::momentum_z))),
-    _dT_dt(declareADProperty<Real>(nms::time_deriv(nms::T_fluid))),
-    _grad_grad_T_fluid(declareADProperty<RealTensorValue>(nms::grad(nms::grad(nms::T_fluid)))),
-    _grad_grad_vel_x(declareADProperty<RealTensorValue>(nms::grad(nms::grad(nms::velocity_x)))),
-    _grad_grad_vel_y(declareADProperty<RealTensorValue>(nms::grad(nms::grad(nms::velocity_y)))),
-    _grad_grad_vel_z(declareADProperty<RealTensorValue>(nms::grad(nms::grad(nms::velocity_z))))
+  : Material(params),
+    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _rho(declareADProperty<Real>(NS::density)),
+    _momentum(declareADProperty<RealVectorValue>(NS::momentum)),
+    _specific_internal_energy(declareADProperty<Real>(NS::specific_internal_energy)),
+    _specific_total_energy(declareADProperty<Real>(NS::specific_total_energy)),
+    _total_energy_density(declareADProperty<Real>(NS::total_energy_density)),
+    _specific_total_enthalpy(declareADProperty<Real>(NS::specific_total_enthalpy)),
+    _total_enthalpy_density(declareADProperty<Real>(NS::total_enthalpy_density)),
+    _v(declareADProperty<Real>(NS::v)),
+    _T_fluid(declareADProperty<Real>(NS::T_fluid)),
+    _pressure(declareADProperty<Real>(NS::pressure)),
+    _speed(declareADProperty<Real>(NS::speed)),
+    _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
+    _grad_rho(declareADProperty<RealVectorValue>(NS::grad(NS::density))),
+    _grad_rho_et(declareADProperty<RealVectorValue>(NS::grad(NS::total_energy_density))),
+    _grad_rho_u(declareADProperty<RealVectorValue>(NS::grad(NS::momentum_x))),
+    _grad_rho_v(declareADProperty<RealVectorValue>(NS::grad(NS::momentum_y))),
+    _grad_rho_w(declareADProperty<RealVectorValue>(NS::grad(NS::momentum_z))),
+    _grad_vel_x(declareADProperty<RealVectorValue>(NS::grad(NS::velocity_x))),
+    _grad_vel_y(declareADProperty<RealVectorValue>(NS::grad(NS::velocity_y))),
+    _grad_vel_z(declareADProperty<RealVectorValue>(NS::grad(NS::velocity_z))),
+    _grad_T_fluid(declareADProperty<RealVectorValue>(NS::grad(NS::T_fluid))),
+    _grad_pressure(declareADProperty<RealVectorValue>(NS::grad(NS::pressure))),
+    _drho_dt(declareADProperty<Real>(NS::time_deriv(NS::density))),
+    _drho_et_dt(declareADProperty<Real>(NS::time_deriv(NS::total_energy_density))),
+    _drho_u_dt(declareADProperty<Real>(NS::time_deriv(NS::momentum_x))),
+    _drho_v_dt(declareADProperty<Real>(NS::time_deriv(NS::momentum_y))),
+    _drho_w_dt(declareADProperty<Real>(NS::time_deriv(NS::momentum_z))),
+    _dT_dt(declareADProperty<Real>(NS::time_deriv(NS::T_fluid))),
+    _grad_grad_T_fluid(declareADProperty<RealTensorValue>(NS::grad(NS::grad(NS::T_fluid)))),
+    _grad_grad_vel_x(declareADProperty<RealTensorValue>(NS::grad(NS::grad(NS::velocity_x)))),
+    _grad_grad_vel_y(declareADProperty<RealTensorValue>(NS::grad(NS::grad(NS::velocity_y)))),
+    _grad_grad_vel_z(declareADProperty<RealTensorValue>(NS::grad(NS::grad(NS::velocity_z))))
 {
 }
 

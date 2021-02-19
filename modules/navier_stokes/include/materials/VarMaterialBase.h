@@ -1,11 +1,8 @@
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
-class VarMaterialBase;
 class SinglePhaseFluidProperties;
-
-declareADValidParams(VarMaterialBase);
 
 /**
  * Material to calculate nonlinear and auxiliary variables as material
@@ -14,10 +11,11 @@ declareADValidParams(VarMaterialBase);
  * the materials that all derived classes must compute based on some
  * set of nonlinear variables.
  */
-class VarMaterialBase : public ADMaterial
+class VarMaterialBase : public Material
 {
 public:
   VarMaterialBase(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() = 0;
