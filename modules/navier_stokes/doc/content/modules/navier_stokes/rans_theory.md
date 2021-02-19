@@ -265,7 +265,9 @@ isotropic velocity gradient,
   + \nabla v_y \cdot \nabla v_y + \nabla v_z \cdot \nabla v_z}
 \end{equation}
 
-This diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md) kernel.
+This momentum diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md)
+kernel. The corresponding model for diffusivity of passive scalars (like energy)
+is implemented in the [INSFVMixingLengthScalarDiffusion](source/fvkernels/INSFVMixingLengthScalarDiffusion.md) kernel.
 
 A model is then needed for the mixing length itself. One popular choice is to
 assume the mixing length is proportional to the distance from the nearest wall,

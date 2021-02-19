@@ -15,6 +15,8 @@ InputParameters
 INSFVMixingLengthScalarDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params.addClassDescription("Computes the turbulent diffusive flux that appears in "
+                             "Reynolds-averaged fluid conservation equations.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
