@@ -19,6 +19,10 @@ INSFVMixingLengthScalarDiffusion::validParams()
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addRequiredCoupledVar("mixing_length", "The turbulent mixing length.");
+  params.addRequiredParam<Real>(
+      "schmidt_number",
+      "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
+      "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
@@ -36,7 +40,8 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
                ? dynamic_cast<const INSFVVelocityVariable *>(&_subproblem.getVariable(
                      _tid, params.get<std::vector<VariableName>>("w").front()))
                : nullptr),
-    _mixing_len(coupledValue("mixing_length"))
+    _mixing_len(coupledValue("mixing_length")),
+    _schmidt_number(getParam<Real>("schmidt_number"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -80,9 +85,13 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   }
   velocity_gradient = std::sqrt(velocity_gradient + offset);
 
-  // Compute the eddy diffusivitiy
+  // Compute the eddy diffusivity for momentum
   Real mixing_len = _mixing_len[_qp];
   ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
+
+  // Use the turbulent Schmidt/Prandtl number to get the eddy diffusivity for
+  // the scalar variable
+  eddy_diff /= _schmidt_number;
 
   // Compute the diffusive flux of the scalar variable
   auto dudn = gradUDotNormal();

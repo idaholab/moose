@@ -34,4 +34,7 @@ protected:
 
   /// Turbulent eddy mixing length
   const VariableValue & _mixing_len;
+
+  /// Turbulent Schmidt number (or turbulent Prandtl numer)
+  const Real & _schmidt_number;
 };

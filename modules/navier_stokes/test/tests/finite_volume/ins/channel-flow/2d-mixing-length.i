@@ -152,6 +152,7 @@ velocity_interp_method='rc'
     mixing_length = mixing_len
     u = u
     v = v
+    schmidt_number = 1.0
   []
   [scalar_src]
     type = FVBodyForce
