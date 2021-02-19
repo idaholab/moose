@@ -130,6 +130,54 @@ interpolate(InterpMethod m,
   }
 }
 
+/**
+ * Computes the product of the advected and the advector based on the given interpolation method
+ */
+template <typename T1,
+          typename T2,
+          typename T3,
+          template <typename>
+          class Vector1,
+          template <typename>
+          class Vector2>
+void
+interpolate(InterpMethod m,
+            Vector1<T1> & result,
+            const T2 & fi_elem_advected,
+            const T2 & fi_neighbor_advected,
+            const Vector2<T3> & fi_elem_advector,
+            const Vector2<T3> & fi_neighbor_advector,
+            const FaceInfo & fi)
+{
+  switch (m)
+  {
+    case InterpMethod::Average:
+      result = linearInterpolation(fi_elem_advected * fi_elem_advector,
+                                   fi_neighbor_advected * fi_neighbor_advector,
+                                   fi,
+                                   true);
+      break;
+    case InterpMethod::Upwind:
+    {
+      const auto face_advector = linearInterpolation(MetaPhysicL::raw_value(fi_elem_advector),
+                                                     MetaPhysicL::raw_value(fi_neighbor_advector),
+                                                     fi,
+                                                     true);
+      Real elem_coeff, neighbor_coeff;
+      if (face_advector * fi.normal() > 0)
+        elem_coeff = 1, neighbor_coeff = 0;
+      else
+        elem_coeff = 0, neighbor_coeff = 1;
+
+      result = elem_coeff * fi_elem_advected * fi_elem_advector +
+               neighbor_coeff * fi_neighbor_advected * fi_neighbor_advector;
+      break;
+    }
+    default:
+      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+  }
+}
+
 /// Provides interpolation of face values for advective flux kernels.  This should be called by
 /// advective kernels when a face value is needed from two neighboring cells/elements.  The
 /// interpolated value is stored in result. value1 and value2 represent the two neighboring advected
@@ -301,5 +349,4 @@ determineElemOneAndTwo(const FaceInfo & fi, const MooseVariableFV<OutputType> & 
   return std::make_tuple(elem_one, elem_two, one_is_elem);
 }
 }
-
 }
