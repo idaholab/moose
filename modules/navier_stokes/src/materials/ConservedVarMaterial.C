@@ -34,6 +34,9 @@ ConservedVarMaterial::validParams()
   params.addClassDescription("Provides access to variables for a conserved variable set "
     "of density, total fluid energy, and momentum");
   params.addParam<MaterialPropertyName>(NS::porosity, "the porosity");
+  params.addParam<bool>("velocity_is_superficial",
+                        "Whether u in rho_u corresponds to a superficial velocity or a primitive "
+                        "velocity. This parameter must be supplied if porosity is supplied");
   return params;
 }
 
@@ -66,9 +69,13 @@ ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
                                                    : _ad_second_zero),
     _have_porosity(isParamValid(NS::porosity)),
     _epsilon(_have_porosity ? &getMaterialProperty<Real>(NS::porosity) : nullptr),
-    _superficial_velocity(_have_porosity ? &declareADProperty<RealVectorValue>(NS::superficial_velocity) : nullptr)
+    _superficial_velocity(_have_porosity ? &declareADProperty<RealVectorValue>(NS::superficial_velocity) : nullptr),
+    _velocity_is_superficial(isParamValid("velocity_is_superficial") ? getParam<bool>("velocity_is_superficial") : false)
 {
   warnAuxiliaryVariables();
+  if (_have_porosity)
+    if (!isParamValid("velocity_is_superficial"))
+      mooseError("If the porosity parameter is supplied, then a value for 'velocity_is_superficial' must be supplied");
 }
 
 bool
@@ -134,7 +141,9 @@ ConservedVarMaterial::computeQpProperties()
   _grad_grad_vel_z[_qp] = (_var_grad_grad_rho_w[_qp] - outer_product(_grad_rho[_qp], _grad_vel_z[_qp]) -
     outer_product(_grad_vel_z[_qp], _grad_rho[_qp]) - _velocity[_qp](2) * _var_grad_grad_rho[_qp]) / _rho[_qp];
 
-  _specific_internal_energy[_qp] = _total_energy_density[_qp] / _rho[_qp] - (_velocity[_qp] * _velocity[_qp]) / 2;
+  const auto vel2_prefactor = (_have_porosity && _velocity_is_superficial) ? 1. / ((*_epsilon)[_qp] * (*_epsilon)[_qp]) : Real(1);
+  _specific_internal_energy[_qp] = _total_energy_density[_qp] / _rho[_qp] -
+                                   vel2_prefactor * (_velocity[_qp] * _velocity[_qp]) / 2;
 
   Real dTdvol = 0;
   Real dTde = 0;
@@ -146,8 +155,8 @@ ConservedVarMaterial::computeQpProperties()
   _specific_total_enthalpy[_qp] = (_total_energy_density[_qp] + _pressure[_qp]) / _rho[_qp];
   _total_enthalpy_density[_qp] = _rho[_qp] * _specific_total_enthalpy[_qp];
 
-  auto grad_e = _grad_rho_et[_qp] * _v[_qp] + _total_energy_density[_qp] * grad_vol - _velocity[_qp](0) * _grad_vel_x[_qp] -
-                _velocity[_qp](1) * _grad_vel_y[_qp] - _velocity[_qp](2) * _grad_vel_z[_qp];
+  auto grad_e = _grad_rho_et[_qp] * _v[_qp] + _total_energy_density[_qp] * grad_vol - vel2_prefactor * (_velocity[_qp](0) * _grad_vel_x[_qp] +
+                _velocity[_qp](1) * _grad_vel_y[_qp] + _velocity[_qp](2) * _grad_vel_z[_qp]);
 
   _grad_T_fluid[_qp] = grad_vol * dTdvol + grad_e * dTde;
   _grad_pressure[_qp] = grad_vol * dpdvol + grad_e * dpde;
@@ -156,10 +165,14 @@ ConservedVarMaterial::computeQpProperties()
   auto dvely_dt = (_drho_v_dt[_qp] - _velocity[_qp](1) * _drho_dt[_qp]) / _rho[_qp];
   auto dvelz_dt = (_drho_w_dt[_qp] - _velocity[_qp](2) * _drho_dt[_qp]) / _rho[_qp];
   auto de_dt = _drho_et_dt[_qp] / _rho[_qp] - _total_energy_density[_qp] / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp] -
-    (_velocity[_qp](0) * dvelx_dt + _velocity[_qp](1) * dvely_dt + _velocity[_qp](2) * dvelz_dt);
+    vel2_prefactor * (_velocity[_qp](0) * dvelx_dt + _velocity[_qp](1) * dvely_dt + _velocity[_qp](2) * dvelz_dt);
   auto dvol_dt = -1 / (_rho[_qp] * _rho[_qp]) * _drho_dt[_qp];
   _dT_dt[_qp] = dTde * de_dt + dTdvol * dvol_dt;
 
   if (_have_porosity)
-    (*_superficial_velocity)[_qp] = (*_epsilon)[_qp] * _velocity[_qp];
+  {
+    (*_superficial_velocity)[_qp] = _velocity[_qp];
+    if (!_velocity_is_superficial)
+      (*_superficial_velocity)[_qp] *= (*_epsilon)[_qp];
+  }
 }

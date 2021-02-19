@@ -71,4 +71,7 @@ private:
 
   /// superficial velocity
   ADMaterialProperty<RealVectorValue> * const _superficial_velocity;
+
+  /// Whether the velocity is superficial or primitive
+  const bool _velocity_is_superficial;
 };
