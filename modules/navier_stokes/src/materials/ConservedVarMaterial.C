@@ -17,48 +17,50 @@
 // MOOSE includes
 #include "AuxiliarySystem.h"
 
-registerADMooseObject("NavierStokesApp", ConservedVarMaterial);
+registerMooseObject("NavierStokesApp", ConservedVarMaterial);
 
-namespace nms = NS;
-
-defineADValidParams(
-    ConservedVarMaterial,
-    VarMaterialBase,
-    params.addRequiredCoupledVar(nms::density, "density");
-    params.addRequiredCoupledVar(nms::total_energy_density, "total fluid energy");
-    params.addRequiredCoupledVar(nms::momentum_x, "rhou");
-    params.addCoupledVar(nms::momentum_y, "rhov");
-    params.addCoupledVar(nms::momentum_z, "rhow");
-    params.addCoupledVar(
-        nms::T_fluid,
-        "optionally use for approximating second spatial derivatives for stabilization");
-    params.addClassDescription("Provides access to variables for a conserved variable set "
-      "of density, total fluid energy, and momentum"););
+InputParameters
+ConservedVarMaterial::validParams()
+{
+  auto params = VarMaterialBase::validParams();
+  params.addRequiredCoupledVar(NS::density, "density");
+  params.addRequiredCoupledVar(NS::total_energy_density, "total fluid energy");
+  params.addRequiredCoupledVar(NS::momentum_x, "rhou");
+  params.addCoupledVar(NS::momentum_y, "rhov");
+  params.addCoupledVar(NS::momentum_z, "rhow");
+  params.addCoupledVar(
+      NS::T_fluid,
+      "optionally use for approximating second spatial derivatives for stabilization");
+  params.addClassDescription("Provides access to variables for a conserved variable set "
+    "of density, total fluid energy, and momentum");
+  params.addParam<MaterialPropertyName>(NS::porosity, "the porosity");
+  return params;
+}
 
 using MetaPhysicL::raw_value;
 
 ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
   : VarMaterialBase(params),
-    _var_rho(adCoupledValue(nms::density)),
-    _var_total_energy_density(adCoupledValue(nms::total_energy_density)),
-    _var_rho_u(adCoupledValue(nms::momentum_x)),
-    _var_rho_v(isCoupled(nms::momentum_y) ? adCoupledValue(nms::momentum_y) : _ad_zero),
-    _var_rho_w(isCoupled(nms::momentum_z) ? adCoupledValue(nms::momentum_z) : _ad_zero),
-    _var_grad_rho(adCoupledGradient(nms::density)),
-    _var_grad_rho_et(adCoupledGradient(nms::total_energy_density)),
-    _var_grad_rho_u(adCoupledGradient(nms::momentum_x)),
-    _var_grad_rho_v(isCoupled(nms::momentum_y) ? adCoupledGradient(nms::momentum_y) : _ad_grad_zero),
-    _var_grad_rho_w(isCoupled(nms::momentum_z) ? adCoupledGradient(nms::momentum_z) : _ad_grad_zero),
-    _var_grad_grad_rho(adCoupledSecond(nms::density)),
-    _var_grad_grad_rho_u(adCoupledSecond(nms::momentum_x)),
-    _var_grad_grad_rho_v(isCoupled(nms::momentum_y) ? adCoupledSecond(nms::momentum_y) : _ad_second_zero),
-    _var_grad_grad_rho_w(isCoupled(nms::momentum_z) ? adCoupledSecond(nms::momentum_z) : _ad_second_zero),
-    _var_rho_dot(_is_transient ? adCoupledDot(nms::density) : _ad_zero),
-    _var_rho_et_dot(_is_transient ? adCoupledDot(nms::total_energy_density) : _ad_zero),
-    _var_rho_u_dot(_is_transient ? adCoupledDot(nms::momentum_x) : _ad_zero),
-    _var_rho_v_dot(isCoupled(nms::momentum_y) && _is_transient ? adCoupledDot(nms::momentum_y)
+    _var_rho(adCoupledValue(NS::density)),
+    _var_total_energy_density(adCoupledValue(NS::total_energy_density)),
+    _var_rho_u(adCoupledValue(NS::momentum_x)),
+    _var_rho_v(isCoupled(NS::momentum_y) ? adCoupledValue(NS::momentum_y) : _ad_zero),
+    _var_rho_w(isCoupled(NS::momentum_z) ? adCoupledValue(NS::momentum_z) : _ad_zero),
+    _var_grad_rho(adCoupledGradient(NS::density)),
+    _var_grad_rho_et(adCoupledGradient(NS::total_energy_density)),
+    _var_grad_rho_u(adCoupledGradient(NS::momentum_x)),
+    _var_grad_rho_v(isCoupled(NS::momentum_y) ? adCoupledGradient(NS::momentum_y) : _ad_grad_zero),
+    _var_grad_rho_w(isCoupled(NS::momentum_z) ? adCoupledGradient(NS::momentum_z) : _ad_grad_zero),
+    _var_grad_grad_rho(adCoupledSecond(NS::density)),
+    _var_grad_grad_rho_u(adCoupledSecond(NS::momentum_x)),
+    _var_grad_grad_rho_v(isCoupled(NS::momentum_y) ? adCoupledSecond(NS::momentum_y) : _ad_second_zero),
+    _var_grad_grad_rho_w(isCoupled(NS::momentum_z) ? adCoupledSecond(NS::momentum_z) : _ad_second_zero),
+    _var_rho_dot(_is_transient ? adCoupledDot(NS::density) : _ad_zero),
+    _var_rho_et_dot(_is_transient ? adCoupledDot(NS::total_energy_density) : _ad_zero),
+    _var_rho_u_dot(_is_transient ? adCoupledDot(NS::momentum_x) : _ad_zero),
+    _var_rho_v_dot(isCoupled(NS::momentum_y) && _is_transient ? adCoupledDot(NS::momentum_y)
                                                           : _ad_zero),
-    _var_rho_w_dot(isCoupled(nms::momentum_z) && _is_transient ? adCoupledDot(nms::momentum_z)
+    _var_rho_w_dot(isCoupled(NS::momentum_z) && _is_transient ? adCoupledDot(NS::momentum_z)
                                                           : _ad_zero),
     _var_grad_grad_T_fluid(isCoupled(nms::T_fluid) ? adCoupledSecond(nms::T_fluid)
                                                    : _ad_second_zero)
@@ -70,8 +72,8 @@ bool
 ConservedVarMaterial::coupledAuxiliaryVariables() const
 {
   auto & sys = _fe_problem.getAuxiliarySystem();
-  return sys.hasVariable(nms::density) || sys.hasVariable(nms::total_energy_density) || sys.hasVariable(nms::momentum_x) ||
-      sys.hasVariable(nms::momentum_y) || sys.hasVariable(nms::momentum_z);
+  return sys.hasVariable(NS::density) || sys.hasVariable(NS::total_energy_density) || sys.hasVariable(NS::momentum_x) ||
+      sys.hasVariable(NS::momentum_y) || sys.hasVariable(NS::momentum_z);
 }
 
 void
