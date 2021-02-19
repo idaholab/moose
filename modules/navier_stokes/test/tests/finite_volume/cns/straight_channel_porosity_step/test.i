@@ -5,24 +5,22 @@ advected_interp_method='upwind'
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0
-    # xmax = 30
-    # nx = 30
-    xmax = 10
-    nx = 20000
+    xmax = 30
+    nx = 30000
   []
-  # [changing_porosity]
-  #   input = cartesian
-  #   type = SubdomainBoundingBoxGenerator
-  #   bottom_left = '10 0 0'
-  #   top_right = '20 1 1'
-  #   block_id = 1
-  # []
-  [constant_again_porosity]
+  [changing_porosity]
     input = cartesian
     type = SubdomainBoundingBoxGenerator
-    bottom_left = '5 0 0'
-    top_right = '10 1 1'
+    bottom_left = '10 0 0'
+    top_right = '20 1 1'
     block_id = 1
+  []
+  [constant_again_porosity]
+    input = changing_porosity
+    type = SubdomainBoundingBoxGenerator
+    bottom_left = '20 0 0'
+    top_right = '30 1 1'
+    block_id = 2
   []
 []
 
@@ -216,7 +214,7 @@ advected_interp_method='upwind'
   #   type = FVDirichletBC
   #   boundary = 'left'
   #   variable = rho_et
-  #   value = 1
+  #   value = 10.5
   # []
   [rho_et_left]
     type = FVNeumannBC
@@ -249,17 +247,17 @@ advected_interp_method='upwind'
     prop_values = '1'
     block = 0
   []
-  # [porosity_changing]
-  #   type = GenericFunctionMaterial
-  #   prop_names = 'porosity'
-  #   prop_values = 'changing_eps'
-  #   block = 1
-  # []
+  [porosity_changing]
+    type = GenericFunctionMaterial
+    prop_names = 'porosity'
+    prop_values = 'changing_eps'
+    block = 1
+  []
   [porosity_right]
     type = GenericConstantMaterial
     prop_names = 'porosity'
     prop_values = '0.5'
-    block = 1
+    block = 2
   []
 []
 
@@ -271,11 +269,9 @@ advected_interp_method='upwind'
 []
 
 [Executioner]
-  # type = Steady
-  # nl_rel_tol = 1e-3
   solve_type = NEWTON
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-11
   type = Transient
   num_steps = 1000
   [TimeStepper]
@@ -283,7 +279,6 @@ advected_interp_method='upwind'
     dt = 0.1
   []
   steady_state_detection = true
-  # abort_on_solve_fail = true
 []
 
 [Outputs]
