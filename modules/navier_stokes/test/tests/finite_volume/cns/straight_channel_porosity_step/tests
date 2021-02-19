@@ -1,0 +1,20 @@
+[Tests]
+  [real_u_impl]
+    type = Exodiff
+    input = stp-step-change.i
+    exodiff = stp-step-change_out.e
+    requirement = 'The system shall be able to solve a porous version of the Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the primitive velocity.'
+    min_parallel = 9
+    valgrind = 'none'
+    method = '!dbg'
+  []
+  [darcy_u_impl]
+    type = Exodiff
+    input = stp-sup-vel-form-step-change.i
+    exodiff = stp-sup-vel-form-step-change_out.e
+    requirement = 'The system shall be able to solve a porous version of the Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the superficial velocity.'
+    min_parallel = 9
+    valgrind = 'none'
+    method = '!dbg'
+  []
+[]

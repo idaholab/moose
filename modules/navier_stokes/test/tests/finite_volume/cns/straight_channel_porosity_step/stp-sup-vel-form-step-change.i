@@ -1,19 +1,29 @@
 advected_interp_method='upwind'
-rho_stp=1.2754
-p_stp=1.01e5
+one_over_porosity_interp_method='average'
+# Establish initial conditions based on STP
+rho_initial=1.2754
+p_initial=1.01e5
 gamma=1.4
-e_stp=${fparse p_stp / (gamma - 1) / rho_stp}
-et_stp=${e_stp}
-rho_et_stp=${fparse rho_stp * et_stp}
-rho_in=${rho_stp}
+e_initial=${fparse p_initial / (gamma - 1) / rho_initial}
+# No bulk velocity in the domain initially
+et_initial=${e_initial}
+rho_et_initial=${fparse rho_initial * et_initial}
+# prescribe inlet rho = initial rho
+rho_in=${rho_initial}
+# u refers to the superficial velocity
 u_in=1
+# rho_u_in=${fparse rho_in * u_in} # Useful for Dirichlet
+mass_flux_in=${fparse u_in * rho_in}
 eps_in=1
-eps_u_rho_in=${fparse rho_in * eps_in * u_in}
-eps_u_rho_u_in=${fparse rho_in * eps_in * u_in * u_in}
-et_in=${fparse e_stp + 0.5 * u_in * u_in}
-p_in=${p_stp}
+real_u_in=${fparse u_in / eps_in}
+momentum_flux_in=${fparse u_in * rho_in * u_in / eps_in}
+# prescribe inlet e = initial e
+et_in=${fparse e_initial + 0.5 * real_u_in * real_u_in}
+# rho_et_in=${fparse rho_in * et_in} # Useful for Dirichlet
+# prescribe inlet pressure = initial pressure
+p_in=${p_initial}
 ht_in=${fparse et_in + p_in / rho_in}
-eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
+enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 
 [Mesh]
   [cartesian]
@@ -47,26 +57,20 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
 [Variables]
   [rho]
     type = MooseVariableFVReal
-    initial_condition = ${rho_stp}
+    initial_condition = ${rho_initial}
   []
   [rho_u]
     type = MooseVariableFVReal
     initial_condition = 1e-15
   []
   [rho_et]
-    type = MooseVariableFVReal
-    initial_condition = ${rho_et_stp}
+      type = MooseVariableFVReal
+    initial_condition = ${rho_et_initial}
   []
 []
 
 [AuxVariables]
   [specific_volume]
-    type = MooseVariableFVReal
-  []
-  [pressure]
-    type = MooseVariableFVReal
-  []
-  [specific_internal_energy]
     type = MooseVariableFVReal
   []
   [vel_x]
@@ -75,7 +79,13 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
   [porosity]
     type = MooseVariableFVReal
   []
-  [superficial_vel_x]
+  [real_vel_x]
+    type = MooseVariableFVReal
+  []
+  [specific_internal_energy]
+    type = MooseVariableFVReal
+  []
+  [pressure]
     type = MooseVariableFVReal
   []
   [mach]
@@ -106,12 +116,24 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
     momentum = rho_u
     execute_on = 'timestep_end'
   []
+  [porosity]
+    type = MaterialRealAux
+    variable = porosity
+    property = porosity
+    execute_on = 'timestep_end'
+  []
+  [real_vel_x]
+    type = ParsedAux
+    variable = real_vel_x
+    function = 'vel_x / porosity'
+    args = 'vel_x porosity'
+    execute_on = 'timestep_end'
+  []
   [specific_internal_energy]
-    type = NSInternalEnergyAux
+    type = ParsedAux
     variable = specific_internal_energy
-    rho = rho
-    vel_x = vel_x
-    rho_et = rho_et
+    function = 'rho_et / rho - (real_vel_x * real_vel_x) / 2'
+    args = 'rho_et rho real_vel_x'
     execute_on = 'timestep_end'
   []
   [pressure]
@@ -122,23 +144,10 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
     fluid_properties = fp
     execute_on = 'timestep_end'
   []
-  [porosity]
-    type = MaterialRealAux
-    variable = porosity
-    property = porosity
-    execute_on = 'timestep_end'
-  []
-  [superficial_vel_x]
-    type = ParsedAux
-    variable = superficial_vel_x
-    function = 'vel_x * porosity'
-    args = 'vel_x porosity'
-    execute_on = 'timestep_end'
-  []
   [mach]
     type = NSMachAux
     variable = mach
-    vel_x = vel_x
+    vel_x = real_vel_x
     e = specific_internal_energy
     specific_volume = specific_volume
     execute_on = 'timestep_end'
@@ -147,22 +156,22 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
   [mass_flux]
     type = ParsedAux
     variable = mass_flux
-    function = 'superficial_vel_x * rho'
-    args = 'rho superficial_vel_x'
+    function = 'rho_u'
+    args = 'rho_u'
     execute_on = 'timestep_end'
   []
   [momentum_flux]
     type = ParsedAux
     variable = momentum_flux
-    function = 'superficial_vel_x * rho_u'
-    args = 'superficial_vel_x rho_u'
+    function = 'vel_x * rho_u / porosity'
+    args = 'vel_x rho_u porosity'
     execute_on = 'timestep_end'
   []
   [enthalpy_flux]
     type = ParsedAux
     variable = enthalpy_flux
-    function = 'superficial_vel_x * rho * (specific_internal_energy + 0.5 * vel_x * vel_x + pressure / rho)'
-    args = 'superficial_vel_x rho specific_internal_energy vel_x pressure'
+    function = 'vel_x * (rho_et + pressure)'
+    args = 'vel_x rho_et pressure'
     execute_on = 'timestep_end'
   []
 []
@@ -175,19 +184,20 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
   [mass_advection]
     type = FVMatAdvection
     variable = rho
-    vel = superficial_velocity
+    vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
 
   [momentum_time]
-    type = FVPorosityTimeDerivative
+    type = FVTimeKernel
     variable = rho_u
   []
   [momentum_advection]
-    type = FVMatAdvection
+    type = NSFVPorosityMatAdvection
     variable = rho_u
-    vel = superficial_velocity
+    vel = velocity
     advected_interp_method = ${advected_interp_method}
+    one_over_porosity_interp_method = ${one_over_porosity_interp_method}
   []
   [momentum_pressure]
     type = FVPorosityMomentumPressure
@@ -203,7 +213,7 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
     type = FVMatAdvection
     variable = rho_et
     advected_quantity = 'rho_ht'
-    vel = superficial_velocity
+    vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
 []
@@ -213,57 +223,58 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
   #   type = FVDirichletBC
   #   boundary = 'left'
   #   variable = rho
-  #   value = 1
+  #   value = ${rho_in}
   # []
   [rho_left]
     type = FVNeumannBC
     boundary = 'left'
     variable = rho
-    value = ${eps_u_rho_in}
+    value = ${mass_flux_in}
   []
   [rho_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho
-    vel = superficial_velocity
+    vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
   # [rho_u_left]
   #   type = FVDirichletBC
   #   boundary = 'left'
   #   variable = rho_u
-  #   value = 1
+  #   value = ${rho_u_in}
   # []
   [rho_u_left]
     type = FVNeumannBC
     boundary = 'left'
     variable = rho_u
-    value = ${eps_u_rho_u_in}
+    value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVPorosityMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_u
-    vel = superficial_velocity
+    vel = velocity
     advected_interp_method = ${advected_interp_method}
+    one_over_porosity_interp_method = ${one_over_porosity_interp_method}
   []
   # [rho_et_left]
   #   type = FVDirichletBC
   #   boundary = 'left'
   #   variable = rho_et
-  #   value = 10.5
+  #   value = ${rho_et_in}
   # []
   [rho_et_left]
     type = FVNeumannBC
     boundary = 'left'
     variable = rho_et
-    value = ${eps_u_rho_ht_in}
+    value = ${enthalpy_flux_in}
   []
   [rho_et_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
-    vel = superficial_velocity
+    vel = velocity
     advected_quantity = 'rho_ht'
     advected_interp_method = ${advected_interp_method}
   []
@@ -277,7 +288,7 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
     rho_et = rho_et
     fp = fp
     porosity = porosity
-    velocity_is_superficial = false
+    velocity_is_superficial = true
   []
   [porosity_left]
     type = GenericConstantMaterial
