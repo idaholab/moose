@@ -39,6 +39,7 @@ namespace NS
   static const std::string superficial_velocity_x = "superficial_vel_x";
   static const std::string superficial_velocity_y = "superficial_vel_y";
   static const std::string superficial_velocity_z = "superficial_vel_z";
+  static const std::string superficial_velocity = "superficial_velocity";
   static const std::string pressure = "pressure";
   static const std::string temperature = "temperature";
 
