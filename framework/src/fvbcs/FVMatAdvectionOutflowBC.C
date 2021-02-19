@@ -58,20 +58,19 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  ADRealVectorValue v;
   ADReal adv_quant_boundary;
 
   using namespace Moose::FV;
 
   // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
+  interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
 
   interpolate(_advected_interp_method,
               adv_quant_boundary,
               _adv_quant_elem[_qp],
               _adv_quant_neighbor[_qp],
-              v,
+              _v,
               *_face_info,
               true);
-  return _normal * v * adv_quant_boundary;
+  return _normal * _v * adv_quant_boundary;
 }
