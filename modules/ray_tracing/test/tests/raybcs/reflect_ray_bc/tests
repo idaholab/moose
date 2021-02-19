@@ -1,4 +1,7 @@
 [Tests]
+  design = 'ReflectRayBC.md RayBCs/index.md'
+  issues = '#16028'
+
   [test]
     type = 'CSVDiff'
     input = 'reflect_ray_bc.i'
@@ -6,7 +9,14 @@
     allow_test_objects = true
 
     requirement = 'The system shall support the specular reflection of rays on a boundary.'
-    design = 'ReflectRayBC.md RayBCs/index.md'
-    issues = '#16028'
+  []
+
+  [non_planar_warning]
+    type = RunException
+    input = 'reflect_ray_bc_nonplanar.i'
+    expect_err = 'A Ray is being reflected on a non-planar side.'
+    allow_test_objects = true
+
+    requirement = 'The system shall report a reasonable warning when using an approximation to reflect a ray on a side that is not planar.'
   []
 []

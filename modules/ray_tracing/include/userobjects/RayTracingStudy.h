@@ -1139,9 +1139,6 @@ private:
   /// new registered Rays are added via registerRay()
   bool _need_to_associate_registered_rays;
 
-  /// Default prefix for errors when calling verifyRay()
-  const std::string _verify_ray_error_prefix;
-
   /// Helper for defining a local contiguous index for each element
   ElemIndexHelper _elem_index_helper;
 

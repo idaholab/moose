@@ -91,6 +91,8 @@ RepeatableRayStudy::RepeatableRayStudy(const InputParameters & parameters)
 {
   if (_end_points && _directions)
     paramError("directions", "Can only use 'directions' or 'end_points', but not both");
+  if (!_end_points && !_directions)
+    mooseError("Must set 'end_points' or 'directions'");
   if (_start_points.size() != _names.size())
     paramError("start_points", "Not the same size as names");
   if (_directions && _names.size() != _directions->size())

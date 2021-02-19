@@ -49,8 +49,7 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
     _verify_replicated_rays(registerTimedSection("verifyReplicatedRays", 2))
 {
   if (!_claim_after_define_rays && getParam<bool>("_define_rays_replicated"))
-    mooseWarning(_error_prefix,
-                 ": The combination of private parameters:",
+    mooseWarning("The combination of private parameters:",
                  "\n  '_define_rays_replicated' == true",
                  "\n  '_claim_after_define_rays' == false",
                  "\nis not a valid combination.",
@@ -164,10 +163,10 @@ RepeatableRayStudyBase::defineRaysInternal()
   auto num_rays = _rays.size();
   _communicator.sum(num_rays);
   if (!num_rays)
-    mooseError(_error_prefix, ": No Rays were moved to _rays in defineRays()");
+    mooseError("No Rays were moved to _rays in defineRays()");
   for (const auto & ray : _rays)
     if (!ray)
-      mooseError(_error_prefix, ": A nullptr Ray was found in _rays after defineRays().");
+      mooseError("A nullptr Ray was found in _rays after defineRays().");
 
   // The Rays in _rays are ready to go as is: they have their starting element
   // set, their incoming set (if any), and are on the processor that owns said
@@ -188,8 +187,7 @@ RepeatableRayStudyBase::defineRaysInternal()
     for (const std::shared_ptr<Ray> & ray : _rays)
       if (ray->currentElem() || !ray->invalidCurrentIncomingSide())
         mooseError(
-            _error_prefix,
-            ": A Ray was found in _rays after defineRays() that has a starting element or "
+            "A Ray was found in _rays after defineRays() that has a starting element or "
             "incoming side set.\n\n",
             "With the mode in which the private param '_claim_after_define_rays' == true,",
             "\nthe defined Rays at this point should not have their starting elem/side set.\n",
@@ -254,8 +252,7 @@ RepeatableRayStudyBase::verifyReplicatedRays()
 
     // The sizes better match
     if (rank_0_rays.size() != _rays.size())
-      mooseError(_error_prefix,
-                 ": The size of _rays on rank ",
+      mooseError("The size of _rays on rank ",
                  _pid,
                  " does not match the size of rays on rank 0.",
                  error_suffix);
@@ -265,8 +262,7 @@ RepeatableRayStudyBase::verifyReplicatedRays()
     {
       const auto find = ray_map.find(ray->id());
       if (find == ray_map.end())
-        mooseError(_error_prefix,
-                   ": A Ray was found on rank ",
+        mooseError("A Ray was found on rank ",
                    _pid,
                    " with an ID that does not exist on rank 0.",
                    error_suffix,
@@ -276,8 +272,7 @@ RepeatableRayStudyBase::verifyReplicatedRays()
       const Ray * root_ray = find->second;
       if (*root_ray != *ray)
       {
-        mooseError(_error_prefix,
-                   ": A Ray was found on rank ",
+        mooseError("A Ray was found on rank ",
                    _pid,
                    " that does not exist on rank 0.",
                    error_suffix,

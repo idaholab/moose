@@ -66,4 +66,27 @@
       detail = 'and a non-replicated ray exists on a processor.'
     []
   []
+
+  [define_errors]
+    requirement = 'The RepeatableRayStudyBase shall return a useful error after defining rays when'
+
+    [no_rays]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/define_no_rays=true'
+      allow_test_objects = true
+      expect_err = 'No Rays were moved to _rays in defineRays\(\)'
+
+      detail = 'no rays were defined or'
+    []
+    [null_ray]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/define_nullptr_ray=true'
+      allow_test_objects = true
+      expect_err = 'A nullptr Ray was found in _rays after defineRays\(\).'
+
+      detail = 'a null ray was defined.'
+    []
+  []
 []

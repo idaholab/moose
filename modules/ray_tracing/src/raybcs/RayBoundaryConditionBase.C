@@ -55,25 +55,16 @@ RayBoundaryConditionBase::changeRayDirection(const Point & direction, const bool
   auto & ray = currentRay();
 
   if (!ray->shouldContinue())
-    mooseError(_error_prefix,
-               ": Cannot changeRayDirection() for a Ray that should not continue\n\n",
+    mooseError("Cannot changeRayDirection() for a Ray that should not continue\n\n",
                ray->getInfo());
 
-  if (!ray->intersections())
-    mooseError(
-        _error_prefix, ": Cannot change direction for Ray that has not moved\n\n", ray->getInfo());
-
   if (!skip_changed_check && ray->trajectoryChanged())
-    mooseError(
-        _error_prefix,
-        " is trying to change a Ray's direction, but its direction has already been changed\n\n",
-        ray->getInfo());
+    mooseError("Cannot change direction for a ray whose direction has already been changed\n\n",
+               ray->getInfo());
 
   if (ray->endSet())
-    mooseError(_error_prefix,
-               " is trying to change the direction of a Ray that"
-               "\nhad its end point set upon generation (via setStartingEndPoint())."
-               "\n\nThis is not currently supported.\n\n",
+    mooseError("Cannot change the direction of a Ray whose end point is set upon generation "
+               "(via setStartingEndPoint()).\n\n",
                ray->getInfo());
 
   ray->changeDirection(direction, Ray::ChangeDirectionKey());
@@ -98,23 +89,6 @@ RayBoundaryConditionBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
-
-  if (_current_elem != ray->currentElem())
-    mooseError(_error_prefix,
-               ": A Ray was added to the buffer mid-trace that does not\n",
-               "start in the same Elem as the ",
-               type(),
-               " that created it\n\n",
-               currentRay()->getInfo());
-
-  if (ray->currentIncomingSide() != _current_intersected_side)
-    mooseError(
-        _error_prefix,
-        " is trying to add a Ray to the buffer during tracing,\n",
-        "but the incoming side of the new Ray is not the same as the intersected side of the ",
-        type(),
-        " that created it\n\n",
-        ray->getInfo());
 
   _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }

@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayBCs/index.md'
+
+  [change_direction]
+    requirement = 'The system shall report an error when changing a ray direction within a RayBC when'
+
+    [should_not_continue]
+      type = RunException
+      input = 'raybc_errors.i'
+      cli_args = "RayBCs/active='kill change'
+                  RayBCs/change/depends_on=kill"
+      expect_err = "Cannot changeRayDirection\(\) for a Ray that should not continue"
+      allow_test_objects = true
+
+      detail = 'the ray was set to not continue by another RayBC,'
+    []
+    [again]
+      type = RunException
+      input = 'raybc_errors.i'
+      cli_args = "RayBCs/active='change change_again'"
+      expect_err = "Cannot change direction for a ray whose direction has already been changed"
+      allow_test_objects = true
+
+      detail = 'the ray already had its direction changed,'
+    []
+    [end_set]
+      type = RunException
+      input = 'raybc_errors.i'
+      cli_args = "Mesh/active='gmg internal'
+                  UserObjects/active=set_end_study
+                  RayBCs/active=change_internal"
+      expect_err = "Cannot change the direction of a Ray whose end point is set upon generation"
+      allow_test_objects = true
+
+      detail = 'the end point of the ray was set upon generation,'
+    []
+    [zero]
+      type = RunException
+      input = 'raybc_errors.i'
+      cli_args = "RayBCs/active=change_zero"
+      expect_err = "Cannot set zero vector direction for a Ray"
+      allow_test_objects = true
+
+      detail = 'and when the direction is changed to the zero vector.'
+    []
+  []
+[]

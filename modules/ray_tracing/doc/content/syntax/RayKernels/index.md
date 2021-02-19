@@ -89,7 +89,7 @@ In the case of the [IntegralRayKernel.md], the [Ray.md] data is accessed as such
 
 ## Creating Additional Rays
 
-It is possible to generate another [Ray.md] to be traced from within a RayKernel. A [Ray.md] that is generated from within a RayKernel *must* have a starting point within the element that created it. This method is thread safe.
+It is possible to generate another [Ray.md] to be traced from within a RayKernel. This method is thread safe.
 
 First, acquire a new [Ray.md] using the `acquireRay()` method (for more information on acquiring [Rays](Ray.md), see [RayTracingStudy.md#ray-pool]), which takes as arguments the starting point and direction of travel for the new [Ray.md]. For example:
 

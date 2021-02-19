@@ -45,20 +45,19 @@ RayDataValue::RayDataValue(const InputParameters & parameters)
   if (_ray_id && _ray_name)
     paramError("ray_id", "Either 'ray_id' or 'ray_name' must be set, but not both");
   if (!_ray_id && !_ray_name)
-    mooseError(
-        type(), " '", name(), ": Must have either the 'ray_id' or the 'ray_name' param set.");
+    mooseError("Must have either the 'ray_id' or the 'ray_name' param set.");
 
   if (_ray_name && !_study.useRayRegistration())
     paramError("study",
-               _study.type(),
+               _study.errorPrefix(),
                " does not support Ray registration.\n\nThis is controlled by the "
-               "'_use_ray_registration' private param.");
+               "'_use_ray_registration' private param within the study.");
 
   if (!_study.bankRaysOnCompletion())
     paramError("study",
-               _study.type(),
+               _study.errorPrefix(),
                " does not bank Rays on completion.\n\nThis is controlled by the "
-               "'_bank_rays_on_completion' private param.");
+               "'_bank_rays_on_completion' private param within the study.");
 }
 
 void

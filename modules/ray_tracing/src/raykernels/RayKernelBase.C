@@ -69,36 +69,27 @@ RayKernelBase::changeRayStartDirection(const Point & start, const Point & direct
   if (!ray->shouldContinue())
   {
     if (ray->endSet() && ray->atEnd())
-      mooseError(_error_prefix,
-                 ": Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
+      mooseError("Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
                  "It has also hit its user-set end point.\n\n",
                  ray->getInfo());
     else
-      mooseError(_error_prefix,
-                 ": Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
+      mooseError("Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
                  ray->getInfo());
   }
 
-  if (!ray->intersections())
-    mooseError(_error_prefix, ": Cannot changeRayStartDirection() for Ray that has not moved");
 
   if (ray->trajectoryChanged())
-    mooseError(
-        _error_prefix,
-        " is trying to change a Ray's trajectory, but its trajectory has already been changed\n\n",
-        ray->getInfo());
+    mooseError("Cannot change a Ray's trajectory when its trajectory has already been changed\n\n",
+               ray->getInfo());
 
   if (ray->endSet())
-    mooseError(_error_prefix,
-               " is trying to change the direction of a Ray that"
-               "\nhad its end point set upon generation (via setStartingEndPoint())."
-               "\n\nThis is not currently supported.\n\n",
+    mooseError("Cannot change the direction of a Ray whose end point is set upon generation "
+               "(via setStartingEndPoint()).\n\n",
                ray->getInfo());
 
   if (_study.verifyRays() && !_current_elem->contains_point(start))
-    mooseError(_error_prefix,
-               " is trying to change a Ray's trajectory,\n",
-               "but the new start point is not within the Ray's current element\n\n",
+    mooseError("A Ray's start point was changed within a RayKernel, and said start point\n",
+               "is not within the element that the RayKernel was executed on.\n\n",
                ray->getInfo());
 
   ray->changeStartDirection(start, direction, Ray::ChangeStartDirectionKey());
@@ -123,14 +114,6 @@ RayKernelBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
-
-  if (_current_elem != ray->currentElem())
-    mooseError(_error_prefix,
-               ": A Ray was added to the buffer mid-trace that does not\n",
-               "start in the same Elem as the ",
-               type(),
-               " that created it\n\n",
-               currentRay()->getInfo());
 
   _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }

@@ -11,10 +11,10 @@
 
 #include "GeneralRayKernel.h"
 
-class ChangeDataRayKernelTest : public GeneralRayKernel
+class ChangeRayRayKernelTest : public GeneralRayKernel
 {
 public:
-  ChangeDataRayKernelTest(const InputParameters & params);
+  ChangeRayRayKernelTest(const InputParameters & params);
 
   static InputParameters validParams();
 

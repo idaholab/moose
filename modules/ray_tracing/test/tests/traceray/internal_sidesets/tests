@@ -71,4 +71,15 @@
       detail = 'and three-dimensional meshes.'
     []
   []
+
+  [internal_sidesets_disabled]
+    type = RunException
+    input = 'internal_sidesets_1d.i'
+    cli_args = 'UserObjects/study/use_internal_sidesets=false
+                RayBCs/active=\'kill_internal\''
+    expect_err = 'RayBCs are defined on internal sidesets, but the study is not set to use internal sidesets during tracing.'
+    allow_test_objects = true
+
+    requirement = 'The system shall throw an error if RayBCs are defined on internal sidesets, but the study does not have internal sideset capability enabled.'
+  []
 []

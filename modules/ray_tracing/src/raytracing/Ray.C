@@ -463,7 +463,7 @@ Ray::getInfo() const
 {
   std::ostringstream oss;
 
-  oss << "Ray information with " << _study.errorPrefix() << " on pid " << _study.comm().rank()
+  oss << "Ray information with study '" << _study.name() << "' on pid " << _study.comm().rank()
       << "\n";
   oss << "  this = " << this << "\n";
   oss << "  id() = " << id() << "\n";

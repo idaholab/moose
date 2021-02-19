@@ -254,8 +254,7 @@ LotsOfRaysRayStudy::defineRay(const Elem * starting_elem,
     {
       const Point end = _bbox_intersection_helper->intersection(p1, ray->direction());
       if (end == RayTracingCommon::invalid_point)
-        mooseError(
-            _error_prefix, ": Expected distance end intersection not found\n\n", ray->getInfo());
+        mooseError("Expected distance end intersection not found\n\n", ray->getInfo());
 
       _expected_distance += (end - p1).norm();
     }
