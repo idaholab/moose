@@ -9,6 +9,7 @@
 
 #include "BuildArrayVariableAux.h"
 
+#include <algorithm>
 #include "SystemBase.h"
 
 registerMooseObject("MooseApp", BuildArrayVariableAux);
@@ -17,48 +18,43 @@ InputParameters
 BuildArrayVariableAux::validParams()
 {
   InputParameters params = ArrayAuxKernel::validParams();
-  params.addParam<std::vector<VariableName>>(
-      "component_variables",
-      "The variables that make up each component of the output array variable.");
+  params.addCoupledVar("component_variables",
+                       "The variables that make up each component of the output array variable.");
   params.addClassDescription("Copy multiple variables into the components of an array variable.");
   return params;
 }
 
 BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
-  : ArrayAuxKernel(parameters)
+  : ArrayAuxKernel(parameters), _component_vars(coupledValues("component_variables"))
 {
-  const auto & var_names = parameters.get<std::vector<VariableName>>("component_variables");
-
   // Check the number of component variables
-  if (var_names.size() != _var.count())
+  if (_component_vars.size() != _var.count())
     mooseError("The array variable has ",
                _var.count(),
                " components, but ",
-               var_names.size(),
+               _component_vars.size(),
                " component variables were specified.");
 
-  // Get pointers to each of the component VariableValues
+  // List the supported FETypes
+  std::vector<FEType> supported_fe_types{{Order::CONSTANT, FEFamily::MONOMIAL},
+                                         {Order::FIRST, FEFamily::LAGRANGE}};
+
+  // Check the FEType of the output variable
+  if (std::find(supported_fe_types.begin(), supported_fe_types.end(), _var.feType()) ==
+      supported_fe_types.end())
+    mooseError(
+        "BuildArrayVariableAux only supports constant monomial or linear Lagrange variables");
+
+  // Make sure the FEType of each input variable matches the output type
+  const auto & var_names = parameters.get<std::vector<VariableName>>("component_variables");
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
   for (VariableName name : var_names)
   {
     const MooseVariableFieldBase & var_base = _subproblem.getVariable(tid, name);
-
-    // Check the FEType of the component var
-    if ((var_base.feType().family != FEFamily::MONOMIAL) ||
-        (var_base.feType().order != Order::CONSTANT))
-      mooseError("BuildArrayVariableAux only supports constant monomial variables");
-
-    // Try casting to the appropriate type and store the VariableValue
-    if (const MooseVariableField<Real> * var =
-            dynamic_cast<const MooseVariableField<Real> *>(&var_base))
-      _component_vars.push_back(&var->sln());
-    else
-      mooseError("BuildArrayVariableAux only supports variables of type MooseVariableField<Real>");
+    if (var_base.feType() != _var.feType())
+      mooseError(
+          "The input and output variables of BuildArrayVariableAux must have the same FE type");
   }
-
-  // Check the FEType of the output variable
-  if ((_var.feType().family != FEFamily::MONOMIAL) || (_var.feType().order != Order::CONSTANT))
-    mooseError("BuildArrayVariableAux only supports constant monomial variables");
 }
 
 RealEigenVector

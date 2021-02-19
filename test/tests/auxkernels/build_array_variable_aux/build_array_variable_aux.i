@@ -8,53 +8,99 @@
 []
 
 [Variables]
-  [u]
+  [a]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [b]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [c]
     order = CONSTANT
     family = MONOMIAL
     fv = true
   []
-  [v]
+  [d]
     order = CONSTANT
     family = MONOMIAL
     fv = true
+  []
+[]
+
+[Kernels]
+  [diff_a]
+    type = Diffusion
+    variable = a
+  []
+  [diff_b]
+    type = Diffusion
+    variable = b
   []
 []
 
 [FVKernels]
-  [diff_u]
+  [diff_c]
     type = FVDiffusion
-    variable = u
+    variable = c
     coeff = 1
   []
-  [diff_v]
+  [diff_d]
     type = FVDiffusion
-    variable = v
+    variable = d
     coeff = 1
   []
 []
 
-[FVBCs]
-  [left]
-    type = FVDirichletBC
-    variable = u
+[BCs]
+  [a1]
+    type = DirichletBC
+    variable = a
     boundary = left
     value = 0
   []
-  [right]
-    type = FVDirichletBC
-    variable = u
+  [a2]
+    type = DirichletBC
+    variable = a
     boundary = right
     value = 1
   []
-  [bottom]
-    type = FVDirichletBC
-    variable = v
+  [b1]
+    type = DirichletBC
+    variable = b
     boundary = bottom
     value = 0
   []
-  [top]
+  [b2]
+    type = DirichletBC
+    variable = b
+    boundary = top
+    value = 1
+  []
+[]
+
+[FVBCs]
+  [c1]
     type = FVDirichletBC
-    variable = v
+    variable = c
+    boundary = left
+    value = 0
+  []
+  [c2]
+    type = FVDirichletBC
+    variable = c
+    boundary = right
+    value = 1
+  []
+  [d1]
+    type = FVDirichletBC
+    variable = d
+    boundary = bottom
+    value = 0
+  []
+  [d2]
+    type = FVDirichletBC
+    variable = d
     boundary = top
     value = 1
   []
@@ -70,7 +116,12 @@
 []
 
 [AuxVariables]
-  [uv]
+  [ab]
+    order = FIRST
+    family = LAGRANGE
+    components = 2
+  []
+  [cd]
     order = CONSTANT
     family = MONOMIAL
     components = 2
@@ -78,10 +129,15 @@
 []
 
 [AuxKernels]
-  [build_uv]
+  [build_ab]
     type = BuildArrayVariableAux
-    variable = uv
-    component_variables = 'u v'
+    variable = ab
+    component_variables = 'a b'
+  []
+  [build_cd]
+    type = BuildArrayVariableAux
+    variable = cd
+    component_variables = 'c d'
   []
 []
 
