@@ -32,7 +32,7 @@ PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & p
   _rho(getParam<Real>("rho")),
   _cp(getADMaterialProperty<Real>("cp_name")),
   _eps(coupledValue("porosity")),
-  _eps_dot(coupledDot("porosity")),
+  // _eps_dot(coupledDot("porosity")),
   _is_solid(getParam<bool>("is_solid"))
 {
 }
@@ -43,6 +43,6 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
   //FIXME Neglecting time derivative of _cp
   //FIXME Possibly use a VarMat instead of querying variables as parameters
   //FIXME Separate derivative of porosity since it's uncommon to need it
-  return (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * _rho * _cp[_qp] * FVTimeKernel::computeQpResidual() +
-     (_is_solid ? - _eps_dot[_qp] : _eps_dot[_qp]) * _rho * _cp[_qp] * _u[_qp];
+  return (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * _rho * _cp[_qp] * FVTimeKernel::computeQpResidual();// +
+     // (_is_solid ? - _eps_dot[_qp] : _eps_dot[_qp]) * _rho * _cp[_qp] * _u[_qp];
 }
