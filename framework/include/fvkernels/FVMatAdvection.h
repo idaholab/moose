@@ -31,4 +31,8 @@ protected:
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
+
+  /// The interfacial velocity. We cache this in the residual computation in case a derived class
+  /// might want to use it
+  ADRealVectorValue _v;
 };
