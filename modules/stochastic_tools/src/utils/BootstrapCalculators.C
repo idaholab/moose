@@ -61,7 +61,7 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
   std::vector<OutType> values(_replicates);
   for (std::size_t i = 0; i < _replicates; ++i)
   {
-    InType replicate = shuffle(data, generator, is_distributed);
+    InType replicate = resample(data, generator, is_distributed);
     values[i] = _calc.compute(replicate, is_distributed);
   }
   std::sort(values.begin(), values.end());
@@ -74,8 +74,7 @@ BootstrapCalculator<InType, OutType>::resample(const InType & data,
                                                MooseRandom & generator,
                                                const bool is_distributed) const
 {
-  return StochasticTools::resample<OutType>(
-      data, generator, 0, is_distributed ? &_communicator : nullptr);
+  return MooseUtils::resample(data, generator, 0, is_distributed ? &this->_communicator : nullptr);
 }
 
 // PERCENTILE //////////////////////////////////////////////////////////////////////////////////////

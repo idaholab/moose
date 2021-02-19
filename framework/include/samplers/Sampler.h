@@ -167,8 +167,8 @@ protected:
    * These methods should not be called directly, each is automatically called by the public
    * getGlobalSamples() or getLocalSamples() methods.
    */
-  virtual void sampleSetUp(const SampleMode /*mode*/){}
-  virtual void sampleTearDown(const SampleMode /*mode*/){}
+  virtual void sampleSetUp(const SampleMode /*mode*/) {}
+  virtual void sampleTearDown(const SampleMode /*mode*/) {}
   ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,

@@ -33,7 +33,7 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
 
   setNumberOfRows(getParam<dof_id_type>("num_rows"));
   setNumberOfCols(distribution_names.size());
-  setNumberOfRandomSeeds(2 * getNumberOfCols());
+  setNumberOfRandomSeeds(2 * distribution_names.size());
 
   // The use of MooseRandom in this Sampler is fairly complex. There are two sets of random
   // generators. The first set (n = number columns) is used to generate the random probability
