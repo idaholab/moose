@@ -32,6 +32,12 @@ FVMomentumPressure::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+
+  // In the worst case scenario this pressure gradient will be computed by a material and if we are
+  // doing FV then we will also have a neighbor material that is computing a cell center gradient.
+  // And cell ceneter gradients need one layer of ghosting. So total layers = neighbor needs
+  // gradient (1) + neighbor cell center gradient (1) = 2
+  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
