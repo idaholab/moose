@@ -21,24 +21,24 @@
 
 [RayKernels]
   [add_1]
-    type = ChangeDataRayKernelTest
+    type = ChangeRayRayKernelTest
     data_name = data
     add_value = 1
     depends_on = add_10
   []
   [scale_5]
-    type = ChangeDataRayKernelTest
+    type = ChangeRayRayKernelTest
     data_name = data
     scale_value = 5
     depends_on = scale_9
   []
   [add_10]
-    type = ChangeDataRayKernelTest
+    type = ChangeRayRayKernelTest
     data_name = data
     add_value = 10
   []
   [scale_9]
-    type = ChangeDataRayKernelTest
+    type = ChangeRayRayKernelTest
     data_name = data
     scale_value = 9
     depends_on = add_1

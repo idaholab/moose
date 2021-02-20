@@ -60,4 +60,32 @@
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
   []
+  [linear-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction_out.e
+    requirement = 'The system shall be able to model linear volumetric friction in a channel.'
+    issues = '#16872'
+    ad_indexing_type = 'global'
+    design = 'NSFVMomentumFriction.md'
+  []
+  [quadratic-friction]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = 2d-rc-friction-quad_out.e
+    requirement = 'The system shall be able to model quadratic volumetric friction in a channel.'
+    issues = '#16872'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='2d-rc-friction-quad_out' FVKernels/inactive='u_friction_linear v_friction_linear'"
+    design = 'NSFVMomentumFriction.md'
+  []
+  [ambient-convection]
+    type = 'Exodiff'
+    input = 2d-rc-ambient-convection.i
+    exodiff = 2d-rc-ambient-convection_out.e
+    requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
+    issues = '#16948'
+    ad_indexing_type = 'global'
+    design = 'NSFVEnergyAmbientConvection.md'
+  []
 []

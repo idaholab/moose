@@ -1430,6 +1430,11 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     }
 
     elem_to_delete->nullify_neighbors();
+
+    // remove the property storage of deleted element/side
+    (*_material_data)[0]->eraseProperty(elem_to_delete);
+    (*_bnd_material_data)[0]->eraseProperty(elem_to_delete);
+
     _mesh->boundary_info->remove(elem_to_delete);
     unsigned int deleted_elem_id = elem_to_delete->id();
     _mesh->delete_elem(elem_to_delete);

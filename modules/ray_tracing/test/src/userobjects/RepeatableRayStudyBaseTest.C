@@ -27,6 +27,9 @@ RepeatableRayStudyBaseTest::validParams()
   params.addParam<processor_id_type>("create_non_replicated_ray_pid",
                                      "Create a non-replicated Ray on the given processor");
 
+  params.addParam<bool>("define_no_rays", false, "Test defining no rays");
+  params.addParam<bool>("define_nullptr_ray", false, "Test defining a nullptr ray");
+
   params.suppressParameter<std::vector<Real>>("max_distances");
   params.suppressParameter<std::vector<Point>>("end_points");
 
@@ -41,7 +44,13 @@ RepeatableRayStudyBaseTest::RepeatableRayStudyBaseTest(const InputParameters & p
 void
 RepeatableRayStudyBaseTest::defineRays()
 {
+  if (getParam<bool>("define_no_rays"))
+    return;
+
   RepeatableRayStudy::defineRays();
+
+  if (getParam<bool>("define_nullptr_ray") && _rays.size())
+    _rays[0] = nullptr;
 
   if (parameters().isParamSetByUser("create_non_unique_id_rays") &&
       getParam<bool>("create_non_unique_id_rays"))

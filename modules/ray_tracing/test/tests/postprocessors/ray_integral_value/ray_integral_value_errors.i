@@ -5,18 +5,33 @@
   []
 []
 
-[UserObjects/study]
-  type = RepeatableRayStudy
-  start_points = '0 0 0'
-  directions = '1 1 1'
-  names = ray
-  ray_kernel_coverage_check = false
+[AuxVariables/u]
+[]
+
+[UserObjects]
+  active = 'repeatable'
+
+  [repeatable]
+    type = RepeatableRayStudy
+    start_points = '0 0 0'
+    directions = '1 0 0'
+    names = ray
+  []
+  [lots]
+    type = LotsOfRaysRayStudy
+    ray_kernel_coverage_check = false
+  []
+  [no_banking_study]
+    type = DisableRayBankingStudy
+    start_points = '0 0 0'
+    directions = '1 0 0'
+    names = ray
+  []
 []
 
 [RayBCs/kill]
   type = KillRayBC
-  boundary = right
-  study = study
+  boundary = 'left right'
 []
 
 [RayKernels]
@@ -24,6 +39,10 @@
 
   [null]
     type = NullRayKernel
+  []
+  [variable_integral]
+    type = VariableIntegralRayKernel
+    variable = u
   []
 []
 
@@ -35,10 +54,25 @@
     ray_kernel = null
     ray = ray
   []
-  [not_found]
+  [kernel_not_found]
     type = RayIntegralValue
     ray_kernel = dummy
     ray = ray
+  []
+  [ray_not_found]
+    type = RayIntegralValue
+    ray_kernel = variable_integral
+    ray = dummy
+  []
+  [no_registration]
+    type = RayIntegralValue
+    ray_kernel = variable_integral
+    ray = dummy
+  []
+  [no_banking]
+    type = RayIntegralValue
+    ray_kernel = variable_integral
+    ray = dummy
   []
 []
 

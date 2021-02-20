@@ -191,6 +191,13 @@ public:
    */
   bool isOnlyResizeIfSmaller() const { return _resize_only_if_smaller; };
 
+  /**
+   * Remove the property storage and element pointer from MaterialPropertyStorage data structures
+   * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
+   * stateful properties) hanging around in our data structures
+   */
+  void eraseProperty(const Elem * elem) { _storage.eraseProperty(elem); };
+
 protected:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;

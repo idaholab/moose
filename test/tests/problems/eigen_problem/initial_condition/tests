@@ -11,6 +11,14 @@
     requirement = "The system shall provide an initial guess to Newton if users request."
   [../]
 
+  [./newton_no_free_power]
+    type = 'CSVDiff'
+    input = 'ne_ic_no_free.i'
+    csvdiff = 'ne_ic_no_free_out_eigenvalues_0001.csv'
+    issues = '#17026'
+    requirement = "The system shall support eigenvalue execution without free power iterations."
+  [../]
+
   [./inverse_eigenvalue_postprocessor]
     type = 'CSVDiff'
     input = 'ne_ic.i'

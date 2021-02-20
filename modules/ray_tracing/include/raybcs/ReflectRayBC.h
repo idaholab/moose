@@ -28,4 +28,8 @@ public:
    * reflects off of.
    */
   static Point reflectedDirection(const Point & direction, const Point & normal);
+
+protected:
+  /// Whether or not to emit a warning if a Ray is being reflected on a non-planar side
+  const bool _warn_non_planar;
 };

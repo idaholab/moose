@@ -62,7 +62,7 @@ BackfaceCullingStudyTest::getElemNormals(const Elem * elem, const THREAD_ID)
 {
   const auto find = _normals.find(elem);
   if (find == _normals.end())
-    mooseError(_error_prefix, "Failed to find normal for elem ", elem->id());
+    mooseError("Failed to find normal for elem ", elem->id());
 
   const auto & normals = find->second;
   mooseAssert(normals.size() == elem->n_sides(), "Normals not sized properly");

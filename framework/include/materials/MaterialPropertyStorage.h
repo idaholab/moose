@@ -255,12 +255,16 @@ public:
     return _prop_names.count(retrievePropertyId(prop_name)) > 0;
   }
 
+  /**
+   * Remove the property storage and element pointer from internal data structures
+   * Use this when elements are deleted so we don't end up with invalid elem pointers (for e.g.
+   * stateful properties) hanging around in our data structures
+   */
+  void eraseProperty(const Elem * elem);
+
 protected:
   /// Release all internal data structures
   void releaseProperties();
-
-  /// Remove the property storage and element pointer from internal data structures
-  void eraseProperty(const Elem * elem);
 
   /// Internal property storage release helper
   void releasePropertyMap(HashMap<unsigned int, MaterialProperties> & inner_map);

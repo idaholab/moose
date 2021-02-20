@@ -355,6 +355,9 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
   Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+  // Only one outer iteration in EPS is allowed when Newton/PJFNK/JFNK
+  // is used as the eigen solver
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it", "1");
   if (initial_power)
   {
     Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
@@ -458,10 +461,12 @@ void
 slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 {
   Moose::PetscSupport::petscSetOptions(eigen_problem);
+  // Call "SolverTolerances" first, so some solver specific tolerance such as "eps_max_it"
+  // can be overriden
+  setSlepcEigenSolverTolerances(eigen_problem, params);
   setEigenSolverOptions(eigen_problem.solverParams(), params);
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
-  setSlepcEigenSolverTolerances(eigen_problem, params);
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 

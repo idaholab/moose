@@ -18,23 +18,32 @@ InputParameters
 ReflectRayBC::validParams()
 {
   auto params = GeneralRayBC::validParams();
+
+  params.addParam<bool>(
+      "warn_non_planar",
+      true,
+      "Whether or not to emit a warning if a Ray is being reflected on a non-planar side");
+
   params.addClassDescription("A RayBC that reflects a Ray in a specular manner on a boundary.");
+
   return params;
 }
 
-ReflectRayBC::ReflectRayBC(const InputParameters & params) : GeneralRayBC(params) {}
+ReflectRayBC::ReflectRayBC(const InputParameters & params)
+  : GeneralRayBC(params), _warn_non_planar(getParam<bool>("warn_non_planar"))
+{
+}
 
 void
 ReflectRayBC::onBoundary(const unsigned int num_applying)
 {
-  if (_study.warnNonPlanar() && _study.sideIsNonPlanar(_current_elem, _current_intersected_side))
-    mooseWarning(_error_prefix,
-                 ": A Ray is being reflected on a non-planar side.\n\n",
+  if (_warn_non_planar && _study.sideIsNonPlanar(_current_elem, _current_intersected_side))
+    mooseWarning("A Ray is being reflected on a non-planar side.\n\n",
                  "Ray tracing on elements with non-planar faces is an approximation.\n\n",
                  "The normal used to compute the reflected direction is computed at\n",
                  "the side centroid and may not be valid for a non-planar side.\n\n",
-                 "To disable this warning, set UserObjects/",
-                 _study.name(),
+                 "To disable this warning, set RayKernels/",
+                 name(),
                  "/warn_non_planar=false.\n\n",
                  currentRay()->getInfo());
 

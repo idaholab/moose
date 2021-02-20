@@ -53,14 +53,14 @@ ADRayKernelTempl<T>::ADRayKernelTempl(const InputParameters & params)
   // integrations that follow.
   for (const auto & subdomain_id : _mesh.meshSubdomains())
     if (_fe_problem.getCoordSystem(subdomain_id) != Moose::COORD_XYZ)
-      mooseError(_error_prefix, ": Not valid on coordinate systems other than XYZ");
+      mooseError("Not valid on coordinate systems other than XYZ");
 
   _subproblem.haveADObjects(true);
 
   addMooseVariableDependency(&variable());
 
   if (!isImplicit())
-    mooseError(type(), ": ADRayKernels do not currently support explicit solves.");
+    mooseError("ADRayKernels do not currently support explicit solves.");
 }
 
 template <typename T>

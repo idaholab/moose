@@ -30,13 +30,10 @@ ParallelRayStudy::postExecuteChunk(const work_iterator begin, const work_iterato
       continue;
     }
 
-    // If the Ray is going to another processor - move it to the send buffer
-    const auto dest_pid = ray->currentElem()->processor_id();
-    if (dest_pid != _pid)
-      moveParallelDataToBuffer(ray, dest_pid);
-    else
-      mooseError("Continuing Ray is not going to another processor after being traced\n\n",
-                 ray->getInfo());
+    // Going to another processor
+    mooseAssert(ray->currentElem()->processor_id() != _pid,
+                "Continuing Ray not going to another processor");
+    moveParallelDataToBuffer(ray, ray->currentElem()->processor_id());
   }
 }
 
@@ -59,8 +56,7 @@ ParallelRayStudy::postReceiveParallelData(const parallel_data_iterator begin,
 void
 ParallelRayStudy::executeWork(const std::shared_ptr<Ray> & ray, const THREAD_ID tid)
 {
-  if (!ray->shouldContinue())
-    mooseError("Tracing Ray that should not continue\n\n", ray->getInfo());
+  mooseAssert(ray->shouldContinue(), "Tracing Ray that should not continue");
 
   // If this is false, it means we have a Ray that is banked to go onto another processor
   if (ray->currentElem()->processor_id() == _pid)

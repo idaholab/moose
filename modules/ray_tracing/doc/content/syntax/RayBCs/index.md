@@ -81,10 +81,7 @@ The correct specular reflection (inwards to the domain) can be achieved by apply
 
 ## Creating a New Ray
 
-It is possible to generate another [Ray.md] to be traced from within a RayBC. A [Ray.md] that is generated from within a RayBC must satisfy the following requirements:
-
-- It must start on `_current_elem` from `_current_intersected_side` at `_current_intersection_point`.
-- Its direction must be entrant into the element on `_current_intersected_side`.
+It is possible to generate another [Ray.md] to be traced from within a RayBC.
 
 First, acquire a new [Ray.md] using the `acquireRay()` method (for more information on acquiring [Rays](Ray.md), see [RayTracingStudy.md#ray-pool]), which takes an argument that is the direction for the new [Ray.md]. For example:
 

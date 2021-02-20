@@ -23,6 +23,14 @@
     names = ray
     ray_kernel_coverage_check = false
   []
+  [no_banking_study]
+    type = DisableRayBankingStudy
+    start_points = '0 0 0'
+    directions = '1 0 0'
+    ray_data_names = data
+    names = ray
+    ray_kernel_coverage_check = false
+  []
 []
 
 [RayBCs]
@@ -41,6 +49,12 @@
     study = lots
     ray_name = dummy
     data_name = dummy
+  []
+  [no_banking]
+    type = RayDataValue
+    study = no_banking_study
+    ray_name = ray
+    data_name = data
   []
   [ray_name_not_found]
     type = RayDataValue
@@ -70,6 +84,20 @@
     ray_id = 1
     data_name = data
     execute_on = final
+  []
+  [neither_provided]
+    type = RayDataValue
+    study = repeatable
+    data_name = data
+    execute_on = initial
+  []
+  [both_provided]
+    type = RayDataValue
+    study = repeatable
+    data_name = data
+    ray_id = 0
+    ray_name = dummy
+    execute_on = initial
   []
 []
 

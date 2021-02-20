@@ -41,8 +41,6 @@ RayIntegralValue::RayIntegralValue(const InputParameters & parameters)
 void
 RayIntegralValue::initialize()
 {
-  const std::string error_prefix = type() + " '" + name() + "'";
-
   // Look for the IntegralRayKernel by the name provided by the user
   const IntegralRayKernel * integral_ray_kernel = nullptr;
   std::vector<RayKernelBase *> rks;
@@ -52,32 +50,27 @@ RayIntegralValue::initialize()
     {
       integral_ray_kernel = dynamic_cast<const IntegralRayKernel *>(rk);
       if (!integral_ray_kernel)
-        mooseError(error_prefix,
-                   ": The ",
-                   rk->errorPrefix(),
-                   " is not derived from an IntegralRayKernel.");
+        mooseError(rk->type(), " is not derived from an IntegralRayKernel.");
       _study = &rk->study();
       break;
     }
 
   // Didn't find one
   if (!integral_ray_kernel)
-    mooseError(error_prefix,
-               ": The RayKernel by the name '",
+    paramError("ray_kernel",
+               "The RayKernel by the name '",
                getParam<std::string>("ray_kernel"),
                "' was not found.");
 
   // This requires that our studies use Ray name registration
   if (!_study->useRayRegistration())
-    mooseError(error_prefix,
-               ": Cannot be used because the supplied ",
+    mooseError("Cannot be used because the supplied ",
                _study->type(),
                " does not have Ray registration enabled.\n\nThis is controlled by the "
                "RayTracingStudy private param '_use_ray_registration'.");
   // And also that the Rays are banked, otherwise we can't grab the values
   if (!_study->bankRaysOnCompletion())
-    mooseError(error_prefix,
-               ": Cannot be used because the supplied ",
+    mooseError("Cannot be used because the supplied ",
                _study->type(),
                " does not bank Rays on completion.\n\nThis is controlled by the RayTracingStudy "
                "private param '_bank_rays_on_completion'.");
@@ -86,11 +79,7 @@ RayIntegralValue::initialize()
   const auto & ray_name = getParam<std::string>("ray");
   _ray_id = _study->registeredRayID(ray_name, /* graceful = */ true);
   if (_ray_id == Ray::INVALID_RAY_ID)
-    mooseError(error_prefix,
-               ": "
-               " Could not find a Ray named '",
-               ray_name,
-               "'");
+    paramError("ray", "Could not find a Ray named '", ray_name, "'");
 
   // Get the index for the data on the ray requested
   _ray_data_index = _study->getRayDataIndex(integral_ray_kernel->integralRayDataName());
