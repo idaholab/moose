@@ -472,7 +472,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad>
     if (behavior == WindowFailure::WARN)
       mooseWarning(msg.str());
     else if (behavior == WindowFailure::ERROR)
-      mooseError(msg.str());
+      mooseException(msg.str());
   }
 }
 
