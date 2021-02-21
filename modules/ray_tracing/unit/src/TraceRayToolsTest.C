@@ -55,6 +55,9 @@ traceRayToolsTestMesh(const int type)
       break;
   }
 
+  if (mesh)
+    mesh->prepare_for_use();
+
   return mesh;
 }
 
@@ -67,30 +70,31 @@ TEST(TraceRayToolsTest, withinEdge)
     auto mesh = traceRayToolsTestMesh(type);
     EXPECT_TRUE(mesh);
 
-    for (const auto elem : mesh->active_local_element_ptr_range())
-      if (elem->dim() > 2)
+    if (mesh->mesh_dimension() != 3)
+      continue;
+
+    for (const auto elem : mesh->element_ptr_range())
+    {
+      for (const auto e : elem->edge_index_range())
       {
-        for (const auto e : elem->edge_index_range())
+        extrema.invalidate();
+        EXPECT_TRUE(TraceRayTools::withinEdge(elem, elem->build_edge_ptr(e)->centroid(), extrema));
+        EXPECT_TRUE(extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]));
+      }
+      for (const auto n : elem->node_index_range())
+        if (elem->is_vertex(n))
         {
           extrema.invalidate();
-          EXPECT_TRUE(
-              TraceRayTools::withinEdge(elem, elem->build_edge_ptr(e)->centroid(), extrema));
-          EXPECT_TRUE(extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]));
-        }
-        for (const auto n : elem->node_index_range())
-          if (elem->is_vertex(n))
-          {
-            extrema.invalidate();
-            EXPECT_TRUE(TraceRayTools::withinEdge(elem, elem->point(n), extrema));
+          EXPECT_TRUE(TraceRayTools::withinEdge(elem, elem->point(n), extrema));
 
-            bool extrema_correct = false;
-            for (const auto e : elem->edge_index_range())
-              if (!extrema_correct && elem->is_node_on_edge(n, e))
-                extrema_correct =
-                    extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]);
-            EXPECT_TRUE(extrema_correct);
-          }
-      }
+          bool extrema_correct = false;
+          for (const auto e : elem->edge_index_range())
+            if (!extrema_correct && elem->is_node_on_edge(n, e))
+              extrema_correct =
+                  extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]);
+          EXPECT_TRUE(extrema_correct);
+        }
+    }
   }
 }
 
@@ -103,40 +107,42 @@ TEST(TraceRayToolsTest, withinEdgeOnSide)
     auto mesh = traceRayToolsTestMesh(type);
     EXPECT_TRUE(mesh);
 
-    for (const auto elem : mesh->active_local_element_ptr_range())
-      if (elem->dim() > 2)
-      {
-        for (const auto s : elem->side_index_range())
-        {
-          extrema.invalidate();
-          EXPECT_FALSE(TraceRayTools::withinEdgeOnSide(
-              elem, elem->build_side_ptr(s)->centroid(), s, extrema));
-          EXPECT_TRUE(extrema.isInvalid());
+    if (mesh->mesh_dimension() != 3)
+      continue;
 
-          for (const auto e : elem->edge_index_range())
-            if (elem->is_edge_on_side(e, s))
+    for (const auto elem : mesh->element_ptr_range())
+    {
+      for (const auto s : elem->side_index_range())
+      {
+        extrema.invalidate();
+        EXPECT_FALSE(
+            TraceRayTools::withinEdgeOnSide(elem, elem->build_side_ptr(s)->centroid(), s, extrema));
+        EXPECT_TRUE(extrema.isInvalid());
+
+        for (const auto e : elem->edge_index_range())
+          if (elem->is_edge_on_side(e, s))
+          {
+            extrema.invalidate();
+            EXPECT_TRUE(TraceRayTools::withinEdgeOnSide(
+                elem, elem->build_edge_ptr(e)->centroid(), s, extrema));
+          }
+      }
+      for (const auto n : elem->node_index_range())
+        if (elem->is_vertex(n))
+          for (const auto s : elem->side_index_range())
+            if (elem->is_node_on_side(n, s))
             {
               extrema.invalidate();
-              EXPECT_TRUE(TraceRayTools::withinEdgeOnSide(
-                  elem, elem->build_edge_ptr(e)->centroid(), s, extrema));
-            }
-        }
-        for (const auto n : elem->node_index_range())
-          if (elem->is_vertex(n))
-            for (const auto s : elem->side_index_range())
-              if (elem->is_node_on_side(n, s))
-              {
-                extrema.invalidate();
-                EXPECT_TRUE(TraceRayTools::withinEdgeOnSide(elem, elem->point(n), s, extrema));
+              EXPECT_TRUE(TraceRayTools::withinEdgeOnSide(elem, elem->point(n), s, extrema));
 
-                bool extrema_correct = false;
-                for (const auto e : elem->edge_index_range())
-                  if (!extrema_correct && elem->is_node_on_edge(n, e))
-                    extrema_correct =
-                        extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]);
-                EXPECT_TRUE(extrema_correct);
-              }
-      }
+              bool extrema_correct = false;
+              for (const auto e : elem->edge_index_range())
+                if (!extrema_correct && elem->is_node_on_edge(n, e))
+                  extrema_correct =
+                      extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]);
+              EXPECT_TRUE(extrema_correct);
+            }
+    }
   }
 }
 
@@ -147,7 +153,7 @@ TEST(TraceRayToolsTest, atVertex)
     auto mesh = traceRayToolsTestMesh(type);
     EXPECT_TRUE(mesh);
 
-    for (const auto elem : mesh->active_local_element_ptr_range())
+    for (const auto elem : mesh->element_ptr_range())
     {
       EXPECT_EQ(TraceRayTools::atVertex(elem, elem->centroid()), RayTracingCommon::invalid_vertex);
       for (const auto n : elem->node_index_range())
@@ -166,7 +172,7 @@ TEST(TraceRayToolsTest, atVertexOnSide)
     auto mesh = traceRayToolsTestMesh(type);
     EXPECT_TRUE(mesh);
 
-    for (const auto elem : mesh->active_local_element_ptr_range())
+    for (const auto elem : mesh->element_ptr_range())
       for (const auto s : elem->side_index_range())
       {
         if (elem->dim() > 1)
@@ -198,7 +204,7 @@ TEST(TraceRayToolsTest, findPointNeighbors)
     auto mesh = traceRayToolsTestMesh(type);
     EXPECT_TRUE(mesh);
 
-    for (const auto elem : mesh->active_local_element_ptr_range())
+    for (const auto elem : mesh->element_ptr_range())
     {
       for (const auto n : elem->node_index_range())
       {

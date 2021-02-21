@@ -20,4 +20,6 @@ public:
 
 protected:
   void generateRays() override;
+
+  void postExecuteStudy() override;
 };
