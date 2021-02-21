@@ -19,7 +19,6 @@ PINSFVEnergyAdvection::validParams()
   params.addClassDescription("Advects energy, e.g. rho*cp*T. A user may still override what "
                              "quantity is advected, but the default is rho*cp*T");
   params.set<MaterialPropertyName>("advected_quantity") = "rho_cp_temp";
-  //FIXME Add option to enable the pressure advection term
   return params;
 }
 
