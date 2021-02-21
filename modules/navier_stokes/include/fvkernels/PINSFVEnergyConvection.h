@@ -14,8 +14,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// porosity of the local medium
-  const VariableValue & _eps;
   /// the convective heat transfer coefficient
   const ADMaterialProperty<Real> & _h_solid_fluid;
   /// fluid temperature
