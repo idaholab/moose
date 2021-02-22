@@ -91,15 +91,6 @@ public:
   bool operator!=(const MooseEnum & value) const;
 
   /**
-   * Adds an enumeration item from name
-   */
-  MooseEnum & operator+=(const std::string & name);
-  /**
-   * Adds enumeration items from a list of names
-   */
-  MooseEnum & operator+=(const std::initializer_list<std::string> & names);
-
-  /**
    * Method for comparing currently set values between MooseEnum.
    */
   bool compareCurrent(const MooseEnum & other, CompareMode mode = CompareMode::COMPARE_NAME) const;

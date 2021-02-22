@@ -36,6 +36,10 @@ ifeq ($(ALL_MODULES),yes)
         XFEM                        := yes
 endif
 
+ifeq ($(HEAT_CONDUCTION),yes)
+        RAY_TRACING                 := yes
+endif
+
 ifeq ($(PERIDYNAMICS),yes)
         TENSOR_MECHANICS           := yes
 endif
@@ -48,6 +52,7 @@ endif
 
 ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES            := yes
+				RAY_TRACING                 := yes
         RDG                         := yes
         HEAT_CONDUCTION             := yes
 endif
@@ -104,9 +109,18 @@ ifeq ($(GEOCHEMISTRY),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+ifeq ($(RAY_TRACING),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/ray_tracing
+  APPLICATION_NAME   := ray_tracing
+  SUFFIX             := ray
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
+
+	DEPEND_MODULES     := ray_tracing
   SUFFIX             := hc
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -137,7 +151,7 @@ ifeq ($(NAVIER_STOKES),yes)
   APPLICATION_NAME   := navier_stokes
 
   # Dependency on fluid properties and rdg
-  DEPEND_MODULES     := fluid_properties rdg heat_conduction
+  DEPEND_MODULES     := fluid_properties rdg heat_conduction ray_tracing
   SUFFIX             := ns
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -177,13 +191,6 @@ ifeq ($(POROUS_FLOW),yes)
 
   DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions
   SUFFIX             := pflow
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(RAY_TRACING),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/ray_tracing
-  APPLICATION_NAME   := ray_tracing
-  SUFFIX             := ray
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

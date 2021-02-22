@@ -256,40 +256,70 @@ PatchSidesetGenerator::partition(MeshBase & mesh)
     const auto & delta = max - min;
 
     // set number of elements
-    unsigned int nx, ny;
+    std::vector<unsigned int> nelems(3);
     if (_dim == 1)
     {
-      nx = _n_patches;
-      ny = 1;
+      // find the largest component in delta
+      unsigned int largest_id = 0;
+      Real largest = delta(0);
+      for (unsigned int j = 1; j < 3; ++j)
+        if (largest < delta(j))
+        {
+          largest = delta(j);
+          largest_id = j;
+        }
+
+      // set nelems now
+      nelems = {1, 1, 1};
+      nelems[largest_id] = _n_patches;
     }
     else
     {
-      nx = std::round(std::sqrt(delta(0) / delta(1) * _n_patches));
-      ny = std::round(std::sqrt(delta(1) / delta(0) * _n_patches));
-      if (_n_patches != nx * ny)
+      // find the smallest component in delta
+      unsigned int smallest_id = 0;
+      Real smallest = delta(0);
+      for (unsigned int j = 1; j < 3; ++j)
+        if (smallest > delta(j))
+        {
+          smallest = delta(j);
+          smallest_id = j;
+        }
+
+      // store the ids for the two larger dimensions
+      unsigned int id1 = 1, id2 = 2;
+      if (smallest_id == 1)
+        id1 = 0;
+      else if (smallest_id == 2)
+        id2 = 0;
+
+      // set number of elements
+      nelems[smallest_id] = 1;
+      nelems[id1] = std::round(std::sqrt(delta(id1) / delta(id2) * _n_patches));
+      nelems[id2] = std::round(std::sqrt(delta(id2) / delta(id1) * _n_patches));
+      unsigned int final_n_patches = nelems[id1] * nelems[id2];
+      // We need to check if the number of requested patches and the number of
+      // actually created patches matches. If the two do not match, then a warning
+      // is printed.
+      if (_n_patches != final_n_patches)
       {
         _console << "Note: For creating radiation patches for boundary " << _sideset
                  << " using grid partitioner number of patches was changed from " << _n_patches
-                 << " to " << nx * ny << std::endl;
-        _n_patches = nx * ny;
+                 << " to " << final_n_patches << std::endl;
+        _n_patches = final_n_patches;
       }
     }
 
-    const Real dx = delta(0) / nx;
-    const Real dy = delta(1) / ny;
+    const Real dx = delta(0) / nelems[0];
+    const Real dy = delta(1) / nelems[1];
+    const Real dz = delta(2) / nelems[2];
     for (auto & elem_ptr : mesh.active_element_ptr_range())
     {
-      // Find the element it lands in in the GeneratedMesh
       const Point centroid = elem_ptr->centroid();
       processor_id_type proc_id;
-      if (_dim == 1)
-        proc_id = std::floor((centroid(0) - min(0)) / dx);
-      else
-      {
-        const unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
-        const unsigned int iy = std::floor((centroid(1) - min(1)) / dy);
-        proc_id = ix + iy * nx;
-      }
+      const unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
+      const unsigned int iy = std::floor((centroid(1) - min(1)) / dy);
+      const unsigned int iz = std::floor((centroid(2) - min(2)) / dz);
+      proc_id = ix + iy * nelems[0] + iz * nelems[0] * nelems[1];
       elem_ptr->processor_id() = proc_id;
     }
   }

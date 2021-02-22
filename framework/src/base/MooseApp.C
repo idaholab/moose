@@ -1709,6 +1709,7 @@ MooseApp::appendMeshGenerator(const std::string & generator_name,
       _factory.create<MeshGenerator>(generator_name, name, parameters);
 
   final_generators.push_back(mesh_generator);
+  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
 }
 
 void
