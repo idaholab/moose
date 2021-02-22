@@ -25,7 +25,4 @@ protected:
 
   /// The porosity on the neighbor
   const MaterialProperty<Real> & _eps_neighbor;
-
-  /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _one_over_porosity_interp_method;
 };
