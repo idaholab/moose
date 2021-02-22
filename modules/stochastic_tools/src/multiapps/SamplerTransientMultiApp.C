@@ -170,7 +170,7 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   {
     std::shared_ptr<StochasticToolsTransfer> ptr =
         std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
-    if (ptr && ptr->getMultiApp()->name() == this->name())
+    if (ptr && ptr->getMultiApp().get() == this)
       output.push_back(ptr);
   }
   return output;
