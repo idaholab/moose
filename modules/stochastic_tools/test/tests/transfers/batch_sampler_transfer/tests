@@ -76,6 +76,14 @@
     []
   []
 
+  [batch_two_subapps]
+      requirement = "The system shall include the ability to transfer stochastic results for two sub apps."
+      issues = '#17079'
+      type = CSVDiff
+      input = master_2sub.i
+      csvdiff = 'master_2sub_out_data0_0001.csv master_2sub_out_data1_0001.csv master_2sub_out_storage0_0001.csv master_2sub_out_storage1_0001.csv'
+  []
+
   [StochasticToolsTransfer_execute_on_error]
     type = RunException
     input = master.i

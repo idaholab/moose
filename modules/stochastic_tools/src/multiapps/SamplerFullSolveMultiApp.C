@@ -186,7 +186,7 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
   {
     auto ptr = std::dynamic_pointer_cast<StochasticToolsTransfer>(transfer);
-    if (ptr)
+    if (ptr && ptr->getMultiApp()->name() == this->name())
       output.push_back(ptr);
   }
   return output;
