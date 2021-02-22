@@ -2,7 +2,6 @@
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import norm, uniform
 
 df0 = pandas.read_csv('gold/latin_hypercube_out_data_0000.csv')
 df1 = pandas.read_csv('gold/latin_hypercube_out_data_0001.csv')

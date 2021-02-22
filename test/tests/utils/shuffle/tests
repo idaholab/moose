@@ -9,6 +9,7 @@
       jsondiff = swap_out.json
       cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
       allow_test_objects = true
+      recover = false # steady
 
       detail = "on a single processor,"
     []
@@ -20,6 +21,7 @@
       allow_test_objects = true
       min_parallel = 2
       max_parallel = 2
+      recover = false # steady
 
       detail = "on 2 processors, and"
     []
@@ -31,6 +33,7 @@
       allow_test_objects = true
       min_parallel = 3
       max_parallel = 3
+      recover = false # steady
 
       detail = "on 3 processors."
     []
@@ -44,6 +47,7 @@
       jsondiff = shuffle_out.json
       cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
       allow_test_objects = true
+      recover = false # steady
 
       detail = "on a single processor,"
     []
@@ -53,6 +57,7 @@
       jsondiff = shuffle_out.json
       cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
       allow_test_objects = true
+      recover = false # steady
       min_parallel = 2
       max_parallel = 2
 
@@ -64,6 +69,7 @@
       jsondiff = shuffle_out.json
       cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
       allow_test_objects = true
+      recover = false # steady
       min_parallel = 3
       max_parallel = 3
 
@@ -72,13 +78,14 @@
   []
 
   [resample]
-    requirement = "The system shall include a utility for shuffling values within a vector of data"
+    requirement = "The system shall include a utility for resampling values within a vector of data"
     [serial]
       type = JSONDiff
       input = shuffle.i
       jsondiff = resample_out.json
       cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
       allow_test_objects = true
+      recover = false # steady
 
       detail = "on a single processor,"
     []
@@ -88,6 +95,7 @@
       jsondiff = resample_out.json
       cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
       allow_test_objects = true
+      recover = false # steady
       min_parallel = 2
       max_parallel = 2
 
@@ -99,6 +107,7 @@
       jsondiff = resample_out.json
       cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
       allow_test_objects = true
+      recover = false # steady
       min_parallel = 3
       max_parallel = 3
 
