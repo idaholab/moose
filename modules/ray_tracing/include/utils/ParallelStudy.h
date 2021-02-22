@@ -570,12 +570,11 @@ void
 ParallelStudy<WorkType, ParallelDataType, Context>::moveParallelDataToBuffer(
     std::shared_ptr<ParallelDataType> & data, const processor_id_type dest_pid)
 {
+  mooseAssert(comm().size() > dest_pid, "Invalid processor ID");
+  mooseAssert(_pid != dest_pid, "Processor ID is self");
+
   if (!_currently_executing && !_currently_pre_executing)
     mooseError(_name, ": Cannot sendParallelData() when not executing");
-  if (comm().size() < dest_pid)
-    mooseError(_name, ": Parallel data to be communicated has invalid pid");
-  if (dest_pid == _pid)
-    mooseError(_name, ": Parallel Data to be communicated has same pid");
 
   // Get the send buffer for the proc this object is going to
   auto find_pair = _send_buffers.find(dest_pid);

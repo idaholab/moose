@@ -957,9 +957,11 @@ private:
   void localElemIndexSetup();
 
   /**
-   * Sets up the maps from Ray to associated RayTracingObjects if _use_ray_registration
+   * Sets up the maps from Ray to associated RayTracingObjects if _use_ray_registration.
+   *
+   * If ray registration is disabled, this makes sure no RayTracingObjects provided rays.
    */
-  void associateRegisteredRays();
+  void registeredRaySetup();
 
   /**
    * Zero the AuxVariables that the registered AuxRayKernels contribute to.
@@ -1135,9 +1137,6 @@ private:
 
   /// Whether or not we've called initial setup - used to stop from late registration
   bool _called_initial_setup;
-  /// Whether or not we need to call associateRegisteredRays(); this is true when
-  /// new registered Rays are added via registerRay()
-  bool _need_to_associate_registered_rays;
 
   /// Helper for defining a local contiguous index for each element
   ElemIndexHelper _elem_index_helper;

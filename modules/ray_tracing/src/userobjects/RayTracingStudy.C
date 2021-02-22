@@ -170,7 +170,6 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _local_trace_ray_results(TraceRay::FAILED_TRACES + 1, 0),
 
     _called_initial_setup(false),
-    _need_to_associate_registered_rays(false),
 
     _elem_index_helper(_mesh.getMesh(), name() + "_elem_index")
 {
@@ -544,44 +543,53 @@ RayTracingStudy::subdomainHMaxSetup()
 }
 
 void
-RayTracingStudy::associateRegisteredRays()
+RayTracingStudy::registeredRaySetup()
 {
   // First, clear the objects associated with each Ray on each thread
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     for (auto & set : _threaded_ray_object_registration[tid])
       set.clear();
 
-  // All of the registered ray names - used when a RayTracingObject did not specify
-  // any Rays so it should be associated with all Rays.
-  std::vector<std::string> all_ray_names;
-  all_ray_names.reserve(_registered_ray_map.size());
-  for (const auto & pair : _registered_ray_map)
-    all_ray_names.push_back(pair.first);
+  const auto rtos = getRayTracingObjects();
 
-  for (auto & rto : getRayTracingObjects())
+  if (_use_ray_registration)
   {
-    const auto object_type = rto->parameters().get<std::string>("_moose_warehouse_system_name");
-    const auto & params = rto->parameters();
+    // All of the registered ray names - used when a RayTracingObject did not specify
+    // any Rays so it should be associated with all Rays.
+    std::vector<std::string> all_ray_names;
+    all_ray_names.reserve(_registered_ray_map.size());
+    for (const auto & pair : _registered_ray_map)
+      all_ray_names.push_back(pair.first);
 
-    // The Ray names associated with this RayTracingObject
-    const auto & ray_names = params.get<std::vector<std::string>>("rays");
-    // The registration for RayTracingObjects for the thread rto is on
-    const auto tid = params.get<THREAD_ID>("_tid");
-    auto & registration = _threaded_ray_object_registration[tid];
-
-    // Ray names but we don't need them
-    if (!ray_names.empty() && !_use_ray_registration)
-      rto->paramError("rays",
-                      "Rays cannot be supplied when the study does not require Ray registration");
-
-    // Register each Ray for this object in the registration
-    for (const auto & ray_name : (ray_names.empty() ? all_ray_names : ray_names))
+    for (auto & rto : rtos)
     {
-      const auto id = registeredRayID(ray_name, /* graceful = */ true);
-      if (id == DofObject::invalid_id)
-        rto->paramError("rays", "Supplied ray '", ray_name, "' is not a registered Ray");
-      registration[id].insert(rto);
+      // The Ray names associated with this RayTracingObject
+      const auto & ray_names = rto->parameters().get<std::vector<std::string>>("rays");
+      // The registration for RayTracingObjects for the thread rto is on
+      const auto tid = rto->parameters().get<THREAD_ID>("_tid");
+      auto & registration = _threaded_ray_object_registration[tid];
+
+      // Register each Ray for this object in the registration
+      for (const auto & ray_name : (ray_names.empty() ? all_ray_names : ray_names))
+      {
+        const auto id = registeredRayID(ray_name, /* graceful = */ true);
+        if (ray_names.size() && id == Ray::INVALID_RAY_ID)
+          rto->paramError(
+              "rays", "Supplied ray '", ray_name, "' is not a registered Ray in ", _error_prefix);
+        registration[id].insert(rto);
+      }
     }
+  }
+  // Not using Ray registration
+  else
+  {
+    for (const auto & rto : rtos)
+      if (rto->parameters().get<std::vector<std::string>>("rays").size())
+        rto->paramError(
+            "rays",
+            "Rays cannot be supplied when the study does not require Ray registration.\n\n",
+            type(),
+            " does not require Ray registration.");
   }
 }
 
@@ -807,11 +815,7 @@ RayTracingStudy::executeStudy()
                          /* error_suffix = */ "after generateRays()");
     }
 
-    if (_need_to_associate_registered_rays)
-    {
-      associateRegisteredRays();
-      _need_to_associate_registered_rays = false;
-    }
+    registeredRaySetup();
 
     {
       CONSOLE_TIMED_PRINT("Propagating rays");
@@ -1334,8 +1338,6 @@ RayTracingStudy::registerRay(const std::string & name)
   if (search != _registered_ray_map.end())
     return search->second;
 
-  _need_to_associate_registered_rays = true;
-
   const auto next_id = _threaded_ray_object_registration[0].size();
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _threaded_ray_object_registration[tid].emplace_back();
@@ -1669,7 +1671,7 @@ RayTracingStudy::acquireRay()
 {
   mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
 
-  std::shared_ptr<Ray> ray = _parallel_ray_study->acquireParallelData(
+  return _parallel_ray_study->acquireParallelData(
       /* tid = */ 0,
       this,
       generateUniqueRayID(/* tid = */ 0),
@@ -1677,8 +1679,6 @@ RayTracingStudy::acquireRay()
       rayAuxDataSize(),
       /* reset = */ true,
       Ray::ConstructRayKey());
-
-  return ray;
 }
 
 std::shared_ptr<Ray>
@@ -1686,16 +1686,13 @@ RayTracingStudy::acquireUnsizedRay()
 {
   mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
 
-  std::shared_ptr<Ray> ray =
-      _parallel_ray_study->acquireParallelData(/* tid = */ 0,
-                                               this,
-                                               generateUniqueRayID(/* tid = */ 0),
-                                               /* data_size = */ 0,
-                                               /* aux_data_size = */ 0,
-                                               /* reset = */ true,
-                                               Ray::ConstructRayKey());
-
-  return ray;
+  return _parallel_ray_study->acquireParallelData(/* tid = */ 0,
+                                                  this,
+                                                  generateUniqueRayID(/* tid = */ 0),
+                                                  /* data_size = */ 0,
+                                                  /* aux_data_size = */ 0,
+                                                  /* reset = */ true,
+                                                  Ray::ConstructRayKey());
 }
 
 std::shared_ptr<Ray>
@@ -1704,7 +1701,7 @@ RayTracingStudy::acquireReplicatedRay()
   mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
   libmesh_parallel_only(comm());
 
-  std::shared_ptr<Ray> ray = _parallel_ray_study->acquireParallelData(
+  return _parallel_ray_study->acquireParallelData(
       /* tid = */ 0,
       this,
       generateReplicatedRayID(),
@@ -1712,8 +1709,6 @@ RayTracingStudy::acquireReplicatedRay()
       rayAuxDataSize(),
       /* reset = */ true,
       Ray::ConstructRayKey());
-
-  return ray;
 }
 
 std::shared_ptr<Ray>
@@ -1726,7 +1721,7 @@ RayTracingStudy::acquireRegisteredRay(const std::string & name)
   const RayID id = registerRay(name);
 
   // Acquire a Ray with the properly sized data initialized to zero
-  std::shared_ptr<Ray> ray = _parallel_ray_study->acquireParallelData(
+  return _parallel_ray_study->acquireParallelData(
       /* tid = */ 0,
       this,
       id,
@@ -1734,8 +1729,6 @@ RayTracingStudy::acquireRegisteredRay(const std::string & name)
       rayAuxDataSize(),
       /* reset = */ true,
       Ray::ConstructRayKey());
-
-  return ray;
 }
 
 std::shared_ptr<Ray>
