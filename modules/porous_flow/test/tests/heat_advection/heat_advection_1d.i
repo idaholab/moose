@@ -1,4 +1,5 @@
 # 1phase, heat advecting with a moving fluid
+# Full upwinding is used
 [Mesh]
   type = GeneratedMesh
   dim = 1

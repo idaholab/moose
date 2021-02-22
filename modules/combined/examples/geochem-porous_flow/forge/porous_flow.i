@@ -2,8 +2,7 @@
 # - 2D instead of 3D with different resolution.  Effectively this means a 1m height of RobPodgorney aquifer is simulated.  RobPodgorney total mass flux is 2.5kg/s meaning 0.25kg/s is appropriate here
 # - Celsius instead of Kelvin
 # - no use of PorousFlowPointEnthalpySourceFromPostprocessor since that is not yet merged into MOOSE: a DirichletBC is used instead
-# - Use of Kernels and Materials instead of PorousFlowUnsaturated.  This is in preparation for coupling to Geochemistry since the save_in feacture of PorousFlowMassTimeDerivative needs to be employed to record the change in kg of each species at each node for passing to the Geochem simulation
-# - use of mass fractions to represent chemical species, which adds many almost-identical copies of Kernels, DiracKernels and Postprocessors, one for each species
+# - Use of PorousFlowFullySaturated instead of PorousFlowUnsaturated, and the save_component_rate_in feature to record the change in kg of each species at each node for passing to the Geochem simulation
 # - MultiApps and Transfers to transfer information between this simulation and the aquifer_geochemistry.i simulation
 [Mesh]
   [gen]
@@ -329,15 +328,6 @@
   [./produced_heat]
     type = PorousFlowSumQuantity
   [../]
-  [./capillary_pressure]
-    type = PorousFlowCapillaryPressureConst
-  [../]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure temperature f_H f_Na f_K f_Ca f_Mg f_SiO2 f_Al f_Cl f_SO4 f_HCO3'
-    number_fluid_phases = 1
-    number_fluid_components = 11
-  [../]
 []
 
 [Postprocessors]
@@ -432,136 +422,14 @@
   [../]
 []
 
-[Kernels]
-  [./advective_flux_H]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = f_H
-  [../]
-  [./advective_flux_Na]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = f_Na
-  [../]
-  [./advective_flux_K]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 2
-    variable = f_K
-  [../]
-  [./advective_flux_Ca]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 3
-    variable = f_Ca
-  [../]
-  [./advective_flux_Mg]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 4
-    variable = f_Mg
-  [../]
-  [./advective_flux_SiO2]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 5
-    variable = f_SiO2
-  [../]
-  [./advective_flux_Al]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 6
-    variable = f_Al
-  [../]
-  [./advective_flux_Cl]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 7
-    variable = f_Cl
-  [../]
-  [./advective_flux_SO4]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 8
-    variable = f_SO4
-  [../]
-  [./advective_flux_HCO3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 9
-    variable = f_HCO3
-  [../]
-  [./advective_flux_H2O]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 10
-    variable = porepressure
-  [../]
-  [./time_deriv_H]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    save_in = rate_H # change in kg at every node / dt
-    variable = f_H
-  [../]
-  [./time_deriv_Na]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    save_in = rate_Na # change in kg at every node / dt
-    variable = f_Na
-  [../]
-  [./time_deriv_K]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 2
-    save_in = rate_K # change in kg at every node / dt
-    variable = f_K
-  [../]
-  [./time_deriv_Ca]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 3
-    save_in = rate_Ca # change in kg at every node / dt
-    variable = f_Ca
-  [../]
-  [./time_deriv_Mg]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 4
-    save_in = rate_Mg # change in kg at every node / dt
-    variable = f_Mg
-  [../]
-  [./time_deriv_SiO2]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 5
-    save_in = rate_SiO2 # change in kg at every node / dt
-    variable = f_SiO2
-  [../]
-  [./time_deriv_Al]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 6
-    save_in = rate_Al # change in kg at every node / dt
-    variable = f_Al
-  [../]
-  [./time_deriv_Cl]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 7
-    save_in = rate_Cl # change in kg at every node / dt
-    variable = f_Cl
-  [../]
-  [./time_deriv_SO4]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 8
-    save_in = rate_SO4 # change in kg at every node / dt
-    variable = f_SO4
-  [../]
-  [./time_deriv_HCO3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 9
-    save_in = rate_HCO3 # change in kg at every node / dt
-    variable = f_HCO3
-  [../]
-  [./time_deriv_H2O]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 10
-    save_in = rate_H2O # change in kg at every node / dt
-    variable = porepressure
-  [../]
-  [./temperature_advection]
-    type = PorousFlowHeatAdvection
-    variable = temperature
-  [../]
-  [./temperature_time_deriv]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temperature
-  [../]
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = porepressure
+  temperature = temperature
+  mass_fraction_vars = 'f_H f_Na f_K f_Ca f_Mg f_SiO2 f_Al f_Cl f_SO4 f_HCO3'
+  save_component_rate_in = 'rate_H rate_Na rate_K rate_Ca rate_Mg rate_SiO2 rate_Al rate_Cl rate_SO4 rate_HCO3 rate_H2O' # change in kg at every node / dt
+  fp = the_simple_fluid
+  temperature_unit = Celsius
 []
 
 [AuxVariables]
@@ -590,29 +458,6 @@
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temperature
-  [../]
-  [./mass_frac]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'f_H f_Na f_K f_Ca f_Mg f_SiO2 f_Al f_Cl f_SO4 f_HCO3'
-  [../]
-  [./fluid_props]
-    type = PorousFlowSingleComponentFluid
-    fp = the_simple_fluid
-    temperature_unit = Celsius
-    phase = 0
-  [../]
-  [./saturation]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-    capillary_pressure = capillary_pressure
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.01
@@ -629,6 +474,11 @@
     type = PorousFlowMatrixInternalEnergy
     density = 2750.0
     specific_heat_capacity = 900.0
+  [../]
+  [./relperm] # this is necessary because of the use_mobility = true used in the PorousFlowPeacemanBorehole objects
+    type = PorousFlowRelativePermeabilityConst
+    at_nodes = true
+    phase = 0
   [../]
 []
 

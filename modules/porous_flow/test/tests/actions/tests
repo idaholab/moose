@@ -5,37 +5,87 @@
     csvdiff = 'fullsat_brine.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-    requirement = "The system shall calculate proper density, viscosity, enthalpy and internal energy with the PorousFlowBrine material "
-                  "when using PorousFlowFullySaturated Action."
+    requirement = "The system shall calculate proper density, viscosity, enthalpy and internal energy with the PorousFlowBrine material when using PorousFlowFullySaturated Action."
     issues = "#10093"
     design = "brineco2.md"
   [../]
   [./fullsat_brine_except1]
     type = RunException
     input = 'fullsat_brine_except1.i'
-    expect_err = 'You need to specify at least one component in mass_fraction_vars if use_brine is true'
+    expect_err = 'PorousFlowSinglePhaseBase: You must specify nacl_name when fluid_properties_type = PorousFlowBrine'
     threading = '!pthreads'
-    requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material without any mass fraction variables."
-    issues = "#10093"
+    requirement = "The system shall produce an error when attempting to use a PorousFlowBrine Material without any NaCl variable"
+    issues = "#10093 #16841"
     design = "brineco2.md"
   [../]
   [./fullsat_brine_except2]
     type = RunException
     input = 'fullsat_brine_except2.i'
-    expect_err = 'nacl_index must be less than length of mass_fraction_vars'
+    expect_err = 'PorousFlowSinglePhaseBase: You should not specify fp when fluid_properties_type = PorousFlowBrine'
+    match_literal = true
     threading = '!pthreads'
-    requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material with an NaCL index greater than the number of components."
-    issues = "#10093"
+    requirement = "The system shall produce an error when attempting to use a PorousFlowBrine Material at the same time as a PorousFlowSimpleFluidProperties Material"
+    issues = "#10093 #16841"
     design = "brineco2.md"
   [../]
   [./fullsat_brine_except3]
     type = RunException
     input = 'fullsat_brine_except3.i'
-    expect_err = 'You need to specify fp if use_brine is false'
+    expect_err = 'PorousFlowSinglePhaseBase: You should not specify a nacl_name when fluid_properties_type = PorousFlowSingleComponentFluid'
+    match_literal = true
     threading = '!pthreads'
-    requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material without setting an fp value.."
-    issues = "#10093"
+    requirement = "The system shall produce an error when attempting to use a PorousFlowSingleComponentFluid Material at the same time as a PorousFlowBrine Material"
+    issues = "#10093 #16841"
     design = "brineco2.md"
+  [../]
+  [./fullsat_brine_except4]
+    type = RunException
+    input = 'fullsat_brine_except4.i'
+    expect_err = 'PorousFlowSinglePhaseBase: You must specify fp when fluid_properties_type = PorousFlowSingleComponentFluid'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = "The system shall produce an error when attempting to use a PorousFlowSingleComponentFluid Material without a fluid-properties UserObject"
+    issues = "#16841"
+    design = "PorousFlowFullySaturated.md"
+  [../]
+  [./fullsat_brine_except5]
+    type = RunException
+    input = 'fullsat_brine_except5.i'
+    expect_err = 'Must use pressure_unit = Pa for fluid_properties_type = PorousFlowBrine'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = "The system shall produce an error when attempting to use a non-standard pressure unit choice with PorousFlowBrine"
+    issues = "#16841"
+    design = "PorousFlowFullySaturated.md"
+  [../]
+  [./fullsat_brine_except6]
+    type = RunException
+    input = 'fullsat_brine_except6.i'
+    expect_err = 'Must use time_unit = seconds for fluid_properties_type = PorousFlowBrine'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = "The system shall produce an error when attempting to use a non-standard time unit choice with PorousFlowBrine"
+    issues = "#16841"
+    design = "PorousFlowFullySaturated.md"
+  [../]
+  [./unsat_except1]
+    type = RunException
+    input = 'unsat_except1.i'
+    expect_err = 'Some stabilization must be used in PorousFlowUnsaturated'
+    threading = '!pthreads'
+    requirement = "The system shall produce an error if PorousFlowUnsaturated is used with no stabilization."
+    issues = "#16841"
+    design = "PorousFlowUnsaturated.md"
+  [../]
+  [./unsat_except2]
+    type = RunException
+    input = 'unsat_except2.i'
+    expect_err = 'The number of save_component_rate_in variables must be the number of fluid components + 1'
+    match_literal = true
+    threading = '!pthreads'
+    requirement = "The system shall produce an error if the number of variables to save fluid-component rates-of-change into is not equal to the number of fluid components"
+    issues = "#16841"
+    design = "PorousFlowUnsaturated.md"
   [../]
   [./addjoiner]
     type = RunApp

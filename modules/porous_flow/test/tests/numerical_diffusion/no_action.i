@@ -1,4 +1,4 @@
-# Using upwinded and mass-lumped PorousFlow Kernels
+# Using upwinded and mass-lumped PorousFlow Kernels: this is equivalent of fully_saturated_action.i with stabilization = Full
 [Mesh]
   type = GeneratedMesh
   dim = 1

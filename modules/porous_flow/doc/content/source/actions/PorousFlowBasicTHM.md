@@ -1,29 +1,22 @@
 # PorousFlowBasicTHM
 
-This action allows simple simulation of fully-saturated, single-phase,
-single-component fluid flow.  The fluid flow may be optionally coupled
+This Action allows simple simulation of fully-saturated, single-phase, single-component simulations.  It is mainly used in *poro-elastic* and *thermo-poro-elastic* simulations.  The fluid flow may be optionally coupled
 to mechanics and/or heat flow using the `coupling_type` flag.
 
-The fluid equation is a *simplified* form of the full [PorousFlow fluid equation](/porous_flow/governing_equations.md) (see [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md) and [PorousFlowFullySaturatedDarcyBase](/PorousFlowFullySaturatedDarcyBase.md) for the derivation):
+This Action offers simplified physics compared with the [PorousFlowFullySaturated](PorousFlowFullySaturated.md) and [PorousFlowUnsaturated](PorousFlowUnsaturated.md) Actions.
+
+## Fluid flow
+
+The fluid equation is a simplified form of the full [PorousFlow fluid equation](/porous_flow/governing_equations.md) (see [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md) and [PorousFlowFullySaturatedDarcyBase](/PorousFlowFullySaturatedDarcyBase.md) for the derivation):
 \begin{equation}
 \label{eq:basicthm}
 0 = (\rho)\left(\frac{\dot{P}}{M} + \alpha_{B}\dot{\epsilon}_{v} - A\dot{T}\right) -
 \nabla_{i}\left((\rho) k_{ij}\left(\nabla_{j}P - \rho g_{j}\right)/\mu\right)
 \ .
 \end{equation}
-Note that the fluid-mass time derivative is close to linear, and is perfectly linear if `multiply_by_density=false`, and this also almost linearises the flow term.  Extremely good nonlinear convergence should therefore be expected, but there are some knock-on effects that are documented in [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md).
+In this equation, the fluid density, $\rho$, appears in parentheses, because the user has the option of including it or not using the `multiply_by_density` flag.  Note that the fluid-mass time derivative is close to linear, and is perfectly linear if `multiply_by_density=false`, and this also almost linearises the flow term.  Extremely good nonlinear convergence should therefore be expected, but there are some knock-on effects that are documented in [PorousFlowFullySaturatedMassTimeDerivative](/PorousFlowFullySaturatedMassTimeDerivative.md).
 
-In fully-saturated, single-phase simulations [upwinding](/porous_flow/upwinding.md)
-is typically unnecessary.  Moreover, the standard PorousFlow Kernels
-are somewhat inefficient in the fully-saturated case since Material
-Properties such as relative permeabilities and saturations actually do
-not need to be computed.
-
-In fully-saturated, single-phase, single-component simulations, the
-[mass lumping](/porous_flow/mass_lumping.md) is also typically unncessary.  More
-importantly, in many real-life situations, as may be seen in
-[eq:basicthm] the time derivative of the fluid mass may be linearised,
-which leads to improved convergence.
+The term $\alpha_{B}\dot{\epsilon}_{v}$ only appears if the `coupling_type` includes "Mechanical".  The term $A\dot{T}$ only appears if the `coupling_type` includes "Thermo".
 
 To simulate [eq:basicthm] the `PorousFlowBasicTHM` Action employs the following Kernels:
 
@@ -31,6 +24,10 @@ To simulate [eq:basicthm] the `PorousFlowBasicTHM` Action employs the following 
 - [PorousFlowFullySaturatedDarcyBase](/PorousFlowFullySaturatedDarcyBase.md)
 
 For isothermal simulations, the fluid properties may still depend on temperature, so the `temperature` input parameter may be set to any real number, or to an AuxVariable if desired.
+
+[Upwinding](/porous_flow/upwinding.md) and [mass lumping](/porous_flow/mass_lumping.md) are not used by these Kernels.  These numerical schemes are typically unnecessary in fully-saturated, single-phase simulations, but the lack of stabilization means the results from `PorousFlowBasicTHM` will typically be slightly different to the remainder of PorousFlow.
+
+## Heat flow
 
 For anisothermal simulations, the energy equation reads
 \begin{equation}
@@ -43,11 +40,15 @@ where the final term is only used if coupling with mechanics is also desired.  T
 - [PorousFlowHeatConduction](/PorousFlowHeatConduction.md)
 - [PorousFlowHeatVolumetricExpansion](/PorousFlowHeatVolumetricExpansion.md) if coupling with temperature and mechanics is desired, and if the simulation is of Transient type
 
+## Solid Mechanics
+
 For simulations that couple fluid flow to mechanics, the equations are already written in [governing equations](/porous_flow/governing_equations.md), and `PorousFlowBasicTHM` implements these by using the following kernels:
 
 - [StressDivergenceTensors](/StressDivergenceTensors.md)
 - [Gravity](/Gravity.md)
 - [PorousFlowEffectiveStressCoupling](/PorousFlowEffectiveStressCoupling.md)
+
+## Required Materials
 
 `PorousFlowBasicTHM` adds many Materials automatically, however, to run a simulation you will need to provide more Materials for each mesh block, depending on your simulation type, viz:
 
@@ -63,7 +64,10 @@ For simulations that couple fluid flow to mechanics, the equations are already w
 - A stress calculator, eg [ComputeLinearElasticStress](/ComputeLinearElasticStress.md)
 
 !alert note
-Since upwinding and no mass lumping of the fluid mass are used (for simplicity, efficiency and to reduce [numerical diffusion](/porous_flow/numerical_diffusion.md)), the results may be slightly different to simulations that employ upwinding and mass lumping.
+Before choosing non-standard `pressure_unit` or `time_unit`, you should read the essay on these non-standard choices [here](PorousFlowSingleComponentFluid.md)
+
+
+## Examples
 
 A simple example of using `PorousFlowBasicTHM` is documented in the [PorousFlow tutorial](/porous_flow/tutorial_01.md) with input file:
 

@@ -18,8 +18,7 @@
   coupling_type = ThermoHydro
   porepressure = pp
   temperature = temp
-  use_brine = true
-  nacl_index = 0
+  fluid_properties_type = PorousFlowBrine
   dictator_name = dictator
 []
 

@@ -49,6 +49,7 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
   PorousFlowDictator = dictator
   gravity = '0 0 -10'
 []
+
 [BCs]
   [./injection_temperature]
     type = MatchedValueBC
@@ -57,6 +58,7 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     boundary = injection_nodes
   [../]
 []
+
 [Modules]
   [./FluidProperties]
     [./the_simple_fluid]
@@ -71,26 +73,17 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
   [../]
 []
 
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = porepressure
+  temperature = temperature
+  mass_fraction_vars = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
+  save_component_rate_in = 'rate_H rate_Cl rate_SO4 rate_HCO3 rate_SiO2aq rate_Al rate_Ca rate_Mg rate_Fe rate_K rate_Na rate_Sr rate_F rate_BOH rate_Br rate_Ba rate_Li rate_NO3 rate_O2aq rate_H2O' # change in kg at every node / dt
+  fp = the_simple_fluid
+  temperature_unit = Celsius
+[]
+
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temperature
-  [../]
-  [./fluid_props]
-    type = PorousFlowSingleComponentFluid
-    fp = the_simple_fluid
-    temperature_unit = Celsius
-    phase = 0
-  [../]
-  [./saturation]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-    capillary_pressure = capillary_pressure
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
   [./porosity_caps]
     type = PorousFlowPorosityConst # this simulation has no porosity changes from dissolution
     block = 0
@@ -111,16 +104,17 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     block = aquifer
     permeability = '1.7E-15 0 0   0 1.7E-15 0   0 0 4.1E-16'
   [../]
+  [./thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
+  [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
     density = 2500.0
     specific_heat_capacity = 1200.0
   [../]
-  [./mass_frac]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq '
-  [../]
 []
+
 [Preconditioning]
   active = typically_efficient
   [./typically_efficient]
@@ -143,6 +137,7 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     petsc_options_value = ' lu       mumps'
   [../]
 []
+
 [Executioner]
   type = Transient
   solve_type = Newton
@@ -152,9 +147,11 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     function = 'min(3E4, max(1E4, 0.2 * t))'
   [../]
 []
+
 [Outputs]
   exodus = true
 []
+
 [Variables]
   [./f_H]
     initial_condition = -2.952985071156e-06
@@ -662,18 +659,8 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
   [./produced_heat]
     type = PorousFlowSumQuantity
   [../]
-
-  [./capillary_pressure]
-    type = PorousFlowCapillaryPressureConst
-  [../]
-
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure temperature f_H f_Cl f_SO4 f_HCO3 f_SiO2aq f_Al f_Ca f_Mg f_Fe f_K f_Na f_Sr f_F f_BOH f_Br f_Ba f_Li f_NO3 f_O2aq'
-    number_fluid_phases = 1
-    number_fluid_components = 20
-  [../]
 []
+
 [Postprocessors]
   [./dt]
     type = TimestepSize
@@ -974,237 +961,6 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
     vars = 'kg_H2O dt'
     vals = 'kg_H2O_produced_this_timestep dt'
     value = 'kg_H2O * 1000 / 18.01801802 / dt'
-  [../]
-[]
-
-[Kernels]
-  [./advective_flux_H]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = f_H
-  [../]
-  [./advective_flux_Cl]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = f_Cl
-  [../]
-  [./advective_flux_SO4]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 2
-    variable = f_SO4
-  [../]
-  [./advective_flux_HCO3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 3
-    variable = f_HCO3
-  [../]
-  [./advective_flux_SiO2aq]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 4
-    variable = f_SiO2aq
-  [../]
-  [./advective_flux_Al]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 5
-    variable = f_Al
-  [../]
-  [./advective_flux_Ca]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 6
-    variable = f_Ca
-  [../]
-  [./advective_flux_Mg]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 7
-    variable = f_Mg
-  [../]
-  [./advective_flux_Fe]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 8
-    variable = f_Fe
-  [../]
-  [./advective_flux_K]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 9
-    variable = f_K
-  [../]
-  [./advective_flux_Na]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 10
-    variable = f_Na
-  [../]
-  [./advective_flux_Sr]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 11
-    variable = f_Sr
-  [../]
-  [./advective_flux_F]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 12
-    variable = f_F
-  [../]
-  [./advective_flux_BOH]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 13
-    variable = f_BOH
-  [../]
-  [./advective_flux_Br]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 14
-    variable = f_Br
-  [../]
-  [./advective_flux_Ba]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 15
-    variable = f_Ba
-  [../]
-  [./advective_flux_Li]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 16
-    variable = f_Li
-  [../]
-  [./advective_flux_NO3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 17
-    variable = f_NO3
-  [../]
-  [./advective_flux_O2aq]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 18
-    variable = f_O2aq
-  [../]
-  [./advective_flux_H2O]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 19
-    variable = porepressure
-  [../]
-  [./time_deriv_H]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    save_in = rate_H # change in kg at every node / dt
-    variable = f_H
-  [../]
-  [./time_deriv_Cl]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    save_in = rate_Cl # change in kg at every node / dt
-    variable = f_Cl
-  [../]
-  [./time_deriv_SO4]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 2
-    save_in = rate_SO4 # change in kg at every node / dt
-    variable = f_SO4
-  [../]
-  [./time_deriv_HCO3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 3
-    save_in = rate_HCO3 # change in kg at every node / dt
-    variable = f_HCO3
-  [../]
-  [./time_deriv_SiO2aq]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 4
-    save_in = rate_SiO2aq # change in kg at every node / dt
-    variable = f_SiO2aq
-  [../]
-  [./time_deriv_Al]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 5
-    save_in = rate_Al # change in kg at every node / dt
-    variable = f_Al
-  [../]
-  [./time_deriv_Ca]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 6
-    save_in = rate_Ca # change in kg at every node / dt
-    variable = f_Ca
-  [../]
-  [./time_deriv_Mg]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 7
-    save_in = rate_Mg # change in kg at every node / dt
-    variable = f_Mg
-  [../]
-  [./time_deriv_Fe]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 8
-    save_in = rate_Fe # change in kg at every node / dt
-    variable = f_Fe
-  [../]
-  [./time_deriv_K]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 9
-    save_in = rate_K # change in kg at every node / dt
-    variable = f_K
-  [../]
-  [./time_deriv_Na]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 10
-    save_in = rate_Na # change in kg at every node / dt
-    variable = f_Na
-  [../]
-  [./time_deriv_Sr]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 11
-    save_in = rate_Sr # change in kg at every node / dt
-    variable = f_Sr
-  [../]
-  [./time_deriv_F]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 12
-    save_in = rate_F # change in kg at every node / dt
-    variable = f_F
-  [../]
-  [./time_deriv_BOH]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 13
-    save_in = rate_BOH # change in kg at every node / dt
-    variable = f_BOH
-  [../]
-  [./time_deriv_Br]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 14
-    save_in = rate_Br # change in kg at every node / dt
-    variable = f_Br
-  [../]
-  [./time_deriv_Ba]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 15
-    save_in = rate_Ba # change in kg at every node / dt
-    variable = f_Ba
-  [../]
-  [./time_deriv_Li]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 16
-    save_in = rate_Li # change in kg at every node / dt
-    variable = f_Li
-  [../]
-  [./time_deriv_NO3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 17
-    save_in = rate_NO3 # change in kg at every node / dt
-    variable = f_NO3
-  [../]
-  [./time_deriv_O2aq]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 18
-    save_in = rate_O2aq # change in kg at every node / dt
-    variable = f_O2aq
-  [../]
-  [./time_deriv_H2O]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 19
-    save_in = rate_H2O # change in kg at every node / dt
-    variable = porepressure
-  [../]
-  [./temperature_advection]
-    type = PorousFlowHeatAdvection
-    variable = temperature
-  [../]
-  [./temperature_time_deriv]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temperature
   [../]
 []
 

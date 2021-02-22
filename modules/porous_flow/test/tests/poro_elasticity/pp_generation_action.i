@@ -73,6 +73,7 @@
   van_genuchten_m = 0.8
   relative_permeability_type = Corey
   relative_permeability_exponent = 0.0
+  save_component_rate_in = nodal_kg_per_s
 []
 
 [BCs]
@@ -108,6 +109,8 @@
   [./porosity]
     order = CONSTANT
     family = MONOMIAL
+  [../]
+  [./nodal_kg_per_s]
   [../]
 []
 
@@ -156,6 +159,12 @@
 []
 
 [Postprocessors]
+  [./nodal_kg_per_s]
+    type = PointValue
+    outputs = csv
+    point = '0 0 0'
+    variable = nodal_kg_per_s
+  [../]
   [./fluid_mass]
     type = PorousFlowFluidMass
     fluid_component = 0

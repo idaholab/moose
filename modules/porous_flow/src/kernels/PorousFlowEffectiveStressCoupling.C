@@ -19,14 +19,14 @@ InputParameters
 PorousFlowEffectiveStressCoupling::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription(
-      "Adds $-Bi \\cdot p_s \\cdot \\nabla \\Psi_c$, where the subscript $c$ is the component.");
+  params.addClassDescription("Implements the weak form of the expression biot_coefficient * "
+                             "grad(effective fluid pressure)");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1, "biot_coefficient>=0&biot_coefficient<=1", "Biot coefficient");
   params.addRequiredParam<unsigned int>("component",
-                                        "The gradient direction (0 for x, 1 for y and 2 for z)");
+                                        "The component (0 for x, 1 for y and 2 for z) of grad(P)");
   return params;
 }
 

@@ -19,7 +19,11 @@ PorousFlowSinglePhaseBase::validParams()
   InputParameters params = PorousFlowActionBase::validParams();
   params.addParam<bool>("add_darcy_aux", true, "Add AuxVariables that record Darcy velocity");
   params.addParam<bool>("add_stress_aux", true, "Add AuxVariables that record effective stress");
-  params.addParam<bool>("use_brine", false, "Use PorousFlowBrine material for the fluid phase");
+  params.addDeprecatedParam<bool>("use_brine",
+                                  false,
+                                  "Whether to use a PorousFlowBrine Material",
+                                  "This parameter should no longer be used.  Instead use "
+                                  "fluid_properties_type = PorousFlowBrine");
   params.addRequiredParam<VariableName>("porepressure", "The name of the porepressure variable");
   MooseEnum coupling_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
   params.addParam<MooseEnum>("coupling_type",
@@ -28,6 +32,15 @@ PorousFlowSinglePhaseBase::validParams()
                              "deformations, you will need to supply the correct Biot coefficient.  "
                              "For simulations involving Thermal flows, you will need an associated "
                              "ConstantThermalExpansionCoefficient Material");
+  MooseEnum fluid_properties_type("PorousFlowSingleComponentFluid PorousFlowBrine Custom",
+                                  "PorousFlowSingleComponentFluid");
+  params.addParam<MooseEnum>(
+      "fluid_properties_type",
+      fluid_properties_type,
+      "Type of fluid properties to use.  For 'PorousFlowSingleComponentFluid' you must provide a "
+      "fp UserObject.  For 'PorousFlowBrine' you must supply a nacl_name.  For "
+      "'Custom' your input file must include a Material that provides fluid properties such as "
+      "density, viscosity, enthalpy and internal energy");
   MooseEnum simulation_type_choice("steady transient", "transient");
   params.addDeprecatedParam<MooseEnum>(
       "simulation_type",
@@ -35,10 +48,10 @@ PorousFlowSinglePhaseBase::validParams()
       "Whether a transient or steady-state simulation is being performed",
       "The execution type is now determined automatically. This parameter should no longer be "
       "used");
-  params.addParam<UserObjectName>("fp",
-                                  "use_brine_material",
-                                  "The name of the user object for fluid "
-                                  "properties. Not required if use_brine is true.");
+  params.addParam<UserObjectName>(
+      "fp",
+      "The name of the user object for fluid "
+      "properties. Only needed if fluid_properties_type = PorousFlowSingleComponentFluid");
   params.addCoupledVar("mass_fraction_vars",
                        "List of variables that represent the mass fractions.  With only one fluid "
                        "component, this may be left empty.  With N fluid components, the format is "
@@ -49,14 +62,43 @@ PorousFlowSinglePhaseBase::validParams()
                        "will associated the i^th mass fraction variable to the equation for the "
                        "i^th fluid component, and the pressure variable to the N^th fluid "
                        "component.");
-  params.addParam<unsigned>("nacl_index",
-                            0,
-                            "Index of NaCl variable in mass_fraction_vars, for "
-                            "calculating brine properties. Only required if use_brine is true.");
+  params.addDeprecatedParam<unsigned>(
+      "nacl_index",
+      0,
+      "Index of NaCl variable in mass_fraction_vars, for "
+      "calculating brine properties. Only required if use_brine is true.",
+      "This parameter should no longer be used.  Instead use nacl_name = the_nacl_variable_name");
+  params.addParam<VariableName>(
+      "nacl_name",
+      "Name of the NaCl variable.  Only required if fluid_properties_type = PorousFlowBrine");
   params.addParam<Real>(
       "biot_coefficient",
       1.0,
       "The Biot coefficient (relevant only for mechanically-coupled simulations)");
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_component_rate_in",
+      "List of AuxVariables into which the rate-of-change of each fluid component at each node "
+      "will be saved.  There must be exactly N of these to match the N fluid components.  The "
+      "result will be measured in kg/s, where the kg is the mass of the fluid component at the "
+      "node (or m^3/s if multiply_by_density=false).  Note that this saves the result from the "
+      "MassTimeDerivative Kernels, but NOT from the MassVolumetricExpansion Kernels.");
+  MooseEnum temp_unit_choice("Kelvin Celsius", "Kelvin");
+  params.addParam<MooseEnum>(
+      "temperature_unit", temp_unit_choice, "The unit of the temperature variable");
+  MooseEnum p_unit_choice("Pa MPa", "Pa");
+  params.addParam<MooseEnum>(
+      "pressure_unit",
+      p_unit_choice,
+      "The unit of the pressure variable used everywhere in the input file "
+      "except for in the FluidProperties-module objects.  This can be set to the non-default value "
+      "only for fluid_properties_type = PorousFlowSingleComponentFluid");
+  MooseEnum time_unit_choice("seconds hours days years", "seconds");
+  params.addParam<MooseEnum>(
+      "time_unit",
+      time_unit_choice,
+      "The unit of time used everywhere in the input file except for in the "
+      "FluidProperties-module objects.  This can be set to the non-default value only for "
+      "fluid_properties_type = PorousFlowSingleComponentFluid");
   params.addClassDescription("Base class for single-phase simulations");
   return params;
 }
@@ -69,27 +111,57 @@ PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & par
              _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
     _mechanical(_coupling_type == CouplingTypeEnum::HydroMechanical ||
                 _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
-    _fp(getParam<UserObjectName>("fp")),
+    _fluid_properties_type(
+        getParam<MooseEnum>("fluid_properties_type").getEnum<FluidPropertiesTypeEnum>()),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _add_darcy_aux(getParam<bool>("add_darcy_aux")),
     _add_stress_aux(getParam<bool>("add_stress_aux")),
-    _use_brine(getParam<bool>("use_brine")),
-    _nacl_index(getParam<unsigned>("nacl_index"))
+    _save_component_rate_in(getParam<std::vector<AuxVariableName>>("save_component_rate_in")),
+    _temperature_unit(getParam<MooseEnum>("temperature_unit")),
+    _pressure_unit(getParam<MooseEnum>("pressure_unit")),
+    _time_unit(getParam<MooseEnum>("time_unit"))
 {
   if (_thermal && _temperature_var.size() != 1)
     mooseError("PorousFlowSinglePhaseBase: You need to specify a temperature variable to perform "
                "non-isothermal simulations");
 
-  if (_use_brine && !params.isParamValid("mass_fraction_vars"))
-    mooseError("PorousFlowSinglePhaseBase: You need to specify at least one component in "
-               "mass_fraction_vars if use_brine is true");
+  if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowSingleComponentFluid)
+  {
+    if (params.isParamValid("nacl_name"))
+      paramError("nacl_name",
+                 "PorousFlowSinglePhaseBase: You should not specify a nacl_name when "
+                 "fluid_properties_type = PorousFlowSingleComponentFluid");
+    if (!params.isParamValid("fp"))
+      paramError("fp",
+                 "PorousFlowSinglePhaseBase: You must specify fp when fluid_properties_type = "
+                 "PorousFlowSingleComponentFluid");
+    _fp = getParam<UserObjectName>("fp");
+  }
 
-  if (_use_brine && _nacl_index >= _num_mass_fraction_vars)
-    mooseError(
-        "PorousFlowSinglePhaseBase: nacl_index must be less than length of mass_fraction_vars");
+  if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowBrine)
+  {
+    if (!params.isParamValid("nacl_name"))
+      paramError("nacl_name",
+                 "PorousFlowSinglePhaseBase: You must specify nacl_name when "
+                 "fluid_properties_type = PorousFlowBrine");
+    if (params.isParamValid("fp"))
+      paramError("fp",
+                 "PorousFlowSinglePhaseBase: You should not specify fp when "
+                 "fluid_properties_type = PorousFlowBrine");
+    if (_pressure_unit != "Pa")
+      paramError("pressure_unit",
+                 "Must use pressure_unit = Pa for fluid_properties_type = PorousFlowBrine");
+    if (_time_unit != "seconds")
+      paramError("time_unit",
+                 "Must use time_unit = seconds for fluid_properties_type = PorousFlowBrine");
+    _nacl_name = getParam<VariableName>("nacl_name");
+  }
 
-  if (!_use_brine && _fp == "use_brine_material")
-    mooseError("PorousFlowSinglePhaseBase: You need to specify fp if use_brine is false");
+  if (params.isParamValid("save_component_rate_in") &&
+      _save_component_rate_in.size() != _num_mass_fraction_vars + 1)
+    paramError("save_component_rate_in",
+               "The number of save_component_rate_in variables must be the number of fluid "
+               "components + 1");
 }
 
 void
@@ -190,6 +262,7 @@ PorousFlowSinglePhaseBase::addKernels()
       params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+      params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
       _problem->addKernel(kernel_type, kernel_name, params);
     }
   }
@@ -201,6 +274,7 @@ PorousFlowSinglePhaseBase::addKernels()
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<NonlinearVariableName>("variable") = _temperature_var[0];
+    params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 }
@@ -242,13 +316,19 @@ PorousFlowSinglePhaseBase::addMaterials()
 
   if (compute_rho_mu_qp || compute_e_qp || compute_h_qp)
   {
-    if (_use_brine)
-    {
-      const std::string nacl_name = _mass_fraction_vars[_nacl_index];
-      addBrineMaterial(nacl_name, false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp);
-    }
-    else
-      addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
+    if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowBrine)
+      addBrineMaterial(
+          _nacl_name, false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _temperature_unit);
+    else if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowSingleComponentFluid)
+      addSingleComponentFluidMaterial(false,
+                                      0,
+                                      compute_rho_mu_qp,
+                                      compute_e_qp,
+                                      compute_h_qp,
+                                      _fp,
+                                      _temperature_unit,
+                                      _pressure_unit,
+                                      _time_unit);
   }
 
   const bool compute_rho_mu_nodal = _deps.dependsOn(_included_objects, "density_nodal") ||
@@ -258,14 +338,24 @@ PorousFlowSinglePhaseBase::addMaterials()
 
   if (compute_rho_mu_nodal || compute_e_nodal || compute_h_nodal)
   {
-    if (_use_brine)
-    {
-      const std::string nacl_name = _mass_fraction_vars[_nacl_index];
-      addBrineMaterial(nacl_name, true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal);
-    }
-    else
-      addSingleComponentFluidMaterial(
-          true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
+    if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowBrine)
+      addBrineMaterial(_nacl_name,
+                       true,
+                       0,
+                       compute_rho_mu_nodal,
+                       compute_e_nodal,
+                       compute_h_nodal,
+                       _temperature_unit);
+    else if (_fluid_properties_type == FluidPropertiesTypeEnum::PorousFlowSingleComponentFluid)
+      addSingleComponentFluidMaterial(true,
+                                      0,
+                                      compute_rho_mu_nodal,
+                                      compute_e_nodal,
+                                      compute_h_nodal,
+                                      _fp,
+                                      _temperature_unit,
+                                      _pressure_unit,
+                                      _time_unit);
   }
 
   if (_deps.dependsOn(_included_objects, "effective_pressure_qp"))

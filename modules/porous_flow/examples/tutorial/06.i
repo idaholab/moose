@@ -71,6 +71,7 @@
   gravity = '0 0 0'
   fp = the_simple_fluid
   mass_fraction_vars = tracer_concentration
+  stabilization = none # Note to reader: 06_KT.i uses KT stabilization - compare the results
 []
 
 [BCs]

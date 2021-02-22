@@ -27,11 +27,17 @@ InputParameters
 PorousFlowFullySaturated::validParams()
 {
   InputParameters params = PorousFlowSinglePhaseBase::validParams();
+  params.addParam<bool>(
+      "multiply_by_density",
+      true,
+      "If true, then the Kernels for fluid flow are multiplied by "
+      "the fluid density.  If false, this multiplication is not "
+      "performed, which means the problem becomes more linear, but care must be taken when using "
+      "other PorousFlow objects, since MOOSE will be computing volume fluxes, not mass fluxes.");
   params.addClassDescription(
       "Adds Kernels and fluid-property Materials necessary to simulate a "
-      "single-phase fully-saturated flow problem.  Full-upwinding of fluid flow is not available "
-      "in this Action, so the results may differ slightly from the Unsaturated Action.  However KT "
-      "stabilization may be employed for both the fluid and any heat flow.  No Kernels for "
+      "single-phase fully-saturated flow problem.  Numerical stabilization options for the fluid "
+      "and heat flow are: no upwinding, full-upwinding or KT stabilization.  No Kernels for "
       "diffusion and dispersion of "
       "fluid components are added.  To run a simulation you will also "
       "need to provide various other Materials for each mesh "
@@ -42,7 +48,7 @@ PorousFlowFullySaturated::validParams()
 }
 
 PorousFlowFullySaturated::PorousFlowFullySaturated(const InputParameters & params)
-  : PorousFlowSinglePhaseBase(params)
+  : PorousFlowSinglePhaseBase(params), _multiply_by_density(getParam<bool>("multiply_by_density"))
 {
 }
 
@@ -52,7 +58,12 @@ PorousFlowFullySaturated::addMaterialDependencies()
   PorousFlowSinglePhaseBase::addMaterialDependencies();
 
   // Add necessary objects to list of PorousFlow objects added by this action
-  _included_objects.push_back("PorousFlowFullySaturatedDarcyFlow");
+  if (_stabilization == StabilizationEnum::None)
+    _included_objects.push_back("PorousFlowFullySaturatedDarcyFlow");
+  else if (_stabilization == StabilizationEnum::Full)
+    _included_objects.push_back("PorousFlowFullySaturatedAdvectiveFlux");
+  else if (_stabilization == StabilizationEnum::KT)
+    _included_objects.push_back("PorousFlowFluxLimitedTVDAdvection");
 
   if (_transient)
     _included_objects.push_back("PorousFlowMassTimeDerivative");
@@ -61,7 +72,17 @@ PorousFlowFullySaturated::addMaterialDependencies()
     _included_objects.push_back("PorousFlowMassVolumetricExpansion");
 
   if (_thermal)
-    _included_objects.push_back("PorousFlowFullySaturatedHeatAdvection");
+  {
+    if (_stabilization == StabilizationEnum::None)
+      _included_objects.push_back("PorousFlowFullySaturatedHeatAdvection");
+    else if (_stabilization == StabilizationEnum::Full)
+      _included_objects.push_back("PorousFlowFullySaturatedUpwindHeatAdvection");
+    else if (_stabilization == StabilizationEnum::KT)
+      _included_objects.push_back("PorousFlowFluxLimitedTVDAdvection");
+  }
+
+  if (_stabilization == StabilizationEnum::KT && _thermal)
+    _included_objects.push_back("PorousFlowAdvectiveFluxCalculatorSaturatedHeat");
 
   if (_stabilization == StabilizationEnum::KT)
     _included_objects.push_back("PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent");
@@ -75,12 +96,13 @@ PorousFlowFullySaturated::addKernels()
 {
   PorousFlowSinglePhaseBase::addKernels();
 
-  if (_stabilization == StabilizationEnum::Full)
+  if (_stabilization == StabilizationEnum::None)
   {
     const std::string kernel_type = "PorousFlowFullySaturatedDarcyFlow";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<RealVectorValue>("gravity") = _gravity;
+    params.set<bool>("multiply_by_density") = _multiply_by_density;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -92,6 +114,29 @@ PorousFlowFullySaturated::addKernels()
 
     const std::string kernel_name =
         "PorousFlowFullySaturated_DarcyFlow" + Moose::stringify(_num_mass_fraction_vars);
+    params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
+    params.set<NonlinearVariableName>("variable") = _pp_var;
+    _problem->addKernel(kernel_type, kernel_name, params);
+  }
+  else if (_stabilization == StabilizationEnum::Full)
+  {
+    const std::string kernel_type = "PorousFlowFullySaturatedAdvectiveFlux";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<RealVectorValue>("gravity") = _gravity;
+    params.set<bool>("multiply_by_density") = _multiply_by_density;
+
+    for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+    {
+      const std::string kernel_name =
+          "PorousFlowFullySaturated_AdvectiveFlux" + Moose::stringify(i);
+      params.set<unsigned int>("fluid_component") = i;
+      params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
+
+    const std::string kernel_name =
+        "PorousFlowFullySaturated_AdvectiveFlux" + Moose::stringify(_num_mass_fraction_vars);
     params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
     params.set<NonlinearVariableName>("variable") = _pp_var;
     _problem->addKernel(kernel_type, kernel_name, params);
@@ -125,12 +170,16 @@ PorousFlowFullySaturated::addKernels()
     std::string kernel_type = "PorousFlowMassTimeDerivative";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<bool>("multiply_by_density") = _multiply_by_density;
+    params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
       kernel_name = "PorousFlowFullySaturated_MassTimeDerivative" + Moose::stringify(i);
       params.set<unsigned int>("fluid_component") = i;
       params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+      if (_save_component_rate_in.size() != 0)
+        params.set<std::vector<AuxVariableName>>("save_in") = {_save_component_rate_in[i]};
       _problem->addKernel(kernel_type, kernel_name, params);
     }
 
@@ -138,6 +187,9 @@ PorousFlowFullySaturated::addKernels()
         "PorousFlowFullySaturated_MassTimeDerivative" + Moose::stringify(_num_mass_fraction_vars);
     params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
     params.set<NonlinearVariableName>("variable") = _pp_var;
+    if (_save_component_rate_in.size() != 0)
+      params.set<std::vector<AuxVariableName>>("save_in") = {
+          _save_component_rate_in[_num_mass_fraction_vars]};
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
@@ -147,6 +199,8 @@ PorousFlowFullySaturated::addKernels()
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<bool>("multiply_by_density") = _multiply_by_density;
+    params.set<bool>("strain_at_nearest_qp") = _strain_at_nearest_qp;
 
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -165,10 +219,21 @@ PorousFlowFullySaturated::addKernels()
 
   if (_thermal)
   {
-    if (_stabilization == StabilizationEnum::Full)
+    if (_stabilization == StabilizationEnum::None)
     {
       std::string kernel_name = "PorousFlowFullySaturated_HeatAdvection";
       std::string kernel_type = "PorousFlowFullySaturatedHeatAdvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_var[0];
+      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+      params.set<RealVectorValue>("gravity") = _gravity;
+      params.set<bool>("multiply_by_density") = true;
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
+    else if (_stabilization == StabilizationEnum::Full)
+    {
+      std::string kernel_name = "PorousFlowFullySaturatedUpwind_HeatAdvection";
+      std::string kernel_type = "PorousFlowFullySaturatedUpwindHeatAdvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_var[0];
       params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
@@ -199,17 +264,19 @@ PorousFlowFullySaturated::addUserObjects()
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
       const std::string userobject_name = "PorousFlowFullySaturated_AC_" + Moose::stringify(i);
-      addAdvectiveFluxCalculatorSaturatedMultiComponent(0, i, true, userobject_name);
+      addAdvectiveFluxCalculatorSaturatedMultiComponent(
+          0, i, _multiply_by_density, userobject_name);
     }
 
     const std::string userobject_name =
         "PorousFlowFullySaturated_AC_" + Moose::stringify(_num_mass_fraction_vars);
 
     if (_num_mass_fraction_vars == 0)
-      addAdvectiveFluxCalculatorSaturated(0, true, userobject_name); // 1 component only
+      addAdvectiveFluxCalculatorSaturated(
+          0, _multiply_by_density, userobject_name); // 1 component only
     else
       addAdvectiveFluxCalculatorSaturatedMultiComponent(
-          0, _num_mass_fraction_vars, true, userobject_name);
+          0, _num_mass_fraction_vars, _multiply_by_density, userobject_name);
 
     if (_thermal)
     {
@@ -252,9 +319,7 @@ PorousFlowFullySaturated::addMaterials()
       _deps.dependsOn(_included_objects, "volumetric_strain_nodal"))
     addVolumetricStrainMaterial(_coupled_displacements, true);
 
-  if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
+  if (_deps.dependsOn(_included_objects,
+                      "relative_permeability_qp")) // might be needed by Darcy-velocity Aux
     addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
-
-  if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
-    addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
 }

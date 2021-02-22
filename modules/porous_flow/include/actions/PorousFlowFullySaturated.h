@@ -26,4 +26,7 @@ protected:
   virtual void addMaterialDependencies() override;
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
+
+  // Whether to multiply the fluid kernels by the fluid density
+  const bool _multiply_by_density;
 };
