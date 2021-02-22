@@ -21,5 +21,5 @@ public:
 protected:
   virtual RealEigenVector computeValue() override;
 
-  std::vector<const VariableValue *> _component_vars;
+  const std::vector<const VariableValue *> _component_vars;
 };

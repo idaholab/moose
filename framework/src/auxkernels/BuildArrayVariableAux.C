@@ -29,7 +29,8 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
 {
   // Check the number of component variables
   if (_component_vars.size() != _var.count())
-    mooseError("The array variable has ",
+    paramError("variable",
+               "The array variable has ",
                _var.count(),
                " components, but ",
                _component_vars.size(),
@@ -42,7 +43,8 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
   // Check the FEType of the output variable
   if (std::find(supported_fe_types.begin(), supported_fe_types.end(), _var.feType()) ==
       supported_fe_types.end())
-    mooseError(
+    paramError(
+        "variable",
         "BuildArrayVariableAux only supports constant monomial or linear Lagrange variables");
 
   // Make sure the FEType of each input variable matches the output type
@@ -52,7 +54,8 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
   {
     const MooseVariableFieldBase & var_base = _subproblem.getVariable(tid, name);
     if (var_base.feType() != _var.feType())
-      mooseError(
+      paramError(
+          "component_variables",
           "The input and output variables of BuildArrayVariableAux must have the same FE type");
   }
 }
@@ -61,13 +64,9 @@ RealEigenVector
 BuildArrayVariableAux::computeValue()
 {
   // Get the value of each component
-  std::vector<Real> component_vals;
-  component_vals.reserve(_component_vars.size());
-  for (auto var : _component_vars)
-    component_vals.push_back((*var)[_qp]);
+  RealEigenVector out(_component_vars.size());
+  for (size_t i = 0; i < _component_vars.size(); ++i)
+    out(i) = (*_component_vars[i])[_qp];
 
-  // Convert the output to an Eigen matrix and return
-  RealEigenVector out;
-  out = Eigen::Map<RealEigenVector>(component_vals.data(), component_vals.size());
   return out;
 }

@@ -3,8 +3,7 @@
 ## Description
 
 `BuildArrayVariableAux` will fill the values of an array variable using a
-standard variable for each of the array components. Currently this aux kernel
-only supports constant monomial variables.
+standard variable for each of the array components.
 
 ## Example Syntax
 
