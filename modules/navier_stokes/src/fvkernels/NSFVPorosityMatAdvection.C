@@ -18,12 +18,6 @@ NSFVPorosityMatAdvection::validParams()
   InputParameters params = FVMatAdvection::validParams();
   params.addClassDescription(
       "Computes the residual of advective term with porosity using finite volume method.");
-  MooseEnum one_over_porosity_interp_method("average upwind", "average");
-
-  params.addParam<MooseEnum>("one_over_porosity_interp_method",
-                             one_over_porosity_interp_method,
-                             "The interpolation to use for the one/porosity prefactor. Options are "
-                             "'upwind' and 'average', with the default being 'average'.");
   return params;
 }
 
@@ -32,36 +26,36 @@ NSFVPorosityMatAdvection::NSFVPorosityMatAdvection(const InputParameters & param
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity))
 {
-  using namespace Moose::FV;
-
-  const auto & one_over_porosity_interp_method =
-      getParam<MooseEnum>("one_over_porosity_interp_method");
-  if (one_over_porosity_interp_method == "average")
-    _one_over_porosity_interp_method = InterpMethod::Average;
-  else if (one_over_porosity_interp_method == "upwind")
-    _one_over_porosity_interp_method = InterpMethod::Upwind;
-  else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(one_over_porosity_interp_method));
 }
 
 ADReal
 NSFVPorosityMatAdvection::computeQpResidual()
 {
-  auto residual = FVMatAdvection::computeQpResidual();
+  // Check for large porosity change. If we do have a large change we are going to upwind everything
+  // to prevent oscillations due to the discontinuity
+  if (std::abs(_eps_elem[_qp] - _eps_neighbor[_qp]) > 0.1)
+  {
+    ADReal u_interface;
 
-  ADReal one_over_porosity_interface;
-  const auto one_over_porosity_elem = 1 / _eps_elem[_qp];
-  const auto one_over_porosity_neighbor = 1 / _eps_neighbor[_qp];
+    interpolate(Moose::FV::InterpMethod::Average,
+                _v,
+                _vel_elem[_qp],
+                _vel_neighbor[_qp],
+                *_face_info,
+                true);
+    if (MetaPhysicL::raw_value(_v) * _face_info->normal() > 0)
+    {
+      _v = _vel_elem[_qp];
+      u_interface = _adv_quant_elem[_qp];
+    }
+    else
+    {
+      _v = _vel_neighbor[_qp];
+      u_interface = _adv_quant_neighbor[_qp];
+    }
 
-  using namespace Moose::FV;
-
-  interpolate(_one_over_porosity_interp_method,
-              one_over_porosity_interface,
-              one_over_porosity_elem,
-              one_over_porosity_neighbor,
-              _v,
-              *_face_info,
-              true);
-  return residual * one_over_porosity_interface;
+    return _normal * _v * u_interface;
+  }
+  else
+    return FVMatAdvection::computeQpResidual();
 }

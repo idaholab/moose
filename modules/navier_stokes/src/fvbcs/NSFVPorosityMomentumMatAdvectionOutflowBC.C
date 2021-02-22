@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPorosityMatAdvectionOutflowBC.h"
+#include "NSFVPorosityMomentumMatAdvectionOutflowBC.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVPorosityMatAdvectionOutflowBC);
+registerMooseObject("NavierStokesApp", NSFVPorosityMomentumMatAdvectionOutflowBC);
 
 InputParameters
-NSFVPorosityMatAdvectionOutflowBC::validParams()
+NSFVPorosityMomentumMatAdvectionOutflowBC::validParams()
 {
   InputParameters params = FVMatAdvectionOutflowBC::validParams();
   params.addClassDescription(
@@ -24,13 +24,22 @@ NSFVPorosityMatAdvectionOutflowBC::validParams()
                              one_over_porosity_interp_method,
                              "The interpolation to use for the one/porosity prefactor. Options are "
                              "'upwind' and 'average', with the default being 'average'.");
+  MooseEnum momentum_component("x=0 y=1 z=2");
+  params.addRequiredParam<MooseEnum>(
+      "momentum_component",
+      momentum_component,
+      "The component of the momentum equation that this kernel applies to.");
   return params;
 }
 
-NSFVPorosityMatAdvectionOutflowBC::NSFVPorosityMatAdvectionOutflowBC(const InputParameters & params)
+NSFVPorosityMomentumMatAdvectionOutflowBC::NSFVPorosityMomentumMatAdvectionOutflowBC(
+    const InputParameters & params)
   : FVMatAdvectionOutflowBC(params),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
-    _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity))
+    _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
+    _p_elem(getADMaterialProperty<Real>(NS::pressure)),
+    _p_neighbor(getNeighborADMaterialProperty<Real>(NS::pressure)),
+    _index(getParam<MooseEnum>("momentum_component"))
 {
   using namespace Moose::FV;
 
@@ -46,15 +55,16 @@ NSFVPorosityMatAdvectionOutflowBC::NSFVPorosityMatAdvectionOutflowBC(const Input
 }
 
 ADReal
-NSFVPorosityMatAdvectionOutflowBC::computeQpResidual()
+NSFVPorosityMomentumMatAdvectionOutflowBC::computeQpResidual()
 {
-  auto residual = FVMatAdvectionOutflowBC::computeQpResidual();
+  using namespace Moose::FV;
 
   ADReal one_over_porosity_face;
+
+  auto residual = FVMatAdvectionOutflowBC::computeQpResidual();
+
   const auto one_over_porosity_elem = 1 / _eps_elem[_qp];
   const auto one_over_porosity_neighbor = 1 / _eps_neighbor[_qp];
-
-  using namespace Moose::FV;
 
   interpolate(_one_over_porosity_interp_method,
               one_over_porosity_face,
@@ -63,5 +73,14 @@ NSFVPorosityMatAdvectionOutflowBC::computeQpResidual()
               _v,
               *_face_info,
               true);
-  return residual * one_over_porosity_face;
+
+  ADReal eps_p_face;
+  interpolate(InterpMethod::Average,
+              eps_p_face,
+              _eps_elem[_qp] * _p_elem[_qp],
+              _eps_neighbor[_qp] * _p_neighbor[_qp],
+              *_face_info,
+              true);
+
+  return residual * one_over_porosity_face + _normal(_index) * eps_p_face;
 }

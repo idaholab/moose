@@ -11,11 +11,11 @@
 
 #include "FVMatAdvectionOutflowBC.h"
 
-class NSFVPorosityMatAdvectionOutflowBC : public FVMatAdvectionOutflowBC
+class NSFVPorosityMomentumMatAdvectionOutflowBC : public FVMatAdvectionOutflowBC
 {
 public:
   static InputParameters validParams();
-  NSFVPorosityMatAdvectionOutflowBC(const InputParameters & params);
+  NSFVPorosityMomentumMatAdvectionOutflowBC(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;
@@ -25,6 +25,15 @@ protected:
 
   /// The porosity on the neighbor
   const MaterialProperty<Real> & _eps_neighbor;
+
+  /// the pressure on the element
+  const ADMaterialProperty<Real> & _p_elem;
+
+  /// the pressure on the neighbor
+  const ADMaterialProperty<Real> & _p_neighbor;
+
+  /// index x|y|z
+  const unsigned int _index;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _one_over_porosity_interp_method;

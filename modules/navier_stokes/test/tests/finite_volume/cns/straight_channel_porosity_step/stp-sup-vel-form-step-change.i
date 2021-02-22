@@ -16,12 +16,13 @@ u_in=1
 mass_flux_in=${fparse u_in * rho_in}
 eps_in=1
 real_u_in=${fparse u_in / eps_in}
-momentum_flux_in=${fparse u_in * rho_in * u_in / eps_in}
+# prescribe inlet pressure = initial pressure
+p_in=${p_initial}
+rho_u_in=${fparse rho_in * u_in} # Useful for Dirichlet
+momentum_flux_in=${fparse eps_in * p_in + u_in * rho_in * u_in / eps_in}
 # prescribe inlet e = initial e
 et_in=${fparse e_initial + 0.5 * real_u_in * real_u_in}
 # rho_et_in=${fparse rho_in * et_in} # Useful for Dirichlet
-# prescribe inlet pressure = initial pressure
-p_in=${p_initial}
 ht_in=${fparse et_in + p_in / rho_in}
 enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 
@@ -31,7 +32,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     dim = 1
     xmin = 0
     xmax = 10
-    nx = 10000
+    nx = 1000
   []
   [constant_again_porosity]
     input = cartesian
@@ -61,7 +62,8 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   []
   [rho_u]
     type = MooseVariableFVReal
-    initial_condition = 1e-15
+    # initial_condition = 1e-15
+    initial_condition = ${rho_u_in}
   []
   [rho_et]
       type = MooseVariableFVReal
@@ -163,8 +165,8 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   [momentum_flux]
     type = ParsedAux
     variable = momentum_flux
-    function = 'vel_x * rho_u / porosity'
-    args = 'vel_x rho_u porosity'
+    function = 'vel_x * rho_u / porosity + pressure * porosity'
+    args = 'vel_x rho_u porosity pressure'
     execute_on = 'timestep_end'
   []
   [enthalpy_flux]
@@ -177,40 +179,41 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 []
 
 [FVKernels]
-  [mass_time]
-    type = FVPorosityTimeDerivative
-    variable = rho
-  []
+  # [mass_time]
+  #   type = FVPorosityTimeDerivative
+  #   variable = rho
+  # []
   [mass_advection]
-    type = FVMatAdvection
+    type = NSFVPorosityMatAdvection
     variable = rho
     vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
 
-  [momentum_time]
-    type = FVTimeKernel
-    variable = rho_u
-  []
+  # [momentum_time]
+  #   type = FVTimeKernel
+  #   variable = rho_u
+  # []
   [momentum_advection]
-    type = NSFVPorosityMatAdvection
+    type = NSFVPorosityMomentumMatAdvection
     variable = rho_u
     vel = velocity
     advected_interp_method = ${advected_interp_method}
     one_over_porosity_interp_method = ${one_over_porosity_interp_method}
-  []
-  [momentum_pressure]
-    type = FVPorosityMomentumPressure
-    variable = rho_u
     momentum_component = 'x'
   []
+  # [momentum_pressure]
+  #   type = FVPorosityMomentumPressure
+  #   variable = rho_u
+  #   momentum_component = 'x'
+  # []
 
-  [energy_time]
-    type = FVPorosityTimeDerivative
-    variable = rho_et
-  []
+  # [energy_time]
+  #   type = FVPorosityTimeDerivative
+  #   variable = rho_et
+  # []
   [energy_advection]
-    type = FVMatAdvection
+    type = NSFVPorosityMatAdvection
     variable = rho_et
     advected_quantity = 'rho_ht'
     vel = velocity
@@ -251,12 +254,13 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = NSFVPorosityMatAdvectionOutflowBC
+    type = NSFVPorosityMomentumMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_u
     vel = velocity
     advected_interp_method = ${advected_interp_method}
     one_over_porosity_interp_method = ${one_over_porosity_interp_method}
+    momentum_component = 'x'
   []
   # [rho_et_left]
   #   type = FVDirichletBC
@@ -314,28 +318,29 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Executioner]
   solve_type = NEWTON
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-7
-  type = Transient
-  num_steps = 1000
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1e-4
-    optimal_iterations = 6
-  []
-  steady_state_detection = true
-  line_search = 'none'
+  type = Steady
+  # nl_abs_tol = 1e-7
+  # type = Transient
+  # num_steps = 1000
+  # [TimeStepper]
+  #   type = IterationAdaptiveDT
+  #   dt = 1e-4
+  #   optimal_iterations = 6
+  # []
+  # steady_state_detection = true
+  line_search = 'bt'
   automatic_scaling = true
   compute_scaling_once = false
   verbose = true
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       strumpack'
+  petsc_options_value = 'lu       mumps'
+  nl_max_its = 10
 []
 
 [Outputs]
   [out]
     type = Exodus
-    execute_on = 'final'
-    # execute_on = 'timestep_end'
+    execute_on = 'initial timestep_end'
   []
   checkpoint = true
 []
