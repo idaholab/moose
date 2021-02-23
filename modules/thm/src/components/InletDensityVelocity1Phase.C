@@ -6,7 +6,7 @@ registerMooseObject("THMApp", InletDensityVelocity1Phase);
 InputParameters
 InletDensityVelocity1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("rho", "Prescribed density [kg/m^3]");
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
@@ -16,14 +16,14 @@ InletDensityVelocity1Phase::validParams()
 }
 
 InletDensityVelocity1Phase::InletDensityVelocity1Phase(const InputParameters & params)
-  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
 {
 }
 
 void
 InletDensityVelocity1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)
@@ -60,7 +60,6 @@ InletDensityVelocity1Phase::setupCG()
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhouA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "rho");
@@ -74,7 +73,6 @@ InletDensityVelocity1Phase::setupCG()
     params.set<Real>("normal") = _normal;
     params.set<Real>("rho") = rho_in;
     params.set<Real>("vel") = u_in;
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<UserObjectName>("fp") = _fp_name;

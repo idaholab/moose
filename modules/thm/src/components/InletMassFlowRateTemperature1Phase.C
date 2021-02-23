@@ -6,7 +6,7 @@ registerMooseObject("THMApp", InletMassFlowRateTemperature1Phase);
 InputParameters
 InletMassFlowRateTemperature1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
   params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
@@ -17,14 +17,14 @@ InletMassFlowRateTemperature1Phase::validParams()
 
 InletMassFlowRateTemperature1Phase::InletMassFlowRateTemperature1Phase(
     const InputParameters & params)
-  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
 {
 }
 
 void
 InletMassFlowRateTemperature1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)
@@ -69,7 +69,6 @@ InletMassFlowRateTemperature1Phase::setup1PhaseCG()
     params.set<Real>("m_dot") = m_dot_in;
     params.set<Real>("T") = T_in;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     params.set<MaterialPropertyName>("p") = FlowModelSinglePhase::PRESSURE;
     params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};

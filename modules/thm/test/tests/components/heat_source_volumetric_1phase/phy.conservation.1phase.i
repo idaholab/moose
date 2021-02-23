@@ -33,16 +33,16 @@
     initial_vel = 0
   [../]
   [./wall1]
-    type = SolidWall
+    type = SolidWall1Phase
     input = flow_channel:in
   [../]
   [./wall2]
-    type = SolidWall
+    type = SolidWall1Phase
     input = flow_channel:out
   [../]
 
   [./heat_source]
-    type = HeatSourceVolumetric
+    type = HeatSourceVolumetric1Phase
     flow_channel = flow_channel
     q = 1e3
   [../]

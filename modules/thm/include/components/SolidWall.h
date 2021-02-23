@@ -1,21 +1,16 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowConnection.h"
 
 /**
  * A simple component for solid wall BC
+ *
+ * Deprecated
  */
-class SolidWall : public FlowBoundary
+class SolidWall : public FlowConnection
 {
 public:
   SolidWall(const InputParameters & params);
-
-  virtual void addMooseObjects() override;
-
-protected:
-  virtual void addMooseObjects1Phase();
-  virtual void addMooseObjects2Phase();
-  virtual void addMooseObjects2PhaseNCG();
 
 public:
   static InputParameters validParams();

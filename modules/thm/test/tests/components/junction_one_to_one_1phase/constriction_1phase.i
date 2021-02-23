@@ -1,4 +1,4 @@
-# This test is used to test the JunctionOneToOne component with unequal areas
+# This test is used to test the JunctionOneToOne1Phase1Phase component with unequal areas
 # at the junction. The downstream flow channel has an area half that of the
 # upstream pipe, so there should be a pressure increase just upstream of the
 # junction due to the partial wall. The velocity should increase through the
@@ -42,7 +42,7 @@
   [../]
 
   [./junction]
-    type = JunctionOneToOne
+    type = JunctionOneToOne1Phase
     connections = 'left_channel:out right_channel:in'
   [../]
 

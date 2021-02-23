@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  * Boundary condition with prescribed mass flow rate and temperature for 1-phase flow channels
  */
-class InletMassFlowRateTemperature1Phase : public FlowBoundary
+class InletMassFlowRateTemperature1Phase : public FlowBoundary1Phase
 {
 public:
   InletMassFlowRateTemperature1Phase(const InputParameters & params);

@@ -1,29 +1,4 @@
 [Tests]
-  [./acoustic_impedance_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=Z_liquid
-      Kernels/test_vapor/material_property=Z_vapor
-      JacobianTest2Phase/snes_test_err=1e-12"
-    ratio_tol = 2e-7
-    difference_tol = 0.3
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./acoustic_impedance_7eqn_ncg]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=Z_liquid
-      Kernels/test_vapor/material_property=Z_vapor
-      Kernels/test_ncg/material_property=Z_vapor
-      JacobianTest2PhaseNCG/snes_test_err=1e-12"
-    ratio_tol = 2e-7
-    difference_tol = 0.3
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./constant_material]
     type = 'PetscJacobianTester'
     input = 'constant_material.i'
@@ -41,31 +16,11 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./density_7eqn_material]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=rho_liquid
-      Kernels/test_vapor/material_property=rho_vapor
-      JacobianTest2Phase/snes_test_err=1e-12"
-    ratio_tol = 5e-7
-    difference_tol = 2e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./dynamic_viscosity]
     type = 'PetscJacobianTester'
     input = 'dynamic_viscosity.i'
     ratio_tol = 1e-7
     difference_tol = 1e-7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./interfacial_area_density_simple]
-    type = 'PetscJacobianTester'
-    input = 'interfacial_area_density_simple.i'
-    ratio_tol = 5e-7
-    difference_tol = 5e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -86,57 +41,12 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./pressure_7eqn_material]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=p_liquid
-      Kernels/test_vapor/material_property=p_vapor
-      JacobianTest2Phase/snes_test_err=1e-12"
-    ratio_tol = 2e-7
-    difference_tol = 250
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./pressure_7eqn_ncg_material]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=p_liquid
-      Kernels/test_vapor/material_property=p_vapor
-      Kernels/test_ncg/material_property=p_vapor
-      JacobianTest2PhaseNCG/snes_test_err=1e-12"
-    ratio_tol = 2e-7
-    difference_tol = 250
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./pressure_relaxation_rate]
-    type = 'PetscJacobianTester'
-    input = 'pressure_relaxation_rate.i'
-    ratio_tol = 5e-7
-    difference_tol = 1e-9
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./specific_internal_energy_3eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
     cli_args = "Kernels/test_kernel/material_property=e JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 5e-7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./specific_internal_energy_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=e_liquid
-      Kernels/test_vapor/material_property=e_vapor
-      JacobianTest2Phase/snes_test_err=1e-10"
-    ratio_tol = 5e-8
-    difference_tol = 2e-4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -149,69 +59,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./specific_volume_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=v_liquid
-      Kernels/test_liquid/args='beta arhoA_liquid'
-      Kernels/test_vapor/material_property=v_vapor
-      Kernels/test_vapor/args='beta arhoA_vapor'
-      JacobianTest2Phase/snes_test_err=1e-12"
-    ratio_tol = 1e-9
-    difference_tol = 1e-9
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./saturation_temperature]
-    type = 'PetscJacobianTester'
-    input = 'saturation_temperature.i'
-    ratio_tol = 5e-14
-    difference_tol = 5e-14
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./surface_tension]
-    type = 'PetscJacobianTester'
-    input = 'surface_tension.i'
-    ratio_tol = 5e-14
-    difference_tol = 5e-14
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./sound_speed_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=c_liquid
-      Kernels/test_vapor/material_property=c_vapor
-      JacobianTest2Phase/snes_test_err=1e-8"
-    ratio_tol = 5e-3
-    difference_tol = 10
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./sound_speed_7eqn_ncg]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=c_liquid
-      Kernels/test_vapor/material_property=c_vapor
-      Kernels/test_ncg/material_property=c_vapor
-      JacobianTest2PhaseNCG/snes_test_err=1e-12"
-    ratio_tol = 5e-8
-    difference_tol = 5e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./velocity_relaxation_rate]
-    type = 'PetscJacobianTester'
-    input = 'velocity_relaxation_rate.i'
-    ratio_tol = 1e-8
-    difference_tol = 5e-2
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./velocity_3eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
@@ -221,50 +68,12 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./velocity_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=vel_liquid
-      Kernels/test_liquid/args='arhoA_liquid arhouA_liquid'
-      Kernels/test_vapor/material_property=vel_vapor
-      Kernels/test_vapor/args='arhoA_vapor arhouA_vapor'
-      JacobianTest2Phase/snes_test_err=1e-10"
-    ratio_tol = 5e-8
-    difference_tol = 5e-10
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./enthalpy_3eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
     cli_args = "Kernels/test_kernel/material_property=h JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 1e-7
     difference_tol = 5e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./enthalpy_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=h_liquid
-      Kernels/test_vapor/material_property=h_vapor
-      JacobianTest2Phase/snes_test_err=1e-8"
-    ratio_tol = 5e-3
-    difference_tol = 5e3
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./enthalpy_7eqn_ncg]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=h_liquid
-      Kernels/test_vapor/material_property=h_vapor
-      Kernels/test_ncg/material_property=h_vapor"
-    ratio_tol = 2e-8
-    difference_tol = 0.03
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -285,98 +94,12 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./temperature_7eqn_material]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=T_liquid
-      Kernels/test_vapor/material_property=T_vapor
-      JacobianTest2Phase/snes_test_err=1e-12"
-    ratio_tol = 2e-8
-    difference_tol = 5e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./temperature_7eqn_ncg_material]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=T_liquid
-      Kernels/test_vapor/material_property=T_vapor
-      Kernels/test_ncg/material_property=T_vapor
-      JacobianTest2PhaseNCG/snes_test_err=1e-12"
-    ratio_tol = 1e-8
-    difference_tol = 3e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./total_enthalpy_3eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
     cli_args = "Kernels/test_kernel/material_property=H JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 1e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./total_enthalpy_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=H_liquid
-      Kernels/test_vapor/material_property=H_vapor
-      JacobianTest2Phase/snes_test_err=1e-8"
-    ratio_tol = 5e-3
-    difference_tol = 5e3
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./total_enthalpy_7eqn_ncg]
-    type = 'PetscJacobianTester'
-    input = 'fluid_properties_7eqn_ncg.i'
-    cli_args = "
-      Kernels/test_liquid/material_property=H_liquid
-      Kernels/test_vapor/material_property=H_vapor
-      Kernels/test_ncg/material_property=H_vapor"
-    ratio_tol = 2e-8
-    difference_tol = 0.03
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  # liquid volume fraction in the exponential region of the volume fraction mapper
-  [./volume_fraction_liquid_exponential]
-    type = 'PetscJacobianTester'
-    input = 'volume_fraction.i'
-    cli_args = "JacobianTestGeneral/variable_values='0.95' JacobianTestGeneral/snes_test_err=1e-8"
-    ratio_tol = 5e-8
-    difference_tol = 5e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  # liquid volume fraction in the linear region of the volume fraction mapper
-  [./volume_fraction_liquid_linear]
-    type = 'PetscJacobianTester'
-    input = 'volume_fraction.i'
-    ratio_tol = 1e-13
-    difference_tol = 1e-13
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  # vapor volume fraction in the linear region of the volume fraction mapper
-  [./volume_fraction_vapor_linear]
-    type = 'PetscJacobianTester'
-    input = 'volume_fraction.i'
-    cli_args = 'Kernels/test_kernel/material_property=alpha_vapor'
-    ratio_tol = 1e-13
-    difference_tol = 1e-13
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./wall_boiling_fraction]
-    type = 'PetscJacobianTester'
-    input = 'wall_boiling_fraction.i'
-    ratio_tol = 5e-8
-    difference_tol = 5e-8
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -393,22 +116,6 @@
     input = 'wall_friction_churchill.i'
     ratio_tol = 2e-10
     difference_tol = 2e-10
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./interfacial_velocity]
-    type = 'PetscJacobianTester'
-    input = 'interfacial_velocity.i'
-    ratio_tol = 6e-7
-    difference_tol = 2e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./interfacial_pressure]
-    type = 'PetscJacobianTester'
-    input = 'interfacial_pressure.i'
-    ratio_tol = 6e-7
-    difference_tol = 2.0
     max_threads = 1
     allow_test_objects = true
   [../]

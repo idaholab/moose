@@ -19,9 +19,6 @@ protected:
 
   bool _reversible;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const VariableValue & _area;
   const VariableValue & _arhoA;
   const VariableValue & _arhouA;
@@ -30,7 +27,6 @@ protected:
   // Variable numbers (for Jacobians)
   unsigned _arhoA_var_number;
   unsigned _arhouA_var_number;
-  unsigned _beta_var_num;
 
   // Required parameters
   /// the desired input static pressure

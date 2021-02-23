@@ -53,12 +53,12 @@
 
   # BCs
   [./left]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe1:in'
   [../]
 
   [./right]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe1:out'
   [../]
 []

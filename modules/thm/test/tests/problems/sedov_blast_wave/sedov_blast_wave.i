@@ -67,12 +67,12 @@
   [../]
 
   [./left_boundary]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:in'
   [../]
 
   [./right_boundary]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'pipe:out'
   [../]
 []

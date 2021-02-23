@@ -4,15 +4,4 @@
     input = 'cfl_1ph.i'
     csvdiff = 'cfl_1ph_out.csv'
   [../]
-  [./2phase]
-    type = 'CSVDiff'
-    input = 'cfl_2ph.i'
-    csvdiff = 'cfl_2ph_out.csv'
-  [../]
-  [./size_mismatch]
-    type = 'RunException'
-    input = 'cfl_2ph.i'
-    cli_args = 'Postprocessors/cfl/c_names=c_liquid'
-    expect_err = "The number of elements in the parameters 'vel_names' and 'c_names' must be equal"
-  [../]
 []

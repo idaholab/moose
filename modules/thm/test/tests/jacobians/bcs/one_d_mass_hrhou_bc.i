@@ -14,7 +14,6 @@
     normal = -1
     rhou = 123
     A = A
-    alpha = unity
   [../]
   [./bc_2]
     type = OneDMassHRhoUBC
@@ -23,6 +22,5 @@
     normal = 1
     rhou = 123
     A = A
-    alpha = unity
   [../]
 []

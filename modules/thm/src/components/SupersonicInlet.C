@@ -7,19 +7,22 @@ registerMooseObject("THMApp", SupersonicInlet);
 InputParameters
 SupersonicInlet::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<Real>("vel", "Prescribed velocity [m/s]");
   return params;
 }
 
-SupersonicInlet::SupersonicInlet(const InputParameters & parameters) : FlowBoundary(parameters) {}
+SupersonicInlet::SupersonicInlet(const InputParameters & parameters)
+  : FlowBoundary1Phase(parameters)
+{
+}
 
 void
 SupersonicInlet::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);

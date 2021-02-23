@@ -35,35 +35,10 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
     Registry::registerActionsTo(af, {"THMTestApp"});
 
     s.registerActionSyntax("JacobianTest1PhaseAction", "JacobianTest1Phase");
-    s.registerActionSyntax("JacobianTest2PhaseAction", "JacobianTest2Phase");
     s.registerActionSyntax("JacobianTestGeneralAction", "JacobianTestGeneral");
     s.registerActionSyntax("JacobianTest1PhaseRDGAction", "JacobianTest1PhaseRDG");
-    s.registerActionSyntax("JacobianTest2PhaseRDGBaseAction", "JacobianTest2PhaseRDG");
-    s.registerActionSyntax("JacobianTest2PhaseNumericalFluxAction",
-                           "JacobianTest2PhaseNumericalFlux");
-    s.registerActionSyntax("JacobianTest2PhaseBoundaryFluxAction",
-                           "JacobianTest2PhaseBoundaryFlux");
-    s.registerActionSyntax("JacobianTest2PhaseRDGInterfacialVariablesAction",
-                           "JacobianTest2PhaseRDGInterfacialVariables");
-    s.registerActionSyntax("JacobianTest2PhaseRiemannSolverAction",
-                           "JacobianTest2PhaseRiemannSolver");
-    s.registerActionSyntax("JacobianTest2PhaseNCGBoundaryFluxAction",
-                           "JacobianTest2PhaseNCGBoundaryFlux");
-    s.registerActionSyntax("JacobianTest2PhaseNCGRDGBaseAction", "JacobianTest2PhaseNCGRDG");
-    s.registerActionSyntax("JacobianTest2PhaseWaveSpeedsAction", "JacobianTest2PhaseWaveSpeeds");
-
-    s.registerActionSyntax("JacobianTest2PhaseNCGNumericalFluxAction",
-                           "JacobianTest2PhaseNCGNumericalFlux");
-    s.registerActionSyntax("JacobianTest2PhaseNCGAction", "JacobianTest2PhaseNCG");
-    s.registerActionSyntax("JacobianTest2PhaseNCGWaveSpeedsAction",
-                           "JacobianTest2PhaseNCGWaveSpeeds");
-    s.registerActionSyntax("JacobianTest2PhaseNCGRDGInterfacialVariablesAction",
-                           "JacobianTest2PhaseNCGRDGInterfacialVariables");
-    s.registerActionSyntax("JacobianTest2PhaseNCGRiemannSolverAction",
-                           "JacobianTest2PhaseNCGRiemannSolver");
 
     s.registerActionSyntax("ClosureTest1PhaseAction", "ClosureTest1Phase");
-    s.registerActionSyntax("ClosureTest2PhaseAction", "ClosureTest2Phase");
   }
   HeatConductionApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);

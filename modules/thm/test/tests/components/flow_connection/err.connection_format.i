@@ -8,7 +8,7 @@
 
 [Components]
   [./left_wall]
-    type = SolidWall
+    type = SolidWall1Phase
   [../]
 
   [./pipe]
@@ -30,7 +30,7 @@
   [../]
 
   [./right_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:out'
   [../]
 []

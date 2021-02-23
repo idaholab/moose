@@ -1,6 +1,5 @@
 #include "HeatTransferFromExternalAppHeatFlux1Phase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowModelTwoPhase.h"
 
 registerMooseObject("THMApp", HeatTransferFromExternalAppHeatFlux1Phase);
 

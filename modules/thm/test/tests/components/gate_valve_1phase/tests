@@ -34,28 +34,6 @@
     abs_zero = 1e-8
   [../]
 
-  [./2phase]
-    type = Exodiff
-    input = 'gate_valve_2phase.i'
-    exodiff = 'gate_valve_2phase_out.e'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-  [../]
-
-  [./2phase_flipped]
-    type = Exodiff
-    input = 'gate_valve_2phase.i'
-    cli_args = "
-      Components/valve/connections='left_pipe:out right_pipe:out'
-      Components/right_pipe/position='2 0 0'
-      Components/right_pipe/orientation='-1 0 0'
-      Components/outlet/input='right_pipe:in'
-      Outputs/file_base=gate_valve_2phase_flipped"
-    exodiff = 'gate_valve_2phase_flipped.e'
-    rel_err = 1e-5
-    abs_zero = 1e-8
-  [../]
-
   [./err:not_2_connections]
     type = 'RunException'
     input = 'gate_valve_1phase.i'
@@ -74,6 +52,6 @@
     type = 'RunException'
     input = 'gate_valve_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
-    expect_err = "GateValve cannot perform slope reconstruction"
+    expect_err = "GateValve1Phase cannot perform slope reconstruction"
   [../]
 []

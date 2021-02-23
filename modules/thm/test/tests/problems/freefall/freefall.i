@@ -48,7 +48,7 @@ time = ${fparse num_steps * dt}
   [../]
 
   [./junction]
-    type = JunctionOneToOne
+    type = JunctionOneToOne1Phase
     connections = 'pipe:in pipe:out'
   [../]
 []

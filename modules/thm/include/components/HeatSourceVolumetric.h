@@ -4,14 +4,13 @@
 
 /**
  * Volumetric heat source applied on a flow channel
+ *
+ * Deprecated
  */
 class HeatSourceVolumetric : public Component
 {
 public:
   HeatSourceVolumetric(const InputParameters & parameters);
-
-  virtual void check() const override;
-  virtual void addMooseObjects() override;
 
 public:
   static InputParameters validParams();

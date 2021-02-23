@@ -34,14 +34,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./boundary_flux_7eqn_ghost_free_outflow]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_free_outflow.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
 
   # mass flow rate and temperature boundary flux
   [./boundary_flux_3eqn_ghost_mass_flow_rate_temperature]
@@ -59,42 +51,6 @@
     cli_args = 'UserObjects/boundary_flux/normal=1'
     ratio_tol = 1e-6
     difference_tol = 1e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ghost_mass_flow_rate_temperature]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_mass_flow_rate_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ghost_mass_flow_rate_temperature_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_mass_flow_rate_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_mass_flow_rate_temperature]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_mass_flow_rate_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-6
-    difference_tol = 4e4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_mass_flow_rate_temperature_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_mass_flow_rate_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-6
-    difference_tol = 4e4
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -118,42 +74,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./boundary_flux_7eqn_ghost_density_velocity]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_density_velocity.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-6
-    difference_tol = 1e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ghost_density_velocity_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_density_velocity.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1 -snes_test_err 1e-9'
-    ratio_tol = 2e-7
-    difference_tol = 6e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_density_velocity]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_density_velocity.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-7
-    difference_tol = 500
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_density_velocity_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_density_velocity.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-7
-    difference_tol = 400
-    max_threads = 1
-    allow_test_objects = true
-  [../]
 
   # velocity and temperature boundary flux
   [./boundary_flux_3eqn_ghost_velocity_temperature]
@@ -173,41 +93,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./boundary_flux_7eqn_ghost_velocity_temperature]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_velocity_temperature.i'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ghost_velocity_temperature_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_velocity_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_velocity_temperature]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_velocity_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./boundary_flux_7eqn_ncg_ghost_velocity_temperature_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_velocity_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-6
-    difference_tol = 1000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
 
   # pressure boundary flux
   [./boundary_flux_3eqn_ghost_pressure]
@@ -215,24 +100,6 @@
     input = 'boundary_flux_3eqn_ghost_pressure.i'
     ratio_tol = 1e-6
     difference_tol = 1e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./boundary_flux_7eqn_ghost_pressure]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_pressure.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./boundary_flux_7eqn_ncg_ghost_pressure]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_pressure.i'
-    ratio_tol = 1e-7
-    difference_tol = 50
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -257,26 +124,6 @@
     allow_test_objects = true
   [../]
 
-  [./boundary_flux_7eqn_ghost_stagnation_pressure_temperature]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_stagnation_pressure_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=-1'
-    ratio_tol = 1e-6
-    difference_tol = 1e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./boundary_flux_7eqn_ghost_stagnation_pressure_temperature_reversed]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_stagnation_pressure_temperature.i'
-    cli_args = 'UserObjects/boundary_flux/normal=1'
-    ratio_tol = 1e-6
-    difference_tol = 2e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
   # wall boundary flux
   [./boundary_flux_3eqn_ghost_wall]
     type = 'PetscJacobianTester'
@@ -287,68 +134,12 @@
     allow_test_objects = true
   [../]
 
-  [./boundary_flux_7eqn_ghost_wall]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ghost_wall.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./boundary_flux_7eqn_ncg_ghost_wall]
-    type = 'PetscJacobianTester'
-    input = 'boundary_flux_7eqn_ncg_ghost_wall.i'
-    ratio_tol = 1e-12
-    difference_tol = 0.005
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
   # centered flux
   [./numerical_flux_3eqn_centered]
     type = 'PetscJacobianTester'
     input = 'numerical_flux_3eqn_centered.i'
     ratio_tol = 1e-6
     difference_tol = 1e-6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./numerical_flux_7eqn_conservative_centered_rdg]
-    type = 'PetscJacobianTester'
-    input = 'numerical_flux_7eqn_conservative_centered_rdg.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./numerical_flux_7eqn_ncg_conservative_centered_rdg]
-    type = 'PetscJacobianTester'
-    input = 'numerical_flux_7eqn_ncg_conservative_centered_rdg.i'
-    ratio_tol = 8e-5
-    difference_tol = 3e5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  # non-conservative flux
-  [./numerical_flux_7eqn_nonconservative]
-    type = 'PetscJacobianTester'
-    input = 'numerical_flux_7eqn_nonconservative.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-5
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  # sum flux
-  [./numerical_flux_7eqn_sum]
-    type = 'PetscJacobianTester'
-    input = 'numerical_flux_7eqn_sum.i'
-    ratio_tol = 1e-6
-    difference_tol = 1e-5
     max_threads = 1
     allow_test_objects = true
   [../]

@@ -27,7 +27,6 @@
     m_dot = 1234
     T = 300
     A = A
-    alpha = unity
     p = p
     arhoA = rhoA
     arhouA = rhouA
@@ -42,7 +41,6 @@
     m_dot = 1234
     T = 300
     A = A
-    alpha = unity
     p = p
     arhoA = rhoA
     arhouA = rhouA

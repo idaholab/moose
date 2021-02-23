@@ -4,25 +4,9 @@
   initial_p = 1e6
   initial_T = 300
   initial_vel = 0
-
-  velocity_relaxation_rate = 0
-  pressure_relaxation_rate = 0
-  heat_exchange_coef_liquid = 0
-  heat_exchange_coef_vapor = 0
-
-  initial_p_liquid = 1e6
-  initial_T_liquid = 453
-  initial_vel_liquid = 0
-  initial_p_vapor = 1e6
-  initial_T_vapor = 454
-  initial_vel_vapor = 0
-  initial_alpha_vapor = 0.5
 []
 
 [FluidProperties]
-  [./fp_2phase]
-    type = StiffenedGasTwoPhaseFluidProperties
-  [../]
   [./fp_liquid]
     type = StiffenedGasFluidProperties
     gamma = 2.35
@@ -44,12 +28,12 @@
 
 [Components]
   [./pri_inlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'hx/primary:out'
   [../]
 
   [./pri_outlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'hx/primary:in'
   [../]
 
@@ -92,33 +76,31 @@
     [../]
 
     [./ht_secondary]
-      type = HeatTransferFromHeatStructure2Phase
+      type = HeatTransferFromHeatStructure1Phase
       hs = hx/wall
       flow_channel = hx/secondary
       hs_side = inner
-      Hw_liquid = 0
-      Hw_vapor = 0
+      Hw = 0
     [../]
 
     [./secondary]
-      type = FlowChannel2Phase
+      type = FlowChannel1Phase
       position = '0 0 0'
       orientation = '1 0 0'
       n_elems = ${n_elems}
       length = ${length}
       A = 1
       f = 1
-      f_interface = 1
-      fp = fp_2phase
+      fp = fp_liquid
     [../]
   [../]
 
   [./sec_inlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'hx/secondary:out'
   [../]
   [./sec_outlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'hx/secondary:in'
   [../]
 []

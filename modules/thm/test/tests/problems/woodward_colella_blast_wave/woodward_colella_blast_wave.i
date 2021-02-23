@@ -53,12 +53,12 @@
   [../]
 
   [./left_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:in'
   [../]
 
   [./right_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:out'
   [../]
 []

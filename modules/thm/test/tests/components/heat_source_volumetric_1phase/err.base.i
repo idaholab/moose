@@ -33,7 +33,7 @@
   [../]
 
   [./hs]
-    type = HeatSourceVolumetric
+    type = HeatSourceVolumetric1Phase
     flow_channel = fch1
     q = 1
   [../]

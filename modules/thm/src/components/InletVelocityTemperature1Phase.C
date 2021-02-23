@@ -6,7 +6,7 @@ registerMooseObject("THMApp", InletVelocityTemperature1Phase);
 InputParameters
 InletVelocityTemperature1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
   params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
@@ -16,14 +16,14 @@ InletVelocityTemperature1Phase::validParams()
 }
 
 InletVelocityTemperature1Phase::InletVelocityTemperature1Phase(const InputParameters & params)
-  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
 {
 }
 
 void
 InletVelocityTemperature1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)

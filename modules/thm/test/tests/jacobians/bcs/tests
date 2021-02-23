@@ -23,14 +23,6 @@
     max_threads = 1
     allow_test_objects = true
   [../]
-  [./one_d_mass_ncg_free_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_mass_ncg_free_bc.i'
-    ratio_tol = 4e-9
-    difference_tol = 2e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
 
   [./one_d_equal_value_ced_bc]
     type = 'PetscJacobianTester'
@@ -169,171 +161,11 @@
     allow_test_objects = true
   [../]
 
-  [./one_d_mass_stagnation_pt_bc_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'one_d_mass_stagnation_pt_bc_7eqn.i'
-    ratio_tol = 8e-10
-    difference_tol = 7e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_momentum_stagnation_pt_bc_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'one_d_momentum_stagnation_pt_bc_7eqn.i'
-    ratio_tol = 2e-8
-    difference_tol = 0.03
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_energy_stagnation_pt_bc_7eqn]
-    type = 'PetscJacobianTester'
-    input = 'one_d_energy_stagnation_pt_bc_7eqn.i'
-    ratio_tol = 1e-9
-    difference_tol = 0.1
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
   [./one_d_area_times_constant_bc]
     type = 'PetscJacobianTester'
     input = 'one_d_area_times_constant_bc.i'
     ratio_tol = 1e-9
     difference_tol = 2e-9
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_area_times_constant_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_area_times_constant_bc.i'
-    ratio_tol = 1e-13
-    difference_tol = 2e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_momentum_free_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_free_bc.i'
-    ratio_tol = 5e-5
-    difference_tol = 2e7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_free_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_free_bc.i'
-    ratio_tol = 4e-6
-    difference_tol = 3e6
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_momentum_densityvelocity_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_densityvelocity_bc.i'
-    ratio_tol = 2e-6
-    difference_tol = 1e4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_densityvelocity_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_densityvelocity_bc.i'
-    ratio_tol = 2e-6
-    difference_tol = 1e4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_mass_hrhou_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_mass_hrhou_bc.i'
-    ratio_tol = 1e-13
-    difference_tol = 5e-11
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_momentum_hrhou_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_hrhou_bc.i'
-    ratio_tol = 5e-5
-    difference_tol = 2e7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_hrhou_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_hrhou_bc.i'
-    ratio_tol = 1e-13
-    difference_tol = 3e-8
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_momentum_static_pressure_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_static_pressure_bc.i'
-    ratio_tol = 4e-13
-    difference_tol = 2e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_momentum_static_pressure_legacy_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_static_pressure_legacy_bc.i'
-    ratio_tol = 4e-13
-    difference_tol = 2e-4
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_momentum_static_pressure_bc_supersonic]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_static_pressure_bc_supersonic.i'
-    ratio_tol = 1e-8
-    difference_tol = 1.2
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_static_pressure_legacy_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_static_pressure_legacy_bc.i'
-    ratio_tol = 1e-9
-    difference_tol = 1
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_static_pressure_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_static_pressure_bc.i'
-    ratio_tol = 1e-5
-    difference_tol = 2e7
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_7eqn_momentum_massflowrate_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_momentum_massflowrate_bc.i'
-    ratio_tol = 1e-13
-    difference_tol = 1e-13
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-  [./one_d_7eqn_energy_massflowrate_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_7eqn_energy_massflowrate_bc.i'
-    ratio_tol = 3e-3
-    difference_tol = 9000
-    max_threads = 1
-    allow_test_objects = true
-  [../]
-
-  [./one_d_volume_fraction_vapor_bc]
-    type = 'PetscJacobianTester'
-    input = 'one_d_volume_fraction_vapor_bc.i'
-    ratio_tol = 1e-13
-    difference_tol = 1e-13
     max_threads = 1
     allow_test_objects = true
   [../]

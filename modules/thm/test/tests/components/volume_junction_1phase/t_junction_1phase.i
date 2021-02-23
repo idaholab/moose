@@ -82,15 +82,15 @@ A_small = 0.5
   [../]
 
   [./pipe1_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe1:in'
   [../]
   [./pipe2_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe2:out'
   [../]
   [./pipe3_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe3:out'
   [../]
 []

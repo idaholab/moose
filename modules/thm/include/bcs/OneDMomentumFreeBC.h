@@ -17,8 +17,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  bool _is_liquid;
-  Real _sign;
   unsigned _arhoA_var_number;
   unsigned _arhouA_var_number;
   unsigned _arhoEA_var_number;
@@ -28,10 +26,6 @@ protected:
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
   const MaterialProperty<Real> & _dp_darhoEA;
-  bool _has_beta;
-  unsigned int _beta_var_number;
-  const MaterialProperty<Real> * _dp_dbeta;
-  const VariableValue & _alpha;
 
 public:
   static InputParameters validParams();

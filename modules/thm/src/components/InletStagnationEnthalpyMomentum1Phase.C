@@ -6,7 +6,7 @@ registerMooseObject("THMApp", InletStagnationEnthalpyMomentum1Phase);
 InputParameters
 InletStagnationEnthalpyMomentum1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("rhou", "Prescribed momentum density [kg/(m^2-s)]");
   params.addRequiredParam<Real>("H", "Prescribed specific total enthalpy [J/kg]");
   params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");
@@ -17,14 +17,14 @@ InletStagnationEnthalpyMomentum1Phase::validParams()
 
 InletStagnationEnthalpyMomentum1Phase::InletStagnationEnthalpyMomentum1Phase(
     const InputParameters & params)
-  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
 {
 }
 
 void
 InletStagnationEnthalpyMomentum1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)
@@ -49,7 +49,6 @@ InletStagnationEnthalpyMomentum1Phase::addMooseObjects()
     params.set<Real>("normal") = _normal;
     params.set<Real>("rhou") = rhou;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhoA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "rhou");
@@ -81,7 +80,6 @@ InletStagnationEnthalpyMomentum1Phase::addMooseObjects()
     params.set<Real>("rhou") = rhou;
     params.set<Real>("H") = H;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "rhoEA_bc");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "rhou");
