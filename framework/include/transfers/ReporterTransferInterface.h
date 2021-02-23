@@ -115,4 +115,20 @@ protected:
    * @param n New size of vector
    */
   void resizeReporter(const ReporterName & name, FEProblemBase & problem, dof_id_type n);
+
+  /*
+   * Helper for declaring reporter names when transfer is cloning values.
+   * The result names will be:
+   *      names[i] = obj_name/prefix:rep_name[i].getObjectName():rep_name[i].getValueName()
+   *
+   * @param prefix A string to prefix the reporter value name with.
+   *               Typically the transfer name or user supplied.
+   * @param obj_name The reporter object name that emulates holding the data
+   * @param rep_names The list of reporter names that are being cloned
+   *
+   * @return A list of declarable reporter names
+   */
+  std::vector<ReporterName> getReporterNamesHelper(std::string prefix,
+                                                   const std::string & obj_name,
+                                                   const std::vector<ReporterName> & rep_names);
 };

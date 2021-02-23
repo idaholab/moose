@@ -86,3 +86,17 @@ ReporterTransferInterface::resizeReporter(const ReporterName & name,
   ReporterData & data = problem.getReporterData(ReporterData::WriteKey());
   data.resize(name, n);
 }
+
+std::vector<ReporterName>
+ReporterTransferInterface::getReporterNamesHelper(std::string prefix,
+                                                  const std::string & obj_name,
+                                                  const std::vector<ReporterName> & rep_names)
+{
+  if (!prefix.empty())
+    prefix += ":";
+  std::vector<ReporterName> rnames;
+  rnames.reserve(rep_names.size());
+  for (const auto & rn : rep_names)
+    rnames.emplace_back(obj_name, prefix + rn.getObjectName() + ":" + rn.getValueName());
+  return rnames;
+}
