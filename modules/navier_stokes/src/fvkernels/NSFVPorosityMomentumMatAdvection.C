@@ -56,57 +56,33 @@ NSFVPorosityMomentumMatAdvection::computeQpResidual()
 {
   using namespace Moose::FV;
 
-  ADReal one_over_porosity_interface;
+  ADReal one_over_porosity_interface, u_interface, eps_p_interface, eps_interface;
+  Real elem_coeff, neighbor_coeff;
 
-  // Check for large porosity change. If we do have a large change we are going to upwind everything
-  // to prevent oscillations due to the discontinuity
-  if (std::abs(_eps_elem[_qp] - _eps_neighbor[_qp]) > 0.1)
+  interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
+  if (MetaPhysicL::raw_value(_v) * _face_info->normal() > 0)
   {
-    ADReal u_interface, p_interface, eps_interface;
-
-    interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
-    if (MetaPhysicL::raw_value(_v) * _face_info->normal() > 0)
-    {
-      _v = _vel_elem[_qp];
-      u_interface = _adv_quant_elem[_qp];
-      p_interface = _p_elem[_qp];
-      eps_interface = _eps_elem[_qp];
-    }
-    else
-    {
-      _v = _vel_neighbor[_qp];
-      u_interface = _adv_quant_neighbor[_qp];
-      p_interface = _p_neighbor[_qp];
-      eps_interface = _eps_neighbor[_qp];
-    }
-    one_over_porosity_interface = 1 / eps_interface;
-
-    return _normal * _v * u_interface * one_over_porosity_interface +
-           _normal(_index) * p_interface * eps_interface;
+    elem_coeff = 1;
+    neighbor_coeff = 0;
+    eps_interface = _eps_elem[_qp];
   }
   else
   {
-    auto residual = FVMatAdvection::computeQpResidual();
-
-    const auto one_over_porosity_elem = 1 / _eps_elem[_qp];
-    const auto one_over_porosity_neighbor = 1 / _eps_neighbor[_qp];
-
-    interpolate(_one_over_porosity_interp_method,
-                one_over_porosity_interface,
-                one_over_porosity_elem,
-                one_over_porosity_neighbor,
-                _v,
-                *_face_info,
-                true);
-
-    ADReal eps_p_interface;
-    interpolate(InterpMethod::Average,
-                eps_p_interface,
-                _eps_elem[_qp] * _p_elem[_qp],
-                _eps_neighbor[_qp] * _p_neighbor[_qp],
-                *_face_info,
-                true);
-
-    return residual * one_over_porosity_interface + _normal(_index) * eps_p_interface;
+    elem_coeff = 0;
+    neighbor_coeff = 1;
+    eps_interface = _eps_neighbor[_qp];
   }
+  _v = _vel_elem[_qp] * elem_coeff + _vel_neighbor[_qp] * neighbor_coeff;
+  u_interface = _adv_quant_elem[_qp] * elem_coeff + _adv_quant_neighbor[_qp] * neighbor_coeff;
+  one_over_porosity_interface = 1 / eps_interface;
+
+  interpolate(InterpMethod::Average,
+              eps_p_interface,
+              _eps_elem[_qp] * _p_elem[_qp],
+              _eps_neighbor[_qp] * _p_neighbor[_qp],
+              *_face_info,
+              true);
+
+  return _normal * _v * u_interface * one_over_porosity_interface +
+         _normal(_index) * eps_p_interface;
 }
