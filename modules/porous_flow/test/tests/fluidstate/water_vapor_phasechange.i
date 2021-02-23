@@ -22,16 +22,16 @@
 []
 
 [Variables]
-  [./pliq]
+  [pliq]
     initial_condition = 9e6
-  [../]
-  [./h]
+  []
+  [h]
     scaling = 1e-3
-  [../]
+  []
 []
 
 [ICs]
-  [./hic]
+  [hic]
     type = PorousFlowFluidPropertyIC
     variable = h
     porepressure = pliq
@@ -39,243 +39,243 @@
     temperature = 300
     temperature_unit = Celsius
     fp = water
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./mass]
+  [mass]
     type = ConstantPointSource
     point = '5 5 5'
     variable = pliq
     value = -1
-  [../]
-  [./heat]
+  []
+  [heat]
     type = ConstantPointSource
     point = '5 5 5'
     variable = h
     value = -1.344269e6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pressure_gas]
+  [pressure_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./pressure_water]
+  []
+  [pressure_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./enthalpy_gas]
+  []
+  [enthalpy_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./enthalpy_water]
+  []
+  [enthalpy_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./saturation_gas]
+  []
+  [saturation_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./saturation_water]
+  []
+  [saturation_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./density_water]
+  []
+  [density_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./density_gas]
+  []
+  [density_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./viscosity_water]
+  []
+  [viscosity_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./viscosity_gas]
+  []
+  [viscosity_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./temperature]
+  []
+  [temperature]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e_gas]
+  []
+  [e_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./e_water]
+  []
+  [e_water]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./enthalpy_water]
+  [enthalpy_water]
     type = PorousFlowPropertyAux
     variable = enthalpy_water
     property = enthalpy
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./enthalpy_gas]
+  []
+  [enthalpy_gas]
     type = PorousFlowPropertyAux
     variable = enthalpy_gas
     property = enthalpy
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./pressure_water]
+  []
+  [pressure_water]
     type = PorousFlowPropertyAux
     variable = pressure_water
     property = pressure
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./pressure_gas]
+  []
+  [pressure_gas]
     type = PorousFlowPropertyAux
     variable = pressure_gas
     property = pressure
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./saturation_water]
+  []
+  [saturation_water]
     type = PorousFlowPropertyAux
     variable = saturation_water
     property = saturation
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./saturation_gas]
+  []
+  [saturation_gas]
     type = PorousFlowPropertyAux
     variable = saturation_gas
     property = saturation
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./density_water]
+  []
+  [density_water]
     type = PorousFlowPropertyAux
     variable = density_water
     property = density
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./density_gas]
+  []
+  [density_gas]
     type = PorousFlowPropertyAux
     variable = density_gas
     property = density
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./viscosity_water]
+  []
+  [viscosity_water]
     type = PorousFlowPropertyAux
     variable = viscosity_water
     property = viscosity
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./viscosity_gas]
+  []
+  [viscosity_gas]
     type = PorousFlowPropertyAux
     variable = viscosity_gas
     property = viscosity
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowPropertyAux
     variable = temperature
     property = temperature
     execute_on = 'initial timestep_end'
-  [../]
-  [./e_water]
+  []
+  [e_water]
     type = PorousFlowPropertyAux
     variable = e_water
     property = internal_energy
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./egas]
+  []
+  [egas]
     type = PorousFlowPropertyAux
     variable = e_gas
     property = internal_energy
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass]
+  [mass]
     type = PorousFlowMassTimeDerivative
     variable = pliq
-  [../]
-  [./heat]
+  []
+  [heat]
     type = PorousFlowEnergyTimeDerivative
     variable = h
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pliq h'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureBC
     pe = 1e5
     lambda = 2
     pc_max = 1e6
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowWaterVapor
     water_fp = water
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./water]
+  [FluidProperties]
+    [water]
       type = Water97FluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./watervapor]
+  [watervapor]
     type = PorousFlowFluidStateSingleComponent
     porepressure = pliq
     enthalpy = h
     temperature_unit = Celsius
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-14 0 0 0 1e-14 0 0 0 1e-14'
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = PorousFlowMatrixInternalEnergy
     density = 2650
     specific_heat_capacity = 1000
-  [../]
+  []
 []
 
 [Executioner]
@@ -283,115 +283,115 @@
   solve_type = NEWTON
   end_time = 1e3
   nl_abs_tol = 1e-12
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./density_water]
+  [density_water]
     type = ElementAverageValue
     variable = density_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./density_gas]
+  []
+  [density_gas]
     type = ElementAverageValue
     variable = density_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./viscosity_water]
+  []
+  [viscosity_water]
     type = ElementAverageValue
     variable = viscosity_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./viscosity_gas]
+  []
+  [viscosity_gas]
     type = ElementAverageValue
     variable = viscosity_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./enthalpy_water]
+  []
+  [enthalpy_water]
     type = ElementAverageValue
     variable = enthalpy_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./enthalpy_gas]
+  []
+  [enthalpy_gas]
     type = ElementAverageValue
     variable = enthalpy_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./sg]
+  []
+  [sg]
     type = ElementAverageValue
     variable = saturation_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./sw]
+  []
+  [sw]
     type = ElementAverageValue
     variable = saturation_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./pwater]
+  []
+  [pwater]
     type = ElementAverageValue
     variable = pressure_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./pgas]
+  []
+  [pgas]
     type = ElementAverageValue
     variable = pressure_gas
     execute_on = 'initial timestep_end'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementAverageValue
     variable = temperature
     execute_on = 'initial timestep_end'
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = ElementAverageValue
     variable = h
     execute_on = 'initial timestep_end'
-  [../]
-  [./pliq]
+  []
+  [pliq]
     type = ElementAverageValue
     variable = pliq
     execute_on = 'initial timestep_end'
-  [../]
-  [./liquid_mass]
+  []
+  [liquid_mass]
     type = PorousFlowFluidMass
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./vapor_mass]
+  []
+  [vapor_mass]
     type = PorousFlowFluidMass
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./liquid_heat]
+  []
+  [liquid_heat]
     type = PorousFlowHeatEnergy
     phase = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./vapor_heat]
+  []
+  [vapor_heat]
     type = PorousFlowHeatEnergy
     phase = 1
     execute_on = 'initial timestep_end'
-  [../]
-  [./e_water]
+  []
+  [e_water]
     type = ElementAverageValue
     variable = e_water
     execute_on = 'initial timestep_end'
-  [../]
-  [./e_gas]
+  []
+  [e_gas]
     type = ElementAverageValue
     variable = e_gas
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

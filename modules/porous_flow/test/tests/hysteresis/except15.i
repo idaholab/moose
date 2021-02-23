@@ -1,9 +1,9 @@
 # Exception: attempting to use PorousFlow2PhaseHysPS in a 1-phase situation
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -11,55 +11,55 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = 'pp'
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass_conservation]
+  [mass_conservation]
     type = PorousFlowMassTimeDerivative
     variable = pp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./hys_order_material]
+  []
+  [hys_order_material]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./pc_calculator]
+  []
+  [pc_calculator]
     type = PorousFlow2PhaseHysPS
     alpha_d = 10.0
     alpha_w = 7.0
@@ -74,7 +74,7 @@
     high_extension_type = power
     phase0_porepressure = pp
     phase1_saturation = pp
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,37 +11,37 @@
     ymin = -6
     ymax = 6
   []
-  [./aquifer]
+  [aquifer]
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 -2 0'
     top_right = '10 2 0'
     input = gen
-  [../]
-  [./injection_area]
+  []
+  [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x<1.0001'
     included_subdomain_ids = 1
     new_sideset_name = 'injection_area'
     input = 'aquifer'
-  [../]
-  [./rename]
+  []
+  [rename]
     type = RenameBlockGenerator
     old_block_id = '0 1'
     new_block_name = 'caps aquifer'
     input = 'injection_area'
-  [../]
+  []
 []
 
 [Variables]
-  [./dummy_var]
-  [../]
+  [dummy_var]
+  []
 []
 [Kernels]
-  [./dummy_diffusion]
+  [dummy_diffusion]
     type = Diffusion
     variable = dummy_var
-  [../]
+  []
 []
 
 [Executioner]

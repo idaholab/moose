@@ -1,9 +1,9 @@
 # Simple example of a 1-phase situation with hysteretic relative permeability.  Water is removed and added to the system in order to observe the hysteresis
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -11,137 +11,137 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = 'pp'
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     alpha = 10.0
     m = 0.33
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass_conservation]
+  [mass_conservation]
     type = PorousFlowMassTimeDerivative
     variable = pp
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./pump]
+  [pump]
     type = PorousFlowPointSourceFromPostprocessor
     mass_flux = flux
     point = '0.5 0 0'
     variable = pp
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sat]
+  [sat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./relperm]
+  []
+  [relperm]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sat]
+  [sat]
     type = PorousFlowPropertyAux
     variable = sat
     property = saturation
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowPropertyAux
     variable = relperm
     property = relperm
     phase = 0
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./pc_calculator]
+  []
+  [pc_calculator]
     type = PorousFlow1PhaseP
     capillary_pressure = pc
     porepressure = pp
-  [../]
-  [./hys_order_material]
+  []
+  [hys_order_material]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./relperm_material]
+  []
+  [relperm_material]
     type = PorousFlowHystereticRelativePermeabilityLiquid
     phase = 0
     S_lr = 0.1
     S_gr_max = 0.2
     m = 0.9
     liquid_modification_range = 0.9
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flux]
+  [flux]
     type = FunctionValuePostprocessor
     function = 'if(t <= 5, -10, 10)'
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PointValue
     point = '0 0 0'
     variable = hys_order
-  [../]
-  [./sat]
+  []
+  [sat]
     type = PointValue
     point = '0 0 0'
     variable = sat
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PointValue
     point = '0 0 0'
     variable = relperm
-  [../]
+  []
 []
 
 [Executioner]

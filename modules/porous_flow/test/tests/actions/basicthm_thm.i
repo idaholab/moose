@@ -9,33 +9,33 @@
     xmax = 10
     ymax = 3
   []
-  [./aquifer]
+  [aquifer]
     input = gen
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 1 0'
     top_right = '10 2 0'
-  [../]
-  [./injection_area]
+  []
+  [injection_area]
     type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = 'injection_area'
     normal = '-1 0 0'
     input = 'aquifer'
-  [../]
-  [./outflow_area]
+  []
+  [outflow_area]
     type = SideSetsAroundSubdomainGenerator
     block = 1
     new_boundary = 'outflow_area'
     normal = '1 0 0'
     input = 'injection_area'
-  [../]
-  [./rename]
+  []
+  [rename]
     type = RenameBlockGenerator
     old_block_id = '0 1'
     new_block_name = 'caprock aquifer'
     input = 'outflow_area'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -45,19 +45,19 @@
 []
 
 [Variables]
-  [./porepressure]
+  [porepressure]
     initial_condition = 1e6
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 293
     scaling = 1e-6
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     scaling = 1e-6
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     scaling = 1e-6
-  [../]
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -72,19 +72,19 @@
 []
 
 [BCs]
-  [./constant_injection_porepressure]
+  [constant_injection_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1.5e6
     boundary = injection_area
-  [../]
-  [./constant_injection_temperature]
+  []
+  [constant_injection_temperature]
     type = DirichletBC
     variable = temperature
     value = 313
     boundary = injection_area
-  [../]
-  [./constant_outflow_porepressure]
+  []
+  [constant_outflow_porepressure]
     type = PorousFlowPiecewiseLinearSink
     variable = porepressure
     boundary = outflow_area
@@ -92,97 +92,97 @@
     multipliers = '0 1e9'
     flux_function = 1e-6
     PT_shift = 1e6
-  [../]
-  [./constant_outflow_temperature]
+  []
+  [constant_outflow_temperature]
     type = DirichletBC
     variable = temperature
     value = 293
     boundary = outflow_area
-  [../]
-  [./top_bottom]
+  []
+  [top_bottom]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'top bottom'
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = right
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     biot_coefficient = 0.8
     solid_bulk_compliance = 2e-7
     fluid_bulk_modulus = 1e7
-  [../]
-  [./permeability_aquifer]
+  []
+  [permeability_aquifer]
     type = PorousFlowPermeabilityConst
     block = aquifer
     permeability = '1e-13 0 0   0 1e-13 0   0 0 1e-13'
-  [../]
-  [./permeability_caprock]
+  []
+  [permeability_caprock]
     type = PorousFlowPermeabilityConst
     block = caprock
     permeability = '1e-15 0 0   0 1e-15 0   0 0 1e-15'
-  [../]
-  [./thermal_expansion]
+  []
+  [thermal_expansion]
     type = PorousFlowConstantThermalExpansionCoefficient
     drained_coefficient = 0.003
     fluid_coefficient = 0.0002
-  [../]
-  [./rock_internal_energy]
+  []
+  [rock_internal_energy]
     type = PorousFlowMatrixInternalEnergy
     density = 2500.0
     specific_heat_capacity = 1200.0
-  [../]
-  [./thermal_conductivity]
+  []
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '10 0 0  0 10 0  0 0 10'
     block = 'caprock aquifer'
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 5e9
     poissons_ratio = 0.0
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     eigenstrain_names = thermal_contribution
-  [../]
-  [./thermal_contribution]
+  []
+  [thermal_contribution]
     type = ComputeThermalExpansionEigenstrain
     temperature = temperature
     thermal_expansion_coeff = 0.001
     eigenstrain_name = thermal_contribution
     stress_free_temperature = 293
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./basic]
+  [basic]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

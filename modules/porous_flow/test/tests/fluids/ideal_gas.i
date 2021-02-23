@@ -22,59 +22,59 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 1e6
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = pp
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temp]
+  [temp]
     initial_condition = 50.0
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./idealgas]
+  [FluidProperties]
+    [idealgas]
       type = IdealGasFluidProperties
       molar_mass = 2.01588e-3
       gamma = 1.4
       mu = 9.4393e-6
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./idealgass]
+  []
+  [idealgass]
     type = PorousFlowSingleComponentFluid
     temperature_unit = Celsius
     fp = idealgas
     phase = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -83,30 +83,30 @@
 []
 
 [Postprocessors]
-  [./pressure]
+  [pressure]
     type = ElementIntegralVariablePostprocessor
     variable = pp
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementIntegralVariablePostprocessor
     variable = temp
-  [../]
-  [./density]
+  []
+  [density]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_density_qp0'
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity_qp0'
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_internal_energy_qp0'
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
-  [../]
+  []
 []
 
 [Outputs]

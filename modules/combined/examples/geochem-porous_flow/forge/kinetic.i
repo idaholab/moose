@@ -6,7 +6,7 @@
 # - the total mineral volume is 99000cm^3, so that the porosity is 0.01
 # - see initial_kinetic_moles.xlsx for the remaining mole numbers
 [UserObjects]
-  [./rate_Albite]
+  [rate_Albite]
     type = GeochemistryKineticRate
     kinetic_species_name = Albite
     intrinsic_rate_constant = 1E-17
@@ -14,8 +14,8 @@
     area_quantity = 10
     activation_energy = 69.8E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Anhydrite]
+  []
+  [rate_Anhydrite]
     type = GeochemistryKineticRate
     kinetic_species_name = Anhydrite
     intrinsic_rate_constant = 1.0E-7
@@ -23,8 +23,8 @@
     area_quantity = 10
     activation_energy = 14.3E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Anorthite]
+  []
+  [rate_Anorthite]
     type = GeochemistryKineticRate
     kinetic_species_name = Anorthite
     intrinsic_rate_constant = 1.0E-13
@@ -32,8 +32,8 @@
     area_quantity = 10
     activation_energy = 17.8E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Calcite]
+  []
+  [rate_Calcite]
     type = GeochemistryKineticRate
     kinetic_species_name = Calcite
     intrinsic_rate_constant = 1.0E-10
@@ -41,8 +41,8 @@
     area_quantity = 10
     activation_energy = 23.5E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Chalcedony]
+  []
+  [rate_Chalcedony]
     type = GeochemistryKineticRate
     kinetic_species_name = Chalcedony
     intrinsic_rate_constant = 1.0E-18
@@ -50,8 +50,8 @@
     area_quantity = 10
     activation_energy = 90.1E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Clinochl-7A]
+  []
+  [rate_Clinochl-7A]
     type = GeochemistryKineticRate
     kinetic_species_name = Clinochl-7A
     intrinsic_rate_constant = 1.0E-17
@@ -59,8 +59,8 @@
     area_quantity = 10
     activation_energy = 88.0E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Illite]
+  []
+  [rate_Illite]
     type = GeochemistryKineticRate
     kinetic_species_name = Illite
     intrinsic_rate_constant = 1E-17
@@ -68,8 +68,8 @@
     area_quantity = 10
     activation_energy = 29E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_K-feldspar]
+  []
+  [rate_K-feldspar]
     type = GeochemistryKineticRate
     kinetic_species_name = K-feldspar
     intrinsic_rate_constant = 1E-17
@@ -77,8 +77,8 @@
     area_quantity = 10
     activation_energy = 38E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Kaolinite]
+  []
+  [rate_Kaolinite]
     type = GeochemistryKineticRate
     kinetic_species_name = Kaolinite
     intrinsic_rate_constant = 1E-18
@@ -86,8 +86,8 @@
     area_quantity = 10
     activation_energy = 22.2E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Quartz]
+  []
+  [rate_Quartz]
     type = GeochemistryKineticRate
     kinetic_species_name = Quartz
     intrinsic_rate_constant = 1E-18
@@ -95,8 +95,8 @@
     area_quantity = 10
     activation_energy = 90.1E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Paragonite]
+  []
+  [rate_Paragonite]
     type = GeochemistryKineticRate
     kinetic_species_name = Paragonite
     intrinsic_rate_constant = 1E-17
@@ -104,8 +104,8 @@
     area_quantity = 10
     activation_energy = 22E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Phlogopite]
+  []
+  [rate_Phlogopite]
     type = GeochemistryKineticRate
     kinetic_species_name = Phlogopite
     intrinsic_rate_constant = 1E-17
@@ -113,8 +113,8 @@
     area_quantity = 10
     activation_energy = 22E3
     one_over_T0 = 0.003354
-  [../]
-  [./rate_Zoisite]
+  []
+  [rate_Zoisite]
     type = GeochemistryKineticRate
     kinetic_species_name = Zoisite
     intrinsic_rate_constant = 1E-16
@@ -122,15 +122,15 @@
     area_quantity = 10
     activation_energy = 66.1E3
     one_over_T0 = 0.003354
-  [../]
-  [./definition]
+  []
+  [definition]
     type = GeochemicalModelDefinition
     database_file = '../../../../geochemistry/database/moose_geochemdb.json'
     basis_species = 'H2O H+ Na+ K+ Ca++ Mg++ SiO2(aq) Al+++ Cl- SO4-- HCO3-'
     remove_all_extrapolated_secondary_species = true
     kinetic_minerals = 'Albite Anhydrite Anorthite Calcite Chalcedony Clinochl-7A Illite K-feldspar Kaolinite Quartz Paragonite Phlogopite'
     kinetic_rate_descriptions = 'rate_Albite rate_Anhydrite rate_Anorthite rate_Calcite rate_Chalcedony rate_Clinochl-7A rate_Illite rate_K-feldspar rate_Kaolinite rate_Quartz rate_Paragonite rate_Phlogopite'
-  [../]
+  []
 []
 
 [TimeDependentReactionSolver]
@@ -165,59 +165,59 @@
 []
 
 [Postprocessors]
-  [./cm3_Albite]
+  [cm3_Albite]
     type = PointValue
     variable = 'free_cm3_Albite'
-  [../]
-  [./cm3_Anhydrite]
+  []
+  [cm3_Anhydrite]
     type = PointValue
     variable = 'free_cm3_Anhydrite'
-  [../]
-  [./cm3_Anorthite]
+  []
+  [cm3_Anorthite]
     type = PointValue
     variable = 'free_cm3_Anorthite'
-  [../]
-  [./cm3_Calcite]
+  []
+  [cm3_Calcite]
     type = PointValue
     variable = 'free_cm3_Calcite'
-  [../]
-  [./cm3_Chalcedony]
+  []
+  [cm3_Chalcedony]
     type = PointValue
     variable = 'free_cm3_Chalcedony'
-  [../]
-  [./cm3_Clinochl-7A]
+  []
+  [cm3_Clinochl-7A]
     type = PointValue
     variable = 'free_cm3_Clinochl-7A'
-  [../]
-  [./cm3_Illite]
+  []
+  [cm3_Illite]
     type = PointValue
     variable = 'free_cm3_Illite'
-  [../]
-  [./cm3_K-feldspar]
+  []
+  [cm3_K-feldspar]
     type = PointValue
     variable = 'free_cm3_K-feldspar'
-  [../]
-  [./cm3_Kaolinite]
+  []
+  [cm3_Kaolinite]
     type = PointValue
     variable = 'free_cm3_Kaolinite'
-  [../]
-  [./cm3_Quartz]
+  []
+  [cm3_Quartz]
     type = PointValue
     variable = 'free_cm3_Quartz'
-  [../]
-  [./cm3_Paragonite]
+  []
+  [cm3_Paragonite]
     type = PointValue
     variable = 'free_cm3_Paragonite'
-  [../]
-  [./cm3_Phlogopite]
+  []
+  [cm3_Phlogopite]
     type = PointValue
     variable = 'free_cm3_Phlogopite'
-  [../]
-  [./cm3_mineral]
+  []
+  [cm3_mineral]
     type = LinearCombinationPostprocessor
     pp_names = 'cm3_Albite cm3_Anhydrite cm3_Anorthite cm3_Calcite cm3_Chalcedony cm3_Clinochl-7A cm3_Illite cm3_K-feldspar cm3_Kaolinite cm3_Quartz cm3_Paragonite cm3_Phlogopite'
     pp_coefs = '1 1 1 1 1 1 1 1 1 1 1 1'
-  [../]
+  []
 []
 
 [Outputs]

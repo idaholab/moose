@@ -31,209 +31,209 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./p]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [p]
+  []
 []
 
 [BCs]
-  [./p]
+  [p]
     type = FunctionDirichletBC
     boundary = 'bottom top'
     variable = p
     function = t
-  [../]
-  [./xmin]
+  []
+  [xmin]
     type = DirichletBC
     boundary = left
     variable = disp_x
     value = 0
-  [../]
-  [./ymin]
+  []
+  [ymin]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0
-  [../]
-  [./zmin]
+  []
+  [zmin]
     type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./p_does_not_really_diffuse]
+  [p_does_not_really_diffuse]
     type = Diffusion
     variable = p
-  [../]
-  [./TensorMechanics]
+  []
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./poro_x]
+  []
+  [poro_x]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     variable = disp_z
     component = 2
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./corner_x]
+  [corner_x]
     type = PointValue
     point = '1 1 1'
     variable = disp_x
-  [../]
-  [./corner_y]
+  []
+  [corner_y]
     type = PointValue
     point = '1 1 1'
     variable = disp_y
-  [../]
-  [./corner_z]
+  []
+  [corner_z]
     type = PointValue
     point = '1 1 1'
     variable = disp_z
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'p'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     # bulk modulus = 1, poisson ratio = 0.2
     C_ijkl = '0.5 0.75'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = p
     capillary_pressure = pc
-  [../]
-  [./p_eff]
+  []
+  [p_eff]
     type = PorousFlowEffectiveFluidPressure
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 10 1E-15 1E-10'
-  [../]
+  []
 []
 
 [Executioner]

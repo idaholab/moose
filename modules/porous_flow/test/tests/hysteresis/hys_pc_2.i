@@ -1,13 +1,13 @@
 # Capillary-pressure calculation.  Second-order drying curve
 # When comparing the results with a by-hand computation, remember the MOOSE results are averaged over an element
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0.1
     xmax = 0.9
     nx = 80
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -15,51 +15,51 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = ''
-  [../]
+  []
 []
 
 [Variables]
-  [./sat]
-  [../]
+  [sat]
+  []
 []
 
 [ICs]
-  [./sat]
+  [sat]
     type = FunctionIC
     variable = sat
     function = 'x'
-  [../]
+  []
 []
 
 [BCs]
-  [./sat]
+  [sat]
     type = FunctionDirichletBC
     variable = sat
     function = 'x'
     boundary = 'left right'
-  [../]
+  []
 []
 
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = sat
-  [../]
+  []
 []
 
 [Materials]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowHysteresisOrder
     initial_order = 2
     previous_turning_points = '0.1 0.9'
-  [../]
-  [./pc_calculator]
+  []
+  [pc_calculator]
     type = PorousFlowHystereticInfo
     alpha_d = 10.0
     alpha_w = 7.0
@@ -73,42 +73,42 @@
     low_extension_type = none
     high_extension_type = none
     sat_var = sat
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./hys_order]
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pc]
+  []
+  [pc]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowPropertyAux
     variable = pc
     property = hysteretic_info
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./pc]
+  [pc]
     type = LineValueSampler
     start_point = '0.1 0 0'
     end_point = '0.9 0 0'
     num_points = 9
     sort_by = x
     variable = 'sat pc'
-  [../]
+  []
 []
 
 [Executioner]

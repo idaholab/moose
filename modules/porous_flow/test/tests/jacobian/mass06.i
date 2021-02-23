@@ -13,87 +13,87 @@
 []
 
 [Variables]
-  [./md]
-  [../]
+  [md]
+  []
 []
 
 [ICs]
-  [./md]
+  [md]
     type = RandomIC
     min = 0
     max = 1
     variable = md
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = md
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'md'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       density0 = 0.8
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseMD_Gaussian
     mass_density = md
     al = 1.1
     density_P0 = 0.8
     bulk_modulus = 1.5
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
+  []
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

@@ -11,127 +11,127 @@
 []
 
 [Variables]
-  [./p0]
+  [p0]
     initial_condition = 1e6
-  [../]
-  [./s1]
-  [../]
+  []
+  [s1]
+  []
 []
 
 [AuxVariables]
-  [./s0aux]
+  [s0aux]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./s1aux]
+  []
+  [s1aux]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./kr0aux]
+  []
+  [kr0aux]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./kr1aux]
+  []
+  [kr1aux]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./s0]
+  [s0]
     type = PorousFlowPropertyAux
     property = saturation
     phase = 0
     variable = s0aux
-  [../]
-  [./s1]
+  []
+  [s1]
     type = PorousFlowPropertyAux
     property = saturation
     phase = 1
     variable = s1aux
-  [../]
-  [./kr0]
+  []
+  [kr0]
     type = PorousFlowPropertyAux
     property = relperm
     phase = 0
     variable = kr0aux
-  [../]
-  [./kr1]
+  []
+  [kr1]
     type = PorousFlowPropertyAux
     property = relperm
     phase = 1
     variable = kr1aux
-  [../]
+  []
 []
 
 [Functions]
-  [./s1]
+  [s1]
     type = ParsedFunction
     value = x
-  [../]
+  []
 []
 
 [ICs]
-  [./s1]
+  [s1]
     type = FunctionIC
     variable = s1
     function = s1
-  [../]
+  []
 []
 
 [Kernels]
-  [./p0]
+  [p0]
     type = Diffusion
     variable = p0
-  [../]
-  [./s1]
+  []
+  [s1]
     type = Diffusion
     variable = s1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'p0 s1'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = p0
     phase1_saturation = s1
     capillary_pressure = pc
-  [../]
-  [./kr0]
+  []
+  [kr0]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./kr1]
+  []
+  [kr1]
     type = PorousFlowRelativePermeabilityConst
     phase = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./vpp]
+  [vpp]
     type = LineValueSampler
     variable = 's0aux s1aux kr0aux kr1aux'
     start_point = '0 0 0'
     end_point = '1 0 0'
     num_points = 20
     sort_by = id
-  [../]
+  []
 []
 
 [Executioner]
@@ -141,18 +141,18 @@
 []
 
 [BCs]
-  [./sleft]
+  [sleft]
     type = DirichletBC
     variable = s1
     value = 0
     boundary = left
-  [../]
-  [./sright]
+  []
+  [sright]
     type = DirichletBC
     variable = s1
     value = 1
     boundary = right
-  [../]
+  []
 []
 
 [Outputs]

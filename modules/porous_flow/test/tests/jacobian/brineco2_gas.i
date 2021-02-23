@@ -14,97 +14,97 @@
 []
 
 [AuxVariables]
-  [./xnacl]
+  [xnacl]
     initial_condition = 0.05
-  [../]
+  []
 []
 
 [Variables]
-  [./pgas]
-  [../]
-  [./zi]
-  [../]
+  [pgas]
+  []
+  [zi]
+  []
 []
 
 [ICs]
-  [./pgas]
+  [pgas]
     type = RandomIC
     min = 5e4
     max = 1e5
     variable = pgas
-  [../]
-  [./z]
+  []
+  [z]
     type = RandomIC
     min = 0.9
     max = 0.99
     variable = zi
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = pgas
     fluid_component = 0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     variable = zi
     fluid_component = 1
-  [../]
-  [./adv0]
+  []
+  [adv0]
     type = PorousFlowAdvectiveFlux
     variable = pgas
     fluid_component = 0
-  [../]
-  [./adv1]
+  []
+  [adv1]
     type = PorousFlowAdvectiveFlux
     variable = zi
     fluid_component = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pgas zi'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
     pc_max = 1e3
-  [../]
-  [./fs]
+  []
+  [fs]
     type = PorousFlowBrineCO2
     brine_fp = brine
     co2_fp = co2
     capillary_pressure = pc
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./co2]
+  [FluidProperties]
+    [co2]
       type = CO2FluidProperties
-    [../]
-    [./brine]
+    []
+    [brine]
       type = BrineFluidProperties
-    [../]
-    [./water]
+    []
+    [water]
       type = Water97FluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 50
-  [../]
-  [./brineco2]
+  []
+  [brineco2]
     type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
@@ -112,25 +112,25 @@
     xnacl = xnacl
     capillary_pressure = pc
     fluid_state = fs
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -142,37 +142,37 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sgas]
+  [sgas]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sgas]
+  [sgas]
     type = PorousFlowPropertyAux
     property = saturation
     phase = 1
     variable = sgas
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sgas_min]
+  [sgas_min]
     type = ElementExtremeValue
     variable = sgas
     value_type = min
-  [../]
-  [./sgas_max]
+  []
+  [sgas_max]
     type = ElementExtremeValue
     variable = sgas
     value_type = max
-  [../]
+  []
 []

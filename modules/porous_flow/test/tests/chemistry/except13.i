@@ -7,10 +7,10 @@
 []
 
 [Variables]
-  [./a]
-  [../]
-  [./b]
-  [../]
+  [a]
+  []
+  [b]
+  []
 []
 
 [GlobalParams]
@@ -18,55 +18,55 @@
 []
 
 [Kernels]
-  [./a]
+  [a]
     type = Diffusion
     variable = a
-  [../]
-  [./b]
+  []
+  [b]
     type = Diffusion
     variable = b
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 1
     number_fluid_components = 3
     number_aqueous_kinetic = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./eqm_k]
+  [eqm_k]
     initial_condition = 1E-6
-  [../]
-  [./pressure]
-  [../]
+  []
+  [pressure]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b'
-  [../]
-  [./predis]
+  []
+  [predis]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b'
     num_reactions = 1
@@ -78,19 +78,19 @@
     activation_energy = 1.5e4
     molar_volume = 1
     eta_exponent = '1 1'
-  [../]
-  [./mineral]
+  []
+  [mineral]
     type = PorousFlowAqueousPreDisMineral
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
+  []
 []
 
 [Executioner]

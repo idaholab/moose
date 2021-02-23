@@ -79,621 +79,621 @@
     type = FileMeshGenerator
     file = fine.e
   []
-  [./xmin]
+  [xmin]
     type = SideSetsAroundSubdomainGenerator
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     new_boundary = xmin
     normal = '-1 0 0'
     input = file
-  [../]
-  [./xmax]
+  []
+  [xmax]
     type = SideSetsAroundSubdomainGenerator
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     new_boundary = xmax
     normal = '1 0 0'
     input = xmin
-  [../]
-  [./ymin]
+  []
+  [ymin]
     type = SideSetsAroundSubdomainGenerator
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     new_boundary = ymin
     normal = '0 -1 0'
     input = xmax
-  [../]
-  [./ymax]
+  []
+  [ymax]
     type = SideSetsAroundSubdomainGenerator
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     new_boundary = ymax
     normal = '0 1 0'
     input = ymin
-  [../]
-  [./zmax]
+  []
+  [zmax]
     type = SideSetsAroundSubdomainGenerator
     block = 30
     new_boundary = zmax
     normal = '0 0 1'
     input = ymax
-  [../]
-  [./zmin]
+  []
+  [zmin]
     type = SideSetsAroundSubdomainGenerator
     block = 2
     new_boundary = zmin
     normal = '0 0 -1'
     input = zmax
-  [../]
-  [./excav]
+  []
+  [excav]
     type = SubdomainBoundingBoxGenerator
     input = zmin
     block_id = 1
     bottom_left = '0 0 -400'
     top_right = '150 1000 -397'
-  [../]
-  [./roof]
+  []
+  [roof]
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = 3
     paired_block = 1
     input = excav
     new_boundary = roof
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./wc_x]
-  [../]
-  [./wc_y]
-  [../]
-  [./porepressure]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [wc_x]
+  []
+  [wc_y]
+  []
+  [porepressure]
     scaling = 1E-5
-  [../]
+  []
 []
 
 [ICs]
-  [./porepressure]
+  [porepressure]
     type = FunctionIC
     variable = porepressure
     function = ini_pp
-  [../]
+  []
 []
 
 [Kernels]
-  [./cx_elastic]
+  [cx_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_x
     component = 0
-  [../]
-  [./cy_elastic]
+  []
+  [cy_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_y
     component = 1
-  [../]
-  [./cz_elastic]
+  []
+  [cz_elastic]
     type = CosseratStressDivergenceTensors
     use_displaced_mesh = false
     variable = disp_z
     component = 2
-  [../]
-  [./x_couple]
+  []
+  [x_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
-  [../]
-  [./y_couple]
+  []
+  [y_couple]
     type = StressDivergenceTensors
     use_displaced_mesh = false
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./x_moment]
+  []
+  [x_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_x
     component = 0
-  [../]
-  [./y_moment]
+  []
+  [y_moment]
     type = MomentBalancing
     use_displaced_mesh = false
     variable = wc_y
     component = 1
-  [../]
-  [./gravity]
+  []
+  [gravity]
     type = Gravity
     use_displaced_mesh = false
     variable = disp_z
     value = -10E-6 # remember this is in MPa
-  [../]
-  [./poro_x]
+  []
+  [poro_x]
     type = PorousFlowEffectiveStressCoupling
     use_displaced_mesh = false
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PorousFlowEffectiveStressCoupling
     use_displaced_mesh = false
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PorousFlowEffectiveStressCoupling
     use_displaced_mesh = false
     component = 2
     variable = disp_z
-  [../]
-  [./poro_vol_exp]
+  []
+  [poro_vol_exp]
     type = PorousFlowMassVolumetricExpansion
     use_displaced_mesh = false
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     variable = porepressure
     fluid_component = 0
-  [../]
-  [./mass0]
+  []
+  [mass0]
     type = PorousFlowMassTimeDerivative
     use_displaced_mesh = false
     fluid_component = 0
     variable = porepressure
-  [../]
-  [./flux]
+  []
+  [flux]
     type = PorousFlowAdvectiveFlux
     use_displaced_mesh = false
     variable = porepressure
     gravity = '0 0 -10E-6'
     fluid_component = 0
-  [../]
+  []
 []
 
 
 [AuxVariables]
-  [./saturation]
+  [saturation]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./darcy_x]
+  []
+  [darcy_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./darcy_y]
+  []
+  [darcy_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./darcy_z]
+  []
+  [darcy_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./porosity]
+  []
+  [porosity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wc_z]
-  [../]
-  [./stress_xx]
+  []
+  [wc_z]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_xx]
+  []
+  [total_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_xy]
+  []
+  [total_strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_xz]
+  []
+  [total_strain_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_yx]
+  []
+  [total_strain_yx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_yy]
+  []
+  [total_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_yz]
+  []
+  [total_strain_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_zx]
+  []
+  [total_strain_zx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_zy]
+  []
+  [total_strain_zy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./total_strain_zz]
+  []
+  [total_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_xx]
+  []
+  [perm_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_yy]
+  []
+  [perm_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_zz]
+  []
+  [perm_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mc_shear]
+  []
+  [mc_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mc_tensile]
+  []
+  [mc_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_shear]
+  []
+  [wp_shear]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_tensile]
+  []
+  [wp_tensile]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_shear_f]
+  []
+  [wp_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./wp_tensile_f]
+  []
+  [wp_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mc_shear_f]
+  []
+  [mc_shear_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./mc_tensile_f]
+  []
+  [mc_tensile_f]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./saturation_water]
+  [saturation_water]
     type = PorousFlowPropertyAux
     variable = saturation
     property = saturation
     phase = 0
     execute_on = timestep_end
-  [../]
-  [./darcy_x]
+  []
+  [darcy_x]
     type = PorousFlowDarcyVelocityComponent
     variable = darcy_x
     gravity = '0 0 -10E-6'
     component = x
-  [../]
-  [./darcy_y]
+  []
+  [darcy_y]
     type = PorousFlowDarcyVelocityComponent
     variable = darcy_y
     gravity = '0 0 -10E-6'
     component = y
-  [../]
-  [./darcy_z]
+  []
+  [darcy_z]
     type = PorousFlowDarcyVelocityComponent
     variable = darcy_z
     gravity = '0 0 -10E-6'
     component = z
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
     execute_on = timestep_end
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_yx]
+  []
+  [stress_yx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yx
     index_i = 1
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_zx]
+  []
+  [stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zx
     index_i = 2
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_zy]
+  []
+  [stress_zy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zy
     index_i = 2
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./total_strain_xx]
+  []
+  [total_strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./total_strain_xy]
+  []
+  [total_strain_xy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./total_strain_xz]
+  []
+  [total_strain_xz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_xz
     index_i = 0
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./total_strain_yx]
+  []
+  [total_strain_yx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yx
     index_i = 1
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./total_strain_yy]
+  []
+  [total_strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./total_strain_yz]
+  []
+  [total_strain_yz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yz
     index_i = 1
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./total_strain_zx]
+  []
+  [total_strain_zx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_zx
     index_i = 2
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./total_strain_zy]
+  []
+  [total_strain_zy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_zy
     index_i = 2
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./total_strain_zz]
+  []
+  [total_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./perm_xx]
+  []
+  [perm_xx]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_xx
     row = 0
     column = 0
     execute_on = timestep_end
-  [../]
-  [./perm_yy]
+  []
+  [perm_yy]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_yy
     row = 1
     column = 1
     execute_on = timestep_end
-  [../]
-  [./perm_zz]
+  []
+  [perm_zz]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_zz
     row = 2
     column = 2
     execute_on = timestep_end
-  [../]
-  [./mc_shear]
+  []
+  [mc_shear]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_internal_parameter
     variable = mc_shear
     execute_on = timestep_end
-  [../]
-  [./mc_tensile]
+  []
+  [mc_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = mc_plastic_internal_parameter
     variable = mc_tensile
     execute_on = timestep_end
-  [../]
-  [./wp_shear]
+  []
+  [wp_shear]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_internal_parameter
     variable = wp_shear
     execute_on = timestep_end
-  [../]
-  [./wp_tensile]
+  []
+  [wp_tensile]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_internal_parameter
     variable = wp_tensile
     execute_on = timestep_end
-  [../]
-  [./mc_shear_f]
+  []
+  [mc_shear_f]
     type = MaterialStdVectorAux
     index = 6
     property = mc_plastic_yield_function
     variable = mc_shear_f
     execute_on = timestep_end
-  [../]
-  [./mc_tensile_f]
+  []
+  [mc_tensile_f]
     type = MaterialStdVectorAux
     index = 0
     property = mc_plastic_yield_function
     variable = mc_tensile_f
     execute_on = timestep_end
-  [../]
-  [./wp_shear_f]
+  []
+  [wp_shear_f]
     type = MaterialStdVectorAux
     index = 0
     property = wp_plastic_yield_function
     variable = wp_shear_f
     execute_on = timestep_end
-  [../]
-  [./wp_tensile_f]
+  []
+  [wp_tensile_f]
     type = MaterialStdVectorAux
     index = 1
     property = wp_plastic_yield_function
     variable = wp_tensile_f
     execute_on = timestep_end
-  [../]
+  []
 []
 
 
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'xmin xmax'
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'ymin ymax'
     value = 0.0
-  [../]
-  [./no_z]
+  []
+  [no_z]
     type = DirichletBC
     variable = disp_z
     boundary = zmin
     value = 0.0
-  [../]
-  [./no_wc_x]
+  []
+  [no_wc_x]
     type = DirichletBC
     variable = wc_x
     boundary = 'ymin ymax'
     value = 0.0
-  [../]
-  [./no_wc_y]
+  []
+  [no_wc_y]
     type = DirichletBC
     variable = wc_y
     boundary = 'xmin xmax'
     value = 0.0
-  [../]
-  [./fix_porepressure]
+  []
+  [fix_porepressure]
     type = FunctionDirichletBC
     variable = porepressure
     boundary = 'ymin ymax xmax'
     function = ini_pp
-  [../]
-  [./roof_porepressure]
+  []
+  [roof_porepressure]
     type = PorousFlowPiecewiseLinearSink
     variable = porepressure
     pt_vals = '-1E3 1E3'
@@ -701,162 +701,162 @@
     fluid_phase = 0
     flux_function = roof_conductance
     boundary = roof
-  [../]
-  [./roof]
+  []
+  [roof]
     type = StickyBC
     variable = disp_z
     min_value = -3.0
     boundary = roof
-  [../]
+  []
 []
 
 [Functions]
-  [./ini_pp]
+  [ini_pp]
     type = ParsedFunction
     vars = 'bulk p0 g    rho0'
     vals = '2E3 0.0 1E-5 1E3'
     value = '-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk)'
-  [../]
-  [./ini_xx]
+  []
+  [ini_xx]
     type = ParsedFunction
     vars = 'bulk p0 g    rho0 biot'
     vals = '2E3 0.0 1E-5 1E3  0.7'
     value = '0.8*(2500*10E-6*z+biot*(-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk)))'
-  [../]
-  [./ini_zz]
+  []
+  [ini_zz]
     type = ParsedFunction
     vars = 'bulk p0 g    rho0 biot'
     vals = '2E3 0.0 1E-5 1E3  0.7'
     value = '2500*10E-6*z+biot*(-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk))'
-  [../]
-  [./excav_sideways]
+  []
+  [excav_sideways]
     type = ParsedFunction
     vars = 'end_t ymin ymax  minval maxval slope'
     vals = '0.5   0    1000.0 1E-9 1 10'
     # excavation face at ymin+(ymax-ymin)*min(t/end_t,1)
     # slope is the distance over which the modulus reduces from maxval to minval
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,if(y<ymin+(ymax-ymin)*min(t/end_t,1)+slope,minval+(maxval-minval)*(y-(ymin+(ymax-ymin)*min(t/end_t,1)))/slope,maxval))'
-  [../]
-  [./density_sideways]
+  []
+  [density_sideways]
     type = ParsedFunction
     vars = 'end_t ymin ymax  minval maxval'
     vals = '0.5   0    1000.0 0 2500'
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,maxval)'
-  [../]
-  [./roof_conductance]
+  []
+  [roof_conductance]
     type = ParsedFunction
     vars = 'end_t ymin ymax   maxval minval'
     vals = '0.5   0    1000.0 1E7      0'
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),maxval,minval)'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1 # MPa^-1
-  [../]
+  []
 
-  [./mc_coh_strong_harden]
+  [mc_coh_strong_harden]
     type = TensorMechanicsHardeningExponential
     value_0 = 1.99 # MPa
     value_residual = 2.01 # MPa
     rate = 1.0
-  [../]
-  [./mc_fric]
+  []
+  [mc_fric]
     type = TensorMechanicsHardeningConstant
     value = 0.61 # 35deg
-  [../]
-  [./mc_dil]
+  []
+  [mc_dil]
     type = TensorMechanicsHardeningConstant
     value = 0.15 # 8deg
-  [../]
+  []
 
-  [./mc_tensile_str_strong_harden]
+  [mc_tensile_str_strong_harden]
     type = TensorMechanicsHardeningExponential
     value_0 = 1.0 # MPa
     value_residual = 1.0 # MPa
     rate = 1.0
-  [../]
-  [./mc_compressive_str]
+  []
+  [mc_compressive_str]
     type = TensorMechanicsHardeningCubic
     value_0 = 100 # Large!
     value_residual = 100
     internal_limit = 0.1
-  [../]
+  []
 
-  [./wp_coh_harden]
+  [wp_coh_harden]
     type = TensorMechanicsHardeningCubic
     value_0 = 0.05
     value_residual = 0.05
     internal_limit = 10
-  [../]
-  [./wp_tan_fric]
+  []
+  [wp_tan_fric]
     type = TensorMechanicsHardeningConstant
     value = 0.26 # 15deg
-  [../]
-  [./wp_tan_dil]
+  []
+  [wp_tan_dil]
     type = TensorMechanicsHardeningConstant
     value = 0.18 # 10deg
-  [../]
+  []
 
-  [./wp_tensile_str_harden]
+  [wp_tensile_str_harden]
     type = TensorMechanicsHardeningCubic
     value_0 = 0.05
     value_residual = 0.05
     internal_limit = 10
-  [../]
-  [./wp_compressive_str_soften]
+  []
+  [wp_compressive_str_soften]
     type = TensorMechanicsHardeningCubic
     value_0 = 100
     value_residual = 1
     internal_limit = 1.0
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E3
       density0 = 1000
       thermal_expansion = 0
       viscosity = 3.5E-17
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity_for_aux]
+  []
+  [porosity_for_aux]
     type = PorousFlowPorosity
     at_nodes = false
     fluid = true
@@ -864,8 +864,8 @@
     ensure_positive = true
     porosity_zero = 0.02
     solid_bulk = 5.3333E3
-  [../]
-  [./porosity_bulk]
+  []
+  [porosity_bulk]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -873,13 +873,13 @@
     ensure_positive = true
     porosity_zero = 0.02
     solid_bulk = 5.3333E3
-  [../]
-  [./porosity_excav]
+  []
+  [porosity_excav]
     type = PorousFlowPorosityConst
     block = 1
     porosity = 1.0
-  [../]
-  [./permeability_bulk]
+  []
+  [permeability_bulk]
     type = PorousFlowPermeabilityKozenyCarman
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     poroperm_function = kozeny_carman_phi0
@@ -887,21 +887,21 @@
     phi0 = 0.02
     n = 2
     m = 2
-  [../]
-  [./permeability_excav]
+  []
+  [permeability_excav]
     type = PorousFlowPermeabilityConst
     block = 1
     permeability = '0 0 0   0 0 0   0 0 0'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 4
     s_res = 0.4
     sum_s_res = 0.4
     phase = 0
-  [../]
+  []
 
-  [./elasticity_tensor_0]
+  [elasticity_tensor_0]
     type = ComputeLayeredCosseratElasticityTensor
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     young = 8E3 # MPa
@@ -909,8 +909,8 @@
     layer_thickness = 1.0
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3 # MPa
-  [../]
-  [./elasticity_tensor_1]
+  []
+  [elasticity_tensor_1]
     type = ComputeLayeredCosseratElasticityTensor
     block = 1
     young = 8E3 # MPa
@@ -919,18 +919,18 @@
     joint_normal_stiffness = 1E9 # huge
     joint_shear_stiffness = 1E3 # MPa
     elasticity_tensor_prefactor = excav_sideways
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCosseratIncrementalSmallStrain
     eigenstrain_names = ini_stress
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     eigenstrain_name = ini_stress
     initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
-  [../]
+  []
 
-  [./stress_0]
+  [stress_0]
     type = ComputeMultipleInelasticCosseratStress
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     inelastic_models = 'mc wp'
@@ -940,8 +940,8 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
-  [./stress_1]
+  []
+  [stress_1]
     type = ComputeMultipleInelasticCosseratStress
     block = 1
     inelastic_models = ''
@@ -950,8 +950,8 @@
     max_iterations = 1
     tangent_operator = nonlinear
     perform_finite_strain_rotations = false
-  [../]
-  [./mc]
+  []
+  [mc]
     type = CappedMohrCoulombCosseratStressUpdate
     warn_about_precision_loss = false
     host_youngs_modulus = 8E3
@@ -967,8 +967,8 @@
     yield_function_tol = 1E-9 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0
-  [../]
-  [./wp]
+  []
+  [wp]
     type = CappedWeakPlaneCosseratStressUpdate
     warn_about_precision_loss = false
     base_name = wp
@@ -983,60 +983,60 @@
     yield_function_tol = 1E-11 # MPa.  this is essentially the lowest possible without lots of precision loss
     perfect_guess = true
     min_step_size = 1.0E-3
-  [../]
+  []
 
 
-  [./undrained_density_0]
+  [undrained_density_0]
     type = GenericConstantMaterial
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     prop_names = density
     prop_values = 2500
-  [../]
-  [./undrained_density_1]
+  []
+  [undrained_density_1]
     type = GenericFunctionMaterial
     block = 1
     prop_names = density
     prop_values = density_sideways
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
   []
 []
 
 [Postprocessors]
-  [./min_roof_disp]
+  [min_roof_disp]
     type = NodalExtremeValue
     boundary = roof
     value_type = min
     variable = disp_z
-  [../]
-  [./min_roof_pp]
+  []
+  [min_roof_pp]
     type = NodalExtremeValue
     boundary = roof
     value_type = min
     variable = porepressure
-  [../]
-  [./min_surface_disp]
+  []
+  [min_surface_disp]
     type = NodalExtremeValue
     boundary = zmax
     value_type = min
     variable = disp_z
-  [../]
-  [./min_surface_pp]
+  []
+  [min_surface_pp]
     type = NodalExtremeValue
     boundary = zmax
     value_type = min
     variable = porepressure
-  [../]
-  [./max_perm_zz]
+  []
+  [max_perm_zz]
     type = ElementExtremeValue
      block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     variable = perm_zz
-  [../]
+  []
 []
 
 [Executioner]

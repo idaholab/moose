@@ -1,9 +1,9 @@
 # The saturation is varied with time and the capillary pressure is computed
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -11,63 +11,63 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = ''
-  [../]
+  []
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sat]
+  [sat]
     initial_condition = 1
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pc]
+  []
+  [pc]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sat_aux]
+  [sat_aux]
     type = FunctionAux
     variable = sat
     function = '1 - t'
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowPropertyAux
     variable = pc
     property = hysteretic_info
-  [../]
+  []
 []
 
 [Materials]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./pc_calculator]
+  []
+  [pc_calculator]
     type = PorousFlowHystereticInfo
     alpha_d = 10.0
     alpha_w = 7.0
@@ -81,25 +81,25 @@
     low_extension_type = quadratic
     high_extension_type = power
     sat_var = sat
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./hys_order]
+  [hys_order]
     type = PointValue
     point = '0 0 0'
     variable = hys_order
-  [../]
-  [./sat]
+  []
+  [sat]
     type = PointValue
     point = '0 0 0'
     variable = sat
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PointValue
     point = '0 0 0'
     variable = pc
-  [../]
+  []
 []
 
 [Executioner]

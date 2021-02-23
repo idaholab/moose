@@ -18,111 +18,111 @@
 []
 
 [Variables]
-  [./porepressure]
+  [porepressure]
     initial_condition = 2
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 4
-  [../]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  []
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = FunctionIC
     function = '0.5 * x'
     variable = disp_x
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy_p]
+  [dummy_p]
     type = TimeDerivative
     variable = porepressure
-  [../]
-  [./dummy_t]
+  []
+  [dummy_t]
     type = TimeDerivative
     variable = temperature
-  [../]
-  [./dummy_x]
+  []
+  [dummy_x]
     type = TimeDerivative
     variable = disp_x
-  [../]
-  [./dummy_y]
+  []
+  [dummy_y]
     type = TimeDerivative
     variable = disp_y
-  [../]
-  [./dummy_z]
+  []
+  [dummy_z]
     type = TimeDerivative
     variable = disp_z
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
+  [porosity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./porosity]
+  [porosity]
     type = PointValue
     variable = porosity
     point = '0 0 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure temperature'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = porepressure
     capillary_pressure = pc
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     mechanical = true
     thermal = true
@@ -130,7 +130,7 @@
     porosity_zero = 0.5
     thermal_expansion_coeff = 0.5
     reference_temperature = 3.5
-  [../]
+  []
 []
 
 [Executioner]

@@ -26,147 +26,147 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 1
-  [../]
-  [./pp]
+  []
+  [pp]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = PorousFlowHeatConduction
     variable = temp
-  [../]
-  [./dummy]
+  []
+  [dummy]
     type = Diffusion
     variable = pp
-  [../]
+  []
 []
 
 [BCs]
-  [./temp]
+  [temp]
     type = DirichletBC
     variable = temp
     boundary = 'front back'
     value = 1
-  [../]
-  [./pp]
+  []
+  [pp]
     type = DirichletBC
     variable = pp
     boundary = 'front back'
     value = 0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./lambda_x]
+  [lambda_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./lambda_y]
+  []
+  [lambda_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./lambda_z]
+  []
+  [lambda_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./lambda_x]
+  [lambda_x]
     type = MaterialRealTensorValueAux
     property = PorousFlow_thermal_conductivity_qp
     row = 0
     column = 0
     variable = lambda_x
-  [../]
-  [./lambda_y]
+  []
+  [lambda_y]
     type = MaterialRealTensorValueAux
     property = PorousFlow_thermal_conductivity_qp
     row = 1
     column = 1
     variable = lambda_y
-  [../]
-  [./lambda_z]
+  []
+  [lambda_z]
     type = MaterialRealTensorValueAux
     property = PorousFlow_thermal_conductivity_qp
     row = 2
     column = 2
     variable = lambda_z
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./lambda_x]
+  [lambda_x]
     type = ElementalVariableValue
     elementid = 0
     variable = lambda_x
     execute_on = 'timestep_end'
-  [../]
-  [./lambda_y]
+  []
+  [lambda_y]
     type = ElementalVariableValue
     elementid = 0
     variable = lambda_y
     execute_on = 'timestep_end'
-  [../]
-  [./lambda_z]
+  []
+  [lambda_z]
     type = ElementalVariableValue
     elementid = 0
     variable = lambda_z
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp temp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss_qp]
+  []
+  [ppss_qp]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity_qp]
+  []
+  [porosity_qp]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./lambda]
+  []
+  [lambda]
     type = PorousFlowThermalConductivityFromPorosity
     lambda_s = '3 0 0  0 3 0  0 0 3'
     lambda_f = '2 0 0  0 2 0  0 0 2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -21,118 +21,118 @@
 []
 
 [Variables]
-  [./porepressure]
-  [../]
+  [porepressure]
+  []
 []
 
 [ICs]
-  [./porepressure]
+  [porepressure]
     type = FunctionIC
     function = ppic
     variable = porepressure
-  [../]
+  []
 []
 
 [Functions]
-  [./ppic]
+  [ppic]
     type = ParsedFunction
     value = '10e6 + 1060*9.81*(100-y)'
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = porepressure
     value = 10e6
     boundary = top
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./temperature]
+  [temperature]
     initial_condition = 50
-  [../]
-  [./xnacl]
+  []
+  [xnacl]
     initial_condition = 0.1
-  [../]
-  [./brine_density]
+  []
+  [brine_density]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     variable = porepressure
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowFullySaturatedDarcyFlow
     variable = porepressure
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./brine_density]
+  [brine_density]
     type = PorousFlowPropertyAux
     property = density
     variable = brine_density
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = porepressure
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./brine]
+  [FluidProperties]
+    [brine]
       type = BrineFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./ps]
+  []
+  [ps]
     type = PorousFlow1PhaseFullySaturated
     porepressure = porepressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./brine]
+  []
+  [brine]
     type = PorousFlowBrine
     compute_enthalpy = false
     compute_internal_energy = false
     xnacl = xnacl
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-13 0 0 0 1e-13 0  0 0 1e-13'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -143,10 +143,10 @@
   nl_rel_tol = 1e-06
   steady_state_detection = true
   steady_state_tolerance = 1e-12
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e1
-  [../]
+  []
 []
 
 [Outputs]

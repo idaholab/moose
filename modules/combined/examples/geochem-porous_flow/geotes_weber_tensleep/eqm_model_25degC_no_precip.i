@@ -1,10 +1,10 @@
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../../geochemistry/database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl- SO4-- HCO3- SiO2(aq) Al+++ Ca++ Mg++ Fe++ K+ Na+ Sr++ F- B(OH)3 Br- Ba++ Li+ NO3- O2(aq)"
     equilibrium_minerals = "Siderite Pyrrhotite Dolomite Illite Anhydrite Calcite Quartz K-feldspar Kaolinite Barite Celestite Fluorite Albite Chalcedony Goethite"
-  [../]
+  []
 []
 
 [TimeIndependentReactionSolver]

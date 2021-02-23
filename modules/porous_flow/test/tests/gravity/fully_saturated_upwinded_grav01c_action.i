@@ -14,20 +14,20 @@
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = RandomIC
       min = 0
       max = 1
-    [../]
-  [../]
-  [./frac]
-    [./InitialCondition]
+    []
+  []
+  [frac]
+    [InitialCondition]
       type = RandomIC
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -39,62 +39,62 @@
 []
 
 [Functions]
-  [./ana_pp]
+  [ana_pp]
     type = ParsedFunction
     vars = 'g B p0 rho0'
     vals = '1 1.2 0 1'
     value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
-  [../]
+  []
 []
 
 [BCs]
-  [./z]
+  [z]
     type = DirichletBC
     variable = pp
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.2
       density0 = 1
       viscosity = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     PorousFlowDictator = dictator
     permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp_base]
+  [pp_base]
     type = PointValue
     variable = pp
     point = '-1 0 0'
-  [../]
-  [./pp_analytical]
+  []
+  [pp_analytical]
     type = FunctionValuePostprocessor
     function = ana_pp
     point = '-1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -33,50 +33,50 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./fix_x]
+  [fix_x]
     type = DirichletBC
     variable = disp_x
     value = 0.0
     boundary = 'left right'
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     variable = disp_y
     value = 0.0
     boundary = 'bottom top'
-  [../]
-  [./fix_z_bottom]
+  []
+  [fix_z_bottom]
     type = DirichletBC
     variable = disp_z
     value = 0.0
     boundary = back
-  [../]
-  [./barometric_loading]
+  []
+  [barometric_loading]
     type = FunctionNeumannBC
     variable = disp_z
     function = -1000.0 # atmospheric pressure increase of 1kPa
     boundary = front
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E9
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -88,46 +88,46 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 10.0E9 # drained bulk modulus
     poissons_ratio = 0.25
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
     porosity = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     solid_bulk_compliance = 1E-10
     fluid_bulk_modulus = 2E9
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp]
+  [pp]
     type = PointValue
     point = '0.5 0.5 0.5'
     variable = porepressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

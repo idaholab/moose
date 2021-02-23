@@ -46,49 +46,49 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     initial_condition = 0.05
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k]
+  [eqm_k]
     initial_condition = 0.5
-  [../]
-  [./pressure0]
-  [../]
-  [./saturation1]
+  []
+  [pressure0]
+  []
+  [saturation1]
     initial_condition = 0.25
-  [../]
-  [./b]
+  []
+  [b]
     initial_condition = 0.123
-  [../]
-  [./ini_mineral_conc]
+  []
+  [ini_mineral_conc]
     initial_condition = 0.015
-  [../]
-  [./mineral]
+  []
+  [mineral]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./should_be_static]
+  []
+  [should_be_static]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mineral]
+  [mineral]
     type = PorousFlowPropertyAux
     property = mineral_concentration
     mineral_species = 0
     variable = mineral
-  [../]
-  [./should_be_static]
+  []
+  [should_be_static]
     type = ParsedAux
     args = 'mineral a'
     function = 'a + mineral / 0.1'
     variable = should_be_static
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -96,61 +96,61 @@
 []
 
 [Kernels]
-  [./mass_a]
+  [mass_a]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = a
-  [../]
-  [./pre_dis]
+  []
+  [pre_dis]
     type = PorousFlowPreDis
     variable = a
     mineral_density = 1000
     stoichiometry = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = a
     number_fluid_phases = 2
     number_fluid_components = 2
     number_aqueous_kinetic = 1
     aqueous_phase_number = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9 # huge, so mimic chemical_reactions
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = 1
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     capillary_pressure = pc
     phase0_porepressure = pressure0
     phase1_saturation = saturation1
-  [../]
-  [./mass_frac]
+  []
+  [mass_frac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'b a'
-  [../]
-  [./predis]
+  []
+  [predis]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = a
     num_reactions = 1
@@ -163,32 +163,32 @@
     molar_volume = 2
     gas_constant = 6
     reference_temperature = 0.5
-  [../]
-  [./mineral_conc]
+  []
+  [mineral_conc]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = ini_mineral_conc
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.4
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -200,16 +200,16 @@
 []
 
 [Postprocessors]
-  [./a]
+  [a]
     type = PointValue
     point = '0 0 0'
     variable = a
-  [../]
-  [./should_be_static]
+  []
+  [should_be_static]
     type = PointValue
     point = '0 0 0'
     variable = should_be_static
-  [../]
+  []
 []
 [Outputs]
   interval = 10

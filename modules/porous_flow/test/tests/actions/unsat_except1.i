@@ -19,27 +19,27 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.3
-  [../]
+  []
 []
 
 [Executioner]

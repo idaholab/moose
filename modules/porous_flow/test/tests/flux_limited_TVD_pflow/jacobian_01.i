@@ -22,89 +22,89 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 
 [ICs]
-  [./pp]
+  [pp]
     variable = pp
     type = RandomIC
     min = 1
     max = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux0]
+  [flux0]
     type = PorousFlowFluxLimitedTVDAdvection
     variable = pp
     advective_flux_calculator = advective_flux_calculator
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1
       density0 = 0.4
       viscosity = 1.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
-  [./advective_flux_calculator]
+  []
+  [advective_flux_calculator]
     type = PorousFlowAdvectiveFluxCalculatorSaturated
     flux_limiter_type = None
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.21 0 0  0 1.5 0  0 0 0.8'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
-  [../]
+  []
 []
 
 [Executioner]

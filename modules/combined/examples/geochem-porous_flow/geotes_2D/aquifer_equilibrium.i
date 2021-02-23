@@ -1,11 +1,11 @@
 # Finds the equilibrium free molality of SiO2(aq) when in contact with QuartzLike at 50degC
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "small_database.json"
     basis_species = "H2O SiO2(aq) Na+ Cl-"
     equilibrium_minerals = "QuartzLike"
-  [../]
+  []
 []
 
 [TimeIndependentReactionSolver]
@@ -24,11 +24,11 @@
 []
 
 [Postprocessors]
-  [./free_moles_SiO2]
+  [free_moles_SiO2]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_SiO2(aq)'
-  [../]
+  []
 []
 
 [Outputs]
