@@ -71,8 +71,10 @@ ConservedVarMaterial::ConservedVarMaterial(const InputParameters & params)
     _epsilon(_have_porosity ? &getMaterialProperty<Real>(NS::porosity) : nullptr),
     _superficial_velocity(
         _have_porosity ? &declareADProperty<RealVectorValue>(NS::superficial_velocity) : nullptr),
-    _velocity_is_superficial(
-        isParamValid("velocity_is_superficial") ? getParam<bool>("velocity_is_superficial") : false)
+    _velocity_is_superficial(isParamValid("velocity_is_superficial")
+                                 ? getParam<bool>("velocity_is_superficial")
+                                 : false),
+    _mass_flux(declareADProperty<RealVectorValue>(NS::mass_flux))
 {
   warnAuxiliaryVariables();
   if (_have_porosity)
@@ -193,5 +195,9 @@ ConservedVarMaterial::computeQpProperties()
     (*_superficial_velocity)[_qp] = _velocity[_qp];
     if (!_velocity_is_superficial)
       (*_superficial_velocity)[_qp] *= (*_epsilon)[_qp];
+
+    _mass_flux[_qp] = _rho[_qp] * (*_superficial_velocity)[_qp];
   }
+  else
+    _mass_flux[_qp] = _rho[_qp] * _velocity[_qp];
 }
