@@ -41,7 +41,12 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
     _should_define_rays(declareRestartableData<bool>("should_define_rays", true)),
     _local_rays(
         declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("local_rays", this)),
-    _claim_rays(*this, _mesh, _rays, _local_rays, /* do_exchange = */ !_define_rays_replicated),
+    _claim_rays(*this,
+                *parallelStudy(),
+                _mesh,
+                _rays,
+                _local_rays,
+                /* do_exchange = */ !_define_rays_replicated),
     _should_claim_rays(
         declareRestartableData<bool>("claim_after_define_rays", _claim_after_define_rays)),
     _claim_rays_timer(registerTimedSection("claimRays", 1)),
@@ -228,7 +233,7 @@ RepeatableRayStudyBase::verifyReplicatedRays()
     for (processor_id_type pid = 0; pid < n_processors(); ++pid)
       if (pid != 0)
         comm().send_packed_range(
-            pid, (RayTracingStudy *)this, _rays.begin(), _rays.end(), *request_it++, tag);
+            pid, parallelStudy(), _rays.begin(), _rays.end(), *request_it++, tag);
 
     Parallel::wait(requests);
   }
@@ -244,11 +249,8 @@ RepeatableRayStudyBase::verifyReplicatedRays()
     // Receive the duplicated rays from rank 0
     std::vector<std::shared_ptr<Ray>> rank_0_rays;
     rank_0_rays.reserve(_rays.size());
-    comm().receive_packed_range(0,
-                                (RayTracingStudy *)this,
-                                std::back_inserter(rank_0_rays),
-                                (std::shared_ptr<Ray> *)nullptr,
-                                tag);
+    comm().receive_packed_range(
+        0, parallelStudy(), std::back_inserter(rank_0_rays), (std::shared_ptr<Ray> *)nullptr, tag);
 
     // The sizes better match
     if (rank_0_rays.size() != _rays.size())
