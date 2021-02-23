@@ -30,3 +30,4 @@ Extensions:
         categories:
             framework: !include framework/doc/sqa_framework.yml
             heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml

@@ -1,0 +1,1 @@
+!template load file=sqa/app_sdd.md.template app=RayTracingApp category=ray_tracing
