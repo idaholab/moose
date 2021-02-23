@@ -1,5 +1,4 @@
 advected_interp_method='upwind'
-one_over_porosity_interp_method='average'
 # Establish initial conditions based on STP
 rho_initial=1.2754
 p_initial=1.01e5
@@ -12,14 +11,13 @@ rho_et_initial=${fparse rho_initial * et_initial}
 rho_in=${rho_initial}
 # u refers to the superficial velocity
 u_in=1
-# rho_u_in=${fparse rho_in * u_in} # Useful for Dirichlet
 mass_flux_in=${fparse u_in * rho_in}
 eps_in=1
 real_u_in=${fparse u_in / eps_in}
 # prescribe inlet pressure = initial pressure
 p_in=${p_initial}
 rho_u_in=${fparse rho_in * u_in} # Useful for Dirichlet
-momentum_flux_in=${fparse eps_in * p_in + u_in * rho_in * u_in / eps_in}
+momentum_flux_in=${fparse eps_in * p_in}
 # prescribe inlet e = initial e
 et_in=${fparse e_initial + 0.5 * real_u_in * real_u_in}
 # rho_et_in=${fparse rho_in * et_in} # Useful for Dirichlet
@@ -58,16 +56,40 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Variables]
   [rho]
     type = MooseVariableFVReal
-    initial_condition = ${rho_initial}
   []
   [rho_u]
     type = MooseVariableFVReal
-    # initial_condition = 1e-15
     initial_condition = ${rho_u_in}
   []
   [rho_et]
-      type = MooseVariableFVReal
-    initial_condition = ${rho_et_initial}
+    type = MooseVariableFVReal
+  []
+[]
+
+[ICs]
+  [rho_left]
+    type = ConstantIC
+    value = ${rho_initial}
+    block = 0
+    variable = rho
+  []
+  [rho_right]
+    type = ConstantIC
+    value = ${fparse 2 * rho_initial}
+    block = 1
+    variable = rho
+  []
+  [rho_et_left]
+    type = ConstantIC
+    value = ${rho_et_initial}
+    variable = rho_et
+    block = 0
+  []
+  [rho_et_right]
+    type = ConstantIC
+    value = ${fparse 2 * rho_et_initial}
+    variable = rho_et
+    block = 1
   []
 []
 
@@ -179,10 +201,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 []
 
 [FVKernels]
-  # [mass_time]
-  #   type = FVPorosityTimeDerivative
-  #   variable = rho
-  # []
   [mass_advection]
     type = NSFVPorosityMatAdvection
     variable = rho
@@ -190,28 +208,12 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     advected_interp_method = ${advected_interp_method}
   []
 
-  # [momentum_time]
-  #   type = FVTimeKernel
-  #   variable = rho_u
-  # []
-  [momentum_advection]
-    type = NSFVPorosityMomentumMatAdvection
+  [momentum_pressure]
+    type = NSFVPorosityMomentumPressure
     variable = rho_u
-    vel = velocity
-    advected_interp_method = ${advected_interp_method}
-    one_over_porosity_interp_method = ${one_over_porosity_interp_method}
     momentum_component = 'x'
   []
-  # [momentum_pressure]
-  #   type = FVPorosityMomentumPressure
-  #   variable = rho_u
-  #   momentum_component = 'x'
-  # []
 
-  # [energy_time]
-  #   type = FVPorosityTimeDerivative
-  #   variable = rho_et
-  # []
   [energy_advection]
     type = NSFVPorosityMatAdvection
     variable = rho_et
@@ -222,12 +224,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 []
 
 [FVBCs]
-  # [rho_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho
-  #   value = ${rho_in}
-  # []
   [rho_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -241,12 +237,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
-  # [rho_u_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho_u
-  #   value = ${rho_u_in}
-  # []
   [rho_u_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -254,20 +244,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = NSFVPorosityMomentumMatAdvectionOutflowBC
-    boundary = 'right'
+    type = CNSFVMomImplicitPressureBC
     variable = rho_u
-    vel = velocity
-    advected_interp_method = ${advected_interp_method}
-    one_over_porosity_interp_method = ${one_over_porosity_interp_method}
+    boundary = 'right'
     momentum_component = 'x'
   []
-  # [rho_et_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho_et
-  #   value = ${rho_et_in}
-  # []
   [rho_et_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -319,19 +300,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   solve_type = NEWTON
   nl_rel_tol = 1e-8
   type = Steady
-  # nl_abs_tol = 1e-7
-  # type = Transient
-  # num_steps = 1000
-  # [TimeStepper]
-  #   type = IterationAdaptiveDT
-  #   dt = 1e-4
-  #   optimal_iterations = 6
-  # []
-  # steady_state_detection = true
   line_search = 'bt'
-  automatic_scaling = true
-  compute_scaling_once = false
-  verbose = true
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu       mumps'
   nl_max_its = 10
@@ -342,7 +311,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = Exodus
     execute_on = 'initial timestep_end'
   []
-  checkpoint = true
 []
 
 [Debug]

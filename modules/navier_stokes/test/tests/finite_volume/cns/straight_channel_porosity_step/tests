@@ -17,14 +17,21 @@
   #   valgrind = 'none'
   #   method = '!dbg'
   # []
-  [darcy_u_impl_steady_correct]
+  [darcy_u_impl_steady]
     type = Exodiff
-    input = stp-sup-vel-form-step-change.i
-    exodiff = stp-sup-vel-form-step-change_out.e
-    requirement = 'The system shall be able to solve a porous version of the Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the superficial velocity.'
-    cli_args = 'Mesh/cartesian/nx=10'
+    input = steady-sup-vel-form-step-change.i
+    exodiff = steady-sup-vel-form-step-change_out.e
+    requirement = 'The system shall be able to solve a porous version of the steady Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the superficial velocity.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final'"
   []
-  [mass_flux__impl_steady_correct]
+  [darcy_u_impl_transient]
+    type = Exodiff
+    input = transient-sup-vel-form-step-change.i
+    exodiff = transient-sup-vel-form-step-change_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the superficial velocity.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
+  []
+  [mass_flux__impl_steady]
     type = Exodiff
     input = mass-flux-impl-step-change.i
     exodiff = mass-flux-impl-step-change_out.e
