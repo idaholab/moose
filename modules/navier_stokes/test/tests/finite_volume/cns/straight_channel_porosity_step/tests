@@ -31,11 +31,18 @@
     requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with a step change in porosity using an implementation in which the nonlinear momentum varible incorporates the superficial velocity.'
     cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
   []
-  [mass_flux__impl_steady]
+  [mass_flux_impl_steady]
     type = Exodiff
     input = mass-flux-impl-step-change.i
     exodiff = mass-flux-impl-step-change_out.e
     requirement = 'The system shall be able to solve a porous version of the Euler equations with a step change in porosity using an implementation in which the mass flux is the advector and linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
     cli_args = 'Mesh/cartesian/nx=10'
+  []
+  [mass_flux_impl_transient]
+    type = Exodiff
+    input = transient-mass-flux-impl-step-change.i
+    exodiff = transient-mass-flux-impl-step-change_out.e
+    requirement = 'The system shall be able to solve a porous version of the Euler equations with a step change in porosity using an implementation in which the mass flux is the advector and linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
   []
 []
