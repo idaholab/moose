@@ -2,7 +2,7 @@
 #include "ElkEnums.h"
 #include <complex>
 
-registerMooseObject("ElkApp", MMSTestFunc);
+registerMooseObject("ElkTestApp", MMSTestFunc);
 
 template <>
 InputParameters
