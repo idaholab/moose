@@ -10,7 +10,6 @@
 #include "BuildArrayVariableAux.h"
 
 #include <algorithm>
-#include "SystemBase.h"
 
 registerMooseObject("MooseApp", BuildArrayVariableAux);
 
@@ -20,7 +19,7 @@ BuildArrayVariableAux::validParams()
   InputParameters params = ArrayAuxKernel::validParams();
   params.addCoupledVar("component_variables",
                        "The variables that make up each component of the output array variable.");
-  params.addClassDescription("Copy multiple variables into the components of an array variable.");
+  params.addClassDescription("Combines multiple standard variables into an array variable.");
   return params;
 }
 

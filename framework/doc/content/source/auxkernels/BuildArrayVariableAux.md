@@ -1,9 +1,6 @@
 # BuildArrayVariableAux
 
-## Description
-
-`BuildArrayVariableAux` will fill the values of an array variable using a
-standard variable for each of the array components.
+!syntax description /AuxKernels/BuildArrayVariableAux
 
 ## Example Syntax
 
