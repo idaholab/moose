@@ -30,6 +30,7 @@ CHEMICAL_REACTIONS  := no
 CONTACT             := no
 FLUID_PROPERTIES    := yes
 HEAT_CONDUCTION     := yes
+RAY_TRACING         := yes
 MISC                := yes
 NAVIER_STOKES       := no
 PHASE_FIELD         := no
