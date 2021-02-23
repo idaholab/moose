@@ -27,7 +27,7 @@ protected:
 
   /// porosity
   // const VariableValue & _eps;
-  const Real _eps;
+  const MaterialProperty<Real> & _eps;
 
   /// The pressure on the elem
   const ADMaterialProperty<Real> & _pressure;
