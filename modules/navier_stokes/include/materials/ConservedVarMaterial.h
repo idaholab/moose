@@ -74,4 +74,7 @@ private:
 
   /// Whether the velocity is superficial or primitive
   const bool _velocity_is_superficial;
+
+  /// Mass flux
+  ADMaterialProperty<RealVectorValue> & _mass_flux;
 };
