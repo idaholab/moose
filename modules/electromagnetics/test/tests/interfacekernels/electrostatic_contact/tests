@@ -49,6 +49,7 @@
     type = CSVDiff
     input = 'analytic_solution_test_two_block.i'
     csvdiff = 'analytic_solution_test_two_block_out.csv'
+    allow_test_objects = True
     requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, two-material-block scenario.'
     design = 'ElectrostaticContactCondition.md'
     issues = '#31'
@@ -57,6 +58,7 @@
     type = CSVDiff
     input = 'analytic_solution_test_three_block.i'
     csvdiff = 'analytic_solution_test_three_block_out.csv'
+    allow_test_objects = True
     requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, three-material-block scenario.'
     design = 'ElectrostaticContactCondition.md'
     issues = '#31'
