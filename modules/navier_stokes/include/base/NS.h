@@ -121,6 +121,7 @@ namespace NS
   static const std::string C = "C";
   static const std::string Z = "Z";
   static const std::string K = "K";
+  static const std::string mass_flux = "mass_flux";
 }
 
 namespace NS_DEFAULT_VALUES
