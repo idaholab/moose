@@ -7,10 +7,8 @@
 ParallelRayStudy::ParallelRayStudy(
     RayTracingStudy & ray_tracing_study,
     const std::vector<std::shared_ptr<TraceRay>> & threaded_trace_ray)
-  : ParallelStudy<std::shared_ptr<Ray>, Ray, RayTracingStudy>(ray_tracing_study.comm(),
-                                                              &ray_tracing_study,
-                                                              ray_tracing_study.parameters(),
-                                                              "ParallelRayStudy"),
+  : ParallelStudy<std::shared_ptr<Ray>, Ray>(
+        ray_tracing_study.comm(), ray_tracing_study.parameters(), "ParallelRayStudy"),
     _ray_tracing_study(ray_tracing_study),
     _threaded_trace_ray(threaded_trace_ray)
 {
@@ -82,7 +80,7 @@ ParallelRayStudy::moveWorkError(const MoveWorkError error, const std::shared_ptr
   else if (error == MoveWorkError::PRE_EXECUTION_THREAD_0_ONLY)
     oss << "Rays can only be added on thread 0 during generateRays() (not thread safe)";
   else if (error == CONTINUING_DURING_EXECUTING_WORK)
-    ParallelStudy<std::shared_ptr<Ray>, Ray, RayTracingStudy>::moveWorkError(error, ray);
+    ParallelStudy<std::shared_ptr<Ray>, Ray>::moveWorkError(error, ray);
 
   if (ray)
     oss << "\n\n" << (*ray)->getInfo();

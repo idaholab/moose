@@ -10,6 +10,7 @@
 #include "Ray.h"
 
 // Local includes
+#include "ParallelRayStudy.h"
 #include "RayTracingStudy.h"
 #include "RayTracingPackingUtils.h"
 
@@ -521,18 +522,21 @@ namespace libMesh
 namespace Parallel
 {
 
-unsigned int Packing<std::shared_ptr<Ray>>::mixed_size =
-    RayTracingPackingUtils::mixedPackSize<buffer_type>(
-        (unsigned short)0, (bool)true, (unsigned int)0, (unsigned int)0, (unsigned int)0);
-
 unsigned int
 Packing<std::shared_ptr<Ray>>::size(const std::size_t data_size, const std::size_t aux_data_size)
 {
-  // Data lengths, current point and direction, current element id, distance, max_distance, ray ID
-  unsigned int size = 12;
-  // Current incoming side, end_set, processor crossings, intersections, trajectory changes
-  // (packed into as few buffer_type as possible)
-  size += mixed_size;
+  // First value: Data lengths, current point and direction, current element id, distance,
+  // max_distance, ray ID
+  // Second value: Current incoming side, end_set, processor crossings, intersections, trajectory
+  // changes (packed into as few buffer_type as possible: 5 values stored as 2 Reals)
+  constexpr unsigned int base_size = 12 + RayTracingPackingUtils::mixedPackSize<buffer_type,
+                                                                                unsigned short,
+                                                                                bool,
+                                                                                unsigned int,
+                                                                                unsigned int,
+                                                                                unsigned int>();
+
+  auto size = base_size;
 
 #ifdef SINGLE_PRECISION_RAY
   if (data_size)
@@ -550,7 +554,7 @@ unsigned int
 Packing<std::shared_ptr<Ray>>::packed_size(typename std::vector<buffer_type>::const_iterator in)
 {
   const std::size_t data_size = static_cast<std::size_t>(*in++);
-  const std::size_t aux_data_size = static_cast<std::size_t>(*in++);
+  const std::size_t aux_data_size = static_cast<std::size_t>(*in);
 
   return size(data_size, aux_data_size);
 }
@@ -564,8 +568,11 @@ Packing<std::shared_ptr<Ray>>::packable_size(const std::shared_ptr<Ray> & ray, c
 template <>
 std::shared_ptr<Ray>
 Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator in,
-                                      RayTracingStudy * study)
+                                      ParallelStudy<std::shared_ptr<Ray>, Ray> * study)
 {
+  mooseAssert(dynamic_cast<ParallelRayStudy *>(study), "Not a ParallelRayStudy");
+  RayTracingStudy & ray_tracing_study = static_cast<ParallelRayStudy *>(study)->rayTracingStudy();
+
   // Grab the data size
   const std::size_t data_size = static_cast<std::size_t>(*in++);
   const std::size_t aux_data_size = static_cast<std::size_t>(*in++);
@@ -574,11 +581,12 @@ Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator i
   RayID id;
   RayTracingPackingUtils::unpack(*in++, id);
 
-  std::shared_ptr<Ray> ray = study->acquireRayInternal(id,
-                                                       data_size,
-                                                       aux_data_size,
-                                                       /* reset = */ false,
-                                                       RayTracingStudy::AcquireRayInternalKey());
+  std::shared_ptr<Ray> ray =
+      ray_tracing_study.acquireRayInternal(id,
+                                           data_size,
+                                           aux_data_size,
+                                           /* reset = */ false,
+                                           RayTracingStudy::AcquireRayInternalKey());
 
   // Current Point
   ray->_current_point(0) = *in++;
@@ -591,7 +599,7 @@ Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator i
   ray->_direction(2) = *in++;
 
   // Current Element
-  RayTracingPackingUtils::unpack(ray->_current_elem, *in++, &study->meshBase());
+  RayTracingPackingUtils::unpack(ray->_current_elem, *in++, &ray_tracing_study.meshBase());
 
   // Current incoming size, end set, processor crossings, intersections, trajectory changes
   // (unpacked from as few buffer_type as possible - 5 values from 2 Reals)
@@ -627,9 +635,12 @@ template <>
 void
 Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
                                     std::back_insert_iterator<std::vector<buffer_type>> data_out,
-                                    const RayTracingStudy * study)
+                                    const ParallelStudy<std::shared_ptr<Ray>, Ray> * study)
 {
-  mooseAssert(&ray->study() == study, "Packing Ray for different study");
+  mooseAssert(dynamic_cast<const ParallelRayStudy *>(study), "Not a ParallelRayStudy");
+  const RayTracingStudy & ray_tracing_study =
+      static_cast<const ParallelRayStudy *>(study)->rayTracingStudy();
+  mooseAssert(&ray->study() == &ray_tracing_study, "Packing Ray for different study");
 
   // Storing the data size first makes it easy to verify and reserve space
   data_out = static_cast<buffer_type>(ray->_data.size());
@@ -649,7 +660,8 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
   data_out = ray->_direction(2);
 
   // Current element
-  data_out = RayTracingPackingUtils::pack<buffer_type>(ray->_current_elem, &study->meshBase());
+  data_out =
+      RayTracingPackingUtils::pack<buffer_type>(ray->_current_elem, &ray_tracing_study.meshBase());
 
   // Current incoming size, end set, processor crossings, intersections, trajectory changes
   // (packed into as few buffer_type as possible - 5 values into 2 Reals

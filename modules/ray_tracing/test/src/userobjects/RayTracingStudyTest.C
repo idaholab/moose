@@ -194,8 +194,7 @@ RayTracingStudyTest::generateRays()
       moveRayToBuffer(ray);
     };
 
-    Parallel::push_parallel_packed_range(
-        comm(), send_map, (RayTracingStudy *)this, add_ray_functor);
+    Parallel::push_parallel_packed_range(comm(), send_map, parallelStudy(), add_ray_functor);
   }
 
   if (getParam<bool>("ray_at_end_without_set"))
