@@ -15,11 +15,11 @@ build:
 
 requirements:
   host:
-    - python >=3.6,<3.8,>=3.9
+    - python >=3.6
     - vtk
 
   run:
-    - python >=3.6,<3.8,>=3.9
+    - python >=3.6
     - vtk
     - numpy
     - pyqt
