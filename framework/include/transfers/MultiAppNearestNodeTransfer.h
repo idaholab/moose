@@ -92,8 +92,8 @@ protected:
 
   // These variables allow us to cache nearest node info
   bool & _neighbors_cached;
-  std::vector<std::vector<unsigned int>> & _cached_froms;
-  std::vector<std::vector<dof_id_type>> & _cached_dof_ids;
+  std::map<processor_id_type, std::vector<unsigned int>> & _cached_froms;
+  std::map<processor_id_type, std::vector<dof_id_type>> & _cached_dof_ids;
   std::map<dof_id_type, unsigned int> & _cached_from_inds;
   std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 };
