@@ -50,35 +50,35 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./confinex]
+  [confinex]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./confiney]
+  []
+  [confiney]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top'
-  [../]
-  [./confinez]
+  []
+  [confinez]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'back'
-  [../]
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -92,114 +92,114 @@
 []
 
 [Kernels]
-  [./source]
+  [source]
     type = BodyForce
     function = '0.1*exp(8.163265306*0.1*t/3.3333333333)'
     variable = porepressure
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 3.3333333333
       density0 = 1
       thermal_expansion = 0
       viscosity = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
     # bulk modulus is lambda + 2*mu/3 = 1 + 2*1.5/3 = 2
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityHMBiotModulus
     porosity_zero = 0.1
     biot_coefficient = 0.3
     solid_bulk = 2
     constant_fluid_bulk_modulus = 3.3333333333
     constant_biot_modulus = 10.0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0   0 1 0   0 0 1' # unimportant
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = porepressure
-  [../]
-  [./zdisp]
+  []
+  [zdisp]
     type = PointValue
     outputs = csv
     point = '0 0 0.5'
     variable = disp_z
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_zz
-  [../]
+  []
 []
 
 [Functions]
-  [./stress_xx_over_strain_fcn]
+  [stress_xx_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'stress_xx zdisp'
-  [../]
-  [./stress_zz_over_strain_fcn]
+  []
+  [stress_zz_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'stress_zz zdisp'
-  [../]
-  [./p_over_strain_fcn]
+  []
+  [p_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'p0 zdisp'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -213,7 +213,7 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = pp_generation_unconfined_constM_action
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

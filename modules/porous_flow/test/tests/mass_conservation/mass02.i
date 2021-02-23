@@ -13,104 +13,104 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./mass_frac_comp0]
-  [../]
+  [pp]
+  []
+  [mass_frac_comp0]
+  []
 []
 
 [ICs]
-  [./pinit]
+  [pinit]
     type = FunctionIC
     function = x
     variable = pp
-  [../]
-  [./minit]
+  []
+  [minit]
     type = FunctionIC
     function = 'x*x'
     variable = mass_frac_comp0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = mass_frac_comp0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp mass_frac_comp0'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1
       density0 = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'mass_frac_comp0'
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./total_mass_0]
+  [total_mass_0]
     type = PorousFlowFluidMass
-  [../]
-  [./total_mass_1]
+  []
+  [total_mass_1]
     type = PorousFlowFluidMass
     fluid_component = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1 1 10000'
-  [../]
+  []
 []
 
 [Executioner]

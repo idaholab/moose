@@ -17,12 +17,12 @@ production_rate = 1.0 # kg/s/m
     ymin = -40
     ymax = 40
   []
-  [./injection_node]
+  [injection_node]
     input = gen
     type = ExtraNodesetGenerator
     new_boundary = injection_node
     coord = '-30 0 0'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -31,35 +31,35 @@ production_rate = 1.0 # kg/s/m
 []
 
 [Variables]
-  [./f0]
+  [f0]
     initial_condition = 0.002285946
-  [../]
-  [./f1]
+  []
+  [f1]
     initial_condition = 0.0035252
-  [../]
-  [./f2]
+  []
+  [f2]
     initial_condition = 1.3741E-05
-  [../]
-  [./porepressure]
+  []
+  [porepressure]
     initial_condition = 2E6
-  [../]
-  [./temperature]
+  []
+  [temperature]
     initial_condition = 50
     scaling = 1E-6 # fluid enthalpy is roughly 1E6
-  [../]
+  []
 []
 
 [BCs]
-  [./injection_temperature]
+  [injection_temperature]
     type = MatchedValueBC
     variable = temperature
     v = injection_temperature
     boundary = injection_node
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./inject_Na]
+  [inject_Na]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -68,8 +68,8 @@ production_rate = 1.0 # kg/s/m
     multiplying_var = injection_rate_massfrac_Na
     point_file = injection.bh
     variable = f0
-  [../]
-  [./inject_Cl]
+  []
+  [inject_Cl]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -78,8 +78,8 @@ production_rate = 1.0 # kg/s/m
     multiplying_var = injection_rate_massfrac_Cl
     point_file = injection.bh
     variable = f1
-  [../]
-  [./inject_SiO2]
+  []
+  [inject_SiO2]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -88,8 +88,8 @@ production_rate = 1.0 # kg/s/m
     multiplying_var = injection_rate_massfrac_SiO2
     point_file = injection.bh
     variable = f2
-  [../]
-  [./inject_H2O]
+  []
+  [inject_H2O]
     type = PorousFlowPolyLineSink
     SumQuantityUO = injected_mass
     fluxes = ${injection_rate}
@@ -98,9 +98,9 @@ production_rate = 1.0 # kg/s/m
     multiplying_var = injection_rate_massfrac_H2O
     point_file = injection.bh
     variable = porepressure
-  [../]
+  []
 
-  [./produce_Na]
+  [produce_Na]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Na
     fluxes = ${production_rate}
@@ -109,8 +109,8 @@ production_rate = 1.0 # kg/s/m
     mass_fraction_component = 0
     point_file = production.bh
     variable = f0
-  [../]
-  [./produce_Cl]
+  []
+  [produce_Cl]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_Cl
     fluxes = ${production_rate}
@@ -119,8 +119,8 @@ production_rate = 1.0 # kg/s/m
     mass_fraction_component = 1
     point_file = production.bh
     variable = f1
-  [../]
-  [./produce_SiO2]
+  []
+  [produce_SiO2]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_SiO2
     fluxes = ${production_rate}
@@ -129,8 +129,8 @@ production_rate = 1.0 # kg/s/m
     mass_fraction_component = 2
     point_file = production.bh
     variable = f2
-  [../]
-  [./produce_H2O]
+  []
+  [produce_H2O]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_mass_H2O
     fluxes = ${production_rate}
@@ -139,8 +139,8 @@ production_rate = 1.0 # kg/s/m
     mass_fraction_component = 3
     point_file = production.bh
     variable = porepressure
-  [../]
-  [./produce_heat]
+  []
+  [produce_heat]
     type = PorousFlowPolyLineSink
     SumQuantityUO = produced_heat
     fluxes = ${production_rate}
@@ -149,112 +149,112 @@ production_rate = 1.0 # kg/s/m
     use_enthalpy = true
     point_file = production.bh
     variable = temperature
-  [../]
+  []
 []
 
 [UserObjects]
-  [./injected_mass]
+  [injected_mass]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Na]
+  []
+  [produced_mass_Na]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_Cl]
+  []
+  [produced_mass_Cl]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_SiO2]
+  []
+  [produced_mass_SiO2]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_mass_H2O]
+  []
+  [produced_mass_H2O]
     type = PorousFlowSumQuantity
-  [../]
-  [./produced_heat]
+  []
+  [produced_heat]
     type = PorousFlowSumQuantity
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
     execute_on = TIMESTEP_BEGIN
-  [../]
-  [./tot_kg_injected_this_timestep]
+  []
+  [tot_kg_injected_this_timestep]
     type = PorousFlowPlotQuantity
     uo = injected_mass
-  [../]
-  [./kg_Na_produced_this_timestep]
+  []
+  [kg_Na_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Na
-  [../]
-  [./kg_Cl_produced_this_timestep]
+  []
+  [kg_Cl_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_Cl
-  [../]
-  [./kg_SiO2_produced_this_timestep]
+  []
+  [kg_SiO2_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_SiO2
-  [../]
-  [./kg_H2O_produced_this_timestep]
+  []
+  [kg_H2O_produced_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_mass_H2O
-  [../]
-  [./mole_rate_Na_produced]
+  []
+  [mole_rate_Na_produced]
     type = FunctionValuePostprocessor
     function = moles_Na
-  [../]
-  [./mole_rate_Cl_produced]
+  []
+  [mole_rate_Cl_produced]
     type = FunctionValuePostprocessor
     function = moles_Cl
-  [../]
-  [./mole_rate_SiO2_produced]
+  []
+  [mole_rate_SiO2_produced]
     type = FunctionValuePostprocessor
     function = moles_SiO2
-  [../]
-  [./mole_rate_H2O_produced]
+  []
+  [mole_rate_H2O_produced]
     type = FunctionValuePostprocessor
     function = moles_H2O
-  [../]
-  [./heat_joules_extracted_this_timestep]
+  []
+  [heat_joules_extracted_this_timestep]
     type = PorousFlowPlotQuantity
     uo = produced_heat
-  [../]
-  [./production_temperature]
+  []
+  [production_temperature]
     type = PointValue
     point = '30 0 0'
     variable = temperature
-  [../]
+  []
 []
 
 [Functions]
-  [./moles_Na]
+  [moles_Na]
     type = ParsedFunction
     vars = 'kg_Na dt'
     vals = 'kg_Na_produced_this_timestep dt'
     value = 'kg_Na * 1000 / 22.9898 / dt'
-  [../]
-  [./moles_Cl]
+  []
+  [moles_Cl]
     type = ParsedFunction
     vars = 'kg_Cl dt'
     vals = 'kg_Cl_produced_this_timestep dt'
     value = 'kg_Cl * 1000 / 35.453 / dt'
-  [../]
-  [./moles_SiO2]
+  []
+  [moles_SiO2]
     type = ParsedFunction
     vars = 'kg_SiO2 dt'
     vals = 'kg_SiO2_produced_this_timestep dt'
     value = 'kg_SiO2 * 1000 / 60.0843 / dt'
-  [../]
-  [./moles_H2O]
+  []
+  [moles_H2O]
     type = ParsedFunction
     vars = 'kg_H2O dt'
     vals = 'kg_H2O_produced_this_timestep dt'
     value = 'kg_H2O * 1000 / 18.0152 / dt'
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0
       bulk_modulus = 2E9
@@ -262,8 +262,8 @@ production_rate = 1.0 # kg/s/m
       density0 = 1000
       cv = 4000.0
       cp = 4000.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -277,72 +277,72 @@ production_rate = 1.0 # kg/s/m
 []
 
 [AuxVariables]
-  [./injection_temperature]
+  [injection_temperature]
     initial_condition = 200
-  [../]
-  [./injection_rate_massfrac_Na]
+  []
+  [injection_rate_massfrac_Na]
     initial_condition = 0.002285946
-  [../]
-  [./injection_rate_massfrac_Cl]
+  []
+  [injection_rate_massfrac_Cl]
     initial_condition = 0.0035252
-  [../]
-  [./injection_rate_massfrac_SiO2]
+  []
+  [injection_rate_massfrac_SiO2]
     initial_condition = 1.3741E-05
-  [../]
-  [./injection_rate_massfrac_H2O]
+  []
+  [injection_rate_massfrac_H2O]
     initial_condition = 0.994175112
-  [../]
-  [./rate_H2O]
-  [../]
-  [./rate_Na]
-  [../]
-  [./rate_Cl]
-  [../]
-  [./rate_SiO2]
-  [../]
+  []
+  [rate_H2O]
+  []
+  [rate_Na]
+  []
+  [rate_Cl]
+  []
+  [rate_SiO2]
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst # this simulation has no porosity changes from dissolution
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12'
-  [../]
-  [./thermal_conductivity]
+  []
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     density = 2500.0
     specific_heat_capacity = 1200.0
-  [../]
+  []
 []
 
 [Preconditioning]
   active = typically_efficient
-  [./typically_efficient]
+  [typically_efficient]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_hypre_type'
     petsc_options_value = ' hypre    boomeramg'
-  [../]
-  [./strong]
+  []
+  [strong]
     type = SMP
     full = true
     petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = ' asm      ilu           NONZERO                   2'
-  [../]
-  [./probably_too_strong]
+  []
+  [probably_too_strong]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
+  []
 []
 
 [Executioner]
@@ -357,27 +357,27 @@ production_rate = 1.0 # kg/s/m
 []
 
 [MultiApps]
-  [./react]
+  [react]
     type = TransientMultiApp
     input_files = aquifer_geochemistry.i
     clone_master_mesh = true
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
-  [./changes_due_to_flow]
+  [changes_due_to_flow]
     type = MultiAppCopyTransfer
     direction = to_multiapp
     source_variable = 'rate_H2O rate_Na rate_Cl rate_SiO2 temperature'
     variable = 'pf_rate_H2O pf_rate_Na pf_rate_Cl pf_rate_SiO2 temperature'
     multi_app = react
-  [../]
-  [./massfrac_from_geochem]
+  []
+  [massfrac_from_geochem]
     type = MultiAppCopyTransfer
     direction = from_multiapp
     source_variable = 'massfrac_Na massfrac_Cl massfrac_SiO2'
     variable = 'f0 f1 f2'
     multi_app = react
-  [../]
+  []
 []

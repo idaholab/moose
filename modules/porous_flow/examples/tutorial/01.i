@@ -10,40 +10,40 @@
     dmin = 0
     dmax = 90
   []
-  [./make3D]
+  [make3D]
     type = MeshExtruderGenerator
     extrusion_vector = '0 0 12'
     num_layers = 3
     bottom_sideset = 'bottom'
     top_sideset = 'top'
     input = annular
-  [../]
-  [./shift_down]
+  []
+  [shift_down]
     type = TransformGenerator
     transform = TRANSLATE
     vector_value = '0 0 -6'
     input = make3D
-  [../]
-  [./aquifer]
+  []
+  [aquifer]
     type = SubdomainBoundingBoxGenerator
     block_id = 1
     bottom_left = '0 0 -2'
     top_right = '10 10 2'
     input = shift_down
-  [../]
-  [./injection_area]
+  []
+  [injection_area]
     type = ParsedGenerateSideset
     combinatorial_geometry = 'x*x+y*y<1.01'
     included_subdomain_ids = 1
     new_sideset_name = 'injection_area'
     input = 'aquifer'
-  [../]
-  [./rename]
+  []
+  [rename]
     type = RenameBlockGenerator
     old_block_id = '0 1'
     new_block_name = 'caps aquifer'
     input = 'injection_area'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -51,8 +51,8 @@
 []
 
 [Variables]
-  [./porepressure]
-  [../]
+  [porepressure]
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -63,60 +63,60 @@
 []
 
 [BCs]
-  [./constant_injection_porepressure]
+  [constant_injection_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1E6
     boundary = injection_area
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E9
       viscosity = 1.0E-3
       density0 = 1000.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     biot_coefficient = 0.8
     solid_bulk_compliance = 2E-7
     fluid_bulk_modulus = 1E7
-  [../]
-  [./permeability_aquifer]
+  []
+  [permeability_aquifer]
     type = PorousFlowPermeabilityConst
     block = aquifer
     permeability = '1E-14 0 0   0 1E-14 0   0 0 1E-14'
-  [../]
-  [./permeability_caps]
+  []
+  [permeability_caps]
     type = PorousFlowPermeabilityConst
     block = caps
     permeability = '1E-15 0 0   0 1E-15 0   0 0 1E-16'
-  [../]
+  []
 []
 
 [Preconditioning]
   active = basic
-  [./basic]
+  [basic]
     type = SMP
     full = true
-  [../]
-  [./preferred_but_might_not_be_installed]
+  []
+  [preferred_but_might_not_be_installed]
     type = SMP
     full = true
     petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
     petsc_options_value = ' lu       mumps'
-  [../]
+  []
 []
 
 [Executioner]

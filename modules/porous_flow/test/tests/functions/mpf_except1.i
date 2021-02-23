@@ -7,25 +7,25 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Functions]
-  [./moving_planar_front]
+  [moving_planar_front]
     type = MovingPlanarFront
     start_posn = '1 1 0'
     end_posn = '1 1 0'
     active_length = 1
     distance = t
-  [../]
+  []
 []
 
 [Executioner]

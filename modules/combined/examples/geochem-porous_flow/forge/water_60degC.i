@@ -1,13 +1,13 @@
 # Equilibrium model "Water 1" from "Subtask 2C.4.7 Geochemical Modeling SSimmons-VPatil.pdf"
 # At 60degC K-feldspar and Quartz both precipitate
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = '../../../../geochemistry/database/moose_geochemdb.json'
     basis_species = 'H2O H+ Na+ K+ Ca++ Mg++ SiO2(aq) Al+++ Cl- SO4-- HCO3-'
     remove_all_extrapolated_secondary_species = true
     equilibrium_minerals = 'Albite Anhydrite Anorthite Calcite Chalcedony Clinochl-7A Illite K-feldspar Kaolinite Quartz Paragonite Phlogopite Zoisite Laumontite'
-  [../]
+  []
 []
 
 [TimeIndependentReactionSolver]
@@ -22,11 +22,11 @@
 []
 
 [Postprocessors]
-  [./bulk_H+]
+  [bulk_H+]
     type = PointValue
     point = '0 0 0'
     variable = 'bulk_moles_H+'
-  [../]
+  []
 []
 
 [Outputs]

@@ -26,9 +26,9 @@
 []
 
 [Variables]
-  [./porepressure]
+  [porepressure]
     initial_condition = 1.5e6 # initial pressure in domain
-  [../]
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -39,14 +39,14 @@
 []
 
 [AuxVariables]
-  [./fluxes_out]
-  [../]
-  [./fluxes_in]
-  [../]
+  [fluxes_out]
+  []
+  [fluxes_in]
+  []
 []
 
 [BCs]
-  [./in_left]
+  [in_left]
     type = PorousFlowPiecewiseLinearSink
     variable = porepressure
     boundary = 'left'
@@ -56,8 +56,8 @@
     flux_function = 1E-5 # Variable C
     fluid_phase = 0
     save_in = fluxes_out
-  [../]
-  [./out_right]
+  []
+  [out_right]
     type = PorousFlowPiecewiseLinearSink
     variable = porepressure
     boundary = 'right'
@@ -67,62 +67,62 @@
     flux_function = 1E-6 # Variable C
     fluid_phase = 0
     save_in = fluxes_in
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./left_flux]
+  [left_flux]
     type = NodalSum
     boundary = 'left'
     variable = fluxes_out
     execute_on = 'timestep_end'
-  [../]
-  [./right_flux]
+  []
+  [right_flux]
     type = NodalSum
     boundary = 'right'
     variable = fluxes_in
     execute_on = 'timestep_end'
-  [../]
-  [./left_pressure]
+  []
+  [left_pressure]
     type = SideAverageValue
     boundary = 'left'
     variable = porepressure
     execute_on = 'timestep_end'
-  [../]
-  [./right_pressure]
+  []
+  [right_pressure]
     type = SideAverageValue
     boundary = 'right'
     variable = porepressure
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0
       viscosity = 1.0E-3
       density0 = 1000.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     biot_coefficient = 0.8
     solid_bulk_compliance = 2E-7
     fluid_bulk_modulus = 1E7
-  [../]
-  [./permeability_aquifer]
+  []
+  [permeability_aquifer]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0   0 1E-15 0   0 0 1E-15'
-  [../]
+  []
 []
 
 [Executioner]

@@ -23,31 +23,31 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'disp_x'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./dummy_sum]
+  []
+  [dummy_sum]
     type = PorousFlowSumQuantity
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
+  [disp_x]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = disp_x
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./line_sink]
+  [line_sink]
     type = PorousFlowPolyLineSink
     function_of = temperature
     SumQuantityUO = dummy_sum
@@ -55,31 +55,31 @@
     p_or_t_vals = '0'
     fluxes = '0'
     variable = disp_x
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature  # needed because of the PorousFlowPolyLineSink
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
     displacements = disp_x
-  [../]
-  [./porosity_at_nodes]
+  []
+  [porosity_at_nodes]
     type = PorousFlowPorosity
     mechanical = true # to ensure coupling with volumetric strain
     at_nodes = true  # to ensure evaluation at nodes
     porosity_zero = 0
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -13,15 +13,15 @@
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 2E6
-  [../]
-  [./massfrac0]
+  []
+  [massfrac0]
     initial_condition = 0.1
-  [../]
-  [./massfrac1]
+  []
+  [massfrac1]
     initial_condition = 0.3
-  [../]
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -33,42 +33,42 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     value = 3E6
     variable = pp
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,84 +79,84 @@
 []
 
 [Postprocessors]
-  [./p000]
+  [p000]
     type = PointValue
     variable = pp
     point = '0 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p010]
+  []
+  [p010]
     type = PointValue
     variable = pp
     point = '10 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p020]
+  []
+  [p020]
     type = PointValue
     variable = pp
     point = '20 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p030]
+  []
+  [p030]
     type = PointValue
     variable = pp
     point = '30 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p040]
+  []
+  [p040]
     type = PointValue
     variable = pp
     point = '40 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p050]
+  []
+  [p050]
     type = PointValue
     variable = pp
     point = '50 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p060]
+  []
+  [p060]
     type = PointValue
     variable = pp
     point = '60 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p070]
+  []
+  [p070]
     type = PointValue
     variable = pp
     point = '70 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p080]
+  []
+  [p080]
     type = PointValue
     variable = pp
     point = '80 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p090]
+  []
+  [p090]
     type = PointValue
     variable = pp
     point = '90 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p100]
+  []
+  [p100]
     type = PointValue
     variable = pp
     point = '100 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./mf_0_010]
+  []
+  [mf_0_010]
     type = PointValue
     variable = massfrac0
     point = '10 0 0'
     execute_on = 'timestep_end'
-  [../]
-  [./mf_1_010]
+  []
+  [mf_1_010]
     type = PointValue
     variable = massfrac1
     point = '10 0 0'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

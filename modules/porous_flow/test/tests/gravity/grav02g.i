@@ -15,201 +15,201 @@
 []
 
 [Variables]
-  [./ppwater]
+  [ppwater]
     initial_condition = 1.5e6
-  [../]
-  [./sgas]
+  []
+  [sgas]
     initial_condition = 0.3
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./massfrac_ph0_sp0]
+  [massfrac_ph0_sp0]
     initial_condition = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     initial_condition = 0
-  [../]
-  [./ppgas]
+  []
+  [ppgas]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./swater]
+  []
+  [swater]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./relpermwater]
+  []
+  [relpermwater]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./relpermgas]
+  []
+  [relpermgas]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = ppwater
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = ppwater
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = sgas
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     fluid_component = 1
     variable = sgas
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./ppgas]
+  [ppgas]
     type = PorousFlowPropertyAux
     property = pressure
     phase = 1
     variable = ppgas
-  [../]
-  [./swater]
+  []
+  [swater]
     type = PorousFlowPropertyAux
     property = saturation
     phase = 0
     variable = swater
-  [../]
-  [./relpermwater]
+  []
+  [relpermwater]
     type = MaterialStdVectorAux
     property = PorousFlow_relative_permeability_qp
     index = 0
     variable = relpermwater
-  [../]
-  [./relpermgas]
+  []
+  [relpermgas]
     type = PorousFlowPropertyAux
     property = relperm
     phase = 1
     variable = relpermgas
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater sgas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureBC
     lambda = 2
     pe = 1e4
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       viscosity = 1e-3
       thermal_expansion = 0
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 10
       viscosity = 1e-5
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-11 0 0 0 1e-11 0  0 0 1e-11'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityBC
     lambda = 2
     phase = 0
     s_res = 0.25
     sum_s_res = 0.35
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityBC
     lambda = 2
     phase = 1
     s_res = 0.1
     sum_s_res = 0.35
     nw_phase = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mass_ph0]
+  [mass_ph0]
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_ph1]
+  []
+  [mass_ph1]
     type = PorousFlowFluidMass
     fluid_component = 1
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_stol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-13 15'
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
   end_time = 1e5
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 5e3
-  [../]
+  []
 []
 
 [Outputs]

@@ -17,117 +17,117 @@
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = RandomIC
       min = 0
       max = 1
-    [../]
-  [../]
-  [./frac]
-    [./InitialCondition]
+    []
+  []
+  [frac]
+    [InitialCondition]
       type = RandomIC
       min = 0
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./flux1]
+  [flux1]
     type = PorousFlowFullySaturatedAdvectiveFlux
     variable = pp
     fluid_component = 1
     gravity = '-1 0 0'
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowFullySaturatedAdvectiveFlux
     variable = frac
     fluid_component = 0
     gravity = '-1 0 0'
-  [../]
+  []
 []
 
 [Functions]
-  [./ana_pp]
+  [ana_pp]
     type = ParsedFunction
     vars = 'g B p0 rho0'
     vals = '1 1.2 0 1'
     value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
-  [../]
+  []
 []
 
 [BCs]
-  [./z]
+  [z]
     type = DirichletBC
     variable = pp
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp frac'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.2
       density0 = 1
       viscosity = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = frac
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp_base]
+  [pp_base]
     type = PointValue
     variable = pp
     point = '-1 0 0'
-  [../]
-  [./pp_analytical]
+  []
+  [pp_analytical]
     type = FunctionValuePostprocessor
     function = ana_pp
     point = '-1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

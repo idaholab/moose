@@ -16,25 +16,25 @@
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = RandomIC
       min = -1
       max = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0.0
       bulk_modulus = 2.0
       viscosity = 1.0
       density0 = 1.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -50,48 +50,48 @@
 []
 
 [Functions]
-  [./ana_pp]
+  [ana_pp]
     type = ParsedFunction
     vars = 'g B p0 rho0'
     vals = '1 2 -1 1'
     value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
-  [../]
+  []
 []
 
 [BCs]
-  [./z]
+  [z]
     type = DirichletBC
     variable = pp
     boundary = right
     value = -1
-  [../]
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp_base]
+  [pp_base]
     type = PointValue
     variable = pp
     point = '-1 0 0'
-  [../]
-  [./pp_analytical]
+  []
+  [pp_analytical]
     type = FunctionValuePostprocessor
     function = ana_pp
     point = '-1 0 0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -103,7 +103,7 @@
   execute_on = 'timestep_end'
   file_base = grav01c_action
   exodus = true
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

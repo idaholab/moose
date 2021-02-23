@@ -18,142 +18,142 @@
 []
 
 [Variables]
-  [./sgas]
-  [../]
-  [./massfrac0]
-  [../]
+  [sgas]
+  []
+  [massfrac0]
+  []
 []
 
 [AuxVariables]
-  [./massfrac1]
-  [../]
+  [massfrac1]
+  []
 []
 
 [ICs]
-  [./sgas]
+  [sgas]
     type = RandomIC
     variable = sgas
     max = 1
     min = 0
-  [../]
-  [./massfrac0]
+  []
+  [massfrac0]
     type = RandomIC
     variable = massfrac0
     min = 0
     max = 1
-  [../]
-  [./massfrac1]
+  []
+  [massfrac1]
     type = RandomIC
     variable = massfrac1
     min = 0
     max = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff0]
+  [diff0]
     type = PorousFlowDispersiveFlux
     fluid_component = 0
     variable = sgas
     gravity = '1 0 0'
     disp_long = '0 0'
     disp_trans = '0 0'
-  [../]
-  [./diff1]
+  []
+  [diff1]
     type = PorousFlowDispersiveFlux
     fluid_component = 1
     variable = massfrac0
     gravity = '1 0 0'
     disp_long = '0 0'
     disp_trans = '0 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'sgas massfrac0'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
     pc = 0
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 1e7
       density0 = 10
       thermal_expansion = 0
       viscosity = 1
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 1e7
       density0 = 1
       thermal_expansion = 0
       viscosity = 0.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temp]
+  [temp]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = 1
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac0 massfrac1'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./poro]
+  []
+  [poro]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./diff]
+  []
+  [diff]
     type = PorousFlowDiffusivityConst
      diffusion_coeff = '1e-2 1e-1 1e-2 1e-1'
      tortuosity = '0.1 0.2'
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
-  [../]
-  [./relperm0]
+  []
+  [relperm0]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./relperm1]
+  []
+  [relperm1]
     type = PorousFlowRelativePermeabilityConst
     phase = 1
-  [../]
+  []
 []
 
 [Preconditioning]
   active = smp
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

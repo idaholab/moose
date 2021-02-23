@@ -13,104 +13,104 @@
 []
 
 [Variables]
-  [./ppwater]
-  [../]
-  [./sgas]
-  [../]
+  [ppwater]
+  []
+  [sgas]
+  []
 []
 
 [AuxVariables]
-  [./massfrac_ph0_sp0]
-  [../]
-  [./massfrac_ph1_sp0]
-  [../]
+  [massfrac_ph0_sp0]
+  []
+  [massfrac_ph1_sp0]
+  []
 []
 
 [ICs]
-  [./ppwater]
+  [ppwater]
     type = RandomIC
     variable = ppwater
     min = 0
     max = 1
-  [../]
-  [./sgas]
+  []
+  [sgas]
     type = RandomIC
     variable = sgas
     min = 0
     max = 1
-  [../]
-  [./massfrac_ph0_sp0]
+  []
+  [massfrac_ph0_sp0]
     type = RandomIC
     variable = massfrac_ph0_sp0
     min = 0
     max = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     type = RandomIC
     variable = massfrac_ph1_sp0
     min = 0
     max = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./grad0]
+  [grad0]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     component = 0
     variable = ppwater
-  [../]
-  [./grad1]
+  []
+  [grad1]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     component = 1
     variable = sgas
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater sgas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
     pc_max = 10
     sat_lr = 0.01
-  [../]
+  []
 []
 
 [Materials]
-  [./ppss]
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./p_eff]
+  []
+  [p_eff]
     type = PorousFlowEffectiveFluidPressure
-  [../]
+  []
 []
 
 [Preconditioning]
   active = check
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
-  [./check]
+  []
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

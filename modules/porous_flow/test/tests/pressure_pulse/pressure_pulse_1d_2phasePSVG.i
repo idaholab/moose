@@ -14,161 +14,161 @@
 []
 
 [Variables]
-  [./ppwater]
+  [ppwater]
     initial_condition = 2e6
-  [../]
-  [./sgas]
+  []
+  [sgas]
     initial_condition = 0.3
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./massfrac_ph0_sp0]
+  [massfrac_ph0_sp0]
     initial_condition = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     initial_condition = 0
-  [../]
-  [./ppgas]
+  []
+  [ppgas]
     family = MONOMIAL
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = ppwater
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     variable = ppwater
     fluid_component = 0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = sgas
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     variable = sgas
     fluid_component = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./ppgas]
+  [ppgas]
     type = PorousFlowPropertyAux
     property = pressure
     phase = 1
     variable = ppgas
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater sgas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1e-4
     sat_lr = 0.3
     pc_max = 1e6
     log_extension = false
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 2e7
       density0 = 1
       thermal_expansion = 0
       viscosity = 1e-5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-15 0 0 0 1e-15 0 0 0 1e-15'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 1
     phase = 0
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 1
     phase = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./leftwater]
+  [leftwater]
     type = DirichletBC
     boundary = left
     value = 3e6
     variable = ppwater
-  [../]
-  [./rightwater]
+  []
+  [rightwater]
     type = DirichletBC
     boundary = right
     value = 2e6
     variable = ppwater
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-20 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -179,21 +179,21 @@
 []
 
 [VectorPostprocessors]
-  [./pp]
+  [pp]
     type = LineValueSampler
     sort_by = x
     variable = 'ppwater ppgas'
     start_point = '0 0 0'
     end_point = '100 0 0'
     num_points = 11
-  [../]
+  []
 []
 
 [Outputs]
   file_base = pressure_pulse_1d_2phasePSVG
   print_linear_residuals = false
-  [./csv]
+  [csv]
     type = CSV
     execute_on = final
-  [../]
+  []
 []

@@ -10,77 +10,77 @@
 []
 
 [Variables]
-  [./ppwater]
-  [../]
-  [./ppgas]
-  [../]
-  [./temp]
-  [../]
+  [ppwater]
+  []
+  [ppgas]
+  []
+  [temp]
+  []
 []
 
 [Kernels]
-  [./dummy1]
+  [dummy1]
     type = Diffusion
     variable = ppwater
-  [../]
-  [./dummy2]
+  []
+  [dummy2]
     type = Diffusion
     variable = ppgas
-  [../]
-  [./advection]
+  []
+  [advection]
     type = PorousFlowFullySaturatedUpwindHeatAdvection
     variable = temp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater ppgas temp'
     number_fluid_phases = 2
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.1 0 0 0 2 0 0 0 3'
-  [../]
+  []
 []
 
 [Executioner]

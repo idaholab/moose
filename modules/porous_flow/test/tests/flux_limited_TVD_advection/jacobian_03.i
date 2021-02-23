@@ -24,43 +24,43 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [ICs]
-  [./u]
+  [u]
     type = FunctionIC
     variable = u
     function = 'x'
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux]
+  [flux]
     type = FluxLimitedTVDAdvection
     variable = u
     advective_flux_calculator = fluo
-  [../]
+  []
 []
 
 [UserObjects]
-  [./fluo]
+  [fluo]
     type = AdvectiveFluxCalculatorConstantVelocity
     flux_limiter_type = vanleer
     u = u
     velocity = '1 -2 1.5'
-  [../]
+  []
 []
 
 
 [Preconditioning]
   active = smp
-  [./smp]
+  [smp]
     type = SMP
     full = true
     petsc_options = '-snes_check_jacobian'
-  [../]
+  []
 []
 
 [Executioner]

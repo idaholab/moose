@@ -55,298 +55,298 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'porepressure disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./confinex]
+  [confinex]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./confiney]
+  []
+  [confiney]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top'
-  [../]
-  [./confinez]
+  []
+  [confinez]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'back'
-  [../]
+  []
 []
 
 [Kernels]
-  [./grad_stress_x]
+  [grad_stress_x]
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
-  [../]
-  [./grad_stress_y]
+  []
+  [grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
-  [../]
-  [./grad_stress_z]
+  []
+  [grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
-  [../]
-  [./poro_x]
+  []
+  [poro_x]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     variable = disp_x
     component = 0
-  [../]
-  [./poro_y]
+  []
+  [poro_y]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     variable = disp_y
     component = 1
-  [../]
-  [./poro_z]
+  []
+  [poro_z]
     type = PorousFlowEffectiveStressCoupling
     biot_coefficient = 0.3
     component = 2
     variable = disp_z
-  [../]
-  [./mass0]
+  []
+  [mass0]
     type = PorousFlowFullySaturatedMassTimeDerivative
     variable = porepressure
     multiply_by_density = false
     coupling_type = HydroMechanical
     biot_coefficient = 0.3
-  [../]
-  [./source]
+  []
+  [source]
     type = BodyForce
     function = 0.1
     variable = porepressure
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xz
     index_i = 0
     index_j = 2
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yz
     index_i = 1
     index_j = 2
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 3.3333333333
       density0 = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature_qp]
+  [temperature_qp]
     type = PorousFlowTemperature
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
     # bulk modulus is lambda + 2*mu/3 = 1 + 2*1.5/3 = 2
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
+  []
+  [vol_strain]
     type = PorousFlowVolumetricStrain
     consistent_with_displaced_mesh = false
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = porepressure
-  [../]
-  [./simple_fluid_qp]
+  []
+  [simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst # the "const" is irrelevant here: all that uses Porosity is the BiotModulus, which just uses the initial value of porosity
     porosity = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     biot_coefficient = 0.3
     fluid_bulk_modulus = 3.3333333333
     solid_bulk_compliance = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = porepressure
-  [../]
-  [./zdisp]
+  []
+  [zdisp]
     type = PointValue
     outputs = csv
     point = '0 0 0.5'
     variable = disp_z
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./stress_xx_over_strain]
+  []
+  [stress_xx_over_strain]
     type = FunctionValuePostprocessor
     function = stress_xx_over_strain_fcn
     outputs = csv
-  [../]
-  [./stress_zz_over_strain]
+  []
+  [stress_zz_over_strain]
     type = FunctionValuePostprocessor
     function = stress_zz_over_strain_fcn
     outputs = csv
-  [../]
-  [./p_over_strain]
+  []
+  [p_over_strain]
     type = FunctionValuePostprocessor
     function = p_over_strain_fcn
     outputs = csv
-  [../]
+  []
 []
 
 [Functions]
-  [./stress_xx_over_strain_fcn]
+  [stress_xx_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'stress_xx zdisp'
-  [../]
-  [./stress_zz_over_strain_fcn]
+  []
+  [stress_zz_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'stress_zz zdisp'
-  [../]
-  [./p_over_strain_fcn]
+  []
+  [p_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     vars = 'a b'
     vals = 'p0 zdisp'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]
@@ -360,7 +360,7 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = pp_generation_unconfined_fully_saturated_volume
-  [./csv]
+  [csv]
     type = CSV
-  [../]
+  []
 []

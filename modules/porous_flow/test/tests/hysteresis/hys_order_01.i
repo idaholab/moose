@@ -4,10 +4,10 @@
 # Then, water is removed from the system (so order = 2)
 # More water is removed from the system so that the saturation < S0 (so order = 0)
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -15,9 +15,9 @@
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -26,117 +26,117 @@
 []
 
 [DiracKernels]
-  [./source_sink_0]
+  [source_sink_0]
     type = PorousFlowPointSourceFromPostprocessor
     point = '0 0 0'
     mass_flux = sink_strength
     variable = pp
-  [../]
-  [./source_sink_1]
+  []
+  [source_sink_1]
     type = PorousFlowPointSourceFromPostprocessor
     point = '1 0 0'
     mass_flux = sink_strength
     variable = pp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 1.0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0 0 0   0 0 0   0 0 0'
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PorousFlowHysteresisOrder
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./hys_order]
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./tp0]
+  []
+  [tp0]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./tp1]
+  []
+  [tp1]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
-  [./tp0]
+  []
+  [tp0]
     type = PorousFlowPropertyAux
     variable = tp0
     property = hysteresis_saturation_turning_point
     hysteresis_turning_point = 0
-  [../]
-  [./tp1]
+  []
+  [tp1]
     type = PorousFlowPropertyAux
     variable = tp1
     property = hysteresis_saturation_turning_point
     hysteresis_turning_point = 1
-  [../]
+  []
 []
 
 [Functions]
-  [./sink_strength_fcn]
+  [sink_strength_fcn]
     type = ParsedFunction
     value = '30 * if(t <= 4, -1, if(t <= 7, 1, -1))'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sink_strength]
+  [sink_strength]
     type = FunctionValuePostprocessor
     function = sink_strength_fcn
     outputs = 'none'
-  [../]
-  [./saturation]
+  []
+  [saturation]
     type = PointValue
     point = '0 0 0'
     variable = saturation0
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PointValue
     point = '0 0 0'
     variable = hys_order
-  [../]
-  [./tp0]
+  []
+  [tp0]
     type = PointValue
     point = '0 0 0'
     variable = tp0
-  [../]
-  [./tp1]
+  []
+  [tp1]
     type = PointValue
     point = '0 0 0'
     variable = tp1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./basic]
+  [basic]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -148,9 +148,9 @@
 []
 
 [Outputs]
-  [./csv]
+  [csv]
     type = CSV
     sync_times = '0 1 5 6 7 8 9 10 11 13' # cut out t=12 because numerical roundoff might mean order is not reduced exactly at t=12
     sync_only = true
-  [../]
+  []
 []

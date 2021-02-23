@@ -59,16 +59,16 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0.5
       cv = 2
       cp = 2
       bulk_modulus = 2.0
       density0 = 3.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -93,91 +93,91 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./pp]
-  [../]
-  [./temp]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [pp]
+  []
+  [temp]
+  []
 []
 
 [BCs]
-  [./confinex]
+  [confinex]
     type = DirichletBC
     variable = disp_x
     value = 0
     boundary = 'left right'
-  [../]
-  [./confiney]
+  []
+  [confiney]
     type = DirichletBC
     variable = disp_y
     value = 0
     boundary = 'bottom top'
-  [../]
-  [./confinez]
+  []
+  [confinez]
     type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'back front'
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_source]
+  [heat_source]
     type = BodyForce
     function = 1
     variable = temp
-  [../]
+  []
 []
 
 [Functions]
-  [./err_T_fcn]
+  [err_T_fcn]
     type = ParsedFunction
     vars = 'por0 rte temp rd rhc m0 fhc source'
     vals = '0.5 0.25 t0   5  0.2 1.5 2  1'
     value = '((1-por0)*exp(rte*temp)*rd*rhc*temp+m0*fhc*temp-source*t)/(source*t)'
-  [../]
-  [./err_pp_fcn]
+  []
+  [err_pp_fcn]
     type = ParsedFunction
     vars = 'por0 rte temp rd rhc m0 fhc source bulk pp fte'
     vals = '0.5 0.25 t0   5  0.2 1.5 2  1      2    p0 0.5'
     value = '(bulk*(fte*temp-log(1+(por0-1)*exp(rte*temp))+log(por0))-pp)/pp'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
+  [porosity]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
     # bulk modulus is lambda + 2*mu/3 = 1 + 2*1.5/3 = 2
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     thermal = true
     fluid = true
@@ -187,93 +187,93 @@
     porosity_zero = 0.5
     thermal_expansion_coeff = 0.25
     solid_bulk = 2
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 0.2
     density = 5.0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0 0 0 0 0 0 0 0 0'
-  [../]
-  [./thermal_conductivity]
+  []
+  [thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p0]
+  [p0]
     type = PointValue
     outputs = 'console csv'
     execute_on = 'timestep_end'
     point = '0 0 0'
     variable = pp
-  [../]
-  [./t0]
+  []
+  [t0]
     type = PointValue
     outputs = 'console csv'
     execute_on = 'timestep_end'
     point = '0 0 0'
     variable = temp
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PointValue
     outputs = 'console csv'
     execute_on = 'timestep_end'
     point = '0 0 0'
     variable = porosity
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_xx
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_yy
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = PointValue
     outputs = csv
     point = '0 0 0'
     variable = stress_zz
-  [../]
-  [./fluid_mass]
+  []
+  [fluid_mass]
     type = PorousFlowFluidMass
     fluid_component = 0
     execute_on = 'timestep_end'
     use_displaced_mesh = true
     outputs = 'console csv'
-  [../]
-  [./total_heat]
+  []
+  [total_heat]
     type = PorousFlowHeatEnergy
     phase = 0
     execute_on = 'timestep_end'
     use_displaced_mesh = true
     outputs = 'console csv'
-  [../]
-  [./err_T]
+  []
+  [err_T]
     type = FunctionValuePostprocessor
     function = err_T_fcn
-  [../]
-  [./err_P]
+  []
+  [err_P]
     type = FunctionValuePostprocessor
     function = err_pp_fcn
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-12 10000'
-  [../]
+  []
 []
 
 [Executioner]

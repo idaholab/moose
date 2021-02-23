@@ -1,13 +1,13 @@
 # 1-phase hysteresis.  Saturation calculation.  Primary drying curve with low_extension_type = exponential
 # When comparing the results with a by-hand computation, remember the MOOSE results are averaged over an element
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0
     xmax = 10
     nx = 100
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -15,48 +15,48 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = pp
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     function = '1 - 2 * x'
-  [../]
+  []
 []
 
 [BCs]
-  [./pp]
+  [pp]
     type = FunctionDirichletBC
     variable = pp
     function = '1 - 2 * x'
     boundary = 'left right'
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = pp
-  [../]
+  []
 []
 
 [Materials]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./saturation_calculator]
+  []
+  [saturation_calculator]
     type = PorousFlow1PhaseHysP
     alpha_d = 10.0
     alpha_w = 10.0
@@ -68,43 +68,43 @@
     Pc_max = 7.0
     low_extension_type = exponential
     porepressure = pp
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./hys_order]
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./saturation]
+  []
+  [saturation]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
-  [./saturation]
+  []
+  [saturation]
     type = PorousFlowPropertyAux
     variable = saturation
     property = saturation
     phase = 0
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./sat]
+  [sat]
     type = LineValueSampler
     start_point = '0.5 0 0'
     end_point = '9.5 0 0'
     num_points = 10
     sort_by = x
     variable = 'saturation pp'
-  [../]
+  []
 []
 
 [Executioner]

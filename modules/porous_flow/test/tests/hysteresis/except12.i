@@ -1,9 +1,9 @@
 # Exception testing: S_lr too small
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -11,31 +11,31 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = pp
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = pp
-  [../]
+  []
 []
 
 [Materials]
-  [./hys_order]
+  [hys_order]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./saturation_calculator]
+  []
+  [saturation_calculator]
     type = PorousFlow1PhaseHysP
     alpha_d = 10.0
     alpha_w = 10.0
@@ -46,7 +46,7 @@
     S_gr_max = 0.3
     Pc_max = 3.0
     porepressure = pp
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,57 +15,57 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pressure temp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.8
     alpha = 1e-5
-  [../]
+  []
 []
 
 [Variables]
-  [./pressure]
-  [../]
-  [./temp]
-  [../]
+  [pressure]
+  []
+  [temp]
+  []
 []
 
 [ICs]
   # have to start these reasonably close to their steady-state values
-  [./pressure]
+  [pressure]
     type = FunctionIC
     variable = pressure
     function = '(2-x/100)*1E6'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = FunctionIC
     variable = temp
     function = 100+0.1*x
-  [../]
+  []
 []
 
 [Kernels]
-  [./flux]
+  [flux]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     gravity = '0 0 0'
     variable = pressure
-  [../]
-  [./heat_advection]
+  []
+  [heat_advection]
     type = PorousFlowHeatAdvection
     gravity = '0 0 0'
     variable = temp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1e6
       density0 = 1000
@@ -73,53 +73,53 @@
       viscosity = 1e-3
       cv = 1e6
       porepressure_coefficient = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pressure
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey # irrelevant in this fully-saturated situation
     n = 2
     phase = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./leftp]
+  [leftp]
     type = DirichletBC
     variable = pressure
     boundary = left
     value = 2E6
-  [../]
-  [./leftt]
+  []
+  [leftt]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 100
-  [../]
-  [./newtonp]
+  []
+  [newtonp]
     type = PorousFlowPiecewiseLinearSink
     variable = pressure
     boundary = right
@@ -129,8 +129,8 @@
     use_relperm = false
     fluid_phase = 0
     flux_function = 1
-  [../]
-  [./newton]
+  []
+  [newton]
     type = PorousFlowPiecewiseLinearSink
     variable = temp
     boundary = right
@@ -141,11 +141,11 @@
     use_internal_energy = true
     fluid_phase = 0
     flux_function = 1
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./porepressure]
+  [porepressure]
     type = LineValueSampler
     variable = pressure
     start_point = '0 0.5 0'
@@ -153,8 +153,8 @@
     sort_by = x
     num_points = 11
     execute_on = timestep_end
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = LineValueSampler
     variable = temp
     start_point = '0 0.5 0'
@@ -162,17 +162,17 @@
     sort_by = x
     num_points = 11
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_max_it -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol '
     petsc_options_value = 'gmres asm lu 100 NONZERO 2 1E-8 1E-15'
-  [../]
+  []
 []
 
 [Executioner]
@@ -184,8 +184,8 @@
   file_base = nc06
   execute_on = timestep_end
   exodus = true
-  [./along_line]
+  [along_line]
     type = CSV
     execute_vector_postprocessors_on = timestep_end
-  [../]
+  []
 []
