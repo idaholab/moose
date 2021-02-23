@@ -111,6 +111,7 @@
   biot_coefficient = 0.3
   gravity = '0 0 0'
   fp = the_simple_fluid
+  save_component_rate_in = nodal_m3_per_s
 []
 
 
@@ -147,7 +148,18 @@
   [../]
 []
 
+[AuxVariables]
+  [./nodal_m3_per_s]
+  [../]
+[]
+
 [Postprocessors]
+  [./nodal_m3_per_s]
+    type = PointValue
+    outputs = csv
+    point = '0 0 0'
+    variable = nodal_m3_per_s
+  [../]
   [./p0]
     type = PointValue
     outputs = csv

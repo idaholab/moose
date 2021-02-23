@@ -80,7 +80,10 @@ protected:
   /// Flux limiter type in the Kuzmin-Turek FEM-TVD stabilization scheme
   const MooseEnum _flux_limiter_type;
 
-  const enum class StabilizationEnum { Full, KT } _stabilization;
+  const enum class StabilizationEnum { None, Full, KT } _stabilization;
+
+  /// Evaluate strain at the nearest quadpoint for porosity that depends on strain
+  const bool _strain_at_nearest_qp;
 
   /// Coordinate system of the simulation (eg RZ, XYZ, etc)
   Moose::CoordinateSystemType _coord_system;
@@ -155,6 +158,11 @@ protected:
   void addEffectiveFluidPressureMaterial(bool at_nodes);
 
   /**
+   * Adds a PorousFlowNearestQp material
+   */
+  void addNearestQpMaterial();
+
+  /**
    * Adds a quadpoint volumetric strain material
    * @param displacements the names of the displacement variables
    * @param consistent_with_displaced_mesh The volumetric strain should be consistent with the
@@ -171,13 +179,19 @@ protected:
    * @param compute_internal_energy compute the fluid internal energy
    * @param compute_enthalpy compute the fluid enthalpy
    * @param at_nodes add a nodal material
+   * @param temperature_unit the unit of temperature (Kelvin or Celsius)
+   * @param pressure_unit the unit of pressure (MPa or Pa)
+   * @param time_unit the unit of time (seconds, days, hours, etc)
    */
   void addSingleComponentFluidMaterial(bool at_nodes,
                                        unsigned phase,
                                        bool compute_density_and_viscosity,
                                        bool compute_internal_energy,
                                        bool compute_enthalpy,
-                                       const UserObjectName & fp);
+                                       const UserObjectName & fp,
+                                       const MooseEnum & temperature_unit,
+                                       const MooseEnum & pressure_unit,
+                                       const MooseEnum & time_unit);
 
   /**
    * Adds a brine fluid Material
@@ -187,13 +201,15 @@ protected:
    * @param compute_internal_energy compute the fluid internal energy
    * @param compute_enthalpy compute the fluid enthalpy
    * @param at_nodes add a nodal material
+   * @param temperature_unit the unit of temperature (Kelvin or Celsius)
    */
   void addBrineMaterial(const VariableName xnacl,
                         bool at_nodes,
                         unsigned phase,
                         bool compute_density_and_viscosity,
                         bool compute_internal_energy,
-                        bool compute_enthalpy);
+                        bool compute_enthalpy,
+                        const MooseEnum & temperature_unit);
 
   /**
    * Adds a relative-permeability Material of the Corey variety

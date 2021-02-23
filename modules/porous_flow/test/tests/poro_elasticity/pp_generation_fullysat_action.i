@@ -10,7 +10,7 @@
 # Expect:
 # fluid_mass = mass0 + s*t
 # stress = 0 (remember this is effective stress)
-# Porepressure = fluid_bulk*log(fluid_mass_density/density_P0), where fluid_mass_density = fluid_mass*porosity
+# Porepressure = fluid_bulk*log(fluid_mass_density/density_P0), where fluid_mass_density = fluid_mass/porosity
 # porosity = biot+(phi0-biot)*exp(pp(biot-1)/solid_bulk)
 #
 # Parameters:
@@ -69,6 +69,8 @@
   biot_coefficient = 0.3
   gravity = '0 0 0'
   fp = the_simple_fluid
+  stabilization = none # not needed: there is no flow
+  save_component_rate_in = nodal_kg_per_s
 []
 
 [BCs]
@@ -102,6 +104,8 @@
 []
 
 [AuxVariables]
+  [./nodal_kg_per_s]
+  [../]
   [./porosity]
     order = CONSTANT
     family = MONOMIAL
@@ -153,6 +157,12 @@
 []
 
 [Postprocessors]
+  [./nodal_kg_per_s]
+    type = PointValue
+    point = ' 0 0 0'
+    variable = nodal_kg_per_s
+    outputs = csv
+  [../]
   [./fluid_mass]
     type = PorousFlowFluidMass
     fluid_component = 0

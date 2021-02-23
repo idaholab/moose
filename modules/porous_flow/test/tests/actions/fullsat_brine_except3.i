@@ -1,5 +1,5 @@
 # Check error when using PorousFlowFullySaturated action,
-# not setting fp.
+# attempting to use both brine and single-component fluids
 
 [Mesh]
   type = GeneratedMesh
@@ -17,7 +17,19 @@
   coupling_type = ThermoHydro
   porepressure = pp
   temperature = temp
+  mass_fraction_vars = "nacl"
+  fluid_properties_type = PorousFlowSingleComponentFluid
+  nacl_name = nacl
+  fp = simple_fluid
   dictator_name = dictator
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+    [../]
+  [../]
 []
 
 [Variables]
@@ -26,6 +38,9 @@
   [../]
   [./temp]
     initial_condition = 323.15
+  [../]
+  [./nacl]
+    initial_condition = 0.1047
   [../]
 []
 
@@ -45,6 +60,12 @@
     variable = pp
     boundary = 'left right'
     value = 20E6
+  [../]
+  [./nacl_bdy]
+    type = DirichletBC
+    variable = nacl
+    boundary = 'left right'
+    value = 0.1047
   [../]
 []
 
@@ -91,5 +112,5 @@
 []
 
 [Outputs]
-  file_base = fullsat_brine_except3
+  file_base = fullsat_brine_except2
 []

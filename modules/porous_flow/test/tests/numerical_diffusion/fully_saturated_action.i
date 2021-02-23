@@ -37,6 +37,7 @@
   gravity = '0 0 0'
   fp = the_simple_fluid
   mass_fraction_vars = tracer
+  stabilization = none
 []
 
 [BCs]
@@ -81,6 +82,7 @@
     [./the_simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E9
+      thermal_expansion = 0
       viscosity = 1.0
       density0 = 1000.0
     [../]

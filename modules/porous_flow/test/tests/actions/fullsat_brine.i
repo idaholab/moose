@@ -27,9 +27,10 @@
   porepressure = pp
   temperature = temp
   mass_fraction_vars = "nacl"
-  use_brine = true
-  nacl_index = 0
+  fluid_properties_type = PorousFlowBrine
+  nacl_name = nacl
   dictator_name = dictator
+  stabilization = none
 []
 
 [Variables]

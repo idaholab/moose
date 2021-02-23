@@ -16,7 +16,9 @@
  * Kernel = (mass_component - mass_component_old)/dt
  * where mass_component =
  * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
- * It is lumped to the nodes
+ * It is lumped to the nodes.
+ * If multiply_by_density = false, then density_phase is not included in this above sum, so the
+ * Kernel is calculating the time-derivative of fluid volume
  */
 class PorousFlowMassTimeDerivative : public TimeKernel
 {
@@ -45,6 +47,9 @@ protected:
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
+  /// Whether to multiply by density: if true then this Kernel is computing the time-derivative of fluid mass, while if false it is the time-derivative of fluid volume
+  const bool _multiply_by_density;
+
   /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
   const MaterialProperty<Real> & _porosity;
 
@@ -61,13 +66,13 @@ protected:
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// Nodal fluid density
-  const MaterialProperty<std::vector<Real>> & _fluid_density;
+  const MaterialProperty<std::vector<Real>> * const _fluid_density;
 
   /// Old value of nodal fluid density
-  const MaterialProperty<std::vector<Real>> & _fluid_density_old;
+  const MaterialProperty<std::vector<Real>> * const _fluid_density_old;
 
   /// d(nodal fluid density)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
   /// Nodal fluid saturation
   const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal;

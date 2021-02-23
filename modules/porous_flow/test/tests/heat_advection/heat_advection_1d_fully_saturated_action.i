@@ -1,6 +1,8 @@
 # 1phase, heat advecting with a moving fluid
-# Using the PorousFlowFullySaturated Action with KT stabilization
-# This should produce an identical result to heat_advection_1D_KT
+# Using the PorousFlowFullySaturated Action with various stabilization options
+# With stabilization=none, this should produce an identical result to heat_advection_1d_fully_saturated.i
+# With stabilization=Full, this should produce an identical result to heat_advection_1d.i and heat_advection_1d_fullsat.i
+# With stabilization=KT, this should produce an identical result to heat_advection_1D_KT.i
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -63,7 +65,7 @@
   coupling_type = ThermoHydro
   fp = simple_fluid
   add_darcy_aux = false
-  stabilization = KT
+  stabilization = none
   flux_limiter_type = superbee
 []
 

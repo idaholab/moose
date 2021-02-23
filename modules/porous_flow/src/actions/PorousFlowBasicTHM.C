@@ -35,7 +35,8 @@ PorousFlowBasicTHM::validParams()
                         "must be taken when using other PorousFlow objects.");
   params.addClassDescription("Adds Kernels and fluid-property Materials necessary to simulate a "
                              "single-phase, single-component fully-saturated flow problem.  No "
-                             "upwinding and no mass lumping of the fluid mass are used.  The "
+                             "upwinding and no mass lumping of the fluid mass are used (the "
+                             "stabilization input parameter is ignored).  The "
                              "fluid-mass time derivative is close to linear, and is perfectly "
                              "linear if multiply_by_density=false.  These features mean the "
                              "results may differ slightly from the "
@@ -95,6 +96,9 @@ PorousFlowBasicTHM::addKernels()
     params.set<Real>("biot_coefficient") = _biot_coefficient;
     params.set<bool>("multiply_by_density") = _multiply_by_density;
     params.set<MooseEnum>("coupling_type") = parameters().get<MooseEnum>("coupling_type");
+    if (_save_component_rate_in.size() != 0)
+      params.set<std::vector<AuxVariableName>>("save_in") = _save_component_rate_in;
+    params.set<NonlinearVariableName>("variable") = _pp_var;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 

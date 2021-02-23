@@ -58,6 +58,9 @@ RayTracingStudyTest::validParams()
   params.addParam<bool>("ray_set_end_with_direction",
                         false,
                         "Test setting a Ray's end point after setting its direction");
+  params.addParam<bool>("ray_set_distance_with_end",
+                        false,
+                        "Test setting a Ray's max distance after setting its end point");
   params.addParam<bool>("ray_set_end_with_distance",
                         false,
                         "Test setting a Ray's end point after setting its max distance");
@@ -72,6 +75,10 @@ RayTracingStudyTest::validParams()
   params.addParam<bool>("ray_set_distance_with_end",
                         false,
                         "Test setting a Ray's max distance after its end point has been set");
+
+  params.addParam<bool>("ray_error_if_tracing", false, "Tests Ray::errorIfTracing()");
+  params.addParam<bool>(
+      "ray_reset_counters", false, "Tests resetting a Ray's counters after it has began tracing");
 
   params.set<bool>("_use_ray_registration") = false;
 
@@ -114,7 +121,13 @@ RayTracingStudyTest::generateRays()
     ray->setStart(elem->centroid(), another_elem);
   }
   else
-    ray->setStart(elem->centroid());
+    ray->setStart(elem->centroid(), elem);
+
+  if (getParam<bool>("ray_set_end_with_distance"))
+  {
+    ray->setStartingMaxDistance(1);
+    ray->setStartingEndPoint(elem->point(0));
+  }
 
   if (!getParam<bool>("ray_at_end_without_set") && !getParam<bool>("ray_end_point_without_set") &&
       !getParam<bool>("ray_set_direction_again") && !getParam<bool>("ray_set_zero_direction") &&
@@ -122,7 +135,7 @@ RayTracingStudyTest::generateRays()
       !getParam<bool>("ray_set_end_fail_bbox"))
     ray->setStartingEndPoint(elem->point(0));
 
-  if (getParam<bool>("ray_set_end_with_distance"))
+  if (getParam<bool>("ray_set_distance_with_end"))
     ray->setStartingMaxDistance(1);
   if (getParam<bool>("ray_set_end_equal_start"))
     ray->setStartingEndPoint(ray->currentPoint());
@@ -193,4 +206,19 @@ RayTracingStudyTest::generateRays()
 
   if (getParam<bool>("ray_set_start_again"))
     ray->setStart(1.01 * elem->centroid());
+
+  if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
+    moveRayToBuffer(ray);
+}
+
+void
+RayTracingStudyTest::postExecuteStudy()
+{
+  if (getParam<bool>("ray_error_if_tracing"))
+    for (auto & ray : rayBank())
+      ray->clearStartingInfo();
+
+  if (getParam<bool>("ray_reset_counters"))
+    for (auto & ray : rayBank())
+      ray->resetCounters();
 }

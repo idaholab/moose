@@ -80,6 +80,7 @@
   biot_coefficient = 1.0
   gravity = '0 0 0'
   fp = the_simple_fluid
+  stabilization = none
 []
 
 [GlobalParams]

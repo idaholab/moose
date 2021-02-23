@@ -15,7 +15,7 @@ An animation of the tracer advection is shown in [tracer_advection_anim].  Notic
 
 !media porous_flow/tracer_advection.gif style=width:50%;margin-left:10px caption=Tracer advection down the porepressure gradient.  id=tracer_advection_anim
 
-Numerical diffusion has been mentioned in various pieces of PorousFlow documentation (eg, in the [tutorial_06.md] and [source/kernels/PorousFlowFullySaturatedDarcyFlow.md], and the documentation concerning the [sinks tests](porous_flow/tests/sinks/sinks_tests.md) and [heat advection test page](porous_flow/tests/heat_advection/heat_advection_tests.md).  There are two main sources of numerical diffusion:
+Numerical diffusion has been mentioned in various pieces of PorousFlow documentation (eg, in the [tutorial_06.md] and [source/kernels/PorousFlowFullySaturatedDarcyFlow.md], and the documentation concerning the [sinks tests](porous_flow/tests/sinks/sinks_tests.md) and [heat advection test page](porous_flow/tests/heat_advection/heat_advection_tests.md)).  There are two main sources of numerical diffusion:
 
 - employing large time steps with MOOSE's implicit time stepping scheme
 - the full upwinding used by PorousFlow
@@ -62,9 +62,20 @@ The MOOSE input file is:
 
 ## Mass lumping and full upwinding
 
-The MOOSE input file is:
+The MOOSE input file is identical to the one above, save for the `PorousFlowFullySaturated` block that must now contain `stabilization = Full`:
 
-!listing modules/porous_flow/test/tests/numerical_diffusion/no_action.i
+```
+[PorousFlowFullySaturated]
+  porepressure = porepressure
+  coupling_type = Hydro
+  gravity = '0 0 0'
+  fp = the_simple_fluid
+  mass_fraction_vars = tracer
+  stabilization = Full
+[]
+```
+
+(Also, the test suite contains a [non-action version](https://github.com/idaholab/moose/blob/master/modules/porous_flow/test/tests/numerical_diffusion/no_action.i)).
 
 [upwind_eles] and [upwind_dt] show the dependence on discretisation when full upwinding is used.
 
@@ -98,7 +109,21 @@ The MOOSE input file is almost identical to the RDG(P0) version, save for the ch
 
 ## Kuzmin-Turek scheme with no flux limiter
 
-The MOOSE input file is:
+To employ the Kuzmin-Turek scheme, the `fully_saturated_action.i` input file listed above may be simply modified by including KT stabilization:
+
+```
+[PorousFlowFullySaturated]
+  porepressure = porepressure
+  coupling_type = Hydro
+  gravity = '0 0 0'
+  fp = the_simple_fluid
+  mass_fraction_vars = tracer
+  stabilization = KT
+  flux_limiter_type = None
+[]
+```
+
+in the `PorousFlowFullySaturated` Action block.  Alternatively, a new input file may be built, such as:
 
 !listing modules/porous_flow/test/tests/numerical_diffusion/fltvd_no_antidiffusion.i
 
@@ -110,15 +135,29 @@ The MOOSE input file is:
 
 ## Kuzmin-Turek scheme with flux limiter
 
-The MOOSE input file is:
+To employ the Kuzmin-Turek scheme, the `fully_saturated_action.i` input file listed above may be simply modified by including KT stabilization:
+
+```
+[PorousFlowFullySaturated]
+  porepressure = porepressure
+  coupling_type = Hydro
+  gravity = '0 0 0'
+  fp = the_simple_fluid
+  mass_fraction_vars = tracer
+  stabilization = KT
+  flux_limiter_type = superbee
+[]
+```
+
+in the `PorousFlowFullySaturated` Action block.  Alternatively, a new input file may be built, such as:
 
 !listing modules/porous_flow/test/tests/numerical_diffusion/fltvd.i
 
 [KTlimited_eles] and [KTlimited_dt] show the dependence on discretisation when Kuzmin-Turek with a flux limiter is used (the "superbee" limiter has been chosen in this case, see the [worked example of Kuzmin-Turek stabilization](kt_worked.md)). As expected, the behaviour is similar to the RDG(POP1) case, except it is smooth because the variables are linear-lagrange.
 
-!media media/porous_flow/KTlimited_eles.png style=width:60%;margin-left:10px caption=Diffusion as a function of number of elements.  The number of time steps is fixed to 100 and Kuzmin-Turek with no flux limiter is used.  id=KTlimited_eles
+!media media/porous_flow/KTlimited_eles.png style=width:60%;margin-left:10px caption=Diffusion as a function of number of elements.  The number of time steps is fixed to 100 and Kuzmin-Turek with the superbee flux limiter.  id=KTlimited_eles
 
-!media media/porous_flow/KTlimited_dt.png style=width:60%;margin-left:10px caption=Diffusion as a function of number of time steps.  The number of elements is fixed to 100 and Kuzmin-Turek with no flux limiter is used.  id=KTlimited_dt
+!media media/porous_flow/KTlimited_dt.png style=width:60%;margin-left:10px caption=Diffusion as a function of number of time steps.  The number of elements is fixed to 100 and Kuzmin-Turek with the superbee flux limiter.  id=KTlimited_dt
 
 ## Summary
 

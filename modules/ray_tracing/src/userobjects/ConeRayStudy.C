@@ -56,15 +56,15 @@ ConeRayStudy::ConeRayStudy(const InputParameters & parameters)
   : RepeatableRayStudyBase(parameters),
     _start_points(getParam<std::vector<Point>>("start_points")),
     _directions(getParam<std::vector<Point>>("directions")),
-    _scaling_factors(parameters.isParamSetByUser("scaling_factors")
+    _scaling_factors(isParamValid("scaling_factors")
                          ? getParam<std::vector<Real>>("scaling_factors")
                          : std::vector<Real>(_start_points.size(), 1)), // default to 1
     _half_cone_angles(getParam<std::vector<Real>>("half_cone_angles")),
-    _polar_quad_orders(parameters.isParamSetByUser("polar_quad_orders")
+    _polar_quad_orders(isParamValid("polar_quad_orders")
                            ? getParam<std::vector<unsigned int>>("polar_quad_orders")
                            : std::vector<unsigned int>(_start_points.size(), 2)), // default to 2
     _azimuthal_quad_orders(
-        parameters.isParamSetByUser("azimuthal_quad_orders")
+        isParamValid("azimuthal_quad_orders")
             ? getParam<std::vector<unsigned int>>("azimuthal_quad_orders")
             : std::vector<unsigned int>(_start_points.size(), 30)), // default to 30
     _ray_data_index(registerRayData(getParam<std::string>("ray_data_name")))

@@ -1,6 +1,6 @@
 # PorousFlow simulation of injection and production in a 2D aquifer
 # Much of this file is standard porous-flow stuff.  The unusual aspects are:
-# - transfer of the rates of changes of each species (kg.s) to the aquifer_geochemistry.i simulation.  This is achieved by saving these changes from the PorousFlowMassTimeDerivative residuals
+# - transfer of the rates of changes of each species (kg/s) to the aquifer_geochemistry.i simulation.  This is achieved by saving these changes from the PorousFlowMassTimeDerivative residuals
 # - transfer of the temperature field to the aquifer_geochemistry.i simulation
 # Interesting behaviour can be simulated by this file without its "parent" simulation, exchanger.i.  exchanger.i provides mass-fractions injected via the injection_rate_massfrac_* variables, but since these are more-or-less constant throughout the duration of the exchanger.i simulation, the initial_conditions specified below may be used.  Similar, exchanger.i provides injection_temperature, but that is also constant.
 
@@ -171,15 +171,6 @@ production_rate = 1.0 # kg/s/m
   [./produced_heat]
     type = PorousFlowSumQuantity
   [../]
-  [./capillary_pressure]
-    type = PorousFlowCapillaryPressureConst
-  [../]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure temperature f0 f1 f2'
-    number_fluid_phases = 1
-    number_fluid_components = 4
-  [../]
 []
 
 [Postprocessors]
@@ -275,59 +266,14 @@ production_rate = 1.0 # kg/s/m
   [../]
 []
 
-[Kernels]
-  [./advective_flux_0]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = f0
-  [../]
-  [./advective_flux_1]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = f1
-  [../]
-  [./advective_flux_2]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 2
-    variable = f2
-  [../]
-  [./advective_flux_3]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 3
-    variable = porepressure
-  [../]
-  [./time_deriv_0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    save_in = rate_Na # change in kg at every node
-    variable = f0
-  [../]
-  [./time_deriv_1]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    save_in = rate_Cl # change in kg at every node
-    variable = f1
-  [../]
-  [./time_deriv_2]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 2
-    save_in = rate_SiO2 # change in kg at every node
-    variable = f2
-  [../]
-  [./time_deriv_3]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 3
-    save_in = rate_H2O # change in kg at every node / dt
-    variable = porepressure
-  [../]
-  [./temperature_advection]
-    type = PorousFlowHeatAdvection
-    variable = temperature
-  [../]
-  [./temperature_time_deriv]
-    type = PorousFlowEnergyTimeDerivative
-    variable = temperature
-  [../]
+[PorousFlowFullySaturated]
+  coupling_type = ThermoHydro
+  porepressure = porepressure
+  temperature = temperature
+  mass_fraction_vars = 'f0 f1 f2'
+  save_component_rate_in = 'rate_Na rate_Cl rate_SiO2 rate_H2O' # change in kg at every node / dt
+  fp = the_simple_fluid
+  temperature_unit = Celsius
 []
 
 [AuxVariables]
@@ -357,29 +303,6 @@ production_rate = 1.0 # kg/s/m
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temperature
-  [../]
-  [./mass_frac]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'f0 f1 f2'
-  [../]
-  [./fluid_props]
-    type = PorousFlowSingleComponentFluid
-    fp = the_simple_fluid
-    temperature_unit = Celsius
-    phase = 0
-  [../]
-  [./saturation]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-    capillary_pressure = capillary_pressure
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst # this simulation has no porosity changes from dissolution
     porosity = 0.1
@@ -387,6 +310,10 @@ production_rate = 1.0 # kg/s/m
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12'
+  [../]
+  [./thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy

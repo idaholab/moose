@@ -33,13 +33,31 @@ public:
 protected:
   virtual void threadJoin(const UserObject & y) override final;
 
+  /// this function computes the deviation from reciprocity defined as Fij - Aj/Ai * Fji
+  Real devReciprocity(unsigned int i, unsigned int j) const;
+
+  /// this function computes the maximum absolute value of the deviation from reciprocity
+  Real maxDevReciprocity() const;
+
+  /// sum of a row in the view factor matrix
+  Real viewFactorRowSum(unsigned int i) const;
+
+  /// maximum deviation of any view factor row sum from 1
+  Real maxDevRowSum() const;
+
+  /// helper for finding index of correction for i,j-th entry
+  unsigned int indexHelper(unsigned int i, unsigned int j) const;
+
+  /// helper function to get the index from the boundary name
+  unsigned int getSideNameIndex(std::string name) const;
+
   /// this function checks & normalizes view factors to sum to one, this is not always
   void checkAndNormalizeViewFactor();
 
   /// a purely virtural function called in finalize, must be overriden by derived class
   virtual void finalizeViewFactor() = 0;
 
-  /// a purely virtural function called in finalize, must be overriden by derived class
+  /// a purely virtual function called in finalize, must be overriden by derived class
   virtual void threadJoinViewFactor(const UserObject & y) = 0;
 
   /// number of boundaries of this side uo
@@ -53,6 +71,9 @@ protected:
 
   /// whether to normalize view factors so vf[from][:] sums to one
   const bool _normalize_view_factor;
+
+  // whether to print view factor information
+  const bool _print_view_factor_info;
 
   /// the view factor from side i to side j
   std::vector<std::vector<Real>> _view_factors;
