@@ -28,59 +28,59 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./porepressure]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [porepressure]
+  []
 []
 
 [BCs]
-  [./strain_x]
+  [strain_x]
     type = FunctionDirichletBC
     variable = disp_x
     function = earth_tide_x
     boundary = 'left right'
-  [../]
-  [./strain_y]
+  []
+  [strain_y]
     type = FunctionDirichletBC
     variable = disp_y
     function = earth_tide_y
     boundary = 'bottom top'
-  [../]
-  [./strain_z]
+  []
+  [strain_z]
     type = FunctionDirichletBC
     variable = disp_z
     function = earth_tide_z
     boundary = 'back front'
-  [../]
+  []
 []
 
 [Functions]
-  [./earth_tide_x]
+  [earth_tide_x]
     type = ParsedFunction
     value = 'x*1E-8*(5*cos(t*2*pi) + 2*cos((t-0.5)*2*pi) + 1*cos((t+0.3)*0.5*pi))'
-  [../]
-  [./earth_tide_y]
+  []
+  [earth_tide_y]
     type = ParsedFunction
     value = 'y*1E-8*(7*cos(t*2*pi) + 4*cos((t-0.3)*2*pi) + 7*cos((t+0.6)*0.5*pi))'
-  [../]
-  [./earth_tide_z]
+  []
+  [earth_tide_z]
     type = ParsedFunction
     value = 'z*1E-8*(7*cos((t-0.5)*2*pi) + 4*cos((t-0.8)*2*pi) + 7*cos((t+0.1)*4*pi))'
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2E9
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowBasicTHM]
@@ -92,46 +92,46 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 10.0E9 # drained bulk modulus
     poissons_ratio = 0.25
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
     porosity = 0.1
-  [../]
-  [./biot_modulus]
+  []
+  [biot_modulus]
     type = PorousFlowConstantBiotModulus
     solid_bulk_compliance = 1E-10
     fluid_bulk_modulus = 2E9
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pp]
+  [pp]
     type = PointValue
     point = '0.5 0.5 0.5'
     variable = porepressure
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

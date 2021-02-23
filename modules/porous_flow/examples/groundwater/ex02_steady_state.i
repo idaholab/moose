@@ -1,30 +1,30 @@
 # Steady-state groundwater model.  See groundwater_models.md for a detailed description
 [Mesh]
-  [./basic_mesh]
+  [basic_mesh]
     # mesh create by external program: lies within -500<=x<=500 and -200<=y<=200, with varying z
     type = FileMeshGenerator
     file = ex02_mesh.e
-  [../]
-  [./name_blocks]
+  []
+  [name_blocks]
     type = RenameBlockGenerator
     input = basic_mesh
     old_block_id = '2 3 4'
     new_block_name = 'bot_aquifer aquitard top_aquifer'
-  [../]
-  [./zmax]
+  []
+  [zmax]
     type = SideSetsFromNormalsGenerator
     input = name_blocks
     new_boundary = zmax
     normals = '0 0 1'
-  [../]
-  [./xmin_bot_aquifer]
+  []
+  [xmin_bot_aquifer]
     type = ParsedGenerateSideset
     input = zmax
     included_subdomain_ids = 2
     normal = '-1 0 0'
     combinatorial_geometry = 'x <= -500.0'
     new_sideset_name = xmin_bot_aquifer
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -32,26 +32,26 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     function = initial_pp
-  [../]
+  []
 []
 
 [BCs]
-  [./rainfall_recharge]
+  [rainfall_recharge]
     type = PorousFlowSink
     boundary = zmax
     variable = pp
     flux_function = -1E-6  # recharge of 0.1mm/day = 1E-4m3/m2/day = 0.1kg/m2/day ~ 1E-6kg/m2/s
-  [../]
-  [./evapotranspiration]
+  []
+  [evapotranspiration]
     type = PorousFlowHalfCubicSink
     boundary = zmax
     variable = pp
@@ -63,11 +63,11 @@
     # Assume that if permeability was 1E-10m^2 and water table at topography then ET acts as pan strength
     # Because use_mobility = true, then 4E-5 = maximum_flux = max * perm * density / visc = max * 1E-4, so max = 40
     max = 40
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./river]
+  [river]
     type = PorousFlowPolyLineSink
     SumQuantityUO = baseflow
     point_file = ex02_river.bh
@@ -77,22 +77,22 @@
     # Assume the riverbed conductance, k_zz*density*river_segment_length*river_width/riverbed_thickness/viscosity = 1E-6*river_segment_length kg/Pa/s
     fluxes = '-1E3 0 1E3'
     variable = pp
-  [../]
+  []
 []
 
 [Functions]
-  [./initial_pp]
+  [initial_pp]
     type = SolutionFunction
     scale_factor = 1E4
     from_variable = cosflow_depth
     solution = initial_mesh
-  [../]
-  [./baseflow_rate]
+  []
+  [baseflow_rate]
     type = ParsedFunction
     vars = 'baseflow_kg dt'
     vals = 'baseflow_kg dt'
     value = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
-  [../]
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -101,89 +101,89 @@
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity_everywhere]
+  [porosity_everywhere]
     type = PorousFlowPorosityConst
     porosity = 0.05
-  [../]
-  [./permeability_aquifers]
+  []
+  [permeability_aquifers]
     type = PorousFlowPermeabilityConst
     block = 'top_aquifer bot_aquifer'
     permeability = '1E-12 0 0 0 1E-12 0 0 0 1E-13'
-  [../]
-  [./permeability_aquitard]
+  []
+  [permeability_aquitard]
     type = PorousFlowPermeabilityConst
     block = aquitard
     permeability = '1E-16 0 0 0 1E-16 0 0 0 1E-17'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./initial_mesh]
+  [initial_mesh]
     type = SolutionUserObject
     execute_on = INITIAL
     mesh = ex02_mesh.e
     timestep = LATEST
     system_variables = cosflow_depth
-  [../]
-  [./baseflow]
+  []
+  [baseflow]
     type = PorousFlowSumQuantity
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./baseflow_kg]
+  [baseflow_kg]
     type = PorousFlowPlotQuantity
     uo = baseflow
     outputs = 'none'
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimestepSize
     outputs = 'none'
-  [../]
-  [./baseflow_l_per_m_per_day]
+  []
+  [baseflow_l_per_m_per_day]
     type = FunctionValuePostprocessor
     function = baseflow_rate
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
     # following 2 lines are not mandatory, but illustrate a popular preconditioner choice in groundwater models
     petsc_options_iname = '-pc_type -sub_pc_type  -pc_asm_overlap'
     petsc_options_value = ' asm      ilu           2              '
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
   dt = 1E6
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = 'max(1E6, t)'
-  [../]
+  []
   end_time = 1E12
   nl_abs_tol = 1E-13
 []
 
 [Outputs]
   print_linear_residuals = false
-  [./ex]
+  [ex]
     type = Exodus
     execute_on = final
-  [../]
-  [./csv]
+  []
+  [csv]
     type = CSV
-  [../]
+  []
 []
 

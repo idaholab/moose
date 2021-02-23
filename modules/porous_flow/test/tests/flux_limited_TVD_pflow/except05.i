@@ -10,29 +10,29 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./tracer]
-  [../]
-  [./cm]
+  [pp]
+  []
+  [tracer]
+  []
+  [cm]
     family = Monomial
     order = constant
-  [../]
+  []
 []
 
 [Kernels]
-  [./cm]
+  [cm]
     type = Diffusion
     variable = cm
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -42,23 +42,23 @@
 []
 
 [UserObjects]
-  [./dummy_dictator]
+  [dummy_dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp cm'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
-  [./advective_flux_calculator]
+  []
+  [advective_flux_calculator]
     type = PorousFlowAdvectiveFluxCalculatorSaturated
     PorousFlowDictator = dummy_dictator
-  [../]
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0  0 2 0  0 0 3'
-  [../]
+  []
 []
 
 [Executioner]

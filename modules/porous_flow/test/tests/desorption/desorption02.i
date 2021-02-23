@@ -37,89 +37,89 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./conc]
+  [pp]
+  []
+  [conc]
     family = MONOMIAL
     order = CONSTANT
     block = centre_block
-  [../]
+  []
 []
 
 [ICs]
-  [./p_ic]
+  [p_ic]
     type = ConstantIC
     variable = pp
     value = 1.0
-  [../]
-  [./conc_ic]
+  []
+  [conc_ic]
     type = ConstantIC
     variable = conc
     value = 1.0
     block = centre_block
-  [../]
+  []
 []
 
 [Kernels]
-  [./porespace_mass_dot]
+  [porespace_mass_dot]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
-  [./fluid_flow]
+  []
+  [fluid_flow]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
      variable = pp
      gravity = '0 0 0'
-  [../]
-  [./desorped_mass_dot]
+  []
+  [desorped_mass_dot]
     type = PorousFlowDesorpedMassTimeDerivative
     block = centre_block
     conc_var = conc
     variable = pp
-  [../]
-  [./desorped_mass_dot_conc_var]
+  []
+  [desorped_mass_dot_conc_var]
     type = PorousFlowDesorpedMassTimeDerivative
     block = centre_block
     conc_var = conc
     variable = conc
-  [../]
-  [./flow_from_matrix]
+  []
+  [flow_from_matrix]
     type = DesorptionFromMatrix
     block = centre_block
     variable = conc
     pressure_var = pp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp conc'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       viscosity = 1
       density0 = 1
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./lang_stuff]
+  [lang_stuff]
     type = LangmuirMaterial
     block = centre_block
     one_over_adsorption_time_const = 10.0
@@ -128,47 +128,47 @@
     langmuir_pressure = 1
     pressure_var = pp
     conc_var = conc
-  [../]
+  []
 
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0 0 0  0 0 0  0 0 0'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityFLAC
     m = 1
     phase = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
-  [../]
+  []
 []
 
 [Executioner]

@@ -36,118 +36,118 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp frac'
     number_fluid_phases = 1
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
-  [../]
-  [./frac]
-  [../]
+  [pp]
+  []
+  [frac]
+  []
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     function = 1-x
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = frac
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = pp
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 0
     gravity = '0 0 0'
     variable = frac
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowFullySaturatedDarcyFlow
     fluid_component = 1
     gravity = '0 0 0'
     variable = pp
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1e10 # need large in order for constant-velocity advection
       density0 = 1 # almost irrelevant, except that the ability of the right BC to keep P fixed at zero is related to density_P0
       thermal_expansion = 0
       viscosity = 11
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = frac
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.1 0 0 0 1.1 0 0 0 1.1'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2 # irrelevant in this fully-saturated situation
     phase = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./lhs_fixed_a]
+  [lhs_fixed_a]
     type = DirichletBC
     boundary = 'left'
     variable = frac
     value = 1
-  [../]
-  [./lhs_fixed_b]
+  []
+  [lhs_fixed_b]
     type = DirichletBC
     boundary = 'left'
     variable = pp
     value = 1
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
     pt_vals = '-100 100'
@@ -158,8 +158,8 @@
     use_relperm = false
     fluid_phase = 0
     flux_function = 1E4
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
     pt_vals = '-100 100'
@@ -170,16 +170,16 @@
     use_relperm = false
     fluid_phase = 0
     flux_function = 1E4
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_max_it -sub_pc_factor_shift_type -pc_asm_overlap'
     petsc_options_value = 'gmres asm lu 10000 NONZERO 2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -192,26 +192,26 @@
 []
 
 [VectorPostprocessors]
-  [./mf]
+  [mf]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
     num_points = 100
     sort_by = x
     variable = frac
-  [../]
+  []
 []
 
 [Outputs]
   file_base = s09_fully_saturated
-  [./console]
+  [console]
     type = Console
     execute_on = 'nonlinear linear'
-  [../]
-  [./csv]
+  []
+  [csv]
     type = CSV
     sync_times = '0.1 0.5 1'
     sync_only = true
-  [../]
+  []
   interval = 10
 []

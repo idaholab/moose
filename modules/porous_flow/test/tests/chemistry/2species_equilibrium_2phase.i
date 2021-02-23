@@ -20,10 +20,10 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -31,12 +31,12 @@
       y2 = 1
       inside = 1.0e-2
       outside = 1.0e-10
-    [../]
-  [../]
-  [./b]
+    []
+  []
+  [b]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = BoundingBoxIC
       x1 = 0.0
       y1 = 0.0
@@ -44,59 +44,59 @@
       y2 = 1
       inside = 1.0e-2
       outside = 1.0e-10
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./eqm_k0]
+  [eqm_k0]
     initial_condition = 1E2
-  [../]
-  [./eqm_k1]
+  []
+  [eqm_k1]
     initial_condition = 1E-2
-  [../]
-  [./pressure0]
-  [../]
-  [./saturation1]
+  []
+  [pressure0]
+  []
+  [saturation1]
     initial_condition = 0.25
-  [../]
-  [./a_in_phase0]
+  []
+  [a_in_phase0]
     initial_condition = 0.0
-  [../]
-  [./b_in_phase0]
+  []
+  [b_in_phase0]
     initial_condition = 0.0
-  [../]
-  [./pa2]
+  []
+  [pa2]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pab]
+  []
+  [pab]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./pa2]
+  [pa2]
     type = PorousFlowPropertyAux
     property = secondary_concentration
     secondary_species = 0
     variable = pa2
-  [../]
-  [./pab]
+  []
+  [pab]
     type = PorousFlowPropertyAux
     property = secondary_concentration
     secondary_species = 1
     variable = pab
-  [../]
+  []
 []
 
 [ICs]
-  [./pressure0]
+  [pressure0]
     type = FunctionIC
     variable = pressure0
     function = 2-x
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -105,79 +105,79 @@
 []
 
 [Kernels]
-  [./mass_a]
+  [mass_a]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = a
-  [../]
-  [./flux_a]
+  []
+  [flux_a]
     type = PorousFlowAdvectiveFlux
     variable = a
     fluid_component = 0
-  [../]
-  [./diff_a]
+  []
+  [diff_a]
     type = PorousFlowDispersiveFlux
     variable = a
     fluid_component = 0
     disp_trans = '0 0'
     disp_long = '0 0'
-  [../]
-  [./mass_b]
+  []
+  [mass_b]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = b
-  [../]
-  [./flux_b]
+  []
+  [flux_b]
     type = PorousFlowAdvectiveFlux
     variable = b
     fluid_component = 1
-  [../]
-  [./diff_b]
+  []
+  [diff_b]
     type = PorousFlowDispersiveFlux
     variable = b
     fluid_component = 1
     disp_trans = '0 0'
     disp_long = '0 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 2
     number_fluid_components = 3
     number_aqueous_equilibrium = 2
     aqueous_phase_number = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureConst
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2e9 # huge, so mimic chemical_reactions
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePS
     capillary_pressure = pc
     phase0_porepressure = pressure0
     phase1_saturation = saturation1
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a_in_phase0 b_in_phase0 a b'
     num_reactions = 2
@@ -186,63 +186,63 @@
     secondary_activity_coefficients = '1 1'
     reactions = '2 0
                  1 1'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.8
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     # porous_flow permeability / porous_flow viscosity = chemical_reactions conductivity = 1E-4
     permeability = '1E-7 0 0 0 1E-7 0 0 0 1E-7'
-  [../]
-  [./relp0]
+  []
+  [relp0]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./relp1]
+  []
+  [relp1]
     type = PorousFlowRelativePermeabilityConst
     phase = 1
-  [../]
-  [./diff]
+  []
+  [diff]
     type = PorousFlowDiffusivityConst
     # porous_flow diffusion_coeff * tortuousity * porosity = chemical_reactions diffusivity = 1E-4
     diffusion_coeff = '5E-4 5E-4 5E-4
                        5E-4 5E-4 5E-4'
     tortuosity = '0.25 0.25'
-  [../]
+  []
 []
 
 [BCs]
-  [./a_left]
+  [a_left]
     type = DirichletBC
     variable = a
     boundary = left
     value = 1.0e-2
-  [../]
-  [./b_left]
+  []
+  [b_left]
     type = DirichletBC
     variable = b
     boundary = left
     value = 1.0e-2
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

@@ -24,40 +24,40 @@
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 20E6
-  [../]
-  [./nacl]
+  []
+  [nacl]
     initial_condition = 0.1047
-  [../]
+  []
 []
 
 [Materials]
   # Specific heat capacity
-  [./rock_heat]
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 850
     density = 2700
-  [../]
+  []
 
   # Permeability
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-13 0 0  0 1E-13 0  0 0 1E-13'
-  [../]
+  []
 
   # Porosity
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.3
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

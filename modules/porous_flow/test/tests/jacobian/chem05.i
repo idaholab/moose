@@ -6,24 +6,24 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     initial_condition = 0.0
-  [../]
-  [./b]
+  []
+  [b]
     initial_condition = 0.2
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k]
+  [eqm_k]
     initial_condition = 1.234
-  [../]
-  [./ini_sec_conc]
+  []
+  [ini_sec_conc]
     initial_condition = 0.222
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 0.5
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -31,53 +31,53 @@
 []
 
 [Kernels]
-  [./a]
+  [a]
     type = PorousFlowPreDis
     variable = a
     mineral_density = 1E5
     stoichiometry = 2
-  [../]
-  [./b]
+  []
+  [b]
     type = PorousFlowPreDis
     variable = b
     mineral_density = 2.2E5
     stoichiometry = 3
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 1
     number_fluid_components = 3
     number_aqueous_kinetic = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pressure]
-  [../]
+  [pressure]
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.9
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b'
-  [../]
-  [./predis]
+  []
+  [predis]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b'
     num_reactions = 1
@@ -92,11 +92,11 @@
     gas_constant = 7.4
     theta_exponent = 1.1
     eta_exponent = 1.2
-  [../]
-  [./mineral]
+  []
+  [mineral]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = ini_sec_conc
-  [../]
+  []
 []
 
 [Executioner]
@@ -107,11 +107,11 @@
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []

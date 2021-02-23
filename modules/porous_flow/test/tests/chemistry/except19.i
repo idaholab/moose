@@ -6,42 +6,42 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k]
+  [eqm_k]
     initial_condition = 0.5
-  [../]
-  [./a]
+  []
+  [a]
     initial_condition = 0.5
-  [../]
-  [./ini_mineral_conc]
+  []
+  [ini_mineral_conc]
     initial_condition = 0.2
-  [../]
-  [./mineral]
+  []
+  [mineral]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./porosity]
+  []
+  [porosity]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mineral]
+  [mineral]
     type = PorousFlowPropertyAux
     property = mineral_concentration
     mineral_species = 0
     variable = mineral
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPropertyAux
     property = porosity
     variable = porosity
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -49,36 +49,36 @@
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = dummy
     number_fluid_phases = 1
     number_fluid_components = 2
     number_aqueous_kinetic = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature_qp]
+  [temperature_qp]
     type = PorousFlowTemperature
     temperature = 1
-  [../]
-  [./predis_qp]
+  []
+  [predis_qp]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = a
     num_reactions = 1
@@ -91,25 +91,25 @@
     molar_volume = 2
     gas_constant = 6
     reference_temperature = 0.5
-  [../]
-  [./mineral_conc_qp]
+  []
+  [mineral_conc_qp]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = ini_mineral_conc
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     chemical = true
     porosity_zero = 0.6
     reference_chemistry = ini_mineral_conc
-  [../]
+  []
 []
 
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -121,16 +121,16 @@
 []
 
 [Postprocessors]
-  [./porosity]
+  [porosity]
     type = PointValue
     point = '0 0 0'
     variable = porosity
-  [../]
-  [./c]
+  []
+  [c]
     type = PointValue
     point = '0 0 0'
     variable = mineral
-  [../]
+  []
 []
 [Outputs]
   csv = true

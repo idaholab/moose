@@ -5,35 +5,35 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     initial_condition = 0.1
-  [../]
-  [./b]
+  []
+  [b]
     initial_condition = 0.2
-  [../]
-  [./h2o_dummy]
-  [../]
+  []
+  [h2o_dummy]
+  []
 []
 
 [AuxVariables]
-  [./eqm_k0]
+  [eqm_k0]
     initial_condition = 1.234E-4
-  [../]
-  [./eqm_k1]
+  []
+  [eqm_k1]
     initial_condition = 0.987E-4
-  [../]
-  [./eqm_k2]
+  []
+  [eqm_k2]
     initial_condition = 0.5E-4
-  [../]
-  [./temp]
+  []
+  [temp]
     initial_condition = 0.5
-  [../]
-  [./ini_sec_conc0]
+  []
+  [ini_sec_conc0]
     initial_condition = 0.111
-  [../]
-  [./ini_sec_conc1]
+  []
+  [ini_sec_conc1]
     initial_condition = 0.222
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -41,58 +41,58 @@
 []
 
 [Kernels]
-  [./a]
+  [a]
     type = PorousFlowMassTimeDerivative
     variable = a
     fluid_component = 0
-  [../]
-  [./b]
+  []
+  [b]
     type = PorousFlowMassTimeDerivative
     variable = b
     fluid_component = 1
-  [../]
-  [./h2o_dummy]
+  []
+  [h2o_dummy]
     # note that in real simulations this Kernel would not be used
     # It is just here to check derivatives
     type = PorousFlowMassTimeDerivative
     variable = h2o_dummy
     fluid_component = 2
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 1
     number_fluid_components = 3
     number_aqueous_equilibrium = 3
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./pressure]
-  [../]
+  [pressure]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
     temperature = temp
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a b'
     num_reactions = 3
@@ -102,16 +102,16 @@
     reactions = '1 2
                  2.2 -1
                  -2 1'
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -122,11 +122,11 @@
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []

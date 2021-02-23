@@ -1,10 +1,10 @@
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "small_database.json"
     basis_species = "H2O SiO2(aq) Na+ Cl-"
     equilibrium_minerals = "QuartzUnlike"
-  [../]
+  []
 []
 
 [TimeIndependentReactionSolver]
@@ -23,11 +23,11 @@
 []
 
 [Postprocessors]
-  [./free_moles_SiO2]
+  [free_moles_SiO2]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_SiO2(aq)'
-  [../]
+  []
 []
 
 [Outputs]

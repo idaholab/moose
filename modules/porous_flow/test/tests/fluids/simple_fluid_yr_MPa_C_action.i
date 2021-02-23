@@ -1,8 +1,8 @@
 # Version of simple_fluid_yr_MPa_C.i but using a PorousFlowFullySaturated Action, to check that the Action passes the unit choices through to the remainder of PorousFlow
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 2.0E-4
       cv = 4000.0
@@ -11,8 +11,8 @@
       thermal_conductivity = 1.0
       viscosity = 1.1E-3
       density0 = 1500.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Mesh]
@@ -27,12 +27,12 @@
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 10
-  [../]
-  [./T]
+  []
+  [T]
     initial_condition = 26.85
-  [../]
+  []
 []
 
 [PorousFlowFullySaturated]
@@ -47,57 +47,57 @@
 
 [Materials]
   # these are needed by the Kernels, but are irrelevant to this particular problem
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.2
-  [../]
-  [./zero_thermal_conductivity]
+  []
+  [zero_thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
     dry_thermal_conductivity = '0 0 0  0 0 0  0 0 0'
-  [../]
-  [./rock_heat]
+  []
+  [rock_heat]
     type = PorousFlowMatrixInternalEnergy
     specific_heat_capacity = 1.0
     density = 1.0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0 0 0 0 0 0 0 0 0'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pressure]
+  [pressure]
     type = ElementIntegralVariablePostprocessor
     variable = pp
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = ElementIntegralVariablePostprocessor
     variable = T
-  [../]
-  [./density]
+  []
+  [density]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_density_qp0'
-  [../]
-  [./viscosity]
+  []
+  [viscosity]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity_qp0'
-  [../]
-  [./internal_energy]
+  []
+  [internal_energy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_internal_energy_nodal0'
-  [../]
-  [./enthalpy]
+  []
+  [enthalpy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_enthalpy_nodal0'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

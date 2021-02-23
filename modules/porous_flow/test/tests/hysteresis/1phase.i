@@ -1,9 +1,9 @@
 # Simple example of a 1-phase situation with hysteretic capillary pressure.  Water is removed and added to the system in order to observe the hysteresis
 [Mesh]
-  [./mesh]
+  [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -11,88 +11,88 @@
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     number_fluid_phases = 1
     number_fluid_components = 1
     porous_flow_vars = 'pp'
-  [../]
+  []
 []
 
 [Variables]
-  [./pp]
+  [pp]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass_conservation]
+  [mass_conservation]
     type = PorousFlowMassTimeDerivative
     variable = pp
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./pump]
+  [pump]
     type = PorousFlowPointSourceFromPostprocessor
     mass_flux = flux
     point = '0.5 0 0'
     variable = pp
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sat]
+  [sat]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sat]
+  [sat]
     type = PorousFlowPropertyAux
     variable = sat
     property = saturation
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PorousFlowPropertyAux
     variable = hys_order
     property = hysteresis_order
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./porosity]
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./hys_order_material]
+  []
+  [hys_order_material]
     type = PorousFlowHysteresisOrder
-  [../]
-  [./pc_calculator]
+  []
+  [pc_calculator]
     type = PorousFlow1PhaseHysP
     alpha_d = 10.0
     alpha_w = 7.0
@@ -106,29 +106,29 @@
     low_extension_type = quadratic
     high_extension_type = power
     porepressure = pp
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flux]
+  [flux]
     type = FunctionValuePostprocessor
     function = 'if(t <= 9, -10, 10)'
-  [../]
-  [./hys_order]
+  []
+  [hys_order]
     type = PointValue
     point = '0 0 0'
     variable = hys_order
-  [../]
-  [./sat]
+  []
+  [sat]
     type = PointValue
     point = '0 0 0'
     variable = sat
-  [../]
-  [./pp]
+  []
+  [pp]
     type = PointValue
     point = '0 0 0'
     variable = pp
-  [../]
+  []
 []
 
 [Executioner]

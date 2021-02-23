@@ -41,20 +41,20 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./the_simple_fluid]
+  [FluidProperties]
+    [the_simple_fluid]
       type = SimpleFluidProperties
       thermal_expansion = 0.0
       bulk_modulus = 2.0E7
       viscosity = 1.0
       density0 = 100.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [PorousFlowUnsaturated]
@@ -68,36 +68,36 @@
 []
 
 [ICs]
-  [./pp]
+  [pp]
     type = FunctionIC
     variable = pp
     #function = if((x<1)&(y<0.5),1E7,-1E7)
     function = if((x<1)&(y>0.5),1E7,-1E7)
     #function = if((x>1)&(y<0.5),1E7,-1E7)
     #function = if((x>1)&(y>0.5),1E7,-1E7)
-  [../]
+  []
 []
 
 [UserObjects]
-  [./pls_total_outflow_mass]
+  [pls_total_outflow_mass]
     type = PorousFlowSumQuantity
-  [../]
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0 0 0  0 0 0  0 0 0'
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 
 [DiracKernels]
-  [./pls]
+  [pls]
     type = PorousFlowPolyLineSink
     fluid_phase = 0
     point_file = pls03.bh
@@ -107,76 +107,76 @@
     variable = pp
     p_or_t_vals = '0 1E7'
     fluxes = '1 1'
-  [../]
+  []
 []
 
 
 [Postprocessors]
-  [./pls_report]
+  [pls_report]
     type = PorousFlowPlotQuantity
     uo = pls_total_outflow_mass
-  [../]
+  []
 
-  [./fluid_mass0]
+  [fluid_mass0]
     type = PorousFlowFluidMass
     execute_on = timestep_begin
-  [../]
+  []
 
-  [./fluid_mass1]
+  [fluid_mass1]
     type = PorousFlowFluidMass
     execute_on = timestep_end
-  [../]
+  []
 
-  [./zmass_error]
+  [zmass_error]
     type = FunctionValuePostprocessor
     function = mass_bal_fcn
     execute_on = timestep_end
-  [../]
+  []
 
-  [./p00]
+  [p00]
     type = PointValue
     variable = pp
     point = '0 0 0'
     execute_on = timestep_end
-  [../]
-  [./p01]
+  []
+  [p01]
     type = PointValue
     variable = pp
     point = '0 1 0'
     execute_on = timestep_end
-  [../]
-  [./p20]
+  []
+  [p20]
     type = PointValue
     variable = pp
     point = '2 0 0'
     execute_on = timestep_end
-  [../]
-  [./p21]
+  []
+  [p21]
     type = PointValue
     variable = pp
     point = '2 1 0'
     execute_on = timestep_end
-  [../]
+  []
 []
 
 
 [Functions]
-  [./mass_bal_fcn]
+  [mass_bal_fcn]
     type = ParsedFunction
     value = abs((a-c+d)/2/(a+c))
     vars = 'a c d'
     vals = 'fluid_mass1 fluid_mass0 pls_report'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./usual]
+  [usual]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
-  [../]
+  []
 []
 
 

@@ -31,136 +31,136 @@
 []
 
 [Variables]
-  [./pp]
-  [../]
+  [pp]
+  []
 []
 
 [ICs]
-  [./pinit]
+  [pinit]
     type = FunctionIC
     function = x+2*y+4*z
     variable = pp
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = pp
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
+  [vel_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vel_z]
+  []
+  [vel_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./vel_x]
+  [vel_x]
     type = PorousFlowDarcyVelocityComponent
     variable = vel_x
     component = x
     fluid_phase = 0
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     type = PorousFlowDarcyVelocityComponent
     variable = vel_y
     component = y
     fluid_phase = 0
-  [../]
-  [./vel_z]
+  []
+  [vel_z]
     type = PorousFlowDarcyVelocityComponent
     variable = vel_z
     component = z
     fluid_phase = 0
- [../]
+ []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 1.5
       viscosity = 3.2
       density0 = 1.2
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Postprocessors]
-  [./vel_x]
+  [vel_x]
     type = PointValue
     variable = vel_x
     point = '0.5 0.5 0.5'
-  [../]
-  [./vel_y]
+  []
+  [vel_y]
     type = PointValue
     variable = vel_y
     point = '0.5 0.5 0.5'
-  [../]
-  [./vel_z]
+  []
+  [vel_z]
     type = PointValue
     variable = vel_z
     point = '0.5 0.5 0.5'
-  [../]
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
+  []
 []
 
 [Executioner]

@@ -16,147 +16,147 @@
 []
 
 [Variables]
-  [./pp]
-    [./InitialCondition]
+  [pp]
+    [InitialCondition]
       type = ConstantIC
       value = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./flux]
+  [flux]
     type = PorousFlowAdvectiveFlux
     gravity = '0 0 0'
     variable = pp
-  [../]
+  []
 []
 
 [BCs]
-  [./ptop]
+  [ptop]
     type = DirichletBC
     variable = pp
     boundary = right
     value = 0
-  [../]
-  [./pbase]
+  []
+  [pbase]
     type = DirichletBC
     variable = pp
     boundary = left
     value = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./poro]
+  [poro]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_x]
+  []
+  [perm_x]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_y]
+  []
+  [perm_y]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./perm_z]
+  []
+  [perm_z]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./poro]
+  [poro]
     type = PorousFlowPropertyAux
     property = porosity
     variable = poro
-  [../]
-  [./perm_x]
+  []
+  [perm_x]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_x
     row = 0
     column = 0
-  [../]
-  [./perm_y]
+  []
+  [perm_y]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_y
     row = 1
     column = 1
-  [../]
-  [./perm_z]
+  []
+  [perm_z]
     type = PorousFlowPropertyAux
     property = permeability
     variable = perm_z
     row = 2
     column = 2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./perm_x_bottom]
+  [perm_x_bottom]
     type = PointValue
     variable = perm_x
     point = '0 0 0'
-  [../]
-  [./perm_y_bottom]
+  []
+  [perm_y_bottom]
     type = PointValue
     variable = perm_y
     point = '0 0 0'
-  [../]
-  [./perm_z_bottom]
+  []
+  [perm_z_bottom]
     type = PointValue
     variable = perm_z
     point = '0 0 0'
-  [../]
-  [./perm_x_top]
+  []
+  [perm_x_top]
     type = PointValue
     variable = perm_x
     point = '3 0 0'
-  [../]
-  [./perm_y_top]
+  []
+  [perm_y_top]
     type = PointValue
     variable = perm_y
     point = '3 0 0'
-  [../]
-  [./perm_z_top]
+  []
+  [perm_z_top]
     type = PointValue
     variable = perm_z
     point = '3 0 0'
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     # unimportant in this fully-saturated test
     m = 0.8
     alpha = 1e-4
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid]
+  [FluidProperties]
+    [simple_fluid]
       type = SimpleFluidProperties
       bulk_modulus = 2.2e9
       viscosity = 1e-3
       density0 = 1000
       thermal_expansion = 0
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./permeability]
+  [permeability]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
     poroperm_function = kozeny_carman_fd2
@@ -164,42 +164,42 @@
     d = 5
     m = 2
     n = 7
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./eff_fluid_pressure]
+  []
+  [eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
-  [../]
-  [./simple_fluid]
+  []
+  [simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-  [../]
-  [./relperm]
+  []
+  [relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

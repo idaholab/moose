@@ -12,148 +12,148 @@
 []
 
 [Variables]
-  [./ppwater]
+  [ppwater]
     initial_condition = 2E6
-  [../]
-  [./ppgas]
+  []
+  [ppgas]
     initial_condition = 2E6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./massfrac_ph0_sp0]
+  [massfrac_ph0_sp0]
     initial_condition = 1
-  [../]
-  [./massfrac_ph1_sp0]
+  []
+  [massfrac_ph1_sp0]
     initial_condition = 0
-  [../]
+  []
 []
 
 [Kernels]
-  [./mass0]
+  [mass0]
     type = PorousFlowMassTimeDerivative
     fluid_component = 0
     variable = ppwater
-  [../]
-  [./flux0]
+  []
+  [flux0]
     type = PorousFlowAdvectiveFlux
     variable = ppwater
     gravity = '0 0 0'
     fluid_component = 0
-  [../]
-  [./mass1]
+  []
+  [mass1]
     type = PorousFlowMassTimeDerivative
     fluid_component = 1
     variable = ppgas
-  [../]
-  [./flux1]
+  []
+  [flux1]
     type = PorousFlowAdvectiveFlux
     variable = ppgas
     gravity = '0 0 0'
     fluid_component = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./dictator]
+  [dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'ppwater ppgas'
     number_fluid_phases = 2
     number_fluid_components = 2
-  [../]
-  [./pc]
+  []
+  [pc]
     type = PorousFlowCapillaryPressureVG
     m = 0.5
     alpha = 1
-  [../]
+  []
 []
 
 [Modules]
-  [./FluidProperties]
-    [./simple_fluid0]
+  [FluidProperties]
+    [simple_fluid0]
       type = SimpleFluidProperties
       bulk_modulus = 2e9
       density0 = 1000
       thermal_expansion = 0
       viscosity = 1e-3
-    [../]
-    [./simple_fluid1]
+    []
+    [simple_fluid1]
       type = SimpleFluidProperties
       bulk_modulus = 2e6
       density0 = 1
       thermal_expansion = 0
       viscosity = 1e-5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./temperature]
+  [temperature]
     type = PorousFlowTemperature
-  [../]
-  [./ppss]
+  []
+  [ppss]
     type = PorousFlow2PhasePP
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
     capillary_pressure = pc
-  [../]
-  [./massfrac]
+  []
+  [massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
-  [../]
-  [./simple_fluid0]
+  []
+  [simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-  [../]
-  [./simple_fluid1]
+  []
+  [simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-  [../]
-  [./porosity]
+  []
+  [porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
-  [../]
-  [./permeability]
+  []
+  [permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
-  [../]
-  [./relperm_water]
+  []
+  [relperm_water]
     type = PorousFlowRelativePermeabilityCorey
     n = 1
     phase = 0
-  [../]
-  [./relperm_gas]
+  []
+  [relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
     n = 1
     phase = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./leftwater]
+  [leftwater]
     type = DirichletBC
     boundary = left
     value = 3E6
     variable = ppwater
-  [../]
-  [./leftgas]
+  []
+  [leftgas]
     type = DirichletBC
     boundary = left
     value = 3E6
     variable = ppgas
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-15       1E-20 20'
-  [../]
+  []
 []
 
 [Executioner]
@@ -164,72 +164,72 @@
 []
 
 [Postprocessors]
-  [./p000]
+  [p000]
     type = PointValue
     variable = ppwater
     point = '0 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p010]
+  []
+  [p010]
     type = PointValue
     variable = ppwater
     point = '10 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p020]
+  []
+  [p020]
     type = PointValue
     variable = ppwater
     point = '20 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p030]
+  []
+  [p030]
     type = PointValue
     variable = ppwater
     point = '30 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p040]
+  []
+  [p040]
     type = PointValue
     variable = ppwater
     point = '40 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p050]
+  []
+  [p050]
     type = PointValue
     variable = ppwater
     point = '50 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p060]
+  []
+  [p060]
     type = PointValue
     variable = ppwater
     point = '60 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p070]
+  []
+  [p070]
     type = PointValue
     variable = ppwater
     point = '70 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p080]
+  []
+  [p080]
     type = PointValue
     variable = ppwater
     point = '80 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p090]
+  []
+  [p090]
     type = PointValue
     variable = ppwater
     point = '90 0 0'
     execute_on = 'initial timestep_end'
-  [../]
-  [./p100]
+  []
+  [p100]
     type = PointValue
     variable = ppwater
     point = '100 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]
