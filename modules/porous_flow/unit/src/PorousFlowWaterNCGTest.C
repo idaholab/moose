@@ -299,8 +299,8 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   mu2 = fsp[1].viscosity;
   h2 = fsp[1].enthalpy;
 
-  REL_TEST(ddensity_dZ, (rho1 - rho2).value() / (2.0 * dZ), 1.0e-8);
-  REL_TEST(dviscosity_dZ, (mu1 - mu2).value() / (2.0 * dZ), 1.0e-8);
+  REL_TEST(ddensity_dZ, (rho1 - rho2).value() / (2.0 * dZ), 5.0e-8);
+  REL_TEST(dviscosity_dZ, (mu1 - mu2).value() / (2.0 * dZ), 5.0e-8);
   REL_TEST(denthalpy_dZ, (h1 - h2).value() / (2.0 * dZ), 1.0e-8);
 
   // Check derivatives in the two phase region as well. Note that the mass fractions
