@@ -16,4 +16,34 @@
       detail = 'using automatic differentiation materials.'
     []
   []
+  [negative]
+    requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor'
+    [zero]
+      type = CSVDiff
+      input = 'negative_porosity_zero.i'
+      csvdiff = 'negative_porosity_zero_out.csv'
+      detail = 'by setting the porosity to zero.'
+    []
+    [initial]
+      type = CSVDiff
+      input = 'negative_porosity_initial.i'
+      csvdiff = 'negative_porosity_initial_out.csv'
+      detail = 'by setting the porosity to the initial condition.'
+    []
+    [excetion]
+      type = RunException
+      input = 'negative_porosity_error.i'
+      expect_err = 'porosity is negative'
+      detail = 'by throwing an excetion.'
+    []
+  []
+  [nan]
+    requirement = 'The system shall handle a nan calcualted porosity computed from a strain tensor'
+    [exception]
+      type = RunException
+      input = 'nan.i'
+      expect_err = 'porosity is nan'
+      detail = 'by throwing an exception.'
+    []
+  []
 []
