@@ -1,117 +1,40 @@
 [Tests]
   design = Samplers/index.md
   issues = '#14830'
+
   [swap]
-    requirement = "The system shall include a utility for swapping values within a vector of data"
-    [serial]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = swap_out.json
-      cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
-      allow_test_objects = true
-      recover = false # steady
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = swap_out.json
+    cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
 
-      detail = "on a single processor,"
-    []
-    [parallel_2]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = swap_out.json
-      cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
-      allow_test_objects = true
-      min_parallel = 2
-      max_parallel = 2
-      recover = false # steady
-
-      detail = "on 2 processors, and"
-    []
-    [parallel_3]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = swap_out.json
-      cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
-      allow_test_objects = true
-      min_parallel = 3
-      max_parallel = 3
-      recover = false # steady
-
-      detail = "on 3 processors."
-    []
+    requirement = "The system shall include a utility for swapping values within a vector of data."
   []
 
-  [shuffle]
-    requirement = "The system shall include a utility for shuffling values within a vector of data"
-    [serial]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = shuffle_out.json
-      cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
-      allow_test_objects = true
-      recover = false # steady
+  [serial]
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = shuffle_out.json
+    cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
 
-      detail = "on a single processor,"
-    []
-    [parallel_2]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = shuffle_out.json
-      cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
-      allow_test_objects = true
-      recover = false # steady
-      min_parallel = 2
-      max_parallel = 2
-
-      detail = "on 2 processors, and"
-    []
-    [parallel_3]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = shuffle_out.json
-      cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
-      allow_test_objects = true
-      recover = false # steady
-      min_parallel = 3
-      max_parallel = 3
-
-      detail = "on 3 processors."
-    []
+    requirement = "The system shall include a utility for shuffling values within a vector of data."
   []
 
   [resample]
-    requirement = "The system shall include a utility for resampling values within a vector of data"
-    [serial]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = resample_out.json
-      cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
-      allow_test_objects = true
-      recover = false # steady
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = resample_out.json
+    cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
 
-      detail = "on a single processor,"
-    []
-    [parallel_2]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = resample_out.json
-      cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
-      allow_test_objects = true
-      recover = false # steady
-      min_parallel = 2
-      max_parallel = 2
-
-      detail = "on 2 processors, and"
-    []
-    [parallel_3]
-      type = JSONDiff
-      input = shuffle.i
-      jsondiff = resample_out.json
-      cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
-      allow_test_objects = true
-      recover = false # steady
-      min_parallel = 3
-      max_parallel = 3
-
-      detail = "on 3 processors."
-    []
+    requirement = "The system shall include a utility for resampling values within a vector of data."
   []
 []
