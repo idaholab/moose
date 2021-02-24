@@ -220,12 +220,12 @@ ADHillPlasticityStressUpdate::computeHillTensorEigenDecomposition(ADDenseMatrix 
 {
   const unsigned int dimension = hill_tensor.n();
 
-  AnisotropyMatrix A;
+  AnisotropyMatrixReal A;
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      A(index_i, index_j) = hill_tensor(index_i, index_j);
+      A(index_i, index_j) = MetaPhysicL::raw_value(hill_tensor(index_i, index_j));
 
-  Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es(A);
+  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es(A);
 
   auto lambda = es.eigenvalues();
   auto v = es.eigenvectors();

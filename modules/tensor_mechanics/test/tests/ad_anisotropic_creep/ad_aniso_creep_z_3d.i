@@ -28,7 +28,6 @@
   []
 []
 
-
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true

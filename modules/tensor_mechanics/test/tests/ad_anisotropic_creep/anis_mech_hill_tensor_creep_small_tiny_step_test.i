@@ -82,7 +82,8 @@
     strain = FINITE
     add_variables = true
     incremental = true
-    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy stress_yy'
+    generate_output = 'elastic_strain_xx elastic_strain_yy elastic_strain_xy stress_xx stress_xy '
+                      'stress_yy'
     use_automatic_differentiation = true
   []
 []

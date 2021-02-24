@@ -28,7 +28,6 @@
   []
 []
 
-
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   volumetric_locking_correction = true
@@ -132,8 +131,6 @@
     max_inelastic_increment = 0.00003
   []
 []
-
-
 
 [BCs]
   [no_disp_x]

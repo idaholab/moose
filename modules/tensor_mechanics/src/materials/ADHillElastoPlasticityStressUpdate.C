@@ -165,22 +165,14 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
   _anisotropic_elastic_tensor(5, 4) = (_elasticity_tensor)[_qp](0, 1, 0, 2);
   _anisotropic_elastic_tensor(5, 5) = (_elasticity_tensor)[_qp](0, 1, 0, 1);
 
-  //  for (int i = 0; i < 6; i++)
-  //  {
-  //    Moose::out << " \n";
-  //    for (int j = 0; j < 6; j++)
-  //      Moose::out << MetaPhysicL::raw_value(_anisotropic_elastic_tensor(i, j)) << " ";
-  //  }
-  //  Moose::out << " \n";
-
   const unsigned int dimension = _anisotropic_elastic_tensor.n();
 
-  AnisotropyMatrix A;
+  AnisotropyMatrixReal A;
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      A(index_i, index_j) = _anisotropic_elastic_tensor(index_i, index_j);
+      A(index_i, index_j) = MetaPhysicL::raw_value(_anisotropic_elastic_tensor(index_i, index_j));
 
-  Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es(A);
+  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es(A);
 
   auto lambda = es.eigenvalues();
   auto v = es.eigenvectors();
@@ -203,18 +195,19 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
   _elasticity_eigenvectors[_qp].get_transpose(eigenvectors_elasticity_transpose);
 
   ADDenseMatrix b_matrix(_hill_tensor);
+
   // Right multiply by matrix of eigenvectors transpose
   b_matrix.right_multiply(_elasticity_eigenvectors[_qp]);
   b_matrix.right_multiply(sqrt_Delta);
   b_matrix.left_multiply(eigenvectors_elasticity_transpose);
   b_matrix.left_multiply(sqrt_Delta);
 
-  AnisotropyMatrix B_eigen;
+  AnisotropyMatrixReal B_eigen;
   for (unsigned int index_i = 0; index_i < dimension; index_i++)
     for (unsigned int index_j = 0; index_j < dimension; index_j++)
-      B_eigen(index_i, index_j) = b_matrix(index_i, index_j);
+      B_eigen(index_i, index_j) = MetaPhysicL::raw_value(b_matrix(index_i, index_j));
 
-  Eigen::SelfAdjointEigenSolver<AnisotropyMatrix> es_b(B_eigen);
+  Eigen::SelfAdjointEigenSolver<AnisotropyMatrixReal> es_b(B_eigen);
 
   auto lambda_b = es_b.eigenvalues();
   auto v_b = es_b.eigenvectors();
@@ -228,15 +221,6 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
   _alpha_matrix[_qp] = sqrt_Delta;
   _alpha_matrix[_qp].right_multiply(_b_eigenvectors[_qp]);
   _alpha_matrix[_qp].left_multiply(_elasticity_eigenvectors[_qp]);
-
-  //  Moose::out << "alpha matrix in computeEigenDecomposition \n";
-  //  for (int i = 0; i < 6; i++)
-  //  {
-  //    Moose::out << " \n";
-  //    for (int j = 0; j < 6; j++)
-  //      Moose::out << MetaPhysicL::raw_value(_alpha_matrix[_qp](i, j)) << " ";
-  //  }
-  //  Moose::out << " \n";
 }
 
 ADReal

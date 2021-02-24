@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseTypes.h"
 #include "DualRealOps.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"

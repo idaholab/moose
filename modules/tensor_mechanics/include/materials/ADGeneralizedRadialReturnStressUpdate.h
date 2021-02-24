@@ -12,6 +12,25 @@
 #include "StressUpdateBase.h"
 #include "ADGeneralizedReturnMappingSolution.h"
 #include "MooseTypes.h"
+#include "libmesh/ignore_warnings.h"
+#include "Eigen/Dense"
+#include "Eigen/Eigenvalues"
+#include "libmesh/restore_warnings.h"
+
+namespace Eigen
+{
+namespace internal
+{
+template <>
+struct cast_impl<ADReal, int>
+{
+  static inline int run(const ADReal & x) { return static_cast<int>(MetaPhysicL::raw_value(x)); }
+};
+} // namespace internal
+} // namespace Eigen
+
+typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
 
 /**
  * ADGeneralizedRadialReturnStressUpdate computes the generalized radial return stress increment for
