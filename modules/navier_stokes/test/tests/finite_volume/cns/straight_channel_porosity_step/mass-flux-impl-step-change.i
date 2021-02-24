@@ -1,4 +1,4 @@
-advected_interp_method='upwind'
+flux_interp_method='upwind'
 # Establish initial conditions based on STP
 rho_initial=1.2754
 p_initial=1.01e5
@@ -25,9 +25,12 @@ et_in=${fparse e_initial + 0.5 * real_u_in * real_u_in}
 ht_in=${fparse et_in + p_in / rho_in}
 enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 
+# Uncomment this to do a safety check and make sure that you haven't accidentally forgotten to supply a defaulted parameter
+# Default parameters can yield unanticipated results
 # [GlobalParams]
 #   vel = 'nonsense'
 #   advected_interp_method = 'nonsense'
+#   flux_interp_method = 'nonsense'
 #   momentum_component = 'nonsense'
 #   advected_quantity = 'nonsense'
 # []
@@ -190,10 +193,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho
   # []
   [mass_advection]
-    type = FVMatAdvection
+    type = NSFVAdvection
     variable = rho
-    vel = 'mass_flux'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
@@ -202,10 +204,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho_u
   # []
   [momentum_advection]
-    type = FVMatAdvection
+    type = NSFVAdvection
     variable = rho_u
-    vel = 'mass_flux'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
     advected_quantity = 'vel_x'
   []
   [momentum_pressure]
@@ -219,21 +220,14 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho_et
   # []
   [energy_advection]
-    type = FVMatAdvection
+    type = NSFVAdvection
     variable = rho_et
     advected_quantity = 'ht'
-    vel = 'mass_flux'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
 []
 
 [FVBCs]
-  # [rho_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho
-  #   value = ${rho_in}
-  # []
   [rho_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -241,19 +235,12 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${mass_flux_in}
   []
   [rho_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVAdvectionFluxBC
     boundary = 'right'
     variable = rho
-    vel = 'mass_flux'
     advected_quantity = 1
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
-  # [rho_u_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho_u
-  #   value = ${rho_u_in}
-  # []
   [rho_u_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -261,12 +248,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVAdvectionFluxBC
     boundary = 'right'
     variable = rho_u
-    vel = 'mass_flux'
     advected_quantity = 'vel_x'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
   [rho_u_pressure_right]
     type = NSFVPorosityMomentumPressureBC
@@ -274,12 +260,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_u
     momentum_component = 'x'
   []
-  # [rho_et_left]
-  #   type = FVDirichletBC
-  #   boundary = 'left'
-  #   variable = rho_et
-  #   value = ${rho_et_in}
-  # []
   [rho_et_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -287,12 +267,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${enthalpy_flux_in}
   []
   [rho_et_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVAdvectionFluxBC
     boundary = 'right'
     variable = rho_et
-    vel = 'mass_flux'
     advected_quantity = 'ht'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
 []
 
