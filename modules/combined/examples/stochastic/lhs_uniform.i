@@ -55,7 +55,6 @@
     num_rows = 100000
     distributions = 'cond_inner cond_outer heat_source alpha_inner alpha_outer ymod_inner ymod_outer prat_inner prat_outer'
     execute_on = INITIAL
-    num_bins = 10
   []
 []
 

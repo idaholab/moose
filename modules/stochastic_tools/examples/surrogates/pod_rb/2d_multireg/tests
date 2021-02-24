@@ -8,7 +8,6 @@
     allow_test_objects = true
     check_files = 'trainer_out_pod_rb.rd'
     cli_args = "Samplers/sample/num_rows=2
-                Samplers/sample/num_bins=1
                 sub:halfa=1
                 sub:fulla=2"
   []
@@ -18,7 +17,6 @@
     input = surr.i
     allow_test_objects = true
     cli_args = "Samplers/sample/num_rows=2
-                Samplers/sample/num_bins=1
                 Surrogates/rbpod/change_rank='psi'
                 Surrogates/rbpod/new_ranks='1'"
     csvdiff = "surr_out_res_0001.csv"

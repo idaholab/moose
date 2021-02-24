@@ -66,6 +66,7 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
+    _auto_advance_generators(true),
     _perf_get_global_samples(registerTimedSection("getGlobalSamples", 1)),
     _perf_get_local_samples(registerTimedSection("getLocalSamples", 1)),
     _perf_get_next_local_row(registerTimedSection("getNextLocalRow", 1)),
@@ -203,7 +204,7 @@ Sampler::execute()
   if (_has_executed)
   {
     _generator.restoreState();
-    advanceGenerators(_n_rows * _n_cols);
+    advanceGeneratorsInternal(_n_rows * _n_cols);
   }
   _generator.saveState();
   executeTearDown();
@@ -226,10 +227,10 @@ Sampler::getGlobalSamples()
 
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
-  sampleSetUp();
+  sampleSetUp(SampleMode::GLOBAL);
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
-  sampleTearDown();
+  sampleTearDown(SampleMode::GLOBAL);
   return output;
 }
 
@@ -249,10 +250,10 @@ Sampler::getLocalSamples()
 
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
-  sampleSetUp();
+  sampleSetUp(SampleMode::LOCAL);
   DenseMatrix<Real> output(_n_local_rows, _n_cols);
   computeLocalSampleMatrix(output);
-  sampleTearDown();
+  sampleTearDown(SampleMode::LOCAL);
   return output;
 }
 
@@ -265,8 +266,8 @@ Sampler::getNextLocalRow()
   if (_next_local_row_requires_state_restore)
   {
     _generator.restoreState();
-    sampleSetUp();
-    advanceGenerators(_next_local_row * _n_cols);
+    sampleSetUp(SampleMode::LOCAL);
+    advanceGeneratorsInternal(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
 
     if (_n_cols > _limit_get_next_local_row)
@@ -285,8 +286,8 @@ Sampler::getNextLocalRow()
 
   if (_next_local_row == _local_row_end)
   {
-    advanceGenerators((_n_rows - _local_row_end) * _n_cols);
-    sampleTearDown();
+    advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
+    sampleTearDown(SampleMode::LOCAL);
     _next_local_row = _local_row_begin;
     _next_local_row_requires_state_restore = true;
   }
@@ -315,7 +316,7 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 {
   TIME_SECTION(_perf_local_sample_matrix);
 
-  advanceGenerators(_local_row_begin * _n_cols);
+  advanceGeneratorsInternal(_local_row_begin * _n_cols);
   for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
   {
     std::vector<Real> row(_n_cols, 0);
@@ -326,7 +327,7 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
     std::copy(
         row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
   }
-  advanceGenerators((_n_rows - _local_row_end) * _n_cols);
+  advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
 }
 
 void
@@ -343,13 +344,30 @@ Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
 }
 
 void
-Sampler::advanceGenerators(dof_id_type count)
+Sampler::advanceGenerators(const dof_id_type count)
 {
   TIME_SECTION(_perf_advance_generator);
+  for (std::size_t j = 0; j < _generator.size(); ++j)
+    advanceGenerator(j, count);
+}
+void
+Sampler::advanceGenerator(const unsigned int seed_index, const dof_id_type count)
+{
+  for (std::size_t i = 0; i < count; ++i)
+    getRand(seed_index);
+}
 
-  for (dof_id_type i = 0; i < count; ++i)
-    for (std::size_t j = 0; j < _generator.size(); ++j)
-      getRand(j);
+void
+Sampler::advanceGeneratorsInternal(const dof_id_type count)
+{
+  if (_auto_advance_generators)
+    advanceGenerators(count);
+}
+
+void
+Sampler::setAutoAdvanceGenerators(const bool state)
+{
+  _auto_advance_generators = state;
 }
 
 double

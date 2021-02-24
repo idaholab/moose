@@ -51,7 +51,7 @@ if __name__ == '__main__':
         print('Obtaining Full-Order solutions for testing (might be slow)')
         os.system(fom_cmd + ' > tmp.txt')
         print('Reference values obtained.')
-        os.system('rm surrs*0000.csv')
+        os.system('rm surr*0000.csv')
     fom_data = mooseutils.PostprocessorReader(fom_results)
 
     mean_rel_diff = []
@@ -63,11 +63,11 @@ if __name__ == '__main__':
         os.system(cmd) # + ' > tmp.txt')
         print('Surrogate run finished.')
 
-        os.system('rm surrs*0000.csv')
+        os.system('rm surr*0000.csv')
         rom_data = mooseutils.PostprocessorReader(rom_results)
         os.system('mv surr_out_res_0001.csv surr_out_res_'+str(no_modes)+'.csv')
 
-        rel_diff = abs(fom_data['results:nodal_l2'].values - rom_data['value'].values)/abs(fom_data['results:nodal_l2'].values)
+        rel_diff = abs(fom_data['results:nodal_l2'].values - rom_data['rbpod:nodal_l2'].values)/abs(fom_data['results:nodal_l2'].values)
 
         mean_rel_diff.append(rel_diff.mean())
         max_rel_diff.append(rel_diff.max())
