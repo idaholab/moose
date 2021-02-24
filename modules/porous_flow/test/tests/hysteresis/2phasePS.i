@@ -108,6 +108,7 @@
   []
   [temperature]
     type = PorousFlowTemperature
+    temperature = 20
   []
   [massfrac]
     type = PorousFlowMassFraction

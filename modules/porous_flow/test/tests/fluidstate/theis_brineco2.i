@@ -159,6 +159,7 @@
 [Materials]
   [temperature]
     type = PorousFlowTemperature
+    temperature = 20
   []
   [brineco2]
     type = PorousFlowFluidState
