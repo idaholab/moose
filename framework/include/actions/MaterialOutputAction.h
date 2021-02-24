@@ -36,7 +36,7 @@ public:
   MaterialOutputAction(InputParameters params);
   virtual void act() override;
 
-private:
+protected:
   /**
    * Helper method for testing if the material exists as a block or boundary material
    * @tparam T The property type (e.g., REAL)
@@ -45,7 +45,7 @@ private:
   template <typename T>
   bool hasProperty(const std::string & property_name);
 
-  /*
+  /**
    * Helper method for testing if the material exists as a block or boundary material
    * @tparam T The AD property type (e.g., Real)
    * @param property_name The name of the AD property to test
@@ -53,6 +53,28 @@ private:
   template <typename T>
   bool hasADProperty(const std::string & property_name);
 
+  /**
+   * A function to be overriden by derived actions to handle a set of material property types
+   */
+  virtual std::vector<std::string> materialOutput(const std::string & property_name,
+                                                  const MaterialBase & material,
+                                                  bool get_names_only);
+
+  /**
+   * A method for retrieving and partially filling the InputParameters object for an AuxVariable
+   * @param type The type of AuxVariable
+   * @param property_name The property name to associated with that action
+   * @param variable_name The AuxVariable name to create
+   * @param material A MaterialBase object containing the property of interest
+   *
+   * @return An InputParameter object with common properties added.
+   */
+  InputParameters getParams(const std::string & type,
+                            const std::string & property_name,
+                            const std::string & variable_name,
+                            const MaterialBase & material);
+
+private:
   /**
    * Template method for creating the necessary objects for the various material property types
    * @tparam T The type of material property that automatic output is being performed
@@ -70,20 +92,6 @@ private:
   std::vector<std::string> materialOutputHelper(const std::string & property_name,
                                                 const MaterialBase & material,
                                                 bool get_names_only);
-
-  /**
-   * A method for retrieving and partially filling the InputParameters object for an AuxVariable
-   * @param type The type of AuxVariable
-   * @param property_name The property name to associated with that action
-   * @param variable_name The AuxVariable name to create
-   * @param material A MaterialBase object containing the property of interest
-   *
-   * @return An InputParameter object with common properties added.
-   */
-  InputParameters getParams(const std::string & type,
-                            const std::string & property_name,
-                            const std::string & variable_name,
-                            const MaterialBase & material);
 
   /// Pointer the MaterialData object storing the block restricted materials
   std::shared_ptr<MaterialData> _block_material_data;

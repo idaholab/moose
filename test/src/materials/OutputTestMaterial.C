@@ -29,6 +29,8 @@ OutputTestMaterial::validParams()
   params.addParam<std::string>("rankfourtensor_property_name",
                                "rankfourtensor_property",
                                "The name of the rank four tensor property");
+  params.addParam<std::string>("stdvector_property_name",
+                               "The name of the standard vector property");
   params.addParam<Real>(
       "real_factor", 0, "Add this factor to all of the scalar real material property");
   params.addCoupledVar("variable",
@@ -50,6 +52,11 @@ OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters)
     _factor(getParam<Real>("real_factor")),
     _variable(coupledValue("variable"))
 {
+  if (isParamValid("stdvector_property_name"))
+    _stdvector_property =
+        &declareProperty<std::vector<Real>>(getParam<std::string>("stdvector_property_name"));
+  else
+    _stdvector_property = nullptr;
 }
 
 OutputTestMaterial::~OutputTestMaterial() {}
@@ -79,4 +86,11 @@ OutputTestMaterial::computeQpProperties()
         for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
           _rankfourtensor_property[_qp](i, j, k, l) =
               i * 1000 + j * 100 + k * 10 + l + _variable[_qp] / 10.0;
+
+  if (_stdvector_property)
+  {
+    (*_stdvector_property)[_qp].resize(2);
+    (*_stdvector_property)[_qp][0] = vec(0);
+    (*_stdvector_property)[_qp][1] = vec(1);
+  }
 }
