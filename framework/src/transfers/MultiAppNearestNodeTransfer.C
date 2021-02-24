@@ -23,7 +23,6 @@
 #include "libmesh/dof_object.h"
 
 // TIMPI includes
-#include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
 registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
@@ -351,6 +350,7 @@ MultiAppNearestNodeTransfer::execute()
       // Quadrature points from processor 'pid'
       auto & incoming_qps_from_pid = incoming_qps[pid];
       // Store data for late use
+      incoming_qps_from_pid.reserve(incoming_qps_from_pid.size() + qps.size());
       std::copy(qps.begin(), qps.end(), std::back_inserter(incoming_qps_from_pid));
     };
 
@@ -358,22 +358,22 @@ MultiAppNearestNodeTransfer::execute()
 
     for (auto & qps : incoming_qps)
     {
-      processor_id_type i_proc = qps.first;
+      const processor_id_type pid = qps.first;
 
       if (_fixed_meshes)
       {
-        _cached_froms[i_proc].resize(qps.second.size());
-        _cached_dof_ids[i_proc].resize(qps.second.size());
+        _cached_froms[pid].resize(qps.second.size());
+        _cached_dof_ids[pid].resize(qps.second.size());
       }
 
-      std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+      std::vector<Real> & outgoing_evals = processor_outgoing_evals[pid];
       // Resize this vector to two times the size of the incoming_qps
       // vector because we are going to store both the value from the nearest
       // local node *and* the distance between the incoming_qp and that node
       // for later comparison purposes.
       outgoing_evals.resize(2 * qps.second.size());
 
-      for (unsigned int qp = 0; qp < qps.second.size(); qp++)
+      for (std::size_t qp = 0; qp < qps.second.size(); qp++)
       {
         const Point & qpt = qps.second[qp];
         outgoing_evals[2 * qp] = std::numeric_limits<Real>::max();
@@ -420,8 +420,8 @@ MultiAppNearestNodeTransfer::execute()
                 if (_fixed_meshes)
                 {
                   // Cache the nearest nodes.
-                  _cached_froms[i_proc][qp] = i_local_from;
-                  _cached_dof_ids[i_proc][qp] = from_dof;
+                  _cached_froms[pid][qp] = i_local_from;
+                  _cached_dof_ids[pid][qp] = from_dof;
                 }
               }
             }
@@ -435,8 +435,8 @@ MultiAppNearestNodeTransfer::execute()
   {
     for (auto & problem_from : _cached_froms)
     {
-      processor_id_type i_proc = problem_from.first;
-      std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+      const processor_id_type pid = problem_from.first;
+      std::vector<Real> & outgoing_evals = processor_outgoing_evals[pid];
       outgoing_evals.resize(problem_from.second.size());
 
       for (unsigned int qp = 0; qp < outgoing_evals.size(); qp++)
@@ -447,8 +447,8 @@ MultiAppNearestNodeTransfer::execute()
             Moose::VarKindType::VAR_ANY,
             Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
-        dof_id_type from_dof = _cached_dof_ids[i_proc][qp];
-        // outgoing_evals[qp] = (*from_sys.solution)(_cached_dof_ids[i_proc][qp]);
+        dof_id_type from_dof = _cached_dof_ids[pid][qp];
+        // outgoing_evals[qp] = (*from_sys.solution)(_cached_dof_ids[pid][qp]);
         outgoing_evals[qp] = (*from_sys.solution)(from_dof);
       }
     }
@@ -459,6 +459,7 @@ MultiAppNearestNodeTransfer::execute()
     // evals for processor 'pid'
     auto & incoming_evals_for_pid = incoming_evals[pid];
     // Copy evals for late use
+    incoming_evals_for_pid.reserve(incoming_evals_for_pid.size() + evals.size());
     std::copy(evals.begin(), evals.end(), std::back_inserter(incoming_evals_for_pid));
   };
 

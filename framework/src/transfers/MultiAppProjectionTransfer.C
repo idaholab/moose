@@ -28,7 +28,6 @@
 #include "libmesh/default_coupling.h"
 
 // TIMPI includes
-#include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
 void
@@ -352,6 +351,7 @@ MultiAppProjectionTransfer::execute()
       // Quadrature points from processor 'pid'
       auto & incoming_qps_from_pid = incoming_qps[pid];
       // Store data for late use
+      incoming_qps_from_pid.reserve(incoming_qps_from_pid.size() + qps.size());
       std::copy(qps.begin(), qps.end(), std::back_inserter(incoming_qps_from_pid));
     };
 
@@ -364,10 +364,10 @@ MultiAppProjectionTransfer::execute()
 
   for (auto & qps : _cached_qps)
   {
-    processor_id_type i_proc = qps.first;
+    const processor_id_type pid = qps.first;
 
-    outgoing_evals_ids[i_proc].resize(qps.second.size(),
-                                      std::make_pair(OutOfMeshValue, libMesh::invalid_uint));
+    outgoing_evals_ids[pid].resize(qps.second.size(),
+                                   std::make_pair(OutOfMeshValue, libMesh::invalid_uint));
 
     for (unsigned int qp = 0; qp < qps.second.size(); qp++)
     {
@@ -379,10 +379,10 @@ MultiAppProjectionTransfer::execute()
       {
         if (local_bboxes[i_from].contains_point(qpt))
         {
-          outgoing_evals_ids[i_proc][qp].first =
+          outgoing_evals_ids[pid][qp].first =
               (*local_meshfuns[i_from])(qpt - _from_positions[i_from]);
           if (_current_direction == FROM_MULTIAPP)
-            outgoing_evals_ids[i_proc][qp].second = _local2global_map[i_from];
+            outgoing_evals_ids[pid][qp].second = _local2global_map[i_from];
         }
       }
     }
@@ -401,6 +401,7 @@ MultiAppProjectionTransfer::execute()
         // evals for processor 'pid'
         auto & incoming_evals_ids_for_pid = incoming_evals_ids[pid];
         // Copy evals for late use
+        incoming_evals_ids_for_pid.reserve(incoming_evals_ids_for_pid.size() + evals.size());
         std::copy(evals.begin(), evals.end(), std::back_inserter(incoming_evals_ids_for_pid));
       };
 
