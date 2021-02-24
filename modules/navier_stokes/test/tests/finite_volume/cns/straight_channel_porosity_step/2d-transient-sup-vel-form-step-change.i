@@ -274,11 +274,18 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     boundary = 'right'
     momentum_component = 'x'
   []
-  [rho_v_pressure]
+  [rho_v_pressure_inlet_walls]
     type = NSFVPorosityMomentumPressureBC
-    boundary = 'top bottom left right'
+    boundary = 'top bottom left'
     variable = rho_v
     momentum_component = 'y'
+  []
+  [rho_v_advection_and_pressure_outlet]
+    type = NSFVPorosityMomentumMatAdvectionOutflowBC
+    boundary = 'right'
+    variable = rho_v
+    momentum_component = 'y'
+    vel = velocity
   []
   [rho_et_left]
     type = FVNeumannBC
@@ -331,7 +338,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Executioner]
   solve_type = NEWTON
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 2e-6
   type = Transient
   num_steps = 1000
   [TimeStepper]
