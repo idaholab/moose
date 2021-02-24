@@ -1,4 +1,4 @@
-advected_interp_method='upwind'
+flux_interp_method='upwind'
 # Establish initial conditions based on STP
 rho_initial=1.2754
 p_initial=1.01e5
@@ -212,10 +212,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho
   []
   [mass_advection]
-    type = FVMatAdvection
+    type = NSFVAdvection
     variable = rho
-    vel = 'mass_flux'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
@@ -230,11 +229,10 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_et
   []
   [energy_advection]
-    type = FVMatAdvection
+    type = NSFVAdvection
     variable = rho_et
     advected_quantity = 'ht'
-    vel = 'mass_flux'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
 []
 
@@ -246,12 +244,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${mass_flux_in}
   []
   [rho_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVAdvectionFluxBC
     boundary = 'right'
     variable = rho
-    vel = 'mass_flux'
     advected_quantity = 1
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
   [rho_u_left]
     type = FVNeumannBC
@@ -272,12 +269,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${enthalpy_flux_in}
   []
   [rho_et_right]
-    type = FVMatAdvectionOutflowBC
+    type = NSFVAdvectionFluxBC
     boundary = 'right'
     variable = rho_et
-    vel = 'mass_flux'
     advected_quantity = 'ht'
-    advected_interp_method = ${advected_interp_method}
+    flux_interp_method = ${flux_interp_method}
   []
 []
 
