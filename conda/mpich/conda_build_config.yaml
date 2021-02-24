@@ -38,7 +38,7 @@ llvmopenmp:
   - 11.0.0 h73239a0_1
 
 osxfortran:
-  - 7.3.0 h22b1bf0_7
+  - 9.3.0 h18f7dce_13
 
 libcxx:
   - 11.0.0 h4c3b8ed_1
