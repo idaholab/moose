@@ -210,12 +210,62 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     const std::vector<std::string> & cli_args_name =
         MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
 
-    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
+    std::size_t col_position = 0;
+
+    unsigned int count_brackets = 0;
+    for (unsigned int i = 0; i < cli_args_name.size(); ++i)
     {
-      if (col > 0)
-        oss << ";";
-      oss << cli_args_name[col] << "=" << Moose::stringify(row[col]);
+      if (cli_args_name[i].find("[") != std::string::npos)
+      {
+        count_brackets++;
+        const std::vector<std::string> & vector_param = MooseUtils::split(cli_args_name[i], "[");
+        const std::vector<std::string> & index_string =
+            MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
+
+        oss << vector_param[0] << "='";
+        std::vector<unsigned int> col_count;
+        for (unsigned j = 0; j < index_string.size(); ++j)
+        {
+          if (index_string[j].find("(") != std::string::npos)
+            oss << std::stod(index_string[j].substr(index_string[j].find("(") + 1));
+          else
+          {
+            unsigned int index = MooseUtils::stringToInteger(index_string[j]);
+            if (index >= row.size())
+              mooseError("The provided global column index (",
+                         index,
+                         ") for ",
+                         vector_param[0],
+                         " is out of bound.");
+            oss << Moose::stringify(row[index]);
+            if (std::find(col_count.begin(), col_count.end(), index) == col_count.end())
+              col_count.push_back(index);
+          }
+          if (j != index_string.size() - 1)
+            oss << " ";
+        }
+        oss << "';";
+        col_position += col_count.size();
+      }
+      else
+      {
+        oss << cli_args_name[i] << "=" << Moose::stringify(row[col_position]) << ";";
+        col_position++;
+      }
     }
+
+    if (count_brackets != 0 && count_brackets != cli_args_name.size())
+      mooseError("If the bracket is used, it must be provided to every parameter.");
+
+    if (count_brackets == 0)
+      if (_sampler.getNumberOfCols() != cli_args_name.size())
+        mooseError("param_names",
+                   "The number of columns (",
+                   _sampler.getNumberOfCols(),
+                   ") must match the number of parameters (",
+                   cli_args_name.size(),
+                   ").");
+
     args = oss.str();
   }
 
