@@ -125,6 +125,7 @@
 [VectorPostprocessors]
   [./axial_str]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     start_point = '0.5 0.0 0.0'
     end_point = '0.5 0.150080 0.0'
     variable = 'axial_strain temp'

@@ -384,6 +384,7 @@
 [VectorPostprocessors]
   [./soln]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     sort_by = y
     variable = 'disp_x wc_z stress_yx couple_stress_zy'
     start_point = '0 0 0'
