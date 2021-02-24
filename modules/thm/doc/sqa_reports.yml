@@ -1,38 +1,32 @@
 Applications:
     thm:
-        content_directory: doc/content
-        log_hidden_syntax: WARNING
+        app_types:
+            - THMApp
+        content_directory: ${ROOT_DIR}/doc/content
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_stub_files: WARNING
         log_missing_description: WARNING
         log_missing_markdown: WARNING
         show_warning: false
 
 Documents:
-    log_software_requirements_specification: WARNING
-    log_software_design_description: WARNING
-    log_software_test_plan: WARNING
-    log_requirements_traceablity_matrix: WARNING
-    log_verification_validation_plan: WARNING
-    log_safety_software_determination: WARNING
-    log_quality_level_determination: WARNING
-    log_enterprise_architecture_entry: WARNING
-    log_project_management_plan: WARNING
-    log_software_quality_plan: WARNING
-    log_configuration_management_plan: WARNING
-    log_asset_management_plan: WARNING
-    log_verification_validation_plan: WARNING
-    log_user_manual: WARNING
-    log_theory_manual: WARNING
+    software_requirements_specification: sqa/thm_srs.md
+    software_design_description: sqa/thm_sdd.md
+    software_test_plan: sqa/thm_stp.md
+    requirements_traceablity_matrix: sqa/thm_rtm.md
+    verification_validation_plan: sqa/thm_vvr.md
+    failure_analysis_report: sqa/thm_far.md
+    log_default: WARNING
     show_warning: false
 
 Requirements:
     thm:
         directories:
-            - test/tests
-        log_testable: WARNING
-        log_duplicate_requirement: WARNING
+            - ${ROOT_DIR}/test
         log_missing: WARNING
         log_missing_design: WARNING
         log_missing_issues: WARNING
-        log_issue_format: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
         show_warning: false

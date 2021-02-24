@@ -1,0 +1,14 @@
+directories:
+    - ${THM_DIR}/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+    - fluid_properties
+    - misc
+    - heat_conduction
+    - ray_tracing
+    - rdg
+repos:
+    default: https://gitlab.software.inl.gov/idaholab/thm
+reports: !include ${THM_DIR}/doc/sqa_reports.yml
