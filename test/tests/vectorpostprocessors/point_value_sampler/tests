@@ -25,4 +25,15 @@
 
     requirement = 'The system shall report an error when requested sample points do not fall within the mesh domain.'
   [../]
+
+  [./warning_discontinuous_variable_at_node]
+    type = 'RunApp'
+    input = 'point_value_sampler_fv.i'
+    expect_out = "A discontinuous variable is sampled on a face"
+    cli_args = 'VectorPostprocessors/point_sample/points=\'0.1 0.1 0\' VectorPostprocessors/point_sample/warn_discontinuous_face_values=true'
+    allow_warnings = true
+
+    requirement = 'The system shall report a warning when requested sample points are on element faces and the variables requested are discontinuous.'
+    issues = '17115'
+  [../]
 []

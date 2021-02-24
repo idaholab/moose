@@ -61,6 +61,7 @@
 [VectorPostprocessors]
   [./point_sample]
     type = PointValueSampler
+    warn_discontinuous_face_values = false
     variable = 'u v'
     points = '0.09 0.09 0  0.23 0.4 0  0.78 0.2 0'
     sort_by = x

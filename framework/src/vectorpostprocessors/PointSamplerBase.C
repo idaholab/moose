@@ -27,6 +27,8 @@ PointSamplerBase::validParams()
       "variable", "The names of the variables that this VectorPostprocessor operates on");
   params.addParam<PostprocessorName>(
       "scaling", 1.0, "The postprocessor that the variables are multiplied with");
+  params.addParam<bool>(
+      "warn_discontinuous_face_values", true, "Whether to return a warning if a discontinuous variable is sampled on a face");
 
   return params;
 }
@@ -41,7 +43,9 @@ PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh()),
-    _pp_value(getPostprocessorValue("scaling"))
+    _pp_value(getPostprocessorValue("scaling")),
+    _warn_discontinuous_face_values(getParam<bool>("warn_discontinuous_face_values")),
+    _discontinuous_variables(false)
 {
   addMooseVariableDependency(&mooseVariableField());
 
@@ -72,6 +76,11 @@ PointSamplerBase::initialize()
   _point_values.resize(_points.size());
   std::for_each(
       _point_values.begin(), _point_values.end(), [](std::vector<Real> & vec) { vec.clear(); });
+
+  // Check for elemental variables, which are ill-defined on faces for this object
+  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+    if (!_assembly.getFE(_coupled_moose_vars[i]->feType(), _mesh.dimension())->get_continuity())
+      _discontinuous_variables = true;
 }
 
 void
@@ -162,7 +171,18 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p)
   const Elem * elem = (*_pl)(p);
 
   if (elem && elem->processor_id() == processor_id())
+  {
+    // Print a warning if it's on a face and a variable is discontinuous
+    if (_warn_discontinuous_face_values && _discontinuous_variables)
+      for (const auto s : elem->side_index_range())
+        if (elem->build_side_ptr(s)->contains_point(p))
+        {
+          mooseWarning("A discontinuous variable is sampled on a face, at ", p);
+          break;
+        }
+
     return elem;
+  }
 
   return nullptr;
 }
