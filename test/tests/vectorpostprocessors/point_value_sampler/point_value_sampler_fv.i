@@ -62,7 +62,7 @@
   [./point_sample]
     type = PointValueSampler
     variable = 'u v'
-    points = '0.1 0.1 0  0.23 0.4 0  0.78 0.2 0'
+    points = '0.09 0.09 0  0.23 0.4 0  0.78 0.2 0'
     sort_by = x
   [../]
 []

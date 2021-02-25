@@ -23,7 +23,6 @@
   [sample]
     type = LatinHypercube
     num_rows = 100000
-    num_bins = 50
     distributions = 'C_dist f_dist init_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []

@@ -1,0 +1,40 @@
+[Tests]
+  design = Samplers/index.md
+  issues = '#14830'
+
+  [swap]
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = swap_out.json
+    cli_args = 'Reporters/test/test_type=swap Outputs/file_base=swap_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
+
+    requirement = "The system shall include a utility for swapping values within a vector of data."
+  []
+
+  [serial]
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = shuffle_out.json
+    cli_args = 'Reporters/test/test_type=shuffle Outputs/file_base=shuffle_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
+
+    requirement = "The system shall include a utility for shuffling values within a vector of data."
+  []
+
+  [resample]
+    type = JSONDiff
+    input = shuffle.i
+    jsondiff = resample_out.json
+    cli_args = 'Reporters/test/test_type=resample Outputs/file_base=resample_out'
+    allow_test_objects = true
+    max_parallel = 3 # test written for up to 3 processors
+    recover = false # steady
+
+    requirement = "The system shall include a utility for resampling values within a vector of data."
+  []
+[]

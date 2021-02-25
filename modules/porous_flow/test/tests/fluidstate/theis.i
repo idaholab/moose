@@ -129,6 +129,7 @@
 [Materials]
   [temperature]
     type = PorousFlowTemperature
+    temperature = 20
   []
   [waterncg]
     type = PorousFlowFluidState
