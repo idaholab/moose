@@ -22,12 +22,14 @@ CNSFVMomImplicitPressureBC::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this BC applies to.");
+  params.addParam<bool>(
+      "include_porosity", false, "Whether to multiply the pressure times porosity");
   return params;
 }
 
 CNSFVMomImplicitPressureBC::CNSFVMomImplicitPressureBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
-    _eps(getMaterialProperty<Real>(nms::porosity)),
+    _eps(getParam<bool>("include_porosity") ? &getMaterialProperty<Real>(nms::porosity) : nullptr),
     _pressure(getADMaterialProperty<Real>(nms::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
@@ -36,5 +38,8 @@ CNSFVMomImplicitPressureBC::CNSFVMomImplicitPressureBC(const InputParameters & p
 ADReal
 CNSFVMomImplicitPressureBC::computeQpResidual()
 {
-  return _normal(_index) * _pressure[_qp] * _eps[_qp];
+  auto resid = _normal(_index) * _pressure[_qp];
+  if (_eps)
+    resid *= (*_eps)[_qp];
+  return resid;
 }
