@@ -512,8 +512,7 @@ protected:
   GeochemistryDebyeHuckel _debye_huckel;
   /// Neutral species activity coefficients
   std::map<std::string, GeochemistryNeutralSpeciesActivity> _neutral_species_activity;
-  // Helper for converting json node to Real from string, if needed (see
-  // https://www.urbandictionary.com/define.php?term=get%20real)
+  // Helper for converting json node to Real from string
   static Real getReal(const nlohmann::json & node);
 
 private:
