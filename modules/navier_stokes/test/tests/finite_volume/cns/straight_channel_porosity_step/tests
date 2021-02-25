@@ -45,20 +45,6 @@
     requirement = 'The system shall be able to solve a porous version of the steady Euler equations with a step change in porosity using an implementation in which the advective flux is linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
     cli_args = "Mesh/cartesian/nx=10 Outputs/out/file_base=mass-flux-impl-step-change-average flux_interp_method='average'"
   []
-  [mass_flux_impl_transient]
-    type = Exodiff
-    input = transient-mass-flux-impl-step-change.i
-    exodiff = transient-mass-flux-impl-step-change_out.e
-    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with a step change in porosity using an implementation in which the advective flux is upwinded to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
-    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
-  []
-  [mass_flux_impl_transient_average]
-    type = Exodiff
-    input = transient-mass-flux-impl-step-change.i
-    exodiff = transient-mass-flux-impl-step-change-average.e
-    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with a step change in porosity using an implementation in which the advective flux is linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
-    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8 Outputs/out/file_base=transient-mass-flux-impl-step-change-average flux_interp_method='average'"
-  []
   [darcy_u_impl_transient_2d]
     type = Exodiff
     input = 2d-transient-sup-vel-form-step-change.i
@@ -87,11 +73,41 @@
     method = '!dbg'
     valgrind = 'none'
   []
-  [mass_flux_impl_transient_average_all_terms]
+  [transient-mass-flux-advector-upwind-advected]
     type = Exodiff
-    input = transient-mass-flux-impl-step-change-all-terms-average.i
-    exodiff = transient-mass-flux-impl-step-change-all-terms-average_out.e
-    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the advective flux is linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
+    input = transient-mass-flux-advector.i
+    exodiff = transient-mass-flux-advector_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the mass flux is the advector and linearly interpolated, the advected quantities are upwinded, and the product of porosity and pressure is linearly interpolated.'
     cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
+  []
+  [transient-mass-flux-advector-average-advected]
+    type = Exodiff
+    input = transient-mass-flux-advector.i
+    exodiff = transient-mass-flux-advector-average.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the mass flux is the advector and linearly interpolated, the advected quantities are linearly interpolated, and the product of porosity and pressure is linearly interpolated.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Outputs/out/file_base=transient-mass-flux-advector-average Executioner/TimeStepper/dt=1e-8 GlobalParams/advected_interp_method='average'"
+  []
+  [transient-real-velocity-advector-upwind-advected]
+    type = Exodiff
+    input = transient-real-velocity-advector.i
+    exodiff = transient-real-velocity-advector_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the real velocity is the advector and linearly interpolated, the advected quantities are upwinded, and the product of porosity and pressure is linearly interpolated.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Executioner/TimeStepper/dt=1e-8"
+  []
+  [transient-real-velocity-advector-average-advected]
+    type = Exodiff
+    input = transient-real-velocity-advector.i
+    exodiff = transient-real-velocity-advector-average.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the real velocity is the advector and linearly interpolated, the advected quantities are linearly interpolated, and the product of porosity and pressure is linearly interpolated.'
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Outputs/out/file_base=transient-real-velocity-advector-average Executioner/TimeStepper/dt=1e-8 GlobalParams/advected_interp_method='average'"
+  []
+  [2d-transient-real-velocity-advector-upwind-advected]
+    type = Exodiff
+    input = 2d-transient-real-velocity-advector.i
+    exodiff = 2d-transient-real-velocity-advector_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the real velocity is the advector and linearly interpolated, the advected quantities are upwinded, and the product of porosity and pressure is linearly interpolated.'
+    cli_args = "Outputs/out/execute_on='final'"
+    method = "!dbg"
+    valgrind = 'none'
   []
 []

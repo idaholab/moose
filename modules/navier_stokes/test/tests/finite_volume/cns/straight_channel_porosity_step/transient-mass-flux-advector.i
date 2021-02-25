@@ -1,5 +1,3 @@
-# upwind is not stable
-flux_interp_method='average'
 # Establish initial conditions based on STP
 rho_initial_left=1.2754
 p_initial_left=1.01e5
@@ -25,12 +23,11 @@ e_in = ${e_initial_left}
 ht_in=${fparse 0.5 * real_u_in * real_u_in + gamma * e_in}
 enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 
-# [GlobalParams]
-#   vel = 'nonsense'
-#   advected_interp_method = 'nonsense'
-#   momentum_component = 'nonsense'
-#   advected_quantity = 'nonsense'
-# []
+[GlobalParams]
+  advected_interp_method = 'upwind'
+  vel = 'mass_flux'
+  # momentum_component = 'nonsense'
+[]
 
 [Mesh]
   [cartesian]
@@ -214,9 +211,8 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho
   []
   [mass_advection]
-    type = NSFVAdvection
+    type = FVMatAdvection
     variable = rho
-    flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
@@ -225,9 +221,8 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_u
   []
   [momentum_advection]
-    type = NSFVAdvection
+    type = FVMatAdvection
     variable = rho_u
-    flux_interp_method = ${flux_interp_method}
     advected_quantity = 'vel_x'
   []
   [momentum_pressure]
@@ -241,10 +236,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_et
   []
   [energy_advection]
-    type = NSFVAdvection
+    type = FVMatAdvection
     variable = rho_et
     advected_quantity = 'ht'
-    flux_interp_method = ${flux_interp_method}
   []
 []
 
@@ -256,19 +250,11 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${mass_flux_in}
   []
   [rho_right]
-    type = NSFVAdvectionFluxBC
+    type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho
     advected_quantity = 1
-    flux_interp_method = ${flux_interp_method}
   []
-  # [rho_u_advection]
-  #   type = NSFVAdvectionFluxBC
-  #   boundary = 'left right'
-  #   variable = rho_u
-  #   advected_quantity = 'vel_x'
-  #   flux_interp_method = ${flux_interp_method}
-  # []
   [rho_u_advection_left]
     type = FVNeumannBC
     boundary = 'left'
@@ -276,11 +262,10 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${advective_momentum_flux_in}
   []
   [rho_u_advection_right]
-    type = NSFVAdvectionFluxBC
+    type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_u
     advected_quantity = 'vel_x'
-    flux_interp_method = ${flux_interp_method}
   []
   [rho_u_pressure_left]
     type = NSFVPorosityMomentumPressureBC
@@ -301,11 +286,10 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${enthalpy_flux_in}
   []
   [rho_et_right]
-    type = NSFVAdvectionFluxBC
+    type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'ht'
-    flux_interp_method = ${flux_interp_method}
   []
 []
 
@@ -335,7 +319,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Executioner]
   solve_type = NEWTON
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-8
   type = Transient
   num_steps = 1000
   [TimeStepper]
