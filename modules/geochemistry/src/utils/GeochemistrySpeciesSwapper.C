@@ -87,17 +87,15 @@ GeochemistrySpeciesSwapper::constructInverseMatrix(const ModelGeochemicalDatabas
   for (unsigned i = 0; i < num_cols; ++i)
     _swap_matrix(basis_index_to_replace, i) = mgd.eqm_stoichiometry(eqm_index_to_insert, i);
 
+  // record the swap matrix since the SVD trashes it
   _true_swap_matrix = _swap_matrix;
 
   // In order to invert _swap_matrix, perform the SVD: A = U * D * VT
-  try
-  {
-    _swap_matrix.svd(_swap_sigma, _swap_U, _swap_VT);
-  }
-  catch (...)
-  {
-    mooseException("Matrix is not invertible, which signals an invalid basis swap");
-  }
+  // Although every matrix has a SVD, this process might fail due to numerical errors.  Therefore
+  // the following could be wrapped in a try-catch block, but I have never been able to trigger a
+  // failure since _swap_matrix is always so well-formed due to all the checks on the database while
+  // parsing it
+  _swap_matrix.svd(_swap_sigma, _swap_U, _swap_VT);
   const Real l1norm = _swap_sigma.l1_norm();
   for (unsigned i = 0; i < num_cols; ++i)
     if (std::abs(_swap_sigma(i) / l1norm) < _stoi_tol)
@@ -188,6 +186,18 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
   // flag indicating whether the redox_lhs is the equilibrium species that is being put into the
   // basis
   const bool redox_lhs_going_to_basis = (eqm_name == mgd.redox_lhs);
+  mooseAssert(
+      !redox_lhs_going_to_basis,
+      "Should not be able to swap the redox LHS into the basis"); // At present, it is impossible to
+                                                                  // swap redox_lhs into the basis,
+                                                                  // since redox_lhs cannot be an
+                                                                  // equilibrium species, because it
+                                                                  // is explicitly excluded in
+                                                                  // PertinentGeochemicalSystem when
+                                                                  // building the secondary species.
+  /*
+  In past versions of the code, it was possible to swap the redox LHS into the basis.
+  If you want to make it possible again then mgd needs to be modified as follows
   if (redox_lhs_going_to_basis)
   {
     // need to make the redox_lhs equal to the species that is being taken from the basis
@@ -211,6 +221,7 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
             coef * (mgd.redox_log10K(red, t) - mgd.eqm_log10K(eqm_index_to_insert, t));
     }
   }
+  */
 
   // record that the swap has occurred
   if (mgd.swap_to_original_basis.n() == 0)
