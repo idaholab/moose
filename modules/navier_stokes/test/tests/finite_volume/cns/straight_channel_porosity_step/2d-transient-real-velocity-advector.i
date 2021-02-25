@@ -11,17 +11,14 @@ rho_et_initial_left=${fparse rho_initial_left * et_initial_left}
 rho_in=${rho_initial_left}
 # u refers to the superficial velocity
 u_in=1
-mass_flux_in=${fparse u_in * rho_in}
+rho_u_in=${fparse u_in * rho_in}
+mass_flux_in=${rho_u_in}
 eps_in=1
-real_u_in=${fparse u_in / eps_in}
-advective_momentum_flux_in=${fparse rho_in * u_in * real_u_in}
 # prescribe outlet pressure = initial pressure on right
 p_out=${p_initial_right}
 eps_out=0.5
-# prescribe inlet e = initial e on left
-e_in = ${e_initial_left}
-ht_in=${fparse 0.5 * real_u_in * real_u_in + gamma * e_in}
-enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
+T_in=273.15
+two_term_boundary_expansion=true
 
 [GlobalParams]
   advected_interp_method = 'upwind'
@@ -64,17 +61,21 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Variables]
   [rho]
     type = MooseVariableFVReal
+    two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
   [rho_u]
     type = MooseVariableFVReal
     initial_condition = 1e-15
+    two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
   [rho_v]
     type = MooseVariableFVReal
     initial_condition = 1e-15
+    two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
   [rho_et]
     type = MooseVariableFVReal
+    two_term_boundary_expansion = ${two_term_boundary_expansion}
   []
 []
 
@@ -263,45 +264,64 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho
     advected_quantity = 'superficial_rho'
   []
-  [rho_u_advection_left]
-    type = FVNeumannBC
+
+  [rho_u_left] # implicitly includes advection and pressure
+    type = FVDirichletBC
     boundary = 'left'
     variable = rho_u
-    value = ${advective_momentum_flux_in}
+    value = ${rho_u_in}
+  []
+  # no advection through walls
+  [rho_u_pressure_walls]
+    type = NSFVPorosityMomentumPressureBC
+    boundary = 'top bottom'
+    variable = rho_u
+    momentum_component = 'x'
   []
   [rho_u_advection_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_u
   []
-  [rho_u_pressure_left_and_walls]
-    type = NSFVPorosityMomentumPressureBC
-    boundary = 'left top bottom'
-    variable = rho_u
-    momentum_component = 'x'
-  []
-  [rho_u_pressure_right]
+  [rho_u_pressure_right] # Normal in x so apply all of pressure
     type = FVNeumannBC
     boundary = 'right'
     variable = rho_u
     value = ${fparse -p_out * eps_out}
+  []
+
+  [rho_v_left] # implicitly includes advection and pressure
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = rho_v
+    value = 0
+  []
+  [rho_v_pressure_walls]
+    type = NSFVPorosityMomentumPressureBC
+    boundary = 'top bottom'
+    variable = rho_v
+    momentum_component = 'y'
   []
   [rho_v_advection_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_v
   []
-  [rho_v_pressure]
-    type = NSFVPorosityMomentumPressureBC
-    boundary = 'left right top bottom'
-    variable = rho_v
-    momentum_component = 'y'
-  []
-  [rho_et_left]
+  [rho_v_pressure_right] # There is no normal in y so no "pressure flux"
     type = FVNeumannBC
+    boundary = 'right'
+    variable = rho_v
+    value = 0
+  []
+
+  [rho_et_left]
+    type = NSFVFluidEnergySpecifiedTemperatureBC
     boundary = 'left'
     variable = rho_et
-    value = ${enthalpy_flux_in}
+    temperature = ${T_in}
+    superficial_rhou = ${rho_u_in}
+    superficial_rhov = 0
+    fp = fp
   []
   [rho_et_right]
     type = FVMatAdvectionOutflowBC
