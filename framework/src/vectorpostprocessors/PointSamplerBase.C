@@ -28,7 +28,9 @@ PointSamplerBase::validParams()
   params.addParam<PostprocessorName>(
       "scaling", 1.0, "The postprocessor that the variables are multiplied with");
   params.addParam<bool>(
-      "warn_discontinuous_face_values", true, "Whether to return a warning if a discontinuous variable is sampled on a face");
+      "warn_discontinuous_face_values",
+      true,
+      "Whether to return a warning if a discontinuous variable is sampled on a face");
 
   return params;
 }
@@ -168,20 +170,48 @@ PointSamplerBase::transferPointsVector(std::vector<Point> && points)
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p)
 {
-  const Elem * elem = (*_pl)(p);
-
-  if (elem && elem->processor_id() == processor_id())
+  if (_discontinuous_variables)
   {
-    // Print a warning if it's on a face and a variable is discontinuous
-    if (_warn_discontinuous_face_values && _discontinuous_variables)
-      for (const auto s : elem->side_index_range())
-        if (elem->build_side_ptr(s)->contains_point(p))
-        {
-          mooseWarning("A discontinuous variable is sampled on a face, at ", p);
-          break;
-        }
+    // Get all possible elements the point may be in
+    std::set<const Elem *> candidate_elements;
+    (*_pl)(p, candidate_elements);
 
-    return elem;
+    if (candidate_elements.begin() != candidate_elements.end())
+    {
+      // Look at all the element IDs
+      std::set<dof_id_type> candidate_ids;
+      std::transform(candidate_elements.begin(),
+                     candidate_elements.end(),
+                     std::inserter(candidate_ids, candidate_ids.end()),
+                     [](const Elem * elem) { return elem->id(); });
+
+      // Keep track of the local minimum
+      const dof_id_type local_min = *(candidate_ids.begin());
+
+      // Process owning the global minimum owns the point
+      comm().set_union(candidate_ids);
+      if (local_min == *(candidate_ids.begin()))
+      {
+        const Elem * elem = _mesh.queryElemPtr(local_min);
+
+        // Print a warning if it's on a face and a variable is discontinuous
+        if (_warn_discontinuous_face_values && candidate_ids.size() > 1)
+          mooseWarning("A discontinuous variable is sampled on a face, at ", p);
+
+        // We should have an element and be on the right process at this point
+        mooseAssert(elem->processor_id() == processor_id(), "Wrong process owning the minimum ID");
+        mooseAssert(elem, "Minium ID has no associated element");
+
+        return elem;
+      }
+    }
+  }
+  else
+  {
+    const Elem * elem = (*_pl)(p);
+
+    if (elem && elem->processor_id() == processor_id())
+      return elem;
   }
 
   return nullptr;
