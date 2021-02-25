@@ -17,7 +17,7 @@ import moosesqa
 from .Requirement import Requirement
 from .LogHelper import LogHelper
 
-ISSUE_RE = re.compile(r'^([0-9a-f]{6,40})$|^(\w*#[0-9]+)$', flags=re.MULTILINE)
+ISSUE_RE = re.compile(r'^([0-9a-f]{6,40})$|^(.*#[0-9]+)$', flags=re.MULTILINE)
 
 class RequirementLogHelper(LogHelper):
     COLOR_TEXT = True
