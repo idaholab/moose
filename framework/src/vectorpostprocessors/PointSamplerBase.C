@@ -170,13 +170,14 @@ PointSamplerBase::transferPointsVector(std::vector<Point> && points)
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p)
 {
+  const Elem * elem;
   if (_discontinuous_variables)
   {
     // Get all possible elements the point may be in
     std::set<const Elem *> candidate_elements;
     (*_pl)(p, candidate_elements);
 
-    if (candidate_elements.begin() != candidate_elements.end())
+    if (candidate_elements.size())
     {
       // Look at all the element IDs
       std::set<dof_id_type> candidate_ids;
@@ -185,34 +186,28 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p)
                      std::inserter(candidate_ids, candidate_ids.end()),
                      [](const Elem * elem) { return elem->id(); });
 
-      // Keep track of the local minimum
-      const dof_id_type local_min = *(candidate_ids.begin());
-
       // Process owning the global minimum owns the point
       comm().set_union(candidate_ids);
-      if (local_min == *(candidate_ids.begin()))
-      {
-        const Elem * elem = _mesh.queryElemPtr(local_min);
+      
+      // If we know of the minimum, this'll be valid. Otherwise, it'll be
+      // nullptr which is fine
+      elem = _mesh.queryElemPtr(*(candidate_ids.begin()));
+ 
+      // Print a warning if it's on a face and a variable is discontinuous
+      if (_warn_discontinuous_face_values && candidate_ids.size() > 1)
+        mooseWarning("A discontinuous variable is sampled on a face, at ", p);
 
-        // Print a warning if it's on a face and a variable is discontinuous
-        if (_warn_discontinuous_face_values && candidate_ids.size() > 1)
-          mooseWarning("A discontinuous variable is sampled on a face, at ", p);
-
-        // We should have an element and be on the right process at this point
-        mooseAssert(elem->processor_id() == processor_id(), "Wrong process owning the minimum ID");
-        mooseAssert(elem, "Minium ID has no associated element");
-
-        return elem;
       }
     }
   }
-  else
-  {
-    const Elem * elem = (*_pl)(p);
+  else // continuous variables
+    elem = (*_pl)(p);
 
-    if (elem && elem->processor_id() == processor_id())
-      return elem;
-  }
+  if (elem && elem->processor_id() == processor_id())
+    return elem;
+    
+  return nullptr;
+}
 
   return nullptr;
 }
