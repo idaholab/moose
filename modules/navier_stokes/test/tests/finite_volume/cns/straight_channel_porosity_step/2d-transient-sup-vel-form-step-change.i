@@ -273,6 +273,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_u
     boundary = 'right'
     momentum_component = 'x'
+    include_porosity = true
   []
   [rho_v_pressure_inlet_walls]
     type = NSFVPorosityMomentumPressureBC
