@@ -25,6 +25,7 @@ namespace NS
 
   // Names defined in Navier-Stokes
   static const std::string density = "rho";
+  static const std::string superficial_density = "superficial_rho";
   static const std::string momentum_x = "rhou";
   static const std::string momentum_y = "rhov";
   static const std::string momentum_z = "rhow";
@@ -52,6 +53,7 @@ namespace NS
   static const std::string specific_total_enthalpy = "ht";
   static const std::string enthalpy_density = "rho_h";
   static const std::string total_enthalpy_density = "rho_ht";
+  static const std::string superficial_total_enthalpy_density = "superficial_rho_ht";
 
   static const std::string mach_number = "Mach";
   static const std::string specific_volume = "specific_volume";
