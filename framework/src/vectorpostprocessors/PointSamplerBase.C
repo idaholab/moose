@@ -170,44 +170,38 @@ PointSamplerBase::transferPointsVector(std::vector<Point> && points)
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p)
 {
-  const Elem * elem;
+  const Elem * elem = nullptr;
   if (_discontinuous_variables)
   {
     // Get all possible elements the point may be in
     std::set<const Elem *> candidate_elements;
     (*_pl)(p, candidate_elements);
 
+    // Look at all the element IDs
+    std::set<dof_id_type> candidate_ids;
+    for (auto candidate : candidate_elements)
+      candidate_ids.insert(candidate->id());
+
+    comm().set_union(candidate_ids);
+
+    // Domains without candidate elements will not own the lowest ID one
     if (candidate_elements.size())
     {
-      // Look at all the element IDs
-      std::set<dof_id_type> candidate_ids;
-      std::transform(candidate_elements.begin(),
-                     candidate_elements.end(),
-                     std::inserter(candidate_ids, candidate_ids.end()),
-                     [](const Elem * elem) { return elem->id(); });
-
-      // Process owning the global minimum owns the point
-      comm().set_union(candidate_ids);
-      
-      // If we know of the minimum, this'll be valid. Otherwise, it'll be
+      // If we know of the minimum, this will be valid. Otherwise, it'll be
       // nullptr which is fine
       elem = _mesh.queryElemPtr(*(candidate_ids.begin()));
- 
+
       // Print a warning if it's on a face and a variable is discontinuous
       if (_warn_discontinuous_face_values && candidate_ids.size() > 1)
         mooseWarning("A discontinuous variable is sampled on a face, at ", p);
-
-      }
     }
   }
   else // continuous variables
     elem = (*_pl)(p);
 
-  if (elem && elem->processor_id() == processor_id())
-    return elem;
-    
-  return nullptr;
-}
+  if (elem)
+    if (elem->processor_id() == processor_id())
+      return elem;
 
   return nullptr;
 }
