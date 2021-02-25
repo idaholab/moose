@@ -1,0 +1,78 @@
+{
+  "Header": {
+    "title": "MOOSE thermodynamic database",
+    "original": "{$MOOSE_DIR}/projects/moose/modules/geochemistry/python/original_dbs/gwb_llnl.dat",
+    "date": "13:13 16-03-2020",
+    "original format": "gwb",
+    "activity model": "debye-huckel",
+    "fugacity model": "tsonopoulos",
+    "logk model": "fourth-order",
+    "temperatures": [
+      0.0000,
+      25.0000,
+      60.0000,
+      100.0000,
+      150.0000,
+      200.0000,
+      250.0000,
+      300.0000
+    ],
+    "pressures": [
+      1.0134,
+      1.0134,
+      1.0134,
+      1.0134,
+      4.7600,
+      15.5490,
+      39.7760,
+      85.9270
+    ],
+    "adh": [
+      0.4913,
+      0.5092,
+      0.5450,
+      0.5998,
+      0.6898,
+      0.8099,
+      0.9785,
+      1.2555
+    ],
+    "bdh": [
+      0.3247,
+      0.3283,
+      0.3343,
+      0.3422,
+      0.3533,
+      0.3655,
+      0.3792,
+      0.3965
+    ],
+    "bdot": [
+      0.0174,
+      0.0410,
+      0.0440,
+      0.0460,
+      0.0470,
+      0.0470,
+      0.0340,
+      0.0000
+    ]
+  },
+  "elements": {
+    "Al": {
+      "name": "Aluminum",
+      "molecular weight": 26.9815
+    }
+  },
+  "basis species": {
+    "H2O": {
+      "elements": {
+        "H": 2.000,
+        "O": 1.000
+      },
+      "charge": 0,
+      "radius": 0.0,
+      "molecular weight": 18.0152
+    }
+  }
+}

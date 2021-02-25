@@ -244,6 +244,24 @@
       "charge": 0,
       "radius": 0,
       "molecular weight": 72.8543
+    },
+    "radius_neg1": {
+      "elements": {
+        "H": 1.000,
+        "O": 1.000
+      },
+      "charge": 0,
+      "radius": -1.0,
+      "molecular weight": 1.234
+    },
+    "radius_neg1.5": {
+      "elements": {
+        "H": 1.000,
+        "O": 1.000
+      },
+      "charge": 0,
+      "radius": -1.5,
+      "molecular weight": 2.345
     }
   },
   "secondary species": {
@@ -364,6 +382,15 @@
         1001.2844
       ],
       "note": "this is a note saying that the 1001.2844 has resulted from a crazy extrapolation of logK"
+    },
+    "seq_radius_neg1": {
+      "species": {
+        "radius_neg1": 1.000
+      },
+      "charge": 0,
+      "radius": -1.0,
+      "molecular weight": 3.456,
+      "logk": [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     }
   },
   "mineral species": {

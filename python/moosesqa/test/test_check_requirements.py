@@ -188,16 +188,21 @@ class TestCheckRequirements(unittest.TestCase):
 
     def testIssuesFormat(self):
         issues = ['11600c68be9e8f77e4870d7b8efb26e5ada10a5a',
-                  '11600c68be9e8f77e4870d7b8efb26e5ada10a5a23423',
-                  '11600',
-                  '26exada10a5a',
+                  '11600c68be9e8f77e4870d7b8efb26e5ada10a5a23423', # error, too long
+                  '11600', # error, too short or no #
+                  '26exada10a5a', # error, invalid hex
                   '#12345',
-                  '#1234c']
+                  '#1234c',# # error, invalid hex
+                  'app#1234',
+                  'app-7#1234']
         req0 = moosesqa.Requirement(name='req0', requirement='requirement', design=['Diffusion.md'],
                                     issues=issues, issues_line=1)
+        req0.details = [moosesqa.Detail(name='req0-0', detail='detail')] # add detail so Req. is testable
 
         with self.assertLogs(level='ERROR') as cm:
             moosesqa.check_requirements([req0])
+
+        self.assertEqual(len(cm.output), 4) # only 4 errors
         self.assertIn("(11600c68be9e8f77e4870d7b8efb26e5ada10a5a23423)", cm.output[0])
         self.assertIn(":1", cm.output[0])
 
