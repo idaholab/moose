@@ -542,11 +542,11 @@ MultiAppNearestNodeTransfer::execute()
           for (auto & evals : incoming_evals)
           {
             // processor Id
-            auto i_from = evals.first;
+            const processor_id_type pid = evals.first;
             std::pair<unsigned int, dof_id_type> key(i_to, node->id());
-            if (node_index_map[i_from].find(key) == node_index_map[i_from].end())
+            if (node_index_map[pid].find(key) == node_index_map[pid].end())
               continue;
-            unsigned int qp_ind = node_index_map[i_from][key];
+            unsigned int qp_ind = node_index_map[pid][key];
             // Distances
             if (evals.second[2 * qp_ind] >= min_dist)
               continue;
@@ -559,7 +559,7 @@ MultiAppNearestNodeTransfer::execute()
             if (_fixed_meshes)
             {
               // Cache these indices.
-              _cached_from_inds[node->id()] = i_from;
+              _cached_from_inds[node->id()] = pid;
               _cached_qp_inds[node->id()] = qp_ind;
             }
           }
@@ -620,13 +620,13 @@ MultiAppNearestNodeTransfer::execute()
             Real min_dist = std::numeric_limits<Real>::max();
             for (auto & evals : incoming_evals)
             {
-              auto i_from = evals.first;
+              const processor_id_type pid = evals.first;
 
               std::pair<unsigned int, dof_id_type> key(i_to, point_id);
-              if (node_index_map[i_from].find(key) == node_index_map[i_from].end())
+              if (node_index_map[pid].find(key) == node_index_map[pid].end())
                 continue;
 
-              unsigned int qp_ind = node_index_map[i_from][key];
+              unsigned int qp_ind = node_index_map[pid][key];
               if (evals.second[2 * qp_ind] >= min_dist)
                 continue;
 
@@ -636,7 +636,7 @@ MultiAppNearestNodeTransfer::execute()
               if (_fixed_meshes)
               {
                 // Cache these indices.
-                _cached_from_inds[point_id] = i_from;
+                _cached_from_inds[point_id] = pid;
                 _cached_qp_inds[point_id] = qp_ind;
               } // if _fixed_meshes
             }   // i_from

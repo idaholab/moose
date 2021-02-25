@@ -436,12 +436,12 @@ MultiAppProjectionTransfer::execute()
         for (auto & values_ids : incoming_evals_ids)
         {
           // Current processor id
-          processor_id_type i_proc = values_ids.first;
+          const processor_id_type pid = values_ids.first;
 
           // Ignore the selected processor if the element wasn't found in it's
           // bounding box.
           std::map<std::pair<unsigned int, unsigned int>, unsigned int> & map =
-              element_index_map[i_proc];
+              element_index_map[pid];
           std::pair<unsigned int, unsigned int> key(i_to, elem->id());
           if (map.find(key) == map.end())
             continue;
