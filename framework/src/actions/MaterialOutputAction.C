@@ -202,9 +202,10 @@ MaterialOutputAction::act()
       oss << "\n  " << var_name;
       _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
     }
-    _console << COLOR_CYAN << "The following total " << material_names.size()
-             << " aux variables:" << oss.str() << "\nare added for automatic output by " << type()
-             << "." << COLOR_DEFAULT << std::endl;
+    if (material_names.size() > 0)
+      _console << COLOR_CYAN << "The following total " << material_names.size()
+               << " aux variables:" << oss.str() << "\nare added for automatic output by " << type()
+               << "." << COLOR_DEFAULT << std::endl;
   }
   else
   {
