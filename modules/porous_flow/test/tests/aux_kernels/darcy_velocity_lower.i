@@ -144,17 +144,17 @@
   [bulk_vel_x]
     type = PointValue
     variable = bulk_vel_x
-    point = '0 0 0'
+    point = '0.1 0.1 0'
   []
   [bulk_vel_y]
     type = PointValue
     variable = bulk_vel_y
-    point = '0 0 0'
+    point = '0.1 0.1 0'
   []
   [bulk_vel_z]
     type = PointValue
     variable = bulk_vel_z
-    point = '0 0 0'
+    point = '0.1 0.1 0'
   []
   [fracture_vel_x]
     type = ElementAverageValue
