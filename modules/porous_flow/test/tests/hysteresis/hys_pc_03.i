@@ -101,7 +101,7 @@
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
-    num_points = 11
+    num_points = 10
     sort_by = x
     variable = 'sat pc'
   []
