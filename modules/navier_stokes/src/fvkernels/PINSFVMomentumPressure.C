@@ -16,7 +16,7 @@ PINSFVMomentumPressure::validParams()
 {
   InputParameters params = INSFVMomentumPressure::validParams();
   params.addClassDescription(
-    "Introduces the coupled pressure term into the Navier-Stokes porous media momentum equation.");
+    "Introduces the coupled pressure term $eps \nabla P$ into the Navier-Stokes porous media momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   return params;

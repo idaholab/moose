@@ -16,7 +16,7 @@ PINSFVEnergyDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
   params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
-                             "equations :  $-div(eps * k * grad(T))"");
+                             "fluid energy equations :  $-div(eps * k * grad(T))$");
   params.addRequiredCoupledVar("porosity", "Porosity variable");
   params.addParam<MaterialPropertyName>("k", "Thermal conductivity");
   params.set<unsigned short>("ghost_layers") = 2;

@@ -6,7 +6,7 @@ InputParameters
 PINSFVEnergyConvection::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Implements the solid-fluid convection term in the porous "
+  params.addClassDescription("Implements the solid-fluid ambient convection term in the porous "
                              "media Navier Stokes energy equation.");
   params.addRequiredParam<MaterialPropertyName>("h_solid_fluid", "Name of the convective heat "
       "transfer coefficient. This coefficient should include the influence of porosity.");

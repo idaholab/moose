@@ -16,8 +16,8 @@ InputParameters
 PINSFVMomentumDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Viscous diffusion term in the porous media incompressible Navier-Stokes "
-                             "momentum equation.");
+  params.addClassDescription("Viscous diffusion term, div(mu grad(u)), in the porous media "
+                             "incompressible Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2");

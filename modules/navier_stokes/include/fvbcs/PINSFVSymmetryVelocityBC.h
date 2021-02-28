@@ -21,5 +21,5 @@ protected:
   ADReal computeQpResidual() override;
 
   /// porosity of the medium
-  const VariableValue & _eps;
+  const INSFVVelocityVariable * const _eps_var;
 };

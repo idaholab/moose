@@ -41,8 +41,8 @@ PINSFVEnergyEffectiveDiffusion::computeQpResidual()
   ADReal k_eps_face;
   interpolate(Moose::FV::InterpMethod::Average,
               k_eps_face,
-              _kappa_elem[_qp] * _eps[_qp],
-              _kappa_neighbor[_qp] * _eps_neighbor[_qp],
+              _kappa_elem[_qp],
+              _kappa_neighbor[_qp],
               *_face_info,
               true);
 
