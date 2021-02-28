@@ -34,6 +34,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// mesh to add the sidesets to
   std::unique_ptr<MeshBase> & _input;
 
   /// function expression

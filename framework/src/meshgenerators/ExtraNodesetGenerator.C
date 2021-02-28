@@ -26,7 +26,7 @@ ExtraNodesetGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
-                                                     "The name of the boundary to create");
+                                                     "The names of the boundaries to create");
 
   params.addParam<std::vector<unsigned int>>("nodes",
                                              "The nodes you want to be in the nodeset "

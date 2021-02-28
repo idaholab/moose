@@ -30,6 +30,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// mesh to modify
   std::unique_ptr<MeshBase> & _input;
 };
-

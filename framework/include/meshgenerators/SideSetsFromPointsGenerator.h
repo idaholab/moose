@@ -18,7 +18,8 @@ template <>
 InputParameters validParams<SideSetsFromPointsGenerator>();
 
 /**
- *
+ * A mesh generator to generate new sidesets from all faces connected to points
+ * with the same normal as the face the point is part of
  */
 class SideSetsFromPointsGenerator : public SideSetsGeneratorBase
 {
@@ -30,10 +31,10 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// the mesh to add the sidesets to
   std::unique_ptr<MeshBase> & _input;
-
+  /// holds the boundary names for the sidesets
   std::vector<BoundaryName> _boundary_names;
-
+  /// holds the points used to generate sidesets
   std::vector<Point> _points;
 };
-

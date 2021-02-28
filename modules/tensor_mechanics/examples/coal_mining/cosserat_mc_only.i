@@ -113,7 +113,7 @@
   []
   [hole]
     type = BlockDeletionGenerator
-    block_id = 1
+    block = 1
     input = roof
   []
 []

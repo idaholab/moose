@@ -23,7 +23,7 @@ BreakMeshByBlockGeneratorBase::validParams()
       "the name of the new interface. Cannot be used whit `split_interface=true`");
   params.addParam<bool>("split_interface",
                         false,
-                        "If true, it create a "
+                        "If true, it creates a "
                         "different interface for each block pair.");
   params.addClassDescription("This is the base class used to split a monolithic"
                              "mesh by blocks pairs");
@@ -39,8 +39,8 @@ BreakMeshByBlockGeneratorBase::BreakMeshByBlockGeneratorBase(const InputParamete
   // check input consistency
   if (getParam<bool>("split_interface") && _pars.isParamSetByUser("interface_name"))
   {
-    mooseError("if split_interface == true,  the new interface_name"
-               " cannot be specified by the user. It will be autoamtically assigned");
+    mooseError("if split_interface == true, the new interface_name"
+               " cannot be specified by the user. It will be automatically assigned");
   }
 }
 

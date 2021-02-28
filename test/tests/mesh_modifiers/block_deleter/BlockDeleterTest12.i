@@ -21,7 +21,7 @@
   [delete]
     type = BlockDeletionGenerator
     input = mark
-    block_id = 1
+    block = 1
     new_boundary = cut_surface
   []
 []

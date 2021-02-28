@@ -38,7 +38,7 @@
   [ed0]
     type = BlockDeletionGenerator
     input = SubdomainBoundingBox3
-    block_id = 1
+    block = 1
   []
 []
 
