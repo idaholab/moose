@@ -18,7 +18,8 @@ PINSFVEnergyTimeDerivative::validParams()
 {
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
-      "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
+      "Adds the time derivative term to the incompressible Navier-Stokes energy equation: "
+      "for fluids: eps * rho * cp * dT/dt, for solids: (1 - eps) * rho * cp * dT/dt");
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
   params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");

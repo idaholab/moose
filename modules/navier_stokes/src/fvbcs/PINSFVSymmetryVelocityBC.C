@@ -23,7 +23,7 @@ PINSFVSymmetryVelocityBC::validParams()
 
 PINSFVSymmetryVelocityBC::PINSFVSymmetryVelocityBC(const InputParameters & params)
   : INSFVSymmetryVelocityBC(params),
-    _eps(coupledValue("porosity"))
+    _eps_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("porosity", 0)))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run "
@@ -35,6 +35,6 @@ PINSFVSymmetryVelocityBC::PINSFVSymmetryVelocityBC(const InputParameters & param
 ADReal
 PINSFVSymmetryVelocityBC::computeQpResidual()
 {
-  // FIXME: Compute the face porosity
-  return INSFVSymmetryVelocityBC::computeQpResidual() / _eps[_qp];
+  const auto & eps_face = _eps_var->getBoundaryFaceValue(*_face_info);
+  return INSFVSymmetryVelocityBC::computeQpResidual() / eps_face;
 }
