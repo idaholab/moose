@@ -30,7 +30,7 @@ MeshSideSetGenerator::validParams()
   params.addClassDescription("Add lower dimensional elements along the faces contained in a side "
                              "set to set up mixed dimensional problems");
   params.addRequiredParam<std::vector<BoundaryName>>("boundaries",
-                                                     "The name of the boundary to mesh");
+                                                     "The names of the boundaries to mesh");
   params.addRequiredParam<subdomain_id_type>(
       "block_id", "Subdomain id to set for the new elements along the boundary");
   params.addParam<SubdomainName>(

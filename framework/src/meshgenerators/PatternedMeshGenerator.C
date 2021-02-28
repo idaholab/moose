@@ -142,7 +142,6 @@ PatternedMeshGenerator::generate()
       // If this is the first cell of the row initialize the row mesh
       if (j == 0)
       {
-        //_row_meshes[i] = _mesh_ptrs[_pattern[i][j]]->clone();
         auto clone = _meshes[_pattern[i][j]]->clone();
         _row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
 

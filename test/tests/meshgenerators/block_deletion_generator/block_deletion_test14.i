@@ -1,26 +1,19 @@
 [Mesh]
-  [./gmg]
-    type = GeneratedMeshGenerator
+  [./cmg]
+    type = CartesianMeshGenerator
     dim = 2
-    nx = 4
-    ny = 4
-    xmin = 0
-    xmax = 4
-    ymin = 0
-    ymax = 4
+    dx = '4 2 3'
+    dy = '1 2'
+    ix = '10 10 10'
+    iy = '8 8'
+    subdomain_id = '1 2 3
+                    2 2 2'
   []
 
-  [./SubdomainBoundingBox1]
-    type = SubdomainBoundingBoxGenerator
-    input = gmg
-    block_id = 1
-    bottom_left = '0 0 0'
-    top_right = '3 4 1'
-  [../]
   [./ed0]
     type = BlockDeletionGenerator
-    block = 1
-    input = 'SubdomainBoundingBox1'
+    input = cmg
+    block = '1 3'
   [../]
 []
 

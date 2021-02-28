@@ -18,6 +18,9 @@ class TransformGenerator;
 template <>
 InputParameters validParams<TransformGenerator>();
 
+/*
+ * A mesh generator that applies a linear transformation (rotation, translation) to the mesh
+ */
 class TransformGenerator : public MeshGenerator
 {
 public:
@@ -28,7 +31,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// the input mesh
   std::unique_ptr<MeshBase> & _input;
-
+  /// the transform to apply to the mesh
   const MooseEnum _transform;
 };
