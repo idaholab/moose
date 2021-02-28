@@ -7,28 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVEnergyDiffusion.h"
+#include "PINSFVEnergyEffectiveDiffusion.h"
 
-registerMooseObject("NavierStokesApp", PINSFVEnergyDiffusion);
+registerMooseObject("NavierStokesApp", PINSFVEnergyEffectiveDiffusion);
 
 InputParameters
-PINSFVEnergyDiffusion::validParams()
+PINSFVEnergyEffectiveDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
-                             "equations :  $-div(eps * k * grad(T))"");
-  params.addRequiredCoupledVar("porosity", "Porosity variable");
-  params.addParam<MaterialPropertyName>("k", "Thermal conductivity");
+  params.addClassDescription("Effective diffusion term in the porous media incompressible Navier-Stokes "
+                             "equations : $-div(kappa grad(T))");
+  params.addRequiredParam<MaterialPropertyName>("kappa", "Effective thermal conductivity");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
-PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
+PINSFVEnergyEffectiveDiffusion::PINSFVEnergyEffectiveDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-  _k_elem(getADMaterialProperty<Real>("k")),
-  _k_neighbor(getNeighborADMaterialProperty<Real>("k")),
-  _eps(coupledValue("porosity")),
-  _eps_neighbor(coupledNeighborValue("porosity"))
+  _kappa_elem(getADMaterialProperty<Real>("kappa")),
+  _kappa_neighbor(getNeighborADMaterialProperty<Real>("kappa"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -38,14 +35,14 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
 }
 
 ADReal
-PINSFVEnergyDiffusion::computeQpResidual()
+PINSFVEnergyEffectiveDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
   interpolate(Moose::FV::InterpMethod::Average,
               k_eps_face,
-              _k_elem[_qp] * _eps[_qp],
-              _k_neighbor[_qp] * _eps_neighbor[_qp],
+              _kappa_elem[_qp] * _eps[_qp],
+              _kappa_neighbor[_qp] * _eps_neighbor[_qp],
               *_face_info,
               true);
 
