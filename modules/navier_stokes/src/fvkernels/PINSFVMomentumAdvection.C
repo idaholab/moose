@@ -16,7 +16,8 @@ InputParameters
 PINSFVMomentumAdvection::validParams()
 {
   auto params = INSFVMomentumAdvection::validParams();
-  params.addClassDescription("Object for advecting mass in porous media mass equation");
+  params.addClassDescription("Object for advecting superficial momentum, e.g. rho*u_d, "
+                             "in the porous media momentum equation");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   return params;
@@ -141,60 +142,64 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
                   "I think some of my logic might depend on my implicit assumption that we have "
                   "one boundary ID at most per face");
       const auto bc_id = *fi->boundaryIDs().begin();
-
-      if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
+      // Find the boundary id that has an associated INSFV boundary condition
+      // if a face has more than one bc_id
+      for (const auto bc_id : fi->boundaryIDs())
       {
-        // Need to account for viscous shear stress from wall
-        for (const auto i : make_range(_dim))
-          coeff(i) += mu / eps_face * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - rc_centroid) * normal) *
-                      (1 - normal(i) * normal(i));
+        if (_no_slip_wall_boundaries.find(bc_id) != _no_slip_wall_boundaries.end())
+        {
+          // Need to account for viscous shear stress from wall
+          for (const auto i : make_range(_dim))
+            coeff(i) += mu / eps_face * surface_vector.norm() /
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) *
+                        (1 - normal(i) * normal(i));
 
-        // No flow normal to wall, so no contribution to coefficient from the advection term
-        return;
-      }
+          // No flow normal to wall, so no contribution to coefficient from the advection term
+          return;
+        }
 
-      if (_slip_wall_boundaries.find(bc_id) != _slip_wall_boundaries.end())
-        // In the case of a slip wall we neither have viscous shear stress from the wall nor
-        // normal outflow, so our contribution to the coefficient is zero
-        return;
+        if (_slip_wall_boundaries.find(bc_id) != _slip_wall_boundaries.end())
+          // In the case of a slip wall we neither have viscous shear stress from the wall nor
+          // normal outflow, so our contribution to the coefficient is zero
+          return;
 
-      if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
-      {
-        ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
-        if (_v_var)
-          face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
-        if (_w_var)
-          face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
+        if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
+        {
+          ADRealVectorValue face_velocity(_u_var->getBoundaryFaceValue(*fi));
+          if (_v_var)
+            face_velocity(1) = _v_var->getBoundaryFaceValue(*fi);
+          if (_w_var)
+            face_velocity(2) = _w_var->getBoundaryFaceValue(*fi);
 
-        const auto advection_coeffs =
-            Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
-        ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
+          const auto advection_coeffs =
+              Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
+          ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
 
-        if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
-          // We are not on a fully developed flow boundary, so we have a viscous term contribution.
-          // This term is slightly modified relative to the internal face term. Instead of the
-          // distance between elem and neighbor centroid, we just have the distance between the elem
-          // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
-          // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
-          // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
-          temp_coeff += mu / eps_face * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
+          if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
+            // We are not on a fully developed flow boundary, so we have a viscous term contribution.
+            // This term is slightly modified relative to the internal face term. Instead of the
+            // distance between elem and neighbor centroid, we just have the distance between the elem
+            // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
+            // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
+            // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
+            temp_coeff += mu / eps_face * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
 
-        // For flow boundaries, the coefficient addition is the same for every velocity component
-        for (const auto i : make_range(_dim))
-          coeff(i) += temp_coeff;
+          // For flow boundaries, the coefficient addition is the same for every velocity component
+          for (const auto i : make_range(_dim))
+            coeff(i) += temp_coeff;
 
-        return;
-      }
+          return;
+        }
 
-      if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
-      {
-        // Moukalled eqns. 15.154 - 15.156
-        for (const auto i : make_range(_dim))
-          coeff(i) += 2. * mu / eps_face * surface_vector.norm() /
-                      std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
+        if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
+        {
+          // Moukalled eqns. 15.154 - 15.156
+          for (const auto i : make_range(_dim))
+            coeff(i) += 2. * mu / eps_face * surface_vector.norm() /
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
 
-        return;
+          return;
+        }
       }
 
       mooseError("The INSFVMomentumAdvection object ",
@@ -254,23 +259,23 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
                                     const ADRealVectorValue & elem_v,
                                     const ADRealVectorValue & neighbor_v)
 {
-  auto tup = Moose::FV::determineElemOneAndTwo(*_face_info, *_p_var);
-  const Elem * const elem_one = std::get<0>(tup);
-  const Elem * const elem_two = std::get<1>(tup);
-  const bool elem_is_elem_one = std::get<2>(tup);
-  mooseAssert(elem_is_elem_one
-                  ? elem_one == &_face_info->elem() && elem_two == _face_info->neighborPtr()
-                  : elem_one == _face_info->neighborPtr() && elem_two == &_face_info->elem(),
-              "The determineElemOneAndTwo utility determined the wrong value for elem_is_elem_one");
+  const Elem * const elem = &_face_info->elem();
+  const Elem * const neighbor = _face_info->neighborPtr();
 
   if (onBoundary(*_face_info))
   {
-    // In my mind there should only be about one bc_id per FaceInfo
-    mooseAssert(_face_info->boundaryIDs().size() == 1,
-                "I think some of my logic might depend on my implicit assumption that we have "
-                "one boundary ID at most per face");
-    mooseAssert(_flow_boundaries.find(*_face_info->boundaryIDs().begin()) != _flow_boundaries.end(),
+#ifndef NDEBUG
+    bool flow_boundary_found = false;
+    for (const auto b_id : _face_info->boundaryIDs())
+      if (_flow_boundaries.find(b_id) != _flow_boundaries.end())
+      {
+        flow_boundary_found = true;
+        break;
+      }
+
+    mooseAssert(flow_boundary_found,
                 "INSFV*Advection flux kernel objects should only execute on flow boundaries.");
+#endif
 
     v(0) = _u_var->getBoundaryFaceValue(*_face_info);
     if (_v_var)
@@ -295,67 +300,57 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   // along a boundary face
   const VectorValue<ADReal> & unc_grad_p = _p_var->uncorrectedAdGradSln(*_face_info);
 
-  const Point & elem_one_centroid =
-      elem_is_elem_one ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const Point * const elem_two_centroid =
-      elem_two ? (elem_is_elem_one ? &_face_info->neighborCentroid() : &_face_info->elemCentroid())
-               : nullptr;
-  Real elem_one_volume = elem_is_elem_one ? _face_info->elemVolume() : _face_info->neighborVolume();
-  Real elem_two_volume =
-      elem_two ? (elem_is_elem_one ? _face_info->neighborVolume() : _face_info->elemVolume()) : 0;
-
-  const auto & elem_one_mu = elem_is_elem_one ? _mu_elem[_qp] : _mu_neighbor[_qp];
+  const Point & elem_centroid = _face_info->elemCentroid();
+  const Point * const neighbor_centroid = neighbor ? &_face_info->neighborCentroid() : nullptr;
+  Real elem_volume = _face_info->elemVolume();
+  Real neighbor_volume = neighbor ? _face_info->neighborVolume() : 0;
+  const auto & elem_mu = _mu_elem[_qp];
 
   // Now we need to perform the computations of D
-  const VectorValue<ADReal> & elem_one_a = rcCoeff(*elem_one, elem_one_mu);
+  const VectorValue<ADReal> & elem_a = rcCoeff(*elem, elem_mu);
 
-  mooseAssert(elem_two ? _subproblem.getCoordSystem(elem_one->subdomain_id()) ==
-                             _subproblem.getCoordSystem(elem_two->subdomain_id())
+  mooseAssert(neighbor ? _subproblem.getCoordSystem(elem->subdomain_id()) ==
+                             _subproblem.getCoordSystem(neighbor->subdomain_id())
                        : true,
               "Coordinate systems must be the same between the two elements");
 
   Real coord;
-  coordTransformFactor(_subproblem, elem_one->subdomain_id(), elem_one_centroid, coord);
+  coordTransformFactor(_subproblem, elem->subdomain_id(), elem_centroid, coord);
 
-  elem_one_volume *= coord;
+  elem_volume *= coord;
 
-  VectorValue<ADReal> elem_one_D = 0;
+  VectorValue<ADReal> elem_D = 0;
   for (const auto i : make_range(_dim))
   {
-    mooseAssert(elem_one_a(i).value() != 0, "We should not be dividing by zero");
-    elem_one_D(i) = elem_one_volume / elem_one_a(i);
+    mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
+    elem_D(i) = elem_volume / elem_a(i);
   }
 
   VectorValue<ADReal> face_D;
 
-  if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
+  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
   {
-    const auto & elem_two_mu = elem_is_elem_one ? _mu_neighbor[_qp] : _mu_elem[_qp];
+    const auto & neighbor_mu = _mu_neighbor[_qp];
 
-    const VectorValue<ADReal> & elem_two_a = rcCoeff(*elem_two, elem_two_mu);
+    const VectorValue<ADReal> & neighbor_a = rcCoeff(*neighbor, neighbor_mu);
 
-    coordTransformFactor(_subproblem, elem_two->subdomain_id(), *elem_two_centroid, coord);
-    elem_two_volume *= coord;
+    coordTransformFactor(_subproblem, neighbor->subdomain_id(), *neighbor_centroid, coord);
+    neighbor_volume *= coord;
 
-    VectorValue<ADReal> elem_two_D = 0;
+    VectorValue<ADReal> neighbor_D = 0;
     for (const auto i : make_range(_dim))
     {
-      mooseAssert(elem_two_a(i).value() != 0, "We should not be dividing by zero");
-      elem_two_D(i) = elem_two_volume / elem_two_a(i);
+      mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
+      neighbor_D(i) = neighbor_volume / neighbor_a(i);
     }
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           face_D,
-                           elem_one_D,
-                           elem_two_D,
-                           *_face_info,
-                           elem_is_elem_one);
+    Moose::FV::interpolate(
+        Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
   }
   else
-    face_D = elem_one_D;
+    face_D = elem_D;
 
-
- Real eps_face = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>(
-     getFieldVar("porosity", 0))->getInternalFaceValue(elem_two, *_face_info, _eps[_qp]));
+  Real eps_face = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>(
+      getFieldVar("porosity", 0))->getInternalFaceValue(neighbor, *_face_info, _eps[_qp]));
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))

@@ -17,7 +17,8 @@ PINSFVMomentumTimeDerivative::validParams()
 {
   InputParameters params = INSFVMomentumTimeDerivative::validParams();
   params.addClassDescription(
-      "Adds the time derivative term to the porous media incompressible Navier-Stokes momentum equation.");
+      "Adds the time derivative term: d(rho u_d) / dt to the porous media "
+      "incompressible Navier-Stokes momentum equation.");
   return params;
 }
 
