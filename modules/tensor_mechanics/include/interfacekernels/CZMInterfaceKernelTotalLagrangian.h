@@ -15,16 +15,20 @@
 /// separation laws based on the displacement jump. This kernel operates only on
 /// a single displacement compenent.
 /// One kernel is required for each mesh dimension.
-class CZMInterfaceKernel : public InterfaceKernel
+class CZMInterfaceKernelTotalLagrangian : public InterfaceKernel
 {
 public:
   static InputParameters validParams();
-  CZMInterfaceKernel(const InputParameters & parameters);
+  CZMInterfaceKernelTotalLagrangian(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
+
+  /// method computing the jacobian contribution due to rotations and area
+  /// changes
+  Real JacLD(const unsigned int cc, const bool neighbor) const;
 
   /// the displacement component this kernel is operating on (0=x, 1=y, 2 =z)
   const unsigned int _component;
@@ -41,9 +45,10 @@ protected:
   // pointer to displacement variables
   std::vector<MooseVariable *> _vars;
 
-  // values of the traction and traction derivatives used
+  // values of the traction and traction derivatives used by the kernel
   ///@{
-  const MaterialProperty<RealVectorValue> & _traction_global;
-  const MaterialProperty<RankTwoTensor> & _traction_derivatives_global;
+  const MaterialProperty<RealVectorValue> & _PK1traction;
+  const MaterialProperty<RankTwoTensor> & _dPK1traction_djumpglobal;
+  const MaterialProperty<RankThreeTensor> & _dPK1traction_dF;
   ///@}
 };

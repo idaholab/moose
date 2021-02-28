@@ -14,6 +14,8 @@
 
 registerMooseAction("TensorMechanicsApp", CohesiveZoneMasterAction, "add_interface_kernel");
 
+registerMooseAction("TensorMechanicsApp", CohesiveZoneMasterAction, "add_material");
+
 InputParameters
 CohesiveZoneMasterAction::validParams()
 {
@@ -25,17 +27,34 @@ CohesiveZoneMasterAction::validParams()
   params.addRequiredParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
+  MooseEnum kinematicType("SmallStrain TotalLagrangian", "SmallStrain");
+  params.addParam<MooseEnum>("kinematic", kinematicType, "Kinematic formulation");
+
   return params;
 }
 
-CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & params) : Action(params)
+CohesiveZoneMasterAction::CohesiveZoneMasterAction(const InputParameters & params)
+  : Action(params), _kinematic(getParam<MooseEnum>("kinematic").getEnum<Kinematic>())
 {
+  if (_kinematic == Kinematic::SmallStrain)
+  {
+    _czm_kernel_name = "CZMInterfaceKernelSmallStrain";
+    _disp_jump_provider_name = "CZMDisplacementJumpProviderSmallStrain";
+    _equilibrium_traction_calculator_name = "CZMEquilibriumTractionCalculatorSmallStrain";
+  }
+  else if (_kinematic == Kinematic::TotalLagrangian)
+  {
+    _czm_kernel_name = "CZMInterfaceKernelTotalLagrangian";
+    _disp_jump_provider_name = "CZMDisplacementJumpProviderIncrementalTotalLagrangian";
+    _equilibrium_traction_calculator_name = "CZMEquilibriumTractionCalculatorTotalLagrangian";
+  }
+  else
+    mooseError("Internal error");
 }
 
 void
 CohesiveZoneMasterAction::act()
 {
-  std::string kernel_name = "CZMInterfaceKernel";
   std::vector<VariableName> displacements;
   if (isParamValid("displacements"))
     displacements = getParam<std::vector<VariableName>>("displacements");
@@ -45,11 +64,10 @@ CohesiveZoneMasterAction::act()
     for (unsigned int i = 0; i < displacements.size(); ++i)
     {
       // Create unique kernel name for each of the components
-      std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
+      std::string unique_kernel_name = _czm_kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
-      InputParameters paramsk = _factory.getValidParams(kernel_name);
+      InputParameters paramsk = _factory.getValidParams(_czm_kernel_name);
 
-      paramsk.set<bool>("use_displaced_mesh") = false;
       paramsk.set<unsigned int>("component") = i;
       paramsk.set<NonlinearVariableName>("variable") = displacements[i];
       paramsk.set<std::vector<VariableName>>("neighbor_var") = {displacements[i]};
@@ -57,7 +75,32 @@ CohesiveZoneMasterAction::act()
       paramsk.set<std::vector<BoundaryName>>("boundary") =
           getParam<std::vector<BoundaryName>>("boundary");
 
-      _problem->addInterfaceKernel(kernel_name, unique_kernel_name, paramsk);
+      _problem->addInterfaceKernel(_czm_kernel_name, unique_kernel_name, paramsk);
     }
   }
+  else if (_current_task == "add_material")
+  {
+    // Create unique material name for the displacement jump provider
+    std::string unique_material_name = _disp_jump_provider_name + "_" + _name;
+    InputParameters paramsm = _factory.getValidParams(_disp_jump_provider_name);
+    paramsm.set<std::vector<BoundaryName>>("boundary") =
+        getParam<std::vector<BoundaryName>>("boundary");
+    paramsm.set<std::vector<VariableName>>("displacements") = displacements;
+    _problem->addInterfaceMaterial(_disp_jump_provider_name, unique_material_name, paramsm);
+
+    // Create unique material name for the equilibrium traction calculator
+    unique_material_name = _equilibrium_traction_calculator_name + "_" + _name;
+    paramsm = _factory.getValidParams(_equilibrium_traction_calculator_name);
+    paramsm.set<std::vector<BoundaryName>>("boundary") =
+        getParam<std::vector<BoundaryName>>("boundary");
+    _problem->addInterfaceMaterial(
+        _equilibrium_traction_calculator_name, unique_material_name, paramsm);
+  }
+}
+
+void
+CohesiveZoneMasterAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  InputParameters ips = _factory.getValidParams(_czm_kernel_name);
+  addRelationshipManagers(input_rm_type, ips);
 }

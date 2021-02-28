@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CZMInterfaceKernel.h"
+#include "CZMInterfaceKernelSmallStrain.h"
 
-registerMooseObject("TensorMechanicsApp", CZMInterfaceKernel);
+registerMooseObject("TensorMechanicsApp", CZMInterfaceKernelSmallStrain);
 
 InputParameters
-CZMInterfaceKernel::validParams()
+CZMInterfaceKernelSmallStrain::validParams()
 {
   InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<unsigned int>("component",
@@ -22,16 +22,16 @@ CZMInterfaceKernel::validParams()
                                         " component == 1, ==> Y"
                                         " component == 2, ==> Z");
   params.set<bool>("_use_undisplaced_reference_points") = true;
-
+  params.suppressParameter<bool>("use_displaced_mesh");
   params.addRequiredCoupledVar("displacements", "the string containing displacement variables");
 
-  params.addClassDescription("Interface kernel for use with cohesive zone models (CZMs) that "
-                             "compute traction as a function of the displacement jump");
+  params.addClassDescription(
+      "CZM Interface kernel to use when using the Small Strain kinematic formulation.");
 
   return params;
 }
 
-CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
+CZMInterfaceKernelSmallStrain::CZMInterfaceKernelSmallStrain(const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
@@ -39,11 +39,8 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _disp_neighbor_var(_ndisp),
     _vars(_ndisp),
     _traction_global(getMaterialPropertyByName<RealVectorValue>("traction_global")),
-    _traction_derivatives_global(
-        getMaterialPropertyByName<RankTwoTensor>("traction_derivatives_global"))
+    _dtraction_djump_global(getMaterialPropertyByName<RankTwoTensor>("dtraction_djump_global"))
 {
-  if (getParam<bool>("use_displaced_mesh") == true)
-    mooseError("CZMInterfaceKernel cannot be used with use_displaced_mesh = true");
 
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -54,7 +51,7 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
 }
 
 Real
-CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
+CZMInterfaceKernelSmallStrain::computeQpResidual(Moose::DGResidualType type)
 {
 
   Real r = _traction_global[_qp](_component);
@@ -73,11 +70,11 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
+CZMInterfaceKernelSmallStrain::computeQpJacobian(Moose::DGJacobianType type)
 {
   // retrieve the diagonal Jacobian coefficient dependning on the displacement
   // component (_component) this kernel is working on
-  Real jac = _traction_derivatives_global[_qp](_component, _component);
+  Real jac = _dtraction_djump_global[_qp](_component, _component);
 
   switch (type)
   {
@@ -98,7 +95,8 @@ CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
 }
 
 Real
-CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
+CZMInterfaceKernelSmallStrain::computeQpOffDiagJacobian(Moose::DGJacobianType type,
+                                                        unsigned int jvar)
 {
 
   // find the displacement component associated to jvar
@@ -108,9 +106,9 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
       break;
 
   mooseAssert(off_diag_component < _ndisp,
-              "CZMInterfaceKernel::computeQpOffDiagJacobian wrong offdiagonal variable");
+              "CZMInterfaceKernelSmallStrain::computeQpOffDiagJacobian wrong offdiagonal variable");
 
-  Real jac = _traction_derivatives_global[_qp](_component, off_diag_component);
+  Real jac = _dtraction_djump_global[_qp](_component, off_diag_component);
 
   switch (type)
   {

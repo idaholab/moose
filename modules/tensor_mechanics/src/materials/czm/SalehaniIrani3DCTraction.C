@@ -14,7 +14,7 @@ registerMooseObject("TensorMechanicsApp", SalehaniIrani3DCTraction);
 InputParameters
 SalehaniIrani3DCTraction::validParams()
 {
-  InputParameters params = CZMMaterialBase::validParams();
+  InputParameters params = CZMConstitutiveModelTotalBase::validParams();
   params.addClassDescription("3D Coupled (3DC) cohesive law of Salehani and Irani with no damage");
   params.addRequiredParam<Real>(
       "normal_gap_at_maximum_normal_traction",
@@ -30,7 +30,7 @@ SalehaniIrani3DCTraction::validParams()
 }
 
 SalehaniIrani3DCTraction::SalehaniIrani3DCTraction(const InputParameters & parameters)
-  : CZMMaterialBase(parameters),
+  : CZMConstitutiveModelTotalBase(parameters),
     _delta_u0({getParam<Real>("normal_gap_at_maximum_normal_traction"),
                std::sqrt(2) * getParam<Real>("tangential_gap_at_maximum_shear_traction"),
                std::sqrt(2) * getParam<Real>("tangential_gap_at_maximum_shear_traction")}),
@@ -38,6 +38,13 @@ SalehaniIrani3DCTraction::SalehaniIrani3DCTraction(const InputParameters & param
                              getParam<Real>("maximum_shear_traction"),
                              getParam<Real>("maximum_shear_traction")})
 {
+}
+
+void
+SalehaniIrani3DCTraction::computeInterfaceTractionAndDerivatives()
+{
+  _interface_traction[_qp] = computeTraction();
+  _dinterface_traction_djump[_qp] = computeTractionDerivatives();
 }
 
 RealVectorValue
@@ -56,7 +63,7 @@ SalehaniIrani3DCTraction::computeTraction()
   x = 0;
   for (i = 0; i < 3; i++)
   {
-    aa = _displacement_jump[_qp](i) / _delta_u0[i];
+    aa = _interface_displacement_jump[_qp](i) / _delta_u0[i];
     if (i > 0)
       aa *= aa; // square for shear component
 
@@ -73,7 +80,7 @@ SalehaniIrani3DCTraction::computeTraction()
       aa = std::sqrt(2 * std::exp(1));
 
     a_i = _max_allowable_traction[i] * aa;
-    b_i = _displacement_jump[_qp](i) / _delta_u0[i];
+    b_i = _interface_displacement_jump[_qp](i) / _delta_u0[i];
     traction_local(i) = a_i * b_i * exp_x;
   }
 
@@ -107,7 +114,7 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
   x = 0;
   for (i = 0; i < 3; i++)
   {
-    aa = _displacement_jump[_qp](i) / _delta_u0[i];
+    aa = _interface_displacement_jump[_qp](i) / _delta_u0[i];
     if (i > 0)
       aa *= aa;
     x += aa;
@@ -129,7 +136,7 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
       a_i = std::sqrt(2 * std::exp(1));
 
     a_i *= _max_allowable_traction[i];
-    b_i = _displacement_jump[_qp](i) / _delta_u0[i];
+    b_i = _interface_displacement_jump[_qp](i) / _delta_u0[i];
 
     for (j = 0; j < 3; j++)
     {
@@ -141,7 +148,7 @@ SalehaniIrani3DCTraction::computeTractionDerivatives()
       if (j == 0) // alpha = 1
         dx_duj = 1. / _delta_u0[j];
       else // alpha = 2
-        dx_duj = 2. * _displacement_jump[_qp](j) / (_delta_u0[j] * _delta_u0[j]);
+        dx_duj = 2. * _interface_displacement_jump[_qp](j) / (_delta_u0[j] * _delta_u0[j]);
 
       traction_jump_derivatives_local(i, j) =
           a_i * exp_x * (dbi_dui - b_i * dx_duj); // the minus sign is due to exp(-x)
