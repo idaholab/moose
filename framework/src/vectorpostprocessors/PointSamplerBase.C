@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 #include "libmesh/mesh_tools.h"
 
@@ -134,7 +135,8 @@ PointSamplerBase::finalize()
 
   for (MooseIndex(_found_points) i = 0; i < _found_points.size(); ++i)
   {
-    // _global_found_points should contain all 1's at this point (ie every point was found by a proc)
+    // _global_found_points should contain all 1's at this point (ie every point was found by a
+    // proc)
     if (pid == 0 && !_global_found_points[i])
       mooseError("In ", name(), ", sample point not found: ", _points[i]);
 

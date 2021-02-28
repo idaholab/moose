@@ -68,6 +68,7 @@
 [VectorPostprocessors]
   [./line_sample]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     variable = 'T elec_conduct'
     start_point = '0 0. 0'
     end_point = '1.0 0. 0'

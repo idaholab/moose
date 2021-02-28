@@ -422,6 +422,7 @@
 [VectorPostprocessors]
   [./soln]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     sort_by = x
     variable = 'disp_x disp_z stress_xx stress_xz stress_zx stress_zz wc_y couple_stress_xx couple_stress_xz couple_stress_zx couple_stress_zz'
     start_point = '0 0 0'
