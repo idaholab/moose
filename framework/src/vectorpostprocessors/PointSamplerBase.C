@@ -97,31 +97,27 @@ PointSamplerBase::execute()
   {
     Point & p = _points[i];
 
-    // Do a bounding box check so we're not doing unnecessary PointLocator lookups
-    if (bbox.contains_point(p))
+    auto & values = _point_values[i];
+
+    if (values.empty())
+      values.resize(_coupled_moose_vars.size());
+
+    // First find the element the hit lands in
+    const Elem * elem = getLocalElemContainingPoint(p);
+
+    if (elem)
     {
-      auto & values = _point_values[i];
+      // We have to pass a vector of points into reinitElemPhys
+      point_vec[0] = p;
 
-      if (values.empty())
-        values.resize(_coupled_moose_vars.size());
+      _subproblem.setCurrentSubdomainID(elem, 0);
+      _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
 
-      // First find the element the hit lands in
-      const Elem * elem = getLocalElemContainingPoint(p);
+      for (MooseIndex(_coupled_moose_vars) j = 0; j < _coupled_moose_vars.size(); ++j)
+        values[j] = (dynamic_cast<MooseVariableField<Real> *>(_coupled_moose_vars[j]))->sln()[0] *
+                    _pp_value; // The zero is for the "qp"
 
-      if (elem)
-      {
-        // We have to pass a vector of points into reinitElemPhys
-        point_vec[0] = p;
-
-        _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.reinitElemPhys(elem, point_vec, 0); // Zero is for tid
-
-        for (MooseIndex(_coupled_moose_vars) j = 0; j < _coupled_moose_vars.size(); ++j)
-          values[j] = (dynamic_cast<MooseVariableField<Real> *>(_coupled_moose_vars[j]))->sln()[0] *
-                      _pp_value; // The zero is for the "qp"
-
-        _found_points[i] = true;
-      }
+      _found_points[i] = true;
     }
   }
 }
@@ -132,23 +128,18 @@ PointSamplerBase::finalize()
   // Save off for speed
   const auto pid = processor_id();
 
-  /*
-   * Figure out which processor is actually going "claim" each point.
-   * If multiple processors found the point and computed values what happens is that
-   * maxloc will give us the smallest PID in max_id
-   */
-  std::vector<unsigned int> max_id(_found_points.size());
+  // Consolidate _found_points across processes to know which points were found
+  auto _global_found_points = _found_points;
+  _comm.sum(_global_found_points);
 
-  _communicator.maxloc(_found_points, max_id);
-
-  for (MooseIndex(max_id) i = 0; i < max_id.size(); ++i)
+  for (MooseIndex(_found_points) i = 0; i < _found_points.size(); ++i)
   {
-    // Only do this check on the proc zero because it's the same on every processor
-    // _found_points should contain all 1's at this point (ie every point was found by a proc)
-    if (pid == 0 && !_found_points[i])
+    // _global_found_points should contain all 1's at this point (ie every point was found by a proc)
+    if (pid == 0 && !_global_found_points[i])
       mooseError("In ", name(), ", sample point not found: ", _points[i]);
 
-    if (max_id[i] == pid)
+    // only process that found the point has the value
+    if (_found_points[i])
       SamplerBase::addSample(_points[i], _ids[i], _point_values[i]);
   }
 
