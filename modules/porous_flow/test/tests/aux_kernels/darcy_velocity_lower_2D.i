@@ -1,6 +1,6 @@
 # checking that the PorousFlowDarcyVelocityComponentLowerDimensional AuxKernel works as expected in 1D+2D situation
 # for the fully-saturated case (relative-permeability = 1)
-# The 1_frac_in_2D_example.e has size 0.3x0.2x0, and a fracturing running through its
+# The 1_frac_in_2D_example.e has size 0.3x0.2x0, and a fracture running through its
 # centre, with normal = (0, 1, 0)
 # Porepressure is initialised to grad(P) = (1, 2, 0)
 # Fluid_density = 2
