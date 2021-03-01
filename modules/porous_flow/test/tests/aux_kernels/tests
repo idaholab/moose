@@ -5,29 +5,55 @@
     csvdiff = 'darcy_velocity.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector for a fully-saturated case'
+    issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponent.md'
   [../]
   [./properties]
     type = 'Exodiff'
     input = 'properties.i'
     exodiff = 'properties_out.e'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to populate AuxVariables corresponding to capillary pressure, saturation, fluid density, etc'
+    issues = '#17159'
+    design = 'PorousFlowPropertyAux.md'
   [../]
   [./darcy_velocity_lower]
     type = 'CSVDiff'
     input = 'darcy_velocity_lower.i'
     csvdiff = 'darcy_velocity_lower_out.csv'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix'
+    issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
+  [../]
+  [./darcy_velocity_lower_tets]
+    type = 'CSVDiff'
+    input = 'darcy_velocity_lower.i'
+    cli_args = 'Mesh/file=fractured_block_tets.e'
+    prereq = 'darcy_velocity_lower'
+    csvdiff = 'darcy_velocity_lower_out.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 2D fracture embedded inside a 3D matrix, including the case with triangular and tetrahedral elements'
+    issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   [../]
   [./darcy_velocity_lower_2D]
     type = 'CSVDiff'
     input = 'darcy_velocity_lower_2D.i'
     csvdiff = 'darcy_velocity_lower_2D_out.csv'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to calculate the Darcy flow velocity vector on 1D fracture embedded inside a 2D matrix'
+    issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   [../]
   [./darcy_velocity_lower_except]
     type = 'RunException'
     input = 'darcy_velocity_lower_except.i'
     expect_err = 'The variable fracture_vel_x must must be defined on lower-dimensional elements only since it employs PorousFlowDarcyVelocityComponentLowerDimensional'
     threading = '!pthreads'
+    requirement = 'An error shall be produced if PorousFlow is asked to calculate the Darcy flow velocity vector on a lower-dimensional fracture, but the variables are not defined only on the lower-dimensional elements'
+    issues = '#17159'
+    design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   [../]
 []
