@@ -4,7 +4,7 @@
 
 # Step 6: Define a Set of Input Parameters
 
-This step introduces the class used to a define a unique set of parameters for a `MooseObject`. The values for these parameters can be specified by users via input files. For the demonstration, the `DarcyPressure` class, which was created in the [previous step](tutorial01_app_development/step05_kernel_object.md#source-demo), will be modified to accept any arbitrary real number for the `_permeability` and `_viscosity` variables. Then, the values for $K$ and $\mu_{f}$ will be specified in the input file.
+This step introduces the class used to a define a unique set of parameters for a `MooseObject`. The values for these parameters can be specified by users via input files. For the demonstration, the `DarcyPressure` class, which was created in the [previous step](tutorial01_app_development/step05_kernel_object.md#source-demo), will be modified to accept any arbitrary real numbers for the `_permeability` and `_viscosity` variables instead of hard-coding ones.
 
 ## Input Parameters
 
@@ -60,16 +60,16 @@ The `getParam()` method can be called from within any member---not just the cons
 
 ## Demonstration id=demo
 
-Recall from the [previous step](tutorial01_app_development/step05_kernel_object.md#physics) that, upon applying the [!ac](BVP), the weak form of Darcy's pressure equation is
+Recall from the [previous step](tutorial01_app_development/step05_kernel_object.md#physics) that, upon applying the [!ac](BVP) and the isotropy assumption, the weak form of Darcy's pressure equation is
 
 !equation id=darcy-weak
-(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-Also, recall that the property values are $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ and $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$.
+The `DarcyPressure` object shall be modified to allow users to define the constant properties $K$ and $\mu$.
 
 ### Source Code id=source-demo
 
-The `DarcyPressure` object shall be modified to allow users to define the constant properties. A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu_{f}$. Assuming that $K$ and $\mu_{f}$ are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
+A required parameter, `"permeability"`, shall be used to set the value of $K$ and an optional parameter, `"viscosity"`, whose default value is the dynamic viscosity of water at $30 \degree \textrm{C}$, shall be used to set the value of $\mu$. Assuming that both are valid for any number in $\mathbb{R}$, the data type of these parameters should be `Real`.
 
 In `DarcyPressure.h`, declare `_permeability` and `_viscosity` as reference variables so that their input value may be accessed without having to create additional copies of them:
 

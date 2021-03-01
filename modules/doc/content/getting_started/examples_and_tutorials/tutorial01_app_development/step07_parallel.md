@@ -10,7 +10,7 @@ A major objective of MOOSE is performance. This step briefly introduces parallel
 
 There are two types of parallelism supported by MOOSE: [multiprocessing](https://en.wikipedia.org/wiki/Multiprocessing) and [multithreading](https://en.wikipedia.org/wiki/Thread_(computing%29). At its core, MOOSE is designed to run in parallel by using the [Message Passing Interface](https://en.wikipedia.org/wiki/Message_Passing_Interface) protocol. [!ac](MPI) is a library of programming tools for accessing hardware and controlling how multiple CPUs exchange information while working simultaneously to run a single computer program. Shared memory parallelism is also supported through various threading libraries and can be used in union with [!ac](MPI).
 
-The general approach to solving a [!ac](FE) simulation in parallel is to partition the mesh and run an individual process that assembles and solves the system of equations for each of those mesh partitions. In general, the duration the solve procedure decreases as the number of CPUs increases.
+The general approach to solving a [!ac](FE) simulation in parallel is to partition the mesh and run an individual process that assembles and solves the system of equations for each of those mesh partitions. In general, the duration of the solve procedure decreases as the number of CPUs increases.
 
 ### Basic Commands id=commands
 
