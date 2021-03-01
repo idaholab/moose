@@ -4,7 +4,7 @@
 
 # Step 9: Develop a Material Object
 
-In this step, the basic components of the `Material` class will be presented. To demonstrate its use, a new `MooseObject` will be developed that provides the values for permeability and viscosity needed by the `DarcyPressure` class. A test for this new object shall be written in accordance with the procedures outlined in the [previous step](getting_started/examples_and_tutorials/tutorial01_app_development/step08_test_harness.md). In addition, any input files which create `DarcyPressure` objects will be need to be modified.
+In this step, the basic components of the `Material` class will be presented. To demonstrate its use, a new `MooseObject` that provides the values for permeability and viscosity needed by the `DarcyPressure` class will be developed. A test for this new object shall be written in accordance with the procedures outlined in the [previous step](getting_started/examples_and_tutorials/tutorial01_app_development/step08_test_harness.md). In addition, any input files which create `DarcyPressure` objects will be need to be modified.
 
 ## Material Objects
 
