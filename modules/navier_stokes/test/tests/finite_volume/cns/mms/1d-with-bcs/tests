@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#16758'
+  design = 'navier_stokes/fv.md'
+  [1d-upwind]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DUpwind
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with two physical boundary conditions on the subsonic inlet and one physical boundary condition on the outlet and display first order convergence for all variables when using a first-order upwind scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [1d-average]
+    type = PythonUnitTest
+    input = test.py
+    test_case = Test1DAverage
+    requirement = 'The system shall be able to solve compressible fluid flow kernels for mass, momentum, and energy with two physical boundary conditions on the subsonic inlet and one physical boundary condition on the outlet and display first order convergence for all variables when using a second-order central differencing scheme for the convection terms.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]
