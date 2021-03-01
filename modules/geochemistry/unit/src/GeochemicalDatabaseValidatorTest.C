@@ -26,6 +26,7 @@ testExceptionMessage(const FileName filename, const std::string msg)
   try
   {
     database.validate();
+    FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & err)
   {
@@ -109,7 +110,29 @@ TEST(GeochemicalDatabaseValidatorTest, nonReaWeight)
 TEST(GeochemicalDatabaseValidatorTest, nonReaNeutralSpeciesArray)
 {
   const FileName filename = "database/faultydbs/nonreal_neutralspecies.json";
-  const std::string msg = "Array value \".1967cg\" in the Header:nutral species:co2:a field of " +
+  const std::string msg = "Array value \".1967cg\" in the Header:neutral species:co2:a field of " +
                           filename + " cannot be converted to Real";
+  testExceptionMessage(filename, msg);
+}
+
+TEST(GeochemicalDatabaseValidatorTest, missingNeutralValue)
+{
+  const FileName filename = "database/faultydbs/missing_neutral_value.json";
+  const std::string msg = "The number of values in the Header:neutral species:h2o:a field of " +
+                          filename + " is not equal to the number of temperature values";
+  testExceptionMessage(filename, msg);
+}
+
+TEST(GeochemicalDatabaseValidatorTest, noCharge)
+{
+  const FileName filename = "database/faultydbs/no_charge.json";
+  const std::string msg = "The secondary species CO3-- in " + filename + " does not have a charge";
+  testExceptionMessage(filename, msg);
+}
+
+TEST(GeochemicalDatabaseValidatorTest, noStoichiometry)
+{
+  const FileName filename = "database/faultydbs/no_stoi.json";
+  const std::string msg = "The secondary species CO3-- in " + filename + " does not have a species";
   testExceptionMessage(filename, msg);
 }

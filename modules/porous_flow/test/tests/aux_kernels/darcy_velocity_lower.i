@@ -1,6 +1,6 @@
 # checking that the PorousFlowDarcyVelocityComponentLowerDimensional AuxKernel works as expected
 # for the fully-saturated case (relative-permeability = 1)
-# The fractured_block.e has size = 10x10x10, and a fracturing running through its
+# The fractured_block.e has size = 10x10x10, and a fracture running through its
 # centre, with normal = (0, -sin(20deg), cos(20deg))
 # Porepressure is initialised to grad(P) = (0, 0, 1)
 # Fluid_density = 2
@@ -142,19 +142,19 @@
 
 [Postprocessors]
   [bulk_vel_x]
-    type = PointValue
+    type = ElementAverageValue
+    block = 1
     variable = bulk_vel_x
-    point = '0.1 0.1 0'
   []
   [bulk_vel_y]
-    type = PointValue
+    type = ElementAverageValue
+    block = 1
     variable = bulk_vel_y
-    point = '0.1 0.1 0'
   []
   [bulk_vel_z]
-    type = PointValue
+    type = ElementAverageValue
+    block = 1
     variable = bulk_vel_z
-    point = '0.1 0.1 0'
   []
   [fracture_vel_x]
     type = ElementAverageValue
