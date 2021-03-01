@@ -28,7 +28,7 @@ protected:
    * @param elem The elem to compute the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-   VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
+  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
 
   /// Density
   const Real & _rho;

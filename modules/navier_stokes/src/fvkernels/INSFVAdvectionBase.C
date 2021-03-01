@@ -185,8 +185,8 @@ INSFVAdvectionBase::setupFlowBoundaries(const BoundaryID bnd_id)
 template <typename T>
 void
 INSFVAdvectionBase::setupBoundaries(const BoundaryID bnd_id,
-                                        const INSFVBCs bc_type,
-                                        std::set<BoundaryID> & bnd_ids)
+                                    const INSFVBCs bc_type,
+                                    std::set<BoundaryID> & bnd_ids)
 {
   std::vector<T *> bcs;
 

@@ -25,8 +25,7 @@ INSFVMomentumAdvection::validParams()
 }
 
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
-  : INSFVAdvectionBase(params),
-    _rho(getParam<Real>("rho"))
+  : INSFVAdvectionBase(params), _rho(getParam<Real>("rho"))
 {
 }
 
