@@ -10,25 +10,17 @@
 #pragma once
 
 #include "InterfaceMaterial.h"
-#include "MaterialProperty.h"
 
-/**
- * Interface material calculates a variable's jump value across an interface
- */
-class JumpInterfaceMaterial : public InterfaceMaterial
+class ConsumerInterfaceMaterial : public InterfaceMaterial
 {
 public:
   static InputParameters validParams();
 
-  JumpInterfaceMaterial(const InputParameters & parameters);
+  ConsumerInterfaceMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
-  const VariableValue & _value;
-  const VariableValue & _neighbor_value;
-  const ADVariableValue & _ad_value;
-  const ADVariableValue & _ad_neighbor_value;
-  MaterialProperty<Real> & _jump;
-  ADMaterialProperty<Real> & _ad_jump;
+  const ADMaterialProperty<Real> & _prop_consumed;
+  ADMaterialProperty<Real> & _prop_produced;
 };
