@@ -36,19 +36,19 @@ The `"outputs"` parameter defaults to `none` and, therefore, must be explicitly 
 
 ## Demonstration id=demo
 
-Now that the basic purpose of the Materials System has been established, another object in the divergence-free weak form of Darcy's equation can be identified, i.e.,
+Now that the basic purpose of the Materials System has been established, another object in the isotropic, divergence-free weak form of Darcy's equation can be identified, i.e.,
 
 !equation id=darcy-weak
-\underbrace{(\nabla \psi, \underbrace{\dfrac{K}{\mu_{f}}}_{\clap{Material}} \nabla p)}_{\clap{Kernel}} = 0
+\underbrace{(\nabla \psi, \underbrace{\dfrac{K}{\mu}}_{\clap{Material}} \nabla p)}_{\clap{Kernel}} = 0
 
-For this demonstration, a new `Material` object will be developed to produce the $K / \mu_f$ term in [darcy-weak] and the `DarcyPressure` class will be modified to consume it. The new `MooseObject` shall accept an input for the radius of steel spheres, $r_{s}$, tightly packed to form a porous medium. The [tutorial01_app_development/problem_statement.md#mats] section of the Problem Statement provided the following linear relationship between the permeability ($\text{m}^{2}$) of such media and the sphere radius ($\text{mm}$):
+For this demonstration, a new `Material` object will be developed to produce the $K / \mu$ term in [darcy-weak] and the `DarcyPressure` class will be modified to consume it. The new `MooseObject` shall accept an input for the radius, $r$, of steel spheres tightly packed to form a porous medium. The [tutorial01_app_development/problem_statement.md#mats] section of the Problem Statement provided the following linear relationship between the permeability ($\text{m}^{2}$) of such media and the sphere radius ($\text{mm}$):
 
 !equation id=permeability
-K(r_{s}) = \frac{1}{2} \begin{bmatrix} -r_{s} + 3 & r_{s} - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \, \, \, \forall \, r_{s} \in [1, 3]
+K(r) = \frac{1}{2} \begin{bmatrix} -r + 3 & r - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \, \, \, \forall \, r \in [1, 3]
 
-The new object shall restrict the input radius to the domain of [permeability] and enforce the requirement that $\mu_{f} \; {=}\mathllap{\small{/}\,} \; 0$.
+The new object shall restrict the input radius to the domain of [permeability] and enforce the requirement that $\mu \; {=}\mathllap{\small{/}\,} \; 0$.
 
-Since the pressure vessel model uses $r_{s} = 1 \, \text{mm}$, `pressure_diffusion.i` shall be modified to use this value as input. It will be shown that this input reproduces the isotropic permeability value, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$, introduced in [Step 5](tutorial01_app_development/step05_kernel_object.md#demo). Thus, the results of the `darcy_pressure_test.i` file created in the [previous step](tutorial01_app_development/step08_test_harness.md#test-demo) should still match the gold file after modifying its inputs.
+Since the pressure vessel model uses $r = r_{s} = 1 \, \text{mm}$, `pressure_diffusion.i` shall be modified to use this value as input. It will be shown that this input reproduces the isotropic permeability value, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$, introduced in [Step 5](tutorial01_app_development/step05_kernel_object.md#demo). Thus, the results of the `darcy_pressure_test.i` file created in the [previous step](tutorial01_app_development/step08_test_harness.md#test-demo) should still match the gold file after modifying its inputs.
 
 ### Source Code id=source-demo
 
@@ -59,14 +59,14 @@ cd ~/projects/babbler
 mkdir include/materials src/materials
 ```
 
-In `include/materials`, create a file name `PackedColumn.h` and add the code given in [pc-header]. Here, the header file for the base class was included so that it can be inherited. In addition, [`LinearInterpolation.h`](framework/include/utils/LinearInterpolation.h) was included so that an object of the `LinearInterpolation` class---a member of the [framework_development/utils/index.md] System in MOOSE---can be made to evaluate [permeability]. The `validParams()` and constructor methods were the first members declared, as is typical, and the `computeQpProperties()` method from the base class was overridden. Two variables, `_radius` and `_input_viscosity`, were declared to store the values input for $r_{s}$ and $\mu_{f}$, respectively. The former of these two variables will need to be passed to a `LinearInterpolation` object, in order to obtain $K$, so `_permeability_interpolation` was declared for this purpose. Finally, two `ADMaterialProperty` variables were declared and will, ultimately, become available to other MOOSE objects that need them.
+In `include/materials`, create a file name `PackedColumn.h` and add the code given in [pc-header]. Here, the header file for the base class was included so that it can be inherited. In addition, [`LinearInterpolation.h`](framework/include/utils/LinearInterpolation.h) was included so that an object of the `LinearInterpolation` class---a member of the [framework_development/utils/index.md] System in MOOSE---can be made to evaluate [permeability]. The `validParams()` and constructor methods were the first members declared, as is typical, and the `computeQpProperties()` method from the base class was overridden. Two variables, `_radius` and `_input_viscosity`, were declared to store the values input for $r$ and $\mu$, respectively. The former of these two variables will need to be passed to a `LinearInterpolation` object, in order to obtain $K$, so `_permeability_interpolation` was declared for this purpose. Finally, two `ADMaterialProperty` variables were declared and will, ultimately, become available to other MOOSE objects that need them.
 
 !listing tutorials/tutorial01_app_development/step09_mat_props/include/materials/PackedColumn.h
          link=False
          id=pc-header
          caption=Header file for the `PackedColumn` class.
 
-In `src/kernels`, create a file named `PackedColumn.C` and add the code given in [pc-source]. To enforce the necessary restrictions on values for $r_{s}$ and $\mu_{f}$, their inputs are parsed with the [`addRangeCheckedParam()` method](source/utils/InputParameters.md#range-checked-parameters optional=True). This method is like `addParam()`, i.e., it sets a default value in lieu of user input, for which `radius = 1` and `viscosity = 7.98e-04` were used here. However, it has an additional argument that accepts logical expressions, which operate on the parameter itself. If the expression is false for a given input, an error message is invoked and the application terminates. This method provides more convenient means for enforcing $\mu_{f} \; {=}\mathllap{\small{/}\,} \; 0$, or $1 \le r_{s} \le 3$ for that matter, than hard-coding a condition that leads to a `paramError()`---the approach followed in the previous step, but not all types of parameters are able to be validated in this way.
+In `src/kernels`, create a file named `PackedColumn.C` and add the code given in [pc-source]. To enforce the necessary restrictions on values for $r$ and $\mu$, their inputs are parsed with the [`addRangeCheckedParam()` method](source/utils/InputParameters.md#range-checked-parameters optional=True). This method is like `addParam()`, i.e., it sets a default value in lieu of user input, for which `radius = 1` ($r_{s}$) and `viscosity = 7.98e-04` ($\mu_{f}$) were used here. However, it has an additional argument that accepts logical expressions, which operate on the parameter itself. If the expression is false for a given input, an error message is invoked and the application terminates. This method provides more convenient means for enforcing $\mu \; {=}\mathllap{\small{/}\,} \; 0$, or $1 \le r \le 3$ for that matter, than hard-coding a condition that leads to a `paramError()`---the approach followed in the previous step, but not all types of parameters are able to be validated in this way.
 
 In the constructor definition, two `Real` type properties by the names `"permeability"` and `"viscosity"` were declared available for consumption using the `declareADProperty()` method that was mentioned in the [#prod-cons] section. Two vector variables, `sphere_sizes` and `permeability` were declared and set to the domain and range of [permeability] in an abscissa-ordinate pair fashion. These vectors are then passed to the `setData()` method of the `LinearInterpolation` object, which is a wise task to handle in the constructor, since there's no need to repeatedly send invariant copies of the data at each solve step and at each [!ac](QP) index. Finally, in the `computeQpProperties()` definition, the references to the properties are set, for which MOOSE and [libMesh] work together to resolve the `_qp` indexing scheme. Here, the `_radius` variable was passed to the `sample()` method to retrieve the permeability.
 
@@ -104,7 +104,7 @@ An input file specialized to test the `PackedColumn` class is in order. Start by
 cd ~/projects/babbler
 mkdir test/tests/materials/packed_column
 
-In this folder, create a file named `packed_column_test.i` and add the inputs given in [pc-test]. In the `[filter]` block, a `PackedColumn` object is created with a `"viscosity"` input that is trivial for testing purposes as its value goes directly to the property reference. However, for the `"radius"` input, the median value of the domain, $r_{s} = 2$, was selected, because this obviously corresponds to the median value of the range, $K = 4.907 \times 10^{-9}$, and, therefore, can be verified in such terms. Outputs were requested for both properties by means which were discussed in the [#out-props] section, where the format will be an ExodusII file so that an `Exodiff` tester may reference it.
+In this folder, create a file named `packed_column_test.i` and add the inputs given in [pc-test]. In the `[filter]` block, a `PackedColumn` object is created with a `"viscosity"` input that is trivial for testing purposes as its value goes directly to the property reference. However, for the `"radius"` input, the median value of the domain, $r = 2$, was selected, because this obviously corresponds to the median value of the range, $K = 4.907 \times 10^{-9}$, and, therefore, can be verified in such terms. Outputs were requested for both properties by means which were discussed in the [#out-props] section, where the format will be an ExodusII file so that an `Exodiff` tester may reference it.
 
 !listing tutorials/tutorial01_app_development/step09_mat_props/test/tests/materials/packed_column/packed_column_test.i
          link=False
@@ -178,11 +178,11 @@ Be sure that the `darcy_pressure_test.i` file has been updated in the manner dem
 If the tests passed, the terminal output should look something like that shown below.
 
 ```
+test:materials/packed_column.test ......................................................................... OK
 test:kernels/darcy_pressure.test .......................................................................... OK
 test:kernels/simple_diffusion.test ........................................................................ OK
-test:materials/packed_column.test ......................................................................... OK
 --------------------------------------------------------------------------------------------------------------
-Ran 3 tests in 2.0 seconds. Average test time 1.7 seconds, maximum test time 1.7 seconds.
+Ran 3 tests in 0.4 seconds. Average test time 0.1 seconds, maximum test time 0.1 seconds.
 3 passed, 0 skipped, 0 pending, 0 failed
 ```
 

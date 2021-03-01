@@ -54,9 +54,9 @@ MOOSE applications have a testing system to quickly verify that the executable w
 If the test passed, the terminal output should look something like that shown below.
 
 ```
-test:kernels/simple_diffusion.test ...................... OK
-------------------------------------------------------------
-Ran 1 tests in 0.3 seconds.
+test:kernels/simple_diffusion.test ........................................................................ OK
+--------------------------------------------------------------------------------------------------------------
+Ran 1 tests in 0.3 seconds. Average test time 0.1 seconds, maximum test time 0.1 seconds.
 1 passed, 0 skipped, 0 pending, 0 failed
 ```
 

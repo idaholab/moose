@@ -4,7 +4,7 @@
 
 # Problem Statement
 
-Consider a system containing two pressure vessels at differing temperatures as in the experiments presented by [!cite](pamuk2012friction). The vessels are connected via a pipe that contains a filter consisting of close-packed steel spheres as shown in [problem-schematic]. Predict the velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m in diameter. The fluid inside the system is liquid water.
+Consider a system containing two pressure vessels at differing temperatures as in the experiments presented by [!cite](pamuk2012friction). The vessels are connected via a pipe that contains a filter consisting of close-packed steel spheres as shown in [problem-schematic]. Predict the velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m in diameter. The fluid inside the system is liquid water at approximately 30 degrees Celcius.
 
 !media tutorial01_app_development/problem_schematic.png
        style=width:80%;margin-left:auto;margin-right:auto;
@@ -20,24 +20,24 @@ To solve this problem, the following physics must be considered:
 - Conservation of Mass:
 
 !equation id=mass
-\nabla \cdot \bar{u} = 0
+\nabla \cdot \vec{u} = 0
 
 - Conservation of Energy:
 
 !equation id=energy
-C \left(\dfrac{\partial T}{\partial t} + \epsilon \bar{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
+C \left(\dfrac{\partial T}{\partial t} + \epsilon \vec{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
 
 - Darcy's Law:
 
 !equation id=darcy
-\bar{u} = -\dfrac{\mathbf{K}}{\mu} \left(\nabla p - \rho \bar{g} \right)
+\vec{u} = -\dfrac{\mathbf{K}}{\mu} \left(\nabla p - \rho \vec{g} \right)
 
 The variables shown in [mass], [energy], and [darcy] denote the properties listed in [variables].
 
 !table id=variables caption=Disambiguation of problem variables.
 | Symbol | Property |
 | - | - |
-| $\bar{u}$ | Velocity |
+| $\vec{u}$ | Velocity (Volumetric Flux) Vector |
 | $C$ | Heat Capacity |
 | $T$ | Temperature |
 | $t$ | Time |
@@ -47,15 +47,15 @@ The variables shown in [mass], [energy], and [darcy] denote the properties liste
 | $\mu$ | Dynamic Viscosity |
 | $p$ | Pressure |
 | $\rho$ | Density |
-| $\bar{g}$ | Gravity Vector |
+| $\vec{g}$ | Gravity Vector |
 
-If a zero-gravity condition is assumed, i.e., if $\bar{g} = 0$, and if the divergence-free condition of [mass] is imposed onto [darcy],
+If a zero-gravity condition is assumed, i.e., if $\vec{g} = 0$, and if the divergence-free condition of [mass] is imposed onto [darcy],
 then it follows that the two unknowns, $p$ and $T$, must satisfy the following system of two [!ac](PDEs):
 
 !equation id=system
 -\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p = 0
 \newline \, \newline
-C \left(\dfrac{\partial T}{\partial t} + \epsilon \bar{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
+C \left(\dfrac{\partial T}{\partial t} + \epsilon \vec{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
 
 The system overall heat capacity, density, and thermal conductivity are weighted by the contributions of the individual materials and each depend on the porosity of the packed steel sphere medium. These three relationships are defined by the following:
 
@@ -75,9 +75,9 @@ Here, $c_{p}$ denotes specific heat and the subscripts, $f$ and $s$ refer to the
 The material properties of the fluid, $f$, and the solid, $s$, are given in [mats]. The permeability of the packed steel sphere medium that is present throughout the pipe is assumed to be isotropic. [!cite](pamuk2012friction) provides the following relationship:
 
 !equation id=permeability
-K(r_{s}) = \frac{1}{2} \begin{bmatrix} -r_{s} + 3 & r_{s} - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \, \, \, \forall \, r_{s} \in [1, 3]
+K(r) = \frac{1}{2} \begin{bmatrix} -r + 3 & r - 1 \end{bmatrix} \begin{Bmatrix} 0.8451 \\ 8.968 \end{Bmatrix} \times 10^{-9}, \, \, \, \forall \, r \in [1, 3]
 
-where $r_{s}$ is the radius ($\textrm{mm}$) of the steel spheres and $K$ denotes the scalar permeability ($\textrm{m}^{2}$) and is a linear function of $r_{s}$.
+where $r$ is the radius ($\textrm{mm}$) of the spheres and $K$ denotes the scalar permeability ($\textrm{m}^{2}$), which is a linear function of $r$.
 
 !!!
 TODO: The properties listed here are somewhat inconsistent with what we input in the code. First off,
@@ -90,7 +90,8 @@ assumptions are...
 !table id=mats caption=Material property values.
 | Property | Value | Units |
 | :- | :- | :- |
-| Viscosity of water, $\mu_f$ | $7.98\times10^{-4}$ |  $\textrm{Pa}\cdot\textrm{s}$ |
+| Viscosity of water, $\mu_{f}$ | $7.98\times10^{-4}$ |  $\textrm{Pa}\cdot\textrm{s}$ |
+| Steel sphere radius, $r_{s}$ | $1$ | $\textrm{mm}$ |
 | Density of water, $\rho_f$ | 996 | $\textrm{kg}/\textrm{m}^3$ |
 | Density of steel, $\rho_s$ | 8000 | $\textrm{kg}/\textrm{m}^3$ |
 | Thermal conductivity of water, $k_f$ | 0.600 | $\textrm{W}/\textrm{m}\,\textrm{K}$ |

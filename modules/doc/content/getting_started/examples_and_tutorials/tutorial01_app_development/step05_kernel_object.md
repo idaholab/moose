@@ -58,9 +58,9 @@ In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it 
 [darcy-weak] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$ on the remaining boundaries. Therefore, it is possible to drop the second term in [darcy-weak] and express it, more simply, as
 
 !equation id=darcy-weak-kernel
-(\nabla \psi, \dfrac{K}{\mu_{f}} \nabla p) = 0
+(\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity, $\mu$, of the fluid (water) is $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the permeability tensor, $\mathbf{K}$, takes on an isotropic, scalar value of $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ to represent the 1 mm steel sphere medium inside the pipe<!--This should also be given in the problem statement, so long as it remains constant throughout the tutorial-->.
+where $K$ is a scalar and was substituted under the assertion that the permeability be isotropic, such that the full tensor $\mathbf{K}$ may be consolidated into a single value. It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity of the fluid (water) is $\mu = \mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the isotropic permeability $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ represents the 1 mm steel sphere medium inside the pipe.
 
 ### Source Code id=source-demo
 
@@ -71,7 +71,7 @@ cd ~/projects/babbler
 mkdir include/kernels src/kernels
 ```
 
-In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu_{f}$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
+In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file, `ADKernelGrad.h`, was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/include/kernels/DarcyPressure.h
          link=False
