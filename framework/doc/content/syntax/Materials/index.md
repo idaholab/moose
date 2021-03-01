@@ -197,6 +197,14 @@ table lists the types of properties that are available for automatic output.
 | RealVectorValue | `MaterialRealVectorValueAux` | prop_1, prop_2, and prop_3 |
 | RealTensorValue | `MaterialRealTensorValueAux` | prop_11, prop_12, prop_13, prop_21, etc. |
 
+## Material sorting
+
+Materials are sorted such that one material may consume a property produced by
+another material and know that the consumed property will be up-to-date,
+e.g. the producer material will execute before the consumer material. If a
+cyclic dependcy is detected between two materials, then MOOSE will produce an
+error.
+
 ## Advanced Topics
 
 ### Evaluation of Material Properties on Element Faces
