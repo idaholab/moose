@@ -24,7 +24,7 @@ keywords = {Framework, Finite-element, Parallel, Multiphysics, Multiscale}
 }
 ```
 
-If this application uses the MultiApp system, please also cite the following.
+If your application uses the MultiApp system, please also cite the following.
 
 ```
 @article{gaston2015physics,
@@ -37,6 +37,19 @@ If this application uses the MultiApp system, please also cite the following.
    volume = {84},
     pages = {45--54},
 publisher = {Elsevier}
+}
+```
+If your application uses automatic differentiation, please also cite the following.
+```
+@article{lindsay2021automatic,
+  title={Automatic Differentiation in MetaPhysicL and Its Applications in MOOSE},
+  author={Lindsay, Alexander and Stogner, Roy and Gaston, Derek and Schwen, Daniel and Matthews,
+  Christopher and Jiang, Wen and Aagesen, Larry K and Carlsen, Robert and Kong, Fande and Slaughter,
+  Andrew and others},
+  journal={Nuclear Technology},
+  pages={1--18},
+  year={2021},
+  publisher={Taylor \& Francis}
 }
 ```
 
