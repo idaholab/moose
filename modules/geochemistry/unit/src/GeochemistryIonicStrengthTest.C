@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "GeochemistryIonicStrength.h"
+#include "GeochemistrySpeciesSwapper.h"
 
 const GeochemicalDatabaseReader database("database/moose_testdb.json");
 // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
@@ -296,6 +297,8 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength_except)
 TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrengthOnlyCl)
 {
   const GeochemicalDatabaseReader db_cl("../database/moose_geochemdb.json", true, true, false);
+
+  // Cl is a basis species
   const PertinentGeochemicalSystem model_cl(
       db_cl, {"H2O", "H+", "Cl-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   const ModelGeochemicalDatabase mgd_cl = model_cl.modelGeochemicalDatabase();
@@ -303,4 +306,28 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrengthOnlyCl)
   const std::vector<Real> basis_m{0.75, 2.5, 3.5};
   const std::vector<Real> eqm_m{1.5, 0.25};
   EXPECT_EQ(is_cl.stoichiometricIonicStrength(mgd_cl, basis_m, eqm_m, {}), 3.5);
+
+  // Cl is an equilibrium species
+  const PertinentGeochemicalSystem model_cl_eqm(
+      db_cl, {"H2O", "H+", "Cl-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd_cl_eqm = model_cl_eqm.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(3, 1E-6);
+  swapper.performSwap(mgd_cl_eqm, "Cl-", "HCl");
+  const GeochemistryIonicStrength is_cl_eqm(1E9, 1E9, false, true);
+  const std::vector<Real> basis_m_eqm{0.75, 2.5, 3.5};
+  const std::vector<Real> eqm_m_eqm{1.5, 0.25};
+  const unsigned pos = mgd_cl_eqm.eqm_species_name[0] == "Cl-" ? 0 : 1;
+  EXPECT_EQ(is_cl_eqm.stoichiometricIonicStrength(mgd_cl_eqm, basis_m_eqm, eqm_m_eqm, {}),
+            eqm_m_eqm[pos]);
+
+  // Cl is a kinetic species
+  const GeochemicalDatabaseReader db_cl_kin(
+      "database/moose_testdb_cl_kinetic.json", true, true, false);
+  const PertinentGeochemicalSystem model_cl_kin(
+      db_cl_kin, {"H2O"}, {}, {}, {}, {"Cl-"}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd_cl_kin = model_cl_kin.modelGeochemicalDatabase();
+  const GeochemistryIonicStrength is_cl_kin(1E9, 1E9, false, true);
+  const std::vector<Real> basis_m_kin{0.75};
+  const std::vector<Real> kin_m_kin{7.75};
+  EXPECT_EQ(is_cl_kin.stoichiometricIonicStrength(mgd_cl_kin, basis_m_kin, {}, kin_m_kin), 7.75);
 }
