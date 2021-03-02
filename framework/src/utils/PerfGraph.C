@@ -29,6 +29,7 @@
 PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app, const bool live_all)
   : ConsoleStreamInterface(app),
     _live_print_all(live_all),
+    _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _pid(app.processor_id()),
     _current_position(-1),
     _stack(),

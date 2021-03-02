@@ -53,10 +53,10 @@ PerfGraphInterface::registerTimedSection(const std::string & section_name,
                                          const unsigned int level) const
 {
   if (_prefix != "")
-    return _perf_graph.getPerfGraphRegistry().registerSection(_prefix + "::" + section_name,
+    return moose::internal::getPerfGraphRegistry().registerSection(_prefix + "::" + section_name,
                                                                    level);
   else
-    return _perf_graph.getPerfGraphRegistry().registerSection(section_name, level);
+    return moose::internal::getPerfGraphRegistry().registerSection(section_name, level);
 }
 
 PerfID
@@ -66,9 +66,9 @@ PerfGraphInterface::registerTimedSection(const std::string & section_name,
                                          const bool print_dots) const
 {
   if (_prefix != "")
-    return _perf_graph.getPerfGraphRegistry().registerSection(
+    return moose::internal::getPerfGraphRegistry().registerSection(
         _prefix + "::" + section_name, level, live_message, print_dots);
   else
-    return _perf_graph.getPerfGraphRegistry().registerSection(
+    return moose::internal::getPerfGraphRegistry().registerSection(
         section_name, level, live_message, print_dots);
 }
