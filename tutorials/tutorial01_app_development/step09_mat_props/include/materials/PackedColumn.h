@@ -7,7 +7,7 @@
 
 /**
  * Computes the permeability of a porous medium made up of packed steel spheres of a specified
- * radius in accordance with Pamuk and Ozdemir (2012). This also provides a specified dynamic
+ * diameter in accordance with Pamuk and Ozdemir (2012). This also provides a specified dynamic
  * viscosity of the fluid in the medium.
  */
 class PackedColumn : public ADMaterial
@@ -21,11 +21,11 @@ protected:
   /// Necessary override. This is where the property values are set.
   virtual void computeQpProperties() override;
 
-  /// The inputs for the radius of the spheres in the column and the dynamic viscosity of the fluid
-  const Real & _radius;
+  /// The inputs for the diameter of spheres in the column and the dynamic viscosity of the fluid
+  const Real & _diameter;
   const Real & _input_viscosity;
 
-  /// This object interpolates permeability (m^2) based on the radius (mm)
+  /// This object interpolates permeability (m^2) based on the diameter (mm)
   LinearInterpolation _permeability_interpolation;
 
   /// The material property objects that hold values for permeability (K) and dynamic viscosity (mu)
