@@ -2,7 +2,7 @@
 import os
 import unittest
 import logging
-
+import moosesyntax
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, modal, alert
 from MooseDocs import base
@@ -264,6 +264,16 @@ class TestRenderSyntaxList(AppSyntaxTestCase):
 
     def testMaterialize(self):
         res = self.render(self.AST, renderer=base.MaterializeRenderer())
+
+class TestSyntaxFailure(AppSyntaxTestCase):
+    def test(self):
+        moosesyntax.get_moose_syntax_tree = lambda *args: None # break syntax return
+        with self.assertLogs(level=logging.ERROR) as cm:
+            self._MooseDocsTestCase__setup()
+
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn('Failed to load application executable', cm.output[0])
+        self.assertIn('--json --allow-test-objects', cm.output[0])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -13,13 +13,14 @@ import logging
 import copy
 import re
 import time
+import traceback
 import moosetree
 import moosesyntax
 import mooseutils
 
 import MooseDocs
 from .. import common
-from ..common import exceptions
+from ..common import exceptions, report_error
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
 from . import command, core, floats, table, autolink, materialicon, modal, alert
@@ -167,13 +168,17 @@ class AppSyntaxExtension(command.CommandExtension):
                     LOG.error(msg)
 
             except Exception as e:
-                msg = "Failed to load application executable from '%s', " \
-                      "application syntax is being disabled:\n%s"
+                msg = "Failed to load application executable from '{}' with the following error; " \
+                      "application syntax is being disabled.\n".format(exe)
+                msg += '\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
+                msg += "This typically indicates that the application is not producing JSON output " \
+                       "correctly, try running the following:\n" \
+                       "    {} --json --allow-test-objects\n".format(exe)
                 self.setActive(False)
-                LOG.error(msg, exe, e)
+                LOG.error(msg)
 
         # Enable test objects by removing the test flag (i.e., don't consider them test objects)
-        if self['allow-test-objects']:
+        if self['allow-test-objects'] and (self._app_syntax is not None):
             for node in moosetree.iterate(self._app_syntax):
                 node.test = False
 
