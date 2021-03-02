@@ -138,6 +138,10 @@ PointSamplerBase::finalize()
   auto _global_found_points = _found_points;
   _comm.sum(_global_found_points);
 
+  // Keep track of maximum process ids for each point to only add it once
+  std::vector<unsigned int> max_pid(_found_points.size());
+  _comm.maxloc(_found_points, max_pid);
+
   for (MooseIndex(_found_points) i = 0; i < _found_points.size(); ++i)
   {
     // _global_found_points should contain all 1's at this point (ie every point was found by a
@@ -145,8 +149,8 @@ PointSamplerBase::finalize()
     if (pid == 0 && !_global_found_points[i])
       mooseError("In ", name(), ", sample point not found: ", _points[i]);
 
-    // only process that found the point has the value
-    if (_found_points[i])
+    // only process that found the point has the value, and only process with max id should add
+    if (pid == max_pid[i] && _found_points[i])
       SamplerBase::addSample(_points[i], _ids[i], _point_values[i]);
   }
 
@@ -197,9 +201,8 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p)
   else // continuous variables
     elem = (*_pl)(p);
 
-  if (elem)
-    if (elem->processor_id() == processor_id())
-      return elem;
+  if (elem && elem->processor_id() == processor_id())
+    return elem;
 
   return nullptr;
 }
