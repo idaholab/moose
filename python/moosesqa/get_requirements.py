@@ -27,8 +27,9 @@ def get_requirements_from_tests(directories, specs):
     for location in directories:
         for filename in sorted(mooseutils.git_ls_files(location)):
             if os.path.isfile(filename) and (os.path.basename(filename) in specs):
-                group = os.path.relpath(filename, location).split('/')[0]
-                out[group] += get_requirements_from_file(filename)
+                local = os.path.relpath(filename, location)
+                group = local.split('/')[0]
+                out[group] += get_requirements_from_file(filename, os.path.dirname(local))
     return out
 
 def number_requirements(requirement_dict, category):
@@ -50,7 +51,7 @@ def number_requirements(requirement_dict, category):
         for j, req in enumerate(requirements):
             req.label = "{}.{}.{}".format(category, i+1, j+1)
 
-def get_requirements_from_file(filename):
+def get_requirements_from_file(filename, prefix=None):
     """
     Opens hit file and extracts requirement items.
 
@@ -84,6 +85,7 @@ def get_requirements_from_file(filename):
                                   issues, issues_line,
                                   collections, collections_line,
                                   deprecated, deprecated_line)
+        req.prefix = prefix
         requirements.append(req)
 
         # Get "detail" parameter from nested tests

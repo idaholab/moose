@@ -76,4 +76,10 @@
     requirement = "MOOSE python utilities shall include a tool for reading compared JSON files."
     issues = '#11323'
   []
+  [civet_results]
+    type = PythonUnitTest
+    input = test_civet_results.py
+
+    requirement = "The system shall include a tool for accessing CIVET testing results."
+  []
 []
