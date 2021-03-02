@@ -17,6 +17,36 @@ TriSubChannelMesh::validParams()
   return params;
 }
 
+void
+rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
+{
+  positions.clear();
+
+  const Real start_r = (nrings - 1) * pitch;
+  const Real theta0 = 2 * libMesh::pi / 3;
+  const Real startx = start_r * std::cos(theta0);
+  const Real starty = start_r * std::sin(theta0);
+  for (int i = 0; i < nrings; i++)
+  {
+    int n_rods_in_row = nrings + i;
+    const Real y = starty - i * pitch * std::sin(theta0);
+    const Real x_row = startx + i * pitch * std::cos(theta0);
+    for (int j = 0; j < n_rods_in_row; j++)
+    {
+      const Real x = x_row + j * pitch;
+      positions.emplace_back(center(0) + x, center(1) + y);
+      if (i < nrings - 1)
+        positions.emplace_back(center(0) + x, center(1) - y);
+    }
+  }
+}
+
+void
+rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
+{
+  // INSERT YOUR ALGORITHM HERE
+}
+
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   : SubChannelMeshBase(params),
     _nrings(getParam<unsigned int>("nrings")),

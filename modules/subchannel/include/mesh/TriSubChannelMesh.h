@@ -3,6 +3,10 @@
 #include <vector>
 #include "SubChannelMeshBase.h"
 
+void rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center);
+
+void rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point center);
+
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
  */
