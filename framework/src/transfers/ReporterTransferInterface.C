@@ -9,6 +9,9 @@
 
 #include "ReporterTransferInterface.h"
 
+#include "UserObject.h"
+#include "Reporter.h"
+
 InputParameters
 ReporterTransferInterface::validParams()
 {
@@ -63,6 +66,15 @@ ReporterTransferInterface::declareClone(const ReporterName & from_reporter,
   ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
   const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
   from_context->declareClone(to_data, to_reporter, mode);
+
+  // Hide variables (if requested in parameters) if name is associated with a reporter object
+  if (to_problem.hasUserObject(to_reporter.getObjectName()))
+  {
+    UserObject & uo = to_problem.getUserObject<UserObject>(to_reporter.getObjectName());
+    Reporter * rep = dynamic_cast<Reporter *>(&uo);
+    if (rep)
+      rep->buildOutputHideVariableList({to_reporter.getCombinedName()});
+  }
 }
 
 void
@@ -76,6 +88,15 @@ ReporterTransferInterface::declareVectorClone(const ReporterName & from_reporter
   ReporterData & to_data = to_problem.getReporterData(ReporterData::WriteKey());
   const ReporterContextBase * from_context = from_data.getReporterContextBase(from_reporter);
   from_context->declareVectorClone(to_data, to_reporter, mode);
+
+  // Hide variables (if requested in parameters) if name is associated with a reporter object
+  if (to_problem.hasUserObject(to_reporter.getObjectName()))
+  {
+    UserObject & uo = to_problem.getUserObject<UserObject>(to_reporter.getObjectName());
+    Reporter * rep = dynamic_cast<Reporter *>(&uo);
+    if (rep)
+      rep->buildOutputHideVariableList({to_reporter.getCombinedName()});
+  }
 }
 
 void

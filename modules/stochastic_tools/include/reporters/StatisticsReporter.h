@@ -125,9 +125,16 @@ public:
   static InputParameters validParams();
   StatisticsReporter(const InputParameters & parameters);
 
+  /**
+   * This is where the reporter values are declared
+   * Note: unfortunetly this cannot be in the constructor since the reporter values
+   *       containing the data might not exist yet. So we put it here to give the
+   *       values their last chance to exist.
+   */
+  virtual void initialize() final;
+
   /// Not used; all operations are  wrapped in the ReporterStatisticsContext
   virtual void execute() final{};
-  virtual void initialize() final{};
   virtual void finalize() final{};
   virtual void store(nlohmann::json & json) const override;
 
@@ -146,6 +153,9 @@ private:
 
   // Random seed for producing CI replicates
   const unsigned int & _ci_seed;
+
+  /// Whether or not initialize() has been called for reporter value declaration
+  bool _initialized;
 
   /**
    * Helper for adding statistic reporter values
