@@ -101,7 +101,6 @@
     add_variables = true
     strain = SMALL
     incremental = true
-    temperature = temp2
     automatic_eigenstrain_names = true
   [../]
 []

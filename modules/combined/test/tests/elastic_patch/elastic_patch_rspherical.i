@@ -12,7 +12,6 @@
 
 [GlobalParams]
   displacements = 'disp_x'
-  temperature = temp
 []
 
 [Problem]

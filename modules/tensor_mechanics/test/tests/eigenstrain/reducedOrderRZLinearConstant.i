@@ -87,7 +87,6 @@
         add_variables = true
         strain = SMALL
         incremental = true
-        temperature = temp
         eigenstrain_names = 'fred' #'thermal_eigenstrain'
       [../]
     [../]

@@ -124,7 +124,6 @@
   [./TensorMechanics]
     use_displaced_mesh = false
     displacements = 'disp_x disp_y'
-    temperature = temp
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
     block = '1 2'

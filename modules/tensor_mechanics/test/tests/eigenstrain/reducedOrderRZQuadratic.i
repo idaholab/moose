@@ -130,7 +130,6 @@
         add_variables = true
         strain = SMALL
         incremental = true
-        temperature = temp2
         #eigenstrain_names = thermal_eigenstrain
         eigenstrain_names = reduced_order_eigenstrain
       [../]

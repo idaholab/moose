@@ -47,7 +47,6 @@
     planar_formulation = GENERALIZED_PLANE_STRAIN
     eigenstrain_names = eigenstrain
     scalar_out_of_plane_strain = scalar_strain_zz
-    temperature = temp
     save_in = 'saved_x saved_y'
   [../]
 []
