@@ -19,7 +19,7 @@
 [Materials]
   [filter]
     type = PackedColumn
-    radius = 2
+    diameter = 2
     viscosity = 1e-03
     output_properties = 'permeability viscosity'
     outputs = exodus
