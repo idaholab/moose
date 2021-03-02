@@ -24,14 +24,15 @@ namespace internal
 // Forward Declarations
 class PerfGraphRegistry;
 
-PerfGraphRegistry & getPerfGraphRegistry();
-
 /**
  * The place where all timed sections will be stored
  */
 class PerfGraphRegistry
 {
 public:
+  PerfGraphRegistry(){};
+  ~PerfGraphRegistry(){};
+
   /**
    * Used to hold metadata about the registered sections
    */
@@ -68,17 +69,11 @@ public:
                          const bool print_dots = true);
 
 protected:
-  PerfGraphRegistry(){};
-  ~PerfGraphRegistry(){};
-
   /// Map of section names to IDs
   std::unordered_map<std::string, PerfID> _section_name_to_id;
 
   /// Map of IDs to section information
   std::unordered_map<PerfID, SectionInfo> _id_to_section_info;
-
-  /// So it can be constructed
-  friend PerfGraphRegistry & getPerfGraphRegistry();
 
   /// For access from the PerfGraph system
   friend class ::PerfGraph;

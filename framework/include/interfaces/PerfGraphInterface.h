@@ -44,7 +44,7 @@ template <>
 InputParameters validParams<PerfGraphInterface>();
 
 /**
- * Interface for objects that needs transient capabilities
+ * Interface for objects that needs PerfGraph capabilities
  */
 class PerfGraphInterface
 {

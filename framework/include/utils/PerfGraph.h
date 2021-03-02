@@ -215,6 +215,11 @@ public:
    */
   void updateTiming();
 
+  /**
+   * Get the PerfGraphRegistry
+   */
+  PerfGraphRegistry & getPerfGraphRegistry() { return _perf_graph_registry; }
+
 protected:
   typedef VariadicTable<std::string,
                         unsigned long int,
@@ -340,7 +345,7 @@ protected:
   bool _live_print_all;
 
   /// The PerfGraphRegistry
-  PerfGraphRegistry & _perf_graph_registry;
+  PerfGraphRegistry _perf_graph_registry;
 
   /// This processor id
   processor_id_type _pid;
