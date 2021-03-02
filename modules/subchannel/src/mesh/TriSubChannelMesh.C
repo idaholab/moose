@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "libmesh/edge_edge2.h"
+#include "libmesh/face_quad4.h"
 #include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("SubChannelApp", TriSubChannelMesh);
@@ -66,6 +67,102 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
       theta = theta + dtheta;
     } // j
   }   // i
+}
+
+// calculate the x-y coordinates of the corner points for the duct cross section;
+void
+ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center)
+{
+  corners.resize(n_corners);
+  Real r_corner = flat_to_flat / 2 / std::cos(libMesh::pi / 6.0);
+  for (int i = 0; i < n_corners; i++)
+  {
+    Real theta = i * libMesh::pi / 3;
+    Point corner = {r_corner * std::cos(theta), r_corner * std::sin(theta)};
+    corners[i] = center + corner;
+  }
+}
+
+// calcultes the points around the cross section of the duct (perpendicular to z axis) using
+// assembly parameters
+void
+ductXsec(std::vector<Point> & xsec,
+         const std::vector<Point> & corners,
+         int nrings,
+         Real pitch,
+         Real flat_to_flat)
+{
+  xsec.clear();
+
+  Real r_corner = flat_to_flat / 2 / std::cos(libMesh::pi / 6.0);
+  Real start_offset = (r_corner - (nrings - 2) * pitch) * std::sin(libMesh::pi / 6);
+  Real side_length = (corners[0] - corners[1]).norm();
+
+  for (int i = 0; i < corners.size(); i++)
+  {
+    auto left = corners[i];
+    auto right = corners[(i + 1) % corners.size()];
+    xsec.push_back(left);
+    auto direc = (right - left).unit();
+    for (Real offset_from_corner = start_offset; offset_from_corner < side_length;
+         offset_from_corner += pitch)
+      xsec.push_back(left + direc * offset_from_corner);
+  }
+}
+
+int
+pointIndex(int points_per_layer, int layer, int point)
+{
+  return layer * points_per_layer + point;
+}
+
+void
+ductPoints(std::vector<Point> & points,
+           const std::vector<Point> & xsec,
+           const std::vector<Real> & z_layers)
+{
+  points.resize(xsec.size() * z_layers.size());
+  for (int i = 0; i < z_layers.size(); i++)
+    for (int j = 0; j < xsec.size(); j++)
+      points[pointIndex(xsec.size(), i, j)] = Point(xsec[j](0), xsec[j](1), z_layers[i]);
+}
+
+void
+ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int points_per_layer)
+{
+  elem_point_indices.clear();
+  for (int i = 0; i < n_layers - 1; i++)
+  {
+    int bottom = i;
+    int top = i + 1;
+    for (int j = 0; j < points_per_layer; j++)
+    {
+      int left = j;
+      int right = (j + 1) % points_per_layer;
+      elem_point_indices.push_back({pointIndex(points_per_layer, bottom, left),
+                                    pointIndex(points_per_layer, bottom, right),
+                                    pointIndex(points_per_layer, top, right),
+                                    pointIndex(points_per_layer, top, left)});
+    }
+  }
+}
+
+void
+buildDuct(UnstructuredMesh & mesh,
+          const std::vector<Point> & points,
+          std::vector<std::vector<int>> & elem_point_indices)
+{
+  std::vector<Node *> nodes;
+  for (int i = 0; i < points.size(); i++)
+    nodes.push_back(mesh.add_point(points[i]));
+
+  for (auto & elem_indices : elem_point_indices)
+  {
+    auto elem = mesh.add_elem(new Quad4());
+    elem->subdomain_id() = 2;
+    for (int i = 0; i < elem_indices.size(); i++)
+      elem->set_node(i) = nodes[elem_indices[i]];
+  }
 }
 
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
@@ -670,5 +767,22 @@ TriSubChannelMesh::buildMesh()
   boundary_info.sideset_name(1) = "outlet";
   boundary_info.nodeset_name(0) = "inlet";
   boundary_info.nodeset_name(1) = "outlet";
+
+  // build the duct
+  std::vector<Point> corners;
+  ductCorners(corners, _flat_to_flat, Point(0, 0, 0));
+
+  std::vector<Point> xsec;
+  ductXsec(xsec, corners, _nrings, _pitch, _flat_to_flat);
+
+  std::vector<Point> points;
+  ductPoints(points, xsec, _z_grid);
+
+  std::vector<std::vector<int>> elem_point_indices;
+  ductElems(elem_point_indices, _z_grid.size(), xsec.size());
+
+  buildDuct(mesh, points, elem_point_indices);
+
+  // finalze things
   mesh.prepare_for_use();
 }

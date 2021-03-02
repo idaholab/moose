@@ -3,6 +3,32 @@
 #include <vector>
 #include "SubChannelMeshBase.h"
 
+const int n_corners = 6;
+
+// calculate the x-y coordinates of the corner points for the duct cross section;
+void ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center);
+
+// calcultes the points around the cross section of the duct (perpendicular to z axis) using
+// assembly parameters
+void ductXsec(std::vector<Point> & xsec,
+              const std::vector<Point> & corners,
+              int nrings,
+              Real pitch,
+              Real flat_to_flat);
+
+int pointIndex(int points_per_layer, int layer, int point);
+
+void ductPoints(std::vector<Point> & points,
+                const std::vector<Point> & xsec,
+                const std::vector<Real> & z_layers);
+
+void
+ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int points_per_layer);
+
+void buildDuct(UnstructuredMesh & mesh,
+               const std::vector<Point> & points,
+               std::vector<std::vector<int>> & elem_point_indices);
+
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
  */
