@@ -958,6 +958,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
   // Construct the KD tree for lower-dimensional elements in the volume mesh.
   kd_tree.buildIndex();
 
+  std::unordered_set<dof_id_type> primary_nodes_visited;
+
   for (const auto & primary_side_elem : mesh.active_element_ptr_range())
   {
     // If this is not one of the lower-dimensional primary side elements, go on to the next one.
@@ -976,11 +978,14 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       const std::vector<const Elem *> & primary_node_neighbors =
           this->nodes_to_primary_elem_map.at(primary_node->id());
 
-      // Check whether we have already successfully inverse mapped this primary node and skip if
-      // so.
+      // Check whether we have already successfully inverse mapped this primary node (whether during
+      // secondary node projection or now during primary node projection) or we have already failed
+      // to inverse map this primary node (now during primary node projection), and then skip if
+      // either of those things is true
       auto primary_key =
           std::make_tuple(primary_node->id(), primary_node, primary_node_neighbors[0]);
-      if (primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
+      if (!primary_nodes_visited.insert(primary_node->id()).second ||
+          primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
         continue;
 
       // Data structure for performing Nanoflann searches.
