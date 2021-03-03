@@ -825,8 +825,9 @@ FEProblemBase::initialSetup()
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
       _materials.sort(tid);
+      _interface_materials.sort(tid);
 
-      // Call initialSetup on both Material and Material objects
+      // Call initialSetup on all material objects
       _all_materials.initialSetup(tid);
     }
 

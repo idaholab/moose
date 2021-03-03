@@ -25,7 +25,10 @@ JumpInterfaceMaterial::JumpInterfaceMaterial(const InputParameters & parameters)
   : InterfaceMaterial(parameters),
     _value(coupledValue("var")),
     _neighbor_value(coupledNeighborValue("neighbor_var")),
-    _jump(declareProperty<Real>("jump"))
+    _ad_value(adCoupledValue("var")),
+    _ad_neighbor_value(adCoupledNeighborValue("neighbor_var")),
+    _jump(declareProperty<Real>("jump")),
+    _ad_jump(declareADProperty<Real>("ad_jump"))
 {
 }
 
@@ -33,4 +36,5 @@ void
 JumpInterfaceMaterial::computeQpProperties()
 {
   _jump[_qp] = _value[_qp] - _neighbor_value[_qp];
+  _ad_jump[_qp] = _ad_value[_qp] - _ad_neighbor_value[_qp];
 }
