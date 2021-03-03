@@ -29,9 +29,9 @@ template <typename WorkType, typename ParallelDataType>
 class ParallelStudy : public ParallelObject
 {
 public:
+  typedef typename MooseUtils::SharedPool<ParallelDataType>::PtrType ParallelDataPoolPtr;
   typedef typename MooseUtils::Buffer<WorkType>::iterator work_iterator;
-  typedef typename MooseUtils::Buffer<std::shared_ptr<ParallelDataType>>::iterator
-      parallel_data_iterator;
+  typedef typename MooseUtils::Buffer<ParallelDataPoolPtr>::iterator parallel_data_iterator;
 
   static InputParameters validParams();
 
@@ -60,8 +60,8 @@ public:
    * During execute(), this method is thread safe and can be used to add work during execution.
    */
   ///@{
-  void moveWorkToBuffer(WorkType & work, const THREAD_ID tid);
-  void moveWorkToBuffer(const work_iterator begin, const work_iterator end, const THREAD_ID tid);
+  void moveWorkToBuffer(WorkType && work, const THREAD_ID tid);
+  void moveWorkToBuffer(work_iterator begin, work_iterator end, const THREAD_ID tid);
   void moveWorkToBuffer(std::vector<WorkType> & work, const THREAD_ID tid);
   ///@}
 
@@ -69,8 +69,7 @@ public:
    * Acquire a parallel data object from the pool.
    */
   template <typename... Args>
-  typename MooseUtils::SharedPool<ParallelDataType>::PtrType
-  acquireParallelData(const THREAD_ID tid, Args &&... args)
+  ParallelDataPoolPtr acquireParallelData(const THREAD_ID tid, Args &&... args)
   {
     return _parallel_data_pools[tid].acquire(std::forward<Args>(args)...);
   }
@@ -78,13 +77,12 @@ public:
   /**
    * Moves parallel data objects to the send buffer to be communicated to processor \p dest_pid.
    */
-  void moveParallelDataToBuffer(std::shared_ptr<ParallelDataType> & data,
-                                const processor_id_type dest_pid);
+  void moveParallelDataToBuffer(ParallelDataPoolPtr && data, const processor_id_type dest_pid);
 
   /**
    * Gets the receive buffer.
    */
-  const ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>> &
+  const ReceiveBuffer<ParallelDataPoolPtr, ParallelStudy<WorkType, ParallelDataType>> &
   receiveBuffer() const
   {
     return *_receive_buffer;
@@ -137,6 +135,10 @@ public:
    * Whether or not this object is between preExecute() and execute().
    */
   bool currentlyPreExecuting() const { return _currently_pre_executing; }
+  /**
+   * Whether or not work is currently being executed within executeAndBuffer().
+   */
+  bool currentlyExecutingWork() const { return _currently_executing_work; }
 
   /**
    * Gets the max buffer size
@@ -177,18 +179,6 @@ public:
 
 protected:
   /**
-   * Enum for providing useful errors during work addition in moveWorkError().
-   */
-  enum MoveWorkError
-  {
-    DURING_EXECUTION_DISABLED,
-    PRE_EXECUTION_AND_EXECUTION_ONLY,
-    PRE_EXECUTION_ONLY,
-    PRE_EXECUTION_THREAD_0_ONLY,
-    CONTINUING_DURING_EXECUTING_WORK
-  };
-
-  /**
    * Creates the work buffer
    *
    * This is virtual so that derived classes can use their own specialized buffers
@@ -198,12 +188,7 @@ protected:
   /**
    * Pure virtual to be overridden that executes a single object of work on a given thread
    */
-  virtual void executeWork(const WorkType & work, const THREAD_ID tid) = 0;
-
-  /**
-   * Virtual that allows for the customization of error text for moving work into the buffer.
-   */
-  virtual void moveWorkError(const MoveWorkError error, const WorkType * work = nullptr) const;
+  virtual void executeWork(WorkType & work, const THREAD_ID tid) = 0;
 
   /**
    * Insertion point for derived classes to provide an alternate ending criteria for
@@ -241,7 +226,7 @@ protected:
    * algorithm into the buffer.
    */
   ///@{
-  void moveContinuingWorkToBuffer(WorkType & Work);
+  void moveContinuingWorkToBuffer(WorkType && Work);
   void moveContinuingWorkToBuffer(const work_iterator begin, const work_iterator end);
   ///@}
 
@@ -292,11 +277,6 @@ private:
   void executeAndBuffer(const std::size_t chunk_size);
 
   /**
-   * Internal check for if it is allowed to currently add work in moveWorkToBuffer().
-   */
-  void canMoveWorkCheck(const THREAD_ID tid);
-
-  /**
    * Internal method for acting on the parallel data that has just been received into
    * the parallel buffer
    */
@@ -312,8 +292,6 @@ private:
   const Real _buffer_shrink_multiplier;
   /// Number of objects to execute at once during communication
   const unsigned int _chunk_size;
-  /// Whether or not to allow the addition of new work to the buffer during execution
-  const bool _allow_new_work_during_execution;
 
   /// Iterations to wait before communicating
   const unsigned int _clicks_per_communication;
@@ -329,14 +307,15 @@ private:
   /// Threaded temprorary storage for work added while we're using the _work_buffer (one for each thread)
   std::vector<std::vector<WorkType>> _temp_threaded_work;
   /// Buffer for executing work
-  const std::unique_ptr<MooseUtils::Buffer<WorkType>> _work_buffer;
+  std::unique_ptr<MooseUtils::Buffer<WorkType>> _work_buffer;
   /// The receive buffer
-  const std::unique_ptr<ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>
+  const std::unique_ptr<
+      ReceiveBuffer<ParallelDataPoolPtr, ParallelStudy<WorkType, ParallelDataType>>>
       _receive_buffer;
   /// Send buffers for each processor
   std::unordered_map<
       processor_id_type,
-      std::unique_ptr<SendBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>>
+      std::unique_ptr<SendBuffer<ParallelDataPoolPtr, ParallelStudy<WorkType, ParallelDataType>>>>
       _send_buffers;
 
   /// Number of chunks of work executed on this processor
@@ -379,7 +358,6 @@ ParallelStudy<WorkType, ParallelDataType>::ParallelStudy(
     _buffer_growth_multiplier(params.get<Real>("buffer_growth_multiplier")),
     _buffer_shrink_multiplier(params.get<Real>("buffer_shrink_multiplier")),
     _chunk_size(params.get<unsigned int>("chunk_size")),
-    _allow_new_work_during_execution(params.get<bool>("allow_new_work_during_execution")),
 
     _clicks_per_communication(params.get<unsigned int>("clicks_per_communication")),
     _clicks_per_root_communication(params.get<unsigned int>("clicks_per_root_communication")),
@@ -388,9 +366,8 @@ ParallelStudy<WorkType, ParallelDataType>::ParallelStudy(
     _parallel_data_buffer_tag(Parallel::MessageTag(100)),
     _parallel_data_pools(libMesh::n_threads()),
     _temp_threaded_work(libMesh::n_threads()),
-    _work_buffer(createWorkBuffer()),
     _receive_buffer(libmesh_make_unique<
-                    ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>(
+                    ReceiveBuffer<ParallelDataPoolPtr, ParallelStudy<WorkType, ParallelDataType>>>(
         comm, this, _method, _clicks_per_receive, _parallel_data_buffer_tag)),
 
     _currently_executing(false),
@@ -401,11 +378,6 @@ ParallelStudy<WorkType, ParallelDataType>::ParallelStudy(
   if (libMesh::n_threads() != 1)
     mooseWarning(_name, ": Threading will not be used without OpenMP");
 #endif
-
-  if (_method != ParallelStudyMethod::SMART && _allow_new_work_during_execution)
-    mooseError(_name,
-               ": When allowing new work addition during execution\n",
-               "('allow_new_work_during_execution = true'), the method must be SMART");
 }
 
 template <typename WorkType, typename ParallelDataType>
@@ -466,11 +438,6 @@ ParallelStudy<WorkType, ParallelDataType>::validParams()
                                     "size if it is force dumped.  Will stop at "
                                     "min_buffer_size.");
 
-  params.addParam<bool>(
-      "allow_new_work_during_execution",
-      true,
-      "Whether or not to allow the addition of new work to the work buffer during execution");
-
   MooseEnum methods("smart harm bs", "smart");
   params.addParam<MooseEnum>("method", methods, "The algorithm to use");
 
@@ -480,7 +447,7 @@ ParallelStudy<WorkType, ParallelDataType>::validParams()
   params.addParamNamesToGroup(
       "send_buffer_size chunk_size clicks_per_communication clicks_per_root_communication "
       "clicks_per_receive min_buffer_size buffer_growth_multiplier buffer_shrink_multiplier method "
-      "work_buffer_type allow_new_work_during_execution",
+      "work_buffer_type",
       "Advanced");
 
   return params;
@@ -529,34 +496,30 @@ ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t ch
   // Remove the objects we just worked on from the buffer
   _work_buffer->eraseChunk(chunk_size);
 
-  // If new work is allowed to be geneated during execution, it goes into _temp_threaded_work
-  // during the threaded execution phase and then must be moved into the working buffer
-  if (_allow_new_work_during_execution)
+  // Amount of work that needs to be moved into the main working buffer from
+  // the temporary working buffer
+  std::size_t threaded_work_size = 0;
+  for (const auto & work_objects : _temp_threaded_work)
+    threaded_work_size += work_objects.size();
+
+  // Work exists in the temp buffers - need to move it
+  if (threaded_work_size)
   {
-    // Amount of work that needs to be moved into the main working buffer from
-    // the temporary working buffer
-    std::size_t threaded_work_size = 0;
-    for (const auto & work_objects : _temp_threaded_work)
-      threaded_work_size += work_objects.size();
+    mooseAssert(_method == ParallelStudyMethod::SMART,
+                "Should only have during-execution work with SMART");
 
-    if (threaded_work_size)
+    // Move the work into the buffer
+    _work_buffer->reserve(_work_buffer->size() + threaded_work_size);
+    for (auto & threaded_work_vector : _temp_threaded_work)
     {
-      // We don't ever want to decrease the capacity, so only set it if we need more entries
-      if (_work_buffer->capacity() < _work_buffer->capacity() + threaded_work_size)
-        _work_buffer->setCapacity(_work_buffer->capacity() + threaded_work_size);
-
-      // Move the work into the buffer
-      for (auto & threaded_work_vector : _temp_threaded_work)
-      {
-        for (auto & work : threaded_work_vector)
-          _work_buffer->move(work);
-        threaded_work_vector.clear();
-      }
-
-      // Variable that must be set when adding work so that the algorithm can keep count
-      // of how much work still needs to be executed
-      _local_work_started += threaded_work_size;
+      for (auto & work : threaded_work_vector)
+        _work_buffer->emplaceBack(std::move(work));
+      threaded_work_vector.clear();
     }
+
+    // Variable that must be set when adding work so that the algorithm can keep count
+    // of how much work still needs to be executed
+    _local_work_started += threaded_work_size;
   }
 
   if (_method == ParallelStudyMethod::HARM)
@@ -568,7 +531,7 @@ ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t ch
 template <typename WorkType, typename ParallelDataType>
 void
 ParallelStudy<WorkType, ParallelDataType>::moveParallelDataToBuffer(
-    std::shared_ptr<ParallelDataType> & data, const processor_id_type dest_pid)
+    ParallelDataPoolPtr && data, const processor_id_type dest_pid)
 {
   mooseAssert(comm().size() > dest_pid, "Invalid processor ID");
   mooseAssert(_pid != dest_pid, "Processor ID is self");
@@ -583,7 +546,7 @@ ParallelStudy<WorkType, ParallelDataType>::moveParallelDataToBuffer(
     _send_buffers
         .emplace(dest_pid,
                  libmesh_make_unique<
-                     SendBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>(
+                     SendBuffer<ParallelDataPoolPtr, ParallelStudy<WorkType, ParallelDataType>>>(
                      comm(),
                      this,
                      dest_pid,
@@ -593,10 +556,10 @@ ParallelStudy<WorkType, ParallelDataType>::moveParallelDataToBuffer(
                      _buffer_growth_multiplier,
                      _buffer_shrink_multiplier,
                      _parallel_data_buffer_tag))
-        .first->second->moveObject(data);
+        .first->second->emplace_back(std::move(data));
   // Send buffer exists for this processor
   else
-    find_pair->second->moveObject(data);
+    find_pair->second->emplace_back(std::move(data));
 }
 
 template <typename WorkType, typename ParallelDataType>
@@ -615,8 +578,7 @@ ParallelStudy<WorkType, ParallelDataType>::reserveBuffer(const std::size_t size)
     mooseError(_name, ": Can only reserve in object buffer during pre-execution");
 
   // We don't ever want to decrease the capacity, so only set if we need more entries
-  if (_work_buffer->capacity() < size)
-    _work_buffer->setCapacity(size);
+  _work_buffer->reserve(size);
 }
 
 template <typename WorkType, typename ParallelDataType>
@@ -701,19 +663,8 @@ ParallelStudy<WorkType, ParallelDataType>::smartExecute()
   // Temp for use in sending the current value in a nonblocking sum instead of an updated value
   unsigned long long int temp;
 
-  // Whether or not to make the started request first, or after every finished request.
-  // When allowing adding new work during the execution phase, the starting object counts could
-  // change after right now, so we must update them after each finished request is complete.
-  // When not allowing generation during propagation, we know the counts up front.
-  const bool started_request_first = !_allow_new_work_during_execution;
-
-  // Get the amount of work that was started in the whole domain, if applicable
-  if (started_request_first)
-    nonblockingSum(comm(), _local_work_started, _total_work_started, started_request);
-
-  // Whether or not the started request has been made
-  bool made_started_request = started_request_first;
-  // Whether or not the completed request has been made
+  // Whether or not the started and completed requests have been made
+  bool made_started_request = false;
   bool made_completed_request = false;
 
   // Good time to get rid of whatever's currently in our SendBuffers
@@ -759,10 +710,6 @@ ParallelStudy<WorkType, ParallelDataType>::smartExecute()
     {
       non_executing_root_clicks = 0;
 
-      // We need the starting work sum first but said request isn't complete yet
-      if (started_request_first && !started_request.test())
-        continue;
-
       // At this point, we need to make a request for the completed work sum
       if (!made_completed_request)
       {
@@ -775,8 +722,7 @@ ParallelStudy<WorkType, ParallelDataType>::smartExecute()
       // We have the completed work sum
       if (completed_request.test())
       {
-        // The starting work sum must be requested /after/ we have finishing counts and we
-        // need to make the request for said sum
+        // Need to make the request for the starting sum
         if (!made_started_request)
         {
           made_started_request = true;
@@ -785,20 +731,17 @@ ParallelStudy<WorkType, ParallelDataType>::smartExecute()
           continue;
         }
 
-        // The starting work sum must be requested /after/ we have finishing sum and we
-        // don't have the starting sum yet
-        if (!started_request_first && !started_request.test())
+        // Don't have the starting sum yet
+        if (!started_request.test())
           continue;
 
         // Started count is the same as the finished count - we're done!
         if (_total_work_started == _total_work_completed)
           return;
 
-        // Next time around we should make a completed sum request
+        // Next time around we should make a starting and completed sum request
         made_completed_request = false;
-        // If we need the starting work sum after the completed work sum, we need those now as well
-        if (!started_request_first)
-          made_started_request = false;
+        made_started_request = false;
       }
     }
   }
@@ -810,8 +753,6 @@ ParallelStudy<WorkType, ParallelDataType>::harmExecute()
 {
   if (_has_alternate_ending_criteria)
     mooseError("ParallelStudy: Alternate ending criteria not yet supported for HARM");
-  if (_allow_new_work_during_execution)
-    mooseError(_name, ": The addition of new work during execution is not supported by HARM");
   mooseAssert(_method == ParallelStudyMethod::HARM, "Should be called with HARM only");
 
   // Request for the total amount of work started
@@ -907,8 +848,6 @@ ParallelStudy<WorkType, ParallelDataType>::bsExecute()
 {
   if (_has_alternate_ending_criteria)
     mooseError("ParallelStudy: Alternate ending criteria not yet supported for BS");
-  if (_allow_new_work_during_execution)
-    mooseError(_name, ": The addition of new work during execution is not supported by BS");
   mooseAssert(_method == ParallelStudyMethod::BS, "Should be called with BS only");
 
   Parallel::Request work_completed_probe_status;
@@ -970,6 +909,9 @@ template <typename WorkType, typename ParallelDataType>
 void
 ParallelStudy<WorkType, ParallelDataType>::preExecute()
 {
+  if (!_work_buffer)
+    _work_buffer = createWorkBuffer();
+
   if (!buffersAreEmpty())
     mooseError(_name, ": Buffers are not empty in preExecute()");
 
@@ -1026,64 +968,13 @@ ParallelStudy<WorkType, ParallelDataType>::execute()
 
 template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType>::moveWorkError(
-    const MoveWorkError error, const WorkType * /* work = nullptr */) const
+ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(WorkType && work, const THREAD_ID tid)
 {
-  if (error == MoveWorkError::DURING_EXECUTION_DISABLED)
-    mooseError(_name,
-               ": The moving of new work into the buffer during work execution requires\n",
-               "that the parameter 'allow_new_work_during_execution = true'");
-  if (error == MoveWorkError::PRE_EXECUTION_AND_EXECUTION_ONLY)
-    mooseError(
-        _name,
-        ": Can only move work into the buffer in the pre-execution and execution phase\n(between "
-        "preExecute() and the end of execute()");
-  if (error == MoveWorkError::PRE_EXECUTION_ONLY)
-    mooseError(_name,
-               ": Can only move work into the buffer in the pre-execution phase\n(between "
-               "preExecute() and execute()");
-  if (error == MoveWorkError::PRE_EXECUTION_THREAD_0_ONLY)
-    mooseError(_name,
-               ": Can only move work into the buffer in the pre-execution phase\n(between "
-               "preExecute() and execute()) on thread 0");
-  if (error == CONTINUING_DURING_EXECUTING_WORK)
-    mooseError(_name, ": Cannot move continuing work into the buffer during executeAndBuffer()");
-
-  mooseError("Unknown MoveWorkError");
-}
-
-template <typename WorkType, typename ParallelDataType>
-void
-ParallelStudy<WorkType, ParallelDataType>::canMoveWorkCheck(const THREAD_ID tid)
-{
-  if (_currently_executing)
-  {
-    if (!_allow_new_work_during_execution)
-      moveWorkError(MoveWorkError::DURING_EXECUTION_DISABLED);
-  }
-  else if (!_currently_pre_executing)
-  {
-    if (_allow_new_work_during_execution)
-      moveWorkError(MoveWorkError::PRE_EXECUTION_AND_EXECUTION_ONLY);
-    else
-      moveWorkError(MoveWorkError::PRE_EXECUTION_ONLY);
-  }
-  else if (tid != 0)
-    moveWorkError(MoveWorkError::PRE_EXECUTION_THREAD_0_ONLY);
-}
-
-template <typename WorkType, typename ParallelDataType>
-void
-ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(WorkType & work, const THREAD_ID tid)
-{
-  // Error checks for moving work into the buffer at unallowed times
-  canMoveWorkCheck(tid);
-
   // Can move directly into the work buffer on thread 0 when we're not executing work
   if (!_currently_executing_work && tid == 0)
   {
     ++_local_work_started; // must ALWAYS increment when adding new work to the working buffer
-    _work_buffer->move(work);
+    _work_buffer->emplaceBack(std::move(work));
   }
   // Objects added during execution go into a temporary threaded vector (is thread safe) to be
   // moved into the working buffer when possible
@@ -1093,30 +984,26 @@ ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(WorkType & work, con
 
 template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(const work_iterator begin,
-                                                            const work_iterator end,
+ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(work_iterator begin,
+                                                            work_iterator end,
                                                             const THREAD_ID tid)
 {
-  // Error checks for moving work into the buffer at unallowed times
-  canMoveWorkCheck(tid);
-
   // Get work size beforehand so we can resize
   const auto size = std::distance(begin, end);
 
   // Can move directly into the work buffer on thread 0 when we're not executing work
   if (!_currently_executing_work && tid == 0)
   {
-    if (_work_buffer->capacity() < _work_buffer->capacity() + size)
-      _work_buffer->setCapacity(_work_buffer->capacity() + size);
+    _work_buffer->reserve(_work_buffer->size() + size);
     _local_work_started += size;
   }
   else
-    _temp_threaded_work[tid].reserve(_temp_threaded_work[tid].capacity() + size);
+    _temp_threaded_work[tid].reserve(_temp_threaded_work[tid].size() + size);
 
   // Move the objects
   if (!_currently_executing_work && tid == 0)
     for (auto it = begin; it != end; ++it)
-      _work_buffer->move(*it);
+      _work_buffer->emplaceBack(std::move(*it));
   else
     for (auto it = begin; it != end; ++it)
       _temp_threaded_work[tid].emplace_back(std::move(*it));
@@ -1132,28 +1019,24 @@ ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(std::vector<WorkType
 
 template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(WorkType & work)
+ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(WorkType && work)
 {
-  if (_currently_executing_work)
-    moveWorkError(MoveWorkError::CONTINUING_DURING_EXECUTING_WORK);
+  mooseAssert(!_currently_executing_work, "Cannot be used while executing work");
 
-  _work_buffer->move(work);
+  _work_buffer->emplaceBack(std::move(work));
 }
 
 template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(const work_iterator begin,
-                                                                      const work_iterator end)
+ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(work_iterator begin,
+                                                                      work_iterator end)
 {
-  if (_currently_executing_work)
-    moveWorkError(MoveWorkError::CONTINUING_DURING_EXECUTING_WORK);
+  mooseAssert(!_currently_executing_work, "Cannot be used while executing work");
 
-  const auto size = std::distance(begin, end);
-  if (_work_buffer->capacity() < _work_buffer->capacity() + size)
-    _work_buffer->setCapacity(_work_buffer->capacity() + size);
+  _work_buffer->reserve(_work_buffer->size() + std::distance(begin, end));
 
   for (auto it = begin; it != end; ++it)
-    _work_buffer->move(*it);
+    _work_buffer->emplaceBack(std::move(*it));
 }
 
 template <typename WorkType, typename ParallelDataType>
@@ -1196,12 +1079,12 @@ template <typename WorkType, typename ParallelDataType>
 unsigned long long int
 ParallelStudy<WorkType, ParallelDataType>::poolParallelDataCreated() const
 {
-  unsigned long long int num_created = 0;
+  unsigned long long int numCreated = 0;
 
   for (const auto & pool : _parallel_data_pools)
-    num_created += pool.num_created();
+    numCreated += pool.numCreated();
 
-  return num_created;
+  return numCreated;
 }
 
 template <typename WorkType, typename ParallelDataType>

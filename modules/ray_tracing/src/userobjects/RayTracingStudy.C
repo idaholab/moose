@@ -165,6 +165,9 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _threaded_cached_normals(libMesh::n_threads()),
     _threaded_next_ray_id(libMesh::n_threads()),
 
+    _ray_bank(declareRestartableDataWithContext<std::vector<MooseUtils::SharedPool<Ray>::PtrType>>(
+        "ray_bank", this)),
+
     _parallel_ray_study(libmesh_make_unique<ParallelRayStudy>(*this, _threaded_trace_ray)),
 
     _local_trace_ray_results(TraceRay::FAILED_TRACES + 1, 0),
@@ -616,7 +619,7 @@ RayTracingStudy::segmentSubdomainSetup(const SubdomainID subdomain,
                                        const THREAD_ID tid,
                                        const RayID ray_id)
 {
-  mooseAssert(currentlyPropagating(), "Should not call while not propagating");
+  mooseAssert(currentlyTracing(), "Should not call while not propagating");
 
   // Call subdomain setup on FE
   _fe_problem.subdomainSetup(subdomain, tid);
@@ -652,7 +655,7 @@ RayTracingStudy::reinitSegment(
     const Elem * elem, const Point & start, const Point & end, const Real length, THREAD_ID tid)
 {
   mooseAssert(MooseUtils::absoluteFuzzyEqual((start - end).norm(), length), "Invalid length");
-  mooseAssert(currentlyPropagating(), "Should not call while not propagating");
+  mooseAssert(currentlyTracing(), "Should not call while not propagating");
 
   _fe_problem.setCurrentSubdomainID(elem, tid);
 
@@ -712,9 +715,9 @@ RayTracingStudy::buildSegmentQuadrature(const Point & start,
 }
 
 void
-RayTracingStudy::postOnSegment(const THREAD_ID tid, const std::shared_ptr<Ray> & /* ray */)
+RayTracingStudy::postOnSegment(const THREAD_ID tid, const Ray & /* ray */)
 {
-  mooseAssert(currentlyPropagating(), "Should not call while not propagating");
+  mooseAssert(currentlyTracing(), "Should not call while not propagating");
   if (!_fe_problem.currentlyComputingJacobian() && !_fe_problem.currentlyComputingResidual())
     mooseAssert(_num_cached[tid] == 0,
                 "Values should only be cached when computing Jacobian/residual");
@@ -777,8 +780,6 @@ RayTracingStudy::executeStudy()
   for (auto & rto : getRayTracingObjects())
     rto->preExecuteStudy();
 
-  _ray_bank.clear();
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     _threaded_trace_ray[tid]->preExecute();
@@ -801,14 +802,12 @@ RayTracingStudy::executeStudy()
       _generation_time = std::chrono::steady_clock::now() - generation_start_time;
     }
 
+    _ray_bank.clear();
+
     // At this point, nobody is working so this is good time to make sure
     // Rays are unique across all processors in the working buffer
     if (verifyRays())
     {
-      verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
-                       _parallel_ray_study->workBuffer().end(),
-                       /* error_suffix = */ "after generateRays()");
-
       verifyUniqueRayIDs(_parallel_ray_study->workBuffer().begin(),
                          _parallel_ray_study->workBuffer().end(),
                          /* global = */ true,
@@ -832,13 +831,10 @@ RayTracingStudy::executeStudy()
 
   _execution_time = std::chrono::steady_clock::now() - _execution_start_time;
 
-  if (verifyRays())
-  {
-    verifyUniqueRays(_parallel_ray_study->workBuffer().begin(),
-                     _parallel_ray_study->workBuffer().end(),
-                     /* error_suffix = */ "after tracing completed");
-
 #ifndef NDEBUG
+  // Outside of debug, _ray_bank always holds all of the Rays that have ended on this processor
+  // We can use this as a global point to check for unique IDs for every Ray that has traced
+  if (verifyRays())
     // Outside of debug, _ray_bank always holds all of the Rays that have ended on this processor
     // We can use this as a global point to check for unique IDs for every Ray that has traced
     verifyUniqueRayIDs(_ray_bank.begin(),
@@ -846,7 +842,6 @@ RayTracingStudy::executeStudy()
                        /* global = */ true,
                        /* error_suffix = */ "after tracing completed");
 #endif
-  }
 
   // Update counters from the threaded trace objects
   for (const auto & tr : _threaded_trace_ray)
@@ -930,9 +925,9 @@ RayTracingStudy::executeStudy()
 }
 
 void
-RayTracingStudy::onCompleteRay(const std::shared_ptr<Ray> & ray)
+RayTracingStudy::onCompleteRay(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
-  mooseAssert(currentlyPropagating(), "Should only be called during Ray propagation");
+  mooseAssert(currentlyTracing(), "Should only be called during Ray propagation");
 
   _ending_processor_crossings += ray->processorCrossings();
   _ending_max_processor_crossings =
@@ -947,7 +942,7 @@ RayTracingStudy::onCompleteRay(const std::shared_ptr<Ray> & ray)
   // In non-opt modes, we will always bank the Rays for debugging
   if (_bank_rays_on_completion)
 #endif
-    _ray_bank.emplace_back(ray);
+    _ray_bank.emplace_back(std::move(ray));
 }
 
 RayDataIndex
@@ -1246,19 +1241,27 @@ RayTracingStudy::getRayTracingObjects()
   return result;
 }
 
-const std::vector<std::shared_ptr<Ray>> &
+std::vector<MooseUtils::SharedPool<Ray>::PtrType> &
+RayTracingStudy::rayBank()
+{
+  if (!_bank_rays_on_completion)
+    mooseError("The Ray bank is not available because the private parameter "
+               "'_bank_rays_on_completion' is set to false.");
+
+  return _ray_bank;
+}
+
+const std::vector<MooseUtils::SharedPool<Ray>::PtrType> &
 RayTracingStudy::rayBank() const
 {
   if (!_bank_rays_on_completion)
     mooseError("The Ray bank is not available because the private parameter "
                "'_bank_rays_on_completion' is set to false.");
-  if (currentlyGenerating() || currentlyPropagating())
-    mooseError("Cannot get the Ray bank during generation or propagation.");
 
   return _ray_bank;
 }
 
-std::shared_ptr<Ray>
+const Ray *
 RayTracingStudy::getBankedRay(const RayID ray_id) const
 {
   if (!_bank_rays_on_completion)
@@ -1268,11 +1271,11 @@ RayTracingStudy::getBankedRay(const RayID ray_id) const
 
   // This is only a linear search - can be improved on with a map in the future
   // if this is used on a larger scale
-  std::shared_ptr<Ray> ray;
-  for (const std::shared_ptr<Ray> & possible_ray : rayBank())
+  const Ray * ray = nullptr;
+  for (const auto & possible_ray : rayBank())
     if (possible_ray->id() == ray_id)
     {
-      ray = possible_ray;
+      ray = possible_ray.get();
       break;
     }
 
@@ -1301,7 +1304,7 @@ RayTracingStudy::getBankedRayDataInternal(const RayID ray_id,
                (aux ? rayAuxDataSize() : rayDataSize()) - 1);
 
   // Will be a nullptr shared_ptr if this processor doesn't own the Ray
-  const std::shared_ptr<Ray> ray = getBankedRay(ray_id);
+  const auto ray = getBankedRay(ray_id);
 
   Real value = ray ? (aux ? ray->auxData(index) : ray->data(index)) : 0;
   _communicator.sum(value);
@@ -1406,35 +1409,35 @@ RayTracingStudy::getInternalSidesets(const Elem * elem) const
 }
 
 TraceData &
-RayTracingStudy::initThreadedCachedTrace(const std::shared_ptr<Ray> & ray, THREAD_ID tid)
+RayTracingStudy::initThreadedCachedTrace(const Ray & ray, THREAD_ID tid)
 {
   mooseAssert(shouldCacheTrace(ray), "Not caching trace");
-  mooseAssert(currentlyPropagating(), "Should only use while tracing");
+  mooseAssert(currentlyTracing(), "Should only use while tracing");
 
   _threaded_cached_traces[tid].emplace_back(ray);
   return _threaded_cached_traces[tid].back();
 }
 
 void
-RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::const_iterator begin,
-                                    const std::vector<std::shared_ptr<Ray>>::const_iterator end,
-                                    const bool global,
-                                    const std::string & error_suffix) const
+RayTracingStudy::verifyUniqueRayIDs(
+    const std::vector<MooseUtils::SharedPool<Ray>::PtrType>::const_iterator begin,
+    const std::vector<MooseUtils::SharedPool<Ray>::PtrType>::const_iterator end,
+    const bool global,
+    const std::string & error_suffix) const
 {
   // Determine the unique set of Ray IDs on this processor,
   // and if not locally unique throw an error. Once we build this set,
   // we will send it to rank 0 to verify globally
   std::set<RayID> local_rays;
-  for (const std::shared_ptr<Ray> & ray : as_range(begin, end))
+  for (const auto & ray : as_range(begin, end))
   {
     mooseAssert(ray, "Null ray");
 
     // Try to insert into the set; the second entry in the pair
     // will be false if it was not inserted
     if (!local_rays.insert(ray->id()).second)
-    {
-      for (const std::shared_ptr<Ray> & other_ray : as_range(begin, end))
-        if (ray.get() != other_ray.get() && ray->id() == other_ray->id())
+      for (const auto & other_ray : as_range(begin, end))
+        if (ray->id() == other_ray->id())
           mooseError("Multiple Rays exist with ID ",
                      ray->id(),
                      " on processor ",
@@ -1445,12 +1448,6 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
                      ray->getInfo(),
                      "\n",
                      other_ray->getInfo());
-
-      mooseError("Duplicated shared pointers to the same local Ray were found ",
-                 error_suffix,
-                 "\n\n",
-                 ray->getInfo());
-    }
   }
 
   // Send IDs from all procs to rank 0 and verify on rank 0
@@ -1491,35 +1488,21 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
 }
 
 void
-RayTracingStudy::verifyUniqueRays(const std::vector<std::shared_ptr<Ray>>::const_iterator begin,
-                                  const std::vector<std::shared_ptr<Ray>>::const_iterator end,
-                                  const std::string & error_suffix)
-{
-  std::set<const Ray *> rays;
-  for (const std::shared_ptr<Ray> & ray : as_range(begin, end))
-    if (!rays.insert(ray.get()).second) // false if not inserted into rays
-      mooseError("Multiple shared_ptrs were found that point to the same Ray ",
-                 error_suffix,
-                 "\n\nOffending Ray:\n",
-                 ray->getInfo());
-}
-
-void
-RayTracingStudy::moveRayToBuffer(std::shared_ptr<Ray> & ray)
+RayTracingStudy::moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
   mooseAssert(currentlyGenerating(), "Can only use while generating");
   mooseAssert(ray, "Null ray");
   mooseAssert(ray->shouldContinue(), "Ray is not continuing");
 
-  _parallel_ray_study->moveWorkToBuffer(ray, /* tid = */ 0);
+  _parallel_ray_study->moveWorkToBuffer(std::move(ray), /* tid = */ 0);
 }
 
 void
-RayTracingStudy::moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays)
+RayTracingStudy::moveRaysToBuffer(std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays)
 {
   mooseAssert(currentlyGenerating(), "Can only use while generating");
 #ifndef NDEBUG
-  for (const std::shared_ptr<Ray> & ray : rays)
+  for (const auto & ray : rays)
   {
     mooseAssert(ray, "Null ray");
     mooseAssert(ray->shouldContinue(), "Ray is not continuing");
@@ -1530,22 +1513,19 @@ RayTracingStudy::moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays)
 }
 
 void
-RayTracingStudy::moveRayToBufferDuringTrace(std::shared_ptr<Ray> & ray,
+RayTracingStudy::moveRayToBufferDuringTrace(MooseUtils::SharedPool<Ray>::PtrType && ray,
                                             const THREAD_ID tid,
                                             const AcquireMoveDuringTraceKey &)
 {
   mooseAssert(ray, "Null ray");
-  mooseAssert(currentlyPropagating(), "Can only use while tracing");
+  mooseAssert(currentlyTracing(), "Can only use while tracing");
 
-  _parallel_ray_study->moveWorkToBuffer(ray, tid);
+  _parallel_ray_study->moveWorkToBuffer(std::move(ray), tid);
 }
 
 void
 RayTracingStudy::reserveRayBuffer(const std::size_t size)
 {
-  if (!currentlyGenerating())
-    mooseError("Can only reserve in Ray buffer during generateRays()");
-
   _parallel_ray_study->reserveBuffer(size);
 }
 
@@ -1666,10 +1646,10 @@ RayTracingStudy::sideIsIncoming(const Elem * const elem,
   return dot < TraceRayTools::TRACE_TOLERANCE;
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireRay()
 {
-  mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
+  mooseAssert(!currentlyTracing(), "Cannot use while tracing");
 
   return _parallel_ray_study->acquireParallelData(
       /* tid = */ 0,
@@ -1681,10 +1661,10 @@ RayTracingStudy::acquireRay()
       Ray::ConstructRayKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireUnsizedRay()
 {
-  mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
+  mooseAssert(!currentlyTracing(), "Cannot use while tracing");
 
   return _parallel_ray_study->acquireParallelData(/* tid = */ 0,
                                                   this,
@@ -1695,10 +1675,10 @@ RayTracingStudy::acquireUnsizedRay()
                                                   Ray::ConstructRayKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireReplicatedRay()
 {
-  mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
+  mooseAssert(!currentlyTracing(), "Cannot use while tracing");
   libmesh_parallel_only(comm());
 
   return _parallel_ray_study->acquireParallelData(
@@ -1711,10 +1691,10 @@ RayTracingStudy::acquireReplicatedRay()
       Ray::ConstructRayKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireRegisteredRay(const std::string & name)
 {
-  mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
+  mooseAssert(!currentlyTracing(), "Cannot use while tracing");
   mooseAssert(_use_ray_registration, "Can only use with Ray registration");
 
   // Either register a Ray or get an already registered Ray id
@@ -1731,18 +1711,20 @@ RayTracingStudy::acquireRegisteredRay(const std::string & name)
       Ray::ConstructRayKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireCopiedRay(const Ray & ray)
 {
-  mooseAssert(currentlyGenerating(), "Can only use during generateRays()");
+  mooseAssert(!currentlyTracing(), "Cannot use while tracing");
+
   return _parallel_ray_study->acquireParallelData(
       /* tid = */ 0, &ray, Ray::ConstructRayKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayTracingStudy::acquireRayDuringTrace(const THREAD_ID tid, const AcquireMoveDuringTraceKey &)
 {
-  mooseAssert(currentlyPropagating(), "Can only use during propagation");
+  mooseAssert(currentlyTracing(), "Can only use while tracing");
+
   return _parallel_ray_study->acquireParallelData(tid,
                                                   this,
                                                   generateUniqueRayID(tid),

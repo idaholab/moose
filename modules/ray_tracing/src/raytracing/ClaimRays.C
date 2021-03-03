@@ -20,10 +20,9 @@
 #include "libmesh/mesh_tools.h"
 
 ClaimRays::ClaimRays(RayTracingStudy & study,
-                     ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
+                     ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> & parallel_study,
                      MooseMesh & mesh,
-                     const std::vector<std::shared_ptr<Ray>> & rays,
-                     std::vector<std::shared_ptr<Ray>> & local_rays,
+                     std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays,
                      const bool do_exchange)
   : ParallelObject(study.comm()),
     MeshChangedInterface(study.parameters()),
@@ -33,7 +32,7 @@ ClaimRays::ClaimRays(RayTracingStudy & study,
     _study(study),
     _parallel_study(parallel_study),
     _rays(rays),
-    _local_rays(local_rays),
+    _point_locator(nullptr),
     _needs_init(true)
 {
 }
@@ -49,57 +48,62 @@ ClaimRays::claim()
 
   preClaim();
 
-  // Clear these as we're about to fill
-  _local_rays.clear();
+  // Move the user's rays into _temp_rays, so that we can look through them
+  // and move (and receive) rays that we claim into _rays
+  _temp_rays.clear();
+  _temp_rays.swap(_rays);
 
   // Grab the point locator
   _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, _mesh.getMesh());
   _point_locator->enable_out_of_mesh_mode();
 
   // Exchange: filter Rays into processors that _may_ claim them
-  std::unordered_map<processor_id_type, std::vector<std::shared_ptr<Ray>>> rays_to_send;
+  std::unordered_map<processor_id_type, std::vector<MooseUtils::SharedPool<Ray>::PtrType>>
+      rays_to_send;
   if (_do_exchange)
     for (processor_id_type pid = 0; pid < comm().size(); ++pid)
       if (_pid != pid)
       {
         const BoundingBox & pid_bbox = inflatedBoundingBox(pid);
-        for (auto & ray : _rays)
+        for (const auto & ray : _temp_rays)
           if (pid_bbox.contains_point(ray->currentPoint()))
-            rays_to_send[pid].push_back(ray);
+            rays_to_send[pid].emplace_back(_study.acquireCopiedRay(*ray));
       }
 
   // Functor for possibly claiming a vector of Rays
   auto claim_functor = [&](processor_id_type /* pid */,
-                           const std::vector<std::shared_ptr<Ray>> & rays) {
+                           const std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays) {
     for (auto & ray : rays)
-      possiblyClaim(ray);
+      possiblyClaim(_study.acquireCopiedRay(*ray));
   };
 
   // Send the relevant Rays to everyone and then attempt to claim the ones that we receive
   if (_do_exchange)
-    Parallel::push_parallel_packed_range(comm(), rays_to_send, &_parallel_study, claim_functor);
+    new_push_parallel_packed_range(comm(), rays_to_send, &_parallel_study, claim_functor);
 
   // Attempt to claim the locally generated rays in _rays
-  claim_functor(_pid, _rays);
+  claim_functor(_pid, _temp_rays);
 
   // Verify the claiming if the study so desires
   if (_study.verifyRays())
     verifyClaiming();
 
+  _temp_rays.clear();
+
   postClaim();
 }
 
 void
-ClaimRays::possiblyClaim(const std::shared_ptr<Ray> & ray)
+ClaimRays::possiblyClaim(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
-  prePossiblyClaimRay(ray);
+  prePossiblyClaimRay(*ray);
 
   const auto elem =
-      claimPoint(ray->currentPoint(), getID(ray), (*_point_locator)(ray->currentPoint()));
+      claimPoint(ray->currentPoint(), getID(*ray), (*_point_locator)(ray->currentPoint()));
   if (elem)
   {
-    _local_rays.push_back(ray);
-    postClaimRay(_local_rays.back(), elem);
+    _rays.emplace_back(std::move(ray));
+    postClaimRay(*_rays.back(), elem);
   }
 }
 
@@ -141,7 +145,7 @@ ClaimRays::claimPoint(const Point & point, const RayID id, const Elem * elem)
 }
 
 void
-ClaimRays::postClaimRay(std::shared_ptr<Ray> & ray, const Elem * elem)
+ClaimRays::postClaimRay(Ray & ray, const Elem * elem)
 {
   mooseAssert(_mesh.queryElemPtr(elem->id()) == elem, "Mesh doesn't contain elem");
   mooseAssert(elem->active(), "Inactive element");
@@ -149,19 +153,18 @@ ClaimRays::postClaimRay(std::shared_ptr<Ray> & ray, const Elem * elem)
   // If the incoming side is set and is not incoming, or if it is not set at all, see
   // if we can find an incoming side that is valid.
   auto starting_incoming_side = RayTracingCommon::invalid_side;
-  if (!(!ray->invalidCurrentIncomingSide() &&
-        _study.sidePtrHelper(elem, ray->currentIncomingSide())
-            ->contains_point(ray->currentPoint()) &&
-        _study.sideIsIncoming(elem, ray->currentIncomingSide(), ray->direction(), /* tid = */ 0)))
+  if (!(!ray.invalidCurrentIncomingSide() &&
+        _study.sidePtrHelper(elem, ray.currentIncomingSide())->contains_point(ray.currentPoint()) &&
+        _study.sideIsIncoming(elem, ray.currentIncomingSide(), ray.direction(), /* tid = */ 0)))
     for (const auto s : elem->side_index_range())
-      if (_study.sidePtrHelper(elem, s)->contains_point(ray->currentPoint()) &&
-          _study.sideIsIncoming(elem, s, ray->direction(), /* tid = */ 0))
+      if (_study.sidePtrHelper(elem, s)->contains_point(ray.currentPoint()) &&
+          _study.sideIsIncoming(elem, s, ray.direction(), /* tid = */ 0))
       {
         starting_incoming_side = s;
         break;
       }
 
-  ray->setStart(ray->currentPoint(), elem, starting_incoming_side);
+  ray.setStart(ray.currentPoint(), elem, starting_incoming_side);
 }
 
 void
@@ -232,38 +235,39 @@ ClaimRays::verifyClaiming()
   // Map from Ray ID -> whether or not it was generated (false) or
   // claimed/possibly also generated (true)
   std::map<RayID, char> local_map;
-  auto add_to_local_map = [this, &local_map](const std::vector<std::shared_ptr<Ray>> & rays,
-                                             const bool claimed_rays) {
-    for (const auto & ray : rays)
-    {
-      const auto id = getID(ray);
+  auto add_to_local_map =
+      [this, &local_map](const std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays,
+                         const bool claimed_rays) {
+        for (const auto & ray : rays)
+        {
+          const auto id = getID(*ray);
 
-      // Try to insert into the map
-      auto emplace_pair = local_map.emplace(id, claimed_rays);
+          // Try to insert into the map
+          auto emplace_pair = local_map.emplace(id, claimed_rays);
 
-      // Already existed in the map
-      if (!emplace_pair.second)
-      {
-        // If it already exists but has not been claimed yet, set it to being claimed
-        if (claimed_rays && !emplace_pair.first->second)
-          emplace_pair.first->second = true;
-        // Otherwise, it is being doubly generated/claimed
-        else
-          _study.mooseError("Ray with ID ",
-                            id,
-                            " was ",
-                            claimed_rays ? "claimed" : "generated",
-                            " multiple times on pid ",
-                            _pid,
-                            "\n\n",
-                            ray->getInfo());
-      }
-    }
-  };
+          // Already existed in the map
+          if (!emplace_pair.second)
+          {
+            // If it already exists but has not been claimed yet, set it to being claimed
+            if (claimed_rays && !emplace_pair.first->second)
+              emplace_pair.first->second = true;
+            // Otherwise, it is being doubly generated/claimed
+            else
+              _study.mooseError("Ray with ID ",
+                                id,
+                                " was ",
+                                claimed_rays ? "claimed" : "generated",
+                                " multiple times on pid ",
+                                _pid,
+                                "\n\n",
+                                ray->getInfo());
+          }
+        }
+      };
 
   // Build the local_map
-  add_to_local_map(_rays, false);
-  add_to_local_map(_local_rays, true);
+  add_to_local_map(_temp_rays, false);
+  add_to_local_map(_rays, true);
 
   // Build the structure to send the local generation/claiming information to rank 0
   std::map<processor_id_type, std::vector<std::pair<RayID, char>>> send_info;
