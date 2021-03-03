@@ -40,17 +40,15 @@ public:
 
   CircularBuffer(const std::size_t capacity);
 
-  virtual void erase(const std::size_t num) override;
-  virtual void eraseChunk(const std::size_t chunk_size) override;
+  void erase(const std::size_t num) override;
+  void eraseChunk(const std::size_t chunk_size) override;
 
-  virtual typename Buffer<T>::iterator beginChunk(const std::size_t chunk_size) override;
-  virtual typename Buffer<T>::const_iterator
-  beginChunk(const std::size_t chunk_size) const override;
-  virtual typename Buffer<T>::iterator endChunk(const std::size_t chunk_size) override;
-  virtual typename Buffer<T>::const_iterator endChunk(const std::size_t chunk_size) const override;
+  typename Buffer<T>::iterator beginChunk(const std::size_t chunk_size) override;
+  typename Buffer<T>::const_iterator beginChunk(const std::size_t chunk_size) const override;
+  typename Buffer<T>::iterator endChunk(const std::size_t chunk_size) override;
+  typename Buffer<T>::const_iterator endChunk(const std::size_t chunk_size) const override;
 
-protected:
-  virtual std::size_t newEnd(const std::size_t new_end) override;
+  void emplaceBack(T && value) override;
 };
 
 template <typename T>
@@ -121,35 +119,38 @@ CircularBuffer<T>::endChunk(const std::size_t chunk_size) const
 }
 
 template <typename T>
-std::size_t
-CircularBuffer<T>::newEnd(const std::size_t new_end)
+void
+CircularBuffer<T>::emplaceBack(T && value)
 {
-  auto actual_new_end = new_end;
-
-  if (new_end > this->_data.size())
+  // Vector does not have space for the new value
+  if (this->_end_pos + 1 > this->_data.size())
   {
-    const auto new_size = new_end - this->_begin_pos;
+    // Reserve some more while we're here so we can avoid reallocating later
+    this->reserve(2 * (this->_end_pos + 1));
 
-    // See if we need to grow our capacity
-    if (this->_begin_pos == 0) // If we're already using the beginning - just resize
-      this->_data.resize(2 * new_size);
+    // If we're at the beginning, just emplace back
+    if (this->_begin_pos == 0)
+      this->_data.emplace_back(std::move(value));
+    // Begin isn't at the beginning, so shift everything while we're here
     else
     {
-      // Move everything to the beginning
       auto to_it = this->_data.begin();
-      for (auto from_it = this->begin(); from_it < this->end(); ++from_it)
+      for (auto from_it = this->begin(); from_it != this->end(); ++from_it)
         *to_it++ = std::move(*from_it);
 
+      // Shift back end position based on everything we moved to the beginning
+      this->_end_pos -= this->_begin_pos;
+      // Move the value
+      this->_data[this->_end_pos] = std::move(value);
+      // Begin is now at the vector beginning
       this->_begin_pos = 0;
-      actual_new_end = new_size;
-
-      // If there still isn't room... add space
-      if (actual_new_end > this->_data.size())
-        this->_data.resize(2 * new_size);
     }
   }
+  // Vector currently has space
+  else
+    this->_data[this->_end_pos] = std::move(value);
 
-  return actual_new_end;
+  ++this->_end_pos;
 }
 
 }

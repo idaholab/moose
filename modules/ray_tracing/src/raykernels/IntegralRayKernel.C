@@ -33,7 +33,7 @@ IntegralRayKernel::onSegment()
   // an integration that contributes to the residual/Jacobian. Hence: it is something like
   // a line integral. In RZ and RSPHERICAL, we want line integrals to still be line integrals.
   // Therefore, it does not make sense to multiply by the coordinate transformation.
-  auto & value = currentRay()->data(_integral_data_index);
+  auto & value = _current_ray->data(_integral_data_index);
   for (_qp = 0; _qp < _q_point.size(); ++_qp)
     value += _JxW[_qp] * computeQpIntegral();
 }

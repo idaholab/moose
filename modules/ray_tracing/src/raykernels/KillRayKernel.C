@@ -24,5 +24,5 @@ KillRayKernel::KillRayKernel(const InputParameters & params) : GeneralRayKernel(
 void
 KillRayKernel::onSegment()
 {
-  currentRay()->setShouldContinue(false);
+  _current_ray->setShouldContinue(false);
 }

@@ -32,15 +32,15 @@ struct TracePointData
  */
 struct TraceData
 {
-  TraceData(const std::shared_ptr<Ray> & ray)
-    : _ray_id(ray->id()),
-      _intersections(ray->intersections()),
-      _processor_crossings(ray->processorCrossings()),
-      _trajectory_changes(ray->trajectoryChanges()),
+  TraceData(const Ray & ray)
+    : _ray_id(ray.id()),
+      _intersections(ray.intersections()),
+      _processor_crossings(ray.processorCrossings()),
+      _trajectory_changes(ray.trajectoryChanges()),
       _last(false)
   {
     mooseAssert(_ray_id != Ray::INVALID_RAY_ID, "Invalid Ray ID");
-    addPoint(ray->currentPoint());
+    addPoint(ray.currentPoint());
   }
 
   void addPoint(const libMesh::Point & point) { _point_data.emplace_back(point); }

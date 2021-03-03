@@ -116,7 +116,7 @@ ConeRayStudy::defineRays()
     for (std::size_t l = 0; l < aq.numDirections(); ++l)
     {
       // Get a Ray from the study to initialize
-      std::shared_ptr<Ray> ray = acquireReplicatedRay();
+      auto ray = acquireReplicatedRay();
 
       // Start from our cone point in the rotated angular quadrature direction
       // Note here that we do not need to set the starting element - all Rays
@@ -135,7 +135,7 @@ ConeRayStudy::defineRays()
       ray->data(_ray_data_index) = _scaling_factors[i] * aq.getTotalWeight(l) / (2. * M_PI);
 
       // Done with this Ray - move it to be traced later on
-      _rays.emplace_back(std::move(ray));
+      defineRay(std::move(ray));
     }
   }
 }

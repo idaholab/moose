@@ -222,9 +222,6 @@ LotsOfRaysRayStudy::defineRays()
 
   if (_compute_expected_distance)
     _communicator.sum(_expected_distance);
-
-  // Insertion point for other derived test objects to modify the Rays
-  modifyRays();
 }
 
 void
@@ -234,7 +231,7 @@ LotsOfRaysRayStudy::defineRay(const Elem * starting_elem,
                               const Point & p2,
                               const bool ends_within_mesh)
 {
-  std::shared_ptr<Ray> ray = _use_unsized_rays ? acquireUnsizedRay() : acquireRay();
+  auto ray = _use_unsized_rays ? acquireUnsizedRay() : acquireRay();
 
   ray->setStart(
       p1, starting_elem, _set_incoming_side ? incoming_side : RayTracingCommon::invalid_side);
@@ -260,10 +257,8 @@ LotsOfRaysRayStudy::defineRay(const Elem * starting_elem,
     }
   }
 
-  _rays.emplace_back(std::move(ray));
-}
+  // So that derived classes can modify this as needed
+  modifyRay(*ray);
 
-void
-LotsOfRaysRayStudy::modifyRays()
-{
+  RepeatableRayStudyBase::defineRay(std::move(ray));
 }

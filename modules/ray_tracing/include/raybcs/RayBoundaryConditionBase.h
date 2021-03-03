@@ -36,7 +36,7 @@ public:
    * Called on a Ray on the boundary to apply the Ray boundary condition.
    *
    * Important information available during onBoundary():
-   *   currentRay() - The current Ray that is being applied at the boundary
+   *   _current_ray - The current Ray that is being applied at the boundary
    *   _current_elem - The current Elem the Ray is tracing in
    *   _current_intersected_side - The side intersected on the boundary
    *   _current_intersection_point - The point intersected on the boundary
@@ -77,13 +77,13 @@ protected:
    * - Sets the direction as provided by \p direction
    * - Sets the RayID to something unique
    */
-  std::shared_ptr<Ray> acquireRay(const Point & direction);
+  MooseUtils::SharedPool<Ray>::PtrType acquireRay(const Point & direction);
 
   /**
    * Moves a Ray into the working buffer to be traced during tracing with a
    * meaningful error on verification failure
    */
-  void moveRayToBuffer(std::shared_ptr<Ray> & ray);
+  void moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray);
 
   /// The current intersection point on the boundary
   const Point & _current_intersection_point;

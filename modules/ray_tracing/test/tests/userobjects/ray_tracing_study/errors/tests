@@ -4,14 +4,6 @@
 
   [tests]
     requirement = 'The RayTracingStudy shall return a useful error when'
-    [duplicate_ray]
-      type = 'RunException'
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/add_duplicate_ray=true'
-      allow_test_objects = true
-      expect_err = 'Multiple shared_ptrs were found that point to the same Ray'
-      detail = 'the same ray is added to be traced multiple times,'
-    []
     [local_non_unique_id]
       type = 'RunException'
       input = 'errors.i'

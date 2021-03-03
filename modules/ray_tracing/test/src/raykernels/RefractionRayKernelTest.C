@@ -39,7 +39,7 @@ RefractionRayKernelTest::RefractionRayKernelTest(const InputParameters & params)
 void
 RefractionRayKernelTest::onSegment()
 {
-  auto & has_refracted = currentRay()->data(_has_refracted_data_index);
+  auto & has_refracted = _current_ray->data(_has_refracted_data_index);
 
   // If this Ray has refracted once already... don't let it refract again
   // This model is limited in the fact that it only checks the field change (if not 0 or 1) at the
@@ -56,7 +56,7 @@ RefractionRayKernelTest::onSegment()
     // Refract at the midpoint
     const auto refracted_point = 0.5 * (_current_segment_start + _current_segment_end);
     // Get the refracted direction
-    const auto refracted_direction = refract(currentRay()->direction(), field_normal, _r1, _r2);
+    const auto refracted_direction = refract(_current_ray->direction(), field_normal, _r1, _r2);
 
     // Refract!
     changeRayStartDirection(refracted_point, refracted_direction);

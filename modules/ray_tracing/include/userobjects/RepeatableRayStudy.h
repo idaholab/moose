@@ -26,6 +26,12 @@ public:
 protected:
   virtual void defineRays() override;
 
+  /**
+   * Virtual method to be overridden by derived classes if they would like to
+   * modify the define rays in any way during definition.
+   */
+  virtual void modifyRay(Ray & ray);
+
   /// The Ray names
   const std::vector<std::string> _names;
   /// The points to start the Rays from

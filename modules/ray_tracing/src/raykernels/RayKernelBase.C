@@ -64,45 +64,41 @@ RayKernelBase::changeRayStartDirection(const Point & start, const Point & direct
 {
   mooseAssert(_study.currentlyPropagating(), "Should not change Ray outside of tracing");
 
-  const auto & ray = currentRay();
-
-  if (!ray->shouldContinue())
+  if (!_current_ray->shouldContinue())
   {
-    if (ray->endSet() && ray->atEnd())
+    if (_current_ray->endSet() && _current_ray->atEnd())
       mooseError("Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
                  "It has also hit its user-set end point.\n\n",
-                 ray->getInfo());
+                 _current_ray->getInfo());
     else
       mooseError("Cannot changeRayStartDirection() for a Ray that should not continue.\n\n",
-                 ray->getInfo());
+                 _current_ray->getInfo());
   }
 
-
-  if (ray->trajectoryChanged())
+  if (_current_ray->trajectoryChanged())
     mooseError("Cannot change a Ray's trajectory when its trajectory has already been changed\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
-  if (ray->endSet())
+  if (_current_ray->endSet())
     mooseError("Cannot change the direction of a Ray whose end point is set upon generation "
                "(via setStartingEndPoint()).\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
   if (_study.verifyRays() && !_current_elem->contains_point(start))
     mooseError("A Ray's start point was changed within a RayKernel, and said start point\n",
                "is not within the element that the RayKernel was executed on.\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
-  ray->changeStartDirection(start, direction, Ray::ChangeStartDirectionKey());
+  _current_ray->changeStartDirection(start, direction, Ray::ChangeStartDirectionKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayKernelBase::acquireRay(const Point & start, const Point & direction)
 {
   mooseAssert(_study.currentlyPropagating(), "Should not be getting a Ray while not propagating");
 
   // Acquire a Ray with the proper sizes and a unique ID, and set the start info
-  std::shared_ptr<Ray> ray =
-      _study.acquireRayDuringTrace(_tid, RayTracingStudy::AcquireMoveDuringTraceKey());
+  auto ray = _study.acquireRayDuringTrace(_tid, RayTracingStudy::AcquireMoveDuringTraceKey());
   ray->setStart(start, _current_elem, RayTracingCommon::invalid_side);
   ray->setStartingDirection(direction);
 
@@ -110,12 +106,13 @@ RayKernelBase::acquireRay(const Point & start, const Point & direction)
 }
 
 void
-RayKernelBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
+RayKernelBase::moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
 
-  _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
+  _study.moveRayToBufferDuringTrace(
+      std::move(ray), _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }
 
 void

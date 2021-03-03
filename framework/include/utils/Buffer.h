@@ -44,48 +44,28 @@ public:
   virtual ~Buffer() {}
 
   /**
-   * Resize the capacity
+   * Reserve in the buffer
    */
-  void setCapacity(const std::size_t capacity) { this->_data.resize(capacity); }
+  void reserve(const std::size_t capacity) { this->_data.reserve(capacity); }
   /**
-   * Get the capacity
+   * Get the capacity of the buffer
    */
-  std::size_t capacity() const { return this->_data.size(); }
+  std::size_t capacity() const { return this->_data.capacity(); }
 
   /**
-   * Set the size
-   */
-  void setSize(const std::size_t size) { this->_end_pos = this->newEnd(this->_begin_pos + size); }
-  /**
-   * Get the size
+   * Get the current size of the buffer
    */
   std::size_t size() const { return this->_end_pos - this->_begin_pos; }
 
   /**
    * Whether or not the buffer is empty
    */
-  bool empty() const { return !size(); }
+  bool empty() const { return this->_begin_pos == this->_end_pos; }
 
   /**
-   * Add a new entry on the end
+   * Emplaces an object into the buffer
    */
-  void push_back(const T & value);
-
-  /**
-   * Moves the object into the buffer (calls std::move())
-   */
-  void move(T & value);
-
-  /**
-   * Add new entries to the end
-   *
-   * Everything in [in_begin, in_end) is appended
-   */
-  void append(const_iterator in_begin, const_iterator in_end);
-  /**
-   * Add new entries to the end
-   */
-  void append(const std::vector<T> & vals);
+  virtual void emplaceBack(T && value) = 0;
 
   /**
    * Remove all entries (does not change the capacity)
@@ -192,15 +172,6 @@ public:
   std::size_t dataEndPos() const { return _end_pos; }
 
 protected:
-  /**
-   * Find out where the new end will be.
-   * This will resize/copy data as necessary
-   *
-   * @param new_end the proposed new_end position
-   * @return The actual position of the new ending
-   */
-  virtual std::size_t newEnd(const std::size_t new_end) = 0;
-
   /// The raw data
   std::vector<T> _data;
 
@@ -216,43 +187,9 @@ Buffer<T>::Buffer() : _begin_pos(0), _end_pos(0)
 }
 
 template <typename T>
-Buffer<T>::Buffer(const std::size_t capacity) : _data(capacity), _begin_pos(0), _end_pos(0)
+Buffer<T>::Buffer(const std::size_t capacity) : _begin_pos(0), _end_pos(0)
 {
-}
-
-template <typename T>
-void
-Buffer<T>::push_back(const T & value)
-{
-  this->_end_pos = newEnd(this->_end_pos + 1);
-  this->_data[this->_end_pos - 1] = value;
-}
-
-template <typename T>
-void
-Buffer<T>::move(T & value)
-{
-  this->_end_pos = newEnd(this->_end_pos + 1);
-  this->_data[this->_end_pos - 1] = std::move(value);
-}
-
-template <typename T>
-void
-Buffer<T>::append(const_iterator in_begin, const_iterator in_end)
-{
-  const auto additional_size = std::distance(in_begin, in_end);
-  if (additional_size == 0)
-    return;
-
-  this->_end_pos = this->newEnd(this->_end_pos + additional_size);
-  std::copy(in_begin, in_end, this->end() - additional_size);
-}
-
-template <typename T>
-void
-Buffer<T>::append(const std::vector<T> & vals)
-{
-  this->append(vals.begin(), vals.end());
+  this->reserve(capacity);
 }
 
 template <typename T>

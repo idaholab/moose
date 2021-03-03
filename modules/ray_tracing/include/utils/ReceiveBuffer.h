@@ -61,12 +61,12 @@ public:
   /**
    * Number of buffers created in the object buffer pool
    */
-  unsigned long int objectPoolCreated() const { return _object_buffer_pool.num_created(); }
+  unsigned long int objectPoolCreated() const { return _object_buffer_pool.numCreated(); }
 
   /**
    * Number of buffers created in the buffer pool
    */
-  unsigned long int bufferPoolCreated() const { return _buffer_pool.num_created(); }
+  unsigned long int bufferPoolCreated() const { return _buffer_pool.numCreated(); }
 
   /**
    * Start receives for all currently available messages
@@ -101,13 +101,13 @@ public:
   /**
    * Gets the buffer that the received objects are filled into after the requests are finished.
    */
-  MooseUtils::LIFOBuffer<std::shared_ptr<Object>> & buffer() { return _buffer; }
+  MooseUtils::LIFOBuffer<Object> & buffer() { return _buffer; }
 
 private:
   /// The context
   Context * const _context;
   /// The buffer that finished requests are filled into
-  MooseUtils::LIFOBuffer<std::shared_ptr<Object>> _buffer;
+  MooseUtils::LIFOBuffer<Object> _buffer;
 
   /// The method
   const ParallelStudyMethod _method;
@@ -115,8 +115,7 @@ private:
   const unsigned int _clicks_per_receive;
 
   /// List of Requests and buffers for each request
-  std::list<std::pair<std::shared_ptr<Parallel::Request>,
-                      std::shared_ptr<std::vector<std::shared_ptr<Object>>>>>
+  std::list<std::pair<std::shared_ptr<Parallel::Request>, std::shared_ptr<std::vector<Object>>>>
       _requests;
 
   /// MessageTag for sending objects
@@ -135,11 +134,9 @@ private:
   unsigned long int _num_probes;
 
   /// Shared pool of object buffers for incoming messages
-  MooseUtils::SharedPool<std::vector<std::shared_ptr<Object>>> _object_buffer_pool;
+  MooseUtils::SharedPool<std::vector<Object>> _object_buffer_pool;
   /// Shared pool of buffers
-  MooseUtils::SharedPool<
-      std::vector<typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type>>
-      _buffer_pool;
+  MooseUtils::SharedPool<std::vector<typename Parallel::Packing<Object>::buffer_type>> _buffer_pool;
 
   template <typename C, typename OutputIter, typename T>
   inline void blocking_receive_packed_range(const Parallel::Communicator & comm,
@@ -210,7 +207,7 @@ ReceiveBuffer<Object, Context>::receive(const bool start_receives_only /* = fals
     // Receive and process a bunch of objects
     do
     {
-      stat = _communicator.template packed_range_probe<std::shared_ptr<Object>>(
+      stat = _communicator.template packed_range_probe<Object>(
           Parallel::any_source, _object_buffer_tag, flag);
 
       _num_probes++;
@@ -218,8 +215,7 @@ ReceiveBuffer<Object, Context>::receive(const bool start_receives_only /* = fals
       if (flag)
       {
         auto req = std::make_shared<Parallel::Request>();
-        std::shared_ptr<std::vector<std::shared_ptr<Object>>> objects =
-            _object_buffer_pool.acquire();
+        std::shared_ptr<std::vector<Object>> objects = _object_buffer_pool.acquire();
 
         // Make sure the buffer is clear - this shouldn't resize the storage though.
         objects->clear();
@@ -229,25 +225,23 @@ ReceiveBuffer<Object, Context>::receive(const bool start_receives_only /* = fals
                                         stat.source(),
                                         _context,
                                         std::back_inserter(*objects),
-                                        (std::shared_ptr<Object> *)(libmesh_nullptr),
+                                        (Object *)(libmesh_nullptr),
                                         *req,
                                         stat,
                                         _object_buffer_tag);
         else
         {
-          std::shared_ptr<
-              std::vector<typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type>>
-              buffer = _buffer_pool.acquire();
+          std::shared_ptr<std::vector<typename Parallel::Packing<Object>::buffer_type>> buffer =
+              _buffer_pool.acquire();
 
-          _communicator.nonblocking_receive_packed_range(
-              stat.source(),
-              _context,
-              std::back_inserter(*objects),
-              (std::shared_ptr<Object> *)(libmesh_nullptr),
-              *req,
-              stat,
-              buffer,
-              _object_buffer_tag);
+          _communicator.nonblocking_receive_packed_range(stat.source(),
+                                                         _context,
+                                                         std::back_inserter(*objects),
+                                                         (Object *)(libmesh_nullptr),
+                                                         *req,
+                                                         stat,
+                                                         buffer,
+                                                         _object_buffer_tag);
         }
 
         _requests.emplace_back(req, objects);
@@ -280,8 +274,7 @@ void
 ReceiveBuffer<Object, Context>::cleanupRequests()
 {
   _requests.remove_if([&](std::pair<std::shared_ptr<Parallel::Request>,
-                                    std::shared_ptr<std::vector<std::shared_ptr<Object>>>> &
-                              request_pair) {
+                                    std::shared_ptr<std::vector<Object>>> & request_pair) {
     auto req = request_pair.first;
     auto objects = request_pair.second;
 
@@ -292,11 +285,10 @@ ReceiveBuffer<Object, Context>::cleanupRequests()
       _buffers_received++;
       _objects_received += objects->size();
 
-      if (_buffer.capacity() < _buffer.capacity() + objects->size())
-        _buffer.setCapacity(_buffer.capacity() + objects->size());
+      _buffer.reserve(_buffer.size() + objects->size());
 
       for (auto & object : *objects)
-        _buffer.move(object);
+        _buffer.emplaceBack(std::move(object));
 
       objects->clear();
 

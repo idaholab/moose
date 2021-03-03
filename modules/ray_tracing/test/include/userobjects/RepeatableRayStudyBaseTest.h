@@ -20,4 +20,6 @@ public:
 
 protected:
   void defineRays() override;
+
+  void modifyRay(Ray & ray) override;
 };

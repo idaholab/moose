@@ -61,9 +61,9 @@ LineSourceRayKernelTempl<is_ad>::computeQpResidual()
 
   // Scale by any Ray data and aux data if given
   for (const auto index : _ray_data_factor_indices)
-    factor *= currentRay()->data(index);
+    factor *= _current_ray->data(index);
   for (const auto index : _ray_aux_data_factor_indices)
-    factor *= currentRay()->auxData(index);
+    factor *= _current_ray->auxData(index);
 
   return _test[_i][_qp] * -factor;
 }

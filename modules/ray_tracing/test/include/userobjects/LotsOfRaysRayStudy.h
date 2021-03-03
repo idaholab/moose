@@ -43,10 +43,9 @@ protected:
                  const bool ends_within_mesh);
 
   /**
-   * Insertion point for after _rays is defined for other derived test studies
-   * to modify the Rays
+   * Insertion point after a Ray is defined to modify it in derived classes
    */
-  virtual void modifyRays();
+  virtual void modifyRay(Ray & /* ray */) {}
 
   const bool _vertex_to_vertex;
   const bool _centroid_to_vertex;

@@ -21,9 +21,7 @@ TestReuseRaysStudy::validParams()
 
 TestReuseRaysStudy::TestReuseRaysStudy(const InputParameters & parameters)
   : RayTracingStudy(parameters),
-    _executed_once(declareRestartableData<bool>("executed_once", false)),
-    _banked_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("banked_rays", this))
+    _executed_once(declareRestartableData<bool>("executed_once", false))
 {
   if (_mesh.dimension() != 1)
     mooseError("Works with 1D only");
@@ -38,11 +36,11 @@ TestReuseRaysStudy::generateRays()
       auto ray = acquireRay();
       ray->setStart(elem->centroid(), elem);
       ray->setStartingDirection(Point(1, 0, 0));
-      moveRayToBuffer(ray);
+      moveRayToBuffer(std::move(ray));
     }
   else
   {
-    for (std::shared_ptr<Ray> & ray : _banked_rays)
+    for (auto & ray : rayBank())
     {
       const auto start_point = ray->currentPoint();
       const auto direction = ray->direction();
@@ -52,16 +50,11 @@ TestReuseRaysStudy::generateRays()
       ray->clearStartingInfo();
       ray->setStart(start_point, elem);
       ray->setStartingDirection(-direction);
+      moveRayToBuffer(std::move(ray));
     }
-    moveRaysToBuffer(_banked_rays);
-    _banked_rays.clear();
+
+    rayBank().clear();
   }
 
   _executed_once = true;
-}
-
-void
-TestReuseRaysStudy::postExecuteStudy()
-{
-  _banked_rays = rayBank();
 }

@@ -190,8 +190,8 @@ mixedPack(BufferIter & out, ValueTypes const &... values)
  * Helper for mixedPackSize()
  */
 template <typename BufferType, typename InputType>
-void
-mixedPackSizeHelper(std::size_t & offset, std::size_t & size, InputType)
+constexpr void
+mixedPackSizeHelper(std::size_t & offset, std::size_t & size)
 {
   if (offset + sizeof(InputType) > sizeof(BufferType))
   {
@@ -203,20 +203,17 @@ mixedPackSizeHelper(std::size_t & offset, std::size_t & size, InputType)
 }
 
 /**
- * Gets the number of BufferType required to store \p inputs for use with
+ * Gets the number of BufferType required to store the expanded InputTypes for use with
  * mixedPack() and mixedUnpack()
  */
 template <typename BufferType, typename... InputTypes>
-std::size_t
-mixedPackSize(InputTypes const... inputs)
+constexpr std::size_t
+mixedPackSize()
 {
   std::size_t size = 0;
   std::size_t offset = 0;
 
-  int expander[] = {
-      0,
-      ((void)mixedPackSizeHelper<BufferType>(offset, size, std::forward<InputTypes const>(inputs)),
-       0)...};
+  int expander[] = {0, (mixedPackSizeHelper<BufferType, InputTypes>(offset, size), 0)...};
   (void)expander;
 
   if (offset)

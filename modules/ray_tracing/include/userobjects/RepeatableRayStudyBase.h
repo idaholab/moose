@@ -33,15 +33,25 @@ protected:
   /**
    * Entry point for the user to create Rays
    *
-   * Users _must_ override this function to fill _rays.
+   * Users _must_ override this method and call defineRay() for each
+   * Ray that they want defined.
    *
    * See the comments in RepeatableRayStudyBase::generateRays()
    * for more information.
    */
   virtual void defineRays() = 0;
 
-  /// Vector of Rays that the user will fill into in defineRays() (restartable)
-  std::vector<std::shared_ptr<Ray>> & _rays;
+  /**
+   * To be called during defineRays() to define a Ray.
+   *
+   * You must call std::move() on the Ray within this method.
+   */
+  void defineRay(MooseUtils::SharedPool<Ray>::PtrType && ray);
+
+  /**
+   * Returns a read-only reference to the defined/claimed rays.
+   */
+  const std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays() const { return _rays; }
 
   /// Whether or not the Rays filled into _rays are replicated across all processors
   const bool _define_rays_replicated;
@@ -66,14 +76,16 @@ private:
    */
   void verifyReplicatedRays();
 
-  /// Storage for all of the Rays this processor is responsible for (restartable)
-  std::vector<std::shared_ptr<Ray>> & _local_rays;
+  /// Vector of Rays that the user will fill into in defineRays() with defineRay() (restartable)
+  std::vector<MooseUtils::SharedPool<Ray>::PtrType> & _rays;
 
   /// The object used to claim Rays
   ClaimRays _claim_rays;
 
   /// Whether or not we should call claimRays() on the next generateRays() (restartable)
   bool & _should_claim_rays;
+  /// Whether or not we are currently calling defineRays()
+  bool _defining_rays;
 
   /// Timing for claiming rays
   PerfID _claim_rays_timer;
