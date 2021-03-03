@@ -41,7 +41,7 @@ public:
    * Called on each segment of a Ray
    *
    * Important information available during onSegment():
-   *   currentRay() - The current Ray that is being traced on the segment
+   *   _current_ray - The current Ray that is being traced on the segment
    *   _current_elem - The current Elem the Ray is tracing in
    *   _current_segment_start - The start point of the segment
    *   _current_segment_end - The end point of the segment
@@ -86,13 +86,13 @@ protected:
    * - Sets the direction as provided by \p direction
    * - Sets the RayID to something unique
    */
-  std::shared_ptr<Ray> acquireRay(const Point & start, const Point & direction);
+  MooseUtils::SharedPool<Ray>::PtrType acquireRay(const Point & start, const Point & direction);
 
   /**
    * Moves a Ray into the working buffer to be traced during tracing with a
    * meaningful error on verification failure
    */
-  void moveRayToBuffer(std::shared_ptr<Ray> & ray);
+  void moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray);
 
   /// The start point of the current Ray's segment
   const Point & _current_segment_start;

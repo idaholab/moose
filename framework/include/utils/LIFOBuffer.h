@@ -33,17 +33,17 @@ public:
 
   LIFOBuffer(const std::size_t capacity);
 
-  virtual void erase(const std::size_t num) override;
-  virtual void eraseChunk(const std::size_t chunk_size) override;
+  void erase(const std::size_t num) override;
+  void eraseChunk(const std::size_t chunk_size) override;
 
-  virtual typename Buffer<T>::iterator beginChunk(const std::size_t chunk_size) override;
-  virtual typename Buffer<T>::const_iterator
-  beginChunk(const std::size_t chunk_size) const override;
-  virtual typename Buffer<T>::iterator endChunk(const std::size_t chunk_size) override;
-  virtual typename Buffer<T>::const_iterator endChunk(const std::size_t chunk_size) const override;
+  typename Buffer<T>::iterator beginChunk(const std::size_t chunk_size) override;
+  typename Buffer<T>::const_iterator beginChunk(const std::size_t chunk_size) const override;
+  typename Buffer<T>::iterator endChunk(const std::size_t chunk_size) override;
+  typename Buffer<T>::const_iterator endChunk(const std::size_t chunk_size) const override;
+
+  void emplaceBack(T && value) override;
 
 protected:
-  virtual std::size_t newEnd(const std::size_t new_end) override;
 };
 
 template <typename T>
@@ -114,17 +114,16 @@ LIFOBuffer<T>::endChunk(const std::size_t /* chunk_size */) const
 }
 
 template <typename T>
-std::size_t
-LIFOBuffer<T>::newEnd(const std::size_t new_end)
+void
+LIFOBuffer<T>::emplaceBack(T && value)
 {
-  if (new_end > this->_data.size())
+  if (++this->_end_pos > this->_data.size())
   {
-    auto new_size = new_end - this->_begin_pos;
-
-    this->_data.resize(std::max(new_size * 2, this->_data.size() * 2));
+    this->reserve(2 * this->_end_pos);
+    this->_data.emplace_back(std::move(value));
   }
-
-  return new_end;
+  else
+    this->_data[this->_end_pos - 1] = std::move(value);
 }
 
 }

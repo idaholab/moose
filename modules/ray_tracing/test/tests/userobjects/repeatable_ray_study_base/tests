@@ -1,28 +1,6 @@
 [Tests]
   design = 'RepeatableRayStudyBase.md'
   issues = '#16028 #16848'
-  [test]
-    requirement = 'The RepeatableRayStudyBase shall support the'
-    [checkpoint]
-      type = 'RunApp'
-      input = 'recover.i'
-      allow_test_objects = true
-      cli_args = 'Outputs/checkpoint=true Executioner/num_steps=1'
-      recover = false
-      detail = 'outputting of checkpoint files and'
-    []
-    [recover]
-      type = 'CSVDiff'
-      input = 'recover.i'
-      csvdiff = 'recover_out.csv'
-      cli_args = '--recover'
-      allow_test_objects = true
-      prereq = 'test/checkpoint'
-      delete_output_before_running = false
-      recover = false
-      detail = 'shall be capable of restarting from the output data.'
-    []
-  []
 
   [non_unique_id_error]
     requirement = 'The RepeatableRayStudyBase shall return a useful error when a ray is added with a non-unique ID.'
@@ -67,26 +45,13 @@
     []
   []
 
-  [define_errors]
-    requirement = 'The RepeatableRayStudyBase shall return a useful error after defining rays when'
+  [no_rays]
+    type = 'RunException'
+    input = 'errors.i'
+    cli_args = 'UserObjects/study/define_no_rays=true'
+    allow_test_objects = true
+    expect_err = 'No Rays were moved to _rays in defineRays\(\)'
 
-    [no_rays]
-      type = 'RunException'
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/define_no_rays=true'
-      allow_test_objects = true
-      expect_err = 'No Rays were moved to _rays in defineRays\(\)'
-
-      detail = 'no rays were defined or'
-    []
-    [null_ray]
-      type = 'RunException'
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/define_nullptr_ray=true'
-      allow_test_objects = true
-      expect_err = 'A nullptr Ray was found in _rays after defineRays\(\).'
-
-      detail = 'a null ray was defined.'
-    []
+    requirement = 'The RepeatableRayStudyBase shall return a useful error after defining rays when no rays were defined.'
   []
 []

@@ -84,7 +84,7 @@ public:
   /**
    * Traces a ray.
    */
-  void trace(const std::shared_ptr<Ray> & ray);
+  void trace(Ray & ray);
 
   /**
    * Get the various results reported by this object, indexed by TraceRayResult
@@ -106,7 +106,7 @@ public:
   /**
    * Gets the current Ray that is being traced
    */
-  const std::shared_ptr<Ray> * const & currentRay() const { return _current_ray; }
+  Ray * const & currentRay() const { return _current_ray; }
   /**
    * Gets the element that the current Ray is being traced in
    */
@@ -159,36 +159,32 @@ public:
 
 private:
   /**
-   * Called on a single segment traced by a Ray.
+   * Called on a single segment traced by the current ray.
    */
-  void onSegment(const std::shared_ptr<Ray> & ray);
+  void onSegment();
 
   /**
-   * Called when a Ray hits a boundary.
+   * Called when the current Ray hits a boundary.
    */
-  void onBoundary(const std::shared_ptr<Ray> & ray, const bool external);
+  void onBoundary(const bool external);
 
   /**
-   * Called when a Ray is finished tracing (whenever !ray->shouldContinue())
-   * @param ray The ray that is finished tracing
+   * Called when the current Ray is finished tracing
    */
-  void onCompleteTrace(const std::shared_ptr<Ray> & ray);
+  void onCompleteTrace();
   /**
-   * Called when a Ray is continuing to trace after segment
-   * @param ray The ray
+   * Called when the current Ray is continuing to trace after segment
    */
-  void onContinueTrace(const std::shared_ptr<Ray> & /* ray */);
+  void onContinueTrace();
   /**
-   * Called when a Ray's trajectory changes
-   * @param ray The ray
+   * Called when the current Ray's trajectory changes
    */
-  void onTrajectoryChanged(const std::shared_ptr<Ray> & ray);
+  void onTrajectoryChanged();
   /**
    * Called when the subdomain changes.
-   * @param ray The current Ray
    * @param same_ray Whether or not this is being called on the same Ray as previously
    */
-  void onSubdomainChanged(const std::shared_ptr<Ray> & ray, const bool same_ray);
+  void onSubdomainChanged(const bool same_ray);
 
   /**
    * Creates a useful error string with current tracing information.
@@ -322,12 +318,12 @@ private:
    * Gets and applies external boundary conditions in _current_elem on side _intersected_side at
    * _intersection_point.
    */
-  void applyOnExternalBoundary(const std::shared_ptr<Ray> & ray);
+  void applyOnExternalBoundary();
   /**
    * Gets and applies internal boundary conditions (if any) from _current_elem, _last_elem, and
    * any other point neighbors that have internal sidesets at _intersection_point.
    */
-  void applyOnInternalBoundary(const std::shared_ptr<Ray> & ray);
+  void applyOnInternalBoundary();
   /**
    * Helper for possibly storing boundary information in _boundary_elems, which is storage for
    * boundary elements (elem, side, bnd_id) that need to have RayBCs applied to them.
@@ -346,12 +342,8 @@ private:
                                   const ElemExtrema & extrema);
   /**
    * Sets up a ray to continue tracing off processor
-   * @param ray The ray
-   * @param elem The element that is owned by another processor
-   * @param incoming_side The incoming side elem
-   * @param point The point on elem at which ray continues
    */
-  void continueTraceOffProcessor(const std::shared_ptr<Ray> & ray);
+  void continueTraceOffProcessor();
 
   /**
    * Gets the neighbors at a vertex.
@@ -427,9 +419,10 @@ private:
   /**
    * Called after executing a RayTracingObject (RayBCs and RayKernels)
    *
-   * Verifies the configuration of ray->shouldContinue() and ray->trajectoryChanged()
+   * Verifies the configuration of _current_ray->shouldContinue() and
+   * _current_ray->trajectoryChanged()
    */
-  void postRayTracingObject(const std::shared_ptr<Ray> & ray, const RayTracingObject * rto);
+  void postRayTracingObject(const RayTracingObject * rto);
 
   /// The RayTracingStudy
   RayTracingStudy & _study;
@@ -451,7 +444,7 @@ private:
   TraceData * _current_cached_trace;
 
   /// The current ray being traced
-  const std::shared_ptr<Ray> * _current_ray;
+  Ray * _current_ray;
   /// The element the current Ray is being traced in
   const Elem * _current_elem;
   /// The last element the current Ray was traced in

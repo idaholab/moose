@@ -165,7 +165,7 @@ RepeatableRayStudy::defineRays()
 {
   for (std::size_t i = 0; i < _names.size(); ++i)
   {
-    std::shared_ptr<Ray> ray = acquireRegisteredRay(_names[i]);
+    auto ray = acquireRegisteredRay(_names[i]);
 
     ray->setStart(_start_points[i]);
     if (_end_points) // user set end point
@@ -183,6 +183,15 @@ RepeatableRayStudy::defineRays()
     if (_max_distances)
       ray->setStartingMaxDistance((*_max_distances)[i]);
 
-    _rays.emplace_back(std::move(ray));
+    // Insertion point for derived classes to modify this Ray
+    modifyRay(*ray);
+
+    // Done with this Ray
+    defineRay(std::move(ray));
   }
+}
+
+void
+RepeatableRayStudy::modifyRay(Ray & /* ray */)
+{
 }

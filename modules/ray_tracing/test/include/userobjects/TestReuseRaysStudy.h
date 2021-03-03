@@ -27,9 +27,7 @@ public:
 
 protected:
   virtual void generateRays() override;
-  virtual void postExecuteStudy() override;
 
 private:
   bool & _executed_once;
-  std::vector<std::shared_ptr<Ray>> & _banked_rays;
 };

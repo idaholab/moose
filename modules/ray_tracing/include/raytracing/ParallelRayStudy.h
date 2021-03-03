@@ -9,7 +9,7 @@
 class RayTracingStudy;
 class TraceRay;
 
-class ParallelRayStudy : public ParallelStudy<std::shared_ptr<Ray>, Ray>
+class ParallelRayStudy : public ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray>
 {
 public:
   ParallelRayStudy(RayTracingStudy & study,
@@ -24,11 +24,10 @@ public:
   ///@}
 
 protected:
-  void executeWork(const std::shared_ptr<Ray> & ray, const THREAD_ID tid) override;
-  void moveWorkError(const MoveWorkError error, const std::shared_ptr<Ray> * ray) const override;
+  void executeWork(MooseUtils::SharedPool<Ray>::PtrType & ray, const THREAD_ID tid) override;
   void postReceiveParallelData(const parallel_data_iterator begin,
                                const parallel_data_iterator end) override;
-  bool workIsComplete(const std::shared_ptr<Ray> & ray) override;
+  bool workIsComplete(const MooseUtils::SharedPool<Ray>::PtrType & ray) override;
   void postExecuteChunk(const work_iterator begin, const work_iterator end) override;
 
   /// The RayTracingStudy

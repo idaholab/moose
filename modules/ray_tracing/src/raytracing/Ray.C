@@ -523,7 +523,8 @@ namespace Parallel
 {
 
 unsigned int
-Packing<std::shared_ptr<Ray>>::size(const std::size_t data_size, const std::size_t aux_data_size)
+Packing<MooseUtils::SharedPool<Ray>::PtrType>::size(const std::size_t data_size,
+                                                    const std::size_t aux_data_size)
 {
   // First value: Data lengths, current point and direction, current element id, distance,
   // max_distance, ray ID
@@ -551,7 +552,8 @@ Packing<std::shared_ptr<Ray>>::size(const std::size_t data_size, const std::size
 }
 
 unsigned int
-Packing<std::shared_ptr<Ray>>::packed_size(typename std::vector<buffer_type>::const_iterator in)
+Packing<MooseUtils::SharedPool<Ray>::PtrType>::packed_size(
+    typename std::vector<buffer_type>::const_iterator in)
 {
   const std::size_t data_size = static_cast<std::size_t>(*in++);
   const std::size_t aux_data_size = static_cast<std::size_t>(*in);
@@ -560,15 +562,17 @@ Packing<std::shared_ptr<Ray>>::packed_size(typename std::vector<buffer_type>::co
 }
 
 unsigned int
-Packing<std::shared_ptr<Ray>>::packable_size(const std::shared_ptr<Ray> & ray, const void *)
+Packing<MooseUtils::SharedPool<Ray>::PtrType>::packable_size(
+    const MooseUtils::SharedPool<Ray>::PtrType & ray, const void *)
 {
   return size(ray->data().size(), ray->auxData().size());
 }
 
 template <>
-std::shared_ptr<Ray>
-Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator in,
-                                      ParallelStudy<std::shared_ptr<Ray>, Ray> * study)
+MooseUtils::SharedPool<Ray>::PtrType
+Packing<MooseUtils::SharedPool<Ray>::PtrType>::unpack(
+    std::vector<buffer_type>::const_iterator in,
+    ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> * study)
 {
   mooseAssert(dynamic_cast<ParallelRayStudy *>(study), "Not a ParallelRayStudy");
   RayTracingStudy & ray_tracing_study = static_cast<ParallelRayStudy *>(study)->rayTracingStudy();
@@ -581,12 +585,11 @@ Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator i
   RayID id;
   RayTracingPackingUtils::unpack(*in++, id);
 
-  std::shared_ptr<Ray> ray =
-      ray_tracing_study.acquireRayInternal(id,
-                                           data_size,
-                                           aux_data_size,
-                                           /* reset = */ false,
-                                           RayTracingStudy::AcquireRayInternalKey());
+  auto ray = ray_tracing_study.acquireRayInternal(id,
+                                                  data_size,
+                                                  aux_data_size,
+                                                  /* reset = */ false,
+                                                  RayTracingStudy::AcquireRayInternalKey());
 
   // Current Point
   ray->_current_point(0) = *in++;
@@ -633,9 +636,10 @@ Packing<std::shared_ptr<Ray>>::unpack(std::vector<buffer_type>::const_iterator i
 
 template <>
 void
-Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
-                                    std::back_insert_iterator<std::vector<buffer_type>> data_out,
-                                    const ParallelStudy<std::shared_ptr<Ray>, Ray> * study)
+Packing<MooseUtils::SharedPool<Ray>::PtrType>::pack(
+    const MooseUtils::SharedPool<Ray>::PtrType & ray,
+    std::back_insert_iterator<std::vector<buffer_type>> data_out,
+    const ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> * study)
 {
   mooseAssert(dynamic_cast<const ParallelRayStudy *>(study), "Not a ParallelRayStudy");
   const RayTracingStudy & ray_tracing_study =
@@ -692,13 +696,10 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
 } // namespace libMesh
 
 void
-dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataStore(std::ostream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context)
 {
-  if (!ray)
-    mooseError("Cannot store a Ray that is nullptr!");
-
-  if (!context)
-    mooseError("Can only store Ray objects using a RayTracingStudy context!");
+  mooseAssert(ray, "Nullptr ray");
+  mooseAssert(context, "Needs a RayTracingStudy context");
   mooseAssert(static_cast<RayTracingStudy *>(context) == &ray->study(), "Different study");
 
   storeHelper(stream, ray->_id, context);
@@ -720,10 +721,9 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
 }
 
 void
-dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataLoad(std::istream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context)
 {
-  if (!context)
-    mooseError("Can only store Ray objects using a RayTracingStudy context!");
+  mooseAssert(context, "Needs a RayTracingStudy context");
 
   RayTracingStudy * study = static_cast<RayTracingStudy *>(context);
 

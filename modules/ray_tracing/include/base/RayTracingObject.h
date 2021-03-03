@@ -75,11 +75,6 @@ public:
 
 protected:
   /**
-   * Gets the current Ray that this is working on
-   */
-  const std::shared_ptr<Ray> & currentRay() const { return *_current_ray; }
-
-  /**
    * Add an object of this classes base type that this class depends on.
    */
   void dependsOn(const std::string name) { _depend_names.insert(name); }
@@ -104,6 +99,8 @@ protected:
   /// Prefix used in errors (type() 'name()')
   const std::string _error_prefix;
 
+  /// The current Ray that the action is being applied to
+  Ray * const & _current_ray;
   /// The current Elem that _current_ray is tracing through
   const Elem * const & _current_elem;
   /// The subdomain ID of the _current_elem that the ray is tracing through
@@ -118,9 +115,6 @@ private:
   std::set<std::string> _depend_names;
   /// The names of the supplied objects: just this one
   std::set<std::string> _supplied_names;
-
-  /// The current Ray that the action is being applied to
-  const std::shared_ptr<Ray> * const & _current_ray;
 };
 
 #define usingRayTracingObjectMembers                                                               \
@@ -128,5 +122,5 @@ private:
   usingFunctionInterfaceMembers;                                                                   \
   usingPostprocessorInterfaceMembers;                                                              \
   usingTransientInterfaceMembers;                                                                  \
-  using RayTracingObject::currentRay;                                                              \
+  using RayTracingObject::_current_ray;                                                            \
   using RayTracingObject::errorPrefix

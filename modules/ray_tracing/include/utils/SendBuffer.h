@@ -52,7 +52,7 @@ public:
   /**
    * Get the number of buffers created in the buffer pool
    */
-  unsigned long int bufferPoolCreated() const { return _buffer_pool.num_created(); }
+  unsigned long int bufferPoolCreated() const { return _buffer_pool.numCreated(); }
 
   /**
    * Whether or not messages are currently being sent
@@ -65,10 +65,8 @@ public:
 
   /**
    * Move an object to the buffer.  May cause the buffer to be communicated.
-   *
-   * This DOES call std::move on the object
    */
-  void moveObject(std::shared_ptr<Object> & object);
+  void emplace_back(Object && object);
 
   /**
    * Forces a Send for all currently buffered objects
@@ -117,7 +115,7 @@ private:
   Real _current_buffer_size_real;
 
   /// The buffer
-  std::vector<std::shared_ptr<Object>> _buffer;
+  std::vector<Object> _buffer;
   /// The size of the objects in the buffer in bytes
   std::size_t _buffer_size_bytes;
 
@@ -125,9 +123,7 @@ private:
   std::list<std::shared_ptr<Parallel::Request>> _requests;
 
   /// Shared pool of buffers
-  MooseUtils::SharedPool<
-      std::vector<typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type>>
-      _buffer_pool;
+  MooseUtils::SharedPool<std::vector<typename Parallel::Packing<Object>::buffer_type>> _buffer_pool;
 
   /// Counter for objects sent
   unsigned long int _objects_sent;
@@ -172,11 +168,10 @@ SendBuffer<Object, Context>::~SendBuffer()
 
 template <typename Object, typename Context>
 void
-SendBuffer<Object, Context>::moveObject(std::shared_ptr<Object> & object)
+SendBuffer<Object, Context>::emplace_back(Object && object)
 {
-  _buffer_size_bytes +=
-      Parallel::Packing<std::shared_ptr<Object>>::packable_size(object, _context) *
-      sizeof(typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type);
+  _buffer_size_bytes += Parallel::Packing<Object>::packable_size(object, _context) *
+                        sizeof(typename Parallel::Packing<Object>::buffer_type);
   _buffer.emplace_back(std::move(object));
 
   // Force a send with SMART if we find it appropriate
@@ -208,8 +203,8 @@ SendBuffer<Object, Context>::forceSend(const bool shrink_current_buffer_size)
     _objects_sent += _buffer.size();
     _buffers_sent++;
 
-    std::shared_ptr<std::vector<typename Parallel::Packing<std::shared_ptr<Object>>::buffer_type>>
-        buffer = _buffer_pool.acquire();
+    std::shared_ptr<std::vector<typename Parallel::Packing<Object>::buffer_type>> buffer =
+        _buffer_pool.acquire();
 
     comm().nonblocking_send_packed_range(
         _pid, _context, _buffer.begin(), _buffer.end(), *req, buffer, _object_buffer_tag);

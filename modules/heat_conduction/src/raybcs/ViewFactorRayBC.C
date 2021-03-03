@@ -34,9 +34,9 @@ void
 ViewFactorRayBC::onBoundary(const unsigned int num_applying)
 {
   // The boundary ID this Ray started on
-  const BoundaryID start_bnd_id = currentRay()->auxData(_ray_index_start_bnd_id);
+  const BoundaryID start_bnd_id = _current_ray->auxData(_ray_index_start_bnd_id);
   // Starting total weight
-  const Real start_total_weight = currentRay()->auxData(_ray_index_start_total_weight);
+  const Real start_total_weight = _current_ray->auxData(_ray_index_start_total_weight);
   // Value to append (divide by num_applying if we hit an edge or node)
   const Real value = start_total_weight / (Real)num_applying;
   mooseAssert(!std::isnan(value), "Encountered NaN");
@@ -45,5 +45,5 @@ ViewFactorRayBC::onBoundary(const unsigned int num_applying)
   _vf_study.addToViewFactorInfo(value, start_bnd_id, _current_bnd_id, _tid);
 
   // Either hit an obstacle here or hit its end and contributed: done with this Ray
-  currentRay()->setShouldContinue(false);
+  _current_ray->setShouldContinue(false);
 }

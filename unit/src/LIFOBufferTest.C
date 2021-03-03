@@ -20,10 +20,10 @@ TEST(LIFOBuffer, test)
   EXPECT_EQ(buffer.size(), 0);
   EXPECT_EQ(buffer.capacity(), 4);
 
-  buffer.push_back(0);
-  buffer.push_back(1);
-  buffer.push_back(2);
-  buffer.push_back(3);
+  buffer.emplaceBack(0);
+  buffer.emplaceBack(1);
+  buffer.emplaceBack(2);
+  buffer.emplaceBack(3);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 4);
@@ -48,15 +48,15 @@ TEST(LIFOBuffer, test)
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 0);
 
-  buffer.push_back(0);
-  buffer.push_back(1);
-  buffer.push_back(2);
-  buffer.push_back(3);
+  buffer.emplaceBack(0);
+  buffer.emplaceBack(1);
+  buffer.emplaceBack(2);
+  buffer.emplaceBack(3);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 4);
 
-  buffer.push_back(4);
+  buffer.emplaceBack(4);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 5);
@@ -70,12 +70,12 @@ TEST(LIFOBuffer, test)
   EXPECT_EQ(buffer.dataEndPos(), 3);
 
   for (unsigned int i = 3; i < 10; i++)
-    buffer.push_back(i);
+    buffer.emplaceBack(i);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 10);
 
-  buffer.push_back(10);
+  buffer.emplaceBack(10);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 11);
@@ -114,7 +114,7 @@ TEST(LIFOBuffer, test)
   EXPECT_EQ(buffer.capacity(), 4);
 
   buffer.erase(2);
-  buffer.push_back(5);
+  buffer.emplaceBack(5);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 3);
@@ -122,7 +122,11 @@ TEST(LIFOBuffer, test)
   EXPECT_EQ(buffer.capacity(), 4);
 
   buffer.erase(2);
-  buffer.append({6, 7, 8, 9, 10});
+  buffer.emplaceBack(6);
+  buffer.emplaceBack(7);
+  buffer.emplaceBack(8);
+  buffer.emplaceBack(9);
+  buffer.emplaceBack(10);
 
   EXPECT_EQ(buffer.dataBeginPos(), 0);
   EXPECT_EQ(buffer.dataEndPos(), 6);
@@ -135,9 +139,9 @@ TEST(LIFOBuffer, test)
 
   EXPECT_EQ(buffer.empty(), true);
 
-  buffer.setCapacity(21);
+  buffer.reserve(21);
   for (unsigned int i = 0; i < 21; i++)
-    buffer.push_back(i);
+    buffer.emplaceBack(i);
 
   const unsigned int chunk_size = 5;
   for (unsigned int i = 0; i < 5; i++)

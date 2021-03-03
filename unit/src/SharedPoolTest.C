@@ -56,7 +56,7 @@ TEST(SharedPool, test)
     }
 
     EXPECT_EQ(pool.size(), 2);
-    EXPECT_EQ(pool.num_created(), 2);
+    EXPECT_EQ(pool.numCreated(), 2);
 
     {
       std::shared_ptr<PoolDummy> dumb = pool.acquire();
@@ -65,16 +65,16 @@ TEST(SharedPool, test)
       std::shared_ptr<PoolDummy> dumb2 = pool.acquire(2);
       EXPECT_EQ(num_constructed, 2);
 
-      EXPECT_EQ(pool.num_created(), 2);
+      EXPECT_EQ(pool.numCreated(), 2);
 
       std::shared_ptr<PoolDummy> dumb3 = pool.acquire(2);
       EXPECT_EQ(num_constructed, 3);
 
-      EXPECT_EQ(pool.num_created(), 3);
+      EXPECT_EQ(pool.numCreated(), 3);
     }
 
     EXPECT_EQ(pool.size(), 3);
-    EXPECT_EQ(pool.num_created(), 3);
+    EXPECT_EQ(pool.numCreated(), 3);
   }
 
   {

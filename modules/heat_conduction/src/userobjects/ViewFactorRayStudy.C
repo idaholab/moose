@@ -316,7 +316,7 @@ ViewFactorRayStudy::generateRays()
         const auto start_weight = start_elem._weights[start_i] * awf;
 
         // Acquire a Ray and fill with the starting information
-        std::shared_ptr<Ray> ray = acquireRay();
+        auto ray = acquireRay();
         ray->setStart(
             start_elem._points[start_i], start_elem._start_elem, start_elem._incoming_side);
         ray->setStartingDirection(direction);
@@ -324,7 +324,7 @@ ViewFactorRayStudy::generateRays()
         ray->auxData(_ray_index_start_total_weight) = start_weight;
 
         // Move the Ray into the buffer to be traced
-        moveRayToBuffer(ray);
+        moveRayToBuffer(std::move(ray));
       }
   }
 }

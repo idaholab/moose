@@ -52,20 +52,20 @@ ChangeRayRayKernelTest::onSegment()
 {
   if (_ray_data_index != Ray::INVALID_RAY_DATA_INDEX)
   {
-    currentRay()->data(_ray_data_index) *= _scale_value;
-    currentRay()->data(_ray_data_index) += _add_value;
+    _current_ray->data(_ray_data_index) *= _scale_value;
+    _current_ray->data(_ray_data_index) += _add_value;
   }
 
   if (getParam<bool>("change_start_direction"))
-    changeRayStartDirection(_current_elem->centroid(), -currentRay()->direction());
+    changeRayStartDirection(_current_elem->centroid(), -_current_ray->direction());
   if (getParam<bool>("change_direction_zero"))
-    changeRayStartDirection(currentRay()->currentPoint(), Point(0, 0, 0));
+    changeRayStartDirection(_current_ray->currentPoint(), Point(0, 0, 0));
 
   if (getParam<bool>("change_start_out_of_elem"))
     for (const auto neighbor : _current_elem->neighbor_ptr_range())
       if (neighbor && neighbor != remote_elem)
       {
-        changeRayStartDirection(neighbor->centroid(), currentRay()->direction());
+        changeRayStartDirection(neighbor->centroid(), _current_ray->direction());
         break;
       }
 }

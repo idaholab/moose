@@ -28,7 +28,6 @@ RepeatableRayStudyBaseTest::validParams()
                                      "Create a non-replicated Ray on the given processor");
 
   params.addParam<bool>("define_no_rays", false, "Test defining no rays");
-  params.addParam<bool>("define_nullptr_ray", false, "Test defining a nullptr ray");
 
   params.suppressParameter<std::vector<Real>>("max_distances");
   params.suppressParameter<std::vector<Point>>("end_points");
@@ -49,12 +48,9 @@ RepeatableRayStudyBaseTest::defineRays()
 
   RepeatableRayStudy::defineRays();
 
-  if (getParam<bool>("define_nullptr_ray") && _rays.size())
-    _rays[0] = nullptr;
-
   if (parameters().isParamSetByUser("create_non_unique_id_rays") &&
-      getParam<bool>("create_non_unique_id_rays"))
-    _rays.push_back(acquireCopiedRay(*_rays[0]));
+      getParam<bool>("create_non_unique_id_rays") && rays().size())
+    defineRay(acquireCopiedRay(*rays()[0]));
 
   if (parameters().isParamSetByUser("create_additional_ray_pid"))
   {
@@ -63,11 +59,11 @@ RepeatableRayStudyBaseTest::defineRays()
     mooseAssert(pid < n_processors(), "Invalid pid");
     auto ray = acquireRegisteredRay("additional_ray");
 
-    if (pid == _pid)
+    if (pid == _pid && rays().size())
     {
-      ray->setStart(_rays[0]->currentPoint());
-      ray->setStartingDirection(_rays[0]->direction());
-      _rays.push_back(ray);
+      ray->setStart(rays()[0]->currentPoint());
+      ray->setStartingDirection(rays()[0]->direction());
+      defineRay(std::move(ray));
     }
   }
 
@@ -78,21 +74,28 @@ RepeatableRayStudyBaseTest::defineRays()
     mooseAssert(pid < n_processors(), "Invalid pid");
     auto ray = acquireRegisteredRay("non_replicated_ray");
 
-    if (pid == _pid)
+    if (pid == _pid && rays().size())
     {
-      ray->setStart(_rays[0]->currentPoint());
-      ray->setStartingDirection(_rays[0]->direction());
-      _rays[0] = ray;
+      ray->setStart(rays()[0]->currentPoint());
+      ray->setStartingDirection(rays()[0]->direction());
+
+      auto & non_const_rays =
+          *const_cast<std::vector<MooseUtils::SharedPool<Ray>::PtrType> *>(&rays());
+      non_const_rays[0] = std::move(ray);
     }
   }
+}
 
-  if (parameters().isParamSetByUser("create_non_replicated_ray_pid"))
+void
+RepeatableRayStudyBaseTest::modifyRay(Ray & ray)
+{
+  if (parameters().isParamSetByUser("create_non_replicated_ray_pid") && ray.id() == 0)
   {
     const auto pid = getParam<processor_id_type>("create_non_replicated_ray_pid");
 
     mooseAssert(pid < n_processors(), "Invalid pid");
 
     if (pid == _pid)
-      _rays[0]->setStartingMaxDistance(1);
+      ray.setStartingMaxDistance(1);
   }
 }

@@ -97,7 +97,7 @@ TraceRay::exitsElem(const Elem * elem,
               "Distance should be invalid");
   if (_study.verifyRays() && incoming_side != RayTracingCommon::invalid_side &&
       !_study.sideIsNonPlanar(elem, incoming_side))
-    traceAssert(_study.sideIsIncoming(elem, incoming_side, (*_current_ray)->direction(), _tid),
+    traceAssert(_study.sideIsIncoming(elem, incoming_side, _current_ray->direction(), _tid),
                 "Incoming side is non-entrant");
 
   bool intersected;
@@ -319,7 +319,7 @@ TraceRay::exitsElem(const Elem * elem,
   // is also an exiting point
   bool try_nonplanar_incoming_side = false;
   // Easy access into the current direction
-  const auto & direction = (*_current_ray)->direction();
+  const auto & direction = _current_ray->direction();
   // The current side that we're checking
   unsigned short s = 0;
 
@@ -526,7 +526,7 @@ TraceRay::exitsElem(const Elem * elem,
 
   // End point that is for sure out of the element
   const Point extended_end_point =
-      _incoming_point + _study.domainMaxLength() * (*_current_ray)->direction();
+      _incoming_point + _study.domainMaxLength() * _current_ray->direction();
 
   // We're looking for the side whose point lays between the incoming point and the
   // extended end point
@@ -691,7 +691,7 @@ TraceRay::moveThroughNeighbor(const NeighborInfo & neighbor_info,
   // Find an entrant side (if any)
   incoming_side = RayTracingCommon::invalid_side;
   for (MooseIndex(neighbor_info._sides.size()) i = 0; i < neighbor_info._sides.size(); ++i)
-    if (neighbor_info._side_normals[i] * (*_current_ray)->direction() < LOOSE_TRACE_TOLERANCE)
+    if (neighbor_info._side_normals[i] * _current_ray->direction() < LOOSE_TRACE_TOLERANCE)
     {
       incoming_side = neighbor_info._sides[i];
       break;
@@ -723,7 +723,7 @@ TraceRay::moveThroughNeighbor(const NeighborInfo & neighbor_info,
 }
 
 void
-TraceRay::applyOnExternalBoundary(const std::shared_ptr<Ray> & ray)
+TraceRay::applyOnExternalBoundary()
 {
   debugRay("Called applyOnExternalBoundary() with");
   debugRay("  _current_elem->id() = ", _current_elem->id());
@@ -757,7 +757,7 @@ TraceRay::applyOnExternalBoundary(const std::shared_ptr<Ray> & ray)
 
       for (MooseIndex(side_normals.size()) i = 0; i < side_normals.size(); ++i)
         if (!elem->neighbor_ptr(sides[i]) // is a boundary side that has our point
-            && side_normals[i] * ray->direction() > TRACE_TOLERANCE) // and is entrant
+            && side_normals[i] * _current_ray->direction() > TRACE_TOLERANCE) // and is entrant
         {
           // TODO: this could likely be optimized
           ElemExtrema extrema;
@@ -778,11 +778,11 @@ TraceRay::applyOnExternalBoundary(const std::shared_ptr<Ray> & ray)
   }
 
   debugRay("Calling external onBoundary() with ", _boundary_elems.size(), " boundaries");
-  onBoundary(ray, /* external = */ true);
+  onBoundary(/* external = */ true);
 }
 
 void
-TraceRay::applyOnInternalBoundary(const std::shared_ptr<Ray> & ray)
+TraceRay::applyOnInternalBoundary()
 {
   traceAssert(_last_elem, "Must be valid");
 
@@ -843,7 +843,8 @@ TraceRay::applyOnInternalBoundary(const std::shared_ptr<Ray> & ray)
       {
         const auto side = sides[i];
         // Side has internal sidesets and is entrant
-        if (sidesets[side].size() && std::abs(side_normals[i] * ray->direction()) > TRACE_TOLERANCE)
+        if (sidesets[side].size() &&
+            std::abs(side_normals[i] * _current_ray->direction()) > TRACE_TOLERANCE)
         {
           // TODO: this could likely be optimized
           temp_extrema.invalidate();
@@ -890,7 +891,7 @@ TraceRay::applyOnInternalBoundary(const std::shared_ptr<Ray> & ray)
   if (!_boundary_elems.empty())
   {
     debugRay("  Calling internal onBoundary() with ", _boundary_elems.size(), " boundaries");
-    onBoundary(ray, /* external = */ false);
+    onBoundary(/* external = */ false);
   }
 }
 
@@ -943,7 +944,7 @@ TraceRay::findExternalBoundarySide(unsigned short & boundary_side,
   debugRay("  _intersected_side = ", _intersected_side);
   debugRay("  _intersected_extrema", _intersected_extrema);
 
-  const auto & direction = (*_current_ray)->direction();
+  const auto & direction = _current_ray->direction();
   const auto at_edge = _intersected_extrema.atEdge();
 
   // First, look for other sides on _current_elem that touch the intersected vertex/edge
@@ -997,23 +998,23 @@ TraceRay::findExternalBoundarySide(unsigned short & boundary_side,
 }
 
 void
-TraceRay::trace(const std::shared_ptr<Ray> & ray)
+TraceRay::trace(Ray & ray)
 {
   _current_ray = &ray;
 
-  _current_elem = ray->currentElem();
+  _current_elem = _current_ray->currentElem();
   _last_elem = nullptr;
-  _incoming_point = ray->currentPoint();
-  _incoming_side = ray->currentIncomingSide();
+  _incoming_point = _current_ray->currentPoint();
+  _incoming_side = _current_ray->currentIncomingSide();
   _should_continue = true;
 
   traceAssert(_current_elem, "Current element is not set");
   traceAssert(_current_elem->active(), "Current element is not active");
-  traceAssert(!ray->invalidCurrentPoint(), "Current point is invalid");
-  traceAssert(ray->shouldContinue(), "Ray should not continue");
-  if (_study.verifyRays() && !ray->invalidCurrentIncomingSide() &&
+  traceAssert(!_current_ray->invalidCurrentPoint(), "Current point is invalid");
+  traceAssert(_current_ray->shouldContinue(), "Ray should not continue");
+  if (_study.verifyRays() && !_current_ray->invalidCurrentIncomingSide() &&
       !_study.sideIsNonPlanar(_current_elem, _incoming_side) &&
-      !_study.sideIsIncoming(_current_elem, _incoming_side, ray->direction(), _tid))
+      !_study.sideIsIncoming(_current_elem, _incoming_side, _current_ray->direction(), _tid))
     failTrace("Ray incoming side is not incoming", /* warning = */ false, __LINE__);
 
 #ifdef DEBUG_RAY_IF
@@ -1021,8 +1022,8 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     libMesh::err << "\n\n";
 #endif
   debugRay("At top of trace for Ray");
-  debugRay("Top of trace loop Ray info\n", ray->getInfo());
-  debugRay("Top of trace loop starting elem info\n", ray->currentElem()->get_info());
+  debugRay("Top of trace loop Ray info\n", _current_ray->getInfo());
+  debugRay("Top of trace loop starting elem info\n", _current_ray->currentElem()->get_info());
 
   // Invalidate this up front because it's copied immedtiately into _last_intersected_extrema
   _intersected_extrema.invalidate();
@@ -1038,24 +1039,24 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
 #endif
 
   // Caching trace along the way: init for this Ray
-  if (_study.shouldCacheTrace(ray))
+  if (_study.shouldCacheTrace(*_current_ray))
   {
     debugRay("Trying to init threaded cached trace");
 
-    _current_cached_trace = &_study.initThreadedCachedTrace(ray, _tid);
+    _current_cached_trace = &_study.initThreadedCachedTrace(*_current_ray, _tid);
 
     // Add starting data
     if (_study.dataOnCacheTraces())
-      _current_cached_trace->lastPoint()._data = ray->data();
+      _current_cached_trace->lastPoint()._data = _current_ray->data();
     if (_study.auxDataOnCacheTraces())
-      _current_cached_trace->lastPoint()._aux_data = ray->auxData();
+      _current_cached_trace->lastPoint()._aux_data = _current_ray->auxData();
   }
   else
     _current_cached_trace = nullptr;
 
   // Need to call subdomain setup
   if (_current_elem->subdomain_id() != _current_subdomain_id || _study.rayDependentSubdomainSetup())
-    onSubdomainChanged(ray, /* same_ray = */ false);
+    onSubdomainChanged(/* same_ray = */ false);
   // If we didn't change subdomains, we still need to call this on the RayKernels
   else
     for (RayKernelBase * rk : _study.currentRayKernels(_tid))
@@ -1069,14 +1070,14 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       libMesh::err << "\n\n";
 #endif
     debugRay("At top of ray tracing loop");
-    debugRay("  ray->id() = ", ray->id());
+    debugRay("  _current_ray->id() = ", _current_ray->id());
     debugRay("  _incoming_point = ", _incoming_point);
     debugRay("  _incoming_side = ", _incoming_side);
     debugRay("  _current_elem->id() = ", _current_elem->id());
     debugRay("  _current_elem->subdomain_id() = ", _current_elem->subdomain_id());
     debugRay("  _current_subdomain_id = ", _current_subdomain_id);
     debugRay("  _current_elem_type = ", Utility::enum_to_string(_current_elem_type));
-    debugRay("Top of ray tracing loop Ray info\n", ray->getInfo());
+    debugRay("Top of ray tracing loop Ray info\n", _current_ray->getInfo());
     debugRay("Top of ray tracing loop current elem info\n", _current_elem->get_info());
 
     traceAssert(_current_ray == &ray, "Current ray mismatch");
@@ -1117,7 +1118,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       {
         storeExitsElemResult(exits_elem_result);
         _exits_elem = true;
-        ray->setCurrentPoint(_intersection_point);
+        _current_ray->setCurrentPoint(_intersection_point);
       }
     }
     else
@@ -1217,9 +1218,9 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       _last_elem = _current_elem;
       _current_elem = best_neighbor;
       _incoming_side = best_neighbor_side;
-      ray->setCurrentElem(best_neighbor);
-      ray->setCurrentIncomingSide(best_neighbor_side);
-      ray->setCurrentPoint(_intersection_point);
+      _current_ray->setCurrentElem(best_neighbor);
+      _current_ray->setCurrentIncomingSide(best_neighbor_side);
+      _current_ray->setCurrentPoint(_intersection_point);
 
       // Don't own this element - return exits trace for this Ray on this proc
       if (best_neighbor->processor_id() != _pid)
@@ -1227,16 +1228,16 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
         // We've already computed the next intersection but said intersection is
         // on an elem on another processor. Therefore, the next proc will re-trace
         // this Ray on the perfect elem that we've picked (best_neighbor)
-        ray->setCurrentPoint(_incoming_point);
+        _current_ray->setCurrentPoint(_incoming_point);
         _intersection_distance = RayTracingCommon::invalid_distance;
 
-        continueTraceOffProcessor(ray);
+        continueTraceOffProcessor();
         return;
       }
 
       // Subdomain changed
       if (_current_elem->subdomain_id() != _current_subdomain_id)
-        onSubdomainChanged(ray, /* same_ray = */ true);
+        onSubdomainChanged(/* same_ray = */ true);
 
       // Do own this element - tally the result as we're the ones tracing it
       storeExitsElemResult(exits_elem_result);
@@ -1254,52 +1255,52 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     debugRay("  _intersection_distance = ", _intersection_distance);
 
     // Increment intersections
-    debugRay("Incrementing ray intersections by 1 to ", ray->intersections() + 1);
-    ray->addIntersection();
+    debugRay("Incrementing ray intersections by 1 to ", _current_ray->intersections() + 1);
+    _current_ray->addIntersection();
     _results[INTERSECTIONS]++;
 
     // Increment distance
-    ray->addDistance(_intersection_distance);
+    _current_ray->addDistance(_intersection_distance);
     debugRay("Incremented ray distance by ", _intersection_distance);
 
     // The effective max distance that the Ray should travel - minimum of the two
-    const auto max_distance = std::min(ray->maxDistance(), _study.rayMaxDistance());
+    const auto max_distance = std::min(_current_ray->maxDistance(), _study.rayMaxDistance());
     debugRay("Max distance checks");
     debugRay("  _study.rayMaxDistance() = ", _study.rayMaxDistance());
-    debugRay("  ray->maxDistance() = ", ray->maxDistance());
+    debugRay("  _current_ray->maxDistance() = ", _current_ray->maxDistance());
     debugRay("  max_distance (effective) = ", max_distance);
 
     // At the maximum distance - distinguish between this and past the maximum
     // distance because in this case we're close enough to the intersection point
     // that we can keep it, its intersected side, and intersected extrema
-    if (MooseUtils::absoluteFuzzyEqual(ray->distance(), max_distance))
+    if (MooseUtils::absoluteFuzzyEqual(_current_ray->distance(), max_distance))
     {
       debugRay("At max distance");
 
-      ray->setShouldContinue(false);
+      _current_ray->setShouldContinue(false);
       _should_continue = false;
     }
     // Past the max distance - need to remove the additional distance we traveled,
     // change the point and invalidate the intersection data (moves the Ray back)
-    else if (ray->distance() > max_distance)
+    else if (_current_ray->distance() > max_distance)
     {
       debugRay("Past max distance");
 
       // The distance past the max distance we have traveled
-      const auto difference = ray->distance() - max_distance;
+      const auto difference = _current_ray->distance() - max_distance;
       traceAssert(difference > 0, "Negative distance change after past_max_distance");
 
       debugRay("Removing distance ", difference);
-      ray->addDistance(-difference);
-      debugRay("  New ray->distance() = ", ray->distance());
+      _current_ray->addDistance(-difference);
+      debugRay("  New _current_ray->distance() = ", _current_ray->distance());
 
-      _intersection_point -= ray->direction() * difference;
+      _intersection_point -= _current_ray->direction() * difference;
       _intersection_distance -= difference;
       _intersected_side = RayTracingCommon::invalid_side;
       _intersected_extrema.invalidate();
-      ray->setCurrentPoint(_intersection_point);
+      _current_ray->setCurrentPoint(_intersection_point);
 
-      ray->setShouldContinue(false);
+      _current_ray->setShouldContinue(false);
       _should_continue = false;
 
       traceAssert(_intersection_distance >= 0, "Negative _intersection_distance");
@@ -1321,40 +1322,41 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       debugRay("  _intersected_side = ", _intersected_side);
       debugRay("  _intersected_extrema = ", _intersected_extrema);
       debugRay("  _intersection_distance = ", _intersection_distance);
-      onSegment(ray);
+      onSegment();
 
       // RayKernel killed a Ray or we're at the end
-      traceAssert(_should_continue == ray->shouldContinue(), "Should be the same");
+      traceAssert(_should_continue == _current_ray->shouldContinue(), "Should be the same");
       if (!_should_continue)
       {
         debugRay("RayKernel killed the ray or past max distance");
-        traceAssert(!ray->trajectoryChanged(),
+        traceAssert(!_current_ray->trajectoryChanged(),
                     "RayKernels should not change trajectories of Rays at end");
 
-        onCompleteTrace(ray);
+        onCompleteTrace();
         return;
       }
 
       // RayKernel moved a Ray
-      if (ray->trajectoryChanged())
+      if (_current_ray->trajectoryChanged())
       {
         debugRay("RayKernel changed the Ray's trajectory");
-        debugRay("  new direction = ", ray->direction());
+        debugRay("  new direction = ", _current_ray->direction());
         debugRay("  old incoming point = ", _incoming_point);
-        debugRay("  new incoming point = ", ray->currentPoint());
-        possiblyAddDebugRayMeshPoint(_incoming_point, ray->currentPoint());
+        debugRay("  new incoming point = ", _current_ray->currentPoint());
+        possiblyAddDebugRayMeshPoint(_incoming_point, _current_ray->currentPoint());
 
-        _incoming_point = ray->currentPoint();
+        _incoming_point = _current_ray->currentPoint();
         _incoming_side = RayTracingCommon::invalid_side;
         _intersected_extrema.invalidate();
-        ray->setCurrentIncomingSide(_incoming_side);
+        _current_ray->setCurrentIncomingSide(_incoming_side);
 
-        const auto new_intersection_distance = (ray->currentPoint() - _incoming_point).norm();
-        ray->addDistance(-_intersection_distance + new_intersection_distance);
+        const auto new_intersection_distance =
+            (_current_ray->currentPoint() - _incoming_point).norm();
+        _current_ray->addDistance(-_intersection_distance + new_intersection_distance);
         _intersection_distance = new_intersection_distance;
 
-        onTrajectoryChanged(ray);
-        onContinueTrace(ray);
+        onTrajectoryChanged();
+        onContinueTrace();
         continue;
       }
       else
@@ -1363,9 +1365,9 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     else if (!_should_continue)
     {
       debugRay("Killing due to at end without RayKernels");
-      traceAssert(!ray->shouldContinue(), "Ray shouldn't continue");
+      traceAssert(!_current_ray->shouldContinue(), "Ray shouldn't continue");
 
-      onCompleteTrace(ray);
+      onCompleteTrace();
       return;
     }
 
@@ -1398,7 +1400,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
         _current_elem = boundary_elem;
         _intersected_side = boundary_side;
         _intersected_extrema = boundary_extrema;
-        ray->setCurrentElem(_current_elem);
+        _current_ray->setCurrentElem(_current_elem);
 
         debugRay("Found a neighbor boundary side with:");
         debugRay("  _current_elem->id() = ", _current_elem->id());
@@ -1452,8 +1454,8 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
 
       _last_elem = _current_elem;
       _current_elem = neighbor;
-      ray->setCurrentElem(neighbor);
-      ray->setCurrentIncomingSide(_incoming_side);
+      _current_ray->setCurrentElem(neighbor);
+      _current_ray->setCurrentIncomingSide(_incoming_side);
 
       debugRay("Next elem: ", neighbor->id(), " with centroid ", neighbor->centroid());
       debugRay("Next _incoming_side: ",
@@ -1472,45 +1474,46 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       // the subdomain changes
       if (_study.hasInternalSidesets() && (subdomain_changed || _intersected_extrema.atExtrema()))
       {
-        applyOnInternalBoundary(ray);
+        applyOnInternalBoundary();
 
         // Internal RayBC killed a Ray
         if (!_should_continue)
         {
-          traceAssert(!ray->shouldContinue(), "Should be the same");
+          traceAssert(!_current_ray->shouldContinue(), "Should be the same");
           debugRay("Internal RayBC killed the ray");
 
-          onCompleteTrace(ray);
+          onCompleteTrace();
           return;
         }
 
         // Internal RayBC changed the Ray
-        if (ray->trajectoryChanged())
+        if (_current_ray->trajectoryChanged())
         {
           debugRay("Internal RayBC changed the trajectory:");
-          debugRay("  new direction = ", ray->direction());
+          debugRay("  new direction = ", _current_ray->direction());
 
           // Is this side still incoming?
           const auto normal = _study.getSideNormal(_current_elem, _incoming_side, _tid);
-          const auto dot = normal * ray->direction();
+          const auto dot = normal * _current_ray->direction();
           debugRay("Dot product with new direction and side = ", dot);
           if (dot > -TRACE_TOLERANCE)
           {
             _incoming_side = _last_elem->which_neighbor_am_i(_current_elem);
             _current_elem = _last_elem;
             neighbor = _last_elem;
-            ray->setCurrentElem(_current_elem);
-            ray->setCurrentIncomingSide(_incoming_side);
+            _current_ray->setCurrentElem(_current_elem);
+            _current_ray->setCurrentIncomingSide(_incoming_side);
             debugRay("  Dot > 0 (Ray turned around): Setting _current_elem = ",
                      _current_elem->id(),
                      " and _incoming_side = ",
                      _incoming_side);
           }
 
-          onTrajectoryChanged(ray);
+          onTrajectoryChanged();
         }
 
-        traceAssert(ray->currentPoint().absolute_fuzzy_equals(_intersection_point, TRACE_TOLERANCE),
+        traceAssert(_current_ray->currentPoint().absolute_fuzzy_equals(_intersection_point,
+                                                                       TRACE_TOLERANCE),
                     "Internal RayBC changed the Ray point");
       }
 
@@ -1525,14 +1528,14 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
         }
         else
         {
-          continueTraceOffProcessor(ray);
+          continueTraceOffProcessor();
           return;
         }
       }
 
       // Neighbor is on processor, call subdomain setup if needed
       if (subdomain_changed)
-        onSubdomainChanged(ray, /* same_ray = */ true);
+        onSubdomainChanged(/* same_ray = */ true);
     }
     // No neighbor found: on the boundary
     else
@@ -1540,26 +1543,27 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       debugRay("No neighbor found - on the boundary");
 
       // Apply boundary conditions
-      applyOnExternalBoundary(ray);
+      applyOnExternalBoundary();
 
-      traceAssert(ray->currentPoint().absolute_fuzzy_equals(_intersection_point, TRACE_TOLERANCE),
-                  "RayBC changed the Ray point");
+      traceAssert(
+          _current_ray->currentPoint().absolute_fuzzy_equals(_intersection_point, TRACE_TOLERANCE),
+          "RayBC changed the Ray point");
 
       // Quit tracing if the Ray was killed by a BC
       if (!_should_continue)
       {
-        traceAssert(!ray->shouldContinue(), "Should be the same");
+        traceAssert(!_current_ray->shouldContinue(), "Should be the same");
         debugRay("Exiting due to death by BC");
 
-        onCompleteTrace(ray);
+        onCompleteTrace();
         return;
       }
       // RayBC changed the direction of the Ray
-      if (ray->trajectoryChanged())
+      if (_current_ray->trajectoryChanged())
       {
         debugRay("RayBC changed the trajectory");
-        debugRay("  new direction = ", ray->direction());
-        traceAssert(ray->direction() *
+        debugRay("  new direction = ", _current_ray->direction());
+        traceAssert(_current_ray->direction() *
                             _study.getSideNormal(_current_elem, _intersected_side, _tid) <
                         TRACE_TOLERANCE,
                     "Reflected ray is not incoming");
@@ -1568,13 +1572,13 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
         _last_elem = _current_elem;
         _incoming_point = _intersection_point;
         _incoming_side = _intersected_side;
-        ray->setCurrentPoint(_incoming_point);
-        ray->setCurrentIncomingSide(_incoming_side);
-        onTrajectoryChanged(ray);
+        _current_ray->setCurrentPoint(_incoming_point);
+        _current_ray->setCurrentIncomingSide(_incoming_side);
+        onTrajectoryChanged();
       }
     }
 
-    onContinueTrace(ray);
+    onContinueTrace();
   } while (true);
 
   // If a trace made its way down here and didn't return... it failed
@@ -1582,9 +1586,9 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
 }
 
 void
-TraceRay::onCompleteTrace(const std::shared_ptr<Ray> & ray)
+TraceRay::onCompleteTrace()
 {
-  debugRay("Called onCompleteTrace()\n", (*_current_ray)->getInfo());
+  debugRay("Called onCompleteTrace()\n", _current_ray->getInfo());
   if (_intersection_distance > 0)
     possiblyAddDebugRayMeshPoint(_incoming_point, _intersection_point);
   possiblySaveDebugRayMesh();
@@ -1595,48 +1599,49 @@ TraceRay::onCompleteTrace(const std::shared_ptr<Ray> & ray)
 
     if (_intersection_distance > 0)
     {
-      _current_cached_trace->addPoint(ray->currentPoint());
+      _current_cached_trace->addPoint(_current_ray->currentPoint());
       if (_study.dataOnCacheTraces())
-        _current_cached_trace->lastPoint()._data = ray->data();
+        _current_cached_trace->lastPoint()._data = _current_ray->data();
       if (_study.auxDataOnCacheTraces())
-        _current_cached_trace->lastPoint()._aux_data = ray->auxData();
+        _current_cached_trace->lastPoint()._aux_data = _current_ray->auxData();
     }
   }
 }
 
 void
-TraceRay::onContinueTrace(const std::shared_ptr<Ray> & ray)
+TraceRay::onContinueTrace()
 {
-  traceAssert(ray->shouldContinue(), "Ray must continue");
+  traceAssert(_current_ray->shouldContinue(), "Ray must continue");
 
   if (_current_cached_trace && _study.segmentsOnCacheTraces() && _intersection_distance > 0)
   {
-    _current_cached_trace->addPoint(ray->currentPoint());
+    _current_cached_trace->addPoint(_current_ray->currentPoint());
     if (_study.dataOnCacheTraces())
-      _current_cached_trace->lastPoint()._data = ray->data();
+      _current_cached_trace->lastPoint()._data = _current_ray->data();
     if (_study.auxDataOnCacheTraces())
-      _current_cached_trace->lastPoint()._aux_data = ray->auxData();
+      _current_cached_trace->lastPoint()._aux_data = _current_ray->auxData();
   }
 }
 
 void
-TraceRay::continueTraceOffProcessor(const std::shared_ptr<Ray> & ray)
+TraceRay::continueTraceOffProcessor()
 {
-  traceAssert(ray->currentElem() == _current_elem, "Ray currentElem() invalid");
-  traceAssert(ray->currentIncomingSide() == _incoming_side, "Ray currentIncomingSide() invalid");
-  traceAssert(ray->currentPoint() == _incoming_point, "Ray currentPoint() invalid");
+  traceAssert(_current_ray->currentElem() == _current_elem, "Ray currentElem() invalid");
+  traceAssert(_current_ray->currentIncomingSide() == _incoming_side,
+              "Ray currentIncomingSide() invalid");
+  traceAssert(_current_ray->currentPoint() == _incoming_point, "Ray currentPoint() invalid");
   traceAssert(_current_elem->processor_id() != _pid, "Off processor trace is not off processor");
   debugRay("Ray going off processor to ", _current_elem->processor_id());
 
-  ray->addProcessorCrossing();
+  _current_ray->addProcessorCrossing();
 
   if (_current_cached_trace && _intersection_distance > 0)
   {
     _current_cached_trace->addPoint(_incoming_point);
     if (_study.dataOnCacheTraces())
-      _current_cached_trace->lastPoint()._data = ray->data();
+      _current_cached_trace->lastPoint()._data = _current_ray->data();
     if (_study.auxDataOnCacheTraces())
-      _current_cached_trace->lastPoint()._aux_data = ray->auxData();
+      _current_cached_trace->lastPoint()._aux_data = _current_ray->auxData();
   }
 
   if (_intersection_distance > 0)
@@ -1645,36 +1650,37 @@ TraceRay::continueTraceOffProcessor(const std::shared_ptr<Ray> & ray)
 }
 
 void
-TraceRay::onTrajectoryChanged(const std::shared_ptr<Ray> & ray)
+TraceRay::onTrajectoryChanged()
 {
 #ifndef NDEBUG
   if (_study.verifyTraceIntersections() &&
       (_intersected_extrema.atExtrema()
-           ? !_current_elem->close_to_point(ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
-           : !_current_elem->contains_point(ray->currentPoint())))
+           ? !_current_elem->close_to_point(_current_ray->currentPoint(), LOOSE_TRACE_TOLERANCE)
+           : !_current_elem->contains_point(_current_ray->currentPoint())))
     failTrace("Elem does not contain point after trajectory change",
               /* warning = */ false,
               __LINE__);
 #endif
 
-  traceAssert(ray->shouldContinue(), "Ray should continue when trajectory is being changed");
+  traceAssert(_current_ray->shouldContinue(),
+              "Ray should continue when trajectory is being changed");
 
-  ray->setTrajectoryChanged(false);
-  ray->addTrajectoryChange();
+  _current_ray->setTrajectoryChanged(false);
+  _current_ray->addTrajectoryChange();
 
   if (_current_cached_trace && !_study.segmentsOnCacheTraces())
   {
     if (_intersection_distance > 0)
-      _current_cached_trace->addPoint(ray->currentPoint());
+      _current_cached_trace->addPoint(_current_ray->currentPoint());
     if (_study.dataOnCacheTraces())
-      _current_cached_trace->lastPoint()._data = ray->data();
+      _current_cached_trace->lastPoint()._data = _current_ray->data();
     if (_study.auxDataOnCacheTraces())
-      _current_cached_trace->lastPoint()._aux_data = ray->auxData();
+      _current_cached_trace->lastPoint()._aux_data = _current_ray->auxData();
   }
 }
 
 void
-TraceRay::onSubdomainChanged(const std::shared_ptr<Ray> & ray, const bool same_ray)
+TraceRay::onSubdomainChanged(const bool same_ray)
 {
   debugRay("Calling onSubdomainChanged() on subdomain ", _current_elem->subdomain_id());
   debugRay("  _current_subdomain_id = ", _current_subdomain_id);
@@ -1697,7 +1703,7 @@ TraceRay::onSubdomainChanged(const std::shared_ptr<Ray> & ray, const bool same_r
       _old_ray_kernels.clear();
 
     // Call segmentSubdomainSetup to get new kernels etc
-    _study.segmentSubdomainSetup(_current_subdomain_id, _tid, ray->id());
+    _study.segmentSubdomainSetup(_current_subdomain_id, _tid, _current_ray->id());
 
     // Call preTrace() on all of the RayKernels that need it
     for (RayKernelBase * rk : current_ray_kernels)
@@ -1715,7 +1721,7 @@ TraceRay::failTraceMessage(const std::string & reason, const int line)
   if (line != -1)
     oss << " at line " << line;
   oss << "\n\n" << reason << "\n\n";
-  oss << ((*_current_ray))->getInfo() << "\n";
+  oss << (_current_ray)->getInfo() << "\n";
   oss << "Current trace information\n";
   oss << "  _current_subdomain_id = ";
   if (_current_subdomain_id == Elem::invalid_subdomain_id)
@@ -1764,7 +1770,7 @@ TraceRay::failTrace(const std::string & reason, const bool warning, const int li
   {
     ++_results[FAILED_TRACES];
     mooseWarning(message);
-    (*_current_ray)->setShouldContinue(false);
+    _current_ray->setShouldContinue(false);
     _should_continue = false;
   }
   else
@@ -1915,7 +1921,7 @@ TraceRay::getEdgeNeighbors(const Elem * elem,
   debugRay("  vertices.first = ", vertices.first);
   debugRay("  vertices.second = ", vertices.second);
   traceAssert(vertices.first < elem->n_vertices(),
-              "Invalid vertex with ray " + std::to_string((*_current_ray)->id()));
+              "Invalid vertex with ray " + std::to_string(_current_ray->id()));
   traceAssert(vertices.second < elem->n_vertices(), "Invalid vertex");
 
   return getEdgeNeighbors(
@@ -1975,12 +1981,11 @@ TraceRay::storeExitsElemResult(const TraceRay::ExitsElemResult result)
 }
 
 void
-TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
+TraceRay::onSegment()
 {
-  traceAssert((*_current_ray)->currentElem() == _current_elem, "Ray currentElem() incorrect");
-  traceAssert((*_current_ray)->currentPoint() == _intersection_point,
-              "Ray currentPoint() incorrect");
-  traceAssert((*_current_ray)->currentIncomingSide() == _incoming_side,
+  traceAssert(_current_ray->currentElem() == _current_elem, "Ray currentElem() incorrect");
+  traceAssert(_current_ray->currentPoint() == _intersection_point, "Ray currentPoint() incorrect");
+  traceAssert(_current_ray->currentIncomingSide() == _incoming_side,
               "Ray currentIncomingSide() incorrect");
 #ifndef NDEBUG
   if (_study.verifyTraceIntersections())
@@ -1995,9 +2000,9 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
       traceAssert(sidePtrHelper(_current_elem, _intersected_side)
                       ->close_to_point(_intersection_point, LOOSE_TRACE_TOLERANCE),
                   "Intersected point is not on intersected side");
-      traceAssert(!_study.sideIsIncoming(
-                      _current_elem, _intersected_side, (*_current_ray)->direction(), _tid),
-                  "Intersected side is not outgoing");
+      traceAssert(
+          !_study.sideIsIncoming(_current_elem, _intersected_side, _current_ray->direction(), _tid),
+          "Intersected side is not outgoing");
     }
     if (_incoming_side != RayTracingCommon::invalid_side &&
         !_study.sideIsNonPlanar(_current_elem, _incoming_side))
@@ -2006,7 +2011,7 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
                       ->close_to_point(_incoming_point, LOOSE_TRACE_TOLERANCE),
                   "Incoming point is not on incoming side");
       traceAssert(
-          _study.sideIsIncoming(_current_elem, _incoming_side, (*_current_ray)->direction(), _tid),
+          _study.sideIsIncoming(_current_elem, _incoming_side, _current_ray->direction(), _tid),
           "Incoming side is not incoming");
     }
   }
@@ -2026,20 +2031,20 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
   for (auto & rk : rks)
   {
     rk->onSegment();
-    postRayTracingObject(ray, rk);
+    postRayTracingObject(rk);
   }
 
-  _study.postOnSegment(_tid, ray);
+  _study.postOnSegment(_tid, *_current_ray);
 }
 
 void
-TraceRay::onBoundary(const std::shared_ptr<Ray> & ray, const bool external)
+TraceRay::onBoundary(const bool external)
 {
-  traceAssert(ray->currentPoint().absolute_fuzzy_equals(_intersection_point),
+  traceAssert(_current_ray->currentPoint().absolute_fuzzy_equals(_intersection_point),
               "Ray currentPoint() not set before onBoundary()");
 
   // Get the RayBCs on bnd_elems
-  _study.getRayBCs(_on_boundary_ray_bcs, _boundary_elems, _tid, ray->id());
+  _study.getRayBCs(_on_boundary_ray_bcs, _boundary_elems, _tid, _current_ray->id());
 
   // Store this information temprorarily because we are going to change it as we
   // apply each boundary condition
@@ -2075,7 +2080,7 @@ TraceRay::onBoundary(const std::shared_ptr<Ray> & ray, const bool external)
       _current_subdomain_id = _current_elem->subdomain_id();
 
       rbc->onBoundary(_on_boundary_apply_index.size());
-      postRayTracingObject(ray, rbc);
+      postRayTracingObject(rbc);
     }
   }
 
@@ -2089,7 +2094,7 @@ TraceRay::onBoundary(const std::shared_ptr<Ray> & ray, const bool external)
   // When on an external boundary, the Ray must have been changed or killed.
   // Otherwise, we don't know what to do with it now! If this didn't happen,
   // output a detailed error message.
-  if (external && !ray->trajectoryChanged() && ray->shouldContinue())
+  if (external && !_current_ray->trajectoryChanged() && _current_ray->shouldContinue())
   {
     std::stringstream oss;
     oss << "Don't know what to do with a Ray after it hit an external\n";
@@ -2147,9 +2152,9 @@ TraceRay::subdomainHmax(const Elem * elem) const
 }
 
 void
-TraceRay::postRayTracingObject(const std::shared_ptr<Ray> & ray, const RayTracingObject * rto)
+TraceRay::postRayTracingObject(const RayTracingObject * rto)
 {
-  if (!ray->shouldContinue())
+  if (!_current_ray->shouldContinue())
   {
     if (_should_continue)
       _should_continue = false;
@@ -2161,7 +2166,7 @@ TraceRay::postRayTracingObject(const std::shared_ptr<Ray> & ray, const RayTracin
               /* warning = */ false,
               __LINE__);
 
-  if (!_should_continue && ray->trajectoryChanged())
+  if (!_should_continue && _current_ray->trajectoryChanged())
     failTrace(rto->errorPrefix() +
                   " changed the trajectory of a Ray that was set to not continue,\n" +
                   "or set a Ray whose trajectory was changed to not continue.",

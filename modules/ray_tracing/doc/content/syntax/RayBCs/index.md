@@ -19,7 +19,7 @@ The method that is called on each intersected boundary along the trajectory of a
 
 The significant information pertaining to the trace that is available within `onBoundary()` is as follows:
 
-- `currentRay()` - The current [Ray.md] being operated on that has intersected the boundary.
+- `_current_ray` - The current [Ray.md] being operated on that has intersected the boundary.
 - `_current_elem` - The element that the [Ray.md] has intersected on the boundary.
 - `_current_intersected_side` - The side of `_current_elem` that the [Ray.md] has intersected on the boundary.
 - `_current_intersection_point` - The point on `_current_elem` on `_current_intersected_side` that the [Ray.md] has intersected on the boundary.
@@ -38,7 +38,7 @@ A RayBC can stop a [Ray.md] from being traced, as is done in [KillRayBC.md]:
 Similarly, you can check if another RayBC has set to kill a [Ray.md] after this segment with:
 
 ```
-const bool ended = currentRay().shouldContinue();
+const bool ended = _current_ray->shouldContinue();
 ```
 
 After all RayBCs are executed at a point, if `!shouldContinue()`, the trace for the [Ray.md] will end.
@@ -47,8 +47,8 @@ After all RayBCs are executed at a point, if `!shouldContinue()`, the trace for 
 
 A [Ray.md] that is currently being traced can have its trajectory changed on a boundary by a RayBC. The following conditions are imposed on a [Ray.md] with such a trajectory change:
 
-- It must be continuing (`currentRay()->shouldContinue() == true`).
-- It must have moved some before hitting the boundary (`currentRay()->distance() > 0`).
+- It must be continuing (`_current_ray->shouldContinue() == true`).
+- It must have moved some before hitting the boundary (`_current_ray->distance() > 0`).
 - The [Ray.md] cannot have had its end point set by `Ray::setStartingEndPoint()`. That is, if the user set a specific end point for the [Ray.md] (which internally sets its maximum distance to the straight-line distance from the start to the end), its trajectory can never be changed.
 - The new direction must be entrant into `_current_elem` on `_current_intersected_side` (the dot product of the outward normal of the side and the direction of the [Ray.md] must be negative).
 

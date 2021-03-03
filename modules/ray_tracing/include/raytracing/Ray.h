@@ -15,6 +15,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "SharedPool.h"
 
 // libMesh Includes
 #include "libmesh/parallel.h"
@@ -710,10 +711,12 @@ private:
   // TraceRay is the only object that should be executing Rays and therefore needs access
   friend class TraceRay;
   // Packing needs access to changing the internal counters during the trace
-  friend class Parallel::Packing<std::shared_ptr<Ray>>;
+  friend class Parallel::Packing<MooseUtils::SharedPool<Ray>::PtrType>;
   // Data helpers needs to be able to access the internal methods for a Ray for store/load
-  friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context);
-  friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);
+  friend void
+  dataStore(std::ostream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context);
+  friend void
+  dataLoad(std::istream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context);
 };
 
 /**
@@ -725,25 +728,26 @@ namespace libMesh
 namespace Parallel
 {
 template <>
-class Packing<std::shared_ptr<Ray>>
+class Packing<MooseUtils::SharedPool<Ray>::PtrType>
 {
 public:
   typedef Real buffer_type;
 
   static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
-  static unsigned int packable_size(const std::shared_ptr<Ray> & ray, const void *);
+  static unsigned int packable_size(const MooseUtils::SharedPool<Ray>::PtrType & ray, const void *);
   static unsigned int size(const std::size_t data_size, const std::size_t aux_data_size);
 
   template <typename Iter, typename Context>
-  static void pack(const std::shared_ptr<Ray> & object, Iter data_out, const Context * context);
+  static void
+  pack(const MooseUtils::SharedPool<Ray>::PtrType & object, Iter data_out, const Context * context);
 
   template <typename BufferIter, typename Context>
-  static std::shared_ptr<Ray> unpack(BufferIter in, Context * context);
+  static MooseUtils::SharedPool<Ray>::PtrType unpack(BufferIter in, Context * context);
 };
 
 } // namespace Parallel
 
 } // namespace libMesh
 
-void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context);
-void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);
+void dataStore(std::ostream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context);
+void dataLoad(std::istream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context);

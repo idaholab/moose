@@ -45,15 +45,15 @@ ReflectRayBC::onBoundary(const unsigned int num_applying)
                  "To disable this warning, set RayKernels/",
                  name(),
                  "/warn_non_planar=false.\n\n",
-                 currentRay()->getInfo());
+                 _current_ray->getInfo());
 
   // No need to do anything if the Ray's gonna die anyway
-  if (!currentRay()->shouldContinue())
+  if (!_current_ray->shouldContinue())
     return;
 
   // The direction this Ray reflects off this boundary
   const auto & normal = _study.getSideNormal(_current_elem, _current_intersected_side, _tid);
-  const auto reflected_direction = reflectedDirection(currentRay()->direction(), normal);
+  const auto reflected_direction = reflectedDirection(_current_ray->direction(), normal);
 
   // Change it! Note here the usage of num_applying: if we are at a corner with a reflecting
   // boundary condition on both sides, we want to allow both boundary conditions to reflect the Ray.

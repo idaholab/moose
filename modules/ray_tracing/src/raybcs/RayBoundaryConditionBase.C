@@ -52,32 +52,29 @@ RayBoundaryConditionBase::~RayBoundaryConditionBase() {}
 void
 RayBoundaryConditionBase::changeRayDirection(const Point & direction, const bool skip_changed_check)
 {
-  auto & ray = currentRay();
-
-  if (!ray->shouldContinue())
+  if (!_current_ray->shouldContinue())
     mooseError("Cannot changeRayDirection() for a Ray that should not continue\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
-  if (!skip_changed_check && ray->trajectoryChanged())
+  if (!skip_changed_check && _current_ray->trajectoryChanged())
     mooseError("Cannot change direction for a ray whose direction has already been changed\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
-  if (ray->endSet())
+  if (_current_ray->endSet())
     mooseError("Cannot change the direction of a Ray whose end point is set upon generation "
                "(via setStartingEndPoint()).\n\n",
-               ray->getInfo());
+               _current_ray->getInfo());
 
-  ray->changeDirection(direction, Ray::ChangeDirectionKey());
+  _current_ray->changeDirection(direction, Ray::ChangeDirectionKey());
 }
 
-std::shared_ptr<Ray>
+MooseUtils::SharedPool<Ray>::PtrType
 RayBoundaryConditionBase::acquireRay(const Point & direction)
 {
   mooseAssert(_study.currentlyPropagating(), "Should not be getting a Ray while not propagating");
 
   // Acquire a Ray with the proper sizes and a unique ID, and set the start info
-  std::shared_ptr<Ray> ray =
-      _study.acquireRayDuringTrace(_tid, RayTracingStudy::AcquireMoveDuringTraceKey());
+  auto ray = _study.acquireRayDuringTrace(_tid, RayTracingStudy::AcquireMoveDuringTraceKey());
   ray->setStart(_current_intersection_point, _current_elem, _current_intersected_side);
   ray->setStartingDirection(direction);
 
@@ -85,10 +82,11 @@ RayBoundaryConditionBase::acquireRay(const Point & direction)
 }
 
 void
-RayBoundaryConditionBase::moveRayToBuffer(std::shared_ptr<Ray> & ray)
+RayBoundaryConditionBase::moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
   mooseAssert(_study.currentlyPropagating(),
               "Should not move Rays into buffer while not propagating");
 
-  _study.moveRayToBufferDuringTrace(ray, _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
+  _study.moveRayToBufferDuringTrace(
+      std::move(ray), _tid, RayTracingStudy::AcquireMoveDuringTraceKey());
 }

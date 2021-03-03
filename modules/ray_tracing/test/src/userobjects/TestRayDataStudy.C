@@ -71,26 +71,21 @@ TestRayDataStudy::auxDataValue(const unsigned int i, const Ray & ray) const
 }
 
 void
-TestRayDataStudy::modifyRays()
+TestRayDataStudy::modifyRay(Ray & ray)
 {
-  for (const std::shared_ptr<Ray> & ray : _rays)
-  {
-    for (unsigned int i = 0; i < 3; ++i)
-      ray->auxData(_actual_start_indices[i]) = ray->currentPoint()(i);
+  for (unsigned int i = 0; i < 3; ++i)
+    ray.auxData(_actual_start_indices[i]) = ray.currentPoint()(i);
 
-    for (unsigned int i = 0; i < _data_size; ++i)
-      ray->data(_data_indices[i]) = dataValue(i, *ray);
+  for (unsigned int i = 0; i < _data_size; ++i)
+    ray.data(_data_indices[i]) = dataValue(i, ray);
 
-    for (unsigned int i = 0; i < _aux_data_size; ++i)
-      ray->auxData(_aux_data_indices[i]) = auxDataValue(i, *ray);
-  }
+  for (unsigned int i = 0; i < _aux_data_size; ++i)
+    ray.auxData(_aux_data_indices[i]) = auxDataValue(i, ray);
 }
 
 void
-TestRayDataStudy::onCompleteRay(const std::shared_ptr<Ray> & ray)
+TestRayDataStudy::onCompleteRay(MooseUtils::SharedPool<Ray>::PtrType && ray)
 {
-  LotsOfRaysRayStudy::onCompleteRay(ray);
-
   const Ray & const_ray = *ray;
 
   for (unsigned int i = 0; i < _data_size; ++i)
@@ -101,4 +96,6 @@ TestRayDataStudy::onCompleteRay(const std::shared_ptr<Ray> & ray)
     if (!MooseUtils::absoluteFuzzyEqual(const_ray.auxData(_aux_data_indices[i]),
                                         auxDataValue(i, const_ray)))
       mooseError(_name, ": Incorrect expected aux data");
+
+  LotsOfRaysRayStudy::onCompleteRay(std::move(ray));
 }

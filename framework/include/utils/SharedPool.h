@@ -44,15 +44,21 @@ class SharedPool
 private:
   struct ExternalDeleter
   {
-    explicit ExternalDeleter(std::weak_ptr<SharedPool<T> *> pool) : _pool(pool) {}
+    explicit ExternalDeleter(std::shared_ptr<SharedPool<T> *> & pool) : _pool(pool) {}
+
+    /**
+     * The following exists only so that we can create default-constructable (nullptr
+     * pointing) objects with the type that this pool creates
+     */
+    constexpr ExternalDeleter() noexcept : _pool(std::weak_ptr<SharedPool<T> *>{}) {}
 
     void operator()(T * ptr)
     {
-      if (auto _poolptr = _pool.lock())
+      if (auto poolptr = _pool.lock())
       {
         try
         {
-          (*_poolptr.get())->add(std::unique_ptr<T>{ptr});
+          (*poolptr.get())->add(std::unique_ptr<T>{ptr});
           return;
         }
         catch (...)
@@ -72,40 +78,60 @@ public:
   SharedPool() : _this_ptr(new SharedPool<T> *(this)) {}
   virtual ~SharedPool() {}
 
-  void add(std::unique_ptr<T> t) { _pool.push(std::move(t)); }
-
   template <typename... Args>
   PtrType acquire(Args &&... args)
   {
-    // if the pool is empty - create one
+    // If the pool is empty - create one
     if (_pool.empty())
     {
-      _num_created++;
-      return std::move(PtrType(new T(std::forward<Args>(args)...),
-                               ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
+      ++_num_created;
+      return std::move(
+          PtrType(new T(std::forward<Args>(args)...), std::move(ExternalDeleter(_this_ptr))));
     }
+    // Pool is not empty - grab one from it
     else
     {
-      PtrType tmp(_pool.top().release(),
-                  ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
+      PtrType tmp(_pool.top().release(), std::move(ExternalDeleter(_this_ptr)));
       _pool.pop();
 
+      // Attempts to call the user-defined reset method
       reset(1, *tmp, std::forward<Args>(args)...);
 
       return tmp;
     }
   }
 
+  /**
+   * Whether or not the pool is empty
+   */
   bool empty() const { return _pool.empty(); }
 
+  /**
+   * The current size of the pool (objects available)
+   */
   size_t size() const { return _pool.size(); }
 
-  size_t num_created() const { return _num_created; }
+  /**
+   * The number of objects created in the pool
+   */
+  size_t numCreated() const { return _num_created; }
 
 private:
+  /**
+   * Adds an object back to the pool. Used in the deleter.
+   */
+  void add(std::unique_ptr<T> t) { _pool.push(std::move(t)); }
+
+  /// Shared pointer to this for use in the deleter
   std::shared_ptr<SharedPool<T> *> _this_ptr;
+
+  /// The pool
   std::stack<std::unique_ptr<T>> _pool;
 
+  /// Total number of objects created in the pool
   size_t _num_created = 0;
+
+  /// Deleter needs access to add
+  friend struct ExternalDeleter;
 };
 }
