@@ -96,7 +96,7 @@
     input = master_vector.i
     cli_args = "Controls/cmdline/param_names='Mesh/xmax[0] Materials/const/prop_values[1,(1.5),2,2] Mesh/ymax'"
     expect_err = "If the bracket is used, it must be provided to every parameter."
-    requirement = "The system shall error when '[]' syntex is not used for all parameters."
+    requirement = "The system shall error when '[]' syntax is not used for all parameters."
     max_parallel = 3
   []
   [vector_out_of_bound]
