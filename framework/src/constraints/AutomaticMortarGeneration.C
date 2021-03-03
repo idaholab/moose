@@ -785,7 +785,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
           Real xi2 = xi2_dn.value();
 
           // Check whether the projection worked.
-          if (std::abs(xi2) <= 1. + TOLERANCE)
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + TOLERANCE))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
             // surface. This isn't as unlikely as you might think, it will happen if the meshes
@@ -1080,7 +1080,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           Real xi1 = xi1_dn.value();
 
           // Check for convergence to a valid solution...
-          if (std::abs(xi1) <= 1. + TOLERANCE)
+          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + TOLERANCE))
           {
             if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
             {
