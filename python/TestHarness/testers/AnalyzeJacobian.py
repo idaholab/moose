@@ -50,7 +50,7 @@ class AnalyzeJacobian(FileTester):
     def getCommand(self, options):
         specs = self.specs
         # Create the command line string to run
-        command = os.path.join(specs['moose_dir'], 'python', 'jacobiandebug', 'analyzejacobian.py')
+        command = os.path.join(self.getMoosePythonDir(), 'jacobiandebug', 'analyzejacobian.py')
 
         # Check for built application
         if not options.dry_run and not os.path.exists(command):

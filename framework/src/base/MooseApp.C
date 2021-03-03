@@ -129,6 +129,7 @@ MooseApp::validParams()
       "json", "--json", "Dumps input file syntax in JSON format.");
   params.addCommandLineParam<bool>(
       "syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
+  params.addCommandLineParam<bool>("run_tests", "--tests", false, "run all tests");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    false,
@@ -1132,6 +1133,28 @@ void
 MooseApp::run()
 {
   TIME_SECTION(_run_timer);
+
+  if (isParamValid("run_tests") && getParam<bool>("run_tests"))
+  {
+    std::string args;
+    for (int i = 2; i < _sys_info->argc(); i++)
+      args += " " + std::string(*(_sys_info->argv() + i));
+    auto cmd = MooseUtils::runTestsExecutable() + args;
+    if (MooseUtils::findTestRoot() == "")
+    {
+      // run installed tests instead of cwd tests
+      auto binname = appBinaryName();
+      if (binname == "")
+        mooseError("could not locate installed tests to run (unresolved binary/app name)");
+      auto dir = MooseUtils::testsDir(binname);
+      chdir(dir.c_str());
+    }
+    int ret = system(cmd.c_str());
+    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
+      mooseError("Tests failed");
+    _ready_to_exit = true;
+    return;
+  }
 
   try
   {

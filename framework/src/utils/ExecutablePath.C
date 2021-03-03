@@ -21,7 +21,7 @@ namespace Moose
 {
 
 std::string
-getExecutablePath()
+getExec()
 {
   std::string exec_path;
   char path[1024];
@@ -44,12 +44,27 @@ getExecutablePath()
     exec_path = path;
   }
 #endif
-
-  // Now strip off the exeuctable to get the PATH
-  std::string::size_type t = exec_path.find_last_of("/");
-  exec_path = exec_path.substr(0, t) + "/";
-
   return exec_path;
+}
+
+std::string
+getExecutablePath()
+{
+  auto exec_path = getExec();
+  // strip off the exeuctable to get the PATH
+  std::string::size_type t = exec_path.find_last_of("/");
+  return exec_path.substr(0, t) + "/";
+}
+
+std::string
+getExecutableName()
+{
+  auto name = getExec();
+  // strip off the path to get the name
+  std::string::size_type start = name.find_last_of("/");
+  if (start == std::string::npos)
+    start = 0;
+  return name.substr(start, std::string::npos);
 }
 
 } // Namespace MOOSE

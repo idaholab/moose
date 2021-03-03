@@ -16,6 +16,7 @@
 #include "MooseError.h"
 #include "Moose.h"
 #include "DualReal.h"
+#include "ExecutablePath.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
@@ -70,6 +71,22 @@ MetaPhysicL::DualNumber<T, D, asd> abs(MetaPhysicL::DualNumber<T, D, asd> && in)
 
 namespace MooseUtils
 {
+
+std::string pathjoin(const std::string & s);
+
+template <typename... Args>
+std::string
+pathjoin(const std::string & s, Args... args)
+{
+  if (s[s.size() - 1] == '/')
+    return s + pathjoin(args...);
+  return s + "/" + pathjoin(args...);
+}
+
+std::string runTestsExecutable();
+std::string findTestRoot();
+std::string testsDir(const std::string & app_name);
+std::string docsDir(const std::string & app_name);
 
 /// Replaces all occurences of from in str with to and returns the result.
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
