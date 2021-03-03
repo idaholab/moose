@@ -718,11 +718,21 @@ MooseApp::setupOptions()
       param_search = following_arg;
 
     JsonSyntaxTree tree(param_search);
-    _parser.buildJsonSyntaxTree(tree);
+
+    {
+      TIME_SECTION("MooseApp::dump", 1, "Building Syntax Tree");
+      _parser.buildJsonSyntaxTree(tree);
+    }
+
+    // Turn off live printing so that it doesn't mess with the dump
+    _perf_graph.setLivePrintActive(false);
+
     JsonInputFileFormatter formatter;
-    Moose::out << "### START DUMP DATA ###\n"
+    Moose::out << "\n### START DUMP DATA ###\n"
                << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
     _ready_to_exit = true;
+
+    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("registry"))
   {
