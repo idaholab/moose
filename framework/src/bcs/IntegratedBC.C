@@ -87,9 +87,14 @@ IntegratedBC::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
+  precalculateResidual();
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpResidual();
     for (_i = 0; _i < _test.size(); _i++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+  }
 
   accumulateTaggedLocalResidual();
 
@@ -106,10 +111,15 @@ IntegratedBC::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
+  precalculateJacobian();
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpJacobian();
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+  }
 
   accumulateTaggedLocalMatrix();
 
@@ -139,6 +149,8 @@ IntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
 
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
+  precalculateOffDiagJacobian(jvar_num);
+
   // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
   // on the displaced mesh, so we obtain the variable on the proper system
   auto phi_size = jvar.dofIndices().size();
@@ -146,9 +158,12 @@ IntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
               "The size of the phi container does not match the number of local Jacobian columns");
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    precalculateQpOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < phi_size; _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+  }
 
   accumulateTaggedLocalMatrix();
 }

@@ -74,18 +74,19 @@ protected:
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
   /**
-   * Put necessary evaluations depending on qp but independent on test functions here
+   * Insertion point for evaluations that depend on qp but are independent of the test functions.
    */
   virtual void precalculateQpResidual(Moose::DGResidualType /*type*/) {}
 
   /**
-   * Put necessary evaluations depending on qp but independent on test and shape functions here
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions.
    */
   virtual void precalculateQpJacobian(Moose::DGJacobianType /*type*/) {}
 
   /**
-   * Put necessary evaluations depending on qp but independent on test and shape functions here for
-   * off-diagonal Jacobian assembly
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions for off-diagonal Jacobian assembly.
    */
   virtual void precalculateQpOffDiagJacobian(Moose::DGJacobianType /*type*/,
                                              const MooseVariableFEBase & /*jvar*/)
