@@ -6,7 +6,7 @@ registerMooseObject("THMApp", Outlet1Phase);
 InputParameters
 Outlet1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addParam<bool>("reversible", false, "True for reversible outlet boundary conditions");
   params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<bool>(
@@ -17,7 +17,7 @@ Outlet1Phase::validParams()
 }
 
 Outlet1Phase::Outlet1Phase(const InputParameters & params)
-  : FlowBoundary(params),
+  : FlowBoundary1Phase(params),
     _reversible(getParam<bool>("reversible")),
     _legacy(getParam<bool>("legacy"))
 {
@@ -26,7 +26,7 @@ Outlet1Phase::Outlet1Phase(const InputParameters & params)
 void
 Outlet1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)
@@ -61,7 +61,6 @@ Outlet1Phase::add3EqnStaticPBC()
     // coupling
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     params.set<std::vector<VariableName>>("vel") = {FlowModelSinglePhase::VELOCITY};
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     std::string nm = genName(name(), "bc_rhou");
@@ -76,7 +75,6 @@ Outlet1Phase::add3EqnStaticPBC()
     params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("reversible") = _reversible;
-    params.set<bool>("is_liquid") = true;
     params.set<Real>("p_in") = p;
     params.set<Real>("normal") = _normal;
     // coupling
@@ -99,7 +97,6 @@ Outlet1Phase::add3EqnStaticPBC()
     params.set<Real>("normal") = _normal;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("reversible") = _reversible;
-    params.set<bool>("is_liquid") = true;
     // coupling
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
@@ -198,7 +195,6 @@ Outlet1Phase::add3EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("vel") = {FlowModelSinglePhase::VELOCITY};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "bc_rhou");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "p", "p_in");
@@ -217,7 +213,6 @@ Outlet1Phase::add3EqnStaticPBCLegacy()
     params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("vel") = {FlowModelSinglePhase::VELOCITY};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     std::string nm = genName(name(), "bc_rhoE");
     _sim.addBoundaryCondition(class_name, nm, params);
     connectObject(params, nm, "p", "p_in");

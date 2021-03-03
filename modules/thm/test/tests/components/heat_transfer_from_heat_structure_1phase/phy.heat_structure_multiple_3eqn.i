@@ -161,12 +161,12 @@ cp2 = 600
   [../]
 
   [./left]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:in'
   [../]
 
   [./right]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:out'
   [../]
 []

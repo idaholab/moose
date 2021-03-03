@@ -34,7 +34,7 @@ D_h = 5
 
 [Components]
   [./left_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = pipe:in
   [../]
 
@@ -54,7 +54,7 @@ D_h = 5
   [../]
 
   [./right_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = pipe:out
   [../]
 []

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  * Boundary condition with prescribed density and velocity for 1-phase flow channels
  */
-class InletDensityVelocity1Phase : public FlowBoundary
+class InletDensityVelocity1Phase : public FlowBoundary1Phase
 {
 public:
   InletDensityVelocity1Phase(const InputParameters & params);

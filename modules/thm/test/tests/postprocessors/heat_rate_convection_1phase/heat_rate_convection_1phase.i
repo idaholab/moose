@@ -21,7 +21,7 @@ L = 2.0
 
 [Components]
   [./left_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:in'
   [../]
 
@@ -43,7 +43,7 @@ L = 2.0
   [../]
 
   [./right_wall]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:out'
   [../]
 

@@ -29,14 +29,10 @@ protected:
   const VariableValue & _vel;
   const VariableValue & _vel_old;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const VariableValue & _arhoA;
   const VariableValue & _arhouA;
   const VariableValue & _arhoEA;
 
-  const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;
   const unsigned int _arhoEA_var_number;
 

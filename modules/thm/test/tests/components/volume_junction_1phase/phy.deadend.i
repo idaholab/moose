@@ -127,7 +127,7 @@
   [../]
 
   [./deadend]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'deadend_pipe:out'
   [../]
 []

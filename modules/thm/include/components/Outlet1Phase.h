@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  * Boundary condition with prescribed pressure for 1-phase flow channels
  */
-class Outlet1Phase : public FlowBoundary
+class Outlet1Phase : public FlowBoundary1Phase
 {
 public:
   Outlet1Phase(const InputParameters & params);

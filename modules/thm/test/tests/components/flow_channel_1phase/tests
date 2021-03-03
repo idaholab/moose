@@ -32,13 +32,6 @@
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
   [../]
 
-  [./err:wrong_ht_T_wall]
-    type = 'RunException'
-    input = 'err.wrong_ht.i'
-    expect_err = "pipe: Coupled heat source 'ht_pipe' is not compatible with single phase flow channel\. Use single phase heat transfer component instead\."
-    cli_args = 'Components/ht_pipe/type=HeatTransferFromSpecifiedTemperature2Phase Components/ht_pipe/T_wall=300'
-  [../]
-
   # jacobians
   [./jac:3eqn]
     type = 'PetscJacobianTester'

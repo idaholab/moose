@@ -26,7 +26,6 @@
     normal = -1
     rhoA = rhoA
     rhoEA = rhoEA
-    alpha = unity
     A = A
     p_in = 6e6
   [../]
@@ -37,7 +36,6 @@
     normal = 1
     rhoA = rhoA
     rhoEA = rhoEA
-    alpha = unity
     A = A
     p_in = 6e6
   [../]

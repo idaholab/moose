@@ -62,16 +62,10 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::registerActions(s);
 
   registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
-  registerClosuresOption("simple", "Closures2PhaseSimple", THM::FM_TWO_PHASE);
-  registerClosuresOption("simple", "Closures2PhaseSimple", THM::FM_TWO_PHASE_NCG);
   registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
-  registerClosuresOption("none", "Closures2PhaseNone", THM::FM_TWO_PHASE);
-  registerClosuresOption("none", "Closures2PhaseNone", THM::FM_TWO_PHASE_NCG);
 
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
-  registerFlowModel(THM::FM_TWO_PHASE, FlowModelTwoPhase);
-  registerFlowModel(THM::FM_TWO_PHASE_NCG, FlowModelTwoPhaseNCG);
 }
 
 const std::string &

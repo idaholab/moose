@@ -28,7 +28,6 @@
     vel = 0.75
     rhoEA = rhoEA
     A = A
-    alpha = unity
     fp = fp_1phase
   [../]
   [./bc_2]
@@ -40,7 +39,6 @@
     vel = 0.75
     rhoEA = rhoEA
     A = A
-    alpha = unity
     fp = fp_1phase
   [../]
 []

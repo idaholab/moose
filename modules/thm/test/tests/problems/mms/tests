@@ -6,11 +6,4 @@
     allow_test_objects = true
     recover = false
   []
-  [2phase]
-    type = 'CSVDiff'
-    input = 'mms_2phase.i'
-    csvdiff = 'mms_2phase_out.csv'
-    allow_test_objects = true
-    recover = false
-  []
 []

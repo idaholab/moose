@@ -30,7 +30,6 @@
     p0 = 2e5
     A = A
     vel = vel
-    alpha = unity
     arhoA = rhoA
     arhouA = rhouA
     arhoEA = rhoEA
@@ -45,7 +44,6 @@
     p0 = 0.5e5
     A = A
     vel = vel
-    alpha = unity
     arhoA = rhoA
     arhouA = rhouA
     arhoEA = rhoEA

@@ -21,7 +21,7 @@
 
 [Components]
   [./sw1]
-    type = SolidWall
+    type = SolidWall1Phase
     input = fch1:in
   [../]
 
@@ -51,7 +51,7 @@
   [../]
 
   [./sw2]
-    type = SolidWall
+    type = SolidWall1Phase
     input = fch2:out
   [../]
 

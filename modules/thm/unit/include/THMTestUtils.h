@@ -10,5 +10,8 @@
 // Minimum perturbation to be used in FD Jacobian computations
 #define PERTURBATION_MIN 1e-12
 
-Real computeFDPerturbation(const Real & value,
-                           const Real & relative_perturbation = REL_PERTURBATION);
+inline Real
+computeFDPerturbation(const Real & value, const Real & relative_perturbation = REL_PERTURBATION)
+{
+  return std::max(relative_perturbation * std::abs(value), PERTURBATION_MIN);
+}

@@ -11,10 +11,4 @@
     csvdiff = 'churchill_ad_out.csv'
     recover = false
   []
-  [laminar_annulus_ad]
-    type = 'CSVDiff'
-    input = 'laminar_annulus_ad.i'
-    csvdiff = 'laminar_annulus_ad_out.csv'
-    recover = false
-  []
 []

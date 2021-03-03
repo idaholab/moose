@@ -26,7 +26,6 @@
     normal = -1
     rho = 999
     vel = 0.75
-    alpha = unity
     rhoEA = rhoEA
     A = A
     fp = fp_1phase
@@ -38,7 +37,6 @@
     normal = 1
     rho = 999
     vel = 0.75
-    alpha = unity
     rhoEA = rhoEA
     A = A
     fp = fp_1phase

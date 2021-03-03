@@ -9,15 +9,6 @@
     recover = false
   [../]
 
-  [./phy:conservation_2phase]
-    type = CSVDiff
-    input = 'phy.conservation.2phase.i'
-    csvdiff = 'phy.conservation.2phase_out.csv'
-    abs_zero = 1e-9
-    # because output has execute_on = 'final'
-    recover = false
-  [../]
-
   # Error checking
   [./err:nonexistent_flow_channel]
     type = 'RunException'
@@ -30,6 +21,6 @@
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hs/flow_channel=total_power"
-    expect_err = "hs: The component 'total_power' is not of type 'FlowChannelBase'"
+    expect_err = "hs: The component 'total_power' is not of type 'FlowChannel1Phase'"
   [../]
 []
