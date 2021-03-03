@@ -202,7 +202,7 @@ table lists the types of properties that are available for automatic output.
 Materials are sorted such that one material may consume a property produced by
 another material and know that the consumed property will be up-to-date,
 e.g. the producer material will execute before the consumer material. If a
-cyclic dependcy is detected between two materials, then MOOSE will produce an
+cyclic dependency is detected between two materials, then MOOSE will produce an
 error.
 
 ## Advanced Topics
