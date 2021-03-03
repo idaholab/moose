@@ -3,21 +3,21 @@
     type = 'RunApp'
     input = 'eqm_model_25degC_no_precip.i'
     expect_out = 'Minerals:
-Illite = 5*H2O - 8*H+ + 3.5*SiO2(aq) + 2.3*Al+++ + 0.25*Mg++ + 0.6*K+;  log10K = 9.796;  SI = 9.793
-Kaolinite = 5*H2O - 6*H+ + 2*SiO2(aq) + 2*Al+++;  log10K = 7.434;  SI = 7.734
-K-feldspar = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*K+;  log10K = 0.06546;  SI = 7.166
-Albite = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*Na+;  log10K = 3.081;  SI = 5.703
-Pyrrhotite = -0.125*H2O - 0.7188*H+ + 0.03125*SO4-- + 0.875*Fe++ + 0.9688*HS-;  log10K = -5.557;  SI = 3.52
-Barite = 1*SO4-- + 1*Ba++;  log10K = -9.973;  SI = 2.614
-Quartz = 1*SiO2(aq);  log10K = -4.01;  SI = 1.376
-Chalcedony = 1*SiO2(aq);  log10K = -3.738;  SI = 1.104
-Siderite = -1*H+ + 1*HCO3- + 1*Fe++;  log10K = -0.2225;  SI = 0.8197
-Dolomite = -2*H+ + 2*HCO3- + 1*Ca++ + 1*Mg++;  log10K = 2.516;  SI = 0.3875
-Calcite = -1*H+ + 1*HCO3- + 1*Ca++;  log10K = 1.711;  SI = 0.0183
-Fluorite = 1*Ca++ + 2*F-;  log10K = -10.97;  SI = -0.1105
-Celestite = 1*SO4-- + 1*Sr++;  log10K = -6.443;  SI = -0.6262
-Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.274;  SI = -1.118
-Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.308;  SI = -1.249'
+Illite = 5*H2O - 8*H+ + 3.5*SiO2(aq) + 2.3*Al+++ + 0.25*Mg++ + 0.6*K+;  log10K = 9.7964;  SI = 9.7925
+Kaolinite = 5*H2O - 6*H+ + 2*SiO2(aq) + 2*Al+++;  log10K = 7.4341;  SI = 7.734
+K-feldspar = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*K+;  log10K = 0.065455;  SI = 7.1657
+Albite = 2*H2O - 4*H+ + 3*SiO2(aq) + 1*Al+++ + 1*Na+;  log10K = 3.0808;  SI = 5.7026
+Pyrrhotite = -0.125*H2O - 0.71875*H+ + 0.03125*SO4-- + 0.875*Fe++ + 0.96875*HS-;  log10K = -5.5573;  SI = 3.5197
+Barite = 1*SO4-- + 1*Ba++;  log10K = -9.9729;  SI = 2.6139
+Quartz = 1*SiO2(aq);  log10K = -4.0098;  SI = 1.3755
+Chalcedony = 1*SiO2(aq);  log10K = -3.7384;  SI = 1.1042
+Siderite = -1*H+ + 1*HCO3- + 1*Fe++;  log10K = -0.22246;  SI = 0.81967
+Dolomite = -2*H+ + 2*HCO3- + 1*Ca++ + 1*Mg++;  log10K = 2.5162;  SI = 0.3875
+Calcite = -1*H+ + 1*HCO3- + 1*Ca++;  log10K = 1.7105;  SI = 0.018304
+Fluorite = 1*Ca++ + 2*F-;  log10K = -10.968;  SI = -0.11047
+Celestite = 1*SO4-- + 1*Sr++;  log10K = -6.4427;  SI = -0.62617
+Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.2739;  SI = -1.1179
+Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.3083;  SI = -1.2487'
     match_literal = true
     requirement = "The geochemistry model shall be able to report the saturation indices of minerals"
     issues = '#15693'
