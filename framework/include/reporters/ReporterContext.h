@@ -237,8 +237,6 @@ public:
                                 dof_id_type index,
                                 unsigned int time_index = 0) const override;
 
-  virtual void resize(dof_id_type local_size) override;
-
   /**
    * Add a consumer mode to the associate ReporterState
    */
@@ -388,12 +386,6 @@ ReporterContext<T>::addConsumerMode(ReporterMode mode, const std::string & objec
 }
 
 template <typename T>
-void ReporterContext<T>::resize(dof_id_type)
-{
-  mooseError("Cannot resize non vector-type reporter values.");
-}
-
-template <typename T>
 class ReporterGeneralContext : public ReporterContext<T>
 {
 public:
@@ -426,7 +418,15 @@ public:
   virtual void declareVectorClone(ReporterData & r_data,
                                   const ReporterName & r_name,
                                   const ReporterMode & mode) const override;
+
+  virtual void resize(dof_id_type local_size) final;
 };
+
+template <typename T>
+void ReporterGeneralContext<T>::resize(dof_id_type)
+{
+  mooseError("Cannot resize non vector-type reporter values.");
+}
 
 /**
  * A context that broadcasts the Reporter value from the root processor
@@ -632,7 +632,7 @@ public:
    */
   virtual void declareClone(ReporterData & r_data,
                             const ReporterName & r_name,
-                            const ReporterMode & mode) const override;
+                            const ReporterMode & mode) const final;
 
   /**
    * This simply throws an error to avoid infinite instantiations.
@@ -640,7 +640,7 @@ public:
    */
   virtual void declareVectorClone(ReporterData & r_data,
                                   const ReporterName & r_name,
-                                  const ReporterMode & mode) const override;
+                                  const ReporterMode & mode) const final;
 
   /**
    * Since we know that the _state value is a vector type, we can resize it based

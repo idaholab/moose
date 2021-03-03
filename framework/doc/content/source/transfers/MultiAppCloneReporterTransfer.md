@@ -7,7 +7,7 @@
 This transfer is very similar to [MultiAppReporterTransfer.md] with a few key differences. The first is that this object can only transfer from sub-application(s) to the main app. The second is that reporter values are declared on-the-fly, i.e. the reporter values from the sub-app are "cloned" onto the main app, with out an already existing value on the main app. The third is that when there are multiple sub-applications, the values are collected into a vector of that reporter type on the main app.
 
 !alert warning
-It is not possible to transfer a reporter value that has already been cloned with this object. 
+It is not possible to transfer a reporter value that has already been cloned with this object. For instance, let's say there is a hierarchical structure of multiapps with a primary (main), secondary, and tertiary app. If this object is used to clone values from the tertiary to secondary, it cannot again be used to clone the same values from the secondary to the primary.
 
 ## Example Input Syntax
 
