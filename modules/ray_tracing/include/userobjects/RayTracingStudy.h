@@ -52,8 +52,9 @@ public:
    */
   class AcquireRayInternalKey
   {
-    friend class Parallel::Packing<std::shared_ptr<Ray>>;
-    friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);
+    friend class Parallel::Packing<MooseUtils::SharedPool<Ray>::PtrType>;
+    friend void
+    dataLoad(std::istream & stream, MooseUtils::SharedPool<Ray>::PtrType & ray, void * context);
     AcquireRayInternalKey() {}
     AcquireRayInternalKey(const AcquireRayInternalKey &) {}
   };
@@ -109,7 +110,7 @@ public:
    * @param tid Thread id
    * @param ray The ray
    */
-  virtual void postOnSegment(const THREAD_ID tid, const std::shared_ptr<Ray> & ray);
+  virtual void postOnSegment(const THREAD_ID tid, const Ray & ray);
 
   /**
    * Method for executing the study so that it can be called out of the standard UO execute()
@@ -476,13 +477,13 @@ public:
    * respectively.
    */
   ///@{
-  std::shared_ptr<Ray> acquireRayDuringTrace(const THREAD_ID tid,
-                                             const AcquireMoveDuringTraceKey &);
-  std::shared_ptr<Ray> acquireRayInternal(const RayID id,
-                                          const std::size_t data_size,
-                                          const std::size_t aux_data_size,
-                                          const bool reset,
-                                          const AcquireRayInternalKey &)
+  MooseUtils::SharedPool<Ray>::PtrType acquireRayDuringTrace(const THREAD_ID tid,
+                                                             const AcquireMoveDuringTraceKey &);
+  MooseUtils::SharedPool<Ray>::PtrType acquireRayInternal(const RayID id,
+                                                          const std::size_t data_size,
+                                                          const std::size_t aux_data_size,
+                                                          const bool reset,
+                                                          const AcquireRayInternalKey &)
   {
     return _parallel_ray_study->acquireParallelData(
         0, this, id, data_size, aux_data_size, reset, Ray::ConstructRayKey());
@@ -496,7 +497,7 @@ public:
    * AcquireMoveDuringTraceKey, which is only constructable by
    * RayKernelBase and RayBoundaryConditionBase.
    */
-  void moveRayToBufferDuringTrace(std::shared_ptr<Ray> & ray,
+  void moveRayToBufferDuringTrace(MooseUtils::SharedPool<Ray>::PtrType && ray,
                                   const THREAD_ID tid,
                                   const AcquireMoveDuringTraceKey &);
   /**
@@ -567,15 +568,12 @@ public:
    * Virtual that allows for selection in if a Ray should be cached or not (only used when
    * _cache_traces).
    */
-  virtual bool shouldCacheTrace(const std::shared_ptr<Ray> & /* ray */) const
-  {
-    return _always_cache_traces;
-  }
+  virtual bool shouldCacheTrace(const Ray & /* ray */) const { return _always_cache_traces; }
 
   /**
    * Initialize a Ray in the threaded cached trace map to be filled with segments
    */
-  TraceData & initThreadedCachedTrace(const std::shared_ptr<Ray> & ray, THREAD_ID tid);
+  TraceData & initThreadedCachedTrace(const Ray & ray, THREAD_ID tid);
   /**
    * Get the cached trace data structure
    */
@@ -590,8 +588,11 @@ public:
 
   /**
    * Entry point for acting on a ray when it is completed (shouldContinue() == false)
+   *
+   * The ray is passed as a rvalue reference so that its ownership can be moved if
+   * it is desired to bank the ray.
    */
-  virtual void onCompleteRay(const std::shared_ptr<Ray> & ray);
+  virtual void onCompleteRay(MooseUtils::SharedPool<Ray>::PtrType && ray);
 
   /**
    * Verifies that the Rays in the given range have unique Ray IDs.
@@ -601,22 +602,11 @@ public:
    * @param global If true, this will complete the verification across all processors
    * @param error_suffix Entry point for additional information in the error message
    */
-  void verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::const_iterator begin,
-                          const std::vector<std::shared_ptr<Ray>>::const_iterator end,
-                          const bool global,
-                          const std::string & error_suffix) const;
-
-  /**
-   * Verifies that the Rays in the given range are unique. That is, that there are not multiple
-   * shared_ptrs that point to the same Ray
-   *
-   * @param begin The beginning of the range of Rays to check
-   * @param end The end of the range of Rays to check
-   * @param error_suffix Entry point for additional information in the error message
-   */
-  void verifyUniqueRays(const std::vector<std::shared_ptr<Ray>>::const_iterator begin,
-                        const std::vector<std::shared_ptr<Ray>>::const_iterator end,
-                        const std::string & error_suffix);
+  void
+  verifyUniqueRayIDs(const std::vector<MooseUtils::SharedPool<Ray>::PtrType>::const_iterator begin,
+                     const std::vector<MooseUtils::SharedPool<Ray>::PtrType>::const_iterator end,
+                     const bool global,
+                     const std::string & error_suffix) const;
 
   /**
    * Whether or not the study is propagating (tracing Rays)
@@ -626,6 +616,10 @@ public:
    * Whether or not the study is generating
    */
   bool currentlyGenerating() const { return _parallel_ray_study->currentlyPreExecuting(); }
+  /**
+   * Whether or not the study is currently tracing rays
+   */
+  bool currentlyTracing() const { return _parallel_ray_study->currentlyExecutingWork(); }
 
   /**
    * Casts the RayTracingStudy found in the given input parameters to a study of type T
@@ -685,6 +679,50 @@ public:
    * Gets the error prefix (type() + " '" + name() "'")
    */
   const std::string & errorPrefix() const { return _error_prefix; }
+
+  /**
+   * User APIs for constructing Rays within the RayTracingStudy.
+   */
+  ///@{
+  /**
+   * Acquire a Ray from the pool of Rays within generateRays().
+   *
+   * A unique ID is generated and assigned to the acquired Ray. The data and aux
+   * data sizes are set according to the sizes required by the RayTracingStudy.
+   */
+  MooseUtils::SharedPool<Ray>::PtrType acquireRay();
+  /**
+   * Acquire a Ray from the pool of Rays within generateRays(), without resizing
+   * the data (sizes the data to zero).
+   *
+   * A unique ID is generated and assigned to the acquired Ray.
+   */
+  MooseUtils::SharedPool<Ray>::PtrType acquireUnsizedRay();
+  /**
+   * Acquire a Ray from the pool of Rays within generateRays() in a replicated fashion.
+   *
+   * That is, this method must be called on all processors at the same time and the ID of the
+   * resulting Ray is the same across all processors.
+   *
+   * The data and aux data sizes are set according to the sizes required by the RayTracingStudy.
+   */
+  MooseUtils::SharedPool<Ray>::PtrType acquireReplicatedRay();
+  /**
+   * Acquires a Ray with a given name within generateRays(). Used when ray registration is enabled,
+   * that is, the private paramater '_use_ray_registration' == true.
+   *
+   * This method must be called on all processors at the same time with the same name.
+   * This method can only be called on thread 0, which is why there is no thread argument.
+   */
+  MooseUtils::SharedPool<Ray>::PtrType acquireRegisteredRay(const std::string & name);
+  /**
+   * Acquires a Ray that that is copied from another Ray within generateRays().
+   *
+   * All of the information is copied except for the counters (intersections, processor crossings,
+   * etc), which are reset.
+   */
+  MooseUtils::SharedPool<Ray>::PtrType acquireCopiedRay(const Ray & ray);
+  ///@}
 
 protected:
   /**
@@ -763,8 +801,8 @@ protected:
    * This is only available when the private parameter _bank_rays_on_completion
    * is set to true.
    */
-  const std::vector<std::shared_ptr<Ray>> & rayBank() const;
-
+  std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rayBank();
+  const std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rayBank() const;
   /**
    * Gets the Ray with the ID \p ray_id from the Ray bank.
    *
@@ -773,7 +811,7 @@ protected:
    * This will ONLY return a valid Ray (not a null shared_ptr) on the processor that
    * has the Ray.
    */
-  std::shared_ptr<Ray> getBankedRay(const RayID ray_id) const;
+  const Ray * getBankedRay(const RayID ray_id) const;
 
   /**
    * Resets the generation of unique RayIDs via generateUniqueRayID() to the beginning
@@ -802,70 +840,27 @@ protected:
   RayID generateReplicatedRayID();
 
   /**
-   * User APIs for constructing Rays within the RayTracingStudy.
-   *
-   * Rays can ONLY be constructed by users within the RayTracingStudy via the following methods.
-   */
-  ///@{
-  /**
-   * Acquire a Ray from the pool of Rays within generateRays().
-   *
-   * A unique ID is generated and assigned to the acquired Ray. The data and aux
-   * data sizes are set according to the sizes required by the RayTracingStudy.
-   */
-  std::shared_ptr<Ray> acquireRay();
-  /**
-   * Acquire a Ray from the pool of Rays within generateRays(), without resizing
-   * the data (sizes the data to zero).
-   *
-   * A unique ID is generated and assigned to the acquired Ray.
-   */
-  std::shared_ptr<Ray> acquireUnsizedRay();
-  /**
-   * Acquire a Ray from the pool of Rays within generateRays() in a replicated fashion.
-   *
-   * That is, this method must be called on all processors at the same time and the ID of the
-   * resulting Ray is the same across all processors.
-   *
-   * The data and aux data sizes are set according to the sizes required by the RayTracingStudy.
-   */
-  std::shared_ptr<Ray> acquireReplicatedRay();
-  /**
-   * Acquires a Ray that that is copied from another Ray within generateRays().
-   *
-   * All of the information is copied except for the counters (intersections, processor crossings,
-   * etc), which are reset.
-   */
-  std::shared_ptr<Ray> acquireCopiedRay(const Ray & ray);
-  /**
-   * Acquires a Ray with a given name within generateRays(). Used when ray registration is enabled,
-   * that is, the private paramater '_use_ray_registration' == true.
-   *
-   * This method must be called on all processors at the same time with the same name.
-   * This method can only be called on thread 0, which is why there is no thread argument.
-   */
-  std::shared_ptr<Ray> acquireRegisteredRay(const std::string & name);
-  ///@}
-
-  /**
    * Moves a ray to the buffer to be traced during generateRays().
    *
    * This moves the Ray into the buffer (with std::move), therefore \p ray will be nullptr after
    * this call.
    */
-  void moveRayToBuffer(std::shared_ptr<Ray> & ray);
+  void moveRayToBuffer(MooseUtils::SharedPool<Ray>::PtrType && ray);
   /**
    * Moves rays to the buffer to be traced during generateRays().
    *
    * This moves the rays into the buffer (with std::move), therefore all valid rays
    * in \p rays will be nullptr after this call.
    */
-  void moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays);
+  void moveRaysToBuffer(std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays);
 
   /**
    * The underlying parallel study: used for the context for calling the packed range routines.
    */
-  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
+  ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> * parallelStudy()
+  {
+    return _parallel_ray_study.get();
+  }
 
   /// The Mesh
   MooseMesh & _mesh;
@@ -1094,12 +1089,13 @@ private:
   /// Threaded cache for side normals that have been computed already during tracing
   std::vector<std::unordered_map<std::pair<const Elem *, unsigned short>, Point>>
       _threaded_cached_normals;
-  /// Cumulative Ray bank - stored only when _bank_rays_on_completion
-  std::vector<std::shared_ptr<Ray>> _ray_bank;
   /// Storage for the next available unique RayID, obtained via generateUniqueRayID()
   std::vector<RayID> _threaded_next_ray_id;
   /// Storage for the next available replicated RayID, obtained via generateReplicatedRayID()
   RayID _replicated_next_ray_id;
+
+  /// Cumulative Ray bank - stored only when _bank_rays_on_completion (restartable)
+  std::vector<MooseUtils::SharedPool<Ray>::PtrType> & _ray_bank;
 
   /// The study that used is to actually execute (trace) the Rays
   const std::unique_ptr<ParallelRayStudy> _parallel_ray_study;
