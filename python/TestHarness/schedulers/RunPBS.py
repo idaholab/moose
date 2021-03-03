@@ -84,6 +84,7 @@ class RunPBS(QueueManager):
         # Compute node requirement
         if self.options.pbs_node_cpus:
             nodes = template['mpi_procs']/self.options.pbs_node_cpus
+            template['mpi_procs'] = self.options.pbs_node_cpus
         else:
             nodes = 1
         template['nodes'] = math.ceil(nodes)
