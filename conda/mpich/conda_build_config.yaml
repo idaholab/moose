@@ -11,37 +11,37 @@ MACOSX_DEPLOYMENT_TARGET:      # [osx]
   - 10.9                       # [osx]
 
 libllvm:
-  - 11.0.0 hf85e3d2_0
+  - 11.0.1 h223d4b2_0
 
 libclang:
-  - 11.0.0 default_h9e6edd0_2
+  - 11.0.1 default_hf8bb9ca_1
 
 compilerrt:
-  - 11.0.0 h01488ec_2
+  - 11.0.1 h654b07c_0
 
 compilerrtosx:
-  - 11.0.0 hd3c4e95_2
+  - 11.0.1 h8c5fa43_0
 
 clangxx:
-  - 11.0.0 default_h9e6edd0_2
+  - 11.0.1 default_hf8bb9ca_1
 
 clangosx:
-  - 11.0.0 hb91bd55_5
+  - 11.0.1 hb91bd55_2
 
 clangxxosx:
-  - 11.0.0 h7e1b574_5
+  - 11.0.1 h7e1b574_2
 
 clang:
-  - 11.0.0 h694c41f_2
+  - 11.0.1 h694c41f_1
 
 llvmopenmp:
-  - 11.0.0 h73239a0_1
+  - 11.0.1 h7c73e74_0
 
 osxfortran:
   - 9.3.0 h18f7dce_13
 
 libcxx:
-  - 11.0.0 h4c3b8ed_1
+  - 11.0.1 habf9029_0
 
 gcc:
   - 9.3.0 h7247604_29
