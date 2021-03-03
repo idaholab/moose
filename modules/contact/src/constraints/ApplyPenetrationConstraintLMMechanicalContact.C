@@ -50,8 +50,10 @@ ApplyPenetrationConstraintLMMechanicalContact::ApplyPenetrationConstraintLMMecha
 bool
 ApplyPenetrationConstraintLMMechanicalContact::shouldApply()
 {
-  _dof_number = _current_node->dof_number(_sys.number(), _var.number(), /*comp=*/0);
-  return _dof_number != DofObject::invalid_id;
+  const bool has_dofs = _current_node->n_dofs(_sys.number(), _var.number());
+  _dof_number = has_dofs ? _current_node->dof_number(_sys.number(), _var.number(), /*comp=*/0)
+                         : DofObject::invalid_id;
+  return has_dofs;
 }
 
 bool
