@@ -1,13 +1,13 @@
 {% set build = pr_num %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2020.03.17" %}
+{% set version = "2020.12.08" %}
 
 package:
   name: moose-opt
   version: {{ version }}
 
 source:
-  path: ../../moose
+  path: ../../../moose
 
 build:
   number: {{ build }}  # [linux,osx]
@@ -16,14 +16,23 @@ build:
 
 requirements:
   build:
-    - moose-libmesh
+    - moose-libmesh {{ moose_libmesh }}
+    - moose-petsc
+    - moose-mpich
+
+  host:
+    - moose-libmesh {{ moose_libmesh }}
+    - moose-petsc
+    - moose-mpich
 
   run:
-    - moose-libmesh
+    - moose-libmesh {{ moose_libmesh }}
+    - moose-petsc
+    - moose-mpich
 
 test:
   commands:
-    - test -f $PREFIX/moose/moose_test-opt
+    - test -f $PREFIX/moose/bin/moose_test-opt
 
 about:
   home: https://mooseframework.org/

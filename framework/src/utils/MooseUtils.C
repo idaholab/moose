@@ -51,6 +51,61 @@ std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpo
 
 namespace MooseUtils
 {
+std::string
+pathjoin(const std::string & s)
+{
+  return s;
+}
+
+std::string
+runTestsExecutable()
+{
+  auto build_loc = pathjoin(Moose::getExecutablePath(), "run_tests");
+  if (pathExists(build_loc) && checkFileReadable(build_loc))
+    return build_loc;
+  // TODO: maybe no path prefix - just moose_test_runner here?
+  return pathjoin(Moose::getExecutablePath(), "moose_test_runner");
+}
+std::string
+findTestRoot()
+{
+  std::string path = ".";
+  for (int i = 0; i < 5; i++)
+  {
+    auto testroot = pathjoin(path, "testroot");
+    if (pathExists(testroot) && checkFileReadable(testroot))
+      return testroot;
+    path += "/..";
+  }
+  return "";
+}
+
+std::string
+testsDir(const std::string & app_name)
+{
+  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "test");
+
+  auto testroot = pathjoin(installed_path, "testroot");
+  if (pathExists(testroot) && checkFileReadable(testroot))
+    return installed_path;
+  return Moose::getExecutablePath();
+}
+std::string
+docsDir(const std::string & app_name)
+{
+  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "doc");
+
+  auto docfile = pathjoin(installed_path, "TODO-DOCSFILE?");
+  auto mooserepofile = pathjoin(Moose::getExecutablePath(), "../../MOOSEDOCS?");
+  auto appfile = pathjoin(Moose::getExecutablePath(), "../../APPDOCS?");
+  if (pathExists(docfile) && checkFileReadable(docfile))
+    return installed_path;
+  // check case where we are in moose repo moose_test dir setup
+  else if (pathExists(mooserepofile) && checkFileReadable(mooserepofile))
+    return pathjoin(Moose::getExecutablePath(), "../../MOOSEDOCS?");
+  // assume we are in a  regular app dir setup
+  return pathjoin(Moose::getExecutablePath(), "../../APPDOCS?");
+}
 
 std::string
 replaceAll(std::string str, const std::string & from, const std::string & to)

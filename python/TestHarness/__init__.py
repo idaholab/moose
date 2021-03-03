@@ -13,4 +13,5 @@ if sys.version_info < (3, 6):
     sys.exit(1)
 
 from .TestHarness import TestHarness
-__all__=['TestHarness']
+from .TestHarness import findDepApps
+__all__=['TestHarness', 'findDepApps']

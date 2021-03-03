@@ -208,6 +208,10 @@ class Tester(MooseObject):
         """ return moose directory """
         return self.specs['moose_dir']
 
+    def getMoosePythonDir(self):
+        """ return moose directory """
+        return self.specs['moose_python_dir']
+
     def getTestDir(self):
         """ return directory in which this tester is located """
         if self.specs['working_directory']:

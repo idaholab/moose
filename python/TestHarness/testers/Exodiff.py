@@ -11,6 +11,15 @@ from FileTester import FileTester
 from TestHarness import util
 import os
 
+def findExodiff(moose_dir):
+    # install location
+    exodiff_bin = os.path.join(moose_dir, 'share', 'moose', 'bin', 'exodiff')
+
+    if not os.path.exists(exodiff_bin):
+        # use tradional build location
+        exodiff_bin = os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff')
+    return exodiff_bin
+
 class Exodiff(FileTester):
 
     @staticmethod
@@ -56,7 +65,7 @@ class Exodiff(FileTester):
             else:
                 partial_option = ''
 
-            commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + partial_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
+            commands.append(findExodiff(moose_dir) + map_option + partial_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
                             + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
                             + os.path.join(self.getTestDir(), self.specs['gold_dir'], file) + ' ' + os.path.join(self.getTestDir(), file))
 

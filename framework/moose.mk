@@ -2,6 +2,11 @@
 MOOSE_UNITY ?= true
 MOOSE_HEADER_SYMLINKS ?= true
 
+# this allows us to modify the linked names/rpaths safely later for install targets
+ifneq (,$(findstring darwin,$(libmesh_HOST)))
+	libmesh_LDFLAGS += -headerpad_max_install_names
+endif
+
 #
 # Verify Conda
 #
@@ -358,33 +363,70 @@ $(exodiff_APP): $(exodiff_objects)
 
 -include $(wildcard $(exodiff_DIR)/*.d)
 
-#
-# Install targets
-#
-lib_DIRS         := $(dir $(app_LIBS))
-install: install_libs install_bin
+####### install lib stuff ##############
+moose_include_dir = $(PREFIX)/include/moose
+share_dir = $(PREFIX)/share
+moose_share_dir = $(share_dir)/moose
+python_install_dir = $(moose_share_dir)/python
+bin_install_dir = $(PREFIX)/bin
 
-install_libs: all | install_make_dir
-	@(ret_val=0; \
-	for lib in $(app_LIBS); \
-	do \
-		echo Installing Library $${lib}...; \
-		${libmesh_LIBTOOL} --mode=install --warning=none --quiet install $${lib} ${PREFIX} || ret_val=1; \
-	done; \
-	exit $$ret_val;)
-	@$(libmesh_LIBTOOL) --mode=finish --quiet $(lib_DIRS)
+install: install_libs install_bin install_harness install_exodiff
 
-install_bin: all | install_make_dir
-	@(ret_val=0; \
-	for exec in $(app_EXEC); \
-	do \
-		echo Installing Executable $${exec}...; \
-		${libmesh_LIBTOOL} --mode=install --warning=none --quiet install $${exec} ${PREFIX} || ret_val=1; \
-	done; \
-	exit $$ret_val;)
-install_make_dir:
-	@echo "Prefix Install Directory $(PREFIX)"
-	@$(shell mkdir -p $(PREFIX))
+install_exodiff: all
+	@echo "Installing exodiff"
+	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)
+
+install_harness:
+	@echo "Installing test harness"
+	@rm -rf $(python_install_dir)
+	@mkdir -p $(python_install_dir)
+	@mkdir -p $(moose_share_dir)/bin
+	@mkdir -p $(moose_include_dir)
+	@mkdir -p $(bin_install_dir)
+	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
+	@cp -f $(MOOSE_DIR)/scripts/moose_test_runner $(bin_install_dir)/moose_test_runner
+	@cp -f $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(moose_share_dir)/bin/
+	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
+	@echo "libmesh_install_dir = '$(LIBMESH_DIR)'" > $(moose_share_dir)/moose_config.py
+
+lib_install_suffix = lib/$(APPLICATION_NAME)
+lib_install_dir = $(PREFIX)/$(lib_install_suffix)
+
+ifneq (,$(findstring darwin,$(libmesh_HOST)))
+  patch_relink = install_name_tool -change $(2) @rpath/$(3) $(1)
+  patch_rpath = install_name_tool -add_rpath @executable_path/$(2) $(1)
+else
+  patch_relink = :
+  patch_rpath = patchelf --set-rpath '$$ORIGIN'/$(2):$$(patchelf --print-rpath $(1)) $(1)
+endif
+
+libname_framework = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/libmoose-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)
+libname_pcre = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
+libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
+
+install_lib_$(notdir $(moose_LIB)): $(moose_LIB) all
+	@echo "Installing $<"
+	@mkdir -p $(lib_install_dir)
+	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
+	@$(eval libdst := $(lib_install_dir)/$(libname))
+	@cp $(dir $<)$(libname) $(libdst)
+	@$(call patch_rpath,$(libdst),../$(lib_install_suffix)/.)
+	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
+
+install_lib_$(notdir $(pcre_LIB)): $(pcre_LIB) all
+	@echo "Installing $<"
+	@mkdir -p $(lib_install_dir)
+	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
+	@$(eval libdst := $(lib_install_dir)/$(libname))
+	@cp $(dir $<)$(libname) $(libdst)
+
+install_lib_$(notdir $(hit_LIB)): $(hit_LIB) all
+	@echo "Installing $<"
+	@mkdir -p $(lib_install_dir)
+	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
+	@$(eval libdst := $(lib_install_dir)/$(libname))
+	@cp $(dir $<)$(libname) $(libdst)
 
 #
 # Clean targets

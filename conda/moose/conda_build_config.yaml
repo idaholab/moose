@@ -10,5 +10,9 @@ macos_machine:                 # [osx]
 MACOSX_DEPLOYMENT_TARGET:      # [osx]
   - 10.10                      # [osx]
 
+moose_libmesh:
+  - 2020.11.04 build_0         # [osx]
+  - 2020.11.04 build_1         # [linux]
+
 pr_num:
- - 12345
+  - 12345

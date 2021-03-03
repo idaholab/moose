@@ -13,6 +13,8 @@ import platform
 import os, re, inspect, errno, copy, json
 import shlex
 from . import RaceChecker
+import subprocess
+import shutil
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
@@ -42,26 +44,158 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
             app_name, args, hit_node = readTestRoot(fname)
             return rootdir, app_name, args, hit_node
         rootdir = os.path.dirname(rootdir)
-    raise RuntimeError('test root directory not found')
+    raise RuntimeError('test root directory not found in "{}"'.format(start))
+
+# This function finds a file in the herd trunk containing all the possible applications
+# thay may be built with an "up" target.  If passed the value ROOT it will simply
+# return the root directory
+def findDepApps(dep_names, use_current_only=False):
+    dep_name = dep_names.split('~')[0]
+
+    app_dirs = []
+    moose_apps = ['framework', 'moose', 'test', 'unit', 'modules', 'examples']
+    apps = []
+
+    # First see if we are in a git repo
+    p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    p.wait()
+    if p.returncode == 0:
+        git_dir = p.communicate()[0].decode('utf-8')
+        root_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
+
+        # Assume that any application we care about is always a peer
+        dir_to_append = '.' if use_current_only else '..'
+        app_dirs.append(os.path.abspath(os.path.join(root_dir, dir_to_append)))
+
+    # Now see if we can find .build_apps in a parent directory from where we are at, usually "projects"
+    restrict_file = '.build_apps'
+    restrict_file_path = ''
+    restrict_dir = ''
+
+    next_dir = os.getcwd()
+    for i in range(4):
+        next_dir = os.path.join(next_dir, "..")
+        if os.path.isfile(os.path.join(next_dir, restrict_file)):
+            restrict_file_path = os.path.join(next_dir, restrict_file)
+            break
+    if restrict_file_path != '':
+        restrict_dir = os.path.dirname(os.path.abspath(restrict_file_path))
+        app_dirs.append(restrict_dir)
+
+    # Make sure that we found at least one directory to search
+    if len(app_dirs) == 0:
+        return ''
+
+    # unique paths to search
+    unique_dirs = set()
+    for dir in app_dirs:
+        unique_dirs.add(os.path.abspath(dir))
+
+    remove_dirs = set()
+    # now strip common paths
+    for dir1 in unique_dirs:
+        for dir2 in unique_dirs:
+            if dir1 == dir2:
+                continue
+
+            if dir1 in dir2:
+                remove_dirs.add(dir2)
+            elif dir2 in dir1:
+                remove_dirs.add(dir1)
+    # set difference
+    unique_dirs = unique_dirs - remove_dirs
+
+    if restrict_file_path != '':
+        f = open(restrict_file_path)
+        apps.extend(f.read().splitlines())
+        f.close()
+
+    # See which apps in this file are children or dependents of this app
+    dep_apps = set()
+    dep_dirs = set()
+
+    # moose, elk and modules have special rules
+    if dep_name == "moose":
+        dep_app_re=re.compile(r"\bmoose\.mk\b")
+    elif dep_name == "modules":
+        dep_app_re=re.compile(r"\bmodules\.mk\b")
+    elif dep_name == "elk":
+        dep_app_re=re.compile(r"\belk(?:_module)?\.mk\b")
+    else:
+        dep_app_re=re.compile(r"^\s*APPLICATION_NAME\s*:=\s*"+dep_name,re.MULTILINE)
+
+    ignores = ['.git', '.svn', '.libs', 'gold', 'src', 'include', 'contrib', 'tests', 'bak', 'tutorials']
+
+    for dir in unique_dirs:
+        startinglevel = dir.count(os.sep)
+        for dirpath, dirnames, filenames in os.walk(dir, topdown=True):
+            # Don't traverse too deep!
+            if dirpath.count(os.sep) - startinglevel >= 2: # 2 levels outta be enough for anybody
+                dirnames[:] = []
+
+            # Don't traverse into ignored directories
+            for ignore in ignores:
+                if ignore in dirnames:
+                    dirnames.remove(ignore)
+
+            # Honor user ignored directories
+            if os.path.isfile(os.path.join(dirpath, '.moose_ignore')):
+                dirnames[:] = []
+                continue
+
+            # Don't traverse into submodules
+            if os.path.isfile(os.path.join(dirpath, '.gitmodules')):
+                f = open(os.path.join(dirpath, '.gitmodules'))
+                content = f.read()
+                f.close()
+                sub_mods = re.findall(r'path = (\w+)', content)
+                dirnames[:] = [x for x in dirnames if x not in sub_mods]
+
+            potential_makefile = os.path.join(dirpath, 'Makefile')
+
+            if os.path.isfile(potential_makefile):
+                f = open(potential_makefile)
+                lines = f.read()
+                f.close()
+
+                # We only want to build certain applications, look at the path to make a decision
+                # If we are in trunk, we will honor .build_apps.  If we aren't, then we'll add it
+                eligible_app = dirpath.split('/')[-1]
+
+                if dep_app_re.search(lines) and ((len(apps) == 0 or eligible_app in apps) or ('/moose/' in dirpath and eligible_app in moose_apps)):
+                    dep_apps.add(eligible_app)
+                    dep_dirs.add(dirpath)
+
+                    # Don't traverse once we've found a dependency
+                    dirnames[:] = []
+
+    # Now we need to filter out duplicate moose apps
+    moose_dir = os.environ.get('MOOSE_DIR')
+    return '\n'.join(dep_dirs)
 
 class TestHarness:
 
     @staticmethod
-    def buildAndRun(argv, app_name, moose_dir):
-        harness = TestHarness(argv, moose_dir, app_name=app_name)
+    def buildAndRun(argv, app_name, moose_dir, moose_python=None):
+        harness = TestHarness(argv, moose_dir, app_name=app_name, moose_python=moose_python)
         harness.findAndRunTests()
         sys.exit(harness.error_code)
 
-    def __init__(self, argv, moose_dir, app_name=None):
+    def __init__(self, argv, moose_dir, app_name=None, moose_python=None):
+        if moose_python is None:
+            self.moose_python_dir = os.path.join(moose_dir, "python")
+        else:
+            self.moose_python_dir = moose_python
         os.environ['MOOSE_DIR'] = moose_dir
-        os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
+        os.environ['PYTHONPATH'] = self.moose_python_dir + ':' + os.environ.get('PYTHONPATH', '')
 
         if app_name:
             rootdir, app_name, args, root_params = '.', app_name, [], pyhit.Node()
         else:
             rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
 
-        orig_cwd = os.getcwd()
+        self._rootdir = rootdir
+        self._orig_cwd = os.getcwd()
         os.chdir(rootdir)
         argv = argv[:1] + args + argv[1:]
 
@@ -77,11 +211,10 @@ class TestHarness:
         # Get dependant applications and load dynamic tester plugins
         # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
         dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
-        sys.path.append(os.path.join(moose_dir, 'framework', 'scripts'))   # For find_dep_apps.py
+        dirs.append(os.path.join(moose_dir, 'share', 'moose', 'python', 'TestHarness', 'testers'))
 
         # Use the find_dep_apps script to get the dependant applications for an app
-        import find_dep_apps
-        depend_app_dirs = find_dep_apps.findDepApps(app_name, use_current_only=True)
+        depend_app_dirs = findDepApps(app_name, use_current_only=True)
         dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
 
         # Finally load the plugins!
@@ -202,7 +335,7 @@ class TestHarness:
 
         self.initialize(argv, app_name)
 
-        os.chdir(orig_cwd)
+        os.chdir(self._orig_cwd)
 
     """
     Recursively walks the current tree looking for tests to run
@@ -221,11 +354,9 @@ class TestHarness:
 
         if self.options.spec_file and os.path.isdir(self.options.spec_file):
             search_dir = self.options.spec_file
-
         elif self.options.spec_file and os.path.isfile(self.options.spec_file):
             search_dir = os.path.dirname(self.options.spec_file)
             self._infiles = [os.path.basename(self.options.spec_file)]
-
         else:
             search_dir = os.getcwd()
 
@@ -254,7 +385,11 @@ class TestHarness:
                             full_app_name = app_name + "-" + self.options.method
                             if platform.system() == 'Windows':
                                 full_app_name += '.exe'
-                            testroot_params["executable"] = os.path.join(dirpath, full_app_name)
+
+                            testroot_params["executable"] = full_app_name
+                            if shutil.which(full_app_name) is None:
+                                testroot_params["executable"] = os.path.join(dirpath, full_app_name)
+
                             testroot_params["testroot_dir"] = dirpath
                             caveats = [full_app_name]
                             if args:
@@ -375,6 +510,7 @@ class TestHarness:
         params['executable'] = testroot_params.get("executable", self.executable)
         params['hostname'] = self.host_name
         params['moose_dir'] = self.moose_dir
+        params['moose_python_dir'] = self.moose_python_dir
         params['base_dir'] = self.base_dir
         params['first_directory'] = first_directory
         params['root_params'] = testroot_params.get("root_params", self.root_params)
@@ -714,7 +850,8 @@ class TestHarness:
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
-        self.factory.loadPlugins([os.path.join(self.moose_dir, 'python', 'TestHarness')], 'schedulers', "IS_SCHEDULER")
+        plugin_paths = [os.path.join(self.moose_dir, 'python', 'TestHarness'), os.path.join(self.moose_dir, 'share', 'moose', 'python', 'TestHarness')]
+        self.factory.loadPlugins(plugin_paths, 'schedulers', "IS_SCHEDULER")
 
         self.options.queueing = False
         if self.options.pbs:
@@ -742,9 +879,27 @@ class TestHarness:
         self.scheduler = self.factory.create(scheduler_plugin, self, plugin_params)
 
         ## Save executable-under-test name to self.executable
-        self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
-        if platform.system() == 'Windows':
-            self.executable += '.exe'
+        exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
+        self.executable = app_name + '-' + self.options.method + exec_suffix
+        # if the executable has a slash - assume it is a file path
+        if '/' in app_name:
+            self.executable = os.path.abspath(self.executable)
+        # look for executable in PATH - if not there, check other places.
+        elif shutil.which(self.executable) is None:
+            if os.path.exists(os.getcwd() + '/' + self.executable):
+                # it's in the current working directory
+                self.executable = os.getcwd() + '/' + self.executable
+            elif os.path.exists(os.path.join(self._rootdir, self.executable)):
+                # it's in the testroot file's directory
+                self.executable = self.executable
+                # we may be hopping around between multiple (module)
+                # subdirectories of tests - so the executable needs to be an
+                # absolute path.
+                self.executable = os.path.abspath(os.path.join(self._rootdir, self.executable))
+            else:
+                # it's (hopefully) in an installed location
+                mydir = os.path.dirname(os.path.realpath(__file__))
+                self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
 
         # Save the output dir since the current working directory changes during tests
         self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
