@@ -27,7 +27,7 @@ moose_petsc:
  - 3.15.1 build_0
 
 moose_libmesh_vtk:
- - 6.3.0 build_5
+ - 6.3.0 build_6
 
 pin_run_as_build:
   moose_petsc: x.x.x
