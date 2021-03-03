@@ -46,7 +46,7 @@ The vector parameter can be altered statistically with `MultiAppCommandLineContr
 
 In this input file, the `param_names` includes a vector parameter with 4 entries called `Materials/const/prop_values` and two scalar parameters called `Mesh/xmax` and `Mesh/ymax`.
 
-Several cases are discussed as follows:
+Several cases exist for modifying the vector parameter:
 
 1. All four entries will be altered: set `param_names = Materials/const/prop_values[0,1,2,3]`. The `[0,1,2,3]` is the global column index of the provided distributions which implies that each entry corresponds to a different distribution.  
 
@@ -54,7 +54,8 @@ Several cases are discussed as follows:
 
 3. The second entry will not be altered: set `param_names = Materials/const/prop_values[0,(0.5),1,2]`. In this case, the second entry will be set as 0.5 while the first, third and last entries will be altered statistically. In general, a constant value will be provided inside the parentheses bracket.
 
-4. If `[]` is used, it must be provided to every parameter. By default, if the ``[]`` is not provided it is assumed that values are scalar and captured in order.
+!alert note
+If `[]` is used, it must be provided to every parameter. By default, if the `[]` is not provided it is assumed that values are scalar and captured in order.
 
 !syntax parameters /Controls/MultiAppCommandLineControl
 
