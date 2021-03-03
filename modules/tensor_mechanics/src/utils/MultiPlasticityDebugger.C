@@ -516,7 +516,8 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
     L2_numer += Utility::pow<2>(orig_rhs[i] - fd_times_x[i]);
     L2_denom += Utility::pow<2>(orig_rhs[i] + fd_times_x[i]);
   }
-  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5 << std::endl;
+  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5
+             << std::endl;
 }
 
 void

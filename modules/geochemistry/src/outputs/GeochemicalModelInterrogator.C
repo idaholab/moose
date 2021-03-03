@@ -267,7 +267,8 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
     rhs = -std::log10(getActivity(eqm_species));
   else
   {
-    _console << "Not enough activites known to compute equilibrium temperature for reaction\n  " << std::flush;
+    _console << "Not enough activites known to compute equilibrium temperature for reaction\n  "
+             << std::flush;
     outputReaction(eqm_species);
     return;
   }
@@ -280,8 +281,8 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
         rhs += _mgd.eqm_stoichiometry(row, i) * std::log10(getActivity(sp));
       else
       {
-        _console
-          << "Not enough activites known to compute equilibrium temperature for reaction\n  " << std::flush;
+        _console << "Not enough activites known to compute equilibrium temperature for reaction\n  "
+                 << std::flush;
         outputReaction(eqm_species);
         return;
       }

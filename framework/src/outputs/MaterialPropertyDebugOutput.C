@@ -49,7 +49,7 @@ MaterialPropertyDebugOutput::output(const ExecFlagType & /*type*/)
   }
 
   _console << "\n\nConsumed Material Properties:\n";
-  _console << std::setw(ConsoleUtils::console_field_width) << consumed.str() << '\n';
+  _console << std::setw(ConsoleUtils::console_field_width) << consumed.str() << std::endl;
 }
 
 void

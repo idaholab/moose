@@ -29,8 +29,7 @@ OutputWarehouse::OutputWarehouse(MooseApp & app)
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
     _logging_requested(false),
-    _last_message_ended_in_newline(true),
-    _num_printed(0)
+    _last_message_ended_in_newline(true)
 {
   // Set the reserved names
   _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -216,8 +215,9 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
 
       // If that last message ended in newline then this one may need
       // to start with indenting
-      if (_last_message_ended_in_newline && _app.multiAppLevel() > 0)
-        MooseUtils::indentMessage(_app.name(), message);
+      // Note that we only indent the first line if the last message ended in new line
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
 
       Moose::out << message << std::flush;
       buffer.clear();

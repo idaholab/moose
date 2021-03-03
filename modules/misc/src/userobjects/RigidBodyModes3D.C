@@ -67,7 +67,8 @@ RigidBodyModes3D::RigidBodyModes3D(const InputParameters & parameters)
   if (_modes.size() > 6)
   {
     std::stringstream err;
-    err << "Expected between 0 and 6 rigid body modes, got " << _modes.size() << " instead" << std::endl;
+    err << "Expected between 0 and 6 rigid body modes, got " << _modes.size() << " instead"
+        << std::endl;
     mooseError(err.str());
   }
   for (std::set<std::string>::const_iterator it = _modes.begin(); it != _modes.end(); ++it)

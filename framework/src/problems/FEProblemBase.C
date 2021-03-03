@@ -985,7 +985,7 @@ FEProblemBase::initialSetup()
   // Call initialSetup on the MultiApps
   if (_multi_apps.hasObjects())
   {
-    TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps");
+    TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps", false);
     _multi_apps.initialSetup();
   }
 

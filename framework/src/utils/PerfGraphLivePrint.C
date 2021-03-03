@@ -99,7 +99,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
       (_last_printed_increment &&
        _last_printed_increment != &section_increment_start)) // Print Finished
   {
-    if ((_last_printed_increment->_state == PerfGraph::IncrementState::printed &&
+    if ((_last_printed_increment &&
+         _last_printed_increment->_state == PerfGraph::IncrementState::printed &&
          _id_to_section_info[_last_printed_increment->_id]._print_dots))
       _console << '\n';
 
@@ -268,7 +269,7 @@ PerfGraphLivePrint::start()
       continue;
 
     // The last entry in the current execution list for convenience
-    _current_execution_list_last = _current_execution_list_end - 1 >= 0
+    _current_execution_list_last = static_cast<long int>(_current_execution_list_end) - 1 >= 0
                                        ? _current_execution_list_end - 1
                                        : MAX_EXECUTION_LIST_SIZE;
 

@@ -337,8 +337,7 @@ EBSDReader::readFile()
     if (!data_quality_ok)
       _console << COLOR_YELLOW << "EBSD data may not be reliable"
                << "\n"
-               << COLOR_DEFAULT
-               << std::flush;
+               << COLOR_DEFAULT << std::flush;
 
     // compute eigen values and eigen vectors
     Eigen::EigenSolver<Eigen::MatrixXd> EigenSolver(quat_mat * weight * quat_mat.transpose());

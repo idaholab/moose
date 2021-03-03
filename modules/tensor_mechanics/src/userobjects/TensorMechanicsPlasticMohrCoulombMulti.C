@@ -68,7 +68,8 @@ TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(
     mooseError("Value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti is probably "
-      "set too high" << std::endl;
+                "set too high"
+             << std::endl;
   if (LIBMESH_DIM != 3)
     mooseError("TensorMechanicsPlasticMohrCoulombMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);

@@ -891,6 +891,9 @@ protected:
   /// Input file names used
   std::vector<std::string> _input_filenames;
 
+  /// Input file name used
+  std::string _input_filename;
+
   /// The output file basename
   std::string _output_file_base;
 
@@ -923,6 +926,9 @@ protected:
 
   /// The PerfGraph object for this applciation
   PerfGraph _perf_graph;
+
+  /// The RankMap is a useful object for determining how
+  const RankMap _rank_map;
 
   /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
   InputParameterWarehouse * _input_parameter_warehouse;

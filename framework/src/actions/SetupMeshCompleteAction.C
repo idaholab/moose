@@ -104,12 +104,16 @@ SetupMeshCompleteAction::act()
   }
   else
   {
-    TIME_SECTION("completeSetup", 2, "Completing Mesh Setup");
-
     // Prepare the mesh (may occur multiple times)
-    _mesh->prepare();
+    {
+      TIME_SECTION("completeSetupUndisplaced", 2, "Setting Up Undisplaced Mesh");
+      _mesh->prepare();
+    }
 
     if (_displaced_mesh)
+    {
+      TIME_SECTION("completeSetupDisplaced", 2, "Setting Up Displaced Mesh");
       _displaced_mesh->prepare();
+    }
   }
 }

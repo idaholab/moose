@@ -404,5 +404,6 @@ ADSingleVariableReturnMappingSolution::outputIterationSummary(std::stringstream 
   if (iter_output)
     *iter_output << "In " << total_it << " iterations the residual went from "
                  << MetaPhysicL::raw_value(_initial_residual) << " to "
-                 << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'." << std::endl;
+                 << MetaPhysicL::raw_value(_residual) << " in '" << _svrms_name << "'."
+                 << std::endl;
 }

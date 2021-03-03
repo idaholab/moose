@@ -30,7 +30,7 @@ CouplingFunctorCheckAction::validParams()
 }
 
 CouplingFunctorCheckAction::CouplingFunctorCheckAction(InputParameters parameters)
-    : Action(parameters)
+  : Action(parameters)
 {
   _name = "coupling_functor_check";
 }

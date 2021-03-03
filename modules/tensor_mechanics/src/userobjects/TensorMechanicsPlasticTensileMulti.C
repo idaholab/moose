@@ -59,7 +59,8 @@ TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(
     mooseError("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticTensileMulti is probably set "
-      "too high" << std::endl;
+                "too high"
+             << std::endl;
   if (LIBMESH_DIM != 3)
     mooseError("TensorMechanicsPlasticTensileMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);
