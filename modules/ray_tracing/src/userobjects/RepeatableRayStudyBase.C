@@ -33,22 +33,21 @@ RepeatableRayStudyBase::validParams()
 
 RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameters)
   : RayTracingStudy(parameters),
-    _rays(declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("rays", this)),
     _define_rays_replicated(getParam<bool>("_claim_after_define_rays")
                                 ? getParam<bool>("_define_rays_replicated")
                                 : false),
     _claim_after_define_rays(getParam<bool>("_claim_after_define_rays")),
     _should_define_rays(declareRestartableData<bool>("should_define_rays", true)),
-    _local_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("local_rays", this)),
+    _rays(declareRestartableDataWithContext<std::vector<MooseUtils::SharedPool<Ray>::PtrType>>(
+        "rays", this)),
     _claim_rays(*this,
                 *parallelStudy(),
                 _mesh,
                 _rays,
-                _local_rays,
                 /* do_exchange = */ !_define_rays_replicated),
     _should_claim_rays(
         declareRestartableData<bool>("claim_after_define_rays", _claim_after_define_rays)),
+    _defining_rays(false),
     _claim_rays_timer(registerTimedSection("claimRays", 1)),
     _define_rays_timer(registerTimedSection("defineRays", 1)),
     _verify_replicated_rays(registerTimedSection("verifyReplicatedRays", 2))
@@ -82,9 +81,6 @@ RepeatableRayStudyBase::generateRays()
   //   correct
   // - Are on the processor that will start them (the processor that contains
   //   the starting element)
-  // At this point, the Rays in _rays will be also inserted into _local_rays
-  // because they are on the right processor with starting information set.
-  // An example of this is in LotsOfRaysRayStudy.
   if (_should_define_rays)
   {
     _should_define_rays = false;
@@ -100,25 +96,18 @@ RepeatableRayStudyBase::generateRays()
   }
 
   // Reserve ahead of time how many Rays we are adding to the buffer
-  reserveRayBuffer(_local_rays.size());
+  reserveRayBuffer(_rays.size());
 
   // To make this study "repeatable", we will not trace the Rays that
-  // are ready to go in _local_rays. We will instead create new Rays
-  // that are duplicates of the ones in _local_rays, and trace those.
+  // are ready to go in _rays. We will instead create new Rays
+  // that are duplicates of the ones in _rays, and trace those.
   // This ensures that on multiple executions of this study, we always
   // have the information to create the same Rays.
-  for (const auto & ray : _local_rays)
-  {
-    // This acquires a new ray that is copied from a Ray that has already
-    // been claimed to begin on this processor with the user-defined trajectory
-    std::shared_ptr<Ray> copied_ray = acquireCopiedRay(*ray);
-
-    // This calls std::move() on the ray, which means that copied_ray in this context
-    // is no longer valid. We use the move method because copied_ray is a shared_ptr
-    // and otherwise we would increase the count as we add it to the buffer and also
-    // decrease the count once this goes out of scope.
-    moveRayToBuffer(copied_ray);
-  }
+  //
+  // This acquires a new ray that is copied from a Ray that has already
+  // been claimed to begin on this processor with the user-defined trajectory
+  for (const auto & ray : _rays)
+    moveRayToBuffer(acquireCopiedRay(*ray));
 }
 
 void
@@ -135,11 +124,6 @@ RepeatableRayStudyBase::meshChanged()
     ray->invalidateStartingElem();
     ray->invalidateStartingIncomingSide();
   }
-  for (const auto & ray : _local_rays)
-  {
-    ray->invalidateStartingElem();
-    ray->invalidateStartingIncomingSide();
-  }
 }
 
 void
@@ -152,6 +136,15 @@ RepeatableRayStudyBase::claimRaysInternal()
 }
 
 void
+RepeatableRayStudyBase::defineRay(MooseUtils::SharedPool<Ray>::PtrType && ray)
+{
+  mooseAssert(_defining_rays, "Should only be called during defineRays()");
+  mooseAssert(ray, "Not a ray");
+
+  _rays.emplace_back(std::move(ray));
+}
+
+void
 RepeatableRayStudyBase::defineRaysInternal()
 {
   {
@@ -159,9 +152,10 @@ RepeatableRayStudyBase::defineRaysInternal()
     CONSOLE_TIMED_PRINT("Defining rays");
 
     _rays.clear();
-    _local_rays.clear();
 
+    _defining_rays = true;
     defineRays();
+    _defining_rays = false;
   }
 
   // Do we actually have Rays
@@ -169,27 +163,16 @@ RepeatableRayStudyBase::defineRaysInternal()
   _communicator.sum(num_rays);
   if (!num_rays)
     mooseError("No Rays were moved to _rays in defineRays()");
-  for (const auto & ray : _rays)
-    if (!ray)
-      mooseError("A nullptr Ray was found in _rays after defineRays().");
 
   // The Rays in _rays are ready to go as is: they have their starting element
   // set, their incoming set (if any), and are on the processor that owns said
-  // starting element. Therefore, we move them right into _local_rays and
-  // set that we don't need to claim.
+  // starting element.
   if (!_claim_after_define_rays)
-  {
-    _local_rays.reserve(_rays.size());
-    for (const std::shared_ptr<Ray> & ray : _rays)
-      _local_rays.emplace_back(ray);
-
     _should_claim_rays = false;
-  }
   // Claiming is required after defining. The Rays in _rays should not
   // have their starting elems or incoming sides set - verify that.
   else
-  {
-    for (const std::shared_ptr<Ray> & ray : _rays)
+    for (const auto & ray : _rays)
       if (ray->currentElem() || !ray->invalidCurrentIncomingSide())
         mooseError(
             "A Ray was found in _rays after defineRays() that has a starting element or "
@@ -198,7 +181,6 @@ RepeatableRayStudyBase::defineRaysInternal()
             "\nthe defined Rays at this point should not have their starting elem/side set.\n",
             "\nTheir starting information will be set internally using a claiming process.\n\n",
             ray->getInfo());
-  }
 
   // Sanity checks on if the Rays are actually replicated
   if (_define_rays_replicated && verifyRays())
@@ -249,8 +231,11 @@ RepeatableRayStudyBase::verifyReplicatedRays()
     // Receive the duplicated rays from rank 0
     std::vector<std::shared_ptr<Ray>> rank_0_rays;
     rank_0_rays.reserve(_rays.size());
-    comm().receive_packed_range(
-        0, parallelStudy(), std::back_inserter(rank_0_rays), (std::shared_ptr<Ray> *)nullptr, tag);
+    comm().receive_packed_range(0,
+                                parallelStudy(),
+                                std::back_inserter(rank_0_rays),
+                                (MooseUtils::SharedPool<Ray>::PtrType *)nullptr,
+                                tag);
 
     // The sizes better match
     if (rank_0_rays.size() != _rays.size())

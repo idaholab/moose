@@ -30,18 +30,18 @@ void
 CreateRayRayBCTest::onBoundary(const unsigned int /* num_applying */)
 {
   // Don't generate another if this Ray is already a secondary Ray (was generated mid-trace)
-  const bool is_secondary = currentRay()->auxData(_secondary_ray_data_index) > 0;
+  const bool is_secondary = _current_ray->auxData(_secondary_ray_data_index) > 0;
   if (is_secondary)
     return;
 
   // Reverse direction of the Ray - where the new Ray will go
-  const Point reverse_direction = -1.0 * currentRay()->direction();
+  const Point reverse_direction = -1.0 * _current_ray->direction();
 
   // Get a new Ray that starts in this elem, at the current intersection point in the
   // reverse direction, from the current interescted side, with a unique ID
-  std::shared_ptr<Ray> new_ray = acquireRay(reverse_direction);
+  auto new_ray = acquireRay(reverse_direction);
   // Set that this Ray is a secondary Ray so that it doesn't generate even more Rays
   new_ray->auxData(_secondary_ray_data_index) = 1;
   // Add it to the buffer to be traced and we're done!
-  moveRayToBuffer(new_ray);
+  moveRayToBuffer(std::move(new_ray));
 }

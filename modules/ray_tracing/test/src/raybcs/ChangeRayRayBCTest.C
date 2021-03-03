@@ -45,12 +45,12 @@ ChangeRayRayBCTest::onBoundary(const unsigned int /* num_applying */)
 {
   if (_ray_data_index != Ray::INVALID_RAY_DATA_INDEX)
   {
-    currentRay()->data(_ray_data_index) *= _scale_value;
-    currentRay()->data(_ray_data_index) += _add_value;
+    _current_ray->data(_ray_data_index) *= _scale_value;
+    _current_ray->data(_ray_data_index) += _add_value;
   }
 
   if (getParam<bool>("change_direction"))
-    changeRayDirection(-currentRay()->direction());
+    changeRayDirection(-_current_ray->direction());
   if (getParam<bool>("change_direction_zero"))
     changeRayDirection(Point(0, 0, 0));
 }

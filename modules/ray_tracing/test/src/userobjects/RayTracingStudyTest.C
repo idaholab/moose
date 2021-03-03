@@ -18,7 +18,6 @@ RayTracingStudyTest::validParams()
 {
   auto params = RayTracingStudy::validParams();
 
-  params.addParam<bool>("add_duplicate_ray", false, "Add a duplicate Ray to the buffer");
   params.addParam<bool>(
       "add_local_non_unique_id_ray", false, "Add two Rays on each processor with the same ID");
   params.addParam<bool>(
@@ -160,38 +159,35 @@ RayTracingStudyTest::generateRays()
   if (getParam<bool>("ray_set_distance_with_end"))
     ray->setStartingMaxDistance(1);
 
-  if (getParam<bool>("add_duplicate_ray"))
-  {
-    std::shared_ptr<Ray> duplicate_ray = ray;
-    moveRayToBuffer(ray);
-    moveRayToBuffer(duplicate_ray);
-  }
-
   if (getParam<bool>("add_local_non_unique_id_ray"))
   {
-    std::shared_ptr<Ray> other_ray = acquireCopiedRay(*ray);
-    moveRayToBuffer(ray);
-    moveRayToBuffer(other_ray);
+    auto other_ray = acquireCopiedRay(*ray);
+    moveRayToBuffer(std::move(ray));
+    moveRayToBuffer(std::move(other_ray));
   }
 
   if (getParam<bool>("add_global_non_unique_id_ray"))
   {
     mooseAssert(n_processors() > 1, "Needs multiple ranks");
 
-    std::map<processor_id_type, std::vector<std::shared_ptr<Ray>>> send_map;
+    std::map<processor_id_type, std::vector<MooseUtils::SharedPool<Ray>::PtrType>> send_map;
     if (_pid == 0)
     {
       for (processor_id_type pid = 1; pid < n_processors(); ++pid)
-        send_map[pid].push_back(ray);
-      moveRayToBuffer(ray);
+        send_map[pid].emplace_back(acquireCopiedRay(*ray));
+      moveRayToBuffer(std::move(ray));
     }
 
-    auto add_ray_functor = [&](processor_id_type, const std::vector<std::shared_ptr<Ray>> & rays) {
-      std::shared_ptr<Ray> ray = rays[0];
-      ray->clearStartingInfo();
-      ray->setStart(elem->centroid());
-      ray->setStartingEndPoint(elem->point(0));
-      moveRayToBuffer(ray);
+    auto add_ray_functor = [&](processor_id_type,
+                               const std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays) {
+      for (const auto & ray : rays)
+      {
+        auto copy = acquireCopiedRay(*ray);
+        copy->clearStartingInfo();
+        copy->setStart(elem->centroid());
+        copy->setStartingEndPoint(elem->point(0));
+        moveRayToBuffer(std::move(copy));
+      }
     };
 
     Parallel::push_parallel_packed_range(comm(), send_map, parallelStudy(), add_ray_functor);
@@ -207,7 +203,7 @@ RayTracingStudyTest::generateRays()
     ray->setStart(1.01 * elem->centroid());
 
   if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
-    moveRayToBuffer(ray);
+    moveRayToBuffer(std::move(ray));
 }
 
 void

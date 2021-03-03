@@ -21,7 +21,7 @@ The method that is called on each segment of a [Ray.md] in a RayKernel is `onSeg
 
 The significant information pertaining to the trace that is available within `onSegment()` is as follows:
 
-- `currentRay()` - The current [Ray.md] that is being traced on the segment.
+- `_current_ray` - The current [Ray.md] that is being traced on the segment.
 - `_current_elem` - The current element that the [Ray.md] is being traced in.
 - `_current_segment_start` - The start point of the current segment being operated on. This is not necessarily on the element periphery (a side of `_current_elem`) in the case that a [Ray.md] starts within an element.
 - `_current_segment_end` - The end point of the current segment being operated on. This is not necessarily on the element periphery in the case that a [Ray.md] has ended within an element.
@@ -37,16 +37,16 @@ Many standard MOOSE interfaces are also available within RayKernels to do things
 
 ## Ending the Ray
 
-`Ray::shouldContinue()` denotes whether or not a [Ray.md] will continue to be traced after execution of current objects on the [Ray.md]. In the case of a RayKernel, when `currentRay()->shouldContinue() == false`, the [Ray.md] will cease tracing after execution of RayKernels. Internally, the following will set the state of the [Ray.md] to not continue before RayKernels are executed but will still allow them to be executed on the segment that contains the final end point:
+`Ray::shouldContinue()` denotes whether or not a [Ray.md] will continue to be traced after execution of current objects on the [Ray.md]. In the case of a RayKernel, when `_current_ray->shouldContinue() == false`, the [Ray.md] will cease tracing after execution of RayKernels. Internally, the following will set the state of the [Ray.md] to not continue before RayKernels are executed but will still allow them to be executed on the segment that contains the final end point:
 
-- If it has reached the user-set end point (when the [Ray.md] trajectory is set via `Ray::setStartingEndPoint()`). In this specific case, you can tell if the [Ray.md] has hit its end point by `currentRay()->atEnd()`.
-- If it has reached the user-set maximum distance for the [Ray.md] (`currentRay()->distance() == currentRay()->maxDistance()`).
-- If it has reached the global maximum distance set by the study parameter `ray_distance` (`currentRay()->distance() == _study.maxRayDistance()`)
+- If it has reached the user-set end point (when the [Ray.md] trajectory is set via `Ray::setStartingEndPoint()`). In this specific case, you can tell if the [Ray.md] has hit its end point by `_current_ray->atEnd()`.
+- If it has reached the user-set maximum distance for the [Ray.md] (`_current_ray->distance() == _current_ray->maxDistance()`).
+- If it has reached the global maximum distance set by the study parameter `ray_distance` (`_current_ray->distance() == _study.maxRayDistance()`)
 
 To stop a [Ray.md] from being traced, call:
 
 ```
-currentRay().setShouldContinue(false);
+_current_ray->setShouldContinue(false);
 ```
 
 After a [Ray.md] has been set to not continue by any RayKernel, it cannot ever be set to continue again for the current trace.
@@ -55,7 +55,7 @@ After a [Ray.md] has been set to not continue by any RayKernel, it cannot ever b
 
 A [Ray.md] that is currently being traced can have its trajectory changed mid-trace by a RayKernel. The following conditions are imposed on such a trajectory change:
 
-- The [Ray.md] must be continuing (`currentRay()->shouldContinue() == true`). That is, it cannot have reached its max distance and it cannot have been set to not continue by another RayKernel. See [Ending the Ray](#ending-the-ray) for more information.
+- The [Ray.md] must be continuing (`_current_ray->shouldContinue() == true`). That is, it cannot have reached its max distance and it cannot have been set to not continue by another RayKernel. See [Ending the Ray](#ending-the-ray) for more information.
 - The new start point (if changed) must remain within the element of the object that changed it.
 - The [Ray.md] cannot have had its end point set by `Ray::setStartingEndPoint()`. That is, if the user set a specific end point for the [Ray.md] (which internally sets its maximum distance to the straight-line distance from the start to the end), its trajectory can never be changed.
 - Only one trajectory change can be called by all RayKernels on each segment.
@@ -69,7 +69,7 @@ const Point some_direction(1, 0, 0);
 changeRayStartDirection(some_point, some_direction);
 ```
 
-If the start point of the [Ray.md] is changed within the element, the [Ray.md] distance will be adjusted accordingly as if the [Ray.md] hit the changed point instead. That is, the original incremented distance will be removed (`_current_segment_length`) and the new incremented distance for this segment will be the distance between `currentRay()->currentPoint()` and `_current_segment_start`.
+If the start point of the [Ray.md] is changed within the element, the [Ray.md] distance will be adjusted accordingly as if the [Ray.md] hit the changed point instead. That is, the original incremented distance will be removed (`_current_segment_length`) and the new incremented distance for this segment will be the distance between `_current_ray->currentPoint()` and `_current_segment_start`.
 
 ## Modifying/Registering Ray Data
 
@@ -81,7 +81,7 @@ An example of this exists in [IntegralRayKernel.md], which accumulates integrals
 
 !listing modules/ray_tracing/include/raykernels/IntegralRayKernel.h re=class IntegralRayKernel :.*?^};
 
-By registering the data, the data is guaranteed to be available for all constructed [Rays](Ray.md) and can be accessed by `currentRay()->data()` and `currentRay()->auxData()`.
+By registering the data, the data is guaranteed to be available for all constructed [Rays](Ray.md) and can be accessed by `_current_ray->data()` and `_current_ray->auxData()`.
 
 In the case of the [IntegralRayKernel.md], the [Ray.md] data is accessed as such:
 

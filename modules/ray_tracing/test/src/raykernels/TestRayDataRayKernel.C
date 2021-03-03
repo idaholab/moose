@@ -33,6 +33,6 @@ TestRayDataRayKernel::onSegment()
   const auto & data_indices = _test_ray_data_study.dataIndices();
 
   for (unsigned int i = 0; i < data_indices.size(); ++i)
-    currentRay()->data(data_indices[i]) +=
+    _current_ray->data(data_indices[i]) +=
         _test_ray_data_study.dataValueChange(i, _current_segment_length);
 }

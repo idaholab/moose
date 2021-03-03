@@ -39,16 +39,15 @@ public:
    * @param study The RayTracingStudy
    * @param parallel_study The base parallel study
    * @param mesh The MooseMesh
-   * @param rays The vector of Rays that need to be claimed
-   * @param local_rays Insertion point for Rays that have been claimed
+   * @param rays The vector of Rays that need to be claimed, to also be filled with the
+   * claimed rays
    * @param do_exchange Whether or not an exchange is needed, i.e., if "rays" still needs to be
    * filled by objects on other processors
    */
   ClaimRays(RayTracingStudy & study,
-            ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
+            ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> & parallel_study,
             MooseMesh & mesh,
-            const std::vector<std::shared_ptr<Ray>> & rays,
-            std::vector<std::shared_ptr<Ray>> & local_rays,
+            std::vector<MooseUtils::SharedPool<Ray>::PtrType> & rays,
             const bool do_exchange);
 
   /**
@@ -81,11 +80,11 @@ protected:
   /**
    * Entry point before possibly claiming a Ray
    */
-  virtual void prePossiblyClaimRay(const std::shared_ptr<Ray> & /* ray */) {}
+  virtual void prePossiblyClaimRay(Ray & /* ray */) {}
   /**
    * Entry point for acting on a Ray after it is claimed
    */
-  virtual void postClaimRay(std::shared_ptr<Ray> & ray, const Elem * elem);
+  virtual void postClaimRay(Ray & ray, const Elem * elem);
 
   /**
    * Gets an ID associated with the Ray for claiming purposes. Defaults
@@ -98,7 +97,7 @@ protected:
    * be generated with different IDs, in which case the user may
    * want to use a different ID for this process.
    */
-  virtual RayID getID(const std::shared_ptr<Ray> & ray) const { return ray->id(); }
+  virtual RayID getID(const Ray & ray) const { return ray.id(); }
 
   /**
    * Get the inflated bounding box for rank \pid.
@@ -119,7 +118,7 @@ protected:
   /// The RayTracingStudy
   RayTracingStudy & _study;
   /// The ParallelStudy, used as the context for communicating rays
-  ParallelStudy<std::shared_ptr<Ray>, Ray> & _parallel_study;
+  ParallelStudy<MooseUtils::SharedPool<Ray>::PtrType, Ray> & _parallel_study;
 
 private:
   /**
@@ -137,7 +136,7 @@ private:
   /**
    * Possibly claim a Ray.
    */
-  void possiblyClaim(const std::shared_ptr<Ray> & obj);
+  void possiblyClaim(MooseUtils::SharedPool<Ray>::PtrType && ray);
 
   /**
    * Verifies that the claiming process succeeded. That is, all Rays were claimed
@@ -156,12 +155,12 @@ private:
   const Elem * claimPoint(const Point & point, const RayID id, const Elem * elem);
 
   /// The Rays that need to be searched to possibly claimed
-  const std::vector<std::shared_ptr<Ray>> & _rays;
-  /// The local Rays that are claimed
-  std::vector<std::shared_ptr<Ray>> & _local_rays;
+  std::vector<MooseUtils::SharedPool<Ray>::PtrType> & _rays;
+  /// Temprorary for moving rays into before claiming
+  std::vector<MooseUtils::SharedPool<Ray>::PtrType> _temp_rays;
 
   /// The point locator
-  std::unique_ptr<PointLocatorBase> _point_locator = nullptr;
+  std::unique_ptr<PointLocatorBase> _point_locator;
 
   /// The inflated bounding boxes for all processors
   std::vector<BoundingBox> _inflated_bboxes;

@@ -27,12 +27,12 @@ public:
   RayData dataValueChange(const unsigned int i, const Real distance) const;
   RayData auxDataValue(const unsigned int i, const Ray & ray) const;
 
-  virtual void onCompleteRay(const std::shared_ptr<Ray> & ray) override;
+  virtual void onCompleteRay(MooseUtils::SharedPool<Ray>::PtrType && ray) override;
 
   const std::vector<RayDataIndex> & dataIndices() const { return _data_indices; }
 
 protected:
-  virtual void modifyRays() override;
+  virtual void modifyRay(Ray & ray) override;
 
   const std::size_t _data_size;
   const std::size_t _aux_data_size;
