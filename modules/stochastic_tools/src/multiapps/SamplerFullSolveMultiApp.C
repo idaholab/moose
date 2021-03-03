@@ -197,19 +197,29 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
   TIME_SECTION(_perf_command_line_args);
 
-  // Since we only store param_names in cli_args, we need to find the values for each param from
-  // sampler data and combine them to get full command line option strings.
-  std::vector<Real> row = _sampler.getNextLocalRow();
+  std::string args;
 
-  std::ostringstream oss;
-  const std::vector<std::string> & cli_args_name =
-      MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
-
-  for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
+  // With multiple processors per app, there are no local rows for non-root processors
+  if (isRootProcessor())
   {
-    if (col > 0)
-      oss << ";";
-    oss << cli_args_name[col] << "=" << Moose::stringify(row[col]);
+    // Since we only store param_names in cli_args, we need to find the values for each param from
+    // sampler data and combine them to get full command line option strings.
+    std::vector<Real> row = _sampler.getNextLocalRow();
+
+    std::ostringstream oss;
+    const std::vector<std::string> & cli_args_name =
+        MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
+
+    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
+    {
+      if (col > 0)
+        oss << ";";
+      oss << cli_args_name[col] << "=" << Moose::stringify(row[col]);
+    }
+    args = oss.str();
   }
-  return oss.str();
+
+  _my_communicator.broadcast(args);
+
+  return args;
 }
