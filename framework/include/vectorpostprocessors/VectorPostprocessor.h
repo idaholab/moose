@@ -109,7 +109,7 @@ extern const ReporterMode REPORTER_MODE_VPP_SCATTER;
  * @see VectorPostprocessorInterface
  */
 template <typename T>
-class VectorPostprocessorContext : public ReporterContext<T>
+class VectorPostprocessorContext : public ReporterGeneralContext<T>
 {
 public:
   VectorPostprocessorContext(const libMesh::ParallelObject & other, ReporterState<T> & state);

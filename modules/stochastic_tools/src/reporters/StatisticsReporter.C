@@ -66,7 +66,8 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     _ci_method(getParam<MooseEnum>("ci_method")),
     _ci_levels(getParam<std::vector<Real>>("ci_levels")),
     _ci_replicates(getParam<unsigned int>("ci_replicates")),
-    _ci_seed(getParam<unsigned int>("ci_seed"))
+    _ci_seed(getParam<unsigned int>("ci_seed")),
+    _initialized(false)
 {
   // CI levels error checking
   if (_ci_method.isValid())
@@ -82,6 +83,19 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     else if (*std::max_element(_ci_levels.begin(), _ci_levels.end()) >= 1)
       paramError("ci_levels", "The supplied levels must be less than 1.0");
   }
+
+  if ((!isParamValid("reporters") && !isParamValid("vectorpostprocessors")) ||
+      (getParam<std::vector<ReporterName>>("reporters").empty() &&
+       getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors").empty()))
+    mooseError(
+        "The 'vectorpostprocessors' and/or 'reporters' parameters must be defined and non-empty.");
+}
+
+void
+StatisticsReporter::initialize()
+{
+  if (_initialized)
+    return;
 
   // Stats for Reporters
   if (isParamValid("reporters"))
@@ -122,11 +136,7 @@ StatisticsReporter::StatisticsReporter(const InputParameters & parameters)
     }
   }
 
-  if ((!isParamValid("reporters") && !isParamValid("vectorpostprocessors")) ||
-      (getParam<std::vector<ReporterName>>("reporters").empty() &&
-       getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors").empty()))
-    mooseError(
-        "The 'vectorpostprocessors' and/or 'reporters' parameters must be defined and non-empty.");
+  _initialized = true;
 }
 
 void

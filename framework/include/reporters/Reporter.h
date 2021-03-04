@@ -92,13 +92,13 @@ protected:
    * a declareBroadcastValue, etc. Please refer to the ReporterData object for more information
    * on how the data system operates for Reporter values.
    */
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
   T & declareValue(const std::string & param_name, Args &&... args);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
   T & declareValue(const std::string & param_name, ReporterMode mode, Args &&... args);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
   T & declareValueByName(const ReporterValueName & value_name, Args &&... args);
-  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  template <typename T, template <typename> class S = ReporterGeneralContext, typename... Args>
   T & declareValueByName(const ReporterValueName & value_name, ReporterMode mode, Args &&... args);
 
   template <typename T, typename S, typename... Args>

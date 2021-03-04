@@ -40,6 +40,21 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
+dataStore(std::ostream & stream, bool & v, void * /*context*/)
+{
+  stream.write((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, std::vector<bool> & v, void * context)
+{
+  for (bool b : v)
+    dataStore(stream, b, context);
+}
+
+template <>
+void
 dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
 {
   dataStore(stream, rtt._coords, context);
@@ -317,6 +332,21 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
   // Read the string
   stream.read(&v[0], sizeof(char) * size);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, bool & v, void * /*context*/)
+{
+  stream.read((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
+{
+  for (bool b : v)
+    dataLoad(stream, b, context);
 }
 
 template <>

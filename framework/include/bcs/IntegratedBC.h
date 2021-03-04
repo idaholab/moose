@@ -67,6 +67,23 @@ protected:
     return computeQpOffDiagJacobian(jvar);
   }
 
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test functions.
+   */
+  virtual void precalculateQpResidual() {}
+
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions.
+   */
+  virtual void precalculateQpJacobian() {}
+
+  /**
+   * Insertion point for evaluations that depend on qp but are independent of the test and shape
+   * functions for off-diagonal Jacobian assembly.
+   */
+  virtual void precalculateQpOffDiagJacobian(const MooseVariableFEBase & /*jvar*/) {}
+
   MooseVariable & _var;
 
   /// normals at quadrature points

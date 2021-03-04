@@ -1,5 +1,5 @@
 [Tests]
-  design = MultiAppReporterTransfer.md
+  design = 'MultiAppReporterTransfer.md MultiAppCloneReporterTransfer.md'
   issues = '#16055'
 
   [vpp]
@@ -71,6 +71,30 @@
       expect_err = "subapp_index must be provided when more than one subapp is present."
 
       detail = "from multiple sub-applications."
+    []
+  []
+
+  [clone]
+    requirement = "The system shall support declaring reporter value clone on a main application and transferring sub-application data into it "
+    [serial]
+      type = JSONDiff
+      input = clone.i
+      cli_args = 'Outputs/file_base=clone_serial'
+      jsondiff = 'clone_serial.json'
+      skip_keys = 'part number_of_parts'
+      max_parallel = 1
+
+      detail = 'in serial and'
+    []
+    [parallel]
+      type = JSONDiff
+      input = clone.i
+      jsondiff = 'clone_out.json clone_out.json.1 clone_out.json.2 clone_out.json.3 clone_out.json.4 clone_out.json.5'
+      skip_keys = 'part number_of_parts'
+      min_parallel = 6
+      max_parallel = 6
+
+      detail = 'in parallel.'
     []
   []
 []

@@ -9,3 +9,5 @@ are provided for convenience when running and testing this locally.
 [syntax/index.md exact=True]
 
 [sqa/framework_srs.md]
+
+[sqa/framework_rtm.md]

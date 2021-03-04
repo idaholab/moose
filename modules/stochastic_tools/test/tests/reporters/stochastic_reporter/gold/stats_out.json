@@ -1,0 +1,68 @@
+{
+    "time_steps": [
+        {
+            "reporters": {
+                "stats": {
+                    "info": {
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "storage_data:constant:int_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:pp:value_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                0.2,
+                                []
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 0.01,
+            "time_step": 1
+        },
+        {
+            "reporters": {
+                "stats": {
+                    "info": {
+                        "name": "stats",
+                        "type": "StatisticsReporter"
+                    },
+                    "values": [
+                        {
+                            "name": "storage_data:constant:int_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                1.0,
+                                []
+                            ]
+                        },
+                        {
+                            "name": "storage_data:pp:value_MEAN",
+                            "stat": "MEAN",
+                            "type": "std::pair<double, std::vector<double> >",
+                            "value": [
+                                0.2,
+                                []
+                            ]
+                        }
+                    ]
+                }
+            },
+            "time": 0.02,
+            "time_step": 2
+        }
+    ]
+}

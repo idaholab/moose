@@ -825,8 +825,9 @@ FEProblemBase::initialSetup()
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
       _materials.sort(tid);
+      _interface_materials.sort(tid);
 
-      // Call initialSetup on both Material and Material objects
+      // Call initialSetup on all material objects
       _all_materials.initialSetup(tid);
     }
 
@@ -3459,8 +3460,9 @@ FEProblemBase::initPostprocessorData(const std::string & name)
 {
   ReporterName r_name(name, "value");
   if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
-    _reporter_data.declareReporterValue<PostprocessorValue, ReporterContext<PostprocessorValue>>(
-        r_name, REPORTER_MODE_UNSET);
+    _reporter_data
+        .declareReporterValue<PostprocessorValue, ReporterGeneralContext<PostprocessorValue>>(
+            r_name, REPORTER_MODE_UNSET);
 }
 
 const PostprocessorValue &
