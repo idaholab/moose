@@ -76,7 +76,16 @@ protected:
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
-                                     const ADDenseVector & stress_dev) override;
+                                     const ADDenseVector & stress_dev,
+                                     const ADRankFourTensor & elasticity_tensor) override;
+
+  virtual ADReal initialGuess(const ADDenseVector & /*stress_dev*/) override;
+
+  /**
+   * Does the model require the elasticity tensor to be isotropic? Not in principle.
+   * TODO: Take care of rotation of anisotropy parameters
+   */
+  bool requiresIsotropicTensor() override { return false; }
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;

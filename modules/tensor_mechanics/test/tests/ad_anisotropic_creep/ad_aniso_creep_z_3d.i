@@ -92,8 +92,8 @@
 [Functions]
   [pull]
     type = PiecewiseLinear
-    x = '0 0.001 1.0'
-    y = '0 -4e1 -4e1'
+    x = '0 1.0'
+    y = '-4e1 -4e1'
   []
 []
 
@@ -109,7 +109,7 @@
 [Materials]
   [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
-    youngs_modulus = 70000
+    youngs_modulus = 700
     poissons_ratio = 0.0
   []
 
@@ -129,6 +129,8 @@
     # F G H L M N
     hill_constants = "0.5 0.25 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 0.00003
+    absolute_tolerance = 1e-20
+    relative_tolerance = 1e-20
   []
 []
 
@@ -169,11 +171,11 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
 
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1.0e-14
+  nl_rel_tol = 1.0e-13
+  nl_abs_tol = 1.0e-13
   l_max_its = 90
-  num_steps = 25
-  dt = 1.0e-3
+  num_steps = 10
+  dt = 1.0e-4
   start_time = 0
   automatic_scaling = true
 []

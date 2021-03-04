@@ -29,7 +29,10 @@ struct cast_impl<ADReal, int>
 } // namespace internal
 } // namespace Eigen
 
-typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+// Instantiation of ADReal will be enabled shortly, once
+// https://github.com/roystgnr/MetaPhysicL/issues/70 makes it to MOOSE
+// typedef Eigen::Matrix<ADReal, 6, 6, Eigen::DontAlign> AnisotropyMatrix;
+
 typedef Eigen::Matrix<Real, 6, 6, Eigen::DontAlign> AnisotropyMatrixReal;
 
 /**
@@ -127,7 +130,8 @@ protected:
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
-                                     const ADDenseVector & /*stress_dev*/) = 0;
+                                     const ADDenseVector & /*stress_dev*/,
+                                     const ADRankFourTensor & elasticity_tensor) = 0;
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment

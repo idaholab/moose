@@ -81,7 +81,8 @@ protected:
   virtual void computeStressFinalize(const ADRankTwoTensor & inelasticStrainIncrement,
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
-                                     const ADDenseVector & /*stress_dev*/) override;
+                                     const ADDenseVector & /*stress_dev*/,
+                                     const ADRankFourTensor & elasticity_tensor) override;
 
   ADReal computeOmega(const ADReal & delta_gamma, const ADDenseVector & stress_trial);
 

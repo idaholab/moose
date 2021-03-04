@@ -303,7 +303,8 @@ ADHillPlasticityStressUpdate::computeStressFinalize(
     const ADRankTwoTensor & /*plastic_strain_increment*/,
     const ADReal & delta_gamma,
     ADRankTwoTensor & stress_new,
-    const ADDenseVector & stress_dev)
+    const ADDenseVector & stress_dev,
+    const ADRankFourTensor & /*elasticity_tensor*/)
 {
   // Need to compute this iteration's stress tensor based on the scalar variable
   // For deviatoric

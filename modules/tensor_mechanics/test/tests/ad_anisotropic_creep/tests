@@ -5,45 +5,64 @@
     type = 'Exodiff'
     input = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test.i'
     exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test_out.e'
-    heavy = true
     min_parallel = 2
     custom_cmp = 'generalized.exodiff'
-    requirement = 'Moose shall be capable of simulating materials that exhibit anisotropic creep '
-                  'with material time step.'
+    requirement = 'Moose shall avoid regression on material time step and combined anisotropic creep computations'
   []
-
-  [anis_mech_hill_tensor_creep_small_tiny_step_test]
-    type = 'Exodiff'
-    input = 'anis_mech_hill_tensor_creep_small_tiny_step_test.i'
-    exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_test_out.e'
-    requirement = 'Moose shall be capable of simulating materials that exhibit anisotropic creep.'
-    min_parallel = 2
-    custom_cmp = 'generalized.exodiff'
-    heavy = true
-  []
-
   [ad_aniso_creep_x_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_x_3d.i'
     csvdiff = ad_aniso_creep_x_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the X direction.'
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the X direction.'
     min_parallel = 2
-    rel_err = 1.0e-5
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-7
   []
   [ad_aniso_creep_y_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_y_3d.i'
     csvdiff = ad_aniso_creep_y_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the Y direction.'
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the Y direction.'
     min_parallel = 2
     rel_err = 1.0e-5
+    abs_zero = 1.0e-7
   []
   [ad_aniso_creep_z_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_z_3d.i'
     csvdiff = ad_aniso_creep_z_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios along the Z direction.'
+    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+                  'along the Z direction.'
     min_parallel = 2
     rel_err = 1.0e-5
+    abs_zero = 1.0e-7
   []
+  [ad_aniso_iso_iso]
+    type = 'CSVDiff'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    csvdiff = ad_aniso_iso_creep_x_3d_out.csv
+    cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
+               "Materials/inactive='trial_creep_aniso_iso' Outputs/file_base=ad_aniso_iso_creep_x_3d_out"
+    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+                  'creep parameters: Baseline'
+    min_parallel = 2
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-8
+  []
+  [ad_aniso_iso_aniso]
+    type = 'CSVDiff'
+    input = 'ad_aniso_iso_creep_x_3d.i'
+    csvdiff = ad_aniso_iso_aniso_creep_x_3d_out.csv
+    cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_aniso_iso' "
+               "Materials/inactive='trial_creep_iso' "
+               "Outputs/file_base=ad_aniso_iso_aniso_creep_x_3d_out"
+    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+                  'creep parameters.'
+    min_parallel = 2
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-8
+  []
+
 []
