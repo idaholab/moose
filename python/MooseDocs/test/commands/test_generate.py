@@ -40,14 +40,14 @@ class TestGenerate(unittest.TestCase):
         shouldCreateStub.side_effect = self._shouldCreateStub
 
         # Run the generate command
-        opt = types.SimpleNamespace(app_types=['MooseApp'], config='sqa_test_reports.yml')
+        opt = types.SimpleNamespace(app_types=['MooseApp'], config='sqa_reports.yml')
         status = generate.main(opt)
 
         self.assertEqual(status, 0)
         self.assertEqual(len(filenames), 3)
-        self.assertTrue(filenames[0].endswith('moose/test/doc/content/syntax/Kernels/index.md'))
-        self.assertTrue(filenames[1].endswith('moose/test/doc/content/source/actions/AddKernelAction.md'))
-        self.assertTrue(filenames[2].endswith('moose/test/doc/content/source/kernels/Diffusion.md'))
+        self.assertTrue(filenames[0].endswith('moose/framework/doc/content/syntax/Kernels/index.md'))
+        self.assertTrue(filenames[1].endswith('moose/framework/doc/content/source/actions/AddKernelAction.md'))
+        self.assertTrue(filenames[2].endswith('moose/framework/doc/content/source/kernels/Diffusion.md'))
 
     @staticmethod
     def _shouldCreateStub(report, n):

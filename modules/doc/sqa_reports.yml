@@ -169,7 +169,7 @@ Documents:
     software_design_description: sqa/moose_sdd.md
     software_test_plan: sqa/moose_stp.md
     requirements_traceablity_matrix: sqa/moose_rtm.md
-    verification_validation_plan: sqa/moose_vvr.md
+    verification_validation_report: sqa/moose_vvr.md
     failure_analysis_report: sqa/moose_far.md
     log_safety_software_determination: WARNING
     log_quality_level_determination: WARNING
