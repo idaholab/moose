@@ -96,7 +96,7 @@ const ReporterMode REPORTER_MODE_VPP_SCATTER("VPP_SCATTER");
 template <typename T>
 VectorPostprocessorContext<T>::VectorPostprocessorContext(const libMesh::ParallelObject & other,
                                                           ReporterState<T> & state)
-  : ReporterContext<T>(other, state)
+  : ReporterGeneralContext<T>(other, state)
 {
 }
 
@@ -104,7 +104,7 @@ template <typename T>
 void
 VectorPostprocessorContext<T>::finalize()
 {
-  ReporterContext<T>::finalize();
+  ReporterGeneralContext<T>::finalize();
 
   const auto & consumer_modes = this->state().getConsumerModes();
   auto func = [](const std::pair<ReporterMode, std::string> & mode_pair) {
@@ -128,7 +128,7 @@ template <typename T>
 void
 VectorPostprocessorContext<T>::copyValuesBack()
 {
-  ReporterContext<T>::copyValuesBack();
+  ReporterGeneralContext<T>::copyValuesBack();
   _scatter_value_old = _scatter_value;
 }
 

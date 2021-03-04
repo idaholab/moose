@@ -14,12 +14,12 @@
 /**
  * Transfer for migrating reporter values between the main and sub-application(s).
  */
-class MultiAppReporterTransfer : public MultiAppTransfer, public ReporterTransferInterface
+class MultiAppCloneReporterTransfer : public MultiAppTransfer, public ReporterTransferInterface
 {
 public:
   static InputParameters validParams();
 
-  MultiAppReporterTransfer(const InputParameters & parameters);
+  MultiAppCloneReporterTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
   virtual void execute() override;
 
@@ -28,6 +28,6 @@ protected:
   virtual void executeFromMultiapp();
 
   const std::vector<ReporterName> & _from_reporter_names;
-  const std::vector<ReporterName> & _to_reporter_names;
-  const unsigned int & _subapp_index;
+  const std::string & _to_obj_name;
+  const std::vector<ReporterName> _to_reporter_names;
 };
