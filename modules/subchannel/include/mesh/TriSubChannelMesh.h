@@ -26,8 +26,9 @@ void
 ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int points_per_layer);
 
 void buildDuct(UnstructuredMesh & mesh,
+               std::vector<Node *> & duct_nodes,
                const std::vector<Point> & points,
-               std::vector<std::vector<int>> & elem_point_indices);
+               const std::vector<std::vector<int>> & elem_point_indices);
 
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
@@ -106,6 +107,11 @@ protected:
   Real _duct_to_rod_gap;
   /// nodes
   std::vector<std::vector<Node *>> _nodes;
+
+  std::vector<Node *> _duct_nodes;
+  std::map<Node *, Node *> _chan_to_duct_node_map;
+  std::map<Node *, Node *> _duct_node_to_chan_map;
+
   /// stores the channel pairs for each gap
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
   /// stores the gaps that forms each subchannel

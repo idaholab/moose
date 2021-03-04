@@ -98,7 +98,7 @@ ductXsec(std::vector<Point> & xsec,
   Real start_offset = (r_corner - (nrings - 2) * pitch) * std::sin(libMesh::pi / 6);
   Real side_length = (corners[0] - corners[1]).norm();
 
-  for (int i = 0; i < corners.size(); i++)
+  for (size_t i = 0; i < corners.size(); i++)
   {
     auto left = corners[i];
     auto right = corners[(i + 1) % corners.size()];
@@ -122,8 +122,8 @@ ductPoints(std::vector<Point> & points,
            const std::vector<Real> & z_layers)
 {
   points.resize(xsec.size() * z_layers.size());
-  for (int i = 0; i < z_layers.size(); i++)
-    for (int j = 0; j < xsec.size(); j++)
+  for (size_t i = 0; i < z_layers.size(); i++)
+    for (size_t j = 0; j < xsec.size(); j++)
       points[pointIndex(xsec.size(), i, j)] = Point(xsec[j](0), xsec[j](1), z_layers[i]);
 }
 
@@ -149,19 +149,19 @@ ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int 
 
 void
 buildDuct(UnstructuredMesh & mesh,
+          std::vector<Node *> & duct_nodes,
           const std::vector<Point> & points,
-          std::vector<std::vector<int>> & elem_point_indices)
+          const std::vector<std::vector<int>> & elem_point_indices)
 {
-  std::vector<Node *> nodes;
-  for (int i = 0; i < points.size(); i++)
-    nodes.push_back(mesh.add_point(points[i]));
+  for (size_t i = 0; i < points.size(); i++)
+    duct_nodes.push_back(mesh.add_point(points[i]));
 
   for (auto & elem_indices : elem_point_indices)
   {
     auto elem = mesh.add_elem(new Quad4());
     elem->subdomain_id() = 2;
-    for (int i = 0; i < elem_indices.size(); i++)
-      elem->set_node(i) = nodes[elem_indices[i]];
+    for (size_t i = 0; i < elem_indices.size(); i++)
+      elem->set_node(i) = duct_nodes[elem_indices[i]];
   }
 }
 
@@ -715,6 +715,48 @@ TriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 }
 
 void
+channelToDuctMaps(std::map<Node *, Node *> & chan_to_duct,
+                  std::map<Node *, Node *> & duct_to_chan,
+                  const std::vector<Node *> & duct_nodes,
+                  const std::vector<std::vector<Real>> & chan_positions,
+                  const std::vector<std::vector<Node *>> & chan_nodes)
+{
+  const Real tol = 1e-10;
+  for (size_t i = 0; i < duct_nodes.size(); i++)
+  {
+    int min_chan = 0;
+    Real min_dist = std::numeric_limits<double>::max();
+    Point ductpos((*duct_nodes[i])(0), (*duct_nodes[i])(1), 0);
+    for (size_t j = 0; j < chan_positions.size(); j++)
+    {
+      Point chanpos(chan_positions[j][0], chan_positions[j][1], 0);
+      auto dist = (chanpos - ductpos).norm();
+      if (dist < min_dist)
+      {
+        min_dist = dist;
+        min_chan = j;
+      }
+    }
+
+    Node * chan_node = nullptr;
+    for (auto cn : chan_nodes[min_chan])
+    {
+      if (std::abs((*cn)(2) - (*duct_nodes[i])(2)) < tol)
+      {
+        chan_node = cn;
+        break;
+      }
+    }
+
+    if (chan_node == nullptr)
+      mooseError("failed to find matching channel node for duct node");
+
+    duct_to_chan[duct_nodes[i]] = chan_node;
+    chan_to_duct[chan_node] = duct_nodes[i];
+  }
+}
+
+void
 TriSubChannelMesh::buildMesh()
 {
   // Generate nodes and elements given the subchannel and subchannel x, y positions and z_grid
@@ -781,8 +823,12 @@ TriSubChannelMesh::buildMesh()
   std::vector<std::vector<int>> elem_point_indices;
   ductElems(elem_point_indices, _z_grid.size(), xsec.size());
 
-  buildDuct(mesh, points, elem_point_indices);
+  buildDuct(mesh, _duct_nodes, points, elem_point_indices);
+
+  channelToDuctMaps(
+      _chan_to_duct_node_map, _duct_node_to_chan_map, _duct_nodes, _subchannel_position, _nodes);
 
   // finalze things
   mesh.prepare_for_use();
 }
+
