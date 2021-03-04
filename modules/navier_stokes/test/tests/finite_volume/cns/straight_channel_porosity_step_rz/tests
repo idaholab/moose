@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#16758'
+  [2d-transient-real-velocity-advector-upwind-advected]
+    type = Exodiff
+    input = transient-real-velocity-advector.i
+    exodiff = transient-real-velocity-advector_out.e
+    requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations in axisymmetric coordinates with a step change in porosity using an implementation in which the real velocity is the advector and linearly interpolated, the advected quantities are upwinded, and the product of porosity and pressure is linearly interpolated.'
+    cli_args = "Outputs/out/execute_on='final'"
+    method = "!dbg"
+    valgrind = 'none'
+  []
+[]
