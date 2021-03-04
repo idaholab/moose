@@ -62,13 +62,12 @@
     type = ElementIntegralVariablePostprocessor
     block = 1
     variable = sink
-    execute_on = 'transfer nonlinear TIMESTEP_END'
   []
   [from_master_pp]
     type = ElementIntegralVariablePostprocessor
     block = 1
     variable = from_master
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
 []
 

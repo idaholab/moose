@@ -171,6 +171,9 @@ MultiAppConservativeTransfer::initialSetup()
     // Sub apps
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
     {
+      // If we dot not have this app, we skip
+      if (!_multi_app->hasLocalApp(i))
+        continue;
       // Sub problem for
       FEProblemBase & sub_problem = _multi_app->appProblemBase(i);
       // PPs for this subapp
@@ -369,6 +372,10 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
 
   to_solution.close();
   to_sys.update();
+
+  // Compute the to-postproessor again so that it has the right value with the updated solution
+  if (_current_direction == TO_MULTIAPP)
+    to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 }
 
 void
