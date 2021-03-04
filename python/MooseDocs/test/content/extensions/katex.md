@@ -2,7 +2,7 @@
 
 ## Inline
 
-Inline $y=ax+b$.
+Inline [!eq](y=ax+b).
 
 ## Block
 
@@ -33,6 +33,16 @@ c = \pm\sqrt{a^2 + b^2}\in\RR
 
 [!eqref](calculus)
 
+[!eqref](second_law)
+
 [!eqref](katex_include.md#second_law)
 
 [!eqref](katex_include2.md#second_law)
+
+## Deprecated
+
+$y=2x$
+
+\begin{equation}
+y = 3x
+\end{equation}

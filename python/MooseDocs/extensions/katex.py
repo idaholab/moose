@@ -9,22 +9,20 @@
 import sys
 import re
 import uuid
+import logging
 import moosetree
 from .. import common
 from ..base import components, renderers
 from ..tree import tokens, html, latex
 from . import command, core, floats, heading
 
+LOG = logging.getLogger(__name__)
+
 def make_extension(**kwargs):
     """Create an instance of the Extension object."""
     return KatexExtension(**kwargs)
 
-LatexBlockEquation = tokens.newToken('LatexBlockEquation',
-                                     tex=r'',
-                                     label=None,
-                                     number=None,
-                                     bookmark=None)
-LatexInlineEquation = tokens.newToken('LatexInlineEquation', tex=r'', bookmark=None)
+Equation = tokens.newToken('Equation', tex=r'', inline=False, label=None, number=None, bookmark=None)
 EquationReference = tokens.newToken('EquationReference', label=None, filename=None)
 
 class KatexExtension(command.CommandExtension):
@@ -48,15 +46,16 @@ class KatexExtension(command.CommandExtension):
         Add the necessary components for reading and rendering LaTeX.
         """
         self.requires(core, floats, heading)
-        self.addCommand(reader, KatexBlockEquationCommand())
+        self.addCommand(reader, EquationCommand())
         self.addCommand(reader, EquationReferenceCommand())
 
+        renderer.add('Equation', RenderEquation())
+        renderer.add('EquationReference', RenderEquationReference())
+
+        # Deprecated
         reader.addInline(KatexBlockEquationComponent(), location='_begin')
         reader.addInline(KatexInlineEquationComponent(), location='_begin')
-        renderer.add('LatexBlockEquation', RenderLatexEquation())
-        renderer.add('LatexInlineEquation', RenderLatexEquation())
         renderer.add('ShortcutLink', RenderEquationLink())
-        renderer.add('EquationReference', RenderEquationReference())
 
         if isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
@@ -65,12 +64,15 @@ class KatexExtension(command.CommandExtension):
                     renderer.addNewCommand(k, v)
 
     def initPage(self, page):
+
+        # Contains a mapping of the equation label ("id=") to a tuple that contains
+        # the equation number and unique bookmark. This used for equation referencing.
         page['labels'] = dict()
 
     def postTokenize(self, page, ast):
         labels = dict()
         count = 0
-        func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
+        func = lambda n: (n.name == 'Equation') and (n['label'] is not None)
         for node in moosetree.iterate(ast, func):
             count += 1
             node['number'] = count
@@ -82,19 +84,18 @@ class KatexExtension(command.CommandExtension):
 
         page['labels'] = labels
 
-        if common.has_tokens(ast, 'LatexBlockEquation', 'LatexInlineEquation'):
-            renderer = self.translator.renderer
-            if isinstance(renderer, renderers.HTMLRenderer):
-                renderer.addCSS('katex', "contrib/katex/katex.min.css", puid=page.uid)
-                renderer.addCSS('katex_moose', "css/katex_moose.css", puid=page.uid)
-                renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True, puid=page.uid)
+        renderer = self.translator.renderer
+        if common.has_tokens(ast, 'Equation', 'LatexInlineEquation') and isinstance(renderer, renderers.HTMLRenderer):
+            renderer.addCSS('katex', "contrib/katex/katex.min.css", puid=page.uid)
+            renderer.addCSS('katex_moose', "css/katex_moose.css", puid=page.uid)
+            renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True, puid=page.uid)
 
-                if self.get('macros', None):
-                    mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
-                    self.macros = '{' + mc + '}'
+            if self.get('macros', None):
+                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').items())
+                self.macros = '{' + mc + '}'
 
-class KatexBlockEquationCommand(command.CommandComponent):
-    COMMAND = 'equation'
+class EquationCommand(command.CommandComponent):
+    COMMAND = ('equation', 'eq')
     SUBCOMMAND = None
 
     @staticmethod
@@ -107,14 +108,15 @@ class KatexBlockEquationCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
 
         # Extract the TeX
-        tex = info['inline'] if 'inline' in info else info['block']
+        inline = 'inline' in info
+        tex = info['inline'] if inline else info['block']
         tex = r'{}'.format(tex.strip('\n').replace('\n', ' '))
 
         # Define a unique equation ID for use by KaTeX
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
         # Build the token
-        LatexBlockEquation(parent, tex=tex, bookmark=eq_id, label=self.settings['id'])
+        Equation(parent, tex=tex, bookmark=eq_id, label=self.settings['id'], inline=inline)
         return parent
 
 class KatexBlockEquationComponent(components.ReaderComponent):
@@ -129,7 +131,10 @@ class KatexBlockEquationComponent(components.ReaderComponent):
 
     def createToken(self, parent, info, page):
         """Create a LatexBlockEquation token."""
-        # TODO: Deprecate this, auto format is needed first so I can update automatically
+        msg = '{}:{}\n'.format(page.source, info.line)
+        msg += "The LaTeX style commands for defining equations is deprecated, please update " \
+               "your markdown files to use the !equation command."
+        LOG.warning(msg)
 
         # Raw LaTeX appropriate for passing to KaTeX render method
         tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
@@ -138,7 +143,7 @@ class KatexBlockEquationComponent(components.ReaderComponent):
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
         # Build the token
-        token = LatexBlockEquation(parent, tex=tex, bookmark=eq_id)
+        token = Equation(parent, tex=tex, bookmark=eq_id)
 
         # Add a label
         label = self.LABEL_RE.search(info['equation'])
@@ -157,11 +162,16 @@ class KatexInlineEquationComponent(components.ReaderComponent):
         # Raw LaTeX appropriate for passing to KaTeX render method
         tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
 
+        msg = '{}:{}\n'.format(page.source, info.line)
+        msg += "The LaTeX style commands for defining equations is deprecated, please update " \
+               "your markdown files to use [!eq]({}) command.".format(tex)
+        LOG.warning(msg)
+
         # Define a unique equation ID for use by KaTeX
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
         # Create token
-        LatexInlineEquation(parent, tex=tex, bookmark=eq_id)
+        Equation(parent, tex=tex, bookmark=eq_id, inline=True)
         return parent
 
 class EquationReferenceCommand(command.CommandComponent):
@@ -183,11 +193,10 @@ class EquationReferenceCommand(command.CommandComponent):
         EquationReference(parent, label=match.group('label'), filename=match.group('filename'))
         return parent
 
-class RenderLatexEquation(components.RenderComponent):
-    """Render LatexBlockEquation and LatexInlineEquation tokens"""
+class RenderEquation(components.RenderComponent):
     def createHTML(self, parent, token, page):
 
-        if token.name == 'LatexInlineEquation':
+        if token['inline']:
             div = html.Tag(parent, 'span', token, class_='moose-katex-inline-equation',
                            id_=token['bookmark'])
             display = 'false'
@@ -249,9 +258,7 @@ class RenderEquationLink(core.RenderShortcutLink):
 class RenderEquationReference(core.RenderShortcutLink):
 
     def createHTML(self, parent, token, page):
-
         a = html.Tag(parent, 'a', class_='moose-equation-reference')
-
         eq_page = page
 
         if token['filename']:
