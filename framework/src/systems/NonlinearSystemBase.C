@@ -1574,10 +1574,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  // undisplaced mortar constraints
-  mortarConstraints(false);
-  // displaced mortar constraints
-  mortarConstraints(true);
+  mortarConstraints();
 
   if (_need_residual_copy)
   {
@@ -2538,10 +2535,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  // undisplaced mortar constraints
-  mortarConstraints(false);
-  // displaced mortar constraints
-  mortarConstraints(true);
+  mortarConstraints();
 
   closeTaggedMatrices(tags);
 
@@ -3347,30 +3341,33 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints(bool displaced)
+NonlinearSystemBase::mortarConstraints()
 {
-  // go over mortar constraints
-  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
 
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>::iterator it, end_it;
-
-  for (const auto & mortar_interface : mortar_interfaces)
+  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
   {
-    if (!displaced)
-    {
-      it = _undisplaced_mortar_functors.find(mortar_interface.first);
-      end_it = _undisplaced_mortar_functors.end();
-    }
-    else
-    {
-      it = _displaced_mortar_functors.find(mortar_interface.first);
-      end_it = _displaced_mortar_functors.end();
-    }
+    auto it = _undisplaced_mortar_functors.find(mortar_interface.first);
 
-    mooseAssert(
-        it != end_it,
-        "No ComputeMortarFunctor exists for the specified primary-secondary boundary pair, primary "
-            << mortar_interface.first.first << " and secondary " << mortar_interface.first.second);
+    mooseAssert(it != _undisplaced_mortar_functors.end(),
+                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
+                "pair, primary "
+                    << mortar_interface.first.first << " and secondary "
+                    << mortar_interface.first.second);
+    it->second();
+  }
+
+  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
+
+  for (const auto & mortar_interface : displaced_mortar_interfaces)
+  {
+    auto it = _displaced_mortar_functors.find(mortar_interface.first);
+
+    mooseAssert(it != _displaced_mortar_functors.end(),
+                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
+                "pair, primary "
+                    << mortar_interface.first.first << " and secondary "
+                    << mortar_interface.first.second);
     it->second();
   }
 }

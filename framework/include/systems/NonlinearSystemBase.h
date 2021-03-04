@@ -724,7 +724,7 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints(bool displaced);
+  void mortarConstraints();
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes
