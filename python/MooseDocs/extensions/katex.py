@@ -13,7 +13,7 @@ import moosetree
 from .. import common
 from ..base import components, renderers
 from ..tree import tokens, html, latex
-from . import command, core, floats
+from . import command, core, floats, heading
 
 def make_extension(**kwargs):
     """Create an instance of the Extension object."""
@@ -25,6 +25,7 @@ LatexBlockEquation = tokens.newToken('LatexBlockEquation',
                                      number=None,
                                      bookmark=None)
 LatexInlineEquation = tokens.newToken('LatexInlineEquation', tex=r'', bookmark=None)
+EquationReference = tokens.newToken('EquationReference', label=None, filename=None)
 
 class KatexExtension(command.CommandExtension):
     """
@@ -46,13 +47,16 @@ class KatexExtension(command.CommandExtension):
         """
         Add the necessary components for reading and rendering LaTeX.
         """
-        self.requires(core, floats)
+        self.requires(core, floats, heading)
         self.addCommand(reader, KatexBlockEquationCommand())
+        self.addCommand(reader, EquationReferenceCommand())
+
         reader.addInline(KatexBlockEquationComponent(), location='_begin')
         reader.addInline(KatexInlineEquationComponent(), location='_begin')
         renderer.add('LatexBlockEquation', RenderLatexEquation())
         renderer.add('LatexInlineEquation', RenderLatexEquation())
         renderer.add('ShortcutLink', RenderEquationLink())
+        renderer.add('EquationReference', RenderEquationReference())
 
         if isinstance(renderer, renderers.LatexRenderer):
             renderer.addPackage('amsfonts')
@@ -60,21 +64,21 @@ class KatexExtension(command.CommandExtension):
                 for k, v in self.get('macros').items():
                     renderer.addNewCommand(k, v)
 
+    def initPage(self, page):
+        page['labels'] = dict()
+
     def postTokenize(self, page, ast):
-        labels = set()
+        labels = dict()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and (n['label'] is not None)
         for node in moosetree.iterate(ast, func):
             count += 1
             node['number'] = count
-            if node['label']:
-                if isinstance(self.translator.renderer, renderers.LatexRenderer):
-                    labels.add(node['label'])
-                else:
-                    core.Shortcut(ast,
-                                  key=node['label'],
-                                  string='{} ({})'.format(self.get('prefix'), count),
-                                  link='#{}'.format(node['bookmark']))
+            labels[node['label']] = (count, node['bookmark'])
+            core.Shortcut(ast,
+                          key=node['label'],
+                          string='{} ({})'.format(self.get('prefix'), count),
+                          link='#{}'.format(node['bookmark']))
 
         page['labels'] = labels
 
@@ -160,6 +164,25 @@ class KatexInlineEquationComponent(components.ReaderComponent):
         LatexInlineEquation(parent, tex=tex, bookmark=eq_id)
         return parent
 
+class EquationReferenceCommand(command.CommandComponent):
+    COMMAND = 'eqref'
+    SUBCOMMAND = None
+    LABEL_RE = re.compile(r'((?P<filename>.*?\.md)#)?(?P<label>.+)', flags=re.UNICODE)
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        return settings
+
+    def createToken(self, parent, info, page):
+        content = info['inline'] if ('inline' in info) else info['block']
+        match = self.LABEL_RE.search(content)
+        if match is None:
+            raise common.exceptions.MooseDocsException("Invalid equation label format.")
+
+        EquationReference(parent, label=match.group('label'), filename=match.group('filename'))
+        return parent
+
 class RenderLatexEquation(components.RenderComponent):
     """Render LatexBlockEquation and LatexInlineEquation tokens"""
     def createHTML(self, parent, token, page):
@@ -222,3 +245,32 @@ class RenderEquationLink(core.RenderShortcutLink):
             latex.Command(parent, 'eqref', string=key)
             return parent
         return core.RenderShortcutLink.createLatex(self, parent, token, page)
+
+class RenderEquationReference(core.RenderShortcutLink):
+
+    def createHTML(self, parent, token, page):
+
+        a = html.Tag(parent, 'a', class_='moose-equation-reference')
+
+        eq_page = page
+
+        if token['filename']:
+            eq_page = self.translator.findPage(token['filename'])
+            head = heading.find_heading(eq_page)
+            if head is not None:
+                tok = tokens.Token(None)
+                head.copyToToken(tok)
+                self.renderer.render(a, tok, page)
+                html.String(a, content=', ')
+            else:
+                html.String(a, content=token['filename'] + ', ')
+
+        num, id_ = eq_page['labels'].get(token['label'], (None, None))
+        # TODO: Error if label not found
+        if eq_page is not page:
+            url = eq_page.relativeDestination(page)
+            a['href']='{}#{}'.format(url, id_)
+        else:
+            a['href']='#{}'.format(id_)
+
+        html.String(a, content='{} ({})'.format(self.extension['prefix'], num))

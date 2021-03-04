@@ -6,29 +6,33 @@ Inline $y=ax+b$.
 
 ## Block
 
-\begin{equation}
+!equation id=pythagorean
 a^2 + b^2 = c^2
-\end{equation}
 
-\begin{equation*}
+
+!equation
 G_{\mu\nu} = 8\pi G(T_{\mu\nu} + \rho_{\Lambda} g_{\mu\nu})
-\end{equation*}
 
 !include katex_include.md
 
-\begin{equation}
-\label{calculus}
+!equation id=calculus
 \int_a^b f'(x)dx = f(b) - f(a)
-\end{equation}
 
 The fundamental theorem of calculus: [calculus].
 
 ## Macros
 
-\begin{equation}
+!equation
 c = \pm\sqrt{a^2 + b^2}\in\RR
-\end{equation}
 
-\begin{equation}
+!equation
 \pf{T}{t} = c
-\end{equation}
+
+
+## Equation References
+
+[!eqref](calculus)
+
+[!eqref](katex_include.md#second_law)
+
+[!eqref](katex_include2.md#second_law)
