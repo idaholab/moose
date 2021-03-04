@@ -247,11 +247,12 @@ MultiApp::setupPositions()
   {
     fillPositions();
     init(_positions.size());
+    createApps();
   }
 }
 
 void
-MultiApp::initialSetup()
+MultiApp::createApps()
 {
   if (!_has_an_app)
     return;
@@ -270,6 +271,15 @@ MultiApp::initialSetup()
     createApp(i, _global_time_offset);
     _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
   }
+}
+
+void
+MultiApp::initialSetup()
+{
+  if (!_use_positions)
+    // if not using positions, we create the sub-apps in initialSetup instead of right after
+    // construction of MultiApp
+    createApps();
 }
 
 void
@@ -745,7 +755,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
   // will be cached by the MooseApp object so that it can be used
-  // during FEProblemBase::initialSetup() during runInputFile()
+  // during FEProblemBase::initialSetup() during initialSetup()
   if (_app.isRestarting() || _app.isRecovering())
     app->setBackupObject(_backups[i]);
 
