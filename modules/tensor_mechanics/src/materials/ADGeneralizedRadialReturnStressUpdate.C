@@ -108,7 +108,8 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
 
   elastic_strain_increment -= inelastic_strain_increment;
 
-  computeStressFinalize(inelastic_strain_increment, delta_gamma, stress_new, stress_dev);
+  computeStressFinalize(
+      inelastic_strain_increment, delta_gamma, stress_new, stress_dev, elasticity_tensor);
 }
 
 Real

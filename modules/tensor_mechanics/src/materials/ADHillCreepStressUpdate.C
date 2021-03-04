@@ -96,6 +96,12 @@ ADHillCreepStressUpdate::computeStressInitialize(const ADDenseVector & /*stress_
 }
 
 ADReal
+ADHillCreepStressUpdate::initialGuess(const ADDenseVector & /*stress_dev*/)
+{
+  return 0.0;
+}
+
+ADReal
 ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial_stress*/,
                                          const ADDenseVector & stress_new,
                                          const ADReal & delta_gamma)
@@ -116,6 +122,8 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
   qsigma_square += 2 * N * stress_new(3) * stress_new(3);
 
   qsigma_square = std::sqrt(qsigma_square);
+  qsigma_square -= 1.5 * _two_shear_modulus * delta_gamma;
+
   const ADReal creep_rate =
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
 
@@ -124,22 +132,19 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
 }
 
 Real
-ADHillCreepStressUpdate::computeReferenceResidual(const ADDenseVector & effective_trial_stress,
-                                                  const ADDenseVector & /*stress_new*/,
-                                                  const ADReal & /*residual*/,
-                                                  const ADReal & scalar_effective_inelastic_strain)
+ADHillCreepStressUpdate::computeReferenceResidual(
+    const ADDenseVector & /*effective_trial_stress*/,
+    const ADDenseVector & /*stress_new*/,
+    const ADReal & /*residual*/,
+    const ADReal & /*scalar_effective_inelastic_strain*/)
 {
-  // This is an approximation. Better to have this method in the material model itself, rather than
-  // an application-agnostic parent class.
-  return MetaPhysicL::raw_value(effective_trial_stress).l2_norm() /
-             MetaPhysicL::raw_value(_two_shear_modulus) -
-         MetaPhysicL::raw_value(scalar_effective_inelastic_strain);
+  return 1.0;
 }
 
 ADReal
 ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_trial_stress*/,
                                            const ADDenseVector & stress_new,
-                                           const ADReal & /*delta_gamma*/)
+                                           const ADReal & delta_gamma)
 {
   // Hill constants, some constraints apply
   const Real & F = _hill_constants[0];
@@ -158,9 +163,11 @@ ADHillCreepStressUpdate::computeDerivative(const ADDenseVector & /*effective_tri
   qsigma_square += 2 * N * stress_new(3) * stress_new(3);
 
   qsigma_square = std::sqrt(qsigma_square);
+  qsigma_square -= 1.5 * _two_shear_modulus * delta_gamma;
+
   _qsigma = qsigma_square;
 
-  const ADReal creep_rate_derivative = 1.0 * _coefficient * _n_exponent *
+  const ADReal creep_rate_derivative = -_coefficient * 1.5 * _two_shear_modulus * _n_exponent *
                                        std::pow(qsigma_square, _n_exponent - 1.0) * _exponential *
                                        _exp_time;
   return (creep_rate_derivative * _dt - 1.0);
@@ -192,11 +199,7 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
   qsigma_square = std::sqrt(qsigma_square);
   if (qsigma_square == 0)
   {
-    inelasticStrainIncrement(0, 0) = inelasticStrainIncrement(1, 1) =
-        inelasticStrainIncrement(2, 2) = inelasticStrainIncrement(0, 1) =
-            inelasticStrainIncrement(1, 0) = inelasticStrainIncrement(2, 0) =
-                inelasticStrainIncrement(0, 2) = inelasticStrainIncrement(1, 2) =
-                    inelasticStrainIncrement(2, 1) = 0.0;
+    inelasticStrainIncrement.zero();
 
     ADAnisotropicReturnCreepStressUpdateBase::computeStrainFinalize(
         inelasticStrainIncrement, stress, stress_dev, delta_gamma);
@@ -237,12 +240,14 @@ ADHillCreepStressUpdate::computeStrainFinalize(ADRankTwoTensor & inelasticStrain
 }
 
 void
-ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & /*creepStrainIncrement*/,
+ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & creepStrainIncrement,
                                                const ADReal & /*delta_gamma*/,
-                                               ADRankTwoTensor & /*stress_new*/,
-                                               const ADDenseVector & /*stress_dev*/)
+                                               ADRankTwoTensor & stress_new,
+                                               const ADDenseVector & /*stress_dev*/,
+                                               const ADRankFourTensor & elasticity_tensor)
 {
-  // No need to compute anything here, stress does not change.
+  // Class only valid for isotropic elasticity (for now)
+  stress_new -= elasticity_tensor * creepStrainIncrement;
 }
 
 Real

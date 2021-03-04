@@ -44,11 +44,9 @@
 [Variables]
   [disp_x]
     order = SECOND
-    scaling = 1e-10
   []
   [disp_y]
     order = SECOND
-    scaling = 1e-10
   []
 []
 
@@ -127,20 +125,6 @@
     max_inelastic_increment = 1.0e-5
     base_name = trial_creep_two
   []
-  [creep_one]
-    type = ADPowerLawCreepStressUpdate
-    coefficient = 1e-18
-    n_exponent = 5
-    activation_energy = 0
-    base_name = creep_one
-  []
-  [creep_nine]
-    type = ADPowerLawCreepStressUpdate
-    coefficient = 9e-24
-    n_exponent = 4
-    activation_energy = 0
-    base_name = creep_nine
-  []
 []
 
 [BCs]
@@ -181,10 +165,10 @@
   petsc_options_value = '101                asm      lu'
 
   line_search = 'none'
-  nl_rel_tol = 1e-07
-  nl_abs_tol = 1.0e-15
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1.0e-14
   l_max_its = 90
-  num_steps = 40
+  num_steps = 7
   start_time = 0
   automatic_scaling = true
 

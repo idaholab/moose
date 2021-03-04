@@ -26,7 +26,7 @@ More details on the Hill-type creep material model may be found in [!cite](stewa
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/anis_mech_hill_tensor_creep_small_tiny_step_test.i block=Materials/trial_creep
+!listing modules/tensor_mechanics/test/tests/ad_anisotropic_creep/ad_aniso_creep_y_3d.i block=Materials/trial_creep_two
 
 !syntax parameters /Materials/ADHillCreepStressUpdate
 
