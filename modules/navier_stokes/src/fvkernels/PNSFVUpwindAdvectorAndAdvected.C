@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPorosityMatAdvection.h"
+#include "PNSFVUpwindAdvectorAndAdvected.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVPorosityMatAdvection);
+registerMooseObject("NavierStokesApp", PNSFVUpwindAdvectorAndAdvected);
 
 InputParameters
-NSFVPorosityMatAdvection::validParams()
+PNSFVUpwindAdvectorAndAdvected::validParams()
 {
   InputParameters params = FVMatAdvection::validParams();
   params.addClassDescription(
@@ -21,7 +21,7 @@ NSFVPorosityMatAdvection::validParams()
   return params;
 }
 
-NSFVPorosityMatAdvection::NSFVPorosityMatAdvection(const InputParameters & params)
+PNSFVUpwindAdvectorAndAdvected::PNSFVUpwindAdvectorAndAdvected(const InputParameters & params)
   : FVMatAdvection(params),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity))
@@ -29,7 +29,7 @@ NSFVPorosityMatAdvection::NSFVPorosityMatAdvection(const InputParameters & param
 }
 
 ADReal
-NSFVPorosityMatAdvection::computeQpResidual()
+PNSFVUpwindAdvectorAndAdvected::computeQpResidual()
 {
   ADReal u_interface;
   Real elem_coeff, neighbor_coeff;

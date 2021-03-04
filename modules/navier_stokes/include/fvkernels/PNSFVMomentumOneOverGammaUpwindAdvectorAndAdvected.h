@@ -9,26 +9,17 @@
 
 #pragma once
 
-#include "NSFVPorosityMatAdvection.h"
+#include "PNSFVUpwindAdvectorAndAdvected.h"
 
-class NSFVPorosityMomentumMatAdvection : public NSFVPorosityMatAdvection
+class PNSFVMomentumOneOverGammaUpwindAdvectorAndAdvected : public PNSFVUpwindAdvectorAndAdvected
 {
 public:
   static InputParameters validParams();
-  NSFVPorosityMomentumMatAdvection(const InputParameters & params);
+  PNSFVMomentumOneOverGammaUpwindAdvectorAndAdvected(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
   /// The interpolation method to use for one / porosity
   Moose::FV::InterpMethod _one_over_porosity_interp_method;
-
-  /// the pressure on the element
-  const ADMaterialProperty<Real> & _p_elem;
-
-  /// the pressure on the neighbor
-  const ADMaterialProperty<Real> & _p_neighbor;
-
-  /// index x|y|z
-  const unsigned int _index;
 };

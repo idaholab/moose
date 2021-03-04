@@ -225,7 +225,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_u
   []
   [momentum_pressure]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
   []
@@ -266,7 +266,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_u
   []
   [rho_u_pressure_left]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     boundary = 'left'
     variable = rho_u
     momentum_component = 'x'

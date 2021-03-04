@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVAdvectionFluxBC.h"
+#include "NSFVMassFluxAdvection.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVAdvectionFluxBC);
+registerMooseObject("NavierStokesApp", NSFVMassFluxAdvection);
 
 InputParameters
-NSFVAdvectionFluxBC::validParams()
+NSFVMassFluxAdvection::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
+  InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription(
       "Computes the residual for a quantity being advected by a moving mass of fluid.");
   params.addRequiredParam<MaterialPropertyName>("advected_quantity",
@@ -29,8 +29,8 @@ NSFVAdvectionFluxBC::validParams()
   return params;
 }
 
-NSFVAdvectionFluxBC::NSFVAdvectionFluxBC(const InputParameters & params)
-  : FVFluxBC(params),
+NSFVMassFluxAdvection::NSFVMassFluxAdvection(const InputParameters & params)
+  : FVFluxKernel(params),
     _mass_flux_elem(getADMaterialProperty<RealVectorValue>(NS::mass_flux)),
     _mass_flux_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::mass_flux)),
     _adv_elem(getADMaterialProperty<Real>("advected_quantity")),
@@ -48,7 +48,7 @@ NSFVAdvectionFluxBC::NSFVAdvectionFluxBC(const InputParameters & params)
 }
 
 ADReal
-NSFVAdvectionFluxBC::computeQpResidual()
+NSFVMassFluxAdvection::computeQpResidual()
 {
   using namespace Moose::FV;
 
