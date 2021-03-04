@@ -20,10 +20,6 @@ protected:
   bool _reversible;
   unsigned int _rhoA_var_number;
   unsigned int _rhoEA_var_number;
-  unsigned int _beta_var_num;
-
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
 
   // Coupled variables
   const VariableValue & _area;

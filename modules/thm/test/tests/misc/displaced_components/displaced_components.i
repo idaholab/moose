@@ -67,15 +67,15 @@
   [../]
 
   [./in1]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe1:out'
   [../]
   [./in2]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe2:out'
   [../]
   [./in3]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe3:out'
   [../]
 []

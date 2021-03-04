@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  * Boundary condition with prescribed stagnation enthalpy and momentum for 1-phase flow channels
  */
-class InletStagnationEnthalpyMomentum1Phase : public FlowBoundary
+class InletStagnationEnthalpyMomentum1Phase : public FlowBoundary1Phase
 {
 public:
   InletStagnationEnthalpyMomentum1Phase(const InputParameters & params);

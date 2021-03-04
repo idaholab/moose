@@ -1,138 +1,15 @@
 #include "SolidWall.h"
-#include "FlowModelSinglePhase.h"
-#include "FlowModelTwoPhase.h"
-#include "FlowModelTwoPhaseNCG.h"
 
 registerMooseObject("THMApp", SolidWall);
 
 InputParameters
 SolidWall::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowConnection::validParams();
   return params;
 }
 
-SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
-
-void
-SolidWall::addMooseObjects1Phase()
+SolidWall::SolidWall(const InputParameters & params) : FlowConnection(params)
 {
-  ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-  // boundary flux user object
-  {
-    const std::string class_name = "BoundaryFlux3EqnGhostWall";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-    params.set<Real>("normal") = _normal;
-    params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, _boundary_uo_name, params);
-  }
-
-  // BCs
-  addWeakBC3Eqn();
-
-  // Strongly impose zero velocity for CG
-  if (_spatial_discretization == FlowModel::CG)
-  {
-    InputParameters params = _factory.getValidParams("DirichletBC");
-    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("value") = 0.;
-    _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
-  }
-}
-
-void
-SolidWall::addMooseObjects2Phase()
-{
-  if (_spatial_discretization == FlowModel::CG)
-  {
-    {
-      InputParameters params = _factory.getValidParams("DirichletBC");
-      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID;
-      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-      params.set<Real>("value") = 0.;
-      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_liquid"), params);
-    }
-    {
-      InputParameters params = _factory.getValidParams("DirichletBC");
-      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR;
-      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-      params.set<Real>("value") = 0.;
-      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
-    }
-  }
-  else if (_spatial_discretization == FlowModel::rDG)
-  {
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-    // boundary flux user object
-    {
-      const std::string class_name = "BoundaryFlux7EqnGhostWall";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-      params.set<Real>("normal") = _normal;
-      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim.addUserObject(class_name, _boundary_uo_name, params);
-    }
-
-    // BCs
-    addWeakBC7Eqn();
-  }
-}
-
-void
-SolidWall::addMooseObjects2PhaseNCG()
-{
-  if (_spatial_discretization == FlowModel::CG)
-  {
-    {
-      InputParameters params = _factory.getValidParams("DirichletBC");
-      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID;
-      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-      params.set<Real>("value") = 0.;
-      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_liquid"), params);
-    }
-    {
-      InputParameters params = _factory.getValidParams("DirichletBC");
-      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR;
-      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-      params.set<Real>("value") = 0.;
-      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
-    }
-  }
-  else if (_spatial_discretization == FlowModel::rDG)
-  {
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-    {
-      const std::string class_name = "BoundaryFlux7EqnNCGGhostWall";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-      params.set<Real>("normal") = _normal;
-      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-      const std::vector<VariableName> & vars = fm.getNCGSolutionVars();
-      params.set<std::vector<VariableName>>("aXrhoA_vapor") = vars;
-      _sim.addUserObject(class_name, _boundary_uo_name, params);
-    }
-
-    // BCs
-    addWeakBC7EqnNCG();
-  }
-}
-
-void
-SolidWall::addMooseObjects()
-{
-  if (_flow_model_id == THM::FM_SINGLE_PHASE)
-    addMooseObjects1Phase();
-  else if (_flow_model_id == THM::FM_TWO_PHASE)
-    addMooseObjects2Phase();
-  else if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
-    addMooseObjects2PhaseNCG();
+  logError("Deprecated component. Use SolidWall1Phase or SolidWall2Phase instead.");
 }

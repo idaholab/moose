@@ -27,7 +27,6 @@
     arhoA = rhoA
     arhouA = rhouA
     A = A
-    alpha = unity
     p_in = 6e6
   [../]
   [./bc_2]
@@ -38,7 +37,6 @@
     arhoA = rhoA
     arhouA = rhouA
     A = A
-    alpha = unity
     p_in = 6e6
   [../]
 []

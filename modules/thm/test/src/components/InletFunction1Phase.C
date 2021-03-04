@@ -5,7 +5,7 @@ registerMooseObject("THMTestApp", InletFunction1Phase);
 InputParameters
 InletFunction1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
 
   params.addClassDescription("1-phase inlet with all variables prescribed by functions.");
 
@@ -16,12 +16,15 @@ InletFunction1Phase::validParams()
   return params;
 }
 
-InletFunction1Phase::InletFunction1Phase(const InputParameters & params) : FlowBoundary(params) {}
+InletFunction1Phase::InletFunction1Phase(const InputParameters & params)
+  : FlowBoundary1Phase(params)
+{
+}
 
 void
 InletFunction1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);

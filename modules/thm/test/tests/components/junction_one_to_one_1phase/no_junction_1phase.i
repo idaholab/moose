@@ -41,7 +41,7 @@
 
 [Components]
   [./left_boundary]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'channel:in'
   [../]
 
@@ -64,7 +64,7 @@
   [../]
 
   [./right_boundary]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'channel:out'
   [../]
 []

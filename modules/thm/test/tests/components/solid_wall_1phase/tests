@@ -8,28 +8,12 @@
     compiler = 'GCC CLANG'
   [../]
 
-  [./phy:7eqn]
-    type = 'Exodiff'
-    input = 'phy.7eqn.i'
-    exodiff = 'phy.7eqn_out.e'
-    custom_cmp = 'phy.7eqn.exodiff'
-    method = 'OPT OPROF DEVEL'
-  [../]
-
   # jacobian
   [./jac:3eqn]
     type = 'PetscJacobianTester'
     input = 'jac.3eqn.i'
     ratio_tol = 3e-8
     difference_tol = 1e-4
-    cli_args = 'Debug/check_jacobian=true'
-  [../]
-
-  [./jac:7eqn]
-    type = 'PetscJacobianTester'
-    input = 'jac.7eqn.i'
-    ratio_tol = 9e-10
-    difference_tol = 3e-4
     cli_args = 'Debug/check_jacobian=true'
   [../]
 []

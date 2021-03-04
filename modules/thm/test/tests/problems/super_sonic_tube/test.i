@@ -44,7 +44,7 @@
   [../]
 
   [./outlet]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'pipe:out'
   [../]
 []

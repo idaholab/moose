@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  * 1-phase inlet with all variables prescribed by functions.
  */
-class InletFunction1Phase : public FlowBoundary
+class InletFunction1Phase : public FlowBoundary1Phase
 {
 public:
   InletFunction1Phase(const InputParameters & params);

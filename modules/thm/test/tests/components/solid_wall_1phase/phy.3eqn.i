@@ -39,12 +39,12 @@
   [../]
 
   [./inlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:in'
   [../]
 
   [./outlet]
-    type = SolidWall
+    type = SolidWall1Phase
     input = 'pipe:out'
   [../]
 []

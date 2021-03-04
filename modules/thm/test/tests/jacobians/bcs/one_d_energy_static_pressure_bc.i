@@ -24,7 +24,6 @@
     type = OneDEnergyStaticPressureBC
     variable = rhoEA
     boundary = 0
-    is_liquid = true
     rho = rho
     rhoA = rhoA
     rhouA = rhouA
@@ -40,7 +39,6 @@
     type = OneDEnergyStaticPressureBC
     variable = rhoEA
     boundary = 1
-    is_liquid = true
     rho = rho
     rhoA = rhoA
     rhouA = rhouA

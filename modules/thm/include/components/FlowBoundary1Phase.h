@@ -3,12 +3,12 @@
 #include "FlowConnection.h"
 
 /**
- * Base class for boundary components connected to flow channels
+ * Base class for boundary components connected to 1-phase flow channels
  */
-class FlowBoundary : public FlowConnection
+class FlowBoundary1Phase : public FlowConnection
 {
 public:
-  FlowBoundary(const InputParameters & params);
+  FlowBoundary1Phase(const InputParameters & params);
 
 protected:
   virtual void init() override;
@@ -18,16 +18,6 @@ protected:
    * Creates the boundary condition objects for 1-phase flow
    */
   void addWeakBC3Eqn();
-
-  /**
-   * Creates the boundary condition objects for 2-phase flow
-   */
-  void addWeakBC7Eqn();
-
-  /**
-   * Creates the boundary condition objects for 2-phase flow with NCG
-   */
-  void addWeakBC7EqnNCG();
 
   /// The name of the connect flow channel
   std::string _connected_flow_channel_name;

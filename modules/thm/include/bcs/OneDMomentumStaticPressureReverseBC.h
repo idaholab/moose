@@ -19,17 +19,12 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  bool _is_liquid;
-  Real _sign;
-
-  const VariableValue & _alpha;
   const VariableValue & _vel;
   const VariableValue & _vel_old;
   const VariableValue & _area;
   const VariableValue & _arhoA;
   const VariableValue & _temperature;
 
-  unsigned int _beta_varnum;
   unsigned int _arhoA_varnum;
 
   /// Specified pressure

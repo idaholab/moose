@@ -6,7 +6,7 @@ registerMooseObject("THMApp", InletStagnationPressureTemperature1Phase);
 InputParameters
 InletStagnationPressureTemperature1Phase::validParams()
 {
-  InputParameters params = FlowBoundary::validParams();
+  InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure [Pa]");
   params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
@@ -17,22 +17,19 @@ InletStagnationPressureTemperature1Phase::validParams()
 
 InletStagnationPressureTemperature1Phase::InletStagnationPressureTemperature1Phase(
     const InputParameters & params)
-  : FlowBoundary(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
 {
 }
 
 void
 InletStagnationPressureTemperature1Phase::check() const
 {
-  FlowBoundary::check();
+  FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
   if (fm == nullptr)
     logError("Incompatible flow model. Make sure you use this component with single phase flow "
              "channel.");
-
-  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == THM::FM_TWO_PHASE_NCG))
-    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
@@ -73,7 +70,6 @@ InletStagnationPressureTemperature1Phase::setup1PhaseCG()
     params.set<Real>("p0") = p0;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("vel") = {FlowModelSinglePhase::VELOCITY};
-    params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
     params.set<std::vector<VariableName>>("arhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("arhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
@@ -126,7 +122,6 @@ InletStagnationPressureTemperature1Phase::setup1PhaseCG()
       // coupling
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-      params.set<MaterialPropertyName>("alpha") = FlowModel::UNITY;
       params.set<std::vector<VariableName>>("vel") = {FlowModelSinglePhase::VELOCITY};
       params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
       std::string nm = genName(name(), "bc_rhou", "rev");
@@ -139,7 +134,6 @@ InletStagnationPressureTemperature1Phase::setup1PhaseCG()
       params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
       params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
       params.set<UserObjectName>("fp") = _fp_name;
-      params.set<bool>("is_liquid") = true;
       params.set<Real>("p_in") = p0;
       params.set<bool>("reversible") = _reversible;
       params.set<Real>("normal") = _normal;

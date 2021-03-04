@@ -1,7 +1,6 @@
 #include "OneDMassStagnationPandTBC.h"
 #include "SinglePhaseFluidProperties.h"
 #include "OneDStagnationPandTBase.h"
-#include "VolumeFractionMapper.h"
 #include "Numerics.h"
 
 registerMooseObject("THMApp", OneDMassStagnationPandTBC);
@@ -16,14 +15,10 @@ OneDMassStagnationPandTBC::validParams()
   params.addRequiredParam<Real>("p0", "Stagnation pressure");
   params.addRequiredCoupledVar("A", "Area");
   params.addRequiredCoupledVar("vel", "x-component of the velocity");
-  params.addCoupledVar("alpha", 1, "Volume fraction of phase (two-phase only)");
-  params.addCoupledVar("beta", 1, "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A (two-phase) or rho*A (single-phase)");
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A (two-phase) or rho*u*A (single-phase)");
   params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A (two-phase) or rho*E*A (single-phase)");
-  params.addParam<bool>("is_liquid", true, "Does the phase correspond to liquid? (two-phase only)");
   params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties user object to use.");
-  params.addParam<UserObjectName>("vfm", "The name of the volume fraction mapper user object");
 
   params.declareControllable("p0 T0");
 
@@ -39,16 +34,11 @@ OneDMassStagnationPandTBC::OneDMassStagnationPandTBC(const InputParameters & par
     _area(coupledValue("A")),
     _vel(coupledValue("vel")),
     _vel_old(coupledValueOld("vel")),
-    _alpha(coupledValue("alpha")),
-    _beta(coupledValue("beta")),
     _arhoA(coupledValue("arhoA")),
     _arhouA(coupledValue("arhouA")),
     _arhoEA(coupledValue("arhoEA")),
-    _sign(getParam<bool>("is_liquid") ? 1. : -1.),
-    _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _arhouA_var_number(coupled("arhouA")),
-    _arhoEA_var_number(coupled("arhoEA")),
-    _vfm(isCoupled("beta") ? &getUserObject<VolumeFractionMapper>("vfm") : nullptr)
+    _arhoEA_var_number(coupled("arhoEA"))
 {
 }
 
@@ -65,7 +55,7 @@ OneDMassStagnationPandTBC::computeQpResidual()
   rho_p_from_p0_T0_vel(_p0, _T0, _vel[_qp], rho, p);
 
   // See RELAP-7 Theory Manual, pg. 111, Equation (398) {eq:p0_T0_inlet_mass_residual}
-  return _arhoA[_qp] - _alpha[_qp] * rho * _area[_qp];
+  return _arhoA[_qp] - rho * _area[_qp];
 }
 
 Real
@@ -76,23 +66,17 @@ OneDMassStagnationPandTBC::computeQpJacobian()
 
   const Real drho_darhoA = drho_du * du_darhoA;
 
-  return 1 - _alpha[_qp] * _area[_qp] * drho_darhoA;
+  return 1 - _area[_qp] * drho_darhoA;
 }
 
 Real
 OneDMassStagnationPandTBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _beta_var_number)
-  {
-    Real rho, p_dummy;
-    rho_p_from_p0_T0_vel(_p0, _T0, _vel[_qp], rho, p_dummy);
-    return -_sign * (*_vfm).dalpha_liquid_dbeta(_beta[_qp]) * rho * _area[_qp];
-  }
-  else if (jvar == _arhouA_var_number)
+  if (jvar == _arhouA_var_number)
   {
     const Real drho_du = drhodu_from_p0_T0_vel(_p0, _T0, _vel[_qp]);
     const Real drho_darhouA = drho_du / _arhoA[_qp];
-    return -_alpha[_qp] * _area[_qp] * drho_darhouA;
+    return -_area[_qp] * drho_darhouA;
   }
   else if (jvar == _arhoEA_var_number)
   {

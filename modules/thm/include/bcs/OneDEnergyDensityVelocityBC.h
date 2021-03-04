@@ -4,7 +4,6 @@
 #include "DerivativeMaterialInterfaceTHM.h"
 
 class SinglePhaseFluidProperties;
-class VolumeFractionMapper;
 
 /**
  *
@@ -22,13 +21,8 @@ protected:
   const Real & _rho;
   const Real & _vel;
 
-  const MaterialProperty<Real> & _alpha;
-  const MaterialProperty<Real> * const _dalpha_dbeta;
-
   const VariableValue & _area;
   const VariableValue & _rhoEA;
-
-  unsigned int _beta_var_num;
 
   const SinglePhaseFluidProperties & _fp;
 

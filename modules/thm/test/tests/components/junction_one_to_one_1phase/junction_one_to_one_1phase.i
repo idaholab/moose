@@ -38,7 +38,7 @@
 
 [Components]
   [./left_boundary]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'left_channel:in'
   [../]
 
@@ -61,7 +61,7 @@
   [../]
 
   [./junction]
-    type = JunctionOneToOne
+    type = JunctionOneToOne1Phase
     connections = 'left_channel:out right_channel:in'
   [../]
 
@@ -84,7 +84,7 @@
   [../]
 
   [./right_boundary]
-    type = FreeBoundary
+    type = FreeBoundary1Phase
     input = 'right_channel:out'
   [../]
 []

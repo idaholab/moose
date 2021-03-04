@@ -1,5 +1,4 @@
 #include "OneDAreaTimesConstantBC.h"
-#include "VolumeFractionMapper.h"
 
 registerMooseObject("THMApp", OneDAreaTimesConstantBC);
 

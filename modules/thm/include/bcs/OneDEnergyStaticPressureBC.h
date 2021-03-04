@@ -3,7 +3,6 @@
 #include "OneDNodalBC.h"
 
 class SinglePhaseFluidProperties;
-class VolumeFractionMapper;
 
 /**
  *
@@ -20,8 +19,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   bool _reversible;
-  Real _sign;
-  const VariableValue & _alpha;
   const VariableValue & _area;
   const VariableValue & _rho;
   const VariableValue & _rhoA;
@@ -34,16 +31,12 @@ protected:
   // Variable numbers (for Jacobians)
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
-  unsigned _beta_var_num;
-
-  const VariableValue & _beta;
 
   // Required parameters
   /// the desired input static pressure
   const Real & _p_in;
 
   const SinglePhaseFluidProperties & _fp;
-  const VolumeFractionMapper * _vfm;
 
 public:
   static InputParameters validParams();

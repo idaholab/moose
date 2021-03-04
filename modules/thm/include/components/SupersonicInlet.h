@@ -1,11 +1,11 @@
 #pragma once
 
-#include "FlowBoundary.h"
+#include "FlowBoundary1Phase.h"
 
 /**
  *
  */
-class SupersonicInlet : public FlowBoundary
+class SupersonicInlet : public FlowBoundary1Phase
 {
 public:
   SupersonicInlet(const InputParameters & parameters);

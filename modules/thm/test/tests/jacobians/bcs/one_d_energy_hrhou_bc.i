@@ -15,7 +15,6 @@
     H = 11
     rhou = 123
     A = A
-    alpha = unity
   [../]
   [./bc_2]
     type = OneDEnergyHRhoUBC
@@ -25,6 +24,5 @@
     H = 11
     rhou = 123
     A = A
-    alpha = unity
   [../]
 []

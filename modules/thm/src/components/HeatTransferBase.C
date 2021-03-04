@@ -1,6 +1,5 @@
 #include "HeatTransferBase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowModelTwoPhase.h"
 #include "FlowChannelBase.h"
 #include "ClosuresBase.h"
 #include "MooseUtils.h"
