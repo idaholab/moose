@@ -44,7 +44,59 @@ rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point cent
 void
 rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
 {
-  // INSERT YOUR ALGORITHM HERE
+  Real teta = 0.0;
+  Real dteta = 0.0;
+  Real distance = 0.0;
+  Real teta1 = 0.0;
+  Real teta_corrected = 0.0;
+  Real pi = libMesh::pi;
+  unsigned int k = 0;
+  positions.emplace_back(0.0, 0.0);
+  for (unsigned int i = 1; i < nrings; i++)
+  {
+    dteta = 2.0 * pi / (i * 6);
+    teta = 0.0;
+    for (unsigned int j = 0; j < i * 6; j++)
+    {
+      k = k + 1;
+      teta1 = fmod(teta + 1.0e-10, pi / 3.0);
+      distance = std::sqrt((pow(i * pitch, 2) + pow(teta1 / dteta * pitch, 2) -
+                            2.0 * i * pitch * (teta1 / dteta * pitch) * std::cos(pi / 3.0)));
+      teta_corrected = acos(1.0 / (i * pitch) / distance / 2.0 *
+                            (pow(i * pitch, 2) + pow(distance, 2) - pow(teta1 / dteta * pitch, 2)));
+      if (teta1 < 1.0e-6)
+      {
+        teta_corrected = teta;
+      }
+      else
+      {
+        if (teta > pi / 3.0 && teta <= 2.0 / 3.0 * pi)
+        {
+          teta_corrected = teta_corrected + pi / 3.0;
+        }
+        else if (teta > 2.0 / 3.0 * pi && teta <= pi)
+        {
+          teta_corrected = teta_corrected + 2.0 / 3.0 * pi;
+        }
+        else if (teta > pi && teta <= 4.0 / 3.0 * pi)
+        {
+          teta_corrected = teta_corrected + pi;
+        }
+        else if (teta > 4.0 / 3.0 * pi && teta <= 5.0 / 3.0 * pi)
+        {
+          teta_corrected = teta_corrected + 4.0 / 3.0 * pi;
+        }
+        else if (teta > 5.0 / 3.0 * pi && teta <= 2.0 * pi)
+        {
+          teta_corrected = teta_corrected + 5.0 / 3.0 * pi;
+        }
+      }
+      positions.emplace_back(distance * std::cos(teta_corrected),
+                             distance * std::sin(teta_corrected));
+      teta = teta + dteta;
+    } // j
+  }   // i
+  //
 }
 
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
