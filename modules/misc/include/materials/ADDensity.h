@@ -22,11 +22,12 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
+  const Real _initial_density;
+
 private:
   const Moose::CoordinateSystemType _coord_system;
   std::vector<const ADVariableGradient *> _grad_disp;
   const ADVariableValue & _disp_r;
 
-  const Real _initial_density;
   ADMaterialProperty<Real> & _density;
 };

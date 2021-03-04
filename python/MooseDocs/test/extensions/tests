@@ -87,12 +87,17 @@
     [pysyntax]
       type = PythonUnitTest
       input = test_pysyntax.py
-      detail = "automatically retrieving python syntax, and"
+      detail = "automatically retrieving python syntax,"
     []
     [modal]
       type = PythonUnitTest
       input = test_modal.py
-      detail = "create modal website content."
+      detail = "create modal website content, and"
+    []
+    [katex]
+      type = PythonUnitTest
+      input = test_katex.py
+      detail = "support equations."
     []
   []
 []

@@ -25,10 +25,10 @@ ADDensity::validParams()
 
 ADDensity::ADDensity(const InputParameters & parameters)
   : ADMaterial(parameters),
+    _initial_density(getParam<Real>("density")),
     _coord_system(getBlockCoordSystem()),
     _grad_disp(adCoupledGradients("displacements")),
     _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),
-    _initial_density(getParam<Real>("density")),
     _density(declareADProperty<Real>("density"))
 {
   if (getParam<bool>("use_displaced_mesh"))
