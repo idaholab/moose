@@ -23,8 +23,8 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return CivetExtension(**kwargs)
 
-CivetTestBadges = tokens.newToken('CivetTestBadges', tests=list())
-CivetTestReport = tokens.newToken('CivetTestReport', tests=list(), source=None)
+CivetTestBadges = tokens.newToken('CivetTestBadges', prefix=None, tests=list())
+CivetTestReport = tokens.newToken('CivetTestReport', prefix=None, tests=list(), source=None)
 
 class CivetExtension(command.CommandExtension):
     "Adds ability to include CIVET links."""
@@ -242,15 +242,17 @@ class RenderCivetTestBadges(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         div = html.Tag(parent, 'div', class_='moose-civet-badges')
+        prefix = token['prefix']
         for test in token['tests']:
+            tname = '{}.{}'.format(prefix, test) if (prefix is not None) else test
             counts = collections.defaultdict(int)
-            results = self.extension.results(test)
+            results = self.extension.results(tname)
             if results:
                 for job, recipes in results.items():
                     for recipe in recipes:
                         counts[recipe.status] += 1
 
-            base = self.extension.testBaseFileName(test)
+            base = self.extension.testBaseFileName(tname)
             if self.extension.hasTestReports() and (base is not None):
                 report_root = self.extension.get('test_reports_location')
                 fname = os.path.join(self.translator.get("destination"), report_root, base + '.html')
@@ -277,8 +279,10 @@ class RenderCivetTestReport(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
 
+        prefix = token['prefix']
         for key in token['tests']:
-            results = self.extension.results(key)
+            tname = '{}.{}'.format(prefix, key) if (prefix is not None) else key
+            results = self.extension.results(tname)
 
             div = html.Tag(parent, 'div', class_='moose-civet-test-report')
 

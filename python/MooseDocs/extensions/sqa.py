@@ -402,17 +402,8 @@ class SQARequirementsCommand(command.CommandComponent):
                 if labels:
                     SQARequirementPrerequisites(item, specs=labels)
 
-            if self.settings.get('link-results', False):
-                keys = list()
-
-                for detail in req.details:
-                    keys.append('{}/{}'.format(req.name, detail.name))
-
-                if not keys:
-                    keys.append(req.name)
-
-                if self.extension.hasCivetExtension():
-                    civet.CivetTestBadges(item, tests=keys)
+            if self.settings.get('link-results', False) and self.extension.hasCivetExtension():
+                civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names)
 
             if self.settings.get('link-verification', False) and req.verification:
                 p = core.Paragraph(item)
@@ -628,17 +619,8 @@ class SQAReportCommand(command.CommandComponent):
                 if labels:
                     SQARequirementPrerequisites(item, specs=labels)
 
-            if token['link_results']:
-                keys = list()
-
-                for detail in req.details:
-                    keys.append('{}/{}'.format(req.name, detail.name))
-
-                if not keys:
-                    keys.append(req.name)
-
-                if self.extension.hasCivetExtension():
-                    civet.CivetTestBadges(item, tests=keys)
+            if token['link_results'] and self.extension.hasCivetExtension():
+                civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names)
 
             if token['link_verification'] and req.verification:
                 p = core.Paragraph(item)

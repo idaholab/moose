@@ -57,6 +57,7 @@ class TestSpecification(mooseutils.AutoPropertyMixin):
 @mooseutils.addProperty('validation_line', ptype=int)
 @mooseutils.addProperty('label', ptype=str)
 @mooseutils.addProperty('duplicate', ptype=bool, default=False)
+@mooseutils.addProperty('prefix', ptype=str, default=None)
 class Requirement(mooseutils.AutoPropertyMixin):
     """struct for storing Requirement information."""
 
@@ -70,6 +71,7 @@ class Requirement(mooseutils.AutoPropertyMixin):
         out = set()
         if self.specification is not None:
             out.add(self.specification.name)
+
         elif self.details:
             for d in self.details:
                 if d.specification is not None:

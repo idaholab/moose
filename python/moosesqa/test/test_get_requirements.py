@@ -188,6 +188,9 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(spec0.name, 'mark_only')
         self.assertIn('markers/box_marker/tests', spec0.filename)
 
+        self.assertEqual(r0.prefix, 'box_marker')
+        self.assertEqual(r1.prefix, 'box_marker')
+
     def testRequirementWithDetails(self):
         loc = [os.getcwd()]
         req = get_requirements_from_tests(loc, ['test_get_requirements_spec0'])
