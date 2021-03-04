@@ -193,7 +193,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho
   # []
   [mass_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho
     flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
@@ -204,13 +204,13 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho_u
   # []
   [momentum_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho_u
     flux_interp_method = ${flux_interp_method}
     advected_quantity = 'vel_x'
   []
   [momentum_pressure]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
   []
@@ -220,7 +220,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   #   variable = rho_et
   # []
   [energy_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho_et
     advected_quantity = 'ht'
     flux_interp_method = ${flux_interp_method}
@@ -235,7 +235,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${mass_flux_in}
   []
   [rho_right]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho
     advected_quantity = 1
@@ -248,14 +248,14 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_u
     advected_quantity = 'vel_x'
     flux_interp_method = ${flux_interp_method}
   []
   [rho_u_pressure_right]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     boundary = 'right'
     variable = rho_u
     momentum_component = 'x'
@@ -267,7 +267,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${enthalpy_flux_in}
   []
   [rho_et_right]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'ht'

@@ -221,7 +221,7 @@ two_term_boundary_expansion=true
     variable = rho_u
   []
   [momentum_pressure_x]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
   []
@@ -235,7 +235,7 @@ two_term_boundary_expansion=true
     variable = rho_v
   []
   [momentum_pressure_y]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_v
     momentum_component = 'y'
   []
@@ -273,7 +273,7 @@ two_term_boundary_expansion=true
   []
   # no advection through walls
   [rho_u_pressure_walls]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     boundary = 'top bottom'
     variable = rho_u
     momentum_component = 'x'
@@ -297,7 +297,7 @@ two_term_boundary_expansion=true
     value = 0
   []
   [rho_v_pressure_walls]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     boundary = 'top bottom'
     variable = rho_v
     momentum_component = 'y'

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVFluxBC.h"
 
-class NSFVAdvection : public FVFluxKernel
+class NSFVMassFluxAdvectionBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  NSFVAdvection(const InputParameters & params);
+  NSFVMassFluxAdvectionBC(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

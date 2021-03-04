@@ -205,14 +205,14 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho
   []
   [mass_advection]
-    type = NSFVPorosityMatAdvection
+    type = PNSFVUpwindAdvectorAndAdvected
     variable = rho
     vel = velocity
     advected_interp_method = ${advected_interp_method}
   []
 
   [momentum_pressure]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
   []
@@ -222,7 +222,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_et
   []
   [energy_advection]
-    type = NSFVPorosityMatAdvection
+    type = PNSFVUpwindAdvectorAndAdvected
     variable = rho_et
     advected_quantity = 'rho_ht'
     vel = velocity
@@ -251,11 +251,10 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = CNSFVMomImplicitPressureBC
+    type = PNSFVMomentumPressureBC
     variable = rho_u
     boundary = 'right'
     momentum_component = 'x'
-    include_porosity = true
   []
   [rho_et_left]
     type = FVNeumannBC

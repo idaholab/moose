@@ -212,14 +212,14 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho
   []
   [mass_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho
     flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
   [rho_u_pressure]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
   []
@@ -229,13 +229,13 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_v
   []
   [rho_v_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho_v
     flux_interp_method = ${flux_interp_method}
     advected_quantity = 'vel_y'
   []
   [rho_v_pressure]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_v
     momentum_component = 'y'
   []
@@ -245,7 +245,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     variable = rho_et
   []
   [energy_advection]
-    type = NSFVAdvection
+    type = NSFVMassFluxAdvection
     variable = rho_et
     advected_quantity = 'ht'
     flux_interp_method = ${flux_interp_method}
@@ -260,7 +260,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${mass_flux_in}
   []
   [rho_right]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho
     flux_interp_method = ${flux_interp_method}
@@ -275,26 +275,26 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${momentum_flux_in}
   []
   [rho_u_right]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     variable = rho_u
     boundary = 'right'
     momentum_component = 'x'
   []
   # [rho_u_pressure]
-  #   type = NSFVPorosityMomentumPressureBC
+  #   type = PNSFVMomentumPressureBC
   #   boundary = 'top bottom left right'
   #   variable = rho_u
   #   momentum_component = 'x'
   # []
 
   [rho_v_pressure]
-    type = NSFVPorosityMomentumPressureBC
+    type = PNSFVMomentumPressureBC
     boundary = 'top bottom left right'
     variable = rho_v
     momentum_component = 'y'
   []
   [rho_v_advection_outlet]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_v
     flux_interp_method=${flux_interp_method}
@@ -307,7 +307,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     value = ${enthalpy_flux_in}
   []
   [rho_et_right]
-    type = NSFVAdvectionFluxBC
+    type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'ht'

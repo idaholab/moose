@@ -173,7 +173,7 @@ rho_et0 = 26.74394130735463
     variable = rho_ud
   []
   [momentum_pressure_x]
-    type = NSFVPorosityMomentumPressure
+    type = PNSFVMomentumPressure
     variable = rho_ud
     momentum_component = 'x'
   []
