@@ -139,10 +139,12 @@ class KatexBlockEquationComponent(components.ReaderComponent):
 
     def createToken(self, parent, info, page):
         """Create a LatexBlockEquation token."""
-        msg = '{}:{}\n'.format(page.source, info.line)
-        msg += "The LaTeX style commands for defining equations is deprecated, please update " \
-               "your markdown to use the !equation command."
-        LOG.warning(msg)
+
+        # TODO: Change to new syntax
+        #msg = '{}:{}\n'.format(page.source, info.line)
+        #msg += "The LaTeX style commands for defining equations is deprecated, please update " \
+        #       "your markdown to use the !equation command."
+        #LOG.warning(msg)
 
         # Raw LaTeX appropriate for passing to KaTeX render method
         tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
@@ -170,10 +172,11 @@ class KatexInlineEquationComponent(components.ReaderComponent):
         # Raw LaTeX appropriate for passing to KaTeX render method
         tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
 
-        msg = '{}:{}\n'.format(page.source, info.line)
-        msg += "The LaTeX style commands for defining equations is deprecated, please update " \
-               "your markdown to use the [!eq]({}) command.".format(tex)
-        LOG.warning(msg)
+        # TODO: Change to new syntax
+        # msg = '{}:{}\n'.format(page.source, info.line)
+        # msg += "The LaTeX style commands for defining equations is deprecated, please update " \
+        #        "your markdown to use the [!eq]({}) command.".format(tex)
+        # LOG.warning(msg)
 
         # Define a unique equation ID for use by KaTeX
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
