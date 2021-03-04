@@ -5,8 +5,6 @@
 
 void rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center);
 
-void rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point center);
-
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
  */
@@ -89,7 +87,7 @@ protected:
   /// x,y coordinates of the subchannels
   std::vector<std::vector<Real>> _subchannel_position;
   /// x,y coordinates of the fuel rods
-  std::vector<std::vector<Real>> _rod_position;
+  std::vector<Point> _rod_position;
   /// fuel rods that are belonging to each ring
   std::vector<std::vector<Real>> _rods_in_rings;
   /// stores the fuel rods belonging to each subchannel

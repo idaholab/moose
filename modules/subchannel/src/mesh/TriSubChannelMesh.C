@@ -20,30 +20,6 @@ TriSubChannelMesh::validParams()
 void
 rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
 {
-  positions.clear();
-
-  const Real start_r = (nrings - 1) * pitch;
-  const Real theta0 = 2 * libMesh::pi / 3;
-  const Real startx = start_r * std::cos(theta0);
-  const Real starty = start_r * std::sin(theta0);
-  for (int i = 0; i < nrings; i++)
-  {
-    int n_rods_in_row = nrings + i;
-    const Real y = starty - i * pitch * std::sin(theta0);
-    const Real x_row = startx + i * pitch * std::cos(theta0);
-    for (int j = 0; j < n_rods_in_row; j++)
-    {
-      const Real x = x_row + j * pitch;
-      positions.emplace_back(center(0) + x, center(1) + y);
-      if (i < nrings - 1)
-        positions.emplace_back(center(0) + x, center(1) - y);
-    }
-  }
-}
-
-void
-rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
-{
   Real teta = 0.0;
   Real dteta = 0.0;
   Real distance = 0.0;
@@ -71,32 +47,21 @@ rodPositions2(std::vector<Point> & positions, Real nrings, Real pitch, Point cen
       else
       {
         if (teta > pi / 3.0 && teta <= 2.0 / 3.0 * pi)
-        {
           teta_corrected = teta_corrected + pi / 3.0;
-        }
         else if (teta > 2.0 / 3.0 * pi && teta <= pi)
-        {
           teta_corrected = teta_corrected + 2.0 / 3.0 * pi;
-        }
         else if (teta > pi && teta <= 4.0 / 3.0 * pi)
-        {
           teta_corrected = teta_corrected + pi;
-        }
         else if (teta > 4.0 / 3.0 * pi && teta <= 5.0 / 3.0 * pi)
-        {
           teta_corrected = teta_corrected + 4.0 / 3.0 * pi;
-        }
         else if (teta > 5.0 / 3.0 * pi && teta <= 2.0 * pi)
-        {
           teta_corrected = teta_corrected + 5.0 / 3.0 * pi;
-        }
       }
-      positions.emplace_back(distance * std::cos(teta_corrected),
-                             distance * std::sin(teta_corrected));
+      positions.emplace_back(center(0) + distance * std::cos(teta_corrected),
+                             center(1) + distance * std::sin(teta_corrected));
       teta = teta + dteta;
     } // j
   }   // i
-  //
 }
 
 TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
@@ -109,14 +74,6 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   //  compute the hex mesh variables
   // -------------------------------------------
 
-  // angle in radians
-  Real teta = 0.0;
-  // incremental angle
-  Real dteta = 0.0;
-  // distance between selected fuel rods
-  Real distance = 0.0;
-  // angle in radiance
-  Real teta1 = 0.0;
   // x coordinate for the first position
   Real x0 = 0.0;
   // y coordinate for the first position
@@ -138,8 +95,6 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   // distance between two points
   Real dist0 = 0.0;
   // integer counter
-  unsigned int k = 0;
-  // integer counter
   unsigned int kgap = 0;
   // dummy integer
   unsigned int icorner = 0;
@@ -148,50 +103,16 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   // used to defined global direction of the cross_flow_map coefficients for each subchannel and gap
   const Real negative_flow = -1.0;
 
-  // find total number of fuel rods and set the rod position vector
-  _nrods = 1; //  the central rod initial set
+  rodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
+  _nrods = _rod_position.size();
 
-  for (unsigned int i = 2; i < _nrings + 1; i++)
-  {
-    _nrods = _nrods + (i - 1) * 6;
-  }
-
-  _rod_position.resize(_nrods);
-
-  for (unsigned int i = 0; i < _nrods; i++)
-  {
-    _rod_position[i].reserve(2);
-  }
-  _rod_position[0] = {0.0, 0.0};
-
-  // set the size of the rods_in_rings vector
-  k = 0; // initializat the fuel rod counter index
+  // assign the rods to the corresponding rings
+  unsigned int k = 0; // initializat the fuel rod counter index
   _rods_in_rings.resize(_nrings);
-  for (unsigned int i = 0; i < _nrings; i++)
-  {
-    _rods_in_rings[i].reserve(i * 6 + 1);
-  }
-  _rods_in_rings[0].push_back(k); // set the innermost ring which is a single rod, ring-0
-
-  // set the rod positions for each rod and assign the rods to the corresponding rings
+  _rods_in_rings[0].push_back(k++);
   for (unsigned int i = 1; i < _nrings; i++)
-  {
-    dteta = 2.0 * libMesh::pi / (i * 6);
-    teta = 0.0;
-
     for (unsigned int j = 0; j < i * 6; j++)
-    {
-      k = k + 1;
-      _rods_in_rings[i].push_back(k);
-      teta1 = fmod(teta, libMesh::pi / 3.0);
-      distance =
-          std::sqrt((pow(i * _pitch, 2) + pow(teta1 / dteta * _pitch, 2) -
-                     2.0 * i * _pitch * (teta1 / dteta * _pitch) * std::cos(libMesh::pi / 3.0)));
-
-      _rod_position[k] = {distance * std::cos(teta), distance * std::sin(teta)};
-      teta = teta + dteta;
-    } // j
-  }   // i
+      _rods_in_rings[i].push_back(k++);
 
   // to find the total number of subchannels...
   // inner ring subchannels = 6 ,
@@ -243,9 +164,9 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][0]);
         avg_coor_x =
-            0.5 * (_rod_position[_rods_in_rings[i][j]][0] + _rod_position[_rods_in_rings[i][0]][0]);
+            0.5 * (_rod_position[_rods_in_rings[i][j]](0) + _rod_position[_rods_in_rings[i][0]](0));
         avg_coor_y =
-            0.5 * (_rod_position[_rods_in_rings[i][j]][1] + _rod_position[_rods_in_rings[i][0]][1]);
+            0.5 * (_rod_position[_rods_in_rings[i][j]](1) + _rod_position[_rods_in_rings[i][0]](1));
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][0]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
         _gap_type[kgap] = EChannelType::CENTER;
@@ -255,10 +176,10 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
       {
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j + 1]);
-        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]][0] +
-                            _rod_position[_rods_in_rings[i][j + 1]][0]);
-        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]][1] +
-                            _rod_position[_rods_in_rings[i][j + 1]][1]);
+        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]](0) +
+                            _rod_position[_rods_in_rings[i][j + 1]](0));
+        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]](1) +
+                            _rod_position[_rods_in_rings[i][j + 1]](1));
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j]);
         _gap_to_rod_map[kgap].push_back(_rods_in_rings[i][j + 1]);
         _gap_type[kgap] = EChannelType::CENTER;
@@ -272,8 +193,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
       for (unsigned int l = 0; l < _rods_in_rings[i - 1].size(); l++)
       {
-        dist = std::sqrt(pow(_rod_position[_rods_in_rings[i - 1][l]][0] - avg_coor_x, 2) +
-                         pow(_rod_position[_rods_in_rings[i - 1][l]][1] - avg_coor_y, 2));
+        dist = std::sqrt(pow(_rod_position[_rods_in_rings[i - 1][l]](0) - avg_coor_x, 2) +
+                         pow(_rod_position[_rods_in_rings[i - 1][l]](1) - avg_coor_y, 2));
 
         if (dist < dist0)
         {
@@ -301,18 +222,18 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][0]);
         avg_coor_x =
-            0.5 * (_rod_position[_rods_in_rings[i][j]][0] + _rod_position[_rods_in_rings[i][0]][0]);
+            0.5 * (_rod_position[_rods_in_rings[i][j]](0) + _rod_position[_rods_in_rings[i][0]](0));
         avg_coor_y =
-            0.5 * (_rod_position[_rods_in_rings[i][j]][1] + _rod_position[_rods_in_rings[i][0]][1]);
+            0.5 * (_rod_position[_rods_in_rings[i][j]](1) + _rod_position[_rods_in_rings[i][0]](1));
       }
       else
       {
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j]);
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i][j + 1]);
-        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]][0] +
-                            _rod_position[_rods_in_rings[i][j + 1]][0]);
-        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]][1] +
-                            _rod_position[_rods_in_rings[i][j + 1]][1]);
+        avg_coor_x = 0.5 * (_rod_position[_rods_in_rings[i][j]](0) +
+                            _rod_position[_rods_in_rings[i][j + 1]](0));
+        avg_coor_y = 0.5 * (_rod_position[_rods_in_rings[i][j]](1) +
+                            _rod_position[_rods_in_rings[i][j + 1]](1));
       }
 
       // if the outermost ring, set the edge subchannels first... then the corner subchannels
@@ -354,8 +275,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
         _subchannel_to_rod_map[k].push_back(_rods_in_rings[i + 1][0]);
         for (unsigned int l = 0; l < _rods_in_rings[i + 1].size(); l++)
         {
-          dist = std::sqrt(pow(_rod_position[_rods_in_rings[i + 1][l]][0] - avg_coor_x, 2) +
-                           pow(_rod_position[_rods_in_rings[i + 1][l]][1] - avg_coor_y, 2));
+          dist = std::sqrt(pow(_rod_position[_rods_in_rings[i + 1][l]](0) - avg_coor_x, 2) +
+                           pow(_rod_position[_rods_in_rings[i + 1][l]](1) - avg_coor_y, 2));
           if (dist < dist0)
           {
             _subchannel_to_rod_map[k][2] = _rods_in_rings[i + 1][l];
@@ -586,13 +507,13 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   {
     if (_subch_type[i] == EChannelType::CENTER)
     {
-      _subchannel_position[i][0] = (_rod_position[_subchannel_to_rod_map[i][0]][0] +
-                                    _rod_position[_subchannel_to_rod_map[i][1]][0] +
-                                    _rod_position[_subchannel_to_rod_map[i][2]][0]) /
+      _subchannel_position[i][0] = (_rod_position[_subchannel_to_rod_map[i][0]](0) +
+                                    _rod_position[_subchannel_to_rod_map[i][1]](0) +
+                                    _rod_position[_subchannel_to_rod_map[i][2]](0)) /
                                    3.0;
-      _subchannel_position[i][1] = (_rod_position[_subchannel_to_rod_map[i][0]][1] +
-                                    _rod_position[_subchannel_to_rod_map[i][1]][1] +
-                                    _rod_position[_subchannel_to_rod_map[i][2]][1]) /
+      _subchannel_position[i][1] = (_rod_position[_subchannel_to_rod_map[i][0]](1) +
+                                    _rod_position[_subchannel_to_rod_map[i][1]](1) +
+                                    _rod_position[_subchannel_to_rod_map[i][2]](1)) /
                                    3.0;
     }
     else if (_subch_type[i] == EChannelType::EDGE)
@@ -605,8 +526,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
              (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
               _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][0])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][2]][0];
-          y0 = _rod_position[_subchannel_to_rod_map[j][2]][1];
+          x0 = _rod_position[_subchannel_to_rod_map[j][2]](0);
+          y0 = _rod_position[_subchannel_to_rod_map[j][2]](1);
         }
         else if (_subch_type[j] == EChannelType::CENTER &&
                  ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][0] &&
@@ -614,8 +535,8 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
                   (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
                    _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][0])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][1]][0];
-          y0 = _rod_position[_subchannel_to_rod_map[j][1]][1];
+          x0 = _rod_position[_subchannel_to_rod_map[j][1]](0);
+          y0 = _rod_position[_subchannel_to_rod_map[j][1]](1);
         }
         else if (_subch_type[j] == EChannelType::CENTER &&
                  ((_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][1] &&
@@ -623,13 +544,13 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
                   (_subchannel_to_rod_map[i][0] == _subchannel_to_rod_map[j][2] &&
                    _subchannel_to_rod_map[i][1] == _subchannel_to_rod_map[j][1])))
         {
-          x0 = _rod_position[_subchannel_to_rod_map[j][0]][0];
-          y0 = _rod_position[_subchannel_to_rod_map[j][0]][1];
+          x0 = _rod_position[_subchannel_to_rod_map[j][0]](0);
+          y0 = _rod_position[_subchannel_to_rod_map[j][0]](1);
         }
-        x1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]][0] +
-                    _rod_position[_subchannel_to_rod_map[i][1]][0]);
-        y1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]][1] +
-                    _rod_position[_subchannel_to_rod_map[i][1]][1]);
+        x1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](0) +
+                    _rod_position[_subchannel_to_rod_map[i][1]](0));
+        y1 = 0.5 * (_rod_position[_subchannel_to_rod_map[i][0]](1) +
+                    _rod_position[_subchannel_to_rod_map[i][1]](1));
         a1 = _rod_diameter / 2.0 + _duct_to_rod_gap / 2.0;
         a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
         _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
@@ -638,10 +559,10 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
     }
     else if (_subch_type[i] == EChannelType::CORNER)
     {
-      x0 = _rod_position[0][0];
-      y0 = _rod_position[0][1];
-      x1 = _rod_position[_subchannel_to_rod_map[i][0]][0];
-      y1 = _rod_position[_subchannel_to_rod_map[i][0]][1];
+      x0 = _rod_position[0](0);
+      y0 = _rod_position[0](1);
+      x1 = _rod_position[_subchannel_to_rod_map[i][0]](0);
+      y1 = _rod_position[_subchannel_to_rod_map[i][0]](1);
       a1 = _rod_diameter / 2.0 + _duct_to_rod_gap / 2.0;
       a2 = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) + a1;
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
