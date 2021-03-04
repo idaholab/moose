@@ -37,14 +37,13 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(
-        getFieldVar(params.get<std::vector<VariableName>>("u").front(), 0))),
-    _v_var(isParamValid("v") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar(
-                                   params.get<std::vector<VariableName>>("v").front(), 0))
-                             : nullptr),
-    _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar(
-                                   params.get<std::vector<VariableName>>("w").front(), 0))
-                             : nullptr),
+    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
+    _v_var(params.isParamValid("v")
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
+               : nullptr),
+    _w_var(params.isParamValid("w")
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
+               : nullptr),
     _rho(getParam<Real>("rho")),
     _mixing_len(coupledValue("mixing_length"))
 {
