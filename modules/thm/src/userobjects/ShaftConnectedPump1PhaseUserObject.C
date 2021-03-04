@@ -67,6 +67,7 @@ ShaftConnectedPump1PhaseUserObject::ShaftConnectedPump1PhaseUserObject(
   unsigned int n_jct_vars = _scalar_variable_names.size();
   _torque_jacobian_scalar_vars.resize(_n_shaft_eq, n_jct_vars);
   _moi_jacobian_scalar_vars.resize(_n_shaft_eq, n_jct_vars);
+  _moi_jacobian_scalar_vars.zero();
 }
 
 void
@@ -306,7 +307,6 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     _torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX) = dtau_hyd_drhoV;
 
     _moi_jacobian_omega_var(0, 0) = dmoi_domega;
-    _moi_jacobian_scalar_vars.zero();
 
     // dtau_dUi (i.e. wrt flow variables)
     {
@@ -381,6 +381,21 @@ ShaftConnectedPump1PhaseUserObject::threadJoin(const UserObject & uo)
   _friction_torque += scpuo._friction_torque;
   _pump_head += scpuo._pump_head;
   _moment_of_inertia += scpuo._moment_of_inertia;
+
+  _moi_jacobian_omega_var(0, 0) += scpuo._moi_jacobian_omega_var(0, 0);
+
+  _torque += scpuo._torque;
+  _torque_jacobian_omega_var(0, 0) += scpuo._torque_jacobian_omega_var(0, 0);
+  _torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX) +=
+      scpuo._torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX);
+
+  for (unsigned int i = 0; i < _n_scalar_eq; i++)
+  {
+    for (unsigned int j = 0; j < _omega_dof.size(); j++)
+    {
+      _residual_jacobian_omega_var[i](0, j) += scpuo._residual_jacobian_omega_var[i](0, j);
+    }
+  }
 }
 
 void
