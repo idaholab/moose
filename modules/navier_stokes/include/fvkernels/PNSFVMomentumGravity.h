@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include "INSFVMomentumGravity.h"
+#include "NSFVMomentumGravity.h"
 
 /**
  * Imposes a gravitational force on the momentum equation in porous media.
  */
-class PINSFVMomentumGravity : public INSFVMomentumGravity
+class PNSFVMomentumGravity : public NSFVMomentumGravity
 {
 public:
   static InputParameters validParams();
-  PINSFVMomentumGravity(const InputParameters & params);
+  PNSFVMomentumGravity(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
