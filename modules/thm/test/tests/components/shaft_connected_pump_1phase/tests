@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'shaft_motor_pump.i'
     exodiff = 'shaft_motor_pump_out.e'
-    rel_err = 8e-5
+    rel_err = 1e-3
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true'
   []
