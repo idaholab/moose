@@ -15,9 +15,11 @@ import io
 import mooseutils
 import moosesqa
 import copy
+import platform
 from MooseDocs.commands import check
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
+@unittest.skipIf(platform.system() == 'Darwin', "Running check a bunch of times causes a timeout on MacOS test machines, see moosetools#36.")
 class TestCheckScript(unittest.TestCase):
     def testCheck(self, *args):
 
@@ -50,6 +52,7 @@ class TestCheckScript(unittest.TestCase):
         self.assertIn('WARNING', out)
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
+@unittest.skipIf(platform.system() == 'Darwin', "Running check a bunch of times causes a timeout on MacOS test machines, see moosetools#36.")
 class TestCheck(unittest.TestCase):
     def setUp(self):
         # Change to the test/doc directory
