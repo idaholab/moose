@@ -11,11 +11,11 @@
 
 #include "FVFluxKernel.h"
 
-class NSFVPorosityMomentumPressure : public FVFluxKernel
+class PNSFVMomentumPressure : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
-  NSFVPorosityMomentumPressure(const InputParameters & params);
+  PNSFVMomentumPressure(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

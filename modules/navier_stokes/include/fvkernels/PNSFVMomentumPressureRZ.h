@@ -9,16 +9,17 @@
 
 #pragma once
 
-#include "NSFVMomentumPressureRZ.h"
+#include "FVElementalKernel.h"
 
-class NSFVPorosityMomentumPressureRZ : public NSFVMomentumPressureRZ
+class PNSFVMomentumPressureRZ : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  NSFVPorosityMomentumPressureRZ(const InputParameters & params);
+  PNSFVMomentumPressureRZ(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
+  const ADMaterialProperty<Real> & _p;
   const MaterialProperty<Real> & _eps;
 };

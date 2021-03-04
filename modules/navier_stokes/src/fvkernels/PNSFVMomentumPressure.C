@@ -7,13 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVPorosityMomentumPressure.h"
+#include "PNSFVMomentumPressure.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVPorosityMomentumPressure);
+registerMooseObject("NavierStokesApp", PNSFVMomentumPressure);
+registerMooseObjectRenamed("NavierStokesApp",
+                           PINSFVMomentumPressure,
+                           "07/01/2021 00:00",
+                           PNSFVMomentumPressure);
 
 InputParameters
-NSFVPorosityMomentumPressure::validParams()
+PNSFVMomentumPressure::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Introduces the coupled pressure term multiplied by a porosity into "
@@ -28,7 +32,7 @@ NSFVPorosityMomentumPressure::validParams()
   return params;
 }
 
-NSFVPorosityMomentumPressure::NSFVPorosityMomentumPressure(const InputParameters & params)
+PNSFVMomentumPressure::PNSFVMomentumPressure(const InputParameters & params)
   : FVFluxKernel(params),
     _eps_elem(getMaterialProperty<Real>(NS::porosity)),
     _eps_neighbor(getNeighborMaterialProperty<Real>(NS::porosity)),
@@ -39,7 +43,7 @@ NSFVPorosityMomentumPressure::NSFVPorosityMomentumPressure(const InputParameters
 }
 
 ADReal
-NSFVPorosityMomentumPressure::computeQpResidual()
+PNSFVMomentumPressure::computeQpResidual()
 {
   ADReal eps_p_interface;
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
