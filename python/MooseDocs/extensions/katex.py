@@ -77,6 +77,8 @@ class KatexExtension(command.CommandExtension):
             count += 1
             node['number'] = count
             labels[node['label']] = (count, node['bookmark'])
+
+            # TODO: When !eqref is used for references, this should be removed
             core.Shortcut(ast,
                           key=node['label'],
                           string='{} ({})'.format(self.get('prefix'), count),
@@ -85,7 +87,7 @@ class KatexExtension(command.CommandExtension):
         page['labels'] = labels
 
         renderer = self.translator.renderer
-        if common.has_tokens(ast, 'Equation', 'LatexInlineEquation') and isinstance(renderer, renderers.HTMLRenderer):
+        if common.has_tokens(ast, 'Equation') and isinstance(renderer, renderers.HTMLRenderer):
             renderer.addCSS('katex', "contrib/katex/katex.min.css", puid=page.uid)
             renderer.addCSS('katex_moose', "css/katex_moose.css", puid=page.uid)
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True, puid=page.uid)
@@ -106,9 +108,15 @@ class EquationCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
+        inline = 'inline' in info
+        if inline and info['command'] == 'equation':
+            raise common.exceptions.MooseDocsException("The '!equation' command is a block level command, use '!eq' instead.")
+        if not inline and info['command'] == 'eq':
+            raise common.exceptions.MooseDocsException("The '!eq' command is an inline level command, use '!equation' instead.")
+        if inline and (self.settings.get('id', None) is not None):
+            raise common.exceptions.MooseDocsException("The 'id' setting is not allowed within in the inline equation command.")
 
         # Extract the TeX
-        inline = 'inline' in info
         tex = info['inline'] if inline else info['block']
         tex = r'{}'.format(tex.strip('\n').replace('\n', ' '))
 
@@ -133,7 +141,7 @@ class KatexBlockEquationComponent(components.ReaderComponent):
         """Create a LatexBlockEquation token."""
         msg = '{}:{}\n'.format(page.source, info.line)
         msg += "The LaTeX style commands for defining equations is deprecated, please update " \
-               "your markdown files to use the !equation command."
+               "your markdown to use the !equation command."
         LOG.warning(msg)
 
         # Raw LaTeX appropriate for passing to KaTeX render method
@@ -164,7 +172,7 @@ class KatexInlineEquationComponent(components.ReaderComponent):
 
         msg = '{}:{}\n'.format(page.source, info.line)
         msg += "The LaTeX style commands for defining equations is deprecated, please update " \
-               "your markdown files to use [!eq]({}) command.".format(tex)
+               "your markdown to use the [!eq]({}) command.".format(tex)
         LOG.warning(msg)
 
         # Define a unique equation ID for use by KaTeX
@@ -185,7 +193,11 @@ class EquationReferenceCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        content = info['inline'] if ('inline' in info) else info['block']
+        inline = 'inline' in info
+        if not inline:
+            raise common.exceptions.MooseDocsException("The '!eqref' command is an inline level command.")
+
+        content = info['inline']
         match = self.LABEL_RE.search(content)
         if match is None:
             raise common.exceptions.MooseDocsException("Invalid equation label format.")
@@ -281,3 +293,9 @@ class RenderEquationReference(core.RenderShortcutLink):
             a['href']='#{}'.format(id_)
 
         html.String(a, content='{} ({})'.format(self.extension['prefix'], num))
+
+    def createLatex(self, parent, token, page):
+        key = token['label']
+        latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
+        latex.Command(parent, 'eqref', string=key)
+        return parent
