@@ -147,6 +147,48 @@ MultiAppConservativeTransfer::initialSetup()
               " regular to-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
+
+    // Let us check execute_on here. Users need to specify execute_on='transfer' in their input
+    // files for the postprocessors that are used to compute conversative qualities Master app
+    FEProblemBase & master_problem = _multi_app->problemBase();
+    std::vector<PostprocessorName> pps_empty;
+    // PPs for master app
+    auto & master_pps =
+        _current_direction == TO_MULTIAPP ? pps_empty : _to_postprocessors_to_be_preserved;
+    for (auto & master_pp : master_pps)
+    {
+      // Get out all execute_on options for master pp
+      auto & execute_on = master_problem.getUserObjectBase(master_pp).getExecuteOnEnum();
+      // Check if master app has transfer execute_on
+      if (!execute_on.contains(EXEC_TRANSFER))
+        mooseError("execute_on='transfer' is required in the conversative transfer for ",
+                   master_pp,
+                   ".\n"
+                   "Please add execute_on='transfer' into input file, and also \n"
+                   "make sure that execute_on options are not hardcoded in the code \n");
+    }
+
+    // Sub apps
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    {
+      // Sub problem for
+      FEProblemBase & sub_problem = _multi_app->appProblemBase(i);
+      // PPs for this subapp
+      auto & sub_pps =
+          _current_direction == TO_MULTIAPP ? _to_postprocessors_to_be_preserved : pps_empty;
+      for (auto & sub_pp : sub_pps)
+      {
+        // Get out of all execute_on options for sub pp
+        auto & execute_on = sub_problem.getUserObjectBase(sub_pp).getExecuteOnEnum();
+        // Check if sub pp has transfer execute_on
+        if (!execute_on.contains(EXEC_TRANSFER))
+          mooseError("execute_on='transfer' is required in the conversative transfer for ",
+                     sub_pp,
+                     ". \n"
+                     "Please add execute_on='transfer' into input file, and also \n"
+                     "make sure that execute_on options are not hardcoded in the code \n");
+      }
+    }
   }
 }
 
@@ -161,8 +203,8 @@ MultiAppConservativeTransfer::postExecute()
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
-        from_problem.computeUserObjectByName(EXEC_TRANSFER,
-                                             _from_postprocessors_to_be_preserved[0]);
+        from_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _from_postprocessors_to_be_preserved[0]);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
@@ -185,7 +227,8 @@ MultiAppConservativeTransfer::postExecute()
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
       if (_use_nearestpoint_pps)
-        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessors_to_be_preserved[0]);
+        to_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
@@ -206,7 +249,8 @@ MultiAppConservativeTransfer::postExecute()
 
       // Compute the to-postproessor again so that it has the right value with the updated solution
       if (_use_nearestpoint_pps)
-        to_problem.computeUserObjectByName(EXEC_TRANSFER, _to_postprocessors_to_be_preserved[0]);
+        to_problem.computeUserObjectByName(
+            EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
     }
 
     _console << "Finished Conservative transfers " << name() << std::endl;
@@ -248,7 +292,7 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
   // Compute to-postproessor to have the adjuster
   if (_current_direction == TO_MULTIAPP)
   {
-    to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+    to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
     to_adjuster = to_problem.getPostprocessorValueByName(to_postprocessor);
   }
 
@@ -357,7 +401,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   }
 
   // Compute to-postproessor to have the adjuster
-  to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+  to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster = to_problem.getPostprocessorValue(to_postprocessor);
@@ -454,7 +498,7 @@ MultiAppConservativeTransfer::adjustTransferedSolution(FEProblemBase * from_prob
   to_sys.update();
 
   // Compute again so that the post-processor has the value with the updated solution
-  to_problem.computeUserObjectByName(EXEC_TRANSFER, to_postprocessor);
+  to_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, to_postprocessor);
 }
 
 bool
