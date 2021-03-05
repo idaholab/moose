@@ -7,22 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GenericConstantArray.h"
+#include "GenericConstantVectorMaterial.h"
 
-#include "libmesh/quadrature.h"
+registerMooseObject("MooseApp", GenericConstantVectorMaterial);
+registerMooseObject("MooseApp", ADGenericConstantVectorMaterial);
 
-registerMooseObject("MooseApp", GenericConstantArray);
-
-defineLegacyParams(GenericConstantArray);
-
+template <bool is_ad>
 InputParameters
-GenericConstantArray::validParams()
+GenericConstantVectorMaterialTempl<is_ad>::validParams()
 {
 
   InputParameters params = Material::validParams();
   params.addRequiredParam<std::string>("prop_name",
                                        "The name of the property this material will have");
-  params.addRequiredParam<RealEigenVector>("prop_value",
+  params.addRequiredParam<RealVectorValue>("prop_value",
                                            "The values associated with the named property");
   params.declareControllable("prop_value");
   params.addClassDescription(
@@ -31,22 +29,29 @@ GenericConstantArray::validParams()
   return params;
 }
 
-GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
+template <bool is_ad>
+GenericConstantVectorMaterialTempl<is_ad>::GenericConstantVectorMaterialTempl(
+  const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
-    _prop_value(getParam<RealEigenVector>("prop_value")),
-    _property(declareProperty<RealEigenVector>(_prop_name))
+    _prop_value(getParam<RealVectorValue>("prop_value")),
+    _property(declareProperty<RealVectorValue>(_prop_name))
 {
 }
 
+template <bool is_ad>
 void
-GenericConstantArray::initQpStatefulProperties()
+GenericConstantVectorMaterialTempl<is_ad>::initQpStatefulProperties()
 {
   computeQpProperties();
 }
 
+template <bool is_ad>
 void
-GenericConstantArray::computeQpProperties()
+GenericConstantVectorMaterialTempl<is_ad>::computeQpProperties()
 {
   _property[_qp] = _prop_value;
 }
+
+template class GenericConstantVectorMaterialTempl<false>;
+template class GenericConstantVectorMaterialTempl<true>;
