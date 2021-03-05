@@ -63,13 +63,13 @@ static const std::string v = "v";
 static const std::string acceleration = "acceleration";
 static const std::string fluid = "fp";
 
-// for pronghorn material props representing gradients of nonlin+aux vars
+// for Navier-Stokes material props representing gradients of nonlin+aux vars
 inline std::string
 grad(const std::string & var)
 {
   return "grad_" + var;
 }
-// for pronghorn material props representing time derivatives of nonlin+aux vars
+// for Navier-Stokes material props representing time derivatives of nonlin+aux vars
 inline std::string
 time_deriv(const std::string & var)
 {
@@ -111,7 +111,7 @@ static const std::string c = "c";
 static const std::string speed = "speed";
 static const std::string sound_speed = "sound_speed";
 
-// other Pronghorn terms
+// other Navier-Stokes terms
 static const std::string component = "component";
 static const std::string T_ambient = "T_ambient";
 static const std::string source_scaling = "source_scaling";
