@@ -13,30 +13,29 @@
 
 class SinglePhaseFluidProperties;
 
-class PorousConservedVarMaterial : public Material
+class ConservedVarValuesMaterial : public Material
 {
 public:
-  PorousConservedVarMaterial(const InputParameters & parameters);
+  ConservedVarValuesMaterial(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
+  ADReal computeSpeed() const;
 
   /// fluid properties
   const SinglePhaseFluidProperties & _fluid;
 
   const ADVariableValue & _var_rho;
-  const ADVariableValue & _var_rho_ud;
-  const ADVariableValue & _var_rho_vd;
-  const ADVariableValue & _var_rho_wd;
+  const ADVariableValue & _var_rho_u;
+  const ADVariableValue & _var_rho_v;
+  const ADVariableValue & _var_rho_w;
   const ADVariableValue & _var_total_energy_density;
-  const MaterialProperty<Real> & _epsilon;
   ADMaterialProperty<Real> & _rho;
-  ADMaterialProperty<Real> & _superficial_rho;
   ADMaterialProperty<RealVectorValue> & _mass_flux;
   ADMaterialProperty<Real> & _total_energy_density;
   ADMaterialProperty<RealVectorValue> & _velocity;
-  ADMaterialProperty<RealVectorValue> & _superficial_velocity;
+  ADMaterialProperty<Real> & _speed;
   ADMaterialProperty<Real> & _vel_x;
   ADMaterialProperty<Real> & _vel_y;
   ADMaterialProperty<Real> & _vel_z;
@@ -48,5 +47,4 @@ protected:
   ADMaterialProperty<Real> & _pressure;
   ADMaterialProperty<Real> & _specific_total_enthalpy;
   ADMaterialProperty<Real> & _rho_ht;
-  ADMaterialProperty<Real> & _superficial_rho_ht;
 };
