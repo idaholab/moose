@@ -92,7 +92,7 @@ private:
   OutputWarehouse & _output_warehouse;
 
   /// The stream for buffering the message
-  /// This stupidly has to be a shared poitner because
+  /// This stupidly has to be a shared pointer because
   /// of something in AutomaticMortarGeneration that requires
   /// this to be trivially copyable.
   mutable std::shared_ptr<std::ostringstream> _oss;

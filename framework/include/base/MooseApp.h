@@ -924,7 +924,7 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
-  /// The PerfGraph object for this applciation
+  /// The PerfGraph object for this application
   PerfGraph _perf_graph;
 
   /// The RankMap is a useful object for determining how

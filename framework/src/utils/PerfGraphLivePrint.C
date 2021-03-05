@@ -20,8 +20,12 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _time_limit(perf_graph._live_print_time_limit),
     _mem_limit(perf_graph._live_print_mem_limit),
     _stack_level(0),
+    _current_execution_list_end(0),
+    _current_execution_list_last(0),
     _last_execution_list_end(0),
-    _last_printed_increment(NULL)
+    _last_printed_increment(NULL),
+    _last_num_printed(0),
+    _printed(false)
 {
 }
 
@@ -66,7 +70,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   {
     _console << std::string(2 * section_increment._print_stack_level, ' ') << message;
 
-    // If we're not printind dots - just finish the line
+    // If we're not printing dots - just finish the line
     if (!_id_to_section_info[section_increment._id]._print_dots)
       _console << '\n';
 

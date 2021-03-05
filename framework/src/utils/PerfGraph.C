@@ -230,7 +230,7 @@ PerfGraph::push(const PerfID id)
 
   _stack[_current_position] = new_node;
 
-  // Add this to the exection list
+  // Add this to the execution list
   if ((_live_print_active || _live_print_all) && _pid == 0 &&
       (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
   {
@@ -266,7 +266,7 @@ PerfGraph::pop()
     // Tell the printing thread that a section has finished
     //
     // Note: no mutex is needed here because we're using an atomic
-    // in the predacate of the condition_variable in the thread
+    // in the predicate of the condition_variable in the thread
     // This is technically correct - but there is a chance of missing a signal
     // For us - that chance is low and doesn't matter (the timeout will just be hit
     // instead). So - I would rather not have an extra lock here in the main thread.
@@ -381,10 +381,6 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto self_avg = self / static_cast<Real>(num_calls);
     auto self_percent = 100. * self / total_root_time;
 
-    //    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-    //    auto children_avg = children / static_cast<Real>(num_calls);
-    //    auto children_percent = 100. * children / total_root_time;
-
     auto total = std::chrono::duration<double>(current_node->totalTime()).count();
     auto total_avg = total / static_cast<Real>(num_calls);
     auto total_percent = 100. * total / total_root_time;
@@ -398,9 +394,6 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
                   self_avg,
                   self_percent,
                   self_memory,
-                  //                  children,
-                  //                  children_avg,
-                  //                  children_percent,
                   total,
                   total_avg,
                   total_percent,
@@ -433,10 +426,6 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto self_avg = self / static_cast<Real>(num_calls);
   auto self_percent = 100. * self / total_root_time;
 
-  //  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-  //  auto children_avg = children / static_cast<Real>(num_calls);
-  //  auto children_percent = 100. * children / total_root_time;
-
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
   auto total_avg = total / static_cast<Real>(num_calls);
   auto total_percent = 100. * total / total_root_time;
@@ -450,9 +439,6 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
                 self_avg,
                 self_percent,
                 self_memory,
-                //                children,
-                //                children_avg,
-                //                children_percent,
                 total,
                 total_avg,
                 total_percent,
@@ -488,9 +474,6 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
                     "Avg(s)",
                     "%",
                     "Mem(MB)",
-                    // "Children(s)",
-                    // "Avg(s)",
-                    // "%",
                     "Total(s)",
                     "Avg(s)",
                     "%",
@@ -504,14 +487,11 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
       VariadicTableColumnFormat::FIXED,   // Avg.
       VariadicTableColumnFormat::PERCENT, // %
       VariadicTableColumnFormat::AUTO,    // Memory
-      // VariadicTableColumnFormat::FIXED,     // Children
-      // VariadicTableColumnFormat::FIXED,     // Avg.
-      // VariadicTableColumnFormat::PERCENT,   // %
       VariadicTableColumnFormat::FIXED,   // Total
       VariadicTableColumnFormat::FIXED,   // Avg.
       VariadicTableColumnFormat::PERCENT, // %
       VariadicTableColumnFormat::AUTO,    // Memory
-  });                                     // %
+  });
 
   vtable.setColumnPrecision({
       1, // Section Name
@@ -542,9 +522,6 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
                     "Avg(s)",
                     "%",
                     "Mem(MB)",
-                    // "Children(s)",
-                    // "Avg(s)",
-                    // "%",
                     "Total(s)",
                     "Avg(s)",
                     "%",
@@ -557,9 +534,6 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
                           VariadicTableColumnFormat::FIXED,   // Avg.
                           VariadicTableColumnFormat::PERCENT, // %
                           VariadicTableColumnFormat::AUTO,    // Memory
-                          // VariadicTableColumnFormat::FIXED,     // Children
-                          // VariadicTableColumnFormat::FIXED,     // Avg.
-                          // VariadicTableColumnFormat::PERCENT,   // %
                           VariadicTableColumnFormat::FIXED,   // Total
                           VariadicTableColumnFormat::FIXED,   // Avg.
                           VariadicTableColumnFormat::PERCENT, // %

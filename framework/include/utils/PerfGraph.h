@@ -237,21 +237,43 @@ protected:
    */
   struct SectionTime
   {
+    /// Amount of time used within this section (without children)
     Real _self = 0.;
+
+    /// Amount of time used by children
     Real _children = 0.;
+
+    /// Total amount of time used
     Real _total = 0.;
+
+    /// Number of times this section has been called
     unsigned long int _num_calls = 0;
+
+    /// Amount of memory gained within this section (without children)
     long int _self_memory = 0;
+
+    /// Amanout of memory gained by children
     long int _children_memory = 0;
+
+    /// Total memory gain for this section
     long int _total_memory = 0;
   };
 
-  // Whether or not an increment is the start of the finish increment
+  /**
+   * The execution state of an increment.
+   */
   enum IncrementState
   {
+    /// Section just started running
     started,
+
+    /// This section has already started printing
     printed,
+
+    /// Something else printed, but now this printed again
     continued,
+
+    /// The section is complete
     finished
   };
 
@@ -266,9 +288,17 @@ protected:
     /// Whether or not this increment is the start of an increment or
     /// the finishing of an increment.
     IncrementState _state;
+
+    /// How much to indent this section
     unsigned int _print_stack_level;
+
+    /// How many dots have been printed for this section
     unsigned int _num_dots;
+
+    /// Either the starting time or final time depending on _state
     std::chrono::time_point<std::chrono::steady_clock> _time;
+
+    /// Either the starting memory or final memory depending on _state
     long int _memory;
   };
 
