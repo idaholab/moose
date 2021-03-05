@@ -69,9 +69,6 @@
       #Applies the pressure
       boundary = top
       factor = 5e5 # Pa
-      disp_x = disp_x
-      disp_y = disp_y
-      disp_z = disp_z
     [../]
   [../]
   [./anchor_x]
