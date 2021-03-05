@@ -290,6 +290,11 @@ public:
    */
   bool isRootProcessor() { return _my_rank == 0; }
 
+  /**
+   * Whether or not this MultiApp is using positions or its own way for constructing sub-apps.
+   */
+  bool usingPositions() const { return _use_positions; }
+
 protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps

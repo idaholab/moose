@@ -21,7 +21,7 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 2
     distributions = 'uniform'
     execute_on = PRE_MULTIAPP_SETUP
   []

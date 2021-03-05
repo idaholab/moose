@@ -53,6 +53,15 @@ MultiAppCommandLineControl::MultiAppCommandLineControl(const InputParameters & p
         name(),
         "' object, thus the 'execute_on' of the sampler must include 'PRE_MULTIAPP_SETUP'.");
 
+  if (_multi_app->usingPositions())
+    paramError("multi_app",
+               "The MultiApp must construct its sub-apps in initial setup but not during its "
+               "creation for '",
+               type(),
+               "'.\nTypically only sampler MultiApps work with '",
+               type(),
+               "' objects.");
+
   bool batch_reset = _multi_app->isParamValid("mode") &&
                      (_multi_app->getParam<MooseEnum>("mode") == "batch-reset");
   bool batch_restore = _multi_app->isParamValid("mode") &&

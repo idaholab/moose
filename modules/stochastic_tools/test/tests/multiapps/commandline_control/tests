@@ -24,15 +24,13 @@
     []
   []
 
-  [wrong_size]
+  [wrong_multiapp_type]
     type = RunException
-    input = master_wrong_size.i
-    expect_err = "The number of sub apps \(2\) created by MultiApp object 'sub' must be equal to the "
-                 "number for rows \(10\) for the 'sample' Sampler object"
+    input = master_wrong_multiapp_type.i
+    expect_err = "The MultiApp must construct its sub-apps in initial setup but not during its creation"
     design = 'source/controls/MultiAppCommandLineControl.md'
 
-    requirement = "The system shall error when the number of samplers differs from the number of sub "
-                  "applications."
+    requirement = "The system shall error when sub-apps are constructed too early thus unable to be changed by sampers."
   []
 
   [wrong_num_params]
