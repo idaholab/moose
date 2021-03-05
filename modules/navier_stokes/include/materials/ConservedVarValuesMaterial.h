@@ -47,4 +47,5 @@ protected:
   ADMaterialProperty<Real> & _pressure;
   ADMaterialProperty<Real> & _specific_total_enthalpy;
   ADMaterialProperty<Real> & _rho_ht;
+  ADMaterialProperty<Real> & _T_fluid;
 };
