@@ -7,13 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVMomentumFriction.h"
-#include "PINSFVSuperficialVelocityVariable.h"
+#include "PNSFVMomentumFriction.h"
 
-registerMooseObject("NavierStokesApp", PINSFVMomentumFriction);
+registerMooseObject("NavierStokesApp", PNSFVMomentumFriction);
+registerMooseObjectRenamed("NavierStokesApp",
+                           PINSFVMomentumFriction,
+                           "07/01/2021 00:00",
+                           PNSFVMomentumFriction);
 
 InputParameters
-PINSFVMomentumFriction::validParams()
+PNSFVMomentumFriction::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a friction force term on fluid in porous media in the "
@@ -37,7 +40,7 @@ PINSFVMomentumFriction::validParams()
   return params;
 }
 
-PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
+PNSFVMomentumFriction::PNSFVMomentumFriction(const InputParameters & params)
   : FVElementalKernel(params),
     _component(getParam<MooseEnum>("momentum_component")),
     _cL(isParamValid("Darcy_name") ? &getADMaterialProperty<RealVectorValue>("Darcy_name")
@@ -52,10 +55,6 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
                                             : nullptr),
     _rho(isParamValid("rho") ? getParam<Real>("rho") : 0)
 {
-  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
-    mooseError("PINSFVMomentumFriction may only be used with a superficial velocity "
-               "variable, of variable type PINSFVSuperficialVelocityVariable.");
-
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
 
@@ -67,7 +66,7 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
 }
 
 ADReal
-PINSFVMomentumFriction::computeQpResidual()
+PNSFVMomentumFriction::computeQpResidual()
 {
   ADReal friction_term = 0;
 
