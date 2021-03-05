@@ -204,7 +204,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   [mass_advection]
     type = PNSFVUpwindAdvectorAndAdvected
     variable = rho
-    vel = velocity
+    vel = superficial_velocity
     advected_interp_method = ${advected_interp_method}
   []
 
@@ -218,7 +218,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = PNSFVUpwindAdvectorAndAdvected
     variable = rho_et
     advected_quantity = 'rho_ht'
-    vel = velocity
+    vel = superficial_velocity
     advected_interp_method = ${advected_interp_method}
   []
 []
@@ -234,7 +234,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho
-    vel = velocity
+    vel = superficial_velocity
     advected_interp_method = ${advected_interp_method}
   []
   [rho_u_left]
@@ -259,7 +259,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
-    vel = velocity
+    vel = superficial_velocity
     advected_quantity = 'rho_ht'
     advected_interp_method = ${advected_interp_method}
   []
@@ -267,13 +267,12 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 
 [Materials]
   [var_mat]
-    type = ConservedVarMaterial
+    type = PorousConservedVarMaterial
     rho = rho
-    rhou = rho_u
+    superficial_rhou = rho_u
     rho_et = rho_et
     fp = fp
     porosity = porosity
-    velocity_is_superficial = true
   []
   [porosity_left]
     type = GenericConstantMaterial
