@@ -68,7 +68,6 @@
 #include "ADKernel.h"
 #include "ADDirichletBCBase.h"
 #include "Moose.h"
-#include "TimedPrint.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
 #include "FVElementalKernel.h"

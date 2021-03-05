@@ -36,7 +36,7 @@ protected:
   /// What to do if we're still in the same spot
   void inSamePlace();
 
-  // What to do if there are new things in the execution list
+  /// What to do if there are new things in the execution list
   void iterateThroughExecutionList();
 
   /// Number of columns before wrapping

@@ -14,7 +14,6 @@
 #include "MooseApp.h"
 #include "RelationshipManager.h"
 #include "PointListAdaptor.h"
-#include "TimedPrint.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
 #include "Assembly.h"

@@ -13,7 +13,6 @@
 #include "DisplacedProblem.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
-#include "TimedPrint.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/equation_systems.h"

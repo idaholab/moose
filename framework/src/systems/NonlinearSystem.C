@@ -16,7 +16,6 @@
 #include "PetscSupport.h"
 #include "ComputeResidualFunctor.h"
 #include "ComputeFDResidualFunctor.h"
-#include "TimedPrint.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 

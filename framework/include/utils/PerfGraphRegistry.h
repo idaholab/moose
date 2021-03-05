@@ -24,6 +24,9 @@ namespace internal
 // Forward Declarations
 class PerfGraphRegistry;
 
+/**
+ * Get the global PerfGraphRegistry singleton.
+ */
 PerfGraphRegistry & getPerfGraphRegistry();
 
 /**
@@ -37,10 +40,19 @@ public:
    */
   struct SectionInfo
   {
+    /// It's unique ID
     PerfID _id;
+
+    /// The name
     std::string _name;
+
+    /// It's print level (verbosity level)
     unsigned int _level;
+
+    /// Message to print while the section is running
     std::string _live_message;
+
+    /// Whether or not to print dots while this section runs
     bool _print_dots;
   };
 

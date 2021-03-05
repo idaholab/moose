@@ -32,6 +32,7 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
 void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
+  // If the live_message is empty - just print the name
   auto message = !_id_to_section_info[section_increment._id]._live_message.empty()
                      ? _id_to_section_info[section_increment._id]._live_message
                      : _id_to_section_info[section_increment._id]._name;
@@ -43,10 +44,11 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       _id_to_section_info[_last_printed_increment->_id]._print_dots)
     _console << '\n';
 
+  // Do we need to print dots?
   if (_last_printed_increment && _last_printed_increment == &section_increment &&
       (section_increment._state != PerfGraph::IncrementState::finished &&
        (section_increment._state == PerfGraph::IncrementState::printed ||
-        section_increment._state == PerfGraph::IncrementState::continued))) // Add dots
+        section_increment._state == PerfGraph::IncrementState::continued)))
   {
     if (_id_to_section_info[section_increment._id]._print_dots)
     {
@@ -88,6 +90,7 @@ void
 PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_start,
                                PerfGraph::SectionIncrement & section_increment_finish)
 {
+  // If the live_message is empty - just print the name
   auto message = !_id_to_section_info[section_increment_start._id]._live_message.empty()
                      ? _id_to_section_info[section_increment_start._id]._live_message
                      : _id_to_section_info[section_increment_start._id]._name;
@@ -95,13 +98,15 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   auto time_increment =
       std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
           .count();
+
   auto memory_increment = section_increment_finish._memory - section_increment_start._memory;
 
   auto num_horizontal_chars = message.size() + (2 * section_increment_start._print_stack_level);
 
+  // Do we need to print "Finished"?
+  // This happens after something else printed in-between when this increment started and finished
   if (!_id_to_section_info[section_increment_start._id]._print_dots ||
-      (_last_printed_increment &&
-       _last_printed_increment != &section_increment_start)) // Print Finished
+      (_last_printed_increment && _last_printed_increment != &section_increment_start))
   {
     if ((_last_printed_increment &&
          _last_printed_increment->_state == PerfGraph::IncrementState::printed &&
@@ -116,6 +121,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   else
     num_horizontal_chars += section_increment_start._num_dots;
 
+  // Actually do the printing
   _console << std::setw(WRAP_LENGTH - num_horizontal_chars) << ' ' << " [" << COLOR_YELLOW
            << std::setw(6) << std::fixed << std::setprecision(2) << time_increment << " s"
            << COLOR_DEFAULT << ']' << " [" << COLOR_YELLOW << std::setw(5) << std::fixed

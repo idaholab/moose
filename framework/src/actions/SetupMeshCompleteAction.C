@@ -12,7 +12,6 @@
 #include "Moose.h"
 #include "Adaptivity.h"
 #include "MooseApp.h"
-#include "TimedPrint.h"
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 

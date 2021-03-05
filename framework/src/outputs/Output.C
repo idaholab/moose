@@ -21,7 +21,6 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "Console.h"
-#include "TimedPrint.h"
 
 #include "libmesh/equation_systems.h"
 

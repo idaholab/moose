@@ -20,7 +20,6 @@
 #include "UpdateDisplacedMeshThread.h"
 #include "Assembly.h"
 #include "DisplacedProblem.h"
-#include "TimedPrint.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/fe_interface.h"
 

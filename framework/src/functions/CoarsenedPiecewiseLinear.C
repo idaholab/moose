@@ -9,7 +9,6 @@
 
 #include "CoarsenedPiecewiseLinear.h"
 #include "PointReduction.h"
-#include "TimedPrint.h"
 
 registerMooseObject("MooseApp", CoarsenedPiecewiseLinear);
 

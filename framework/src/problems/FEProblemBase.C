@@ -87,7 +87,6 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
-#include "TimedPrint.h"
 #include "MaxVarNDofsPerElem.h"
 #include "MaxVarNDofsPerNode.h"
 #include "FVKernel.h"

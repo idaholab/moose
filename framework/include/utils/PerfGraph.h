@@ -279,7 +279,7 @@ protected:
 
   /**
    * Use to hold an increment of time and memory for a section
-   * This is used in the TimedPrint capability.
+   * This is used in the LivePrint capability.
    */
   struct SectionIncrement
   {

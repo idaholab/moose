@@ -16,7 +16,6 @@
 #include "MooseMesh.h"
 #include "NonlinearSystemBase.h"
 #include "UpdateErrorVectorsThread.h"
-#include "TimedPrint.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
