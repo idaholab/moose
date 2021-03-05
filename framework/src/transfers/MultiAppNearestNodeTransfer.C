@@ -131,25 +131,7 @@ MultiAppNearestNodeTransfer::execute()
 
       if (is_to_nodal)
       {
-        std::vector<Node *> target_local_nodes;
-
-        if (isParamValid("target_boundary"))
-        {
-          BoundaryID target_bnd_id =
-              _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
-
-          ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-          for (const auto & bnode : bnd_nodes)
-            if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
-              target_local_nodes.push_back(bnode->_node);
-        }
-        else
-        {
-          target_local_nodes.resize(to_mesh->n_local_nodes());
-          unsigned int i = 0;
-          for (auto & node : to_mesh->local_node_ptr_range())
-            target_local_nodes[i++] = node;
-        }
+        std::vector<Node *> target_local_nodes = getTargetLocalNodes(i_to);
 
         // For error checking: keep track of all target_local_nodes
         // which are successfully mapped to at least one domain where
@@ -503,25 +485,7 @@ MultiAppNearestNodeTransfer::execute()
 
     if (is_to_nodal)
     {
-      std::vector<Node *> target_local_nodes;
-
-      if (isParamValid("target_boundary"))
-      {
-        BoundaryID target_bnd_id =
-            _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
-
-        ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-        for (const auto & bnode : bnd_nodes)
-          if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
-            target_local_nodes.push_back(bnode->_node);
-      }
-      else
-      {
-        target_local_nodes.resize(to_mesh.n_local_nodes());
-        unsigned int i = 0;
-        for (auto & node : to_mesh.local_node_ptr_range())
-          target_local_nodes[i++] = node;
-      }
+      std::vector<Node *> target_local_nodes = getTargetLocalNodes(i_to);
 
       for (const auto & node : target_local_nodes)
       {
@@ -892,4 +856,31 @@ MultiAppNearestNodeTransfer::getLocalEntities(
         local_entities.emplace_back(elem->centroid(), elem);
     }
   }
+}
+
+std::vector<Node *>
+MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_id)
+{
+  std::vector<Node *> target_local_nodes;
+  const MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
+
+  if (isParamValid("target_boundary"))
+  {
+    BoundaryID target_bnd_id =
+        _to_meshes[to_problem_id]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
+
+    ConstBndNodeRange & bnd_nodes = *(_to_meshes[to_problem_id])->getBoundaryNodeRange();
+    for (const auto & bnode : bnd_nodes)
+      if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
+        target_local_nodes.push_back(bnode->_node);
+  }
+  else
+  {
+    target_local_nodes.resize(to_mesh.n_local_nodes());
+    unsigned int i = 0;
+    for (auto & node : to_mesh.local_node_ptr_range())
+      target_local_nodes[i++] = node;
+  }
+
+  return target_local_nodes;
 }
