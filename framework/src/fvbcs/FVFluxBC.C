@@ -149,7 +149,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  mooseAssert(_var.dofIndices().size() <= 1, "We're currently built to use CONSTANT MONOMIALS");
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
     // Even though the elem element is always the non-null pointer on mesh

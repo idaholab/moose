@@ -489,24 +489,35 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
     fv_kernel_requested_props.insert(mp_deps.begin(), mp_deps.end());
   }
 
+  std::set<unsigned int> same_matprop_name;
   for (std::shared_ptr<MaterialBase> mat : mats)
   {
     for (const auto prop_id : mat->getSuppliedPropIDs())
     {
       auto pr = supplied_props.insert(prop_id);
-      mooseAssert(pr.second,
-                  "Multiple objects supply property ID "
-                      << pr.second
-                      << ". Do you have different block-restricted physics *and* different "
-                         "block-restricted materials "
-                         "on either side of an interface that define the same "
-                         "property name? Unfortunately that is not supported in FV because we have "
-                         "to allow ghosting of material properties for block-restricted physics.");
+      if (!pr.second)
+        same_matprop_name.insert(prop_id);
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
     emptyDifferenceTest(mp_deps, supplied_props, props_diff);
   }
+
+  // Print a warning if block restricted materials are used
+  std::stringstream same_matprop_name_str;
+  std::copy(same_matprop_name.begin(),
+            same_matprop_name.end(),
+            std::ostream_iterator<int>(same_matprop_name_str, " "));
+
+  if (same_matprop_name.size() > 0)
+    mooseDoOnce(
+        mooseWarning("Multiple objects supply properties of ID ",
+                     same_matprop_name_str.str(),
+                     ".\n Do you have different block-restricted physics *and* different "
+                     "block-restricted \nmaterials "
+                     "on either side of an interface that define the same "
+                     "property name? \nUnfortunately that is not supported in FV because we have "
+                     "to allow ghosting \nof material properties for block-restricted physics."));
 
   emptyDifferenceTest(fv_kernel_requested_props, supplied_props, props_diff);
 #endif

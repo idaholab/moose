@@ -90,6 +90,7 @@ MultiAppVariableValueSampleTransfer::execute()
 
           if (elem && elem->processor_id() == from_mesh.processor_id())
           {
+            from_sub_problem.setCurrentSubdomainID(elem, 0);
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
             mooseAssert(from_var.sln().size() == 1, "No values in u!");
