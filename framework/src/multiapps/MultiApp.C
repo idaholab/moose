@@ -438,10 +438,10 @@ MultiApp::restore(bool force)
 
   if (force || needsRestoration())
   {
-    // Must be restarting / recovering so hold off on restoring
-    // Instead - the restore will happen in createApp()
-    // Note that _backups was already populated by dataLoad()
-    if (_apps.empty())
+    // Must be restarting / recovering from main app so hold off on restoring
+    // Instead - the restore will happen in sub-apps' initialSetup()
+    // Note that _backups was already populated by dataLoad() in the main app
+    if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
       return;
 
     // We temporarily copy and store solutions for all subapps
