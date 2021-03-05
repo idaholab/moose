@@ -297,7 +297,7 @@ ContactAction::addMortarContact()
 {
   std::string action_name = MooseUtils::shortName(name());
 
-  std::vector<VariableName> displacements = getDisplacementVarNames();
+  std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
   const unsigned int ndisp = displacements.size();
 
   // Definitions for mortar contact.
@@ -478,7 +478,7 @@ ContactAction::addNodeFaceContact()
 {
   std::string action_name = MooseUtils::shortName(name());
 
-  std::vector<VariableName> displacements = getDisplacementVarNames();
+  std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
   const unsigned int ndisp = displacements.size();
 
   std::string constraint_type;
@@ -568,31 +568,4 @@ ContactAction::commonParameters()
   params.addParam<MooseEnum>("model", ContactAction::getModelEnum(), "The contact model to use");
 
   return params;
-}
-
-std::vector<VariableName>
-ContactAction::getDisplacementVarNames()
-{
-  std::vector<VariableName> displacements;
-  if (isParamValid("displacements"))
-    displacements = getParam<std::vector<VariableName>>("displacements");
-  else
-  {
-    // Legacy parameter scheme for displacements
-    if (!isParamValid("disp_x"))
-      mooseError("Specify displacement variables using the `displacements` parameter.");
-    displacements.push_back(getParam<VariableName>("disp_x"));
-
-    if (isParamValid("disp_y"))
-    {
-      displacements.push_back(getParam<VariableName>("disp_y"));
-      if (isParamValid("disp_z"))
-        displacements.push_back(getParam<VariableName>("disp_z"));
-    }
-
-    mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
-                    "will go away with the deprecation of the Solid Mechanics module).");
-  }
-
-  return displacements;
 }

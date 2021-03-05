@@ -64,9 +64,6 @@ DomainIntegralAction::validParams()
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<VariableName>("disp_x", "The x displacement");
-  params.addParam<VariableName>("disp_y", "The y displacement");
-  params.addParam<VariableName>("disp_z", "The z displacement");
   params.addParam<VariableName>("temperature", "", "The temperature");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
@@ -190,34 +187,12 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
-    if (isParamValid("displacements"))
-    {
-      _displacements = getParam<std::vector<VariableName>>("displacements");
+    _displacements = getParam<std::vector<VariableName>>("displacements");
 
-      if (_displacements.size() < 2)
-        paramError(
-            "displacements",
-            "DomainIntegral error: The size of the displacements vector should at least be 2.");
-    }
-    else
-    {
-      if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
-        mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
-                        "Please specify displacements using the `displacements` parameter.");
-
-      if (!isParamValid("disp_x") || !isParamValid("disp_y"))
-        paramError(
-            "displacements",
-            "DomainIntegral error: Specify displacements using the `displacements` parameter.");
-      else
-      {
-        _displacements.clear();
-        _displacements.push_back(getParam<VariableName>("disp_x"));
-        _displacements.push_back(getParam<VariableName>("disp_y"));
-        if (isParamValid("disp_z"))
-          _displacements.push_back(getParam<VariableName>("disp_z"));
-      }
-    }
+    if (_displacements.size() < 2)
+      paramError(
+          "displacements",
+          "DomainIntegral error: The size of the displacements vector should at least be 2.");
 
     if (integral_moose_enums[i] != "JIntegral" && integral_moose_enums[i] != "CIntegral" &&
         integral_moose_enums[i] != "KFromJIntegral")

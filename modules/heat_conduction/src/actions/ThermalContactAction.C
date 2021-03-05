@@ -62,9 +62,6 @@ ThermalContactAction::validParams()
       "type",
       "A string representing the Moose object that will be used for heat conduction over the gap");
 
-  params.addParam<std::vector<VariableName>>("disp_x", "The x displacement");
-  params.addParam<std::vector<VariableName>>("disp_y", "The y displacement");
-  params.addParam<std::vector<VariableName>>("disp_z", "The z displacement");
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
