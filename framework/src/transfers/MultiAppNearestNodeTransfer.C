@@ -199,7 +199,10 @@ MultiAppNearestNodeTransfer::execute()
         std::set<Elem *> local_elems_found;
         std::vector<Point> points;
         std::vector<dof_id_type> point_ids;
-        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
+
+        std::vector<Elem *> target_local_elems = getTargetLocalElems(i_to);
+
+        for (auto & elem : target_local_elems)
         {
           // Skip this element if the variable has no dofs at it.
           if (elem->n_dofs(sys_num, var_num) < 1)
@@ -267,7 +270,7 @@ MultiAppNearestNodeTransfer::execute()
         // Verify that we found at least one candidate bounding
         // box for each local element with dofs for the current
         // variable in the current System.
-        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
+        for (auto & elem : target_local_elems)
           if (elem->n_dofs(sys_num, var_num) && !local_elems_found.count(elem))
             mooseError("In ",
                        name(),
@@ -542,7 +545,10 @@ MultiAppNearestNodeTransfer::execute()
     {
       std::vector<Point> points;
       std::vector<dof_id_type> point_ids;
-      for (auto & elem : to_mesh.active_local_element_ptr_range())
+
+      std::vector<Elem *> target_local_elems = getTargetLocalElems(i_to);
+
+      for (auto & elem : target_local_elems)
       {
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
@@ -883,4 +889,18 @@ MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_i
   }
 
   return target_local_nodes;
+}
+
+std::vector<Elem *>
+MultiAppNearestNodeTransfer::getTargetLocalElems(const unsigned int to_problem_id)
+{
+  std::vector<Elem *> target_local_elems;
+  const MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
+
+  target_local_elems.resize(to_mesh.n_local_elem());
+  unsigned int i = 0;
+  for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+    target_local_elems[i++] = elem;
+
+  return target_local_elems;
 }

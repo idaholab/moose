@@ -104,4 +104,11 @@ private:
    * @return target local nodes
    */
   std::vector<Node *> getTargetLocalNodes(const unsigned int to_problem_id);
+
+  /**
+   * Get the local elements on the target boundary for the transfer
+   * @param to_problem_id index of the problem transfer is sending to
+   * @return target local elements
+   */
+  std::vector<Elem *> getTargetLocalElems(const unsigned int to_problem_id);
 };
