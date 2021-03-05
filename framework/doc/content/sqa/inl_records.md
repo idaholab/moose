@@ -12,7 +12,7 @@ actual application of interest when searching.
 1. Enter +PLN-4005+ in the "Document Id" field and select +Submit+.
 1. Select the +Doc Viewer down arrow+ and then select the +Record File pdf+.
 
-## [!ac](EA) record for a MOOSE-Based Application id=enterprise_architecture_entry
+## [!ac](EA) Record id=enterprise_architecture_entry
 
 1. From the Nucleus Home page select +A-Z+
 1. From the alphabetical list select +CTM –Capabilities & Technology Management+
@@ -20,14 +20,14 @@ actual application of interest when searching.
 1. When the search is complete, click on the ellipses (three dots) to the left of the application
    name and then select +View Details+
 
-## [!ac](SSD) record for a MOOSE-Based Application id=safety_software+determination
+## [!ac](SSD) id=safety_software+determination
 
 1. From the [!ac](EA) +Details+ screen for the application (refer to [#enterprise_architecture_entry]),
    select the +General+ tab
 1. Scroll to the bottom of the screen and in the +Related Artifacts+ section select +Safety
    Software Determination+
 
-## [!ac](QLD) record for a MOOSE-Based Application id=quality_level_determination
+## [!ac](QLD) id=quality_level_determination
 
 1. From the Enterprise Architecture +Details+ screen for the application (refer to [#enterprise_architecture_entry]),
    select the +General+ tab)
