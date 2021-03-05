@@ -18,48 +18,49 @@ TriSubChannelMesh::validParams()
 }
 
 void
-rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center)
+triRodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center)
 {
-  Real teta = 0.0;
-  Real dteta = 0.0;
+  Real theta = 0.0;
+  Real dtheta = 0.0;
   Real distance = 0.0;
-  Real teta1 = 0.0;
-  Real teta_corrected = 0.0;
+  Real theta1 = 0.0;
+  Real theta_corrected = 0.0;
   Real pi = libMesh::pi;
   unsigned int k = 0;
   positions.emplace_back(0.0, 0.0);
   for (unsigned int i = 1; i < nrings; i++)
   {
-    dteta = 2.0 * pi / (i * 6);
-    teta = 0.0;
+    dtheta = 2.0 * pi / (i * 6);
+    theta = 0.0;
     for (unsigned int j = 0; j < i * 6; j++)
     {
       k = k + 1;
-      teta1 = fmod(teta + 1.0e-10, pi / 3.0);
-      distance = std::sqrt((pow(i * pitch, 2) + pow(teta1 / dteta * pitch, 2) -
-                            2.0 * i * pitch * (teta1 / dteta * pitch) * std::cos(pi / 3.0)));
-      teta_corrected = acos(1.0 / (i * pitch) / distance / 2.0 *
-                            (pow(i * pitch, 2) + pow(distance, 2) - pow(teta1 / dteta * pitch, 2)));
-      if (teta1 < 1.0e-6)
+      theta1 = fmod(theta + 1.0e-10, pi / 3.0);
+      distance = std::sqrt((pow(i * pitch, 2) + pow(theta1 / dtheta * pitch, 2) -
+                            2.0 * i * pitch * (theta1 / dtheta * pitch) * std::cos(pi / 3.0)));
+      theta_corrected = std::acos(
+          1.0 / (i * pitch) / distance / 2.0 *
+          (std::pow(i * pitch, 2) + std::pow(distance, 2) - std::pow(theta1 / dtheta * pitch, 2)));
+      if (theta1 < 1.0e-6)
       {
-        teta_corrected = teta;
+        theta_corrected = theta;
       }
       else
       {
-        if (teta > pi / 3.0 && teta <= 2.0 / 3.0 * pi)
-          teta_corrected = teta_corrected + pi / 3.0;
-        else if (teta > 2.0 / 3.0 * pi && teta <= pi)
-          teta_corrected = teta_corrected + 2.0 / 3.0 * pi;
-        else if (teta > pi && teta <= 4.0 / 3.0 * pi)
-          teta_corrected = teta_corrected + pi;
-        else if (teta > 4.0 / 3.0 * pi && teta <= 5.0 / 3.0 * pi)
-          teta_corrected = teta_corrected + 4.0 / 3.0 * pi;
-        else if (teta > 5.0 / 3.0 * pi && teta <= 2.0 * pi)
-          teta_corrected = teta_corrected + 5.0 / 3.0 * pi;
+        if (theta > pi / 3.0 && theta <= 2.0 / 3.0 * pi)
+          theta_corrected = theta_corrected + pi / 3.0;
+        else if (theta > 2.0 / 3.0 * pi && theta <= pi)
+          theta_corrected = theta_corrected + 2.0 / 3.0 * pi;
+        else if (theta > pi && theta <= 4.0 / 3.0 * pi)
+          theta_corrected = theta_corrected + pi;
+        else if (theta > 4.0 / 3.0 * pi && theta <= 5.0 / 3.0 * pi)
+          theta_corrected = theta_corrected + 4.0 / 3.0 * pi;
+        else if (theta > 5.0 / 3.0 * pi && theta <= 2.0 * pi)
+          theta_corrected = theta_corrected + 5.0 / 3.0 * pi;
       }
-      positions.emplace_back(center(0) + distance * std::cos(teta_corrected),
-                             center(1) + distance * std::sin(teta_corrected));
-      teta = teta + dteta;
+      positions.emplace_back(center(0) + distance * std::cos(theta_corrected),
+                             center(1) + distance * std::sin(theta_corrected));
+      theta = theta + dtheta;
     } // j
   }   // i
 }
@@ -103,7 +104,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   // used to defined global direction of the cross_flow_map coefficients for each subchannel and gap
   const Real negative_flow = -1.0;
 
-  rodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
+  triRodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
   _nrods = _rod_position.size();
 
   // assign the rods to the corresponding rings

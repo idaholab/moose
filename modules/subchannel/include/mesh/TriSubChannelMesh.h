@@ -3,7 +3,13 @@
 #include <vector>
 #include "SubChannelMeshBase.h"
 
-void rodPositions(std::vector<Point> & positions, Real nrings, Real pitch, Point center);
+/**
+ * Calculates and stores the rod positions/centers for a hexagonal assembly
+ * containing the given number of rings in a triangular/alternating row grid
+ * spaced 'pitch' apart.  The points are generated such that the duct is
+ * centered at the given center point.
+ */
+void triRodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
 
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
