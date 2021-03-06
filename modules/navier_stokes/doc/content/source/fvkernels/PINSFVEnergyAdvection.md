@@ -1,20 +1,10 @@
 # PINSFVEnergyAdvection
 
-!alert construction title=Undocumented Class
-The PINSFVEnergyAdvection has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /FVKernels/PINSFVEnergyAdvection
-
-## Overview
-
-!! Replace these lines with information regarding the PINSFVEnergyAdvection object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVEnergyAdvection object.
+This object adds a $\rho \epsilon c_p \vec u \cdot \nabla T$ term to a finite volume
+formulation of a heat transport equation. The user can control what (material) quantity is
+advected through the `advected_quantity` parameter. The default value is the
+name `rho_cp_temp` which corresponds to a material property name declared by
+[PINSFVMaterial.md].
 
 !syntax parameters /FVKernels/PINSFVEnergyAdvection
 

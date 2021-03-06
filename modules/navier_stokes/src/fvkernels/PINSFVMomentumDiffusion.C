@@ -16,7 +16,7 @@ InputParameters
 PINSFVMomentumDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Viscous diffusion term, div(mu grad(u)), in the porous media "
+  params.addClassDescription("Viscous diffusion term, div(mu grad(u_d / eps)), in the porous media "
                              "incompressible Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
@@ -34,9 +34,6 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
   _mu_elem(isParamValid("mu") ? &getADMaterialProperty<Real>("mu") : nullptr),
   _mu_neighbor(isParamValid("mu") ? &getNeighborADMaterialProperty<Real>("mu") : nullptr),
-  _mu_eff_elem(isParamValid("mu_eff") ? &getADMaterialProperty<Real>("mu_eff") : nullptr),
-  _mu_eff_neighbor(isParamValid("mu_eff") ? &getNeighborADMaterialProperty<Real>("mu_eff") : nullptr),
-  _effective_viscosity(isParamValid("mu_eff")),
   _eps(coupledValue("porosity")),
   _eps_neighbor(coupledNeighborValue("porosity")),
   _index(getParam<MooseEnum>("momentum_component")),
@@ -53,11 +50,6 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   if (_smooth_porosity && !params.isParamSetByUser("momentum_component"))
     mooseError("The momentum component parameter is required for modeling the porosity "
                "gradient contribution in the momentum diffusion term.");
-  if (_smooth_porosity && isParamValid("mu_eff"))
-    paramError("mu_eff", "The porosity gradient term need not be included when using an "
-               "effective viscosity.");
-  if (isParamValid("mu") == isParamValid("mu_eff"))
-    mooseError("Either the viscosity or the effective viscosity must be specified.");
 }
 
 ADReal
@@ -73,20 +65,12 @@ PINSFVMomentumDiffusion::computeQpResidual()
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
   ADReal mu_eps_face;
-  if (!_effective_viscosity)
-    interpolate(Moose::FV::InterpMethod::Average,
-                mu_eps_face,
-                (*_mu_elem)[_qp] / _eps[_qp],
-                (*_mu_neighbor)[_qp] / _eps_neighbor[_qp],
-                *_face_info,
-                true);
-  else
-    interpolate(Moose::FV::InterpMethod::Average,
-                mu_eps_face,
-                (*_mu_eff_elem)[_qp],
-                (*_mu_eff_neighbor)[_qp],
-                *_face_info,
-                true);
+  interpolate(Moose::FV::InterpMethod::Average,
+              mu_eps_face,
+              (*_mu_elem)[_qp] / _eps[_qp],
+              (*_mu_neighbor)[_qp] / _eps_neighbor[_qp],
+              *_face_info,
+              true);
 
   // Compute face superficial velocity gradient
   auto dudn = gradUDotNormal();

@@ -1,20 +1,9 @@
 # PINSFVMomentumTimeDerivative
 
-!alert construction title=Undocumented Class
-The PINSFVMomentumTimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /FVKernels/PINSFVMomentumTimeDerivative
-
-## Overview
-
-!! Replace these lines with information regarding the PINSFVMomentumTimeDerivative object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVMomentumTimeDerivative object.
+This object adds the $\rho\frac{\partial \vec u_{di}}{\partial t}$ term of the
+porous media incompressible Navier Stokes momentum equation where $\rho$ is the density,
+$\vec u_{di}$ refers to the i'th component of the superficial velocity $\vec{ud}$, and $t$ is
+time. This kernel must be applied for every component of the velocity.
 
 !syntax parameters /FVKernels/PINSFVMomentumTimeDerivative
 

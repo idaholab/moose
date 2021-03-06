@@ -1,20 +1,19 @@
 # PINSFVEnergyTimeDerivative
 
-!alert construction title=Undocumented Class
-The PINSFVEnergyTimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+## Description
 
-!syntax description /FVKernels/PINSFVEnergyTimeDerivative
+The `PINSFVEnergyTimeDerivative` kernel implements a time derivative for the domain $\Omega$ given by
 
-## Overview
+\begin{equation}
+\underbrace{\epsilon \rho c_{pf} \frac{\partial T_f}{\partial t}}_{\textrm{PINSFVEnergyTimeDerivative}}
+\end{equation}
+for the fluid phase and
+\begin{equation}
+\underbrace{(1 - \epsilon) \rho_s c_{ps} \frac{\partial T_s}{\partial t}}_{\textrm{INSFVEnergyTimeDerivative}}
+\end{equation}
+for the solid phase, where $\epsilon$ is the porosity, $\rho_{f/s}$ the fluid/solid material density, $c_{pf/s}$ the fluid/solid specific heat and $T_{f/s}$ the fluid/solid temperature.
 
-!! Replace these lines with information regarding the PINSFVEnergyTimeDerivative object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVEnergyTimeDerivative object.
+The variation of the kinetic energy is not considered in this kernel.
 
 !syntax parameters /FVKernels/PINSFVEnergyTimeDerivative
 

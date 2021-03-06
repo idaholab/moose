@@ -26,7 +26,10 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MaterialPropertyName>("quadratic_coef_name", "Name of a quadratic friction coefficient material property.");
   params.addParam<MaterialPropertyName>("Darcy_name", "Name of the Darcy coefficients material property.");
   params.addParam<MaterialPropertyName>("Forchheimer_name", "Name of the Forchheimer coefficients material property.");
-  params.addParam<MaterialPropertyName>("momentum_name", "Name of the momentum material property for the Darcy and Forchheimer friction terms.");
+  params.addCoupledVar("porosity", "Porosity variable.");
+
+  params.addParam<MaterialPropertyName>("momentum_name",
+                                        "Name of the superficial momentum material property for the Darcy and Forchheimer friction terms.");
   params.addParam<Real>("rho", "Constant density to use with incompressible flow.");
 
   return params;
@@ -51,6 +54,7 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
   _use_quadratic_friction_matprop(isParamValid("quadratic_coef_name")),
   _use_Darcy_friction_model(isParamValid("Darcy_name")),
   _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
+  _eps(coupledValue("porosity")),
   _momentum(isParamValid("momentum_name") ? &getADMaterialProperty<Real>("momentum_name") : nullptr),
   _rho(isParamValid("rho") ? getParam<Real>("rho") : 0)
 {
@@ -70,16 +74,16 @@ PINSFVMomentumFriction::computeQpResidual()
   if (!_momentum)
   {
     if (_use_Darcy_friction_model)
-      friction_term += (*_cL)[_qp](_component) * _rho * _u[_qp];
+      friction_term += (*_cL)[_qp](_component) * _rho * _u[_qp] / _eps[_qp];
     if (_use_Forchheimer_friction_model)
-      friction_term += (*_cQ)[_qp](_component) * _rho * _u[_qp];
+      friction_term += (*_cQ)[_qp](_component) * _rho * _u[_qp] / _eps[_qp];
   }
   else
   {
     if (_use_Darcy_friction_model)
-      friction_term += (*_cL)[_qp](_component) * (*_momentum)[_qp];
+      friction_term += (*_cL)[_qp](_component) * (*_momentum)[_qp] / _eps[_qp];
     if (_use_Forchheimer_friction_model)
-      friction_term += (*_cQ)[_qp](_component) * (*_momentum)[_qp];
+      friction_term += (*_cQ)[_qp](_component) * (*_momentum)[_qp] / _eps[_qp];
   }
 
   return friction_term;

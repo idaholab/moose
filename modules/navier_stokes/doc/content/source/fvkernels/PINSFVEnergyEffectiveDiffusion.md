@@ -1,20 +1,18 @@
 # PINSFVEnergyEffectiveDiffusion
 
-!alert construction title=Undocumented Class
-The PINSFVEnergyEffectiveDiffusion has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+## Description
 
-!syntax description /FVKernels/PINSFVEnergyEffectiveDiffusion
+The `PINSFVEnergyEffectiveDiffusion` kernel implements a diffusion term for the fluid energy equation.
+This kernel accepts an effective thermal conductivity material property, a regular thermal conductivity may be
+specified using a [PINSFVEnergyDiffusion] kernel. The effective thermal conductivity takes into account the
+effect of porosity on the thermal conductivity.
 
-## Overview
+\begin{equation}
+\nabla \cdot \left( \kappa \nabla T \right)
+\end{equation}
+where $\epsilon$ is the porosity, $\kappa$ is the effective thermal conductivity, and $T$ the fluid temperature.
 
-!! Replace these lines with information regarding the PINSFVEnergyEffectiveDiffusion object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVEnergyEffectiveDiffusion object.
+More information may be found on effective thermal conductivity models in the Pronghorn manual.
 
 !syntax parameters /FVKernels/PINSFVEnergyEffectiveDiffusion
 

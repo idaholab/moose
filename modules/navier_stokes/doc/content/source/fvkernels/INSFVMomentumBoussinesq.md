@@ -1,20 +1,11 @@
 # INSFVMomentumBoussinesq
 
-!alert construction title=Undocumented Class
-The INSFVMomentumBoussinesq has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /FVKernels/INSFVMomentumBoussinesq
-
-## Overview
-
-!! Replace these lines with information regarding the INSFVMomentumBoussinesq object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the INSFVMomentumBoussinesq object.
+This object adds a $\rho\alpha\vec{g}(T - T_{ref})$ term to the incompressible
+Navier Stokes (INS) equations where $\rho$ is the density, $\alpha$ is the thermal
+expansion coefficient, $\vec{g}$ is the gravity vector, $T$ is the temperature,
+and $T_{ref}$ is a reference temperature. The term above introduces the
+Boussinesq approximation into the INS equations, which allows for modeling
+natural convection.
 
 !syntax parameters /FVKernels/INSFVMomentumBoussinesq
 
