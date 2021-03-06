@@ -22,7 +22,6 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
-  bool skipForBoundary(const FaceInfo & fi) const override;
 
   /// the current element porosity
   const VariableValue & _eps;
