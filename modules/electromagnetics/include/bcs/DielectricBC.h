@@ -10,8 +10,8 @@ public:
   DielectricBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
   Real _eps_one;
   Real _eps_two;
