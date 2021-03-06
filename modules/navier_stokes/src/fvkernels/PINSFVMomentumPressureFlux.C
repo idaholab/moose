@@ -35,8 +35,10 @@ PINSFVMomentumPressureFlux::validParams()
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
     _eps(coupledValue("porosity")),
+    _eps_neighbor(coupledNeighborValue("porosity")),
     _p_elem(adCoupledValue(NS::pressure)),
     _p_neighbor(adCoupledNeighborValue(NS::pressure)),
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("p", 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -44,9 +46,12 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
-    mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
-               "of variable type PINSFVSuperficialVelocityVariable.");
+}
+
+bool
+PINSFVMomentumPressureFlux::skipForBoundary(const FaceInfo &) const
+{
+  return false;
 }
 
 ADReal
@@ -55,10 +60,10 @@ PINSFVMomentumPressureFlux::computeQpResidual()
   ADReal p_interface;
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         p_interface,
-                         _p_elem[_qp],
-                         _p_neighbor[_qp],
+                         eps_p_interface,
+                         _p_elem[_qp] * _eps[_qp],
+                         _p_neighbor[_qp] * _eps_neighbor[_qp],
                          *_face_info,
                          true);
-  return _eps[_qp] * p_interface * _normal(_index);
+  return eps_p_interface * _normal(_index);
 }
