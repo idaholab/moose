@@ -1,20 +1,17 @@
 # PINSFVMomentumDiffusion
 
-!alert construction title=Undocumented Class
-The PINSFVMomentumDiffusion has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+This kernel implements the diffusion term of the porous media Navier Stokes momentum equation.
+This diffusion term represents a Brinkman-type viscous stress. This kernel may only be used
+with a superficial velocity variable.
 
-!syntax description /FVKernels/PINSFVMomentumDiffusion
+The incompressible approximation simplifies the expression of the stress tensor and the
+diffusion term is expressed in terms of the superficial velocity:
+\begin{equation}
+-\nabla \cdot \left( \mu \nabla \dfrac{\vec{u_d}}{\epsilon} \right) = -\nabla \cdot \left( \dfrac{\mu}{\epsilon} \nabla \vec{u_d} \right) -\nabla \cdot \left( \mu u_d \nabla \dfrac{1}{\epsilon} \right)
 
-## Overview
-
-!! Replace these lines with information regarding the PINSFVMomentumDiffusion object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVMomentumDiffusion object.
+The divergence theorem is used to compute this term by examining its flux through the element's faces.
+The second term is challenging to compute near discontinuities in porosity and is not included by default.
+For continuous porosity variations, the `smooth_porosity` parameter may be used to include it.
 
 !syntax parameters /FVKernels/PINSFVMomentumDiffusion
 

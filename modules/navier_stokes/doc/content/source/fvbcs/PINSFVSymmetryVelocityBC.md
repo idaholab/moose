@@ -1,20 +1,15 @@
 # PINSFVSymmetryVelocityBC
 
-!alert construction title=Undocumented Class
-The PINSFVSymmetryVelocityBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-!syntax description /FVBCs/PINSFVSymmetryVelocityBC
-
 ## Overview
 
-!! Replace these lines with information regarding the PINSFVSymmetryVelocityBC object.
+This object implements a symmetry boundary condition for the superficial velocity. It
+applies boundary forces such that the gradient of the velocity parallel to the
+boundary is zero in the boundary normal direction. A `PINSFVSymmetryVelocityBC`
+should be applied for every superficial velocity component on a symmetry boundary. Similarly
+an [`INSFVSymmetryPressureBC`](INSFVSymmetryPressureBC.md) should be applied for
+the pressure on the symmetry boundary.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVSymmetryVelocityBC object.
+!syntax description /FVBCs/PINSFVSymmetryVelocityBC
 
 !syntax parameters /FVBCs/PINSFVSymmetryVelocityBC
 

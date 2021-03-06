@@ -27,13 +27,7 @@ protected:
   const ADMaterialProperty<Real> * const _mu_elem;
   /// the neighbor element viscosity
   const ADMaterialProperty<Real> * const _mu_neighbor;
-  /// the current element effective viscosity
-  const ADMaterialProperty<Real> * const _mu_eff_elem;
-  /// the neighbor element effective viscosity
-  const ADMaterialProperty<Real> * const _mu_eff_neighbor;
-  /// Whether an effective viscosity is used
-  const bool _effective_viscosity;
-  
+
   /// the porosity
   const VariableValue & _eps;
   /// the neighbor element porosity

@@ -1,20 +1,18 @@
 # PINSFVEnergyDiffusion
 
-!alert construction title=Undocumented Class
-The PINSFVEnergyDiffusion has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+## Description
 
-!syntax description /FVKernels/PINSFVEnergyDiffusion
+The `PINSFVEnergyDiffusion` kernel implements a diffusion term for the fluid energy equation.
+This kernel accepts a regular thermal conductivity material property, an effective thermal conductivity may be
+specified using a [PINSFVEnergyEffectiveDiffusion] kernel.
 
-## Overview
+\begin{equation}
+\nabla \cdot \left( \epsilon k \nabla T \right) = \epsilon \nabla \cdot k \nabla T + k \nabla T \nabla \epsilon
+\end{equation}
+where $\epsilon$ is the porosity, $k$ is the thermal conductivity, and $T$ the fluid temperature.
 
-!! Replace these lines with information regarding the PINSFVEnergyDiffusion object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVEnergyDiffusion object.
+The porosity gradient term creates oscillations in the presence of porosity discontinuities and is
+generally neglected. It is not computed by this kernel.
 
 !syntax parameters /FVKernels/PINSFVEnergyDiffusion
 

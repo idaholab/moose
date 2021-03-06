@@ -1,20 +1,26 @@
 # PINSFVMomentumFriction
 
-!alert construction title=Undocumented Class
-The PINSFVMomentumFriction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+This `PINSFVMomentumFriction` kernel adds the friction term to the porous media Navier Stokes
+equation. This kernel should be use with a superficial velocity variable. A variety of models are supported for the friction force:
 
-!syntax description /FVKernels/PINSFVMomentumFriction
-
-## Overview
-
-!! Replace these lines with information regarding the PINSFVMomentumFriction object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVMomentumFriction object.
+Linear friction, for laminar flow
+\begin{equation}
+F_i = - f v_i
+\end{equation}
+Quadratic friction, for turbulent flow
+\begin{equation}
+F_i = - f v_i |v_i|
+\end{equation}
+Darcy drag
+\begin{equation}
+F_i = - \dfrac{f_i}{\epsilon} \rho v_i
+\end{equation}
+Forchheimer
+\begin{equation}
+F_i = - \dfrac{f_i}{\epsilon} \rho v_i
+\end{equation}
+where $F_i$ is the i-th component of the friction force, f the friction factor, which may be anisotropic,
+$\epsilon$ the porosity and $\rho$ the fluid density and $v_i$ the fluid superficial velocity.
 
 !syntax parameters /FVKernels/PINSFVMomentumFriction
 
