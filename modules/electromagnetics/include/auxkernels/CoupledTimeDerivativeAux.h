@@ -2,14 +2,11 @@
 
 #include "AuxKernel.h"
 
-class CoupledTimeDerivativeAux;
-
-template <>
-InputParameters validParams<CoupledTimeDerivativeAux>();
-
 class CoupledTimeDerivativeAux : public AuxKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledTimeDerivativeAux(const InputParameters & parameters);
 
 protected:

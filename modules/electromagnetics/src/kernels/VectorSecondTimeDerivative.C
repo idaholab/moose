@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", VectorSecondTimeDerivative);
 
-template <>
 InputParameters
-validParams<VectorSecondTimeDerivative>()
+VectorSecondTimeDerivative::validParams()
 {
-  InputParameters params = validParams<VectorTimeKernel>();
+  InputParameters params = VectorTimeKernel::validParams();
   params.addClassDescription(
       "The second time derivative operator with the weak form of $(\\vec{\\psi_i}, "
       "a(\\vec{r}, t) \\frac{\\partial^2 \\vec{u_h}}{\\partial t^2})$, where $a(\\vec{r}, t)$ is a "

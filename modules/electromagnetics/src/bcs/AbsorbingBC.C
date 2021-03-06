@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", AbsorbingBC);
 
-template <>
 InputParameters
-validParams<AbsorbingBC>()
+AbsorbingBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("First order Absorbing BC based on 'Theory and Computation of "
                              "Electromagnetic Fields' by JM Jin for scalar variables.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");

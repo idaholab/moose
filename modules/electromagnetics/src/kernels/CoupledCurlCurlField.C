@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", CoupledCurlCurlField);
 
-template <>
 InputParameters
-validParams<CoupledCurlCurlField>()
+CoupledCurlCurlField::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Weak form term corresponding to $\\nabla \\times \\nabla \\times \\vec{E}$.");
   params.addParam<Real>("sign", 1.0, "Sign in weak form.");

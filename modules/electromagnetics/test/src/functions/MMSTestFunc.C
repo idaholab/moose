@@ -4,11 +4,10 @@
 
 registerMooseObject("ElkTestApp", MMSTestFunc);
 
-template <>
 InputParameters
-validParams<MMSTestFunc>()
+MMSTestFunc::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "Function of RHS for manufactured solution in spatial_constant_helmholtz test.");
   params.addRequiredParam<Real>("L", "Length of 1D test domain, where 0 < x < L");

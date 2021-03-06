@@ -2,14 +2,11 @@
 
 #include "IntegratedBC.h"
 
-class ReflectionBC;
-
-template <>
-InputParameters validParams<ReflectionBC>();
-
 class ReflectionBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   ReflectionBC(const InputParameters & parameters);
 
 protected:

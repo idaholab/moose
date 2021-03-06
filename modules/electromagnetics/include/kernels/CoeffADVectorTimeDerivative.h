@@ -2,13 +2,11 @@
 
 #include "ADVectorTimeDerivative.h"
 
-class CoeffADVectorTimeDerivative;
-
-declareADValidParams(CoeffADVectorTimeDerivative);
-
 class CoeffADVectorTimeDerivative : public ADVectorTimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   CoeffADVectorTimeDerivative(const InputParameters & parameters);
 
 protected:

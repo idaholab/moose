@@ -4,11 +4,10 @@
 
 registerMooseObject("ElkApp", WaveCoeff);
 
-template <>
 InputParameters
-validParams<WaveCoeff>()
+WaveCoeff::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "Function for use as coefficient in standard-form Helmholtz wave equation applications.");
   params.addRequiredParam<FunctionName>("eps_rel_real", "Relative permittivity, real component.");

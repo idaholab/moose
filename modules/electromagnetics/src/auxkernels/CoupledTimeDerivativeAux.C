@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", CoupledTimeDerivativeAux);
 
-template <>
 InputParameters
-validParams<CoupledTimeDerivativeAux>()
+CoupledTimeDerivativeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("AuxKernel to calculate the time derivative of a coupled variable.");
   params.addRequiredCoupledVar("coupled", "Coupled variable.");
   return params;

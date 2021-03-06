@@ -2,14 +2,11 @@
 
 #include "IntegratedBC.h"
 
-class PEC;
-
-template <>
-InputParameters validParams<PEC>();
-
 class PEC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   PEC(const InputParameters & parameters);
 
 protected:

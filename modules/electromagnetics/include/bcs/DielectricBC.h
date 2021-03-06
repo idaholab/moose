@@ -2,14 +2,11 @@
 
 #include "DiffusionFluxBC.h"
 
-class DielectricBC;
-
-template <>
-InputParameters validParams<DielectricBC>();
-
 class DielectricBC : public DiffusionFluxBC
 {
 public:
+  static InputParameters validParams();
+
   DielectricBC(const InputParameters & parameters);
 
 protected:

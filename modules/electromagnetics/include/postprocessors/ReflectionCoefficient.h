@@ -3,14 +3,11 @@
 #include "SidePostprocessor.h"
 #include "MooseVariableInterface.h"
 
-class ReflectionCoefficient;
-
-template <>
-InputParameters validParams<ReflectionCoefficient>();
-
 class ReflectionCoefficient : public SidePostprocessor, public MooseVariableInterface<Real>
 {
 public:
+  static InputParameters validParams();
+
   ReflectionCoefficient(const InputParameters & parameters);
 
   virtual void initialize() override;

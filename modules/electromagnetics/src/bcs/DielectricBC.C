@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", DielectricBC);
 
-template <>
 InputParameters
-validParams<DielectricBC>()
+DielectricBC::validParams()
 {
-  InputParameters params = validParams<DiffusionFluxBC>();
+  InputParameters params = DiffusionFluxBC::validParams();
   params.addClassDescription(
       "A first attempt at defining an electric field condition on a dielectric surface, following "
       "Maxwell's Equations and Griffith's 'Introduction to Electrodynamics'");

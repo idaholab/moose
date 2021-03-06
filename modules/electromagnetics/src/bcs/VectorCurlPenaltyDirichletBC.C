@@ -7,11 +7,10 @@ registerMooseObject("ElkApp", VectorCurlPenaltyDirichletBC);
  * Based on VectorCurlPenaltyDirichletBC in 'tests' directories in core MOOSE Framework.
  */
 
-template <>
 InputParameters
-validParams<VectorCurlPenaltyDirichletBC>()
+VectorCurlPenaltyDirichletBC::validParams()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
+  InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription("Dirichlet boundary condition using a penalty method to set the value "
                              "of a vector variable on a boundary.");
   params.addRequiredParam<Real>("penalty", "The penalty coefficient.");

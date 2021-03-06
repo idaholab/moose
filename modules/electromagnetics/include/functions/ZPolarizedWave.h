@@ -2,14 +2,11 @@
 
 #include "Function.h"
 
-class ZPolarizedWave;
-
-template <>
-InputParameters validParams<ZPolarizedWave>();
-
 class ZPolarizedWave : public Function
 {
 public:
+  static InputParameters validParams();
+
   ZPolarizedWave(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

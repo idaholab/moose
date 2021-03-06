@@ -2,14 +2,11 @@
 
 #include "VectorKernel.h"
 
-class CoupledCurlCurlField;
-
-template <>
-InputParameters validParams<CoupledCurlCurlField>();
-
 class CoupledCurlCurlField : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledCurlCurlField(const InputParameters & parameters);
 
 protected:

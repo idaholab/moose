@@ -4,11 +4,10 @@
 
 registerMooseObject("ElkApp", RobinTestFunc);
 
-template <>
 InputParameters
-validParams<RobinTestFunc>()
+RobinTestFunc::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Function of analytical solution for use in convergence testing with "
                              "RobinTest test file.");
   params.addRequiredParam<Real>("L", "Length of 1D test domain, where 0 < x < L");

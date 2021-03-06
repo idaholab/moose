@@ -2,14 +2,11 @@
 
 #include "Diffusion.h"
 
-class FuncDiffusion;
-
-template <>
-InputParameters validParams<FuncDiffusion>();
-
 class FuncDiffusion : public Diffusion
 {
 public:
+  static InputParameters validParams();
+
   FuncDiffusion(const InputParameters & parameters);
 
 protected:

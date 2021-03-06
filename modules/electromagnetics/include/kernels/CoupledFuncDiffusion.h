@@ -2,14 +2,11 @@
 
 #include "Diffusion.h"
 
-class CoupledFuncDiffusion;
-
-template <>
-InputParameters validParams<CoupledFuncDiffusion>();
-
 class CoupledFuncDiffusion : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledFuncDiffusion(const InputParameters & parameters);
 
 protected:

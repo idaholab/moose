@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", ReflectionBC);
 
-template <>
 InputParameters
-validParams<ReflectionBC>()
+ReflectionBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("First order Reflection BC based on 'The Finite Element Method in "
                              "Electromagnetics' by JM Jin for scalar variables.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");

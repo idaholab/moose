@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", OneDFieldCoeff);
 
-template <>
 InputParameters
-validParams<OneDFieldCoeff>()
+OneDFieldCoeff::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "Coefficient for field term in Helmholtz wave equation, for 1D Ez-polarized plane wave.");
   params.addRequiredParam<Real>("theta", "Angle of wave incidence, in degrees");

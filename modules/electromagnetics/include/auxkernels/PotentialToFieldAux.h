@@ -2,14 +2,11 @@
 
 #include "VariableGradientComponent.h"
 
-class PotentialToFieldAux;
-
-template <>
-InputParameters validParams<PotentialToFieldAux>();
-
 class PotentialToFieldAux : public VariableGradientComponent
 {
 public:
+  static InputParameters validParams();
+
   PotentialToFieldAux(const InputParameters & parameters);
 
 protected:

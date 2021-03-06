@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", CoupledCoeffField);
 
-template <>
 InputParameters
-validParams<CoupledCoeffField>()
+CoupledCoeffField::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Kernel representing the contribution of the PDE term $cfv$, where $c$ and $f$ are constant "
       "and function coefficients, respectively, and $v$ is a coupled scalar variable.");

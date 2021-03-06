@@ -2,14 +2,11 @@
 
 #include "IntegratedBC.h"
 
-class CoupledGradBC;
-
-template <>
-InputParameters validParams<CoupledGradBC>();
-
 class CoupledGradBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   CoupledGradBC(const InputParameters & parameters);
 
 protected:

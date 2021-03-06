@@ -4,11 +4,10 @@
 
 registerMooseObject("ElkApp", JinSlabCoeffFunc);
 
-template <>
 InputParameters
-validParams<JinSlabCoeffFunc>()
+JinSlabCoeffFunc::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Function describing a wave incident on a surface at a given angle "
                              "and wave number, for use in reflection and transmission problems.");
   params.addRequiredParam<Real>("k", "Wave Number");
