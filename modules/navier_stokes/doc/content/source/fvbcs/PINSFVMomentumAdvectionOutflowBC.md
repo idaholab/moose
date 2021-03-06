@@ -1,20 +1,13 @@
 # PINSFVMomentumAdvectionOutflowBC
 
-!alert construction title=Undocumented Class
-The PINSFVMomentumAdvectionOutflowBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /FVBCs/PINSFVMomentumAdvectionOutflowBC
 
 ## Overview
 
-!! Replace these lines with information regarding the PINSFVMomentumAdvectionOutflowBC object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVMomentumAdvectionOutflowBC object.
+This object implements the $\rho \epsilon \left(\vec u_d \cdot\nabla\right)\vec u_d$ component
+term of the incompressible porous media Navier Stokes momentum equation along a domain boundary.
+It simultaneously requires that the normal gradient of each superficial velocity component at
+the boundary be zero.
 
 !syntax parameters /FVBCs/PINSFVMomentumAdvectionOutflowBC
 

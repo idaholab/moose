@@ -1,20 +1,13 @@
 # PINSFVMassAdvection
 
-!alert construction title=Undocumented Class
-The PINSFVMassAdvection has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+This object computes the residual and Jacobian contribution of the
+incompressible version of the mass continuity equation, e.g. $\nabla\cdot \rho \vec
+u_d$. We apply the divergence theorem and compute the advective flux of mass
+across cell/element faces.
 
-!syntax description /FVKernels/PINSFVMassAdvection
-
-## Overview
-
-!! Replace these lines with information regarding the PINSFVMassAdvection object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PINSFVMassAdvection object.
+When using the Rhie-Chow interpolation to compute the mass flow across faces, this kernel
+reverts by default to average interpolation near porosity changes. This behavior may be disabled
+with the `smooth_porosity` boolean.
 
 !syntax parameters /FVKernels/PINSFVMassAdvection
 
