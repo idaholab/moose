@@ -19,14 +19,17 @@ PINSFVMomentumAdvection::validParams()
   params.addClassDescription("Object for advecting superficial momentum, e.g. rho*u_d, "
                              "in the porous media momentum equation");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
 
   return params;
 }
 
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
+  _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
   _eps(coupledValue("porosity")),
-  _eps_neighbor(coupledNeighborValue("porosity"))
+  _eps_neighbor(coupledNeighborValue("porosity")),
+  _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
   if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
@@ -122,11 +125,6 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
           "Let's make sure our normal is what we think it is");
 #endif
 
-    // if (elem_has_info && std::abs(_eps[_qp] - MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>( getFieldVar("porosity", 0))->getElemValue(&fi->elem()))) > 1e-8)
-    //   std::cout << _eps[_qp] << " " << dynamic_cast<const MooseVariableFVReal *>( getFieldVar("porosity", 0))->getElemValue(&fi->elem()) << std::endl;
-    // else if (!elem_has_info && std::abs(_eps[_qp] - MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>( getFieldVar("porosity", 0))->getElemValue(&fi->neighbor()))) > 1e-8)
-    //   std::cout << _eps[_qp] << " " << dynamic_cast<const MooseVariableFVReal *>( getFieldVar("porosity", 0))->getElemValue(&fi->neighbor()) << std::endl;
-
     // Unless specified otherwise, "elem" here refers to the element we're computing the
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
@@ -134,8 +132,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     if (onBoundary(*fi))
     {
       // Compute the face porosity
-      Real eps_face = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>(
-          getFieldVar("porosity", 0))->getBoundaryFaceValue(*fi));
+      Real eps_face = MetaPhysicL::raw_value(_eps_var->getBoundaryFaceValue(*fi));
 
       // In my mind there should only be about one bc_id per FaceInfo
       mooseAssert(fi->boundaryIDs().size() == 1,
@@ -212,11 +209,9 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     // Else we are on an internal face
 
     // Compute the face porosity
-    Real eps_elem = MetaPhysicL::raw_value(elem_has_info ? dynamic_cast<const MooseVariableFVReal *>(
-        getFieldVar("porosity", 0))->getElemValue(&fi->elem()) :  dynamic_cast<const MooseVariableFVReal *>(
-            getFieldVar("porosity", 0))->getElemValue(neighbor));
-    Real eps_face = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>(
-        getFieldVar("porosity", 0))->getInternalFaceValue(neighbor, *fi, eps_elem));
+    Real eps_elem = MetaPhysicL::raw_value(elem_has_info ? _eps_var->getElemValue(&fi->elem()) :
+                                                           _eps_var->getElemValue(neighbor));
+    Real eps_face = MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(neighbor, *fi, eps_elem));
 
     ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
     if (_v_var)
@@ -292,6 +287,11 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   if (m == Moose::FV::InterpMethod::Average)
     return;
 
+  // If the porosity has discontinuities, avoid Rhie Chow near the jumps
+  if (!_smooth_porosity && (_eps_var->adGradSln(elem).norm() > 0 ||
+      _eps_var->adGradSln(neighbor).norm() > 0))
+      return;
+
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
   const VectorValue<ADReal> & grad_p = _p_var->adGradSln(*_face_info);
@@ -349,8 +349,7 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   else
     face_D = elem_D;
 
-  Real eps_face = MetaPhysicL::raw_value(dynamic_cast<const MooseVariableFVReal *>(
-      getFieldVar("porosity", 0))->getInternalFaceValue(neighbor, *_face_info, _eps[_qp]));
+  Real eps_face = MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(neighbor, *_face_info, _eps[_qp]));
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))
@@ -370,15 +369,28 @@ PINSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
   ADReal adv_quant_interface;
+  Real one_over_eps_interface;
 
+  // Velocity interpolation
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
-  Moose::FV::interpolate(_advected_interp_method,
-                         adv_quant_interface,
-                         _adv_quant_elem[_qp] / _eps[_qp],
-                         _adv_quant_neighbor[_qp] / _eps_neighbor[_qp],
+
+  // Interpolation of 1/eps term
+  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                         one_over_eps_interface,
+                         1 / _eps[_qp],
+                         1 / _eps_neighbor[_qp],
                          v,
                          *_face_info,
                          true);
 
-  return _normal * v * adv_quant_interface;
+  // Interpolation of advected quantity
+  Moose::FV::interpolate(_advected_interp_method,
+                         adv_quant_interface,
+                         _adv_quant_elem[_qp],
+                         _adv_quant_neighbor[_qp],
+                         v,
+                         *_face_info,
+                         true);
+
+  return _normal * v * adv_quant_interface * one_over_eps_interface;
 }

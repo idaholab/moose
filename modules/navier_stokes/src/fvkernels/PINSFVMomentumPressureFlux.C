@@ -16,8 +16,10 @@ InputParameters
 PINSFVMomentumPressureFlux::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Viscous diffusion term, div(mu grad(u)), in the porous media "
-                             "incompressible Navier-Stokes momentum equation.");
+  params.addClassDescription("Viscous diffusion term, div(mu grad(u)), as a flux kernel "
+                             "using the divergence theoreom, in the porous media "
+                             "incompressible Navier-Stokes momentum equation. This kernel "
+                             "is also executed on boundaries.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredCoupledVar("p", "Pressure variable");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -26,6 +28,7 @@ PINSFVMomentumPressureFlux::validParams()
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.set<bool>("force_boundary_execution") = true;
   return params;
 }
 
@@ -45,12 +48,6 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
 #endif
 }
 
-bool
-PINSFVMomentumPressureFlux::skipForBoundary(const FaceInfo & fi) const
-{
-  return false;
-}
-
 ADReal
 PINSFVMomentumPressureFlux::computeQpResidual()
 {
@@ -59,10 +56,10 @@ PINSFVMomentumPressureFlux::computeQpResidual()
   ADReal p_neighbor = _p_var->getNeighborValue(_face_info->neighborPtr(), *_face_info, p_elem);
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                        eps_p_interface,
-                        _p_elem[_qp] * _eps[_qp],
-                        _p_neighbor[_qp] * _eps_neighbor[_qp],
-                        *_face_info,
-                        true);
-  return eps_p_interface * _normal(_index);
+                         eps_p_interface,
+                         _p_elem[_qp],
+                         _p_neighbor[_qp],
+                         *_face_info,
+                         true);
+  return _eps[_qp] * eps_p_interface * _normal(_index);
 }

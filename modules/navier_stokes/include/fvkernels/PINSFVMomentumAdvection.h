@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseVariableFV.h"
 #include "INSFVMomentumAdvection.h"
 
 /**
@@ -39,7 +40,12 @@ protected:
    */
   const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const override;
 
-  /// porosity
+  /// porosity variable to compute gradients
+  const MooseVariableFV<Real> * const _eps_var;
+  /// porosity in the current element
   const VariableValue & _eps;
+  /// porosity in the neighbor element
   const VariableValue & _eps_neighbor;
+  /// whether the porosity has discontinuities that the Rhie Chow interpolation should avoid
+  const bool _smooth_porosity;
 };

@@ -38,4 +38,9 @@ protected:
   const bool _use_quadratic_friction_matprop;
   const bool _use_Darcy_friction_model;
   const bool _use_Forchheimer_friction_model;
+
+  /// Momentum as a material property
+  const ADMaterialProperty<Real> * const _momentum;
+  /// Constant density, use only with incompressible flow
+  const Real _rho;
 };
