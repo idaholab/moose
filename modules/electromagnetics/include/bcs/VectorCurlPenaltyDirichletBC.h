@@ -10,8 +10,8 @@ public:
   VectorCurlPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
   Real _penalty;
   const Function & _exact_x;
   const Function & _exact_y;
