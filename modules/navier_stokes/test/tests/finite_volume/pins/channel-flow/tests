@@ -124,7 +124,43 @@
     method = "!dbg"
     requirement = 'The system shall be able to model a smooth porosity gradient in a channel.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-epsjump'"
+    cli_args = "Outputs/file_base='rc-epsjump' ICs/inactive='porosity_1 porosity_2' FVKernels/*/smooth_porosity=true"
+  []
+  [1d-discontinuous-jump-average-average]
+    type = 'Exodiff'
+    input = 1d-rc-epsjump.i
+    exodiff = rc-discontinuous-1d-epsjump_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and advected quantity.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-average' advected_interp_method='average' velocity_interp_method='average'"
+  []
+  [1d-discontinuous-jump-average-upwind]
+    type = 'Exodiff'
+    input = 1d-rc-epsjump.i
+    exodiff = rc-discontinuous-1d-epsjump_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and upwinding of the advected quantity.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-upwind' advected_interp_method='upwind' velocity_interp_method='average'"
+  []
+  [1d-discontinuous-jump-rc-average]
+    type = 'Exodiff'
+    input = 1d-rc-epsjump.i
+    exodiff = rc-discontinuous-1d-epsjump_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and averaging of the advected quantity.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-average' advected_interp_method='average' velocity_interp_method='rc'"
+  []
+  [1d-discontinuous-jump-rc-upwind]
+    type = 'Exodiff'
+    input = 1d-rc-epsjump.i
+    exodiff = rc-discontinuous-1d-epsjump_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and upwinding of the advected quantity.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-upwind' advected_interp_method='upwind' velocity_interp_method='rc'"
   []
   [discontinuous-jump]
     type = 'Exodiff'
@@ -133,6 +169,6 @@
     method = "!dbg"
     requirement = 'The system shall be able to model a discontinuous porosity jump in a channel.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-discontinuous-epsjump' ICs/inactive='porosity_continuous'"
+    cli_args = "Outputs/file_base='rc-discontinuous-epsjump'"
   []
 []

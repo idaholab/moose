@@ -23,10 +23,17 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// the viscosity
-  const ADMaterialProperty<Real> & _mu_elem;
+  /// the current element viscosity
+  const ADMaterialProperty<Real> * const _mu_elem;
   /// the neighbor element viscosity
-  const ADMaterialProperty<Real> & _mu_neighbor;
+  const ADMaterialProperty<Real> * const _mu_neighbor;
+  /// the current element effective viscosity
+  const ADMaterialProperty<Real> * const _mu_eff_elem;
+  /// the neighbor element effective viscosity
+  const ADMaterialProperty<Real> * const _mu_eff_neighbor;
+  /// Whether an effective viscosity is used
+  const bool _effective_viscosity;
+  
   /// the porosity
   const VariableValue & _eps;
   /// the neighbor element porosity
@@ -43,5 +50,5 @@ protected:
   const MooseVariableFVReal * const _eps_var;
 
   /// Whether to add the porosity gradient term, only for continuous porosity
-  const bool _smooth_porosity_gradient;
+  const bool _smooth_porosity;
 };

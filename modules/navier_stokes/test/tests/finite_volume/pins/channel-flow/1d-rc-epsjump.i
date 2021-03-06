@@ -6,11 +6,9 @@ velocity_interp_method='rc'
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
-    dim = 2
+    dim = 1
     dx = '1 1'
-    dy = '0.5'
     ix = '30 30'
-    iy = '20'
     subdomain_id = '1 2'
   []
 []
@@ -23,10 +21,6 @@ velocity_interp_method='rc'
   [u]
     type = PINSFVVelocityVariable
     initial_condition = 1
-  []
-  [v]
-    type = PINSFVVelocityVariable
-    initial_condition = 1e-6
   []
   [pressure]
     type = INSFVPressureVariable
@@ -71,7 +65,7 @@ velocity_interp_method='rc'
 []
 
 [FVKernels]
-  inactive = 'u_porosity_gradient v_porosity_gradient'
+  inactive = 'u_porosity_gradient'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -80,7 +74,6 @@ velocity_interp_method='rc'
     vel = 'velocity'
     pressure = pressure
     u = u
-    v = v
     mu = ${mu}
     rho = ${rho}
     porosity = porosity
@@ -95,7 +88,6 @@ velocity_interp_method='rc'
     velocity_interp_method = ${velocity_interp_method}
     pressure = pressure
     u = u
-    v = v
     mu = ${mu}
     rho = ${rho}
     porosity = porosity
@@ -118,49 +110,9 @@ velocity_interp_method='rc'
     type = PINSFVMomentumAdvectionPorosityGradient
     variable = u
     u = u
-    v = v
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'
-    smooth_porosity = true
-  []
-
-  [v_advection]
-    type = PINSFVMomentumAdvection
-    variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
-    porosity = porosity
-  []
-  [v_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = v
-    momentum_component = 'y'
-    mu = ${mu}
-    porosity = porosity
-  []
-  [v_pressure]
-    type = PINSFVMomentumPressureFlux
-    variable = v
-    momentum_component = 'y'
-    p = pressure
-    porosity = porosity
-  []
-  [v_porosity_gradient]
-    type = PINSFVMomentumAdvectionPorosityGradient
-    variable = v
-    u = u
-    v = v
-    rho = ${rho}
-    porosity = porosity
-    momentum_component = 'y'
     smooth_porosity = true
   []
 []
@@ -171,23 +123,6 @@ velocity_interp_method='rc'
     boundary = 'left'
     variable = u
     function = '1'
-  []
-  [inlet-v]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = v
-    function = 0
-  []
-
-  [walls-u]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
-    variable = u
-  []
-  [walls-v]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
-    variable = v
   []
   [outlet_p]
     type = INSFVOutletPressureBC
@@ -201,7 +136,6 @@ velocity_interp_method='rc'
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
-    v = 'v'
     pressure = 'pressure'
     rho = ${rho}
   []
