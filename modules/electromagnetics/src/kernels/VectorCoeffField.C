@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", VectorCoeffField);
 
-template <>
 InputParameters
-validParams<VectorCoeffField>()
+VectorCoeffField::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Kernel representing the contribution of the PDE term $cfu$, where $c$ and $f$ are constant "
       "and function coefficients, respectively, and $u$ is a vector variable.");

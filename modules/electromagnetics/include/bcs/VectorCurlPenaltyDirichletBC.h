@@ -2,14 +2,11 @@
 
 #include "VectorIntegratedBC.h"
 
-class VectorCurlPenaltyDirichletBC;
-
-template <>
-InputParameters validParams<VectorCurlPenaltyDirichletBC>();
-
 class VectorCurlPenaltyDirichletBC : public VectorIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   VectorCurlPenaltyDirichletBC(const InputParameters & parameters);
 
 protected:

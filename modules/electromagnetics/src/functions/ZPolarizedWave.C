@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", ZPolarizedWave);
 
-template <>
 InputParameters
-validParams<ZPolarizedWave>()
+ZPolarizedWave::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Z-polarized wave function in 1D, at a particular angle of incidence "
                              "relative to the x-axis, on a plane parallel to the y-axis.");
   params.addRequiredParam<Real>("theta", "Angle of incidence, in degrees");

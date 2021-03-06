@@ -4,11 +4,10 @@
 
 registerMooseObject("ElkApp", HelmholtzTestFunc);
 
-template <>
 InputParameters
-validParams<HelmholtzTestFunc>()
+HelmholtzTestFunc::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription("Function of analytical solution for use in convergence testing with "
                              "coupled_helmholtz test file.");
   params.addRequiredParam<Real>("L", "Length of 1D test domain, where 0 < x < L");

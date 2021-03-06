@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", VectorPortBC);
 
-template <>
 InputParameters
-validParams<VectorPortBC>()
+VectorPortBC::validParams()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
+  InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription("First order Absorbing/Port BC from 'Theory and Computation of "
                              "Electromagnetic Fields' by JM Jin for vector variables.");
   params.addParam<FunctionName>(

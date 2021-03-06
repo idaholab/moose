@@ -3,17 +3,14 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class RobinTestFunc;
-
-template <>
-InputParameters validParams<RobinTestFunc>();
-
 /**
  *  Function of analytical solution for use in convergence testing with coupled_helmholtz test file
  */
 class RobinTestFunc : public Function, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   RobinTestFunc(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

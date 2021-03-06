@@ -3,17 +3,14 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class HelmholtzTestFunc;
-
-template <>
-InputParameters validParams<HelmholtzTestFunc>();
-
 /**
  *  Function of analytical solution for use in convergence testing with coupled_helmholtz test file
  */
 class HelmholtzTestFunc : public Function, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   HelmholtzTestFunc(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

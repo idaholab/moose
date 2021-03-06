@@ -3,17 +3,14 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class WaveCoeff;
-
-template <>
-InputParameters validParams<WaveCoeff>();
-
 /**
  *    Function for use as coefficient in standard-form Helmholtz wave equation applications.
  */
 class WaveCoeff : public Function, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   WaveCoeff(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

@@ -3,14 +3,11 @@
 #include "VectorIntegratedBC.h"
 #include <complex>
 
-class VectorTransientAbsorbingBC;
-
-template <>
-InputParameters validParams<VectorTransientAbsorbingBC>();
-
 class VectorTransientAbsorbingBC : public VectorIntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   VectorTransientAbsorbingBC(const InputParameters & parameters);
 
 protected:

@@ -2,14 +2,11 @@
 
 #include "IntegratedBC.h"
 
-class PortBC;
-
-template <>
-InputParameters validParams<PortBC>();
-
 class PortBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   PortBC(const InputParameters & parameters);
 
 protected:

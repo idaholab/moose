@@ -2,15 +2,11 @@
 
 #include "Reaction.h"
 
-// Forward declarations
-class CoeffField;
-
-template <>
-InputParameters validParams<CoeffField>();
-
 class CoeffField : public Reaction
 {
 public:
+  static InputParameters validParams();
+
   CoeffField(const InputParameters & parameters);
 
 protected:

@@ -2,14 +2,11 @@
 
 #include "VectorKernel.h"
 
-class VectorCurrentSource;
-
-template <>
-InputParameters validParams<VectorCurrentSource>();
-
 class VectorCurrentSource : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorCurrentSource(const InputParameters & parameters);
 
 protected:

@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", CoupledGradBC);
 
-template <>
 InputParameters
-validParams<CoupledGradBC>()
+CoupledGradBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Imposes the integrated boundary condition arising from integration by parts of a Helmholtz "
       "equation, when that term is set equal to the gradient of a coupled variable. ");

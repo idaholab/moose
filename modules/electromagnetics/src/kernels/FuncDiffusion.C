@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", FuncDiffusion);
 
-template <>
 InputParameters
-validParams<FuncDiffusion>()
+FuncDiffusion::validParams()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = Diffusion::validParams();
   params.addClassDescription("The Laplacian operator with a function coefficient.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
   return params;

@@ -2,14 +2,11 @@
 
 #include "IntegratedBC.h"
 
-class AbsorbingBC;
-
-template <>
-InputParameters validParams<AbsorbingBC>();
-
 class AbsorbingBC : public IntegratedBC
 {
 public:
+  static InputParameters validParams();
+
   AbsorbingBC(const InputParameters & parameters);
 
 protected:

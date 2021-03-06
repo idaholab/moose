@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", CoeffField);
 
-template <>
 InputParameters
-validParams<CoeffField>()
+CoeffField::validParams()
 {
-  InputParameters params = validParams<Reaction>();
+  InputParameters params = Reaction::validParams();
   params.addClassDescription(
       "Kernel representing the contribution of the PDE term $cfu$, where $c$ and $f$ are constant "
       "and function coefficients, respectively, and $u$ is a scalar variable.");

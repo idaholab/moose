@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", VectorTransientAbsorbingBC);
 
-template <>
 InputParameters
-validParams<VectorTransientAbsorbingBC>()
+VectorTransientAbsorbingBC::validParams()
 {
-  InputParameters params = validParams<VectorIntegratedBC>();
+  InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription("First order transient Absorbing BC from 'Theory and Computation of "
                              "Electromagnetic Fields' by JM Jin for vector variables.");
   params.addParam<FunctionName>("admittance",

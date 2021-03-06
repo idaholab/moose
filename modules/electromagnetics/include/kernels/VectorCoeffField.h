@@ -2,14 +2,11 @@
 
 #include "VectorKernel.h"
 
-class VectorCoeffField;
-
-template <>
-InputParameters validParams<VectorCoeffField>();
-
 class VectorCoeffField : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorCoeffField(const InputParameters & parameters);
 
 protected:

@@ -2,14 +2,11 @@
 
 #include "VectorTimeKernel.h"
 
-class VectorSecondTimeDerivative;
-
-template <>
-InputParameters validParams<VectorSecondTimeDerivative>();
-
 class VectorSecondTimeDerivative : public VectorTimeKernel
 {
 public:
+  static InputParameters validParams();
+
   VectorSecondTimeDerivative(const InputParameters & parameters);
 
 protected:

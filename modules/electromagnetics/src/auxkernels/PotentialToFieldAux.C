@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", PotentialToFieldAux);
 
-template <>
 InputParameters
-validParams<PotentialToFieldAux>()
+PotentialToFieldAux::validParams()
 {
-  InputParameters params = validParams<VariableGradientComponent>();
+  InputParameters params = VariableGradientComponent::validParams();
   params.addClassDescription("An AuxKernel that calculates the electrostatic electric field given "
                              "the electrostatic potential.");
   MooseEnum sign("positive=1 negative=-1", "negative");

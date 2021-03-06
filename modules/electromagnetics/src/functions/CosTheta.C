@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", CosTheta);
 
-template <>
 InputParameters
-validParams<CosTheta>()
+CosTheta::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addClassDescription(
       "Function for cosine(theta) (where theta is in degrees) for use in reflection problems.");
   params.addRequiredParam<Real>("theta", "Angle (in degrees).");

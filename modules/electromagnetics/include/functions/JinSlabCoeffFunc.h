@@ -3,17 +3,14 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class JinSlabCoeffFunc;
-
-template <>
-InputParameters validParams<JinSlabCoeffFunc>();
-
 /**
  *    Function for coefficient in JinSlab1D case.
  */
 class JinSlabCoeffFunc : public Function, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   JinSlabCoeffFunc(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

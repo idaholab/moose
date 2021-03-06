@@ -3,14 +3,11 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class OneDFieldCoeff;
-
-template <>
-InputParameters validParams<OneDFieldCoeff>();
-
 class OneDFieldCoeff : public Function, public FunctionInterface
 {
 public:
+  static InputParameters validParams();
+
   OneDFieldCoeff(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

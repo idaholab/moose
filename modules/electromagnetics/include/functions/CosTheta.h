@@ -2,17 +2,14 @@
 
 #include "Function.h"
 
-class CosTheta;
-
-template <>
-InputParameters validParams<CosTheta>();
-
 /**
  *  Function for cosine(theta) (where theta is in degrees) for use in reflection problems.
  */
 class CosTheta : public Function
 {
 public:
+  static InputParameters validParams();
+
   CosTheta(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const override;

@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", ReflectionCoefficient);
 
-template <>
 InputParameters
-validParams<ReflectionCoefficient>()
+ReflectionCoefficient::validParams()
 {
-  InputParameters params = validParams<SidePostprocessor>();
+  InputParameters params = SidePostprocessor::validParams();
   params.addClassDescription("CURRENTLY ONLY FOR 1D SOLVES. Calculate power reflection coefficient "
                              "for impinging wave on a "
                              "surface. Assumes that wave of form F = F_incoming + R*F_reflected");

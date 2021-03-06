@@ -2,14 +2,11 @@
 
 #include "VectorKernel.h"
 
-class CoupledVectorCoeffField;
-
-template <>
-InputParameters validParams<CoupledVectorCoeffField>();
-
 class CoupledVectorCoeffField : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledVectorCoeffField(const InputParameters & parameters);
 
 protected:

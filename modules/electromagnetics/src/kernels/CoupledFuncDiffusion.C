@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", CoupledFuncDiffusion);
 
-template <>
 InputParameters
-validParams<CoupledFuncDiffusion>()
+CoupledFuncDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Represents a coupled Laplacian term with sign and function coefficients.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");

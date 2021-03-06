@@ -2,14 +2,11 @@
 
 #include "CoupledTimeDerivative.h"
 
-class CoupledCoeffTimeDerivative;
-
-template <>
-InputParameters validParams<CoupledCoeffTimeDerivative>();
-
 class CoupledCoeffTimeDerivative : public CoupledTimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   CoupledCoeffTimeDerivative(const InputParameters & parameters);
 
 protected:

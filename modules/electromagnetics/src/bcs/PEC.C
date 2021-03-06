@@ -2,11 +2,10 @@
 
 registerMooseObject("ElkApp", PEC);
 
-template <>
 InputParameters
-validParams<PEC>()
+PEC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("NodalNormals system description of the Perfect Electrical Conductor "
                              "(PEC) Boundary Condition, where ${\\hat{n} \\times \\vec{E} = 0}.");
   params.addCoupledVar("coupled_0", 0.0, "Coupled field variable, 0 component.");

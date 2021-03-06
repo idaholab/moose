@@ -2,15 +2,11 @@
 
 #include "Kernel.h"
 
-// Forward declarations
-class CoupledCoeffField;
-
-template <>
-InputParameters validParams<CoupledCoeffField>();
-
 class CoupledCoeffField : public Kernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledCoeffField(const InputParameters & parameters);
 
 protected:

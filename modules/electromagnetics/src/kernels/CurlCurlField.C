@@ -3,11 +3,10 @@
 
 registerMooseObject("ElkApp", CurlCurlField);
 
-template <>
 InputParameters
-validParams<CurlCurlField>()
+CurlCurlField::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Weak form term corresponding to $\\nabla \\times (a \\nabla \\times "
       "\\vec{E})$, where $a$ is a coefficient parameter (in EM, usually tied to "

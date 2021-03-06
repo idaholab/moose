@@ -2,15 +2,11 @@
 
 #include "InterfaceKernel.h"
 
-class PerpendicularElectricFieldInterface;
-
-template <>
-InputParameters
-validParams<PerpendicularElectricFieldInterface>();
-
 class PerpendicularElectricFieldInterface : public VectorInterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   PerpendicularElectricFieldInterface(const InputParameters & parameters);
 
 protected:

@@ -2,14 +2,11 @@
 
 #include "VectorKernel.h"
 
-class CurlCurlField;
-
-template <>
-InputParameters validParams<CurlCurlField>();
-
 class CurlCurlField : public VectorKernel
 {
 public:
+  static InputParameters validParams();
+
   CurlCurlField(const InputParameters & parameters);
 
 protected:

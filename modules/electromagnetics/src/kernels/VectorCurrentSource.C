@@ -5,11 +5,10 @@
 
 registerMooseObject("ElkApp", VectorCurrentSource);
 
-template <>
 InputParameters
-validParams<VectorCurrentSource>()
+VectorCurrentSource::validParams()
 {
-  InputParameters params = validParams<VectorKernel>();
+  InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
       "Kernel to calculate the RHS current source term in the helmholtz wave equation.");
   params.addParam<FunctionName>("function_coefficient", 1.0, "Function coefficient multiplier for current source (normally $\\omega$ or $\\omega \\cdot \\mu$).");
