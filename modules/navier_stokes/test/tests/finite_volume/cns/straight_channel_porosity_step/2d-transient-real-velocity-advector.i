@@ -315,7 +315,7 @@ two_term_boundary_expansion=true
   []
 
   [rho_et_left]
-    type = NSFVFluidEnergySpecifiedTemperatureBC
+    type = PNSFVFluidEnergySpecifiedTemperatureBC
     boundary = 'left'
     variable = rho_et
     temperature = ${T_in}
