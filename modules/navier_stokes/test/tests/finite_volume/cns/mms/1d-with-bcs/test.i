@@ -229,7 +229,7 @@ rho_et0 = 26.74394130735463
   []
 
   [rho_et_left]
-    type = NSFVFluidEnergySpecifiedTemperatureBC
+    type = PNSFVFluidEnergySpecifiedTemperatureBC
     boundary = 'left'
     variable = rho_et
     temperature = exact_T
