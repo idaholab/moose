@@ -34,6 +34,7 @@ protected:
   ADMaterialProperty<Real> & _rho;
   ADMaterialProperty<Real> & _superficial_rho;
   ADMaterialProperty<RealVectorValue> & _mass_flux;
+  ADMaterialProperty<RealVectorValue> & _momentum;
   ADMaterialProperty<Real> & _total_energy_density;
   ADMaterialProperty<RealVectorValue> & _velocity;
   ADMaterialProperty<RealVectorValue> & _superficial_velocity;

@@ -46,6 +46,7 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
     _rho(declareADProperty<Real>(NS::density)),
     _superficial_rho(declareADProperty<Real>(NS::superficial_density)),
     _mass_flux(declareADProperty<RealVectorValue>(NS::mass_flux)),
+    _momentum(declareADProperty<RealVectorValue>(NS::momentum)),
     _total_energy_density(declareADProperty<Real>(NS::total_energy_density)),
     _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
     _superficial_velocity(declareADProperty<RealVectorValue>(NS::superficial_velocity)),
@@ -70,6 +71,7 @@ PorousConservedVarMaterial::computeQpProperties()
   _rho[_qp] = _var_rho[_qp];
   _superficial_rho[_qp] = _rho[_qp] * _epsilon[_qp];
   _mass_flux[_qp] = {_var_rho_ud[_qp], _var_rho_vd[_qp], _var_rho_wd[_qp]};
+  _momentum[_qp] = _mass_flux[_qp] / _epsilon[_qp];
   _total_energy_density[_qp] = _var_total_energy_density[_qp];
 
   _superficial_velocity[_qp] = _mass_flux[_qp] / _rho[_qp];

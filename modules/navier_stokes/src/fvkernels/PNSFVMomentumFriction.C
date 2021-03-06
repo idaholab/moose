@@ -34,7 +34,6 @@ PNSFVMomentumFriction::validParams()
                                         "Name of the Darcy coefficients material property.");
   params.addParam<MaterialPropertyName>("Forchheimer_name",
                                         "Name of the Forchheimer coefficients material property.");
-  params.addRequiredCoupledVar("porosity", "Porosity variable.");
 
   params.addParam<MaterialPropertyName>("momentum_name",
                                         "Name of the superficial momentum material property for "
@@ -62,20 +61,11 @@ PNSFVMomentumFriction::PNSFVMomentumFriction(const InputParameters & params)
     _use_quadratic_friction_matprop(isParamValid("quadratic_coef_name")),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
-    _eps(coupledValue("porosity")),
-    _momentum(isParamValid("momentum_name") ? &getADMaterialProperty<Real>("momentum_name")
-                                            : nullptr),
-    _rho(isParamValid("rho") ? getParam<Real>("rho") : 0)
+    _momentum(getADMaterialProperty<RealVectorValue>(NS::momentum))
 {
   if (!_use_linear_friction_matprop && !_use_quadratic_friction_matprop &&
       !_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
-
-  if ((_use_Darcy_friction_model || _use_Forchheimer_friction_model) && !_rho &&
-      !isParamValid("momentum_name"))
-    mooseError(
-        "The density (rho) or the momentum material property name should be specified to use "
-        "the Darcy or Forchheimer friction models.");
 }
 
 ADReal
@@ -83,24 +73,14 @@ PNSFVMomentumFriction::computeQpResidual()
 {
   ADReal friction_term = 0;
   if (_use_linear_friction_matprop)
-    friction_term += (*_linear_friction_matprop)[_qp] * _u[_qp];
+    friction_term += (*_linear_friction_matprop)[_qp] * _momentum[_qp](_component);
   if (_use_quadratic_friction_matprop)
-    friction_term += (*_quadratic_friction_matprop)[_qp] * _u[_qp] * std::abs(_u[_qp]);
-
-  if (!_momentum)
-  {
-    if (_use_Darcy_friction_model)
-      friction_term += (*_cL)[_qp](_component) * _rho * _u[_qp] / _eps[_qp];
-    if (_use_Forchheimer_friction_model)
-      friction_term += (*_cQ)[_qp](_component) * _rho * _u[_qp] / _eps[_qp];
-  }
-  else
-  {
-    if (_use_Darcy_friction_model)
-      friction_term += (*_cL)[_qp](_component) * (*_momentum)[_qp] / _eps[_qp];
-    if (_use_Forchheimer_friction_model)
-      friction_term += (*_cQ)[_qp](_component) * (*_momentum)[_qp] / _eps[_qp];
-  }
+    friction_term += (*_quadratic_friction_matprop)[_qp] * _momentum[_qp](_component) *
+                     std::abs(_momentum[_qp](_component));
+  if (_use_Darcy_friction_model)
+    friction_term += (*_cL)[_qp](_component) * _momentum[_qp](_component);
+  if (_use_Forchheimer_friction_model)
+    friction_term += (*_cQ)[_qp](_component) * _momentum[_qp](_component);
 
   return friction_term;
 }
