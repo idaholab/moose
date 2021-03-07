@@ -30,10 +30,10 @@ PINSFVEnergyTimeDerivative::validParams()
 
 PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
-  _rho(getParam<Real>("rho")),
-  _cp(getADMaterialProperty<Real>("cp_name")),
-  _eps(coupledValue("porosity")),
-  _is_solid(getParam<bool>("is_solid"))
+    _rho(getParam<Real>("rho")),
+    _cp(getADMaterialProperty<Real>("cp_name")),
+    _eps(coupledValue("porosity")),
+    _is_solid(getParam<bool>("is_solid"))
 {
 }
 
@@ -41,5 +41,6 @@ ADReal
 PINSFVEnergyTimeDerivative::computeQpResidual()
 {
   // Note: This is neglecting time derivative of both _cp and _rho
-  return (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * _rho * _cp[_qp] * FVTimeKernel::computeQpResidual();
+  return (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * _rho * _cp[_qp] *
+         FVTimeKernel::computeQpResidual();
 }

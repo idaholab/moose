@@ -15,7 +15,8 @@ InputParameters
 PINSFVMomentumBoussinesq::validParams()
 {
   InputParameters params = INSFVMomentumBoussinesq::validParams();
-  params.addClassDescription("Computes a body force for natural convection buoyancy $eps alpha (T-T_0)$ in porous media.");
+  params.addClassDescription(
+      "Computes a body force for natural convection buoyancy $eps alpha (T-T_0)$ in porous media.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   return params;

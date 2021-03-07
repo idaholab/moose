@@ -23,10 +23,9 @@ PINSFVMomentumPressureFlux::validParams()
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredCoupledVar("p", "Pressure variable");
   MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this kernel applies to.");
+  params.addParam<MooseEnum>("momentum_component",
+                             momentum_component,
+                             "The component of the momentum equation that this kernel applies to.");
   params.set<unsigned short>("ghost_layers") = 2;
   params.set<bool>("force_boundary_execution") = true;
   return params;
@@ -34,12 +33,12 @@ PINSFVMomentumPressureFlux::validParams()
 
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
-  _eps(coupledValue("porosity")),
-  _eps_neighbor(coupledNeighborValue("porosity")),
-  _p_elem(adCoupledValue(NS::pressure)),
-  _p_neighbor(adCoupledNeighborValue(NS::pressure)),
-  _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("p", 0))),
-  _index(getParam<MooseEnum>("momentum_component"))
+    _eps(coupledValue("porosity")),
+    _eps_neighbor(coupledNeighborValue("porosity")),
+    _p_elem(adCoupledValue(NS::pressure)),
+    _p_neighbor(adCoupledNeighborValue(NS::pressure)),
+    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("p", 0))),
+    _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "

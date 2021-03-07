@@ -21,6 +21,6 @@ public:
   static InputParameters validParams();
   PINSFVMassAdvection(const InputParameters & params);
 
-  protected:
-    ADReal computeQpResidual() override;
+protected:
+  ADReal computeQpResidual() override;
 };

@@ -27,5 +27,5 @@ PINSFVEnergyAdvection::PINSFVEnergyAdvection(const InputParameters & params)
 {
   if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
     mooseError("PINSFVEnergyAdvection may only be used with a superficial advective velocity, "
-        "of variable type PINSFVVelocityVariable.");
+               "of variable type PINSFVVelocityVariable.");
 }
