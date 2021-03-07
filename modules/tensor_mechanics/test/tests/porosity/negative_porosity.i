@@ -25,7 +25,6 @@
     type = PorosityFromStrain
     initial_porosity = 1e-10
     inelastic_strain = strain
-    negative_behavior = INITIAL_CONDITION
     outputs = all
   []
   [strain]

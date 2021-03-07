@@ -38,7 +38,7 @@ protected:
 
   /// Old porosity value
   const MaterialProperty<Real> & _porosity_old;
-  //
+
   /// Initial porosity
   const Real _initial_porosity;
 
