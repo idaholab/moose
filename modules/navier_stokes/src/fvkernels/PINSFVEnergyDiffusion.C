@@ -25,10 +25,10 @@ PINSFVEnergyDiffusion::validParams()
 
 PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-  _k_elem(getADMaterialProperty<Real>("k")),
-  _k_neighbor(getNeighborADMaterialProperty<Real>("k")),
-  _eps(coupledValue("porosity")),
-  _eps_neighbor(coupledNeighborValue("porosity"))
+    _k_elem(getADMaterialProperty<Real>("k")),
+    _k_neighbor(getNeighborADMaterialProperty<Real>("k")),
+    _eps(coupledValue("porosity")),
+    _eps_neighbor(coupledNeighborValue("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -52,5 +52,5 @@ PINSFVEnergyDiffusion::computeQpResidual()
   // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();
 
-  return - k_eps_face * dTdn;
+  return -k_eps_face * dTdn;
 }

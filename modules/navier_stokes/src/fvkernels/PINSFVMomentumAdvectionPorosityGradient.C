@@ -26,24 +26,24 @@ PINSFVMomentumAdvectionPorosityGradient::validParams()
   params.declareControllable("rho");
 
   MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this kernel applies to.");
+  params.addParam<MooseEnum>("momentum_component",
+                             momentum_component,
+                             "The component of the momentum equation that this kernel applies to.");
   params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
-PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient(const InputParameters & params)
+PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient(
+    const InputParameters & params)
   : FVElementalKernel(params),
-  _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
-  _u(adCoupledValue("u")),
-  _v(params.isParamValid("v") ? adCoupledValue("v") : _ad_zero),
-  _w(params.isParamValid("w") ? adCoupledValue("w") : _ad_zero),
-  _rho(getParam<Real>("rho")),
-  _index(getParam<MooseEnum>("momentum_component")),
-  _smooth_porosity(getParam<bool>("smooth_porosity"))
+    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _u(adCoupledValue("u")),
+    _v(params.isParamValid("v") ? adCoupledValue("v") : _ad_zero),
+    _w(params.isParamValid("w") ? adCoupledValue("w") : _ad_zero),
+    _rho(getParam<Real>("rho")),
+    _index(getParam<MooseEnum>("momentum_component")),
+    _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
@@ -51,7 +51,9 @@ PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient
              "'--with-ad-indexing-type=global'");
 #endif
   if (!_smooth_porosity)
-    paramError("smooth_porosity", "The MomentumAdvectionContinuousPorosity may only be used with a continuous porosity.");
+    paramError(
+        "smooth_porosity",
+        "The MomentumAdvectionContinuousPorosity may only be used with a continuous porosity.");
   if (!isParamValid("momentum_component"))
     mooseError("The momentum equation component this kernel applies to should be specified.");
 }
@@ -62,5 +64,6 @@ PINSFVMomentumAdvectionPorosityGradient::computeQpResidual()
   const Real one_over_eps = 1 / MetaPhysicL::raw_value(_eps_var->getElemValue(_current_elem));
   ADRealVectorValue V = {_u[_qp], _v[_qp], _w[_qp]};
 
-  return _rho * V(_index) * (-one_over_eps* one_over_eps) * (V * MetaPhysicL::raw_value(_eps_var->adGradSln(_current_elem)));
+  return _rho * V(_index) * (-one_over_eps * one_over_eps) *
+         (V * MetaPhysicL::raw_value(_eps_var->adGradSln(_current_elem)));
 }

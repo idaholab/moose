@@ -15,7 +15,7 @@
 class INSFVVelocityVariable;
 
 class PINSFVMomentumAdvectionOutflowBC : public FVMatAdvectionOutflowBC,
-                                        public INSFVFullyDevelopedFlowBC
+                                         public INSFVFullyDevelopedFlowBC
 {
 public:
   static InputParameters validParams();

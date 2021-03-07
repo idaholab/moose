@@ -15,7 +15,8 @@ InputParameters
 PINSFVMomentumGravity::validParams()
 {
   InputParameters params = INSFVMomentumGravity::validParams();
-  params.addClassDescription("Computes a body force, $eps * \rho * g$ due to gravity on fluid in porous media.");
+  params.addClassDescription(
+      "Computes a body force, $eps * \rho * g$ due to gravity on fluid in porous media.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
 
   return params;

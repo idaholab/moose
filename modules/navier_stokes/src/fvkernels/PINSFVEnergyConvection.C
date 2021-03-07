@@ -8,7 +8,9 @@ PINSFVEnergyConvection::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements the solid-fluid ambient convection term in the porous "
                              "media Navier Stokes energy equation.");
-  params.addRequiredParam<MaterialPropertyName>("h_solid_fluid", "Name of the convective heat "
+  params.addRequiredParam<MaterialPropertyName>(
+      "h_solid_fluid",
+      "Name of the convective heat "
       "transfer coefficient. This coefficient should include the influence of porosity.");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
   params.addRequiredCoupledVar("temp_fluid", "Fluid temperature");
@@ -18,10 +20,10 @@ PINSFVEnergyConvection::validParams()
 
 PINSFVEnergyConvection::PINSFVEnergyConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
-  _h_solid_fluid(getADMaterialProperty<Real>("h_solid_fluid")),
-  _temp_fluid(adCoupledValue("temp_fluid")),
-  _temp_solid(adCoupledValue("temp_solid")),
-  _is_solid(getParam<bool>("is_solid"))
+    _h_solid_fluid(getADMaterialProperty<Real>("h_solid_fluid")),
+    _temp_fluid(adCoupledValue("temp_fluid")),
+    _temp_solid(adCoupledValue("temp_solid")),
+    _is_solid(getParam<bool>("is_solid"))
 {
 }
 
