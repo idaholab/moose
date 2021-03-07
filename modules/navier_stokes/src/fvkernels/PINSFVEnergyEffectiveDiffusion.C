@@ -15,8 +15,9 @@ InputParameters
 PINSFVEnergyEffectiveDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Effective diffusion term in the porous media incompressible Navier-Stokes "
-                             "equations : $-div(kappa grad(T))");
+  params.addClassDescription(
+      "Effective diffusion term in the porous media incompressible Navier-Stokes "
+      "equations : $-div(kappa grad(T))");
   params.addRequiredParam<MaterialPropertyName>("kappa", "Effective thermal conductivity");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -24,8 +25,8 @@ PINSFVEnergyEffectiveDiffusion::validParams()
 
 PINSFVEnergyEffectiveDiffusion::PINSFVEnergyEffectiveDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-  _kappa_elem(getADMaterialProperty<Real>("kappa")),
-  _kappa_neighbor(getNeighborADMaterialProperty<Real>("kappa"))
+    _kappa_elem(getADMaterialProperty<Real>("kappa")),
+    _kappa_neighbor(getNeighborADMaterialProperty<Real>("kappa"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -49,5 +50,5 @@ PINSFVEnergyEffectiveDiffusion::computeQpResidual()
   // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();
 
-  return - k_eps_face * dTdn;
+  return -k_eps_face * dTdn;
 }

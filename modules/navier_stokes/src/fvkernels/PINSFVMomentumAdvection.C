@@ -26,14 +26,14 @@ PINSFVMomentumAdvection::validParams()
 
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
-  _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
-  _eps(coupledValue("porosity")),
-  _eps_neighbor(coupledNeighborValue("porosity")),
-  _smooth_porosity(getParam<bool>("smooth_porosity"))
+    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _eps(coupledValue("porosity")),
+    _eps_neighbor(coupledNeighborValue("porosity")),
+    _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
   if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
-        "of variable type PINSFVVelocityVariable.");
+               "of variable type PINSFVVelocityVariable.");
 }
 
 const VectorValue<ADReal> &
@@ -172,14 +172,17 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
               Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
           ADReal temp_coeff = _rho * face_velocity * surface_vector * advection_coeffs.first;
 
-          if (_fully_developed_flow_boundaries.find(bc_id) == _fully_developed_flow_boundaries.end())
-            // We are not on a fully developed flow boundary, so we have a viscous term contribution.
-            // This term is slightly modified relative to the internal face term. Instead of the
-            // distance between elem and neighbor centroid, we just have the distance between the elem
-            // and face centroid. Specifically, the term below is the result of Moukalled 8.80, 8.82,
-            // and the orthogonal correction approach equation for E_f, equation 8.89. So relative to
-            // the internal face viscous term, we have substituted eqn. 8.82 for 8.78
-            temp_coeff += mu / eps_face * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
+          if (_fully_developed_flow_boundaries.find(bc_id) ==
+              _fully_developed_flow_boundaries.end())
+            // We are not on a fully developed flow boundary, so we have a viscous term
+            // contribution. This term is slightly modified relative to the internal face term.
+            // Instead of the distance between elem and neighbor centroid, we just have the distance
+            // between the elem and face centroid. Specifically, the term below is the result of
+            // Moukalled 8.80, 8.82, and the orthogonal correction approach equation for E_f,
+            // equation 8.89. So relative to the internal face viscous term, we have substituted
+            // eqn. 8.82 for 8.78
+            temp_coeff +=
+                mu / eps_face * surface_vector.norm() / (fi->faceCentroid() - rc_centroid).norm();
 
           // For flow boundaries, the coefficient addition is the same for every velocity component
           for (const auto i : make_range(_dim))
@@ -193,7 +196,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
           // Moukalled eqns. 15.154 - 15.156
           for (const auto i : make_range(_dim))
             coeff(i) += 2. * mu / eps_face * surface_vector.norm() /
-                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) * normal(i);
+                        std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) *
+                        normal(i);
 
           return;
         }
@@ -209,8 +213,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     // Else we are on an internal face
 
     // Compute the face porosity
-    Real eps_elem = MetaPhysicL::raw_value(elem_has_info ? _eps_var->getElemValue(&fi->elem()) :
-                                                           _eps_var->getElemValue(neighbor));
+    Real eps_elem = MetaPhysicL::raw_value(elem_has_info ? _eps_var->getElemValue(&fi->elem())
+                                                         : _eps_var->getElemValue(neighbor));
     Real eps_face = MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(neighbor, *fi, eps_elem));
 
     ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
@@ -236,7 +240,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
     // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
     // E_f, equation 8.69
-    temp_coeff += mu / eps_face * surface_vector.norm() / (fi->neighborCentroid() - fi->elemCentroid()).norm();
+    temp_coeff += mu / eps_face * surface_vector.norm() /
+                  (fi->neighborCentroid() - fi->elemCentroid()).norm();
 
     // For internal faces the coefficient is the same for every velocity component.
     for (const auto i : make_range(_dim))
@@ -250,9 +255,9 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
 
 void
 PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
-                                    ADRealVectorValue & v,
-                                    const ADRealVectorValue & elem_v,
-                                    const ADRealVectorValue & neighbor_v)
+                                     ADRealVectorValue & v,
+                                     const ADRealVectorValue & elem_v,
+                                     const ADRealVectorValue & neighbor_v)
 {
   const Elem * const elem = &_face_info->elem();
   const Elem * const neighbor = _face_info->neighborPtr();
@@ -288,9 +293,9 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
     return;
 
   // If the porosity has discontinuities, avoid Rhie Chow near the jumps
-  if (!_smooth_porosity && (_eps_var->adGradSln(elem).norm() > 0 ||
-      _eps_var->adGradSln(neighbor).norm() > 0))
-      return;
+  if (!_smooth_porosity && (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > 0 ||
+                            MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > 0))
+    return;
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
@@ -349,7 +354,8 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   else
     face_D = elem_D;
 
-  Real eps_face = MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(neighbor, *_face_info, _eps[_qp]));
+  Real eps_face =
+      MetaPhysicL::raw_value(_eps_var->getInternalFaceValue(neighbor, *_face_info, _eps[_qp]));
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))

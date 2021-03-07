@@ -18,6 +18,6 @@ PINSFVVelocityVariable::validParams()
 }
 
 PINSFVVelocityVariable::PINSFVVelocityVariable(const InputParameters & params)
- : INSFVVelocityVariable(params)
+  : INSFVVelocityVariable(params)
 {
 }

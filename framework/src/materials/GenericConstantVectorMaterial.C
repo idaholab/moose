@@ -31,7 +31,7 @@ GenericConstantVectorMaterialTempl<is_ad>::validParams()
 
 template <bool is_ad>
 GenericConstantVectorMaterialTempl<is_ad>::GenericConstantVectorMaterialTempl(
-  const InputParameters & parameters)
+    const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealVectorValue>("prop_value")),

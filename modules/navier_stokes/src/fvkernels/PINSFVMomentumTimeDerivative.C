@@ -16,9 +16,8 @@ InputParameters
 PINSFVMomentumTimeDerivative::validParams()
 {
   InputParameters params = INSFVMomentumTimeDerivative::validParams();
-  params.addClassDescription(
-      "Adds the time derivative term: d(rho u_d) / dt to the porous media "
-      "incompressible Navier-Stokes momentum equation.");
+  params.addClassDescription("Adds the time derivative term: d(rho u_d) / dt to the porous media "
+                             "incompressible Navier-Stokes momentum equation.");
   return params;
 }
 
@@ -27,5 +26,5 @@ PINSFVMomentumTimeDerivative::PINSFVMomentumTimeDerivative(const InputParameters
 {
   if (!dynamic_cast<PINSFVVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumTimeDerivative may only be used with a superficial velocity, "
-        "of variable type PINSFVVelocityVariable.");
+               "of variable type PINSFVVelocityVariable.");
 }
