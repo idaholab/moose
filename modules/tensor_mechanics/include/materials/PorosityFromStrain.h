@@ -23,6 +23,13 @@ public:
   PorosityFromStrainTempl(const InputParameters & parameters);
 
 protected:
+  enum class NegativeBehavior
+  {
+    ZERO,
+    INITIAL_CONDITION,
+    EXCEPTION
+  };
+
   virtual void computeQpProperties() override;
   virtual void initQpStatefulProperties() override;
 
@@ -31,7 +38,7 @@ protected:
 
   /// Old porosity value
   const MaterialProperty<Real> & _porosity_old;
-  //
+
   /// Initial porosity
   const Real _initial_porosity;
 
@@ -40,6 +47,9 @@ protected:
 
   /// Old value of the inelastic strain
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
+
+  /// Enum for negative porosity handling
+  const NegativeBehavior _negative_behavior;
 };
 
 typedef PorosityFromStrainTempl<false> PorosityFromStrain;

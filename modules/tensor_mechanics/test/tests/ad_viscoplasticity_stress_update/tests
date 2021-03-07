@@ -1,42 +1,23 @@
 [Tests]
   issues = '#13494'
   design = 'source/materials/ADViscoplasticityStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-  [./regular_creep]
+  [./creep]
     type = CSVDiff
     input = creep.i
     csvdiff = creep_out.csv
-    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep'"
     design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
     requirement = 'The ADPowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading.'
   [../]
-  [./regular_creep-jac]
-    type = 'PetscJacobianTester'
-    input = 'creep.i'
-    cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep' -snes_test_err 1e-11"
-    run_sim = 'True'
-    ratio_tol = 1e-7
-    difference_tol = 1e8
-    prereq = regular_creep
-    requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
-    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
-  [../]
-
-  [./porous_creep]
-    type = CSVDiff
-    input = creep.i
-    csvdiff = creep_out.csv
-    prereq = regular_creep-jac
-    requirement = 'The PowerLawCreepStressUpdate, called through the ADComputeMultipleInelasticStress, shall compute a creep strain based on an extrenal loading, and match the values computed instead with ADComputeMultipleInelasticStress.'
-  [../]
-  [./porous_creep-jac]
+  [./creep-jac]
     type = 'PetscJacobianTester'
     input = 'creep.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
     ratio_tol = 1e-7
-    difference_tol = 1e4
-    prereq = porous_creep
-    requirement = 'The Jacobian for the AD porous creep problem shall be perfect'
+    difference_tol = 1e8
+    prereq = creep
+    requirement = 'The Jacobian for the AD regular creep problem shall be perfect'
+    design = 'source/materials/ADPowerLawCreepStressUpdate.md source/materials/ADComputeMultipleInelasticStress.md'
   [../]
 
   [./exact_spherical]
@@ -142,4 +123,29 @@
     prereq = gtn_single
     requirement = 'The Jacobian for the AD gtn single problem shall be perfect'
   [../]
+
+  [negative]
+    requirement = 'The system shall handle a negative calculated porosity computed from a strain tensor'
+    [zero]
+      type = CSVDiff
+      input = 'negative_porosity.i'
+      csvdiff = 'negative_porosity_zero_out.csv'
+      cli_args = 'Outputs/file_base=negative_porosity_zero_out Materials/lps/negative_behavior=ZERO'
+      detail = 'by setting the porosity to zero.'
+    []
+    [initial]
+      type = CSVDiff
+      input = 'negative_porosity.i'
+      csvdiff = 'negative_porosity_initial_out.csv'
+      cli_args = 'Outputs/file_base=negative_porosity_initial_out Materials/lps/negative_behavior=INITIAL_CONDITION'
+      detail = 'by setting the porosity to the initial condition.'
+    []
+    [exception]
+      type = RunException
+      input = 'negative_porosity.i'
+      expect_err = 'porosity is negative'
+      cli_args = 'Materials/lps/negative_behavior=EXCEPTION'
+      detail = 'by throwing an exception.'
+    []
+  []
 []

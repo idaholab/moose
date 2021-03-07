@@ -81,4 +81,17 @@ protected:
 
   /// Flag to enable verbose output
   const bool _verbose;
+
+  /// Initial porosity
+  const Real _initial_porosity;
+
+  enum class NegativeBehavior
+  {
+    ZERO,
+    INITIAL_CONDITION,
+    EXCEPTION
+  };
+
+  /// Enum for negative porosity handling
+  const NegativeBehavior _negative_behavior;
 };
