@@ -293,8 +293,8 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
     return;
 
   // If the porosity has discontinuities, avoid Rhie Chow near the jumps
-  if (!_smooth_porosity && (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > 0 ||
-                            MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > 0))
+  if (!_smooth_porosity &&
+      (_eps_var->adGradSln(elem).norm() > 0 || _eps_var->adGradSln(neighbor).norm() > 0))
     return;
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
