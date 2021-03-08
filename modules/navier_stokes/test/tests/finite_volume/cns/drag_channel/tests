@@ -1,0 +1,16 @@
+[Tests]
+  design = 'cnsfv.md'
+  issues = '#16758'
+  [friction_dominated]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to solve friction-dominated Euler equations, in which the momentum equation only includes drag and pressure terms, in multiple dimensions and show a flat profile for the mass flux.'
+  []
+  [arbitrary_body_force]
+    type = Exodiff
+    input = simpler.i
+    exodiff = simpler_out.e
+    requirement = 'The system shall be able to solve the Euler equations, in which the momentum equation only contains a pressure and body force term, and show a flat profile for the mass flux.'
+  []
+[]
