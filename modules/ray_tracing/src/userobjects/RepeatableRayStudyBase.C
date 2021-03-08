@@ -9,9 +9,6 @@
 
 #include "RepeatableRayStudyBase.h"
 
-// MOOSE includes
-#include "TimedPrint.h"
-
 // libMesh includes
 #include "libmesh/parallel_sync.h"
 
@@ -46,10 +43,7 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
                 _local_rays,
                 /* do_exchange = */ !_define_rays_replicated),
     _should_claim_rays(
-        declareRestartableData<bool>("claim_after_define_rays", _claim_after_define_rays)),
-    _claim_rays_timer(registerTimedSection("claimRays", 1)),
-    _define_rays_timer(registerTimedSection("defineRays", 1)),
-    _verify_replicated_rays(registerTimedSection("verifyReplicatedRays", 2))
+        declareRestartableData<bool>("claim_after_define_rays", _claim_after_define_rays))
 {
   if (!_claim_after_define_rays && getParam<bool>("_define_rays_replicated"))
     mooseWarning("The combination of private parameters:",
@@ -143,8 +137,7 @@ RepeatableRayStudyBase::meshChanged()
 void
 RepeatableRayStudyBase::claimRaysInternal()
 {
-  TIME_SECTION(_claim_rays_timer);
-  CONSOLE_TIMED_PRINT("Claiming rays");
+  TIME_SECTION("claimRaysInternal", 2, "Claiming Rays");
 
   _claim_rays.claim();
 }
@@ -153,8 +146,7 @@ void
 RepeatableRayStudyBase::defineRaysInternal()
 {
   {
-    TIME_SECTION(_define_rays_timer);
-    CONSOLE_TIMED_PRINT("Defining rays");
+    TIME_SECTION("defineRaysInternal", 2, "Defining Rays");
 
     _rays.clear();
     _local_rays.clear();
@@ -206,8 +198,7 @@ RepeatableRayStudyBase::defineRaysInternal()
 void
 RepeatableRayStudyBase::verifyReplicatedRays()
 {
-  TIME_SECTION(_verify_replicated_rays);
-  CONSOLE_TIMED_PRINT("Verifying replicated rays");
+  TIME_SECTION("verifyReplicatedRays", 2, "Verifying Replicated Rays");
 
   const std::string error_suffix =
       "\n\nThe Rays added in defineRays() must be replicated across all processors\nwith the "

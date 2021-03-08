@@ -9,9 +9,6 @@
 
 #include "ViewFactorRayStudy.h"
 
-// MOOSE includes
-#include "TimedPrint.h"
-
 // Local includes
 #include "ViewFactorRayBC.h"
 
@@ -244,7 +241,7 @@ ViewFactorRayStudy::postExecuteStudy()
 void
 ViewFactorRayStudy::generateRays()
 {
-  CONSOLE_TIMED_PRINT("ViewFactorRayStudy generating rays");
+  TIME_SECTION("generateRays", 3, "ViewFactorRayStudy Generating Rays");
 
   // Determine number of Rays and points to allocate space before generation and for output
   std::size_t num_local_rays = 0;

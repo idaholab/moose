@@ -30,8 +30,7 @@ CSVSampler::validParams()
   return params;
 }
 
-CSVSampler::CSVSampler(const InputParameters & parameters)
-  : Sampler(parameters), _perf_compute_sample(registerTimedSection("computeSample", 4))
+CSVSampler::CSVSampler(const InputParameters & parameters) : Sampler(parameters)
 {
   // If indices or names are not provided, all of the data will be read and the
   // matrix will be the same as the contents of the data file
@@ -85,6 +84,7 @@ CSVSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
   mooseAssert(row_index < _data[0].size(), "row_index cannot be out of bounds of the data.");
   mooseAssert(col_index < _data.size(), "col_index cannot be out of bounds of the data.");
 
-  TIME_SECTION(_perf_compute_sample);
+  TIME_SECTION("computeSample", 3, "Sampling CSV");
+
   return _data[col_index][row_index]; // entering samples into the matrix
 }

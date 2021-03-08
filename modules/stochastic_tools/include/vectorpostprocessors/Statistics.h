@@ -67,10 +67,4 @@ private:
    * This also performs error checking on the supplied "ci_levels".
    */
   std::vector<Real> computeLevels(const std::vector<Real> & levels_in) const;
-
-  ///@{
-  /// PrefGraph timers
-  const PerfID _perf_initial_setup;
-  const PerfID _perf_execute;
-  ///@}
 };

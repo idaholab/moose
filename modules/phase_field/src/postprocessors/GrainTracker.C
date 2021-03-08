@@ -97,12 +97,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(declareRestartableData<unsigned int>("max_curr_grain_id", invalid_id)),
-    _is_transient(_subproblem.isTransient()),
-    _finalize_timer(registerTimedSection("finalize", 1)),
-    _remap_timer(registerTimedSection("remapGrains", 2)),
-    _track_grains(registerTimedSection("trackGrains", 2)),
-    _broadcast_update(registerTimedSection("broadCastUpdate", 2)),
-    _update_field_info(registerTimedSection("updateFieldInfo", 2))
+    _is_transient(_subproblem.isTransient())
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -332,7 +327,7 @@ GrainTracker::finalize()
   if (_t_step < _tracking_step)
     return;
 
-  TIME_SECTION(_finalize_timer);
+  TIME_SECTION("finalize", 3, "Finalizing GrainTracker");
 
   // Expand the depth of the halos around all grains
   auto num_halo_layers = _halo_level >= 1
@@ -386,7 +381,7 @@ GrainTracker::finalize()
 void
 GrainTracker::broadcastAndUpdateGrainData()
 {
-  TIME_SECTION(_broadcast_update);
+  TIME_SECTION("broadcastAndUpdateGrainData", 3, "Broadcasting and Updating Grain Data");
 
   std::vector<PartialFeatureData> root_feature_data;
   std::vector<std::string> send_buffer(1), recv_buffer;
@@ -496,7 +491,7 @@ GrainTracker::assignGrains()
 void
 GrainTracker::trackGrains()
 {
-  TIME_SECTION(_track_grains);
+  TIME_SECTION("trackGrains", 3, "Tracking Grains");
 
   mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
 
@@ -917,7 +912,7 @@ GrainTracker::remapGrains()
   if (_t_step < _tracking_step)
     return;
 
-  TIME_SECTION(_remap_timer);
+  TIME_SECTION("remapGrains", 3, "Remapping Grains");
 
   if (_verbosity_level > 1)
     _console << "Running remap Grains\n" << std::endl;
@@ -1553,7 +1548,7 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node,
 void
 GrainTracker::updateFieldInfo()
 {
-  TIME_SECTION(_update_field_info);
+  TIME_SECTION("updateFieldInfo", 3, "Updating Field Info");
 
   for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
