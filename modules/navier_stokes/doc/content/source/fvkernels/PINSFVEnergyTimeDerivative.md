@@ -2,7 +2,7 @@
 
 ## Description
 
-The `PINSFVEnergyTimeDerivative` kernel implements a time derivative for the domain $\Omega$ given by
+This kernel implements a time derivative for the domain $\Omega$ given by
 
 \begin{equation}
 \underbrace{\epsilon \rho c_{pf} \frac{\partial T_f}{\partial t}}_{\textrm{PINSFVEnergyTimeDerivative}}

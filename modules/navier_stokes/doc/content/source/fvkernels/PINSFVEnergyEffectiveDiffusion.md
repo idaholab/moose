@@ -2,9 +2,9 @@
 
 ## Description
 
-The `PINSFVEnergyEffectiveDiffusion` kernel implements a diffusion term for the fluid energy equation.
+This kernel implements a diffusion term for the fluid energy equation.
 This kernel accepts an effective thermal conductivity material property, a regular thermal conductivity may be
-specified using a [PINSFVEnergyDiffusion] kernel. The effective thermal conductivity takes into account the
+specified using a [PINSFVEnergyDiffusion.md] kernel. The effective thermal conductivity takes into account the
 effect of porosity on the thermal conductivity.
 
 \begin{equation}

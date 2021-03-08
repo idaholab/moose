@@ -1,7 +1,7 @@
 # PINSFVMomentumGravity
 
 This object adds a simple gravitational force term to the incompressible porous media Navier
-Stokes equations of the form $-\epsilon \rho \vec{g}$ where $\epsilon$ is the porosity, $\rho$ the density and
+Stokes momentum equations of the form $-\epsilon \rho \vec{g}$ where $\epsilon$ is the porosity, $\rho$ the density and
 $\vec{g}$ the gravity vector.
 
 !syntax parameters /FVKernels/PINSFVMomentumGravity
