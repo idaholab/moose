@@ -3,7 +3,7 @@ API: Application Programming Interface
 AMP: Asset Management Plan
 BVP: boundary value problem
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
-CMP: Content Management Plan
+CMP: Configuration Management Plan
 CSV: comma-separated values
 DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
@@ -41,6 +41,7 @@ SDD: Software Design Description
 SRS: Software Requirement Specification
 SSD: Safety Software Determination
 STP: Software Test Plan
+SQAP: Software Quality  Assurance Plan
 SQP: Software Quality Plan
 VVR: Verification and Validation Report
 VVP: Verification and Validation Plan

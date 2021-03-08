@@ -20,7 +20,7 @@ class Document(mooseutils.AutoPropertyMixin):
 INL_DOCUMENTS = ['safety_software_determination',
                  'quality_level_determination',
                  'enterprise_architecture_entry',
-                 'project_management_plan',
+                 'project_management_plan', # deprecated
                  'software_quality_plan',
                  'configuration_management_plan',
                  'software_test_plan',
