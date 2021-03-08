@@ -41,6 +41,7 @@ ConservedVarValuesMaterial::ConservedVarValuesMaterial(const InputParameters & p
     _var_total_energy_density(adCoupledValue(NS::total_energy_density)),
     _rho(declareADProperty<Real>(NS::density)),
     _mass_flux(declareADProperty<RealVectorValue>(NS::mass_flux)),
+    _momentum(declareADProperty<RealVectorValue>(NS::momentum)),
     _total_energy_density(declareADProperty<Real>(NS::total_energy_density)),
     _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
     _speed(declareADProperty<Real>(NS::speed)),
@@ -78,6 +79,7 @@ ConservedVarValuesMaterial::computeQpProperties()
 {
   _rho[_qp] = _var_rho[_qp];
   _mass_flux[_qp] = {_var_rho_u[_qp], _var_rho_v[_qp], _var_rho_w[_qp]};
+  _momentum[_qp] = _mass_flux[_qp];
   _total_energy_density[_qp] = _var_total_energy_density[_qp];
 
   _velocity[_qp] = _mass_flux[_qp] / _rho[_qp];
