@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumAdvection.h"
-#include "PINSFVVelocityVariable.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
 
@@ -31,9 +31,9 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
     _eps_neighbor(coupledNeighborValue("porosity")),
     _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
-  if (!dynamic_cast<const PINSFVVelocityVariable *>(_u_var))
+  if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
-               "of variable type PINSFVVelocityVariable.");
+               "of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 const VectorValue<ADReal> &

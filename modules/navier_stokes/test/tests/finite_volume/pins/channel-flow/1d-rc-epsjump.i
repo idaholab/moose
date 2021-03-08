@@ -19,7 +19,7 @@ velocity_interp_method='rc'
 
 [Variables]
   [u]
-    type = PINSFVVelocityVariable
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 1
   []
   [pressure]
