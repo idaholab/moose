@@ -31,4 +31,6 @@ protected:
   const ADMaterialProperty<Real> * const _quadratic_friction_matprop;
   /// Boolean to select the right model
   const bool _use_linear_friction_matprop;
+  /// drag quantity
+  const MooseArray<ADReal> & _drag_quantity;
 };

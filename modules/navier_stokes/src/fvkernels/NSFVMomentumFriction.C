@@ -26,6 +26,10 @@ NSFVMomentumFriction::validParams()
                                         "Linear friction coefficient name as a material property");
   params.addParam<MaterialPropertyName>(
       "quadratic_coef_name", "Quadratic friction coefficient name as a material property");
+  params.addParam<MaterialPropertyName>(
+      "drag_quantity",
+      "the quantity that the drag force is proportional to. If this is not supplied, then the "
+      "variable value will be used.");
   return params;
 }
 
@@ -37,7 +41,9 @@ NSFVMomentumFriction::NSFVMomentumFriction(const InputParameters & parameters)
     _quadratic_friction_matprop(isParamValid("quadratic_coef_name")
                                     ? &getADMaterialProperty<Real>("quadratic_coef_name")
                                     : nullptr),
-    _use_linear_friction_matprop(isParamValid("linear_coef_name"))
+    _use_linear_friction_matprop(isParamValid("linear_coef_name")),
+    _drag_quantity(
+        isParamValid("drag_quantity") ? getADMaterialProperty<Real>("drag_quantity").get() : _u)
 {
   // Check that one and at most one friction coefficient has been provided
   if (isParamValid("linear_coef_name") + isParamValid("quadratic_coef_name") != 1)
@@ -49,7 +55,8 @@ ADReal
 NSFVMomentumFriction::computeQpResidual()
 {
   if (_use_linear_friction_matprop)
-    return (*_linear_friction_matprop)[_qp] * _u[_qp];
+    return (*_linear_friction_matprop)[_qp] * _drag_quantity[_qp];
   else
-    return (*_quadratic_friction_matprop)[_qp] * _u[_qp] * std::abs(_u[_qp]);
+    return (*_quadratic_friction_matprop)[_qp] * _drag_quantity[_qp] *
+           std::abs(_drag_quantity[_qp]);
 }
