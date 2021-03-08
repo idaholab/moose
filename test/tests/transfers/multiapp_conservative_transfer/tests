@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#12948'
-  design = '/MultiAppCopyTransfer.md'
+  issues = '#12948 #17231'
+  design = '/MultiAppConservativeTransfer.md'
 
   [./test]
     type = Exodiff
