@@ -43,11 +43,11 @@ velocity_interp_method='average'
 
 [Variables]
   [u]
-    type = PINSFVVelocityVariable
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 0
   []
   [v]
-    type = PINSFVVelocityVariable
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 1
   []
   [pressure]

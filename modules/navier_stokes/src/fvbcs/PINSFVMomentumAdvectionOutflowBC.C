@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumAdvectionOutflowBC.h"
-#include "PINSFVVelocityVariable.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
@@ -31,9 +31,9 @@ PINSFVMomentumAdvectionOutflowBC::validParams()
 PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputParameters & params)
   : FVMatAdvectionOutflowBC(params),
     INSFVFullyDevelopedFlowBC(params),
-    _u_var(dynamic_cast<const PINSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(dynamic_cast<const PINSFVVelocityVariable *>(getFieldVar("v", 0))),
-    _w_var(dynamic_cast<const PINSFVVelocityVariable *>(getFieldVar("w", 0))),
+    _u_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("u", 0))),
+    _v_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("v", 0))),
+    _w_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("w", 0))),
     _eps(coupledValue("porosity")),
     _eps_neighbor(coupledNeighborValue("porosity")),
     _dim(_subproblem.mesh().dimension())
@@ -45,17 +45,17 @@ PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputPa
 #endif
 
   if (!_u_var)
-    paramError("u", "the u velocity must be an PINSFVVelocityVariable.");
+    paramError("u", "the u velocity must be an PINSFVSuperficialVelocityVariable.");
 
   if (_dim >= 2 && !_v_var)
     paramError("v",
                "In two or more dimensions, the v velocity must be supplied and it must be an "
-               "PINSFVVelocityVariable.");
+               "PINSFVSuperficialVelocityVariable.");
 
   if (_dim >= 3 && !params.isParamValid("w"))
     paramError("w",
                "In three-dimensions, the w velocity must be supplied and it must be an "
-               "PINSFVVelocityVariable.");
+               "PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal
