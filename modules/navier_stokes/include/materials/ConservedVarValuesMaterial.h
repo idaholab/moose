@@ -33,6 +33,7 @@ protected:
   const ADVariableValue & _var_total_energy_density;
   ADMaterialProperty<Real> & _rho;
   ADMaterialProperty<RealVectorValue> & _mass_flux;
+  ADMaterialProperty<RealVectorValue> & _momentum;
   ADMaterialProperty<Real> & _total_energy_density;
   ADMaterialProperty<RealVectorValue> & _velocity;
   ADMaterialProperty<Real> & _speed;
