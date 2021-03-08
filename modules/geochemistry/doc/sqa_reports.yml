@@ -10,7 +10,6 @@ Documents:
     enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
     safety_software_determination: sqa/inl_records.md#safety_software_determination
     quality_level_determination: sqa/inl_records.md#quality_level_determination
-    project_management_plan: sqa/inl_records.md#project_management_plan
     configuration_management_plan: sqa/inl_records.md#configuration_management_plan
     asset_management_plan: sqa/inl_records.md#asset_management_plan
     verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
