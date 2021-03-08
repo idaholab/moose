@@ -1,8 +1,7 @@
 # PINSFVMomentumDiffusion
 
 This kernel implements the diffusion term of the porous media Navier Stokes momentum equation.
-This diffusion term represents a Brinkman-type viscous stress. This kernel may only be used
-with a superficial velocity variable.
+This diffusion term represents a Brinkman-type viscous stress.
 
 The incompressible approximation simplifies the expression of the stress tensor and the
 diffusion term is expressed in terms of the superficial velocity:

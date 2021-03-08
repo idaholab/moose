@@ -129,7 +129,11 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
-  inactive = 'symmetry-u symmetry-v symmetry-p no-slip-u no-slip-v inlet-p outlet-p-novalue outlet-u outlet-v'
+  # Select desired boundary conditions by disabling
+  inactive = 'symmetry-u symmetry-v symmetry-p'
+             'no-slip-u no-slip-v'
+             'inlet-p'
+             'outlet-p-novalue outlet-u outlet-v'
   # Possible inlet boundary conditions
   [inlet-u]
     type = INSFVInletVelocityBC

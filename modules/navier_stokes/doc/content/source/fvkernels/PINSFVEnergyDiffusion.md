@@ -2,9 +2,9 @@
 
 ## Description
 
-The `PINSFVEnergyDiffusion` kernel implements a diffusion term for the fluid energy equation.
+This kernel implements a diffusion term for the fluid energy equation.
 This kernel accepts a regular thermal conductivity material property, an effective thermal conductivity may be
-specified using a [PINSFVEnergyEffectiveDiffusion] kernel.
+specified using a [PINSFVEnergyEffectiveDiffusion.md] kernel.
 
 \begin{equation}
 \nabla \cdot \left( \epsilon k \nabla T \right) = \epsilon \nabla \cdot k \nabla T + k \nabla T \nabla \epsilon
