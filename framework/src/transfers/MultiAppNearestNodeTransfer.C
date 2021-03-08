@@ -120,7 +120,6 @@ MultiAppNearestNodeTransfer::execute()
       System * to_sys = find_sys(*_to_es[i_to], _to_var_name);
       unsigned int sys_num = to_sys->number();
       unsigned int var_num = to_sys->variable_number(_to_var_name);
-      MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
       auto & fe_type = to_sys->variable_type(var_num);
       bool is_constant = fe_type.order == CONSTANT;
       bool is_to_nodal = fe_type.family == LAGRANGE;
@@ -475,8 +474,6 @@ MultiAppNearestNodeTransfer::execute()
       default:
         mooseError("Unknown direction");
     }
-
-    const MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
 
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_constant = fe_type.order == CONSTANT;
@@ -897,10 +894,23 @@ MultiAppNearestNodeTransfer::getTargetLocalElems(const unsigned int to_problem_i
   std::vector<Elem *> target_local_elems;
   const MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
 
-  target_local_elems.resize(to_mesh.n_local_elem());
-  unsigned int i = 0;
-  for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
-    target_local_elems[i++] = elem;
+  if (isParamValid("target_boundary"))
+  {
+    BoundaryID target_bnd_id =
+        _to_meshes[to_problem_id]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
+
+    ConstBndElemRange & bnd_elems = *(_to_meshes[to_problem_id])->getBoundaryElementRange();
+    for (const auto & belem : bnd_elems)
+      if (belem->_bnd_id == target_bnd_id && belem->_elem->processor_id() == processor_id())
+        target_local_elems.push_back(belem->_elem);
+  }
+  else
+  {
+    target_local_elems.resize(to_mesh.n_local_elem());
+    unsigned int i = 0;
+    for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      target_local_elems[i++] = elem;
+  }
 
   return target_local_elems;
 }
