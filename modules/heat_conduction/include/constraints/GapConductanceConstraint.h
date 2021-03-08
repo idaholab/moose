@@ -61,4 +61,7 @@ protected:
 
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
+
+  /// Minimum gap distance allowed
+  const Real _min_gap;
 };
