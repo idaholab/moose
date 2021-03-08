@@ -28,11 +28,11 @@ velocity_interp_method='rc'
 [Variables]
   inactive = 'temp_solid'
   [u]
-    type = PINSFVVelocityVariable
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 1
   []
   [v]
-    type = PINSFVVelocityVariable
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 1e-6
   []
   [pressure]

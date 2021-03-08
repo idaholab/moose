@@ -7,17 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVVelocityVariable.h"
+#pragma once
 
-registerMooseObject("NavierStokesApp", PINSFVVelocityVariable);
+#include "INSFVVelocityVariable.h"
 
-InputParameters
-PINSFVVelocityVariable::validParams()
+class InputParameters;
+
+class PINSFVSuperficialVelocityVariable : public INSFVVelocityVariable
 {
-  return INSFVVelocityVariable::validParams();
-}
+public:
+  PINSFVSuperficialVelocityVariable(const InputParameters & params);
 
-PINSFVVelocityVariable::PINSFVVelocityVariable(const InputParameters & params)
-  : INSFVVelocityVariable(params)
-{
-}
+  static InputParameters validParams();
+};
