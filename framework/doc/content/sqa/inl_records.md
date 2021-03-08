@@ -1,6 +1,6 @@
 # [!ac](INL) Software Quality Records
 
-Several software quality-related documents and records listed below are available by those with
+Several software quality-related documents and records are only available with
 access to the [!ac](INL) network. Instructions on how to access these documents are
 provided below. These are stored in the same way for each MOOSE-based application, so where
 appropriate, use the name of the actual application of interest when searching.
