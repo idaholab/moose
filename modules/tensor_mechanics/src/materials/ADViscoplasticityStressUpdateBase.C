@@ -26,6 +26,11 @@ ADViscoplasticityStressUpdateBase::validParams()
   params.addParam<MaterialPropertyName>(
       "porosity_name", "porosity", "Name of porosity material property");
   params.addParam<std::string>("total_strain_base_name", "Base name for the total strain");
+  params.addRangeCheckedParam<Real>(
+      "initial_porosity", 0.0, "initial_porosity>=0.0 & initial_porosity<1.0", "Initial porosity");
+  MooseEnum negative_behavior("ZERO INITIAL_CONDITION EXCEPTION", "INITIAL_CONDITION");
+  params.addParam<MooseEnum>(
+      "negative_behavior", negative_behavior, "Enum how to handle negative porosities");
 
   params.addParamNamesToGroup("inelastic_strain_name", "Advanced");
   return params;
@@ -50,7 +55,10 @@ ADViscoplasticityStressUpdateBase::ADViscoplasticityStressUpdateBase(
     _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
     _intermediate_porosity(0.0),
     _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _initial_porosity(getParam<Real>("initial_porosity")),
+    _negative_behavior(this->template getParam<MooseEnum>("negative_behavior")
+                           .template getEnum<NegativeBehavior>())
 {
 }
 
@@ -86,12 +94,23 @@ ADViscoplasticityStressUpdateBase::updateIntermediatePorosity(
     const ADRankTwoTensor & elastic_strain_increment)
 {
   // Subtract elastic strain from strain increment to find all inelastic strain increments
-  // calculated so far except the one that we're about to calculate
-  const ADRankTwoTensor inelastic_volumetric_increment =
-      _strain_increment[_qp] - elastic_strain_increment;
-
-  // Calculate intermdiate porosity from all inelastic strain increments calculated so far except
-  // the one that we're about to calculate
+  // calculated so far except the one that we're about to calculate. Then calculate intermdiate
+  // porosity from all inelastic strain increments calculated so far except the one that we're about
+  // to calculate
   _intermediate_porosity =
-      (1.0 - _porosity_old[_qp]) * inelastic_volumetric_increment.trace() + _porosity_old[_qp];
+      (1.0 - _porosity_old[_qp]) * (_strain_increment[_qp] - elastic_strain_increment).trace() +
+      _porosity_old[_qp];
+
+  if (_intermediate_porosity < 0.0)
+  {
+    if (_negative_behavior == NegativeBehavior::ZERO)
+      _intermediate_porosity = 0.0;
+    if (_negative_behavior == NegativeBehavior::INITIAL_CONDITION)
+      _intermediate_porosity = _initial_porosity;
+    if (_negative_behavior == NegativeBehavior::EXCEPTION)
+      mooseException("In ", _name, ": porosity is negative.");
+  }
+
+  if (std::isnan(_intermediate_porosity))
+    mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }
