@@ -447,6 +447,10 @@ install_lib_$(notdir $(app_LIB)): $(app_LIB) all
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
+# sometimes app_test_LIB is an empty string when this app.mk file is
+# included/processed - so we guard against this case and don't create a recipe
+# if it is empty.
+ifneq ($(notdir $(app_test_LIB)),)
 install_lib_$(notdir $(app_test_LIB)): $(app_test_LIB) all
 	@echo "Installing $<"
 	@mkdir -p $(lib_install_dir)
@@ -456,6 +460,7 @@ install_lib_$(notdir $(app_test_LIB)): $(app_test_LIB) all
 	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+endif
 
 $(binlink): all install_$(APPLICATION_NAME)_tests
 	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
