@@ -115,13 +115,13 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
     for (unsigned int j = 0; j < i * 6; j++)
       _rods_in_rings[i].push_back(k++);
 
-  // to find the total number of subchannels...
-  // inner ring subchannels = 6 ,
-  // for each ring starting with 3rd ring hex corner rods and middle rods can be counted as 1 and 2
-  // subchannels. (_nrings-2)*12 + _nrods - 7 - (_nrings-2)*6
-  //  there are 6 corner subchannels and number of edge subchannels is  2*((_nrings-1)*6 - 6)
-  _n_channels =
-      6 + (_nrings - 2) * 12 + _nrods - 7 - (_nrings - 2) * 6 + 6 + 2 * ((_nrings - 1) * 6 - 6);
+  //  Given the number of rods and number of fuel rod rings, the number of subchannels can be
+  //  computed as follows:
+  unsigned int chancount = 0.0;
+  for (unsigned int j = 0; j < _nrings - 1; j++)
+    chancount += j * 6;
+  _n_channels = chancount + _nrods - 1 + (_nrings - 1) * 6 + 6;
+
   _subchannel_to_rod_map.resize(_n_channels);
   _subch_type.resize(_n_channels);
   _n_gaps = _n_channels + _nrods - 1; /// initial assignment
@@ -132,10 +132,9 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   _gap_to_rod_map.resize(_n_gaps);
   _gap_type.resize(_n_gaps);
   _subchannel_position.resize(_n_channels);
+
   for (unsigned int i = 0; i < _n_gaps; i++)
-  {
     _gap_to_rod_map[i].reserve(2);
-  } // i
 
   for (unsigned int i = 0; i < _n_channels; i++)
   {
