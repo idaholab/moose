@@ -412,9 +412,9 @@ ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
 	test_dir := $(APPLICATION_DIR)/test
 endif
 
-lib_install_targets = $(foreach lib,$(applibs),install_lib_$(notdir  $(lib)))
+lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 ifneq ($(app_test_LIB),)
-	lib_install_targets += install_lib_$(notdir $(app_test_LIB))
+	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
 endif
 
 install_libs: $(lib_install_targets) install_lib_$(notdir $(moose_LIB)) install_lib_$(notdir $(pcre_LIB)) install_lib_$(notdir $(hit_LIB))
@@ -434,7 +434,7 @@ else
 endif
 endif
 
-install_lib_$(notdir $(app_LIB)): $(app_LIB) all
+install_lib_%: % all
 	@echo "Installing $<"
 	@mkdir -p $(lib_install_dir)
 	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
@@ -443,16 +443,6 @@ install_lib_$(notdir $(app_LIB)): $(app_LIB) all
 	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
 	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
 	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
-
-install_lib_$(notdir $(app_test_LIB)): $(app_test_LIB) all
-	@echo "Installing $<"
-	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
 	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
