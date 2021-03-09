@@ -25,12 +25,14 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  bool _is_coupled;
-  Moose::CoordinateSystemType _coord_system;
-  std::vector<const VariableGradient *> _grad_disp;
+  const bool _is_coupled;
+  const Moose::CoordinateSystemType _coord_system;
   const VariableValue & _disp_r;
 
   const std::string _base_name;
-  const Real _orig_density;
+  const Real _initial_density;
+
+private:
+  std::vector<const VariableGradient *> _grad_disp;
   MaterialProperty<Real> & _density;
 };
