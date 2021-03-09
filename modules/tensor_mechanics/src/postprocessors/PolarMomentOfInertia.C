@@ -17,8 +17,8 @@ PolarMomentOfInertia::validParams()
   InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredParam<Point>("origin", "Axis origin");
   params.addRequiredParam<RealVectorValue>("direction", "Axis direction");
-  params.addClassDescription("Compute the a component of the polar moment of inertia of a sideset "
-                             "w.r.t. a point and a direction");
+  params.addClassDescription(
+      "Compute the polar moment of inertia of a sideset w.r.t. a point and a direction");
   return params;
 }
 

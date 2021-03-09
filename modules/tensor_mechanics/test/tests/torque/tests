@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#17176'
+  design = 'Torque.md PolarMomentOfInertia.md RotationAngle.md'
+  [non-ad]
+    type = Exodiff
+    input = 'torque_small.i'
+    exodiff = 'torque_small_out.e'
+    abs_zero = 1e-9
+    requirement = 'The mechanics system shall provide a way to apply a torque to a boundary for small strain simulations.'
+  []
+  [ad]
+    type = Exodiff
+    input = 'ad_torque_small.i'
+    exodiff = 'ad_torque_small_out.e'
+    abs_zero = 1e-9
+    requirement = 'The mechanics system shall provide a way to apply a torque to a boundary for small strain simulations with automatic differentiation.'
+  []
+[]

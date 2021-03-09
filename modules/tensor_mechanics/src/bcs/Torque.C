@@ -7,21 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TwistingMomentBC.h"
+#include "Torque.h"
 #include "Function.h"
 
-registerMooseObject("TensorMechanicsApp", TwistingMomentBC);
-registerMooseObject("TensorMechanicsApp", ADTwistingMomentBC);
+registerMooseObject("TensorMechanicsApp", Torque);
+registerMooseObject("TensorMechanicsApp", ADTorque);
 
 template <bool is_ad>
 InputParameters
-TwistingMomentBCTempl<is_ad>::validParams()
+TorqueTempl<is_ad>::validParams()
 {
-  InputParameters params = TwistingMomentBCParent<is_ad>::validParams();
-  params.addClassDescription("Apply a moment around a pivot point. This should operate on "
-                             "the displaced mesh for large deformations.");
+  InputParameters params = TorqueParent<is_ad>::validParams();
+  params.addClassDescription(
+      "Apply a moment as tractions distributed over a surface around a "
+      "pivot point. This should operate on the displaced mesh for large deformations.");
   MooseEnum component("x=0 y=1 z=2");
-  params.addRequiredParam<Point>("origin", "Pivot point for the bending moment");
+  params.addRequiredParam<Point>(
+      "origin", "Reference point defining the location for the axis the torque is applied to");
   params.addRequiredParam<RealVectorValue>("direction", "Torque vector");
   params.addParam<FunctionName>(
       "factor", "1", "Prefactor for the force (can only be time dependent)");
@@ -34,8 +36,8 @@ TwistingMomentBCTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-TwistingMomentBCTempl<is_ad>::TwistingMomentBCTempl(const InputParameters & parameters)
-  : TwistingMomentBCParent<is_ad>(parameters),
+TorqueTempl<is_ad>::TorqueTempl(const InputParameters & parameters)
+  : TorqueParent<is_ad>(parameters),
     _component(libMesh::invalid_uint),
     _origin(this->template getParam<Point>("origin")),
     _torque(this->template getParam<RealVectorValue>("direction")),
@@ -56,11 +58,13 @@ TwistingMomentBCTempl<is_ad>::TwistingMomentBCTempl(const InputParameters & para
   if (_component == libMesh::invalid_uint)
     this->paramError("variables",
                      "The kernel variable needs to be one of the 'displacements' variables");
+  if (this->template getParam<bool>("use_displaced_mesh"))
+    this->paramError("use_displaced_mesh", "This BC is only validated for small strains");
 }
 
 template <>
 ADReal
-TwistingMomentBCTempl<true>::computeQpResidual()
+TorqueTempl<true>::computeQpResidual()
 {
   // local lever (distance to the origin)
   auto local_lever = this->_ad_q_points[_qp] - _origin;
@@ -69,12 +73,12 @@ TwistingMomentBCTempl<true>::computeQpResidual()
   auto local_force =
       _factor.value(_t + _alpha * _dt, _dummy_point) * _torque.cross(local_lever) / _pmi;
 
-  return local_force(_component) * _test[_i][_qp];
+  return -local_force(_component) * _test[_i][_qp];
 }
 
 template <>
 Real
-TwistingMomentBCTempl<false>::computeQpResidual()
+TorqueTempl<false>::computeQpResidual()
 {
   // local lever (distance to the origin)
   auto local_lever = this->_q_point[_qp] - _origin;
@@ -83,12 +87,12 @@ TwistingMomentBCTempl<false>::computeQpResidual()
   auto local_force =
       _factor.value(_t + _alpha * _dt, _dummy_point) * _torque.cross(local_lever) / _pmi;
 
-  return local_force(_component) * _test[_i][_qp];
+  return -local_force(_component) * _test[_i][_qp];
 }
 
 template <>
 Real
-TwistingMomentBCTempl<false>::componentJacobian(unsigned int component)
+TorqueTempl<false>::componentJacobian(unsigned int component)
 {
   // vector phi
   RealGradient phi;
@@ -96,26 +100,26 @@ TwistingMomentBCTempl<false>::componentJacobian(unsigned int component)
 
   // force calculation
   auto d_local_force = _factor.value(_t + _alpha * _dt, _dummy_point) * _torque.cross(phi) / _pmi;
-  return d_local_force(_component) * _test[_i][_qp];
+  return -d_local_force(_component) * _test[_i][_qp];
 }
 
 template <>
 Real
-TwistingMomentBCTempl<true>::componentJacobian(unsigned int)
+TorqueTempl<true>::componentJacobian(unsigned int)
 {
   mooseError("This should never get called");
 }
 
 template <bool is_ad>
 Real
-TwistingMomentBCTempl<is_ad>::computeQpJacobian()
+TorqueTempl<is_ad>::computeQpJacobian()
 {
   return componentJacobian(_component);
 }
 
 template <bool is_ad>
 Real
-TwistingMomentBCTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
+TorqueTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _dvars[i])
@@ -124,5 +128,5 @@ TwistingMomentBCTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
   return 0.0;
 }
 
-template class TwistingMomentBCTempl<false>;
-template class TwistingMomentBCTempl<true>;
+template class TorqueTempl<false>;
+template class TorqueTempl<true>;

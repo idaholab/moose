@@ -12,7 +12,7 @@
 #include "SideIntegralPostprocessor.h"
 
 /**
- * Compute the a component of the second moment of the area of a sideset w.r.t. a point
+ * Compute the polar moment of inertia of a sideset w.r.t. a point and a direction
  */
 class PolarMomentOfInertia : public SideIntegralPostprocessor
 {
@@ -24,6 +24,9 @@ public:
 protected:
   Real computeQpIntegral() override;
 
+  /// origin point or center to compute the moment with respect to
   const Point _origin;
+
+  /// direction of the axis through the origin
   RealVectorValue _direction;
 };

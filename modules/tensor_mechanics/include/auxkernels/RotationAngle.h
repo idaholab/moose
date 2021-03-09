@@ -12,27 +12,25 @@
 #include "AuxKernel.h"
 
 /**
- * Compute a displacement angle field w.r.t. a point and an optional plane
+ * Compute the field of angular rotations of points around an axis defined by an origin point and a
+ * direction vector
  */
-class DeflectionAngle : public AuxKernel
+class RotationAngle : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  DeflectionAngle(const InputParameters & parameters);
+  RotationAngle(const InputParameters & parameters);
 
 protected:
   Real computeValue() override;
 
-  /// origin point to determine teh angle w.r.t.
+  /// origin point to determine the angle w.r.t.
   const Point _origin;
 
-  /// was a direction vector specified?
-  const bool _has_direction;
-
-  /// optional direction. If specified compute angles in the plane defined by this vector
+  /// compute angles in the plane defined by this vector
   RealVectorValue _direction;
 
-  /// displacements
+  /// displacement variables
   std::vector<const VariableValue *> _disp;
 };

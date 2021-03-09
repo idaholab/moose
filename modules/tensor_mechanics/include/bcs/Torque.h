@@ -16,18 +16,18 @@ class Function;
 
 // switch parent class depending on is_ad value
 template <bool is_ad>
-using TwistingMomentBCParent = typename std::conditional<is_ad, ADIntegratedBC, IntegratedBC>::type;
+using TorqueParent = typename std::conditional<is_ad, ADIntegratedBC, IntegratedBC>::type;
 
 /**
- * Apply a bending or twisting moment (torque) to a boundary
+ * Apply a torque as tractions distributed over a surface
  */
 template <bool is_ad>
-class TwistingMomentBCTempl : public TwistingMomentBCParent<is_ad>
+class TorqueTempl : public TorqueParent<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  TwistingMomentBCTempl(const InputParameters & parameters);
+  TorqueTempl(const InputParameters & parameters);
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual();
@@ -37,27 +37,36 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
+  /// coordinte axis this BC acts on
   unsigned int _component;
 
+  /// pivot point for the torque
   const Point _origin;
+  /// applied torque vector
   const RealVectorValue _torque;
 
+  /// prefactor function (can only be time dependent)
   const Function & _factor;
+  /// alpha parameter required for HHT time integration scheme
   const Real & _alpha;
+  /// postprocessor that computes the polar moment of inertia
   const PostprocessorValue & _pmi;
 
+  /// number of coupled displacement variables
   const unsigned int _ndisp;
+  /// coupled displacement variables
   std::vector<unsigned int> _dvars;
 
+  /// dummy point (zero) used in evaluating the time dependent prefactor
   const Point _dummy_point;
 
-  using TwistingMomentBCParent<is_ad>::_i;
-  using TwistingMomentBCParent<is_ad>::_t;
-  using TwistingMomentBCParent<is_ad>::_dt;
-  using TwistingMomentBCParent<is_ad>::_qp;
-  using TwistingMomentBCParent<is_ad>::_test;
-  using TwistingMomentBCParent<is_ad>::_q_point;
+  using TorqueParent<is_ad>::_i;
+  using TorqueParent<is_ad>::_t;
+  using TorqueParent<is_ad>::_dt;
+  using TorqueParent<is_ad>::_qp;
+  using TorqueParent<is_ad>::_test;
+  using TorqueParent<is_ad>::_q_point;
 };
 
-using TwistingMomentBC = TwistingMomentBCTempl<false>;
-using ADTwistingMomentBC = TwistingMomentBCTempl<true>;
+using Torque = TorqueTempl<false>;
+using ADTorque = TorqueTempl<true>;
