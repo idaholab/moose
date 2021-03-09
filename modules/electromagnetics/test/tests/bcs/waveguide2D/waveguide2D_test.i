@@ -69,7 +69,7 @@
     boundary = bottom
   [../]
   [./port_real]
-    type = PortBC
+    type = RobinBC
     coeff_real = -0.27706242940220277  # -sqrt(k^2 - (pi/10)^2)
     sign = 1.0
     length = 0
@@ -79,16 +79,18 @@
     field_imaginary = E_imag
     variable = E_real
     component = real
+    mode = port
     boundary = port
   [../]
   [./exit_real]
-    type = AbsorbingBC
+    type = RobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
     field_real = E_real
     field_imaginary = E_imag
     variable = E_real
     component = real
+    mode = absorbing
     boundary = exit
   [../]
   [./top_imaginary]
@@ -104,7 +106,7 @@
     boundary = bottom
   [../]
   [./port_imaginary]
-    type = PortBC
+    type = RobinBC
     coeff_real = -0.27706242940220277
     sign = 1.0
     profile_func_real = inc_y
@@ -113,16 +115,18 @@
     field_imaginary = E_imag
     variable = E_imag
     component = imaginary
+    mode = port
     boundary = port
   [../]
   [./exit_imaginary]
-    type = AbsorbingBC
+    type = RobinBC
     coeff_real = 0.27706242940220277
     sign = -1.0
     field_real = E_real
     field_imaginary = E_imag
     variable = E_imag
     component = imaginary
+    mode = absorbing
     boundary = exit
   [../]
 []

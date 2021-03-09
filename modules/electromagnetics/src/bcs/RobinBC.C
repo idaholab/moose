@@ -1,16 +1,17 @@
-#include "PortBC.h"
+#include "RobinBC.h"
 #include "ElkEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", PortBC);
+registerMooseObject("ElkApp", RobinBC);
 
 InputParameters
-PortBC::validParams()
+RobinBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
-  params.addClassDescription("First order Absorbing/Port BC based on 'Theory and Computation of "
-                             "Electromagnetic Fields' by JM Jin for scalar variables.");
+  params.addClassDescription(
+      "First order Robin-style Absorbing/Port BC based on 'Theory and Computation of "
+      "Electromagnetic Fields' by JM Jin for scalar variables.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");
   params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
   MooseEnum component("real imaginary");
@@ -23,10 +24,15 @@ PortBC::validParams()
   params.addParam<Real>("coeff_real", 1.0, "Constant coefficient, real component.");
   params.addParam<Real>("coeff_imag", 0.0, "Constant coefficient, real component.");
   params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
+  MooseEnum mode("absorbing port", "port");
+  params.addParam<MooseEnum>("mode",
+                             mode,
+                             "Mode of operation for RobinBC. Can be set to 'absorbing' or 'port' "
+                             "(default: 'port').");
   return params;
 }
 
-PortBC::PortBC(const InputParameters & parameters)
+RobinBC::RobinBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
 
     _field_real(coupledValue("field_real")),
@@ -38,12 +44,24 @@ PortBC::PortBC(const InputParameters & parameters)
     _profile_func_imag(getFunction("profile_func_imag")),
     _coeff_real(getParam<Real>("coeff_real")),
     _coeff_imag(getParam<Real>("coeff_imag")),
-    _sign(getParam<Real>("sign"))
+    _sign(getParam<Real>("sign")),
+    _mode(getParam<MooseEnum>("mode"))
 {
+  bool profile_func_real_was_set = parameters.isParamSetByUser("profile_func_real");
+  bool profile_func_imag_was_set = parameters.isParamSetByUser("profile_func_imag");
+
+  if (_mode == elk::ABSORBING && (profile_func_real_was_set || profile_func_imag_was_set))
+  {
+    mooseError(
+        "In ",
+        _name,
+        ", mode was set to Absorbing, while an incoming profile function (used for Port BCs) was "
+        "defined. Either remove the profile function parameters, or set your BC to Port mode!");
+  }
 }
 
 Real
-PortBC::computeQpResidual()
+RobinBC::computeQpResidual()
 {
 
   std::complex<double> field(_field_real[_qp], _field_imag[_qp]);
@@ -55,16 +73,28 @@ PortBC::computeQpResidual()
   std::complex<double> jay(0, 1);
 
   std::complex<double> common = jay * coeff * func;
-  std::complex<double> rhs = 2.0 * common * profile_func * std::exp(common * _q_point[_qp](0));
   std::complex<double> lhs = common * field;
-  std::complex<double> diff = rhs - lhs;
 
-  if (_component == elk::REAL)
+  std::complex<double> rhs = 0.0;
+  switch (_mode)
   {
-    return _sign * _test[_i][_qp] * diff.real();
+    case elk::PORT:
+      rhs = 2.0 * common * profile_func * std::exp(common * _q_point[_qp](0));
+      break;
+    case elk::ABSORBING:
+      break;
   }
-  else
+
+  std::complex<double> diff = rhs - lhs;
+  Real res = 0.0;
+  switch (_component)
   {
-    return _sign * _test[_i][_qp] * diff.imag();
+    case elk::REAL:
+      res = _sign * _test[_i][_qp] * diff.real();
+      break;
+    case elk::IMAGINARY:
+      res = _sign * _test[_i][_qp] * diff.imag();
+      break;
   }
+  return res;
 }

@@ -11,4 +11,9 @@ enum ComponentEnum
   REAL,
   IMAGINARY
 };
+enum RobinEnum
+{
+  ABSORBING,
+  PORT
+};
 } // namespace elk
