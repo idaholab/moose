@@ -54,20 +54,22 @@
     boundary = antenna
     variable = E_imag
   [../]
-  [./radiation_condition_real]    # Port BC without incoming wave is first order radiation condition
-    type = VectorPortBC
+  [./radiation_condition_real]
+    type = VectorRobinBC
     variable = E_real
     coupled_field = E_imag
     boundary = boundary
     component = real
+    mode = absorbing
     beta = 20.9439510239  # wave number at 1 GHz
   [../]
   [./radiation_condition_imag]
-    type = VectorPortBC
+    type = VectorRobinBC
     variable = E_imag
     coupled_field = E_real
     boundary = boundary
     component = imaginary
+    mode = absorbing
     beta = 20.9439510239  # wave number at 1 GHz
   [../]
 []

@@ -1,16 +1,17 @@
-#include "VectorPortBC.h"
+#include "VectorRobinBC.h"
 #include "ElkEnums.h"
 #include "Function.h"
 #include <complex>
 
-registerMooseObject("ElkApp", VectorPortBC);
+registerMooseObject("ElkApp", VectorRobinBC);
 
 InputParameters
-VectorPortBC::validParams()
+VectorRobinBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
-  params.addClassDescription("First order Absorbing/Port BC from 'Theory and Computation of "
-                             "Electromagnetic Fields' by JM Jin for vector variables.");
+  params.addClassDescription(
+      "First order Robin-style Absorbing/Port BC from 'Theory and Computation of Electromagnetic "
+      "Fields' by JM Jin for vector variables.");
   params.addParam<FunctionName>(
       "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
   MooseEnum component("real imaginary");
@@ -19,10 +20,16 @@ VectorPortBC::validParams()
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
   params.addParam<FunctionName>("real_incoming", 0.0, "Real incoming field vector.");
   params.addParam<FunctionName>("imag_incoming", 0.0, "Imaginary incoming field vector.");
+  MooseEnum mode("absorbing port", "port");
+  params.addParam<MooseEnum>(
+      "mode",
+      mode,
+      "Mode of operation for VectorRobinBC. Can be set to 'absorbing' or 'port' "
+      "(default: 'port').");
   return params;
 }
 
-VectorPortBC::VectorPortBC(const InputParameters & parameters)
+VectorRobinBC::VectorRobinBC(const InputParameters & parameters)
   : VectorIntegratedBC(parameters),
 
     _beta(getFunction("beta")),
@@ -36,12 +43,25 @@ VectorPortBC::VectorPortBC(const InputParameters & parameters)
     _inc_imag(getFunction("imag_incoming")),
 
     // Value of complex j (can't use _j or _i due to MOOSE basis fxn conventions)
-    _jay(0, 1)
+    _jay(0, 1),
+
+    _mode(getParam<MooseEnum>("mode"))
 {
+  bool real_incoming_was_set = parameters.isParamSetByUser("real_incoming");
+  bool imag_incoming_was_set = parameters.isParamSetByUser("imag_incoming");
+
+  if (_mode == elk::ABSORBING && (real_incoming_was_set || imag_incoming_was_set))
+  {
+    mooseError(
+        "In ",
+        _name,
+        ", mode was set to Absorbing, while an incoming profile function (used for Port BCs) was "
+        "defined. Either remove the profile function parameters, or set your BC to Port mode!");
+  }
 }
 
 Real
-VectorPortBC::computeQpResidual()
+VectorRobinBC::computeQpResidual()
 {
 
   // Initialize E components
@@ -76,11 +96,11 @@ VectorPortBC::computeQpResidual()
 
   // Creating vector, curl for field_inc before residual and Jacobian contributions
   std::complex<double> field_inc_0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
-                              _inc_imag.vectorValue(_t, _q_point[_qp])(0));
+                                   _inc_imag.vectorValue(_t, _q_point[_qp])(0));
   std::complex<double> field_inc_1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
-                              _inc_imag.vectorValue(_t, _q_point[_qp])(1));
+                                   _inc_imag.vectorValue(_t, _q_point[_qp])(1));
   std::complex<double> field_inc_2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
-                              _inc_imag.vectorValue(_t, _q_point[_qp])(2));
+                                   _inc_imag.vectorValue(_t, _q_point[_qp])(2));
   VectorValue<std::complex<double>> field_inc(field_inc_0, field_inc_1, field_inc_2);
 
   std::complex<double> curl_inc0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
@@ -91,36 +111,46 @@ VectorPortBC::computeQpResidual()
                                  _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
   VectorValue<std::complex<double>> curl_inc(curl_inc0, curl_inc1, curl_inc2);
 
-  // Calculate incoming wave contribution to BC residual
-  std::complex<double> u_inc_dot_test =
-      _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
-      _jay * _beta.value(_t, _q_point[_qp]) *
-          (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_inc));
+  std::complex<double> u_inc_dot_test = 0.0;
+  switch (_mode)
+  {
+    case elk::PORT:
+      // Calculate incoming wave contribution to BC residual
+      u_inc_dot_test = _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
+                       _jay * _beta.value(_t, _q_point[_qp]) *
+                           (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_inc));
+      break;
+    case elk::ABSORBING:
+      break;
+  }
 
   // Calculate solution field contribution to BC residual (first order version)
   std::complex<double> p_dot_test = _jay * _beta.value(_t, _q_point[_qp]) *
-                                    _test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field);
+                                    _test[_i][_qp].cross(_normals[_qp]) *
+                                    _normals[_qp].cross(field);
 
-  std::complex<double> res = u_inc_dot_test - p_dot_test;
-
-  if (_component == elk::REAL)
+  std::complex<double> diff = u_inc_dot_test - p_dot_test;
+  Real res = 0.0;
+  switch (_component)
   {
-    return res.real();
+    case elk::REAL:
+      res = diff.real();
+      break;
+    case elk::IMAGINARY:
+      res = diff.imag();
+      break;
   }
-  else
-  {
-    return res.imag();
-  }
+  return res;
 }
 
 Real
-VectorPortBC::computeQpJacobian()
+VectorRobinBC::computeQpJacobian()
 {
   return 0.0;
 }
 
 Real
-VectorPortBC::computeQpOffDiagJacobian(unsigned int jvar)
+VectorRobinBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
                       _normals[_qp].cross(_phi[_j][_qp]);

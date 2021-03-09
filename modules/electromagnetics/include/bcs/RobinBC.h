@@ -2,12 +2,12 @@
 
 #include "IntegratedBC.h"
 
-class PortBC : public IntegratedBC
+class RobinBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  PortBC(const InputParameters & parameters);
+  RobinBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -17,7 +17,7 @@ private:
 
   const VariableValue & _field_imag;
 
-  MooseEnum _component;
+  const MooseEnum _component;
 
   const Function & _func_real;
 
@@ -32,4 +32,6 @@ private:
   Real _coeff_imag;
 
   Real _sign;
+
+  const MooseEnum _mode;
 };

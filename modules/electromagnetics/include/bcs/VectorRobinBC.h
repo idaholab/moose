@@ -3,12 +3,12 @@
 #include "VectorIntegratedBC.h"
 #include <complex>
 
-class VectorPortBC : public VectorIntegratedBC
+class VectorRobinBC : public VectorIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  VectorPortBC(const InputParameters & parameters);
+  VectorRobinBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -17,7 +17,7 @@ protected:
 
   const Function & _beta;
 
-  MooseEnum _component;
+  const MooseEnum _component;
 
   const VectorVariableValue & _coupled_val;
   unsigned int _coupled_var_num;
@@ -25,5 +25,7 @@ protected:
   const Function & _inc_real;
   const Function & _inc_imag;
 
-  std::complex<double> _jay;
+  const std::complex<double> _jay;
+
+  const MooseEnum _mode;
 };
