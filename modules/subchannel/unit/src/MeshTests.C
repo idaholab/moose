@@ -69,13 +69,13 @@ TEST(MeshTests, triRodCoordinates)
   std::sort(positions.begin(), positions.end(), pointLess);
 
   std::vector<Point> positions2;
-  triRodPositions(positions2, nrings, pitch, center);
+  TriSubChannelMesh::rodPositions(positions2, nrings, pitch, center);
   std::sort(positions2.begin(), positions2.end(), pointLess);
 
   ASSERT_EQ(positions.size(), positions2.size());
 
   std::stringstream msg;
-  for (int i = 0; i < positions.size(); i++)
+  for (size_t i = 0; i < positions.size(); i++)
     if (!positions[i].absolute_fuzzy_equals(positions2[i]))
       msg << "point " << i + 1 << " differs: " << positions[i] << " != " << positions2[i] << "\n";
 
