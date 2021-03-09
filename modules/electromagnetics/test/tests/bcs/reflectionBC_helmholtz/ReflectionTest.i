@@ -3,7 +3,6 @@
 # c = a + jb , k = d + jh
 
 [GlobalParams]
-  length = 1
   coeff_real = 15
   coeff_imag = 7
 []

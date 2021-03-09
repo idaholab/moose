@@ -72,7 +72,6 @@
     type = RobinBC
     coeff_real = -0.27706242940220277  # -sqrt(k^2 - (pi/10)^2)
     sign = 1.0
-    length = 0
     profile_func_real = inc_y
     profile_func_imag = 0
     field_real = E_real

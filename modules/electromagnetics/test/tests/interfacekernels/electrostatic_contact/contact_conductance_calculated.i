@@ -26,7 +26,7 @@
   [./delete_block]
     type = BlockDeletionGenerator
     input = create_interface
-    block_id = 3
+    block = 3
   [../]
 []
 
