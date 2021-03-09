@@ -4,19 +4,20 @@
 #include "SubChannelMeshBase.h"
 
 /**
- * Calculates and stores the rod positions/centers for a hexagonal assembly
- * containing the given number of rings in a triangular/alternating row grid
- * spaced 'pitch' apart.  The points are generated such that the duct is
- * centered at the given center point.
- */
-void triRodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
-
-/**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
  */
 class TriSubChannelMesh : public SubChannelMeshBase
 {
 public:
+  /**
+   * Calculates and stores the rod positions/centers for a hexagonal assembly
+   * containing the given number of rings in a triangular/alternating row grid
+   * spaced 'pitch' apart.  The points are generated such that the duct is
+   * centered at the given center point.
+   */
+  static void
+  rodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
+
   TriSubChannelMesh(const InputParameters & parameters);
   TriSubChannelMesh(const TriSubChannelMesh & other_mesh);
   virtual std::unique_ptr<MooseMesh> safeClone() const override;

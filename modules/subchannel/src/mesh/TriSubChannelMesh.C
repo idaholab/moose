@@ -18,7 +18,10 @@ TriSubChannelMesh::validParams()
 }
 
 void
-triRodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center)
+TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
+                                unsigned int nrings,
+                                Real pitch,
+                                Point center)
 {
   Real theta = 0.0;
   Real dtheta = 0.0;
@@ -104,7 +107,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
   // used to defined global direction of the cross_flow_map coefficients for each subchannel and gap
   const Real negative_flow = -1.0;
 
-  triRodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
+  rodPositions(_rod_position, _nrings, _pitch, Point(0, 0));
   _nrods = _rod_position.size();
 
   // assign the rods to the corresponding rings
