@@ -111,4 +111,12 @@ private:
    * @return target local elements
    */
   std::vector<Elem *> getTargetLocalElems(const unsigned int to_problem_id);
+
+  /**
+   * Get the nearest maximum bounding box distance for a given point
+   * @param[in] point Point
+   * @param[in] bboxes Bounding boxes
+   * @return nearest maximum bounding box distance to the point
+   */
+  Real getNearestMaxDistance(const Point & point, const std::vector<BoundingBox> & bboxes);
 };

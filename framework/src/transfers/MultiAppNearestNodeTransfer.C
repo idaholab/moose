@@ -143,14 +143,7 @@ MultiAppNearestNodeTransfer::execute()
           if (node->n_dofs(sys_num, var_num) < 1)
             continue;
 
-          // Find which bboxes might have the nearest node to this point.
-          Real nearest_max_distance = std::numeric_limits<Real>::max();
-          for (const auto & bbox : bboxes)
-          {
-            Real distance = bboxMaxDistance(*node, bbox);
-            if (distance < nearest_max_distance)
-              nearest_max_distance = distance;
-          }
+          Real nearest_max_distance = getNearestMaxDistance(*node, bboxes);
 
           unsigned int from0 = 0;
           for (processor_id_type i_proc = 0; i_proc < n_processors();
@@ -227,14 +220,7 @@ MultiAppNearestNodeTransfer::execute()
           unsigned int offset = 0;
           for (auto & point : points)
           {
-            // Find which bboxes might have the nearest node to this point.
-            Real nearest_max_distance = std::numeric_limits<Real>::max();
-            for (const auto & bbox : bboxes)
-            {
-              Real distance = bboxMaxDistance(point, bbox);
-              if (distance < nearest_max_distance)
-                nearest_max_distance = distance;
-            }
+            Real nearest_max_distance = getNearestMaxDistance(point, bboxes);
 
             unsigned int from0 = 0;
             for (processor_id_type i_proc = 0; i_proc < n_processors();
@@ -913,4 +899,19 @@ MultiAppNearestNodeTransfer::getTargetLocalElems(const unsigned int to_problem_i
   }
 
   return target_local_elems;
+}
+
+Real
+MultiAppNearestNodeTransfer::getNearestMaxDistance(const Point & point, const std::vector<BoundingBox> & bboxes)
+{
+  // Find which bboxes might have the nearest node to this point.
+  Real nearest_max_distance = std::numeric_limits<Real>::max();
+  for (const auto & bbox : bboxes)
+  {
+    Real distance = bboxMaxDistance(point, bbox);
+    if (distance < nearest_max_distance)
+      nearest_max_distance = distance;
+  }
+
+  return nearest_max_distance;
 }
