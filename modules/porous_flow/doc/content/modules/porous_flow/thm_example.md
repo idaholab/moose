@@ -37,13 +37,13 @@ LaForce et al. make the following assumptions
 
 - The porosity, $\phi$, is constant.  It is independent of time, fluid pressure, temperature and volumetric expansion.  However, it is dependent on rock type.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./porosity_reservoir] end=[./permeability_reservoir]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[porosity_reservoir] end=[permeability_reservoir]
 
 - There are two phases, liquid and gas.  Hence $\beta \in \{\mathrm{liquid, gas}\}$.
 
 - The liquid is water and the gas is CO$_{2}$.  Hence $\kappa \in \{ \mathrm{water, co2}\}$.  The water component exists only in the liquid phase and the CO$_{2}$ component exists only in the gas phase.  Hence $\chi_{\mathrm{liquid}}^{\mathrm{water}}=1$, $\chi_{\mathrm{liquid}}^{\mathrm{co2}}=0$, $\chi_{\mathrm{gas}}^{\mathrm{water}}=0$ and $\chi_{\mathrm{gas}}^{\mathrm{co2}}=1$.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./massfrac_ph0_sp0] end=[./pgas]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[massfrac_ph0_sp0] end=[pgas]
 
 - The density of each phase is constant.   This is in order to simplify the fluid equations, which eventually reduce to a well-studied form that models advection of a saturation shock front.  However, in order to derive solutions for the pressure distribution, LaForce et al. assume a small fluid compressibility, which is the same for each phase.  To satisfy both the incompressibility and small compressibility requirements, the MOOSE model uses a fluid bulk modulus that is $\sim 10^{7}$ larger than any porepressures.
 
@@ -61,7 +61,7 @@ With these assumptions, the mass formula becomes
 
 The PorousFlow input file uses the porepressure of water and the gas saturation as its primary nonlinear variables describing fluid flow:
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./pwater] end=[./temp]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[pwater] end=[temp]
 
 
 ### Fluid flow: flux
@@ -93,7 +93,7 @@ LaForce et al. make the following assumptions
 
 - The permeability tensor is diagonal and constant (independent of fluid pressure, temperature and rock stress and strain).  Its $xx$ and $yy$ components are equal, and its $zz$ component is zero.  It is dependent on rock type.  Since the PorousFlow input file is setup in 2D RZ coordinates, the radial permeability enters the first "slot", the $zz$ component appears in the central slot, and all other components are zero in this situation
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./permeability_reservoir] end=[./relperm_liquid]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[permeability_reservoir] end=[relperm_liquid]
 
 - There is a constant and nonzero residual water saturation $S_{\mathrm{water}}^{\mathrm{res}}$ and constant and nonzero residual CO$_{2}$ saturation $S_{\mathrm{co2}}^{\mathrm{res}}$.
 
@@ -113,13 +113,13 @@ LaForce et al. make the following assumptions
   \end{aligned}
   \end{equation}
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./relperm_liquid] end=[./thermal_conductivity_reservoir]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[relperm_liquid] end=[thermal_conductivity_reservoir]
 
 - The viscosity is a function of temperature only.  LaForce et al. use a particular function of temperature that is not included in PorousFlow.  Therefore, here we shall use constant viscosity for each phase that is equal to the average viscosity quoted in LaForce et al., and use LaForce et al.'s solution based on that constant viscosity.  This results in only very tiny modifications to LaForce's solutions which would be difficult to see in the finite-resolution of the MOOSE model anyway.
 
 - There is no capillarity.  Therefore $P_{\mathrm{water}}=P_{\mathrm{co2}}$.  Define $P=P_{\mathrm{water}}$.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./pc] end=[]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[pc] end=[]
 
 - There is no gravity.
 
@@ -155,7 +155,7 @@ LaForce et al. make the following assumptions:
 
 Therefore, the fluid-flow `Kernels` are
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./mass_water_dot] end=[./energy_dot]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[mass_water_dot] end=[energy_dot]
 
 
 ### Fluid flow: summary
@@ -206,7 +206,7 @@ LaForce et al. make the following assumptions
 
 - The specific heat capacity of the rock grains, $C_{R}$, is constant.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./internal_energy_reservoir] end=[./elasticity_tensor]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[internal_energy_reservoir] end=[elasticity_tensor]
 
 - The internal energy of the liquid phase is $\mathcal{E}_{\mathrm{liquid}} = C_{\mathrm{water}}T$, where $C_{\mathrm{water}}$ is constant and independent of all other parameters in the system.
 
@@ -237,7 +237,7 @@ LaForce et al. make the following assumptions
   \end{equation}
   The coefficients $\lambda_{zz}^{0}$ and $\lambda_{zz}^{1}$ are independent of time, fluid pressure, temperature and mechanical deformation, but they are dependent on rock type.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./thermal_conductivity_reservoir] end=[./internal_energy_reservoir]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[thermal_conductivity_reservoir] end=[internal_energy_reservoir]
 
 - The enthalpy of the liquid phase is $h_{\mathrm{liquid}} = C_{\mathrm{water}}T$.
 
@@ -316,7 +316,7 @@ these surrounding rocks on the aquifer are not modelled by LaForce et al.
 
 Therefore, the heat-flow `Kernels` are
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./energy_dot] end=[./grad_stress_r]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[energy_dot] end=[grad_stress_r]
 
 along with the rate of heat loss:
 
@@ -340,7 +340,7 @@ LaForce et al. assume
 
 - The effective fluid pressure is $P_{f}=P$
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./eff_fluid_pressure_qp] end=[./vol_strain]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[eff_fluid_pressure] end=[vol_strain]
 
 In PorousFlow, the solid-mechanical constitutive law reads
 \begin{equation}
@@ -353,13 +353,13 @@ LaForce et al. assume
 
 - The drained elasticity tensor, $E_{ijkl}$, is isotropic, constant and independent of all other parameters in the theory.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./elasticity_tensor] end=[./strain]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[elasticity_tensor] end=[strain]
 
 - There is no plasticity.
 
 - The drained thermal expansion coefficient, $\alpha_{T}$, is constant and independent of all other parameters in the theory.
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./strain] end=[./eff_fluid_pressure]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[strain] end=[eff_fluid_pressure]
 
 
 In PorousFlow, conservation of momentum reads
@@ -383,7 +383,7 @@ LaForce et al. make the following assumptions:
 
 - There is no displacement in the $z$ direction, $u_{z} = 0$.  The solid-mechanics `Kernels` are therefore
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./grad_stress_r] end=[]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[grad_stress_r] end=[]
 
 
 - The reservoir is free to contract and expand radially without being hindered by the impermeable seals.
@@ -450,7 +450,7 @@ and the fluid properties are
 
 Note the initial stress is *effective stress* and the horizontal initial stress occupies the first slot, while the vertical stress occupies the central slot
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./ini_strain] end=[./thermal_contribution]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[ini_strain] end=[thermal_contribution]
 
 The seals do not actually have to be considered in the model, because of LaForce et al.'s assumptions.
 
@@ -463,25 +463,25 @@ LaForce et al. assume the following boundary conditions.
     P(r_{\mathrm{max}}) = P_{0} \ .
   \end{equation}
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./outer_pressure_fixed] end=[./outer_temp_fixed]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[outer_pressure_fixed] end=[outer_temp_fixed]
 
 - The temperature at the outer boundary is
   \begin{equation}
     T(r_{\mathrm{max}}) = T_{0} \ .
   \end{equation}
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./outer_temp_fixed] end=[./fixed_outer_r]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[outer_temp_fixed] end=[fixed_outer_r]
 
 - All displacements at the outer boundary are zero
   \begin{equation}
     u(r_{\mathrm{max}}) = 0 \ .
   \end{equation}
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./fixed_outer_r] end=[./co2_injection]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[fixed_outer_r] end=[co2_injection]
 
 - The injection is at a constant rate of $5\times 10^5\,$T.year$^{-1}$ at a constant temperature of 294$\,$K.  In the PorousFlow input file, the fluid injection is implemented as a [PorousFlowSink](boundaries.md), which slowly ramps up to its full value during the initial 100$\,$s in order to help convergence, and a preset `DirichletBC`:
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./co2_injection] end=[./cavity_pressure_x]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[co2_injection] end=[cavity_pressure_x]
 
 - The *total* radial compressive stress at the well is equal to the porepressure in the well.  This is dictated by the dynamics of the problem: since the injection rate is constant, the porepressure will increase with time.
   \begin{equation}
@@ -494,7 +494,7 @@ This is implemented in a slightly convoluted way in the MOOSE input file.  First
 
 Then a [PressureBC](bcs/Pressure.md) applies this *total* stress (physically, a mechanical pushing force) at the borehole wall:
 
-!listing modules/porous_flow/examples/thm_example/2D.i start=[./cavity_pressure_x] end=[]
+!listing modules/porous_flow/examples/thm_example/2D.i start=[cavity_pressure_x] end=[]
 
 The `component` is zero because this is an axially-symmetric (2D RZ) problem.  The value of the total pressure should be equal to the variable `pwater`, but because the `p_bh` is recorded at the start of each time step, this boundary condition actually lags by one time step.  Because porepressure `pwater` does not change significantly over each time step, this leads to minimal error.
 

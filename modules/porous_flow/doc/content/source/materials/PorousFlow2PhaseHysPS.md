@@ -12,7 +12,7 @@ Note the following features:
 
 - The [PorousFlowHysteresisOrder](PorousFlowHysteresisOrder.md) Material appears alongside the `PorousFlow2PhaseHysPS` Material:
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePS.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS.i start=[hys_order_material] end=[Postprocessors]
 
 - Saturations and hysteresis order may be recorded into `AuxVariables` using a [PorousFlowPropertyAux](PorousFlowPropertyAux.md) 
 

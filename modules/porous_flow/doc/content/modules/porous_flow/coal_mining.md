@@ -75,26 +75,26 @@ meshed with 10$\,$m square elements.
 Single-phase unsaturated fluid is used with the nonlinear Variable being the fluid porepressure.
 Full coupling with mechanical deformations is used, so the Kernels read
 
-!listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i start=[./mass0] end=[]
+!listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i start=[mass0] end=[AuxVariables]
 
 All stresses are measured in MPa and the time unit is years.  A Biot coefficient of 0.7 is used, and
 the fluid properties are:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
          start=[Modules]
-         end=[]
+         end=[Materials]
 
 A van Genuchten capillary pressure relationship is used
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./pc]
-         end=[./mc_coh_strong_harden]
+         start=[pc]
+         end=[mc_coh_strong_harden]
 
 A Corey relative permeability is used
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./relperm_qp]
-         end=[./relperm_qp_all]
+         start=[relperm]
+         end=[elasticity_tensor_0]
 
 The fluid porepressure is fixed at the outer boundaries, and a
 [PorousFlowPiecewiseLinearSink](/modules/porous_flow/src/bcs/PorousFlowPiecewiseLinearSink.C) with a
@@ -102,8 +102,8 @@ spatially and temporally varying `flux_function` is used to withdraw water from 
 goaf:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./fix_porepressure]
-         end=[./roof]
+         start=[fix_porepressure]
+         end=[roof_bcs]
 
 In multi-phase scenarios, such a simple representation of the goaf boundary condition is not valid.
 
@@ -114,43 +114,43 @@ Layered Cosserat solid mechanics is employed, meaning there are 3 translational 
 degrees of freedom.  A quasi-static approximation is used, so the solid-mechanical Kernels are
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./cx_elastic]
-         end=[./mass0]
+         start=[cx_elastic]
+         end=[mass0]
 
 Quite a complicated elasto-plastic model is used and this accounts for the majority of nonlinear
 iterations of this model, as well as the relative slowness of computing the residual and Jacobian.
 The elasticity tensors (one for standard, one for Cosserat) are computed via:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./elasticity_tensor_0]
-         end=[./strain]
+         start=[elasticity_tensor_0]
+         end=[strain]
 
 where the `excav_sideways` Function simulates the excavation of coal (it is 1 ahead of the coal face
 and zero behind it).  Small strain is used, and an insitu stress that increases with depth is
 assumed:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./strain]
-         end=[./stress_0]
+         start=[strain]
+         end=[stress_0]
 
 Capped Mohr-Coulomb plus weak-plane plasticity is used and the plastic models are cycled
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./stress_0]
-         end=[./undrained_density_0]
+         start=[stress_0]
+         end=[undrained_density_0]
 
 The plastic moduli are:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./mc_coh_strong_harden]
-         end=[]
+         start=[mc_coh_strong_harden]
+         end=[Modules]
 
 Roller boundary conditions are prescribed at the boundaries.  At the roof of the excavation, a
 [StickyBC](/StickyBC.md) is employed to prevent the roof from collapsing
 further than 3$\,$m:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./roof_bcs]
+         start=[roof_bcs]
          end=[]
 
 ### Coupling
@@ -159,18 +159,18 @@ Full coupling between the fluid and solid mechanics is evident in the Kernels.  
 [PorousFlowDictator](/PorousFlowDictator.md) ensures all nonzero Jacobian entries are computed:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./dictator]
-         end=[./pc]
+         start=[dictator]
+         end=[pc]
 
 Other aspects of the fluid-solid coupling are the porosity:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i
-         start=[./porosity_bulk]
-         end=[./porosity_excav]
+         start=[porosity_bulk]
+         end=[porosity_excav]
 
 and the permeability:
 
-!listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i start=[./permeability_bulk] end=[./permeability_excav]
+!listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i start=[permeability_bulk] end=[permeability_excav]
 
 
 ## Results

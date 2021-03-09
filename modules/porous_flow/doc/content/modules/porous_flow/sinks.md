@@ -150,9 +150,9 @@ For instance:
 
 The `PorousFlowPolylineSink` is always accompanied by a [`PorousFlowSumQuantity`](PorousFlowSumQuantity.md) UserObject and often by a [`PorousFlowPlotQuantity`](PorousFlowPlotQuantity.md) Postprocessor
 
-!listing modules/porous_flow/test/tests/dirackernels/pls02.i start=[UserObjects] end=[./dictator]
+!listing modules/porous_flow/test/tests/dirackernels/pls02.i start=[pls_total_outflow_mass] end=[dictator]
 
-!listing modules/porous_flow/test/tests/dirackernels/pls02.i start=[Postprocessors] end=[./fluid_mass0]
+!listing modules/porous_flow/test/tests/dirackernels/pls02.i start=[pls_report] end=[fluid_mass0]
 
 These types of sinks are useful in describing groundwater-surface water interactions via streams and
 swamps.  Often a riverbed conductance, measured in kg.Pa$^{-1}$.s$^{-1}$ is defined, which is
@@ -290,7 +290,7 @@ introducing wellbores dependent on the geometry.  The user may specify this quan
 
 In the following examples, a vertical borehole is placed through the centre of a single element, and fluid flow to the borehole as a function of porepressure is measured.  The borehole geometry is
 
-!listing modules/porous_flow/test/tests/dirackernels/bh02.i
+!listing modules/porous_flow/test/tests/dirackernels/bh02.bh
 
 meaning that the borehole radius is 0.1m and it is 1m long.
 
@@ -359,9 +359,9 @@ yields the correct result for an initially unsaturated medium ([bh05_flow.fig] a
 
 Each of these record the total fluid flux (kg) injected by or produced by the borehole in a [`PorousFlowSumQuantity`](PorousFlowSumQuantity.md) UserObject and outputs this result using a [`PorousFlowPlotQuantity`](PorousFlowPlotQuantity.md) Postprocessor:
 
-!listing modules/porous_flow/test/tests/dirackernels/bh02.i start=[UserObjects] end=[./dictator]
+!listing modules/porous_flow/test/tests/dirackernels/bh02.i start=[borehole_total_outflow_mass] end=[dictator]
 
-!listing modules/porous_flow/test/tests/dirackernels/bh02.i start=[Postprocessors] end=[./fluid_mass0]
+!listing modules/porous_flow/test/tests/dirackernels/bh02.i start=[bh_report] end=[fluid_mass0]
 
 
 ### Reproducing the steady-state 2D analytical solution
@@ -448,7 +448,7 @@ The fluid properties are defined as:
 
 The fluid injection and production is implemented in a way that is now familiar:
 
-!listing modules/porous_flow/test/tests/dirackernels/injection_production.i start=[./fluid_injection] end=[./remove_heat_at_production_well]
+!listing modules/porous_flow/test/tests/dirackernels/injection_production.i start=[fluid_injection] end=[remove_heat_at_production_well]
 
 The injection temperature is set via:
 
@@ -458,7 +458,7 @@ Alternatively, the heat energy of the injected fluid could be worked out and inj
 
 The production of fluid means that heat energy must be removed at exactly the rate associated with the fluid-mass removal.  This is implemented by using an identical `PorousFlowPeacemanBorehole` to the fluid production situation *but* associating it with the temperature variable and with `use_enthalpy = true`:
 
-!listing modules/porous_flow/test/tests/dirackernels/injection_production.i start=[./remove_heat_at_production_well] end=[]
+!listing modules/porous_flow/test/tests/dirackernels/injection_production.i start=[remove_heat_at_production_well] end=[]
 
 Here the heat energy per timestep is saved into a [`PorousFlowSumQuantity`](PorousFlowSumQuantity.md) UserObject which may be extracted using a [`PorousFlowPlotQuantity`](PorousFlowPlotQuantity.md) Postprocessor, which would be an important quantity in a geothermal application:
 

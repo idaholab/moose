@@ -4,7 +4,7 @@
 
 # Porous Flow Tutorial Page 02.  Numerical issues
 
-This tutorial page discusses a number of numerical issues involved in the very simple model presented in [Page 01](porous_flow/tutorial_01.md).  *To run PorousFlow effectively, the user must be keenly aware of all these numerical issues,* so it is useful to discuss them in full in such a simple setting.
+This tutorial page discusses a number of numerical issues involved in the very simple model presented in [Page 01](porous_flow/tutorial_01.md).  So, you're really only interested in modelling, and not numerical mathematics rubbish?  Unfortunately, *to run PorousFlow effectively, the user must be keenly aware of all these numerical issues,* so it is useful to discuss them in full in such a simple setting.
 
 ## Newton nonlinear solves
 
@@ -49,9 +49,9 @@ The two difficulties most commonly encountered are:
 
 ## Nonlinear solves and the Dictator's variables
 
-In this simple example, the `PorousFlowDictator` isn't built explicitly, since it is built internally by the `PorousFlowBasicTHM` `Action`.  However, in most input files you will see something like
+In this simple example, the `PorousFlowDictator` isn't built explicitly, since it is built internally by the `PorousFlowBasicTHM` `Action`.  However, in many input files you will see something like
 
-!listing modules/porous_flow/test/tests/energy_conservation/heat03.i start=[./dictator] end=[./pc]
+!listing modules/porous_flow/test/tests/energy_conservation/heat03.i start=[dictator] end=[pc]
 
 The `PorousFlowDictator` is given the name `dictator` and the number of fluid phases and fluid components are specified.  The `porous_flow_vars` specifies the PorousFlow variables.  *All derivatives with respect to these variables enter the Jacobian, while derivatives with respect to any other Variables are not computed.*  Therefore it is strongly recommended that all Variables are entered into the `porous_flow_vars`, unless there is a good reason to not compute the derivatives with respect to a particular variable.
 
@@ -60,8 +60,6 @@ The `PorousFlowDictator` is given the name `dictator` and the number of fluid ph
 In each nonlinear iteration (as MOOSE slowly converges to the solution for that given timestep) a linear solve must be performed to invert the Jacobian.  Often in PorousFlow simulations, the Jacobian is quite ill conditioned, so a strong precondioner is needed.  Typically, one of two choices are made:
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Preconditioning] end=[Executioner]
-
-The "mumps" method is usually superior to the "asm + LU" method, but isn't always installed on all computer systems.  Increasing the `pc_asm_overlap` improves the strength of the preconditioner, but uses a huge amount of memory.  The `NONZERO` shifting helps reduce problems when the diagonal of the Jacobian contains zeroes.
 
 More remarks can be found in [Preconditioning and solvers](porous_flow/solvers.md).  The PorousFlow tests and examples use some alternative preconditioners, and users struggling with convergence of the linear solve may like to explore those, but the two methods shown above work nicely in most cases.
 
