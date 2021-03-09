@@ -21,7 +21,7 @@ TorqueReaction::validParams()
   InputParameters params = NodalPostprocessor::validParams();
   params.addClassDescription("TorqueReaction calculates the torque in 2D and 3D"
                              "about a user-specified axis of rotation centered"
-                             "at a user-specied origin.");
+                             "at a user-specified origin.");
   params.addRequiredParam<std::vector<AuxVariableName>>("reaction_force_variables",
                                                         "The reaction variables");
   params.addParam<RealVectorValue>(
