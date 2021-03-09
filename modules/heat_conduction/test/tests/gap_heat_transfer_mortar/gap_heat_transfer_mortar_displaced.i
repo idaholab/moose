@@ -25,33 +25,18 @@
   material_coverage_check = false
 []
 
-[AuxVariables]
-  [./disp_x]
-    block = '1'
-  [../]
-  [./disp_y]
-    block = '1'
-  [../]
-[]
-
-[AuxKernels]
-  [./disp_x_kernel]
-    type = ConstantAux
-    variable = disp_x
-    value = 0.1
-    block = '1'
-  [../]
-
-  [./disp_y_kernel]
-    type = ConstantAux
-    variable = disp_y
-    value = 0
-    block = '1'
-  [../]
-[]
-
 [Variables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
+    block = '1 2'
+  [../]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+    block = '1 2'
+  [../]
+  [./disp_y]
     order = FIRST
     family = LAGRANGE
     block = '1 2'
@@ -66,14 +51,14 @@
 
 [Materials]
   [./left]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     block = 1
     thermal_conductivity = 1000
     specific_heat = 1
   [../]
 
   [./right]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     block = 2
     thermal_conductivity = 500
     specific_heat = 1
@@ -82,17 +67,27 @@
 
 [Kernels]
   [./hc_displaced_block]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temp
     use_displaced_mesh = true
     block = '1'
   [../]
   [./hc_undisplaced_block]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temp
     use_displaced_mesh = false
     block = '2'
   [../]
+  [disp_x]
+    type = Diffusion
+    variable = disp_x
+    block = '1 2'
+  []
+  [disp_y]
+    type = Diffusion
+    variable = disp_y
+    block = '1 2'
+  []
 []
 
 [Constraints]
@@ -124,6 +119,28 @@
     boundary = 'right'
     value = 0
   [../]
+
+  [left_disp_x]
+    type = DirichletBC
+    preset = false
+    variable = disp_x
+    boundary = 'left'
+    value = .1
+  []
+  [right_disp_x]
+    type = DirichletBC
+    preset = false
+    variable = disp_x
+    boundary = 'right'
+    value = 0
+  []
+  [bottom_disp_y]
+    type = DirichletBC
+    preset = false
+    variable = disp_y
+    boundary = 'bottom'
+    value = 0
+  []
 []
 
 [Preconditioning]
@@ -142,4 +159,8 @@
 [Outputs]
   exodus = true
   show = 'temp disp_x disp_y'
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []
