@@ -57,7 +57,7 @@ def _check_document(name, filename, file_list, logger):
     else:
         found = list()
         for fname in file_list:
-            if fname.endswith(filename):
+            if fname.endswith(filename.split('#')[0]):
                 found.append(filename)
 
         if len(found) == 0:

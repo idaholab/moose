@@ -15,41 +15,44 @@ import io
 import mooseutils
 import moosesqa
 import copy
+import platform
 from MooseDocs.commands import check
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
+@unittest.skipIf(platform.system() == 'Darwin', "Running check a bunch of times causes a timeout on MacOS test machines, see moosetools#36.")
 class TestCheckScript(unittest.TestCase):
     def testCheck(self, *args):
 
         # Test that script runs from within the containing directory
-        cmd = ['python', 'moosedocs.py', 'check', '--config', 'sqa_test_reports.yml']
+        cmd = ['python', 'moosedocs.py', 'check', '--config', 'sqa_reports.yml']
         cwd = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test', 'doc'))
         out = mooseutils.check_output(cmd, cwd=cwd)
         self.assertIn('moose_test', out)
-        self.assertIn('OK', out)
+        self.assertIn('WARNING', out)
 
         # Test that script runs from within the containing directory, without MOOSE_DIR
         env = copy.copy(os.environ)
         env.pop('MOOSE_DIR', None)
         out = mooseutils.check_output(cmd, cwd=cwd, env=env)
         self.assertIn('moose_test', out)
-        self.assertIn('OK', out)
+        self.assertIn('WARNING', out)
 
         # Test that script runs from without the containing directory
-        cmd = ['python', 'test/doc/moosedocs.py', 'check', '--config', 'sqa_test_reports.yml']
+        cmd = ['python', 'test/doc/moosedocs.py', 'check', '--config', 'sqa_reports.yml']
         cwd = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
         out = mooseutils.check_output(cmd, cwd=cwd)
         self.assertIn('moose_test', out)
-        self.assertIn('OK', out)
+        self.assertIn('WARNING', out)
 
         # Test that script runs from without the containing directory and without MOOSE_DIR
         env = copy.copy(os.environ)
         env.pop('MOOSE_DIR', None)
         out = mooseutils.check_output(cmd, cwd=cwd, env=env)
         self.assertIn('moose_test', out)
-        self.assertIn('OK', out)
+        self.assertIn('WARNING', out)
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
+@unittest.skipIf(platform.system() == 'Darwin', "Running check a bunch of times causes a timeout on MacOS test machines, see moosetools#36.")
 class TestCheck(unittest.TestCase):
     def setUp(self):
         # Change to the test/doc directory
@@ -64,7 +67,7 @@ class TestCheck(unittest.TestCase):
     def testCheck(self):
 
         # Create command-line arguments in
-        opt = types.SimpleNamespace(config='sqa_test_reports.yml', reports=['app'], dump=None,
+        opt = types.SimpleNamespace(config='sqa_reports.yml', reports=['app'], dump=None,
                                     app_reports=None, req_reports=None,
                                     generate=['MooseTestApp'], show_warnings=False)
 

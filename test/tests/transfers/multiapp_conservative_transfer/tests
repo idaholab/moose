@@ -1,47 +1,75 @@
 [Tests]
-  issues = '#12948'
-  design = '/MultiAppCopyTransfer.md'
-  [./conservative_transfer]
+  issues = '#12948 #17231'
+  design = '/MultiAppConservativeTransfer.md'
+
+  [./test]
     type = Exodiff
     input = master_conservative_transfer.i
     exodiff = 'master_conservative_transfer_out.e master_conservative_transfer_out_sub0.e'
     requirement = 'The system shall support conservative transfers'
   [../]
 
-  [./conservative_transfer_subs]
+  [./test_execute_on]
+    type = RunException
+    prereq = 'test'
+    input = master_conservative_transfer.i
+    expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to_postprocessor"
+    cli_args ="sub:Postprocessors/to_postprocessor/execute_on='timestep_end'"
+    requirement = 'The system shall check execute_on for PP in sub app'
+  []
+
+  [./subs]
     type = Exodiff
     input = master_power_density.i
     exodiff = 'master_power_density_out.e master_power_density_out_sub0.e master_power_density_out_sub1.e'
     requirement = 'The system shall support conservative transfers using regular postprocessors'
   [../]
 
-  [./conservative_transfer_nearest_point]
+  [./subs_execute_on]
+    type = RunException
+    prereq = 'subs'
+    input = master_power_density.i
+    cli_args ="Postprocessors/from_sub1/execute_on='timestep_end'"
+    expect_err = "execute_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+from\_sub1"
+    requirement = 'The system shall check execute_on for PP in master app'
+  [../]
+
+  [./nearest_point]
     type = Exodiff
     input = master_nearest_point.i
     exodiff = 'master_nearest_point_out.e master_nearest_point_out_sub0.e master_nearest_point_out_sub1.e'
     requirement = 'The system shall support conservative transfers with nearestpoint VectorPostprocessors'
   [../]
 
-  [./conservative_transfer_nearest_point_vector_pps]
+  [./nearest_point_execute_on]
+    type = RunException
+    prereq = 'nearest_point'
+    input = master_nearest_point.i
+    cli_args ="VectorPostprocessors/to_nearest_point/execute_on='timestep_end'"
+    expect_err = "execute\_on='transfer'\s+is\s+required\s+in\s+the\s+conversative\s+transfer\s+for\s+to\_nearest\_point"
+    requirement = 'The system shall check execute_on for vector PP in master app'
+  [../]
+
+  [./nearest_point_vector_pps]
     type = CSVDiff
     input = 'master_nearest_point.i'
     csvdiff = 'master_nearest_point_out_from_nearest_point_0001.csv master_nearest_point_out_to_nearest_point_0001.csv'
-    prereq = conservative_transfer_nearest_point
+    prereq = nearest_point
     requirement = 'The system shall be able to output the adjusting values in conservative transfers'
   [../]
 
-  [./conservative_transfer_userobject_transfer]
+  [./userobject_transfer]
     type = Exodiff
     input = master_userobject.i
     exodiff = 'master_userobject_out.e master_userobject_out_sub_app0.e master_userobject_out_sub_app1.e'
     requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
   [../]
 
-  [./conservative_transfer_userobject_transfer_csv]
+  [./userobject_transfer_csv]
     type = CSVDiff
     input = 'master_userobject.i'
     csvdiff = 'master_userobject_out_to_nearest_point_0001.csv master_userobject_out_to_nearest_point_element_0001.csv'
-    prereq = conservative_transfer_userobject_transfer
+    prereq = userobject_transfer
     requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
   [../]
 

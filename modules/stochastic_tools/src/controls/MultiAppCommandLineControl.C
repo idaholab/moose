@@ -94,20 +94,20 @@ MultiAppCommandLineControl::execute()
 {
   std::vector<std::string> cli_args;
 
-  if (_sampler.getNumberOfCols() != _param_names.size())
-    paramError("param_names",
-               "The number of columns (",
-               _sampler.getNumberOfCols(),
-               ") must match the number of parameters (",
-               _param_names.size(),
-               ").");
-
   // For SamplerFullSolveMultiApp, to avoid storing duplicated param_names for each sampler, we
   // store only param_names once in "cli_args". For other MultApp, we store the full information
   // of params_names and values for each sampler.
 
   if (std::dynamic_pointer_cast<SamplerFullSolveMultiApp>(_multi_app) == nullptr)
   {
+    if (_sampler.getNumberOfCols() != _param_names.size())
+      paramError("param_names",
+                 "The number of columns (",
+                 _sampler.getNumberOfCols(),
+                 ") must match the number of parameters (",
+                 _param_names.size(),
+                 ").");
+
     for (dof_id_type row = _sampler.getLocalRowBegin(); row < _sampler.getLocalRowEnd(); ++row)
     {
       std::vector<Real> data = _sampler.getNextLocalRow();
@@ -125,7 +125,7 @@ MultiAppCommandLineControl::execute()
   else
   {
     std::ostringstream oss;
-    for (dof_id_type col = 0; col < _sampler.getNumberOfCols(); ++col)
+    for (dof_id_type col = 0; col < _param_names.size(); ++col)
     {
       if (col > 0)
         oss << ";";

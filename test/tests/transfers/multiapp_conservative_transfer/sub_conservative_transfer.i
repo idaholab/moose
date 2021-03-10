@@ -53,7 +53,7 @@
   [./to_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = aux_u
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   [../]
 []
 

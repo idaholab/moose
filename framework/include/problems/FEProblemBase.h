@@ -1632,7 +1632,9 @@ public:
   /**
    * Compute an user object with the given name
    */
-  virtual void computeUserObjectByName(const ExecFlagType & type, const std::string & name);
+  virtual void computeUserObjectByName(const ExecFlagType & type,
+                                       const Moose::AuxGroup & group,
+                                       const std::string & name);
 
   /**
    * Call compute methods on AuxKernels

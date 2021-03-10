@@ -28,8 +28,11 @@ class SQADocumentReport(SQAReport):
         super().__init__(**kwargs)
         self.working_dir = self.working_dir or mooseutils.git_root_dir()
 
+    @property
+    def documents(self):
+        return get_documents(self.required_documents, **self._documents)
+
     def execute(self, **kwargs):
         """Determine the status"""
-        documents = get_documents(self.required_documents, **self._documents)
-        logger = check_documents(documents, None, **kwargs)
+        logger = check_documents(self.documents, None, **kwargs)
         return logger

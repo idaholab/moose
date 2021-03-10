@@ -24,7 +24,6 @@
   [./from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = layered_average_value
-    execute_on = 'nonlinear TIMESTEP_END'
   [../]
 []
 
