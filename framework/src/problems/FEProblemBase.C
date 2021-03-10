@@ -3806,14 +3806,16 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 }
 
 void
-FEProblemBase::computeUserObjectByName(const ExecFlagType & type, const std::string & name)
+FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
+                                       const Moose::AuxGroup & group,
+                                       const std::string & name)
 {
   TheWarehouse::Query query = theWarehouse()
                                   .query()
                                   .condition<AttribSystem>("UserObject")
                                   .condition<AttribExecOns>(type)
                                   .condition<AttribName>(name);
-  computeUserObjectsInternal(type, Moose::POST_AUX, query);
+  computeUserObjectsInternal(type, group, query);
 }
 
 void

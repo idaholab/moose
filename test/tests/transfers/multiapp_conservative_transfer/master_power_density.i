@@ -66,25 +66,23 @@
     type = ElementIntegralVariablePostprocessor
     block = 0
     variable = power_density
-    execute_on = 'transfer nonlinear TIMESTEP_END'
   []
   [pwr1]
     type = ElementIntegralVariablePostprocessor
     block = 1
     variable = power_density
-    execute_on = 'transfer nonlinear TIMESTEP_END'
   []
   [from_sub0]
     type = ElementIntegralVariablePostprocessor
     block = 0
     variable = from_sub
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
   [from_sub1]
     type = ElementIntegralVariablePostprocessor
     block = 1
     variable = from_sub
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
 []
 

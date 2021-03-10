@@ -66,14 +66,13 @@
     type = NearestPointIntegralVariablePostprocessor
     variable = power_density
     points = '0 0.5 0 1 0.5 0'
-    execute_on = 'transfer nonlinear TIMESTEP_END'
   []
 
   [to_nearest_point]
     type = NearestPointIntegralVariablePostprocessor
     variable = from_sub
     points = '0 0.5 0 1 0.5 0'
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
 []
 

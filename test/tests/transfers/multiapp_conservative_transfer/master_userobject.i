@@ -72,14 +72,14 @@
     type = NearestPointIntegralVariablePostprocessor
     variable = multi_layered_average
     points = '0.3 0.1 0.3 0.7 0.1 0.3'
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
 
   [to_nearest_point_element]
     type = NearestPointIntegralVariablePostprocessor
     variable = element_multi_layered_average
     points = '0.3 0.1 0.3 0.7 0.1 0.3'
-    execute_on = 'transfer nonlinear TIMESTEP_END'
+    execute_on = 'transfer'
   []
 []
 

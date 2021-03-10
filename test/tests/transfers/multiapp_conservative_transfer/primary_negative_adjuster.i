@@ -66,7 +66,6 @@
   [from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = var
-    execute_on = 'TIMESTEP_BEGIN'
   []
 []
 
