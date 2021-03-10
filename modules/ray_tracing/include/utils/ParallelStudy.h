@@ -672,20 +672,6 @@ ParallelStudy<WorkType, ParallelDataType, Context>::receiveAndExecute()
   return executed_some;
 }
 
-template <typename T>
-void
-nonblockingSum(const libMesh::Parallel::Communicator & comm,
-               T & r,
-               T & o,
-               libMesh::Parallel::Request & req)
-{
-  if (comm.size() > 1)
-    libmesh_call_mpi(MPI_Iallreduce(
-        &r, &o, 1, libMesh::Parallel::StandardType<T>(&r), MPI_SUM, comm.get(), req.get()));
-  else
-    o = r;
-}
-
 template <typename WorkType, typename ParallelDataType, typename Context>
 void
 ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
@@ -708,7 +694,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
 
   // Get the amount of work that was started in the whole domain, if applicable
   if (started_request_first)
-    nonblockingSum(comm(), _local_work_started, _total_work_started, started_request);
+    comm().sum(_local_work_started, _total_work_started, started_request);
 
   // Whether or not the started request has been made
   bool made_started_request = started_request_first;
@@ -767,7 +753,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
       {
         made_completed_request = true;
         temp = _local_work_completed;
-        nonblockingSum(comm(), temp, _total_work_completed, completed_request);
+        comm().sum(temp, _total_work_completed, completed_request);
         continue;
       }
 
@@ -780,7 +766,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
         {
           made_started_request = true;
           temp = _local_work_started;
-          nonblockingSum(comm(), temp, _total_work_started, started_request);
+          comm().sum(temp, _total_work_started, started_request);
           continue;
         }
 
@@ -827,7 +813,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::harmExecute()
   Parallel::MessageTag work_completed_requests_tag = Parallel::MessageTag(21000);
 
   // Get the amount of work that was started in the whole domain
-  nonblockingSum(comm(), _local_work_started, _total_work_started, work_started_request);
+  comm().sum(_local_work_started, _total_work_started, work_started_request);
 
   // All work has been executed, so time to communicate
   flushSendBuffers();
@@ -917,7 +903,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
   unsigned long long int temp;
 
   // Get the amount of work that were started in the whole domain
-  nonblockingSum(comm(), _local_work_started, _total_work_started, work_completed_probe_status);
+  comm().sum(_local_work_started, _total_work_started, work_completed_probe_status);
 
   // Keep working until done
   while (true)
@@ -945,8 +931,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
       if (!receiving && !sending && some_left_request.test() && all_some_left)
       {
         some_left = receiving || sending;
-
-        nonblockingSum(comm(), some_left, all_some_left, some_left_request);
+        comm().sum(some_left, all_some_left, some_left_request);
       }
     } while (receiving || sending || !some_left_request.test() || all_some_left);
 
@@ -960,7 +945,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
         return;
 
       temp = _local_work_completed;
-      nonblockingSum(comm(), temp, _total_work_completed, work_completed_request);
+      comm().sum(temp, _total_work_completed, work_completed_request);
     }
   }
 }
