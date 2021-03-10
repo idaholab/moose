@@ -418,7 +418,7 @@ ifneq ($(app_test_LIB),)
 	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
 endif
 
-install_libs: $(lib_install_targets) install_lib_$(notdir $(moose_LIB)) install_lib_$(notdir $(pcre_LIB)) install_lib_$(notdir $(hit_LIB))
+install_libs: $(lib_install_targets)
 
 install_$(APPLICATION_NAME)_tests: all
 	@echo "Installing tests"
