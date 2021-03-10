@@ -12,87 +12,90 @@
 []
 
 [UserObjects]
-  [./line_seg_cut_uo]
+  [line_seg_cut_uo]
     type = LineSegmentCutUserObject
     cut_data = '0.5 1.0 0.5 0.0'
     time_start_cut = 0.0
     time_end_cut = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./manager]
+  [pair_qps]
+    type = XFEMElementPairQPProvider
+  []
+  [manager]
     type = XFEMElementPairMaterialManager
     material_names = 'material1'
-  [../]
+    element_pair_qps = pair_qps
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./u_left]
+  [u_left]
     type = PiecewiseLinear
     x = '0   2'
     y = '1   1'
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [Constraints]
-  [./xfem_constraint]
+  [xfem_constraint]
     type = XFEMSingleVariableConstraintStatefulTest
     variable = u
     #jump = 0
     #jump_flux = 0
     manager = manager
-  [../]
+  []
 []
 
 [BCs]
-# Define boundary conditions
-  [./left_u]
-    type = FunctionPresetBC
+  # Define boundary conditions
+  [left_u]
+    type = FunctionDirichletBC
     variable = u
     boundary = 3
     function = u_left
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./material1]
+  [material1]
     type = StatefulMaterialJump
-    compute = false
     u = u
-  [../]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   dt = 0.1
-  num_steps = 10
+  num_steps = 2
 []
 
 [Outputs]

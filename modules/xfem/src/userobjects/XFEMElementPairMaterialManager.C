@@ -46,7 +46,7 @@ XFEMElementPairMaterialManager::initialSetup()
   // get MaterialData entries for all listed material properties
   for (auto name : getParam<std::vector<std::string>>("material_names"))
   {
-    auto & material = getMaterialByName(name);
+    auto & material = getMaterialByName(name, /* no_warn = */ true);
 
     // get the material properties
     auto prop_list = material.getSuppliedItems();
