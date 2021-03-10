@@ -404,6 +404,7 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 
 ###### install stuff #############
 
+docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(tests_install_dir)/$(notdir $(app_EXEC))
 
@@ -450,7 +451,12 @@ install_lib_%: % all
 $(binlink): all install_$(APPLICATION_NAME)_tests
 	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
 
-$(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests $(binlink)
+install_$(APPLICATION_NAME)_docs:
+	@echo "Installing docs"
+	@mkdir -p $(docs_install_dir)
+	@cd $(docs_dir) && ./moosedocs.py build --destination $(docs_install_dir)
+
+$(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing $<"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@

@@ -90,21 +90,15 @@ testsDir(const std::string & app_name)
     return installed_path;
   return Moose::getExecutablePath();
 }
+
 std::string
 docsDir(const std::string & app_name)
 {
   std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "doc");
-
-  auto docfile = pathjoin(installed_path, "TODO-DOCSFILE?");
-  auto mooserepofile = pathjoin(Moose::getExecutablePath(), "../../MOOSEDOCS?");
-  auto appfile = pathjoin(Moose::getExecutablePath(), "../../APPDOCS?");
+  auto docfile = pathjoin(installed_path, "css/moose.css");
   if (pathExists(docfile) && checkFileReadable(docfile))
     return installed_path;
-  // check case where we are in moose repo moose_test dir setup
-  else if (pathExists(mooserepofile) && checkFileReadable(mooserepofile))
-    return pathjoin(Moose::getExecutablePath(), "../../MOOSEDOCS?");
-  // assume we are in a  regular app dir setup
-  return pathjoin(Moose::getExecutablePath(), "../../APPDOCS?");
+  return "";
 }
 
 std::string

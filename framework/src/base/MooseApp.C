@@ -130,6 +130,8 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>("run_tests", "--tests", false, "run all tests");
+  params.addCommandLineParam<bool>(
+      "show_docs", "--docs", false, "print url/path to the documentation website");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    false,
@@ -1133,6 +1135,30 @@ void
 MooseApp::run()
 {
   TIME_SECTION(_run_timer);
+  if (isParamValid("show_docs") && getParam<bool>("show_docs"))
+  {
+    auto binname = appBinaryName();
+    if (binname == "")
+      mooseError("could not locate installed tests to run (unresolved binary/app name)");
+    auto docspath = MooseUtils::docsDir(binname);
+    if (docspath == "")
+      mooseError("no installed documentation found");
+
+    auto docmsgfile = MooseUtils::pathjoin(docspath, "docmsg.txt");
+    std::string docmsg = "file://" + MooseUtils::realpath(docspath) + "/index.html";
+    if (MooseUtils::pathExists(docmsgfile) && MooseUtils::checkFileReadable(docmsgfile))
+    {
+      std::ifstream ifs(docmsgfile);
+      std::string content((std::istreambuf_iterator<char>(ifs)),
+                          (std::istreambuf_iterator<char>()));
+      content.replace(content.find("LOCAL_SITE_HOME"), content.length(), docmsg);
+      docmsg = content;
+    }
+
+    Moose::out << docmsg << "\n";
+    _ready_to_exit = true;
+    return;
+  }
 
   if (isParamValid("run_tests") && getParam<bool>("run_tests"))
   {
