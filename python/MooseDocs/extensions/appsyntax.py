@@ -30,9 +30,9 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return AppSyntaxExtension(**kwargs)
 
-ParameterToken = tokens.newToken('ParameterToken', parameter=None)
+ParameterToken = tokens.newToken('ParameterToken', parameter=None, syntax=None, include_heading=True)
 InputParametersToken = tokens.newToken('InputParametersToken',
-                                       parameters=dict(),
+                                       parameters=list(),
                                        level=2,
                                        groups=list(),
                                        hide=list(),
@@ -374,12 +374,14 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
     def createTokenFromSyntax(self, parent, info, page, obj):
 
-        parameters = dict()
+        parameters = list()
         if isinstance(obj, moosesyntax.SyntaxNode):
             for action in obj.actions():
-                parameters.update(action.parameters)
+                for param in action.parameters.values():
+                    parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
         elif obj.parameters:
-            parameters.update(obj.parameters)
+            for param in obj.parameters.values():
+                parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
 
         self.createHeading(parent, page)
         token = InputParametersToken(parent, syntax=obj.name, parameters=parameters,
@@ -438,8 +440,8 @@ class SyntaxParameterCommand(SyntaxCommandBase):
                 msg += '    {}/{}\n'.format(obj_syntax, res)
             raise exceptions.MooseDocsException(msg, param_name, obj_syntax)
 
-        ParameterToken(parent, parameter=parameters[param_name],
-                       string='"{}"'.format(param_name))
+        param_token = ParameterToken(None, parameter=parameters[param_name], syntax=obj.name, include_heading=False);
+        modal.ModalLink(parent, string='"{}"'.format(param_name), title=param_name, content=param_token)
         return parent
 
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
@@ -658,12 +660,12 @@ class RenderSyntaxListItem(components.RenderComponent):
 class RenderInputParametersToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        self._createHTMLHelper(parent, token, page, _insert_html_parameter, False)
+        self._createHTMLHelper(parent, token, page, False)
 
     def createMaterialize(self, parent, token, page):
-        self._createHTMLHelper(parent, token, page, _insert_materialize_parameter, True)
+        self._createHTMLHelper(parent, token, page, True)
 
-    def _createHTMLHelper(self, parent, token, page, func, collapse):
+    def _createHTMLHelper(self, parent, token, page, collapse):
         groups = _get_parameters(token, token['parameters'])
 
         n_groups = 0
@@ -689,87 +691,108 @@ class RenderInputParametersToken(components.RenderComponent):
                 ul['data-collapsible'] = "expandable"
 
             for name, param in params.items():
-                func(ul, name, param)
-
-    @staticmethod
-    def _getParameters(token, parameters):
-        """
-        Add the parameters from the supplied node to the supplied groups
-        """
-
-        # Build the list of groups to display
-        groups = collections.OrderedDict()
-        if token['groups']:
-            for group in token['groups']:
-                groups[group] = dict()
-
-        else:
-            groups['Required'] = dict()
-            groups['Optional'] = dict()
-            for param in parameters.values():
-                group = param['group_name']
-                if group and group not in groups:
-                    groups[group] = dict()
-
-        # Populate the parameter lists by group
-        for param in parameters.values() or []:
-
-            # Do nothing if the parameter is hidden or not shown
-            name = param['name']
-            if (name == 'type') or \
-               (token['hide'] and name in token['hide']) or \
-               (token['show'] and name not in token['show']):
-                continue
-
-            # Handle the 'ungroup' parameters
-            group = param['group_name']
-            if not group and param['required']:
-                group = 'Required'
-            elif not group and not param['required']:
-                group = 'Optional'
-
-            if group in groups:
-                groups[group][name] = param
-
-        return groups
+                self.renderer.render(ul, param, page)
+                # func(ul, name, param)
 
     def createLatex(self, parent, token, page):
 
-        groups = self._getParameters(token, token['parameters'])
+        groups = _get_parameters(token, token['parameters'])
         for group, params in groups.items():
             if not params:
                 continue
 
             for name, param in params.items():
-                if param['deprecated']:
-                    continue
-
-                args = [latex.Brace(string=name), latex.Bracket(string=group), latex.Bracket()]
-                latex.Command(args[2], 'texttt', string=param['cpp_type'])
-                default = _format_default(param) or ''
-                if default:
-                    args.append(latex.Bracket(string=default))
-
-                latex.Environment(parent, 'InputParameter',
-                                  args=args,
-                                  string=param['description'])
+                self.renderer.render(parent, param, page)
 
 class RenderParameterToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'span', class_='moose-parameter-name')
+        param = token['parameter']
+        name = param['name']
+
+        if param['deprecated']:
+            return
+
+        li = html.Tag(parent, 'li')
+        default = _format_default(param)
+
+        if default:
+            html.Tag(li, 'strong', string=name)
+            html.Tag(li, 'span', string=' ({}): '.format(default))
+        else:
+            html.Tag(li, 'strong', string='{}: '.format(name))
+
+        desc = param['description']
+        if desc:
+            html.Tag(li, 'span', string=desc)
 
     def createMaterialize(self, parent, token, page):
-        span = self.createHTML(parent, token, page)
         param = token['parameter']
-        span.addClass('tooltipped')
-        span['data-tooltip'] = param['description']
-        span['data-position'] = 'bottom'
-        span['data-delay'] = 5
-        return span
+        name = param['name']
+
+        if param['deprecated']:
+            return
+
+        default = _format_default(param)
+        desc = param['description']
+
+        if token['include_heading']:
+            li = html.Tag(parent, 'li')
+            header = html.Tag(li, 'div', class_='collapsible-header')
+            body = html.Tag(li, 'div', class_='collapsible-body')
+
+            html.Tag(header, 'span', class_='moose-parameter-name', string=name)
+            if default:
+                html.Tag(header, 'span', class_='moose-parameter-header-default', string=default)
+
+            if desc:
+                html.Tag(header, 'span', class_='moose-parameter-header-description', string=str(desc))
+
+        else:
+            body = parent
+
+        if default:
+            p = html.Tag(body, 'p', class_='moose-parameter-description-default')
+            html.Tag(p, 'span', string='Default:')
+            html.String(p, content=default)
+
+        cpp_type = param['cpp_type']
+        p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
+        html.Tag(p, 'span', string='C++ Type:')
+        html.String(p, content=cpp_type, escape=True)
+
+        if 'options' in param:
+            p = html.Tag(body, 'p', class_='moose-parameter-description-options')
+            html.Tag(p, 'span', string='Options:')
+            html.String(p, content=param['options'])
+
+        p = html.Tag(body, 'p', class_='moose-parameter-description')
+        if desc:
+            html.Tag(p, 'span', string='Description:')
+            html.String(p, content=str(desc))
 
     def createLatex(self, parent, token, page):
-        return parent
+        param = token['parameter']
+        name = param['name']
+        group = param['group_name']
+
+        if param['deprecated']:
+            return
+
+        if not group and param['required']:
+            group = 'Required'
+        elif not group and not param['required']:
+            group = 'Optional'
+
+        args = [latex.Brace(string=name), latex.Bracket(string=group), latex.Bracket()]
+        latex.Command(args[2], 'texttt', string=param['cpp_type'])
+        default = _format_default(param) or ''
+        if default:
+            args.append(latex.Bracket(string=default))
+
+        latex.Environment(parent, 'InputParameter',
+                          args=args,
+                          string=param['description'])
 
 class RenderSyntaxLink(core.RenderLink):
     def createLatex(self, parent, token, page):
@@ -789,99 +812,32 @@ def _get_parameters(token, parameters):
     else:
         groups['Required'] = dict()
         groups['Optional'] = dict()
-        for param in parameters.values():
-            group = param['group_name']
+        for param in parameters:
+            group = param['parameter']['group_name']
             if group and group not in groups:
                 groups[group] = dict()
 
     # Populate the parameter lists by group
-    for param in parameters.values() or []:
+    for param in parameters or []:
 
         # Do nothing if the parameter is hidden or not shown
-        name = param['name']
+        name = param['parameter']['name']
         if (name == 'type') or \
            (token['hide'] and name in token['hide']) or \
            (token['show'] and name not in token['show']):
             continue
 
         # Handle the 'ungroup' parameters
-        group = param['group_name']
-        if not group and param['required']:
+        group = param['parameter']['group_name']
+        if not group and param['parameter']['required']:
             group = 'Required'
-        elif not group and not param['required']:
+        elif not group and not param['parameter']['required']:
             group = 'Optional'
 
         if group in groups:
             groups[group][name] = param
 
     return groups
-
-def _insert_html_parameter(parent, name, param):
-    """
-    Insert parameter in to the supplied <ul> tag.
-
-    Input:
-        parent[html.Tag]: The 'ul' tag that parameter <li> item is to belong.
-        name[str]: The name of the parameter.
-        param: The parameter object from JSON dump.
-    """
-    if param['deprecated']:
-        return
-
-    li = html.Tag(parent, 'li')
-    default = _format_default(param)
-
-    if default:
-        html.Tag(li, 'strong', string=name)
-        html.Tag(li, 'span', string=' ({}): '.format(default))
-    else:
-        html.Tag(li, 'strong', string='{}: '.format(name))
-
-    desc = param['description']
-    if desc:
-        html.Tag(li, 'span', string=desc)
-
-def _insert_materialize_parameter(parent, name, param):
-    """
-    Insert parameter in to the supplied <ul> tag.
-
-    Input:
-        parent[html.Tag]: The 'ul' tag that parameter <li> item is to belong.
-        name[str]: The name of the parameter.
-        param: The parameter object from JSON dump.
-    """
-    if param['deprecated']:
-        return
-
-    li = html.Tag(parent, 'li')
-    header = html.Tag(li, 'div', class_='collapsible-header')
-    body = html.Tag(li, 'div', class_='collapsible-body')
-
-    html.Tag(header, 'span', class_='moose-parameter-name', string=name)
-    default = _format_default(param)
-    if default:
-        html.Tag(header, 'span', class_='moose-parameter-header-default', string=default)
-
-        p = html.Tag(body, 'p', class_='moose-parameter-description-default')
-        html.Tag(p, 'span', string='Default:')
-        html.String(p, content=default)
-
-    cpp_type = param['cpp_type']
-    p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
-    html.Tag(p, 'span', string='C++ Type:')
-    html.String(p, content=cpp_type, escape=True)
-
-    if 'options' in param:
-        p = html.Tag(body, 'p', class_='moose-parameter-description-options')
-        html.Tag(p, 'span', string='Options:')
-        html.String(p, content=param['options'])
-
-    p = html.Tag(body, 'p', class_='moose-parameter-description')
-    desc = param['description']
-    if desc:
-        html.Tag(header, 'span', class_='moose-parameter-header-description', string=str(desc))
-        html.Tag(p, 'span', string='Description:')
-        html.String(p, content=str(desc))
 
 def _format_default(parameter):
     """
