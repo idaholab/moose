@@ -36,11 +36,9 @@
     type = GenericConstantMaterial
     prop_names  = 'prop1 prop2'
     prop_values = '1     2'
-    compute = false
   [../]
   [./material2]
     type = StatefulTestMaterial
-    compute = false
   [../]
 []
 
