@@ -24,7 +24,7 @@
 #include "libmesh/edge_edge3.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
-#include "libmesh/quadrature_trap.h"
+#include "libmesh/quadrature_nodal.h"
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/replicated_mesh.h"
 
@@ -562,25 +562,15 @@ AutomaticMortarGeneration::computeNodalNormals()
   // The dimension according to Mesh::mesh_dimension().
   const auto dim = mesh.mesh_dimension();
 
-  // Build FEType objects for the different variables. This order and
-  // family isn't that important because we are only using it for
-  // geometric information...
-  FEType nnx_fe_type(FIRST, LAGRANGE);
+  // A nodal lower-dimensional nodal quadrature rule to be used on faces.
+  QNodal qface(dim - 1);
 
-  // Build FE objects from those types.
-  std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
-
-  // A nodal lower-dimensional trapezoidal quadrature rule to be used on faces.
-  QTrap qface(dim - 1);
-
-  // Tell the FE objects about the quadrature rule.
-  nnx_fe_face->attach_quadrature_rule(&qface);
-
-  // Get a reference to the normals from the face FE.
-  const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
-
-  // A map from the node id to the attached elemental normals evaluated at the node
-  std::map<dof_id_type, std::vector<Point>> node_to_normals_map;
+  // A map from the node id to the attached elemental normals/weights evaluated at the node. Th
+  // length of the vector will correspond to the number of elements attached to the node. If it is a
+  // vertex node, for a 1D mortar mesh, the vector length will be two. If it is an interior node,
+  // the vector will be length 1. The first member of the pair is that element's normal at the node.
+  // The second member is that element's JxW at the node
+  std::map<dof_id_type, std::vector<std::pair<Point, Real>>> node_to_normals_map;
 
   /// The _periodic flag tells us whether we want to inward vs outward facing normals
   Real sign = _periodic ? -1 : 1;
@@ -599,6 +589,14 @@ AutomaticMortarGeneration::computeNodalNormals()
     if (!this->secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
+    // We will create an FE object and attach the nodal quadrature rule such that we can get out the
+    // normals at the element nodes
+    FEType nnx_fe_type(secondary_elem->default_order(), LAGRANGE);
+    std::unique_ptr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
+    nnx_fe_face->attach_quadrature_rule(&qface);
+    const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
+    const auto & JxW = nnx_fe_face->get_JxW();
+
     // Which side of the parent are we? We need to know this to know
     // which side to reinit.
     const Elem * interior_parent = secondary_elem->interior_parent();
@@ -615,10 +613,10 @@ AutomaticMortarGeneration::computeNodalNormals()
 
     // We loop over n_vertices not n_nodes because we're not interested in
     // computing normals at interior nodes
-    for (MooseIndex(secondary_elem->n_vertices()) n = 0; n < secondary_elem->n_vertices(); ++n)
+    for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
-      auto & normals_vec = node_to_normals_map[secondary_elem->node_id(n)];
-      normals_vec.push_back(sign * face_normals[n]);
+      auto & normals_and_weights_vec = node_to_normals_map[secondary_elem->node_id(n)];
+      normals_and_weights_vec.push_back(std::make_pair(sign * face_normals[n], JxW[n]));
     }
   }
 
@@ -628,11 +626,11 @@ AutomaticMortarGeneration::computeNodalNormals()
   for (const auto & pr : node_to_normals_map)
   {
     const auto & node_id = pr.first;
-    const auto & normals_vec = pr.second;
+    const auto & normals_and_weights_vec = pr.second;
 
     Point nodal_normal;
-    for (const auto & normals : normals_vec)
-      nodal_normal += normals;
+    for (const auto & norm_and_weight : normals_and_weights_vec)
+      nodal_normal += norm_and_weight.first * norm_and_weight.second;
 
     secondary_node_to_nodal_normal[mesh.node_ptr(node_id)] = nodal_normal.unit();
   }
@@ -1035,6 +1033,11 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           if (rejected_secondary_elem_candidates.count(secondary_elem_candidate))
             continue;
 
+          std::vector<Point> nodal_normals(secondary_elem_candidate->n_nodes());
+          for (const auto n : make_range(secondary_elem_candidate->n_nodes()))
+            nodal_normals[n] =
+                secondary_node_to_nodal_normal.at(secondary_elem_candidate->node_ptr(n));
+
           // Use equation 2.4.6 from Bin Yang's dissertation to try and solve for
           // the position on the secondary element where this primary came from.  This
           // requires a Newton iteration in general.
@@ -1049,21 +1052,15 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           do
           {
             VectorValue<DualNumber<Real>> x1(0);
-            VectorValue<DualNumber<Real>> dx1_dxi(0);
+            VectorValue<DualNumber<Real>> normals(0);
             for (MooseIndex(secondary_elem_candidate->n_nodes()) n = 0;
                  n < secondary_elem_candidate->n_nodes();
                  ++n)
             {
-              x1 += Moose::fe_lagrange_1D_shape(order, n, xi1_dn) *
-                    secondary_elem_candidate->point(n);
-              dx1_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1_dn) *
-                         secondary_elem_candidate->point(n);
+              const auto phi = Moose::fe_lagrange_1D_shape(order, n, xi1_dn);
+              x1 += phi * secondary_elem_candidate->point(n);
+              normals += phi * nodal_normals[n];
             }
-
-            // We're assuming our mesh is in the xy plane here
-            auto normals = VectorValue<DualNumber<Real>>(dx1_dxi(1), -dx1_dxi(0), 0).unit();
-            if (_periodic)
-              normals *= -1;
 
             auto u = x1 - (*primary_node);
 
