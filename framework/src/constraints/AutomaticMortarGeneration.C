@@ -774,7 +774,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             auto u = x2 - (*secondary_node);
             auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-            if (std::abs(F) < TOLERANCE)
+            if (std::abs(F) < TOLERANCE * TOLERANCE)
               break;
 
             Real dxi2 = -F.value() / F.derivatives();
@@ -1069,7 +1069,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
             auto F = u(0) * normals(1) - u(1) * normals(0);
 
-            if (std::abs(F) < TOLERANCE)
+            if (std::abs(F) < TOLERANCE * TOLERANCE)
               break;
 
             Real dxi1 = -F.value() / F.derivatives();
