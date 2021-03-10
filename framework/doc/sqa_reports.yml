@@ -1,10 +1,17 @@
 Applications:
-    heat_conduction:
-        exe_directory: ${MOOSE_DIR}/modules/heat_conduction
+    framework:
+        exe_directory: test
+        exe_name: moose_test
         app_types:
-            - HeatConductionApp
-        content_directory: ${MOOSE_DIR}/modules/heat_conduction/doc/content
+            - MooseApp
+        content_directory: framework/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+            - test/doc/remove.yml
         log_stub_files: WARNING
+        show_warning: false
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -14,18 +21,19 @@ Documents:
     configuration_management_plan: sqa/inl_records.md#configuration_management_plan
     asset_management_plan: sqa/inl_records.md#asset_management_plan
     verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
-    software_requirements_specification: sqa/heat_conduction_srs.md
-    software_design_description: sqa/heat_conduction_sdd.md
-    software_test_plan: sqa/heat_conduction_stp.md
-    requirements_traceablity_matrix: sqa/heat_conduction_rtm.md
-    verification_validation_report: sqa/heat_conduction_vvr.md
-    failure_analysis_report: sqa/heat_conduction_far.md
+    software_requirements_specification: sqa/framework_srs.md
+    software_design_description: sqa/framework_sdd.md
+    software_test_plan: sqa/framework_stp.md
+    requirements_traceablity_matrix: sqa/framework_rtm.md
+    verification_validation_report: sqa/framework_vvr.md
+    failure_analysis_report: sqa/framework_far.md
     log_user_manual: WARNING
     log_theory_manual: WARNING
+    show_warning: false
 
 Requirements:
-    heat_conduction:
+    moose_test:
         directories:
-            - ${MOOSE_DIR}/modules/heat_conduction
-        log_duplicate_requirement: WARNING
+            - test/tests
         log_testable: WARNING
+        show_warning: false

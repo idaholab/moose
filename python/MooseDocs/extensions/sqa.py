@@ -260,6 +260,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQADependenciesCommand())
         self.addCommand(reader, SQADocumentCommand())
         self.addCommand(reader, SQAReportCommand())
+        self.addCommand(reader, SQARecordCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -542,7 +543,6 @@ class SQAReportCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['config_file'] = (None, "Provide the config YAML file for gathering reports to display on the dashboard.")
         config['category'] = (None, "Provide the category.")
         return config
 
@@ -635,6 +635,34 @@ class SQAReportCommand(command.CommandComponent):
                 for filename in req.validation:
                     autolink.AutoLink(p, page=str(filename))
                     core.Space(p)
+
+class SQARecordCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'records'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['category'] = (None, "Provide the category.")
+        return config
+
+    def createToken(self, parent, info, page):
+        category = self.settings.get('category') or '_empty_'
+        doc_reports, _, _ = self.extension.reports(category)
+        if doc_reports is not None:
+            core.Heading(parent, string='Software Quality Records', level=2)
+            ul = core.UnorderedList(parent)
+            for report in doc_reports:
+                for document in report.documents:
+                    li = core.ListItem(ul)
+                    if document.filename is not None:
+                        split_name = document.filename.split('#', maxsplit=1)
+                        fname = split_name[0]
+                        bookmark = split_name[1] if len(split_name) > 1 else None
+                        autolink.AutoLink(li, page=fname, bookmark=bookmark, string=document.title)
+                    else:
+                        tokens.String(li, content=document.title)
+        return parent
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
     def createHTML(self, parent, token, page):

@@ -33,7 +33,7 @@ class TestGenerate(unittest.TestCase):
         colorText.side_effect = lambda txt, *args, **kwargs: txt
 
         # Run the generate command
-        opt = types.SimpleNamespace(config='sqa_test_reports.yml')
+        opt = types.SimpleNamespace(config='sqa_reports.yml')
         with mock.patch('sys.stdout', new=io.StringIO()) as stdout:
             status = syntax.main(opt)
         self.assertIn('Adaptivity: /Adaptivity', stdout.getvalue())
