@@ -41,5 +41,7 @@ StatefulTestMaterial::computeQpProperties()
 void
 StatefulTestMaterial::initQpStatefulProperties()
 {
+  _console << "StatefulTestMaterial::initQpStatefulProperties(), _qp =  " << _qp << "elem "
+           << _current_elem << " point " << _qp << ':' << _q_point[_qp] << '\n';
   _prop[_qp] = _q_point[_qp](0);
 }
