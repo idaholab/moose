@@ -12,10 +12,13 @@
 #include "StressUpdateBase.h"
 #include "ADGeneralizedReturnMappingSolution.h"
 #include "MooseTypes.h"
+
 #include "libmesh/ignore_warnings.h"
 #include "Eigen/Dense"
 #include "Eigen/Eigenvalues"
 #include "libmesh/restore_warnings.h"
+
+#include <limits>
 
 namespace Eigen
 {
@@ -94,6 +97,13 @@ public:
   virtual Real computeTimeStepLimit() override;
 
   /**
+   * Compute the limiting value of the time step for this material according to the numerical
+   * integration error
+   * @return Limiting time step
+   */
+  virtual Real computeIntegrationErrorTimeStep() { return std::numeric_limits<Real>::max(); }
+
+  /**
    * Does the model require the elasticity tensor to be isotropic?
    */
   bool requiresIsotropicTensor() override { return true; }
@@ -131,6 +141,7 @@ protected:
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
                                      const ADDenseVector & /*stress_dev*/,
+                                     const ADRankTwoTensor & stress_old,
                                      const ADRankFourTensor & elasticity_tensor) = 0;
   /**
    * Perform any necessary steps to finalize strain increment after return mapping iterations
@@ -151,6 +162,16 @@ protected:
   ADMaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
+  /// Equivalent creep/plastic strain rate: facilitates user's control of integration errors
+  MaterialProperty<Real> & _inelastic_strain_rate;
+  const MaterialProperty<Real> & _inelastic_strain_rate_old;
+
   /// Maximum inelastic strain increment for (next) time step prescription
   Real _max_inelastic_increment;
+
+  /// Maximum integration error for creep
+  Real _max_integration_error;
+
+  /// Maximum integration error time step
+  Real _max_integration_error_time_step;
 };

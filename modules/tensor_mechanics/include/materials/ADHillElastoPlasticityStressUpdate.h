@@ -82,6 +82,7 @@ protected:
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
                                      const ADDenseVector & /*stress_dev*/,
+                                     const ADRankTwoTensor & stress_old,
                                      const ADRankFourTensor & elasticity_tensor) override;
 
   ADReal computeOmega(const ADReal & delta_gamma, const ADDenseVector & stress_trial);

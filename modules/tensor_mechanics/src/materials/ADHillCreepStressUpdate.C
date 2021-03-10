@@ -127,6 +127,8 @@ ADHillCreepStressUpdate::computeResidual(const ADDenseVector & /*effective_trial
   const ADReal creep_rate =
       _coefficient * std::pow(qsigma_square, _n_exponent) * _exponential * _exp_time;
 
+  _inelastic_strain_rate[_qp] = MetaPhysicL::raw_value(creep_rate);
+
   // Return iteration difference between creep strain and inelastic strain multiplier
   return creep_rate * _dt - delta_gamma;
 }
@@ -244,10 +246,22 @@ ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & creepStra
                                                const ADReal & /*delta_gamma*/,
                                                ADRankTwoTensor & stress_new,
                                                const ADDenseVector & /*stress_dev*/,
+                                               const ADRankTwoTensor & stress_old,
                                                const ADRankFourTensor & elasticity_tensor)
 {
   // Class only valid for isotropic elasticity (for now)
   stress_new -= elasticity_tensor * creepStrainIncrement;
+
+  // Compute the maximum time step allowed due to creep strain numerical integration error
+  Real stress_dif = MetaPhysicL::raw_value(stress_new - stress_old).L2norm();
+
+  // Get a representative value of the elasticity tensor
+  Real elasticity_value =
+      1.0 / 3.0 *
+      MetaPhysicL::raw_value((elasticity_tensor(0, 0, 0, 0) + elasticity_tensor(1, 1, 1, 1) +
+                              elasticity_tensor(2, 2, 2, 2)));
+
+  _max_integration_error_time_step = _dt / (stress_dif / elasticity_value / _max_integration_error);
 }
 
 Real

@@ -15,6 +15,7 @@ ADAnisotropicReturnPlasticityStressUpdateBase::validParams()
   InputParameters params = ADGeneralizedRadialReturnStressUpdate::validParams();
 
   params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
+  params.set<std::string>("inelastic_strain_rate_name") = "creep_strain_rate";
 
   return params;
 }

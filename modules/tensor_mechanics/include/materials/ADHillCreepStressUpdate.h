@@ -77,6 +77,7 @@ protected:
                                      const ADReal & delta_gamma,
                                      ADRankTwoTensor & stress,
                                      const ADDenseVector & stress_dev,
+                                     const ADRankTwoTensor & stress_old,
                                      const ADRankFourTensor & elasticity_tensor) override;
 
   virtual ADReal initialGuess(const ADDenseVector & /*stress_dev*/) override;
@@ -86,6 +87,16 @@ protected:
    * TODO: Take care of rotation of anisotropy parameters
    */
   bool requiresIsotropicTensor() override { return false; }
+
+  /**
+   * Compute the limiting value of the time step for this material according to the numerical
+   * integration error
+   * @return Limiting time step
+   */
+  virtual Real computeIntegrationErrorTimeStep() override
+  {
+    return _max_integration_error_time_step;
+  }
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;

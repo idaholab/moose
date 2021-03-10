@@ -12,7 +12,6 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "ElasticityTensorTools.h"
-
 #include "libmesh/ignore_warnings.h"
 #include "Eigen/Dense"
 #include "Eigen/Eigenvalues"
@@ -30,9 +29,15 @@ ADGeneralizedRadialReturnStressUpdate::validParams()
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");
+  params.addParam<Real>("max_integration_error",
+                        5e-4,
+                        "The maximum inelastic strain increment integration error allowed");
   params.addRequiredParam<std::string>(
       "effective_inelastic_strain_name",
       "Name of the material property that stores the effective inelastic strain");
+  params.addRequiredParam<std::string>(
+      "inelastic_strain_rate_name",
+      "Name of the material property that stores the inelastic strain rate");
   return params;
 }
 
@@ -44,7 +49,13 @@ ADGeneralizedRadialReturnStressUpdate::ADGeneralizedRadialReturnStressUpdate(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
         _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
-    _max_inelastic_increment(getParam<Real>("max_inelastic_increment"))
+    _inelastic_strain_rate(
+        declareProperty<Real>(_base_name + getParam<std::string>("inelastic_strain_rate_name"))),
+    _inelastic_strain_rate_old(getMaterialPropertyOld<Real>(
+        _base_name + getParam<std::string>("inelastic_strain_rate_name"))),
+    _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
+    _max_integration_error(getParam<Real>("max_integration_error")),
+    _max_integration_error_time_step(std::numeric_limits<Real>::max())
 {
 }
 
@@ -52,12 +63,14 @@ void
 ADGeneralizedRadialReturnStressUpdate::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
+  _inelastic_strain_rate[_qp] = 0.0;
 }
 
 void
 ADGeneralizedRadialReturnStressUpdate::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+  _inelastic_strain_rate[_qp] = _inelastic_strain_rate_old[_qp];
 }
 
 void
@@ -65,7 +78,7 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
                                                    ADRankTwoTensor & inelastic_strain_increment,
                                                    const ADRankTwoTensor & /*rotation_increment*/,
                                                    ADRankTwoTensor & stress_new,
-                                                   const RankTwoTensor & /*stress_old*/,
+                                                   const RankTwoTensor & stress_old,
                                                    const ADRankFourTensor & elasticity_tensor,
                                                    const RankTwoTensor & /*elastic_strain_old*/)
 {
@@ -108,8 +121,12 @@ ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_str
 
   elastic_strain_increment -= inelastic_strain_increment;
 
-  computeStressFinalize(
-      inelastic_strain_increment, delta_gamma, stress_new, stress_dev, elasticity_tensor);
+  computeStressFinalize(inelastic_strain_increment,
+                        delta_gamma,
+                        stress_new,
+                        stress_dev,
+                        stress_old,
+                        elasticity_tensor);
 }
 
 Real
@@ -135,13 +152,16 @@ ADGeneralizedRadialReturnStressUpdate::maximumPermissibleValue(
 Real
 ADGeneralizedRadialReturnStressUpdate::computeTimeStepLimit()
 {
+
+  // Add a new criterion including numerical integration error
   Real scalar_inelastic_strain_incr = MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
                                       _effective_inelastic_strain_old[_qp];
 
   if (MooseUtils::absoluteFuzzyEqual(scalar_inelastic_strain_incr, 0.0))
     return std::numeric_limits<Real>::max();
 
-  return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
+  return std::min(_dt * _max_inelastic_increment / scalar_inelastic_strain_incr,
+                  computeIntegrationErrorTimeStep());
 }
 
 void
