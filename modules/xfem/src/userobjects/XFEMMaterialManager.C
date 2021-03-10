@@ -1,9 +1,11 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XFEMMaterialManager.h"
 
@@ -82,12 +84,12 @@ XFEMMaterialManager::timestepSetup()
 XFEMMaterialManager::~XFEMMaterialManager()
 {
   // destroy extra QP stateful property storage
-  // for (auto & item : *_map)
-  //   item.second.destroy();
-  // for (auto & item : *_map_old)
-  //   item.second.destroy();
-  // for (auto & item : *_map_older)
-  //   item.second.destroy();
+  for (auto & item : *_map)
+    item.second.destroy();
+  for (auto & item : *_map_old)
+    item.second.destroy();
+  for (auto & item : *_map_older)
+    item.second.destroy();
 }
 
 void
@@ -144,6 +146,11 @@ XFEMMaterialManager::execute()
     item_old.resizeItems(n_extra_qps);
     item_older.resizeItems(n_extra_qps);
 
+    // reinit the element
+    const Elem * elem = _mesh.elem_ptr(extra_qps.first);
+    _fe_problem.setCurrentSubdomainID(elem, 0 /* tid */);
+    _fe_problem.reinitElemPhys(_mesh.elem_ptr(extra_qps.first), extra_qps.second, 0 /* tid */);
+
     // if we added new QPs we need to initialize the history by calling initQpStatefulProperties
     if (n_extra_qps > n_old_extra_qps)
     {
@@ -163,9 +170,6 @@ XFEMMaterialManager::execute()
       _props_old[i]->swap(item_old[i]);
     for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
       _props_older[i]->swap(item_older[i]);
-
-    // reinit the element
-    _fe_problem.reinitElemPhys(_mesh.elem_ptr(extra_qps.first), extra_qps.second, 0 /* tid */);
 
     // loop over QPs
     for (unsigned int qp = 0; qp < extra_qps.second.size(); ++qp)
