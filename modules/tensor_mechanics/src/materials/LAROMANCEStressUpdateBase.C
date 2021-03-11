@@ -10,6 +10,7 @@
 #include "LAROMANCEStressUpdateBase.h"
 #include "Function.h"
 #include "MathUtils.h"
+#include "Units.h"
 
 template <bool is_ad>
 InputParameters
@@ -94,8 +95,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "old_creep_strain_forcing_function",
       "Advanced");
 
-  MooseEnum stress_unit("Pa kPa MPa GPa", "Pa");
-  params.addParam<MooseEnum>("stress_unit", stress_unit, "unit of stress");
+  params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
   params.addParamNamesToGroup("stress_unit", "Advanced");
 
   return params;
@@ -183,24 +183,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::setupUnitConversionFactors(
     const InputParameters & parameters)
 {
   // Stress unit conversion factor
-  const StressUnit stress_unit = parameters.get<MooseEnum>("stress_unit").getEnum<StressUnit>();
-  switch (stress_unit)
-  {
-    case StressUnit::PA:
-      _stress_ucf = 1e-6;
-      break;
-    case StressUnit::KPA:
-      _stress_ucf = 1e-3;
-      break;
-    case StressUnit::MPA:
-      _stress_ucf = 1;
-      break;
-    case StressUnit::GPA:
-      _stress_ucf = 1e3;
-      break;
-    default:
-      mooseError(this->name(), ": internal error in setupUnitConversionFactors().");
-  }
+  const MooseUnits stress_unit_to("MPa");
+  const MooseUnits stress_unit_from(parameters.get<std::string>("stress_unit"));
+  _stress_ucf = stress_unit_to.convert(1, stress_unit_from);
 }
 
 template <bool is_ad>

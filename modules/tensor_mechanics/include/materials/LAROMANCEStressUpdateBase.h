@@ -524,15 +524,6 @@ protected:
   /// Container for tiling orientations
   std::vector<unsigned int> _tiling;
 
-  /// Unit of the stress
-  enum class StressUnit
-  {
-    PA,
-    KPA,
-    MPA,
-    GPA
-  };
-
   /// Unit conversion factors required to convert from the specified unit to MPa
   Real _stress_ucf;
 };
