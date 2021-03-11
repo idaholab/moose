@@ -13,4 +13,12 @@
     exodiff = simpler_out.e
     requirement = 'The system shall be able to solve the Euler equations, in which the momentum equation only contains a pressure and body force term, and show a flat profile for the mass flux.'
   []
+  [conservative_mom_time_adv_pressure_friction]
+    type = Exodiff
+    input = conservative-impl-test.i
+    exodiff = conservative-impl-test_out.e
+    requirement = 'The system shall be able to march a porous compressible channel flow problem to steady-state by solving the Euler equations using a conservative (e.g. all pieces are interpolated together), average interpolation in all advective terms, and in which the momentum equation includes transient, advection, pressure, and friction terms.'
+    heavy = true
+    cli_args = "Outputs/out/execute_on='final'"
+  []
 []
