@@ -1,4 +1,4 @@
-flux_interp_method='upwind'
+global_interp_method='upwind'
 # Establish initial conditions based on STP
 rho_initial=1.2754
 p_initial=1.01e5
@@ -50,7 +50,8 @@ T_in=273.15
 []
 
 [GlobalParams]
-  flux_interp_method=${flux_interp_method}
+  flux_interp_method = ${global_interp_method}
+  interp_method = ${global_interp_method}
 []
 
 [Variables]
