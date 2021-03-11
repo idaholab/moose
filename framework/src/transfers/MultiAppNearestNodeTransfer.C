@@ -125,8 +125,8 @@ MultiAppNearestNodeTransfer::execute()
       bool is_to_nodal = fe_type.family == LAGRANGE;
 
       // We support L2_LAGRANGE elemental variable with the first order
-      if (fe_type.order > FIRST && !is_to_nodal)
-        mooseError("We don't currently support second order or higher elemental variable ");
+      if (!is_constant && !is_to_nodal)
+        mooseError("We don't currently support first order or higher elemental variable ");
 
       if (is_to_nodal)
       {
@@ -202,20 +202,11 @@ MultiAppNearestNodeTransfer::execute()
 
           points.clear();
           point_ids.clear();
-          // For constant monomial, we take the centroid of element
-          if (is_constant)
-          {
-            points.push_back(elem->centroid());
-            point_ids.push_back(elem->id());
-          }
 
-          // For L2_LAGRANGE, we take all the nodes of element
-          else
-            for (auto & node : elem->node_ref_range())
-            {
-              points.push_back(node);
-              point_ids.push_back(node.id());
-            }
+          // For constant monomial (all that is currently supported), we take the centroid of
+          // element
+          points.push_back(elem->centroid());
+          point_ids.push_back(elem->id());
 
           unsigned int offset = 0;
           for (auto & point : points)
@@ -304,9 +295,9 @@ MultiAppNearestNodeTransfer::execute()
       bool is_constant = from_fe_type.order == CONSTANT;
       bool is_to_nodal = from_fe_type.family == LAGRANGE;
 
-      // We support L2_LAGRANGE elemental variable with the first order
-      if (from_fe_type.order > FIRST && !is_to_nodal)
-        mooseError("We don't currently support second order or higher elemental variable ");
+      // We support L2_LAGRANGE elemental variable with the constant order
+      if (!is_constant && !is_to_nodal)
+        mooseError("We don't currently support first order or higher elemental variable ");
 
       _from_vars.emplace_back(from_var);
       getLocalEntitiesAndComponents(
@@ -462,12 +453,7 @@ MultiAppNearestNodeTransfer::execute()
     }
 
     auto & fe_type = to_sys->variable_type(var_num);
-    bool is_constant = fe_type.order == CONSTANT;
     bool is_to_nodal = fe_type.family == LAGRANGE;
-
-    // We support L2_LAGRANGE elemental variable with the first order
-    if (fe_type.order > FIRST && !is_to_nodal)
-      mooseError("We don't currently support second order or higher elemental variable ");
 
     if (is_to_nodal)
     {
@@ -539,22 +525,10 @@ MultiAppNearestNodeTransfer::execute()
 
         points.clear();
         point_ids.clear();
-        // grap sample points
-        // for constant shape function, we take the element centroid
-        if (is_constant)
-        {
-          points.push_back(elem->centroid());
-          point_ids.push_back(elem->id());
-        }
-        // for higher order method, we take all nodes of element
-        // this works for the first order L2 Lagrange. Might not work
-        // with something higher than the first order
-        else
-          for (auto & node : elem->node_ref_range())
-          {
-            points.push_back(node);
-            point_ids.push_back(node.id());
-          }
+
+        // For constant monomial (all that is currently supported), we take the centroid of element
+        points.push_back(elem->centroid());
+        point_ids.push_back(elem->id());
 
         unsigned int n_comp = elem->n_comp(sys_num, var_num);
         // We assume each point corresponds to one component of elemental variable
@@ -902,7 +876,8 @@ MultiAppNearestNodeTransfer::getTargetLocalElems(const unsigned int to_problem_i
 }
 
 Real
-MultiAppNearestNodeTransfer::getNearestMaxDistance(const Point & point, const std::vector<BoundingBox> & bboxes)
+MultiAppNearestNodeTransfer::getNearestMaxDistance(const Point & point,
+                                                   const std::vector<BoundingBox> & bboxes)
 {
   // Find which bboxes might have the nearest node to this point.
   Real nearest_max_distance = std::numeric_limits<Real>::max();
