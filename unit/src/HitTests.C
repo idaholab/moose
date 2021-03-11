@@ -29,11 +29,31 @@
 //     - existing tree gets overridden correctly
 //     - non-existing tree gets duplicated into dst (not moved)
 
-struct PassFailCase
+struct ValCase
 {
   std::string name;
   std::string input;
+  std::string key;
+  std::string val;
+  hit::Field::Kind kind;
 };
+
+std::string
+strkind(hit::Field::Kind k)
+{
+  if (k == hit::Field::Kind::String)
+    return "String";
+  else if (k == hit::Field::Kind::Bool)
+    return "Bool";
+  else if (k == hit::Field::Kind::Int)
+    return "Int";
+  else if (k == hit::Field::Kind::Float)
+    return "Float";
+  else if (k == hit::Field::Kind::None)
+    return "None";
+  else
+    return "Unknown";
+}
 
 TEST(HitTests, BraceExpressions)
 {
