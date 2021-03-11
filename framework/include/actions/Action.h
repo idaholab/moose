@@ -153,7 +153,7 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args)
+  [[noreturn]] void paramError(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
@@ -168,7 +168,7 @@ public:
    * back to the normal behavior of mooseWarning - only printing a message using the given args.
    */
   template <typename... Args>
-  void paramWarning(const std::string & param, Args... args)
+  void paramWarning(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
@@ -184,7 +184,7 @@ public:
    * the given args.
    */
   template <typename... Args>
-  void paramInfo(const std::string & param, Args... args)
+  void paramInfo(const std::string & param, Args... args) const
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
