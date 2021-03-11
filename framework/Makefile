@@ -9,7 +9,6 @@
 ###############################################################################
 MOOSE_DIR          ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
-hit_DIR            ?= $(MOOSE_DIR)/moosetools/contrib/hit #left uncapitalized to match syntax in moose.mk
 ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
 

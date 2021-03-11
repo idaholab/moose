@@ -38,6 +38,7 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 #
 # hit (new getpot parser)
 #
+hit_DIR       ?= $(MOOSE_DIR)/moosetools/contrib/hit
 hit_srcfiles  := $(hit_DIR)/parse.cc $(hit_DIR)/lex.cc $(hit_DIR)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(hit_DIR)/libhit-$(METHOD).la
@@ -155,8 +156,8 @@ moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d)
 endif
 
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
-moose_INC_DIRS += "$(gtest_DIR)"
-moose_INC_DIRS += "$(hit_DIR)"
+moose_INC_DIRS += $(gtest_DIR)
+moose_INC_DIRS += $(hit_DIR)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
