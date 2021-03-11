@@ -2,6 +2,8 @@ flux_interp_method='upwind'
 # Establish initial conditions based on STP
 rho_initial=1.2754
 p_initial=1.01e5
+p_right_initial=${fparse 2 * p_initial}
+p_out=${p_right_initial}
 gamma=1.4
 e_initial=${fparse p_initial / (gamma - 1) / rho_initial}
 # No bulk velocity in the domain initially
@@ -12,16 +14,8 @@ rho_in=${rho_initial}
 # u refers to the superficial velocity
 u_in=1
 mass_flux_in=${fparse u_in * rho_in}
-eps_in=1
-real_u_in=${fparse u_in / eps_in}
-# prescribe inlet pressure = initial pressure
-p_in=${p_initial}
-momentum_flux_in=${fparse eps_in * p_in}
-# prescribe inlet e = initial e
-et_in=${fparse e_initial + 0.5 * real_u_in * real_u_in}
-# rho_et_in=${fparse rho_in * et_in} # Useful for Dirichlet
-ht_in=${fparse et_in + p_in / rho_in}
-enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
+eps_out=0.5
+T_in=273.15
 
 [Mesh]
   [cartesian]
@@ -55,6 +49,10 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   kernel_coverage_check = false
 []
 
+[GlobalParams]
+  flux_interp_method=${flux_interp_method}
+[]
+
 [Variables]
   [rho]
     type = MooseVariableFVReal
@@ -69,6 +67,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   []
   [rho_et]
     type = MooseVariableFVReal
+    scaling = 1e-5
   []
 []
 
@@ -130,6 +129,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   [enthalpy_flux]
     type = MooseVariableFVReal
   []
+  [temperature]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -167,11 +169,15 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     execute_on = 'timestep_end'
   []
   [pressure]
-    type = NSPressureAux
+    type = ADMaterialRealAux
     variable = pressure
-    specific_volume = specific_volume
-    e = specific_internal_energy
-    fluid_properties = fp
+    property = pressure
+    execute_on = 'timestep_end'
+  []
+  [temperature]
+    type = ADMaterialRealAux
+    variable = temperature
+    property = T_fluid
     execute_on = 'timestep_end'
   []
   # [mach]
@@ -214,7 +220,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   [mass_advection]
     type = NSFVMassFluxAdvection
     variable = rho
-    flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
@@ -222,6 +227,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = PNSFVMomentumPressure
     variable = rho_u
     momentum_component = 'x'
+    boundaries_to_force = 'left top bottom'
   []
 
   [rho_v_time]
@@ -231,13 +237,13 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   [rho_v_advection]
     type = NSFVMassFluxAdvection
     variable = rho_v
-    flux_interp_method = ${flux_interp_method}
     advected_quantity = 'vel_y'
   []
   [rho_v_pressure]
     type = PNSFVMomentumPressure
     variable = rho_v
     momentum_component = 'y'
+    boundaries_to_force = 'top bottom'
   []
 
   [energy_time]
@@ -248,7 +254,6 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = NSFVMassFluxAdvection
     variable = rho_et
     advected_quantity = 'ht'
-    flux_interp_method = ${flux_interp_method}
   []
 []
 
@@ -263,55 +268,49 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
     type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho
-    flux_interp_method = ${flux_interp_method}
     advected_quantity = 1
   []
 
-  # Recall we only have pressure for rho_u
-  [rho_u_left]
+  [rho_u_right_pressure]
     type = FVNeumannBC
-    boundary = 'left'
-    variable = rho_u
-    value = ${momentum_flux_in}
-  []
-  [rho_u_right]
-    type = PNSFVMomentumPressureBC
     variable = rho_u
     boundary = 'right'
-    momentum_component = 'x'
+    value = ${fparse -p_out * eps_out}
   []
-  # [rho_u_pressure]
-  #   type = PNSFVMomentumPressureBC
-  #   boundary = 'top bottom left right'
-  #   variable = rho_u
-  #   momentum_component = 'x'
-  # []
 
-  [rho_v_pressure]
-    type = PNSFVMomentumPressureBC
-    boundary = 'top bottom left right'
+  [rho_v_left]
+    type = FVDirichletBC
+    boundary = left
     variable = rho_v
-    momentum_component = 'y'
+    value = 0
   []
-  [rho_v_advection_outlet]
+  [rho_v_right_advection]
     type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_v
-    flux_interp_method=${flux_interp_method}
     advected_quantity = 'vel_y'
   []
-  [rho_et_left]
+  [rho_v_right_pressure]
     type = FVNeumannBC
+    boundary = 'right'
+    variable = rho_v
+    value = 0
+  []
+
+  [rho_et_left]
+    type = PNSFVFluidEnergySpecifiedTemperatureBC
     boundary = 'left'
     variable = rho_et
-    value = ${enthalpy_flux_in}
+    temperature = ${T_in}
+    superficial_rhou = ${mass_flux_in}
+    superficial_rhov = 0
+    fp = fp
   []
   [rho_et_right]
     type = NSFVMassFluxAdvectionBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'ht'
-    flux_interp_method = ${flux_interp_method}
   []
 []
 
@@ -342,7 +341,7 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
 [Executioner]
   solve_type = NEWTON
   nl_rel_tol = 1e-8
-  nl_abs_tol = 2e-6
+  nl_abs_tol = 1e-8
   type = Transient
   num_steps = 1000
   [TimeStepper]
@@ -355,9 +354,9 @@ enthalpy_flux_in=${fparse u_in * rho_in * ht_in}
   abort_on_solve_fail = true
   verbose = true
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       superlu_dist'
-  nl_max_its = 10
-  ss_check_tol = 1e-12
+  petsc_options_value = 'lu       mumps'
+  nl_max_its = 20
+  steady_state_tolerance = 1e-12
 []
 
 [Outputs]
