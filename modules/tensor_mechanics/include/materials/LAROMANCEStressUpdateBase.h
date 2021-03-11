@@ -63,6 +63,7 @@ protected:
     ERROR,
     WARN,
     IGNORE,
+    EXCEPTION,
     EXTRAPOLATE
   };
 
