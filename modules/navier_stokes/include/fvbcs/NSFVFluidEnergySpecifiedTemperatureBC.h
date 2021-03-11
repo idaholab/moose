@@ -27,4 +27,7 @@ protected:
 
   /// fluid properties
   const SinglePhaseFluidProperties & _fluid;
+
+  /// The interpolation method to use
+  Moose::FV::InterpMethod _interp_method;
 };

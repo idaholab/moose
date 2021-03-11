@@ -18,6 +18,11 @@ PNSFVFluidEnergySpecifiedTemperatureBC::validParams()
   params.addParam<FunctionName>(NS::superficial_momentum_z,
                                 "The z component of the inlet superficial momentum");
   params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
+  MooseEnum interp_method("average upwind", "upwind");
+  params.addParam<MooseEnum>("interp_method",
+                             interp_method,
+                             "The interpolation to use. Options are "
+                             "'upwind' and 'average', with the default being 'upwind'.");
   return params;
 }
 
@@ -44,36 +49,47 @@ PNSFVFluidEnergySpecifiedTemperatureBC::PNSFVFluidEnergySpecifiedTemperatureBC(
   if (_mesh.dimension() > 2 && !_superficial_rhow)
     mooseError("If the mesh dimension is greater than 2, a function for the z superficial momentum "
                "must be provided");
+
+  using namespace Moose::FV;
+
+  const auto & interp_method = getParam<MooseEnum>("interp_method");
+  if (interp_method == "average")
+    _interp_method = InterpMethod::Average;
+  else if (interp_method == "upwind")
+    _interp_method = InterpMethod::Upwind;
+  else
+    mooseError("Unrecognized interpolation type ", static_cast<std::string>(interp_method));
 }
 
 ADReal
 PNSFVFluidEnergySpecifiedTemperatureBC::computeQpResidual()
 {
+  using namespace Moose::FV;
+
   mooseAssert(_porosity_elem[_qp] == _porosity_neighbor[_qp],
               "It's not good if a ghost cell porosity has a different porosity than the boundary "
               "cell porosity");
   const auto & porosity = _porosity_elem[_qp];
 
+  RealVectorValue mass_flux(_superficial_rhou.value(_t, _face_info->faceCentroid()));
+  if (_superficial_rhov)
+    mass_flux(1) = _superficial_rhov->value(_t, _face_info->faceCentroid());
+  if (_superficial_rhow)
+    mass_flux(2) = _superficial_rhow->value(_t, _face_info->faceCentroid());
+
   ADReal rho;
-  using namespace Moose::FV;
-  interpolate(InterpMethod::Average, rho, _rho_elem[_qp], _rho_neighbor[_qp], *_face_info, true);
+  interpolate(
+      _interp_method, rho, _rho_elem[_qp], _rho_neighbor[_qp], mass_flux, *_face_info, true);
 
   const ADReal T = _temperature.value(_t, _face_info->faceCentroid());
   const ADReal v = 1 / rho;
   const auto e = _fluid.e_from_T_v(T, v);
 
-  RealVectorValue mass_flux(_superficial_rhou.value(_t, _face_info->faceCentroid()));
   ADRealVectorValue velocity(mass_flux(0) / rho / porosity);
   if (_superficial_rhov)
-  {
-    mass_flux(1) = _superficial_rhov->value(_t, _face_info->faceCentroid());
     velocity(1) = mass_flux(1) / rho / porosity;
-  }
   if (_superficial_rhow)
-  {
-    mass_flux(2) = _superficial_rhow->value(_t, _face_info->faceCentroid());
     velocity(2) = mass_flux(2) / rho / porosity;
-  }
 
   const auto pressure = _fluid.p_from_T_v(T, v);
   const auto ht = e + 0.5 * velocity * velocity + pressure / rho;
