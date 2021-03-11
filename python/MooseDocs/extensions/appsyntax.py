@@ -764,7 +764,7 @@ class RenderParameterToken(components.RenderComponent):
         if 'options' in param:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
             html.Tag(p, 'span', string='Options:')
-            html.String(p, content=param['options'])
+            html.String(p, content=", ".join(param['options'].split()))
 
         p = html.Tag(body, 'p', class_='moose-parameter-description')
         if desc:
