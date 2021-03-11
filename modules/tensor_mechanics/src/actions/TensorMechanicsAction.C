@@ -218,10 +218,30 @@ TensorMechanicsAction::act()
       auto action_params = _action_factory.getValidParams(type);
       action_params.set<bool>("_built_by_moose") = true;
       action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-      action_params.applyParameters(parameters(), {"use_displaced_mesh"});
+
+      // Skipping selected parameters in applyParameters() and then manually setting them only if
+      // they are set by the user is just to prevent both the current and deprecated variants of
+      // these parameters from both getting passed to the UserObject. Once we get rid of the
+      // deprecated versions, we can just set them all with applyParameters().
+      action_params.applyParameters(parameters(),
+                                    {"use_displaced_mesh",
+                                     "out_of_plane_pressure",
+                                     "out_of_plane_pressure_function",
+                                     "factor",
+                                     "pressure_factor"});
       action_params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-      if (isParamValid("pressure_factor"))
-        action_params.set<Real>("factor") = getParam<Real>("pressure_factor");
+
+      if (parameters().isParamSetByUser("out_of_plane_pressure"))
+        action_params.set<FunctionName>("out_of_plane_pressure") =
+            getParam<FunctionName>("out_of_plane_pressure");
+      if (parameters().isParamSetByUser("out_of_plane_pressure_function"))
+        action_params.set<FunctionName>("out_of_plane_pressure_function") =
+            getParam<FunctionName>("out_of_plane_pressure_function");
+      if (parameters().isParamSetByUser("factor"))
+        action_params.set<Real>("factor") = getParam<Real>("factor");
+      if (parameters().isParamSetByUser("pressure_factor"))
+        action_params.set<Real>("pressure_factor") = getParam<Real>("pressure_factor");
+
       // Create and add the action to the warehouse
       auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(type, name() + "_gps", action_params));
