@@ -61,7 +61,8 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
     _pressure(declareADProperty<Real>(NS::pressure)),
     _specific_total_enthalpy(declareADProperty<Real>(NS::specific_total_enthalpy)),
     _rho_ht(declareADProperty<Real>(NS::total_enthalpy_density)),
-    _superficial_rho_ht(declareADProperty<Real>(NS::superficial_total_enthalpy_density))
+    _superficial_rho_ht(declareADProperty<Real>(NS::superficial_total_enthalpy_density)),
+    _T_fluid(declareADProperty<Real>(NS::T_fluid))
 {
 }
 
@@ -93,4 +94,5 @@ PorousConservedVarMaterial::computeQpProperties()
   _specific_total_enthalpy[_qp] = (_total_energy_density[_qp] + _pressure[_qp]) / _rho[_qp];
   _rho_ht[_qp] = _specific_total_enthalpy[_qp] * _rho[_qp];
   _superficial_rho_ht[_qp] = _rho_ht[_qp] * _epsilon[_qp];
+  _T_fluid[_qp] = _fluid.T_from_v_e(_v[_qp], _specific_internal_energy[_qp]);
 }
