@@ -1151,7 +1151,7 @@ MooseApp::run()
       std::ifstream ifs(docmsgfile);
       std::string content((std::istreambuf_iterator<char>(ifs)),
                           (std::istreambuf_iterator<char>()));
-      content.replace(content.find("LOCAL_SITE_HOME"), content.length(), docmsg);
+      content.replace(content.find("$LOCAL_SITE_HOME"), content.length(), docmsg);
       docmsg = content;
     }
 
