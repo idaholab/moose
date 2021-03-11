@@ -19,9 +19,9 @@ p_out=${p_initial_right}
 eps_out=0.5
 T_in=273.15
 two_term_boundary_expansion=true
+interp_method='upwind'
 
 [GlobalParams]
-  advected_interp_method = 'upwind'
   vel = 'velocity'
   # momentum_component = 'nonsense'
 []
@@ -210,6 +210,7 @@ two_term_boundary_expansion=true
     type = FVMatAdvection
     variable = rho
     advected_quantity = 'superficial_rho'
+    advected_interp_method = ${interp_method}
   []
 
   [momentum_time_x]
@@ -219,6 +220,7 @@ two_term_boundary_expansion=true
   [momentum_advection_x]
     type = FVMatAdvection
     variable = rho_u
+    advected_interp_method = ${interp_method}
   []
   [momentum_pressure_x]
     type = PNSFVMomentumPressure
@@ -233,6 +235,7 @@ two_term_boundary_expansion=true
   [momentum_advection_y]
     type = FVMatAdvection
     variable = rho_v
+    advected_interp_method = ${interp_method}
   []
   [momentum_pressure_y]
     type = PNSFVMomentumPressure
@@ -248,6 +251,7 @@ two_term_boundary_expansion=true
     type = FVMatAdvection
     variable = rho_et
     advected_quantity = 'superficial_rho_ht'
+    advected_interp_method = ${interp_method}
   []
 []
 
@@ -263,6 +267,7 @@ two_term_boundary_expansion=true
     boundary = 'right'
     variable = rho
     advected_quantity = 'superficial_rho'
+    advected_interp_method = ${interp_method}
   []
 
   [rho_u_left] # implicitly includes advection and pressure
@@ -282,6 +287,7 @@ two_term_boundary_expansion=true
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_u
+    advected_interp_method = ${interp_method}
   []
   [rho_u_pressure_right] # Normal in x so apply all of pressure
     type = FVNeumannBC
@@ -306,6 +312,7 @@ two_term_boundary_expansion=true
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_v
+    advected_interp_method = ${interp_method}
   []
   [rho_v_pressure_right] # There is no normal in y so no "pressure flux"
     type = FVNeumannBC
@@ -322,12 +329,14 @@ two_term_boundary_expansion=true
     superficial_rhou = ${rho_u_in}
     superficial_rhov = 0
     fp = fp
+    interp_method = ${interp_method}
   []
   [rho_et_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'superficial_rho_ht'
+    advected_interp_method = ${interp_method}
   []
 []
 

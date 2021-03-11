@@ -6,12 +6,12 @@ eps_out=${eps}
 p_out=1.01e5
 T_in=273.15
 cl=${p_out}
+interp_method = 'upwind'
 
 [GlobalParams]
   fp = fluid_properties_obj
   vel = 'mass_flux'
   two_term_boundary_expansion = true
-  advected_interp_method = 'upwind'
 []
 
 [Mesh]
@@ -57,6 +57,7 @@ cl=${p_out}
     type = FVMatAdvection
     variable = rho
     advected_quantity = '1'
+    advected_interp_method = ${interp_method}
   []
 
   [x_momentum_pressure]
@@ -89,6 +90,7 @@ cl=${p_out}
     type = FVMatAdvection
     variable = rho_et
     advected_quantity = 'ht'
+    advected_interp_method = ${interp_method}
   []
 []
 
@@ -133,6 +135,7 @@ cl=${p_out}
     boundary = 'right'
     variable = rho
     advected_quantity = '1'
+    advected_interp_method = ${interp_method}
   []
 
   [superficial_rho_u_left]
@@ -168,12 +171,14 @@ cl=${p_out}
     temperature = ${T_in}
     superficial_rhou = ${superficial_rho_u_in}
     superficial_rhov = ${superficial_rho_v_in}
+    interp_method = ${interp_method}
   []
   [rho_et_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'ht'
+    advected_interp_method = ${interp_method}
   []
 []
 

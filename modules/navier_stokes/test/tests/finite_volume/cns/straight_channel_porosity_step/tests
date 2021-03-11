@@ -51,10 +51,10 @@
     input = 2d-transient-mass-flux-impl-step-change.i
     exodiff = 2d-transient-mass-flux-impl-step-change-average.e
     requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations in two dimensions with a step change in porosity using an implementation in which the advective flux is linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
-    cli_args = "Outputs/out/execute_on='final' Outputs/out/file_base=2d-transient-mass-flux-impl-step-change-average flux_interp_method='average' -pc_factor_mat_solver_type mumps"
+    cli_args = "Outputs/out/execute_on='final' Outputs/out/file_base=2d-transient-mass-flux-impl-step-change-average interp_method='average' -pc_factor_mat_solver_type mumps"
     method = '!dbg'
     valgrind = 'none'
-    abs_zero = '1e-8'
+    abs_zero = 1e-8
   []
   [transient-mass-flux-advector-upwind-advected]
     type = Exodiff
@@ -82,7 +82,7 @@
     input = transient-real-velocity-advector.i
     exodiff = transient-real-velocity-advector-average.e
     requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations with transient and advective terms in the momentun equation with a step change in porosity using an implementation in which the real velocity is the advector and linearly interpolated, the advected quantities are linearly interpolated, and the product of porosity and pressure is linearly interpolated.'
-    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Outputs/out/file_base=transient-real-velocity-advector-average Executioner/TimeStepper/dt=1e-8 GlobalParams/advected_interp_method='average'"
+    cli_args = "Mesh/cartesian/nx=100 Outputs/out/execute_on='final' Outputs/out/file_base=transient-real-velocity-advector-average Executioner/TimeStepper/dt=1e-8"
   []
   [2d-transient-real-velocity-advector-upwind-advected]
     type = Exodiff
@@ -92,5 +92,6 @@
     cli_args = "Outputs/out/execute_on='final'"
     method = "!dbg"
     valgrind = 'none'
+    abs_zero = 1e-9
   []
 []

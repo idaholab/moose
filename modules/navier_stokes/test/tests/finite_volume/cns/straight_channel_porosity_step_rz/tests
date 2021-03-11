@@ -8,5 +8,6 @@
     cli_args = "Outputs/out/execute_on='final'"
     method = "!dbg"
     valgrind = 'none'
+    abs_zero = 1e-9
   []
 []

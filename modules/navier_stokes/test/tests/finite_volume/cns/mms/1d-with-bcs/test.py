@@ -19,7 +19,7 @@ class Test1DAverage(unittest.TestCase):
 # class Test1DAverage():
     def test(self):
         labels = ['L2rho', 'L2rho_ud', 'L2rho_et']
-        df1 = mms.run_spatial('test.i', list(range(3,6)), 'GlobalParams/advected_interp_method=average', y_pp=labels)
+        df1 = mms.run_spatial('test.i', list(range(3,6)), "interp_method='average'", y_pp=labels)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)

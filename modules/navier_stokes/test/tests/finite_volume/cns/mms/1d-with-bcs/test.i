@@ -4,9 +4,9 @@ u0 = 1
 eps = 0.9
 rho_ud0 = ${fparse rho0*u0*eps}
 rho_et0 = 26.74394130735463
+interp_method='upwind'
 
 [GlobalParams]
-  advected_interp_method = 'upwind'
   vel = 'velocity'
   # momentum_component = 'nonsense'
 []
@@ -161,6 +161,7 @@ rho_et0 = 26.74394130735463
     type = FVMatAdvection
     variable = rho
     advected_quantity = 'superficial_rho'
+    advected_interp_method = ${interp_method}
   []
   [mass_fn]
     type = FVBodyForce
@@ -171,6 +172,7 @@ rho_et0 = 26.74394130735463
   [momentum_advection_x]
     type = FVMatAdvection
     variable = rho_ud
+    advected_interp_method = ${interp_method}
   []
   [momentum_pressure_x]
     type = PNSFVMomentumPressure
@@ -187,6 +189,7 @@ rho_et0 = 26.74394130735463
     type = FVMatAdvection
     variable = rho_et
     advected_quantity = 'superficial_rho_ht'
+    advected_interp_method = ${interp_method}
   []
   [energy_fn]
     type = FVBodyForce
@@ -207,6 +210,7 @@ rho_et0 = 26.74394130735463
     boundary = 'right'
     variable = rho
     advected_quantity = 'superficial_rho'
+    advected_interp_method = ${interp_method}
   []
 
   [rho_ud_left] # implicitly includes advection and pressure
@@ -219,6 +223,7 @@ rho_et0 = 26.74394130735463
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_ud
+    advected_interp_method = ${interp_method}
   []
   [rho_ud_pressure_right] # Normal in x so apply all of pressure
     type = FVFunctionNeumannBC
@@ -235,12 +240,14 @@ rho_et0 = 26.74394130735463
     temperature = exact_T
     superficial_rhou = exact_rho_ud
     fp = fp
+    interp_method = ${interp_method}
   []
   [rho_et_right]
     type = FVMatAdvectionOutflowBC
     boundary = 'right'
     variable = rho_et
     advected_quantity = 'superficial_rho_ht'
+    advected_interp_method = ${interp_method}
   []
 []
 
