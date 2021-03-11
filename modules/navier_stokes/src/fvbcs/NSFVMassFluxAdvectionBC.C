@@ -52,8 +52,6 @@ NSFVMassFluxAdvectionBC::computeQpResidual()
 {
   using namespace Moose::FV;
 
-  mooseAssert(_current_elem == &_face_info->elem(),
-              "Guillaume tells me this is always true, but I am jost so paranoid");
   ADRealVectorValue flux;
   interpolate(_flux_interp_method,
               flux,
