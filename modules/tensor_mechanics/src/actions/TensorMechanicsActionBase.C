@@ -108,12 +108,24 @@ TensorMechanicsActionBase::validParams()
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
-  params.addParam<FunctionName>("out_of_plane_pressure",
-                                "0",
-                                "Function used to prescribe pressure in the out-of-plane direction "
-                                "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
-  params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");
+  params.addDeprecatedParam<FunctionName>(
+      "out_of_plane_pressure",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)",
+      "This has been replaced by 'out_of_plane_pressure_function'");
+  params.addParam<FunctionName>(
+      "out_of_plane_pressure_function",
+      "Function used to prescribe pressure (applied toward the body) in the out-of-plane direction "
+      "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
+  params.addParam<Real>(
+      "pressure_factor",
+      "Scale factor applied to prescribed out-of-plane pressure (both material and function)");
+  params.addParam<MaterialPropertyName>("out_of_plane_pressure_material",
+                                        "0",
+                                        "Material used to prescribe pressure (applied toward the "
+                                        "body) in the out-of-plane direction");
   params.addParamNamesToGroup("planar_formulation scalar_out_of_plane_strain out_of_plane_pressure "
+                              "out_of_plane_pressure_material out_of_plane_pressure_function "
                               "pressure_factor out_of_plane_direction out_of_plane_strain",
                               "Out-of-plane stress/strain");
 
