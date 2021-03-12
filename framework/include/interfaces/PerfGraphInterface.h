@@ -14,7 +14,9 @@
 #include "InputParameters.h"
 
 #ifndef MOOSE_NO_PERF_GRAPH
-#define TIME_SECTION1(id) PerfGuard time_guard(_perf_graph, id);
+#define TIME_SECTION1(id)                                                                          \
+  mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");   \
+  PerfGuard time_guard(_perf_graph, id);
 #else
 #define TIME_SECTION1(id)
 #endif

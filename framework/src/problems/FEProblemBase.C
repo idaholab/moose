@@ -842,7 +842,7 @@ FEProblemBase::initialSetup()
     }
 
     {
-      TIME_SECTION("computingInitialResidual", 3, "Computing Initial Residual");
+      TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
       ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
       ComputeMaterialsObjectThread cmt(*this,
@@ -5131,8 +5131,6 @@ FEProblemBase::finalNonlinearResidual() const
 bool
 FEProblemBase::computingInitialResidual() const
 {
-  TIME_SECTION("computeInitialStatefulProps", 3, "Computing Initial Stateful Properties");
-
   return _nl->computingInitialResidual();
 }
 
