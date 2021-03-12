@@ -15,10 +15,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Functions]
   [solution]
     type = ParsedFunction

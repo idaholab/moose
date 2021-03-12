@@ -19,10 +19,6 @@ advected_interp_method = 'average'
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [u]
     type = INSFVVelocityVariable

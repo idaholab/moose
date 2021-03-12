@@ -389,6 +389,24 @@
     issues = '#1405'
   [../]
 
+  [./incomplete_fvkernel_block_coverage_test]
+    type = 'RunException'
+    input = 'incomplete_fvkernel_block_coverage_test.i'
+    expect_err = "The following block\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more domain blocks do not have any active FVKernels objects assigned.'
+    issues = '#1405 #15196'
+  [../]
+
+  [./incomplete_fvkernel_variable_coverage_test]
+    type = 'RunException'
+    input = 'incomplete_fvkernel_variable_coverage_test.i'
+    expect_err = "The following variable\(s\) lack an active kernel:"
+
+    requirement = 'The system shall report an error if one or more variables do not have any active FVKernel objects assigned.'
+    issues = '#1405 #15196'
+  [../]
+
   [./invalid_elemental_to_nodal_couple_test]
     type = 'RunException'
     input = 'invalid_aux_coupling_test.i'

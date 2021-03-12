@@ -64,10 +64,6 @@
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Executioner]
   type = Steady
   nl_abs_tol = 1e-14

@@ -21,7 +21,6 @@ velocity_interp_method='rc'
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = false
   error_on_jacobian_nonzero_reallocation = true
 []

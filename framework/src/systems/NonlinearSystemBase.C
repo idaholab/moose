@@ -73,6 +73,7 @@
 #include "ConsoleStream.h"
 #include "MooseError.h"
 #include "FVElementalKernel.h"
+#include "FVScalarLagrangeMultiplier.h"
 #include "FVFluxKernel.h"
 #include "UserObject.h"
 
@@ -3157,7 +3158,7 @@ NonlinearSystemBase::reinitIncrementAtNodeForDampers(THREAD_ID /*tid*/,
 void
 NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
 {
-  // Check kernel coverage of subdomains (blocks) in your mesh
+  // Obtain all blocks and variables covered by all kernels
   std::set<SubdomainID> input_subdomains;
   std::set<std::string> kernel_variables;
 
@@ -3170,6 +3171,47 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
 
+  if (_fe_problem.haveFV())
+  {
+    std::vector<FVElementalKernel *> fv_elemental_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .queryInto(fv_elemental_kernels);
+
+    for (auto fv_kernel : fv_elemental_kernels)
+    {
+      if (fv_kernel->blockRestricted())
+        for (auto block_id : fv_kernel->blockIDs())
+          input_subdomains.insert(block_id);
+      else
+        global_kernels_exist = true;
+      kernel_variables.insert(fv_kernel->variable().name());
+
+      // Check for lagrange multiplier
+      if (dynamic_cast<FVScalarLagrangeMultiplier *>(fv_kernel))
+        kernel_variables.insert(
+            dynamic_cast<FVScalarLagrangeMultiplier *>(fv_kernel)->lambdaVariable().name());
+    }
+
+    std::vector<FVFluxKernel *> fv_flux_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVFluxKernel")
+        .queryInto(fv_flux_kernels);
+
+    for (auto fv_kernel : fv_flux_kernels)
+    {
+      if (fv_kernel->blockRestricted())
+        for (auto block_id : fv_kernel->blockIDs())
+          input_subdomains.insert(block_id);
+      else
+        global_kernels_exist = true;
+      kernel_variables.insert(fv_kernel->variable().name());
+    }
+  }
+
+  // Check kernel coverage of subdomains (blocks) in your mesh
   if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;
@@ -3191,6 +3233,7 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
     }
   }
 
+  // Check kernel use of variables
   std::set<VariableName> variables(getVariableNames().begin(), getVariableNames().end());
 
   std::set<VariableName> difference;

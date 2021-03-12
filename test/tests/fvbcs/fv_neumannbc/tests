@@ -22,7 +22,7 @@
     type = RunException
     input = 'fv_neumannbc.i'
     expect_err = 'A FVFluxBC is being triggered on a face which does not connect to a block with the relevant finite volume variable.'
-    cli_args = "Mesh/mesh/subdomain_id='1 2'"
+    cli_args = "Mesh/mesh/subdomain_id='1 2' Problem/kernel_coverage_check=false"
     requirement = 'The system shall error out if a finite volume flux boundary condition is used on a mesh element face that is not connected to an element with the corresponding finite volume variable.'
   []
 []

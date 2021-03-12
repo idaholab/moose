@@ -23,10 +23,6 @@ temp_ref=${fparse hot_temp / 2.}
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [u]
     type = INSFVVelocityVariable

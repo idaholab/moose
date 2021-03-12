@@ -17,7 +17,6 @@ velocity_interp_method='average'
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = true
   coord_type = 'RZ'
 []

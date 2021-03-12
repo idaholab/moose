@@ -41,6 +41,8 @@ public:
   virtual void computeJacobian(const FaceInfo & fi);
   /// @}
 
+  const MooseVariableFV<Real> & variable() const { return _var; }
+
 protected:
   /// This is the primary function that must be implemented for flux kernel
   /// terms.  Material properties will be initialized on the face - using any

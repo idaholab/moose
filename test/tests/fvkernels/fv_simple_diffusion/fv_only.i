@@ -43,10 +43,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
