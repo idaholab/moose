@@ -28,10 +28,10 @@ MultiAppCommandLineControl::validParams()
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to control.");
-  params.addParam<SamplerName>(
+  params.addRequiredParam<SamplerName>(
       "sampler",
       "The Sampler object to utilize for altering the command line options of the MultiApp.");
-  params.addParam<std::vector<std::string>>(
+  params.addRequiredParam<std::vector<std::string>>(
       "param_names", "The names of the command line parameters to set via the sampled data.");
 
   return params;
@@ -133,6 +133,24 @@ MultiAppCommandLineControl::execute()
   }
   else
   {
+    // Handle a couple errors up front regarding bracket expressions
+    bool has_brackets = false;
+    if (_param_names.size())
+    {
+      has_brackets = _param_names[0].find("[") != std::string::npos;
+      for (unsigned int i = 1; i < _param_names.size(); ++i)
+        if (has_brackets != (_param_names[i].find("[") != std::string::npos))
+          paramError("param_names",
+                     "If the bracket is used, it must be provided to every parameter.");
+    }
+    if (!has_brackets && _sampler.getNumberOfCols() != _param_names.size())
+      paramError("param_names",
+                 "The number of columns (",
+                 _sampler.getNumberOfCols(),
+                 ") must match the number of parameters (",
+                 _param_names.size(),
+                 ").");
+
     std::ostringstream oss;
     for (dof_id_type col = 0; col < _param_names.size(); ++col)
     {

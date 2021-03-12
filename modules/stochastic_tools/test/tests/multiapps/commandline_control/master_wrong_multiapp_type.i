@@ -32,6 +32,6 @@
     type = MultiAppCommandLineControl
     multi_app = sub
     sampler = sample
-    arguments = 'Mesh/nx'
+    param_names = 'Mesh/nx'
   []
 []
