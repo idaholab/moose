@@ -1,20 +1,25 @@
 # CoupledTimeDerivativeAux
 
-!alert construction title=Undocumented Class
-The CoupledTimeDerivativeAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/CoupledTimeDerivativeAux
 
 ## Overview
 
-!! Replace these lines with information regarding the CoupledTimeDerivativeAux object.
+This AuxKernel calculates the term
+
+\begin{equation}
+  \frac{\partial v}{\partial t}
+\end{equation}
+
+where $v$ is a coupled variable for usage in other calculations or simulation output.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the CoupledTimeDerivativeAux object.
+!alert warning title=This is not currently tested
+The CoupledTimeDerivativeAux object is not currently used in any tested input files. This
+section of the documentation will be updated when this occurs. See a selection of
+untested input files where this is used at the bottom of this page.
+
+!! TODO: add a test to fix this up!
 
 !syntax parameters /AuxKernels/CoupledTimeDerivativeAux
 
