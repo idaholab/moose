@@ -1,20 +1,35 @@
 # PotentialToFieldAux
 
-!alert construction title=Undocumented Class
-The PotentialToFieldAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /AuxKernels/PotentialToFieldAux
 
 ## Overview
 
-!! Replace these lines with information regarding the PotentialToFieldAux object.
+This AuxKernel object uses the following equation for electric field:
+
+\begin{equation}
+  \mathbf{E} = s \nabla V
+\end{equation}
+
+where
+
+- $\mathbf{E}$ is the electric field in units of Volts per meter,
+- $V$ is the electrostatic potential in units of Volts, and
+- $s$ is a coefficient set via the `sign` parameter, and defaults to $-1$.
+
+The sign of the resulting calculation can be changed from the default, if needed,
+by setting `sign = positive`. This option is the result of the desire to keep the
+object code as general as possible for use in other scenarios where the positive
+gradient of a solution variable is desired, while still retaining the traditional and
+expected electrostatic field result from various electrodynamics texts by default.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the PotentialToFieldAux object.
+!alert warning title=This is not currently tested
+The PotentialToFieldAux object is not currently used in any tested input files. This
+section of the documentation will be updated when this occurs. See a selection of
+untested input files where this is used at the bottom of this page.
+
+!! TODO: add a test to fix this up!
 
 !syntax parameters /AuxKernels/PotentialToFieldAux
 
