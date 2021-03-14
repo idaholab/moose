@@ -6,7 +6,7 @@ InputParameters
 PerpendicularElectricFieldInterface::validParams()
 {
   InputParameters params = VectorInterfaceKernel::validParams();
-  params.addClassDescription("VectorInterfaceKernel that implements the condtion $\\epsilon_1 \\vec{E}_{1}^{\\perp} - \\epsilon_2 \\vec{E}_{2}^{\\perp} = \\sigma_f$");
+  params.addClassDescription("VectorInterfaceKernel that implements the condition $\\epsilon_1 \\vec{E}_{1}^{\\perp} - \\epsilon_2 \\vec{E}_{2}^{\\perp} = \\sigma_f$");
   params.addParam<Real>("free_charge", 0.0, "Free charge on the interface (default = 0).");
   params.addParam<Real>(
       "primary_epsilon", 1.0, "Permittivity on the primary side of the interface (default = 1.0).");

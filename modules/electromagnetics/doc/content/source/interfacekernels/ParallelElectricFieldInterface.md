@@ -1,20 +1,25 @@
 # ParallelElectricFieldInterface
 
-!alert construction title=Undocumented Class
-The ParallelElectricFieldInterface has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /InterfaceKernels/ParallelElectricFieldInterface
 
 ## Overview
 
-!! Replace these lines with information regarding the ParallelElectricFieldInterface object.
+!style halign=left
+ParallelElectricFieldInterface is a vector InterfaceKernel object that
+implements the condition
+
+\begin{equation}
+  \vec{E}_{1}^{\parallel} - \vec{E}_{2}^{\parallel} =0
+\end{equation}
+
+where
+
+- $\vec{E}_{1}^{\parallel}$ is the parallel component of the electric field vector on the primary side of the interface, and
+- $\vec{E}_{2}^{\parallel}$ is the parallel component of the electric field vector on the secondary side of the interface.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the ParallelElectricFieldInterface object.
+!listing combined_props.i block=InterfaceKernels/parallel
 
 !syntax parameters /InterfaceKernels/ParallelElectricFieldInterface
 
