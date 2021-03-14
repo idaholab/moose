@@ -90,7 +90,7 @@
     variable = u_imag
   [../]
   [./right_real]
-    type = ReflectionBC
+    type = RobinBC
     func_real = cos
     boundary = right
     component = real
@@ -100,7 +100,7 @@
     sign = -1.0
   [../]
   [./right_imag]
-    type = ReflectionBC
+    type = RobinBC
     func_real = cos
     boundary = right
     component = imaginary

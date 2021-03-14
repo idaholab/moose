@@ -4,7 +4,7 @@
     input = 'ReflectionTest.i'
     exodiff = 'ReflectionTest_out.e'
     requirement = 'The system shall be able to simulate the field result of an incoming wave reflected on a biased surface and properly absorb the reflected wave in a boundary condition.'
-    design = 'ReflectionBC.md'
+    design = 'RobinBC.md'
     issues = '#33'
   [../]
 []
