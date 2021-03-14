@@ -7,7 +7,7 @@ PEC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("NodalNormals system description of the Perfect Electrical Conductor "
-                             "(PEC) Boundary Condition, where ${\\hat{n} \\times \\vec{E} = 0}.");
+                             "(PEC) Boundary Condition, where $\\hat{\\mathbf{n}} \\times \\vec{E} = 0$.");
   params.addCoupledVar("coupled_0", 0.0, "Coupled field variable, 0 component.");
   params.addCoupledVar("coupled_1", 0.0, "Coupled field variable, 1 component.");
   params.addCoupledVar("coupled_2", 0.0, "Coupled field variable, 2 component.");

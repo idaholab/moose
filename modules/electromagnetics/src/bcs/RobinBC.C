@@ -10,8 +10,7 @@ RobinBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
-      "First order Robin-style Absorbing/Port BC based on 'Theory and Computation of "
-      "Electromagnetic Fields' by JM Jin for scalar variables.");
+      "First order Robin-style Absorbing/Port BC for scalar variables, assuming plane waves.");
   params.addRequiredCoupledVar("field_real", "Real component of field.");
   params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
   MooseEnum component("real imaginary");
