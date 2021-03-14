@@ -34,10 +34,8 @@ PINSFVMomentumPressureFlux::validParams()
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
     _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
     _p_elem(adCoupledValue(NS::pressure)),
     _p_neighbor(adCoupledNeighborValue(NS::pressure)),
-    _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar("p", 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -51,8 +49,6 @@ ADReal
 PINSFVMomentumPressureFlux::computeQpResidual()
 {
   ADReal eps_p_interface;
-  ADReal p_elem = _p_var->getElemValue(&_face_info->elem());
-  ADReal p_neighbor = _p_var->getNeighborValue(_face_info->neighborPtr(), *_face_info, p_elem);
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                          eps_p_interface,

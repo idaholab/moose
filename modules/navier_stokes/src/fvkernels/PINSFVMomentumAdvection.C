@@ -134,11 +134,6 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
       // Compute the face porosity
       Real eps_face = MetaPhysicL::raw_value(_eps_var->getBoundaryFaceValue(*fi));
 
-      // In my mind there should only be about one bc_id per FaceInfo
-      mooseAssert(fi->boundaryIDs().size() == 1,
-                  "I think some of my logic might depend on my implicit assumption that we have "
-                  "one boundary ID at most per face");
-      const auto bc_id = *fi->boundaryIDs().begin();
       // Find the boundary id that has an associated INSFV boundary condition
       // if a face has more than one bc_id
       for (const auto bc_id : fi->boundaryIDs())
@@ -203,6 +198,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
         }
       }
 
+      const auto bc_id = *fi->boundaryIDs().begin();
       mooseError("The INSFVMomentumAdvection object ",
                  this->name(),
                  " is not completely bounded by INSFVBCs. Please examine surface ",
@@ -293,9 +289,10 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
     return;
 
   // If the porosity has discontinuities, avoid Rhie Chow near the jumps
-  if (!_smooth_porosity &&
-      (_eps_var->adGradSln(elem).norm() > 0 || _eps_var->adGradSln(neighbor).norm() > 0))
-    return;
+  if (!_smooth_porosity)
+    if (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > 1e-12 ||
+        MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > 1e-12)
+      return;
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
@@ -375,12 +372,13 @@ PINSFVMomentumAdvection::computeQpResidual()
 {
   ADRealVectorValue v;
   ADReal adv_quant_interface;
-  Real one_over_eps_interface;
+  Real one_over_eps_interface = 1;
 
   // Velocity interpolation
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
 
   // Interpolation of 1/eps term
+  // TODO: Consider advecting interstitial momentum, then the kernel may be inherited
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                          one_over_eps_interface,
                          1 / _eps[_qp],
