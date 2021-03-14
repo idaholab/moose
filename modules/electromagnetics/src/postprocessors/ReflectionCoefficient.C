@@ -78,6 +78,8 @@ ReflectionCoefficient::computeReflection()
         (field - _coeff * std::exp(jay * _k * _length * std::cos(_theta * libMesh::pi / 180.))) /
         (_coeff * std::exp(-jay * _k * _length * std::cos(_theta * libMesh::pi / 180.)));
 
+    // TODO: does this need to be a +=?
+    // TODO: Make sure this needs to be squared alongside abs (is this meant to be a 2-norm?)
     ref = std::pow(std::abs(reflection_coefficient_complex), 2);
   }
   return ref;

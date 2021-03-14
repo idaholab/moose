@@ -1,20 +1,30 @@
 # WaveCoeff
 
-!alert construction title=Undocumented Class
-The WaveCoeff has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Functions/WaveCoeff
 
 ## Overview
 
-!! Replace these lines with information regarding the WaveCoeff object.
+!style halign=left
+This object provides a ready-to-use coefficient for the electric field Helmholtz wave equation problem, specifically a coefficient function of the form
+
+\begin{equation}
+  f(\mathbf{r}) = k^2 \mu_r \epsilon_r
+\end{equation}
+
+where
+
+- $k$ is the wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength),
+- $\epsilon_r$ is the complex relative electric permittivity, and
+- $\mu_r$ is the complex relative magnetic permeability.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the WaveCoeff object.
+!alert warning title=This is not currently tested
+The WaveCoeff object is not currently used in any tested input files. This
+section of the documentation will be updated when this occurs. See a selection of
+untested input files where this is used at the bottom of this page.
+
+!! TODO: add a test to fix this up!
 
 !syntax parameters /Functions/WaveCoeff
 
