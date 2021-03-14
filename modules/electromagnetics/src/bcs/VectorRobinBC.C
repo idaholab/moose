@@ -10,8 +10,7 @@ VectorRobinBC::validParams()
 {
   InputParameters params = VectorIntegratedBC::validParams();
   params.addClassDescription(
-      "First order Robin-style Absorbing/Port BC from 'Theory and Computation of Electromagnetic "
-      "Fields' by JM Jin for vector variables.");
+      "First order Robin-style Absorbing/Port BC for vector variables.");
   params.addParam<FunctionName>(
       "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
   MooseEnum component("real imaginary");

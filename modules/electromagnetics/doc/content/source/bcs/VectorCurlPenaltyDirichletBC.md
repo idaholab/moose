@@ -1,20 +1,38 @@
 # VectorCurlPenaltyDirichletBC
 
-!alert construction title=Undocumented Class
-The VectorCurlPenaltyDirichletBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /BCs/VectorCurlPenaltyDirichletBC
 
 ## Overview
 
-!! Replace these lines with information regarding the VectorCurlPenaltyDirichletBC object.
+The VectorCurlPenaltyDirichletBC object is a VectorIntegratedBC which uses a
+penalty method to set the following Dirichlet condition in the context of a
+vector field Helmholtz wave equation:
+
+\begin{equation}
+  \vec{E} = \vec{E}_{exact}
+\end{equation}
+
+where
+
+- $\vec{E}$ is the electric field solution vector, and
+- $\vec{E}_{exact}$ is the exact electric field solution.
+
+This can be weakly imposed on a boundary by using the following inner product
+residual contribution to the finite element equation:
+
+\begin{equation}
+  P \left( (\vec{E} - \vec{E}_{exact}) \times \hat{\mathbf{n}}, \vec{\psi}_i \times \hat{\mathbf{n}}) \right)
+\end{equation}
+
+where
+
+- $\vec{\psi}_i$ is the test function,
+- $P$ is the scalar penalty value, and
+- $\hat{\mathbf{n}}$ is the boundary normal vector.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the VectorCurlPenaltyDirichletBC object.
+!listing vector_kernels.i block=BCs/sides
 
 !syntax parameters /BCs/VectorCurlPenaltyDirichletBC
 
