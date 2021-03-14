@@ -37,7 +37,8 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
     _eps(coupledValue("porosity")),
     _eps_neighbor(coupledNeighborValue("porosity")),
     _index(getParam<MooseEnum>("momentum_component")),
-    _vel_elem(getADMaterialProperty<RealVectorValue>(NS::velocity)),
+    _vel_elem(getADMaterialProperty<RealVectorValue>(
+        NS::velocity)), // FIXME Needs to be superficial velocity!
     _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::velocity)),
     _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
     _smooth_porosity(getParam<bool>("smooth_porosity"))

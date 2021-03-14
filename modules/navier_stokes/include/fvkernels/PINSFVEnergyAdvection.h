@@ -9,14 +9,17 @@
 
 #pragma once
 
-#include "INSFVMomentumAdvection.h"
+#include "PINSFVMomentumAdvection.h"
 
 /**
  * A flux kernel transporting energy in porous media across cell faces
  */
-class PINSFVEnergyAdvection : public INSFVMomentumAdvection
+class PINSFVEnergyAdvection : public PINSFVMomentumAdvection
 {
 public:
   static InputParameters validParams();
   PINSFVEnergyAdvection(const InputParameters & params);
+
+private:
+  ADReal computeQpResidual();
 };

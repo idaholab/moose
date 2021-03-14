@@ -12,7 +12,7 @@
 #include "FVFluxKernel.h"
 
 /**
- * A flux kernel diffusion of momentum in porous media across cell faces
+ * A flux kernel for the pressure gradient term in the momentum equation
  */
 class PINSFVMomentumPressureFlux : public FVFluxKernel
 {
@@ -25,14 +25,10 @@ protected:
 
   /// the current element porosity
   const VariableValue & _eps;
-  /// the neighbor element porosity
-  const VariableValue & _eps_neighbor;
-  /// the porosity
+  /// the current element pressure
   const ADVariableValue & _p_elem;
-  /// the neighbor element porosity
+  /// the neighbor element pressure
   const ADVariableValue & _p_neighbor;
-  /// the pressure variable
-  const MooseVariableFVReal * const _p_var;
-  /// Which momentum component this kernel applies to
+  /// which momentum component this kernel applies to
   const int _index;
 };

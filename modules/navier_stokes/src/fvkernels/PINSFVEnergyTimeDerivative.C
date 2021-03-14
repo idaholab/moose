@@ -22,7 +22,8 @@ PINSFVEnergyTimeDerivative::validParams()
       "for fluids: eps * rho * cp * dT/dt, for solids: (1 - eps) * rho * cp * dT/dt");
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
-  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
+  params.addRequiredParam<MaterialPropertyName>("cp_name",
+                                                "The name of the specific heat capacity");
   params.addRequiredCoupledVar("porosity", "Porosity variable");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
   return params;
