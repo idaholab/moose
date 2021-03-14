@@ -174,7 +174,8 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
                  fi.faceCentroid());
   };
 
-  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  if (_var.dofIndices().size() > 0)
+    _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }
 
 const ADReal &

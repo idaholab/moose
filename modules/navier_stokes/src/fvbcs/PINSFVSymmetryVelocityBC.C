@@ -23,7 +23,7 @@ PINSFVSymmetryVelocityBC::validParams()
 
 PINSFVSymmetryVelocityBC::PINSFVSymmetryVelocityBC(const InputParameters & params)
   : INSFVSymmetryVelocityBC(params),
-    _eps_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("porosity", 0)))
+    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0)))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run "

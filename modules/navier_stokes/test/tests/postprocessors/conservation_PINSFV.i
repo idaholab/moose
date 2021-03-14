@@ -85,6 +85,7 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     rho = ${rho}
+    porosity = porosity
   []
 
   [u_advection]
@@ -156,6 +157,7 @@ velocity_interp_method='average'
     v = v
     mu = ${mu}
     rho = ${rho}
+    porosity = porosity
   []
   [temp_source]
     type = FVBodyForce
