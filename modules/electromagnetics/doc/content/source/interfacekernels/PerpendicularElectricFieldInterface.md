@@ -1,20 +1,29 @@
 # PerpendicularElectricFieldInterface
 
-!alert construction title=Undocumented Class
-The PerpendicularElectricFieldInterface has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /InterfaceKernels/PerpendicularElectricFieldInterface
 
 ## Overview
 
-!! Replace these lines with information regarding the PerpendicularElectricFieldInterface object.
+!style halign=left
+PerpendicularElectricFieldInterface is a vector InterfaceKernel object that
+implements the condition
+
+\begin{equation}
+  \epsilon_1 \vec{E}_{1}^{\perp} - \epsilon_2 \vec{E}_{2}^{\perp} = \sigma_f
+\end{equation}
+
+where
+
+- $\epsilon_1$ is the electric permittivity on the primary side of the interface,
+- $\epsilon_2$ is the electric permittivity on the secondary side of the interface,
+- $\vec{E}_{1}^{\perp}$ is the perpendicular component of the electric field vector on the primary side of the interface,
+- $\vec{E}_{2}^{\perp}$ is the perpendicular component of the electric field vector on the secondary side of the interface, and
+- $\sigma_f$ is the free electric charge on the interface.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the PerpendicularElectricFieldInterface object.
+!listing combined_props.i block=InterfaceKernels/perpendicular
+
 
 !syntax parameters /InterfaceKernels/PerpendicularElectricFieldInterface
 
