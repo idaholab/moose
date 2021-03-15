@@ -1,8 +1,6 @@
 superficial_rho_u_in=1.28969
 superficial_rho_v_in=0
-mass_flux_in=${superficial_rho_u_in}
 eps=0.9
-eps_out=${eps}
 p_out=1.01e5
 T_in=273.15
 cl=${p_out}
@@ -174,10 +172,11 @@ global_interp_method='average'
 
 [FVBCs]
   [rho_left]
-    type = FVNeumannBC
+    type = PNSFVMassSpecifiedMassFluxBC
     boundary = 'left'
     variable = rho
-    value = ${mass_flux_in}
+    superficial_rhou = ${superficial_rho_u_in}
+    superficial_rhov = ${superficial_rho_v_in}
   []
   [rho_right]
     type = NSFVMassFluxAdvectionBC
@@ -198,11 +197,12 @@ global_interp_method='average'
     variable = superficial_rho_u
     advected_quantity = 'vel_x'
   []
-  [superficial_rho_u_pressure_right] # Normal in x so apply all of pressure
-    type = FVNeumannBC
+  [superficial_rho_u_pressure_right]
+    type = PNSFVMomentumSpecifiedPressureBC
     boundary = 'right'
     variable = superficial_rho_u
-    value = ${fparse -p_out * eps_out}
+    pressure = ${p_out}
+    momentum_component = 'x'
   []
 
   [superficial_rho_v_left]
@@ -217,11 +217,12 @@ global_interp_method='average'
     variable = superficial_rho_v
     advected_quantity = 'vel_y'
   []
-  [superficial_rho_v_pressure_right] # Normal in x so apply none of pressure
-    type = FVNeumannBC
+  [superficial_rho_v_pressure_right]
+    type = PNSFVMomentumSpecifiedPressureBC
     boundary = 'right'
     variable = superficial_rho_v
-    value = 0
+    pressure = ${p_out}
+    momentum_component = 'y'
   []
 
   [rho_et_left]
