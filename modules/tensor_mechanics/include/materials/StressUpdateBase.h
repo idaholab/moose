@@ -29,6 +29,8 @@ enum class TangentCalculationMethod
   PARTIAL
 };
 
+static RankFourTensor identityTensor = RankFourTensor(RankFourTensor::initIdentityFour);
+
 /**
  * StressUpdateBase is a material that is not called by MOOSE because
  * of the compute=false flag set in the parameter list.  This class is a base class
@@ -80,23 +82,16 @@ public:
    * compute_full_tangent_operator=false, then tangent_operator=elasticity_tensor is an appropriate
    * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
    */
-  virtual void updateState(RankTwoTensor & strain_increment,
-                           RankTwoTensor & inelastic_strain_increment,
-                           const RankTwoTensor & rotation_increment,
-                           RankTwoTensor & stress_new,
+  virtual void updateState(GenericRankTwoTensor<is_ad> & strain_increment,
+                           GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+                           const GenericRankTwoTensor<is_ad> & rotation_increment,
+                           GenericRankTwoTensor<is_ad> & stress_new,
                            const RankTwoTensor & stress_old,
-                           const RankFourTensor & elasticity_tensor,
+                           const GenericRankFourTensor<is_ad> & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator,
-                           RankFourTensor & tangent_operator);
+                           bool compute_full_tangent_operator = false,
+                           RankFourTensor & tangent_operator = identityTensor);
 
-  virtual void updateState(ADRankTwoTensor & strain_increment,
-                           ADRankTwoTensor & inelastic_strain_increment,
-                           const ADRankTwoTensor & rotation_increment,
-                           ADRankTwoTensor & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const ADRankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old);
   /**
    * Similar to the updateState function, this method updates the strain and stress for one substep
    */
@@ -173,6 +168,5 @@ protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
 };
-
 typedef StressUpdateBaseTempl<false> StressUpdateBase;
 typedef StressUpdateBaseTempl<true> ADStressUpdateBase;
