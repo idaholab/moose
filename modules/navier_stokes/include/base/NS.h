@@ -12,9 +12,12 @@
 #include <string>
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
+#include "HeatConductionNames.h"
 
 namespace NS
 {
+using namespace HeatConduction;
+
 // geometric quantities
 static const std::string pebble_diameter = "pebble_diameter";
 static const std::string infinite_porosity = "infinite_porosity";
@@ -106,14 +109,12 @@ static const std::string Prandtl = "Pr";
 static const std::string Reynolds = "Re";
 static const std::string Reynolds_hydraulic = "Re_h";
 static const std::string Reynolds_interstitial = "Re_i";
-static const std::string emissivity = "emissivity";
 static const std::string c = "c";
 static const std::string speed = "speed";
 static const std::string sound_speed = "sound_speed";
 
 // other Navier-Stokes terms
 static const std::string component = "component";
-static const std::string T_ambient = "T_ambient";
 static const std::string source_scaling = "source_scaling";
 
 // SUPG terms
@@ -136,13 +137,12 @@ static const std::string mass_flux = "mass_flux";
 
 namespace NS_DEFAULT_VALUES
 {
+using namespace HeatConduction::DefaultValues;
+
 static const Real infinite_porosity = 0.4;
 static const int bed_axis = 2;
 static const Real wall_porosity = 1.0;
 
-// epsilon terms for comparing equivalence to zero. Some of these are for
-// specific variables, while 'epsilon' is a generic comparison tolerance.
-static const Real epsilon = 1.00;
 static const Real k_epsilon = 1e-6;
 static const Real vel_epsilon = 1e-8;
 
@@ -155,5 +155,5 @@ static const Real inner_radius = 0.0;
 
 namespace NS_CONSTANTS
 {
-static const Real sigma = 5.67e-8;
+using namespace HeatConduction::Constants;
 }
