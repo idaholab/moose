@@ -15,6 +15,8 @@ TriSubChannelMesh::validParams()
   params.addRequiredParam<unsigned int>("nrings", "Number of fuel rod rings per assembly [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
+  params.addParam<bool>(
+      "generate_duct", false, "true to generate a hexagonal duct mesh around the subchannels");
   return params;
 }
 
@@ -69,9 +71,8 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
   }   // i
 }
 
-// calculate the x-y coordinates of the corner points for the duct cross section;
 void
-ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center)
+TriSubChannelMesh::ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center)
 {
   corners.resize(n_corners);
   Real r_corner = flat_to_flat / 2 / std::cos(libMesh::pi / 6.0);
@@ -83,14 +84,12 @@ ductCorners(std::vector<Point> & corners, Real flat_to_flat, Point center)
   }
 }
 
-// calcultes the points around the cross section of the duct (perpendicular to z axis) using
-// assembly parameters
 void
-ductXsec(std::vector<Point> & xsec,
-         const std::vector<Point> & corners,
-         int nrings,
-         Real pitch,
-         Real flat_to_flat)
+TriSubChannelMesh::ductXsec(std::vector<Point> & xsec,
+                            const std::vector<Point> & corners,
+                            int nrings,
+                            Real pitch,
+                            Real flat_to_flat)
 {
   xsec.clear();
 
@@ -111,24 +110,26 @@ ductXsec(std::vector<Point> & xsec,
 }
 
 int
-pointIndex(int points_per_layer, int layer, int point)
+TriSubChannelMesh::ductPointIndex(int points_per_layer, int layer, int point)
 {
   return layer * points_per_layer + point;
 }
 
 void
-ductPoints(std::vector<Point> & points,
-           const std::vector<Point> & xsec,
-           const std::vector<Real> & z_layers)
+TriSubChannelMesh::ductPoints(std::vector<Point> & points,
+                              const std::vector<Point> & xsec,
+                              const std::vector<Real> & z_layers)
 {
   points.resize(xsec.size() * z_layers.size());
   for (size_t i = 0; i < z_layers.size(); i++)
     for (size_t j = 0; j < xsec.size(); j++)
-      points[pointIndex(xsec.size(), i, j)] = Point(xsec[j](0), xsec[j](1), z_layers[i]);
+      points[ductPointIndex(xsec.size(), i, j)] = Point(xsec[j](0), xsec[j](1), z_layers[i]);
 }
 
 void
-ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int points_per_layer)
+TriSubChannelMesh::ductElems(std::vector<std::vector<int>> & elem_point_indices,
+                             int n_layers,
+                             int points_per_layer)
 {
   elem_point_indices.clear();
   for (int i = 0; i < n_layers - 1; i++)
@@ -139,19 +140,20 @@ ductElems(std::vector<std::vector<int>> & elem_point_indices, int n_layers, int 
     {
       int left = j;
       int right = (j + 1) % points_per_layer;
-      elem_point_indices.push_back({pointIndex(points_per_layer, bottom, left),
-                                    pointIndex(points_per_layer, bottom, right),
-                                    pointIndex(points_per_layer, top, right),
-                                    pointIndex(points_per_layer, top, left)});
+      elem_point_indices.push_back({ductPointIndex(points_per_layer, bottom, left),
+                                    ductPointIndex(points_per_layer, bottom, right),
+                                    ductPointIndex(points_per_layer, top, right),
+                                    ductPointIndex(points_per_layer, top, left)});
     }
   }
 }
 
 void
-buildDuct(UnstructuredMesh & mesh,
-          std::vector<Node *> & duct_nodes,
-          const std::vector<Point> & points,
-          const std::vector<std::vector<int>> & elem_point_indices)
+TriSubChannelMesh::buildDuct(UnstructuredMesh & mesh,
+                             std::vector<Node *> & duct_nodes,
+                             const std::vector<Point> & points,
+                             const std::vector<std::vector<int>> & elem_point_indices,
+                             SubdomainID block)
 {
   for (size_t i = 0; i < points.size(); i++)
     duct_nodes.push_back(mesh.add_point(points[i]));
@@ -159,7 +161,7 @@ buildDuct(UnstructuredMesh & mesh,
   for (auto & elem_indices : elem_point_indices)
   {
     auto elem = mesh.add_elem(new Quad4());
-    elem->subdomain_id() = 2;
+    elem->subdomain_id() = block;
     for (size_t i = 0; i < elem_indices.size(); i++)
       elem->set_node(i) = duct_nodes[elem_indices[i]];
   }
@@ -811,24 +813,27 @@ TriSubChannelMesh::buildMesh()
   boundary_info.nodeset_name(1) = "outlet";
 
   // build the duct
-  std::vector<Point> corners;
-  ductCorners(corners, _flat_to_flat, Point(0, 0, 0));
+  if (getParam<bool>("generate_duct"))
+  {
+    std::vector<Point> corners;
+    ductCorners(corners, _flat_to_flat, Point(0, 0, 0));
 
-  std::vector<Point> xsec;
-  ductXsec(xsec, corners, _nrings, _pitch, _flat_to_flat);
+    std::vector<Point> xsec;
+    ductXsec(xsec, corners, _nrings, _pitch, _flat_to_flat);
 
-  std::vector<Point> points;
-  ductPoints(points, xsec, _z_grid);
+    std::vector<Point> points;
+    ductPoints(points, xsec, _z_grid);
 
-  std::vector<std::vector<int>> elem_point_indices;
-  ductElems(elem_point_indices, _z_grid.size(), xsec.size());
+    std::vector<std::vector<int>> elem_point_indices;
+    ductElems(elem_point_indices, _z_grid.size(), xsec.size());
 
-  buildDuct(mesh, _duct_nodes, points, elem_point_indices);
+    SubdomainID duct_block = 1;
+    buildDuct(mesh, _duct_nodes, points, elem_point_indices, duct_block);
 
-  channelToDuctMaps(
-      _chan_to_duct_node_map, _duct_node_to_chan_map, _duct_nodes, _subchannel_position, _nodes);
+    channelToDuctMaps(
+        _chan_to_duct_node_map, _duct_node_to_chan_map, _duct_nodes, _subchannel_position, _nodes);
+  }
 
   // finalze things
   mesh.prepare_for_use();
 }
-
