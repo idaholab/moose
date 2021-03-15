@@ -76,7 +76,7 @@ TriSubChannelMesh::ductCorners(std::vector<Point> & corners, Real flat_to_flat, 
 {
   corners.resize(n_corners);
   Real r_corner = flat_to_flat / 2 / std::cos(libMesh::pi / 6.0);
-  for (int i = 0; i < n_corners; i++)
+  for (size_t i = 0; i < n_corners; i++)
   {
     Real theta = i * libMesh::pi / 3;
     Point corner = {r_corner * std::cos(theta), r_corner * std::sin(theta)};
@@ -87,7 +87,7 @@ TriSubChannelMesh::ductCorners(std::vector<Point> & corners, Real flat_to_flat, 
 void
 TriSubChannelMesh::ductXsec(std::vector<Point> & xsec,
                             const std::vector<Point> & corners,
-                            int nrings,
+                            unsigned int nrings,
                             Real pitch,
                             Real flat_to_flat)
 {
@@ -109,8 +109,10 @@ TriSubChannelMesh::ductXsec(std::vector<Point> & xsec,
   }
 }
 
-int
-TriSubChannelMesh::ductPointIndex(int points_per_layer, int layer, int point)
+size_t
+TriSubChannelMesh::ductPointIndex(unsigned int points_per_layer,
+                                  unsigned int layer,
+                                  unsigned int point)
 {
   return layer * points_per_layer + point;
 }
@@ -127,19 +129,19 @@ TriSubChannelMesh::ductPoints(std::vector<Point> & points,
 }
 
 void
-TriSubChannelMesh::ductElems(std::vector<std::vector<int>> & elem_point_indices,
-                             int n_layers,
-                             int points_per_layer)
+TriSubChannelMesh::ductElems(std::vector<std::vector<size_t>> & elem_point_indices,
+                             unsigned int n_layers,
+                             unsigned int points_per_layer)
 {
   elem_point_indices.clear();
-  for (int i = 0; i < n_layers - 1; i++)
+  for (unsigned int i = 0; i < n_layers - 1; i++)
   {
-    int bottom = i;
-    int top = i + 1;
-    for (int j = 0; j < points_per_layer; j++)
+    unsigned int bottom = i;
+    unsigned int top = i + 1;
+    for (unsigned int j = 0; j < points_per_layer; j++)
     {
-      int left = j;
-      int right = (j + 1) % points_per_layer;
+      unsigned int left = j;
+      unsigned int right = (j + 1) % points_per_layer;
       elem_point_indices.push_back({ductPointIndex(points_per_layer, bottom, left),
                                     ductPointIndex(points_per_layer, bottom, right),
                                     ductPointIndex(points_per_layer, top, right),
@@ -152,7 +154,7 @@ void
 TriSubChannelMesh::buildDuct(UnstructuredMesh & mesh,
                              std::vector<Node *> & duct_nodes,
                              const std::vector<Point> & points,
-                             const std::vector<std::vector<int>> & elem_point_indices,
+                             const std::vector<std::vector<size_t>> & elem_point_indices,
                              SubdomainID block)
 {
   for (size_t i = 0; i < points.size(); i++)
@@ -824,16 +826,17 @@ TriSubChannelMesh::buildMesh()
     std::vector<Point> points;
     ductPoints(points, xsec, _z_grid);
 
-    std::vector<std::vector<int>> elem_point_indices;
+    std::vector<std::vector<size_t>> elem_point_indices;
     ductElems(elem_point_indices, _z_grid.size(), xsec.size());
 
     SubdomainID duct_block = 1;
     buildDuct(mesh, _duct_nodes, points, elem_point_indices, duct_block);
+    setSubdomainName(duct_block, "duct");
 
     channelToDuctMaps(
         _chan_to_duct_node_map, _duct_node_to_chan_map, _duct_nodes, _subchannel_position, _nodes);
   }
 
-  // finalze things
+  // finalize things
   mesh.prepare_for_use();
 }
