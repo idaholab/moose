@@ -5,7 +5,7 @@
 This forms `PorousFlow` mass-fractions appropriate for an aqueous equilibrium chemistry simulation.
 The first $N-1$ of these are the total concentrations of the primary species of the chemical reaction
 system, while the last one is the mass-fraction of the remaining component, which is assumed to be
-pure water.
+pure water.  See [PorousFlowMassFraction](PorousFlowMassFraction.md) for the non-chemistry version.
 
 !alert warning
 The numerical implementation of the chemical-reactions part of `PorousFlow` is quite simplistic, with
