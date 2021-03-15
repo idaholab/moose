@@ -16,7 +16,7 @@ TriSubChannelMesh::validParams()
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addParam<bool>(
-      "generate_duct", false, "true to generate a hexagonal duct mesh around the subchannels");
+      "generate_duct", true, "true to generate a hexagonal duct mesh around the subchannels");
   return params;
 }
 
