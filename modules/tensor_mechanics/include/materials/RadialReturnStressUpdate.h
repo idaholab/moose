@@ -74,23 +74,15 @@ public:
   /**
    * Similar to the updateState function, this method updates the strain and stress for one substep
    */
-  virtual void updateStateSubstep(RankTwoTensor & /*strain_increment*/,
-                                  RankTwoTensor & /*inelastic_strain_increment*/,
-                                  const RankTwoTensor & /*rotation_increment*/,
-                                  RankTwoTensor & /*stress_new*/,
+  virtual void updateStateSubstep(GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+                                  GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+                                  const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+                                  GenericRankTwoTensor<is_ad> & /*stress_new*/,
                                   const RankTwoTensor & /*stress_old*/,
-                                  const RankFourTensor & /*elasticity_tensor*/,
+                                  const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
                                   const RankTwoTensor & /*elastic_strain_old*/,
-                                  bool /*compute_full_tangent_operator*/,
-                                  RankFourTensor & /*tangent_operator*/) override;
-
-  virtual void updateStateSubstep(ADRankTwoTensor & /*strain_increment*/,
-                                  ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                  const ADRankTwoTensor & /*rotation_increment*/,
-                                  ADRankTwoTensor & /*stress_new*/,
-                                  const RankTwoTensor & /*stress_old*/,
-                                  const ADRankFourTensor & /*elasticity_tensor*/,
-                                  const RankTwoTensor & /*elastic_strain_old*/) override;
+                                  bool compute_full_tangent_operator = false,
+                                  RankFourTensor & tangent_operator = identityTensor) override;
 
   virtual Real
   computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,

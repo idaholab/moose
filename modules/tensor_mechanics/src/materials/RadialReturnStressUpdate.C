@@ -264,23 +264,6 @@ RadialReturnStressUpdateTempl<true>::updateState(
   computeStressFinalize(inelastic_strain_increment);
 }
 
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
-    RankTwoTensor & /*strain_increment*/,
-    RankTwoTensor & /*inelastic_strain_increment*/,
-    const RankTwoTensor & /*rotation_increment*/,
-    RankTwoTensor & /*stress_new*/,
-    const RankTwoTensor & /*stress_old*/,
-    const RankFourTensor & /*elasticity_tensor*/,
-    const RankTwoTensor & /*elastic_strain_old*/,
-    bool /*compute_full_tangent_operator*/,
-    RankFourTensor & /*tangent_operator*/)
-{
-  mooseError("updateStateSubstep called: the version without tangent computation should be "
-             "called instead");
-}
-
 template <>
 void
 RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_increment,
@@ -372,21 +355,6 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   _dt = dt_original;
 }
 
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
-    ADRankTwoTensor & /*strain_increment*/,
-    ADRankTwoTensor & /*inelastic_strain_increment*/,
-    const ADRankTwoTensor & /*rotation_increment*/,
-    ADRankTwoTensor & /*stress_new*/,
-    const RankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & /*elasticity_tensor*/,
-    const RankTwoTensor & /*elastic_strain_old*/)
-{
-  mooseError(
-      "updateStateSubstep called: the version with tangent computation should be called instead");
-}
-
 template <>
 void
 RadialReturnStressUpdateTempl<true>::updateStateSubstep(
@@ -396,7 +364,9 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
     ADRankTwoTensor & stress_new,
     const RankTwoTensor & stress_old,
     const ADRankFourTensor & elasticity_tensor,
-    const RankTwoTensor & elastic_strain_old)
+    const RankTwoTensor & elastic_strain_old,
+    bool /*compute_full_tangent_operator*/,
+    RankFourTensor & /*tangent_operator*/)
 {
   const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
 
