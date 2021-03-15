@@ -9,14 +9,13 @@ InputParameters
 PNSFVFluidEnergySpecifiedTemperatureBC::validParams()
 {
   auto params = FVFluxBC::validParams();
-  params.addRequiredParam<FunctionName>(NS::temperature,
-                                        "Inlet temperature specified as a function");
+  params.addRequiredParam<FunctionName>(NS::temperature, "temperature specified as a function");
   params.addRequiredParam<FunctionName>(NS::superficial_momentum_x,
-                                        "The x component of the inlet superficial momentum");
+                                        "The x component of the superficial momentum");
   params.addParam<FunctionName>(NS::superficial_momentum_y,
-                                "The y component of the inlet superficial momentum");
+                                "The y component of the superficial momentum");
   params.addParam<FunctionName>(NS::superficial_momentum_z,
-                                "The z component of the inlet superficial momentum");
+                                "The z component of the superficial momentum");
   params.addRequiredParam<UserObjectName>(NS::fluid, "fluid userobject");
   MooseEnum interp_method("average upwind", "upwind");
   params.addParam<MooseEnum>("interp_method",
