@@ -15,7 +15,7 @@ Documents:
     software_design_description: sqa/thm_sdd.md
     software_test_plan: sqa/thm_stp.md
     requirements_traceablity_matrix: sqa/thm_rtm.md
-    verification_validation_plan: sqa/thm_vvr.md
+    verification_validation_report: sqa/thm_vvr.md
     failure_analysis_report: sqa/thm_far.md
     log_default: WARNING
     show_warning: false
