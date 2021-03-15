@@ -39,9 +39,9 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 # hit (new getpot parser)
 #
 HIT_DIR       ?= $(MOOSE_DIR)/moosetools/contrib/hit
-HIT_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
-ifeq ($(HIT_CONTENT),)
-  $(error The HIT parser does not seem to be available. Make sure that either the moosetools submodule is checked out or that your HIT_DIR points to the correct location of your HIT parser)
+hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
+ifeq ($(hit_CONTENT),)
+  $(error The HIT input file parser does not seem to be available. Make sure that either the moosetools submodule is checked out or that your HIT_DIR environment variable is set to the correct location of your HIT parser. To get the moosetools submodule, run the following from the root directory of MOOSE.\n    git submodule update --init moosetools)
 endif
 hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
