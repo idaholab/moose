@@ -100,5 +100,6 @@ private:
 
   const bool _force_boundary_execution;
 
-  std::set<BoundaryID> _boundaries_to_force;
+  std::unordered_set<BoundaryID> _boundaries_to_force;
+  std::unordered_set<BoundaryID> _boundaries_to_not_force;
 };
