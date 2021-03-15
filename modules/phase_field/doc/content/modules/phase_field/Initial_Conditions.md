@@ -4,7 +4,7 @@ With the phase field method, the initial condition is critical, as it establishe
 
 ## BoundingBoxIC
 
-!media /phase_field/BoundingBoxIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/BoundingBoxIC.png  style=width:200px;padding-left:20px;float:right;
     caption=BoundingBoxIC
 
 BoundingBoxIC allows setting the initial condition of a value inside and outside of a specified box. The box is aligned with the x,y,z axis, and is specified by passing in the x,y,z coordinates of the bottom left point and the top right point. Each of the coordinates of the "bottom_left" point MUST be less than those coordinates in the "top_right" point. When setting the initial condition if bottom_left <= Point <= top_right then the `inside` value is used. Otherwise the `outside` value is used. More information can be found on the [BoundingBoxIC](/BoundingBoxIC.md) syntax page.
@@ -22,7 +22,7 @@ BoundingBoxIC allows setting the initial condition of a value inside and outside
 
 ## RndBoundingBoxIC
 
-!media /phase_field/RndBoundingBoxIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/RndBoundingBoxIC.png  style=width:200px;padding-left:20px;float:right;
     caption=RndBoundingBoxIC
 
 Like BoundingBoxIC but the inside and outside values are randomly chosen from a uniform distribution between the `mx_invalue` and `mn_invalue` inside the box and `mx_outvalue` and `mn_outvalue` outside the box. More information can be found on the [RndBoundingBoxIC](/RndBoundingBoxIC.md) syntax page.
@@ -42,7 +42,7 @@ Like BoundingBoxIC but the inside and outside values are randomly chosen from a 
 
 ## SmoothCircleIC
 
-!media /phase_field/SmoothCIrcleIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/SmoothCIrcleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=SmoothCIrcleIC
 
 SmoothcircleIC creates a circle of a given radius centered at a given point in the domain. If `int_width` > zero, the border of the circle with smoothly transition from the `invalue` to the `outvalue`. More information can be found on the [SmoothCircleIC](/SmoothCircleIC.md) syntax page.
@@ -60,7 +60,7 @@ SmoothcircleIC creates a circle of a given radius centered at a given point in t
 
 ## RndSmoothCircleIC
 
-!media /phase_field/RndSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/RndSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=RndSmoothCircleIC
 
 Same as SmoothCircleIC but the value inside the circle randomly around `invalue` by plus or minus `variation_invalue` and the value outside the circle randomly varies around `outvalue` by plus or minus `variation_outvalue`. More information can be found on the [RndSmoothCircleIC](/RndSmoothCircleIC.md) syntax page.
@@ -80,7 +80,7 @@ Same as SmoothCircleIC but the value inside the circle randomly around `invalue`
 
 ## MultiSmoothCircleIC
 
-!media /phase_field/MultiSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/MultiSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=MultiSmoothCircleIC
 
 MultiSmoothcircleIC sets variable values by creating `nbub` number of circles with center points randomly positioned throughout the domain. The value within a circle is `invalue` and outside is `outvalue`. More information can be found on the [MultiSmoothCircleIC](/MultiSmoothCircleIC.md) syntax page.
@@ -103,7 +103,7 @@ MultiSmoothcircleIC sets variable values by creating `nbub` number of circles wi
 
 ## LatticeSmoothCircleIC
 
-!media /phase_field/LatticeSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/LatticeSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=LatticeSmoothCircleIC
 
 LatticeSmoothcircleIC sets variable values using a set of smooth circles (see SmoothCircleIC) with centers on a uniform lattice, randomly randomly perturbed from the lattice. The value within a circle is `invalue` and outside is `outvalue`. More information can be found on the [LatticeSmoothCircleIC](/LatticeSmoothCircleIC.md) synatx page.
@@ -125,7 +125,7 @@ LatticeSmoothcircleIC sets variable values using a set of smooth circles (see Sm
 
 ## SpecifiedSmoothCircleIC
 
-!media /phase_field/SpecifiedSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/SpecifiedSmoothCircleIC.png  style=width:200px;padding-left:20px;float:right;
     caption=SpecifiedSmoothCircleIC
 
 SpecifiedSmoothcircleIC creates a user specified number of smooth circles and specific locations and with specific radii. The value within a circle is `invalue` and outside is `outvalue`. More information can be found on the [SpecifiedSmoothCircleIC](/SpecifiedSmoothCircleIC.md) syntax page.
@@ -143,7 +143,7 @@ SpecifiedSmoothcircleIC creates a user specified number of smooth circles and sp
 
 ## CrossIC
 
-!media /phase_field/CrossIC.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/CrossIC.png  style=width:200px;padding-left:20px;float:right;
     caption=CrossIC
 
 CrossIC is a *2D ONLY IC* that sets the variable value to be `average` + `amplitude` within a smooth cross shape and to `average` - `amplitude` outside the cross. The cross is defined within a square defined by the user. More information can be found on the [CrossIC](/CrossIC.md) syntax page

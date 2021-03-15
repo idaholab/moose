@@ -57,7 +57,7 @@ In units of meters, the mesh would be entered into MOOSE as $25×10^{-9}$ by $25
 
 ### Plots
 
-!media /phase_field/energydensitycurve.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/energydensitycurve.png  style=width:300px;padding-left:20px;float:right;
     caption=Free energy density curve for iron-chromium alloy.
 
 The free energy density equation given above is a double-well energy curve, meaning the alloy will want to decompose into two phases with distinct concentrations. The equilibrium concentrations are found at the double tangent line of the free energy density curve. The double tangent line can be solved using a numerical solver. The equilibrium concentrations are 23.6 mol% and 82.3 mol% chromium. We will refer to these as the iron and chromium phases respectively. The curve and the double tangent line are shown to the right:
@@ -66,7 +66,7 @@ If we perform a material balance on the surface using the initial condition, we 
 
 While the curve to the right shows that the mobility varies greatly depending on the concentration, we will begin by assuming that $M(c)$ is constant. There are a lot of values we could choose, but a reasonable one would be the value at our initial condition. At 46.774 mol% chromium, the mobility is $2.2841 × 10^{-26} \frac {m^2 mol} {J s}$.
 
-!media /phase_field/mobilitycurve.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/mobilitycurve.png  style=width:300px;padding-left:20px;float:right;
     caption=Mobility curve for iron-chromium alloy.
 
 ### Expectations

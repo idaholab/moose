@@ -82,7 +82,7 @@ This brings the number of Postprocessors up to 6.
 
 # Results
 
-!media /phase_field/mobilityeq.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/mobilityeq.png  style=width:300px;padding-left:20px;float:right;
         caption=simulation result
 
 The first figure to the right shows the results of this simulation. As you can see, changing the mobility to a function reduced the number of features. The second figure shows the fraction of the surface covered with the chromium phase as a function of time. It is very close to the 39.5% we calculated, which is promising. It is not exact because of the concentration gradients at the phase interfaces.
@@ -93,7 +93,7 @@ If you still have the residual magnitudes outputting to the screen, you may have
 
 We are almost done. Next, we will calculate the total free energy of the surface and look for its S-curve.
 
-!media /phase_field/surfaceplot.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/surfaceplot.png  style=width:300px;padding-left:20px;float:right;
                 caption=chromium phase fraction
 
 [step 5: Check the Surface Energy Curve](Step5.md)

@@ -116,7 +116,7 @@ We are also interested in how the size of the time step changes throughout the s
 
 ## Simulation Results
 
-!media /phase_field/DecompositionResults.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/DecompositionResults.png  style=width:300px;padding-left:20px;float:right;
         caption=Decomposition Results - Mesh shown
 
 The image to the right is of the results of this simulation. The mesh is shown to see how adaptivity effects the mesh. The mesh remains fine where there is a large concentration gradient, but coarsens in large areas with little change.

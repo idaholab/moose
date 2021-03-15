@@ -67,7 +67,7 @@ If you wish you may remove any of the Postprocessors that you feel are unnecessa
 
 ## Results
 
-!media /phase_field/FreeEnergyCurve.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/FreeEnergyCurve.png  style=width:300px;padding-left:20px;float:right;
                 caption=Surface free energy curve
 
 The surface results should look the same as the last simulation. What we really want to look at is what the surface energy looks like throughout the simulation. The plot of the total energy is to the right. Note that the post-processor values are not calculated at the initial condition, so to replicate this plot you must remove that value from the csv file.

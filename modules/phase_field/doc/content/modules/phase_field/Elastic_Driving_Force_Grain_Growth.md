@@ -1,6 +1,6 @@
 # Elastic Driving Force for Grain Growth
 
-!media /phase_field/moose_pf_hex_grgr_stress.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/moose_pf_hex_grgr_stress.png  style=width:200px;padding-left:20px;float:right;
     caption=Elastic energy driven grain growth in a 2D hexagaonal copper polycrystal with one shrinking grain. The result was calculated using an example input file from the combined module. The input file is `hex_grain_growth_2D_eldrforce.i`
 
 
@@ -25,7 +25,7 @@ where $\boxtimes$ is the fourth-order tensor product. In the phase field model, 
 \boldsymbol{\mathcal{C}}(\mathbf{r}) = \frac{\sum_{gr} h(\eta_{gr}(\mathbf{r})) \boldsymbol{\mathcal{C}}_{gr} }{\sum_{gr} h(\eta_{gr}(\mathbf{r}))},
 \end{equation}
 
-!media /phase_field/moose_pf_hex_grgr_stress_2.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/moose_pf_hex_grgr_stress_2.png  style=width:200px;padding-left:20px;float:right;
     caption=Elastic energy driven grain growth in a 2D hexagaonal copper polycrystal with one growing grain. The result was calculated using an example input file from the combined module. The input file is `hex_grain_growth_2D_eldrforce.i`
 
 where the interpolation function $h$ is equal to 0 when $\eta_{gr} = 0$ and 1 when $\eta_{gr}=1$, i.e.
@@ -67,7 +67,7 @@ The partial derivative of the elasticity tensor with respect to the order parame
 \frac{\partial \boldsymbol{\mathcal{C}}}{\partial \eta_{gr}} = h'(\eta_{gr}) \frac{ \boldsymbol{\mathcal{C}}_{gr} }{\sum_{gr} h(\eta_{gr})} - h'(\eta_{gr}) \frac{\sum_{gr} h(\eta_{gr}) \boldsymbol{\mathcal{C}}_{gr} }{\left(\sum_{gr} h(\eta_{gr}) \right)^2}.
 \end{equation}
 
-!media /phase_field/moose_pf_grgr_stress.png  style=width:200px;padding-left:20px;float:right;
+!media phase_field/moose_pf_grgr_stress.png  style=width:200px;padding-left:20px;float:right;
     caption=Elastic energy driven grain growth in a 2D copper polycrystal. The result was calculated using an example input file from the combined module. The input file is `poly_grain_growth_2D_eldrforce.i`
 
 ## Model Implementation

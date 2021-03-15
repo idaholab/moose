@@ -198,10 +198,10 @@ The outputs block lets us decide what MOOSE tells us about the simulation. We wi
 
 ## Simulation Results
 
-!media /phase_field/simple1out.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/simple1out.png  style=width:300px;padding-left:20px;float:right;
         caption=Final result of Simple Test Model
 
-!media /phase_field/Simple1in.png  style=width:300px;padding-left:20px;float:right;
+!media phase_field/Simple1in.png  style=width:300px;padding-left:20px;float:right;
     caption=Initial condition of Simple Test Model.
 
 The first image to the right shows the initial condition of this simulation. The second image shows the end result of the simulation. The result shows that the chromium phase's corners are rounding out and the shape is becoming more circular. This is exactly what we would expect to happen as the surface tries to reduce its free energy. This result is a promising sign that our simulation is working correctly.
