@@ -34,8 +34,8 @@ CoupledVarThresholdElementSubdomainModifier::computeValue()
   Real avg_val = 0;
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    avg_val += _v[qp];
-  avg_val /= _qrule->n_points();
+    avg_val += _v[qp] * _JxW[qp] * _coord[qp];
+  avg_val /= _current_elem_volume;
 
   return avg_val;
 }
