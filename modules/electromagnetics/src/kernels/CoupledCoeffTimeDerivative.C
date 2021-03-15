@@ -6,8 +6,8 @@ InputParameters
 CoupledCoeffTimeDerivative::validParams()
 {
   InputParameters params = CoupledTimeDerivative::validParams();
-  params.addClassDescription(
-      "Coupled time derivative kernel, multiplied by a user-specified coefficient.");
+  params.addClassDescription("Coupled time derivative kernel for scalar variables, multiplied by a "
+                             "user-specified coefficient.");
   params.addParam<Real>("coefficient", "User-provided coefficient for kernel");
   return params;
 }

@@ -1,20 +1,24 @@
 # CurlCurlField
 
-!alert construction title=Undocumented Class
-The CurlCurlField has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/CurlCurlField
 
 ## Overview
 
-!! Replace these lines with information regarding the CurlCurlField object.
+!style halign=left
+The CurlCurlField object implements the following PDE term for vector variables:
+
+\begin{equation}
+  \nabla \times \left( a \; \nabla \times \vec{E} \right)
+\end{equation}
+
+where
+
+- $a$ is a constant coefficient (default = 1.0), and
+- $\vec{E}$ is the electric field vector variable.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the CurlCurlField object.
+!listing vector_kernels.i block=Kernels/curl_curl
 
 !syntax parameters /Kernels/CurlCurlField
 
