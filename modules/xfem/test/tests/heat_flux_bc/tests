@@ -1,0 +1,13 @@
+[Tests]
+  design = 'XFEMConvectiveHeatFluxBC.md'
+  issues = '#17331'
+  [2d]
+    type = Exodiff
+    input = 2d.i
+    exodiff = '2d_out.e'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide the capability to model convective heat flux on an '
+                  'XFEM interface.'
+  []
+[]

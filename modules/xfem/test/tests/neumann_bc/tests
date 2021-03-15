@@ -1,0 +1,24 @@
+[Tests]
+  design = 'XFEMNeumannBC.md XFEMFunctionNeumannBC.md'
+  issues = '#17331'
+  [group]
+    requirement = 'The XFEM module shall provide the capability to model general Neumann boundary '
+                  'conditions an interface cut by XFEM '
+    [2d_constant]
+      type = Exodiff
+      input = 2d_constant.i
+      exodiff = '2d_constant_out.e'
+      map = false
+      unique_id = true
+      detail = ', with constant flux value '
+    []
+    [2d_function]
+      type = Exodiff
+      input = 2d_function.i
+      exodiff = '2d_function_out.e'
+      map = false
+      unique_id = true
+      detail = 'and spatially varying value defined by a function.'
+    []
+  []
+[]

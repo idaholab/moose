@@ -9,32 +9,21 @@
 
 #pragma once
 
-// Moose Includes
+// MOOSE includes
 #include "XFEMIntegratedBC.h"
 #include "Function.h"
 
-class XFEMPressure : public XFEMIntegratedBC
+class XFEMFunctionNeumannBC : public XFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  XFEMPressure(const InputParameters & parameters);
+  XFEMFunctionNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  /// Component of the normal traction
-  const int _component;
-
-  /// Factor to be multiplied
-  const Real _factor;
-
-  /// Function to be multiplied
-  const Function * const _function;
-
-  /// Postprocessor value to be multiplied
-  const PostprocessorValue * const _postprocessor;
-
-  /// _alpha Parameter for HHT time integration scheme
-  const Real _alpha;
+  /// The function being used for setting the value
+  const Function & _func;
 };
