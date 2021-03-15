@@ -26,91 +26,98 @@
 []
 
 [UserObjects]
-  [./square_planar_cut_uo]
+  [square_planar_cut_uo]
     type = RectangleCutUserObject
     cut_data = '-0.2  0.0 -0.5
                 -0.2  0.0  0.0
                  0.2  0.0  0.0
-                 0.2  0.0 -0.5'
-  [../]
+        '
+               '         0.2  0.0 -0.5'
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz'
-  [../]
+  []
 []
 
 [Functions]
-  [./pressure]
+  [pressure]
     type = PiecewiseLinear
     x = '0 2.0 4.0 6.0 8.0'
     y = '0 1000 0 1000 0'
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./p_x]
+  [p_x]
     type = XFEMPressure
     variable = disp_x
+    geometric_cut_userobject = square_planar_cut_uo
     component = 0
     function = pressure
-  [../]
-  [./p_y]
+    use_displaced_mesh = false
+  []
+  [p_y]
     type = XFEMPressure
     variable = disp_y
+    geometric_cut_userobject = square_planar_cut_uo
     component = 1
     function = pressure
-  [../]
-  [./p_z]
+    use_displaced_mesh = false
+  []
+  [p_z]
     type = XFEMPressure
     variable = disp_z
+    geometric_cut_userobject = square_planar_cut_uo
     component = 2
     function = pressure
-  [../]
+    use_displaced_mesh = false
+  []
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     boundary = 'bottom top'
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -122,21 +129,21 @@
 
   line_search = 'none'
 
-  [./Predictor]
+  [Predictor]
     type = SimplePredictor
     scale = 1.0
-  [../]
+  []
 
-# controls for linear iterations
+  # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-2
 
-# controls for nonlinear iterations
+  # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-12
 
-# time control
+  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 2.0
@@ -145,8 +152,8 @@
 [Outputs]
   file_base = edge_3d_pressure_out
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

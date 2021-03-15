@@ -11,30 +11,24 @@
 
 // Moose Includes
 #include "XFEMIntegratedBC.h"
-#include "Function.h"
 
-class XFEMPressure : public XFEMIntegratedBC
+class XFEMConvectiveHeatFluxBC : public XFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  XFEMPressure(const InputParameters & parameters);
+  XFEMConvectiveHeatFluxBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  /// Component of the normal traction
-  const int _component;
+  /// Far-field temperature variable
+  const MaterialProperty<Real> & _T_infinity;
 
-  /// Factor to be multiplied
-  const Real _factor;
+  /// Convective heat transfer coefficient
+  const MaterialProperty<Real> & _htc;
 
-  /// Function to be multiplied
-  const Function * const _function;
-
-  /// Postprocessor value to be multiplied
-  const PostprocessorValue * const _postprocessor;
-
-  /// _alpha Parameter for HHT time integration scheme
-  const Real _alpha;
+  /// Derivative of convective heat transfer coefficient with respect to temperature
+  const MaterialProperty<Real> & _htc_dT;
 };

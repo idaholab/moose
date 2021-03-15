@@ -77,6 +77,13 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
 }
 
 void
+DiracKernel::reinitQp()
+{
+  _current_point = _physical_point[_qp];
+  _integration_factor = 1.0;
+}
+
+void
 DiracKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
@@ -88,14 +95,14 @@ DiracKernel::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _current_point = _physical_point[_qp];
+    reinitQp();
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       if (!_drop_duplicate_points)
         multiplicity = (*multiplicities)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += multiplicity * computeQpResidual();
+        _local_re(_i) += multiplicity * computeQpResidual() * _integration_factor;
     }
   }
 
@@ -114,7 +121,7 @@ DiracKernel::computeJacobian()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _current_point = _physical_point[_qp];
+    reinitQp();
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       if (!_drop_duplicate_points)
@@ -122,7 +129,7 @@ DiracKernel::computeJacobian()
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-          _local_ke(_i, _j) += multiplicity * computeQpJacobian();
+          _local_ke(_i, _j) += multiplicity * computeQpJacobian() * _integration_factor;
     }
   }
 
@@ -147,7 +154,7 @@ DiracKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      _current_point = _physical_point[_qp];
+      reinitQp();
       if (isActiveAtPoint(_current_elem, _current_point))
       {
         if (!_drop_duplicate_points)
@@ -155,7 +162,8 @@ DiracKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar_num);
+            _local_ke(_i, _j) +=
+                multiplicity * computeQpOffDiagJacobian(jvar_num) * _integration_factor;
       }
     }
 

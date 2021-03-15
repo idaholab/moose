@@ -94,6 +94,11 @@ public:
 
 protected:
   /**
+   * Set the _current_point and its integration factor
+   */
+  virtual void reinitQp();
+
+  /**
    * This is the virtual that derived classes should override for computing the residual.
    */
   virtual Real computeQpResidual() = 0;
@@ -154,6 +159,8 @@ protected:
   const QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
+  /// Integration factor
+  Real _integration_factor;
 
   /// i-th, j-th index for enumerating shape and test functions
   unsigned int _i, _j;
