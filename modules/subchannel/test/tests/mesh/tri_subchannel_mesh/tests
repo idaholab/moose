@@ -6,4 +6,11 @@
     cli_args = "--mesh-only"
     recover = false
   []
+  [tri_with_duct]
+    type = Exodiff
+    input = tricoords3.i
+    exodiff = tri_duct.e
+    cli_args = "--mesh-only tri_duct.e Mesh/generate_duct=true Mesh/nrings=5 Mesh/flat_to_flat=1.2"
+    recover = false
+  []
 []
