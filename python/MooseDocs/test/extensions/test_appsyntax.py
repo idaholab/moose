@@ -52,10 +52,16 @@ class TestParameters(AppSyntaxTestCase):
         self.assertToken(ast(1), 'InputParametersToken')
 
         params = ast(1)['parameters']
-        self.assertIsInstance(params, dict)
-        self.assertIn('enable', params)
-        self.assertIn('group_name', params['enable'])
-        self.assertEqual(params['enable']['group_name'], 'Advanced')
+        enable_param = dict()
+        for param in params:
+            self.assertToken(param, 'ParameterToken')
+            self.assertIsInstance(param['parameter'], dict)
+            self.assertIn('name', param['parameter'])
+            if param['parameter']['name'] == 'enable':
+                enable_param = param['parameter']
+                break
+        self.assertIn('group_name', enable_param)
+        self.assertEqual(enable_param['group_name'], 'Advanced')
 
         ast = self.tokenize('{} heading=None'.format(self.TEXT))
         self.assertSize(ast, 1)
@@ -165,9 +171,9 @@ class TestParam(AppSyntaxTestCase):
         ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0,0), 'ParameterToken', string=u'"variable"')
+        self.assertToken(ast(0,0), 'ModalLink', string=u'"variable"')
 
-        param = ast(0,0)['parameter']
+        param = ast(0,0)['content']['parameter']
         self.assertEqual(param[u'basic_type'], u'String')
         self.assertEqual(param[u'cpp_type'], u'NonlinearVariableName')
         self.assertEqual(param[u'deprecated'], False)
@@ -180,14 +186,23 @@ class TestParam(AppSyntaxTestCase):
         _, res = self.execute(self.TEXT, renderer=base.HTMLRenderer())
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'p', size=1)
-        self.assertHTMLTag(res(0,0), 'span', string=u'"variable"', class_='moose-parameter-name')
+        self.assertHTMLTag(res(0,0), 'span', string=u'"variable"', class_='moose-modal-link')
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', size=1)
+        print(res)
+        self.assertHTMLTag(res, 'div', size=2)
         self.assertHTMLTag(res(0), 'p', size=1)
-        self.assertHTMLTag(res(0,0), 'span', string=u'"variable"', class_='moose-parameter-name tooltipped')
-        self.assertIn(u"The name of the variable", res(0,0)['data-tooltip'])
+        self.assertHTMLTag(res(0,0), 'a', string=u'"variable"', class_='moose-modal-link modal-trigger')
+
+        self.assertHTMLTag(res(1), 'div', size=1, class_='moose-modal modal')
+        self.assertHTMLTag(res(1, 0), 'div', size=4, class_='modal-content')
+        self.assertHTMLTag(res(1, 0, 0), 'h4', size=1, string=u'variable')
+        self.assertHTMLTag(res(1, 0, 1), 'p', size=2, class_='moose-parameter-description-cpptype')
+        self.assertEqual(u"NonlinearVariableName", res(1, 0, 1, 1)['content'])
+        self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-options')
+        self.assertHTMLTag(res(1, 0, 3), 'p', size=2, class_='moose-parameter-description')
+        self.assertIn(u"The name of the variable", res(1, 0, 3, 1)['content'])
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
