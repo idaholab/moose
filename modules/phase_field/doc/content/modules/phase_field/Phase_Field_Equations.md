@@ -168,7 +168,7 @@ It is divided into three pieces, each implemented in their own kernel, as shown 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
 $\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | | | [`TimeDerivative`](/TimeDerivative.md) |
-$\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | | [`ACInterface`](/ACInterface,md) |
+$\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | | [`ACInterface`](/ACInterface.md) |
 $L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)$ | $\eta_j$ | $L$ | $\frac{\partial f_{loc} }{\partial \eta_j}, \frac{\partial E_d }{\partial \eta_j}$ | [`AllenCahn`](/AllenCahn.md) |
 
 The residual for the direct solution of the Cahn-Hilliard equation (without boundary terms) is
