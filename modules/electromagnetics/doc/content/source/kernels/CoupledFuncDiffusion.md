@@ -1,20 +1,25 @@
 # CoupledFuncDiffusion
 
-!alert construction title=Undocumented Class
-The CoupledFuncDiffusion has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/CoupledFuncDiffusion
 
 ## Overview
 
-!! Replace these lines with information regarding the CoupledFuncDiffusion object.
+!style halign=left
+The CoupledFuncDiffusion object represents a coupled Laplacian operator term with a function coefficient for scalar variables. This term is
+
+\begin{equation}
+  s f(\mathbf{r}) \nabla^2 v
+\end{equation}
+
+where
+
+- $v$ is a coupled scalar variable,
+- $f(\mathbf{r})$ is a scalar function serving as a coefficient, and
+- $s$ is a constant coefficient providing the sign of the term in the PDE (default = 1.0).
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the CoupledFuncDiffusion object.
+!listing coupled_diffusion_helmholtz.i block=Kernels/coupledLaplacian_real
 
 !syntax parameters /Kernels/CoupledFuncDiffusion
 

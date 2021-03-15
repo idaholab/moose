@@ -1,20 +1,30 @@
 # VectorCurrentSource
 
-!alert construction title=Undocumented Class
-The VectorCurrentSource has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/VectorCurrentSource
 
 ## Overview
 
-!! Replace these lines with information regarding the VectorCurrentSource object.
+!style halign=left
+The VectorCurrentSource object implements the volumetric current source term in
+the electric field Helmholtz wave equation. This term, in general, is
+
+\begin{equation}
+  j \; f(\mathbf{r}, t) \; \vec{J}
+\end{equation}
+
+where
+
+- $j = \sqrt{-1}$,
+- $f(\mathbf{r}, t)$ is a time- and spatially-varying coefficient function, and
+- $\vec{J}$ is the complex source vector field.
+
+Note that $\vec{J}$ is provided via vector-valued functions, using the
+`source_real` and `source_imag` parameters for the real and imaginary components
+respectively.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the VectorCurrentSource object.
+!listing vector_current_source.i block=Kernels/current_real
 
 !syntax parameters /Kernels/VectorCurrentSource
 

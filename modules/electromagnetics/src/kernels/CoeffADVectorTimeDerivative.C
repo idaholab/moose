@@ -7,9 +7,8 @@ InputParameters
 CoeffADVectorTimeDerivative::validParams()
 {
   InputParameters params = ADVectorTimeDerivative::validParams();
-  params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
-                             "a(\\vec{r}, t) \\frac{\\partial u_h}{\\partial t})$, where $a$ is "
-                             "a coefficient function.");
+  params.addClassDescription("The time derivative operator with a user-defined coefficient for use "
+                             "with vector variables.");
   params.addRequiredParam<FunctionName>("coefficient", "Coefficient function.");
   return params;
 }

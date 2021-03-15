@@ -1,20 +1,29 @@
 # CoupledCurlCurlField
 
-!alert construction title=Undocumented Class
-The CoupledCurlCurlField has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/CoupledCurlCurlField
 
 ## Overview
 
-!! Replace these lines with information regarding the CoupledCurlCurlField object.
+!style halign=left
+The CoupledCurlCurlField object computes the residual contribution for the term
+
+\begin{equation}
+  s \nabla \times \nabla \times \vec{E}_{coupled}
+\end{equation}
+
+where
+
+- $\vec{E}_{coupled}$ is a coupled electric field vector variable, and
+- $s$ is a constant coefficient corresponding to the sign of the term in the weak form (default = 1.0)
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the CoupledCurlCurlField object.
+!alert warning title=This is not currently tested
+The CoupledCurlCurlField object is not currently used in any tested input files. This
+section of the documentation will be updated when this occurs. See a selection of
+untested input files where this is used at the bottom of this page.
+
+!! TODO: add a test to fix this up!
 
 !syntax parameters /Kernels/CoupledCurlCurlField
 

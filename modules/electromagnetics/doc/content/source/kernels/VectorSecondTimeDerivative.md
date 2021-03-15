@@ -1,20 +1,27 @@
 # VectorSecondTimeDerivative
 
-!alert construction title=Undocumented Class
-The VectorSecondTimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/VectorSecondTimeDerivative
 
 ## Overview
 
-!! Replace these lines with information regarding the VectorSecondTimeDerivative object.
+!style halign=left
+The VectorSecondTimeDerivative object implements the weak form inner product term
+associated with the second time derivative of a vector variable with a function
+coefficient. The term is
+
+\begin{equation}
+  \left(\vec{\psi}_i \; , \; a(\mathbf{r}, t) \frac{\partial^2 \vec{u}}{\partial t^2}\right)
+\end{equation}
+
+where
+
+- $\vec{\psi}_i$ is a vector-valued test function,
+- $\vec{u}$ is the solution variable, and
+- $a(\mathbf{r}, t)$ is a function coefficient (default = 1.0).
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the VectorSecondTimeDerivative object.
+!listing dipole_transient.i block=Kernels/time_derivative_real
 
 !syntax parameters /Kernels/VectorSecondTimeDerivative
 

@@ -7,7 +7,7 @@ CoupledCurlCurlField::validParams()
 {
   InputParameters params = VectorKernel::validParams();
   params.addClassDescription(
-      "Weak form term corresponding to $\\nabla \\times \\nabla \\times \\vec{E}$.");
+      "Weak form term corresponding to the curl of the curl of a coupled vector variable.");
   params.addParam<Real>("sign", 1.0, "Sign in weak form.");
   params.addRequiredCoupledVar("coupled", "Coupled variable.");
   return params;

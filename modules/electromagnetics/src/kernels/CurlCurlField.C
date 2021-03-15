@@ -7,10 +7,8 @@ InputParameters
 CurlCurlField::validParams()
 {
   InputParameters params = VectorKernel::validParams();
-  params.addClassDescription(
-      "Weak form term corresponding to $\\nabla \\times (a \\nabla \\times "
-      "\\vec{E})$, where $a$ is a coefficient parameter (in EM, usually tied to "
-      "the medium being modeled).");
+  params.addClassDescription("Weak form term corresponding to $\\nabla \\times (a \\nabla \\times "
+                             "\\vec{E})$.");
   params.addParam<Real>("coeff", 1.0, "Weak form coefficient (default = 1.0).");
   return params;
 }

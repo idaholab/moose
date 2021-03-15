@@ -10,7 +10,7 @@ ConductivityLaplacian::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription(
-      "Computes residual and Jacobian contribution for weak form term "
+      "Computes the residual and Jacobian contribution for the weak form term "
       "associated with $\\nabla \\cdot (\\sigma \\nabla V)$, where "
       "$\\sigma$ is the electrical conductivity and $V$ is the electrostatic potential.");
   params.addParam<MaterialPropertyName>(
