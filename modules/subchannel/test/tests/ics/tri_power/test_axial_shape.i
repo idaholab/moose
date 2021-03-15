@@ -3,6 +3,7 @@ length = 1.0
 
 [Mesh]
   type = TriSubChannelMesh
+  generate_duct = false
   nrings = 3
   flat_to_flat = 0.60
   heated_length = ${length}

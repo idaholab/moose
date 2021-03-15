@@ -3,7 +3,7 @@
     type = Exodiff
     input = tricoords3.i
     exodiff = tricoords3_in.e
-    cli_args = "--mesh-only"
+    cli_args = "--mesh-only - Mesh/generate_duct=false"
     recover = false
   []
   [tri_with_duct]
