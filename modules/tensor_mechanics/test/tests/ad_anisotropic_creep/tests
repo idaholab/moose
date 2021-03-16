@@ -64,5 +64,12 @@
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
   []
-
+  [ad_aniso_creep_integration_error]
+    type = 'CSVDiff'
+    input = 'ad_aniso_creep_integration_error.i'
+    csvdiff = ad_aniso_creep_integration_error_out.csv
+    requirement = 'Moose shall be capable of enforcing a time step such that the creep rate integration error is controled by the user with the aid of a soft terminator.'
+    rel_err = 1.0e-4
+    abs_zero = 1.0e-8
+  []
 []
