@@ -10,6 +10,7 @@
 #pragma once
 
 // Local includes
+#include "ParallelStudy.h"
 #include "Ray.h"
 
 // MOOSE includes
@@ -36,6 +37,7 @@ public:
   /**
    * Constructor.
    * @param study The RayTracingStudy
+   * @param parallel_study The base parallel study
    * @param mesh The MooseMesh
    * @param rays The vector of Rays that need to be claimed
    * @param local_rays Insertion point for Rays that have been claimed
@@ -43,6 +45,7 @@ public:
    * filled by objects on other processors
    */
   ClaimRays(RayTracingStudy & study,
+            ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
             MooseMesh & mesh,
             const std::vector<std::shared_ptr<Ray>> & rays,
             std::vector<std::shared_ptr<Ray>> & local_rays,
@@ -113,8 +116,10 @@ protected:
   /// Whether or not the Rays need to be initially exchanged
   const bool _do_exchange;
 
-  /// The study, used for receive context in communicating a Ray
+  /// The RayTracingStudy
   RayTracingStudy & _study;
+  /// The ParallelStudy, used as the context for communicating rays
+  ParallelStudy<std::shared_ptr<Ray>, Ray> & _parallel_study;
 
 private:
   /**

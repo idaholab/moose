@@ -25,7 +25,7 @@
 // libMesh Includes
 #include "libmesh/parallel_object.h"
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 class ParallelStudy : public ParallelObject
 {
 public:
@@ -36,7 +36,6 @@ public:
   static InputParameters validParams();
 
   ParallelStudy(const libMesh::Parallel::Communicator & comm,
-                Context * const context,
                 const InputParameters & params,
                 const std::string & name);
 
@@ -85,7 +84,8 @@ public:
   /**
    * Gets the receive buffer.
    */
-  const ReceiveBuffer<ParallelDataType, Context> & receiveBuffer() const
+  const ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>> &
+  receiveBuffer() const
   {
     return *_receive_buffer;
   }
@@ -251,8 +251,6 @@ protected:
    */
   bool buffersAreEmpty() const;
 
-  /// The context
-  Context * const _context;
   /// This rank
   const processor_id_type _pid;
   /// Name for this object for use in error handling
@@ -333,9 +331,12 @@ private:
   /// Buffer for executing work
   const std::unique_ptr<MooseUtils::Buffer<WorkType>> _work_buffer;
   /// The receive buffer
-  const std::unique_ptr<ReceiveBuffer<ParallelDataType, Context>> _receive_buffer;
+  const std::unique_ptr<ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>
+      _receive_buffer;
   /// Send buffers for each processor
-  std::unordered_map<processor_id_type, std::unique_ptr<SendBuffer<ParallelDataType, Context>>>
+  std::unordered_map<
+      processor_id_type,
+      std::unique_ptr<SendBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>>
       _send_buffers;
 
   /// Number of chunks of work executed on this processor
@@ -359,14 +360,12 @@ private:
   bool _currently_executing_work;
 };
 
-template <typename WorkType, typename ParallelDataType, typename Context>
-ParallelStudy<WorkType, ParallelDataType, Context>::ParallelStudy(
+template <typename WorkType, typename ParallelDataType>
+ParallelStudy<WorkType, ParallelDataType>::ParallelStudy(
     const libMesh::Parallel::Communicator & comm,
-    Context * const context,
     const InputParameters & params,
     const std::string & name)
   : ParallelObject(comm),
-    _context(context),
     _pid(comm.rank()),
     _name(name),
     _params(params),
@@ -390,8 +389,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::ParallelStudy(
     _parallel_data_pools(libMesh::n_threads()),
     _temp_threaded_work(libMesh::n_threads()),
     _work_buffer(createWorkBuffer()),
-    _receive_buffer(libmesh_make_unique<ReceiveBuffer<ParallelDataType, Context>>(
-        comm, context, _method, _clicks_per_receive, _parallel_data_buffer_tag)),
+    _receive_buffer(libmesh_make_unique<
+                    ReceiveBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>(
+        comm, this, _method, _clicks_per_receive, _parallel_data_buffer_tag)),
 
     _currently_executing(false),
     _currently_pre_executing(false),
@@ -408,9 +408,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::ParallelStudy(
                "('allow_new_work_during_execution = true'), the method must be SMART");
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 std::unique_ptr<MooseUtils::Buffer<WorkType>>
-ParallelStudy<WorkType, ParallelDataType, Context>::createWorkBuffer()
+ParallelStudy<WorkType, ParallelDataType>::createWorkBuffer()
 {
   std::unique_ptr<MooseUtils::Buffer<WorkType>> buffer;
 
@@ -425,9 +425,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::createWorkBuffer()
   return buffer;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 InputParameters
-ParallelStudy<WorkType, ParallelDataType, Context>::validParams()
+ParallelStudy<WorkType, ParallelDataType>::validParams()
 {
   auto params = emptyInputParameters();
 
@@ -486,9 +486,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::validParams()
   return params;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::executeAndBuffer(const std::size_t chunk_size)
+ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t chunk_size)
 {
   _currently_executing_work = true;
 
@@ -565,9 +565,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::executeAndBuffer(const std::
   _currently_executing_work = false;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveParallelDataToBuffer(
+ParallelStudy<WorkType, ParallelDataType>::moveParallelDataToBuffer(
     std::shared_ptr<ParallelDataType> & data, const processor_id_type dest_pid)
 {
   mooseAssert(comm().size() > dest_pid, "Invalid processor ID");
@@ -581,34 +581,35 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveParallelDataToBuffer(
   // Need to create a send buffer for said processor
   if (find_pair == _send_buffers.end())
     _send_buffers
-        .emplace(
-            dest_pid,
-            libmesh_make_unique<SendBuffer<ParallelDataType, Context>>(comm(),
-                                                                       _context,
-                                                                       dest_pid,
-                                                                       _method,
-                                                                       _min_buffer_size,
-                                                                       _max_buffer_size,
-                                                                       _buffer_growth_multiplier,
-                                                                       _buffer_shrink_multiplier,
-                                                                       _parallel_data_buffer_tag))
+        .emplace(dest_pid,
+                 libmesh_make_unique<
+                     SendBuffer<ParallelDataType, ParallelStudy<WorkType, ParallelDataType>>>(
+                     comm(),
+                     this,
+                     dest_pid,
+                     _method,
+                     _min_buffer_size,
+                     _max_buffer_size,
+                     _buffer_growth_multiplier,
+                     _buffer_shrink_multiplier,
+                     _parallel_data_buffer_tag))
         .first->second->moveObject(data);
   // Send buffer exists for this processor
   else
     find_pair->second->moveObject(data);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::flushSendBuffers()
+ParallelStudy<WorkType, ParallelDataType>::flushSendBuffers()
 {
   for (auto & send_buffer_iter : _send_buffers)
     send_buffer_iter.second->forceSend();
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::reserveBuffer(const std::size_t size)
+ParallelStudy<WorkType, ParallelDataType>::reserveBuffer(const std::size_t size)
 {
   if (!_currently_pre_executing)
     mooseError(_name, ": Can only reserve in object buffer during pre-execution");
@@ -618,9 +619,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::reserveBuffer(const std::siz
     _work_buffer->setCapacity(size);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::postReceiveParallelDataInternal()
+ParallelStudy<WorkType, ParallelDataType>::postReceiveParallelDataInternal()
 {
   if (_receive_buffer->buffer().empty())
     return;
@@ -634,9 +635,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::postReceiveParallelDataInter
   _receive_buffer->buffer().clear();
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 bool
-ParallelStudy<WorkType, ParallelDataType, Context>::receiveAndExecute()
+ParallelStudy<WorkType, ParallelDataType>::receiveAndExecute()
 {
   bool executed_some = false;
 
@@ -672,23 +673,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::receiveAndExecute()
   return executed_some;
 }
 
-template <typename T>
+template <typename WorkType, typename ParallelDataType>
 void
-nonblockingSum(const libMesh::Parallel::Communicator & comm,
-               T & r,
-               T & o,
-               libMesh::Parallel::Request & req)
-{
-  if (comm.size() > 1)
-    libmesh_call_mpi(MPI_Iallreduce(
-        &r, &o, 1, libMesh::Parallel::StandardType<T>(&r), MPI_SUM, comm.get(), req.get()));
-  else
-    o = r;
-}
-
-template <typename WorkType, typename ParallelDataType, typename Context>
-void
-ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
+ParallelStudy<WorkType, ParallelDataType>::smartExecute()
 {
   mooseAssert(_method == ParallelStudyMethod::SMART, "Should be called with SMART only");
 
@@ -708,7 +695,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
 
   // Get the amount of work that was started in the whole domain, if applicable
   if (started_request_first)
-    nonblockingSum(comm(), _local_work_started, _total_work_started, started_request);
+    comm().sum(_local_work_started, _total_work_started, started_request);
 
   // Whether or not the started request has been made
   bool made_started_request = started_request_first;
@@ -767,7 +754,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
       {
         made_completed_request = true;
         temp = _local_work_completed;
-        nonblockingSum(comm(), temp, _total_work_completed, completed_request);
+        comm().sum(temp, _total_work_completed, completed_request);
         continue;
       }
 
@@ -780,7 +767,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
         {
           made_started_request = true;
           temp = _local_work_started;
-          nonblockingSum(comm(), temp, _total_work_started, started_request);
+          comm().sum(temp, _total_work_started, started_request);
           continue;
         }
 
@@ -803,9 +790,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::smartExecute()
   }
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::harmExecute()
+ParallelStudy<WorkType, ParallelDataType>::harmExecute()
 {
   if (_has_alternate_ending_criteria)
     mooseError("ParallelStudy: Alternate ending criteria not yet supported for HARM");
@@ -827,7 +814,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::harmExecute()
   Parallel::MessageTag work_completed_requests_tag = Parallel::MessageTag(21000);
 
   // Get the amount of work that was started in the whole domain
-  nonblockingSum(comm(), _local_work_started, _total_work_started, work_started_request);
+  comm().sum(_local_work_started, _total_work_started, work_started_request);
 
   // All work has been executed, so time to communicate
   flushSendBuffers();
@@ -900,9 +887,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::harmExecute()
   }
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
+ParallelStudy<WorkType, ParallelDataType>::bsExecute()
 {
   if (_has_alternate_ending_criteria)
     mooseError("ParallelStudy: Alternate ending criteria not yet supported for BS");
@@ -917,7 +904,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
   unsigned long long int temp;
 
   // Get the amount of work that were started in the whole domain
-  nonblockingSum(comm(), _local_work_started, _total_work_started, work_completed_probe_status);
+  comm().sum(_local_work_started, _total_work_started, work_completed_probe_status);
 
   // Keep working until done
   while (true)
@@ -945,8 +932,7 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
       if (!receiving && !sending && some_left_request.test() && all_some_left)
       {
         some_left = receiving || sending;
-
-        nonblockingSum(comm(), some_left, all_some_left, some_left_request);
+        comm().sum(some_left, all_some_left, some_left_request);
       }
     } while (receiving || sending || !some_left_request.test() || all_some_left);
 
@@ -960,14 +946,14 @@ ParallelStudy<WorkType, ParallelDataType, Context>::bsExecute()
         return;
 
       temp = _local_work_completed;
-      nonblockingSum(comm(), temp, _total_work_completed, work_completed_request);
+      comm().sum(temp, _total_work_completed, work_completed_request);
     }
   }
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::preExecute()
+ParallelStudy<WorkType, ParallelDataType>::preExecute()
 {
   if (!buffersAreEmpty())
     mooseError(_name, ": Buffers are not empty in preExecute()");
@@ -989,9 +975,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::preExecute()
   _currently_pre_executing = true;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::execute()
+ParallelStudy<WorkType, ParallelDataType>::execute()
 {
   if (!_currently_pre_executing)
     mooseError(_name, ": preExecute() was not called before execute()");
@@ -1023,9 +1009,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::execute()
     mooseError(_name, ": Buffers are not empty after execution");
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkError(
+ParallelStudy<WorkType, ParallelDataType>::moveWorkError(
     const MoveWorkError error, const WorkType * /* work = nullptr */) const
 {
   if (error == MoveWorkError::DURING_EXECUTION_DISABLED)
@@ -1051,9 +1037,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkError(
   mooseError("Unknown MoveWorkError");
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::canMoveWorkCheck(const THREAD_ID tid)
+ParallelStudy<WorkType, ParallelDataType>::canMoveWorkCheck(const THREAD_ID tid)
 {
   if (_currently_executing)
   {
@@ -1071,10 +1057,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::canMoveWorkCheck(const THREA
     moveWorkError(MoveWorkError::PRE_EXECUTION_THREAD_0_ONLY);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(WorkType & work,
-                                                                     const THREAD_ID tid)
+ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(WorkType & work, const THREAD_ID tid)
 {
   // Error checks for moving work into the buffer at unallowed times
   canMoveWorkCheck(tid);
@@ -1091,11 +1076,11 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(WorkType & 
     _temp_threaded_work[tid].emplace_back(std::move(work));
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(const work_iterator begin,
-                                                                     const work_iterator end,
-                                                                     const THREAD_ID tid)
+ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(const work_iterator begin,
+                                                            const work_iterator end,
+                                                            const THREAD_ID tid)
 {
   // Error checks for moving work into the buffer at unallowed times
   canMoveWorkCheck(tid);
@@ -1122,17 +1107,17 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(const work_
       _temp_threaded_work[tid].emplace_back(std::move(*it));
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveWorkToBuffer(
-    std::vector<WorkType> & work_vector, const THREAD_ID tid)
+ParallelStudy<WorkType, ParallelDataType>::moveWorkToBuffer(std::vector<WorkType> & work_vector,
+                                                            const THREAD_ID tid)
 {
   moveWorkToBuffer(work_vector.begin(), work_vector.end(), tid);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveContinuingWorkToBuffer(WorkType & work)
+ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(WorkType & work)
 {
   if (_currently_executing_work)
     moveWorkError(MoveWorkError::CONTINUING_DURING_EXECUTING_WORK);
@@ -1140,10 +1125,10 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveContinuingWorkToBuffer(W
   _work_buffer->move(work);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType, Context>::moveContinuingWorkToBuffer(
-    const work_iterator begin, const work_iterator end)
+ParallelStudy<WorkType, ParallelDataType>::moveContinuingWorkToBuffer(const work_iterator begin,
+                                                                      const work_iterator end)
 {
   if (_currently_executing_work)
     moveWorkError(MoveWorkError::CONTINUING_DURING_EXECUTING_WORK);
@@ -1156,9 +1141,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::moveContinuingWorkToBuffer(
     _work_buffer->move(*it);
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 unsigned long long int
-ParallelStudy<WorkType, ParallelDataType, Context>::sendBufferPoolCreated() const
+ParallelStudy<WorkType, ParallelDataType>::sendBufferPoolCreated() const
 {
   unsigned long long int total = 0;
 
@@ -1168,9 +1153,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::sendBufferPoolCreated() cons
   return total;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 unsigned long long int
-ParallelStudy<WorkType, ParallelDataType, Context>::parallelDataSent() const
+ParallelStudy<WorkType, ParallelDataType>::parallelDataSent() const
 {
   unsigned long long int total_sent = 0;
 
@@ -1180,9 +1165,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::parallelDataSent() const
   return total_sent;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 unsigned long long int
-ParallelStudy<WorkType, ParallelDataType, Context>::buffersSent() const
+ParallelStudy<WorkType, ParallelDataType>::buffersSent() const
 {
   unsigned long long int total_sent = 0;
 
@@ -1192,9 +1177,9 @@ ParallelStudy<WorkType, ParallelDataType, Context>::buffersSent() const
   return total_sent;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 unsigned long long int
-ParallelStudy<WorkType, ParallelDataType, Context>::poolParallelDataCreated() const
+ParallelStudy<WorkType, ParallelDataType>::poolParallelDataCreated() const
 {
   unsigned long long int num_created = 0;
 
@@ -1204,16 +1189,16 @@ ParallelStudy<WorkType, ParallelDataType, Context>::poolParallelDataCreated() co
   return num_created;
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 bool
-ParallelStudy<WorkType, ParallelDataType, Context>::alternateSmartEndingCriteriaMet()
+ParallelStudy<WorkType, ParallelDataType>::alternateSmartEndingCriteriaMet()
 {
   mooseError(_name, ": Unimplemented alternateSmartEndingCriteriaMet()");
 }
 
-template <typename WorkType, typename ParallelDataType, typename Context>
+template <typename WorkType, typename ParallelDataType>
 bool
-ParallelStudy<WorkType, ParallelDataType, Context>::buffersAreEmpty() const
+ParallelStudy<WorkType, ParallelDataType>::buffersAreEmpty() const
 {
   if (!_work_buffer->empty())
     return false;

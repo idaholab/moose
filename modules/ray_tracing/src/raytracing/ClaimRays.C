@@ -20,6 +20,7 @@
 #include "libmesh/mesh_tools.h"
 
 ClaimRays::ClaimRays(RayTracingStudy & study,
+                     ParallelStudy<std::shared_ptr<Ray>, Ray> & parallel_study,
                      MooseMesh & mesh,
                      const std::vector<std::shared_ptr<Ray>> & rays,
                      std::vector<std::shared_ptr<Ray>> & local_rays,
@@ -30,6 +31,7 @@ ClaimRays::ClaimRays(RayTracingStudy & study,
     _pid(comm().rank()),
     _do_exchange(do_exchange),
     _study(study),
+    _parallel_study(parallel_study),
     _rays(rays),
     _local_rays(local_rays),
     _needs_init(true)
@@ -75,7 +77,7 @@ ClaimRays::claim()
 
   // Send the relevant Rays to everyone and then attempt to claim the ones that we receive
   if (_do_exchange)
-    Parallel::push_parallel_packed_range(comm(), rays_to_send, &_study, claim_functor);
+    Parallel::push_parallel_packed_range(comm(), rays_to_send, &_parallel_study, claim_functor);
 
   // Attempt to claim the locally generated rays in _rays
   claim_functor(_pid, _rays);

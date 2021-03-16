@@ -9,11 +9,19 @@
 class RayTracingStudy;
 class TraceRay;
 
-class ParallelRayStudy : public ParallelStudy<std::shared_ptr<Ray>, Ray, RayTracingStudy>
+class ParallelRayStudy : public ParallelStudy<std::shared_ptr<Ray>, Ray>
 {
 public:
   ParallelRayStudy(RayTracingStudy & study,
                    const std::vector<std::shared_ptr<TraceRay>> & threaded_trace_ray);
+
+  /**
+   * Get the RayTracingStudy associated with this ParallelRayStudy.
+   */
+  ///@{
+  RayTracingStudy & rayTracingStudy() { return _ray_tracing_study; }
+  const RayTracingStudy & rayTracingStudy() const { return _ray_tracing_study; }
+  ///@}
 
 protected:
   void executeWork(const std::shared_ptr<Ray> & ray, const THREAD_ID tid) override;

@@ -730,7 +730,6 @@ class Packing<std::shared_ptr<Ray>>
 public:
   typedef Real buffer_type;
 
-  static unsigned int mixed_size;
   static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
   static unsigned int packable_size(const std::shared_ptr<Ray> & ray, const void *);
   static unsigned int size(const std::size_t data_size, const std::size_t aux_data_size);
