@@ -321,6 +321,14 @@ public:
   virtual void
   mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
+  using SinglePhaseFluidProperties::e_from_T_v;
+  Real e_from_T_v(Real T, Real /*v*/) const override;
+  void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+
+  using SinglePhaseFluidProperties::p_from_T_v;
+  Real p_from_T_v(Real T, Real v) const override;
+  ADReal p_from_T_v(const ADReal & T, const ADReal & v) const override;
+
 protected:
   /// specific heat at constant volume
   const Real _cv;
