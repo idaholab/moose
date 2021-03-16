@@ -21,6 +21,7 @@ public:
 
 protected:
   virtual void computeQpProperties() override;
+  ADReal computeSpeed() const;
 
   /// fluid properties
   const SinglePhaseFluidProperties & _fluid;
@@ -37,6 +38,7 @@ protected:
   ADMaterialProperty<RealVectorValue> & _momentum;
   ADMaterialProperty<Real> & _total_energy_density;
   ADMaterialProperty<RealVectorValue> & _velocity;
+  ADMaterialProperty<Real> & _speed;
   ADMaterialProperty<RealVectorValue> & _superficial_velocity;
   ADMaterialProperty<Real> & _vel_x;
   ADMaterialProperty<Real> & _vel_y;

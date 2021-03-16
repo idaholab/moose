@@ -49,6 +49,7 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
     _momentum(declareADProperty<RealVectorValue>(NS::momentum)),
     _total_energy_density(declareADProperty<Real>(NS::total_energy_density)),
     _velocity(declareADProperty<RealVectorValue>(NS::velocity)),
+    _speed(declareADProperty<Real>(NS::speed)),
     _superficial_velocity(declareADProperty<RealVectorValue>(NS::superficial_velocity)),
     _vel_x(declareADProperty<Real>(NS::velocity_x)),
     _vel_y(declareADProperty<Real>(NS::velocity_y)),
@@ -66,6 +67,20 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
 {
 }
 
+ADReal
+PorousConservedVarMaterial::computeSpeed() const
+{
+  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
+  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
+  // So add a bit of noise to avoid this failure mode.
+  if ((MooseUtils::absoluteFuzzyEqual(_velocity[_qp](0), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](1), 0)) &&
+      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](2), 0)))
+    return 1e-42;
+
+  return _velocity[_qp].norm();
+}
+
 void
 PorousConservedVarMaterial::computeQpProperties()
 {
@@ -77,6 +92,7 @@ PorousConservedVarMaterial::computeQpProperties()
 
   _superficial_velocity[_qp] = _mass_flux[_qp] / _rho[_qp];
   _velocity[_qp] = _superficial_velocity[_qp] / _epsilon[_qp];
+  _speed[_qp] = computeSpeed();
   _vel_x[_qp] = _velocity[_qp](0);
   _vel_y[_qp] = _velocity[_qp](1);
   _vel_z[_qp] = _velocity[_qp](2);
