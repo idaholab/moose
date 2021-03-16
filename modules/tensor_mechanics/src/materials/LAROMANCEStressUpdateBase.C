@@ -25,7 +25,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  MooseEnum error_limit_behavior("ERROR WARN IGNORE", "ERROR");
+  MooseEnum error_limit_behavior("ERROR WARN IGNORE EXCEPTION", "EXCEPTION");
   params.addParam<MooseEnum>("cell_input_window_failure",
                              error_limit_behavior,
                              "What to do if cell dislocation concentration is outside the global "
@@ -39,7 +39,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       error_limit_behavior,
       "What to do if old strain is outside the global window of applicability.");
 
-  MooseEnum extrapolated_limit_behavior("ERROR WARN IGNORE EXTRAPOLATE", "EXTRAPOLATE");
+  MooseEnum extrapolated_limit_behavior("ERROR WARN IGNORE EXCEPTION EXTRAPOLATE", "EXTRAPOLATE");
   params.addParam<MooseEnum>("stress_input_window_failure",
                              extrapolated_limit_behavior,
                              "What to do if stress is outside the global window of applicability.");
@@ -460,7 +460,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad>
                                                         const WindowFailure behavior,
                                                         const std::vector<Real> & global_limits)
 {
-  if (behavior != WindowFailure::WARN && behavior != WindowFailure::ERROR)
+  if (behavior == WindowFailure::IGNORE || behavior == WindowFailure::EXTRAPOLATE)
     return;
 
   if (input < global_limits[0] || input > global_limits[1])
@@ -469,10 +469,20 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad>
     msg << "In " << this->_name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
         << ") is out of global range (" << global_limits[0] << " - " << global_limits[1] << ")";
 
-    if (behavior == WindowFailure::WARN)
-      mooseWarning(msg.str());
-    else if (behavior == WindowFailure::ERROR)
-      mooseException(msg.str());
+    switch (behavior)
+    {
+      case WindowFailure::WARN:
+        mooseWarning(msg.str());
+        break;
+      case WindowFailure::EXCEPTION:
+        mooseException(msg.str());
+        break;
+      case WindowFailure::ERROR:
+        mooseError(msg.str());
+        break;
+      default:
+        mooseError("Internal enum error");
+    }
   }
 }
 
