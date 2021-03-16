@@ -93,7 +93,7 @@ global_interp_method='average'
   [x_momentum_advection]
     type = NSFVMassFluxAdvection
     variable = superficial_rho_u
-    advected_quantity = 'vel_y'
+    advected_quantity = 'vel_x'
   []
   [x_momentum_pressure]
     type = PNSFVMomentumPressure
