@@ -971,8 +971,8 @@ FEProblemBase::initialSetup()
     }
   }
 
-  // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been
-  // restored
+  // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ main-app restartable data
+  // has been restored
 
   // Call initialSetup on the MultiApps
   if (_multi_apps.hasObjects())

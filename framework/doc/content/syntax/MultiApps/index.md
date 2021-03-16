@@ -13,7 +13,7 @@ To MOOSE these situations look like loosely-coupled systems of fully-coupled equ
 allows you to simultaneously solve for individual physics systems.
 
 Each sub-application (app) is considered independent. There is always a
-"master" app that is doing the primary solve. The "master" app can then have any number of
+"main" app that is doing the primary solve. The "main" app can then have any number of
 `MultiApp` objects. Each `MultiApp` can represent many (hence Multi) "sub-applications" (sub-apps).
 The sub-apps can be solving for completely different physics from the main application.  They can be
 other MOOSE applications, or might represent external applications. A sub-app can, itself, have
@@ -26,24 +26,29 @@ other MOOSE applications, or might represent external applications. A sub-app ca
 
 `MultiApp` objects are declared in the `[MultiApps]` block and require a "type" just like may other blocks.
 
-The [!param](/MultiApps/TransientMultiApp/app_type) is required and is the name of the `MooseApp`
-derived app that is going to be executed. Generally, this is the name of the application being
+The [!param](/MultiApps/TransientMultiApp/app_type) is the name of the `MooseApp` derived app that is going
+to be executed. Generally, this is the name of the application being
 executed, therefore if this parameter is omitted it will default as such. However this system
 is designed for running another applications that are compiled or linked into the current app.
 
-A `MultiApp` can be executed at any point during the master solve by setting the
-[!param](/MultiApps/TransientMultiApp/execute_on) parameter. The
-[!param](/MultiApps/TransientMultiApp/positions) parameters is a list of 3D coordinate pairs
-describing the offset of the sub-application(s) into the physical space of the master application,
-see [#multiapp-positions] for more information. A single fit for all the sub-apps or a file for
-each position may be provided.
+Sub-apps are created when a MultiApp is added by MOOSE.
+
+A `MultiApp` can be executed at any point during the main solve by setting the
+[!param](/MultiApps/TransientMultiApp/execute_on) parameter.
+MultiApps at the same point are executed sequentially.
+Before the execution, data on the main app are transferred to sub-apps of all the MultiApps and data on sub-apps are transferred back after the execution.
+The execution order of all MultiApps at the same point is not determined.
+The order is also irrelevant because no data transfers directly among MultiApps.
+To enforce the ordering of execution, users can use multi-level MultiApps or set the MultiApps executed at different points.
+If a `MultiApp` is set to be executed on timestep_begin or timestep_end, the formed loosely-coupled systems of fully-coupled
+equations can be solved with [Picard iterations](syntax/Executioner/index.md).
 
 !listing multiapps/transient_multiapp/dt_from_master.i block=MultiApps
 
 ## Positions id=multiapp-positions
 
 The [!param](/MultiApps/TransientMultiApp/positions) parameter is a coordinate offset from
-the master app domain to the sub-app domain, as illustrated by [multiapps_pos]. The parameter
+the main app domain to the sub-app domain, as illustrated by [multiapps_pos]. The parameter
 requires the positions to be provided as a set of $(x, y, z)$ coordinates for each sub-app.
 
 The number of coordinate sets determines the actual number of sub-applications created.  If there is
@@ -52,19 +57,21 @@ a large number of positions a file can be provided instead using the
 
 
 - The $(x, y, z)$ coordinates are a vector that is being added to the coordinates of the sub-app's
-  domain to put that domain in a specific location within the master domain.
+  domain to put that domain in a specific location within the main domain.
 - If the sub-app's domain starts at $(0,0,0)$ it is easy to think of moving that point around
   using [!param](/MultiApps/TransientMultiApp/positions).
-- For sub-apps on completely different scales, `positions` is the point in the master domain where
+- For sub-apps on completely different scales, `positions` is the point in the main domain where
   that app is located.
 
 !media framework/multiapps_positions.png id=multiapps_pos style=width:80%;margin-left:auto;margin-right:auto;
        caption=Example of MultiApp object position.
 
+If this parameter is not provided, a single position (0,0,0) will be used.
+
 ## Parallel Execution
 
 The `MultiApp` system is designed for efficient parallel execution of hierarchical problems. The
-master application utilizes all processors.  Within each `MultiApp`, all of the processors are split
+main application utilizes all processors.  Within each `MultiApp`, all of the processors are split
 among the sub-apps. If there are more sub-apps than processors, each processor will solve for
 multiple sub-apps.  All sub-apps of a given `MultiApp` are run simultaneously in parallel. Multiple
 `MultiApps` will be executed one after another.
@@ -85,6 +92,22 @@ to your Makefile and registering them. Simply set the proper `type` in your inpu
 !alert warning
 Each application must be compiled separately since the main application Makefile does not have
 knowledge of any sub-app application dependencies.
+
+## Restart and Recover
+
+General information about restart/recover can be found at [Restart/Recovery](restart_recover.md optional=True).
+When running a multiapp simulation you do not need to enable checkpoint output in each sub-app input file.
+The main app stores the restart data for all sub-apps in its file.
+When restarting or recovering, the main app restores the restart data of all sub-apps into MultiApp's *backups*
+(a data structure holding all the current state including solution vectors, stateful material properties,
+post-processors, restartable quantties declared in objects and etc. of the sub-apps), which are used by
+sub-apps to restart/recover the calculations in their initial setups.
+The same backups are also used by multiapps for saving/restoring the current state during Picard iterations.
+
+A sub-app may choose to use a restart file instead of the main backup file by setting [!param](/Problem/FEProblem/force_restart) to true.
+
+!alert warning
+[!param](/Problem/FEProblem/force_restart) is experimental.
 
 !syntax list /MultiApps subsystems=False actions=False objects=True
 
