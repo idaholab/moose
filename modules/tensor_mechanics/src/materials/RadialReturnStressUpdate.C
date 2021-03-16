@@ -217,7 +217,7 @@ RadialReturnStressUpdateTempl<true>::updateState(
     const ADRankFourTensor & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
     bool /*compute_full_tangent_operator = false*/,
-    RankFourTensor & /*tangent_operator = identityTensor*/)
+    RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration

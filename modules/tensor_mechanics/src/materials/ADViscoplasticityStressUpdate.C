@@ -80,7 +80,7 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
                                            const ADRankFourTensor & elasticity_tensor,
                                            const RankTwoTensor & elastic_strain_old,
                                            bool /*compute_full_tangent_operator = false*/,
-                                           RankFourTensor & /*tangent_operator = identityTensor*/)
+                                           RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
   // Compute initial hydrostatic stress and porosity
   if (_pore_shape == PoreShapeModel::CYLINDRICAL)

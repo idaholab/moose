@@ -61,28 +61,30 @@ public:
    * @param tangent_operator              Currently a copy of the elasticity tensor in this class
    */
 
-  virtual void updateState(GenericRankTwoTensor<is_ad> & strain_increment,
-                           GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
-                           const GenericRankTwoTensor<is_ad> & rotation_increment,
-                           GenericRankTwoTensor<is_ad> & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const GenericRankFourTensor<is_ad> & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator = false,
-                           RankFourTensor & tangent_operator = identityTensor) override;
+  virtual void updateState(
+      GenericRankTwoTensor<is_ad> & strain_increment,
+      GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+      const GenericRankTwoTensor<is_ad> & rotation_increment,
+      GenericRankTwoTensor<is_ad> & stress_new,
+      const RankTwoTensor & stress_old,
+      const GenericRankFourTensor<is_ad> & elasticity_tensor,
+      const RankTwoTensor & elastic_strain_old,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
 
   /**
    * Similar to the updateState function, this method updates the strain and stress for one substep
    */
-  virtual void updateStateSubstep(GenericRankTwoTensor<is_ad> & /*strain_increment*/,
-                                  GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
-                                  const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
-                                  GenericRankTwoTensor<is_ad> & /*stress_new*/,
-                                  const RankTwoTensor & /*stress_old*/,
-                                  const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
-                                  const RankTwoTensor & /*elastic_strain_old*/,
-                                  bool compute_full_tangent_operator = false,
-                                  RankFourTensor & tangent_operator = identityTensor) override;
+  virtual void updateStateSubstep(
+      GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+      GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+      const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+      GenericRankTwoTensor<is_ad> & /*stress_new*/,
+      const RankTwoTensor & /*stress_old*/,
+      const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+      const RankTwoTensor & /*elastic_strain_old*/,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
 
   virtual Real
   computeReferenceResidual(const GenericReal<is_ad> & effective_trial_stress,

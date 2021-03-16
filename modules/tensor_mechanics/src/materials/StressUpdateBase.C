@@ -74,7 +74,7 @@ StressUpdateBaseTempl<is_ad>::updateState(
     const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
     const RankTwoTensor & /*elastic_strain_old*/,
     bool /*compute_full_tangent_operator = false*/,
-    RankFourTensor & /*tangent_operator = identityTensor*/)
+    RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
   mooseError("updateState called: it needs to be implemented by your inelastic model");
 }

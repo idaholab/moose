@@ -30,7 +30,7 @@ public:
                            const ADRankFourTensor & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old,
                            bool compute_full_tangent_operator = false,
-                           RankFourTensor & tangent_operator = identityTensor) override;
+                           RankFourTensor & tangent_operator = _identityTensor) override;
 
   virtual ADReal minimumPermissibleValue(const ADReal & effective_trial_stress) const override;
 
