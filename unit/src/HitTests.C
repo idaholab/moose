@@ -624,3 +624,34 @@ TEST(HitTests, Formatter_sorting)
     EXPECT_EQ(test.want, got) << "case " << i + 1 << " FAIL (" << test.name << ")";
   }
 }
+
+TEST(HitTests, unsigned_int)
+{
+  hit::Node * root = nullptr;
+  try
+  {
+    root = hit::parse("TESTCASE", "par = -3");
+    root->param<unsigned int>("par");
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("negative value read from an input file on line 1", std::string(err.what()));
+  }
+}
+
+TEST(HitTests, vector_unsigned_int)
+{
+  hit::Node * root = nullptr;
+  try
+  {
+    root = hit::parse("TESTCASE", "par = '-3 0 1'");
+    root->param<std::vector<unsigned int>>("par");
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("negative value read from an input file on line 1", std::string(err.what()));
+  }
+}
+
