@@ -405,29 +405,6 @@ libpath_framework = $(MOOSE_DIR)/framework/$(libname_framework)
 libname_pcre = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/pcre/libpcre-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
 libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 
-install_lib_$(notdir $(moose_LIB)): $(moose_LIB) all
-	@echo "Installing $<"
-	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
-	@$(call patch_rpath,$(libdst),../$(lib_install_suffix)/.)
-	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
-
-install_lib_$(notdir $(pcre_LIB)): $(pcre_LIB) all
-	@echo "Installing $<"
-	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
-
-install_lib_$(notdir $(hit_LIB)): $(hit_LIB) all
-	@echo "Installing $<"
-	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))
-	@cp $(dir $<)$(libname) $(libdst)
-
 #
 # Clean targets
 #
