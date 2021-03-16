@@ -80,8 +80,8 @@ MaterialPropertyDebugOutput::printMaterialMap() const
     const auto & objects = warehouse[Moose::FACE_MATERIAL_DATA].getBlockObjects();
     for (const auto & it : objects)
     {
-      active_block << "    Subdomain: " << mesh.getSubdomainName(it.first) << " (" << it.first
-                   << ")\n";
+      active_face << "    Subdomain: " << mesh.getSubdomainName(it.first) << " (" << it.first
+                  << ")\n";
       printMaterialProperties(active_face, it.second);
     }
   }
@@ -91,8 +91,8 @@ MaterialPropertyDebugOutput::printMaterialMap() const
     const auto & objects = warehouse[Moose::NEIGHBOR_MATERIAL_DATA].getBlockObjects();
     for (const auto & it : objects)
     {
-      active_block << "    Subdomain: " << mesh.getSubdomainName(it.first) << " (" << it.first
-                   << ")\n";
+      active_neighbor << "    Subdomain: " << mesh.getSubdomainName(it.first) << " (" << it.first
+                      << ")\n";
       printMaterialProperties(active_neighbor, it.second);
     }
   }
