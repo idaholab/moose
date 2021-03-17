@@ -35,14 +35,19 @@ PNSFVMassSpecifiedMassFluxBC::PNSFVMassSpecifiedMassFluxBC(const InputParameters
                "must be provided");
 }
 
+void
+PNSFVMassSpecifiedMassFluxBC::computeMemberData()
+{
+  _mass_flux.assign(RealVectorValue(_superficial_rhou.value(_t, _face_info->faceCentroid()), 0, 0));
+  if (_superficial_rhov)
+    _mass_flux(1) = _superficial_rhov->value(_t, _face_info->faceCentroid());
+  if (_superficial_rhow)
+    _mass_flux(2) = _superficial_rhow->value(_t, _face_info->faceCentroid());
+}
+
 ADReal
 PNSFVMassSpecifiedMassFluxBC::computeQpResidual()
 {
-  RealVectorValue mass_flux(_superficial_rhou.value(_t, _face_info->faceCentroid()));
-  if (_superficial_rhov)
-    mass_flux(1) = _superficial_rhov->value(_t, _face_info->faceCentroid());
-  if (_superficial_rhow)
-    mass_flux(2) = _superficial_rhow->value(_t, _face_info->faceCentroid());
-
-  return _normal * mass_flux;
+  computeMemberData();
+  return _normal * _mass_flux;
 }

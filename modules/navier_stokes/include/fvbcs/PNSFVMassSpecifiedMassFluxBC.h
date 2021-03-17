@@ -16,8 +16,11 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
+  virtual void computeMemberData();
 
   const Function & _superficial_rhou;
   const Function * const _superficial_rhov;
   const Function * const _superficial_rhow;
+
+  RealVectorValue _mass_flux;
 };

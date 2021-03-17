@@ -35,5 +35,5 @@ protected:
   ///@}
 
   /// index x|y|z
-  unsigned int _index;
+  const unsigned int _index;
 };
