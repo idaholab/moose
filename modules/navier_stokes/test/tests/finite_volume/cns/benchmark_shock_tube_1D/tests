@@ -8,13 +8,4 @@
     requirement = 'The system shall be able to solve the 1D Sod shock-tube benchmark problem using an HLLC scheme to compute convective fluxes.'
     cli_args = 'Executioner/num_steps=100'
   [../]
-  [./upwind_sod_shocktube_1D_benchmark]
-    type = Exodiff
-    input = 'upwind-sod-shocktube.i'
-    exodiff = 'upwind-sod-shocktube_out.e'
-    design = 'CNSFVHLLC.md'
-    issues = '#16758'
-    requirement = 'The system shall be able to solve the 1D Sod shock-tube benchmark problem using a first order upwind scheme to compute convective fluxes.'
-    cli_args = 'Executioner/num_steps=100'
-  [../]
 []

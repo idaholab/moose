@@ -51,7 +51,7 @@
     input = 2d-transient-mass-flux-impl-step-change.i
     exodiff = 2d-transient-mass-flux-impl-step-change-average.e
     requirement = 'The system shall be able to solve a porous version of the unsteady Euler equations in two dimensions with a step change in porosity using an implementation in which the advective flux is linearly interpolated to faces and in which the product of porosity and pressure is linearly interpolated to faces.'
-    cli_args = "Outputs/out/execute_on='final' Outputs/out/file_base=2d-transient-mass-flux-impl-step-change-average interp_method='average' -pc_factor_mat_solver_type mumps"
+    cli_args = "Outputs/out/execute_on='final' Outputs/out/file_base=2d-transient-mass-flux-impl-step-change-average -pc_factor_mat_solver_type mumps"
     method = '!dbg'
     valgrind = 'none'
     abs_zero = 1e-8

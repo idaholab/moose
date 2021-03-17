@@ -235,7 +235,7 @@ stagnation_temperature = 1
 
 [Materials]
   [var_mat]
-    type = ConservedVarMaterial
+    type = ConservedVarValuesMaterial
     rho = rho
     rhou = rho_u
     rhov = rho_v

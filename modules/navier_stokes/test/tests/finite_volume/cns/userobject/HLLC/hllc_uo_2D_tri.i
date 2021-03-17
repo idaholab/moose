@@ -70,7 +70,7 @@ v_right = 50
 
 [Materials]
   [./var_mat]
-    type = ConservedVarMaterial
+    type = ConservedVarValuesMaterial
     rho = rho
     rhou = 0
     rhov = rho_v
