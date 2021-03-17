@@ -666,7 +666,7 @@ public:
   const std::string & getSubdomainName(SubdomainID subdomain_id);
 
   /**
-   * This method sets the boundary name of the boundary based on the id parameter
+   * This method returns a writable reference to a boundary name based on the id parameter
    */
   void setBoundaryName(BoundaryID boundary_id, BoundaryName name);
 

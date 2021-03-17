@@ -34,6 +34,4 @@ private:
    */
   MaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
-
-  Real _multiplier;
 };
