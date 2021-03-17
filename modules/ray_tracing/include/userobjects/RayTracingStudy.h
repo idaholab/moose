@@ -862,6 +862,11 @@ protected:
    */
   void moveRaysToBuffer(std::vector<std::shared_ptr<Ray>> & rays);
 
+  /**
+   * The underlying parallel study: used for the context for calling the packed range routines.
+   */
+  ParallelStudy<std::shared_ptr<Ray>, Ray> * parallelStudy() { return _parallel_ray_study.get(); }
+
   /// The Mesh
   MooseMesh & _mesh;
   /// The Communicator
