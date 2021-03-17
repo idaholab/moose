@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLCFluidEnergyImplicitBC.h"
+#include "CNSFVHLLCFluidEnergyImplicitBC.h"
 
 namespace nms = NS;
 
@@ -17,7 +17,7 @@ registerADMooseObject("NavierStokesApp", CNSFVHLLCFluidEnergyImplicitBC);
 InputParameters
 CNSFVHLLCFluidEnergyImplicitBC::validParams()
 {
-  InputParameters params =CNSFVHLLCImplicitBC::validParams();
+  InputParameters params = CNSFVHLLCImplicitBC::validParams();
   return params;
 }
 
@@ -36,8 +36,9 @@ CNSFVHLLCFluidEnergyImplicitBC::fluxElem()
 ADReal
 CNSFVHLLCFluidEnergyImplicitBC::hllcElem()
 {
-  return _rho_et_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
-                                                                (_SL - _normal_speed_elem));
+  return _rho_et_elem[_qp] / _rho_elem[_qp] +
+         (_SM - _normal_speed_elem) *
+             (_SM + _pressure_elem[_qp] / _rho_elem[_qp] / (_SL - _normal_speed_elem));
 }
 
 ADReal

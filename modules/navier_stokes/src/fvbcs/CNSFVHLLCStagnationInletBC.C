@@ -7,34 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLCStagnationInletBC.h"
+#include "CNSFVHLLCStagnationInletBC.h"
 #include "IdealGasFluidProperties.h"
-
-namespace nms = NS;
+#include "NS.h"
 
 InputParameters
 CNSFVHLLCStagnationInletBC::validParams()
 {
   InputParameters params = CNSFVHLLCBC::validParams();
   params.addRequiredParam<PostprocessorName>("stagnation_temperature",
-                                     "Specified inlet stagnation temperature.");
-  params.addRequiredParam<PostprocessorName>("stagnation_pressure", "Specified inlet stagnation pressure.");
+                                             "Specified inlet stagnation temperature.");
+  params.addRequiredParam<PostprocessorName>("stagnation_pressure",
+                                             "Specified inlet stagnation pressure.");
   return params;
 }
 
 CNSFVHLLCStagnationInletBC::CNSFVHLLCStagnationInletBC(const InputParameters & parameters)
   : CNSFVHLLCBC(parameters),
-  _stagnation_temperature(this->getPostprocessorValue("stagnation_temperature")),
-  _stagnation_pressure(this->getPostprocessorValue("stagnation_pressure")),
-  _cp(getADMaterialProperty<Real>(nms::cp)),
-  _cv(getADMaterialProperty<Real>(nms::cv))
+    _stagnation_temperature(this->getPostprocessorValue("stagnation_temperature")),
+    _stagnation_pressure(this->getPostprocessorValue("stagnation_pressure")),
+    _cp(getADMaterialProperty<Real>(NS::cp)),
+    _cv(getADMaterialProperty<Real>(NS::cv))
 {
   // we need to distinguish between ideal gas and non-ideal gas
-  const IdealGasFluidProperties * fluid_ideal_gas = dynamic_cast<const IdealGasFluidProperties *>(&_fluid);
+  const IdealGasFluidProperties * fluid_ideal_gas =
+      dynamic_cast<const IdealGasFluidProperties *>(&_fluid);
   if (!fluid_ideal_gas)
     paramError(
         NS::fluid,
-        "Navier-Stokes module supports stagnation inlet BCs only for IdealGasFluidProperties. Non-ideal "
+        "Navier-Stokes module supports stagnation inlet BCs only for IdealGasFluidProperties. "
+        "Non-ideal "
         "fluid "
         "properties do not implement the necessary interfaces to support isentropic processes.");
 }

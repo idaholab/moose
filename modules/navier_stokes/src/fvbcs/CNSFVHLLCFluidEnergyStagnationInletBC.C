@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLCFluidEnergyStagnationInletBC.h"
+#include "CNSFVHLLCFluidEnergyStagnationInletBC.h"
 
 namespace nms = NS;
 
@@ -23,7 +23,8 @@ CNSFVHLLCFluidEnergyStagnationInletBC::validParams()
 
 CNSFVHLLCFluidEnergyStagnationInletBC::CNSFVHLLCFluidEnergyStagnationInletBC(
     const InputParameters & parameters)
-  : CNSFVHLLCStagnationInletBC(parameters), _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
+  : CNSFVHLLCStagnationInletBC(parameters),
+    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
 {
 }
 
@@ -42,15 +43,17 @@ CNSFVHLLCFluidEnergyStagnationInletBC::fluxBoundary()
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::hllcElem()
 {
-  return _specific_internal_energy_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
-                                                                (_SL - _normal_speed_elem));
+  return _specific_internal_energy_elem[_qp] +
+         (_SM - _normal_speed_elem) *
+             (_SM + _pressure_elem[_qp] / _rho_elem[_qp] / (_SL - _normal_speed_elem));
 }
 
 ADReal
 CNSFVHLLCFluidEnergyStagnationInletBC::hllcBoundary()
 {
-  return _specific_internal_energy_boundary + (_SM - _normal_speed_boundary) *
-                           (_SM + _p_boundary / _rho_boundary / (_SL - _normal_speed_boundary));
+  return _specific_internal_energy_boundary +
+         (_SM - _normal_speed_boundary) *
+             (_SM + _p_boundary / _rho_boundary / (_SL - _normal_speed_boundary));
 }
 
 ADReal

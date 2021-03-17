@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVFluidEnergyHLLC.h"
+#include "CNSFVFluidEnergyHLLC.h"
 #include "NS.h"
 
 namespace nms = NS;
@@ -44,8 +44,9 @@ CNSFVFluidEnergyHLLC::fluxNeighbor()
 ADReal
 CNSFVFluidEnergyHLLC::hllcElem()
 {
-  return _rho_et_elem[_qp] / _rho_elem[_qp] + (_SM - _normal_speed_elem) * (_SM + _pressure_elem[_qp] / _rho_elem[_qp] /
-                                                                (_SL - _normal_speed_elem));
+  return _rho_et_elem[_qp] / _rho_elem[_qp] +
+         (_SM - _normal_speed_elem) *
+             (_SM + _pressure_elem[_qp] / _rho_elem[_qp] / (_SL - _normal_speed_elem));
 }
 
 ADReal

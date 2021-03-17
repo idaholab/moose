@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVHLLCBC.h"
+#include "CNSFVHLLCBC.h"
 
 /**
  * HLLC stagnation boundary conditions

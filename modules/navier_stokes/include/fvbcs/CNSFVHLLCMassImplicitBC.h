@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "FVHLLCImplicitBC.h"
+#include "CNSFVHLLCImplicitBC.h"
 
 /**
  * HLLC implicit boundary conditions
  */
-class CNSFVHLLCFluidEnergyImplicitBC : public CNSFVHLLCImplicitBC
+class CNSFVHLLCMassImplicitBC : public CNSFVHLLCImplicitBC
 {
 public:
-  CNSFVHLLCFluidEnergyImplicitBC(const InputParameters & parameters);
+  CNSFVHLLCMassImplicitBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -25,7 +25,4 @@ protected:
   virtual ADReal fluxElem() override;
   virtual ADReal hllcElem() override;
   virtual ADReal conservedVariableElem() override;
-
-  /// specific total enthalpy material property on elem side
-  const ADMaterialProperty<Real> & _ht_elem;
 };

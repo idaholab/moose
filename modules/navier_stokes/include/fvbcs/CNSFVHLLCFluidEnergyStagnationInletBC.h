@@ -9,23 +9,26 @@
 
 #pragma once
 
-#include "FVHLLCImplicitBC.h"
+#include "CNSFVHLLCStagnationInletBC.h"
 
 /**
- * HLLC implicit boundary conditions
+ * HLLC stagnation inlet boundary conditions
  */
-class CNSFVHLLCMomentumImplicitBC : public CNSFVHLLCImplicitBC
+class CNSFVHLLCFluidEnergyStagnationInletBC : public CNSFVHLLCStagnationInletBC
 {
 public:
-  CNSFVHLLCMomentumImplicitBC(const InputParameters & parameters);
+  CNSFVHLLCFluidEnergyStagnationInletBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
   virtual ADReal fluxElem() override;
+  virtual ADReal fluxBoundary() override;
   virtual ADReal hllcElem() override;
+  virtual ADReal hllcBoundary() override;
   virtual ADReal conservedVariableElem() override;
+  virtual ADReal conservedVariableBoundary() override;
 
-  /// index x|y|z
-  unsigned int _index;
+  /// specific total enthalpy material property on elem side
+  const ADMaterialProperty<Real> & _ht_elem;
 };

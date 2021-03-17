@@ -9,25 +9,22 @@
 
 #pragma once
 
-#include "FVHLLCStagnationInletBC.h"
+#include "CNSFVHLLCImplicitBC.h"
 
 /**
- * HLLC stagnation inlet boundary conditions
+ * HLLC implicit boundary conditions
  */
-class CNSFVHLLCMomentumStagnationInletBC : public CNSFVHLLCStagnationInletBC
+class CNSFVHLLCMomentumImplicitBC : public CNSFVHLLCImplicitBC
 {
 public:
-  CNSFVHLLCMomentumStagnationInletBC(const InputParameters & parameters);
+  CNSFVHLLCMomentumImplicitBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
   virtual ADReal fluxElem() override;
-  virtual ADReal fluxBoundary() override;
   virtual ADReal hllcElem() override;
-  virtual ADReal hllcBoundary() override;
   virtual ADReal conservedVariableElem() override;
-  virtual ADReal conservedVariableBoundary() override;
 
   /// index x|y|z
   unsigned int _index;

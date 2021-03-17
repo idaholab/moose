@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLCMomentumStagnationInletBC.h"
+#include "CNSFVHLLCMomentumStagnationInletBC.h"
 
 // Full specialization of the validParams function for this object
 registerADMooseObject("NavierStokesApp", CNSFVHLLCMomentumStagnationInletBC);
@@ -23,7 +23,8 @@ CNSFVHLLCMomentumStagnationInletBC::validParams()
   return params;
 }
 
-CNSFVHLLCMomentumStagnationInletBC::CNSFVHLLCMomentumStagnationInletBC(const InputParameters & parameters)
+CNSFVHLLCMomentumStagnationInletBC::CNSFVHLLCMomentumStagnationInletBC(
+    const InputParameters & parameters)
   : CNSFVHLLCStagnationInletBC(parameters), _index(getParam<MooseEnum>("momentum_component"))
 {
 }

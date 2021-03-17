@@ -9,16 +9,15 @@
 
 #pragma once
 
-#include "FVHLLC.h"
+#include "CNSFVHLLC.h"
 
-class CNSFVMassHLLC : public CNSFVHLLC
+class CNSFVMomentumHLLC : public CNSFVHLLC
 {
 public:
   static InputParameters validParams();
-  CNSFVMassHLLC(const InputParameters & params);
+  CNSFVMomentumHLLC(const InputParameters & params);
 
 protected:
-
   ///@{ flux functions on elem & neighbor, i.e. standard left/right values of F
   virtual ADReal fluxElem() override;
   virtual ADReal fluxNeighbor() override;
@@ -34,4 +33,7 @@ protected:
   virtual ADReal conservedVariableElem() override;
   virtual ADReal conservedVariableNeighbor() override;
   ///@}
+
+  /// index x|y|z
+  unsigned int _index;
 };

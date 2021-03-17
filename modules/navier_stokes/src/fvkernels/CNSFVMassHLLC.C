@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVMassHLLC.h"
+#include "CNSFVMassHLLC.h"
 
 // Full specialization of the validParams function for this object
 registerADMooseObject("NavierStokesApp", CNSFVMassHLLC);
@@ -19,10 +19,7 @@ CNSFVMassHLLC::validParams()
   return params;
 }
 
-CNSFVMassHLLC::CNSFVMassHLLC(const InputParameters & params)
-  : CNSFVHLLC(params)
-{
-}
+CNSFVMassHLLC::CNSFVMassHLLC(const InputParameters & params) : CNSFVHLLC(params) {}
 
 ADReal
 CNSFVMassHLLC::fluxElem()

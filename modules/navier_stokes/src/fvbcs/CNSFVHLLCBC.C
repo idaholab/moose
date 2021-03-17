@@ -7,9 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLCBC.h"
-#include "FVHLLC.h"
+#include "CNSFVHLLCBC.h"
+#include "CNSFVHLLC.h"
 #include "NS.h"
+#include "SinglePhaseFluidProperties.h"
 
 namespace nms = NS;
 
@@ -40,13 +41,13 @@ CNSFVHLLCBC::computeQpResidual()
   preComputeWaveSpeed();
 
   const auto & wave_speeds = CNSFVHLLC::waveSpeed(_rho_elem[_qp],
-                                               _vel_elem[_qp],
-                                               _specific_internal_energy_elem[_qp],
-                                               _rho_boundary,
-                                               _vel_boundary,
-                                               _specific_internal_energy_boundary,
-                                               _fluid,
-                                               _normal);
+                                                  _vel_elem[_qp],
+                                                  _specific_internal_energy_elem[_qp],
+                                                  _rho_boundary,
+                                                  _vel_boundary,
+                                                  _specific_internal_energy_boundary,
+                                                  _fluid,
+                                                  _normal);
   _SL = wave_speeds[0];
   _SM = wave_speeds[1];
   _SR = wave_speeds[2];
