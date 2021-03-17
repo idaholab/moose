@@ -82,10 +82,6 @@
   l_tol = 1e-6
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Outputs]
   exodus = true
 []

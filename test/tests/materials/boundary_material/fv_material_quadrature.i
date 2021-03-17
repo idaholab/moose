@@ -68,10 +68,6 @@
   petsc_options_value = 'lu'
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true

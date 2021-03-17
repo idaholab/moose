@@ -19,7 +19,6 @@ velocity_interp_method='rc'
 []
 
 [Problem]
-  kernel_coverage_check = false
   fv_bcs_integrity_check = true
 []
 

@@ -1,42 +1,50 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  xmin = 0
-  xmax = 4
-  ymin = 0
-  ymax = 1
+  [./square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  [../]
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    family = MONOMIAL
     order = CONSTANT
+    family = MONOMIAL
+    fv = true
+  [../]
+
+  [./v]
+    order = CONSTANT
+    family = MONOMIAL
     fv = true
   [../]
 []
 
 [FVKernels]
-  active = 'diff'
+  active = 'diff body_force'
 
   [./diff]
     type = FVDiffusion
     variable = u
-    coeff = '1'
+    coeff = 1
+  [../]
+
+  [./body_force]
+    type = FVBodyForce
+    variable = u
+    value = 10
   [../]
 []
 
 [FVBCs]
-  active = 'left right'
+  active = 'right'
 
   [./left]
     type = FVDirichletBC
     variable = u
     boundary = 3
-    value = 0
+    value = 1
   [../]
 
   [./right]
@@ -49,19 +57,9 @@
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
-[]
-
-[Postprocessors]
-  [./integral]
-    type = SideIntegralVariablePostprocessor
-    boundary = 0
-    variable = u
-  [../]
 []
 
 [Outputs]
-  file_base = fv_out
+  file_base = out
   exodus = true
 []
