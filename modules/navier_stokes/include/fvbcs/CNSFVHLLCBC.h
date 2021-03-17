@@ -11,10 +11,12 @@
 
 #include "FVFluxBC.h"
 
+class SinglePhaseFluidProperties;
+
 /**
  * Base clase for HLLC boundary condition for Euler equation
  */
-class CNSFVHLLCBC : public FVFluxBC //Kernel
+class CNSFVHLLCBC : public FVFluxBC // Kernel
 {
 public:
   CNSFVHLLCBC(const InputParameters & parameters);

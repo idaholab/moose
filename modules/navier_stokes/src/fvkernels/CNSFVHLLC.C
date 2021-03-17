@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVHLLC.h"
+#include "CNSFVHLLC.h"
 #include "NS.h"
 #include "HLLCUserObject.h"
 #include "SinglePhaseFluidProperties.h"
@@ -28,7 +28,8 @@ CNSFVHLLC::CNSFVHLLC(const InputParameters & params)
     _fluid(dynamic_cast<FEProblemBase *>(&_subproblem)
                ->getUserObject<SinglePhaseFluidProperties>(nms::fluid)),
     _specific_internal_energy_elem(getADMaterialProperty<Real>(nms::specific_internal_energy)),
-    _specific_internal_energy_neighbor(getNeighborADMaterialProperty<Real>(nms::specific_internal_energy)),
+    _specific_internal_energy_neighbor(
+        getNeighborADMaterialProperty<Real>(nms::specific_internal_energy)),
     _rho_et_elem(getADMaterialProperty<Real>(nms::total_energy_density)),
     _rho_et_neighbor(getNeighborADMaterialProperty<Real>(nms::total_energy_density)),
     _vel_elem(getADMaterialProperty<RealVectorValue>(nms::velocity)),
@@ -44,13 +45,13 @@ CNSFVHLLC::CNSFVHLLC(const InputParameters & params)
 
 std::vector<ADReal>
 CNSFVHLLC::waveSpeed(const ADReal & rho_elem,
-                  const ADRealVectorValue & vel_elem,
-                  const ADReal & e_elem,
-                  const ADReal & rho_neighbor,
-                  const ADRealVectorValue & vel_neighbor,
-                  const ADReal & e_neighbor,
-                  const SinglePhaseFluidProperties & fluid,
-                  const ADRealVectorValue & normal)
+                     const ADRealVectorValue & vel_elem,
+                     const ADReal & e_elem,
+                     const ADReal & rho_neighbor,
+                     const ADRealVectorValue & vel_neighbor,
+                     const ADReal & e_neighbor,
+                     const SinglePhaseFluidProperties & fluid,
+                     const ADRealVectorValue & normal)
 {
   const ADReal rho1 = rho_elem;
   const ADReal u1 = vel_elem.norm();

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVHLLCMomentumImplicitBC.h"
+#include "CNSFVHLLCMomentumImplicitBC.h"
 
 class Function;
 

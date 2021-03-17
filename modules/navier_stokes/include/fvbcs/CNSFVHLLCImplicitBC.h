@@ -9,20 +9,22 @@
 
 #pragma once
 
-#include "FVHLLCImplicitBC.h"
+#include "CNSFVHLLCBC.h"
 
 /**
  * HLLC implicit boundary conditions
  */
-class CNSFVHLLCMassImplicitBC : public CNSFVHLLCImplicitBC
+class CNSFVHLLCImplicitBC : public CNSFVHLLCBC
 {
 public:
-  CNSFVHLLCMassImplicitBC(const InputParameters & parameters);
+  CNSFVHLLCImplicitBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
-  virtual ADReal fluxElem() override;
-  virtual ADReal hllcElem() override;
-  virtual ADReal conservedVariableElem() override;
+  virtual void preComputeWaveSpeed() override;
+
+  virtual ADReal fluxBoundary() override;
+  virtual ADReal hllcBoundary() override;
+  virtual ADReal conservedVariableBoundary() override;
 };
