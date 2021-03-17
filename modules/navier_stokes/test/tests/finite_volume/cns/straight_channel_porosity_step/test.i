@@ -234,7 +234,7 @@ advected_interp_method='upwind'
 
 [Materials]
   [var_mat]
-    type = ConservedVarMaterial
+    type = ConservedVarValuesMaterial
     rho = rho
     rhou = rho_u
     rho_et = rho_et

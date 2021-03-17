@@ -218,7 +218,7 @@ rho_E_initial = ${fparse rho_initial * e_initial}
 
 [Materials]
   [var_mat]
-    type = ConservedVarMaterial
+    type = ConservedVarValuesMaterial
     rho = rho
     rhou = rho_v_x
     rhov = rho_v_y

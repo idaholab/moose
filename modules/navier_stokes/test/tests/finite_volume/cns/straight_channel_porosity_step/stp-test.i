@@ -278,7 +278,7 @@ eps_u_rho_ht_in=${fparse rho_in * eps_in * u_in * ht_in}
 
 [Materials]
   [var_mat]
-    type = ConservedVarMaterial
+    type = ConservedVarValuesMaterial
     rho = rho
     rhou = rho_u
     rho_et = rho_et
