@@ -13,7 +13,7 @@ Documents:
     software_design_description: sqa/{{category}}_sdd.md
     software_test_plan: sqa/{{category}}_stp.md
     requirements_traceablity_matrix: sqa/{{category}}_rtm.md
-    verification_validation_plan: sqa/{{category}}_vvr.md
+    verification_validation_report: sqa/{{category}}_vvr.md
     failure_analysis_report: sqa/{{category}}_far.md
     log_default: WARNING
     show_warning: false

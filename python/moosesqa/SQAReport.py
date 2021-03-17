@@ -49,7 +49,11 @@ class SQAReport(mooseutils.AutoPropertyMixin):
             if value.lower() == 'none':
                 self.attributes[key] = None
             else:
-                self.attributes[key] = getattr(logging, value.upper())
+                attr = getattr(logging, value.upper(), None)
+                if attr is None:
+                    raise RuntimeError("Unknown keyword argument '{}'".format(key))
+                else:
+                    self.attributes[key] = attr
 
     def getReport(self):
         """Generate the report."""
