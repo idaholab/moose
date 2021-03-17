@@ -42,8 +42,8 @@ ParsedMaterialBase::validParams()
       "Vector of material properties used in the parsed function");
 
   // Function expression
-  params.addRequiredParam<std::string>("function",
-                                       "FParser function expression for the parsed material");
+  params.addRequiredCustomTypeParam<std::string>(
+      "function", "FunctionExpression", "FParser function expression for the parsed material");
 
   return params;
 }
