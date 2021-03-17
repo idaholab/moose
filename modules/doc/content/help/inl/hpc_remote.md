@@ -21,7 +21,7 @@ Host hpclogin
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
+Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
   ProxyJump hpclogin
 ```
 
@@ -98,7 +98,7 @@ git clone git@hpcgitlab.hpc.inl.gov:<your user id>/<project>.git
 ## View build status on MOOSEBuild
 
 Using the same browser you modified your socks proxy settings, you should be able to navigate to
-[https://moosebuild.inl.gov](https://moosebuild.inl.gov).
+[https://moosebuild.hpc.inl.gov](https://moosebuild.hpc.inl.gov).
 
 ## Visit the internal HPC webpage
 
