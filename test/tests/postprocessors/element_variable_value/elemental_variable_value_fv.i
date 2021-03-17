@@ -44,10 +44,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Postprocessors]
   [./elem_left]
     type = ElementalVariableValue

@@ -24,10 +24,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [ICs]
   [leftright]
     type = BoundingBoxIC

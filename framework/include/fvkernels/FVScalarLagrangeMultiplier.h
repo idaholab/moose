@@ -17,7 +17,7 @@
  * \int \phi = \int \phi_0
  *
  * using a Lagrange multiplier approach. E.g. this kernel enforces the constraint that the average
- * value of \phi match \phi_0
+ * value of \phi matches \phi_0
  *
  * In particular, this Kernel implements the residual contribution for
  * the lambda term in Eq. (5), and both terms in Eq. (6) where \int \phi_0 = V_0
@@ -30,6 +30,8 @@ public:
   static InputParameters validParams();
 
   FVScalarLagrangeMultiplier(const InputParameters & parameters);
+
+  const MooseVariableScalar & lambdaVariable() const { return _lambda_var; }
 
 private:
   void computeResidual() override final;

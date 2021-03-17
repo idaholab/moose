@@ -90,6 +90,5 @@
 []
 
 [Problem]
-  kernel_coverage_check = false
   parallel_barrier_messaging = false
 []
