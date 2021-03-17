@@ -53,7 +53,7 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _int_width(getParam<Real>("int_width")),
     _chi_name(getParam<MaterialPropertyName>("chi")),
     _chi(getMaterialProperty<Real>(_chi_name)),
-    _dchidc(getMaterialPropertyDerivative<Real>("chi", _c_name)),
+    _dchidc(getMaterialPropertyDerivative<Real>(_chi_name, _c_name)),
     _dchideta(_op_num),
     _dchiDdeta(_op_num),
     _GBMobility(getParam<Real>("GBMobility")),
