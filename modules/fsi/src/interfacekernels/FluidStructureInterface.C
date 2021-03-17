@@ -10,7 +10,7 @@
 #include "FluidStructureInterface.h"
 #include "MooseVariableFE.h"
 
-registerMooseObject("FluidStructureInteractionApp", FluidStructureInterface);
+registerMooseObject("FsiApp", FluidStructureInterface);
 
 InputParameters
 FluidStructureInterface::validParams()
@@ -38,44 +38,13 @@ FluidStructureInterface::FluidStructureInterface(const InputParameters & paramet
 Real
 FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
 {
-  switch (_component)
+  switch (type)
   {
-    case 0:
-    {
-      switch (type)
-      {
-        case Moose::Element: // Element is fluid
-          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
+    case Moose::Element: // Element is fluid
+      return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
 
-        case Moose::Neighbor: // Neighbor is structure
-          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
-      }
-      break;
-    }
-    case 1:
-    {
-      switch (type)
-      {
-        case Moose::Element: // Element is fluid
-          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
-
-        case Moose::Neighbor: // Neighbor is structure
-          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
-      }
-      break;
-    }
-    case 2:
-    {
-      switch (type)
-      {
-        case Moose::Element: // Element is fluid
-          return _test[_i][_qp] * _D[_qp] * _neighbor_dotdot[_qp] * _normals[_qp](_component);
-
-        case Moose::Neighbor: // Neighbor is structure
-          return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
-      }
-      break;
-    }
+    case Moose::Neighbor: // Neighbor is structure
+      return _test_neighbor[_i][_qp] * -_u[_qp] * _normals[_qp](_component);
   }
   return 0.0;
 }
@@ -83,56 +52,17 @@ FluidStructureInterface::computeQpResidual(Moose::DGResidualType type)
 Real
 FluidStructureInterface::computeQpJacobian(Moose::DGJacobianType type)
 {
-  switch (_component)
+  switch (type)
   {
-    case 0:
-    {
-      switch (type)
-      {
-        case Moose::ElementElement:
-          break;
-        case Moose::NeighborNeighbor:
-          break;
-        case Moose::ElementNeighbor:
-          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](_component);
-        case Moose::NeighborElement:
-          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-      }
+    case Moose::ElementElement:
       break;
-    }
-    case 1:
-    {
-      switch (type)
-      {
-        case Moose::ElementElement:
-          break;
-        case Moose::NeighborNeighbor:
-          break;
-        case Moose::ElementNeighbor:
-          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](_component);
-        case Moose::NeighborElement:
-          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-      }
+    case Moose::NeighborNeighbor:
       break;
-    }
-    case 2:
-    {
-      switch (type)
-      {
-        case Moose::ElementElement:
-          break;
-        case Moose::NeighborNeighbor:
-          break;
-        case Moose::ElementNeighbor:
-          return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
-                _normals[_qp](_component);
-        case Moose::NeighborElement:
-          return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
-      }
-      break;
-    }
+    case Moose::ElementNeighbor:
+      return _test[_i][_qp] * _D[_qp] * _phi_neighbor[_j][_qp] * _neighbor_dotdot_du[_qp] *
+             _normals[_qp](_component);
+    case Moose::NeighborElement:
+      return _test_neighbor[_i][_qp] * -_phi[_j][_qp] * _normals[_qp](_component);
   }
   return 0.0;
 }
