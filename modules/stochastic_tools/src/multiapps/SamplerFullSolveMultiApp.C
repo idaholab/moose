@@ -210,14 +210,21 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     const std::vector<std::string> & cli_args_name =
         MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
 
-    std::size_t col_position = 0;
+    bool has_brackets = false;
+    if (cli_args_name.size())
+    {
+      has_brackets = cli_args_name[0].find("[") != std::string::npos;
+      for (unsigned int i = 1; i < cli_args_name.size(); ++i)
+        if (has_brackets != (cli_args_name[i].find("[") != std::string::npos))
+          mooseError("If the bracket is used, it must be provided to every parameter.");
+    }
+    if (!has_brackets && cli_args_name.size() != _sampler.getNumberOfCols())
+      mooseError("Number of command line arguments does not match number of sampler columns.");
 
-    unsigned int count_brackets = 0;
     for (unsigned int i = 0; i < cli_args_name.size(); ++i)
     {
-      if (cli_args_name[i].find("[") != std::string::npos)
+      if (has_brackets)
       {
-        count_brackets++;
         const std::vector<std::string> & vector_param = MooseUtils::split(cli_args_name[i], "[");
         const std::vector<std::string> & index_string =
             MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
@@ -245,26 +252,12 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
             oss << " ";
         }
         oss << "';";
-        col_position += col_count.size();
       }
       else
       {
-        oss << cli_args_name[i] << "=" << Moose::stringify(row[col_position]) << ";";
-        col_position++;
+        oss << cli_args_name[i] << "=" << Moose::stringify(row[i]) << ";";
       }
     }
-
-    if (count_brackets != 0 && count_brackets != cli_args_name.size())
-      mooseError("If the bracket is used, it must be provided to every parameter.");
-
-    if (count_brackets == 0)
-      if (_sampler.getNumberOfCols() != cli_args_name.size())
-        mooseError("param_names",
-                   "The number of columns (",
-                   _sampler.getNumberOfCols(),
-                   ") must match the number of parameters (",
-                   cli_args_name.size(),
-                   ").");
 
     args = oss.str();
   }

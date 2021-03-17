@@ -75,20 +75,24 @@ public:
   virtual void finalize();
 
   /**
-   * Method called at the end of the simulation (after finalize)
+   * Method called at the end of the simulation (after finalize).
    */
   virtual void postExecute();
 
   /**
-   * Called just after construction to allow derived classes to set _positions;
+   * Called just after construction to allow derived classes to set _positions and create
+   * sub-apps accordingly.
    */
   void setupPositions();
 
+  /**
+   * Method to be called in main-app initial setup for create sub-apps if using positions is false.
+   */
   virtual void initialSetup() override;
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp
-   * (Which is just before the MultiApp is solved)
+   * (Which is just before the MultiApp is solved).
    */
   virtual void preTransfer(Real dt, Real target_time);
 
@@ -286,6 +290,11 @@ public:
    */
   bool isRootProcessor() { return _my_rank == 0; }
 
+  /**
+   * Whether or not this MultiApp is using positions or its own way for constructing sub-apps.
+   */
+  bool usingPositions() const { return _use_positions; }
+
 protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps
@@ -327,11 +336,16 @@ protected:
   virtual std::string getCommandLineArgsParamHelper(unsigned int local_app);
 
   /**
-   * Initialize the MultiApp by creating the provided number of apps.
-   *
-   * This is called in the constructor, by default it utilizes the 'positions' input parameters.
+   * Build communicators and reserve backups.
    */
   void init(unsigned int num);
+
+  /**
+   * Create the provided number of apps.
+   *
+   * This is called in the setupPositions().
+   */
+  void createApps();
 
   /**
    * Reserve the solution from the previous simulation,

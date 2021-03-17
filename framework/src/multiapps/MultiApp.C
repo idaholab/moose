@@ -247,11 +247,12 @@ MultiApp::setupPositions()
   {
     fillPositions();
     init(_positions.size());
+    createApps();
   }
 }
 
 void
-MultiApp::initialSetup()
+MultiApp::createApps()
 {
   if (!_has_an_app)
     return;
@@ -270,6 +271,15 @@ MultiApp::initialSetup()
     createApp(i, _global_time_offset);
     _app.parser().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
   }
+}
+
+void
+MultiApp::initialSetup()
+{
+  if (!_use_positions)
+    // if not using positions, we create the sub-apps in initialSetup instead of right after
+    // construction of MultiApp
+    createApps();
 }
 
 void
@@ -438,10 +448,10 @@ MultiApp::restore(bool force)
 
   if (force || needsRestoration())
   {
-    // Must be restarting / recovering so hold off on restoring
-    // Instead - the restore will happen in createApp()
-    // Note that _backups was already populated by dataLoad()
-    if (_apps.empty())
+    // Must be restarting / recovering from main app so hold off on restoring
+    // Instead - the restore will happen in sub-apps' initialSetup()
+    // Note that _backups was already populated by dataLoad() in the main app
+    if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
       return;
 
     // We temporarily copy and store solutions for all subapps
@@ -745,7 +755,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
   // will be cached by the MooseApp object so that it can be used
-  // during FEProblemBase::initialSetup() during runInputFile()
+  // during FEProblemBase::initialSetup() during initialSetup()
   if (_app.isRestarting() || _app.isRecovering())
     app->setBackupObject(_backups[i]);
 
