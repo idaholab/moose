@@ -617,9 +617,11 @@ DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 DisplacedProblem::reinitElemPhys(const Elem * elem,
                                  const std::vector<Point> & phys_points_in_elem,
-                                 THREAD_ID tid,
-                                 bool)
+                                 THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(elem->id()) == elem,
+              "Are you calling this method with a undisplaced mesh element?");
+
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
 
   _displaced_nl.prepare(tid);
@@ -709,6 +711,9 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
                                      const std::vector<Point> & physical_points,
                                      THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+              "Are you calling this method with a undisplaced mesh element?");
+
   // Reinit shape functions
   _assembly[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
 
@@ -728,6 +733,9 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
                                      const std::vector<Point> & physical_points,
                                      THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+              "Are you calling this method with a undisplaced mesh element?");
+
   // Reinit shape functions
   _assembly[tid]->reinitNeighborAtPhysical(neighbor, physical_points);
 

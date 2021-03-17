@@ -1734,9 +1734,11 @@ FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 FEProblemBase::reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid,
-                              bool suppress_displaced_init)
+                              THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(elem->id()) == elem,
+              "Are you calling this method with a displaced mesh element?");
+
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
 
   _nl->prepare(tid);
@@ -1746,14 +1748,6 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
   _assembly[tid]->prepare();
   if (_has_nonlocal_coupling)
     _assembly[tid]->prepareNonlocal();
-
-  if (_displaced_problem && _reinit_displaced_elem && !suppress_displaced_init)
-  {
-    _displaced_problem->reinitElemPhys(
-        _displaced_mesh->elemPtr(elem->id()), phys_points_in_elem, tid);
-    if (_has_nonlocal_coupling)
-      _displaced_problem->prepareNonlocal(tid);
-  }
 }
 
 void
@@ -1891,6 +1885,9 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+              "Are you calling this method with a displaced mesh element?");
+
   // Reinits shape the functions at the physical points
   _assembly[tid]->reinitNeighborAtPhysical(neighbor, neighbor_side, physical_points);
 
@@ -1904,11 +1901,6 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   // Compute the values of each variable at the points
   _nl->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
   _aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
-
-  // Do the same for the displaced problem
-  if (_displaced_problem && _reinit_displaced_face)
-    _displaced_problem->reinitNeighborPhys(
-        _displaced_mesh->elemPtr(neighbor->id()), neighbor_side, physical_points, tid);
 }
 
 void
@@ -1916,6 +1908,9 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid)
 {
+  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+              "Are you calling this method with a displaced mesh element?");
+
   // Reinits shape the functions at the physical points
   _assembly[tid]->reinitNeighborAtPhysical(neighbor, physical_points);
 
@@ -1929,11 +1924,6 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   // Compute the values of each variable at the points
   _nl->reinitNeighbor(neighbor, tid);
   _aux->reinitNeighbor(neighbor, tid);
-
-  // Do the same for the displaced problem
-  if (_displaced_problem && _reinit_displaced_elem)
-    _displaced_problem->reinitNeighborPhys(
-        _displaced_mesh->elemPtr(neighbor->id()), physical_points, tid);
 }
 
 void
