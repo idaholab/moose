@@ -38,7 +38,11 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 #
 # hit (new getpot parser)
 #
-HIT_DIR       ?= $(MOOSE_DIR)/moosetools/contrib/hit
+HIT_DIR ?= $(MOOSE_DIR)/moosetools/contrib/hit
+ifeq ($(wildcard $(HIT_DIR)), "")
+        HIT_DIR = $(MOOSE_DIR)/framework/contrib/hit
+endif
+$(info Using HIT from $(HIT_DIR))
 hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
 ifeq ($(hit_CONTENT),)
   $(error The HIT input file parser does not seem to be available. Make sure that either the moosetools submodule is checked out or that your HIT_DIR environment variable is set to the correct location of your HIT parser. To get the moosetools submodule, run the following from the root directory of MOOSE.\n    git submodule update --init moosetools)
@@ -76,10 +80,16 @@ endif
 UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
 	libmesh_LDFLAGS    += -no-undefined
-	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
+	pyhit_LIB          := $(HIT_DIR)/hit.pyd
+	ifeq ($(wildcard $(pyhit_DIR)), "")
+		pyhit_LIB  := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
+	endif
 	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
 else
-	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
+	pyhit_LIB          := $(HIT_DIR)/hit.so
+	ifeq ($(wildcard $(pyhit_DIR)), "")
+		pyhit_LIB  := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
+	endif
 	pyhit_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
 
