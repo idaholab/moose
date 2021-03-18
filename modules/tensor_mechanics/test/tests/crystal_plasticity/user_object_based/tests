@@ -100,4 +100,13 @@
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh block IDs'
     design = 'ElementPropertyReadFile.md'
   [../]
+  [./use_substep_dt]
+    type = 'CSVDiff'
+    input = 'use_substep_dt.i'
+    csvdiff = 'use_substep_dt_out.csv'
+    allow_warnings = true
+    issues = '#17340'
+    requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
+    design = '/FiniteStrainUObasedCP.md'
+  [../]
 []

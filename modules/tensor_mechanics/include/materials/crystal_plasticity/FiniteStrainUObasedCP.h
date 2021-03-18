@@ -268,4 +268,6 @@ protected:
   RankTwoTensor _delta_dfgrd, _dfgrd_tmp_old;
   /// Scales the substepping increment to obtain deformation gradient at a substep iteration
   Real _dfgrd_scale_factor;
+  /// Current substep size
+  Real _substep_dt;
 };
