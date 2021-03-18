@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumBoussinesq.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumBoussinesq);
 
@@ -25,6 +26,9 @@ PINSFVMomentumBoussinesq::validParams()
 PINSFVMomentumBoussinesq::PINSFVMomentumBoussinesq(const InputParameters & params)
   : INSFVMomentumBoussinesq(params), _eps(coupledValue("porosity"))
 {
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumBoussinesq may only be used with a superficial velocity "
+               "variable, of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal

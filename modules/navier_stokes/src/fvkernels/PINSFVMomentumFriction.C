@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumFriction.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumFriction);
 
@@ -63,6 +64,9 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
                                             : nullptr),
     _rho(isParamValid("rho") ? getParam<Real>("rho") : 0)
 {
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumFriction may only be used with a superficial velocity "
+               "variable, of variable type PINSFVSuperficialVelocityVariable.");
   if (!_use_linear_friction_matprop && !_use_quadratic_friction_matprop &&
       !_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
