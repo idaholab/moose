@@ -132,7 +132,7 @@ global_interp_method='average'
 
   [fluid_energy_time]
     type = FVPorosityTimeDerivative
-    variable = rho
+    variable = rho_et
   []
   [fluid_energy_advection]
     type = NSFVMassFluxAdvection
