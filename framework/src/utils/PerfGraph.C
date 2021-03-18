@@ -26,9 +26,13 @@
 // System Includes
 #include <chrono>
 
-PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app, const bool live_all)
+PerfGraph::PerfGraph(const std::string & root_name,
+                     MooseApp & app,
+                     const bool live_all,
+                     const bool perf_graph_live)
   : ConsoleStreamInterface(app),
     _live_print_all(live_all),
+    _disable_live_print(!perf_graph_live),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _pid(app.processor_id()),
     _current_position(-1),
@@ -44,7 +48,7 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app, const bool l
     _live_print_time_limit(1.0),
     _live_print_mem_limit(100)
 {
-  if (_pid == 0)
+  if (_pid == 0 && !_disable_live_print)
   {
     // Start the printing thread
     _print_thread = std::thread([this] { this->_live_print->start(); });
@@ -56,19 +60,7 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app, const bool l
   push(_root_node_id);
 }
 
-PerfGraph::~PerfGraph()
-{
-  if (_pid == 0)
-  {
-    _done.set_value(true);
-
-    _destructing = true;
-
-    _finished_section.notify_one();
-
-    _print_thread.join();
-  }
-}
+PerfGraph::~PerfGraph() { disableLivePrint(); }
 
 const std::string &
 PerfGraph::sectionName(const PerfID id) const
@@ -79,6 +71,23 @@ PerfGraph::sectionName(const PerfID id) const
     mooseError("PerfGraph cannot find a section name associated with id: ", id);
 
   return find_it->second._name;
+}
+
+void
+PerfGraph::disableLivePrint()
+{
+  if (_pid == 0 && !_disable_live_print)
+  {
+    _done.set_value(true);
+
+    _destructing = true;
+
+    _finished_section.notify_one();
+
+    _print_thread.join();
+
+    _disable_live_print = true;
+  }
 }
 
 unsigned long int
@@ -231,7 +240,7 @@ PerfGraph::push(const PerfID id)
   _stack[_current_position] = new_node;
 
   // Add this to the execution list
-  if ((_live_print_active || _live_print_all) && _pid == 0 &&
+  if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
       (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
   {
     addToExecutionList(id, IncrementState::started, current_time, start_memory);
@@ -258,7 +267,7 @@ PerfGraph::pop()
   _current_position--;
 
   // Add this to the exection list
-  if ((_live_print_active || _live_print_all) && _pid == 0 &&
+  if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
       (!_id_to_section_info[current_node->id()]._live_message.empty() || _live_print_all))
   {
     addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);

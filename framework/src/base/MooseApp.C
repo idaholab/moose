@@ -267,6 +267,11 @@ MooseApp::validParams()
                                    false,
                                    "Forces printing of ALL progress messages.");
 
+  params.addCommandLineParam<bool>("disable_perf_graph_live",
+                                   "--disable-perf-graph-live",
+                                   false,
+                                   "Disables PerfGraph Live Printing.");
+
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
@@ -311,7 +316,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _start_time(0.0),
     _global_time_offset(0.0),
     _output_warehouse(*this),
-    _perf_graph(type() + " (" + name() + ')', *this, getParam<bool>("perf_graph_live_all")),
+    _perf_graph(type() + " (" + name() + ')',
+                *this,
+                getParam<bool>("perf_graph_live_all"),
+                !getParam<bool>("disable_perf_graph_live")),
     _rank_map(*_comm, _perf_graph),
     _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
@@ -725,18 +733,16 @@ MooseApp::setupOptions()
     }
 
     // Turn off live printing so that it doesn't mess with the dump
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     JsonInputFileFormatter formatter;
     Moose::out << "\n### START DUMP DATA ###\n"
                << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("registry"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::out << "Label\tType\tName\tClass\tFile\n";
 
@@ -765,12 +771,10 @@ MooseApp::setupOptions()
     }
 
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("registry_hit"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::out << "### START REGISTRY DATA ###\n";
 
@@ -822,12 +826,10 @@ MooseApp::setupOptions()
 
     Moose::out << "\n### END REGISTRY DATA ###\n";
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("definition"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::perf_log.disable_logging();
     JsonSyntaxTree tree("");
@@ -836,12 +838,10 @@ MooseApp::setupOptions()
     Moose::out << "%-START-SON-DEFINITION-%\n"
                << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("yaml"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::perf_log.disable_logging();
 
@@ -859,12 +859,10 @@ MooseApp::setupOptions()
       _parser.buildFullTree(yaml_following_arg);
 
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (isParamValid("json"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::perf_log.disable_logging();
 
@@ -882,12 +880,10 @@ MooseApp::setupOptions()
 
     Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (getParam<bool>("syntax"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::perf_log.disable_logging();
 
@@ -897,18 +893,14 @@ MooseApp::setupOptions()
       Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (getParam<bool>("apptype"))
   {
-    _perf_graph.setLivePrintActive(false);
+    _perf_graph.disableLivePrint();
 
     Moose::perf_log.disable_logging();
     Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
-
-    _perf_graph.setLivePrintActive(true);
   }
   else if (!_input_filenames.empty() ||
            isParamValid("input_file")) // They already specified an input filename

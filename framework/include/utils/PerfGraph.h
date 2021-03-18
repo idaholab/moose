@@ -67,8 +67,16 @@ public:
 
   /**
    * Create a new PerfGraph
+   *
+   * @param root_name The name of the root node
+   * @param app The MooseApp this PerfGraph is for
+   * @param live_all Whether every message should be printed
+   * @param perf_graph_live Enable/disable PerfGraphLive (permanently)
    */
-  PerfGraph(const std::string & root_name, MooseApp & app, const bool live_all);
+  PerfGraph(const std::string & root_name,
+            MooseApp & app,
+            const bool live_all,
+            const bool perf_graph_live);
 
   /**
    * Destructor
@@ -118,6 +126,11 @@ public:
    * Turn on or off live printing (if timing is off then live printing will be off too)
    */
   void setLivePrintActive(bool active) { _live_print_active = active; }
+
+  /**
+   * Completely disables Live Print (cannot be restarted)
+   */
+  void disableLivePrint();
 
   /**
    * Forces all sections to be output live
@@ -369,11 +382,14 @@ protected:
   /// Whether or not to put everything in the perf graph
   bool _live_print_all;
 
+  /// Whether or not live print is disabled (cannot be turned on again)
+  bool _disable_live_print;
+
   /// The PerfGraphRegistry
   PerfGraphRegistry & _perf_graph_registry;
 
   /// This processor id
-  processor_id_type _pid;
+  const processor_id_type _pid;
 
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
