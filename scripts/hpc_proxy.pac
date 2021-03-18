@@ -10,7 +10,7 @@ function FindProxyForURL(url, host) {
   // For [*.hpc.inl.gov, hpcweb.inl.gov, moosebuild.inl.gov, hpcsc.inl.gov],
   // first attempt to use the SOCKS proxy. If no success,
   // attempt a direct connection (useful when on the INL VPN)
-  if (shExpMatch(host, "*.hpc.inl.gov") ||
+  if (dnsDomainIs(host, ".hpc.inl.gov") ||
       dnsDomainIs(host, "hpcweb.inl.gov") ||
       dnsDomainIs(host, "moosebuild.inl.gov") ||
       dnsDomainIs(host, "hpcsc.inl.gov"))
