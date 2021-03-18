@@ -30,7 +30,8 @@ CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters)
     _speed_elem(getADMaterialProperty<Real>(nms::speed)),
     _rho_elem(getADMaterialProperty<Real>(nms::density)),
     _pressure_elem(getADMaterialProperty<Real>(nms::pressure)),
-    _rho_et_elem(getADMaterialProperty<Real>(nms::total_energy_density))
+    _rho_et_elem(getADMaterialProperty<Real>(nms::total_energy_density)),
+    _ht_elem(getADMaterialProperty<Real>(nms::specific_total_enthalpy))
 {
 }
 
@@ -70,7 +71,5 @@ CNSFVHLLCBC::computeQpResidual()
     }
   }
   mooseError("Should never get here");
-  return 0;
-
   return 0;
 }

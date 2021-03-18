@@ -56,9 +56,9 @@ protected:
   const ADMaterialProperty<Real> & _speed_elem;
   const ADMaterialProperty<Real> & _rho_elem;
   const ADMaterialProperty<Real> & _pressure_elem;
-  ///@}
-
   const ADMaterialProperty<Real> & _rho_et_elem;
+  const ADMaterialProperty<Real> & _ht_elem;
+  ///@}
 
   ///@{ the wave speeds
   ADReal _SL;
@@ -74,5 +74,9 @@ protected:
   ADReal _rho_boundary;
   ADRealVectorValue _vel_boundary;
   ADReal _specific_internal_energy_boundary;
+  ADReal _pressure_boundary;
+  ADReal _ht_boundary;
+  ADReal _et_boundary;
+  ADReal _rho_et_boundary;
   ///@}
 };
