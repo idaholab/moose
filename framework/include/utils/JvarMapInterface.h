@@ -77,6 +77,9 @@ public:
   int mapJvarToCvar(unsigned int jvar, const JvarMap & jvar_map);
 
   /// Make a specific map for a given parameter name representing a couple variable (vector)
+  const JvarMap & getJvarMap() { return _jvar_map; }
+
+  /// Make a specific map for a given parameter name representing a couple variable (vector)
   const JvarMap & getParameterJvarMap(std::string parameter_name);
 
   /**

@@ -62,9 +62,6 @@ StressDivergenceRSphericalTensors::computeQpOffDiagJacobian(unsigned int jvar)
     if (jvar == _disp_var[i])
       return calculateJacobian(_component, i);
 
-  if (_temp_coupled && jvar == _temp_var)
-    return 0.0;
-
   return 0.0;
 }
 

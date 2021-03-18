@@ -90,32 +90,31 @@ StressDivergenceRZTensors::computeQpOffDiagJacobian(unsigned int jvar)
       return calculateJacobian(_component, i);
   }
 
-  if (_temp_coupled && jvar == _temp_var)
-  {
-    RankTwoTensor total_deigenstrain_dT;
-    for (const auto deigenstrain_dT : _deigenstrain_dT)
-      total_deigenstrain_dT += (*deigenstrain_dT)[_qp];
+  // off-diagonal Jacobian with respect to any other couple variable
+  const unsigned int cvar = mapJvarToCvar(jvar);
+  RankTwoTensor total_deigenstrain;
+  for (const auto deigenstrain_darg : _deigenstrain_dargs[cvar])
+    total_deigenstrain += (*deigenstrain_darg)[_qp];
 
-    Real jac = 0.0;
-    if (_component == 0)
-    {
-      for (unsigned k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned l = 0; l < LIBMESH_DIM; ++l)
-          jac -= (_grad_test[_i][_qp](0) * _Jacobian_mult[_qp](0, 0, k, l) +
-                  _test[_i][_qp] / _q_point[_qp](0) * _Jacobian_mult[_qp](2, 2, k, l) +
-                  _grad_test[_i][_qp](1) * _Jacobian_mult[_qp](0, 1, k, l)) *
-                 total_deigenstrain_dT(k, l);
-      return jac * _phi[_j][_qp];
-    }
-    else if (_component == 1)
-    {
-      for (unsigned k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned l = 0; l < LIBMESH_DIM; ++l)
-          jac -= (_grad_test[_i][_qp](1) * _Jacobian_mult[_qp](1, 1, k, l) +
-                  _grad_test[_i][_qp](0) * _Jacobian_mult[_qp](1, 0, k, l)) *
-                 total_deigenstrain_dT(k, l);
-      return jac * _phi[_j][_qp];
-    }
+  Real jac = 0.0;
+  if (_component == 0)
+  {
+    for (unsigned k = 0; k < LIBMESH_DIM; ++k)
+      for (unsigned l = 0; l < LIBMESH_DIM; ++l)
+        jac -= (_grad_test[_i][_qp](0) * _Jacobian_mult[_qp](0, 0, k, l) +
+                _test[_i][_qp] / _q_point[_qp](0) * _Jacobian_mult[_qp](2, 2, k, l) +
+                _grad_test[_i][_qp](1) * _Jacobian_mult[_qp](0, 1, k, l)) *
+               total_deigenstrain(k, l);
+    return jac * _phi[_j][_qp];
+  }
+  else if (_component == 1)
+  {
+    for (unsigned k = 0; k < LIBMESH_DIM; ++k)
+      for (unsigned l = 0; l < LIBMESH_DIM; ++l)
+        jac -= (_grad_test[_i][_qp](1) * _Jacobian_mult[_qp](1, 1, k, l) +
+                _grad_test[_i][_qp](0) * _Jacobian_mult[_qp](1, 0, k, l)) *
+               total_deigenstrain(k, l);
+    return jac * _phi[_j][_qp];
   }
 
   return 0.0;
