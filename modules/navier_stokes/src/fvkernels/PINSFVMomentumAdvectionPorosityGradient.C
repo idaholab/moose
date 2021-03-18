@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumAdvectionPorosityGradient.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvectionPorosityGradient);
 
@@ -50,6 +51,9 @@ PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumAdvectionPorosityGradient may only be used with a superficial "
+               "velocity variable, of variable type PINSFVSuperficialVelocityVariable.");
   if (!_smooth_porosity)
     paramError(
         "smooth_porosity",

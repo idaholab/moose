@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVEnergyAdvection.h"
+#include "INSFVEnergyVariable.h"
 #include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVEnergyAdvection);
@@ -28,6 +29,9 @@ PINSFVEnergyAdvection::PINSFVEnergyAdvection(const InputParameters & params)
   if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))
     mooseError("PINSFVEnergyAdvection may only be used with a superficial advective velocity, "
                "of variable type PINSFVSuperficialVelocityVariable.");
+  if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
+    mooseError("PINSFVEnergyAdvection may only be used with a fluid temperature variable, "
+               "of variable type INSFVEnergyVariable.");
 }
 
 ADReal

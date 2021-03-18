@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVEnergyEffectiveDiffusion.h"
+#include "INSFVEnergyVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVEnergyEffectiveDiffusion);
 
@@ -33,6 +34,9 @@ PINSFVEnergyEffectiveDiffusion::PINSFVEnergyEffectiveDiffusion(const InputParame
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
+    mooseError("PINSFVEnergyEffectiveDiffusion may only be used with a fluid temperature variable, "
+               "of variable type INSFVEnergyVariable.");
 }
 
 ADReal

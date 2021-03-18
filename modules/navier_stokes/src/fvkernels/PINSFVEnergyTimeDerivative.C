@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVEnergyTimeDerivative.h"
+#include "INSFVEnergyVariable.h"
 
 #include "NS.h"
 

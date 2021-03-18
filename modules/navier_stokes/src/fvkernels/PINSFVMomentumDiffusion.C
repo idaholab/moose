@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumDiffusion.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumDiffusion);
@@ -48,6 +49,9 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumDiffusion may only be used with a superficial velocity "
+               "variable, of variable type PINSFVSuperficialVelocityVariable.");
   if (_smooth_porosity && !isParamValid("momentum_component"))
     mooseError("The momentum component parameter is required for modeling the porosity "
                "gradient contribution in the momentum diffusion term.");

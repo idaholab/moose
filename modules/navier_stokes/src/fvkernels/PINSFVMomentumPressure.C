@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumPressure.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumPressure);
 
@@ -25,6 +26,9 @@ PINSFVMomentumPressure::validParams()
 PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
   : INSFVMomentumPressure(params), _eps(coupledValue("porosity"))
 {
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumPressure may only be used with a superficial velocity "
+               "variable, of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal
