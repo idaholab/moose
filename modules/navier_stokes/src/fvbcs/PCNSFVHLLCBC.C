@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CNSFVHLLCBC.h"
-#include "CNSFVHLLC.h"
+#include "PCNSFVHLLCBC.h"
+#include "PCNSFVHLLC.h"
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 
 InputParameters
-CNSFVHLLCBC::validParams()
+PCNSFVHLLCBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
   return params;
 }
 
-CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters)
+PCNSFVHLLCBC::PCNSFVHLLCBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _specific_internal_energy_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
@@ -29,29 +29,32 @@ CNSFVHLLCBC::CNSFVHLLCBC(const InputParameters & parameters)
     _rho_elem(getADMaterialProperty<Real>(NS::density)),
     _pressure_elem(getADMaterialProperty<Real>(NS::pressure)),
     _rho_et_elem(getADMaterialProperty<Real>(NS::total_energy_density)),
-    _ht_elem(getADMaterialProperty<Real>(NS::specific_total_enthalpy))
+    _ht_elem(getADMaterialProperty<Real>(NS::specific_total_enthalpy)),
+    _eps_elem(getMaterialProperty<Real>(NS::porosity))
 {
 }
 
 ADReal
-CNSFVHLLCBC::computeQpResidual()
+PCNSFVHLLCBC::computeQpResidual()
 {
   mooseAssert(this->hasBlocks(_face_info->elem().subdomain_id()), "checking subdomain restriction");
 
   _normal_speed_elem = _normal * _vel_elem[_qp];
   preComputeWaveSpeed();
 
-  const auto & wave_speeds = CNSFVHLLC::waveSpeed(_rho_elem[_qp],
-                                                  _vel_elem[_qp],
-                                                  _specific_internal_energy_elem[_qp],
-                                                  _rho_boundary,
-                                                  _vel_boundary,
-                                                  _specific_internal_energy_boundary,
-                                                  _fluid,
-                                                  _normal);
-  _SL = wave_speeds[0];
-  _SM = wave_speeds[1];
-  _SR = wave_speeds[2];
+  auto wave_speeds = PCNSFVHLLC::waveSpeed(_rho_elem[_qp],
+                                           _vel_elem[_qp],
+                                           _specific_internal_energy_elem[_qp],
+                                           _eps_elem[_qp],
+                                           _rho_boundary,
+                                           _vel_boundary,
+                                           _specific_internal_energy_boundary,
+                                           _eps_boundary,
+                                           _fluid,
+                                           _normal);
+  _SL = std::move(wave_speeds[0]);
+  _SM = std::move(wave_speeds[1]);
+  _SR = std::move(wave_speeds[2]);
 
   if (_SL >= 0)
     return fluxElem();
@@ -61,12 +64,12 @@ CNSFVHLLCBC::computeQpResidual()
   {
     if (_SM >= 0)
     {
-      ADReal f = _rho_elem[_qp] * (_SL - _normal_speed_elem) / (_SL - _SM);
+      ADReal f = _eps_elem[_qp] * _rho_elem[_qp] * (_SL - _normal_speed_elem) / (_SL - _SM);
       return fluxElem() + _SL * (f * hllcElem() - conservedVariableElem());
     }
     else
     {
-      ADReal f = _rho_boundary * (_SR - _normal_speed_boundary) / (_SR - _SM);
+      ADReal f = _eps_boundary * _rho_boundary * (_SR - _normal_speed_boundary) / (_SR - _SM);
       return fluxBoundary() + _SR * (f * hllcBoundary() - conservedVariableBoundary());
     }
   }

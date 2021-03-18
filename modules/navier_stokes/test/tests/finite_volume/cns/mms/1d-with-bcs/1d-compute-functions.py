@@ -33,6 +33,7 @@ f_rho_ud, e_rho_ud = mms.evaluate('div(mass_flux * u) + eps*grad(p).dot(e_i)', r
 f_rho_et, e_rho_et = mms.evaluate('div(mass_flux * ht)', rho_et, variable='rho_et', rho_et=rho_et, rho=rho, rho_ud=rho_ud, mass_flux=mass_flux, ud=ud, u=u, vel=vel, e=e, p=p, rho_ht=rho_ht, ht=ht, scalars=['eps'])
 _, e_T = mms.evaluate('T', T, variable='T', rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, T=T, scalars=['eps'])
 _, e_eps_p = mms.evaluate('eps_p', eps_p, variable='eps_p', rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, p=p, scalars=['eps'])
+_, e_p = mms.evaluate('p', p, variable='p', rho=rho, rho_et=rho_et, rho_ud=rho_ud, ud=ud, u=u, vel=vel, e=e, p=p, scalars=['eps'])
 
 mms.print_hit(e_rho, 'exact_rho')
 mms.print_hit(f_rho, 'forcing_rho', eps='${eps}')
@@ -45,3 +46,4 @@ mms.print_hit(f_rho_et, 'forcing_rho_et', eps='${eps}')
 
 mms.print_hit(e_T, 'exact_T', eps='${eps}')
 mms.print_hit(e_eps_p, 'exact_eps_p', eps='${eps}')
+mms.print_hit(e_p, 'exact_p', eps='${eps}')
