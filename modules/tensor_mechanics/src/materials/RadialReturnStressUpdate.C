@@ -150,22 +150,6 @@ RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_tria
   }
 }
 
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateState(RankTwoTensor & /*strain_increment*/,
-                                                  RankTwoTensor & /*inelastic_strain_increment*/,
-                                                  const RankTwoTensor & /*rotation_increment*/,
-                                                  RankTwoTensor & /*stress_new*/,
-                                                  const RankTwoTensor & /*stress_old*/,
-                                                  const RankFourTensor & /*elasticity_tensor*/,
-                                                  const RankTwoTensor & /*elastic_strain_old*/,
-                                                  bool /*compute_full_tangent_operator*/,
-                                                  RankFourTensor & /*tangent_operator*/)
-{
-  mooseError(
-      "updateState called: the version without tangent computation should be called instead");
-}
-
 template <>
 void
 RadialReturnStressUpdateTempl<false>::updateState(RankTwoTensor & strain_increment,
@@ -222,28 +206,18 @@ RadialReturnStressUpdateTempl<false>::updateState(RankTwoTensor & strain_increme
       effective_trial_stress, stress_new, compute_full_tangent_operator, tangent_operator);
 }
 
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateState(ADRankTwoTensor & /*strain_increment*/,
-                                                  ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                                  const ADRankTwoTensor & /*rotation_increment*/,
-                                                  ADRankTwoTensor & /*stress_new*/,
-                                                  const RankTwoTensor & /*stress_old*/,
-                                                  const ADRankFourTensor & /*elasticity_tensor*/,
-                                                  const RankTwoTensor & /*elastic_strain_old*/)
-{
-  mooseError("updateState called: the version with tangent computation should be called instead");
-}
-
 template <>
 void
-RadialReturnStressUpdateTempl<true>::updateState(ADRankTwoTensor & strain_increment,
-                                                 ADRankTwoTensor & inelastic_strain_increment,
-                                                 const ADRankTwoTensor & /*rotation_increment*/,
-                                                 ADRankTwoTensor & stress_new,
-                                                 const RankTwoTensor & /*stress_old*/,
-                                                 const ADRankFourTensor & elasticity_tensor,
-                                                 const RankTwoTensor & elastic_strain_old)
+RadialReturnStressUpdateTempl<true>::updateState(
+    ADRankTwoTensor & strain_increment,
+    ADRankTwoTensor & inelastic_strain_increment,
+    const ADRankTwoTensor & /*rotation_increment*/,
+    ADRankTwoTensor & stress_new,
+    const RankTwoTensor & /*stress_old*/,
+    const ADRankFourTensor & elasticity_tensor,
+    const RankTwoTensor & elastic_strain_old,
+    bool /*compute_full_tangent_operator = false*/,
+    RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
@@ -288,23 +262,6 @@ RadialReturnStressUpdateTempl<true>::updateState(ADRankTwoTensor & strain_increm
   }
 
   computeStressFinalize(inelastic_strain_increment);
-}
-
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
-    RankTwoTensor & /*strain_increment*/,
-    RankTwoTensor & /*inelastic_strain_increment*/,
-    const RankTwoTensor & /*rotation_increment*/,
-    RankTwoTensor & /*stress_new*/,
-    const RankTwoTensor & /*stress_old*/,
-    const RankFourTensor & /*elasticity_tensor*/,
-    const RankTwoTensor & /*elastic_strain_old*/,
-    bool /*compute_full_tangent_operator*/,
-    RankFourTensor & /*tangent_operator*/)
-{
-  mooseError("updateStateSubstep called: the version without tangent computation should be "
-             "called instead");
 }
 
 template <>
@@ -398,21 +355,6 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   _dt = dt_original;
 }
 
-template <bool is_ad>
-void
-RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
-    ADRankTwoTensor & /*strain_increment*/,
-    ADRankTwoTensor & /*inelastic_strain_increment*/,
-    const ADRankTwoTensor & /*rotation_increment*/,
-    ADRankTwoTensor & /*stress_new*/,
-    const RankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & /*elasticity_tensor*/,
-    const RankTwoTensor & /*elastic_strain_old*/)
-{
-  mooseError(
-      "updateStateSubstep called: the version with tangent computation should be called instead");
-}
-
 template <>
 void
 RadialReturnStressUpdateTempl<true>::updateStateSubstep(
@@ -422,7 +364,9 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
     ADRankTwoTensor & stress_new,
     const RankTwoTensor & stress_old,
     const ADRankFourTensor & elasticity_tensor,
-    const RankTwoTensor & elastic_strain_old)
+    const RankTwoTensor & elastic_strain_old,
+    bool /*compute_full_tangent_operator*/,
+    RankFourTensor & /*tangent_operator*/)
 {
   const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
 
