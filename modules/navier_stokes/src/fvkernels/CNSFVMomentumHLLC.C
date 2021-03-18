@@ -16,10 +16,11 @@ InputParameters
 CNSFVMomentumHLLC::validParams()
 {
   InputParameters params = CNSFVHLLC::validParams();
-  MooseEnum momentum_component("x=0 y=1 z=2", "x");
-  params.addParam<MooseEnum>("momentum_component",
-                             momentum_component,
-                             "The component of the momentum equation that this kernel applies to.");
+  MooseEnum momentum_component("x=0 y=1 z=2");
+  params.addRequiredParam<MooseEnum>(
+      "momentum_component",
+      momentum_component,
+      "The component of the momentum equation that this kernel applies to.");
   return params;
 }
 
