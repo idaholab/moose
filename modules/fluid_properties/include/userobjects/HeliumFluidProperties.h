@@ -329,6 +329,9 @@ public:
   Real p_from_T_v(Real T, Real v) const override;
   ADReal p_from_T_v(const ADReal & T, const ADReal & v) const override;
 
+  using SinglePhaseFluidProperties::e_from_p_rho;
+  ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
+
 protected:
   /// specific heat at constant volume
   const Real _cv;
