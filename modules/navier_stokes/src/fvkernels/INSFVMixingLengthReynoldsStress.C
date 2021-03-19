@@ -45,7 +45,8 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _rho(getParam<Real>("rho")),
-    _mixing_len(coupledValue("mixing_length"))
+    _mixing_len(coupledValue("mixing_length")),
+    _mixing_len_neighbor(coupledNeighborValue("mixing_length"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -89,8 +90,16 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   }
   velocity_gradient = std::sqrt(velocity_gradient + offset);
 
+  // Interpolate the mixing length to the face
+  ADReal mixing_len;
+  interpolate(Moose::FV::InterpMethod::Average,
+              mixing_len,
+              _mixing_len[_qp],
+              _mixing_len_neighbor[_qp],
+              *_face_info,
+              true);
+
   // Compute the eddy diffusivitiy
-  Real mixing_len = _mixing_len[_qp];
   ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
 
   // Compute the dot product of the strain rate tensor and the normal vector

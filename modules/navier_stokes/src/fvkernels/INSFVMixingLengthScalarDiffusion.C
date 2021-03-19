@@ -33,13 +33,14 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
+    _v_var(isParamValid("v")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
                : nullptr),
-    _w_var(params.isParamValid("w")
+    _w_var(isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _mixing_len(coupledValue("mixing_length")),
+    _mixing_len_neighbor(coupledNeighborValue("mixing_length")),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -68,24 +69,32 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  // Compute the normalized velocity gradient.
+  // Compute the normalized velocity gradient
   const auto & grad_u = _u_var->adGradSln(*_face_info);
   ADReal velocity_gradient = grad_u(0) * grad_u(0);
   if (_dim >= 2)
   {
-    auto grad_v = _v_var->adGradSln(*_face_info);
+    const auto & grad_v = _v_var->adGradSln(*_face_info);
     velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0) + grad_v(1) * grad_v(1);
     if (_dim >= 3)
     {
-      auto grad_w = _w_var->adGradSln(*_face_info);
+      const auto & grad_w = _w_var->adGradSln(*_face_info);
       velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2) + grad_w(0) * grad_w(0) +
                            grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
     }
   }
   velocity_gradient = std::sqrt(velocity_gradient + offset);
 
+  // Interpolate the mixing length to the face
+  ADReal mixing_len;
+  interpolate(Moose::FV::InterpMethod::Average,
+              mixing_len,
+              _mixing_len[_qp],
+              _mixing_len_neighbor[_qp],
+              *_face_info,
+              true);
+
   // Compute the eddy diffusivity for momentum
-  Real mixing_len = _mixing_len[_qp];
   ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
 
   // Use the turbulent Schmidt/Prandtl number to get the eddy diffusivity for

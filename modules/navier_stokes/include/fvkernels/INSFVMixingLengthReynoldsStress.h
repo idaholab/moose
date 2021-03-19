@@ -42,4 +42,6 @@ protected:
 
   /// Turbulent eddy mixing length
   const VariableValue & _mixing_len;
+  /// Turbulent eddy mixing length for the neighbor cell
+  const VariableValue & _mixing_len_neighbor;
 };
