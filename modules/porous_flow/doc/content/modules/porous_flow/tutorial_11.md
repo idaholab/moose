@@ -55,7 +55,7 @@ Let's step through the input file.  This simulation uses the water and gas porep
 
 The `PorousFlowDictator` is given the variable names as well as the number of fluid phases and components.
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./dictator] end=[./pc]
+!listing modules/porous_flow/examples/tutorial/11.i start=[dictator] end=[pc]
 
 ## GlobalParams
 
@@ -113,11 +113,11 @@ Some `AuxVariables` are defined that need further explanation.
 
 The boundary conditions for the displacements are roller on the sides, fixed at the top and bottom (an arbitrary choice made by the creator of this input file) and `Pressure` boundary conditions on the injection_area:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./roller_tmax] end=[./cold_co2]
+!listing modules/porous_flow/examples/tutorial/11.i start=[roller_tmax] end=[cold_co2]
 
 Notice the `constrained_effective_fluid_pressure_at_wellbore`.  This is almost the `effective_fluid_pressure` `AuxVariable` defined above, evaluated at the injection_area.  But there is a problem at the first timestep, because this uses   Material properties that are not properly initialised.  So a little bit of deception is used.  Firstly, the `AuxVariable` is evaluated at the injection_area and put into a `Postprocessor`:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[Postprocessors] end=[./constrained_effective_fluid_pressure_at_wellbore]
+!listing modules/porous_flow/examples/tutorial/11.i start=[Postprocessors] end=[constrained_effective_fluid_pressure_at_wellbore]
 
 Then a `Function` is made that returns either the value of this `Postprocessor` or 20E6 (the initial reservoir pressure)
 
@@ -125,79 +125,75 @@ Then a `Function` is made that returns either the value of this `Postprocessor` 
 
 Finally, the value of this `Function` is placed into the `Postprocessor` used in the Pressure BC:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./constrained_effective_fluid_pressure_at_wellbore] end=[]
+!listing modules/porous_flow/examples/tutorial/11.i start=[constrained_effective_fluid_pressure_at_wellbore] end=[]
 
 The boundary conditions for temperature is a simple preset `DirichletBC` on the injection_area:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./cold_co2] end=[./constant_co2_injection]
+!listing modules/porous_flow/examples/tutorial/11.i start=[cold_co2] end=[constant_co2_injection]
 
 The boundary conditions for the fluids at the injection_area is just a constant injection of CO$_{2}$ with rate $10^{-4}\,$kg.s$^{-1}$.m$^{-2}$:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./constant_co2_injection] end=[./outer_water_removal]
+!listing modules/porous_flow/examples/tutorial/11.i start=[constant_co2_injection] end=[outer_water_removal]
 
 At the outer boundary, water and CO$_{2}$ are removed if their porepressures rise above their initial values.  A `PorousFlowPiecewiseLinearSink` is used, with an imaginary boundary at fixed porepressure sitting at a distance of $L=10\,$m outside the model.  The procedure of constructing this sink is described fully in the [boundaries documentation](porous_flow/boundaries.md).  The input-file blocks are
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./outer_water_removal] end=[]
+!listing modules/porous_flow/examples/tutorial/11.i start=[outer_water_removal] end=[Modules]
 
 ## Fluid properties
 
 High-precision equations of state are used for both the water and the CO$_{2}$.  Before running the simulation, these are tabulated, and the tabulated versions are used by MOOSE in all computations, which shortens the simulation time:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[Modules] end=[]
+!listing modules/porous_flow/examples/tutorial/11.i start=[Modules] end=[Materials]
 
 ## Materials
 
 The capillary pressure relationship is defined by the `UserObject`:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./pc] end=[]
+!listing modules/porous_flow/examples/tutorial/11.i start=[pc] end=[]
 
 As explained on [Page 09](porous_flow/tutorial_09.md) and [Page 10](porous_flow/tutorial_10.md), there are a set of "fundamental Materials" that compute all porepressures, saturations, temperature and mass fractions as Material properties (as well as their gradients, and the derivatives with respect to the primary `Variables`, etc).  In the case at hand, these fundamental Materials are:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[Materials] end=[./water_nodal]
+!listing modules/porous_flow/examples/tutorial/11.i start=[Materials] end=[water]
 
 The water and CO$_{2}$ densities, viscosities, enthalpies, and internal energies (as well as derivatives of these) are computed by
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./water_nodal] end=[./density_all_nodal]
+!listing modules/porous_flow/examples/tutorial/11.i start=[water] end=[relperm_water]
 
-These are then Joined into `std::vectors`, ready to be fed into the `Kernels` (and other `Materials`, `AuxKernels`, etc) using the `PorousFlowJoiners`:
+A Corey type of [relative permeability](porous_flow/relative_permeability.md) is chosen for the liquid phase, and a Brooks-Corey type of relative permeability is chosen for the gas phase:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./density_all_nodal] end=[./relperm_water_nodal]
-
-A Corey type of [relative permeability](porous_flow/relative_permeability.md) is chosen for the liquid phase, and a Brooks-Corey type of relative permeability is chosen for the gas phase.  These are then Joined:
-
-!listing modules/porous_flow/examples/tutorial/11.i start=[./relperm_water_nodal] end=[./porosity_nodal]
+!listing modules/porous_flow/examples/tutorial/11.i start=[relperm_water] end=[porosity]
 
 [Porosity](porous_flow/porosity.md) is chosen to depend on porepressures, saturations (actually just the effective porepressure), temperature and mechanical strain using:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./porosity_nodal] end=[./permeability_aquifer]
+!listing modules/porous_flow/examples/tutorial/11.i start=[porosity_mat] end=[permeability_aquifer]
 
 Permeability is chosen to follow the Kozeny-Carman relationship:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./permeability_aquifer] end=[./rock_thermal_conductivity]
+!listing modules/porous_flow/examples/tutorial/11.i start=[permeability_aquifer] end=[rock_thermal_conductivity]
 
 The rock thermal conductivity is chosen to be independent of water saturation and to be isotropic (and independent of rock type --- reservoir or cap-rock):
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./rock_thermal_conductivity] end=[./rock_internal_energy]
+!listing modules/porous_flow/examples/tutorial/11.i start=[rock_thermal_conductivity] end=[rock_internal_energy]
 
 while the rock internal energy is also constant:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./rock_internal_energy] end=[./elasticity_tensor]
+!listing modules/porous_flow/examples/tutorial/11.i start=[rock_internal_energy] end=[elasticity_tensor]
 
 The elasticity tensor of the rock (both reservoir and cap-rock) is assumed isotropic with a Young's modulus of 5$\,$GPa:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./elasticity_tensor] end=[./strain]
+!listing modules/porous_flow/examples/tutorial/11.i start=[elasticity_tensor] end=[strain]
 
 The strain calculator must take into consideration both the thermal strain (see [governing equations](porous_flow/governing_equations)) as well as initial effective stress.  The initial total stress is assumed to be zero (for simplicity, not because it is physically very likely, but a nonzero value doesn't change the results much), so the initial effective stress is just the initial porepressure
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./strain] end=[./stress]
+!listing modules/porous_flow/examples/tutorial/11.i start=[strain] end=[stress]
 
 The `thermal_contribution` eigenstrain name has to be provided to the `StressDivergenceTensors` `Kernels`, by the way (see above).  Stress is just linear elastic:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./stress] end=[./effective_fluid_pressure_nodal]
+!listing modules/porous_flow/examples/tutorial/11.i start=[stress] end=[effective_fluid_pressure_mat]
 
 Finally, the effective fluid pressure must be computed because it is needed by the Porosity and the solid-fluid coupling, and the volumetric strain feeds into the Porosity:
 
-!listing modules/porous_flow/examples/tutorial/11.i start=[./effective_fluid_pressure_nodal] end=[]
+!listing modules/porous_flow/examples/tutorial/11.i start=[effective_fluid_pressure_mat] end=[Postprocessors]
 
 ## Executioner
 
@@ -219,27 +215,27 @@ As mentioned on [Page 00](porous_flow/tutorial_00.md), this problem is really an
 
 There only need by a `disp_r` Variable in place of `disp_x` and `disp_y`:
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./disp_r] end=[]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[disp_r] end=[]
 
 !listing modules/porous_flow/examples/tutorial/11_2D.i start=[GlobalParams] end=[]
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./dictator] end=[./pc]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[dictator] end=[pc]
 
 There are mechanical Kernels only for `disp_r`, and the `StressDivergenceTensors` Kernel is modified:
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./grad_stress_r] end=[./poro_r]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[grad_stress_r] end=[poro_r]
 
 The stress `AuxKernels` are modified.  In TensorMechanics with RZ coordinates, the 00 component is $rr$, the 11 component is $zz$ and the 22 component is $\theta\theta$.  Therefore, these `AuxKernels` read
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./stress_rr_aux] end=[./porosity]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[stress_rr_aux] end=[porosity]
 
 The boundary conditions for the mechanics become simpler:
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./pinned_top_bottom_r] end=[./cold_co2]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[pinned_top_bottom_r] end=[cold_co2]
 
 Finally, the strain calculator needs to be of RZ type:
 
-!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./strain] end=[./thermal_contribution]
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[strain] end=[thermal_contribution]
 
 The reader may check that the 3D and 2D models produce the same answer, although of course the 2D version is much faster due to it having only 176 degrees of freedom compared with the 3D's 1100.
 

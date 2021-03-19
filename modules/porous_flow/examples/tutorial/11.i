@@ -419,7 +419,7 @@
     sum_s_res = 0.2
     phase = 1
   []
-  [porosity]
+  [porosity_mat]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -484,7 +484,7 @@
     type = ComputeLinearElasticStress
   []
 
-  [effective_fluid_pressure]
+  [effective_fluid_pressure_mat]
     type = PorousFlowEffectiveFluidPressure
   []
   [volumetric_strain]

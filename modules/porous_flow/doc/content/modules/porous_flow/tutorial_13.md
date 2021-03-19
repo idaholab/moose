@@ -8,6 +8,8 @@ A very simple chemical system was built in [Page 07](porous_flow/tutorial_07.md)
 - does not use an `Action` to describe the Kernels, Materials, etc.  This makes the input file quite long, but perhaps more easy to extend to multi-phase situations, different boundary conditions, etc.  An `Action` could easily be used instead, by copying the chemistry from this tutorial to that on [Page 07](porous_flow/tutorial_07.md).
 - builds a fully-saturated aqueous chemical system that could be used to describe dolomite precipitation and dissolution.
 
+This page illustrates that it is possible to build quite complicated chemical systems within PorousFlow.  However, geochemists will recognize these are still unrealistically simple, since they contain only a few species, the activity coefficients are all unity, the equilibrium constants are not easily temperature-dependent, etc.  If you require state-of-the-art geochemical modelling capability, please use MOOSE's Geochemistry module.
+
 ## The equilibrium system
 
 The equilibrium system has:
@@ -33,7 +35,7 @@ The primary species are represented as PorousFlow variables:
 
 The equilibrium reactions are encoded into this Material:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./equilibrium_massfrac_qp] end=[./kinetic_nodes]
+!listing modules/porous_flow/examples/tutorial/13.i start=[equilibrium_massfrac] end=[kinetic]
 
 
 
@@ -56,7 +58,7 @@ with the following parameters:
 
 Some of these quantities have been chosen rather arbitrarily.  This kinetic system is encoded in the input file as:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./kinetic_qp] end=[./dolomite_conc]
+!listing modules/porous_flow/examples/tutorial/13.i start=[kinetic] end=[dolomite_conc]
 
 
 
@@ -72,13 +74,13 @@ The model is just a 1D line, extending between $x=0$ and $x=1$.
 
 Each of the primary variables are initialised to have concentration $10^{-6}\,$m$^{3}$(species)/m$^{3}$(solution) everywhere in the domain except for at the left-hand side ($x=0$) where they have concentration $0.05$.  The boundary conditions are to fix these values at the left and right sides of the domain.  For instance:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./h+_ic] end=[./hco3_ic]
+!listing modules/porous_flow/examples/tutorial/13.i start=[h+_ic] end=[hco3_ic]
 
 and
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./h+_left] end=[./ca2+_left]
+!listing modules/porous_flow/examples/tutorial/13.i start=[h+_left] end=[ca2+_left]
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./h+_right] end=[./ca2+_right]
+!listing modules/porous_flow/examples/tutorial/13.i start=[h+_right] end=[ca2+_right]
 
 *Please remember* that boundary conditions in PorousFlow are usually more complicated than setting Dirichlet or Preset boundary conditions: see [boundary conditions](boundaries.md).  Looking at the results below you can clearly see the effect of the naive boundary conditions placed on the right-hand side.
 
@@ -90,7 +92,7 @@ The initial condition for dolomite is $10^{-7}\,$m$^{3}$(precipitate)/m$^{3}$(po
 
 and the Material:
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./dolomite_conc_qp] end=[./simple_fluid]
+!listing modules/porous_flow/examples/tutorial/13.i start=[dolomite_conc] end=[simple_fluid]
 
 Given the above equilibrium constant and concentrations of the primary species, the dolomite immediately begins to dissolve into solution.
 
@@ -98,7 +100,7 @@ Given the above equilibrium constant and concentrations of the primary species, 
 
 The porepressure is fixed to have gradient $dP/dx = 10^{6}\,$Pa/m.
 
-!listing modules/porous_flow/examples/tutorial/13.i start=[./pressure_ic] end=[./h+_ic]
+!listing modules/porous_flow/examples/tutorial/13.i start=[pressure_ic] end=[h+_ic]
 
 With a permeability of $10^{-7}\,$m$^{2}$ and a fluid viscosity of $10^{-3}\,$Pa.s, the Darcy velocity is $0.1\,$m/s.  The porosity is held fixed at 0.2.
 
