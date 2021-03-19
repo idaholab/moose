@@ -6,7 +6,7 @@ import mooseutils
 moose_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
 status = mooseutils.git_submodule_status(moose_dir)
 
-# Use framework/contrib/hit
+# Use framework/contrib/hit because moosetools submodule is not available
 if status['moosetools'] == '-':
     try:
         from . import hit
@@ -14,6 +14,7 @@ if status['moosetools'] == '-':
         moose_test_dir = os.path.abspath(os.path.join(moose_dir, 'test'))
         subprocess.run(['make', 'hit'], cwd=moose_test_dir)
         from . import hit
+# Use hit in moosetools submodule
 else:
     hit_dir = os.path.join(moose_dir, 'moosetools', 'contrib', 'hit')
     try:

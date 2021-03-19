@@ -20,7 +20,7 @@ if [[ -n "$help" ]]; then
   cd $SCRIPT_DIR/..
   echo "Usage: $0 [-h | --help | --skip-submodule-update ]"
   echo
-  echo "-h | --help              Display this message and list of available PETSc options"
+  echo "-h | --help              Display this message"
   echo "--skip-submodule-update  Do not update the moosetools submodule, use the current version"
   echo "*************************************************************************************"
   echo ""
@@ -28,7 +28,6 @@ fi
 
 cd $SCRIPT_DIR/..
 
-# Test for git repository when not using fast
 git_dir=`git rev-parse --show-cdup 2>/dev/null`
 if [[ -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]; then
   git submodule update --init moosetools
