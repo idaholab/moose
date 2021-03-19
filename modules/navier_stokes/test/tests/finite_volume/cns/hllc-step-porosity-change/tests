@@ -1,0 +1,18 @@
+[Tests]
+  design = 'cnsfv.md'
+  issues = '#16758'
+  [1d-porosity-step-change]
+    type = Exodiff
+    input = porous-hllc.i
+    exodiff = porous-hllc_out.e
+    requirement = 'The system shall be able to generate a monotone solution to the porous Euler equations in one dimension with a step change in porosity in the simulation domain using a HLLC discretization of the advection flux.'
+    cli_args = "Outputs/out/execute_on='final'"
+  []
+  [2d-porosity-step-change]
+    type = Exodiff
+    input = 2d-porous-hllc.i
+    exodiff = 2d-porous-hllc_out.e
+    requirement = 'The system shall be able to generate a monotone solution to the porous Euler equations in two dimensions with a step change in porosity in the simulation domain using a HLLC discretization of the advection flux.'
+    cli_args = "Outputs/out/execute_on='final' Mesh/cartesian/nx=20 Mesh/cartesian/ny=4"
+  []
+[]
