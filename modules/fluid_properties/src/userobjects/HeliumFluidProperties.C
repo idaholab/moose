@@ -30,6 +30,38 @@ HeliumFluidProperties::fluidName() const
   return "helium";
 }
 
+ADReal
+HeliumFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
+{
+  // Initial guess using ideal gas law
+  ADReal e = p / (_cp / _cv - 1.) / rho;
+  const ADReal v = 1. / rho;
+
+  Real real_p_from_props, dp_dv, dp_de;
+  const unsigned int max_its = 10;
+  unsigned int it = 0;
+
+  do
+  {
+    p_from_v_e(v.value(), e.value(), real_p_from_props, dp_dv, dp_de);
+    ADReal p_from_props = real_p_from_props;
+    const Real jacobian = dp_de;
+    p_from_props.derivatives() = dp_de * e.derivatives() + dp_dv * v.derivatives();
+
+    const ADReal residual = p_from_props - p;
+
+    if (std::abs(residual.value()) / p.value() < 1e-12)
+      break;
+
+    const ADReal delta_e = -residual / jacobian;
+    e += delta_e;
+  } while (++it < max_its);
+
+  mooseAssert(it < max_its, "The iteration failed to converge");
+
+  return e;
+}
+
 Real
 HeliumFluidProperties::p_from_v_e(Real v, Real e) const
 {
