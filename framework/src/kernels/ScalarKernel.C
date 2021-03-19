@@ -32,6 +32,9 @@ ScalarKernel::validParams()
 
   params.registerBase("ScalarKernel");
 
+  // We do not currently support explicit ScalarKernels
+  params.suppressParameter<bool>("implicit");
+
   return params;
 }
 
@@ -39,7 +42,18 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
   : ResidualObject(parameters),
     ScalarCoupleable(this),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _u_old(_var.slnOld())
+    _u(_var.sln())
 {
+}
+
+const VariableValue &
+ScalarKernel::uOld() const
+{
+  if (_sys.solutionStatesInitialized())
+    mooseError("The solution states have already been initialized when calling ",
+               type(),
+               "::uOld().\n\n",
+               "Make sure to call uOld() within the object constructor.");
+
+  return _var.slnOld();
 }
