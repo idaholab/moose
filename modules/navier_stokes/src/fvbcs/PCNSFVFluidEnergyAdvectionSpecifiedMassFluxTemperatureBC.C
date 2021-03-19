@@ -25,7 +25,7 @@ PCNSFVFluidEnergyAdvectionSpecifiedMassFluxTemperatureBC::
 ADReal
 PCNSFVFluidEnergyAdvectionSpecifiedMassFluxTemperatureBC::computeQpResidual()
 {
-  mooseAssert(this->hasBlocks(_face_info->elem().subdomain_id()), "Checking block restriction");
+  // mooseAssert(_var.hasBlocks(_face_info->elem().subdomain_id()), "Checking block restriction");
 
   computeMemberData();
 
