@@ -51,11 +51,11 @@ with $\eta = 1 = \theta$.  Assuming that $K\neq 1$ and there is some gas present
 
 Using $rAV = 10^{-6}\,$s$^{-1}$, the Materials that compute the reaction rate and the resulting Mineral concentration (m$^{3}$(mineral)/m$^{3}$(porous-material)) are
 
-!listing modules/porous_flow/examples/thm_example/2D_c.i start=[./predis] end=[./predis_nodes]
+!listing modules/porous_flow/examples/thm_example/2D_c.i start=[predis] end=[predis_nodes]
 
 The [PorousFlowDictator](PorousFlowDictator.md) must be enhanced to include the number of reactions and a specification of the phase number of the phase involved in these reactions.
 
-!listing modules/porous_flow/examples/thm_example/2D_c.i start=[./dictator] end=[./pc]
+!listing modules/porous_flow/examples/thm_example/2D_c.i start=[dictator] end=[pc]
 
 The phase involved in the reactions is usually the aqueous phase, hence the `aqueous` in the keywords, but in this case setting `aqueous_phase_number = 1` means the $S$ in the above equation is actually the gas saturation.
 
@@ -64,7 +64,7 @@ The equilibrium constant is assumed to be temperature dependent:
 \log_{10}K = \frac{358 - T}{358 - 294} \ .
 \end{equation}
 
-!listing modules/porous_flow/examples/thm_example/2D_c.i start=[./eqm_const_auxk] end=[./porosity_auxk]
+!listing modules/porous_flow/examples/thm_example/2D_c.i start=[eqm_const_auxk] end=[porosity_auxk]
 
 
 ## Impact of dissolution on porosity
@@ -82,7 +82,7 @@ Here:
 
 For this example, assume $\phi_{0} = 0.2$ and $M_{\mathrm{ref}} = 0.1$.  The relevant Material is:
 
-!listing modules/porous_flow/examples/thm_example/2D_c.i start=[./porosity_reservoir] end=[./permeability_reservoir]
+!listing modules/porous_flow/examples/thm_example/2D_c.i start=[porosity_reservoir] end=[permeability_reservoir]
 
 ## Results
 

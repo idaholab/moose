@@ -266,7 +266,7 @@ To include hysteretic capillarity in an existing (non-hysteretic) input file, th
 
 An example is:
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[hys_order_material] end=[Postprocessors]
 
 ### Preliminary example
 
@@ -276,7 +276,7 @@ Before introducing hysteresis into an input file, it might be useful to assess h
 
 By changing the `FunctionAux` that controls the saturation, various hysteretic curves may be constructed.
 
-!listing modules/porous_flow/test/tests/hysteresis/vary_sat_1.i start=[./sat_aux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/vary_sat_1.i start=[sat_aux] end=[hys_order]
 
 [hys_vary_sat_1_fig] shows the results of two hysteretic simulations.  Both are initialised at full saturation and are then dried.  The first (green curve) dries to $S_{l} = 0$ before wetting, so follows the primary wetting curve.  The second (yellow curve) dries to $S_{l} = 0.2$ before wetting, so follows a first-order wetting curve.
 
@@ -296,7 +296,7 @@ if(t <= 0.4, 1 - 2 * t, if(t <= 0.7, 2 * t - 0.6, if(t <= 0.95, 0.8 - 2 * (t - 0
 
 A simulation that simply removes and adds water to a system to observe the hysteretic capillary pressure is explored in this section.  The water flux is controlled by the Postprocessor
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./flux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[flux] end=[hys_order]
 
 and the DiracKernel
 
@@ -304,7 +304,7 @@ and the DiracKernel
 
 The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_3rd.i start=[hys_order_material] end=[Postprocessors]
 
 The result is [hys_1phase_3_fig].
 
@@ -314,7 +314,7 @@ The result is [hys_1phase_3_fig].
 
 A simulation that simply adds gas then removes gas from a 2-phase system to observe the hysteretic capillary pressure is explored in this section.  The gas flux is controlled by the Postprocessor
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[./flux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[flux] end=[hys_order]
 
 and the DiracKernel
 
@@ -322,7 +322,7 @@ and the DiracKernel
 
 The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePP.i start=[hys_order_material] end=[Postprocessors]
 
 The result is [hys_2phasePP_1_fig].
 
@@ -332,7 +332,7 @@ The result is [hys_2phasePP_1_fig].
 
 A simulation that simply adds gas, then removes gas, and adds it again to a 2-phase system to observe the hysteretic capillary pressure is explored in this section.  The gas flux is controlled by the Postprocessor
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[./flux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[flux] end=[hys_order]
 
 and the DiracKernel
 
@@ -340,7 +340,7 @@ and the DiracKernel
 
 The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_2.i start=[hys_order_material] end=[Postprocessors]
 
 The result is [hys_2phasePS_2_fig].
 
@@ -364,7 +364,7 @@ To include hysteretic relative permeability in an existing (non-hysteretic) inpu
 
 A 1-phase example is:
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[hys_order_material] end=[Postprocessors]
 
 !alert note
 Models need not contain both hysteretic capillary pressures and hysteretic relative permeabilities: the hysteresis may only appear in the capillary pressure, or the relative permeabilities.
@@ -373,7 +373,7 @@ Models need not contain both hysteretic capillary pressures and hysteretic relat
 
 A simulation that simply removes and adds water to a system to observe the hysteretic relative permeability is explored in this section.  The water flux is controlled by the Postprocessor
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./flux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[flux] end=[hys_order]
 
 and the DiracKernel
 
@@ -381,7 +381,7 @@ and the DiracKernel
 
 The remainder of the input file is standard, with the inclusion of the hysteretic capillary pressure:
 
-!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/1phase_relperm.i start=[hys_order_material] end=[Postprocessors]
 
 The result is [hys_1phase_relperm_fig].  By altering the `flux`, the system may be dried, re-wet, dried and re-wet again, to generate results stuch as [hys_1phase_relperm_2_fig]
 
@@ -394,7 +394,7 @@ The result is [hys_1phase_relperm_fig].  By altering the `flux`, the system may 
 
 A simulation that simply adds and removes gas from a system to observe the hysteretic relative permeability is explored in this section.  The water flux is controlled by the Postprocessor
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[./flux] end=[./hys_order]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[flux] end=[hys_order]
 
 and the DiracKernel
 
@@ -402,7 +402,7 @@ and the DiracKernel
 
 The remainder of the input file is standard, with the inclusion of the hysteretic relative permeabilities:
 
-!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[./hys_order_material] end=[]
+!listing modules/porous_flow/test/tests/hysteresis/2phasePS_relperm.i start=[hys_order_material] end=[Postprocessors]
 
 The result is [hys_2phasePS_relperm_fig].  By altering the `flux`, `k_rg_max` and `gas_low_extension_type`, the impact of various extensions may be explored, as shown in [hys_2phasePS_relperm_2_cubic_fig], [hys_2phasePS_relperm_2_linear_like_fig] and [hys_2phasePS_relperm_2_none_fig].
 

@@ -45,7 +45,7 @@ To model this thermo-hydro-mechanical system, the `PorousFlowBasicTHM` action ne
 
 The boundary conditions used here are roller boundary conditions, as well as boundary conditions that model the effect of the fluid porepressure on the injection area:
 
-!listing modules/porous_flow/examples/tutorial/04.i start=[./roller_tmax] end=[]
+!listing modules/porous_flow/examples/tutorial/04.i start=[BCs] end=[AuxVariables]
 
 The `TensorMechanics` module of MOOSE provides some useful `AuxKernels` for extracting effective stresses of interest to this problem (the effective radial stress and the effective hoop stress)
 
@@ -53,7 +53,7 @@ The `TensorMechanics` module of MOOSE provides some useful `AuxKernels` for extr
 
 Finally, some mechanics-related `Materials` need to be defined
 
-!listing modules/porous_flow/examples/tutorial/04.i start=[./elasticity_tensor] end=[]
+!listing modules/porous_flow/examples/tutorial/04.i start=[elasticity_tensor] end=[Preconditioning]
 
 An animation of the results is shown in [tut04_gif_fig].
 

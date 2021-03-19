@@ -65,58 +65,32 @@ StressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 
 template <bool is_ad>
 void
-StressUpdateBaseTempl<is_ad>::updateState(RankTwoTensor & /*strain_increment*/,
-                                          RankTwoTensor & /*inelastic_strain_increment*/,
-                                          const RankTwoTensor & /*rotation_increment*/,
-                                          RankTwoTensor & /*stress_new*/,
-                                          const RankTwoTensor & /*stress_old*/,
-                                          const RankFourTensor & /*elasticity_tensor*/,
-                                          const RankTwoTensor & /*elastic_strain_old*/,
-                                          bool /*compute_full_tangent_operator*/,
-                                          RankFourTensor & /*tangent_operator*/)
+StressUpdateBaseTempl<is_ad>::updateState(
+    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+    const RankTwoTensor & /*stress_old*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    bool /*compute_full_tangent_operator = false*/,
+    RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
   mooseError("updateState called: it needs to be implemented by your inelastic model");
 }
 
 template <bool is_ad>
 void
-StressUpdateBaseTempl<is_ad>::updateState(ADRankTwoTensor & /*strain_increment*/,
-                                          ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                          const ADRankTwoTensor & /*rotation_increment*/,
-                                          ADRankTwoTensor & /*stress_new*/,
-                                          const RankTwoTensor & /*stress_old*/,
-                                          const ADRankFourTensor & /*elasticity_tensor*/,
-                                          const RankTwoTensor & /*elastic_strain_old*/)
-{
-  mooseError("updateState called: it needs to be implemented by your inelastic model");
-}
-
-template <bool is_ad>
-void
-StressUpdateBaseTempl<is_ad>::updateStateSubstep(RankTwoTensor & /*strain_increment*/,
-                                                 RankTwoTensor & /*inelastic_strain_increment*/,
-                                                 const RankTwoTensor & /*rotation_increment*/,
-                                                 RankTwoTensor & /*stress_new*/,
-                                                 const RankTwoTensor & /*stress_old*/,
-                                                 const RankFourTensor & /*elasticity_tensor*/,
-                                                 const RankTwoTensor & /*elastic_strain_old*/,
-                                                 bool /*compute_full_tangent_operator*/,
-                                                 RankFourTensor & /*tangent_operator*/)
-{
-  this->template paramError(
-      "use_substep",
-      "updateStateSubstep called: it needs to be implemented by your inelastic model");
-}
-
-template <bool is_ad>
-void
-StressUpdateBaseTempl<is_ad>::updateStateSubstep(ADRankTwoTensor & /*strain_increment*/,
-                                                 ADRankTwoTensor & /*inelastic_strain_increment*/,
-                                                 const ADRankTwoTensor & /*rotation_increment*/,
-                                                 ADRankTwoTensor & /*stress_new*/,
-                                                 const RankTwoTensor & /*stress_old*/,
-                                                 const ADRankFourTensor & /*elasticity_tensor*/,
-                                                 const RankTwoTensor & /*elastic_strain_old*/)
+StressUpdateBaseTempl<is_ad>::updateStateSubstep(
+    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+    const RankTwoTensor & /*stress_old*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    bool /*compute_full_tangent_operator*/,
+    RankFourTensor & /*tangent_operator*/)
 {
   this->template paramError(
       "use_substep",

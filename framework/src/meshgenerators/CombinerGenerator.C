@@ -11,6 +11,7 @@
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "DelimitedFileReader.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/unstructured_mesh.h"
@@ -42,29 +43,96 @@ CombinerGenerator::validParams()
       "be left blank or N positions must be given.  If 1 input was given then this MUST be "
       "provided.");
 
+  params.addParam<std::vector<FileName>>(
+      "positions_file", "Alternative way to provide the position of each given mesh.");
+
   return params;
 }
 
 CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _positions(getParam<std::vector<Point>>("positions"))
+  : MeshGenerator(parameters), _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
 {
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
 
-  if (_input_names.size() == 1 && _positions.empty())
-    paramError("positions",
-               "If only one input mesh is given, then 'positions' must also be supplied");
+  if (isParamValid("positions") && isParamValid("positions_file"))
+    mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in "
+               "CombinerGenerator ",
+               _name);
 
-  if (_positions.size() && (_input_names.size() != 1) && (_input_names.size() != _positions.size()))
-    paramError("positions",
-               "If more than one input mesh is provided then the number of positions provided must "
-               "exactly match the number of input meshes.");
+  if (_input_names.size() == 1)
+    if (!isParamValid("positions") && !isParamValid("positions_file"))
+      paramError("positions",
+                 "If only one input mesh is given, then 'positions' or 'positions_file' must also "
+                 "be supplied");
 
   // Grab the input mesh references as pointers
   for (auto & input_name : _input_names)
     _meshes.push_back(&getMeshByName(input_name));
+}
+
+void
+CombinerGenerator::fillPositions()
+{
+  if (isParamValid("positions"))
+  {
+    _positions = getParam<std::vector<Point>>("positions");
+
+    // the check in the constructor wont catch error where the user sets positions = ''
+    if ((_input_names.size() == 1) && _positions.empty())
+      paramError("positions", "If only one input mesh is given, then 'positions' cannot be empty.");
+
+    if (_input_names.size() != 1)
+      if (_positions.size() && (_input_names.size() != _positions.size()))
+        paramError(
+            "positions",
+            "If more than one input mesh is provided then the number of positions provided must "
+            "exactly match the number of input meshes.");
+  }
+  else if (isParamValid("positions_file"))
+  {
+    std::vector<FileName> positions_file = getParam<std::vector<FileName>>("positions_file");
+
+    // the check in the constructor wont catch error where the user sets positions_file = ''
+    if ((_input_names.size() == 1) && positions_file.empty())
+      paramError("positions_file",
+                 "If only one input mesh is given, then 'positions_file' cannot be empty.");
+
+    for (const auto & f : positions_file)
+    {
+      MooseUtils::DelimitedFileReader file(f, &_communicator);
+      file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+      file.read();
+
+      const std::vector<std::vector<double>> & data = file.getData();
+
+      if (_input_names.size() != 1)
+        if (data.size() && (_input_names.size() != data.size()))
+          paramError("positions_file",
+                     "If more than one input mesh is provided then the number of positions must "
+                     "exactly match the number of input meshes.");
+
+      if (file.numEntries() % LIBMESH_DIM != 0)
+        mooseError("Number of entries in 'positions_file' ",
+                   f,
+                   " must be divisible by ",
+                   LIBMESH_DIM,
+                   " in CombinerGenerator ",
+                   name());
+
+      for (unsigned int i = 0; i < data.size(); ++i)
+      {
+        Point position;
+
+        // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely
+        // untested!
+        for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+          position(j) = data[i][j];
+
+        _positions.push_back(position);
+      }
+    }
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -73,6 +141,8 @@ CombinerGenerator::generate()
   // Two cases:
   // 1. Multiple input meshes and optional positions
   // 2. One input mesh and multiple positions
+
+  fillPositions();
 
   // Case 1
   if (_meshes.size() != 1)

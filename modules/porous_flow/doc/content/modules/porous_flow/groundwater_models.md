@@ -449,7 +449,7 @@ h_{\mathrm{insitu}} = \left\{
 
 The following functions then describe the in-situ conditions:
 
-!listing modules/porous_flow/examples/groundwater/ex01.i start=[./upper_aquifer_head] end=[./l_rate]
+!listing modules/porous_flow/examples/groundwater/ex01.i start=[upper_aquifer_head] end=[l_rate]
 
 ### Initial and boundary conditions
 
@@ -572,11 +572,11 @@ These properties are specified via:
 
 It is likely that the steady-state solution will be approximately hydrostatic.  Therefore, to help PorousFlow converge, the model is initialized with the hydrostatic condition.  This is non-trivial here because, for fixed elevation ($z$), the depth varies spatially (with $x$ and $y$).  The initial mesh, however, has depth information inserted into it, as the variable `cosflow_depth`.  Hence, it may be extracted using a SolutionUserObject:
 
-!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[./initial_mesh] end=[./baseflow]
+!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[initial_mesh] end=[baseflow]
 
 and then used in a Function:
 
-!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[./initial_pp] end=[./initial_pp_plus_10m]
+!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[initial_pp] end=[baseflow_rate]
 
 before finally being used in an initial condition:
 
@@ -596,7 +596,7 @@ It is assumed that rainfall recharges the groundwater system at the topography w
 \end{equation}
 Hence the BC:
 
-!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[./rainfall_recharge] end=[./evapotranspiration]
+!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[rainfall_recharge] end=[evapotranspiration]
 
 In most groundwater models, rainfall recharge would vary spatially and temporally, since different surficial expressions and vegetation cover and seasonal patterns impact rainfall recharge.  This is easily incorporated through the `flux_function` or other parameters to the [PorousFlowSink](PorousFlowSink.md).
 
@@ -604,7 +604,7 @@ In most groundwater models, rainfall recharge would vary spatially and temporall
 
 A [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) is used to model ET:
 
-!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[./evapotranspiration] end=[]
+!listing modules/porous_flow/examples/groundwater/ex02_steady_state.i start=[evapotranspiration] end=[]
 
 This block requires some explanation, but the reader is strongly encourated to read the PorousFlow documentation on the [PorousFlowHalfCubicSink](PorousFlowHalfCubicSink.md) and [PorousFlow boundary conditions in general](boundaries.md) for further information.
 
@@ -685,7 +685,7 @@ The steady-state solution is used to initialise the transient simulation.  The m
 
 A SolutionUserObject is employed to read the steady-state solution:
 
-!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[./steady_state_solution] end=[./baseflow]
+!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[steady_state_solution] end=[baseflow]
 
 and the `pp` Variable is initialized:
 
@@ -695,7 +695,7 @@ and the `pp` Variable is initialized:
 
 A [PorousFlowPeacemanBorehole](PorousFlowPeacemanBorehole.md) is used to model the borehole:
 
-!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[./horizontal_borehole] end=[./polyline_sink_borehole]
+!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[horizontal_borehole] end=[polyline_sink_borehole]
 
 with point file representing a long horizontal borehole with radius 0.2$\,$m at an elevation of -90$\,$m that sits almost directly underneath the river (the river sits at $x=250$, while the borehole is at $x=240$):
 
@@ -720,7 +720,7 @@ Groundwater modelling therefore suggests that the borehole will have negligible 
 
 It is a *mistake* to use a [PorousFlowPolyLineSink](PorousFlowPolyLineSink.md) to represent the borehole in this case, such as
 
-!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[./polyline_sink_borehole] end=[]
+!listing modules/porous_flow/examples/groundwater/ex02_abstraction.i start=[polyline_sink_borehole] end=[]
 
 If the `fluxes` parameters were chosen sufficiently large, this would fix the porepressure at finite-element nodes surrounding the borehole to the value of 0$\,$Pa.  Since the finite-element mesh has a resolution of around $20\mathrm{m}\times 20\mathrm{m} \times 10\mathrm{m}$, this could correspond to a collosal borehole with cross-sectional size $20\mathrm{m} \times 10\mathrm{m}$ (and length of 400$\,$m from the width of the model)!
 

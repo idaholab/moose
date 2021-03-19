@@ -56,6 +56,43 @@
   bias_y = 0.95
 []
 
+[Kernels]
+  [mass0]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 0
+    variable = pgas
+  []
+  [flux0]
+    type = PorousFlowAdvectiveFlux
+    fluid_component = 0
+    variable = pgas
+  []
+  [diff0]
+    type = PorousFlowDispersiveFlux
+    fluid_component = 0
+    variable = pgas
+    disp_long = '0 0'
+    disp_trans = '0 0'
+  []
+  [mass1]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 1
+    variable = zi
+  []
+  [flux1]
+    type = PorousFlowAdvectiveFlux
+    fluid_component = 1
+    variable = zi
+  []
+  [diff1]
+    type = PorousFlowDispersiveFlux
+    fluid_component = 1
+    variable = zi
+    disp_long = '0 0'
+    disp_trans = '0 0'
+  []
+[]
+
 [AuxVariables]
   [xnacl]
     initial_condition = 0.01
@@ -133,43 +170,6 @@
     min = 0.25
     max = 0.275
     seed = 0
-  []
-[]
-
-[Kernels]
-  [mass0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
-    variable = pgas
-  []
-  [flux0]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = pgas
-  []
-  [diff0]
-    type = PorousFlowDispersiveFlux
-    fluid_component = 0
-    variable = pgas
-    disp_long = '0 0'
-    disp_trans = '0 0'
-  []
-  [mass1]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 1
-    variable = zi
-  []
-  [flux1]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 1
-    variable = zi
-  []
-  [diff1]
-    type = PorousFlowDispersiveFlux
-    fluid_component = 1
-    variable = zi
-    disp_long = '0 0'
-    disp_trans = '0 0'
   []
 []
 
