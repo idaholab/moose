@@ -150,7 +150,10 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  mooseAssert(_var.dofIndices().size() <= 1, "We're currently built to use CONSTANT MONOMIALS");
+  const auto & dof_indices =
+      (ft == FaceInfo::VarFaceNeighbors::ELEM) ? _var.dofIndices() : _var.dofIndicesNeighbor();
+
+  mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
     // Even though the elem element is always the non-null pointer on mesh
@@ -175,13 +178,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
                  fi.faceCentroid());
   };
 
-  if (_var.dofIndices().size() > 0)
-    _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
-  else if (_var.dofIndicesNeighbor().size() > 0)
-    _assembly.processDerivatives(r, _var.dofIndicesNeighbor()[0], _matrix_tags, local_functor);
-  else
-    mooseError("Variable has no dofs on local and neighbor element for this FluxBC at ",
-               _face_info->faceCentroid());
+  _assembly.processDerivatives(r, dof_indices[0], _matrix_tags, local_functor);
 }
 
 const ADReal &
