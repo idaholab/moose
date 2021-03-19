@@ -58,6 +58,7 @@
     strain = FINITE
     decomposition_method = EigenSolution
     extra_vector_tags = 'ref'
+    temperature = temp
   [../]
 []
 
