@@ -23,8 +23,7 @@ PCNSFVHLLC::validParams()
 
 PCNSFVHLLC::PCNSFVHLLC(const InputParameters & params)
   : FVFluxKernel(params),
-    _fluid(dynamic_cast<FEProblemBase *>(&_subproblem)
-               ->getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
+    _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
     _specific_internal_energy_elem(getADMaterialProperty<Real>(NS::specific_internal_energy)),
     _specific_internal_energy_neighbor(
         getNeighborADMaterialProperty<Real>(NS::specific_internal_energy)),
