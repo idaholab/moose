@@ -33,12 +33,10 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _v_var(isParamValid("v") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
+                             : nullptr),
+    _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
+                             : nullptr),
     _mixing_len(coupledValue("mixing_length")),
     _mixing_len_neighbor(coupledNeighborValue("mixing_length")),
     _schmidt_number(getParam<Real>("schmidt_number"))
