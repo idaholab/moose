@@ -74,13 +74,16 @@ ADGeneralizedRadialReturnStressUpdate::propagateQpStatefulPropertiesRadialReturn
 }
 
 void
-ADGeneralizedRadialReturnStressUpdate::updateState(ADRankTwoTensor & elastic_strain_increment,
-                                                   ADRankTwoTensor & inelastic_strain_increment,
-                                                   const ADRankTwoTensor & /*rotation_increment*/,
-                                                   ADRankTwoTensor & stress_new,
-                                                   const RankTwoTensor & stress_old,
-                                                   const ADRankFourTensor & elasticity_tensor,
-                                                   const RankTwoTensor & /*elastic_strain_old*/)
+ADGeneralizedRadialReturnStressUpdate::updateState(
+    ADRankTwoTensor & elastic_strain_increment,
+    ADRankTwoTensor & inelastic_strain_increment,
+    const ADRankTwoTensor & /*rotation_increment*/,
+    ADRankTwoTensor & stress_new,
+    const RankTwoTensor & stress_old,
+    const ADRankFourTensor & elasticity_tensor,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    bool /*compute_full_tangent_operator = false*/,
+    RankFourTensor & /*tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor*/)
 {
   // Prepare initial trial stress for generalized return mapping
   ADRankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();

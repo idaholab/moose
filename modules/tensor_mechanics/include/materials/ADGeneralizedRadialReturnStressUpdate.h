@@ -68,13 +68,17 @@ public:
    * @param elasticity_tensor             Rank 4 C_{ijkl}, must be isotropic
    * @param elastic_strain_old            Old state of total elastic strain
    */
-  virtual void updateState(ADRankTwoTensor & strain_increment,
-                           ADRankTwoTensor & inelastic_strain_increment,
-                           const ADRankTwoTensor & rotation_increment,
-                           ADRankTwoTensor & stress_new,
-                           const RankTwoTensor & stress_old,
-                           const ADRankFourTensor & elasticity_tensor,
-                           const RankTwoTensor & elastic_strain_old) override;
+  virtual void
+  updateState(ADRankTwoTensor & strain_increment,
+              ADRankTwoTensor & inelastic_strain_increment,
+              const ADRankTwoTensor & rotation_increment,
+              ADRankTwoTensor & stress_new,
+              const RankTwoTensor & stress_old,
+              const ADRankFourTensor & elasticity_tensor,
+              const RankTwoTensor & elastic_strain_old,
+              bool /*compute_full_tangent_operator = false*/,
+              RankFourTensor & /*tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor*/)
+      override;
 
   virtual Real computeReferenceResidual(const ADDenseVector & effective_trial_stress,
                                         const ADDenseVector & stress_new,
