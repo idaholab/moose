@@ -30,7 +30,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Build Status (external)](https://civet.inl.gov)
 
-[Build Status (internal)](https://moosebuild.inl.gov)
+[Build Status (internal)](https://moosebuild.hpc.inl.gov)
 
 [Code Coverage](http://mooseframework.com/docs/coverage/moose/)
 

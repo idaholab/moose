@@ -352,14 +352,6 @@ outputLegacyInformation(MooseApp & app)
   std::stringstream oss;
   oss << std::left;
 
-  if (app.parameters().get<bool>("use_legacy_dirichlet_bc"))
-  {
-    oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
-    oss << " Default for parameter preset = false for all DirichletBC and ADDirichletBC objects.\n"
-        << " Set use_legacy_dirichlet_bc = false in the application to change to the preferred "
-           "behavior.\n"
-        << COLOR_DEFAULT << '\n';
-  }
   if (app.parameters().get<bool>("use_legacy_material_output"))
   {
     oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';

@@ -60,4 +60,13 @@
     design = 'auxkernels/RankTwoAux.md'
     issues = '#12036'
   [../]
+  [./use_substep_dt]
+    type = 'CSVDiff'
+    input = 'use_substep_dt.i'
+    csvdiff = 'use_substep_dt_out.csv'
+    allow_warnings = true
+    issues = '#17340'
+    requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
+    design = '/ComputeCrystalPlasticityStress.md'
+  [../]
 []

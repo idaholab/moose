@@ -277,13 +277,6 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
 
   params.addParam<bool>(
-      "use_legacy_dirichlet_bc",
-      true,
-      "Set false to have MOOSE utilize the new and preferred method of setting preset = true as "
-      "default for all DirichletBC and derived objects, which is ideal for the majority of solves "
-      "utilizing this boundary condition type.\nThe old behavior (which is utilized if this is set "
-      "to true) is to set preset = false as the default for DirichletBC and derived objects.");
-  params.addParam<bool>(
       "use_legacy_material_output",
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
@@ -540,6 +533,13 @@ MooseApp::MooseApp(InputParameters parameters)
   // that need them during the setup process. Most of the restartable data isn't made available
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
   registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
+
+  if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
+    mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
+                    "All Dirichlet boundary conditions are preset by default.\n\n",
+                    "Remove said parameter in ",
+                    name(),
+                    " to remove this deprecation warning.");
 }
 
 void
