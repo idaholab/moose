@@ -24,27 +24,16 @@ BuildArrayVariableAux::validParams()
 }
 
 BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
-  : ArrayAuxKernel(parameters), _component_vars(coupledValues("component_variables"))
+  : ArrayAuxKernel(parameters), _component_dofs(coupledAllDofValues("component_variables"))
 {
   // Check the number of component variables
-  if (_component_vars.size() != _var.count())
+  if (_component_dofs.size() != _var.count())
     paramError("variable",
                "The array variable has ",
                _var.count(),
                " components, but ",
-               _component_vars.size(),
+               _component_dofs.size(),
                " component variables were specified.");
-
-  // List the supported FETypes
-  std::vector<FEType> supported_fe_types{{Order::CONSTANT, FEFamily::MONOMIAL},
-                                         {Order::FIRST, FEFamily::LAGRANGE}};
-
-  // Check the FEType of the output variable
-  if (std::find(supported_fe_types.begin(), supported_fe_types.end(), _var.feType()) ==
-      supported_fe_types.end())
-    paramError(
-        "variable",
-        "BuildArrayVariableAux only supports constant monomial or linear Lagrange variables");
 
   // Make sure the FEType of each input variable matches the output type
   const auto & var_names = parameters.get<std::vector<VariableName>>("component_variables");
@@ -59,13 +48,16 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
   }
 }
 
-RealEigenVector
-BuildArrayVariableAux::computeValue()
+void
+BuildArrayVariableAux::compute()
 {
-  // Get the value of each component
-  RealEigenVector out(_component_vars.size());
-  for (size_t i = 0; i < _component_vars.size(); ++i)
-    out(i) = (*_component_vars[i])[_qp];
-
-  return out;
+  unsigned int n_local_dofs = _var.numberOfDofs();
+  _local_sol.resize(n_local_dofs);
+  for (unsigned int j = 0; j < n_local_dofs; ++j)
+  {
+    _local_sol(j) = RealEigenVector::Zero(_var.count());
+    for (unsigned int i = 0; i < _var.count(); ++i)
+      _local_sol(j)(i) = (*_component_dofs[i])[j];
+  }
+  _var.setDofValues(_local_sol);
 }

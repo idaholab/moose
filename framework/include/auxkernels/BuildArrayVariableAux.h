@@ -19,7 +19,10 @@ public:
   BuildArrayVariableAux(const InputParameters & parameters);
 
 protected:
-  virtual RealEigenVector computeValue() override;
+  virtual void compute() override;
 
-  const std::vector<const VariableValue *> _component_vars;
+  // ::computeValue is not used. The actual implementation is in ::compute.
+  virtual RealEigenVector computeValue() override { return RealEigenVector::Zero(_var.count()); }
+
+  const std::vector<const VariableValue *> _component_dofs;
 };
