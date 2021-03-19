@@ -509,7 +509,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 
   ADReal value = (*_solution)(index);
 
-  if (ADReal::do_derivatives)
+  if (ADReal::do_derivatives && _var_kind == Moose::VAR_NONLINEAR)
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
