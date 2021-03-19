@@ -131,6 +131,8 @@
     max_inelastic_increment = 0.00003
     absolute_tolerance = 1e-20
     relative_tolerance = 1e-20
+    # Force it to not use integration error
+    max_integration_error = 100.0
   []
 []
 

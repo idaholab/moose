@@ -127,11 +127,11 @@
     activation_energy = 0
     # F G H L M N
     hill_constants = "0.5 0.25 0.3866 1.6413 1.6413 1.2731"
-  #  hill_constants = "0.5 0.25 0.3866 1.6413 1.6413 1.2731"
-
     max_inelastic_increment = 0.00003
     absolute_tolerance = 1e-20
     relative_tolerance = 1e-20
+    # Force it to not use integration error
+    max_integration_error = 100.0
   []
 []
 

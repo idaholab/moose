@@ -112,6 +112,8 @@
     hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5
     base_name = trial_creep
+    # Force it to not use integration error
+    max_integration_error = 1.0
   []
 
   [trial_creep_two]
@@ -124,6 +126,8 @@
     hill_constants = "0.5 0.5 0.3866 1.6413 1.6413 1.2731"
     max_inelastic_increment = 1.0e-5
     base_name = trial_creep_two
+    # Force it to not use integration error
+    max_integration_error = 1.0
   []
 []
 
