@@ -120,6 +120,16 @@ DelimitedFileReader::read()
   }
 }
 
+std::size_t
+DelimitedFileReader::numEntries() const
+{
+  std::size_t n_entries = 0;
+  for (std::size_t i = 0; i < _data.size(); ++i)
+    n_entries += _data[i].size();
+
+  return n_entries;
+}
+
 const std::vector<std::string> &
 DelimitedFileReader::getNames() const
 {
