@@ -28,7 +28,7 @@ PCNSFVImplicitMassBC::PCNSFVImplicitMassBC(const InputParameters & params)
 ADReal
 PCNSFVImplicitMassBC::computeQpResidual()
 {
-  mooseAssert(this->hasBlocks(_face_info->elem().subdomain_id()), "Checking block restriction");
+  // mooseAssert(_var.hasBlocks(_face_info->elem().subdomain_id()), "Checking block restriction");
 
   return _normal * _mass_flux[_qp];
 }
