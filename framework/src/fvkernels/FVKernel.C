@@ -60,6 +60,7 @@ FVKernel::FVKernel(const InputParameters & params)
     TransientInterface(this),
     BlockRestrictable(this),
     FunctionInterface(this),
+    UserObjectInterface(this),
     PostprocessorInterface(this),
     SetupInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
