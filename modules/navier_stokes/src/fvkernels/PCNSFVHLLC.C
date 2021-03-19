@@ -81,11 +81,9 @@ PCNSFVHLLC::waveSpeed(const ADReal & rho_elem,
   const auto sqrt_rho2 = std::sqrt(rho2);
   const auto u_roe = (sqrt_rho1 * u1 + sqrt_rho2 * u2) / (sqrt_rho1 + sqrt_rho2);
   const auto q_roe = (sqrt_rho1 * q1 + sqrt_rho2 * q2) / (sqrt_rho1 + sqrt_rho2);
-  const auto ht_roe = (sqrt_rho1 * ht1 + sqrt_rho2 * ht2) / (sqrt_rho1 + sqrt_rho2);
-  const auto h_roe = ht_roe - 0.5 * u_roe * u_roe;
+  const auto e_roe = (sqrt_rho1 * e1 + sqrt_rho2 * e2) / (sqrt_rho1 + sqrt_rho2);
   const auto rho_roe = std::sqrt(rho1 * rho2);
   const auto v_roe = 1.0 / rho_roe;
-  const auto e_roe = fluid.e_from_v_h(v_roe, h_roe);
   const auto c_roe = fluid.c_from_v_e(v_roe, e_roe);
 
   // compute wave speeds
