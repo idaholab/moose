@@ -261,7 +261,11 @@ ADHillCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & creepStra
       MetaPhysicL::raw_value((elasticity_tensor(0, 0, 0, 0) + elasticity_tensor(1, 1, 1, 1) +
                               elasticity_tensor(2, 2, 2, 2)));
 
-  _max_integration_error_time_step = _dt / (stress_dif / elasticity_value / _max_integration_error);
+  if (std::abs(stress_dif) > TOLERANCE * TOLERANCE)
+    _max_integration_error_time_step =
+        _dt / (stress_dif / elasticity_value / _max_integration_error);
+  else
+    _max_integration_error_time_step = std::numeric_limits<Real>::max();
 }
 
 Real
