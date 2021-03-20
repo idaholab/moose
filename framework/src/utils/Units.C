@@ -217,6 +217,14 @@ MooseUnits::convert(Real from_value, const MooseUnits & from_unit) const
   return ((from_value + from_unit._shift) * from_unit._factor) / _factor - _shift;
 }
 
+ADReal
+MooseUnits::convert(ADReal from_value, const MooseUnits & from_unit) const
+{
+  if (!conformsTo(from_unit))
+    mooseError("Cannot convert between non-conforming units '", *this, "' and '", from_unit, "'.");
+  return ((from_value + from_unit._shift) * from_unit._factor) / _factor - _shift;
+}
+
 void
 MooseUnits::parse(const std::string & unit_string)
 {

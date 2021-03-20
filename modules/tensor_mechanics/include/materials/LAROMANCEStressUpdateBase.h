@@ -34,13 +34,13 @@ public:
 
   LAROMANCEStressUpdateBaseTempl(const InputParameters & parameters);
 
-protected:
   virtual void initialSetup() override;
 
+protected:
   // Setup unit conversion factors. The required units in the ROM are:
   // Cell dislocation density: m^-2
   // Wall dislocation density: m^-2
-  // MX phase fracture: nondim.
+  // MX phase fraction: nondim.
   // stress: MPa
   // strain: nondim.
   // temperature: K
