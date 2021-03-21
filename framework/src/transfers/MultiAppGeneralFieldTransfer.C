@@ -77,6 +77,72 @@ MultiAppGeneralFieldTransfer::execute()
 }
 
 void
+MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
+{
+  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
+
+  // Get the bounding boxes for the "from" domains.
+  // Clean up _bboxes
+  _bboxes.clear();
+  _bboxes = getFromBoundingBoxes();
+
+  // Figure out how many "from" domains each processor owns.
+  // Clean up _froms_per_proc
+  _froms_per_proc.clear();
+  _froms_per_proc = getFromsPerProc();
+
+  // Find outgoing target points
+  // We need to know what points we need to send which processors
+  // One processor will receive many points from many processors
+  // One point may go to different processors
+  ProcessorToPointVec outgoing_points;
+  extractOutgoingPoints(_to_var_names[i], outgoing_points);
+
+  // Get the local bounding boxes for current processor.
+  // There could be more than one box because of the number of local apps
+  // can be larger than one
+  std::vector<BoundingBox> local_bboxes;
+  extractLocalFromBoundingBoxes(local_bboxes);
+
+  // Setup the local mesh functions.
+  std::vector<std::shared_ptr<MeshFunction>> local_meshfuns;
+  buildMeshFunctions(_from_var_names[i], local_meshfuns);
+
+  // Fill values and app ids for incoming points
+  // We are responsible to compute values for these incoming points
+  auto gather_functor =
+      [this, &local_bboxes, &local_meshfuns](processor_id_type /*pid*/,
+                                             const std::vector<Point> & incoming_points,
+                                             std::vector<Real> & outgoing_vals) {
+        outgoing_vals.resize(incoming_points.size(), OutOfMeshValue);
+        // Evaluate interpolation values for these incoming points
+        evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
+      };
+
+  DofobjectToInterpValVec dofobject_to_valsvec;
+  // Copy data out to incoming_vals_ids
+  auto action_functor =
+      [this, &i, &dofobject_to_valsvec](processor_id_type pid,
+                                        const std::vector<Point> & /*my_outgoing_points*/,
+                                        const std::vector<Real> & incoming_vals) {
+        auto & pointInfoVec = _processor_to_pointInfoVec[pid];
+
+        // Cache interpolation values for each dof object
+        cacheIncomingInterpVals(
+            pid, _to_var_names[i], pointInfoVec, incoming_vals, dofobject_to_valsvec);
+      };
+
+  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
+  // Hopefully, pull_parallel_vector_data will not mess up this
+  const Real * ex = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(
+      comm(), outgoing_points, gather_functor, action_functor, ex);
+
+  // Set cached valeus into solution vector
+  setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec);
+}
+
+void
 MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
                                                    std::vector<processor_id_type> & processors)
 {
@@ -87,6 +153,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   for (processor_id_type i_proc = 0; i_proc < n_processors();
        from0 += _froms_per_proc[i_proc], ++i_proc)
     for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
+       // We will not break here because we want to send a point to all possible source domains
       if (_bboxes[i_from].contains_point(point))
       {
         processors.push_back(i_from);
@@ -96,6 +163,28 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   // Error out if we could not find this point when ask us to do so
   if (!found && _error_on_miss)
     mooseError("Cannot locate point ", point, " \n ", "mismatched meshes are used");
+}
+
+void
+MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point, const dof_id_type dof_object_id, const unsigned int problem_id, ProcessorToPointVec & outgoing_points)
+{
+  std::vector<processor_id_type> processors;
+  // Try to find which processors
+  processors.clear();
+  locatePointReceivers(point, processors);
+
+  // We need to send these data to these processors
+  for (auto pid : processors)
+  {
+    outgoing_points[pid].push_back(point);
+    // Store point information
+    // We can use these information when insert values to solution vector
+    PointInfo pointinfo;
+    pointinfo.problem_id = problem_id;
+    pointinfo.dof_object_id = dof_object_id;
+    pointinfo.offset = 0;
+    _processor_to_pointInfoVec[pid].push_back(pointinfo);
+  }
 }
 
 void
@@ -143,9 +232,6 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     if (fe_type.order > CONSTANT && !is_nodal)
       mooseError("We don't currently support first order or higher elemental variable ");
 
-    // Receivers for a given point
-    std::vector<processor_id_type> processors;
-
     if (is_nodal)
     {
       for (const auto & node : to_mesh.local_node_ptr_range())
@@ -159,22 +245,9 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
         if (blockRestrictedTarget() && !hasBlocks(_to_blocks, to_moose_mesh, node))
           continue;
 
-        // Try to find which processors
-        processors.clear();
-        locatePointReceivers((*node + _to_positions[i_to]), processors);
-
-        // We need to send these data to these processors
-        for (auto pid : processors)
-        {
-          outgoing_points[pid].push_back((*node + _to_positions[i_to]));
-          // Store point information
-          // We can use these information when insert values to solution vector
-          PointInfo pointinfo;
-          pointinfo.problem_id = i_to;
-          pointinfo.dof_object_id = node->id();
-          pointinfo.offset = 0;
-          _processor_to_pointInfoVec[pid].push_back(pointinfo);
-        }
+        // Cache point information
+        // We will use this information later for setting values back to solution vectors
+        cacheOutgoingPointInfor(*node + _to_positions[i_to], node->id(), i_to, outgoing_points);
       }
     }
     else // Elemental
@@ -190,25 +263,9 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
         if (blockRestrictedTarget() && !hasBlocks(_to_blocks, elem))
           continue;
 
-        // Try to find which processors
-        processors.clear();
-        // Right now, let use consider constant elemental variables only
-        // We need to attach qp points for higher order elemental variables
-        locatePointReceivers(elem->centroid() + _to_positions[i_to], processors);
-
-        // We need to send these data to these processors
-        for (auto pid : processors)
-        {
-          outgoing_points[pid].push_back(elem->centroid() + _to_positions[i_to]);
-          // Store point information
-          // We can use these information when insert values to solution vector
-          PointInfo pointinfo;
-          pointinfo.problem_id = i_to;
-          pointinfo.dof_object_id = elem->id();
-          // We need to update this for high order elemental variables
-          pointinfo.offset = 0;
-          _processor_to_pointInfoVec[pid].push_back(pointinfo);
-        } // for
+        // Cache point information
+        // We will use this information later for setting values back to solution vectors
+        cacheOutgoingPointInfor(elem->centroid()+_to_positions[i_to], elem->id(), i_to, outgoing_points);
       }   // for
     }     // else
   }       // for
@@ -316,69 +373,42 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
+    // Use this dof object pointer, so we can handle
+    // both element and node using the same code
+    DofObject * dof_object_ptr = nullptr;
+    // It is a node
     if (is_nodal)
-    {
-      auto & node = to_mesh->node_ref(dof_object_id);
-      auto n_dofs = node.n_dofs(sys_num, var_num);
-      auto values_ptr = dofobject_to_valsvec.find(dofobject);
+      dof_object_ptr = to_mesh->node_ptr(dof_object_id);
+    // It is an element
+    else
+      dof_object_ptr = to_mesh->elem_ptr(dof_object_id);
 
-      if (values_ptr == dofobject_to_valsvec.end())
-      {
-        auto & val_vec = dofobject_to_valsvec[dofobject];
-        val_vec.resize(n_dofs);
-        val_vec[0].first = incoming_vals[val_offset];
-        val_vec[0].second = pid;
-      }
-      else
-      {
-        auto & val_vec = dofobject_to_valsvec[dofobject];
-        if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
-            incoming_vals[val_offset] != OutOfMeshValue)
-          val_vec[0].first = incoming_vals[val_offset];
-      }
+    // How many dofs for this dof object
+    auto n_dofs = dof_object_ptr->n_dofs(sys_num, var_num);
+    // Check if we visited this dof object ealier
+    auto values_ptr = dofobject_to_valsvec.find(dofobject);
+    // We did not visit this
+    if (values_ptr == dofobject_to_valsvec.end())
+    {
+      // Values for this dof object
+      auto & val_vec = dofobject_to_valsvec[dofobject];
+      val_vec.resize(n_dofs);
+      // Interpolation Values
+      val_vec[0].first = incoming_vals[val_offset];
+      // Where these values come from
+      val_vec[0].second = pid;
     }
     else
     {
-      auto & element = to_mesh->elem_ref(dof_object_id);
-      auto n_dofs = element.n_dofs(sys_num, var_num);
-      auto values_ptr = dofobject_to_valsvec.find(dofobject);
-
-      if (values_ptr == dofobject_to_valsvec.end())
-      {
-        auto & val_vec = dofobject_to_valsvec[dofobject];
-        val_vec.resize(n_dofs);
+      auto & val_vec = dofobject_to_valsvec[dofobject];
+      // We adopt values from the smallest rank which has a valid value
+      if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
+          incoming_vals[val_offset] != OutOfMeshValue)
         val_vec[0].first = incoming_vals[val_offset];
-        val_vec[0].second = pid;
-      }
-      else
-      {
-        auto & val_vec = dofobject_to_valsvec[dofobject];
-        if ((val_vec[0].second > pid || val_vec[0].first == OutOfMeshValue) &&
-            incoming_vals[val_offset] != OutOfMeshValue)
-          val_vec[0].first = incoming_vals[val_offset];
-      }
     }
 
+    // Move it to next position
     val_offset++;
-  }
-}
-
-void
-MultiAppGeneralFieldTransfer::getToSolutionVector(const VariableName & var,
-                                                  unsigned int to_problem,
-                                                  System & to_sys,
-                                                  NumericVector<Number> ** solution)
-{
-  switch (_current_direction)
-  {
-    case TO_MULTIAPP:
-      *solution = &getTransferVector(to_problem, var);
-      break;
-    case FROM_MULTIAPP:
-      *solution = to_sys.solution.get();
-      break;
-    default:
-      mooseError("Unknown direction");
   }
 }
 
@@ -401,27 +431,34 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
 
-    NumericVector<Real> * solution = nullptr;
-    getToSolutionVector(var_name, problem_id, *to_sys, &solution);
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
-    dof_id_type dof = -1;
+    DofObject * dof_object = nullptr;
     if (is_nodal)
-    {
-      auto & dof_object = to_mesh->node_ref(dof_object_id);
-      dof = dof_object.dof_number(sys_num, var_num, 0);
-    }
+      dof_object = to_mesh->node_ptr(dof_object_id);
     else
-    {
-      auto & dof_object = to_mesh->elem_ref(dof_object_id);
-      dof = dof_object.dof_number(sys_num, var_num, 0);
-    }
+      dof_object = to_mesh->elem_ptr(dof_object_id);
+
+    auto dof = dof_object->dof_number(sys_num, var_num, 0);
     // If there are more than one dofs for this dof object,
     // we need to add offset
     auto val = id_pair.second[0].first;
 
-    solution->set(dof, val);
+    // This will happen if meshes are mismatched
+    if (_error_on_miss && val == OutOfMeshValue)
+    {
+      if (is_nodal)
+        mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
+      else
+        mooseError("Element ", dof_object_id, " for app ", problem_id, " could not be located ");
+    }
+
+    // We should not put garbage into solution vector
+    if (val == OutOfMeshValue)
+      continue;
+
+    to_sys->solution->set(dof, val);
   }
 
   // Update solution and sync solution
@@ -429,72 +466,10 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
   {
     System * to_sys = find_sys(*_to_es[i_to], var_name);
 
-    NumericVector<Real> * solution = nullptr;
-    getToSolutionVector(var_name, i_to, *to_sys, &solution);
-
-    solution->close();
+    to_sys->solution->close();
+    // Sync local solutions
     to_sys->update();
   }
-}
-
-void
-MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
-{
-  mooseAssert(i < _var_size, "The variable of index " << i << " does not exist");
-
-  // Get the bounding boxes for the "from" domains.
-  _bboxes = getFromBoundingBoxes();
-
-  // Figure out how many "from" domains each processor owns.
-  _froms_per_proc = getFromsPerProc();
-
-  // Find outgoing target points
-  // We need to know what points we need to send which processors
-  // One processor will receive many points from many processors
-  // One point may go to different processors
-  ProcessorToPointVec outgoing_points;
-  extractOutgoingPoints(_to_var_names[i], outgoing_points);
-
-  // Get the local bounding boxes for current processor.
-  // There could be more than one box because of the number of local apps
-  // can be larger than one
-  std::vector<BoundingBox> local_bboxes;
-  extractLocalFromBoundingBoxes(local_bboxes);
-
-  // Setup the local mesh functions.
-  std::vector<std::shared_ptr<MeshFunction>> local_meshfuns;
-  buildMeshFunctions(_from_var_names[i], local_meshfuns);
-
-  // Fill values and app ids for incoming points
-  // We are responsible to compute values for these incoming points
-  auto gather_functor =
-      [this, &local_bboxes, &local_meshfuns](processor_id_type /*pid*/,
-                                             const std::vector<Point> & incoming_points,
-                                             std::vector<Real> & outgoing_vals) {
-        outgoing_vals.resize(incoming_points.size(), OutOfMeshValue);
-        // Evaluate interpolation values for these incoming points
-        evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
-      };
-
-  DofobjectToInterpValVec dofobject_to_valsvec;
-  // Copy data out to incoming_vals_ids
-  auto action_functor =
-      [this, &i, &dofobject_to_valsvec](processor_id_type pid,
-                                        const std::vector<Point> & /*my_outgoing_points*/,
-                                        const std::vector<Real> & incoming_vals) {
-        auto & pointInfoVec = _processor_to_pointInfoVec[pid];
-
-        cacheIncomingInterpVals(
-            pid, _to_var_names[i], pointInfoVec, incoming_vals, dofobject_to_valsvec);
-      };
-
-  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
-  // Hopefully, pull_parallel_vector_data will not mess up this
-  const Real * ex = nullptr;
-  libMesh::Parallel::pull_parallel_vector_data(
-      comm(), outgoing_points, gather_functor, action_functor, ex);
-
-  setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec);
 }
 
 bool

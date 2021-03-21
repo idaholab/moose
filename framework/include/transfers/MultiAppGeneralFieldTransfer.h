@@ -138,10 +138,7 @@ private:
                                DofobjectToInterpValVec & dofobject_to_valsvec);
 
   /*
-   * Get to-solution vector
+   * Cache pointInfo
    */
-  void getToSolutionVector(const VariableName & var,
-                           unsigned int to_problem,
-                           System & to_sys,
-                           NumericVector<Number> ** solution);
+  void cacheOutgoingPointInfor(const Point point, const dof_id_type dof_object_id, const unsigned int problem_id, ProcessorToPointVec & outgoing_points);
 };
