@@ -52,6 +52,7 @@
     allow_test_objects = True
     requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, two-material-block scenario.'
     design = 'ElectrostaticContactCondition.md'
+    verification = 'electrostatic_contact_two_block.md'
     issues = '#31'
   [../]
   [./electrostatic_contact_analytic_solution_test_three_block]
@@ -61,6 +62,7 @@
     allow_test_objects = True
     requirement = 'The system shall calculate the correct electrostatic contact potential solution when compared to an analytic result, given a one-dimensional, three-material-block scenario.'
     design = 'ElectrostaticContactCondition.md'
+    verification = 'electrostatic_contact_three_block.md'
     issues = '#31'
   [../]
 []
