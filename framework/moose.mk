@@ -38,17 +38,25 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 #
 # hit (new getpot parser)
 #
-hit_DIR       := $(FRAMEWORK_DIR)/contrib/hit
-hit_srcfiles  := $(hit_DIR)/parse.cc $(hit_DIR)/lex.cc $(hit_DIR)/braceexpr.cc
+HIT_DIR ?= $(MOOSE_DIR)/moosetools/contrib/hit
+ifeq ($(wildcard $(HIT_DIR)), "")
+        HIT_DIR = $(MOOSE_DIR)/framework/contrib/hit
+endif
+$(info Using HIT from $(HIT_DIR))
+hit_CONTENT   := $(shell ls $(HIT_DIR) 2> /dev/null)
+ifeq ($(hit_CONTENT),)
+  $(error The HIT input file parser does not seem to be available. Make sure that either the moosetools submodule is checked out or that your HIT_DIR environment variable is set to the correct location of your HIT parser. To get the moosetools submodule, run the following from the root directory of MOOSE.\n\n    scripts/update_and_rebuild_hit.sh)
+endif
+hit_srcfiles  := $(HIT_DIR)/parse.cc $(HIT_DIR)/lex.cc $(HIT_DIR)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
-hit_LIB       := $(hit_DIR)/libhit-$(METHOD).la
+hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
+pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HIT_DIR)/braceexpr.cc
 
 #
 # FParser JIT defines
@@ -72,17 +80,23 @@ endif
 UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
 	libmesh_LDFLAGS    += -no-undefined
-	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
+	pyhit_LIB          := $(HIT_DIR)/hit.pyd
+	ifeq ($(wildcard $(pyhit_DIR)), "")
+		pyhit_LIB  := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
+	endif
 	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
 else
-	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
+	pyhit_LIB          := $(HIT_DIR)/hit.so
+	ifeq ($(wildcard $(pyhit_DIR)), "")
+		pyhit_LIB  := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
+	endif
 	pyhit_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
 
 
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
 
 #
 # gtest
@@ -156,8 +170,8 @@ moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d)
 endif
 
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
-moose_INC_DIRS += "$(gtest_DIR)"
-moose_INC_DIRS += "$(hit_DIR)"
+moose_INC_DIRS += $(gtest_DIR)
+moose_INC_DIRS += $(HIT_DIR)
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 #libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
@@ -308,8 +322,8 @@ $(gtest_LIB): $(gtest_objects)
 $(hit_LIB): $(hit_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(hit_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(hit_DIR)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
 $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@echo "Linking Library "$@"..."
