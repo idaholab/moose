@@ -36,27 +36,22 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
                " component variables were specified.");
 
   // Make sure the FEType of each input variable matches the output type
-  const auto & var_names = parameters.get<std::vector<VariableName>>("component_variables");
-  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-  for (VariableName name : var_names)
-  {
-    const MooseVariableFieldBase & var_base = _subproblem.getVariable(tid, name);
-    if (var_base.feType() != _var.feType())
+  for (const auto & var : getCoupledMooseVars())
+    if (var->feType() != _var.feType())
       paramError(
           "component_variables",
           "The input and output variables of BuildArrayVariableAux must have the same FE type");
-  }
 }
 
 void
 BuildArrayVariableAux::compute()
 {
-  unsigned int n_local_dofs = _var.numberOfDofs();
+  const auto n_local_dofs = _var.numberOfDofs();
   _local_sol.resize(n_local_dofs);
-  for (unsigned int j = 0; j < n_local_dofs; ++j)
+  for (MooseIndex(n_local_dofs) j = 0; j < n_local_dofs; ++j)
   {
     _local_sol(j) = RealEigenVector::Zero(_var.count());
-    for (unsigned int i = 0; i < _var.count(); ++i)
+    for (MooseIndex(_var.count()) i = 0; i < _var.count(); ++i)
       _local_sol(j)(i) = (*_component_dofs[i])[j];
   }
   _var.setDofValues(_local_sol);
