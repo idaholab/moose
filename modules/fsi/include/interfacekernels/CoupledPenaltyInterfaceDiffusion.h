@@ -7,16 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COUPLEDPENALTYINTERFACEDIFFUSION_H
-#define COUPLEDPENALTYINTERFACEDIFFUSION_H
+#pragma once
 
 #include "InterfaceKernel.h"
 
 // Forward Declarations
 class CoupledPenaltyInterfaceDiffusion;
-
-template <>
-InputParameters validParams<CoupledPenaltyInterfaceDiffusion>();
 
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
@@ -24,6 +20,8 @@ InputParameters validParams<CoupledPenaltyInterfaceDiffusion>();
 class CoupledPenaltyInterfaceDiffusion : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   CoupledPenaltyInterfaceDiffusion(const InputParameters & parameters);
 
 protected:
@@ -34,11 +32,9 @@ protected:
   virtual void computeNeighborOffDiagJacobian(unsigned int jvar) override;
 
   const Real _penalty;
-  const VariableValue & _master_coupled_value;
-  const VariableValue & _slave_coupled_value;
+  const VariableValue & _primary_coupled_value;
+  const VariableValue & _secondary_coupled_value;
 
-  const unsigned _master_coupled_id;
-  const unsigned _slave_coupled_id;
+  const unsigned _primary_coupled_id;
+  const unsigned _secondary_coupled_id;
 };
-
-#endif
