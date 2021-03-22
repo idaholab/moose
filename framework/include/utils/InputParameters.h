@@ -1412,6 +1412,7 @@ InputParameters::suppressParameter(const std::string & name)
 
   _params[name]._required = false;
   _params[name]._is_private = true;
+  _params[name]._controllable = false;
 }
 
 template <typename T>
