@@ -2,28 +2,30 @@
   issues = '#16402'
   design = 'auxkernels/BuildArrayVariableAux.md'
 
-  [build_array_variable_aux]
+  [test]
     type = 'Exodiff'
     input = 'build_array_variable_aux.i'
     exodiff = 'build_array_variable_aux_out.e'
-    requirement = 'The system shall correctly copy the values of regular variables into the component fields of an array variable.'
+    requirement = 'The system shall support the copy the values of standard variables into the component fields of an array variable.'
   []
 
-  [build_array_variable_aux_size_fail]
-    type = 'RunException'
-    input = 'build_array_variable_aux.i'
-    cli_args = 'AuxVariables/ab/components=3'
-    prereq = build_array_variable_aux
-    expect_err = 'The array variable has 3 components, but'
-    requirement = 'BuildArrayVariableAux should generate an error if the number of normal variables does not correspond to the number of array variable components.'
-  []
+  [error]
+    requirement = 'The system shall report a reasonable error when copying standard variables into the components of an array variable when'
 
-  [build_array_variable_aux_type_fail]
-    type = 'RunException'
-    input = 'build_array_variable_aux.i'
-    cli_args = 'Variables/a/order=SECOND'
-    prereq = build_array_variable_aux
-    expect_err = 'The input and output variables of BuildArrayVariableAux'
-    requirement = 'BuildArrayVariableAux should generate an error if the FE types of the input and output variables do not match.'
+    [size]
+      type = 'RunException'
+      input = 'build_array_variable_aux.i'
+      cli_args = 'AuxVariables/ab/components=3'
+      expect_err = 'The array variable has 3 components, but'
+      detail = 'the variables have inconsistent sizes or'
+    []
+
+    [type]
+      type = 'RunException'
+      input = 'build_array_variable_aux.i'
+      cli_args = 'Variables/a/order=SECOND'
+      expect_err = 'The input and output variables must'
+      detail = 'when the variables have inconsistent types.'
+    []
   []
 []

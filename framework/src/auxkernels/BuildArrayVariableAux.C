@@ -9,8 +9,6 @@
 
 #include "BuildArrayVariableAux.h"
 
-#include <algorithm>
-
 registerMooseObject("MooseApp", BuildArrayVariableAux);
 
 InputParameters
@@ -38,9 +36,8 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
   // Make sure the FEType of each input variable matches the output type
   for (const auto & var : getCoupledMooseVars())
     if (var->feType() != _var.feType())
-      paramError(
-          "component_variables",
-          "The input and output variables of BuildArrayVariableAux must have the same FE type");
+      paramError("component_variables",
+                 "The input and output variables must have the same FE type");
 }
 
 void
