@@ -11,17 +11,17 @@
 
 registerMooseObject("MooseApp", CoupledPenaltyInterfaceDiffusion);
 
-template <>
 InputParameters
-validParams<CoupledPenaltyInterfaceDiffusion>()
+CoupledPenaltyInterfaceDiffusion::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription(
       "Enforces continuity of flux and continuity of solution via penalty across an interface.");
   params.addRequiredParam<Real>(
-      "penalty", "The penalty that penalizes jump between master and neighbor variables.");
-  params.addCoupledVar("master_coupled_var", "The coupled variable on the master side");
-  params.addCoupledVar("slave_coupled_var", "The coupled variable on the slave side");
+      "penalty",
+      "The penalty that penalizes jump between primary and neighbor secondary variables.");
+  params.addCoupledVar("primary_coupled_var", "The coupled variable on the master side");
+  params.addCoupledVar("secondary_coupled_var", "The coupled variable on the slave side");
   return params;
 }
 
@@ -29,14 +29,15 @@ CoupledPenaltyInterfaceDiffusion::CoupledPenaltyInterfaceDiffusion(
     const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _penalty(getParam<Real>("penalty")),
-    _master_coupled_value(isCoupled("master_coupled_var") ? coupledValue("master_coupled_var")
-                                                          : _var.sln()),
-    _slave_coupled_value(isCoupled("slave_coupled_var") ? coupledNeighborValue("slave_coupled_var")
-                                                        : _neighbor_var.slnNeighbor()),
-    _master_coupled_id(isCoupled("master_coupled_var") ? coupled("master_coupled_var")
-                                                       : _var.number()),
-    _slave_coupled_id(isCoupled("slave_coupled_var") ? coupled("slave_coupled_var")
-                                                     : _neighbor_var.number())
+    _primary_coupled_value(isCoupled("primary_coupled_var") ? coupledValue("primary_coupled_var")
+                                                            : _var.sln()),
+    _secondary_coupled_value(isCoupled("secondary_coupled_var")
+                                 ? coupledNeighborValue("secondary_coupled_var")
+                                 : _neighbor_var.slnNeighbor()),
+    _primary_coupled_id(isCoupled("primary_coupled_var") ? coupled("primary_coupled_var")
+                                                         : _var.number()),
+    _secondary_coupled_id(isCoupled("secondary_coupled_var") ? coupled("secondary_coupled_var")
+                                                             : _neighbor_var.number())
 {
 }
 
@@ -48,12 +49,12 @@ CoupledPenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      r = _test[_i][_qp] * _penalty * (_master_coupled_value[_qp] - _slave_coupled_value[_qp]);
+      r = _test[_i][_qp] * _penalty * (_primary_coupled_value[_qp] - _secondary_coupled_value[_qp]);
       break;
 
     case Moose::Neighbor:
       r = _test_neighbor[_i][_qp] * -_penalty *
-          (_master_coupled_value[_qp] - _slave_coupled_value[_qp]);
+          (_primary_coupled_value[_qp] - _secondary_coupled_value[_qp]);
       break;
   }
 
@@ -67,7 +68,7 @@ CoupledPenaltyInterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType
                                                            unsigned int jvar)
 {
   Real jac = 0;
-  if (jvar == _master_coupled_id)
+  if (jvar == _primary_coupled_id)
   {
     switch (type)
     {
@@ -84,7 +85,7 @@ CoupledPenaltyInterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType
         break;
     }
   }
-  else if (jvar == _slave_coupled_id)
+  else if (jvar == _secondary_coupled_id)
   {
     switch (type)
     {

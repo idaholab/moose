@@ -9,7 +9,8 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
+  [gmg]
+  type = GeneratedMeshGenerator
   dim = 2
   xmin = 0
   xmax = 3.0
@@ -18,27 +19,28 @@
   nx = 10
   ny = 15
   elem_type = QUAD4
-[]
+  []
 
-
-[MeshModifiers]
-  [./subdomain1]
-    type = SubdomainBoundingBox
+  [subdomain1]
+    type = SubdomainBoundingBoxGenerator
     bottom_left = '0.0 0.5 0'
     block_id = 1
     top_right = '3.0 1.0 0'
-  [../]
-  [./interface]
-    type = SideSetsBetweenSubdomains
-    depends_on = subdomain1
-    master_block = '0'
+    input = gmg
+  []
+
+  [interface]
+    type = SideSetsBetweenSubdomainsGenerator
+    primary_block = '0'
     paired_block = '1'
     new_boundary = 'master0_interface'
-  [../]
-  [./break_boundary]
-    depends_on = interface
-    type = BreakBoundaryOnSubdomain
-  [../]
+    input = subdomain1
+  []
+
+  [break_boundary]
+    type = BreakBoundaryOnSubdomainGenerator
+    input = interface
+  []
 []
 
 [Variables]
@@ -174,7 +176,7 @@
     type = CoupledPenaltyInterfaceDiffusion
     variable = vel_x
     neighbor_var = disp_x
-    slave_coupled_var = vel_x_solid
+    secondary_coupled_var = vel_x_solid
     boundary = master0_interface
     penalty = 1e6
   [../]
@@ -182,7 +184,7 @@
     type = CoupledPenaltyInterfaceDiffusion
     variable = vel_y
     neighbor_var = disp_y
-    slave_coupled_var = vel_y_solid
+    secondary_coupled_var = vel_y_solid
     boundary = master0_interface
     penalty = 1e6
   [../]

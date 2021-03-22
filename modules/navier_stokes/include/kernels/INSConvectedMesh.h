@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSCONVECTEDMESH_H
-#define INSCONVECTEDMESH_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -43,5 +42,3 @@ protected:
 
   const MaterialProperty<Real> & _rho;
 };
-
-#endif // INSCONVECTEDMESH}_H

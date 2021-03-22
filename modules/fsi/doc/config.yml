@@ -5,6 +5,7 @@ Content:
     - modules/fluid_properties/doc/content
     - modules/navier_stokes/doc/content
     - modules/heat_conduction/doc/content
+    - modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer

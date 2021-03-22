@@ -5,7 +5,7 @@
 This class ensures the continuity of flux of `variable` and `neighbor_var`
 across an interface. Additionally, via a penalty factor,
 `CoupledPenaltyInterfaceDiffusion` enforces the continuity of the value of
-`slave_coupled_var` and `master_coupled_var`. The latter two parameters are
+`secondary_coupled_var` and `primary_coupled_var`. The latter two parameters are
 optional input file parameters; if they are not specified, then they default to
 `neighbor_var` and `variable` respectively. Note that the penalty method (for
 sufficiently high penalty parameter) displays optimal convergence rates (p + 1)
