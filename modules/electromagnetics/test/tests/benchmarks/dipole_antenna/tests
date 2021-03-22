@@ -5,6 +5,7 @@
     exodiff = 'dipole_out.e'
     requirement = 'The system shall calculate the static far field pattern of a half-wave dipole antenna.'
     design = 'benchmarks/DipoleAntenna.md'
+    validation = 'benchmarks/DipoleAntenna.md'
     issues = '#15'
   [../]
   [./transient]
@@ -14,6 +15,7 @@
     cli_args = 'Mesh/file=dipole_antenna_1G_coarse.msh Executioner/num_steps=10'
     requirement = 'The system shall calculate the transient far field pattern of a half-wave dipole antenna.'
     design = 'benchmarks/DipoleAntenna.md'
+    validation = 'benchmarks/DipoleAntenna.md'
     issues = '#15'
   [../]
 []
