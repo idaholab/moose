@@ -1,10 +1,29 @@
 [Tests]
+  issues = '#16402'
+  design = 'auxkernels/BuildArrayVariableAux.md'
+
   [build_array_variable_aux]
     type = 'Exodiff'
     input = 'build_array_variable_aux.i'
     exodiff = 'build_array_variable_aux_out.e'
-    design = 'auxkernels/BuildArrayVariableAux.md'
     requirement = 'The system shall correctly copy the values of regular variables into the component fields of an array variable.'
-    issues = '#16402'
+  []
+
+  [build_array_variable_aux_size_fail]
+    type = 'RunException'
+    input = 'build_array_variable_aux.i'
+    cli_args = 'AuxVariables/ab/components=3'
+    prereq = build_array_variable_aux
+    expect_err = 'The array variable has 3 components, but'
+    requirement = 'BuildArrayVariableAux should generate an error if the number of normal variables does not correspond to the number of array variable components.'
+  []
+
+  [build_array_variable_aux_type_fail]
+    type = 'RunException'
+    input = 'build_array_variable_aux.i'
+    cli_args = 'Variables/a/order=SECOND'
+    prereq = build_array_variable_aux
+    expect_err = 'The input and output variables of BuildArrayVariableAux'
+    requirement = 'BuildArrayVariableAux should generate an error if the FE types of the input and output variables do not match.'
   []
 []
