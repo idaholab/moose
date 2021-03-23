@@ -1173,7 +1173,9 @@ MooseApp::run()
       if (binname == "")
         mooseError("could not locate installed tests to run (unresolved binary/app name)");
       auto dir = MooseUtils::testsDir(binname);
-      chdir(dir.c_str());
+      int ret = chdir(dir.c_str());
+      if (ret != 0)
+        mooseError("Failed to change to testsDir ", dir);
     }
     int ret = system(cmd.c_str());
     if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
