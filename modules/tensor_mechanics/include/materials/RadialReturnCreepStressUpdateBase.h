@@ -27,20 +27,6 @@ public:
   using RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn;
   using SingleVariableReturnMappingSolutionTempl<is_ad>::computeDerivative;
 
-  /**
-   * Compute the strain energy rate density for this inelastic model for the current step.
-   * @param stress The stress tensor at the end of the step
-   * @param strain_rate The strain rate at the end of the step
-   * @return The computed strain energy rate density
-   */
-  virtual GenericReal<is_ad> computeStrainEnergyRateDensity(
-      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*stress*/,
-      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*strain_rate*/)
-  {
-    mooseError(
-        "The computation of strain energy rate density needs to be implemented by a child class");
-  }
-
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;

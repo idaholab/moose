@@ -34,10 +34,6 @@ public:
 
   ADHillCreepStressUpdate(const InputParameters & parameters);
 
-  virtual Real
-  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
-                                 const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
-
 protected:
   virtual void computeStressInitialize(const ADDenseVector & stress_dev,
                                        const ADDenseVector & stress,
