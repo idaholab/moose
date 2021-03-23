@@ -113,10 +113,7 @@ rm -rf libmesh/* libmesh/.* || true
 ARG MOOSETOOLS_REV
 RUN git clone https://github.com/idaholab/moosetools.git ; \
 cd moosetools ; \
-git checkout ${MOOSETOOLS_REV} ; \
-cd contrib/hit ; \
-make hit ; \
-make hit.so
+git checkout ${MOOSETOOLS_REV}
 
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework and tests
