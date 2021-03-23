@@ -49,7 +49,7 @@ public:
   ///@{
   /**
    * Methods for declaring derivative material properties
-   * @tparam U The material property type
+   * @param U The material property type
    * @param base The name of the property to take the derivative of
    * @param c The variable(s) to take the derivatives with respect to
    */

@@ -12,7 +12,7 @@ Mass equation:
 \div (\rho \vec{v}_d = 0)
 \end{equation}
 
-Momentum equation, with friction and gravity force for example:
+Momentum equation, with friction and gravity force as example forces:
 \begin{equation}
 \dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) &= \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
 \end{equation}
@@ -38,12 +38,13 @@ We define a straight channel using a simple Cartesian mesh.
 The non linear variables are specified among the `INSFV` and `PINSFV` sets of variables as their evaluation
 and the computation of their gradients on faces is specific to the treatment of the Navier Stokes equations.
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVKernels/Variables
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=Variables
 
 The porous media Navier Stokes equation are implemented by using `FVKernels` which correspond to
 each term of the equations. In the following example, the first kernel is the mass advection kernel.
 This kernel corresponds to the conservation of mass. It acts on the pressure non-linear variable which
-appears in the mass equation through the Rhie Chow interpolation of the mass fluxes on the element faces.
+appears in the mass equation through the Rhie Chow interpolation of the mass fluxes on the element faces, and
+through its action on the velocity in the momentum equation.
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVKernels/mass
 
@@ -62,7 +63,7 @@ The later is preferred to avoid oscillations in pressure due to the grid colocat
 The next term is the momentum diffusion. This term arises from viscous stress in the fluid. The incompressible
 approximation simplifies its treatment. This term is also evaluated using the divergence theorem.
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVKernels/u_diffusion
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVKernels/u_viscosity
 
 The pressure gradient term in the momentum equation is expressed using a `PINSFVMomentumPressure` term.
 
@@ -90,6 +91,7 @@ for the first component of the superficial velocity:
 
 - momentum advection outflow (only for a mean-pressure approach, equivalent to executing the momentum advection kernel on the boundary)
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-u
+
 
 The pressure boundary condition is usually only set at the outlet:
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-p

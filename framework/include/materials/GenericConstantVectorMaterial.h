@@ -26,7 +26,7 @@ protected:
   std::string _prop_name;
   const RealVectorValue & _prop_value;
 
-  MaterialProperty<RealVectorValue> & _property;
+  GenericMaterialProperty<RealVectorValue, is_ad> & _property;
 };
 
 typedef GenericConstantVectorMaterialTempl<false> GenericConstantVectorMaterial;
