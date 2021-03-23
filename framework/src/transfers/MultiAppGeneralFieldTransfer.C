@@ -41,6 +41,8 @@ MultiAppGeneralFieldTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
 
+  params.addParam<Real>("bbox_tol", 0.1, "How much want to relax bounding boxes");
+
   params.addParam<std::vector<SubdomainName>>(
       "to_blocks", "The blocks we are transferring to (if not specified, whole domain is used).");
 
@@ -52,7 +54,9 @@ MultiAppGeneralFieldTransfer::validParams()
 }
 
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
-  : MultiAppConservativeTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppConservativeTransfer(parameters),
+    _error_on_miss(getParam<bool>("error_on_miss")),
+    _bbox_tol(getParam<Real>("bbox_tol"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -85,6 +89,15 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Clean up _bboxes
   _bboxes.clear();
   _bboxes = getFromBoundingBoxes();
+
+  // Expand bounding boxes. Some right points might be excluded
+  // without an expansion
+  for (auto & box : _bboxes)
+  {
+    auto width = box.second - box.first;
+    box.second += width * _bbox_tol;
+    box.first -= width * _bbox_tol;
+  }
 
   // Figure out how many "from" domains each processor owns.
   // Clean up _froms_per_proc
@@ -153,10 +166,10 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
   for (processor_id_type i_proc = 0; i_proc < n_processors();
        from0 += _froms_per_proc[i_proc], ++i_proc)
     for (unsigned int i_from = from0; i_from < from0 + _froms_per_proc[i_proc]; ++i_from)
-       // We will not break here because we want to send a point to all possible source domains
+      // We will not break here because we want to send a point to all possible source domains
       if (_bboxes[i_from].contains_point(point))
       {
-        processors.push_back(i_from);
+        processors.push_back(i_proc);
         found = true;
       }
 
@@ -166,7 +179,10 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 }
 
 void
-MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point, const dof_id_type dof_object_id, const unsigned int problem_id, ProcessorToPointVec & outgoing_points)
+MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
+                                                      const dof_id_type dof_object_id,
+                                                      const unsigned int problem_id,
+                                                      ProcessorToPointVec & outgoing_points)
 {
   std::vector<processor_id_type> processors;
   // Try to find which processors
@@ -265,10 +281,11 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfor(elem->centroid()+_to_positions[i_to], elem->id(), i_to, outgoing_points);
-      }   // for
-    }     // else
-  }       // for
+        cacheOutgoingPointInfor(
+            elem->centroid() + _to_positions[i_to], elem->id(), i_to, outgoing_points);
+      } // for
+    }   // else
+  }     // for
 }
 
 void

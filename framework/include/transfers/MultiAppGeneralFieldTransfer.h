@@ -51,7 +51,12 @@ private:
 
   /// The number of variables to transfer
   unsigned int _var_size;
+
+  /// Error out when some points can not be located
   bool _error_on_miss;
+
+  /// How much we should relax bounding boxes
+  Real _bbox_tol;
 
   /// Target mesh blocks this transfer is restricted to
   std::set<SubdomainID> _to_blocks;
@@ -140,5 +145,8 @@ private:
   /*
    * Cache pointInfo
    */
-  void cacheOutgoingPointInfor(const Point point, const dof_id_type dof_object_id, const unsigned int problem_id, ProcessorToPointVec & outgoing_points);
+  void cacheOutgoingPointInfor(const Point point,
+                               const dof_id_type dof_object_id,
+                               const unsigned int problem_id,
+                               ProcessorToPointVec & outgoing_points);
 };

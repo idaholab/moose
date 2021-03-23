@@ -32,6 +32,15 @@
   []
 []
 
+[AuxVariables]
+  [from_sub]
+  []
+  [elemental_from_sub]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 1
@@ -70,6 +79,22 @@
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
+    type = MultiAppGeneralFieldTransfer
+    multi_app = sub
+  []
+
+  [from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
+    variable = from_sub
+    type = MultiAppGeneralFieldTransfer
+    multi_app = sub
+  []
+
+  [elemental_from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
+    variable = elemental_from_sub
     type = MultiAppGeneralFieldTransfer
     multi_app = sub
   []
