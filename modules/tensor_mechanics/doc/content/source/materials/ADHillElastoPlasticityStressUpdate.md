@@ -1,4 +1,4 @@
-# Transversely Isotropic Elasto-Plasticity Stress Update
+# Hill Elasto-Plasticity Stress Update
 
 !syntax description /Materials/ADHillElastoPlasticityStressUpdate
 
