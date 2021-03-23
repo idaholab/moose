@@ -157,6 +157,21 @@ public:
    */
   virtual void storeIncrementalMaterialProperties(){};
 
+  /**
+   * Compute the strain energy rate density for this inelastic model for the current step.
+   * @param stress The stress tensor at the end of the step
+   * @param strain_rate The strain rate at the end of the step
+   * @return The computed strain energy rate density
+   */
+  virtual Real computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*stress*/,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & /*strain_rate*/)
+  {
+    mooseError(
+        "The computation of strain energy rate density needs to be implemented by a child class");
+    return 0.0;
+  }
+
 protected:
   /// Name used as a prefix for all material properties related to the stress update model.
   const std::string _base_name;
