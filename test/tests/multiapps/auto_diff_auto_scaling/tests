@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = 'main.i'
+    exodiff = 'main_out.e main_out_sub_app0.e'
+    requirement = 'The system shall allow use of automatic differentiation and automatic scaling in sub-applications.'
+    issues = '#17078'
+    design = 'NonlinearSystemBase.md'
+  []
+[]
