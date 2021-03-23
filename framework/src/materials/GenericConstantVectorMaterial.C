@@ -35,7 +35,7 @@ GenericConstantVectorMaterialTempl<is_ad>::GenericConstantVectorMaterialTempl(
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealVectorValue>("prop_value")),
-    _property(declareProperty<RealVectorValue>(_prop_name))
+    _property(declareGenericProperty<RealVectorValue, is_ad>(_prop_name))
 {
 }
 
