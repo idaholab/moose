@@ -4,3 +4,4 @@
 const ExecFlagType EXEC_FORWARD("FORWARD");
 const ExecFlagType EXEC_ADJOINT("ADJOINT");
 const ExecFlagType EXEC_HESSIAN("HESSIAN");
+const ExecFlagType EXEC_OPTFINAL("OPTFINAL");

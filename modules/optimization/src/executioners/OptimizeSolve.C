@@ -51,7 +51,8 @@ OptimizeSolve::solve()
                 /*block_diag_nz =*/_ndof,
                 /*block_off_diag_nz =*/0);
 
-  return taoSolve() == 0;
+  bool solveInfo = (taoSolve() == 0);
+  return solveInfo;
 }
 
 PetscErrorCode
@@ -116,12 +117,13 @@ OptimizeSolve::taoSolve()
 
   // Set bounds for bounded optimization
   ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
+
   CHKERRQ(ierr);
 
   // Set objective, gradient, and hessian functions
   ierr = TaoSetObjectiveRoutine(_tao, objectiveFunctionWrapper, this);
   CHKERRQ(ierr);
-  ierr = TaoSetGradientRoutine(_tao, gradientFunctionWrapper, this);
+  ierr = TaoSetObjectiveAndGradientRoutine(_tao, objectiveAndGradientFunctionWrapper, this);
   CHKERRQ(ierr);
   ierr = TaoSetHessianRoutine(_tao, _hessian.mat(), _hessian.mat(), hessianFunctionWrapper, this);
   CHKERRQ(ierr);
@@ -138,6 +140,11 @@ OptimizeSolve::taoSolve()
   ierr = TaoSolve(_tao);
   CHKERRQ(ierr);
 
+  // Setting data on reporter fixme lynn  this uses a custom execution flag to only call one
+  // reporter,  maybe there will be more
+  setTaoSolutionStatus(_tao);
+  _problem.execute(EXEC_OPTFINAL);
+
   // Print solve statistics
   if (getParam<bool>("verbose"))
   {
@@ -151,24 +158,61 @@ OptimizeSolve::taoSolve()
   return ierr;
 }
 
+void
+OptimizeSolve::getTaoSolutionStatus(int & tot_iters,
+                                    double & gnorm,
+                                    int & obj_iters,
+                                    double & cnorm,
+                                    int & grad_iters,
+                                    double & xdiff,
+                                    int & hess_iters,
+                                    double & f) const
+{
+  tot_iters = _total_iterate;
+  obj_iters = _obj_iterate;
+  grad_iters = _grad_iterate;
+  hess_iters = _hess_iterate;
+  f = _f;
+  gnorm = _gnorm;
+  cnorm = _cnorm;
+  xdiff = _xdiff;
+}
+
+void
+OptimizeSolve::setTaoSolutionStatus(Tao tao)
+{
+  TaoConvergedReason reason;
+  PetscInt its;
+  PetscReal f, gnorm, cnorm, xdiff;
+
+  TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
+
+  _total_iterate = (int)its;
+  _f = double(f);
+  _gnorm = double(gnorm);
+  _cnorm = double(cnorm);
+  _xdiff = double(xdiff);
+}
+
 PetscErrorCode
 OptimizeSolve::monitor(Tao tao, void * /*ctx*/)
 {
+  TaoConvergedReason reason;
   PetscInt its;
   PetscReal f, gnorm, cnorm, xdiff;
-  TaoConvergedReason reason;
 
   TaoGetSolutionStatus(tao, &its, &f, &gnorm, &cnorm, &xdiff, &reason);
   unsigned int print_nsteps = 1;
   if (!(its % print_nsteps))
   {
-    PetscPrintf(PETSC_COMM_WORLD,
-                "****** TAO SOLVER OUTPUT: iteration=%D\tf=%g\tgnorm=%g\tcnorm=%g\txdiff=%g\n",
-                its,
-                (double)f,
-                (double)gnorm,
-                (double)cnorm,
-                (double)xdiff);
+    PetscPrintf(
+        PETSC_COMM_WORLD,
+        "****************** TAO SOLVER OUTPUT: iteration=%D\tf=%g\tgnorm=%g\tcnorm=%g\txdiff=%g\n",
+        its,
+        f,
+        gnorm,
+        cnorm,
+        xdiff);
   }
   return 0;
 }
@@ -186,12 +230,15 @@ OptimizeSolve::objectiveFunctionWrapper(Tao /*tao*/, Vec x, Real * objective, vo
 }
 
 PetscErrorCode
-OptimizeSolve::gradientFunctionWrapper(Tao /*tao*/, Vec x, Vec gradient, void * ctx)
+OptimizeSolve::objectiveAndGradientFunctionWrapper(
+    Tao /*tao*/, Vec x, Real * objective, Vec gradient, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
 
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
+
+  (*objective) = solver->objectiveFunction();
 
   libMesh::PetscVector<Number> grad(gradient, solver->_my_comm);
 
@@ -234,6 +281,7 @@ OptimizeSolve::objectiveFunction()
   if (_solve_on.contains(EXEC_FORWARD))
     _inner_solve->solve();
 
+  _obj_iterate++;
   return _form_function->computeAndCheckObjective(multiapp_passed);
 }
 
@@ -248,6 +296,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
   if (_solve_on.contains(EXEC_ADJOINT))
     _inner_solve->solve();
 
+  _grad_iterate++;
   _form_function->computeGradient(gradient);
 }
 
@@ -261,6 +310,8 @@ OptimizeSolve::hessianFunction(libMesh::PetscMatrix<Number> & hessian)
     mooseError("Hessian solve multiapp failed!");
   if (_solve_on.contains(EXEC_HESSIAN))
     _inner_solve->solve();
+
+  _hess_iterate++;
 
   _form_function->computeHessian(hessian);
 }

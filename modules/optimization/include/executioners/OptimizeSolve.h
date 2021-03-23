@@ -20,6 +20,15 @@ public:
 
   const FormFunction & getFormFunction() const { return *_form_function; }
 
+  void getTaoSolutionStatus(int & tot_iters,
+                            double & gnorm,
+                            int & obj_iters,
+                            double & cnorm,
+                            int & grad_iters,
+                            double & xdiff,
+                            int & hess_iters,
+                            double & f) const;
+
 protected:
   /// Bounds routine
   virtual PetscErrorCode variableBounds(Tao tao);
@@ -46,17 +55,30 @@ protected:
   Tao _tao;
 
 private:
+  /// tao solver info
+  int _total_iterate = 0;
+  int _obj_iterate = 0;
+  int _grad_iterate = 0;
+  int _hess_iterate = 0;
+  double _f = 0;
+  double _gnorm = 0;
+  double _cnorm = 0;
+  double _xdiff = 0;
+
   /// Here is where we call tao and solve
   PetscErrorCode taoSolve();
 
   /// output optimization iteration solve data
   static PetscErrorCode monitor(Tao tao, void * ctx);
 
+  void setTaoSolutionStatus(Tao tao);
+
   ///@{
   /// Function wrappers for tao
   static PetscErrorCode objectiveFunctionWrapper(Tao tao, Vec x, Real * objective, void * ctx);
-  static PetscErrorCode gradientFunctionWrapper(Tao tao, Vec x, Vec gradient, void * ctx);
   static PetscErrorCode hessianFunctionWrapper(Tao tao, Vec x, Mat hessian, Mat pc, void * ctx);
+  static PetscErrorCode
+  objectiveAndGradientFunctionWrapper(Tao tao, Vec x, Real * objective, Vec gradient, void * ctx);
   static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
   ///@}
 

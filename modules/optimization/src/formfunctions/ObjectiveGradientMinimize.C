@@ -16,7 +16,6 @@ ObjectiveGradientMinimize::validParams()
 
 ObjectiveGradientMinimize::ObjectiveGradientMinimize(const InputParameters & parameters)
   : FormFunction(parameters),
-
     _adjoint_data(getDataValueHelper("adjoint_data_computed", "adjoint_data_name"))
 {
 }

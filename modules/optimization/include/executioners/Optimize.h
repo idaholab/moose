@@ -20,6 +20,8 @@ public:
 
   virtual void execute() override;
 
+  OptimizeSolve & getOptimizeSolve() { return _optim_solve; }
+
 protected:
   OptimizeSolve _optim_solve;
 };
