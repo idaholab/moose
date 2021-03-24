@@ -11,6 +11,9 @@
 
 #include "INSFVMomentumTimeDerivative.h"
 
+/*
+ * An elemental kernel to compute the time derivative term in the momentum equation.
+ */
 class PINSFVMomentumTimeDerivative : public INSFVMomentumTimeDerivative
 {
 public:
