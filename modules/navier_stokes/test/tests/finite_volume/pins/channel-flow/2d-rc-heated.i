@@ -150,7 +150,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [energy_convection]
-    type = PINSFVEnergyConvection
+    type = PINSFVEnergyAmbientConvection
     variable = temperature
     is_solid = false
     temp_fluid = temperature
@@ -164,7 +164,7 @@ velocity_interp_method='rc'
     variable = temp_solid
   []
   [solid_energy_convection]
-    type = PINSFVEnergyConvection
+    type = PINSFVEnergyAmbientConvection
     variable = temp_solid
     is_solid = true
     temp_fluid = temperature

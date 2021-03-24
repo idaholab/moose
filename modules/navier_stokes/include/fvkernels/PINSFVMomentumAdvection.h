@@ -46,8 +46,4 @@ protected:
   const VariableValue & _eps;
   /// porosity in the neighbor element
   const VariableValue & _eps_neighbor;
-  /// whether the porosity has discontinuities that the Rhie Chow interpolation should avoid
-  const bool _smooth_porosity;
-  /// maximum porosity gradient norm before considering a discontinuity exists (only if smooth_porosity is false)
-  const Real _max_eps_gradient;
 };

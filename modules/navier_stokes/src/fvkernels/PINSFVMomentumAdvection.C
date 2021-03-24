@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumAdvection.h"
+#include "INSFVPressureVariable.h"
 #include "PINSFVSuperficialVelocityVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
@@ -19,8 +20,6 @@ PINSFVMomentumAdvection::validParams()
   params.addClassDescription("Object for advecting superficial momentum, e.g. rho*u_d, "
                              "in the porous media momentum equation");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
-  params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
-  params.addParam<Real>("max_eps_gradient", 1e-12, "Maximum porosity gradient before considering a discontinuity exists");
 
   return params;
 }
@@ -29,9 +28,7 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
     _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0))),
     _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
-    _smooth_porosity(getParam<bool>("smooth_porosity")),
-    _max_eps_gradient(getParam<Real>("max_eps_gradient"))
+    _eps_neighbor(coupledNeighborValue("porosity"))
 {
   if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
@@ -190,7 +187,7 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem, const ADReal & mu) c
 
         if (_symmetry_boundaries.find(bc_id) != _symmetry_boundaries.end())
         {
-          // Moukalled eqns. 15.154 - 15.156
+          // Moukalled eqns. 15.154 - 15.156, adapted for porosity
           for (const auto i : make_range(_dim))
             coeff(i) += 2. * mu / eps_face * surface_vector.norm() /
                         std::abs((fi->faceCentroid() - rc_centroid) * normal) * normal(i) *
@@ -290,12 +287,6 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
   if (m == Moose::FV::InterpMethod::Average)
     return;
 
-  // If the porosity has discontinuities, avoid Rhie Chow near the jumps
-  if (!_smooth_porosity)
-    if (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > _max_eps_gradient ||
-        MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > _max_eps_gradient)
-      return;
-
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
   // values on either side of the face
   const VectorValue<ADReal> & grad_p = _p_var->adGradSln(*_face_info);
@@ -380,7 +371,7 @@ PINSFVMomentumAdvection::computeQpResidual()
   this->interpolate(_velocity_interp_method, v, _vel_elem[_qp], _vel_neighbor[_qp]);
 
   // Interpolation of 1/eps term
-  // TODO: Consider advecting interstitial momentum, then the kernel may be inherited
+  // TODO: Consider advecting interstitial momentum, then this function may be inherited
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                          one_over_eps_interface,
                          1 / _eps[_qp],

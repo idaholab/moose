@@ -77,20 +77,20 @@ the same time, the user has to selectively activate the desired one. We list the
 for the first component of the superficial velocity:
 
 - no slip walls
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/no-slip-u
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/no-slip-u
 
 - free slip walls
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/free-slip-u
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/free-slip-u
 
 - symmetry axis. This symmetry condition should also be indicated for the pressure variable.
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-u
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-p
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-u
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/symmetry-p
 
 - inlet mass flux
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/inlet-u
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/inlet-u
 
 - momentum advection outflow (only for a mean-pressure approach, equivalent to executing the momentum advection kernel on the boundary)
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-u
+  !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc.i block=FVBCs/outlet-u
 
 
 The pressure boundary condition is usually only set at the outlet:

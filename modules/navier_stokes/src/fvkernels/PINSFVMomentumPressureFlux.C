@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumPressureFlux.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumPressureFlux);
@@ -43,6 +44,9 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
+               "of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal

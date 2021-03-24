@@ -99,15 +99,15 @@ velocity_interp_method='rc'
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
-    momentum_component = 'x'
     mu = ${mu}
     porosity = porosity
   []
   [u_pressure]
-    type = PINSFVMomentumPressure
+    type = PINSFVMomentumPressureFlux
     variable = u
     p = pressure
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_porosity_gradient]
     type = PINSFVMomentumAdvectionPorosityGradient
@@ -137,15 +137,15 @@ velocity_interp_method='rc'
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
-    momentum_component = 'y'
     mu = ${mu}
     porosity = porosity
   []
   [v_pressure]
-    type = PINSFVMomentumPressure
+    type = PINSFVMomentumPressureFlux
     variable = v
     p = pressure
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_porosity_gradient]
     type = PINSFVMomentumAdvectionPorosityGradient
