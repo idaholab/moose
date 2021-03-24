@@ -48,13 +48,13 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
 ADReal
 PINSFVMomentumPressureFlux::computeQpResidual()
 {
-  ADReal eps_p_interface;
+  ADReal p_interface;
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         eps_p_interface,
+                         p_interface,
                          _p_elem[_qp],
                          _p_neighbor[_qp],
                          *_face_info,
                          true);
-  return _eps[_qp] * eps_p_interface * _normal(_index);
+  return _eps[_qp] * p_interface * _normal(_index);
 }
