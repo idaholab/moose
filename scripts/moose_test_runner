@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys, os
 
 mydir = os.path.dirname(os.path.realpath(__file__))
@@ -26,6 +26,13 @@ if not os.path.isdir(MOOSE_PYTHON_DIR):
     sys.exit(1)
 
 sys.path.append(MOOSE_PYTHON_DIR)
+MOOSE_HIT_DIR = os.path.join(MOOSE_DIR, 'moosetools', 'contrib', 'hit')
+if not os.path.isdir(MOOSE_HIT_DIR):
+    MOOSE_HIT_DIR = os.path.join(MOOSE_DIR, 'framework', 'contrib', 'hit')
+if not os.path.isdir(MOOSE_HIT_DIR):
+    print('Could not locate the HIT directory', file=sys.stderr)
+    sys.exit(1)
+sys.path.append(MOOSE_HIT_DIR)
 
 from TestHarness import TestHarness
 TestHarness.buildAndRun(sys.argv, None, MOOSE_DIR, moose_python=MOOSE_PYTHON_DIR)
