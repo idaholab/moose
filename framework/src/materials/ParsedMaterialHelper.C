@@ -196,8 +196,7 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::initQpStatefulProperties()
 {
-  if (_prop_F)
-    (*_prop_F)[_qp] = 0.0;
+  computeQpProperties();
 }
 
 template <bool is_ad>
