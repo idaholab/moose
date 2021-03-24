@@ -21,5 +21,5 @@ public:
   PINSFVEnergyAdvection(const InputParameters & params);
 
 private:
-  ADReal computeQpResidual();
+  ADReal computeQpResidual() override;
 };

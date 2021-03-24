@@ -176,6 +176,11 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   if (_var.dofIndices().size() > 0)
     _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
+  else if (_var.dofIndicesNeighbor().size() > 0)
+    _assembly.processDerivatives(-r, _var.dofIndicesNeighbor()[0], _matrix_tags, local_functor);
+  else
+    mooseError("Variable has no dofs on local and neighbor element for this FluxBC at ",
+               _face_info->faceCentroid());
 }
 
 const ADReal &

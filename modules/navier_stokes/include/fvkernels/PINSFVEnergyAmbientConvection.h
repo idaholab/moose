@@ -16,12 +16,12 @@ class INSFVEnergyVariable;
 /**
  * An elemental kernel for transfering energy between the solid and fluid phases by convection
  */
-class PINSFVEnergyConvection : public FVElementalKernel
+class PINSFVEnergyAmbientConvection : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
 
-  PINSFVEnergyConvection(const InputParameters & parameters);
+  PINSFVEnergyAmbientConvection(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;

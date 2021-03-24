@@ -22,6 +22,7 @@ public:
   PINSFVMomentumAdvection(const InputParameters & params);
 
 protected:
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * interpolation overload for the velocity
    */
@@ -29,16 +30,9 @@ protected:
                    ADRealVectorValue & interp_v,
                    const ADRealVectorValue & elem_v,
                    const ADRealVectorValue & neighbor_v) override;
-
+#endif
   virtual ADReal computeQpResidual() override;
   VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
-
-  /**
-   * Returns the Rhie-Chow 'a' coefficient for the requested element \p elem
-   * @param elem The elem to get the Rhie-Chow coefficient for
-   * @param mu The dynamic viscosity
-   */
-  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const override;
 
   /// porosity variable to compute gradients
   const MooseVariableFV<Real> * const _eps_var;
@@ -46,8 +40,6 @@ protected:
   const VariableValue & _eps;
   /// porosity in the neighbor element
   const VariableValue & _eps_neighbor;
-  /// whether the porosity has discontinuities that the Rhie Chow interpolation should avoid
+  /// Whether the porosity field is smooth or has discontinuities
   const bool _smooth_porosity;
-  /// maximum porosity gradient norm before considering a discontinuity exists (only if smooth_porosity is false)
-  const Real _max_eps_gradient;
 };

@@ -12,7 +12,7 @@
 #include "FVElementalKernel.h"
 
 /**
- * A flux kernel diffusion of momentum in porous media across cell faces
+ * An elemental kernel to add the inverse porosity gradient term to the momentum equation
  */
 class PINSFVMomentumAdvectionPorosityGradient : public FVElementalKernel
 {
@@ -35,6 +35,6 @@ protected:
   const Real & _rho;
   /// which momentum component this kernel applies to
   const int _index;
-  /// whether the porosity has discontinuities that the Rhie Chow interpolation should avoid
+  /// whether the porosity has discontinuities, in which case this kernel should not be used
   const bool _smooth_porosity;
 };

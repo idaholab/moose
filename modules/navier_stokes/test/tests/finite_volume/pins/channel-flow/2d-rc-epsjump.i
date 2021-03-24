@@ -99,15 +99,15 @@ velocity_interp_method='rc'
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
-    momentum_component = 'x'
     mu = ${mu}
     porosity = porosity
   []
   [u_pressure]
-    type = PINSFVMomentumPressure
+    type = PINSFVMomentumPressureFlux
     variable = u
     p = pressure
     porosity = porosity
+    momentum_component = 'x'
   []
   [u_porosity_gradient]
     type = PINSFVMomentumAdvectionPorosityGradient
@@ -137,15 +137,15 @@ velocity_interp_method='rc'
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
-    momentum_component = 'y'
     mu = ${mu}
     porosity = porosity
   []
   [v_pressure]
-    type = PINSFVMomentumPressure
+    type = PINSFVMomentumPressureFlux
     variable = v
     p = pressure
     porosity = porosity
+    momentum_component = 'y'
   []
   [v_porosity_gradient]
     type = PINSFVMomentumAdvectionPorosityGradient
@@ -183,11 +183,12 @@ velocity_interp_method='rc'
     boundary = 'top bottom'
     variable = v
   []
+
   [outlet_p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0
+    function = 0.4
   []
 []
 
@@ -207,8 +208,6 @@ velocity_interp_method='rc'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
-  nl_abs_tol = 1e-13
-  nl_rel_tol = 1e-13
 []
 
 [Postprocessors]

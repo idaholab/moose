@@ -48,7 +48,7 @@ velocity_interp_method='rc'
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    initial_condition = 1
+    initial_condition = 0.4
   []
 []
 
@@ -179,7 +179,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [energy_convection]
-    type = PINSFVEnergyConvection
+    type = PINSFVEnergyAmbientConvection
     variable = temperature
     is_solid = false
     temp_fluid = temperature

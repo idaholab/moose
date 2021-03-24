@@ -23,10 +23,17 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  std::string _prop_name;
-  const RealVectorValue & _prop_value;
+  /// The names of the constant vector material properties
+  std::vector<std::string> _prop_names;
 
-  GenericMaterialProperty<RealVectorValue, is_ad> & _property;
+  /// The vector values of each vector material property
+  const std::vector<Real> & _prop_values;
+
+  /// The number of constant vector material properties defined
+  unsigned int _num_props;
+
+  /// A vector of pointer to the material properties
+  std::vector<GenericMaterialProperty<RealVectorValue, is_ad> *> _properties;
 };
 
 typedef GenericConstantVectorMaterialTempl<false> GenericConstantVectorMaterial;

@@ -27,9 +27,10 @@ PINSFVMomentumAdvectionPorosityGradient::validParams()
   params.declareControllable("rho");
 
   MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>("momentum_component",
-                             momentum_component,
-                             "The component of the momentum equation that this kernel applies to.");
+  params.addRequiredParam<MooseEnum>(
+      "momentum_component",
+      momentum_component,
+      "The component of the momentum equation that this kernel applies to.");
   params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -54,12 +55,11 @@ PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumAdvectionPorosityGradient may only be used with a superficial "
                "velocity variable, of variable type PINSFVSuperficialVelocityVariable.");
+
   if (!_smooth_porosity)
     paramError(
         "smooth_porosity",
         "The MomentumAdvectionContinuousPorosity may only be used with a continuous porosity.");
-  if (!isParamValid("momentum_component"))
-    mooseError("The momentum equation component this kernel applies to should be specified.");
 }
 
 ADReal
