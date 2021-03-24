@@ -33,7 +33,7 @@ protected:
   const ADMaterialProperty<RealVectorValue> * const _cL;
   /// Forchheimer coefficient
   const ADMaterialProperty<RealVectorValue> * const _cQ;
-  /// Booleans to select the right model
+  /// Booleans to select the right models
   const bool _use_linear_friction_matprop;
   const bool _use_quadratic_friction_matprop;
   const bool _use_Darcy_friction_model;

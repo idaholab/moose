@@ -11,6 +11,9 @@
 
 #include "INSFVSymmetryVelocityBC.h"
 
+/**
+ * A symmetry boundary condition for the superficial velocity
+ */
 class PINSFVSymmetryVelocityBC : public INSFVSymmetryVelocityBC
 {
 public:

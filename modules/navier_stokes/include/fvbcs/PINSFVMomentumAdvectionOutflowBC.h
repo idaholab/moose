@@ -32,7 +32,7 @@ protected:
   const INSFVVelocityVariable * const _w_var;
   /// porosity
   const VariableValue & _eps;
-  /// porosity in the neighbor cell (ghost?)
+  /// porosity in the neighbor cell (for continuous porosities) FIXME: eps should not be defined on the other side of the boundary
   const VariableValue & _eps_neighbor;
   /// the dimension of the simulation
   const unsigned int _dim;
