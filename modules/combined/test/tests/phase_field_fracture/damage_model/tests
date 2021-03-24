@@ -1,0 +1,42 @@
+[Tests]
+  [split]
+    issues = '#17620'
+    requirement = 'The phase-field fracture model shall predict damage evolution using various forms '
+                  'of split elastic energy, including '
+    [no_split]
+      type = Exodiff
+      input = 'mode2.i'
+      exodiff = 'mode2_no_split.e'
+      cli_args = 'Materials/damage/type=PhaseFieldFractureNoSplit Outputs/file_base=mode2_no_split'
+      detail = 'the elastic energy without split, '
+      design = 'PhaseFieldFractureNoSplit.md'
+    []
+    [strain_spectral]
+      type = Exodiff
+      input = 'mode2.i'
+      exodiff = 'mode2_strain_spectral.e'
+      cli_args = 'Materials/damage/type=PhaseFieldFractureStrainSpectralSplit '
+                 'Outputs/file_base=mode2_strain_spectral'
+      detail = 'the elastic energy split based on the spectral decomposition of strain, '
+      design = 'PhaseFieldFractureStrainSpectralSplit.md'
+    []
+    [strain_voldev]
+      type = Exodiff
+      input = 'mode2.i'
+      exodiff = 'mode2_strain_voldev.e'
+      cli_args = 'Materials/damage/type=PhaseFieldFractureStrainVolDevSplit '
+                 'Outputs/file_base=mode2_strain_voldev'
+      detail = 'the elastic energy split based on the volumetric-deviatoric decomposition of strain, and'
+      design = 'PhaseFieldFractureStrainVolDevSplit.md'
+    []
+    [stress_spectral]
+      type = Exodiff
+      input = 'mode2.i'
+      exodiff = 'mode2_stress_spectral.e'
+      cli_args = 'Materials/damage/type=PhaseFieldFractureStressSpectralSplit '
+                 'Outputs/file_base=mode2_stress_spectral'
+      detail = 'the elastic energy split based on the spectral decomposition of stress.'
+      design = 'PhaseFieldFractureStressSpectralSplit.md'
+    []
+  []
+[]
