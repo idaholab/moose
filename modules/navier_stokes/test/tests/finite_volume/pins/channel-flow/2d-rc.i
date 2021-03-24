@@ -16,11 +16,6 @@ velocity_interp_method='rc'
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-  fv_bcs_integrity_check = true
-[]
-
 [Variables]
   inactive = 'lambda'
   [u]
@@ -62,6 +57,7 @@ velocity_interp_method='rc'
     v = v
     mu = ${mu}
     rho = ${rho}
+    porosity = porosity
   []
 
   [u_advection]
@@ -129,11 +125,9 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
-  # Select desired boundary conditions by disabling
-  inactive = 'symmetry-u symmetry-v symmetry-p'
-             'no-slip-u no-slip-v'
-             'inlet-p'
-             'outlet-p-novalue outlet-u outlet-v'
+  # Select desired boundary conditions
+  active = 'inlet-u inlet-v outlet-p free-slip-u free-slip-v'
+
   # Possible inlet boundary conditions
   [inlet-u]
     type = INSFVInletVelocityBC
