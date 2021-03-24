@@ -140,7 +140,8 @@
   constraint_species = 'H2O              H+                  Na+              K+                 Ca++              Mg++                SiO2(aq)           Al+++               Cl-                SO4--               HCO3-'
 # Following numbers are from water_60_to_220degC_out.csv
   constraint_value = '  1.0006383866109  9.5165072498215e-07 0.100020379171   0.0059389061065    0.011570884507621 4.6626763057447e-06 0.0045110404925255 5.8096968688789e-17 0.13500708594394   6.6523540147676e-05 7.7361407898089e-05'
-  constraint_meaning = 'kg_solvent_water free_molality       free_molality    free_molality     free_molality   free_molality       free_molality      free_molality       moles_bulk_species free_molality       free_molality'
+  constraint_meaning = 'kg_solvent_water free_concentration       free_concentration    free_concentration     free_concentration   free_concentration       free_concentration      free_concentration       bulk_composition free_concentration       free_concentration'
+  constraint_unit = '   kg               molal               molal            molal              molal           molal              molal              molal               moles              molal               molal'
   initial_temperature = 220
   temperature = 220
   kinetic_species_name = '         Albite           Anorthite       K-feldspar      Quartz           Phlogopite         Paragonite Calcite     Anhydrite   Chalcedony Illite Kaolinite Clinochl-7A'

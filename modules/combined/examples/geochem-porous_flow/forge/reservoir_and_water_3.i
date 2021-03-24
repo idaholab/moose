@@ -1,4 +1,4 @@
-# Simulation to assess possible changes in the reservoir.  The rock composition from natural_reservoir.i is mixed with the water from water_3.i  Note that the free_molality values are used from water_3.i and that composition is held fixed throughout this entire simulation.  This models water_3 continually flushing through the rock mineral assemblage: as soon as a mineral dissolves the aqueous components are swept away and replaced by a new batch of water_3; as soon as mineral precipitates more water_3 sweeps into the system providing a limitless source of aqueous components (in set ratios) at 70degC
+# Simulation to assess possible changes in the reservoir.  The rock composition from natural_reservoir.i is mixed with the water from water_3.i  Note that the free_concentration values are used from water_3.i and that composition is held fixed throughout this entire simulation.  This models water_3 continually flushing through the rock mineral assemblage: as soon as a mineral dissolves the aqueous components are swept away and replaced by a new batch of water_3; as soon as mineral precipitates more water_3 sweeps into the system providing a limitless source of aqueous components (in set ratios) at 70degC
 # The results depend on the kinetic rates used and these are recognised to be poorly constrained by experiment
 [UserObjects]
   [rate_Albite]
@@ -144,7 +144,8 @@
   constraint_species = 'H2O              H+                  Na+                K+                  Ca++                Mg++               SiO2(aq)            Al+++               Cl-                SO4--               HCO3-'
 # Following numbers are from water_3_out.csv
   constraint_value = '  0.99999999549877 8.0204734722945e-07 0.0001319920398478 2.8097346859027e-05 7.7328020546464e-05 2.874602030221e-05 0.00027284654762868 4.4715524787497e-12 0.0002253530818877 1.0385772502298e-05 0.00012427759434288'
-  constraint_meaning = 'kg_solvent_water free_molality       free_molality    free_molality      free_molality     free_molality       free_molality      free_molality       moles_bulk_species free_molality       free_molality'
+  constraint_meaning = 'kg_solvent_water free_concentration       free_concentration    free_concentration      free_concentration     free_concentration       free_concentration      free_concentration       bulk_composition free_concentration       free_concentration'
+  constraint_unit = '   kg               molal               molal            molal              molal             molal               molal              molal               moles              molal               molal'
   initial_temperature = 70
   temperature = 70
   close_system_at_time = 1E20 # keep the free molalities specified above for all time

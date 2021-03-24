@@ -1,18 +1,19 @@
 # Example demonstrating that controlled-activity can be spatially-dependent
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl-"
-  [../]
+  []
 []
 
 [SpatialReactionSolver]
   model_definition = definition
   charge_balance_species = "Cl-"
   constraint_species = "H2O H+ Cl-"
-  constraint_value = "  55.5 1E-5 1E-5"
-  constraint_meaning = "moles_bulk_water activity moles_bulk_species"
+  constraint_value = "  1                -5            1E-5"
+  constraint_meaning = "bulk_composition log10activity bulk_composition"
+  constraint_unit = "   kg               dimensionless moles"
   controlled_activity_name = 'H+'
   controlled_activity_value = 'act_H+'
 []
@@ -30,28 +31,28 @@
 []
 
 [AuxVariables]
-  [./act_H+]
-  [../]
+  [act_H+]
+  []
 []
 
 [AuxKernels]
-  [./act_H+]
+  [act_H+]
     type = FunctionAux
     variable = 'act_H+'
     function = '10^(-5 + x)'
     execute_on = timestep_begin # so the Reactor gets the correct value
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./pH]
+  [pH]
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
     sort_by = x
     num_points = 11
     variable = pH
-  [../]
+  []
 []
 
 [Outputs]

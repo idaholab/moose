@@ -5,11 +5,11 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O K+ Al+++ SiO2(aq) H+"
     equilibrium_minerals = "Muscovite Quartz Maximum Tridymite Amrph^silica"
-  [../]
+  []
 []
 

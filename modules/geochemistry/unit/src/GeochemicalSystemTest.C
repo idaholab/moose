@@ -12,9 +12,14 @@
 /// Check MultiMooseEnum constructor
 TEST_F(GeochemicalSystemTest, constructWithMultiMooseEnum)
 {
-  MultiMooseEnum constraint_meaning("moles_bulk_water kg_solvent_water moles_bulk_species "
-                                    "free_molality free_moles_mineral_species fugacity activity");
-  constraint_meaning.push_back("activity moles_bulk_species moles_bulk_species free_molality");
+  MultiMooseEnum constraint_user_meaning(
+      "kg_solvent_water bulk_composition free_concentration free_mineral activity log10activity "
+      "fugacity log10fugacity");
+  constraint_user_meaning.push_back(
+      "activity bulk_composition bulk_composition free_concentration");
+  MultiMooseEnum constraint_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
+                                 "g_per_kg_solvent mg_per_kg_solvent ug_per_kg_solvent cm3");
+  constraint_unit.push_back("dimensionless moles moles molal");
   ModelGeochemicalDatabase mgd_calcite2 = _model_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs(mgd_calcite2,
                               _ac3,
@@ -25,7 +30,8 @@ TEST_F(GeochemicalSystemTest, constructWithMultiMooseEnum)
                               "H+",
                               {"H2O", "Calcite", "H+", "HCO3-"},
                               {1.75, 3.0, 2.0, 1.0},
-                              constraint_meaning,
+                              constraint_unit,
+                              constraint_user_meaning,
                               25,
                               0,
                               1E-20,
@@ -59,8 +65,22 @@ TEST_F(GeochemicalSystemTest, swapSizeException)
 
   try
   {
-    GeochemicalSystem egs(
-        mgd, _ac3, _is3, _swapper7, {"H+"}, {}, "H+", {}, {}, _cm_dummy, 25, 0, 1E-20, {}, {});
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper7,
+                          {"H+"},
+                          {},
+                          "H+",
+                          {},
+                          {},
+                          _cu_dummy,
+                          _cm_dummy,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -98,6 +118,7 @@ TEST_F(GeochemicalSystemTest, swapChargeBalanceException)
                           "H+",
                           {},
                           {},
+                          _cu_dummy,
                           _cm_dummy,
                           25,
                           0,
@@ -140,6 +161,7 @@ TEST_F(GeochemicalSystemTest, swapException)
                           "H+",
                           {},
                           {},
+                          _cu_dummy,
                           _cm_dummy,
                           25,
                           0,
@@ -165,14 +187,21 @@ TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_poor;
-  cm_poor.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm_poor.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm_poor;
+  cm_poor.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm_poor.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu_poor;
+  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
 
   try
   {
@@ -185,6 +214,7 @@ TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
                           "H+",
                           {"H2O", "H+", "HCO3-"},
                           {1.0, 2.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -212,6 +242,7 @@ TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
                           "H+",
                           {"H2O", "H+", "HCO3-"},
                           {1.0, 2.0, 3.0},
+                          cu,
                           cm_poor,
                           25,
                           0,
@@ -238,8 +269,37 @@ TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
                           {},
                           {},
                           "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu_poor,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Constrained species names must have same length as constraint units") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper3,
+                          {},
+                          {},
+                          "H+",
                           {"H2O", "H+"},
                           {1.0, 2.0},
+                          cu_poor,
                           cm_poor,
                           25,
                           0,
@@ -266,10 +326,14 @@ TEST_F(GeochemicalSystemTest, constraintNameExceptions)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
@@ -282,6 +346,7 @@ TEST_F(GeochemicalSystemTest, constraintNameExceptions)
                           "H+",
                           {"H2O", "H+", "H20"},
                           {1.0, 2.0, 3.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -309,6 +374,7 @@ TEST_F(GeochemicalSystemTest, constraintNameExceptions)
                           "H+",
                           {"H2O", "H+", "HCO3-"},
                           {1.0, 2.0, 3.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -334,10 +400,14 @@ TEST_F(GeochemicalSystemTest, positiveException1)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
@@ -350,6 +420,7 @@ TEST_F(GeochemicalSystemTest, positiveException1)
                           "H+",
                           {"H2O", "H+", "CO2(aq)"},
                           {-1.0, 2.0, 3.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -374,10 +445,14 @@ TEST_F(GeochemicalSystemTest, positiveException2)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
@@ -390,6 +465,7 @@ TEST_F(GeochemicalSystemTest, positiveException2)
                           "H+",
                           {"H2O", "H+", "CO2(aq)"},
                           {-1.0, 2.0, 3.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -415,11 +491,16 @@ TEST_F(GeochemicalSystemTest, positiveException3)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
 
   try
   {
@@ -432,6 +513,7 @@ TEST_F(GeochemicalSystemTest, positiveException3)
                           "H+",
                           {"H2O", "H+", "O2(g)", "HCO3-"},
                           {1.0, 2.0, -3.0, 4.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -457,10 +539,14 @@ TEST_F(GeochemicalSystemTest, positiveException4)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -473,6 +559,7 @@ TEST_F(GeochemicalSystemTest, positiveException4)
                           "H+",
                           {"H2O", "H+", "CO2(aq)"},
                           {1.0, 2.0, -2.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -484,7 +571,7 @@ TEST_F(GeochemicalSystemTest, positiveException4)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Specified free molality values must be positive: you entered -2") !=
+    ASSERT_TRUE(msg.find("Specified free concentration values must be positive: you entered -2") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -498,11 +585,16 @@ TEST_F(GeochemicalSystemTest, positiveException5)
       database, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -515,6 +607,7 @@ TEST_F(GeochemicalSystemTest, positiveException5)
                           "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, -3.0, 2.0, 1.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -526,10 +619,8 @@ TEST_F(GeochemicalSystemTest, positiveException5)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find(
-            "Specified free mole number of mineral species must be positive: you entered -3") !=
-        std::string::npos)
+    ASSERT_TRUE(msg.find("Specified free mineral values must be positive: you entered -3") !=
+                std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -542,10 +633,14 @@ TEST_F(GeochemicalSystemTest, waterException)
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
@@ -558,6 +653,7 @@ TEST_F(GeochemicalSystemTest, waterException)
                           "H+",
                           {"H2O", "H+", "CO2(aq)"},
                           {1.0, 2.0, 3.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -569,9 +665,8 @@ TEST_F(GeochemicalSystemTest, waterException)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find("H2O must be provided with either a mass of solvent water, a bulk number of "
-                 "moles, or an activity") != std::string::npos)
+    ASSERT_TRUE(msg.find("H2O must be provided with either a mass of solvent water, a bulk "
+                         "composition in moles or mass, or an activity") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -584,11 +679,16 @@ TEST_F(GeochemicalSystemTest, fugacityException)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -601,6 +701,7 @@ TEST_F(GeochemicalSystemTest, fugacityException)
                           "H+",
                           {"H2O", "H+", "O2(g)", "HCO3-"},
                           {1.0, 2.0, 3.0, 4.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -620,11 +721,16 @@ TEST_F(GeochemicalSystemTest, fugacityException)
 /// Check minerals are provided with appropriate meaning
 TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
 {
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -637,6 +743,7 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
                           "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -648,16 +755,23 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The mineral Calcite must be provided with a free number of moles or a "
-                         "bulk number of moles") != std::string::npos)
+    ASSERT_TRUE(
+        msg.find("The mineral Calcite must be provided with either: a free number of moles, a free "
+                 "mass or a free volume; or a bulk composition of moles or mass") !=
+        std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2;
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2;
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -670,6 +784,7 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
                           "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu2,
                           cm2,
                           25,
                           0,
@@ -681,8 +796,10 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The mineral Calcite must be provided with a free number of moles or a "
-                         "bulk number of moles") != std::string::npos)
+    ASSERT_TRUE(
+        msg.find("The mineral Calcite must be provided with either: a free number of "
+                 "moles, a free mass or a free volume; or a bulk composition of moles or mass") !=
+        std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -690,11 +807,16 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
 /// Check aqueous species are provided with appropriate meaning
 TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
 {
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
 
   try
   {
@@ -707,6 +829,7 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
                           "HCO3-",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -718,16 +841,21 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The basis species H+ must be provided with a free molality, bulk number "
-                         "of moles, or an activity") != std::string::npos)
+    ASSERT_TRUE(msg.find("The basis species H+ must be provided with a free concentration, bulk "
+                         "composition or an activity") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2;
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2;
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
@@ -740,6 +868,7 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
                           "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu2,
                           cm2,
                           25,
                           0,
@@ -751,33 +880,180 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find("The basis species HCO3- must be provided with a free molality, bulk number "
-                 "of moles, or an activity") != std::string::npos)
+    ASSERT_TRUE(msg.find("The basis species HCO3- must be provided with a free concentration, bulk "
+                         "composition or an activity") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
 
-/// Check charge-balance species is provided with appropriate meaning
-TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
+/// Exception check units for water
+TEST_F(GeochemicalSystemTest, waterUnitsException)
 {
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   try
   {
-    GeochemicalSystem egs(_mgd_calcite,
+    GeochemicalSystem egs(mgd,
                           _ac3,
                           _is3,
-                          _swapper4,
+                          _swapper3,
                           {},
                           {},
                           "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Units for kg_solvent_water must be kg") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Exception check units for bulk composition
+TEST_F(GeochemicalSystemTest, bulkUnitsException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper3,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Species H+: units for bulk composition must be moles or mass") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Exception check units for free concentration
+TEST_F(GeochemicalSystemTest, freeConcUnitsException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper3,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Species HCO3-: units for free concentration quantities must be molal or "
+                         "mass_per_kg_solvent") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Exception check units for free mineral
+TEST_F(GeochemicalSystemTest, freeMineralUnitsException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper4,
+                          {"Ca++"},
+                          {"Calcite"},
+                          "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu,
                           cm,
                           25,
                           0,
@@ -791,18 +1067,318 @@ TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
     std::string msg(e.what());
     ASSERT_TRUE(
         msg.find(
-            "For code consistency, the species H+ must be provided with a bulk number of moles "
+            "Species Calcite: units for free mineral quantities must be moles, mass or volume") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Exception check units for activity
+TEST_F(GeochemicalSystemTest, activityUnitsException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper3,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Species HCO3-: dimensionless units must be used when specifying activity") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  cm[2] = GeochemicalSystem::ConstraintUserMeaningEnum::LOG10ACTIVITY;
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper3,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "H+", "HCO3-"},
+                          {1.0, 2.0, 3.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Species HCO3-: dimensionless units must be used when specifying log10activity") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Exception check units for fugacity
+TEST_F(GeochemicalSystemTest, fugacityUnitsException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+
+  try
+  {
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper4,
+                          {"O2(aq)"},
+                          {"O2(g)"},
+                          "H+",
+                          {"H2O", "H+", "O2(g)", "HCO3-"},
+                          {1.0, 2.0, 3.0, 4.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Species O2(g): dimensionless units must be used when specifying fugacity") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  cm[2] = GeochemicalSystem::ConstraintUserMeaningEnum::LOG10FUGACITY;
+  try
+  {
+    // no need to swap, since the above constructor of egs will have performed the swaps in mgd
+    GeochemicalSystem egs(mgd,
+                          _ac3,
+                          _is3,
+                          _swapper4,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "H+", "O2(g)", "HCO3-"},
+                          {1.0, 2.0, 3.0, 4.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Species O2(g): dimensionless units must be used when specifying log10fugacity") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check units conversion occurs and constraint_meaning is built correctly
+TEST_F(GeochemicalSystemTest, unitsConversion1)
+{
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G_PER_KG_SOLVENT);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::CM3);
+
+  const GeochemicalSystem egs(_mgd_calcite,
+                              _ac3,
+                              _is3,
+                              _swapper4,
+                              {},
+                              {},
+                              "H+",
+                              {"H2O", "H+", "HCO3-", "Calcite"},
+                              {100.0, 3.0, 1.0, 2.0},
+                              cu,
+                              cm,
+                              25,
+                              0,
+                              1E-20,
+                              {},
+                              {});
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cim = {
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES};
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
+  EXPECT_NEAR(egs.getBulkMolesOld()[0], 100.0 / 18.0152, 1.0E-6); // H2O
+  EXPECT_NEAR(egs.getBulkMolesOld()[1], 3.0, 1.0E-6);             // H+
+  EXPECT_NEAR(
+      egs.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0 / 61.0171, 1.0E-6); // HCO3-
+  EXPECT_NEAR(
+      egs.getSolventMassAndFreeMolalityAndMineralMoles()[3], 2.0 / 36.9340, 1.0E-6); // Calcite
+}
+
+/// Check units conversion occurs and constraint_meaning is built correctly
+TEST_F(GeochemicalSystemTest, unitsConversion2)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::LOG10ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::LOG10FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::UG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+
+  const GeochemicalSystem egs(mgd,
+                              _ac3,
+                              _is3,
+                              _swapper4,
+                              {"O2(aq)"},
+                              {"O2(g)"},
+                              "HCO3-",
+                              {"H2O", "H+", "HCO3-", "O2(g)"},
+                              {1.0, 2.0, 3.0, 4.0},
+                              cu,
+                              cm,
+                              25,
+                              0,
+                              1E-20,
+                              {},
+                              {});
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cim = {
+      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY};
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
+  EXPECT_NEAR(egs.getSolventMassAndFreeMolalityAndMineralMoles()[0], 1.0, 1.0E-6); // H2O
+  EXPECT_NEAR(egs.getBasisActivity(1), 1E2, 1.0E-6);                               // H+
+  EXPECT_NEAR(egs.getBulkMolesOld()[2], 2.0E-6 / 61.0171, 1.0E-6);                 // HCO3-
+  EXPECT_NEAR(egs.getBasisActivity(3), 1E4, 1.0E-6);                               // O2(g)
+}
+
+/// Check charge-balance species is provided with appropriate meaning
+TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
+{
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+
+  try
+  {
+    GeochemicalSystem egs(_mgd_calcite,
+                          _ac3,
+                          _is3,
+                          _swapper4,
+                          {},
+                          {},
+                          "H+",
+                          {"H2O", "Calcite", "H+", "HCO3-"},
+                          {1.0, 3.0, 2.0, 1.0},
+                          cu,
+                          cm,
+                          25,
+                          0,
+                          1E-20,
+                          {},
+                          {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "For code consistency, the species H+ must be provided with a bulk composition "
             "because it is the charge-balance species.  The value provided should be a reasonable "
             "estimate of the mole number, but will be overridden as the solve progresses") !=
         std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2;
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2;
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   try
   {
@@ -815,6 +1391,7 @@ TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
                           "H+",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          cu2,
                           cm2,
                           25,
                           0,
@@ -828,7 +1405,7 @@ TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
     std::string msg(e.what());
     ASSERT_TRUE(
         msg.find(
-            "For code consistency, the species H+ must be provided with a bulk number of moles "
+            "For code consistency, the species H+ must be provided with a bulk composition "
             "because it is the charge-balance species.  The value provided should be a reasonable "
             "estimate of the mole number, but will be overridden as the solve progresses") !=
         std::string::npos)
@@ -850,6 +1427,7 @@ TEST_F(GeochemicalSystemTest, chargeBalanceInBasisExecption)
                           "OH-",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          _cu_calcite,
                           _cm_calcite,
                           25,
                           0,
@@ -882,6 +1460,7 @@ TEST_F(GeochemicalSystemTest, chargeBalanceHasChargeExecption)
                           "Calcite",
                           {"H2O", "Calcite", "H+", "HCO3-"},
                           {1.0, 3.0, 2.0, 1.0},
+                          _cu_calcite,
                           _cm_calcite,
                           25,
                           0,
@@ -965,11 +1544,16 @@ TEST_F(GeochemicalSystemTest, getSolventWaterMass)
 {
   EXPECT_EQ(_egs_calcite.getSolventWaterMass(), 1.0);
 
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -979,6 +1563,7 @@ TEST_F(GeochemicalSystemTest, getSolventWaterMass)
                               "H+",
                               {"H2O", "Calcite", "H+", "HCO3-"},
                               {2.5, 3.0, 2.0, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -994,11 +1579,16 @@ TEST_F(GeochemicalSystemTest, getBulkMolesOld)
   EXPECT_EQ(_egs_calcite.getBulkMolesOld()[3], 3.0); // Calcite
   EXPECT_EQ(_egs_calcite.getBulkMolesOld()[1], 2.0); // H+
 
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1008,6 +1598,7 @@ TEST_F(GeochemicalSystemTest, getBulkMolesOld)
                               "H+",
                               {"H2O", "Calcite", "H+", "HCO3-"},
                               {-0.5, 3.5, 2.5, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -1047,11 +1638,16 @@ TEST_F(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
   EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableValues()[2], 1.1);              // Calcite
   EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableDenseValues()(2), 1.1);         // Calcite
 
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1061,6 +1657,7 @@ TEST_F(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
                               "H+",
                               {"H2O", "Calcite", "H+", "HCO3-"},
                               {0.5, 3.5, 2.5, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -1091,11 +1688,16 @@ TEST_F(GeochemicalSystemTest, getBasisActivityKnown)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -1106,6 +1708,7 @@ TEST_F(GeochemicalSystemTest, getBasisActivityKnown)
                         "H+",
                         {"H2O", "H+", "O2(g)", "HCO3-"},
                         {1.0, 2.0, 3.0, 4.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1144,11 +1747,16 @@ TEST_F(GeochemicalSystemTest, getBasisActivity)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac0,
@@ -1159,6 +1767,7 @@ TEST_F(GeochemicalSystemTest, getBasisActivity)
                         "H+",
                         {"H2O", "H+", "O2(g)", "HCO3-"},
                         {1.0, 1.5, 3.0, 2.5},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1195,11 +1804,16 @@ TEST_F(GeochemicalSystemTest, getBasisActivityCoeff)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac0,
@@ -1210,6 +1824,7 @@ TEST_F(GeochemicalSystemTest, getBasisActivityCoeff)
                         "H+",
                         {"H2O", "H+", "O2(g)", "HCO3-"},
                         {1.0, 1.5, 3.0, 2.5},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1394,10 +2009,14 @@ TEST_F(GeochemicalSystemTest, getTotalChargeOld)
   const PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "Fe+++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -1407,6 +2026,7 @@ TEST_F(GeochemicalSystemTest, getTotalChargeOld)
                               "StoiCheckBasis",
                               {"H2O", "Fe+++", "StoiCheckBasis"},
                               {1.75, 5.0, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -1423,11 +2043,16 @@ TEST_F(GeochemicalSystemTest, getTotalChargeOld)
 /// Check getresidual
 TEST_F(GeochemicalSystemTest, getResidual)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1437,6 +2062,7 @@ TEST_F(GeochemicalSystemTest, getResidual)
                               "HCO3-",
                               {"H2O", "Calcite", "HCO3-", "H+"},
                               {175.0, 3.0, 2.0, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -1499,10 +2125,14 @@ TEST_F(GeochemicalSystemTest, getResidual)
   PertinentGeochemicalSystem model2(
       _db_calcite, {"H2O", "H+", "StoiCheckBasis"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2 = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2 = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const GeochemicalSystem egs2(mgd2,
                                _ac3,
                                _is3,
@@ -1512,6 +2142,7 @@ TEST_F(GeochemicalSystemTest, getResidual)
                                "StoiCheckBasis",
                                {"H2O", "H+", "StoiCheckBasis"},
                                {175.0, 8.0, 2.0},
+                               cu2,
                                cm2,
                                25,
                                0,
@@ -1564,6 +2195,7 @@ TEST_F(GeochemicalSystemTest, setVarException)
                         "H+",
                         {"H2O", "Calcite", "H+", "HCO3-"},
                         {1.75, 3.0, 2.0, 1.0},
+                        _cu_calcite,
                         _cm_calcite,
                         25,
                         0,
@@ -1607,11 +2239,16 @@ TEST_F(GeochemicalSystemTest, setVarException)
  */
 TEST_F(GeochemicalSystemTest, jac1)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem egs(
       _mgd_calcite,
       _ac8,
@@ -1623,6 +2260,7 @@ TEST_F(GeochemicalSystemTest, jac1)
       {"H2O", "Calcite", "HCO3-", "H+"},
       {175.0, 3.0, 3.2E-2, 1E-8}, // the molality of H+ is carefully chosen so the secondary species
                                   // do not contribute much to the ionic strengths
+      cu,
       cm,
       25,
       4,
@@ -1704,11 +2342,16 @@ TEST_F(GeochemicalSystemTest, jac1)
  */
 TEST_F(GeochemicalSystemTest, jac2)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem egs(_mgd_calcite,
                         _ac8,
                         _is8,
@@ -1718,6 +2361,7 @@ TEST_F(GeochemicalSystemTest, jac2)
                         "HCO3-",
                         {"H2O", "Calcite", "HCO3-", "H+"},
                         {1.0, 3.0, 3.2E-4, 1E-4},
+                        cu,
                         cm,
                         25,
                         2,
@@ -1800,11 +2444,16 @@ TEST_F(GeochemicalSystemTest, jac2)
  */
 TEST_F(GeochemicalSystemTest, jac3)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
   GeochemicalSystem egs(_mgd_calcite,
                         _ac8,
                         _is8,
@@ -1814,6 +2463,7 @@ TEST_F(GeochemicalSystemTest, jac3)
                         "H+",
                         {"H2O", "Calcite", "H+", "HCO3-"},
                         {1.0, 3.0, 3.2E-4, 1E-4},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1867,11 +2517,16 @@ TEST_F(GeochemicalSystemTest, jac4)
   const PertinentGeochemicalSystem model(
       _db_calcite, {"H2O", "H+", "Ca++", "HCO3-"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
   GeochemicalSystem egs(mgd,
                         _ac8,
                         _is8,
@@ -1881,6 +2536,7 @@ TEST_F(GeochemicalSystemTest, jac4)
                         "H+",
                         {"H2O", "H+", "Ca++", "HCO3-"},
                         {175.0, 1E1, 4E1, 1E-4},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1956,11 +2612,16 @@ TEST_F(GeochemicalSystemTest, saturationIndices)
   const PertinentGeochemicalSystem model(
       _db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_fixed_activity = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm_fixed_activity = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu_fixed_activity;
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -1970,6 +2631,7 @@ TEST_F(GeochemicalSystemTest, saturationIndices)
                               "H+",
                               {"H2O", "Ca++", "H+", "HCO3-"},
                               {1.11, 3.0, 2.0, 1.5},
+                              cu_fixed_activity,
                               cm_fixed_activity,
                               25,
                               0,
@@ -2026,11 +2688,16 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -2041,6 +2708,7 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
                         "H+",
                         {"H2O", "H+", "O2(aq)", "HCO3-"},
                         {1.0, 1.5, 3.0, 2.5},
+                        cu,
                         cm,
                         25,
                         0,
@@ -2061,11 +2729,16 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
         << "Failed with unexpected error message: " << msg;
   }
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2;
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm2.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2;
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem egs2(mgd,
                          _ac3,
                          _is3,
@@ -2075,6 +2748,7 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
                          "H+",
                          {"H2O", "H+", "O2(g)", "HCO3-"},
                          {1.0, 1.5, 3.0, 2.5},
+                         cu2,
                          cm2,
                          25,
                          0,
@@ -2099,11 +2773,16 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
 /// check swap
 TEST_F(GeochemicalSystemTest, swap)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -2114,6 +2793,7 @@ TEST_F(GeochemicalSystemTest, swap)
                         "H+",
                         {"H2O", "Calcite", "H+", "HCO3-"},
                         {1.75, 3.0, 2.0, 1.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -2151,11 +2831,16 @@ TEST_F(GeochemicalSystemTest, swap)
 /// check get ionic strengths
 TEST_F(GeochemicalSystemTest, getIS)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemistryIonicStrength is(0.0078125, 0.0078125, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, _db_calcite);
   ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
@@ -2168,6 +2853,7 @@ TEST_F(GeochemicalSystemTest, getIS)
                                        "H+",
                                        {"H2O", "Ca++", "H+", "HCO3-"},
                                        {1.75, 3.0E-1, 2.0E-1, 1.0E-1},
+                                       cu,
                                        cm,
                                        25,
                                        0,
@@ -2189,6 +2875,7 @@ TEST_F(GeochemicalSystemTest, getIS)
       "H+",
       {"H2O", "Ca++", "H+", "HCO3-"},
       {1.75, 1E-10, 1E-10, 1.0}, // up to 1E-10, the only contributor to IS is HCO3-
+      cu,
       cm,
       25,
       0,
@@ -2206,10 +2893,14 @@ TEST_F(GeochemicalSystemTest, alterAndRevertChargeBalance)
   const PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -2219,6 +2910,7 @@ TEST_F(GeochemicalSystemTest, alterAndRevertChargeBalance)
                         "StoiCheckBasis",
                         {"H2O", "StoiCheckBasis", "HCO3-"},
                         {1.75, 5.0, 1.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -2369,12 +3061,18 @@ TEST_F(GeochemicalSystemTest, sorbingSurfaceArea)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -2384,6 +3082,7 @@ TEST_F(GeochemicalSystemTest, sorbingSurfaceArea)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe(OH)3(ppd)"},
                         {1.75, 1.0, 2.0, 1.0, 1.5},
+                        cu,
                         cm,
                         25.0,
                         0,
@@ -2408,13 +3107,20 @@ TEST_F(GeochemicalSystemTest, surfacePot)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const Real temp = 45.0;
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -2425,6 +3131,7 @@ TEST_F(GeochemicalSystemTest, surfacePot)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                         {1.75, 1.0, 2.0, 3.0, 1.0, 1.0},
+                        cu,
                         cm,
                         temp,
                         0,
@@ -2555,13 +3262,20 @@ TEST_F(GeochemicalSystemTest, surfacePotJac)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -2574,6 +3288,7 @@ TEST_F(GeochemicalSystemTest, surfacePotJac)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                         {1.75, 1.0, 2.0, 3.0, 0.5, 1.0},
+                        cu,
                         cm,
                         temp,
                         0,
@@ -2623,13 +3338,20 @@ TEST_F(GeochemicalSystemTest, bigJac)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -2642,6 +3364,7 @@ TEST_F(GeochemicalSystemTest, bigJac)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                         {1.75, 1.0, 2.0, 3.0, 0.5, 1.0},
+                        cu,
                         cm,
                         temp,
                         0,
@@ -2691,13 +3414,20 @@ TEST_F(GeochemicalSystemTest, bigJac2)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -2710,6 +3440,7 @@ TEST_F(GeochemicalSystemTest, bigJac2)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                         {1.75, 1.0, 2.0, 3.0, 0.5, 1.0},
+                        cu,
                         cm,
                         temp,
                         0,
@@ -2960,14 +3691,22 @@ TEST_F(GeochemicalSystemTest, setMolalitiesExcept2)
       "O2(aq)",
       "e-");
   ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac3,
                              _is3,
@@ -2977,6 +3716,7 @@ TEST_F(GeochemicalSystemTest, setMolalitiesExcept2)
                              "H+",
                              {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
                              {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+                             cu,
                              cm,
                              25,
                              0,
@@ -3223,14 +3963,22 @@ TEST_F(GeochemicalSystemTest, setMolalities1)
       "O2(aq)",
       "e-");
   ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac0,
                              _is0,
@@ -3240,6 +3988,7 @@ TEST_F(GeochemicalSystemTest, setMolalities1)
                              "Fe+++",
                              {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
                              {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+                             cu,
                              cm,
                              25,
                              0,
@@ -3336,14 +4085,22 @@ TEST_F(GeochemicalSystemTest, setMolalities2)
       "O2(aq)",
       "e-");
   ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac3,
                              _is3,
@@ -3353,6 +4110,7 @@ TEST_F(GeochemicalSystemTest, setMolalities2)
                              "Fe+++",
                              {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
                              {11.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+                             cu,
                              cm,
                              25,
                              0,
@@ -3441,11 +4199,21 @@ TEST_F(GeochemicalSystemTest, setMolalities2)
 TEST_F(GeochemicalSystemTest, getConstraintMeaning)
 {
   ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cim = {
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -3455,6 +4223,7 @@ TEST_F(GeochemicalSystemTest, getConstraintMeaning)
                               "H+",
                               {"H2O", "H+", "HCO3-", "Calcite"},
                               {1.75, 3.0, 2.0, 1.0},
+                              cu,
                               cm,
                               25,
                               0,
@@ -3462,7 +4231,7 @@ TEST_F(GeochemicalSystemTest, getConstraintMeaning)
                               {},
                               {});
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
 }
 
 /// Check changeConstraintToBulk exceptions
@@ -3473,11 +4242,16 @@ TEST_F(GeochemicalSystemTest, changeContraintToBulkExceptions)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -3488,6 +4262,7 @@ TEST_F(GeochemicalSystemTest, changeContraintToBulkExceptions)
                         "H+",
                         {"H2O", "H+", "O2(g)", "HCO3-"},
                         {1.0, 2.0, 3.0, 4.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -3545,11 +4320,16 @@ TEST_F(GeochemicalSystemTest, closeSystem)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -3560,6 +4340,7 @@ TEST_F(GeochemicalSystemTest, closeSystem)
                         "H+",
                         {"H2O", "H+", "HCO3-", "O2(g)"},
                         {1.0, 2.0, 3.0, 4.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -3567,10 +4348,13 @@ TEST_F(GeochemicalSystemTest, closeSystem)
                         {},
                         {});
   egs.closeSystem();
-  cm[0] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER;
-  cm[2] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cim = {
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY};
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
 }
 
 /// Check changeConstraintToBulk
@@ -3581,11 +4365,21 @@ TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cim;
+  cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
+  cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -3596,6 +4390,7 @@ TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
                         "H+",
                         {"H2O", "H+", "HCO3-", "O2(g)"},
                         {1.0, 2.0, 3.0, 4.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -3605,9 +4400,9 @@ TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
   const std::vector<Real> orig_bulk = egs.getBulkMolesOld();
 
   egs.changeConstraintToBulk(0);
-  cm[0] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER;
+  cim[0] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER;
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
   for (unsigned i = 0; i < 4; ++i)
     EXPECT_EQ(egs.getBulkMolesOld()[i], orig_bulk[i]);
 
@@ -3615,22 +4410,22 @@ TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
   egs.changeConstraintToBulk(1, 1.1); // just resets the bulk constraint value
   new_bulk[1] = 1.1;
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
   for (unsigned i = 0; i < 4; ++i)
     EXPECT_EQ(egs.getBulkMolesOld()[i], new_bulk[i]);
 
   egs.changeConstraintToBulk(2); // this means charge-balance can be enforced simply: see next line
   new_bulk[1] = new_bulk[2];
-  cm[2] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  cim[2] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
   for (unsigned i = 0; i < 4; ++i)
     EXPECT_EQ(egs.getBulkMolesOld()[i], new_bulk[i]);
 
   egs.changeConstraintToBulk(3);
-  cm[3] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  cim[3] = GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
   for (unsigned i = 0; i < 4; ++i)
-    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cim[i]);
   EXPECT_EQ(mgd.basis_species_name[3], "(O-phth)--");
 }
 
@@ -3642,11 +4437,16 @@ TEST_F(GeochemicalSystemTest, addToBulkMolesExceptions)
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -3657,6 +4457,7 @@ TEST_F(GeochemicalSystemTest, addToBulkMolesExceptions)
                         "H+",
                         {"H2O", "H+", "HCO3-", "O2(g)"},
                         {1.0, 2.0, 3.0, 4.0},
+                        cu,
                         cm,
                         25,
                         0,
@@ -3687,11 +4488,16 @@ TEST_F(GeochemicalSystemTest, addToBulkMoles)
       database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   std::vector<Real> bm = {1.0, 2.0, 3.0, 4.0};
 
@@ -3704,6 +4510,7 @@ TEST_F(GeochemicalSystemTest, addToBulkMoles)
                         "H+",
                         {"H2O", "H+", "O2(aq)", "HCO3-"},
                         bm,
+                        cu,
                         cm,
                         25,
                         0,
@@ -3753,11 +4560,16 @@ TEST_F(GeochemicalSystemTest, setConstraintValue)
       database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm;
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
-  cm.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm;
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
+  cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
 
   std::vector<Real> bm_in = {1.0, 2.0, 3.0, 4.0};
 
@@ -3770,6 +4582,7 @@ TEST_F(GeochemicalSystemTest, setConstraintValue)
                         "H+",
                         {"H2O", "H+", "O2(aq)", "HCO3-"},
                         bm_in,
+                        cu,
                         cm,
                         25,
                         0,
@@ -3834,11 +4647,14 @@ TEST_F(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
   const PertinentGeochemicalSystem pgs(db, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = pgs.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(2, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem egs(
-      mgd, _ac3, _is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cm, 25, 0, 1E-20, {}, {});
+      mgd, _ac3, _is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cu, cm, 25, 0, 1E-20, {}, {});
 
   const ModelGeochemicalDatabase & mgd_ref = egs.getModelGeochemicalDatabase();
   EXPECT_EQ(mgd_ref.basis_species_name.size(), (std::size_t)2);
@@ -3888,15 +4704,24 @@ TEST_F(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
       "O2(aq)",
       "e-");
   ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem nonconst(
       mgd,
       _ac0,
@@ -3907,6 +4732,7 @@ TEST_F(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
       "Fe+++",
       {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH", "Calcite"},
       {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0},
+      cu,
       cm,
       25,
       0,
@@ -3970,6 +4796,7 @@ TEST_F(GeochemicalSystemTest, initialKinMoleExcept)
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
+                                _cu_calcite,
                                 _cm_calcite,
                                 25,
                                 0,
@@ -3997,6 +4824,7 @@ TEST_F(GeochemicalSystemTest, initialKinMoleExcept)
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
+                                _cu_calcite,
                                 _cm_calcite,
                                 25,
                                 0,
@@ -4024,6 +4852,7 @@ TEST_F(GeochemicalSystemTest, initialKinMoleExcept)
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
+                                _cu_calcite,
                                 _cm_calcite,
                                 25,
                                 0,
@@ -4051,6 +4880,7 @@ TEST_F(GeochemicalSystemTest, initialKinMoleExcept)
                                 "H+",
                                 {"H2O", "Ca++", "H+", "HCO3-"},
                                 {1.75, 3.0, 2.0, 1.0},
+                                _cu_calcite,
                                 _cm_calcite,
                                 25,
                                 0,
@@ -4169,11 +4999,16 @@ TEST_F(GeochemicalSystemTest, getKineticLog10K)
 /// check log10KineticActivityProduct
 TEST_F(GeochemicalSystemTest, log10KineticActivityProduct)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   const GeochemicalSystem gs(_mgd_kinetic_calcite,
                              _ac3,
                              _is3,
@@ -4183,6 +5018,7 @@ TEST_F(GeochemicalSystemTest, log10KineticActivityProduct)
                              "Ca++",
                              {"H2O", "H+", "HCO3-", "Ca++"},
                              {1.75, 3.0, 2.0, 1.0},
+                             cu,
                              cm,
                              25,
                              0,
@@ -4206,6 +5042,7 @@ TEST_F(GeochemicalSystemTest, getKineticMoles)
                        "H+",
                        {"H2O", "H+", "HCO3-", "Ca++"},
                        {1.75, 3.0, 2.0, 1.0},
+                       _cu_calcite,
                        _cm_calcite,
                        25,
                        0,
@@ -4236,6 +5073,7 @@ TEST_F(GeochemicalSystemTest, getBulk_with_kinetic)
                                               "H+",
                                               {"H2O", "Ca++", "H+", "HCO3-"},
                                               {1.75, 3.0, 2.0, 1.0},
+                                              _cu_calcite,
                                               _cm_calcite,
                                               25,
                                               0,
@@ -4264,6 +5102,7 @@ TEST_F(GeochemicalSystemTest, setAlgebraicVars_kinetic)
                        "H+",
                        {"H2O", "H+", "HCO3-", "Ca++"},
                        {1.75, 3.0, 2.0, 1.0},
+                       _cu_calcite,
                        _cm_calcite,
                        25,
                        0,
@@ -4290,11 +5129,16 @@ TEST_F(GeochemicalSystemTest, free_molality_kinetic)
                                          "O2(aq)",
                                          "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem gs(mgd,
                        _ac0,
                        _is0,
@@ -4304,6 +5148,7 @@ TEST_F(GeochemicalSystemTest, free_molality_kinetic)
                        "H+",
                        {"H2O", "H+", "HCO3-", "Calcite"},
                        {1.75, 3.0, 2.0, 10.0},
+                       cu,
                        cm,
                        25,
                        0,
@@ -4331,11 +5176,16 @@ TEST_F(GeochemicalSystemTest, setSolventETC4)
                                          "O2(aq)",
                                          "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem gs(mgd,
                        _ac0,
                        _is0,
@@ -4345,6 +5195,7 @@ TEST_F(GeochemicalSystemTest, setSolventETC4)
                        "H+",
                        {"H2O", "H+", "HCO3-", "Calcite"},
                        {1.75, 3.0, 2.0, 10.0},
+                       cu,
                        cm,
                        25,
                        0,
@@ -4529,12 +5380,18 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
       "CH4(aq)", 1.5, 2.0, true, {"OH-", "CaCO3"}, {3.0, 3.1}, 0.8, 2.5, 66.0, 0.003);
   KineticRateUserDescription rate_cal(
       "Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 2.5, 0.8, 55.0, 0.00315);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   DenseVector<Real> mole_additions(7);
   DenseMatrix<Real> dmole_additions(7, 7);
   ModelGeochemicalDatabase mgd_kin = mod.modelGeochemicalDatabase();
@@ -4547,6 +5404,7 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
                         "H+",
                         {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
                         {1.75, 3.0, 2.0, 1.0, 1.5},
+                        cu,
                         cm,
                         25,
                         0,
@@ -4656,11 +5514,16 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
 /// Check getBulkOldInOriginalBasis
 TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
 {
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
 
   GeochemicalSystem egs_no_swaps(_mgd_kinetic_calcite,
                                  _ac3,
@@ -4671,6 +5534,7 @@ TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
                                  "H+",
                                  {"H2O", "H+", "HCO3-", "Ca++"},
                                  {1.75, 1.0, 5.0, 2.0},
+                                 cu,
                                  cm,
                                  25,
                                  0,
@@ -4692,6 +5556,7 @@ TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
                         "H+",
                         {"H2O", "H+", "HCO3-", "Calcite"},
                         {-0.5, 2.5, 1.0, 3.5},
+                        cu,
                         cm,
                         25,
                         0,
@@ -4732,13 +5597,20 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles)
                                    "O2(aq)",
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -4748,6 +5620,7 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles)
                         "H+",
                         {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                         {1.75, 1.0, 2.0, 3.0, 0.5, 1.0},
+                        cu,
                         cm,
                         40,
                         0,
@@ -4881,11 +5754,16 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
       "O2(aq)",
       "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -4895,6 +5773,7 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
                         "H+",
                         {"H2O", "H+", "Fe++", "O2(aq)"},
                         {1.75, -2.0, 1.0, 1.0},
+                        cu,
                         cm,
                         40,
                         0,
@@ -4930,10 +5809,14 @@ TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
   GeochemicalSystem dest(mgd,
                          _ac3,
                          _is3,
@@ -4943,6 +5826,7 @@ TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
                          "H+",
                          {"H2O", "H+", "HCO3-"},
                          {1.75, 1.0, 2.0},
+                         cu,
                          cm,
                          40,
                          0,
@@ -4972,6 +5856,7 @@ TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
                           "HCO3-",
                           {"H2O", "H+", "HCO3-"},
                           {1.75, 1.0, 2.0},
+                          cu,
                           cm,
                           40,
                           0,
@@ -5004,6 +5889,7 @@ TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
                                            "H+",
                                            {"H2O", "Ca++", "H+", "HCO3-"},
                                            {1.75, 3.0, 2.0, 1.0},
+                                           _cu_calcite,
                                            _cm_calcite,
                                            25,
                                            0,

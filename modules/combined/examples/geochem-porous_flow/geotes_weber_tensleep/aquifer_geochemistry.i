@@ -31,7 +31,8 @@
 # ASSUME that 1 litre of solution contains:
   constraint_species = 'H2O        Quartz     Calcite   K-feldspar Siderite  Dolomite  Anhydrite Pyrrhotite Illite    Kaolinite  Barite       Na+       Cl-       SO4--       Li+         B(OH)3      Br-         F-         Sr++        NH3'
   constraint_value = '  0.99778351 322.177447 12.111108 6.8269499  6.2844304 2.8670301 1.1912027 0.51474767 0.3732507 0.20903322 0.0001865889 1.5876606 1.5059455 0.046792579 0.013110503 0.006663119 0.001238987 0.00032108 0.000159781 0.001937302'
-  constraint_meaning = 'kg_solvent_water moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species'
+  constraint_meaning = 'kg_solvent_water bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition'
+  constraint_unit = "kg moles moles moles moles moles moles moles moles moles moles moles moles moles moles moles moles moles moles moles"
   prevent_precipitation = 'Fluorite Albite Goethite'
   initial_temperature = 92
   temperature = temperature

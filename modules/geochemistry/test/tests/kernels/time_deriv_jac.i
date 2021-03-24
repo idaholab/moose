@@ -6,39 +6,39 @@
 []
 
 [Variables]
-  [./conc]
-  [../]
+  [conc]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = GeochemistryTimeDerivative
     porosity = porosity
     variable = conc
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
-  [../]
+  [porosity]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = FunctionAux
     function = '1.0 + x'
     variable = porosity
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./check]
+  [check]
     type = SMP
     full = true
     petsc_options = '-snes_test_jacobian -snes_force_iteration'
     petsc_options_iname = '-snes_type -ksp_type -pc_type -snes_convergence_test'
     petsc_options_value = ' ksponly    preonly   none     skip'
-  [../]
+  []
 []
 
 [Executioner]

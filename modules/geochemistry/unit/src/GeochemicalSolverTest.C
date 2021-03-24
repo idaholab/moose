@@ -21,14 +21,22 @@ const PertinentGeochemicalSystem
     model_simplest(db_solver, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
 GeochemistrySpeciesSwapper swapper2(2, 1E-6);
 GeochemistrySpeciesSwapper swapper_kin(4, 1E-6);
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm2 = {
-    GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm4 = {
-    GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-    GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-    GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2 = {
+    GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2 = {
+    GeochemistryUnitConverter::GeochemistryUnits::KG,
+    GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm4 = {
+    GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+    GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu4 = {
+    GeochemistryUnitConverter::GeochemistryUnits::KG,
+    GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+    GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+    GeochemistryUnitConverter::GeochemistryUnits::MOLES};
 GeochemistryIonicStrength is_solver(3.0, 3.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver, db_solver);
 
@@ -45,6 +53,7 @@ TEST(GeochemicalSolverTest, exception)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 3.0},
+                        cu2,
                         cm2,
                         25,
                         0,
@@ -239,6 +248,7 @@ TEST(GeochemicalSolverTest, solve1)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 1},
+                        cu2,
                         cm2,
                         25,
                         0,
@@ -322,18 +332,30 @@ TEST(GeochemicalSolverTest, solve2)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -354,6 +376,7 @@ TEST(GeochemicalSolverTest, solve2)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
@@ -611,18 +634,30 @@ TEST(GeochemicalSolverTest, solve3)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -643,6 +678,7 @@ TEST(GeochemicalSolverTest, solve3)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
@@ -910,18 +946,30 @@ TEST(GeochemicalSolverTest, solve3_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -942,6 +990,7 @@ TEST(GeochemicalSolverTest, solve3_restore)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
@@ -1058,6 +1107,7 @@ TEST(GeochemicalSolverTest, solve3_restore)
       "Cl-",
       {"H2O", "MgCO3", "O2(aq)", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)"},
       {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+      cu,
       cm,
       25,
       0,
@@ -1102,21 +1152,36 @@ TEST(GeochemicalSolverTest, solve4)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(14, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1152,6 +1217,7 @@ TEST(GeochemicalSolverTest, solve4)
                          0.005042E-3,
                          0.001897E-3,
                          0.01562E-3},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1427,21 +1493,36 @@ TEST(GeochemicalSolverTest, solve4_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(14, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1477,6 +1558,7 @@ TEST(GeochemicalSolverTest, solve4_restore)
                          0.005042E-3,
                          0.001897E-3,
                          0.01562E-3},
+                        cu,
                         cm,
                         25,
                         0,
@@ -1577,17 +1659,28 @@ TEST(GeochemicalSolverTest, solve5)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(10, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1598,6 +1691,7 @@ TEST(GeochemicalSolverTest, solve5)
       "Cl-",
       {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
       {1.0, 1.0E-4, 10E-3, 10E-3, 0.1E-3, 0.1E-3, 0.2E-3, 9.3573E-3, 4.6786E-5, 1.87145E-3},
+      cu,
       cm,
       25,
       0,
@@ -1836,17 +1930,28 @@ TEST(GeochemicalSolverTest, solve5_restore)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(10, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1857,6 +1962,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
       "Cl-",
       {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
       {1.0, 1.0E-4, 10E-3, 10E-3, 0.1E-3, 0.1E-3, 0.2E-3, 9.3573E-3, 4.6786E-5, 1.87145E-3},
+      cu,
       cm,
       25,
       0,
@@ -1952,6 +2058,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
       "Cl-",
       {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
       {2.0, 2.0E-4, 20E-3, 20E-3, 0.2E-3, 0.2E-3, 0.4E-3, 19.3573E-3, 14.6786E-5, 2.87145E-3},
+      cu,
       cm,
       250,
       0,
@@ -1979,6 +2086,7 @@ TEST(GeochemicalSolverTest, solve_addH)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 1},
+                        cu2,
                         cm2,
                         25,
                         0,
@@ -2086,18 +2194,30 @@ TEST(GeochemicalSolverTest, maxSwapsException)
 
   // build the equilibrium system
   GeochemistrySpeciesSwapper swapper(11, 1E-6);
-  const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
-      GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
+      GeochemistryUnitConverter::GeochemistryUnits::KG,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -2118,6 +2238,7 @@ TEST(GeochemicalSolverTest, maxSwapsException)
        0.010576055,
        0.002412,
        0.00010349},
+      cu,
       cm,
       25,
       0,
@@ -2173,6 +2294,7 @@ TEST(GeochemicalSolverTest, setRampMaxIonicStrength)
                         "H+",
                         {"H2O", "H+"},
                         {1.75, 3.0},
+                        cu2,
                         cm2,
                         25,
                         0,
@@ -2232,6 +2354,7 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
@@ -2413,6 +2536,7 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
@@ -2597,6 +2721,7 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
                         "HCO3-",
                         {"H2O", "H+", "Fe+++", "HCO3-"},
                         {1.75, 1E-5, 1E-5, 4E-5},
+                        cu4,
                         cm4,
                         25,
                         0,
