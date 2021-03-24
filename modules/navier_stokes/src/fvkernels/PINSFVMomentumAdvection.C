@@ -26,7 +26,7 @@ PINSFVMomentumAdvection::validParams()
 
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0))),
     _eps(coupledValue("porosity")),
     _eps_neighbor(coupledNeighborValue("porosity")),
     _smooth_porosity(getParam<bool>("smooth_porosity"))

@@ -19,12 +19,16 @@ PINSFVMomentumPressure::validParams()
   params.addClassDescription("Introduces the coupled pressure term $eps \nabla P$ into the "
                              "Navier-Stokes porous media momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
 
   return params;
 }
 
 PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
-  : INSFVMomentumPressure(params), _eps(coupledValue("porosity"))
+  : INSFVMomentumPressure(params),
+    _eps(coupledValue("porosity")),
+    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0))),
+    _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressure may only be used with a superficial velocity "
@@ -34,5 +38,8 @@ PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
 ADReal
 PINSFVMomentumPressure::computeQpResidual()
 {
-  return _eps[_qp] * INSFVMomentumPressure::computeQpResidual();
+  if (_smooth_porosity || MetaPhysicL::raw_value(_eps_var->adGradSln(_current_elem)).norm() < 1e-12)
+    return _eps[_qp] * INSFVMomentumPressure::computeQpResidual();
+  else
+    return INSFVMomentumPressure::computeQpResidual();
 }
