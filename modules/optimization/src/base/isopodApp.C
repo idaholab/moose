@@ -39,7 +39,6 @@ isopodApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerExecFlag(EXEC_FORWARD);
   registerExecFlag(EXEC_ADJOINT);
   registerExecFlag(EXEC_HESSIAN);
-  registerExecFlag(EXEC_OPTFINAL);
 
   // Form Function actions
   registerSyntaxTask("AddFormFunctionAction", "FormFunction", "add_reporter");

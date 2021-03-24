@@ -91,19 +91,15 @@
     real_vector_values = '0 0 0 0'
    []
    [optInfo]
-     type=OptimizationInfo
-     execute_on = 'OPTFINAL'
+     type = OptimizationInfo
+     execute_on = final
      items = 'current_iterate'
-     outputs = 'iterData'
    []
 []
 
 
 
 [Outputs]
-  console = true
   csv=true
-  [iterData]
-    type = CSV
-  []
+  execute_on = final
 []

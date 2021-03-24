@@ -25,17 +25,14 @@ OptimizationInfo::validParams()
       "items",
       items,
       "The information to output, if nothing is provided everything will be output.");
-  ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_OPTFINAL);
-  //  params.set<ExecFlagEnum>("execute_on") = "OPTFINAL";  //fixme lynn why can't I do this?
-  params.addParam<ExecFlagEnum>(
-      "execute_on", exec_enum, "List of flags indicating when this reporter should solve.");
+  auto & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(EXEC_FORWARD, EXEC_ADJOINT, EXEC_HESSIAN);
   return params;
 }
 
 OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _optimization_executioner(nullptr),
+    _optimization_executioner(dynamic_cast<Optimize *>(_app.getExecutioner())),
     _items(getParam<MultiMooseEnum>("items")),
     _currentIterate(declareHelper<int>("current_iterate", REPORTER_MODE_REPLICATED)),
     _objectiveIterate((!_items.isValid() || _items.contains("current_iterate"))
@@ -52,21 +49,19 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
     _cnorm(declareHelper<double>("cnorm", REPORTER_MODE_REPLICATED)),
     _xdiff(declareHelper<double>("xdiff", REPORTER_MODE_REPLICATED))
 {
+  if (!_optimization_executioner)
+    mooseError("The OptimizationInfo Reporter can only be used with a Optimize Executioner");
 }
 
 void
 OptimizationInfo::initialize()
 {
-  _optimization_executioner = dynamic_cast<Optimize *>(_app.getExecutioner());
-  if (!_optimization_executioner)
-  {
-    mooseError("The OptimizationInfo Reporter can only be used with a Optimize Executioner");
-  }
 }
 
 void
 OptimizationInfo::execute()
 {
+  std::cout << "HERE" << std::endl;
   _optimization_executioner->getOptimizeSolve().getTaoSolutionStatus(_currentIterate,
                                                                      _gnorm,
                                                                      _objectiveIterate,

@@ -143,7 +143,6 @@ OptimizeSolve::taoSolve()
   // Setting data on reporter fixme lynn  this uses a custom execution flag to only call one
   // reporter,  maybe there will be more
   setTaoSolutionStatus(_tao);
-  _problem.execute(EXEC_OPTFINAL);
 
   // Print solve statistics
   if (getParam<bool>("verbose"))

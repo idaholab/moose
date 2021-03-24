@@ -26,7 +26,7 @@ public:
   virtual void finalize() override {}
 
 private:
-  Optimize * _optimization_executioner;
+  Optimize * _optimization_executioner = nullptr;
   const MultiMooseEnum & _items;
 
   int & _currentIterate;
