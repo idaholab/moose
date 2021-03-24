@@ -12,7 +12,8 @@
 #include "FVFluxKernel.h"
 
 /**
- * A flux kernel using the divergence theorem for the pressure gradient term in the momentum equation
+ * A flux kernel using the divergence theorem for the pressure gradient term in the momentum
+ * equation
  */
 class PINSFVMomentumPressureFlux : public FVFluxKernel
 {
@@ -25,6 +26,8 @@ protected:
 
   /// the current element porosity
   const VariableValue & _eps;
+  /// the neighbor element porosity
+  const VariableValue & _eps_neighbor;
   /// the current element pressure
   const ADVariableValue & _p_elem;
   /// the neighbor element pressure

@@ -21,28 +21,16 @@ PINSFVMomentumDiffusion::validParams()
                              "incompressible Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
-  MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>("momentum_component",
-                             momentum_component,
-                             "The component of the momentum equation that this kernel applies to.");
-  params.addParam<bool>(
-      "smooth_porosity", false, "Whether to compute the porosity gradient diffusive term");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _mu_elem(isParamValid("mu") ? &getADMaterialProperty<Real>("mu") : nullptr),
-    _mu_neighbor(isParamValid("mu") ? &getNeighborADMaterialProperty<Real>("mu") : nullptr),
+    _mu_elem(getADMaterialProperty<Real>("mu")),
+    _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
     _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
-    _index(getParam<MooseEnum>("momentum_component")),
-    _vel_elem(getADMaterialProperty<RealVectorValue>(
-        NS::velocity)), // FIXME Needs to be superficial velocity!
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>(NS::velocity)),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
-    _smooth_porosity(getParam<bool>("smooth_porosity"))
+    _eps_neighbor(coupledNeighborValue("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
@@ -52,28 +40,19 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumDiffusion may only be used with a superficial velocity "
                "variable, of variable type PINSFVSuperficialVelocityVariable.");
-  if (_smooth_porosity && !isParamValid("momentum_component"))
-    mooseError("The momentum component parameter is required for modeling the porosity "
-               "gradient contribution in the momentum diffusion term.");
 }
 
 ADReal
 PINSFVMomentumDiffusion::computeQpResidual()
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#else
-  // TODO: Rewrite with fluid velocity once AuxVariables support AD
-
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
   ADReal mu_eps_face;
   interpolate(Moose::FV::InterpMethod::Average,
               mu_eps_face,
-              (*_mu_elem)[_qp] / _eps[_qp],
-              (*_mu_neighbor)[_qp] / _eps_neighbor[_qp],
+              _mu_elem[_qp] / _eps[_qp],
+              _mu_neighbor[_qp] / _eps_neighbor[_qp],
               *_face_info,
               true);
 
@@ -83,26 +62,10 @@ PINSFVMomentumDiffusion::computeQpResidual()
   // First term of residual
   ADReal residual = mu_eps_face * dudn;
 
-  // Add the porosity gradient term if requested
-  if (_smooth_porosity)
-  {
-
-    // Treat the porosity gradient separately
-    const auto & grad_eps_face = MetaPhysicL::raw_value(_eps_var->adGradSln(*_face_info));
-
-    ADRealVectorValue term_elem =
-        (*_mu_elem)[_qp] / _eps[_qp] / _eps[_qp] * grad_eps_face(_index) * _vel_elem[_qp];
-    ADRealVectorValue term_neighbor = (*_mu_neighbor)[_qp] / _eps_neighbor[_qp] /
-                                      _eps_neighbor[_qp] * grad_eps_face(_index) *
-                                      _vel_neighbor[_qp];
-
-    // Interpolate to get the face value
-    ADRealVectorValue term_face;
-    interpolate(
-        Moose::FV::InterpMethod::Average, term_face, term_elem, term_neighbor, *_face_info, true);
-    residual -= term_face * _normal;
-  }
+  // TODO Add the porosity gradient term
 
   return -residual;
+#else
+  return 0;
 #endif
 }

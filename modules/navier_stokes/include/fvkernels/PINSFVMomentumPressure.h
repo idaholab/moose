@@ -25,10 +25,4 @@ protected:
 
   /// the porosity
   const VariableValue & _eps;
-  /// the porosity as a variable to be able to compute gradients
-  const MooseVariableFV<Real> * const _eps_var;
-  /// whether the porosity has no discontinuities
-  const bool _smooth_porosity;
-  /// maximum porosity gradient norm before considering a discontinuity exists (only if smooth_porosity is false)
-  const Real _max_eps_gradient;
 };

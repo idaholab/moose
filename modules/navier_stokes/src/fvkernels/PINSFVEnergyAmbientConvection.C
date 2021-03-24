@@ -1,9 +1,9 @@
-#include "PINSFVEnergyConvection.h"
+#include "PINSFVEnergyAmbientConvection.h"
 
-registerMooseObject("MooseApp", PINSFVEnergyConvection);
+registerMooseObject("NavierStokesApp", PINSFVEnergyAmbientConvection);
 
 InputParameters
-PINSFVEnergyConvection::validParams()
+PINSFVEnergyAmbientConvection::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Implements the solid-fluid ambient convection term in the porous "
@@ -18,7 +18,7 @@ PINSFVEnergyConvection::validParams()
   return params;
 }
 
-PINSFVEnergyConvection::PINSFVEnergyConvection(const InputParameters & parameters)
+PINSFVEnergyAmbientConvection::PINSFVEnergyAmbientConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
     _h_solid_fluid(getADMaterialProperty<Real>("h_solid_fluid")),
     _temp_fluid(adCoupledValue("temp_fluid")),
@@ -28,7 +28,7 @@ PINSFVEnergyConvection::PINSFVEnergyConvection(const InputParameters & parameter
 }
 
 ADReal
-PINSFVEnergyConvection::computeQpResidual()
+PINSFVEnergyAmbientConvection::computeQpResidual()
 {
   if (_is_solid)
     return -_h_solid_fluid[_qp] * (_temp_fluid[_qp] - _temp_solid[_qp]);

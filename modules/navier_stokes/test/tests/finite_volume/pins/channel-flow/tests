@@ -4,7 +4,7 @@
   [free-slip]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc_out.e
+    exodiff = rc.e
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a porous media channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
     ad_indexing_type = 'global'
@@ -13,7 +13,7 @@
   [free-slip-rz]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-rz_out.e
+    exodiff = rc-rz.e
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a porous media cylindrical channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
     ad_indexing_type = 'global'
@@ -22,17 +22,17 @@
   [no-slip]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip_out.e
+    exodiff = rc-no-slip.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip'"
+    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [no-slip-pressure-driven]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-delta-pressure_out.e
+    exodiff = rc-no-slip-delta-pressure.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
@@ -42,7 +42,7 @@
   [no-slip-pressure-average]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-mean-pressure_out.e
+    exodiff = rc-no-slip-mean-pressure.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a set mean pressure; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
@@ -52,27 +52,27 @@
   [no-slip-average]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-average-velocity_out.e
+    exodiff = rc-no-slip-average-velocity.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel using an average interpolation for velocity; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity'"
+    cli_args = "velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [no-slip-match]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-match-insfv_out.e
+    exodiff = rc-no-slip-match-insfv.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a porosity of 1; specifically, it should match a regular INSFV simulation results.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "AuxVariables/porosity/initial_condition=1 FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-match-insfv'"
+    cli_args = "AuxVariables/porosity/initial_condition=1 FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-match-insfv' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [symmetry]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-symmetry_out.e
+    exodiff = rc-no-slip-symmetry.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
@@ -82,29 +82,30 @@
   [symmetry-rz]
     type = 'Exodiff'
     input = 2d-rc.i
-    exodiff = rc-no-slip-rz-symmetry_out.e
+    exodiff = rc-no-slip-rz-symmetry.e
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a cylindrical porous media channel with reflective boundary conditions on one side; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-symmetry-rz'"
+    cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-rz-symmetry' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [friction]
     type = 'Exodiff'
     input = 2d-rc-friction.i
-    exodiff = rc-friction_out.e
+    exodiff = rc-friction.e
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-friction'"
+    cli_args = "FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-friction' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [heated]
     type = 'Exodiff'
     input = 2d-rc-heated.i
-    exodiff = rc-heated_out.e
+    exodiff = rc-heated.e
     method = "!dbg"
-    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium.'
+    abs_zero = 1e-9
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the local medium in a 2D channel.'
     ad_indexing_type = 'global'
     design = 'PINSFVEnergyAdvection.md'
     cli_args = "Outputs/file_base='rc-heated'"
@@ -112,21 +113,34 @@
   [heated-rz]
     type = 'Exodiff'
     input = 2d-rc-heated.i
-    exodiff = rc-heated-rz_out.e
+    exodiff = rc-heated-rz.e
     method = "!dbg"
-    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium in rz geometry.'
+    abs_zero = 1e-9
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the local medium in rz geometry.'
     ad_indexing_type = 'global'
     design = 'PINSFVEnergyAdvection.md'
     cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
   []
+  [heated-kappa]
+    type = 'Exodiff'
+    input = 2d-rc-heated-effective.i
+    exodiff = rc-heated-effective.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    requirement = 'The system shall be able to solve for fluid energy effective diffusion, advection and convection with the local medium in a 2D channel.'
+    ad_indexing_type = 'global'
+    design = 'PINSFVEnergyAdvection.md'
+    cli_args = "Outputs/file_base='rc-heated-effective'"
+  []
   [heated-solid-fluid]
     type = 'Exodiff'
     input = 2d-rc-heated.i
-    exodiff = rc-heated-solid-fluid_out.e
+    exodiff = rc-heated-solid-fluid.e
     method = "!dbg"
-    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium, modeling both fluid and solid temperature.'
+    abs_zero = 1e-9
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the local medium, modeling both fluid and solid temperature.'
     ad_indexing_type = 'global'
-    design = 'PINSFVEnergyConvection.md'
+    design = 'PINSFVEnergyAmbientConvection.md'
     cli_args = "Variables/inactive='' AuxVariables/inactive='temp_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
   []
   [heated-boussinesq]
@@ -134,7 +148,7 @@
     input = 2d-rc-heated-boussinesq.i
     exodiff = rc-heated-boussinesq.e
     method = "!dbg"
-    requirement = 'The system shall be able to solve for energy diffusion, advection and convection with the local medium, with a Boussinesq approximation for the influence of temperature on density.'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the local medium, with a Boussinesq approximation for the influence of temperature on density.'
     ad_indexing_type = 'global'
     design = 'PINSFVMomentumBoussinesq.md'
     cli_args = "Outputs/file_base='rc-heated-boussinesq'"
@@ -142,17 +156,16 @@
   [smooth-jump]
     type = 'Exodiff'
     input = 2d-rc-epsjump.i
-    exodiff = rc-epsjump_out.e
+    exodiff = rc-smooth-epsjump.e
     method = "!dbg"
     requirement = 'The system shall be able to model a smooth porosity gradient in a 2D channel.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-epsjump' ICs/inactive='porosity_1 porosity_2' FVKernels/u_advection/smooth_porosity=true FVKernels/v_advection/smooth_porosity=true FVKernels/inactive=''"
+    cli_args = "Outputs/file_base='rc-smooth-epsjump' ICs/inactive='porosity_1 porosity_2' FVKernels/inactive=''"
   []
   [1d-discontinuous-jump-average-average]
     type = 'Exodiff'
     input = 1d-rc-epsjump.i
-    exodiff = rc-discontinuous-1d-epsjump_out.e
-    method = "!dbg"
+    exodiff = rc-discontinuous-1d-epsjump-average-average.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and advected quantity.'
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-average' velocity_interp_method='average' advected_interp_method='average'"
@@ -160,34 +173,31 @@
   [1d-discontinuous-jump-average-upwind]
     type = 'Exodiff'
     input = 1d-rc-epsjump.i
-    exodiff = rc-discontinuous-1d-epsjump_out.e
-    method = "!dbg"
+    exodiff = rc-discontinuous-1d-epsjump-average-upwind.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and upwinding of the advected quantity.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-upwind' velocity_interp_method='average' advected_interp_method='upwind'"
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-upwind' velocity_interp_method='average' advected_interp_method='upwind' Executioner/nl_abs_tol=1e-13"
   []
   [1d-discontinuous-jump-rc-average]
     type = 'Exodiff'
     input = 1d-rc-epsjump.i
-    exodiff = rc-discontinuous-1d-epsjump_out.e
-    method = "!dbg"
+    exodiff = rc-discontinuous-1d-epsjump-rc-average.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and averaging of the advected quantity.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-average' velocity_interp_method='rc' advected_interp_method='average'"
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-average' velocity_interp_method='rc' advected_interp_method='average' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [1d-discontinuous-jump-rc-upwind]
     type = 'Exodiff'
     input = 1d-rc-epsjump.i
-    exodiff = rc-discontinuous-1d-epsjump_out.e
-    method = "!dbg"
+    exodiff = rc-discontinuous-1d-epsjump-rc-upwind.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and upwinding of the advected quantity.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-upwind' velocity_interp_method='rc' advected_interp_method='upwind'"
+    cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-upwind' velocity_interp_method='rc' advected_interp_method='upwind' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [discontinuous-jump]
     type = 'Exodiff'
     input = 2d-rc-epsjump.i
-    exodiff = rc-discontinuous-epsjump_out.e
+    exodiff = rc-discontinuous-epsjump.e
     method = "!dbg"
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 2D channel.'
     ad_indexing_type = 'global'

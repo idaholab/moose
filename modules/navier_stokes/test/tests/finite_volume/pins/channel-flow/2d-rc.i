@@ -213,20 +213,22 @@ velocity_interp_method='rc'
     rho = ${rho}
   []
   [outlet-u]
-    type = INSFVMomentumAdvectionOutflowBC
+    type = PINSFVMomentumAdvectionOutflowBC
     boundary = 'right'
     variable = u
     vel = velocity
     u = u
     v = v
+    porosity = porosity
   []
   [outlet-v]
-    type = INSFVMomentumAdvectionOutflowBC
+    type = PINSFVMomentumAdvectionOutflowBC
     boundary = 'right'
     variable = v
     vel = velocity
     u = u
     v = v
+    porosity = porosity
   []
 []
 

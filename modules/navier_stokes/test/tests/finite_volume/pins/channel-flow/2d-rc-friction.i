@@ -1,5 +1,5 @@
 mu=1.1
-rho=1.1
+rho=1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
@@ -218,13 +218,8 @@ velocity_interp_method='rc'
   []
   [darcy]
     type = ADGenericConstantVectorMaterial
-    prop_name = 'Darcy_coefficient'
-    prop_value = '0.1 0.1 0.1'
-  []
-  [forchheimer]
-    type = ADGenericConstantVectorMaterial
-    prop_name = 'Forchheimer_coefficient'
-    prop_value = '0.1 0.1 0.1'
+    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
   []
 []
 

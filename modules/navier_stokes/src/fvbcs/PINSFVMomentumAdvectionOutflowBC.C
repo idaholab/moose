@@ -39,7 +39,7 @@ PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputPa
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
@@ -83,7 +83,7 @@ PINSFVMomentumAdvectionOutflowBC::computeQpResidual()
               "the boundary normal");
   return _normal * v * adv_quant_boundary;
 #else
-  mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumPressureFlux.h"
+#include "PINSFVSuperficialVelocityVariable.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumPressureFlux);
@@ -16,7 +17,7 @@ InputParameters
 PINSFVMomentumPressureFlux::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Viscous diffusion term, div(mu grad(u)), as a flux kernel "
+  params.addClassDescription("Momentum pressure term eps grad_P, as a flux kernel "
                              "using the divergence theoreom, in the porous media "
                              "incompressible Navier-Stokes momentum equation. This kernel "
                              "is also executed on boundaries.");
@@ -26,7 +27,6 @@ PINSFVMomentumPressureFlux::validParams()
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
-  params.set<unsigned short>("ghost_layers") = 2;
   params.set<bool>("force_boundary_execution") = true;
   return params;
 }
@@ -34,8 +34,9 @@ PINSFVMomentumPressureFlux::validParams()
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
     _eps(coupledValue("porosity")),
-    _p_elem(adCoupledValue(NS::pressure)),
-    _p_neighbor(adCoupledNeighborValue(NS::pressure)),
+    _eps_neighbor(coupledNeighborValue("porosity")),
+    _p_elem(adCoupledValue("p")),
+    _p_neighbor(adCoupledNeighborValue("p")),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -43,18 +44,21 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+  if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
+    mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
+               "of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal
 PINSFVMomentumPressureFlux::computeQpResidual()
 {
-  ADReal p_interface;
+  ADReal eps_p_interface;
 
   Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         p_interface,
-                         _p_elem[_qp],
-                         _p_neighbor[_qp],
+                         eps_p_interface,
+                         _eps[_qp] * _p_elem[_qp],
+                         _eps_neighbor[_qp] * _p_neighbor[_qp],
                          *_face_info,
                          true);
-  return _eps[_qp] * p_interface * _normal(_index);
+  return eps_p_interface * _normal(_index);
 }

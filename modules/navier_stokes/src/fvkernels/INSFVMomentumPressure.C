@@ -18,7 +18,7 @@ INSFVMomentumPressure::validParams()
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar("p", "The pressure");
-  MooseEnum momentum_component("x=0 y=1 z=2", "x");
+  MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
       momentum_component,

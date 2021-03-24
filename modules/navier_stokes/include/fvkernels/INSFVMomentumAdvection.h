@@ -57,7 +57,7 @@ protected:
    * @param elem The elem to get the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  virtual const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
+  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
 
   /**
    * method for computing the Rhie-Chow 'a' coefficients for the given elem \p elem

@@ -69,7 +69,7 @@ velocity_interp_method='average'
     order = CONSTANT
     family = MONOMIAL
     fv = true
-    initial_condition = 1
+    initial_condition = 0.5
   []
 []
 

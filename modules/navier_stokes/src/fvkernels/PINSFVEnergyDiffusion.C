@@ -32,8 +32,8 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
     _eps_neighbor(coupledNeighborValue("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
+             "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))

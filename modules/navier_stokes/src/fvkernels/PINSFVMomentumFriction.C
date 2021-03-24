@@ -23,10 +23,6 @@ PINSFVMomentumFriction::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addParam<MaterialPropertyName>("linear_coef_name",
-                                        "Name of a linear friction coefficient material property.");
-  params.addParam<MaterialPropertyName>(
-      "quadratic_coef_name", "Name of a quadratic friction coefficient material property.");
   params.addParam<MaterialPropertyName>("Darcy_name",
                                         "Name of the Darcy coefficients material property.");
   params.addParam<MaterialPropertyName>("Forchheimer_name",
@@ -44,19 +40,11 @@ PINSFVMomentumFriction::validParams()
 PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
   : FVElementalKernel(params),
     _component(getParam<MooseEnum>("momentum_component")),
-    _linear_friction_matprop(isParamValid("linear_coef_name")
-                                 ? &getADMaterialProperty<Real>("linear_coef_name")
-                                 : nullptr),
-    _quadratic_friction_matprop(isParamValid("quadratic_coef_name")
-                                    ? &getADMaterialProperty<Real>("quadratic_coef_name")
-                                    : nullptr),
     _cL(isParamValid("Darcy_name") ? &getADMaterialProperty<RealVectorValue>("Darcy_name")
                                    : nullptr),
     _cQ(isParamValid("Forchheimer_name")
             ? &getADMaterialProperty<RealVectorValue>("Forchheimer_name")
             : nullptr),
-    _use_linear_friction_matprop(isParamValid("linear_coef_name")),
-    _use_quadratic_friction_matprop(isParamValid("quadratic_coef_name")),
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
     _eps(coupledValue("porosity")),
@@ -68,8 +56,7 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
     mooseError("PINSFVMomentumFriction may only be used with a superficial velocity "
                "variable, of variable type PINSFVSuperficialVelocityVariable.");
 
-  if (!_use_linear_friction_matprop && !_use_quadratic_friction_matprop &&
-      !_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
+  if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
 
   if ((_use_Darcy_friction_model || _use_Forchheimer_friction_model) && !_rho &&
@@ -83,10 +70,6 @@ ADReal
 PINSFVMomentumFriction::computeQpResidual()
 {
   ADReal friction_term = 0;
-  if (_use_linear_friction_matprop)
-    friction_term += (*_linear_friction_matprop)[_qp] * _u[_qp];
-  if (_use_quadratic_friction_matprop)
-    friction_term += (*_quadratic_friction_matprop)[_qp] * _u[_qp] * std::abs(_u[_qp]);
 
   if (!_momentum)
   {
