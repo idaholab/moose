@@ -14,6 +14,7 @@
 #include "GeochemistrySpeciesSwapper.h"
 #include "GeochemistryActivityCoefficientsDebyeHuckel.h"
 #include "GeochemistryConstants.h"
+#include "GeochemistryUnitConverter.h"
 
 /**
  * This class holds information about bulk composition, molalities, activities, activity
@@ -38,7 +39,11 @@
 class GeochemicalSystem
 {
 public:
-  /// Each basis species must be provided with a constraint, that is chosen from the following enum
+  /**
+   * Each basis species has one of the following constraints.  During the process of units
+   * conversion (from user-prescribed units to mole-based units) each ConstraintMeaningUserEnum
+   * supplied by the user is translated to the appropriate ConstraintMeaningEnum
+   */
   enum class ConstraintMeaningEnum
   {
     MOLES_BULK_WATER,
@@ -48,6 +53,19 @@ public:
     FREE_MOLES_MINERAL_SPECIES,
     FUGACITY,
     ACTIVITY
+  };
+
+  /// Each basis species must be provided with a constraint, that is chosen by the user from the following enum
+  enum class ConstraintUserMeaningEnum
+  {
+    KG_SOLVENT_WATER,
+    BULK_COMPOSITION,
+    FREE_CONCENTRATION,
+    FREE_MINERAL,
+    ACTIVITY,
+    LOG10ACTIVITY,
+    FUGACITY,
+    LOG10FUGACITY
   };
 
   /**
@@ -71,7 +89,10 @@ public:
    * @param constrained_species A list of the basis species after the swaps have been performed
    * @param constraint_values Numerical values of the constraints placed on the basis species.  Each
   basis species must have exactly one constraint
-   * @param constraint_meaning A list the provides physical meaning to the constraint_values
+   * @param constraint_unit Units of the constraint_values.  Each constraint_value must have
+  exactly one constraint_unit.  This is only used during construction, to convert the
+  constraint_values to mole units
+   * @param constraint_user_meaning A list the provides physical meaning to the constraint_values
    * @param initial_temperature Initial temperature
    * @param iters_to_make_consistent The initial equilibrium molalities depend on the activity
   coefficients, which depend on the basis and equilibrium molalities.  This circular dependence
@@ -94,28 +115,31 @@ public:
                     const std::string & charge_balance_species,
                     const std::vector<std::string> & constrained_species,
                     const std::vector<Real> & constraint_value,
-                    const MultiMooseEnum & constraint_meaning,
+                    const MultiMooseEnum & constraint_unit,
+                    const MultiMooseEnum & constraint_user_meaning,
                     Real initial_temperature,
                     unsigned iters_to_make_consistent,
                     Real min_initial_molality,
                     const std::vector<std::string> & kin_name,
                     const std::vector<Real> & kin_initial_moles);
 
-  GeochemicalSystem(ModelGeochemicalDatabase & mgd,
-                    GeochemistryActivityCoefficients & gac,
-                    GeochemistryIonicStrength & is,
-                    GeochemistrySpeciesSwapper & swapper,
-                    const std::vector<std::string> & swap_out_of_basis,
-                    const std::vector<std::string> & swap_into_basis,
-                    const std::string & charge_balance_species,
-                    const std::vector<std::string> & constrained_species,
-                    const std::vector<Real> & constraint_value,
-                    const std::vector<ConstraintMeaningEnum> & cc,
-                    Real initial_temperature,
-                    unsigned iters_to_make_consistent,
-                    Real min_initial_molality,
-                    const std::vector<std::string> & kin_name,
-                    const std::vector<Real> & kin_initial_moles);
+  GeochemicalSystem(
+      ModelGeochemicalDatabase & mgd,
+      GeochemistryActivityCoefficients & gac,
+      GeochemistryIonicStrength & is,
+      GeochemistrySpeciesSwapper & swapper,
+      const std::vector<std::string> & swap_out_of_basis,
+      const std::vector<std::string> & swap_into_basis,
+      const std::string & charge_balance_species,
+      const std::vector<std::string> & constrained_species,
+      const std::vector<Real> & constraint_value,
+      const std::vector<GeochemistryUnitConverter::GeochemistryUnits> & constraint_unit,
+      const std::vector<ConstraintUserMeaningEnum> & constraint_user_meaning,
+      Real initial_temperature,
+      unsigned iters_to_make_consistent,
+      Real min_initial_molality,
+      const std::vector<std::string> & kin_name,
+      const std::vector<Real> & kin_initial_moles);
 
   /**
    * Copy assignment operator.  Almost all of the following is trivial.  The most important
@@ -146,6 +170,8 @@ public:
     _constrained_species = src._constrained_species;
     _constraint_value = src._constraint_value;
     _original_constraint_value = src._original_constraint_value;
+    _constraint_unit = src._constraint_unit;
+    _constraint_user_meaning = src._constraint_user_meaning;
     _constraint_meaning = src._constraint_meaning;
     _eqm_log10K = src._eqm_log10K;
     _redox_log10K = src._redox_log10K;
@@ -191,6 +217,8 @@ public:
            (_constrained_species == rhs._constrained_species) &&
            (_constraint_value == rhs._constraint_value) &&
            (_original_constraint_value == rhs._original_constraint_value) &&
+           (_constraint_unit == rhs._constraint_unit) &&
+           (_constraint_user_meaning == rhs._constraint_user_meaning) &&
            (_constraint_meaning == rhs._constraint_meaning) && (_eqm_log10K == rhs._eqm_log10K) &&
            (_redox_log10K == rhs._redox_log10K) && (_kin_log10K == rhs._kin_log10K) &&
            (_num_basis_in_algebraic_system == rhs._num_basis_in_algebraic_system) &&
@@ -834,6 +862,10 @@ private:
   std::vector<Real> _constraint_value;
   /// Numerical values of the constraints on _constraint_species.  In the constructor, this is ordered to have the same ordering as the basis species.  Since values can change due to charge-balance, this holds the original values set by the user.
   std::vector<Real> _original_constraint_value;
+  /// Units of the _constraint_value when the GeochemicalSystem is constructed.  This is used during the constructor to convert the constraint_values into mole units
+  std::vector<GeochemistryUnitConverter::GeochemistryUnits> _constraint_unit;
+  /// The user-defined meaning of the values in _constraint_value.  In the constructor, this is ordered to have the same ordering as the basis species.  During the process of unit conversion, from the user-supplied _constraint_unit, to mole-based units, _constraint_user_meaning is used to populate _constraint_meaning, and henceforth usually only _constraint_meaning is used in the code
+  std::vector<ConstraintUserMeaningEnum> _constraint_user_meaning;
   /// The meaning of the values in _constraint_value.  In the constructor, this is ordered to have the same ordering as the basis species.
   std::vector<ConstraintMeaningEnum> _constraint_meaning;
   /// equilibrium constant of the equilibrium species
@@ -921,7 +953,7 @@ private:
                           std::vector<unsigned> & basis_index) const;
 
   /**
-   * based on _constrained_value and _constrained_meaning, populate nw, bulk_moles_old and
+   * based on _constrained_value and _constraint_meaning, populate nw, bulk_moles_old and
    * basis_molality with reasonable initial conditions that may be used during the Newton solve of
    * the algebraic system
    * @param bulk_moles_old bulk composition number of moles of the basis species
