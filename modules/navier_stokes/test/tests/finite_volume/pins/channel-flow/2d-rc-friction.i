@@ -1,9 +1,5 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
-u_inlet=1
-T_inlet=200
+mu=1.1
+rho=1.1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
@@ -12,19 +8,19 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 10
+    xmax = 5
     ymin = 0
     ymax = 1
-    nx = 100
+    nx = 40
     ny = 20
   []
 []
 
 [Variables]
-  inactive = 'temp_solid'
+  inactive = 'lambda'
   [u]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = ${u_inlet}
+    initial_condition = 1
   []
   [v]
     type = PINSFVSuperficialVelocityVariable
@@ -33,33 +29,23 @@ velocity_interp_method='rc'
   [pressure]
     type = INSFVPressureVariable
   []
-  [temperature]
-    type = INSFVEnergyVariable
-  []
-  [temp_solid]
-    family = 'MONOMIAL'
-    order = 'CONSTANT'
-    fv = true
+  [lambda]
+    family = SCALAR
+    order = FIRST
   []
 []
 
 [AuxVariables]
-  [temp_solid]
-    family = 'MONOMIAL'
-    order = 'CONSTANT'
-    fv = true
-    initial_condition = 100
-  []
   [porosity]
     family = MONOMIAL
     order = CONSTANT
     fv = true
-    initial_condition = 1
+    initial_condition = 0.5
   []
 []
 
 [FVKernels]
-  inactive = 'solid_energy_diffusion solid_energy_convection'
+  inactive = 'mean-pressure'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -101,6 +87,15 @@ velocity_interp_method='rc'
     p = pressure
     porosity = porosity
   []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    variable = u
+    momentum_component = 'x'
+    porosity = porosity
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    rho = ${rho}
+  []
 
   [v_advection]
     type = PINSFVMomentumAdvection
@@ -129,57 +124,30 @@ velocity_interp_method='rc'
     p = pressure
     porosity = porosity
   []
-
-  [energy_advection]
-    type = PINSFVEnergyAdvection
-    variable = temperature
-    vel = 'velocity'
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
+  [v_friction]
+    type = PINSFVMomentumFriction
+    variable = v
+    momentum_component = 'y'
+    porosity = porosity
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
     rho = ${rho}
-    porosity = porosity
-  []
-  [energy_diffusion]
-    type = PINSFVEnergyDiffusion
-    k = ${k}
-    variable = temperature
-    porosity = porosity
-  []
-  [energy_convection]
-    type = PINSFVEnergyConvection
-    variable = temperature
-    is_solid = false
-    temp_fluid = temperature
-    temp_solid = temp_solid
-    h_solid_fluid = 'h_cv'
   []
 
-  [solid_energy_diffusion]
-    type = FVDiffusion
-    coeff = ${k}
-    variable = temp_solid
-  []
-  [solid_energy_convection]
-    type = PINSFVEnergyConvection
-    variable = temp_solid
-    is_solid = true
-    temp_fluid = temperature
-    temp_solid = temp_solid
-    h_solid_fluid = 'h_cv'
+  [mean-pressure]
+    type = FVScalarLagrangeMultiplier
+    variable = pressure
+    lambda = lambda
+    phi0 = 0.01
   []
 []
 
 [FVBCs]
-  inactive = 'heated-side'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = ${u_inlet}
+    function = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
@@ -187,11 +155,11 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [inlet-T]
-    type = FVNeumannBC
-    variable = temperature
-    value = ${fparse u_inlet * rho * cp * T_inlet}
+  [inlet-p]
+    type = INSFVOutletPressureBC
     boundary = 'left'
+    variable = pressure
+    function = 1
   []
 
   [no-slip-u]
@@ -206,13 +174,6 @@ velocity_interp_method='rc'
     variable = v
     function = 0
   []
-  [heated-side]
-    type = FVDirichletBC
-    boundary = 'top'
-    variable = 'temp_solid'
-    value = 150
-  []
-
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
     boundary = 'bottom'
@@ -248,18 +209,22 @@ velocity_interp_method='rc'
 []
 
 [Materials]
-  [constants]
-    type = ADGenericConstantMaterial
-    prop_names = 'cp h_cv'
-    prop_values = '${cp} 1'
-  []
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
-    temperature = 'temperature'
+  []
+  [darcy]
+    type = ADGenericConstantVectorMaterial
+    prop_name = 'Darcy_coefficient'
+    prop_value = '0.1 0.1 0.1'
+  []
+  [forchheimer]
+    type = ADGenericConstantVectorMaterial
+    prop_name = 'Forchheimer_coefficient'
+    prop_value = '0.1 0.1 0.1'
   []
 []
 
@@ -267,12 +232,13 @@ velocity_interp_method='rc'
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
+  petsc_options_value = 'asm      200                lu           NONZERO'
   line_search = 'none'
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-14
 []
 
-# Some basic Postprocessors to examine the solution
+# Some basic Postprocessors to visually examine the solution
 [Postprocessors]
   [inlet-p]
     type = SideAverageValue
@@ -280,22 +246,12 @@ velocity_interp_method='rc'
     boundary = 'left'
   []
   [outlet-u]
-    type = SideAverageValue
+    type = SideIntegralVariablePostprocessor
     variable = u
     boundary = 'right'
-  []
-  [outlet-temp]
-    type = SideAverageValue
-    variable = temperature
-    boundary = 'right'
-  []
-  [solid-temp]
-    type = ElementAverageValue
-    variable = temp_solid
   []
 []
 
 [Outputs]
   exodus = true
-  csv = false
 []

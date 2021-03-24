@@ -13,10 +13,6 @@ velocity_interp_method='rc'
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable
@@ -100,9 +96,8 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [u_pressure]
-    type = PINSFVMomentumPressureFlux
+    type = PINSFVMomentumPressure
     variable = u
-    momentum_component = 'x'
     p = pressure
     porosity = porosity
   []
@@ -128,7 +123,7 @@ velocity_interp_method='rc'
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0
+    function = 1
   []
 []
 
