@@ -1,43 +1,41 @@
-#
-# 1-D spherical Gap Heat Transfer Test
+# 1-D Gap Heat Transfer Test without mechanics
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
 #
-# The mesh consists of two "blocks" with a mesh biased toward the gap
-#   between them.  Each block is unit length.  The gap between them is one
-#   unit in length.
+# The mesh consists of two element blocks in the x-z plane.  Each element block
+# is a square. They sit next to one another with a unit between them.
 #
 # The conductivity of both blocks is set very large to achieve a uniform temperature
-#  across each block. The temperature of the far left boundary
-#  is ramped from 100 to 200 over one time unit, and then held fixed for an additional
-#  time unit.  The temperature of the far right boundary is held fixed at 100.
+# across each block. The temperature of the far bottom boundary
+# is ramped from 100 to 200 over one time unit.  The temperature of the far top
+# boundary is held fixed at 100.
 #
-# A simple analytical solution is possible for the heat flux between the blocks, or spheres in the case of RSPHERICAL.:
+# A simple analytical solution is possible for the heat flux between the blocks:
 #
-#  Flux = (T_left - T_right) * (gapK/(r^2*((1/r1)-(1/r2))))
+# Flux = (T_left - T_right) * (gapK/gap_width)
 #
-# For gapK = 1 (default value)
+# The gap conductivity is specified as 1, thus
 #
-# The area is taken as the area of the secondary (inner) surface:
+# gapK(Tavg) = 1.0*Tavg
 #
-# Area = 4 * pi * 1 * 1
+# The heat flux across the gap at time = 1 is then:
 #
-# The integrated heat flux across the gap at time 2 is then:
+# Flux = 100 * (1.0/1.0) = 100
 #
-# 4*pi*k*delta_T/((1/r1)-(1/r2))
-# 4*pi*1*100/((1/1) - (1/2)) =  2513.3 watts
-#
-# For comparison, see results from the flux post processors.
-#
-#
-
-[Problem]
-  coord_type = RSPHERICAL
-[]
+# For comparison, see results from the flux post processors.  These results
+# are the same as for the unit 1-D gap heat transfer between two unit cubes.
 
 [Mesh]
-  file = gap_heat_transfer_htonly_rspherical.e
-  construct_side_list_from_node_list = true
+  [file]
+    type = FileMeshGenerator
+    file = simple_2D.e
+  []
+  [./rotate]
+    type = TransformGenerator
+    transform = ROTATE
+    vector_value = '0 90 0'
+    input = file
+  [../]
 []
 
 [Functions]
@@ -56,7 +54,6 @@
     secondary = 2
     emissivity_primary = 0
     emissivity_secondary = 0
-    gap_geometry_type = sphere
   [../]
 []
 
@@ -84,14 +81,13 @@
 
 
 [BCs]
-  [./temp_far_left]
+  [./temp_far_bottom]
     type = FunctionDirichletBC
     boundary = 1
     variable = temp
     function = temp
   [../]
-
-  [./temp_far_right]
+  [./temp_far_top]
     type = DirichletBC
     boundary = 4
     variable = temp
@@ -113,12 +109,13 @@
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
-    thermal_conductivity = 1e6
+    thermal_conductivity = 100000000.0
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = '1 2'
-    density = 1.0
+    prop_names = 'density'
+    prop_values = '1.0'
   [../]
 []
 
@@ -126,54 +123,49 @@
   type = Transient
 
   solve_type = 'PJFNK'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = '201                hypre    boomeramg      4'
 
-  # I don't know enough about this test to say why it needs such a
-  # loose nl_abs_tol... after timestep 10 the residual basically can't
-  # be reduced much beyond the initial residual.  The test probably
-  # needs to be revisited to determine why.
-  nl_abs_tol = 1e-3
-  nl_rel_tol = 1e-10
-  l_tol = 1e-6
-  l_max_its = 100
   line_search = 'none'
-  nl_max_its = 10
+  nl_rel_tol = 1e-12
+  l_tol = 1e-3
+  l_max_its = 100
 
   dt = 1e-1
-  dtmin = 1e-1
-  end_time = 2.0
+  end_time = 1.0
 []
 
 [Postprocessors]
-
-  [./temp_left]
+  [./temp_bottom]
     type = SideAverageValue
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./temp_right]
+  [./temp_top]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_left]
+  [./flux_bottom]
     type = SideFluxIntegral
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_right]
+  [./flux_top]
     type = SideFluxIntegral
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
+    execute_on = 'initial timestep_end'
   [../]
 []
-
 
 [Outputs]
   exodus = true
