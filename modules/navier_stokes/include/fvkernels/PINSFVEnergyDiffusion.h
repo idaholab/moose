@@ -12,7 +12,8 @@
 #include "FVDiffusion.h"
 
 /**
- * A flux kernel diffusion energy in porous media across cell faces
+ * A flux kernel for diffusing energy in porous media across cell faces, using a regular
+ * diffusion coefficient, which is multiplied by porosity
  */
 class PINSFVEnergyDiffusion : public FVFluxKernel
 {

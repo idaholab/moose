@@ -20,6 +20,7 @@ PINSFVMomentumAdvection::validParams()
                              "in the porous media momentum equation");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
   params.addParam<bool>("smooth_porosity", false, "Whether the porosity has no discontinuities");
+  params.addParam<Real>("max_eps_gradient", 1e-12, "Maximum porosity gradient before considering a discontinuity exists");
 
   return params;
 }
@@ -29,7 +30,8 @@ PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
     _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0))),
     _eps(coupledValue("porosity")),
     _eps_neighbor(coupledNeighborValue("porosity")),
-    _smooth_porosity(getParam<bool>("smooth_porosity"))
+    _smooth_porosity(getParam<bool>("smooth_porosity")),
+    _max_eps_gradient(getParam<Real>("max_eps_gradient"))
 {
   if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))
     mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
@@ -290,8 +292,8 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m,
 
   // If the porosity has discontinuities, avoid Rhie Chow near the jumps
   if (!_smooth_porosity)
-    if (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > 1e-12 ||
-        MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > 1e-12)
+    if (MetaPhysicL::raw_value(_eps_var->adGradSln(elem)).norm() > _max_eps_gradient ||
+        MetaPhysicL::raw_value(_eps_var->adGradSln(neighbor)).norm() > _max_eps_gradient)
       return;
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid

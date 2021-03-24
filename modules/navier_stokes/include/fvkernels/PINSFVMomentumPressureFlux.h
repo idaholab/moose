@@ -12,7 +12,7 @@
 #include "FVFluxKernel.h"
 
 /**
- * A flux kernel for the pressure gradient term in the momentum equation
+ * A flux kernel using the divergence theorem for the pressure gradient term in the momentum equation
  */
 class PINSFVMomentumPressureFlux : public FVFluxKernel
 {
