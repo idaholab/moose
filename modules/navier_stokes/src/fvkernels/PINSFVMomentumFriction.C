@@ -31,7 +31,7 @@ PINSFVMomentumFriction::validParams()
                                         "Name of the Darcy coefficients material property.");
   params.addParam<MaterialPropertyName>("Forchheimer_name",
                                         "Name of the Forchheimer coefficients material property.");
-  params.addCoupledVar("porosity", "Porosity variable.");
+  params.addRequiredCoupledVar("porosity", "Porosity variable.");
 
   params.addParam<MaterialPropertyName>("momentum_name",
                                         "Name of the superficial momentum material property for "
@@ -67,13 +67,16 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumFriction may only be used with a superficial velocity "
                "variable, of variable type PINSFVSuperficialVelocityVariable.");
+
   if (!_use_linear_friction_matprop && !_use_quadratic_friction_matprop &&
       !_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
+
   if ((_use_Darcy_friction_model || _use_Forchheimer_friction_model) && !_rho &&
       !isParamValid("momentum_name"))
-    mooseError("The density or the momentum material property name should be specified to use "
-               "the Darcy or Forchheimer friction models.");
+    mooseError(
+        "The density (rho) or the momentum material property name should be specified to use "
+        "the Darcy or Forchheimer friction models.");
 }
 
 ADReal
