@@ -359,10 +359,10 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
+  reinitVariables(fi);
+
   if (_fv_flux_kernels.size() == 0)
     return;
-
-  reinitVariables(fi);
 
   for (const auto k : _fv_flux_kernels)
     if (_do_jacobian)
@@ -398,8 +398,6 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;
-
-  reinitVariables(fi);
 
   for (const auto & bc : bcs)
     if (_do_jacobian)
