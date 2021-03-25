@@ -17,6 +17,8 @@ InputParameters
 SubChannel1PhaseProblemBase::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addRequiredParam<Real>("abeta",
+                                "Thermal diffusion coefficient used in turbulent crossflow");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
@@ -25,6 +27,7 @@ SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters &
   : ExternalProblem(params),
     _g_grav(9.87),
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
+    _abeta(getParam<Real>("abeta")),
     _fp(nullptr)
 {
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
@@ -343,8 +346,7 @@ SubChannel1PhaseProblemBase::computeWijPrime(int iz)
     // Calculation of Turbulent Crossflow
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
-      double abeta = 0.08; // thermal diffusion coefficient
-      WijPrime(i_gap) = abeta * 0.5 *
+      WijPrime(i_gap) = _abeta * 0.5 *
                         (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
                           (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
                          (Si + Sj)) *

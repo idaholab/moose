@@ -63,6 +63,7 @@ mass_flow_in = 11.522 #kg/sec
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  abeta = 0.08
 []
 
 [ICs]
