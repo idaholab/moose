@@ -489,14 +489,23 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
     fv_kernel_requested_props.insert(mp_deps.begin(), mp_deps.end());
   }
 
-  std::set<unsigned int> same_matprop_name;
+  std::set<std::string> same_matprop_name;
   for (std::shared_ptr<MaterialBase> mat : mats)
   {
     for (const auto prop_id : mat->getSuppliedPropIDs())
     {
       auto pr = supplied_props.insert(prop_id);
       if (!pr.second)
-        same_matprop_name.insert(prop_id);
+      {
+        const auto & prop_ids = MaterialPropertyStorage::propIDs();
+        auto same_matprop_name_it =
+            std::find_if(prop_ids.begin(),
+                         prop_ids.end(),
+                         [prop_id](const std::pair<std::string, unsigned int> & map_pr) {
+                           return map_pr.second == prop_id;
+                         });
+        same_matprop_name.insert(same_matprop_name_it->first);
+      }
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
@@ -504,16 +513,13 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
   }
 
   // Print a warning if block restricted materials are used
-  std::stringstream same_matprop_name_str;
-  std::copy(same_matprop_name.begin(),
-            same_matprop_name.end(),
-            std::ostream_iterator<int>(same_matprop_name_str, " "));
+  auto same_matprop_name_str = MooseUtils::join(same_matprop_name, " ");
 
   if (same_matprop_name.size() > 0)
     mooseDoOnce(
-        mooseWarning("Multiple objects supply properties of ID ",
-                     same_matprop_name_str.str(),
-                     ".\n Do you have different block-restricted physics *and* different "
+        mooseWarning("Multiple objects supply properties of name ",
+                     same_matprop_name_str,
+                     ".\nDo you have different block-restricted physics *and* different "
                      "block-restricted \nmaterials "
                      "on either side of an interface that define the same "
                      "property name? \nUnfortunately that is not supported in FV because we have "
