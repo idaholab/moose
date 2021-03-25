@@ -34,23 +34,14 @@ StitchedSubgenerators::StitchedSubgenerators(const InputParameters & parameters)
   : StitchedMeshGenerator(parameters),
     _input_filenames(getParam<std::vector<std::string>>("input_files"))
 {
-  MooseApp &app = this->getMooseApp();
   const std::string sg_name_base = "subgenerator_";
-
-  // InputParameters filemesh_params = FileMeshGenerator::validParams();
-  InputParameters filemesh_params = _app.getFactory().getValidParams("FileMeshGenerator");
 
   // Create and add MeshGenerators for the input meshes
   _mesh_ptrs.reserve(_input_filenames.size());
   int sg_num = 0;
   for (auto & input_filename : _input_filenames)
-    {
-      filemesh_params.set<MeshFileName>("file") = input_filename;
-
-      const std::string sg_name = sg_name_base + std::to_string(sg_num++);
-
-      app.addMeshGenerator("FileMeshGenerator", sg_name, filemesh_params);
-
-      _mesh_ptrs.push_back(&getMeshByName(sg_name));
-    }
+    _mesh_ptrs.push_back(
+      &this->addMeshSubgenerator("FileMeshGenerator",
+                                 sg_name_base + std::to_string(sg_num++),
+                                 "file", MeshFileName(input_filename)));
 }
