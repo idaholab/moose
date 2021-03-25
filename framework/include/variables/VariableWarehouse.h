@@ -180,6 +180,11 @@ public:
    */
   void jacobianSetup();
 
+  /**
+   * Clear all dof indices from each variable
+   */
+  void clearAllDofIndices();
+
 protected:
   /// list of variable names
   std::vector<VariableName> _names;

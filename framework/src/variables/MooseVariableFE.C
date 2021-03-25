@@ -813,6 +813,15 @@ MooseVariableFE<OutputType>::oldestSolutionStateRequested() const
   return state;
 }
 
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::clearAllDofIndices()
+{
+  _element_data->clearDofIndices();
+  _neighbor_data->clearDofIndices();
+  _lower_data->clearDofIndices();
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
 template class MooseVariableFE<RealEigenVector>;

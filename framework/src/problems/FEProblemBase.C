@@ -4992,6 +4992,10 @@ FEProblemBase::solve()
 {
   TIME_SECTION(_solve_timer);
 
+  clearAllDofIndices();
+  if (_displaced_problem)
+    _displaced_problem->clearAllDofIndices();
+
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app

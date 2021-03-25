@@ -781,6 +781,11 @@ public:
    */
   virtual bool computingScalingResidual() const = 0;
 
+  /**
+   * Clear dof indices from variables in nl and aux systems
+   */
+  void clearAllDofIndices();
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for

@@ -1019,3 +1019,10 @@ SubProblem::hasScalingVector()
     assembly(tid).hasScalingVector();
 }
 #endif
+
+void
+SubProblem::clearAllDofIndices()
+{
+  systemBaseNonlinear().clearAllDofIndices();
+  systemBaseAuxiliary().clearAllDofIndices();
+}
