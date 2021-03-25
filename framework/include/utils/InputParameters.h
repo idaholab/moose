@@ -99,6 +99,20 @@ public:
   T & set(const std::string & name, bool quiet_mode = false);
 
   /**
+   * Given a series of parameters names and values, sets each name to
+   * the corresponding value.  Any number of name, value pairs can be
+   * supplied.
+   *
+   * Note that each \p value must be of the correct type for the
+   * parameter of that name, not merely of a type convertible to the
+   * correct type.
+   *
+   * @param name The name of the first parameter to set
+   */
+  template <typename T, typename... Ts>
+  void setParameters(const std::string & name, const T & value, Ts... extra_input_parameters);
+
+  /**
    * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
    * @returns Boolean indicating whether range check exists
    */
@@ -856,6 +870,11 @@ private:
   InputParameters();
 
   /**
+   * Method to terminate the recursive setParameters definition
+   */
+  void setParameters() {}
+
+  /**
    * Private method for setting deprecated coupled variable documentation strings
    */
   void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
@@ -1042,6 +1061,18 @@ InputParameters::set(const std::string & name, bool quiet_mode)
 
   return cast_ptr<Parameter<T> *>(_values[name])->set();
 }
+
+
+
+template <typename T, typename... Ts>
+void
+InputParameters::setParameters(const std::string & name, const T & value, Ts... extra_input_parameters)
+{
+  this->set<T>(name) = value;
+  this->setParameters(extra_input_parameters...);
+}
+
+
 
 template <typename T, typename UP_T>
 void
