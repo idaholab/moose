@@ -56,6 +56,8 @@ protected:
   Eigen::MatrixXd WijPrime_global;
   const Real _g_grav;
   SubChannelMeshBase & _subchannel_mesh;
+  /// Thermal diffusion coefficient used in turbulent crossflow
+  const Real & _abeta;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * mdot_soln;
   SolutionHandle * SumWij_soln;
