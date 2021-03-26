@@ -504,6 +504,8 @@ namespace Moose
 {
 extern const processor_id_type INVALID_PROCESSOR_ID;
 extern const SubdomainID ANY_BLOCK_ID;
+extern const SubdomainID INTERNAL_SIDE_LOWERD_ID;
+extern const SubdomainID BOUNDARY_SIDE_LOWERD_ID;
 extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
 extern const BoundaryID INVALID_BOUNDARY_ID;
