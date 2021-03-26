@@ -54,6 +54,14 @@ AuxKernelTempl<ComputeValueType>::validParams()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParam<bool>("check_boundary_restricted",
+                        true,
+                        "Whether to check for multiple element sides on the boundary "
+                        "in the case of a boundary restricted, element aux variable. "
+                        "Setting this to false will allow contribution to a single element's "
+                        "elemental value(s) from multiple boundary sides on the same element "
+                        "(example: when the restricted boundary exists on two or more sides "
+                        "of an element, such as at a corner of a mesh");
 
   // This flag is set to true if the AuxKernelTempl is being used on a boundary
   params.addPrivateParam<bool>("_on_boundary", false);
@@ -103,6 +111,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
+    _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
@@ -141,7 +150,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
 
-  if (_boundary_restricted && !isNodal())
+  if (_boundary_restricted && !isNodal() && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
     // we need to check that no elements are visited more than once through visiting
@@ -160,7 +169,8 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
               name(),
               "' has element (id=",
               eid,
-              ") connected with more than one boundary sides.\nRefer to the AuxKernel "
+              ") connected with more than one boundary sides.\nTo skip this error check, "
+              "set 'check_boundary_restricted = false'.\nRefer to the AuxKernel "
               "documentation on boundary restricted aux kernels for understanding this error.");
       }
     }

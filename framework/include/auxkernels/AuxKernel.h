@@ -180,6 +180,16 @@ protected:
    */
   const typename OutputTools<ComputeValueType>::VariableValue & uOlder() const;
 
+  /**
+   * Whether or not to check for repeated element sides on the sideset to which
+   * the auxkernel is restricted (if boundary restricted _and_ elemental). Setting
+   * this to false will allow an element with more than one face on the boundary
+   * to which it is restricted allow contribution to the element's value(s). This
+   * flag allows auxkernels that evaluate boundary-restricted elemental auxvariables
+   * to have more than one element face on the boundary of interest.
+   */
+  const bool & _check_boundary_restricted;
+
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
   /// System this kernel is part of
