@@ -28,7 +28,7 @@
     type = RunApp
     input = 'high_order_boundary_aux.i'
     cli_args = "AuxKernels/real_property/boundary='0 1' AuxKernels/real_property/check_boundary_restricted=false --color off"
-    requirement = "MOOSE shall allow skipping error if a boundary restricted elemental auxiliary kernel is evaluated on an element with multiple boundary sides"
+    requirement = "The system shall allow a boundary restricted elemental auxiliary kernel to be evaluated on an element with multiple boundary sides by setting an input parameter."
     issues = '#17424'
     design = 'syntax/AuxKernels/index.md'
   [../]
