@@ -82,6 +82,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule_face(nullptr),
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
+    _need_JxW_neighbor(false),
     _qrule_msm(nullptr),
     _current_qrule_lower(nullptr),
 
@@ -2008,13 +2009,16 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
   delete _current_neighbor_side_elem;
   _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
 
-  // first do the side element. We need to do this to at a minimum get the correct JxW for the
-  // neighbor face.
-  reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
+  if (_need_JxW_neighbor)
+  {
+    // first do the side element. We need to do this to at a minimum get the correct JxW for the
+    // neighbor face.
+    reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
 
-  // compute JxW on the neighbor's face
-  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-      (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+    // compute JxW on the neighbor's face
+    _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
+        (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+  }
 
   reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
   reinitNeighbor(neighbor, *reference_points_ptr);

@@ -458,7 +458,11 @@ public:
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor() const { return _current_JxW_neighbor; }
+  const MooseArray<Real> & JxWNeighbor() const
+  {
+    _need_JxW_neighbor = true;
+    return _current_JxW_neighbor;
+  }
 
   /**
    * Returns the reference to the current quadrature points being used on the neighbor face
@@ -2240,6 +2244,8 @@ private:
   QBase * _current_qrule_neighbor;
   /// The current quadrature points on the neighbor face
   MooseArray<Point> _current_q_points_face_neighbor;
+  /// Flag to indicate that JxW_neighbor is needed
+  mutable bool _need_JxW_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients
