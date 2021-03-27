@@ -1736,7 +1736,7 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
                               THREAD_ID tid)
 {
-  mooseAssert(_mesh.getMesh().query_elem_ptr(elem->id()) == elem,
+  mooseAssert(_mesh.queryElemPtr(elem->id()) == elem,
               "Are you calling this method with a displaced mesh element?");
 
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
@@ -1885,7 +1885,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid)
 {
-  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+  mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a displaced mesh element?");
 
   // Reinits shape the functions at the physical points
@@ -1908,7 +1908,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid)
 {
-  mooseAssert(_mesh.getMesh().query_elem_ptr(neighbor->id()) == neighbor,
+  mooseAssert(_mesh.queryElemPtr(neighbor->id()) == neighbor,
               "Are you calling this method with a displaced mesh element?");
 
   // Reinits shape the functions at the physical points
@@ -4992,6 +4992,8 @@ FEProblemBase::solve()
 {
   TIME_SECTION(_solve_timer);
 
+  // This prevents stale dof indices from lingering around and possibly leading to invalid reads and
+  // writes. Dof indices may be made stale through operations like mesh adaptivity
   clearAllDofIndices();
   if (_displaced_problem)
     _displaced_problem->clearAllDofIndices();

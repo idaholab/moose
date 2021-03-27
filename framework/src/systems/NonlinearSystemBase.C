@@ -981,9 +981,10 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
-  mooseAssert(displaced ? bool(_fe_problem.getDisplacedProblem().get()) : true,
-              "If we're calling this method with displaced = true, then we better well have a "
-              "displaced problem");
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
 
@@ -1121,9 +1122,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
-  mooseAssert(displaced ? bool(_fe_problem.getDisplacedProblem().get()) : true,
-              "If we're calling this method with displaced = true, then we better well have a "
-              "displaced problem");
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
 
@@ -1864,9 +1866,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
-  mooseAssert(displaced ? bool(_fe_problem.getDisplacedProblem().get()) : true,
-              "If we're calling this method with displaced = true, then we better well have a "
-              "displaced problem");
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
   auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
                                 : static_cast<SubProblem &>(_fe_problem);
 

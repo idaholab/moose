@@ -1552,8 +1552,8 @@ SystemBase::jacobianSetup()
 void
 SystemBase::clearAllDofIndices()
 {
-  for (const auto tid : make_range(libMesh::n_threads()))
-    _vars[tid].clearAllDofIndices();
+  for (auto & var_warehouse : _vars)
+    var_warehouse.clearAllDofIndices();
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
