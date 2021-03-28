@@ -16,6 +16,7 @@
 #include "MooseVariableFieldBase.h"
 #include "FVFluxKernel.h"
 #include "FVFluxBC.h"
+#include "FVInterfaceKernel.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
 #include "MaterialBase.h"
@@ -396,14 +397,27 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .template condition<AttribVectorTags>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
       .queryInto(bcs);
-  if (bcs.size() == 0)
-    return;
 
   for (const auto & bc : bcs)
     if (_do_jacobian)
       bc->computeJacobian(fi);
     else
       bc->computeResidual(fi);
+
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(iks);
+
+  for (const auto & ik : iks)
+    if (_do_jacobian)
+      ik->computeJacobian(fi);
+    else
+      ik->computeResidual(fi);
 }
 
 template <typename RangeType>
@@ -720,6 +734,14 @@ ComputeFVFluxThread<RangeType>::pre()
       .template condition<AttribVectorTags>(_tags)
       .queryInto(bcs);
 
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(iks);
+
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
@@ -732,6 +754,8 @@ ComputeFVFluxThread<RangeType>::pre()
   {
     for (auto * bc : bcs)
       bc->jacobianSetup();
+    for (auto * ik : iks)
+      ik->jacobianSetup();
     for (auto * kernel : kernels)
       kernel->jacobianSetup();
   }
@@ -739,6 +763,8 @@ ComputeFVFluxThread<RangeType>::pre()
   {
     for (auto * bc : bcs)
       bc->residualSetup();
+    for (auto * ik : iks)
+      ik->residualSetup();
     for (auto * kernel : kernels)
       kernel->residualSetup();
   }
