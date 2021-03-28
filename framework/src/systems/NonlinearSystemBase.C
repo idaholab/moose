@@ -860,6 +860,8 @@ NonlinearSystemBase::setPredictor(std::shared_ptr<Predictor> predictor)
 void
 NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
+  SystemBase::subdomainSetup();
+
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
