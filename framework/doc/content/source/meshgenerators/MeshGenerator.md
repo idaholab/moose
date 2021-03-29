@@ -60,6 +60,8 @@ You should +only+ use these APIs to create the base mesh in generators that crea
 
 For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchedMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
 
+Your mesh generator can instantiate subgenerators itself, to create existing meshes for the primary generator to combine and/or modify.  The easiest way to do this is to call `MeshGenerator::addMeshSubgenerator()`, which takes as arguments the generator class name and object name to instantiate, followed by an arbitrary number of name/value pairs of subgenerator parameters to set, and which returns a reference to the mesh which the subgenerator will create before the primary `generate()` is called.
+
 ## Showing Mesh Information
 
 The parameter [!param](/Mesh/GeneratedMeshGenerator/show_info) prints to screen detailed information about a mesh immediately after it is generated. It can be used to quickly verify properties about the mesh such as: sidesets, subdomains, and volumes.
