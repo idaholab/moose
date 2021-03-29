@@ -81,10 +81,13 @@ for both of the outer stainless steel regions:
 !style halign=center
 +Stainless Steel (left)+
 
-!equation
-\phi_{S1} (0) = A_{S1}(0) + C_{S1} \\
-A_{S1}(0) + C_{S1} = 1 \\
-C_{S1} = 1
+\begin{equation}
+\begin{aligned}
+\phi_{S1} (0) &= A_{S1}(0) + C_{S1} \\
+A_{S1}(0) + C_{S1} &= 1 \\
+C_{S1} &= 1
+\end{aligned}
+\end{equation}
 
 !col-end!
 
@@ -93,10 +96,13 @@ C_{S1} = 1
 !style halign=center
 +Stainless Steel (right)+
 
-!equation
-\phi_{S3} (3) = A_{S3} (3) + C_{S3} \\
-A_{S3} (3) + C_{S3} = 0 \\
-C_{S3} = -3A_{S3}
+\begin{equation}
+\begin{aligned}
+\phi_{S3} (3) &= A_{S3} (3) + C_{S3} \\
+A_{S3} (3) + C_{S3} &= 0 \\
+C_{S3} &= -3A_{S3}
+\end{aligned}
+\end{equation}
 
 !col-end!
 !row-end!
@@ -109,7 +115,7 @@ let's focus on the current density ($-\sigma_i \nabla \phi_i$) equivalence
 condition on the left interface (at $x = 1$):
 
 !equation
-\sigma_S \left. \frac{\text{d} \phi_{S1}}{\text{d} x} \right|_{x = 2} = \sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 2}
+\sigma_S \left. \frac{\text{d} \phi_{S1}}{\text{d} x} \right|_{x = 1} = \sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 1}
 
 Taking into account our initial guess for the solution function, this becomes
 
@@ -124,11 +130,16 @@ Next, we can apply the conductance condition from [three-block-summary], which i
 Taking into account our initial guess for the solution function and the constant
 coefficient $C_{S1}$ solved for above, this becomes
 
-!equation
-\sigma_S A_{S1} = -C_E (A_{S1}(1) + 1 - A_G (1) - C_G) \\
-\sigma_S A_{S1} = -C_E (A_{S1} + 1 - A_G - C_G) \\
-\sigma_S A_{S1} = -C_E A_{S1} - C_E + C_E A_G + C_E C_G \\
-\sigma_S A_{S1} + C_E A_{S1} - C_E A_G = - C_E + C_E C_G
+\begin{equation}
+\begin{aligned}
+\sigma_S A_{S1} &= -C_E (A_{S1}(1) + 1 - A_G (1) - C_G) \\
+\sigma_S A_{S1} &= -C_E (A_{S1} + 1 - A_G - C_G) \\
+\sigma_S A_{S1} &= -C_E A_{S1} - C_E + C_E A_G + C_E C_G \\
+\sigma_S A_{S1} + C_E A_{S1} - C_E A_G &= - C_E + C_E C_G
+\end{aligned}
+\end{equation}
+
+Grouping terms, we have
 
 !equation id=condition-two
 (\sigma_S + C_E) A_{S1} - C_E A_G = - C_E + C_E C_G
@@ -147,16 +158,21 @@ Taking into account our initial guess for the solution function, this becomes
 Next, we can apply the conductance condition from [three-block-summary], which is
 
 !equation
-\sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 1} = -C_E (\phi_G(2) - \phi_{S3}(2))
+\sigma_G \left. \frac{\text{d} \phi_G}{\text{d} x} \right|_{x = 2} = -C_E (\phi_G(2) - \phi_{S3}(2))
 
 Taking into account our initial guess for the solution function and the constant
 coefficient $C_{S3}$ solved for above, this becomes
 
-!equation
-\sigma_G A_G = -C_E (A_G (2) + C_G - A_{S3} (2 - 3)) \\
-\sigma_G A_G = -C_E (2A_G + C_G + A_{S3}) \\
-\sigma_G A_G = -2 C_E A_G - C_E C_G - C_E A_{S3} \\
-\sigma_G A_G + 2 C_E A_G + C_E A_{S3} = - C_E C_G
+\begin{equation}
+\begin{aligned}
+\sigma_G A_G &= -C_E (A_G (2) + C_G - A_{S3} (2 - 3)) \\
+\sigma_G A_G &= -C_E (2A_G + C_G + A_{S3}) \\
+\sigma_G A_G &= -2 C_E A_G - C_E C_G - C_E A_{S3} \\
+\sigma_G A_G + 2 C_E A_G + C_E A_{S3} &= - C_E C_G \\
+\end{aligned}
+\end{equation}
+
+Grouping terms, we have
 
 !equation id=condition-four
 (\sigma_G + 2 C_E) A_G + C_E A_{S3} = - C_E C_G
@@ -187,9 +203,12 @@ addition yields
 
 which can then be solved for $A_{S1}$:
 
-!equation
-(\sigma_S C_E - \sigma_G (\sigma_S + C_E)) A_{S1} =  \sigma_G C_E - \sigma_G C_E C_G \\
-(\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E) A_{S1} =  \sigma_G C_E - \sigma_G C_E C_G
+\begin{equation}
+\begin{aligned}
+(\sigma_S C_E - \sigma_G (\sigma_S + C_E)) A_{S1} &=  \sigma_G C_E - \sigma_G C_E C_G \\
+(\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E) A_{S1} &=  \sigma_G C_E - \sigma_G C_E C_G
+\end{aligned}
+\end{equation}
 
 !equation id=a-stainless-one
 A_{S1} =  \frac{\sigma_G C_E - \sigma_G C_E C_G}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}
@@ -209,9 +228,12 @@ and
 Combining [!eqref](condition-three-a) and [!eqref](condition-four-a) together via
 addition yields
 
-!equation
-\sigma_G C_E A_G + \sigma_S (\sigma_G + 2 C_E) A_G = - \sigma_S C_E C_G \\
-\sigma_G C_E A_G + \sigma_S \sigma_G A_G + 2 \sigma_S C_E A_G = - \sigma_S C_E C_G
+\begin{equation}
+\begin{aligned}
+\sigma_G C_E A_G + \sigma_S (\sigma_G + 2 C_E) A_G &= - \sigma_S C_E C_G \\
+\sigma_G C_E A_G + \sigma_S \sigma_G A_G + 2 \sigma_S C_E A_G &= - \sigma_S C_E C_G
+\end{aligned}
+\end{equation}
 
 which can then be solved for $A_G$:
 
@@ -225,32 +247,21 @@ Note that [!eqref](a-stainless-one) and [!eqref](a-graphite) still depend on
 finding the coefficient $C_G$. We can now solve for $C_G$ by using
 [!eqref](condition-one), which yields
 
-!equation
-\sigma_S \left[ \frac{\sigma_G C_E - \sigma_G C_E C_G}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] = \sigma_G \left[ \frac{-\sigma_S C_E C_G}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right]
+\begin{equation}
+\begin{aligned}
+\sigma_S \left[ \frac{\sigma_G C_E - \sigma_G C_E C_G}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] &= \sigma_G \left[ \frac{-\sigma_S C_E C_G}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right] \\
+\frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} - \left[ \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G + \left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right] C_G &= 0 \\
+\left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right] C_G - \left[ \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G &= \frac{-\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \\
+\left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G &= \frac{-\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \\
+\left[ \frac{1}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{1}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E} \right] C_G &= \frac{-1}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \\
+\left[ \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E} \right] C_G &= -1 \\
+\left[ \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - 1 \right] C_G &= -1 \\
+\left[ \sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E - \left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right) \right] C_G &= -\left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right)\\
+\left( -\sigma_S C_E - 2 \sigma_G \sigma_S - 2 \sigma_G C_E \right) C_G &= -\left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right)
+\end{aligned}
+\end{equation}
 
-!equation
-\frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} - \left[ \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G + \left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right] C_G = 0
-
-!equation
-\left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \right] C_G - \left[ \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G = \frac{-\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}
-
-!equation
-\left[ \frac{\sigma_G \sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \right] C_G = \frac{-\sigma_S \sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}
-
-!equation
-\left[ \frac{1}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{1}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E} \right] C_G = \frac{-1}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}
-
-!equation
-\left[ \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E} \right] C_G = -1
-
-!equation
-\left[ \frac{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} - 1 \right] C_G = -1
-
-!equation
-\left[ \sigma_S C_E - \sigma_G \sigma_S - \sigma_G C_E - \left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right) \right] C_G = -\left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right)
-
-!equation
-\left( -\sigma_S C_E - 2 \sigma_G \sigma_S - 2 \sigma_G C_E \right) C_G = -\left( \sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E \right)
+and finally
 
 !equation id=c-graphite-final
 C_G = \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E}
@@ -260,33 +271,35 @@ Returning to [!eqref](a-graphite), we can now fully solve for $A_G$:
 !equation
 A_G = \frac{-\sigma_S C_E}{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E} \left[ \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} \right]
 
+Simplifying yields:
+
 !equation id=a-graphite-final
 A_G = \frac{-\sigma_S C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E}
 
 Returning to [!eqref](a-stainless-one), we can now fully solve for $A_{S1}$:
 
-!equation
-A_{S1} =  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ 1 - \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} \right]
+\begin{equation}
+\begin{aligned}
+A_{S1} &=  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ 1 - \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} \right] \\
+A_{S1} &=  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ \frac{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G  C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} - \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G  C_E} \right] \\
+A_{S1} &=  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ \frac{-\sigma_S C_E + \sigma_G \sigma_S + \sigma_G  C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} \right]
+\end{aligned}
+\end{equation}
 
-!equation
-A_{S1} =  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ \frac{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G  C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} - \frac{\sigma_G C_E + \sigma_S \sigma_G + 2 \sigma_S C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G  C_E} \right]
-
-!equation
-A_{S1} =  \frac{\sigma_G C_E}{\sigma_S C_E - \sigma_G \sigma_S - \sigma_G  C_E} \left[ \frac{-\sigma_S C_E + \sigma_G \sigma_S + \sigma_G  C_E}{\sigma_S C_E + 2 \sigma_G \sigma_S + 2 \sigma_G C_E} \right]
+Simplifying yields:
 
 !equation id=a-stainless-one-final
 A_{S1} =  \frac{-\sigma_G C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E}
 
 Returning to [!eqref](condition-three), we can now fully solve for $A_{S3}$:
 
-!equation
-\sigma_G A_G = \sigma_S A_{S3}
-
-!equation
-A_{S3} = \frac{\sigma_G}{\sigma_S} A_G
-
-!equation
-A_{S3} = \frac{\sigma_G}{\sigma_S} \left[ \frac{-\sigma_S C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E} \right]
+\begin{equation}
+\begin{aligned}
+\sigma_G A_G &= \sigma_S A_{S3} \\
+A_{S3} &= \frac{\sigma_G}{\sigma_S} A_G \\
+A_{S3} &= \frac{\sigma_G}{\sigma_S} \left[ \frac{-\sigma_S C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E} \right]
+\end{aligned}
+\end{equation}
 
 !equation id=a-stainless-three-final
 A_{S3} = \frac{-\sigma_G C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E}
@@ -320,3 +333,16 @@ located within the test source code directory located at `elk/test/src`.
 ## Input File
 
 !listing analytic_solution_test_three_block.i
+
+## Results
+
+!style halign=left
+Results from the input file shown above (with `Mesh/line/nx=60` and
+`Outputs/exodus=true`) compared to the analytic function are shown below in
+[three-block-results]. Note that the number of points shown in the plot has been
+down-sampled compared to the solved number of elements for readability.
+
+!media media/three_block_results.png
+       style=width:50%;margin:auto;
+       id=three-block-results
+       caption=Results of electrostatic contact three block validation case.
