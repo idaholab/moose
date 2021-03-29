@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#17087'
+  design = 'FVOneVarDiffusionInterface.md'
+  [test]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestFVOneVarDiffusionInterface
+    requirement = 'The system shall be able to solve a diffusion problem with the domain split in half and with an interface object communicating diffusion flux between the domain splits.'
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+[]
