@@ -1222,16 +1222,18 @@ SystemBase::copyVars(ExodusII_IO & io)
 
     if (hasVariable(vci._dest_name))
     {
-      if (getVariable(0, vci._dest_name).count() > 1)
+      const auto & var = getVariable(0, vci._dest_name);
+      if (var.count() > 1) // array variable
       {
-        ArrayMooseVariable & var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
-        for (unsigned int i = 0; i < getVariable(0, vci._dest_name).count(); i++)
+        const auto & array_var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
+        for (MooseIndex(var.count()) i = 0; i < var.count(); ++i)
         {
-          std::string source_var = _subproblem.arrayVariableComponent(vci._source_name, i);
-          if (getVariable(0, vci._dest_name).isNodal())
-            io.copy_nodal_solution(system(), var.componentName(i), source_var, timestep);
+          const auto exodus_var = _subproblem.arrayVariableComponent(vci._source_name, i);
+          const auto system_var = array_var.componentName(i);
+          if (var.isNodal())
+            io.copy_nodal_solution(system(), exodus_var, system_var, timestep);
           else
-            io.copy_elemental_solution(system(), var.componentName(i), source_var, timestep);
+            io.copy_elemental_solution(system(), exodus_var, system_var, timestep);
         }
       }
       else
