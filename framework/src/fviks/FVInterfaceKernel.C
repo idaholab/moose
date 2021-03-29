@@ -67,12 +67,11 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("_tid")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _nonconst_var1(
-        _sys.getActualFieldVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
-    _nonconst_var2(_sys.getActualFieldVariable<Real>(
-        _tid,
-        isParamValid("variable2") ? getParam<NonlinearVariableName>("variable2")
-                                  : getParam<NonlinearVariableName>("variable1"))),
+    _nonconst_var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
+    _nonconst_var2(_sys.getFVVariable<Real>(_tid,
+                                            isParamValid("variable2")
+                                                ? getParam<NonlinearVariableName>("variable2")
+                                                : getParam<NonlinearVariableName>("variable1"))),
     _assembly(_subproblem.assembly(_tid)),
     _var1(_nonconst_var1),
     _var2(_nonconst_var2),

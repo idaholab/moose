@@ -34,6 +34,8 @@ class SubProblem;
 class FEProblemBase;
 class SystemBase;
 class Assembly;
+template <typename>
+class MooseVariableFV;
 
 /**
  * Base class for creating new types of boundary conditions.
@@ -92,8 +94,8 @@ private:
   SystemBase & _sys;
   SubProblem & _subproblem;
 
-  MooseVariableField<Real> & _nonconst_var1;
-  MooseVariableField<Real> & _nonconst_var2;
+  MooseVariableFV<Real> & _nonconst_var1;
+  MooseVariableFV<Real> & _nonconst_var2;
 
   std::set<SubdomainID> _subdomain1;
   std::set<SubdomainID> _subdomain2;
@@ -104,8 +106,8 @@ private:
   bool _elem_is_one;
 
 protected:
-  const MooseVariableField<Real> & _var1;
-  const MooseVariableField<Real> & _var2;
+  const MooseVariableFV<Real> & _var1;
+  const MooseVariableFV<Real> & _var2;
 
   /// Mesh this interface kernel is defined on
   const MooseMesh & _mesh;
