@@ -96,14 +96,11 @@ dataLoad(std::istream & stream, SystemBase & system_base, void * context)
     std::string vector_name;
     dataLoad(stream, vector_name, context);
 
-    if (!libmesh_system.have_vector(vector_name))
-      mooseError("Trying to load vector name ",
-                 vector_name,
-                 " but that vector doesn't exist in the system.");
-
-    auto & vector = libmesh_system.get_vector(vector_name);
-
-    dataLoad(stream, vector, context);
+    if (libmesh_system.have_vector(vector_name))
+    {
+      auto & vector = libmesh_system.get_vector(vector_name);
+      dataLoad(stream, vector, context);
+    }
   }
 
   system_base.update();
