@@ -46,9 +46,6 @@ private:
   /// The out-of-plane strain variable
   const VariableValue & _out_of_plane_strain;
 
-  /// Number of out-of-plane strain scalar variables
-  unsigned int _nscalar_strains;
-
   /// The out-of-plane strain scalar variables
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
