@@ -872,6 +872,11 @@ public:
   virtual void residualSetup();
   virtual void jacobianSetup();
 
+  /**
+   * Clear all dof indices from moose variables
+   */
+  void clearAllDofIndices();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

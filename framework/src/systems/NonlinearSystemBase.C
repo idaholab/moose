@@ -981,6 +981,13 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
+  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
+
   if (!displaced)
   {
     GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
@@ -1032,7 +1039,7 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             // reinit variables on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            _fe_problem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
               if (nfc->shouldApply())
@@ -1115,6 +1122,13 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
+  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
+
   if (!displaced)
   {
     GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
@@ -1178,7 +1192,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
             // reinit variables on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            _fe_problem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
 
             for (const auto & nfc : constraints)
               if (nfc->shouldApply())
@@ -1306,9 +1320,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         for (const auto & ec : _element_constraints)
         {
           _fe_problem.setCurrentSubdomainID(elem1, tid);
-          _fe_problem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
+          subproblem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
           _fe_problem.setNeighborSubdomainID(elem2, tid);
-          _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
+          subproblem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
           ec->prepareShapes(ec->variable().number());
           ec->prepareNeighborShapes(ec->variable().number());
@@ -1852,6 +1866,13 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
 
+  if (displaced)
+    mooseAssert(_fe_problem.getDisplacedProblem(),
+                "If we're calling this method with displaced = true, then we better well have a "
+                "displaced problem");
+  auto & subproblem = displaced ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
+
   if (!displaced)
   {
     GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
@@ -1911,7 +1932,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
             // reinit variables on the primary element's face at the contact point
             _fe_problem.setNeighborSubdomainID(primary_elem, 0);
-            _fe_problem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
+            subproblem.reinitNeighborPhys(primary_elem, primary_side, points, 0);
             for (const auto & nfc : constraints)
             {
               nfc->_jacobian = &jacobian;
@@ -2123,9 +2144,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
         for (const auto & ec : _element_constraints)
         {
           _fe_problem.setCurrentSubdomainID(elem1, tid);
-          _fe_problem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
+          subproblem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
           _fe_problem.setNeighborSubdomainID(elem2, tid);
-          _fe_problem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
+          subproblem.reinitNeighborPhys(elem2, info._elem2_constraint_q_point, tid);
 
           ec->prepareShapes(ec->variable().number());
           ec->prepareNeighborShapes(ec->variable().number());

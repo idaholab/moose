@@ -1549,6 +1549,13 @@ SystemBase::jacobianSetup()
     _vars[tid].jacobianSetup();
 }
 
+void
+SystemBase::clearAllDofIndices()
+{
+  for (auto & var_warehouse : _vars)
+    var_warehouse.clearAllDofIndices();
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 

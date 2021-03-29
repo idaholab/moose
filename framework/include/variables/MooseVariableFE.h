@@ -186,6 +186,8 @@ public:
     return _lower_data->dofIndices();
   }
 
+  void clearAllDofIndices() final;
+
   unsigned int numberOfDofsNeighbor() override { return _neighbor_data->dofIndices().size(); }
 
   const FieldVariablePhiValue & phi() const override { return _element_data->phi(); }

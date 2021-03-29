@@ -387,8 +387,7 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid,
-                              bool suppress_displaced_init = false) = 0;
+                              THREAD_ID tid) = 0;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitLowerDElem(const Elem * lower_d_elem,
@@ -781,6 +780,11 @@ public:
    * Getter for whether we're computing the scaling residual
    */
   virtual bool computingScalingResidual() const = 0;
+
+  /**
+   * Clear dof indices from variables in nl and aux systems
+   */
+  void clearAllDofIndices();
 
 protected:
   /**
