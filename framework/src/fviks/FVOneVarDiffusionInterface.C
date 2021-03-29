@@ -16,7 +16,8 @@ InputParameters
 FVOneVarDiffusionInterface::validParams()
 {
   InputParameters params = FVInterfaceKernel::validParams();
-  params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
+  params.addClassDescription(
+      "Computes residual for diffusion operator across an interface for finite volume method.");
   params.addRequiredParam<MaterialPropertyName>("coeff1",
                                                 "The diffusion coefficient on the 1st subdomains");
   params.addRequiredParam<MaterialPropertyName>("coeff2",
