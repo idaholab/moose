@@ -5,7 +5,7 @@
 ## MOOSE
 
 - Started in May of 2008
-- MOOSE is a framework enabling rapid development of new simulation tools
+- A framework enabling rapid development of new simulation tools
 - NQA-1 Compliant
 -  Application development focuses on implementing physics (PDEs) rather than numerical implementation issues
 - Seamlessly couples native (MOOSE) applications using MOOSE MultiApps and Transfers
