@@ -32,9 +32,6 @@ ScalarKernel::validParams()
 
   params.registerBase("ScalarKernel");
 
-  // We do not currently support explicit ScalarKernels
-  params.suppressParameter<bool>("implicit");
-
   return params;
 }
 
@@ -42,7 +39,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
   : ResidualObject(parameters),
     ScalarCoupleable(this),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _u(_var.sln())
+    _u(_is_implicit ? _var.sln() : uOld())
 {
 }
 

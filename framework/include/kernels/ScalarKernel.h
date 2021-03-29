@@ -52,6 +52,6 @@ protected:
 
   unsigned int _i, _j;
 
-  /// Value(s) of the scalar variable
-  VariableValue & _u;
+  /// The current solution (old solution if explicit)
+  const VariableValue & _u;
 };
