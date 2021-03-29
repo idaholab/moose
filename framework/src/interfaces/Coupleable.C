@@ -1485,7 +1485,7 @@ Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int com
 const VariableValue &
 Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = getVar(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
