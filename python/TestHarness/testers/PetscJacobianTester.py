@@ -26,6 +26,7 @@ class PetscJacobianTester(RunApp):
                                           "at every non-linear iteration of every time step. This is only "
                                           "relevant for petsc versions >= 3.9.")
         params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
+        params.addParam('only_final_jacobian', False, "Check only final Jacobian comparison.")
 
         # override default values
         params.valid['valgrind'] = 'NONE'
@@ -130,8 +131,8 @@ class PetscJacobianTester(RunApp):
                     reason = ''
                 else:
                     reason = 'INCORRECT JACOBIAN'
-                    break
-
+                    if str(self.specs['only_final_jacobian']).lower()=="false":
+                        break
 
         if reason != '':
             self.setStatus(self.fail, reason)
