@@ -57,7 +57,7 @@ THMParsedFunctionWrapper::initialize()
     }
     else if (_feproblem.hasScalarVariable(_vals_input[i]))
     {
-      VariableValue & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln();
+      const VariableValue & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln();
       _initial_vals.push_back(0);
       _scalar_vals.push_back(&scalar_val);
       _scalar_index.push_back(i);
