@@ -1180,7 +1180,7 @@ MooseApp::run()
                  dst_dir,
                  "\" already exists.\nTo update/recopy tests, rename (\"mv ",
                  dst_dir,
-                 " new_dir_name\") or remove (\"rm ",
+                 " new_dir_name\") or remove (\"rm -r ",
                  dst_dir,
                  "\") the existing directory.\nThen re-run \"",
                  cmdname,
