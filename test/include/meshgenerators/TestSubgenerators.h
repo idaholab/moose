@@ -14,12 +14,12 @@
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
-class StitchedSubgenerators : public StitchedMeshGenerator
+class TestSubgenerators : public StitchedMeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  StitchedSubgenerators(const InputParameters & parameters);
+  TestSubgenerators(const InputParameters & parameters);
 
 protected:
   /// The mesh generator input filenames to read

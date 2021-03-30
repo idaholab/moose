@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StitchedSubgenerators.h"
+#include "TestSubgenerators.h"
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
@@ -15,10 +15,10 @@
 
 #include "libmesh/replicated_mesh.h"
 
-registerMooseObject("MooseTestApp", StitchedSubgenerators);
+registerMooseObject("MooseTestApp", TestSubgenerators);
 
 InputParameters
-StitchedSubgenerators::validParams()
+TestSubgenerators::validParams()
 {
   InputParameters params = StitchedMeshGenerator::validParams();
 
@@ -28,7 +28,7 @@ StitchedSubgenerators::validParams()
   return params;
 }
 
-StitchedSubgenerators::StitchedSubgenerators(const InputParameters & parameters)
+TestSubgenerators::TestSubgenerators(const InputParameters & parameters)
   : StitchedMeshGenerator(parameters),
     _input_filenames(getParam<std::vector<std::string>>("input_files"))
 {
