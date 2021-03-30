@@ -58,6 +58,8 @@ protected:
   SubChannelMeshBase & _subchannel_mesh;
   /// Thermal diffusion coefficient used in turbulent crossflow
   const Real & _abeta;
+  /// Turbulent modeling parameter used in axial momentum equation
+  const Real & _CT;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * mdot_soln;
   SolutionHandle * SumWij_soln;
