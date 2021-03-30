@@ -38,6 +38,7 @@
 class MaterialBase;
 class MooseMesh;
 class SubProblem;
+class FaceInfo;
 
 template <>
 InputParameters validParams<MaterialBase>();
@@ -224,6 +225,8 @@ public:
    */
   virtual bool ghostable() const { return false; }
 
+  void setFaceInfo(const FaceInfo & fi) { _face_info = &fi; }
+
 protected:
   /**
    * Users must override this method.
@@ -321,6 +324,8 @@ protected:
   bool _has_stateful_property;
 
   bool _overrides_init_stateful_props = true;
+
+  const FaceInfo * _face_info = nullptr;
 
 private:
   const MaterialPropertyName _declare_suffix;
