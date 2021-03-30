@@ -24,6 +24,8 @@ PNSFVSolidEnergyTime::validParams()
   params.addClassDescription(
       "Time derivative $(1-\\epsilon)\\rho_sC_{p,s}\\frac{\\partial T_s}{\\partial t}$ "
       "in the solid energy conservation equation.");
+  params.addParam<MaterialPropertyName>(NS::rho_s, NS::rho_s, "The solid density");
+  params.addParam<MaterialPropertyName>(NS::cp_s, NS::cp_s, "The solid heat capacity");
   return params;
 }
 
