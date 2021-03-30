@@ -11,19 +11,15 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class INSConvectedMesh;
-
-template <>
-InputParameters validParams<INSConvectedMesh>();
-
 /**
  * This calculates the time derivative for a coupled variable
  **/
-class INSConvectedMesh : public Kernel
+class ConvectedMesh : public Kernel
 {
 public:
-  INSConvectedMesh(const InputParameters & parameters);
+  static InputParameters validParams();
+
+  ConvectedMesh(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

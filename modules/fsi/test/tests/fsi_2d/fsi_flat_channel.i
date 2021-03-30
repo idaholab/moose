@@ -108,7 +108,7 @@
     use_displaced_mesh = true
   [../]
   [./vel_x_mesh]
-    type = INSConvectedMesh
+    type = ConvectedMesh
     disp_x = disp_x
     disp_y = disp_y
     variable = vel_x
@@ -116,7 +116,7 @@
     use_displaced_mesh = true
   [../]
   [./vel_y_mesh]
-    type = INSConvectedMesh
+    type = ConvectedMesh
     disp_x = disp_x
     disp_y = disp_y
     variable = vel_y

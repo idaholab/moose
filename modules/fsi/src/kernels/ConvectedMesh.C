@@ -7,15 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSConvectedMesh.h"
+#include "ConvectedMesh.h"
 
-registerMooseObject("MooseApp", INSConvectedMesh);
+registerMooseObject("FsiApp", ConvectedMesh);
 
-template <>
 InputParameters
-validParams<INSConvectedMesh>()
+ConvectedMesh::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Corrects the convective derivative for situations in which the fluid mesh is dynamic.");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
@@ -25,7 +24,7 @@ validParams<INSConvectedMesh>()
   return params;
 }
 
-INSConvectedMesh::INSConvectedMesh(const InputParameters & parameters)
+ConvectedMesh::ConvectedMesh(const InputParameters & parameters)
   : Kernel(parameters),
     _disp_x_dot(coupledDot("disp_x")),
     _d_disp_x_dot(coupledDotDu("disp_x")),
@@ -41,21 +40,21 @@ INSConvectedMesh::INSConvectedMesh(const InputParameters & parameters)
 }
 
 Real
-INSConvectedMesh::computeQpResidual()
+ConvectedMesh::computeQpResidual()
 {
   return _test[_i][_qp] * -_rho[_qp] *
          RealVectorValue(_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]) * _grad_u[_qp];
 }
 
 Real
-INSConvectedMesh::computeQpJacobian()
+ConvectedMesh::computeQpJacobian()
 {
   return _test[_i][_qp] * -_rho[_qp] *
          RealVectorValue(_disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]) * _grad_phi[_j][_qp];
 }
 
 Real
-INSConvectedMesh::computeQpOffDiagJacobian(unsigned int jvar)
+ConvectedMesh::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _disp_x_id)
     return _test[_i][_qp] * -_rho[_qp] * _phi[_j][_qp] * _d_disp_x_dot[_qp] * _grad_u[_qp](0);

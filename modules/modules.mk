@@ -19,7 +19,7 @@ ifeq ($(ALL_MODULES),yes)
         CONTACT                     := yes
         EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
-        FSI := yes
+        FSI                         := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
         GEOCHEMISTRY                := yes
         HEAT_CONDUCTION             := yes
@@ -73,11 +73,6 @@ endif
 ifeq ($(FSI),yes)
         TENSOR_MECHANICS            := yes
         NAVIER_STOKES               := yes
-				RAY_TRACING                 := yes
-        FLUID_PROPERTIES            := yes
-        RDG                         := yes
-        HEAT_CONDUCTION             := yes
-				PHASE_FIELD                 := yes
 endif
 
 # The master list of all moose modules
