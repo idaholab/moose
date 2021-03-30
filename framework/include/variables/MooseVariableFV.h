@@ -209,6 +209,8 @@ public:
     return _neighbor_data->dofIndices();
   }
 
+  void clearAllDofIndices() final;
+
   const FieldVariableValue & vectorTagValue(TagID tag)
   {
     return _element_data->vectorTagValue(tag);

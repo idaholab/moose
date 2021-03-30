@@ -269,6 +269,13 @@ VariableWarehouse::residualSetup()
     pair.second->residualSetup();
 }
 
+void
+VariableWarehouse::clearAllDofIndices()
+{
+  for (auto * var : _vars)
+    var->clearAllDofIndices();
+}
+
 template MooseVariableField<Real> *
 VariableWarehouse::getActualFieldVariable<Real>(const std::string & var_name);
 template MooseVariableField<Real> *

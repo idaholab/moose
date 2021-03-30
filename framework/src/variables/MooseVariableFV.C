@@ -984,6 +984,14 @@ MooseVariableFV<OutputType>::oldestSolutionStateRequested() const
   return state;
 }
 
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::clearAllDofIndices()
+{
+  _element_data->clearDofIndices();
+  _neighbor_data->clearDofIndices();
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

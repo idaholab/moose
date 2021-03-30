@@ -1579,7 +1579,7 @@ GrainTracker::updateFieldInfo()
         }
         else
         {
-          _fe_problem.reinitElemPhys(elem, centroid, 0, /* suppress_displaced_init = */ true);
+          _fe_problem.reinitElemPhys(elem, centroid, 0);
           entity_value = _vars[curr_var]->sln()[0];
         }
       }
