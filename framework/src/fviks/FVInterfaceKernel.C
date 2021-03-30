@@ -20,6 +20,7 @@ FVInterfaceKernel::validParams()
   params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
   params += TaggingInterface::validParams();
+  params += TwoMaterialPropertyInterface::validParams();
 
   params.addRequiredParam<std::vector<SubdomainName>>(
       "subdomain1", "The subdomains on the 1st side of the boundary.");
