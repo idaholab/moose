@@ -104,3 +104,15 @@ MeshGenerator::generateInternal()
 
   return mesh;
 }
+
+
+
+std::unique_ptr<MeshBase> &
+MeshGenerator::addMeshSubgenerator (const std::string & generator_name,
+                                    const std::string & name,
+                                    InputParameters & params)
+{
+  _app.addMeshGenerator(generator_name, name, params);
+
+  return this->getMeshByName(name);
+}
