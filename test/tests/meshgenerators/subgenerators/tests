@@ -2,8 +2,8 @@
   [stitched_subgenerators]
     design = 'meshgenerators/MeshGenerator.md'
     issues = '#17184'
-    requirement = "A single MeshGenerator shall be able to generate a mesh with many constituent "
-                  "sub-geometries matching those that existing MeshGenerators can create"
+    requirement = "The system mesh generation capability shall be
+                   extensible to allow composition of existing mesh generators."
 
     type = 'Exodiff'
     input = 'stitched_subgenerators.i'
@@ -11,5 +11,6 @@
     exodiff = 'stitched_subgenerators_in.e'
     mesh_mode = 'REPLICATED'
     recover = false
+    allow_test_objects = true
   []
 []
