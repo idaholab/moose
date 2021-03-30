@@ -34,7 +34,7 @@ StitchedSubgenerators::StitchedSubgenerators(const InputParameters & parameters)
   : StitchedMeshGenerator(parameters),
     _input_filenames(getParam<std::vector<std::string>>("input_files"))
 {
-  const std::string sg_name_base = "subgenerator_";
+  const std::string sg_name_base = name() + "_sub_";
 
   // Create and add MeshGenerators for the input meshes
   _mesh_ptrs.reserve(_input_filenames.size());
