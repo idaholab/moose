@@ -38,8 +38,8 @@ StitchedSubgenerators::StitchedSubgenerators(const InputParameters & parameters)
   _mesh_ptrs.reserve(_input_filenames.size());
   int sg_num = 0;
   for (auto & input_filename : _input_filenames)
-    _mesh_ptrs.push_back(
-      &this->addMeshSubgenerator("FileMeshGenerator",
-                                 sg_name_base + std::to_string(sg_num++),
-                                 "file", MeshFileName(input_filename)));
+    _mesh_ptrs.push_back(&this->addMeshSubgenerator("FileMeshGenerator",
+                                                    sg_name_base + std::to_string(sg_num++),
+                                                    "file",
+                                                    MeshFileName(input_filename)));
 }
