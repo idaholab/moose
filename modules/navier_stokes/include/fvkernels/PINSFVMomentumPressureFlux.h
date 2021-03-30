@@ -20,12 +20,15 @@ class PINSFVMomentumPressureFlux : public FVFluxKernel
 public:
   static InputParameters validParams();
   PINSFVMomentumPressureFlux(const InputParameters & params);
+  bool skipForBoundary(const FaceInfo &) const override;
 
 protected:
   ADReal computeQpResidual() override;
 
   /// the current element porosity
   const VariableValue & _eps;
+  /// the current neighbor porosity
+  const VariableValue & _eps_neighbor;
   /// the current element pressure
   const ADVariableValue & _p_elem;
   /// the neighbor element pressure
