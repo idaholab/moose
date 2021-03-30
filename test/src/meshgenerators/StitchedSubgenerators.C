@@ -15,7 +15,7 @@
 
 #include "libmesh/replicated_mesh.h"
 
-registerMooseObject("MooseApp", StitchedSubgenerators);
+registerMooseObject("MooseTestApp", StitchedSubgenerators);
 
 InputParameters
 StitchedSubgenerators::validParams()
