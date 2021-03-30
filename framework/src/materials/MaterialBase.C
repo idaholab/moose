@@ -52,6 +52,11 @@ MaterialBase::validParams()
       "output_properties",
       "List of material properties, from this material, to output (outputs "
       "must also be defined to an output type)");
+  params.addParam<MaterialPropertyName>(
+      "declare_suffix",
+      "",
+      "An optional suffix parameter that can be appended to any declared properties. The suffix "
+      "will be prepended with a '_' character.");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -94,7 +99,8 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
-    _has_stateful_property(false)
+    _has_stateful_property(false),
+    _declare_suffix(getParam<MaterialPropertyName>("declare_suffix"))
 {
 }
 
