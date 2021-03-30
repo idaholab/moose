@@ -9,7 +9,7 @@
 
 #include "CoupledPenaltyInterfaceDiffusion.h"
 
-registerMooseObject("MooseApp", CoupledPenaltyInterfaceDiffusion);
+registerMooseObject("FsiApp", CoupledPenaltyInterfaceDiffusion);
 
 InputParameters
 CoupledPenaltyInterfaceDiffusion::validParams()
