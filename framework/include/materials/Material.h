@@ -245,40 +245,56 @@ Material::getMaterialPropertyOlder(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-Material::getMaterialPropertyByName(const std::string & prop_name)
+Material::getMaterialPropertyByName(const std::string & prop_name_in)
 {
   MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, MaterialBase::CURRENT);
-  return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name_in);
 }
 
 template <typename T>
 const ADMaterialProperty<T> &
-Material::getADMaterialPropertyByName(const std::string & prop_name)
+Material::getADMaterialPropertyByName(const std::string & prop_name_in)
 {
   MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
   // the same memory)
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, MaterialBase::CURRENT);
-  return MaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name);
+  return MaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name_in);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-Material::getMaterialPropertyOldByName(const std::string & prop_name)
+Material::getMaterialPropertyOldByName(const std::string & prop_name_in)
 {
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   registerPropName(prop_name, true, MaterialBase::OLD);
-  return MaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name_in);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-Material::getMaterialPropertyOlderByName(const std::string & prop_name)
+Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
 {
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   registerPropName(prop_name, true, Material::OLDER);
-  return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
+  return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name_in);
 }

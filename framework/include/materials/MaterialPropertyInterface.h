@@ -344,6 +344,8 @@ protected:
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
+  const MaterialPropertyName _get_suffix;
+
 private:
   /// BoundaryRestricted flag
   const bool _mi_boundary_restricted;
@@ -462,8 +464,11 @@ MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std:
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   checkExecutionStage();
   checkMaterialProperty(name);
 
@@ -483,8 +488,11 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
 
 template <typename T>
 const ADMaterialProperty<T> &
-MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   checkExecutionStage();
   checkMaterialProperty(name);
 
@@ -504,8 +512,12 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
                " Old property for \"",
@@ -522,8 +534,12 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
                " Older property for \"",
@@ -540,8 +556,12 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
 
 template <typename T>
 std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
-MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name)
+MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
   if (_mi_block_ids.empty())
     mooseError("getBlockMaterialProperty must be called by a block restrictable object");
 
@@ -569,8 +589,11 @@ MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
+MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? name_in
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   return _material_data->haveProperty<T>(name);
 }
 
@@ -637,7 +660,10 @@ MaterialPropertyInterface::hasADMaterialProperty(const std::string & name)
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name)
+MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_in)
 {
+  const auto name = _get_suffix.empty()
+                        ? name_in
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   return _material_data->haveADProperty<T>(name);
 }
