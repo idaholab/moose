@@ -1,17 +1,22 @@
 # Anisotropy
 
-## `CahnHilliardAnisoFluxBC` boundary condition
+Objects for modeling anisotropic behavior.
 
-## `CHInterfaceAniso` interface kernel
+## Kernels
 
-## `CahnHilliardAniso` bulk kernel
+- [`CahnHilliardAniso`](/CahnHilliardAniso.md): Bulk Cahn-Hilliard Kernel that uses a DerivativeMaterial Free Energy and a tensor (anisotropic) mobility
 
-## `MatAnisoDiffusion` diffusion kernel
+- [`CHInterfaceAniso`](/CHInterfaceAniso.md): Gradient energy Cahn-Hilliard Kernel with a tensor (anisotropic) mobility
 
-## `SplitCHWResAniso` split Chan-Hilliard kernel
+- [`MatAnisoDiffusion`](/MatAnisoDiffusion.md): Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property
 
-## `ConstantAnisotropicMobility` mobility material
+- [`SplitCHWResAniso`](/SplitCHWResAniso.md): Split formulation Cahn-Hilliard Kernel for the chemical potential variable with a tensor (anisotropic) mobility
 
-## `CompositeMobilityTensor`
+## Materials
 
-## `GBAnisotropy`
+- [`ConstantAnisotropicMobility`](/ConstantAnisotropicMobility.md): Provide a constant mobility tensor value
+
+- [`CompositeMobilityTensor`](/CompositeMobilityTensor.md): Assemble a mobility tensor from multiple tensor contributions weighted by material properties
+
+- [`GBAnisotropy`](/GBAnisotropy.md): Specifying grain boundary energy and mobility parameters for individual grain boundaries as defined by order parameter pairs
+
