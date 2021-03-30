@@ -112,6 +112,9 @@ MeshGenerator::addMeshSubgenerator (const std::string & generator_name,
                                     const std::string & name,
                                     InputParameters & params)
 {
+  // In case the user forgot it
+  params.set<MooseApp*>("_moose_app") = &_app;
+
   _app.addMeshGenerator(generator_name, name, params);
 
   return this->getMeshByName(name);
