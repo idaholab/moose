@@ -247,7 +247,7 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
 bool
 checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
 {
-  std::ofstream out(filename.c_str(), std::ofstream::out);
+  std::ofstream out(filename.c_str(), std::ios_base::app);
   if (out.fail())
   {
     if (throw_on_unwritable)
