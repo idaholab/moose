@@ -38,8 +38,21 @@ StitchedSubgenerators::StitchedSubgenerators(const InputParameters & parameters)
   _mesh_ptrs.reserve(_input_filenames.size());
   int sg_num = 0;
   for (auto & input_filename : _input_filenames)
-    _mesh_ptrs.push_back(&this->addMeshSubgenerator("FileMeshGenerator",
-                                                    sg_name_base + std::to_string(sg_num++),
-                                                    "file",
-                                                    MeshFileName(input_filename)));
+    // Test the variadic API for half of our subgenerators
+    if (sg_num % 2)
+      _mesh_ptrs.push_back(&this->addMeshSubgenerator("FileMeshGenerator",
+                                                      sg_name_base + std::to_string(sg_num++),
+                                                      "file",
+                                                      MeshFileName(input_filename)));
+    // Test the InputParameters API for the other half
+    else
+    {
+      // Deliberately avoid getting params from Factory, to test
+      // that this overload is adding any missing ones itself
+      InputParameters subgenerator_params = FileMeshGenerator::validParams();
+
+      subgenerator_params.set<MeshFileName>("file") = input_filename;
+      _mesh_ptrs.push_back(&this->addMeshSubgenerator(
+          "FileMeshGenerator", sg_name_base + std::to_string(sg_num++), subgenerator_params));
+    }
 }
