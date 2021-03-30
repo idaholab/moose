@@ -11,12 +11,6 @@
 
 #include "StitchedMeshGenerator.h"
 
-// Forward declarations
-class StitchedSubgenerators;
-
-template <>
-InputParameters validParams<StitchedSubgenerators>();
-
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */

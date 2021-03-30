@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", StitchedSubgenerators);
 
-defineLegacyParams(StitchedSubgenerators);
-
 InputParameters
 StitchedSubgenerators::validParams()
 {
