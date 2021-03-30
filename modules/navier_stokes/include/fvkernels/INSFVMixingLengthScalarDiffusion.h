@@ -37,6 +37,6 @@ protected:
   /// Turbulent eddy mixing length for the neighbor cell
   const VariableValue & _mixing_len_neighbor;
 
-  /// Turbulent Schmidt number (or turbulent Prandtl numer)
+  /// Turbulent Schmidt number (or turbulent Prandtl number)
   const Real & _schmidt_number;
 };
