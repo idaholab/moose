@@ -58,7 +58,7 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "BCs"),
+    Restartable(this, "FVInterfaceKernels"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
@@ -95,6 +95,21 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     _subdomain1.insert(_mesh.getSubdomainID(sub_name));
   for (const auto & sub_name : getParam<std::vector<SubdomainName>>("subdomain2"))
     _subdomain2.insert(_mesh.getSubdomainID(sub_name));
+
+  if (!_var1.hasBlocks(_subdomain1))
+    paramError("variable1",
+               "variable1 does not exist on all the blocks specified by the subdomain1 parameter");
+  if (!_var2.hasBlocks(_subdomain2))
+  {
+    const bool var2_provided = isParamValid("variable2");
+    const std::string var_name = var2_provided ? "variable2" : "variable1";
+    paramError(var_name,
+               var_name,
+               " does not exist on all the blocks specified by the subdomain2 parameter",
+               var2_provided ? ""
+                             : ".\nNote that you did not provide the variable2 parameter, "
+                               "so variable1 was implicitly used on subdomain2");
+  }
 }
 
 void

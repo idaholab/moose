@@ -1,6 +1,5 @@
 [Tests]
   issues = '#17087'
-  design = 'FVOneVarDiffusionInterface.md'
   [test]
     type = PythonUnitTest
     input = test.py
@@ -8,5 +7,33 @@
     requirement = 'The system shall be able to solve a diffusion problem with the domain split in half and with an interface object communicating diffusion flux between the domain splits.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    design = 'FVOneVarDiffusionInterface.md'
+  []
+  [run_except1]
+    type = RunException
+    input = test.i
+    expect_err = "variable1 does not exist on all the blocks specified by the subdomain1 parameter"
+    cli_args = "FVInterfaceKernels/active='bad1'"
+    design = 'FVInterfaceKernels/index.md'
+    requirement = 'The system shall error if a user specified variable on the 1th side of an interface does not actually exist on the 1th side.'
+    ad_indexing_type = 'global'
+  []
+  [run_except2]
+    type = RunException
+    input = test.i
+    expect_err = "variable2 does not exist on all the blocks specified by the subdomain2 parameter"
+    cli_args = "FVInterfaceKernels/active='bad2'"
+    design = 'FVInterfaceKernels/index.md'
+    requirement = 'The system shall error if a user specified variable on the 2nd side of an interface does not actually exist on the 2nd side.'
+    ad_indexing_type = 'global'
+  []
+  [run_except3]
+    type = RunException
+    input = test.i
+    expect_err = "variable1 does not exist on all the blocks specified by the subdomain2 parameter\.\s*Note that you did not provide the variable2 parameter, so variable1 was implicitly used on subdomain2"
+    cli_args = "FVInterfaceKernels/active='bad3'"
+    design = 'FVInterfaceKernels/index.md'
+    requirement = 'The system shall error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1th side of the interface should be used on the 2nd side, and the variable on the 1th side does not exist on the 2nd side.'
+    ad_indexing_type = 'global'
   []
 []

@@ -2,11 +2,11 @@
 
 For an overview of MOOSE FV please see [/fv_design.md].
 
-`FVInterfaceKernels` are meant to communicate data between at interfaces between
+`FVInterfaceKernels` are meant to communicate data at interfaces between
 subdomains. An `FVInterfaceKernel` may contribute to the residuals/Jacobians of
 a single variable, specified with the parameter `variable1`, or to multiple
 variables by also using the `variable2` parameter. There are two additional
-critical/required parameters: `subdomain1` and `subdomain2`. In cases whether an
+critical/required parameters: `subdomain1` and `subdomain2`. In cases for which an
 `FVInterfaceKernel` is operating on two variables, `subdomain1` should
 correspond to the subdomain(s) neighboring the `boundary` parameter that
 `variable1` lives on, and similarly for `subdomain2` and `variable2`. By

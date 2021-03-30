@@ -38,7 +38,7 @@ template <typename>
 class MooseVariableFV;
 
 /**
- * Base class for creating new types of boundary conditions.
+ * Base class for creating kernels that interface physics between subdomains
  */
 class FVInterfaceKernel : public MooseObject,
                           public BoundaryRestrictableRequired,
@@ -60,7 +60,6 @@ public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
-   * @param nodal Whether this BC is applied to nodes or not
    */
   FVInterfaceKernel(const InputParameters & parameters);
 
