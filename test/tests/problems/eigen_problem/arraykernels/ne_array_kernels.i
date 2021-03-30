@@ -97,7 +97,6 @@
 
 [Executioner]
   type = Eigenvalue
-  eigen_problem_type = GEN_NON_HERMITIAN
 []
 
 [VectorPostprocessors]

@@ -1,13 +1,15 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 10
-  ymin = 0
-  ymax = 10
-  elem_type = QUAD4
-  nx = 8
-  ny = 8
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 10
+    nx = 8
+    ny = 8
+    elem_type = QUAD4
+  []
 []
 
 # the minimum eigenvalue is (2*PI*(p-1)^(1/p)/a/p/sin(PI/p))^p;
@@ -15,11 +17,19 @@
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  []
 []
 
+# Set an random initial condition is necessary for this problem
+# A constant initial condition will not work for this problem since
+# the problem is ill-conditioned at a constant vector.
+# We observed bad convergence when using a constant initial condition
+[ICs]
+  [./uic]
+    type = RandomIC
+    variable = u
+  [../]
+[]
 
 [Kernels]
   [./diff]
@@ -53,8 +63,8 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = false
-  solve_type = NEWTON
+  free_power_iterations = 10
+  solve_type = PJFNK
 []
 
 [VectorPostprocessors]
