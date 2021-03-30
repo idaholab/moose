@@ -1062,17 +1062,15 @@ InputParameters::set(const std::string & name, bool quiet_mode)
   return cast_ptr<Parameter<T> *>(_values[name])->set();
 }
 
-
-
 template <typename T, typename... Ts>
 void
-InputParameters::setParameters(const std::string & name, const T & value, Ts... extra_input_parameters)
+InputParameters::setParameters(const std::string & name,
+                               const T & value,
+                               Ts... extra_input_parameters)
 {
   this->set<T>(name) = value;
   this->setParameters(extra_input_parameters...);
 }
-
-
 
 template <typename T, typename UP_T>
 void
