@@ -69,7 +69,7 @@
     type = RunApp
     input = 'steady_picard_master.i'
     cli_args = 'Executioner/disable_picard_residual_norm_check=true Executioner/accept_on_max_picard_iteration=true'
-    expect_out = 'Picard converged reason: REACH_MAX_ITS'
+    expect_out = 'Multiapp coupling convergence reason: REACH_MAX_ITS'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
@@ -111,7 +111,7 @@
     type = 'Exodiff'
     input = 'picard_custom_postprocessor.i'
     exodiff = 'picard_custom_diff_out.e picard_custom_diff_out_sub0.e'
-    cli_args = 'Executioner/picard_custom_pp=unorm Executioner/custom_rel_tol=1e-4 Outputs/file_base=picard_custom_diff_out'
+    cli_args = 'Executioner/coupling_custom_pp=unorm Executioner/custom_rel_tol=1e-4 Outputs/file_base=picard_custom_diff_out'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#14642'
@@ -121,10 +121,10 @@
     type = 'RunApp'
     input = 'picard_custom_postprocessor.i'
     cli_args = 'Executioner/direct_pp_value=true Outputs/file_base=picard_custom_pp_history_out'
-    expect_out = '9 Picard unorm_err'
+    expect_out = '9 coupling unorm_err'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#16940'
-    requirement = "The system shall show the Picard convergence history of a user defined postprocessor that is used for convergence check."
+    requirement = "The system shall show the Multiapp coupling convergence history of a user defined postprocessor that is used for convergence check."
   [../]
 []

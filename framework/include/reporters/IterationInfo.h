@@ -33,7 +33,7 @@ protected:
   unsigned int & _time_step_value;
   unsigned int & _num_linear;
   unsigned int & _num_nonlinear;
-  unsigned int & _num_picard;
+  unsigned int & _num_coupling;
 
   // Used to allow for optional declare
   Real _dummy_real = 0;

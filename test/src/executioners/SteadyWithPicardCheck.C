@@ -30,7 +30,7 @@ SteadyWithPicardCheck::SteadyWithPicardCheck(const InputParameters & parameters)
 }
 
 bool
-SteadyWithPicardCheck::augmentedPicardConvergenceCheck() const
+SteadyWithPicardCheck::augmentedCouplingConvergenceCheck() const
 {
   Real rel_err = std::abs((_pp_value - _pp_value_old) / _pp_value);
 

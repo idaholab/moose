@@ -116,7 +116,7 @@ void
 TimeSequenceStepperBase::step()
 {
   TimeStepper::step();
-  if (converged() && !_executioner.picardSolve().XFEMRepeatStep())
+  if (converged() && !_executioner.iterativeMultiAppSolve()->XFEMRepeatStep())
     _current_step++;
 }
 

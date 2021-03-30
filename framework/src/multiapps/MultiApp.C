@@ -164,17 +164,20 @@ MultiApp::validParams()
                                     "Set between 0 and 2.");
   params.addParam<std::vector<std::string>>("relaxed_variables",
                                             std::vector<std::string>(),
-                                            "List of variables to relax during Picard Iteration");
+                                            "List of subapp variables to relax during Multiapp coupling iterations");
+  params.addParam<std::vector<std::string>>("relaxed_postprocessors",
+                                            std::vector<std::string>(),
+                                            "List of subapp postprocessors to relax during Multiapp coupling iterations");
 
   params.addParam<bool>(
       "clone_master_mesh", false, "True to clone master mesh and use it for this MultiApp.");
 
   params.addParam<bool>("keep_solution_during_restore",
                         false,
-                        "This is useful when doing Picard.  It takes the "
-                        "final solution from the previous Picard iteration"
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final solution from the previous coupling iteration"
                         "and re-uses it as the initial guess "
-                        "for the next picard iteration");
+                        "for the next coupling iteration");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -778,10 +781,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
   preRunInputFile();
   app->runInputFile();
 
-  auto & picard_solve = _apps[i]->getExecutioner()->picardSolve();
-  picard_solve.setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  picard_solve.setMultiAppRelaxationVariables(
+  // Transfer coupling relaxation information to the subapps
+  auto iterative_multiapp_solve = _apps[i]->getExecutioner()->iterativeMultiAppSolve();   // FIXME For secant solve, pass the 'relaxed' too
+  iterative_multiapp_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
+  iterative_multiapp_solve->setMultiAppRelaxationVariables(
       getParam<std::vector<std::string>>("relaxed_variables"));
+  iterative_multiapp_solve->setMultiAppRelaxationPostprocessors(
+      getParam<std::vector<std::string>>("relaxed_postprocessors"));
   if (getParam<Real>("relaxation_factor") != 1.0)
   {
     // Store a copy of the previous solution here

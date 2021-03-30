@@ -36,14 +36,14 @@ IterationInfo::IterationInfo(const InputParameters & parameters)
     _time_step_value(declareHelper<unsigned int>("timestep", _dummy_unsigned_int)),
     _num_linear(declareHelper<unsigned int>("num_linear_iterations", _dummy_unsigned_int)),
     _num_nonlinear(declareHelper<unsigned int>("num_nonlinear_iterations", _dummy_unsigned_int)),
-    _num_picard(declareHelper<unsigned int>(
+    _num_coupling(declareHelper<unsigned int>(
         "num_picard_iterations", _dummy_unsigned_int, _transient_executioner != nullptr))
 {
-  if (_transient_executioner == nullptr && _items.contains("num_picard_iterations"))
+  if (_transient_executioner == nullptr && _items.contains("num_coupling_iterations"))
     paramError("items",
-               "The number of picard iterations was requested but the executioner is not of type "
+               "The number of coupling iterations was requested but the executioner is not of type "
                "Transient, "
-               "the picard iteration count is only available for Transient Executioner objects.");
+               "the coupling iteration count is only available for Transient Executioner objects.");
 }
 
 void
@@ -54,5 +54,5 @@ IterationInfo::execute()
   _num_nonlinear = _subproblem.nNonlinearIterations();
   _num_linear = _subproblem.nLinearIterations();
   if (_transient_executioner)
-    _num_picard = _transient_executioner->picardSolve().numPicardIts();
+    _num_coupling = _transient_executioner->iterativeMultiAppSolve()->numCouplingIts();
 }

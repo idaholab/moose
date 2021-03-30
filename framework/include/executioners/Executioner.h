@@ -15,7 +15,9 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 #include "FEProblemSolve.h"
+#include "IterativeMultiAppSolve.h"
 #include "PicardSolve.h"
+#include "SecantSolve.h"
 #include "Reporter.h"
 #include "ReporterInterface.h"
 
@@ -113,11 +115,27 @@ public:
   /// Return the underlining FEProblemSolve object.
   FEProblemSolve & feProblemSolve() { return _feproblem_solve; }
 
-  /// Return underlining PicardSolve object.
-  PicardSolve & picardSolve() { return _picard_solve; }
+  /// Return underlying PicardSolve object.
+  PicardSolve & picardSolve() {
+    mooseDeprecated("picardSolve() is deprecated. Use iterativeMultiAppSolve() instead.");
+    if (_multiapp_iteration_method == "picard")
+      return *(std::dynamic_pointer_cast<PicardSolve>(_iterative_multiapp_solve));
+    else
+      mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
+  }
 
-  /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedPicardConvergenceCheck() const { return false; }
+  /// Return a pointer to the underlying iterative multiapp solve object.
+  std::shared_ptr<IterativeMultiAppSolve> iterativeMultiAppSolve() { return _iterative_multiapp_solve; }
+
+  /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
+  virtual bool augmentedPicardConvergenceCheck() const
+  {
+    mooseDeprecated("augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
+    return false;
+  }
+
+  /// Augmented multiapp coupling convergence check that to be called by PicardSolve and can be overridden by derived executioners
+  virtual bool augmentedCouplingConvergenceCheck() const { return false; }
 
   /**
    * Get the verbose output flag
@@ -143,7 +161,9 @@ protected:
   FEProblemBase & _fe_problem;
 
   FEProblemSolve _feproblem_solve;
-  PicardSolve _picard_solve;
+
+  MooseEnum _multiapp_iteration_method;
+  std::shared_ptr<IterativeMultiAppSolve> _iterative_multiapp_solve;
 
   // Restart
   std::string _restart_file_base;

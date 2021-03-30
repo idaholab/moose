@@ -28,8 +28,16 @@ Executioner::validParams()
   InputParameters params = MooseObject::validParams();
   params += FEProblemSolve::validParams();
   params += PicardSolve::validParams();
+  params += SecantSolve::validParams();
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
+
+  MooseEnum MultiAppIterationMethod(
+      "picard secant steffensen", "picard");
+
+  params.addParam<MooseEnum>("coupling_algorithm",
+                             MultiAppIterationMethod,
+                             "The algorithm to converge the multiapp coupling.");
 
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",
@@ -55,7 +63,7 @@ Executioner::Executioner(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _feproblem_solve(this),
-    _picard_solve(this),
+    _multiapp_iteration_method(getParam<MooseEnum>("coupling_algorithm")),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _verbose(getParam<bool>("verbose")),
     _num_grid_steps(getParam<unsigned int>("num_grids") - 1)
@@ -90,6 +98,13 @@ Executioner::Executioner(const InputParameters & parameters)
         getParam<std::vector<std::vector<std::string>>>("scaling_group_variables"));
 
   _fe_problem.numGridSteps(_num_grid_steps);
+
+  // Instantiate the SolveObject for the multiapp coupling iteration
+  if (_multiapp_iteration_method == "picard")
+    _iterative_multiapp_solve = std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<PicardSolve>(this));
+  else if (_multiapp_iteration_method == "secant")
+    _iterative_multiapp_solve = std::shared_ptr<IterativeMultiAppSolve>(std::make_shared<SecantSolve>(this));
+
 }
 
 Problem &

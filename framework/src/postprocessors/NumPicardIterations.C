@@ -43,5 +43,5 @@ NumPicardIterations::initialize()
 Real
 NumPicardIterations::getValue()
 {
-  return _transient_executioner->picardSolve().numPicardIts();
+  return _transient_executioner->iterativeMultiAppSolve()->numCouplingIts();
 }
