@@ -21,6 +21,11 @@ MaterialPropertyInterface::validParams()
   InputParameters params = emptyInputParameters();
   params.addPrivateParam<Moose::MaterialDataType>(
       "_material_data_type"); // optionally force the type of MaterialData to utilize
+  params.addParam<MaterialPropertyName>("prop_getter_suffix",
+                                        "",
+                                        "An optional suffix parameter that can be appended to any "
+                                        "attempt to retrieve/get material properties. The suffix "
+                                        "will be prepended with a '_' character.");
   return params;
 }
 
@@ -34,6 +39,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
+    _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
     _mi_boundary_restricted(!boundary_ids.empty() &&
                             BoundaryRestrictable::restricted(boundary_ids)),
     _mi_block_ids(block_ids),
