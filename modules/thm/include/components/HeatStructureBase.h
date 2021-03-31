@@ -116,6 +116,8 @@ protected:
   std::vector<unsigned int> _start_bc_id;
   /// BC ID of the heat structure (end)
   std::vector<unsigned int> _end_bc_id;
+  /// BC ID of the interior axial boundaries (per radial section) of the heat structure
+  std::vector<unsigned int> _interior_axial_per_radial_section_bc_id;
   /// BC ID of the axial regions of the outer boundary of the heat structure
   std::vector<unsigned int> _axial_outer_bc_id;
   /// BC ID of the axial regions of the inner boundary of the heat structure
@@ -134,6 +136,8 @@ protected:
   std::vector<BoundaryName> _boundary_names_start;
   /// Boundary names of the end side of the heat structure
   std::vector<BoundaryName> _boundary_names_end;
+  /// Boundary names of the interior axial boundaries (per radial section) of the heat structure
+  std::vector<BoundaryName> _boundary_names_interior_axial_per_radial_section;
   /// Boundary names of the axial regions of the outer side of the heat structure
   std::vector<BoundaryName> _boundary_names_axial_outer;
   /// Boundary names of the axial regions of the inner side of the heat structure
