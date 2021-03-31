@@ -740,6 +740,11 @@ public:
    */
   void addResidualNeighbor(const std::vector<VectorTag> & vector_tags);
   /**
+   * Add local neighbor residuals of all field variables for a set of tags onto the global residual
+   * vectors associated with the tags.
+   */
+  void addResidualLower(const std::vector<VectorTag> & vector_tags);
+  /**
    * Add residuals of all scalar variables for a set of tags onto the global residual vectors
    * associated with the tags.
    */
@@ -902,6 +907,16 @@ public:
    * secondary side of the mortar interface; it's the boundary face of the \p Secondary element.
    */
   void addJacobianMortar();
+
+  /**
+   * Add *all* portions of the Jacobian except PrimaryPrimary, e.g. LowerLower, LowerSecondary,
+   * LowerPrimary, SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower,
+   * PrimarySecondary, for mortar-like objects. Primary indicates the interior parent element on the
+   * primary side of the mortar interface. Secondary indicates the neighbor of the interior parent
+   * element. Lower denotes the lower-dimensional element living on the primary side of the mortar
+   * interface.
+   */
+  void addJacobianNeighborLowerD();
 
   /**
    * Cache *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
@@ -1526,7 +1541,7 @@ public:
 
   /**
    * Helper function for assembling residual contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param re The local residual
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1535,7 +1550,7 @@ public:
   void saveLocalArrayResidual(DenseVector<Number> & re,
                               unsigned int i,
                               unsigned int ntest,
-                              const RealEigenVector & v)
+                              const RealEigenVector & v) const
   {
     for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
       re(i) += v(j);
@@ -1543,7 +1558,7 @@ public:
 
   /**
    * Helper function for assembling diagonal Jacobian contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param ke The local Jacobian
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1557,7 +1572,7 @@ public:
                                   unsigned int j,
                                   unsigned int nphi,
                                   unsigned int ivar,
-                                  const RealEigenVector & v)
+                                  const RealEigenVector & v) const
   {
     unsigned int pace = (_component_block_diagonal[ivar] ? 0 : nphi);
     for (unsigned int k = 0; k < v.size(); ++k, i += ntest, j += pace)
@@ -1566,7 +1581,7 @@ public:
 
   /**
    * Helper function for assembling full Jacobian contriubutions on local
-   * quadrature points for an array variable
+   * quadrature points for an array kernel, bc, etc.
    * @param ke The local Jacobian
    * @param i The local test function index
    * @param ntest The number of test functions
@@ -1583,7 +1598,7 @@ public:
                                   unsigned int nphi,
                                   unsigned int ivar,
                                   unsigned int jvar,
-                                  const RealEigenMatrix & v)
+                                  const RealEigenMatrix & v) const
   {
     unsigned int pace = ((ivar == jvar && _component_block_diagonal[ivar]) ? 0 : nphi);
     unsigned int saved_j = j;
@@ -1843,6 +1858,10 @@ protected:
    * Add local neighbor residuals of all field variables for a tag onto the tag's residual vector
    */
   void addResidualNeighbor(const VectorTag & vector_tag);
+  /**
+   * Add local neighbor residuals of all field variables for a tag onto the tag's residual vector
+   */
+  void addResidualLower(const VectorTag & vector_tag);
   /**
    * Add residuals of all scalar variables for a tag onto the tag's residual vector
    */

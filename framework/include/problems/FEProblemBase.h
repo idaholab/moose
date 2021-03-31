@@ -410,6 +410,8 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) override;
+  virtual void
+  reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) override;
   virtual void reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering = false) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
@@ -1296,6 +1298,7 @@ public:
 
   virtual void addResidual(THREAD_ID tid) override;
   virtual void addResidualNeighbor(THREAD_ID tid) override;
+  virtual void addResidualLower(THREAD_ID tid) override;
   virtual void addResidualScalar(THREAD_ID tid = 0);
 
   virtual void cacheResidual(THREAD_ID tid) override;
@@ -1316,6 +1319,7 @@ public:
 
   virtual void addJacobian(THREAD_ID tid) override;
   virtual void addJacobianNeighbor(THREAD_ID tid) override;
+  virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,

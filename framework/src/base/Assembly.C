@@ -3277,6 +3277,31 @@ Assembly::addResidualNeighbor(const std::vector<VectorTag> & vector_tags)
 }
 
 void
+Assembly::addResidualLower(const VectorTag & vector_tag)
+{
+  mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
+              "Non-residual tag in Assembly::addResidualLower");
+
+  auto & tag_Rl = _sub_Rl[vector_tag._type_id];
+  NumericVector<Number> & residual = _sys.getVector(vector_tag._id);
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+    addResidualBlock(residual,
+                     tag_Rl[var->number()],
+                     var->dofIndicesLower(),
+                     var->arrayScalingFactor(),
+                     var->isNodal());
+}
+
+void
+Assembly::addResidualLower(const std::vector<VectorTag> & vector_tags)
+{
+  for (const auto & vector_tag : vector_tags)
+    if (_sys.hasVector(vector_tag._id))
+      addResidualLower(vector_tag);
+}
+
+void
 Assembly::addResidualScalar(const VectorTag & vector_tag)
 {
   mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
@@ -3921,6 +3946,84 @@ Assembly::addJacobianMortar()
 
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::PrimaryPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesNeighbor());
+      }
+  }
+}
+
+void
+Assembly::addJacobianNeighborLowerD()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesLower());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesNeighbor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesLower());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndicesLower());
+      }
+
+    for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
+         tag < _jacobian_block_neighbor_used.size();
+         tag++)
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndicesNeighbor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),

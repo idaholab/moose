@@ -146,12 +146,12 @@ protected:
   static Threads::spin_mutex _resid_vars_mutex;
   static Threads::spin_mutex _jacoby_vars_mutex;
 
+  /// Check current element if it contains broken boundary
+  bool excludeBoundary() const;
+
 private:
   /// Broken boundaries
   std::set<BoundaryID> _excluded_boundaries;
-
-  /// Check current element if it contains broken boundary
-  bool excludeBoundary() const;
 
   friend class ADDGKernel;
 };
