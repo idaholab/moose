@@ -35,7 +35,7 @@ The [!ac](EA) record can be accessed from the [!ac](INL) network as follows.
 1. When the search is complete, click on the ellipses (three dots) to the left of the application
    name and then select +View Details+
 
-## [!ac](SSD) id=safety_software+determination
+## [!ac](SSD) id=safety_software_determination
 
 The [!ac](SSD) can be accessed from the [!ac](INL) network as follows.
 
