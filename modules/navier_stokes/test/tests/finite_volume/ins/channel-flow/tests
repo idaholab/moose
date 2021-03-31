@@ -54,7 +54,7 @@
     type = 'Exodiff'
     input = 2d-mixing-length.i
     exodiff = 2d-mixing-length_out.e
-    requirement = 'The system shall be able to model the effect of Reynolds stress on the momentum equations using a mixing length model'
+    requirement = 'The system shall be able to model the effect of Reynolds-averaged parameters on the momentum and passive scalar advection equations using a mixing length model'
     ad_indexing_type = 'global'
     design = 'navier_stokes/rans_theory.md'
     issues = '#16794 #16937'
