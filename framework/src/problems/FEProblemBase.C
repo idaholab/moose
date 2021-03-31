@@ -4982,10 +4982,6 @@ FEProblemBase::init()
     _eq.init();
   }
 
-  _mesh.meshChanged();
-  if (_displaced_problem)
-    _displaced_mesh->meshChanged();
-
   _nl->update();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
