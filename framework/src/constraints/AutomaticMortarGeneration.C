@@ -398,7 +398,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Storage for z-component of cross products for determining
     // orientation.
-    std::array<Real, 2> secondary_node_cps, primary_node_cps;
+    std::array<Real, 2> secondary_node_cps;
+    std::vector<Real> primary_node_cps(primary_node_neighbors.size());
 
     // Store z-component of left and right secondary node cross products with the nodal normal.
     for (unsigned int nid = 0; nid < 2; ++nid)
@@ -425,12 +426,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       orientation2_valid = (secondary_node_cps[0] * primary_node_cps[1] > 0.) &&
                            (secondary_node_cps[1] * primary_node_cps[0] > 0.);
     }
-    else
+    else if (primary_node_neighbors.size() == 1)
     {
       // 1 primary neighbor case
       orientation1_valid = (secondary_node_cps[0] * primary_node_cps[0] > 0.);
       orientation2_valid = (secondary_node_cps[1] * primary_node_cps[0] > 0.);
     }
+    else
+      mooseError("Invalid primary node neighbors size ", primary_node_neighbors.size());
 
     // Verify that both orientations are not simultaneously valid/invalid. If they are not, then we
     // are going to throw an exception instead of erroring out since we can easily reach this point
