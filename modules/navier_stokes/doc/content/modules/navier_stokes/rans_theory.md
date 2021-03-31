@@ -194,12 +194,11 @@ model turbulent heat transfer with an analogy to the molecular mechanism,
 \begin{equation}
   \rho c_p \overline{T' \bm{v}'} = -\rho c_p \epsilon_q \nabla \overline{T}
 \end{equation}
-where $\epsilon_h$ is the eddy diffusivity for heat [!citep](lienhard2020_ch6).
+where $\epsilon_q$ is the eddy diffusivity for heat [!citep](lienhard2020_ch6).
 
-The diffusivity for heat is related to the diffusivity for momentum and the
-eddy viscosity by,
+The diffusivity for heat is related to the diffusivity for momentum by,
 \begin{equation}
-  \text{Pr}_t = \frac{\epsilon_m}{\epsilon_q} = \frac{\mu_t}{\rho \epsilon_q}
+  \text{Pr}_t = \frac{\epsilon_m}{\epsilon_q}
 \end{equation}
 where $\text{Pr}_t$ is the turbulent Prandtl number [!citep](lienhard2020_ch6).
 
@@ -234,7 +233,7 @@ The molecular analogy is then,
 where $\epsilon_c$ is the turbulent diffusivity for the passive species
 which is in turn modeled with the relationship,
 \begin{equation}
-  \text{Sc}_t = \frac{\epsilon_m}{\epsilon_c} = \frac{\mu_t}{\rho \epsilon_c}
+  \text{Sc}_t = \frac{\epsilon_m}{\epsilon_c}
 \end{equation}
 where $\text{Sc}_t$ is the turbulent Schmidt number [!citep](tominaga2007).
 
@@ -266,7 +265,9 @@ isotropic velocity gradient,
   + \nabla v_y \cdot \nabla v_y + \nabla v_z \cdot \nabla v_z}
 \end{equation}
 
-This diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md) kernel.
+This momentum diffusivity model is implemented in the [INSFVMixingLengthReynoldsStress](source/fvkernels/INSFVMixingLengthReynoldsStress.md)
+kernel. The corresponding model for diffusivity of passive scalars (like energy)
+is implemented in the [INSFVMixingLengthScalarDiffusion](source/fvkernels/INSFVMixingLengthScalarDiffusion.md) kernel.
 
 A model is then needed for the mixing length itself. One popular choice is to
 assume the mixing length is proportional to the distance from the nearest wall,

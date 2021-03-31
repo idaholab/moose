@@ -7,46 +7,39 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSFVMixingLengthReynoldsStress.h"
-#include "INSFVVelocityVariable.h"
+#include "INSFVMixingLengthScalarDiffusion.h"
 
-registerMooseObject("NavierStokesApp", INSFVMixingLengthReynoldsStress);
+registerMooseObject("NavierStokesApp", INSFVMixingLengthScalarDiffusion);
 
 InputParameters
-INSFVMixingLengthReynoldsStress::validParams()
+INSFVMixingLengthScalarDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  params.addClassDescription(
-      "Computes the force due to the Reynolds stress term in the incompressible"
-      " Reynolds-averaged Navier-Stokes equations.");
+  params.addClassDescription("Computes the turbulent diffusive flux that appears in "
+                             "Reynolds-averaged fluid conservation equations.");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addParam<Real>("rho", "fluid density");
-  params.addRequiredCoupledVar("mixing_length", "Turbulent eddy mixing length.");
-  MooseEnum momentum_component("x=0 y=1 z=2", "x");
-  params.addRequiredParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this kernel applies to.");
+  params.addRequiredCoupledVar("mixing_length", "The turbulent mixing length.");
+  params.addRequiredParam<Real>(
+      "schmidt_number",
+      "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
+      "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
-INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputParameters & params)
+INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _axis_index(getParam<MooseEnum>("momentum_component")),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
-    _rho(getParam<Real>("rho")),
+    _v_var(isParamValid("v") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
+                             : nullptr),
+    _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
+                             : nullptr),
     _mixing_len(coupledValue("mixing_length")),
-    _mixing_len_neighbor(coupledNeighborValue("mixing_length"))
+    _mixing_len_neighbor(coupledNeighborValue("mixing_length")),
+    _schmidt_number(getParam<Real>("schmidt_number"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -69,21 +62,21 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 }
 
 ADReal
-INSFVMixingLengthReynoldsStress::computeQpResidual()
+INSFVMixingLengthScalarDiffusion::computeQpResidual()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  // Compute the normalized velocity gradient.
+  // Compute the normalized velocity gradient
   const auto & grad_u = _u_var->adGradSln(*_face_info);
   ADReal velocity_gradient = grad_u(0) * grad_u(0);
   if (_dim >= 2)
   {
-    auto grad_v = _v_var->adGradSln(*_face_info);
+    const auto & grad_v = _v_var->adGradSln(*_face_info);
     velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0) + grad_v(1) * grad_v(1);
     if (_dim >= 3)
     {
-      auto grad_w = _w_var->adGradSln(*_face_info);
+      const auto & grad_w = _w_var->adGradSln(*_face_info);
       velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2) + grad_w(0) * grad_w(0) +
                            grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
     }
@@ -99,18 +92,16 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
               *_face_info,
               true);
 
-  // Compute the eddy diffusivitiy
+  // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
 
-  // Compute the dot product of the strain rate tensor and the normal vector
-  // aka (grad_v + grad_v^T) * n_hat
-  ADReal norm_strain_rate = gradUDotNormal();
-  norm_strain_rate += _u_var->adGradSln(*_face_info)(_axis_index) * _normal(0);
-  norm_strain_rate += _dim >= 2 ? _v_var->adGradSln(*_face_info)(_axis_index) * _normal(1) : 0;
-  norm_strain_rate += _dim >= 3 ? _w_var->adGradSln(*_face_info)(_axis_index) * _normal(2) : 0;
+  // Use the turbulent Schmidt/Prandtl number to get the eddy diffusivity for
+  // the scalar variable
+  eddy_diff /= _schmidt_number;
 
-  // Return the turbulent stress contribution to the momentum equation
-  return -1 * _rho * eddy_diff * norm_strain_rate;
+  // Compute the diffusive flux of the scalar variable
+  auto dudn = gradUDotNormal();
+  return -1 * eddy_diff * dudn;
 
 #else
   return 0;

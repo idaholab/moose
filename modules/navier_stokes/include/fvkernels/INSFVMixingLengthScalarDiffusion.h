@@ -10,25 +10,20 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "INSFVVelocityVariable.h"
 
-// Forward declare variable class
-class INSFVVelocityVariable;
-
-class INSFVMixingLengthReynoldsStress : public FVFluxKernel
+class INSFVMixingLengthScalarDiffusion : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
 
-  INSFVMixingLengthReynoldsStress(const InputParameters & params);
+  INSFVMixingLengthScalarDiffusion(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
   /// the dimension of the simulation
   const unsigned int _dim;
-
-  /// index x|y|z
-  const unsigned int _axis_index;
 
   /// x-velocity
   const INSFVVelocityVariable * const _u_var;
@@ -37,11 +32,11 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// Density
-  const Real & _rho;
-
   /// Turbulent eddy mixing length
   const VariableValue & _mixing_len;
   /// Turbulent eddy mixing length for the neighbor cell
   const VariableValue & _mixing_len_neighbor;
+
+  /// Turbulent Schmidt number (or turbulent Prandtl number)
+  const Real & _schmidt_number;
 };

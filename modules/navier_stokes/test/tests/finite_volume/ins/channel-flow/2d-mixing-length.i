@@ -16,9 +16,10 @@ velocity_interp_method='rc'
     xmin = 0
     xmax = 5
     ymin = 0
-    ymax = 1
-    nx = 50
-    ny = 40
+    ymax = ${fparse 0.5 * D}
+    nx = 20
+    ny = 10
+    bias_y = ${fparse 1 / 1.2}
   []
 []
 
@@ -37,6 +38,9 @@ velocity_interp_method='rc'
   []
   [pressure]
     type = INSFVPressureVariable
+  []
+  [scalar]
+    type = INSFVScalarFieldVariable
   []
 []
 
@@ -129,6 +133,32 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     p = pressure
   []
+
+  [scalar_advection]
+    type = INSFVScalarFieldAdvection
+    variable = scalar
+    vel = 'velocity'
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
+  []
+  [scalar_diffusion_rans]
+    type = INSFVMixingLengthScalarDiffusion
+    variable = scalar
+    mixing_length = mixing_len
+    u = u
+    v = v
+    schmidt_number = 1.0
+  []
+  [scalar_src]
+    type = FVBodyForce
+    variable = scalar
+    value = 0.1
+  []
 []
 
 [AuxKernels]
@@ -154,17 +184,41 @@ velocity_interp_method='rc'
     variable = v
     function = '0'
   []
-  [walls-u]
+  [inlet_scalar]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = scalar
+    value = 1
+  []
+  [wall-u]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = u
     function = 0
   []
-  [walls-v]
+  [wall-v]
     type = INSFVNoSlipWallBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = v
     function = 0
+  []
+  [sym-u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = x
+  []
+  [sym-v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = y
   []
   [outlet_p]
     type = INSFVOutletPressureBC
