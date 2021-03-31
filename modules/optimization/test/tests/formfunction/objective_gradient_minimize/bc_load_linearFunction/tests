@@ -7,7 +7,7 @@
     type = CSVDiff
     rel_err = 0.0000001
     input = master.i
-    csvdiff = master_iterData.csv
+    csvdiff = master_out.csv
   []
   [taolmvm_par]
     requirement = "Make sure everything is working in parallel, like the constantvectorpostprocessor"

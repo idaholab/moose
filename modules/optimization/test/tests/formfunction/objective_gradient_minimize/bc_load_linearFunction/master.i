@@ -92,8 +92,8 @@
    []
    [optInfo]
      type = OptimizationInfo
-     execute_on = final
      items = 'current_iterate'
+     #execute_on=timestep_end
    []
 []
 
@@ -101,5 +101,5 @@
 
 [Outputs]
   csv=true
-  execute_on = final
+  #execute_on = timestepfinal
 []

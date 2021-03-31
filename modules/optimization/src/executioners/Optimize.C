@@ -35,6 +35,7 @@ Optimize::execute()
 
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
+  _problem.execute(EXEC_TIMESTEP_END);
   _problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 

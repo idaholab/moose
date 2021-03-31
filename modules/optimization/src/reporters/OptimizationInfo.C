@@ -9,8 +9,6 @@
 
 #include "OptimizationInfo.h"
 #include "Optimize.h"
-#include "isopodApp.h"
-#include "IsopodAppTypes.h"
 
 registerMooseObject("isopodApp", OptimizationInfo);
 
@@ -25,8 +23,8 @@ OptimizationInfo::validParams()
       "items",
       items,
       "The information to output, if nothing is provided everything will be output.");
-  auto & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_FORWARD, EXEC_ADJOINT, EXEC_HESSIAN);
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
@@ -42,7 +40,7 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
                          ? declareValueByName<int>("gradient_iterate", REPORTER_MODE_REPLICATED)
                          : declareUnusedValue<int>()),
     _hessianIterate((!_items.isValid() || _items.contains("current_iterate"))
-                        ? declareValueByName<int>("hessian_i:wterate", REPORTER_MODE_REPLICATED)
+                        ? declareValueByName<int>("hessian_iterate", REPORTER_MODE_REPLICATED)
                         : declareUnusedValue<int>()),
     _functionValue(declareHelper<double>("function_value", REPORTER_MODE_REPLICATED)),
     _gnorm(declareHelper<double>("gnorm", REPORTER_MODE_REPLICATED)),
@@ -54,14 +52,8 @@ OptimizationInfo::OptimizationInfo(const InputParameters & parameters)
 }
 
 void
-OptimizationInfo::initialize()
-{
-}
-
-void
 OptimizationInfo::execute()
 {
-  std::cout << "HERE" << std::endl;
   _optimization_executioner->getOptimizeSolve().getTaoSolutionStatus(_currentIterate,
                                                                      _gnorm,
                                                                      _objectiveIterate,
