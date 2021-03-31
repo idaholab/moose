@@ -1170,7 +1170,9 @@ MooseApp::run()
     auto src_dir = MooseUtils::testsDir(binname);
     if (!MooseUtils::checkFileReadable(src_dir, false, false))
       mooseError(
-          "You don't have permissions to read/copy tests from their current installed location.");
+          "You don't have permissions to read/copy tests from their current installed location: \"",
+          src_dir,
+          "\"");
     auto dst_dir = binname + "_tests";
     auto cmdname = Moose::getExecutableName();
     if (cmdname.find_first_of("/") != std::string::npos)
