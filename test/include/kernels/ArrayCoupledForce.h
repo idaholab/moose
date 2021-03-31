@@ -24,7 +24,9 @@ protected:
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
 
 private:
-  unsigned int _v_var;
-  const VariableValue & _v;
-  RealEigenVector _coef;
+  const bool _is_v_array;
+  const unsigned int _v_var;
+  const VariableValue * const _v;
+  const ArrayVariableValue * const _v_array;
+  const RealEigenVector _coef;
 };
