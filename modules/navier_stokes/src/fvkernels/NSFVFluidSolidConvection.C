@@ -19,6 +19,8 @@ NSFVFluidSolidConvection::validParams()
   params.addRequiredCoupledVar(NS::T_solid, "solid temperature");
   params.addClassDescription("Interphase convective heat transfer $\\alpha(T_f-T_s)$ "
                              "in the fluid energy conservation equation.");
+  params.addParam<MaterialPropertyName>(
+      NS::alpha, NS::alpha, "The name of the heat transfer coefficient.");
   return params;
 }
 
