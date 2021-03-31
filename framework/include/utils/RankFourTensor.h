@@ -236,6 +236,12 @@ public:
   RankFourTensorTempl<T> invSymm() const;
 
   /**
+   * This returns A_ijkl such that C_ijkl*A_klmn = de_im de_jn
+   * i.e. the general rank four inverse
+   */
+  RankFourTensorTempl<T> inverse() const;
+
+  /**
    * Rotate the tensor using
    * C_ijkl = R_im R_jn R_ko R_lp C_mnop
    */
