@@ -1076,6 +1076,9 @@ FEProblemBase::initialSetup()
   if (_line_search)
     _line_search->initialSetup();
 
+  // Perform Reporter get/declare check
+  _reporter_data.check();
+
   _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
@@ -6473,9 +6476,6 @@ FEProblemBase::checkProblemIntegrity()
   // variables matches the order of the elements in the displaced
   // mesh.
   checkDisplacementOrders();
-
-  // Perform Reporter get/declare check
-  _reporter_data.check();
 }
 
 void
