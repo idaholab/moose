@@ -67,3 +67,17 @@ public:
   virtual void finalize() override {}
   virtual void execute() override {}
 };
+
+class TestGetReporterDeclaredInInitialSetupReporter : public GeneralReporter
+{
+public:
+  static InputParameters validParams();
+  TestGetReporterDeclaredInInitialSetupReporter(const InputParameters & parameters);
+  virtual void initialize() override {}
+  virtual void finalize() override {}
+  virtual void execute() override;
+
+protected:
+  const Real & _value_declared_in_initial_setup;
+  Real & _the_value_of_the_reporter;
+};

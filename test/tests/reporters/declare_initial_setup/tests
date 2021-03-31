@@ -21,4 +21,12 @@
       detail = "and with other values declared at construction time."
     []
   []
+
+  [decalareInitialSetup_with_get]
+    requirement = "The system shall support getting a reference to an aggregate calculation before it is created."
+    issues = '#17468'
+    type = JSONDiff
+    input = declare_initial_setup_with_get.i
+    jsondiff = declare_initial_setup_with_info.json
+  []
 []
