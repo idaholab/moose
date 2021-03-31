@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#17447'
+  design = '/DGKernels/index.md'
+
+  [dirichlet]
+    type = 'Exodiff'
+    input = 'dirichlet.i'
+    exodiff = 'dirichlet_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions.'
+  []
+  [neumann]
+    type = 'Exodiff'
+    input = 'neumann.i'
+    exodiff = 'neumann_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions.'
+  []
+  [robin]
+    type = 'Exodiff'
+    input = 'robin.i'
+    exodiff = 'robin_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions.'
+  []
+  [high_order]
+    type = 'Exodiff'
+    input = 'robin.i'
+    cli_args = 'Variables/u/order=FOURTH Variables/lambda/order=FIRST Outputs/file_base=high_order_out'
+    exodiff = 'high_order_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with high order shape functions.'
+  []
+  [variable_robin]
+    type = 'Exodiff'
+    input = 'variable_robin.i'
+    exodiff = 'variable_robin_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions through Lagrange multipliers.'
+  []
+  [robin_displaced]
+    type = 'Exodiff'
+    input = 'robin_displaced.i'
+    exodiff = 'robin_displaced_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with displaced meshes.'
+  []
+  [robin_adpatation]
+    type = 'RunException'
+    input = 'robin_adapt.i'
+    expect_err = 'HFEM does not support mesh adaptivity currently'
+    requirement = 'The system shall issue an error for unsupported mesh adaptation with hybrid finite element method (HFEM) calculations.'
+  []
+  [variable_dirichlet]
+    type = 'Exodiff'
+    input = 'variable_dirichlet.i'
+    exodiff = 'variable_dirichlet_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions with boundary values specified by variables.'
+  []
+[]
