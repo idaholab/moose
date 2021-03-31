@@ -47,8 +47,7 @@ SamplerReporterTransfer::SamplerReporterTransfer(const InputParameters & paramet
         isParamValid("prefix")
             ? getReporterNamesHelper(getParam<std::string>("prefix"), _sr_name, _sub_reporter_names)
             : getReporterNamesHelper(_name, _sr_name, _sub_reporter_names)),
-    _converged_name(_sr_name, StochasticReporter::convergedReporterName()),
-    _initialized(false)
+    _converged_name(_sr_name, StochasticReporter::convergedReporterName())
 {
 }
 
@@ -60,17 +59,13 @@ SamplerReporterTransfer::initialSetup()
   _results = dynamic_cast<StochasticReporter *>(&uo);
   if (!_results)
     paramError("stochastic_reporter", "This object must be a 'StochasticReporter' object.");
+
+  intitializeStochasticReporters();
 }
 
 void
 SamplerReporterTransfer::initializeFromMultiapp()
 {
-  if (!_initialized)
-  {
-    intitializeStochasticReporters();
-    _initialized = true;
-  }
-
   resizeStochasticReporters();
 }
 
@@ -90,12 +85,6 @@ SamplerReporterTransfer::finalizeFromMultiapp()
 void
 SamplerReporterTransfer::execute()
 {
-  if (!_initialized)
-  {
-    intitializeStochasticReporters();
-    _initialized = true;
-  }
-
   resizeStochasticReporters();
 
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)

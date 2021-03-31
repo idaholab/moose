@@ -11,6 +11,11 @@
                     },
                     "values": [
                         {
+                            "name": "data:pp:value",
+                            "type": "std::vector<double>",
+                            "value": []
+                        },
+                        {
                             "name": "multiapp_converged",
                             "type": "std::vector<bool>",
                             "value": []
