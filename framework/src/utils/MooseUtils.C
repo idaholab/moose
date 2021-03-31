@@ -81,14 +81,14 @@ findTestRoot()
 }
 
 std::string
-testsDir(const std::string & app_name)
+installedTestsDir(const std::string & app_name)
 {
   std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "test");
 
   auto testroot = pathjoin(installed_path, "testroot");
   if (pathExists(testroot) && checkFileReadable(testroot))
     return installed_path;
-  return Moose::getExecutablePath();
+  return "";
 }
 
 std::string

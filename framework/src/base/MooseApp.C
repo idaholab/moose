@@ -1167,7 +1167,9 @@ MooseApp::run()
     auto binname = appBinaryName();
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
-    auto src_dir = MooseUtils::testsDir(binname);
+    auto src_dir = MooseUtils::installedTestsDir(binname);
+    if (src_dir == "")
+      mooseError("couldn't locate any installed tests to copy");
     if (!MooseUtils::checkFileReadable(src_dir, false, false))
       mooseError(
           "You don't have permissions to read/copy tests from their current installed location: \"",
@@ -1209,7 +1211,9 @@ MooseApp::run()
       auto binname = appBinaryName();
       if (binname == "")
         mooseError("could not locate installed tests to run (unresolved binary/app name)");
-      auto dir = MooseUtils::testsDir(binname);
+      auto dir = MooseUtils::installedTestsDir(binname);
+      if (dir == "")
+        mooseError("no could not find any tests to run");
 
       auto cmdname = Moose::getExecutableName();
       if (cmdname.find_first_of("/") != std::string::npos)
@@ -1226,7 +1230,7 @@ MooseApp::run()
 
       int ret = chdir(dir.c_str());
       if (ret != 0)
-        mooseError("Failed to change to testsDir ", dir);
+        mooseError("Failed to change to testing directory ", dir);
     }
     int ret = system(cmd.c_str());
     if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
