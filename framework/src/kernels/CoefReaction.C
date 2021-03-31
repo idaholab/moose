@@ -9,14 +9,14 @@
 
 #include "CoefReaction.h"
 
-registerMooseObject("PhaseFieldApp", CoefReaction);
+registerMooseObject("MooseApp", CoefReaction);
 
 InputParameters
 CoefReaction::validParams()
 {
   InputParameters params = Reaction::validParams();
   params.addClassDescription("Implements the residual term (p*u, test)");
-  params.addRequiredParam<Real>("coefficient", "Coefficient of the term");
+  params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
   return params;
 }
 
