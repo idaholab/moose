@@ -13,16 +13,16 @@
 
 #include <unordered_map>
 
-class FVPorosityPerSubdomainMaterial : public Material
+class FVPropValPerSubdomainMaterial : public Material
 {
 public:
-  FVPorosityPerSubdomainMaterial(const InputParameters & parameters);
+  FVPropValPerSubdomainMaterial(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
 
 private:
-  MaterialProperty<Real> & _epsilon;
-  std::unordered_map<SubdomainID, Real> _sub_id_to_epsilon;
+  MaterialProperty<Real> & _prop;
+  std::unordered_map<SubdomainID, Real> _sub_id_to_prop;
 };
