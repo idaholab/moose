@@ -276,8 +276,13 @@ all: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
 
 # revision header
 moose_GIT_DIR := $(shell cd "$(FRAMEWORK_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
-# Use wildcard in case the files don't exist
-moose_HEADER_deps := $(wildcard $(moose_GIT_DIR)/.git/HEAD $(moose_GIT_DIR)/.git/index)
+moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/.git/HEAD $(moose_GIT_DIR)/.git/index)
+ifeq (x$(moose_HEADER_deps),x)
+  # Files don't exist, this must be a submodule in which case these files are located in master repo's modules directory
+  # ".git" in this case is a file, not a folder that contains the real location of the ".git" folder
+  moose_GIT_DIR := $(realpath $(moose_GIT_DIR)/$(shell cut -d' ' -f 2 $(moose_GIT_DIR)/.git))
+  moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/HEAD $(moose_GIT_DIR)/index)
+endif
 
 $(moose_revision_header): $(moose_HEADER_deps)
 	@echo "Checking if header needs updating: "$@"..."

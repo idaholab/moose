@@ -309,8 +309,14 @@ else
 endif
 
 app_GIT_DIR := $(shell cd "$(APPLICATION_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
-# Use wildcard in case the files don't exist
-app_HEADER_deps := $(wildcard $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index)
+app_HEADER_deps := $(realpath $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index)
+ifeq (x$(app_HEADER_deps),x)
+  # Files don't exist, this must be a submodule in which case these files are located in master repo's modules directory
+  # ".git" in this case is a file, not a folder that contains the real location of the ".git" folder
+  app_GIT_DIR := $(realpath $(app_GIT_DIR)/$(shell cut -d' ' -f 2 $(app_GIT_DIR)/.git))
+  app_HEADER_deps := $(realpath $(app_GIT_DIR)/HEAD $(app_GIT_DIR)/index)
+endif
+
 # Target-specific Variable Values (See GNU-make manual)
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
