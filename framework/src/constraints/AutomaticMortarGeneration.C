@@ -247,7 +247,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Elem * secondary_elem = val.second;
 
     // If this is an aligned node, we don't need to do anything.
-    if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
+    if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
       continue;
 
     auto && order = secondary_elem->default_order();
@@ -781,7 +781,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             auto u = x2 - (*secondary_node);
             auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-            if (std::abs(F) < TOLERANCE * TOLERANCE)
+            if (std::abs(F) < _newton_tolerance)
               break;
 
             Real dxi2 = -F.value() / F.derivatives();
@@ -792,14 +792,14 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
           Real xi2 = xi2_dn.value();
 
           // Check whether the projection worked.
-          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + TOLERANCE))
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
             // surface. This isn't as unlikely as you might think, it will happen if the meshes
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-            if (std::abs(std::abs(xi2) - 1.) < TOLERANCE)
+            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
@@ -1075,7 +1075,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
             auto F = u(0) * normals(1) - u(1) * normals(0);
 
-            if (std::abs(F) < TOLERANCE * TOLERANCE)
+            if (std::abs(F) < _newton_tolerance)
               break;
 
             Real dxi1 = -F.value() / F.derivatives();
@@ -1086,9 +1086,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           Real xi1 = xi1_dn.value();
 
           // Check for convergence to a valid solution...
-          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + TOLERANCE))
+          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance))
           {
-            if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
+            if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
               // We shouldn't get here, because this primary node should already

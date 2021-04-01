@@ -268,4 +268,12 @@ private:
 
   /// Whether the mortar segment mesh is distributed
   const bool _distributed;
+
+  /// Newton solve tolerance for node projections
+  Real _newton_tolerance = 1e-12;
+
+  /// Tolerance for checking projection xi values. Usually we are checking whether we projected onto
+  /// a certain element (in which case -1 <= xi <= 1) or whether we should have *already* projected
+  /// a primary node (in which case we error if abs(xi) is sufficiently close to 1)
+  Real _xi_tolerance = 1e-6;
 };
