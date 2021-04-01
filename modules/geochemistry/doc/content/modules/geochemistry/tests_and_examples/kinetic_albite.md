@@ -26,11 +26,11 @@ It is assumed that:
 
 The MOOSE input file defines the model using the [GeochemicalModelDefinition](GeochemicalModelDefinition.md).  This defines the basis species as well as defining that the dynamics of the mineral `Albite` will be controlled by a kinetic rate law.
 
-!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[./definition] end=[]
+!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[definition] end=[]
 
 The rate law for Albite is defined by a [GeochemistryKineticRate](GeochemistryKineticRate.md) UserObject (note the `promoting_species`):
 
-!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[./rate_albite] end=[./definition]
+!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i start=[rate_albite] end=[./definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines the following.
 

@@ -110,6 +110,7 @@ AddTimeIndependentReactionSolverAction::act()
         getParam<std::vector<std::string>>("constraint_species");
     params.set<std::vector<Real>>("constraint_value") =
         getParam<std::vector<Real>>("constraint_value");
+    params.set<MultiMooseEnum>("constraint_unit") = getParam<MultiMooseEnum>("constraint_unit");
     params.set<Real>("max_ionic_strength") = getParam<Real>("max_ionic_strength");
     params.set<unsigned>("extra_iterations_to_make_consistent") =
         getParam<unsigned>("extra_iterations_to_make_consistent");

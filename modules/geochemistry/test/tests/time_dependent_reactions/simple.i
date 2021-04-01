@@ -9,8 +9,9 @@
   geochemistry_reactor_name = reactor
   charge_balance_species = "Cl-"
   constraint_species = "H2O H+ Cl-"
-  constraint_value = "  1.0 1E-2 1E-2"
-  constraint_meaning = "kg_solvent_water activity moles_bulk_species"
+  constraint_value = "  1.0              -2            1E-2"
+  constraint_meaning = "kg_solvent_water log10activity bulk_composition"
+  constraint_unit = "   kg               dimensionless moles"
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   execute_console_output_on = '' # only CSV output for this example
 
@@ -34,48 +35,48 @@
 []
 
 [AuxVariables]
-  [./act_H+]
-  [../]
+  [act_H+]
+  []
 []
 
 [AuxKernels]
-  [./act_H+]
+  [act_H+]
     type = FunctionAux
     variable = act_H+
     function = '10^(-2 - t)'
     execute_on = timestep_begin
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./pH]
+  [pH]
     type = PointValue
     variable = 'pH'
-  [../]
-  [./solvent_mass]
+  []
+  [solvent_mass]
     type = PointValue
     variable = 'kg_solvent_H2O'
-  [../]
-  [./molal_Cl-]
+  []
+  [molal_Cl-]
     type = PointValue
     variable = 'molal_Cl-'
-  [../]
-  [./mg_per_kg_HCl]
+  []
+  [mg_per_kg_HCl]
     type = PointValue
     variable = 'mg_per_kg_HCl'
-  [../]
-  [./activity_OH-]
+  []
+  [activity_OH-]
     type = PointValue
     variable = 'activity_OH-'
-  [../]
-  [./bulk_H+]
+  []
+  [bulk_H+]
     type = PointValue
     variable = 'bulk_moles_H+'
-  [../]
-  [./temperature]
+  []
+  [temperature]
     type = PointValue
     variable = 'solution_temperature'
-  [../]
+  []
 []
 
 [Executioner]
@@ -85,11 +86,11 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl-"
-  [../]
+  []
 []
 
 [Outputs]

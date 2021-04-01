@@ -26,7 +26,8 @@
 # initial conditions are unimportant because in exchanger mode all existing fluid is flushed from the system before adding the produced water
   constraint_species = 'H2O H+ Cl- SO4-- HCO3- SiO2(aq) Al+++ Ca++ Mg++ Fe++ K+ Na+ Sr++ F- B(OH)3 Br- Ba++ Li+ NH3 HS-'
   constraint_value = '1.0 1E-6 1E-6 1E-18 1E-18 1E-18    1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18 1E-18'
-  constraint_meaning = 'kg_solvent_water moles_bulk_species moles_bulk_species free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality free_molality'
+  constraint_meaning = 'kg_solvent_water bulk_composition bulk_composition free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration free_concentration'
+  constraint_unit = "kg moles moles molal molal molal molal molal molal molal molal molal molal molal molal molal molal molal molal molal"
   prevent_precipitation = 'Fluorite Albite Goethite'
   initial_temperature = 92
   mode = 4

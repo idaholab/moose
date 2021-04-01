@@ -16,7 +16,8 @@
   charge_balance_species = 'Cl-'
   constraint_species = 'H2O H+      Na+  K+    Ca++    Mg++      SiO2(aq) Al+++    Cl-  SO4--  HCO3-'
   constraint_value = '  1.0 3.16E-8 0.12 0.016 0.68E-3 0.0008E-3 3.7E-3   0.004E-3 0.15 0.5E-3 1.4E-3'
-  constraint_meaning = 'kg_solvent_water activity moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species'
+  constraint_meaning = 'kg_solvent_water activity bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition'
+  constraint_unit = 'kg dimensionless moles moles moles moles moles moles moles moles moles'
   temperature = 60
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
 []

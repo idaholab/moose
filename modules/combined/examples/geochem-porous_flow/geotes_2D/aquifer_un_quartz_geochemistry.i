@@ -23,7 +23,8 @@
   constraint_species = "H2O              Na+                Cl-                SiO2(aq)"
 # ASSUME that 1 litre of solution contains:
   constraint_value = "  1.0              0.1                0.1                0.00172249633"
-  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species free_molality"
+  constraint_meaning = "kg_solvent_water bulk_composition bulk_composition free_concentration"
+  constraint_unit = "   kg               moles              moles              molal"
   initial_temperature = 50.0
   kinetic_species_name = QuartzUnlike
 # Per 1 litre (1000cm^3) of aqueous solution (1kg of solvent water), there is 9000cm^3 of QuartzUnlike, which means the initial porosity is 0.1.  QuartzUnlike has 22.688cm^3/mol, so 9000cm^3 corresponds to 396.685 moles
