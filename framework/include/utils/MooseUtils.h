@@ -83,9 +83,20 @@ pathjoin(const std::string & s, Args... args)
   return s + "/" + pathjoin(args...);
 }
 
+/// Returns the location of either a local repo run_tests script - or an
+/// installed test runner script if run_tests isn't found.
 std::string runTestsExecutable();
+
+/// Searches in the current working directory and then recursively up in each
+/// parent directory looking for a "testroot" file.  Returns the full path to
+/// the first testroot file found.
 std::string findTestRoot();
-std::string testsDir(const std::string & app_name);
+
+/// Returns the directory of any installed tests - or the empty string if none
+/// are found.
+std::string installedTestsDir(const std::string & app_name);
+
+/// Returns the directory of any installed docs/site.
 std::string docsDir(const std::string & app_name);
 
 /// Replaces all occurences of from in str with to and returns the result.

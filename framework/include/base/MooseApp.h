@@ -90,7 +90,10 @@ public:
   virtual std::string appBinaryName() const
   {
     auto name = Moose::getExecutableName();
-    return name.substr(0, name.find_last_of("-"));
+    name = name.substr(0, name.find_last_of("-"));
+    if (name.find_first_of("/") != std::string::npos)
+      name = name.substr(name.find_first_of("/") + 1, std::string::npos);
+    return name;
   }
 
   /**
