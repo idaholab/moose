@@ -20,7 +20,7 @@ registerMooseObject("StochasticToolsApp", PODReducedBasisTrainer);
 InputParameters
 PODReducedBasisTrainer::validParams()
 {
-  InputParameters params = SurrogateTrainer::validParams();
+  InputParameters params = SurrogateTrainerBase::validParams();
 
   params.addClassDescription("Computes the reduced subspace plus the reduced operators for "
                              "POD-RB surrogate.");
@@ -42,7 +42,7 @@ PODReducedBasisTrainer::validParams()
 }
 
 PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameters)
-  : SurrogateTrainer(parameters),
+  : SurrogateTrainerBase(parameters),
     _var_names(declareModelData<std::vector<std::string>>(
         "_var_names", getParam<std::vector<std::string>>("var_names"))),
     _error_res(getParam<std::vector<Real>>("error_res")),

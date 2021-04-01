@@ -24,7 +24,7 @@ class ReplicatedMesh;
 
 typedef StochasticTools::DistributedData<std::shared_ptr<DenseVector<Real>>> DistributedSnapshots;
 
-class PODReducedBasisTrainer : public SurrogateTrainer
+class PODReducedBasisTrainer : public SurrogateTrainerBase
 {
 public:
   static InputParameters validParams();

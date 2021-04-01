@@ -57,23 +57,26 @@
 
 [Transfers]
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = train_sample
-    to_vector_postprocessor = results
-    from_postprocessor = 'avg'
+    stochastic_reporter = results
+    from_reporter = 'avg/value'
   []
 []
 
+[Reporters]
+  [results]
+    type = StochasticReporter
+  []
+[]
 
 [Trainers]
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    distributions = 'q_dist'
     sampler = train_sample
-    results_vpp = results
-    results_vector = data:avg
+    response = results/data:avg:value
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
@@ -98,9 +101,6 @@
 
 # # Computing statistics
 [VectorPostprocessors]
-  [results]
-    type = StochasticResults
-  []
   [cart_avg]
     type = EvaluateGaussianProcess
     model = gauss_process_avg

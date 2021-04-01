@@ -15,14 +15,14 @@
       input = master_2d_quad.i
       allow_test_objects = true
       csvdiff = 'master_2d_quad_out_pc_samp_0002.csv'
-      detail = 'Quadrature sampler with Uniform distribution, '
+      detail = 'Quadrature sampler with Uniform distribution, and '
     []
     [gauss_hermite]
       type = CSVDiff
       input = master_2dnorm_quad.i
       allow_test_objects = true
       csvdiff = 'master_2dnorm_quad_out_pc_samp_0002.csv'
-      detail = 'Quadrature sampler with Normal distribution, and '
+      detail = 'Quadrature sampler with Normal distribution.'
     []
   []
   [statistics]
