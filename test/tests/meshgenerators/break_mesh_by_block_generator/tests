@@ -149,4 +149,17 @@
                'interface;'
     []
   []
+
+  [hanging_nodes]
+    type = 'Exodiff'
+    input = 'hanging_nodes_parallel.i'
+    exodiff = 'hanging_nodes_parallel_out.e'
+    requirement = 'The system shall properly assign node processor ids for paritioned meshes'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#15793'
+    mesh_mode = 'REPLICATED'
+    min_parallel = 12
+    max_parallel = 12
+    recover = false
+  []
 []
