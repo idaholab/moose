@@ -444,6 +444,7 @@ MooseMesh::buildLowerDMesh()
 {
   auto & mesh = getMesh();
 
+  // maximum number of sides of all elements
   unsigned int max_n_sides = 0;
 
   // remove existing lower-d element first
@@ -458,6 +459,8 @@ MooseMesh::buildLowerDMesh()
   for (auto & elem : deleteable_elems)
     mesh.delete_elem(elem);
 
+  mesh.comm().max(max_n_sides);
+
   deleteable_elems.clear();
 
   dof_id_type max_elem_id = mesh.max_elem_id();
@@ -467,14 +470,18 @@ MooseMesh::buildLowerDMesh()
   _higher_d_elem_side_to_lower_d_elem.clear();
   for (const auto & elem : mesh.active_element_ptr_range())
   {
-    for (unsigned short int side = 0; side < elem->n_sides(); side++)
+    // skip existing lower-d elements
+    if (elem->interior_parent())
+      continue;
+
+    for (const auto side : elem->side_index_range())
     {
       Elem * neig = elem->neighbor_ptr(side);
 
       bool build_side = false;
       if (!neig)
         build_side = true;
-      else
+      else if (!neig->is_remote())
       {
         if (mesh.is_replicated() || elem->processor_id() == comm().rank() ||
             neig->processor_id() == comm().rank())
@@ -499,12 +506,13 @@ MooseMesh::buildLowerDMesh()
         else
           side_elem->subdomain_id() = Moose::BOUNDARY_SIDE_LOWERD_ID;
 
-        // set ids consistently across processors
+        // set ids consistently across processors (these ids will be temporary)
         side_elem->set_id(max_elem_id + elem->id() * max_n_sides + side);
         side_elem->set_unique_id(max_unique_id + elem->id() * max_n_sides + side);
 
         // Also assign the side's interior parent, so it is always
         // easy to figure out the Elem we came from.
+        // Note: the interior parent could be a ghost element.
         side_elem->set_interior_parent(elem);
 
         side_elems.push_back(side_elem.release());
@@ -519,7 +527,10 @@ MooseMesh::buildLowerDMesh()
     }
   }
 
-  // Finally, add the lower-dimensional element to the Mesh.
+  // finally, add the lower-dimensional element to the mesh
+  // Note: lower-d interior element will exist on a processor if its associated interior
+  //       parent exists on a processor whether or not being a ghost. Lower-d elements will
+  //       get its interior parent's processor id.
   for (auto & elem : side_elems)
     mesh.add_elem(elem);
 
@@ -528,6 +539,8 @@ MooseMesh::buildLowerDMesh()
   _mesh_subdomains.insert(Moose::BOUNDARY_SIDE_LOWERD_ID);
   mesh.subdomain_name(Moose::BOUNDARY_SIDE_LOWERD_ID) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN";
 
+  // we do all the stuff in prepare_for_use such as renumber_nodes_and_elements(),
+  // update_parallel_id_counts(), cache_elem_dims(), etc. except partitioning here.
   const bool skip_partitioning_old = mesh.skip_partitioning();
   mesh.skip_partitioning(true);
   mesh.prepare_for_use();
