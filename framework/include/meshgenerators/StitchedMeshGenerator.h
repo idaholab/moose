@@ -32,7 +32,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// The mesh files to read
+  /// The mesh generator inputs to read
   const std::vector<MeshGeneratorName> & _input_names;
 
   /// Whether or not to clear (remove) the stitched boundary IDs
