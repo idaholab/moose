@@ -56,8 +56,8 @@ offset = 1e-2
     primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
-    secondary_variable = disp_x
-    secondary_disp_y = disp_y
+    disp_x = disp_x
+    disp_y = disp_y
     use_displaced_mesh = true
   [../]
   [./ncp_lm]

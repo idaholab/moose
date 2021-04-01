@@ -39,15 +39,9 @@ protected:
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                        unsigned int jvar) override;
 
   /// A scaling factor meant to put the weighted gap and the contact pressure on the same scale
   const Real _c;
-
-  const FEProblemBase & _fe_problem;
-
-  const DisplacedProblem * const _displaced_problem;
 
   /// a copy of the ghosted residual vector such that we can read the weighted gap
   const NumericVector<Number> & _residual_copy;

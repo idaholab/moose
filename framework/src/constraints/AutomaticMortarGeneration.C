@@ -620,8 +620,6 @@ AutomaticMortarGeneration::computeNodalNormals()
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
 
-    // We loop over n_vertices not n_nodes because we're not interested in
-    // computing normals at interior nodes
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
       auto & normals_and_weights_vec = node_to_normals_map[secondary_elem->node_id(n)];

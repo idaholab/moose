@@ -23,8 +23,13 @@ public:
   ComputeWeightedGapLMMechanicalContact(const InputParameters & parameters);
 
 protected:
-  ADReal computeQpResidual(Moose::MortarType) final;
+  ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
+  const ADVariableValue & _secondary_disp_x;
+  const ADVariableValue & _primary_disp_x;
   const ADVariableValue & _secondary_disp_y;
   const ADVariableValue & _primary_disp_y;
+
+  /// Whether this object is operating on the displaced mesh
+  const bool _displaced;
 };

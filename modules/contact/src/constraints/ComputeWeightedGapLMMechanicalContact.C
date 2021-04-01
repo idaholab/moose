@@ -8,9 +8,27 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeWeightedGapLMMechanicalContact.h"
-#include "SubProblem.h"
+#include "DisplacedProblem.h"
 
 registerMooseObject("ContactApp", ComputeWeightedGapLMMechanicalContact);
+
+namespace
+{
+const InputParameters &
+assignVarsInParams(const InputParameters & params_in)
+{
+  InputParameters & ret = const_cast<InputParameters &>(params_in);
+  const auto & disp_x_name = ret.get<std::vector<VariableName>>("disp_x");
+  if (disp_x_name.size() != 1)
+    mooseError("We require that the disp_x parameter have exactly one coupled name");
+
+  // We do this so we don't get any variable errors during MortarConstraint(Base) construction
+  ret.set<VariableName>("secondary_variable") = disp_x_name[0];
+  ret.set<VariableName>("primary_variable") = disp_x_name[0];
+
+  return ret;
+}
+}
 
 InputParameters
 ComputeWeightedGapLMMechanicalContact::validParams()
@@ -18,20 +36,21 @@ ComputeWeightedGapLMMechanicalContact::validParams()
   InputParameters params = ADMortarConstraint::validParams();
   params.addClassDescription("Computes the weighted gap that will later be used to enforce the "
                              "zero-penetration mechanical contact conditions");
-  params.addRequiredCoupledVar("secondary_disp_y",
-                               "The y displacement variable on the secondary face");
-  params.addCoupledVar("primary_disp_y",
-                       "The y displacement variable on the primary face. If this is not provided, "
-                       "then the secondary y-displacement variable will be used");
+  params.suppressParameter<VariableName>("secondary_variable");
+  params.suppressParameter<VariableName>("primary_variable");
+  params.addRequiredCoupledVar("disp_x", "The x displacement variable");
+  params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   return params;
 }
 
 ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint(parameters),
-    _secondary_disp_y(adCoupledValue("secondary_disp_y")),
-    _primary_disp_y(isCoupled("primary_disp_y") ? adCoupledNeighborValue("primary_disp_y")
-                                                : adCoupledNeighborValue("secondary_disp_y"))
+  : ADMortarConstraint(assignVarsInParams(parameters)),
+    _secondary_disp_x(adCoupledValue("disp_x")),
+    _primary_disp_x(adCoupledNeighborValue("disp_x")),
+    _secondary_disp_y(adCoupledValue("disp_y")),
+    _primary_disp_y(adCoupledNeighborValue("disp_y")),
+    _displaced(dynamic_cast<DisplacedProblem *>(&_subproblem))
 {
 }
 
@@ -45,11 +64,14 @@ ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType morta
       if (_has_primary)
       {
         DualRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
-        // Here we're assuming that the user provided the x-component as the secondary/primary
-        // variable!
-        gap_vec(0).derivatives() = _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
-        gap_vec(1).derivatives() =
-            _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
+
+        if (_displaced)
+        {
+          gap_vec(0).derivatives() =
+              _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
+          gap_vec(1).derivatives() =
+              _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
+        }
 
         auto gap = gap_vec * _normals[_qp];
 
