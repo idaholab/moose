@@ -28,6 +28,13 @@
     recover = false
   []
 
+  [interior_axial_boundaries]
+    type = CSVDiff
+    input = 'interior_axial_boundaries.i'
+    csvdiff = 'interior_axial_boundaries_out.csv'
+    recover = false
+  []
+
   [./2nd_order]
     type = 'RunApp'
     input = '2nd_order.i'
