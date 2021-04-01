@@ -133,7 +133,7 @@ public:
       const std::string & charge_balance_species,
       const std::vector<std::string> & constrained_species,
       const std::vector<Real> & constraint_value,
-      const std::vector<GeochemistryUnitConverter::GeochemistryUnits> & constraint_unit,
+      const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & constraint_unit,
       const std::vector<ConstraintUserMeaningEnum> & constraint_user_meaning,
       Real initial_temperature,
       unsigned iters_to_make_consistent,
@@ -863,7 +863,7 @@ private:
   /// Numerical values of the constraints on _constraint_species.  In the constructor, this is ordered to have the same ordering as the basis species.  Since values can change due to charge-balance, this holds the original values set by the user.
   std::vector<Real> _original_constraint_value;
   /// Units of the _constraint_value when the GeochemicalSystem is constructed.  This is used during the constructor to convert the constraint_values into mole units
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> _constraint_unit;
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> _constraint_unit;
   /// The user-defined meaning of the values in _constraint_value.  In the constructor, this is ordered to have the same ordering as the basis species.  During the process of unit conversion, from the user-supplied _constraint_unit, to mole-based units, _constraint_user_meaning is used to populate _constraint_meaning, and henceforth usually only _constraint_meaning is used in the code
   std::vector<ConstraintUserMeaningEnum> _constraint_user_meaning;
   /// The meaning of the values in _constraint_value.  In the constructor, this is ordered to have the same ordering as the basis species.

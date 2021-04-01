@@ -34,10 +34,10 @@ public:
                    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
                    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
                    GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION}),
-      _cu_calcite({GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                   GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-                   GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-                   GeochemistryUnitConverter::GeochemistryUnits::MOLAL}),
+      _cu_calcite({GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                   GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+                   GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+                   GeochemistryUnitConverter::GeochemistryUnit::MOLAL}),
       _is3(3.0, 3.0, false, false),
       _ac3(_is3, _db_calcite),
       _is0(0.0, 0.0, false, false),
@@ -97,14 +97,14 @@ public:
                  GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
                  GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
                  GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION}),
-      _cu_redox({GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-                 GeochemistryUnitConverter::GeochemistryUnits::MOLES}),
+      _cu_redox({GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+                 GeochemistryUnitConverter::GeochemistryUnit::MOLES}),
       _egs_redox(
           _mgd_redox,
           _ac3,
@@ -138,7 +138,7 @@ protected:
   GeochemistrySpeciesSwapper _swapper7;
   GeochemistrySpeciesSwapper _swapper8;
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> _cm_calcite;
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> _cu_calcite;
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> _cu_calcite;
   GeochemistryIonicStrength _is3;
   GeochemistryActivityCoefficientsDebyeHuckel _ac3;
   GeochemistryIonicStrength _is0;
@@ -148,10 +148,10 @@ protected:
   const GeochemicalSystem _egs_calcite;
   const GeochemicalSystem _egs_kinetic_calcite;
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> _cm_dummy;
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> _cu_dummy;
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> _cu_dummy;
   const PertinentGeochemicalSystem _model_redox;
   ModelGeochemicalDatabase _mgd_redox;
   std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> _cm_redox;
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> _cu_redox;
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> _cu_redox;
   const GeochemicalSystem _egs_redox;
 };

@@ -24,19 +24,19 @@ GeochemistrySpeciesSwapper swapper_kin(4, 1E-6);
 const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm2 = {
     GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
     GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2 = {
-    GeochemistryUnitConverter::GeochemistryUnits::KG,
-    GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2 = {
+    GeochemistryUnitConverter::GeochemistryUnit::KG,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES};
 const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm4 = {
     GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
     GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
     GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
     GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu4 = {
-    GeochemistryUnitConverter::GeochemistryUnits::KG,
-    GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-    GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-    GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu4 = {
+    GeochemistryUnitConverter::GeochemistryUnit::KG,
+    GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+    GeochemistryUnitConverter::GeochemistryUnit::MOLES};
 GeochemistryIonicStrength is_solver(3.0, 3.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver, db_solver);
 
@@ -344,18 +344,18 @@ TEST(GeochemicalSolverTest, solve2)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -646,18 +646,18 @@ TEST(GeochemicalSolverTest, solve3)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -958,18 +958,18 @@ TEST(GeochemicalSolverTest, solve3_restore)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1167,21 +1167,21 @@ TEST(GeochemicalSolverTest, solve4)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1508,21 +1508,21 @@ TEST(GeochemicalSolverTest, solve4_restore)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(mgd,
                         ac_solver,
                         is_solver,
@@ -1670,17 +1670,17 @@ TEST(GeochemicalSolverTest, solve5)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -1941,17 +1941,17 @@ TEST(GeochemicalSolverTest, solve5_restore)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,
@@ -2206,18 +2206,18 @@ TEST(GeochemicalSolverTest, maxSwapsException)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  const std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu = {
-      GeochemistryUnitConverter::GeochemistryUnits::KG,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLAL,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES,
-      GeochemistryUnitConverter::GeochemistryUnits::MOLES};
+  const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu = {
+      GeochemistryUnitConverter::GeochemistryUnit::KG,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLAL,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES,
+      GeochemistryUnitConverter::GeochemistryUnit::MOLES};
   GeochemicalSystem egs(
       mgd,
       ac_solver,

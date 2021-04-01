@@ -16,7 +16,7 @@
  */
 namespace GeochemistryUnitConverter
 {
-enum class GeochemistryUnits
+enum class GeochemistryUnit
 {
   DIMENSIONLESS,
   MOLES,
@@ -48,7 +48,7 @@ enum class GeochemistryUnits
  * species_name
  */
 Real fromMoles(Real moles,
-               const GeochemistryUnits & unit,
+               const GeochemistryUnit unit,
                const std::string & species_name,
                const ModelGeochemicalDatabase & mgd);
 
@@ -70,7 +70,7 @@ Real fromMoles(Real moles,
  * @return the number of moles, or the molality, whichever is appropriate
  */
 Real toMoles(Real quantity,
-             const GeochemistryUnits & unit,
+             const GeochemistryUnit unit,
              const std::string & species_name,
              const ModelGeochemicalDatabase & mgd);
 
@@ -92,7 +92,7 @@ Real toMoles(Real quantity,
  * @param is_mineral is_mineral[ind] = true iff the substance is a mineral
  * @return 1 mol of substance will be this many "unit"s of that substance
  */
-Real conversionFactor(const GeochemistryUnits & unit,
+Real conversionFactor(const GeochemistryUnit unit,
                       unsigned ind,
                       const std::string & name,
                       const std::vector<Real> & mol_weight,

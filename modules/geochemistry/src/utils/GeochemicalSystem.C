@@ -78,7 +78,7 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
         static_cast<ConstraintUserMeaningEnum>(constraint_user_meaning.get(i));
   for (unsigned i = 0; i < constraint_unit.size(); ++i)
     _constraint_unit[i] =
-        static_cast<GeochemistryUnitConverter::GeochemistryUnits>(constraint_unit.get(i));
+        static_cast<GeochemistryUnitConverter::GeochemistryUnit>(constraint_unit.get(i));
   checkAndInitialize(kin_name, kin_initial_moles);
 }
 
@@ -92,7 +92,7 @@ GeochemicalSystem::GeochemicalSystem(
     const std::string & charge_balance_species,
     const std::vector<std::string> & constrained_species,
     const std::vector<Real> & constraint_value,
-    const std::vector<GeochemistryUnitConverter::GeochemistryUnits> & constraint_unit,
+    const std::vector<GeochemistryUnitConverter::GeochemistryUnit> & constraint_unit,
     const std::vector<ConstraintUserMeaningEnum> & constraint_user_meaning,
     Real initial_temperature,
     unsigned iters_to_make_consistent,
@@ -222,7 +222,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
   // code much cleaner.
   std::vector<std::string> c_s(_num_basis);
   std::vector<Real> c_v(_num_basis);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> c_u(_num_basis);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> c_u(_num_basis);
   std::vector<ConstraintUserMeaningEnum> c_m(_num_basis);
   for (unsigned i = 0; i < _num_basis; ++i)
   {
@@ -252,7 +252,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         if (_constraint_value[i] <= 0.0)
           mooseError("Specified mass of solvent water must be positive: you entered ",
                      _constraint_value[i]);
-        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnits::KG)
+        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnit::KG)
           mooseError("Units for kg_solvent_water must be kg");
         _constraint_meaning[i] = ConstraintMeaningEnum::KG_SOLVENT_WATER;
         break;
@@ -262,11 +262,11 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         // convert to mole units and specify correct constraint_meaning
         _constraint_value[i] = GeochemistryUnitConverter::toMoles(
             _constraint_value[i], _constraint_unit[i], name, _mgd);
-        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::MOLES ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::KG ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::G ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::MG ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::UG))
+        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MOLES ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::KG ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::G ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MG ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::UG))
           mooseError("Species ", name, ": units for bulk composition must be moles or mass");
         if (name == "H2O")
           _constraint_meaning[i] = ConstraintMeaningEnum::MOLES_BULK_WATER;
@@ -280,15 +280,15 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         if (_constraint_value[i] <= 0.0)
           mooseError("Specified free concentration values must be positive: you entered ",
                      _constraint_value[i]);
-        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::MOLAL ||
+        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MOLAL ||
               _constraint_unit[i] ==
-                  GeochemistryUnitConverter::GeochemistryUnits::KG_PER_KG_SOLVENT ||
+                  GeochemistryUnitConverter::GeochemistryUnit::KG_PER_KG_SOLVENT ||
               _constraint_unit[i] ==
-                  GeochemistryUnitConverter::GeochemistryUnits::G_PER_KG_SOLVENT ||
+                  GeochemistryUnitConverter::GeochemistryUnit::G_PER_KG_SOLVENT ||
               _constraint_unit[i] ==
-                  GeochemistryUnitConverter::GeochemistryUnits::MG_PER_KG_SOLVENT ||
+                  GeochemistryUnitConverter::GeochemistryUnit::MG_PER_KG_SOLVENT ||
               _constraint_unit[i] ==
-                  GeochemistryUnitConverter::GeochemistryUnits::UG_PER_KG_SOLVENT))
+                  GeochemistryUnitConverter::GeochemistryUnit::UG_PER_KG_SOLVENT))
           mooseError(
               "Species ",
               name,
@@ -304,12 +304,12 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         if (_constraint_value[i] <= 0.0)
           mooseError("Specified free mineral values must be positive: you entered ",
                      _constraint_value[i]);
-        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::MOLES ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::KG ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::G ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::MG ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::UG ||
-              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnits::CM3))
+        if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MOLES ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::KG ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::G ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MG ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::UG ||
+              _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::CM3))
           mooseError("Species ",
                      name,
                      ": units for free mineral quantities must be moles, mass or volume");
@@ -323,7 +323,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         if (_constraint_value[i] <= 0.0)
           mooseError("Specified activity values must be positive: you entered ",
                      _constraint_value[i]);
-        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS)
+        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS)
           mooseError(
               "Species ", name, ": dimensionless units must be used when specifying activity");
         _constraint_meaning[i] = ConstraintMeaningEnum::ACTIVITY;
@@ -332,7 +332,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
       case ConstraintUserMeaningEnum::LOG10ACTIVITY:
       {
         // if log10activity is provided, convert it to activity
-        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS)
+        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS)
           mooseError("Species ",
                      name,
                      ": dimensionless units must be used when specifying log10activity\n");
@@ -346,7 +346,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         if (_constraint_value[i] <= 0.0)
           mooseError("Specified fugacity values must be positive: you entered ",
                      _constraint_value[i]);
-        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS)
+        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS)
           mooseError(
               "Species ", name, ": dimensionless units must be used when specifying fugacity\n");
         _constraint_meaning[i] = ConstraintMeaningEnum::FUGACITY;
@@ -355,7 +355,7 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
       case ConstraintUserMeaningEnum::LOG10FUGACITY:
       {
         // if log10fugacity is provided, convert it to fugacity
-        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS)
+        if (_constraint_unit[i] != GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS)
           mooseError("Species ",
                      name,
                      ": dimensionless units must be used when specifying log10fugacity\n");

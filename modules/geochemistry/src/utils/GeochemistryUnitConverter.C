@@ -15,7 +15,7 @@ namespace GeochemistryUnitConverter
 
 Real
 fromMoles(Real moles,
-          const GeochemistryUnits & unit,
+          const GeochemistryUnit unit,
           const std::string & species_name,
           const ModelGeochemicalDatabase & mgd)
 {
@@ -50,7 +50,7 @@ fromMoles(Real moles,
 
 Real
 toMoles(Real quantity,
-        const GeochemistryUnits & unit,
+        const GeochemistryUnit unit,
         const std::string & species_name,
         const ModelGeochemicalDatabase & mgd)
 {
@@ -58,7 +58,7 @@ toMoles(Real quantity,
 }
 
 Real
-conversionFactor(const GeochemistryUnits & unit,
+conversionFactor(const GeochemistryUnit unit,
                  unsigned ind,
                  const std::string & name,
                  const std::vector<Real> & mol_weight,
@@ -68,28 +68,28 @@ conversionFactor(const GeochemistryUnits & unit,
   Real factor = 1.0;
   switch (unit)
   {
-    case GeochemistryUnits::DIMENSIONLESS:
-    case GeochemistryUnits::MOLES:
-    case GeochemistryUnits::MOLAL:
+    case GeochemistryUnit::DIMENSIONLESS:
+    case GeochemistryUnit::MOLES:
+    case GeochemistryUnit::MOLAL:
       factor = 1.0;
       break;
-    case GeochemistryUnits::KG:
-    case GeochemistryUnits::KG_PER_KG_SOLVENT:
+    case GeochemistryUnit::KG:
+    case GeochemistryUnit::KG_PER_KG_SOLVENT:
       factor = 1E-3 * mol_weight[ind];
       break;
-    case GeochemistryUnits::G:
-    case GeochemistryUnits::G_PER_KG_SOLVENT:
+    case GeochemistryUnit::G:
+    case GeochemistryUnit::G_PER_KG_SOLVENT:
       factor = mol_weight[ind];
       break;
-    case GeochemistryUnits::MG:
-    case GeochemistryUnits::MG_PER_KG_SOLVENT:
+    case GeochemistryUnit::MG:
+    case GeochemistryUnit::MG_PER_KG_SOLVENT:
       factor = 1.0E3 * mol_weight[ind];
       break;
-    case GeochemistryUnits::UG:
-    case GeochemistryUnits::UG_PER_KG_SOLVENT:
+    case GeochemistryUnit::UG:
+    case GeochemistryUnit::UG_PER_KG_SOLVENT:
       factor = 1.0E6 * mol_weight[ind];
       break;
-    case GeochemistryUnits::CM3:
+    case GeochemistryUnit::CM3:
       if (!is_mineral[ind])
         mooseError("GeochemistryUnitConverter: Cannot use CM3 units for species ",
                    name,

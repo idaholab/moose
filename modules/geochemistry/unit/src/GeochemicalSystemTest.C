@@ -191,17 +191,17 @@ TEST_F(GeochemicalSystemTest, constraintSizeExceptions)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm_poor;
   cm_poor.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm_poor.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu_poor;
-  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu_poor;
+  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu_poor.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -330,10 +330,10 @@ TEST_F(GeochemicalSystemTest, constraintNameExceptions)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -404,10 +404,10 @@ TEST_F(GeochemicalSystemTest, positiveException1)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -449,10 +449,10 @@ TEST_F(GeochemicalSystemTest, positiveException2)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -496,11 +496,11 @@ TEST_F(GeochemicalSystemTest, positiveException3)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -543,10 +543,10 @@ TEST_F(GeochemicalSystemTest, positiveException4)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -590,11 +590,11 @@ TEST_F(GeochemicalSystemTest, positiveException5)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -637,10 +637,10 @@ TEST_F(GeochemicalSystemTest, waterException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -684,11 +684,11 @@ TEST_F(GeochemicalSystemTest, fugacityException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -726,11 +726,11 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -767,11 +767,11 @@ TEST_F(GeochemicalSystemTest, mineralMeaningExecption)
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -812,11 +812,11 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -851,11 +851,11 @@ TEST_F(GeochemicalSystemTest, aqueousSpeciesMeaningExecption)
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -898,10 +898,10 @@ TEST_F(GeochemicalSystemTest, waterUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::G);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -943,10 +943,10 @@ TEST_F(GeochemicalSystemTest, bulkUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   try
   {
@@ -989,10 +989,10 @@ TEST_F(GeochemicalSystemTest, freeConcUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -1036,11 +1036,11 @@ TEST_F(GeochemicalSystemTest, freeMineralUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -1085,10 +1085,10 @@ TEST_F(GeochemicalSystemTest, activityUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -1163,11 +1163,11 @@ TEST_F(GeochemicalSystemTest, fugacityUnitsException)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   try
   {
@@ -1238,11 +1238,11 @@ TEST_F(GeochemicalSystemTest, unitsConversion1)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::G_PER_KG_SOLVENT);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::CM3);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::G);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::G_PER_KG_SOLVENT);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::CM3);
 
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
@@ -1288,11 +1288,11 @@ TEST_F(GeochemicalSystemTest, unitsConversion2)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::LOG10ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::LOG10FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::UG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::UG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   const GeochemicalSystem egs(mgd,
                               _ac3,
@@ -1331,11 +1331,11 @@ TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -1374,11 +1374,11 @@ TEST_F(GeochemicalSystemTest, chargeBalanceMeaningExecption)
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   try
   {
@@ -1549,11 +1549,11 @@ TEST_F(GeochemicalSystemTest, getSolventWaterMass)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1584,11 +1584,11 @@ TEST_F(GeochemicalSystemTest, getBulkMolesOld)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1643,11 +1643,11 @@ TEST_F(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -1693,11 +1693,11 @@ TEST_F(GeochemicalSystemTest, getBasisActivityKnown)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -1752,11 +1752,11 @@ TEST_F(GeochemicalSystemTest, getBasisActivity)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac0,
@@ -1809,11 +1809,11 @@ TEST_F(GeochemicalSystemTest, getBasisActivityCoeff)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac0,
@@ -2013,10 +2013,10 @@ TEST_F(GeochemicalSystemTest, getTotalChargeOld)
       GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -2048,11 +2048,11 @@ TEST_F(GeochemicalSystemTest, getResidual)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   const GeochemicalSystem egs(_mgd_calcite,
                               _ac3,
                               _is3,
@@ -2129,10 +2129,10 @@ TEST_F(GeochemicalSystemTest, getResidual)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const GeochemicalSystem egs2(mgd2,
                                _ac3,
                                _is3,
@@ -2244,11 +2244,11 @@ TEST_F(GeochemicalSystemTest, jac1)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem egs(
       _mgd_calcite,
       _ac8,
@@ -2347,11 +2347,11 @@ TEST_F(GeochemicalSystemTest, jac2)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(_mgd_calcite,
                         _ac8,
                         _is8,
@@ -2449,11 +2449,11 @@ TEST_F(GeochemicalSystemTest, jac3)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
   GeochemicalSystem egs(_mgd_calcite,
                         _ac8,
                         _is8,
@@ -2522,11 +2522,11 @@ TEST_F(GeochemicalSystemTest, jac4)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
   GeochemicalSystem egs(mgd,
                         _ac8,
                         _is8,
@@ -2617,11 +2617,11 @@ TEST_F(GeochemicalSystemTest, saturationIndices)
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu_fixed_activity;
-  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu_fixed_activity;
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu_fixed_activity.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -2693,11 +2693,11 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -2734,11 +2734,11 @@ TEST_F(GeochemicalSystemTest, swapExceptions)
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm2.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu2;
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu2;
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu2.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem egs2(mgd,
                          _ac3,
                          _is3,
@@ -2778,11 +2778,11 @@ TEST_F(GeochemicalSystemTest, swap)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -2836,11 +2836,11 @@ TEST_F(GeochemicalSystemTest, getIS)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemistryIonicStrength is(0.0078125, 0.0078125, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, _db_calcite);
   ModelGeochemicalDatabase mgd = _model_calcite.modelGeochemicalDatabase();
@@ -2897,10 +2897,10 @@ TEST_F(GeochemicalSystemTest, alterAndRevertChargeBalance)
       GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -3067,12 +3067,12 @@ TEST_F(GeochemicalSystemTest, sorbingSurfaceArea)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_MINERAL};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -3114,13 +3114,13 @@ TEST_F(GeochemicalSystemTest, surfacePot)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const Real temp = 45.0;
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -3269,13 +3269,13 @@ TEST_F(GeochemicalSystemTest, surfacePotJac)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -3345,13 +3345,13 @@ TEST_F(GeochemicalSystemTest, bigJac)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -3421,13 +3421,13 @@ TEST_F(GeochemicalSystemTest, bigJac2)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const Real temp = 45.0;
   GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
@@ -3699,14 +3699,14 @@ TEST_F(GeochemicalSystemTest, setMolalitiesExcept2)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac3,
                              _is3,
@@ -3971,14 +3971,14 @@ TEST_F(GeochemicalSystemTest, setMolalities1)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac0,
                              _is0,
@@ -4093,14 +4093,14 @@ TEST_F(GeochemicalSystemTest, setMolalities2)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem nonconst(mgd,
                              _ac3,
                              _is3,
@@ -4209,11 +4209,11 @@ TEST_F(GeochemicalSystemTest, getConstraintMeaning)
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const GeochemicalSystem egs(mgd,
                               _ac3,
                               _is3,
@@ -4247,11 +4247,11 @@ TEST_F(GeochemicalSystemTest, changeContraintToBulkExceptions)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -4325,11 +4325,11 @@ TEST_F(GeochemicalSystemTest, closeSystem)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -4375,11 +4375,11 @@ TEST_F(GeochemicalSystemTest, changeConstraintToBulk)
   cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
   cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
   cim.push_back(GeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -4442,11 +4442,11 @@ TEST_F(GeochemicalSystemTest, addToBulkMolesExceptions)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FUGACITY);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
 
   GeochemicalSystem egs(mgd,
                         _ac3,
@@ -4493,11 +4493,11 @@ TEST_F(GeochemicalSystemTest, addToBulkMoles)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   std::vector<Real> bm = {1.0, 2.0, 3.0, 4.0};
 
@@ -4565,11 +4565,11 @@ TEST_F(GeochemicalSystemTest, setConstraintValue)
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY);
   cm.push_back(GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION);
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
 
   std::vector<Real> bm_in = {1.0, 2.0, 3.0, 4.0};
 
@@ -4650,9 +4650,9 @@ TEST_F(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem egs(
       mgd, _ac3, _is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cu, cm, 25, 0, 1E-20, {}, {});
 
@@ -4713,15 +4713,15 @@ TEST_F(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem nonconst(
       mgd,
       _ac0,
@@ -5004,11 +5004,11 @@ TEST_F(GeochemicalSystemTest, log10KineticActivityProduct)
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   const GeochemicalSystem gs(_mgd_kinetic_calcite,
                              _ac3,
                              _is3,
@@ -5134,11 +5134,11 @@ TEST_F(GeochemicalSystemTest, free_molality_kinetic)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem gs(mgd,
                        _ac0,
                        _is0,
@@ -5181,11 +5181,11 @@ TEST_F(GeochemicalSystemTest, setSolventETC4)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem gs(mgd,
                        _ac0,
                        _is0,
@@ -5386,12 +5386,12 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   DenseVector<Real> mole_additions(7);
   DenseMatrix<Real> dmole_additions(7, 7);
   ModelGeochemicalDatabase mgd_kin = mod.modelGeochemicalDatabase();
@@ -5519,11 +5519,11 @@ TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
 
   GeochemicalSystem egs_no_swaps(_mgd_kinetic_calcite,
                                  _ac3,
@@ -5604,13 +5604,13 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles)
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::DIMENSIONLESS);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -5759,11 +5759,11 @@ TEST_F(GeochemicalSystemTest, getTransportedBulkMoles_kin_redox)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLAL);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLAL);
   GeochemicalSystem egs(mgd,
                         _ac3,
                         _is3,
@@ -5813,10 +5813,10 @@ TEST_F(GeochemicalSystemTest, copyAssignmentExcept)
       GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
-  std::vector<GeochemistryUnitConverter::GeochemistryUnits> cu;
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::KG);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
-  cu.push_back(GeochemistryUnitConverter::GeochemistryUnits::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   GeochemicalSystem dest(mgd,
                          _ac3,
                          _is3,
