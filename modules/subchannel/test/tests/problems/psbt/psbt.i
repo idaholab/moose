@@ -132,10 +132,10 @@ mass_flow_in = 11.522 #kg/sec
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = ConstantAux
+    type = UniformlyDistributedMassFlowRateAux
     variable = mdot
     boundary = inlet
-    value = ${fparse mass_flow_in / 36.0}
+    mass_flow = ${mass_flow_in}
     execute_on = 'timestep_begin'
   []
 []
