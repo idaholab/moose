@@ -1,0 +1,8 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'side_flux_integral_rz.i'
+    csvdiff = 'side_flux_integral_rz_out.csv'
+    recover = false
+  []
+[]
