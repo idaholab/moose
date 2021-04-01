@@ -112,12 +112,18 @@ TiledMesh::buildMesh()
     else
       serial_mesh->read(mesh_file);
 
-    BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
-    BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
-    BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
-    BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
-    BoundaryID front = getBoundaryID(getParam<BoundaryName>("front_boundary"));
-    BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
+    BoundaryID left = MooseMeshUtils::getReplicatedBoundaryID(
+        getParam<BoundaryName>("left_boundary"), *serial_mesh);
+    BoundaryID right = MooseMeshUtils::getReplicatedBoundaryID(
+        getParam<BoundaryName>("right_boundary"), *serial_mesh);
+    BoundaryID top = MooseMeshUtils::getReplicatedBoundaryID(getParam<BoundaryName>("top_boundary"),
+                                                             *serial_mesh);
+    BoundaryID bottom = MooseMeshUtils::getReplicatedBoundaryID(
+        getParam<BoundaryName>("bottom_boundary"), *serial_mesh);
+    BoundaryID front = MooseMeshUtils::getReplicatedBoundaryID(
+        getParam<BoundaryName>("front_boundary"), *serial_mesh);
+    BoundaryID back = MooseMeshUtils::getReplicatedBoundaryID(
+        getParam<BoundaryName>("back_boundary"), *serial_mesh);
 
     {
       std::unique_ptr<MeshBase> clone = serial_mesh->clone();

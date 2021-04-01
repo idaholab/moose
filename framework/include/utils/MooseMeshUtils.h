@@ -15,6 +15,11 @@
 #include "MooseUtils.h"
 #include "MooseTypes.h"
 
+namespace libMesh
+{
+class ReplicatedMesh;
+}
+
 namespace MooseMeshUtils
 {
 // Changes the old ID to new ID in the mesh given in parameters
@@ -43,6 +48,16 @@ SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase 
  * If it is a name, the mesh is queried for the ID associated with said name.
  */
 BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh);
+
+/**
+ * Gets the boundary ID associated with the given BoundaryName.
+ *
+ * This is needed because the BoundaryName can be either an ID or a name.
+ * If it is a name, the mesh is queried for the ID associated with said name. If it is an ID, then
+ * because this is a ReplicatedMesh we can query get_boundary_ids which will be the same across
+ * processes and make sure that the ID exists in the BoundaryInfo
+ */
+BoundaryID getReplicatedBoundaryID(const BoundaryName & boundary_name, const ReplicatedMesh & mesh);
 
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);

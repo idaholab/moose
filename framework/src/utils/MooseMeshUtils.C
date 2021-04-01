@@ -180,4 +180,22 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
 
   return id;
 }
+
+BoundaryID
+getReplicatedBoundaryID(const BoundaryName & boundary_name, const ReplicatedMesh & mesh)
+{
+  BoundaryID id = Moose::INVALID_BOUNDARY_ID;
+  std::istringstream ss(boundary_name);
+
+  if (!(ss >> id))
+    id = mesh.get_boundary_info().get_id_by_name(boundary_name);
+  else
+  {
+    const auto & bnd_ids = mesh.get_boundary_info().get_boundary_ids();
+    if (bnd_ids.find(id) == bnd_ids.end())
+      mooseError("Boundary ", id, " doesn't exist on the libmesh mesh.");
+  }
+
+  return id;
+}
 }
