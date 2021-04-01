@@ -9,62 +9,62 @@
 []
 
 [Variables]
-  [./conc]
-  [../]
+  [conc]
+  []
 []
 
 [ICs]
-  [./conc]
+  [conc]
     type = FunctionIC
     function = 'if(x<=0.25, 1, 0)'
     variable = conc
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     boundary = left
     value = 1.0
     variable = conc
-  [../]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = GeochemistryTimeDerivative
     variable = conc
-  [../]
-  [./adv]
+  []
+  [adv]
     type = ConservativeAdvection
     velocity = velocity
     upwinding_type = full
     variable = conc
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./velocity]
+  [velocity]
     family = MONOMIAL_VEC
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./velocity]
+  [velocity]
     type = VectorFunctionAux
     function = vel_fcn
     variable = velocity
-  [../]
+  []
 []
 
 [Functions]
-  [./vel_fcn]
+  [vel_fcn]
     type = ParsedVectorFunction
     value_x = 1
     value_y = 0
     value_z = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -75,10 +75,10 @@
 []
 
 [Postprocessors]
-  [./front_position]
+  [front_position]
     type = ElementIntegralVariablePostprocessor
     variable = conc
-  [../]
+  []
 []
 
 [Outputs]

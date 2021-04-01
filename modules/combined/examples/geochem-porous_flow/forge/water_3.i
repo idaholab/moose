@@ -18,7 +18,8 @@
   charge_balance_species = 'Cl-'
   constraint_species = 'H2O H+      Na+     K+      Ca++    Mg++    SiO2(aq) Al+++   Cl-     SO4--   HCO3-'
   constraint_value = '  1.0 6.31E-7 1.32E-4 2.81E-5 7.76E-5 2.88E-5 2.73E-4  3.71E-6 1.41E-5 1.04E-5 3.28E-4'
-  constraint_meaning = 'kg_solvent_water activity moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species'
+  constraint_meaning = 'kg_solvent_water activity bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition'
+  constraint_unit = '   kg            dimensionless moles moles moles moles moles moles moles moles moles'
   prevent_precipitation = 'Albite Anhydrite Anorthite Calcite Chalcedony Clinochl-7A Illite K-feldspar Kaolinite Quartz Paragonite Phlogopite Zoisite Laumontite'
   initial_temperature = 20
   remove_fixed_activity_name = 'H+'

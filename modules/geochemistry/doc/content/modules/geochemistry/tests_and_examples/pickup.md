@@ -93,17 +93,17 @@ The `Executioner` defines the meaning of time:
 
 The temperature is controlled using:
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[./T_auxk] end=[./H2O_rate]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[T_auxk] end=[H2O_rate]
 
 This means that during initialization the temperature is 273$^{\circ}$C, and whenever the source species' rates are nonzero (which is for $t>0$ in this case) then the reactant temperature is 4$^{\circ}$C.
 
 The `mode` is set to "dump" for $t\leq 0$, and otherwise no special mode, by:
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[./mode_auxk] end=[./T_auxk]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[mode_auxk] end=[T_auxk]
 
 All the source-species rates follow the same pattern:
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[./H2O_rate_auxk] end=[./Al+++_rate]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing.i start=[H2O_rate_auxk] end=[Al+++_rate]
 
 The numerical values of the rates were derived from the [Geochemists Workbench](https://www.gwb.com/) input file (below) so that the results match as closely as possible to the GWB results, but they could equally be derived from `seawater_mixing_step1.i` and `seawater_mixing_step2.i`.
 

@@ -35,6 +35,7 @@ GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
          getParam<std::string>("charge_balance_species"),
          getParam<std::vector<std::string>>("constraint_species"),
          getParam<std::vector<Real>>("constraint_value"),
+         getParam<MultiMooseEnum>("constraint_unit"),
          getParam<MultiMooseEnum>("constraint_meaning"),
          _temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),

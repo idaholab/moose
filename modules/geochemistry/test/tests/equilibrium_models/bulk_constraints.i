@@ -1,11 +1,11 @@
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Cl- Na+ SO4--"
     equilibrium_minerals = "Mirabilite"
     piecewise_linear_interpolation = true # for comparison with GWB
-  [../]
+  []
 []
 
 [TimeIndependentReactionSolver]
@@ -15,7 +15,8 @@
   charge_balance_species = "Cl-"
   constraint_species = "H2O    Na+ Cl- Mirabilite"
   constraint_value = "  1.0    1.0 1.0 1.0"
-  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species free_moles_mineral_species"
+  constraint_meaning = "kg_solvent_water bulk_composition bulk_composition free_mineral"
+  constraint_unit = "kg moles moles moles"
   ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
   stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
   add_aux_pH = false

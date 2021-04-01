@@ -14,68 +14,68 @@
 []
 
 [Variables]
-  [./conc]
-  [../]
+  [conc]
+  []
 []
 
 [Kernels]
-  [./dot]
+  [dot]
     type = GeochemistryTimeDerivative
     porosity = porosity
     variable = conc
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./source]
+  [source]
     type = ConstantPointSource
     point = '1.0 0 0'
     variable = conc
     value = 12.0
-  [../]
+  []
 []
 
 [ICs]
-  [./conc]
+  [conc]
     type = FunctionIC
     function = 'x * x'
     variable = conc
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./porosity]
-  [../]
-  [./expected]
-  [../]
-  [./should_be_zero]
-  [../]
+  [porosity]
+  []
+  [expected]
+  []
+  [should_be_zero]
+  []
 []
 
 [AuxKernels]
-  [./porosity]
+  [porosity]
     type = FunctionAux
     function = '6.0 + x'
     variable = porosity
-  [../]
-  [./expected]
+  []
+  [expected]
     type = FunctionAux
    function = 'if(x > 0.5 & x < 1.5, x * x + 2.0 * 12.0 / (6.0 + x), x * x)'
     variable = expected
-  [../]
-  [./should_be_zero]
+  []
+  [should_be_zero]
     type = ParsedAux
     args = 'expected conc'
     function = 'expected - conc'
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = NodalL2Norm
     variable = should_be_zero
-  [../]
+  []
 []
 
 [Executioner]

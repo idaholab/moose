@@ -8,12 +8,12 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Fe++ H+ O2(aq)"
     equilibrium_minerals = "Hematite"
     piecewise_linear_interpolation = true # to get exact logK at 25degC with no best-fit interpolation
-  [../]
+  []
 []
 

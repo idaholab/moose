@@ -21,11 +21,11 @@ It is assumed that:
 
 The MOOSE input file defines the model using the [GeochemicalModelDefinition](GeochemicalModelDefinition.md).  This defines the basis species as well as defining that the dynamics of the mineral `Quartz` will be controlled by a kinetic rate law.  Note that this model contains H$^{+}$ and Cl$^{-}$, which is a bit different than Bethke's set up (these species are provided with very small bulk composition so they don't impact the result).  The reason for this is that `geochemistry` requires a charge-balance species to be defined.
 
-!listing modules/geochemistry/test/tests/kinetics/quartz_dissolution.i start=[./definition] end=[]
+!listing modules/geochemistry/test/tests/kinetics/quartz_dissolution.i start=[definition] end=[]
 
 The rate law for Quartz is defined by a [GeochemistryKineticRate](GeochemistryKineticRate.md) UserObject:
 
-!listing modules/geochemistry/test/tests/kinetics/quartz_dissolution.i start=[./rate_quartz] end=[./definition]
+!listing modules/geochemistry/test/tests/kinetics/quartz_dissolution.i start=[rate_quartz] end=[definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines the initial concentration of the species, including the initial mole number for Quartz.  The system is closed at time zero (by default) so the `free_molality` constraint of SiO$_{2}$(aq) becomes inactive (no SiO$_{2}$(aq) is added or removed from the system by an external agent after this time):
 

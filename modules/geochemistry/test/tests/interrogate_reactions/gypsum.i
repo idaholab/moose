@@ -11,11 +11,11 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Ca++ SO4--"
     equilibrium_minerals = "Gypsum Anhydrite"
-  [../]
+  []
 []
 

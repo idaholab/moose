@@ -5,9 +5,10 @@
   swap_out_of_basis = "O2(aq) Fe++"
   swap_into_basis = "O2(g) Hematite"
   charge_balance_species = "Cl-"
-  constraint_species = "H2O              Hematite                   H+         Ca++               Mg++               Na+                HCO3-              SO4--              Cl-                O2(g)"
-  constraint_value = "  1.0              6.26E-6                    3.16228E-7 9.98E-5            4.114E-5           8.7E-5             2.95E-4            3.123E-5           1.4103E-4          0.2"
-  constraint_meaning = "kg_solvent_water free_moles_mineral_species activity   moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species fugacity"
+  constraint_species = "H2O              Hematite     H+            Ca++             Mg++             Na+              HCO3-            SO4--            Cl-              O2(g)"
+  constraint_value = "  1.0              1            -6.5          4                1                2                18               3                5                0.2"
+  constraint_meaning = "kg_solvent_water free_mineral log10activity bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition bulk_composition fugacity"
+  constraint_unit = "   kg               mg           dimensionless mg               mg               mg               mg               mg               mg               dimensionless"
   remove_fixed_activity_name = "H+ O2(g)"
   remove_fixed_activity_time = '0  0'
   source_species_names = "Pyrite"
@@ -25,57 +26,57 @@
 []
 
 [UserObjects]
-  [./definition]
+  [definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Fe++ Ca++ Mg++ Na+ HCO3- SO4-- Cl- O2(aq)"
     equilibrium_minerals = "Hematite Pyrite"
     equilibrium_gases = "O2(g)"
     piecewise_linear_interpolation = true # for comparison with GWB
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./mg_Hematite]
+  [mg_Hematite]
     type = PointValue
     point = '0 0 0'
     variable = 'free_mg_Hematite'
-  [../]
-  [./mg_Pyrite]
+  []
+  [mg_Pyrite]
     type = PointValue
     point = '0 0 0'
     variable = 'free_mg_Pyrite'
-  [../]
-  [./pH]
+  []
+  [pH]
     type = PointValue
     point = '0 0 0'
     variable = 'pH'
-  [../]
-  [./molal_CO2aq]
+  []
+  [molal_CO2aq]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_CO2(aq)'
-  [../]
-  [./molal_HCO3-]
+  []
+  [molal_HCO3-]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_HCO3-'
-  [../]
-  [./molal_SO4--]
+  []
+  [molal_SO4--]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_SO4--'
-  [../]
-  [./molal_Fe++]
+  []
+  [molal_Fe++]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_Fe++'
-  [../]
-  [./molal_O2aq]
+  []
+  [molal_O2aq]
     type = PointValue
     point = '0 0 0'
     variable = 'molal_O2(aq)'
-  [../]
+  []
 []
 [Outputs]
   csv = true

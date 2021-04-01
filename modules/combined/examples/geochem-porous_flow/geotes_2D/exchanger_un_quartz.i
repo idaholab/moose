@@ -16,7 +16,8 @@
   swap_into_basis = "QuartzUnlike"
   constraint_species = "H2O              Na+                Cl-                QuartzUnlike"
   constraint_value = "  1.0E-2           0.1E-2             0.1E-2             1E-10"
-  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species free_moles_mineral_species"
+  constraint_meaning = "kg_solvent_water bulk_composition bulk_composition free_mineral"
+  constraint_unit = "   kg               moles              moles              moles"
   initial_temperature = 50.0
   mode = 4
   temperature = 200

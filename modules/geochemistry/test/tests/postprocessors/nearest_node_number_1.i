@@ -11,18 +11,18 @@
 []
 
 [UserObjects]
-  [./nnn_uo]
+  [nnn_uo]
     type = NearestNodeNumberUO
     point = '2 0 0'
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 [Postprocessors]
-  [./nnn]
+  [nnn]
     type = NearestNodeNumber
     nearest_node_number_uo = nnn_uo
     execute_on = 'initial timestep_begin'
-  [../]
+  []
 []
 
 [Problem]
