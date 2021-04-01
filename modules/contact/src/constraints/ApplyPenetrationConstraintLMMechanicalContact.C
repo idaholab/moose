@@ -62,7 +62,7 @@ ApplyPenetrationConstraintLMMechanicalContact::overwriteSecondaryResidual()
   // If we didn't project the secondary node onto the primary surface, then gap has no meaning and
   // we just want to drive our Lagrange Multiplier to zero. If we did, then our LM drives the
   // residual if it is less than the gap (we're using min for our NCP function)
-  return (!_projection_successful) ||
+  return (!_projection_successful) || std::isnan(_node_to_integrated_gap.at(_current_node)) ||
          (_u_secondary[_qp] < _node_to_integrated_gap.at(_current_node));
 }
 
@@ -146,7 +146,7 @@ ApplyPenetrationConstraintLMMechanicalContact::computeQpResidual(const Moose::Co
 
       // If our LM is less than the integrated gap, then we return the LM, else we return 0 because
       // the residual already is the weighted gap
-      if (_u_secondary[_qp] < integrated_gap)
+      if (std::isnan(integrated_gap) || (_u_secondary[_qp] < integrated_gap))
         return _u_secondary[_qp];
       else
         return 0;
@@ -172,7 +172,8 @@ ApplyPenetrationConstraintLMMechanicalContact::computeQpJacobian(
     {
       _projection_successful = true;
 
-      if (_u_secondary[_qp] < _node_to_integrated_gap.at(_current_node))
+      const auto & integrated_gap = _node_to_integrated_gap.at(_current_node);
+      if (std::isnan(integrated_gap) || (_u_secondary[_qp] < integrated_gap))
         return 1;
       else
         return 0;

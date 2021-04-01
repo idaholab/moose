@@ -56,7 +56,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType morta
         return _test[_i][_qp] * gap;
       }
       else
-        return _test[_i][_qp] * std::numeric_limits<Real>::max();
+        return std::numeric_limits<Real>::quiet_NaN();
     }
 
     default:
