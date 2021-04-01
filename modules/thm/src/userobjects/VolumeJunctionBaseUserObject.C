@@ -155,7 +155,7 @@ VolumeJunctionBaseUserObject::finalize()
   // Get scalar Dofs
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
   {
-    MooseVariableScalar * var = getScalarVar(_scalar_variable_names[i], 0);
+    auto var = getScalarVar(_scalar_variable_names[i], 0);
     auto && dofs = var->dofIndices();
     mooseAssert(dofs.size() == 1,
                 "There should be exactly 1 coupled DoF index for the variable '" + var->name() +
