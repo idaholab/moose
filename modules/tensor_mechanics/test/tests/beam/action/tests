@@ -149,7 +149,7 @@
   [./beam_action_test14]
     type = 'RunException'
     input = 'beam_action_chk.i'
-    cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x" Modules/TensorMechanics/LineElementMaster/block_1/area=1.0 Modules/TensorMechanics/LineElementMaster/block_1/rotational_velocities="rot_vel_x" Modules/TensorMechanics/LineElementMaster/block_1/beta=0.25 Modules/TensorMechanics/LineElementMaster/block_1/density=1.0 Modules/TensorMechanics/LineElementMaster/block_1/nodal_mass=0.1 Modules/TensorMechanics/LineElementMaster/block_1/nodal_Ixx=0.1 Modules/TensorMechanics/LineElementMaster/block_all/block="1 2"'
+    cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x" Modules/TensorMechanics/LineElementMaster/block_1/area=1.0 Modules/TensorMechanics/LineElementMaster/block_1/rotational_velocities="rot_vel_x" Modules/TensorMechanics/LineElementMaster/block_1/beta=0.25 Modules/TensorMechanics/LineElementMaster/block_1/density=1.0 Modules/TensorMechanics/LineElementMaster/block_1/nodal_mass=0.1 Modules/TensorMechanics/LineElementMaster/block_1/nodal_Ixx=0.1 Modules/TensorMechanics/LineElementMaster/block_all/block="0 1"'
     expect_err = 'LineElementAction: The block restrictions in the LineElement actions must be non-overlapping.'
 
     requirement = "The LineElementAction class shall produce an error if multiple subblocks"
