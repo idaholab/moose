@@ -20,6 +20,8 @@ SubChannel1PhaseProblemBase::validParams()
   params.addRequiredParam<Real>("abeta",
                                 "Thermal diffusion coefficient used in turbulent crossflow");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
+  params.addRequiredParam<bool>("enforce_uniform_pressure",
+                                "Flag that enables uniform inlet pressure");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
@@ -30,6 +32,7 @@ SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters &
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
     _abeta(getParam<Real>("abeta")),
     _CT(getParam<Real>("CT")),
+    _enforce_uniform_pressure(getParam<bool>("enforce_uniform_pressure")),
     _fp(nullptr)
 {
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
@@ -443,7 +446,7 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
     else
     {
       // enabling the turbulent term in the momentum equation produces a radial pressure gradient
-      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term * 0.0 +
+      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term +
                                 Friction_Term + Gravity_Term); // Pa
     }
     // update solution
@@ -615,18 +618,21 @@ SubChannel1PhaseProblemBase::computeMassFlowForDPDZ(double dpdz, int i_ch)
 }
 
 void
-SubChannel1PhaseProblemBase::enforceZeroDPDZAtInlet()
+SubChannel1PhaseProblemBase::enforceUniformDPDZAtInlet()
 {
-  _console << "Applying mass flow boundary condition using uniform Pressure drop at the inlet\n";
-  auto node = _subchannel_mesh.getChannelNode(0, 0);
-  // User defined inlet total Massflow
-  auto MassFlow = (*mdot_soln)(node)*_subchannel_mesh.getNumOfChannels();
-  _console << "User provided total massflow :" << MassFlow << " [kg/sec] \n";
+  _console
+      << "Edit mass flow boundary condition in order to have uniform Pressure drop at the inlet\n";
+  auto total_mass_flow = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    total_mass_flow += (*mdot_soln)(node_in);
+  }
+  _console << "Total mass flow :" << total_mass_flow << " [kg/sec] \n";
   // Define vectors of pressure drop and massflow
   Eigen::VectorXd DPDZi(_subchannel_mesh.getNumOfChannels());
   Eigen::VectorXd MassFlowi(_subchannel_mesh.getNumOfChannels());
-  MassFlowi.setConstant(MassFlow / _subchannel_mesh.getNumOfChannels());
-  // Calculate Pressure drop for uniform inlet massflow condition
+  // Calculate Pressure drop derivative for current mass flow BC
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
@@ -642,7 +648,7 @@ SubChannel1PhaseProblemBase::enforceZeroDPDZAtInlet()
         (fi / Dhi) * 0.5 * (std::pow((*mdot_soln)(node_in), 2.0)) / (std::pow(Si, 2.0) * rho_in);
   }
 
-  // Initialize an average pressure drop for uniform inlet condition
+  // Initialize an average pressure drop for uniform pressure inlet condition
   auto DPDZ = DPDZi.mean();
   auto Error = 1.0;
   auto tol = 1e-6;
@@ -662,9 +668,9 @@ SubChannel1PhaseProblemBase::enforceZeroDPDZAtInlet()
       MassFlowi(i_ch) = computeMassFlowForDPDZ(DPDZ, i_ch);
     }
     // Calculate total massflow at the inlet
-    auto MassFlowSum = MassFlowi.sum();
+    auto mass_flow_sum = MassFlowi.sum();
     // Update the DP/DZ to correct the mass flow rate.
-    DPDZ *= std::pow(MassFlow / MassFlowSum, 2.0);
+    DPDZ *= std::pow(total_mass_flow / mass_flow_sum, 2.0);
     Error = std::abs((DPDZ - DPDZ_old) / DPDZ_old);
   }
 
@@ -680,7 +686,10 @@ SubChannel1PhaseProblemBase::enforceZeroDPDZAtInlet()
 void
 SubChannel1PhaseProblemBase::externalSolve()
 {
-  enforceZeroDPDZAtInlet();
+  if (_enforce_uniform_pressure)
+  {
+    enforceUniformDPDZAtInlet();
+  }
   _console << "Executing subchannel solver\n";
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   Eigen::MatrixXd PCYCLES(nz, 2);

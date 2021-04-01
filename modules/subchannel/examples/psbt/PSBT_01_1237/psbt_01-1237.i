@@ -2,7 +2,6 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
-mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -34,6 +33,8 @@ mass_flow_in = 11.522 #kg/sec
   []
   [S]
   []
+  [Sij]
+  []
   [w_perim]
   []
   [q_prime]
@@ -51,6 +52,9 @@ mass_flow_in = 11.522 #kg/sec
 [Problem]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  abeta = 0.08
+  CT = 1.0
+  enforce_uniform_pressure = true
 []
 
 [ICs]
@@ -120,7 +124,6 @@ mass_flow_in = 11.522 #kg/sec
     value = ${P_out}
     execute_on = 'timestep_begin'
   []
-
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -128,19 +131,18 @@ mass_flow_in = 11.522 #kg/sec
     value = ${T_in}
     execute_on = 'timestep_begin'
   []
-
   [mdot_in_bc]
-    type = ConstantAux
+    type = MassFlowRateAux
     variable = mdot
     boundary = inlet
-    value = ${fparse mass_flow_in / 36.0}
+    area = S
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
 
 [Outputs]
   exodus = true
-
   [Temp_Out_MATRIX]
     type = NormalSliceValues
     variable = T
@@ -148,7 +150,6 @@ mass_flow_in = 11.522 #kg/sec
     file_base = "Temp_Out.txt"
     height = 3.658
   []
-
   [mdot_Out_MATRIX]
     type = NormalSliceValues
     variable = mdot
@@ -156,7 +157,6 @@ mass_flow_in = 11.522 #kg/sec
     file_base = "mdot_Out.txt"
     height = 3.658
   []
-
   [mdot_In_MATRIX]
     type = NormalSliceValues
     variable = mdot

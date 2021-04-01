@@ -46,7 +46,7 @@ protected:
   /// Computes Density per channel for level iz
   virtual void computeRho(int iz);
   /// Computes and populates solution vector with Boundary mass flow
-  virtual void enforceZeroDPDZAtInlet();
+  virtual void enforceUniformDPDZAtInlet();
 
   Eigen::VectorXd Wij;
   Eigen::VectorXd Wij_old;
@@ -60,6 +60,8 @@ protected:
   const Real & _abeta;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
+  /// Flag that indicates if uniform pressure should be applied at the subchannel inlet
+  const bool & _enforce_uniform_pressure;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * mdot_soln;
   SolutionHandle * SumWij_soln;

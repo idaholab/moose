@@ -1,9 +1,8 @@
 T_in = 359.15
 length = 3.658
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-# mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
-mass_flow_in = 11.522 #kg/sec
 
 [Mesh]
   type = QuadSubChannelMesh
@@ -65,6 +64,7 @@ mass_flow_in = 11.522 #kg/sec
   fp = water
   abeta = 0.08
   CT = 1.0
+  enforce_uniform_pressure = false
 []
 
 [ICs]
@@ -143,10 +143,11 @@ mass_flow_in = 11.522 #kg/sec
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = UniformlyDistributedMassFlowRateAux
+    type = MassFlowRateAux
     variable = mdot
     boundary = inlet
-    mass_flow = ${mass_flow_in}
+    area = S
+    mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
 []
