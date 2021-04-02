@@ -141,6 +141,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::distance(mesh.bid_nodes_begin(primary_bnd_id), mesh.bid_nodes_end(primary_bnd_id));
     const auto num_secondary_nodes =
         std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
+    mooseAssert(num_primary_nodes,
+                "There are no primary nodes on boundary ID "
+                    << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+    mooseAssert(num_secondary_nodes,
+                "There are no secondary nodes on boundary ID "
+                    << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
 
     node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
   }
