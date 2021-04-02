@@ -175,31 +175,37 @@ public:
   }
 
   template <typename T>
-  const T & getUserObject(const std::string & name)
+  const T & getUserObject(const std::string & param_name) const
   {
-    _depend_uo.insert(_pars.get<UserObjectName>(name));
-    return UserObjectInterface::getUserObject<T>(name);
+    const auto & uo = UserObjectInterface::getUserObject<T>(param_name);
+    _depend_uo.insert(_pars.get<UserObjectName>(param_name));
+    return uo;
   }
 
   template <typename T>
-  const T & getUserObjectByName(const UserObjectName & name)
+  const T & getUserObjectByName(const UserObjectName & object_name) const
   {
-    _depend_uo.insert(name);
-    return UserObjectInterface::getUserObjectByName<T>(name);
+    const auto & uo = UserObjectInterface::getUserObjectByName<T>(object_name);
+    _depend_uo.insert(object_name);
+    return uo;
   }
 
-  const UserObject & getUserObjectBase(const UserObjectName & name)
+  const UserObject & getUserObjectBase(const UserObjectName & param_name) const
   {
-    return getUserObjectBaseByName(_pars.get<UserObjectName>(name));
+    const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
+    _depend_uo.insert(uo.name());
+    return uo;
   }
 
-  const UserObject & getUserObjectBaseByName(const UserObjectName & name)
+  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const
   {
-    _depend_uo.insert(name);
-    return UserObjectInterface::getUserObjectBaseByName(name);
+    const auto & uo = UserObjectInterface::getUserObjectBaseByName(object_name);
+    _depend_uo.insert(object_name);
+    return uo;
   }
 
-  const PostprocessorValue & getPostprocessorValue(const std::string & name, unsigned int index = 0)
+  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                           unsigned int index = 0) const
   {
     if (hasPostprocessor(name, index))
     {
@@ -214,38 +220,43 @@ public:
     return PostprocessorInterface::getPostprocessorValue(name, index);
   }
 
-  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name)
+  virtual const PostprocessorValue &
+  getPostprocessorValueByName(const PostprocessorName & name) const
   {
     _depend_uo.insert(name);
     return PostprocessorInterface::getPostprocessorValueByName(name);
   }
 
-  const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name,
-                                                               const std::string & vector_name)
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name,
+                              const std::string & vector_name) const override
   {
     _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
     return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
   }
 
-  const VectorPostprocessorValue &
+  virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name)
+                                    const std::string & vector_name) const override
   {
     _depend_uo.insert(name);
     return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
   }
 
-  const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name,
-                                                               const std::string & vector_name,
-                                                               bool needs_broadcast)
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name,
+                              const std::string & vector_name,
+                              bool needs_broadcast) const override
   {
     _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
     return VectorPostprocessorInterface::getVectorPostprocessorValue(
         name, vector_name, needs_broadcast);
   }
 
-  const VectorPostprocessorValue & getVectorPostprocessorValueByName(
-      const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name,
+                                    bool needs_broadcast) const override
   {
     _depend_uo.insert(name);
     return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
@@ -253,7 +264,8 @@ public:
   }
 
   const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
+  getScatterVectorPostprocessorValue(const std::string & name,
+                                     const std::string & vector_name) const override final
   {
     _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
     return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
@@ -261,7 +273,7 @@ public:
 
   const ScatterVectorPostprocessorValue &
   getScatterVectorPostprocessorValueByName(const std::string & name,
-                                           const std::string & vector_name)
+                                           const std::string & vector_name) const override final
   {
     _depend_uo.insert(name);
     return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name,
@@ -288,5 +300,5 @@ private:
   UserObject * _primary_thread_copy = nullptr;
 
   /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
-  std::set<UserObjectName> _depend_uo;
+  mutable std::set<UserObjectName> _depend_uo;
 };

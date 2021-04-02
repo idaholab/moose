@@ -3418,17 +3418,18 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
 }
 
 const UserObject &
-FEProblemBase::getUserObjectBase(const std::string & name) const
+FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /* = 0 */) const
 {
   std::vector<UserObject *> objs;
   theWarehouse()
       .query()
       .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
+      .condition<AttribThread>(tid)
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find user object with name '" + name + "'");
+  mooseAssert(objs.size() == 1, "Should only find one UO");
   return *(objs[0]);
 }
 

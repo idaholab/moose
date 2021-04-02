@@ -448,7 +448,7 @@ public:
   /**
    * Prints the type of the requested parameter by name
    */
-  std::string type(const std::string & name);
+  std::string type(const std::string & name) const;
 
   /**
    * Returns a Boolean indicating whether the specified parameter is private or not
