@@ -329,15 +329,35 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
 }
 
 void
-CrystalPlasticityStressUpdateBase::calculateShearStress(RankTwoTensor & pk2)
+CrystalPlasticityStressUpdateBase::calculateShearStress(
+    const RankTwoTensor & pk2,
+    const RankTwoTensor & inverse_eigenstrain_deformation_grad,
+    const unsigned int & num_eigenstrains)
 {
+  if (!num_eigenstrains)
+  {
+    for (unsigned int i = 0; i < _number_slip_systems; ++i)
+      _tau[_qp][i] = pk2.doubleContraction(_flow_direction[_qp][i]);
+    return;
+  }
+
+  RankTwoTensor eigenstrain_deformation_grad = inverse_eigenstrain_deformation_grad.inverse();
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
-    _tau[_qp][i] = pk2.doubleContraction(_flow_direction[_qp][i]);
+  {
+    // compute PK2_hat using deformation gradient
+    RankTwoTensor pk2_hat = eigenstrain_deformation_grad.det() *
+                            eigenstrain_deformation_grad.transpose() * pk2 *
+                            inverse_eigenstrain_deformation_grad.transpose();
+    _tau[_qp][i] = pk2_hat.doubleContraction(_flow_direction[_qp][i]);
+  }
 }
 
 void
 CrystalPlasticityStressUpdateBase::calculateTotalPlasticDeformationGradientDerivative(
-    RankFourTensor & dfpinvdpk2, const RankTwoTensor & inverse_plastic_deformation_grad_old)
+    RankFourTensor & dfpinvdpk2,
+    const RankTwoTensor & inverse_plastic_deformation_grad_old,
+    const RankTwoTensor & inverse_eigenstrain_deformation_grad_old,
+    const unsigned int & num_eigenstrains)
 {
   std::vector<Real> dslip_dtau(_number_slip_systems, 0.0);
   std::vector<RankTwoTensor> dtaudpk2(_number_slip_systems);
@@ -347,7 +367,15 @@ CrystalPlasticityStressUpdateBase::calculateTotalPlasticDeformationGradientDeriv
 
   for (unsigned int j = 0; j < _number_slip_systems; ++j)
   {
-    dtaudpk2[j] = _flow_direction[_qp][j];
+    if (num_eigenstrains)
+    {
+      RankTwoTensor eigenstrain_deformation_grad_old =
+          inverse_eigenstrain_deformation_grad_old.inverse();
+      dtaudpk2[j] = eigenstrain_deformation_grad_old.det() * eigenstrain_deformation_grad_old *
+                    _flow_direction[_qp][j] * inverse_eigenstrain_deformation_grad_old;
+    }
+    else
+      dtaudpk2[j] = _flow_direction[_qp][j];
     dfpinvdslip[j] = -inverse_plastic_deformation_grad_old * _flow_direction[_qp][j];
     dfpinvdpk2 += (dfpinvdslip[j] * dslip_dtau[j] * _substep_dt).outerProduct(dtaudpk2[j]);
   }

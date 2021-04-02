@@ -110,7 +110,7 @@
   [./pk2_yy]
     type = RankTwoAux
     variable = pk2_yy
-    rank_two_tensor = pk2
+    rank_two_tensor = second_piola_kirchhoff_stress
     index_j = 1
     index_i = 1
     execute_on = timestep_end
@@ -126,7 +126,7 @@
   [./fp_yy]
     type = RankTwoAux
     variable = fp_yy
-    rank_two_tensor = fp
+    rank_two_tensor = plastic_deformation_gradient
     index_i = 1
     index_j = 1
     execute_on = timestep_end
