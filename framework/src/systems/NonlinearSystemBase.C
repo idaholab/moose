@@ -1275,8 +1275,6 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  mortarConstraints(displaced);
-
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
 
@@ -1576,6 +1574,8 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
+  mortarConstraints();
+
   if (_need_residual_copy)
   {
     _Re_non_time->close();
@@ -1599,7 +1599,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _Re_non_time->close();
   }
 
-  // Add in Residual contributions from Constraints
+  // Add in Residual contributions from other Constraints
   if (_fe_problem._has_constraints)
   {
     PARALLEL_TRY
@@ -2099,8 +2099,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
-  mortarConstraints(displaced);
-
   THREAD_ID tid = 0;
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
@@ -2537,20 +2535,15 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  if (_fe_problem.hasMortarCoupling())
-    // don't shrink the memory allocation because our constraints may have additional sparsity
-    // pattern that hasn't been used up to this point. Note that some other types of constraints
-    // seem to rely on the matrix actually being closed, so we still close for any constraint types
-    // other mortar
-    flushTaggedMatrices(tags);
-  else
-    closeTaggedMatrices(tags);
+  mortarConstraints();
+
+  closeTaggedMatrices(tags);
 
   // Have no idea how to have constraints work
   // with the tag system
   PARALLEL_TRY
   {
-    // Add in Jacobian contributions from Constraints
+    // Add in Jacobian contributions from other Constraints
     if (_fe_problem._has_constraints)
     {
       // Nodal Constraints
@@ -3348,30 +3341,33 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints(bool displaced)
+NonlinearSystemBase::mortarConstraints()
 {
-  // go over mortar constraints
-  const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
 
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>::iterator it, end_it;
-
-  for (const auto & mortar_interface : mortar_interfaces)
+  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
   {
-    if (!displaced)
-    {
-      it = _undisplaced_mortar_functors.find(mortar_interface.first);
-      end_it = _undisplaced_mortar_functors.end();
-    }
-    else
-    {
-      it = _displaced_mortar_functors.find(mortar_interface.first);
-      end_it = _displaced_mortar_functors.end();
-    }
+    auto it = _undisplaced_mortar_functors.find(mortar_interface.first);
 
-    mooseAssert(
-        it != end_it,
-        "No ComputeMortarFunctor exists for the specified primary-secondary boundary pair, primary "
-            << mortar_interface.first.first << " and secondary " << mortar_interface.first.second);
+    mooseAssert(it != _undisplaced_mortar_functors.end(),
+                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
+                "pair, primary "
+                    << mortar_interface.first.first << " and secondary "
+                    << mortar_interface.first.second);
+    it->second();
+  }
+
+  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
+
+  for (const auto & mortar_interface : displaced_mortar_interfaces)
+  {
+    auto it = _displaced_mortar_functors.find(mortar_interface.first);
+
+    mooseAssert(it != _displaced_mortar_functors.end(),
+                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
+                "pair, primary "
+                    << mortar_interface.first.first << " and secondary "
+                    << mortar_interface.first.second);
     it->second();
   }
 }
