@@ -149,5 +149,7 @@ ElementSubdomainIDGenerator::generate()
     elem->subdomain_id() = newid;
   }
 
+  mesh->cache_elem_data();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

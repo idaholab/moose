@@ -67,4 +67,6 @@ StripeMesh::buildMesh()
       e->subdomain_id() = sid;
     }
   }
+
+  getMesh().cache_elem_data();
 }

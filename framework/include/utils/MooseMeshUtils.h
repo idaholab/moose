@@ -29,6 +29,14 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
                bool generate_unknown);
 
 /**
+ * Gets the subdomain ID associated with the given SubdomainName.
+ *
+ * This is needed because the SubdomainName can be either an ID or a name.
+ * If it is a name, the mesh is queried for the ID associated with said name.
+ */
+SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh);
+
+/**
  * Gets the boundary ID associated with the given BoundaryName.
  *
  * This is needed because the BoundaryName can be either an ID or a name.

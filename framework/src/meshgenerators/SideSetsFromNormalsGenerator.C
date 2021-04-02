@@ -110,5 +110,7 @@ SideSetsFromNormalsGenerator::generate()
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];
   }
 
+  boundary_info.regenerate_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

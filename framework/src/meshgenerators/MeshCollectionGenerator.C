@@ -123,5 +123,7 @@ MeshCollectionGenerator::generate()
     }
   }
 
+  mesh->get_boundary_info().regenerate_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

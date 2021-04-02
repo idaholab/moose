@@ -102,5 +102,7 @@ SideSetsFromPointsGenerator::generate()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     mesh->get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
 
+  mesh->get_boundary_info().regenerate_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

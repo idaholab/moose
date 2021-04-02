@@ -55,6 +55,23 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
   if (_moi_mesh.dimension() == 3)
     mooseError("Mortar cannot currently be run in three dimensions. It's on the to-do list!");
 
+  if (_secondary_id == Moose::INVALID_BOUNDARY_ID)
+    mooseError(moose_object->getParam<BoundaryName>("secondary_boundary"),
+               " does not appear to be a boundary on the mesh. Did you make an error in your "
+               "mortar object input file block?");
+  if (_primary_id == Moose::INVALID_BOUNDARY_ID)
+    mooseError(moose_object->getParam<BoundaryName>("primary_boundary"),
+               " does not appear to be a boundary on the mesh. Did you make an error in your "
+               "mortar object input file block?");
+  if (_secondary_subdomain_id == Moose::INVALID_BLOCK_ID)
+    mooseError(moose_object->getParam<SubdomainName>("secondary_subdomain"),
+               " does not appear to be a subdomain on the mesh. Did you make an error in your "
+               "mortar object input file block?");
+  if (_primary_subdomain_id == Moose::INVALID_BLOCK_ID)
+    mooseError(moose_object->getParam<SubdomainName>("primary_subdomain"),
+               " does not appear to be a subdomain on the mesh. Did you make an error in your "
+               "mortar object input file block?");
+
   // Create the mortar interface if it hasn't already been created
   _moi_problem.createMortarInterface(std::make_pair(_primary_id, _secondary_id),
                                      std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),

@@ -156,12 +156,18 @@ RenameBoundaryGenerator::generate()
     mooseError("Failed to find an unused ID!");
   };
 
+  // Helper for writing to a BoundaryID. Returns whether a write was successful
+  const auto boundary_id_from_name = [](const BoundaryName & boundary_name,
+                                        BoundaryID & boundary_id) {
+    std::istringstream ss(boundary_name);
+    return bool(ss >> boundary_id);
+  };
+
   // Helper for checking whether or not a BoundaryName (which could be an ID or a name)
   // is really input as an ID
-  const auto is_boundary_id = [](const BoundaryName & boundary_name) {
-    std::istringstream ss(boundary_name);
+  const auto is_boundary_id = [boundary_id_from_name](const BoundaryName & boundary_name) {
     BoundaryID id;
-    return !(!(ss >> id));
+    return boundary_id_from_name(boundary_name, id);
   };
 
   const auto num_boundaries = _old_boundary.size();
@@ -209,7 +215,8 @@ RenameBoundaryGenerator::generate()
     // If the user input an ID, we have the ID
     if (is_boundary_id(name))
     {
-      const auto id = MooseMeshUtils::getBoundaryID(name, *mesh);
+      BoundaryID id;
+      boundary_id_from_name(name, id);
       new_boundary_ids[i] = id;
 
       // In the case that this is a new boundary ID, keep track of it so that we

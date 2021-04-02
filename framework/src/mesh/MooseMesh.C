@@ -377,17 +377,12 @@ MooseMesh::prepare(bool)
   if (_moose_mesh_prepared)
     return;
 
-  // Collect (local) subdomain IDs
-  _mesh_subdomains.clear();
-  for (const auto & elem : getMesh().element_ptr_range())
-    _mesh_subdomains.insert(elem->subdomain_id());
+  _mesh_subdomains = _mesh->get_mesh_subdomains();
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
 
-  // Collect (local) boundary IDs
-  const std::set<BoundaryID> & local_bids = getMesh().get_boundary_info().get_boundary_ids();
-  _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
+  _mesh_boundary_ids = _mesh->get_boundary_info().get_global_boundary_ids();
 
   const std::set<BoundaryID> & local_node_bids =
       getMesh().get_boundary_info().get_node_boundary_ids();
@@ -400,8 +395,6 @@ MooseMesh::prepare(bool)
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!getMesh().is_serial())
   {
-    _communicator.set_union(_mesh_subdomains);
-    _communicator.set_union(_mesh_boundary_ids);
     _communicator.set_union(_mesh_nodeset_ids);
     _communicator.set_union(_mesh_sideset_ids);
   }
@@ -1144,7 +1137,14 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
   if (boundary_name == "ANY_BOUNDARY_ID")
     mooseError("Please use getBoundaryIDs() when passing \"ANY_BOUNDARY_ID\"");
 
-  return MooseMeshUtils::getBoundaryID(boundary_name, getMesh());
+  const auto id = MooseMeshUtils::getBoundaryID(boundary_name, getMesh());
+
+  // If the boundary_name is actually an integral type then the boundary information isn't even
+  // queried. So we should perform an error check here
+  if (_mesh_boundary_ids.find(id) == _mesh_boundary_ids.end())
+    mooseError("Requested boundary ", id, " doesn't exist on the mesh.");
+
+  return id;
 }
 
 const Elem *
@@ -1233,6 +1233,13 @@ MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
 
   if (!(ss >> id) || !ss.eof())
     id = getMesh().get_id_by_name(subdomain_name);
+  else
+  {
+    // Ok the requested subdomain name was actually an ID. Let's make sure that ID exists on the
+    // mesh
+    if (_mesh_subdomains.find(id) == _mesh_subdomains.end())
+      mooseError("Requested subdomain ", id, " doesn't exist on the mesh.");
+  }
 
   return id;
 }

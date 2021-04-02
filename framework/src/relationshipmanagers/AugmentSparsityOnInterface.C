@@ -12,6 +12,7 @@
 #include "Executioner.h"
 #include "FEProblemBase.h"
 #include "MooseApp.h"
+#include "MooseMeshUtils.h"
 
 // libMesh includes
 #include "libmesh/elem.h"
@@ -94,18 +95,20 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
   // are unable to get the boundary ids from boundary names until we've attached the MeshBase object
   // to the MooseMesh
-  bool generating_mesh = !_moose_mesh->getMeshPtr();
-  auto primary_boundary_id = generating_mesh ? Moose::INVALID_BOUNDARY_ID
-                                             : _moose_mesh->getBoundaryID(_primary_boundary_name);
-  auto secondary_boundary_id = generating_mesh
-                                   ? Moose::INVALID_BOUNDARY_ID
-                                   : _moose_mesh->getBoundaryID(_secondary_boundary_name);
+  const bool generating_mesh = !_moose_mesh->getMeshPtr();
+
+  auto primary_boundary_id = generating_mesh
+                                 ? Moose::INVALID_BOUNDARY_ID
+                                 : MooseMeshUtils::getBoundaryID(_primary_boundary_name, *_mesh);
+  auto secondary_boundary_id =
+      generating_mesh ? Moose::INVALID_BOUNDARY_ID
+                      : MooseMeshUtils::getBoundaryID(_secondary_boundary_name, *_mesh);
   auto primary_subdomain_id = generating_mesh
                                   ? Moose::INVALID_BLOCK_ID
-                                  : _moose_mesh->getSubdomainID(_primary_subdomain_name);
-  auto secondary_subdomain_id = generating_mesh
-                                    ? Moose::INVALID_BLOCK_ID
-                                    : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
+                                  : MooseMeshUtils::getSubdomainID(_primary_subdomain_name, *_mesh);
+  auto secondary_subdomain_id =
+      generating_mesh ? Moose::INVALID_BLOCK_ID
+                      : MooseMeshUtils::getSubdomainID(_secondary_subdomain_name, *_mesh);
 
   if (!_has_attached_amg && _app.getExecutioner())
   {

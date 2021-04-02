@@ -81,7 +81,7 @@
       cli_args = 'Mesh/rename/old_boundary="0 42 bad_boundary"
                   Mesh/rename/new_boundary="1 2 3"
                   --mesh-only'
-      expect_err = 'The following boundaries were requested to be renamed, but do not exist: 42 bad_boundary'
+      expect_err = "Boundary 42 doesn't exist on the libmesh mesh"
 
       detail = 'when old boundaries are provided that do not exist within the mesh'
     []

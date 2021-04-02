@@ -84,5 +84,8 @@ BoundingBoxNodeSetGenerator::generate()
 
   boundary_info.nodeset_name(boundary_ids[0]) = boundary_names[0];
 
+  // Update global boundary id sets
+  boundary_info.regenerate_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

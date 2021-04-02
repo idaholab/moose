@@ -153,6 +153,30 @@ getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh)
 
   if (!(ss >> id))
     id = mesh.get_boundary_info().get_id_by_name(boundary_name);
+  else
+  {
+    const auto & bnd_ids = mesh.get_boundary_info().get_global_boundary_ids();
+    if (bnd_ids.find(id) == bnd_ids.end())
+      mooseError("Boundary ", id, " doesn't exist on the libmesh mesh.");
+  }
+
+  return id;
+}
+
+SubdomainID
+getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
+{
+  SubdomainID id = Moose::INVALID_BLOCK_ID;
+  std::istringstream ss(subdomain_name);
+
+  if (!(ss >> id))
+    id = mesh.get_id_by_name(subdomain_name);
+  else
+  {
+    const auto & sub_ids = mesh.get_mesh_subdomains();
+    if (sub_ids.find(id) == sub_ids.end())
+      mooseError("Subdomain ", id, " doesn't exist on the libmesh mesh.");
+  }
 
   return id;
 }

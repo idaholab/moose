@@ -274,4 +274,6 @@ CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const Unstructur
 
   for (const auto & t : other_boundary.build_shellface_list())
     boundary.add_shellface(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+  boundary.regenerate_id_sets();
 }
