@@ -160,11 +160,14 @@ bool pathContains(const std::string & expression,
  * @param filename The filename to check
  * @param check_line_endings Whether or not to see if the file contains DOS line endings.
  * @param throw_on_unreadable Whether or not to throw a MOOSE error if the file doesn't exist
+ * @param check_for_git_lfs_pointer Whether or not to call a subroutine utility to make sure that
+ *   the file in question is not actually a git-lfs pointer.
  * @return a Boolean indicating whether the file exists and is readable
  */
 bool checkFileReadable(const std::string & filename,
                        bool check_line_endings = false,
-                       bool throw_on_unreadable = true);
+                       bool throw_on_unreadable = true,
+                       bool check_for_git_lfs_pointer = true);
 
 /**
  * Check if the file is writable (path exists and permissions)
@@ -173,6 +176,17 @@ bool checkFileReadable(const std::string & filename,
  * return a Boolean indicating whether the file exists and is writable
  */
 bool checkFileWriteable(const std::string & filename, bool throw_on_unwritable = true);
+
+/**
+ * Check if the file is a Git-LFS pointer. When using a repository that utilizes Git-LFS,
+ * it's possible that the client may not have the right packages installed in which case
+ * the clone will contain plain-text files with key information for retrieving the actual
+ * (large) files. This can cause odd errors since the file technically exists, is readable,
+ * and even has the right name/extension. However, the content of the file will not match
+ * the expected content.
+ * @param A pointer to the open filestream.
+ */
+bool checkForGitLFSPointer(std::ifstream & file);
 
 /**
  * This function implements a parallel barrier function but writes progress
