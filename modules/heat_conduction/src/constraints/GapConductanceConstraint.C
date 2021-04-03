@@ -63,12 +63,13 @@ GapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
         ADRealVectorValue ad_phys_points_secondary = _phys_points_secondary[_qp];
 
         // ...which uses the derivative vector of the primary and secondary displacements as
-        // an approximation of the true phys points derivatives
-        for (unsigned int i = 0; i < _n_disp; ++i)
-        {
-          ad_phys_points_primary(i).derivatives() = (*_disp_primary[i])[_qp].derivatives();
-          ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
-        }
+        // an approximation of the true phys points derivatives when the mesh is displacing
+        if (_displaced)
+          for (unsigned int i = 0; i < _n_disp; ++i)
+          {
+            ad_phys_points_primary(i).derivatives() = (*_disp_primary[i])[_qp].derivatives();
+            ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
+          }
 
         auto l =
             std::max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
