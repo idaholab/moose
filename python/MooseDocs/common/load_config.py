@@ -51,7 +51,8 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.ifelse',
                       'MooseDocs.extensions.pysyntax',
                       'MooseDocs.extensions.modal',
-                      'MooseDocs.extensions.datetime']
+                      'MooseDocs.extensions.datetime',
+                      'MooseDocs.extensions.gitutils']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
