@@ -78,8 +78,7 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = true
-  solve_type = NEWTON
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type
                          -pc_hmg_use_subspace_coarsening'
   petsc_options_value = 'hmg true'
