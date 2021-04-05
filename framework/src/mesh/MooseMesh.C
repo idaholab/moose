@@ -444,6 +444,12 @@ MooseMesh::buildLowerDMesh()
 {
   auto & mesh = getMesh();
 
+  if (!mesh.is_serial())
+    mooseError(
+        "Hybrid finite element method must use replicated mesh.\nCurrently lower-dimensional mesh "
+        "does not support mesh re-partitioning and a debug assertion being hit related with "
+        "neighbors of lower-dimensional element, with distributed mesh.");
+
   // maximum number of sides of all elements
   unsigned int max_n_sides = 0;
 
