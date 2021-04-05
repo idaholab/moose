@@ -175,3 +175,9 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   }
   return output;
 }
+
+std::string
+SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+{
+  return _cli_args[local_app];
+}
