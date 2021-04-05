@@ -10,9 +10,9 @@ that the documentation build command is being executed within.
 
 ## Commit
 
-The "commit" sub-command inserts the current commit SHA-1 for the repository that the documentation
-build occurs as demonstrated in [gitutils-commit-example].
-The available settings for the this command are provided in [gitutils-commit-settings].
+The "commit" sub-command inserts the current commit SHA-1 for the repository of the working directory
+of the documentation build. [gitutils-commit-example] is an example that demonstrates the use of
+this command. The available settings for the this command are provided in [gitutils-commit-settings].
 
 !devel settings module=MooseDocs.extensions.gitutils
                 object=CommitCommand
