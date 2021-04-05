@@ -10,6 +10,16 @@
     requirement = "The system shall provide the heat source shape when power density is supplied"
   [../]
 
+  [./phy:conservation_from_file_3d]
+    type = 'CSVDiff'
+    input = 'phy.conservation_from_file_3d.i'
+    csvdiff = 'phy.conservation_from_file_3d_out.csv'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+    # because output has execute_on = 'final'
+    recover = false
+  [../]
+
   # Error checking
   [./err:no_hs]
     type = 'RunException'

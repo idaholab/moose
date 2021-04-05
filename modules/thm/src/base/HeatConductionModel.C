@@ -18,10 +18,10 @@ HeatConductionModel::validParams()
 
 registerMooseObject("THMApp", HeatConductionModel);
 
-const std::string HeatConductionModel::DENSITY = "rho_solid";
+const std::string HeatConductionModel::DENSITY = "density";
 const std::string HeatConductionModel::TEMPERATURE = "T_solid";
-const std::string HeatConductionModel::THERMAL_CONDUCTIVITY = "k_solid";
-const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "cp_solid";
+const std::string HeatConductionModel::THERMAL_CONDUCTIVITY = "thermal_conductivity";
+const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "specific_heat";
 
 FEType HeatConductionModel::_fe_type(FIRST, LAGRANGE);
 
@@ -54,7 +54,7 @@ void
 HeatConductionModel::addMaterials()
 {
   const auto & blocks = _hs.getSubdomainNames();
-  const auto & names = _hs.getParam<std::vector<std::string>>("names");
+  const auto & names = _hs.getNames();
   const auto & material_names = _hs.getParam<std::vector<std::string>>("materials");
 
   for (std::size_t i = 0; i < names.size(); i++)

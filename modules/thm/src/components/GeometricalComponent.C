@@ -73,6 +73,15 @@ GeometricalComponent::addNode(const Point & pt)
 }
 
 Elem *
+GeometricalComponent::addElement(libMesh::ElemType elem_type,
+                                 const std::vector<dof_id_type> & node_ids)
+{
+  auto elem = _mesh.addElement(elem_type, node_ids);
+  _elem_ids.push_back(elem->id());
+  return elem;
+}
+
+Elem *
 GeometricalComponent::addElementEdge2(dof_id_type node0, dof_id_type node1)
 {
   auto elem = _mesh.addElementEdge2(node0, node1);

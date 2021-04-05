@@ -53,13 +53,11 @@ HeatSourceFromTotalPower::addMooseObjects()
   /// The heat structure component we work with
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
   const Real num_rods = hs.getNumberOfUnits();
-  Real volume = 0.;
   std::vector<SubdomainName> subdomain_names;
   for (auto && region : _region_names)
   {
     const unsigned int idx = hs.getIndexFromName(region);
     subdomain_names.push_back(hs.getSubdomainNames()[idx]);
-    volume += hs.getVolumes()[idx];
   }
 
   const HeatStructureCylindricalBase * hs_cyl =
