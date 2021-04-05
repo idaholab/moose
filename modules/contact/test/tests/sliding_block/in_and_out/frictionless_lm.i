@@ -98,6 +98,7 @@
   nl_max_its = 20
   line_search = 'none'
   timestep_tolerance = 1e-6
+  snesmf_reuse_base = false
 []
 
 [Debug]
