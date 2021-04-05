@@ -29,13 +29,17 @@ GaussianProcessTrainer::validParams()
   params.addClassDescription(
       "Provides data preperation and training for a Gaussian Process surrogate model.");
   params.addRequiredParam<ReporterName>(
-      "response",
-      "Reporter value of response results, can be vpp with <vpp_name>/<vector_name> or sampler "
-      "column with 'sampler/col_<index>'.");
+      "response", "Reporter value of response results, can be vpp with <vpp_name>/<vector_name>.");
   params.addParam<std::vector<ReporterName>>(
       "predictors",
-      "Reporter values used as the independent random variables, sampler columns can be used with "
-      "'sampler/col_<index>' syntax. Default is to use all sampler columns.");
+      std::vector<ReporterName>(),
+      "Reporter values used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  params.addParam<std::vector<unsigned int>>(
+      "predictor_cols",
+      std::vector<unsigned int>(),
+      "Sampler columns used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
   params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
   params.addParam<bool>(
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
@@ -76,11 +80,24 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(declareModelData<std::unordered_map<std::string, std::vector<Real>>>(
         "_hyperparam_vec_map")),
-    _rval(getTrainingData<Real>("response")),
-    _pvals(getTrainingDataVector<Real>("predictors", true)),
-    _n_params(_pvals.size())
-
+    _sampler_row(getSamplerData()),
+    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
+    _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
+    _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
+                                                 : (_pvals.size() + _pcols.size()))
 {
+  const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
+  for (unsigned int i = 0; i < pnames.size(); ++i)
+    _pvals[i] = &getTrainingData<Real>(pnames[i]);
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_pvals.empty() && _pcols.empty())
+  {
+    _pcols.resize(_sampler.getNumberOfCols());
+    std::iota(_pcols.begin(), _pcols.end(), 0);
+  }
+
 #ifdef LIBMESH_HAVE_PETSC
   _num_tunable = 0;
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
@@ -123,8 +140,11 @@ GaussianProcessTrainer::preTrain()
 void
 GaussianProcessTrainer::train()
 {
-  for (unsigned int d = 0; d < _n_params; ++d)
-    _training_params(_row, d) = *_pvals[d];
+  unsigned int d = 0;
+  for (const auto & val : _pvals)
+    _training_params(_row, d++) = *val;
+  for (const auto & col : _pcols)
+    _training_params(_row, d++) = _sampler_row[col];
 
   // Loading result data from response reporter
   _training_data(_row, 0) = _rval;

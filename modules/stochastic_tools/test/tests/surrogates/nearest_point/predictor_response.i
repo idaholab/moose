@@ -17,6 +17,11 @@
 []
 
 [VectorPostprocessors]
+  [sampler_data]
+    type = SamplerData
+    sampler = sample
+    parallel_type = DISTRIBUTED
+  []
   [values]
     type = GFunction
     sampler = sample
@@ -36,7 +41,8 @@
   [train]
     type = NearestPointTrainer
     sampler = sample
-    predictors = 'sampler/col_0 sampler/col_1 sampler/col_2'
+    predictors = 'sampler_data/sample_0'
+    predictor_cols = '1 2'
     response = values/g_values
   []
 []

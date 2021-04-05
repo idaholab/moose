@@ -25,8 +25,14 @@ PolynomialRegressionTrainer::validParams()
       "column with 'sampler/col_<index>'.");
   params.addParam<std::vector<ReporterName>>(
       "predictors",
-      "Reporter values used as the independent random variables, sampler columns can be used with "
-      "'sampler/col_<index>' syntax. Default is to use all sampler columns.");
+      std::vector<ReporterName>(),
+      "Reporter values used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  params.addParam<std::vector<unsigned int>>(
+      "predictor_cols",
+      std::vector<unsigned int>(),
+      "Sampler columns used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
   MooseEnum rtype("ols=0 ridge=1");
   params.addRequiredParam<MooseEnum>(
       "regression_type", rtype, "The type of regression to perform.");
@@ -39,9 +45,12 @@ PolynomialRegressionTrainer::validParams()
 
 PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _rval(getTrainingData<Real>("response")),
-    _pvals(getTrainingDataVector<Real>("predictors", true)),
-    _n_dims(_pvals.size()),
+    _sampler_row(getSamplerData()),
+    _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
+    _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
+    _n_dims((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
+                                               : (_pvals.size() + _pcols.size())),
     _regression_type(getParam<MooseEnum>("regression_type")),
     _penalty(getParam<Real>("penalty")),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
@@ -54,6 +63,17 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
     _matrix(_n_poly_terms, _n_poly_terms),
     _rhs(_n_poly_terms)
 {
+  const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
+  for (unsigned int i = 0; i < pnames.size(); ++i)
+    _pvals[i] = &getTrainingData<Real>(pnames[i]);
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_pvals.empty() && _pcols.empty())
+  {
+    _pcols.resize(_sampler.getNumberOfCols());
+    std::iota(_pcols.begin(), _pcols.end(), 0);
+  }
+
   _coeff.resize(_n_poly_terms);
 
   // Throwing a warning if the penalty parameter is set with OLS regression
@@ -72,8 +92,11 @@ PolynomialRegressionTrainer::train()
   // system
   DenseMatrix<Real> data_pow(_n_dims, _max_degree + 1);
   for (unsigned int d = 0; d < _n_dims; ++d)
+  {
+    const Real val = d < _pvals.size() ? *_pvals[d] : _sampler_row[_pcols[d - _pvals.size()]];
     for (unsigned int i = 0; i <= _max_degree; ++i)
-      data_pow(d, i) = pow(*_pvals[d], i);
+      data_pow(d, i) = pow(val, i);
+  }
 
   for (unsigned int i = 0; i < _n_poly_terms; ++i)
   {

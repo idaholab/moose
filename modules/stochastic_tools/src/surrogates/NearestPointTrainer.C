@@ -23,8 +23,14 @@ NearestPointTrainer::validParams()
       "column with 'sampler/col_<index>'.");
   params.addParam<std::vector<ReporterName>>(
       "predictors",
-      "Reporter values used as the independent random variables, sampler columns can be used with "
-      "'sampler/col_<index>' syntax. Default is to use all sampler columns.");
+      std::vector<ReporterName>(),
+      "Reporter values used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
+  params.addParam<std::vector<unsigned int>>(
+      "predictor_cols",
+      std::vector<unsigned int>(),
+      "Sampler columns used as the independent random variables, If 'predictors' and "
+      "'predictor_cols' are both empty, all sampler columns are used.");
 
   return params;
 }
@@ -32,10 +38,22 @@ NearestPointTrainer::validParams()
 NearestPointTrainer::NearestPointTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sample_points(declareModelData<std::vector<std::vector<Real>>>("_sample_points")),
-    _response(getTrainingData<Real>("response")),
-    _predictors(getTrainingDataVector<Real>("predictors", true))
+    _sampler_row(getSamplerData()),
+    _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
+    _predictor_cols(getParam<std::vector<unsigned int>>("predictor_cols"))
 {
-  _sample_points.resize(_predictors.size() + 1);
+  for (const ReporterName & rname : getParam<std::vector<ReporterName>>("predictors"))
+    _predictors.push_back(&getTrainingData<Real>(rname));
+
+  // If predictors and predictor_cols are empty, use all sampler columns
+  if (_predictors.empty() && _predictor_cols.empty())
+  {
+    _predictor_cols.resize(_sampler.getNumberOfCols());
+    std::iota(_predictor_cols.begin(), _predictor_cols.end(), 0);
+  }
+
+  // Resize sample points to number of predictors
+  _sample_points.resize(_predictors.size() + _predictor_cols.size() + 1);
 }
 
 void
@@ -49,8 +67,14 @@ NearestPointTrainer::preTrain()
 void
 NearestPointTrainer::train()
 {
-  for (unsigned int i = 0; i < _predictors.size(); ++i)
-    _sample_points[i][_local_row] = *_predictors[i];
+  unsigned int d = 0;
+  // Get predictors from reporter values
+  for (const auto & val : _predictors)
+    _sample_points[d++][_local_row] = *val;
+  // Get predictors from sampler
+  for (const auto & col : _predictor_cols)
+    _sample_points[d++][_local_row] = _sampler_row[col];
+
   _sample_points.back()[_local_row] = _response;
 }
 

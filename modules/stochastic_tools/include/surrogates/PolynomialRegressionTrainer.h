@@ -25,11 +25,17 @@ public:
   virtual void postTrain() override;
 
 private:
+  /// Data from the current sampler row
+  const std::vector<Real> & _sampler_row;
+
   /// Response value
   const Real & _rval;
 
-  /// Predictor values
-  const std::vector<const Real *> _pvals;
+  /// Predictor values from reporters
+  std::vector<const Real *> _pvals;
+
+  /// Columns from sampler for predictors
+  std::vector<unsigned int> _pcols;
 
   /// Number of dimensions.
   const unsigned int _n_dims;

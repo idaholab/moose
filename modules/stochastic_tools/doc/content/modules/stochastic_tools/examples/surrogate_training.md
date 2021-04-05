@@ -117,7 +117,7 @@ Training objects take in sampler and results data to train the surrogate model. 
 
 !listing examples/surrogates/nearest_point_training.i block=Trainers
 
-In the `nearest_point_avg` trainer, we see that the predictor values are from sampler columns, given with the syntax `sampler/col_<index>`. In the `nearest_point_max` trainer, the predictor names were not specified, which indicates that all the sampler columns are used as predictors.
+In the `nearest_point_avg` trainer, we see that the predictor values are from a VPP and sampler columns. In the `nearest_point_max` trainer, the predictor names were not specified, which indicates that all the sampler columns are used as predictors.
 [StochasticReporter.md] defines the reporter name by the name of the transfer executing the transfer, which is why we know that the values names are `data` in this example.
 
 ### Outputting Training Data

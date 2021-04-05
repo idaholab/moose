@@ -20,11 +20,11 @@ The trainer requires the input of a sampler, so that it understands how many dat
 
 ### Constructor
 
-All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data and gathering response/predictor data. All the data meant to be saved and gathered is defined in the constructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variable `_sample_points` is declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data. The variables `_response` and `_predictors` refer to the data being used for training, these are in the form of reporter values and gathered through the `getTrainingData` API.
+All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data and gathering response/predictor data. All the data meant to be saved and gathered is defined in the constructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variable `_sample_points` is declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data. The variables `_response`, `_predictors`, and `_predictor_cols` refer to the data being used for training. `_response` and `_predictors` are in the form of reporter values and gathered through the `getTrainingData` API. `_predictor_cols` refer to the sampler column being used for training.
 
 !listing NearestPointTrainer.C re=NearestPointTrainer::NearestPointTrainer.*?^}
 
-The member variables `_sample_points`, `_response`, and `_predictors` are defined in the header file:
+The member variables `_sample_points`, `_response`, `_predictors`, and `_predictor_cols` are defined in the header file:
 
 !listing NearestPointTrainer.h start=protected end=}; include-start=False
 

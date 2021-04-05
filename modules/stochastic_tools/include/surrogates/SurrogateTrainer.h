@@ -135,20 +135,6 @@ protected:
   // TRAINING_DATA_BEGIN
 
   /*
-   * Get a reference to training data given a parameter
-   */
-  template <typename T>
-  const T & getTrainingData(const std::string & param);
-
-  /*
-   * Get a reference to a vector of training data given a parameter
-   * @param use_sampler_default determines whether to use sampler columns if param is invalid
-   */
-  template <typename T>
-  std::vector<const T *> getTrainingDataVector(const std::string & param,
-                                               bool use_sampler_default = false);
-
-  /*
    * Get a reference to training data given a reporter name
    */
   template <typename T>
@@ -184,72 +170,21 @@ private:
 
 template <typename T>
 const T &
-SurrogateTrainer::getTrainingData(const std::string & param)
-{
-  return getTrainingData<T>(getParam<ReporterName>(param));
-}
-
-template <typename T>
-std::vector<const T *>
-SurrogateTrainer::getTrainingDataVector(const std::string & param, bool use_sampler_default)
-{
-  std::vector<const T *> vals;
-  if (isParamValid(param) || !use_sampler_default)
-  {
-    for (const ReporterName & rname : getParam<std::vector<ReporterName>>(param))
-      vals.push_back(&getTrainingData<T>(rname));
-  }
-  else
-  {
-    if (!std::is_same<T, Real>::value)
-      mooseError("Training data values must be type Real if taken from sampler.");
-    for (const Real & col : _row_data)
-      vals.push_back(&col);
-  }
-
-  return vals;
-}
-
-template <typename T>
-const T &
 SurrogateTrainer::getTrainingData(const ReporterName & rname)
 {
-  if (rname.getObjectName() == "sampler")
+  auto it = _training_data.find(rname);
+  if (it != _training_data.end())
   {
-    if (!std::is_same<T, Real>::value)
-      mooseError("Training data values must be type Real if taken from sampler.");
-
-    std::size_t ind = rname.getValueName().find("_");
-    if (ind != std::string::npos)
-    {
-      unsigned int col = MooseUtils::stringToInteger(rname.getValueName().substr(ind + 1), true);
-      if (col >= _sampler.getNumberOfCols())
-        mooseError("Training data from sampler ",
-                   rname,
-                   " is requesting an index greater than the number of sampler columns (",
-                   _sampler.getNumberOfCols(),
-                   ").");
-      return _row_data[col];
-    }
-    else
-      mooseError("Predictor data ", rname, " from sampler is in the wrong format.");
+    auto data = std::dynamic_pointer_cast<TrainingData<T>>(it->second);
+    if (!data)
+      mooseError("Reporter value ", rname, " already exists but is of different type.");
+    return data->get();
   }
   else
   {
-    auto it = _training_data.find(rname);
-    if (it != _training_data.end())
-    {
-      auto data = std::dynamic_pointer_cast<TrainingData<T>>(it->second);
-      if (!data)
-        mooseError("Reporter value ", rname, " already exists but is of different type.");
-      return data->get();
-    }
-    else
-    {
-      const std::vector<T> & rval = getReporterValueByName<std::vector<T>>(rname);
-      _training_data[rname] = std::make_shared<TrainingData<T>>(rval);
-      return std::dynamic_pointer_cast<TrainingData<T>>(_training_data[rname])->get();
-    }
+    const std::vector<T> & rval = getReporterValueByName<std::vector<T>>(rname);
+    _training_data[rname] = std::make_shared<TrainingData<T>>(rval);
+    return std::dynamic_pointer_cast<TrainingData<T>>(_training_data[rname])->get();
   }
 }
 

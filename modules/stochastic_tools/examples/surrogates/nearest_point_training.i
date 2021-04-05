@@ -51,12 +51,21 @@
   []
 []
 
+[VectorPostprocessors]
+  [sampler_data]
+    type = SamplerData
+    sampler = grid
+    parallel_type = DISTRIBUTED
+  []
+[]
+
 [Trainers]
   [nearest_point_avg]
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    predictors = 'sampler/col_0 sampler/col_1 sampler/col_2 sampler/col_3'
+    predictors = 'sampler_data/grid_0'
+    predictor_cols = '1 2 3'
     response = results/data:avg:value
   []
   [nearest_point_max]

@@ -36,9 +36,7 @@ There are four functions that derived classes can call to gather training data:
 
 !listing SurrogateTrainer.h start=TRAINING_DATA_BEGIN end=TRAINING_DATA_END include-start=False
 
-- `getTrainingData<T>(const std::string & param)` will get training data from a reporter value of type `std::vector<T>`, whose name is defined by the `param` parameter of type `ReporterName`.
-- `getTrainingDataVector<T>(const std::string & param)` will get a vector of training data from a reporter value of type `std::vector<T>`, whose names are defined by the `param` parameter of type `std::vector<ReporterName>`.
-- `getTrainingData<T>(const ReporterName & rname)` will get a vector of training data from a reporter value of type `std::vector<T>`, whose name is defined by `rname`. One can retrieve a sampler column with the `sampler/col_<index>` syntax, but `T` must be `Real`.
+- `getTrainingData<T>(const ReporterName & rname)` will get a vector of training data from a reporter value of type `std::vector<T>`, whose name is defined by `rname`.
 - `getSamplerData()` will simply return a vector of the sampler row.
 
 
