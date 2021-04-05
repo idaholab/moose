@@ -137,7 +137,7 @@
     type = RunException
     input = 'material_output_order.i'
     cli_args = "Modules/TensorMechanics/Master/material_output_family='LAGRANGE MONOMIAL'"
-    expect_err = 'The number of family assigned to material outputs must be: 0 to be assigned CONSTANT; 1 to assign all outputs the same value, or the same size as the number of generate outputs listed.'
+    expect_err = 'The number of families assigned to material outputs must be: 0 to be assigned MONOMIAL; 1 to assign all outputs the same value, or the same size as the number of generate outputs listed.'
     prereq = 'material_output_order_empty'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an the material outputs and or families do not match the number of material outputs.'

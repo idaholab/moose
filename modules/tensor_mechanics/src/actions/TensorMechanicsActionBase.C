@@ -184,8 +184,7 @@ TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & par
 MultiMooseEnum
 TensorMechanicsActionBase::materialOutputOrders()
 {
-  std::string orders = "";
-  orders = AddAuxVariableAction::getAuxVariableOrders().getRawNames();
+  auto orders = AddAuxVariableAction::getAuxVariableOrders().getRawNames();
 
   return MultiMooseEnum(orders);
 }
@@ -193,8 +192,7 @@ TensorMechanicsActionBase::materialOutputOrders()
 MultiMooseEnum
 TensorMechanicsActionBase::materialOutputFamilies()
 {
-  std::string families = "";
-  families = AddAuxVariableAction::getAuxVariableFamilies().getRawNames();
+  auto families = AddAuxVariableAction::getAuxVariableFamilies().getRawNames();
 
   return MultiMooseEnum(families);
 }
