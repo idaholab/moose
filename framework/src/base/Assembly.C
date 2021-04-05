@@ -267,6 +267,13 @@ Assembly::~Assembly()
   delete _qrule_msm;
 }
 
+const MooseArray<Real> &
+Assembly::JxWNeighbor() const
+{
+  _need_JxW_neighbor = true;
+  return _current_JxW_neighbor;
+}
+
 void
 Assembly::buildFE(FEType type) const
 {

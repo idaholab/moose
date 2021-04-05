@@ -458,11 +458,7 @@ public:
    * Returns the reference to the transformed jacobian weights on a current face
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxWNeighbor() const
-  {
-    _need_JxW_neighbor = true;
-    return _current_JxW_neighbor;
-  }
+  const MooseArray<Real> & JxWNeighbor() const;
 
   /**
    * Returns the reference to the current quadrature points being used on the neighbor face
