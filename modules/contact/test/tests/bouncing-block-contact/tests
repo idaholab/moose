@@ -187,4 +187,23 @@
       allow_test_objects = True
     []
   []
+  [weighted_gap]
+    requirement = 'The system shall support a variationally consistent weighted gap implementation of the zero-penetration contact constraint'
+    issues = '#16961'
+    [equal_order]
+      type = 'Exodiff'
+      input = frictionless-weighted-gap.i
+      exodiff = 'frictionless-weighted-gap_out.e'
+      detail = 'using equal, first order bases for displacements and the lagrange multiplier'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+    []
+    [mixed_order]
+      type = 'Exodiff'
+      input = frictionless-weighted-gap-mixed-basis.i
+      exodiff = 'frictionless-weighted-gap-mixed-basis_out.e'
+      detail = 'using a second order basis for displacements and a first order basis for the lagrange multiplier'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 Postprocessors/active=''"
+      ad_mode = 'sparse'
+    []
+  []
 []
