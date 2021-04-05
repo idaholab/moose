@@ -61,6 +61,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [extensions/style.md] | Command for setting text styling. |
 | [extensions/ifelse.md] | Commands for if/elif/else statements in markdown. |
 | [extensions/template.md] | Tools for building MooseDocs markdown templates. |
+| [extensions/datetime.md] | Functions for adding date/time information. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |

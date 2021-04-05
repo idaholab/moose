@@ -33,6 +33,7 @@ Extensions:
     MooseDocs.extensions.devel: default
     MooseDocs.extensions.package: default
     MooseDocs.extensions.alert: default
+    MooseDocs.extensions.datetime: default
     MooseDocs.extensions.katex:
         macros:
             \RR: \mathbb{R}

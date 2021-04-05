@@ -92,12 +92,17 @@
     [modal]
       type = PythonUnitTest
       input = test_modal.py
-      detail = "create modal website content, and"
+      detail = "create modal website content,"
     []
     [katex]
       type = PythonUnitTest
       input = test_katex.py
-      detail = "support equations."
+      detail = "support equations, and"
+    []
+    [datetime]
+      type = PythonUnitTest
+      input = test_datetime.py
+      detail = "include date/time operations."
     []
   []
 []

@@ -56,6 +56,7 @@ Extensions:
     MooseDocs.extensions.pdf: default
     MooseDocs.extensions.pysyntax: default
     MooseDocs.extensions.modal: default
+    MooseDocs.extensions.datetime: default
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:
