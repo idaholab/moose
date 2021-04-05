@@ -25,7 +25,8 @@ ApplyPenetrationConstraintLMMechanicalContact::validParams()
   InputParameters params = NodeFaceConstraint::validParams();
   params.set<bool>("use_displaced_mesh") = true;
 
-  params.addParam<Real>("c", 1, "Parameter for balancing the size of the gap and contact pressure");
+  params.addParam<Real>(
+      "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
 
   params.addClassDescription(
       "Implements the KKT conditions for normal contact using an NCP "
