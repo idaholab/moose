@@ -21,5 +21,6 @@ public:
   virtual ~ThreadedGeneralUserObject() = default;
   virtual void threadJoin(const UserObject &) override;
   virtual void subdomainSetup() override{};
-};
 
+  bool needThreadedCopy() const override final { return true; }
+};

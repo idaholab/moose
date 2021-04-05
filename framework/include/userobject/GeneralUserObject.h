@@ -50,22 +50,26 @@ public:
   /**
    * Store dependency among same object types for proper execution order
    */
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                           unsigned int index = 0);
-  virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+  const PostprocessorValue & getPostprocessorValue(const std::string & name,
+                                                   unsigned int index = 0) const override final;
+  const PostprocessorValue &
+  getPostprocessorValueByName(const PostprocessorName & name) const override final;
 
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
-  virtual const VectorPostprocessorValue &
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name,
+                              const std::string & vector_name) const override final;
+  const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name) override;
+                                    const std::string & vector_name) const override final;
 
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(
-      const std::string & name, const std::string & vector_name, bool use_broadcast) override;
-  virtual const VectorPostprocessorValue &
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name,
+                              const std::string & vector_name,
+                              bool use_broadcast) const override final;
+  const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name,
-                                    bool use_broadcast) override;
+                                    bool use_broadcast) const override final;
 
   ///@}
 
@@ -73,6 +77,6 @@ protected:
   virtual void addReporterDependencyHelper(const ReporterName & state_name) override;
 
 protected:
-  std::set<std::string> _depend_vars;
+  mutable std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 };

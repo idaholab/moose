@@ -585,13 +585,16 @@ InputParameters::getAutoBuildVectors() const
 }
 
 std::string
-InputParameters::type(const std::string & name)
+InputParameters::type(const std::string & name) const
 {
+  if (!_values.count(name))
+    mooseError("Parameter \"", name, "\" not found.\n\n", *this);
+
   if (_coupled_vars.find(name) != _coupled_vars.end())
     return "std::vector<VariableName>";
-  else if (_params.count(name) > 0 && !_params[name]._custom_type.empty())
-    return _params[name]._custom_type;
-  return _values[name]->type();
+  else if (_params.count(name) > 0 && !_params.at(name)._custom_type.empty())
+    return _params.at(name)._custom_type;
+  return _values.at(name)->type();
 }
 
 std::string

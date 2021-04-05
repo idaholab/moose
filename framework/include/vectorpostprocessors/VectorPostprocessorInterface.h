@@ -54,7 +54,7 @@ public:
    * getVectorPostprocessorValueOldByName
    */
   virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
+  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) const;
 
   /**
    * DEPRECATED: Use the new version where you need to specify whether or
@@ -75,7 +75,7 @@ public:
    */
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name);
+                                    const std::string & vector_name) const;
 
   /**
    * DEPRECATED: Use the new version where you need to specify whether or
@@ -88,8 +88,8 @@ public:
    *
    * see getVectorPostprocessorValue
    */
-  const VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
-                                                                  const std::string & vector_name);
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name) const;
 
   /**
    * DEPRECATED: Use the new version where you need to specify whether or
@@ -109,7 +109,7 @@ public:
    */
   const VectorPostprocessorValue &
   getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
-                                       const std::string & vector_name);
+                                       const std::string & vector_name) const;
 
   /**
    * Retrieve the value of a VectorPostprocessor
@@ -128,7 +128,7 @@ public:
    * getVectorPostprocessorValueOldByName
    */
   virtual const VectorPostprocessorValue & getVectorPostprocessorValue(
-      const std::string & name, const std::string & vector_name, bool needs_broadcast);
+      const std::string & name, const std::string & vector_name, bool needs_broadcast) const;
 
   /**
    * Retrieve the value of the VectorPostprocessor
@@ -146,8 +146,10 @@ public:
    * see getVectorPostprocessorValue getVectorPostprocessorValueOldByName
    * getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(
-      const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name,
+                                    bool needs_broadcast) const;
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -160,7 +162,7 @@ public:
    * see getVectorPostprocessorValue
    */
   virtual const VectorPostprocessorValue & getVectorPostprocessorValueOld(
-      const std::string & name, const std::string & vector_name, bool needs_broadcast);
+      const std::string & name, const std::string & vector_name, bool needs_broadcast) const;
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -177,8 +179,10 @@ public:
    *
    * see getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueOldByName(
-      const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
+                                       const std::string & vector_name,
+                                       bool needs_broadcast) const;
 
   /**
    * Return the scatter value for the post processor
@@ -192,7 +196,8 @@ public:
    * @return The reference to the current scatter value
    */
   virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
+  getScatterVectorPostprocessorValue(const std::string & name,
+                                     const std::string & vector_name) const;
 
   /**
    * Return the scatter value for the post processor
@@ -207,7 +212,7 @@ public:
    */
   virtual const ScatterVectorPostprocessorValue &
   getScatterVectorPostprocessorValueByName(const std::string & name,
-                                           const std::string & vector_name);
+                                           const std::string & vector_name) const;
 
   /**
    * Return the old scatter value for the post processor
@@ -221,7 +226,8 @@ public:
    * @return The reference to the old scatter value
    */
   virtual const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
+  getScatterVectorPostprocessorValueOld(const std::string & name,
+                                        const std::string & vector_name) const;
 
   /**
    * Return the old scatter value for the post processor
@@ -236,7 +242,7 @@ public:
    */
   virtual const ScatterVectorPostprocessorValue &
   getScatterVectorPostprocessorValueOldByName(const std::string & name,
-                                              const std::string & vector_name);
+                                              const std::string & vector_name) const;
 
   /**
    * Determine if the VectorPostprocessor data exists
@@ -298,7 +304,7 @@ private:
                                             const std::string & vector_name) const;
 
   /// Whether or not to force broadcasting by default
-  bool _broadcast_by_default;
+  const bool _broadcast_by_default;
 
   /// VectorPostprocessorInterface Parameters
   const InputParameters & _vpi_params;
@@ -307,7 +313,7 @@ private:
   FEProblemBase & _vpi_feproblem;
 
   /// Thread ID
-  THREAD_ID _vpi_tid;
+  const THREAD_ID _vpi_tid;
 
   /// Reference to the ReporterData that stores the vector
   ReporterData & _vpi_reporter_data;
