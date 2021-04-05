@@ -280,6 +280,14 @@ public:
                                                                                   vector_name);
   }
 
+  /**
+   * Whether or not a threaded copy of this object is needed when obtaining it in
+   * another object, like via the UserObjectInterface.
+   *
+   * Derived classes should override this as needed.
+   */
+  virtual bool needThreadedCopy() const { return false; }
+
 protected:
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
