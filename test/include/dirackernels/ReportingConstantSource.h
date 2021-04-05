@@ -26,8 +26,8 @@ public:
   virtual Real computeQpResidual();
 
 protected:
-  VariableValue & _shared_var;
-  std::vector<Real> _point_param;
+  const VariableValue & _shared_var;
+  const std::vector<Real> _point_param;
   Point _p;
-  Real _factor;
+  const Real _factor;
 };

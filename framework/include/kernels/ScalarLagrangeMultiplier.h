@@ -47,5 +47,5 @@ protected:
   unsigned int _lambda_var;
 
   /// Lagrange multiplier variable value
-  VariableValue & _lambda;
+  const VariableValue & _lambda;
 };

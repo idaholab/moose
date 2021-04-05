@@ -102,7 +102,7 @@ private:
   std::vector<unsigned int> _scalar_index;
 
   /// Vector of pointers to scalar variables values
-  std::vector<Real *> _scalar_vals;
+  std::vector<const Real *> _scalar_vals;
 
   /// Stores indices into _addr that are connected to Functions this libMesh::ParsedFunction is using
   std::vector<unsigned int> _function_index;

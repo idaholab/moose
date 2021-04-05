@@ -44,7 +44,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   : ODEKernel(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
-    _nargs(coupledScalarComponents("args")),
+    _nargs(isCoupledScalar("args") ? coupledScalarComponents("args") : 0),
     _args(_nargs),
     _arg_names(_nargs),
     _func_dFdarg(_nargs),

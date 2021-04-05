@@ -20,7 +20,7 @@ ExplicitODE::validParams()
 }
 
 ExplicitODE::ExplicitODE(const InputParameters & parameters)
-  : AuxScalarKernel(parameters), _lambda(getParam<Real>("lambda"))
+  : AuxScalarKernel(parameters), _u_old(uOld()), _lambda(getParam<Real>("lambda"))
 {
 }
 

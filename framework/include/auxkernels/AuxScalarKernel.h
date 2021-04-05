@@ -72,6 +72,13 @@ public:
   virtual bool isActive();
 
 protected:
+  /**
+   * Retrieves the old value of the variable that this AuxScalarKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const VariableValue & uOld() const;
+
   SubProblem & _subproblem;
   SystemBase & _sys;
 
@@ -83,8 +90,7 @@ protected:
 
   unsigned int _i;
 
-  VariableValue & _u;
-  VariableValue & _u_old;
+  const VariableValue & _u;
 
   /// Depend AuxKernels
   std::set<std::string> _depend_vars;
@@ -98,4 +104,3 @@ protected:
    */
   virtual Real computeValue() = 0;
 };
-

@@ -39,9 +39,6 @@ protected:
   /// Whether out-of-plane strain scalar variables are coupled
   const bool _scalar_out_of_plane_strain_coupled;
 
-  /// Number of out-of-plane strain scalar variables
-  unsigned int _nscalar_strains;
-
   ///{@ Current and old values of the out-of-plane strain scalar variable
   std::vector<const ADVariableValue *> _scalar_out_of_plane_strain;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;

@@ -27,7 +27,7 @@ protected:
   /// The time level of the coupled variable
   MooseEnum _lag;
   /// Coupled variable
-  VariableValue & _coupled_val;
+  const VariableValue & _coupled_val;
 
   /// The component of the scalar variable
   unsigned int _component;
