@@ -30,8 +30,7 @@ public:
 
 protected:
   virtual void computeJacobian() override;
-  virtual void computeFaceJacobian(BoundaryID bnd_id) override;
+  virtual void computeFaceJacobian(BoundaryID bnd_id, const Elem * lower_d_elem) override;
   virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
 };
-

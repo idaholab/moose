@@ -141,6 +141,10 @@ MooseMesh::validParams()
                                 "KDTree construction becomes faster but the nearest neighbor search"
                                 "becomes slower.");
 
+  params.addParam<bool>("build_all_side_lowerd_mesh",
+                        false,
+                        "True to build the lower-dimensional mesh for all sides.");
+
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
   // derived types that do so.
   params.addPrivateParam<bool>("_mesh_generator_mesh", false);
@@ -433,6 +437,120 @@ MooseMesh::update()
   buildElemIDInfo();
 
   _face_info_dirty = true;
+}
+
+void
+MooseMesh::buildLowerDMesh()
+{
+  auto & mesh = getMesh();
+
+  if (!mesh.is_serial())
+    mooseError(
+        "Hybrid finite element method must use replicated mesh.\nCurrently lower-dimensional mesh "
+        "does not support mesh re-partitioning and a debug assertion being hit related with "
+        "neighbors of lower-dimensional element, with distributed mesh.");
+
+  // maximum number of sides of all elements
+  unsigned int max_n_sides = 0;
+
+  // remove existing lower-d element first
+  std::set<Elem *> deleteable_elems;
+  for (auto & elem : mesh.element_ptr_range())
+    if (elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID ||
+        elem->subdomain_id() == Moose::BOUNDARY_SIDE_LOWERD_ID)
+      deleteable_elems.insert(elem);
+    else if (elem->n_sides() > max_n_sides)
+      max_n_sides = elem->n_sides();
+
+  for (auto & elem : deleteable_elems)
+    mesh.delete_elem(elem);
+
+  mesh.comm().max(max_n_sides);
+
+  deleteable_elems.clear();
+
+  dof_id_type max_elem_id = mesh.max_elem_id();
+  unique_id_type max_unique_id = mesh.parallel_max_unique_id();
+
+  std::vector<Elem *> side_elems;
+  _higher_d_elem_side_to_lower_d_elem.clear();
+  for (const auto & elem : mesh.active_element_ptr_range())
+  {
+    // skip existing lower-d elements
+    if (elem->interior_parent())
+      continue;
+
+    for (const auto side : elem->side_index_range())
+    {
+      Elem * neig = elem->neighbor_ptr(side);
+
+      bool build_side = false;
+      if (!neig)
+        build_side = true;
+      else if (!neig->is_remote())
+      {
+        if (mesh.is_replicated() || elem->processor_id() == comm().rank() ||
+            neig->processor_id() == comm().rank())
+        {
+          if (!neig->active())
+            build_side = true;
+          else if (neig->level() == elem->level() && elem->id() < neig->id())
+            build_side = true;
+        }
+      }
+
+      if (build_side)
+      {
+        std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, false));
+
+        // The side will be added with the same processor id as the parent.
+        side_elem->processor_id() = elem->processor_id();
+
+        // Add subdomain ID
+        if (neig)
+          side_elem->subdomain_id() = Moose::INTERNAL_SIDE_LOWERD_ID;
+        else
+          side_elem->subdomain_id() = Moose::BOUNDARY_SIDE_LOWERD_ID;
+
+        // set ids consistently across processors (these ids will be temporary)
+        side_elem->set_id(max_elem_id + elem->id() * max_n_sides + side);
+        side_elem->set_unique_id(max_unique_id + elem->id() * max_n_sides + side);
+
+        // Also assign the side's interior parent, so it is always
+        // easy to figure out the Elem we came from.
+        // Note: the interior parent could be a ghost element.
+        side_elem->set_interior_parent(elem);
+
+        side_elems.push_back(side_elem.release());
+
+        // add link between higher d element to lower d element
+        auto pair = std::make_pair(elem, side);
+        auto link = std::make_pair(pair, side_elems.back());
+        auto ilink = std::make_pair(side_elems.back(), side);
+        _lower_d_elem_to_higher_d_elem_side.insert(ilink);
+        _higher_d_elem_side_to_lower_d_elem.insert(link);
+      }
+    }
+  }
+
+  // finally, add the lower-dimensional element to the mesh
+  // Note: lower-d interior element will exist on a processor if its associated interior
+  //       parent exists on a processor whether or not being a ghost. Lower-d elements will
+  //       get its interior parent's processor id.
+  for (auto & elem : side_elems)
+    mesh.add_elem(elem);
+
+  _mesh_subdomains.insert(Moose::INTERNAL_SIDE_LOWERD_ID);
+  mesh.subdomain_name(Moose::INTERNAL_SIDE_LOWERD_ID) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN";
+  _mesh_subdomains.insert(Moose::BOUNDARY_SIDE_LOWERD_ID);
+  mesh.subdomain_name(Moose::BOUNDARY_SIDE_LOWERD_ID) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN";
+
+  // we do all the stuff in prepare_for_use such as renumber_nodes_and_elements(),
+  // update_parallel_id_counts(), cache_elem_dims(), etc. except partitioning here.
+  const bool skip_partitioning_old = mesh.skip_partitioning();
+  mesh.skip_partitioning(true);
+  mesh.prepare_for_use();
+  mesh.skip_partitioning(skip_partitioning_old);
 }
 
 const Node &
@@ -1156,6 +1274,17 @@ MooseMesh::getLowerDElem(const Elem * elem, unsigned short int side) const
     return it->second;
   else
     return nullptr;
+}
+
+unsigned int
+MooseMesh::getHigherDSide(const Elem * elem) const
+{
+  auto it = _lower_d_elem_to_higher_d_elem_side.find(elem);
+
+  if (it != _lower_d_elem_to_higher_d_elem_side.end())
+    return it->second;
+  else
+    return libMesh::invalid_uint;
 }
 
 std::vector<BoundaryID>
@@ -2305,6 +2434,9 @@ MooseMesh::init()
     if (_app.isSplitMesh())
       getMesh().skip_partitioning(false);
   }
+
+  if (getParam<bool>("build_all_side_lowerd_mesh"))
+    buildLowerDMesh();
 }
 
 unsigned int
