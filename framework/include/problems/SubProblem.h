@@ -341,6 +341,7 @@ public:
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
+  virtual void addResidualLower(THREAD_ID tid) = 0;
 
   virtual void cacheResidual(THREAD_ID tid) = 0;
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
@@ -351,6 +352,7 @@ public:
 
   virtual void addJacobian(THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
+  virtual void addJacobianNeighborLowerD(THREAD_ID tid) = 0;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -406,6 +408,7 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   const std::vector<Point> & physical_points,
                                   THREAD_ID tid) = 0;
+  virtual void reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   /**
    * fills the VariableValue arrays for scalar variables from the solution vector
    * @param tid The thread id

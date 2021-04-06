@@ -144,7 +144,7 @@ ComputeFullJacobianThread::computeJacobian()
 }
 
 void
-ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
+ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem * lower_d_elem)
 {
   auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
@@ -159,19 +159,34 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     const auto ivar = ivariable.number();
     const auto jvar = jvariable.number();
 
-    if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-        _ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
+    if (!ivariable.activeOnSubdomain(_subdomain))
+      continue;
+
+    // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
+    // any)
+    if (lower_d_elem)
     {
-      // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
-      // any)
-      const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
-      for (const auto & bc : bcs)
-        if (bc->shouldApply() && bc->variable().number() == ivar && bc->isImplicit())
-        {
-          bc->prepareShapes(jvar);
-          bc->computeOffDiagJacobian(jvar);
-        }
+      auto lower_d_subdomain = lower_d_elem->subdomain_id();
+      if (!jvariable.activeOnSubdomain(_subdomain) &&
+          !jvariable.activeOnSubdomain(lower_d_subdomain))
+        continue;
     }
+    else
+    {
+      if (!jvariable.activeOnSubdomain(_subdomain))
+        continue;
+    }
+
+    if (!_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
+      continue;
+
+    const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+    for (const auto & bc : bcs)
+      if (bc->shouldApply() && bc->variable().number() == ivar && bc->isImplicit())
+      {
+        bc->prepareShapes(jvar);
+        bc->computeOffDiagJacobian(jvar);
+      }
   }
 
   /// done only when nonlocal integrated_bcs exist in the system
@@ -256,9 +271,11 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
       const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg : dgks)
       {
-
+        // this check may skip some couplings...
         if (dg->variable().number() == ivar && dg->isImplicit() &&
-            dg->hasBlocks(neighbor->subdomain_id()) && jvariable.activeOnSubdomain(_subdomain))
+            dg->hasBlocks(neighbor->subdomain_id()) &&
+            (jvariable.activeOnSubdomain(_subdomain) ||
+             jvariable.activeOnSubdomain(Moose::INTERNAL_SIDE_LOWERD_ID)))
         {
           dg->prepareShapes(jvar);
           dg->prepareNeighborShapes(jvar);

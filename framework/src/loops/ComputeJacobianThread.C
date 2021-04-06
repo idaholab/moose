@@ -92,7 +92,7 @@ ComputeJacobianThread::computeJacobian()
 }
 
 void
-ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
+ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem *)
 {
   const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & bc : bcs)
@@ -249,7 +249,13 @@ ComputeJacobianThread::onBoundary(const Elem * elem,
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-    computeFaceJacobian(bnd_id);
+    computeFaceJacobian(bnd_id, lower_d_elem);
+
+    if (lower_d_elem)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addJacobianNeighborLowerD(_tid);
+    }
   }
 }
 
@@ -267,7 +273,7 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level()))
     {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
 
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
       // still remember to swap back during stack unwinding.
@@ -281,7 +287,7 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighbor(_tid);
+        _fe_problem.addJacobianNeighborLowerD(_tid);
       }
     }
   }

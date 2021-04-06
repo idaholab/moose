@@ -9,24 +9,18 @@
 
 #pragma once
 
-#include "ArrayKernel.h"
+#include "ArrayIntegratedBC.h"
 
-class ArrayCoupledForce : public ArrayKernel
+class ArrayNeumannBC : public ArrayIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  ArrayCoupledForce(const InputParameters & parameters);
+  ArrayNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual void computeQpResidual(RealEigenVector & residual) override;
 
-  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
-
-private:
-  const bool _is_v_array;
-  const unsigned int _v_var;
-  const VariableValue * const _v;
-  const ArrayVariableValue * const _v_array;
-  const RealEigenVector _coef;
+  /// Values of grad(u) on the boundary.
+  const RealEigenVector _value;
 };

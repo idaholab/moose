@@ -82,6 +82,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule_face(nullptr),
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
+    _need_JxW_neighbor(false),
     _qrule_msm(nullptr),
     _current_qrule_lower(nullptr),
 
@@ -264,6 +265,13 @@ Assembly::~Assembly()
   _ad_coord.release();
 
   delete _qrule_msm;
+}
+
+const MooseArray<Real> &
+Assembly::JxWNeighbor() const
+{
+  _need_JxW_neighbor = true;
+  return _current_JxW_neighbor;
 }
 
 void
@@ -2008,13 +2016,16 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
   delete _current_neighbor_side_elem;
   _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
 
-  // first do the side element. We need to do this to at a minimum get the correct JxW for the
-  // neighbor face.
-  reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
+  if (_need_JxW_neighbor)
+  {
+    // first do the side element. We need to do this to at a minimum get the correct JxW for the
+    // neighbor face.
+    reinitFEFaceNeighbor(_current_neighbor_side_elem, *reference_points_ptr);
 
-  // compute JxW on the neighbor's face
-  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
-      (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+    // compute JxW on the neighbor's face
+    _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>(
+        (*_holder_fe_face_neighbor_helper[_current_neighbor_side_elem->dim()])->get_JxW()));
+  }
 
   reinitFEFaceNeighbor(neighbor, *reference_points_ptr);
   reinitNeighbor(neighbor, *reference_points_ptr);
@@ -3273,6 +3284,31 @@ Assembly::addResidualNeighbor(const std::vector<VectorTag> & vector_tags)
 }
 
 void
+Assembly::addResidualLower(const VectorTag & vector_tag)
+{
+  mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
+              "Non-residual tag in Assembly::addResidualLower");
+
+  auto & tag_Rl = _sub_Rl[vector_tag._type_id];
+  NumericVector<Number> & residual = _sys.getVector(vector_tag._id);
+  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  for (const auto & var : vars)
+    addResidualBlock(residual,
+                     tag_Rl[var->number()],
+                     var->dofIndicesLower(),
+                     var->arrayScalingFactor(),
+                     var->isNodal());
+}
+
+void
+Assembly::addResidualLower(const std::vector<VectorTag> & vector_tags)
+{
+  for (const auto & vector_tag : vector_tags)
+    if (_sys.hasVector(vector_tag._id))
+      addResidualLower(vector_tag);
+}
+
+void
 Assembly::addResidualScalar(const VectorTag & vector_tag)
 {
   mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
@@ -3917,6 +3953,84 @@ Assembly::addJacobianMortar()
 
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::PrimaryPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesNeighbor());
+      }
+  }
+}
+
+void
+Assembly::addJacobianNeighborLowerD()
+{
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
+         tag++)
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesLower());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerSecondary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndicesNeighbor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::LowerPrimary, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesLower(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::SecondaryLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesLower());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockMortar(Moose::PrimaryLower, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndicesLower());
+      }
+
+    for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
+         tag < _jacobian_block_neighbor_used.size();
+         tag++)
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndices(),
+                         jvar->dofIndicesNeighbor());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                         *ivar,
+                         *jvar,
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndices());
+
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),

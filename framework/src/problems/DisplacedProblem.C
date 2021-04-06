@@ -22,6 +22,7 @@
 #include "DisplacedProblem.h"
 #include "TimedPrint.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/fe_interface.h"
 
 registerMooseObject("MooseApp", DisplacedProblem);
 
@@ -751,6 +752,32 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
 }
 
 void
+DisplacedProblem::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  reinitNeighbor(elem, side, tid);
+
+  const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
+  if (lower_d_elem && lower_d_elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+    reinitLowerDElem(lower_d_elem, tid);
+  else
+  {
+    // with mesh refinement, lower-dimensional element might be defined on neighbor side
+    auto & neighbor = _assembly[tid]->neighbor();
+    auto & neighbor_side = _assembly[tid]->neighborSide();
+    const Elem * lower_d_elem_neighbor = _mesh.getLowerDElem(neighbor, neighbor_side);
+    if (lower_d_elem_neighbor &&
+        lower_d_elem_neighbor->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+    {
+      auto qps = _assembly[tid]->qPointsFaceNeighbor().stdVector();
+      std::vector<Point> reference_points;
+      FEInterface::inverse_map(
+          lower_d_elem_neighbor->dim(), FEType(), lower_d_elem_neighbor, qps, reference_points);
+      reinitLowerDElem(lower_d_elem_neighbor, tid, &qps);
+    }
+  }
+}
+
+void
 DisplacedProblem::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
   _displaced_nl.reinitScalars(tid, reinit_for_derivative_reordering);
@@ -785,6 +812,12 @@ void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
   _assembly[tid]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+}
+
+void
+DisplacedProblem::addResidualLower(THREAD_ID tid)
+{
+  _assembly[tid]->addResidualLower(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
@@ -849,6 +882,12 @@ void
 DisplacedProblem::addJacobianNeighbor(THREAD_ID tid)
 {
   _assembly[tid]->addJacobianNeighbor();
+}
+
+void
+DisplacedProblem::addJacobianNeighborLowerD(THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianNeighborLowerD();
 }
 
 void

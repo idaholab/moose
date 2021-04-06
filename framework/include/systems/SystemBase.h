@@ -737,6 +737,17 @@ public:
   }
 
   /**
+   * Get the block where a variable of this system is defined
+   *
+   * @param var_name The name of the variable
+   * @return the set of subdomain ids where the variable is active (defined)
+   */
+  const std::set<SubdomainID> & getSubdomainsForVar(const std::string & var_name) const
+  {
+    return getSubdomainsForVar(getVariable(0, var_name).number());
+  }
+
+  /**
    * Remove a vector from the system with the given name.
    */
   void removeVector(const std::string & name);

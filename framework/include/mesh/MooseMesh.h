@@ -189,6 +189,11 @@ public:
   const Elem * getLowerDElem(const Elem *, unsigned short int) const;
 
   /**
+   * Returns the local side ID of the interior parent aligned with the lower dimensional element.
+   */
+  unsigned int getHigherDSide(const Elem * elem) const;
+
+  /**
    * Returns a const reference to a set of all user-specified
    * boundary IDs.  On a distributed mesh this will *only* include
    * boundary IDs which exist on local or ghosted elements; a copy and
@@ -1384,6 +1389,7 @@ private:
   /// Holds a map from a high-order element side to its corresponding lower-d element
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;
+  std::unordered_map<const Elem *, unsigned short int> _lower_d_elem_to_higher_d_elem_side;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
@@ -1449,6 +1455,9 @@ private:
 
   /// Build extra data for faster access to the information of extra element integers
   void buildElemIDInfo();
+
+  /// Build lower-d mesh for all sides
+  void buildLowerDMesh();
 
   template <typename T>
   struct MeshType;

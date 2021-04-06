@@ -46,7 +46,7 @@ InputParameters validParams<ArrayMooseVariable>();
  * ----------------------------------------------------
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
- * RealEigenVector      Real                  RealEigenVector
+ * RealEigenVector     Real                  RealEigenVector
  *
  */
 template <typename OutputType>

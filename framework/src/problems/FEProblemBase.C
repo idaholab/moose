@@ -103,6 +103,7 @@
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/fe_interface.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -1406,6 +1407,15 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 }
 
 void
+FEProblemBase::addResidualLower(THREAD_ID tid)
+{
+  _assembly[tid]->addResidualLower(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+
+  if (_displaced_problem)
+    _displaced_problem->addResidualLower(tid);
+}
+
+void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
   _assembly[tid]->addResidualScalar(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
@@ -1489,6 +1499,14 @@ FEProblemBase::addJacobianNeighbor(THREAD_ID tid)
   _assembly[tid]->addJacobianNeighbor();
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(tid);
+}
+
+void
+FEProblemBase::addJacobianNeighborLowerD(THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianNeighborLowerD();
+  if (_displaced_problem)
+    _displaced_problem->addJacobianNeighborLowerD(tid);
 }
 
 void
@@ -1877,6 +1895,36 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID ti
     _displaced_problem->reinitNeighbor(
         _displaced_mesh->elemPtr(elem->id()), side, tid, displaced_ref_pts);
   }
+}
+
+void
+FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side, THREAD_ID tid)
+{
+  reinitNeighbor(elem, side, tid);
+
+  const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
+  if (lower_d_elem && lower_d_elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+    reinitLowerDElem(lower_d_elem, tid);
+  else
+  {
+    // with mesh refinement, lower-dimensional element might be defined on neighbor side
+    auto & neighbor = _assembly[tid]->neighbor();
+    auto & neighbor_side = _assembly[tid]->neighborSide();
+    const Elem * lower_d_elem_neighbor = _mesh.getLowerDElem(neighbor, neighbor_side);
+    if (lower_d_elem_neighbor &&
+        lower_d_elem_neighbor->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID)
+    {
+      auto qps = _assembly[tid]->qPointsFaceNeighbor().stdVector();
+      std::vector<Point> reference_points;
+      FEInterface::inverse_map(
+          lower_d_elem_neighbor->dim(), FEType(), lower_d_elem_neighbor, qps, reference_points);
+      reinitLowerDElem(lower_d_elem_neighbor, tid, &qps);
+    }
+  }
+
+  if (_displaced_problem)
+    _displaced_problem->reinitElemNeighborAndLowerD(
+        _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
 
 void
@@ -4973,10 +5021,6 @@ FEProblemBase::init()
     _eq.init();
   }
 
-  _mesh.meshChanged();
-  if (_displaced_problem)
-    _displaced_mesh->meshChanged();
-
   _nl->update();
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -6040,6 +6084,10 @@ FEProblemBase::initialAdaptMesh()
   _cycles_completed = 0;
   if (n)
   {
+    if (_mesh.meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
+        _mesh.meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+      mooseError("HFEM does not support mesh adaptivity currently.");
+
     TIME_SECTION(_initial_adapt_mesh_timer);
 
     for (unsigned int i = 0; i < n; i++)
@@ -6083,6 +6131,10 @@ FEProblemBase::adaptMesh()
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
+    if (_mesh.meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
+        _mesh.meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+      mooseError("HFEM does not support mesh adaptivity currently.");
+
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();

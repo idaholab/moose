@@ -216,6 +216,13 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
 
         onElement(elem);
 
+        if (elem->subdomain_id() == Moose::INTERNAL_SIDE_LOWERD_ID ||
+            elem->subdomain_id() == Moose::BOUNDARY_SIDE_LOWERD_ID)
+        {
+          postElement(elem);
+          continue;
+        }
+
         for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
           std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
@@ -251,8 +258,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             postInternalSide(elem, side);
           }
         } // sides
-        postElement(elem);
 
+        postElement(elem);
       } // range
 
       post();

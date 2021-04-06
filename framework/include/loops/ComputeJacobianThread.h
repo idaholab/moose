@@ -74,7 +74,7 @@ protected:
   const std::set<TagID> & _tags;
 
   virtual void computeJacobian();
-  virtual void computeFaceJacobian(BoundaryID bnd_id);
+  virtual void computeFaceJacobian(BoundaryID bnd_id, const Elem * lower_d_elem);
   virtual void computeInternalFaceJacobian(const Elem * neighbor);
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 };
