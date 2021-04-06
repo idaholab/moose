@@ -14,6 +14,12 @@
 #include "MooseObject.h"
 #include "UserObject.h"
 
+InputParameters
+PostprocessorInterface::validParams()
+{
+  return emptyInputParameters();
+}
+
 PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
   : _ppi_params(moose_object->parameters()),
     _pi_feproblem(*_ppi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))

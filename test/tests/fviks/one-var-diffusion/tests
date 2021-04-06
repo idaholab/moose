@@ -15,8 +15,8 @@
     expect_err = "variable1 does not exist on all the blocks specified by the subdomain1 parameter"
     cli_args = "FVInterfaceKernels/active='bad1'"
     design = 'FVInterfaceKernels/index.md'
-    requirement = 'The system shall error if a user specified variable on the 1th side of an interface does not actually exist on the 1th side.'
     ad_indexing_type = 'global'
+    requirement = 'The system shall error if a user specified variable on the 1st side of an interface does not actually exist on the 1st side.'
   []
   [run_except2]
     type = RunException
@@ -33,7 +33,7 @@
     expect_err = "variable1 does not exist on all the blocks specified by the subdomain2 parameter\.\s*Note that you did not provide the variable2 parameter, so variable1 was implicitly used on subdomain2"
     cli_args = "FVInterfaceKernels/active='bad3'"
     design = 'FVInterfaceKernels/index.md'
-    requirement = 'The system shall error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1th side of the interface should be used on the 2nd side, and the variable on the 1th side does not exist on the 2nd side.'
     ad_indexing_type = 'global'
+    requirement = 'The system shall error if a user does not specify a variable on the 2nd side of an interface, leading the system to assume that the variable on the 1st side of the interface should be used on the 2nd side, and the variable on the 1st side does not exist on the 2nd side.'
   []
 []

@@ -23,6 +23,8 @@ class BoundaryName;
 class GeometricSearchInterface
 {
 public:
+  static InputParameters validParams();
+
   GeometricSearchInterface(const MooseObject * moose_object);
 
   /**
@@ -59,4 +61,3 @@ public:
 protected:
   GeometricSearchData & _geometric_search_data;
 };
-

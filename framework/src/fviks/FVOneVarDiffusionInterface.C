@@ -33,7 +33,7 @@ FVOneVarDiffusionInterface::FVOneVarDiffusionInterface(const InputParameters & p
     _coeff1_neighbor(getNeighborADMaterialProperty<Real>("coeff1")),
     _coeff2_neighbor(getNeighborADMaterialProperty<Real>("coeff2"))
 {
-  if (&_var1 != &_var2)
+  if (&var1() != &var2())
     paramError("variable2",
                name(),
                " is only designed to work with the same variable on both sides of an interface.");
@@ -45,7 +45,7 @@ FVOneVarDiffusionInterface::computeQpResidual()
   const auto & coef_elem = elemIsOne() ? _coeff1_elem : _coeff2_elem;
   const auto & coef_neighbor = elemIsOne() ? _coeff2_neighbor : _coeff1_neighbor;
 
-  const auto & grad = _var1.adGradSln(*_face_info);
+  const auto & grad = var1().adGradSln(*_face_info);
 
   ADReal coef;
   interpolate(Moose::FV::InterpMethod::Average,

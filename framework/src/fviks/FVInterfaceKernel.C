@@ -17,9 +17,18 @@ InputParameters
 FVInterfaceKernel::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
+  params += SetupInterface::validParams();
+  params += FunctionInterface::validParams();
+  params += DistributionInterface::validParams();
+  params += UserObjectInterface::validParams();
+  params += TransientInterface::validParams();
+  params += PostprocessorInterface::validParams();
+  params += VectorPostprocessorInterface::validParams();
+  params += GeometricSearchInterface::validParams();
+  params += MeshChangedInterface::validParams();
   params += TaggingInterface::validParams();
+  params += NeighborCoupleableMooseVariableDependencyIntermediateInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
 
   params.addRequiredParam<std::vector<SubdomainName>>(
@@ -59,7 +68,6 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "FVInterfaceKernels"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
@@ -68,14 +76,12 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("_tid")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _nonconst_var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
-    _nonconst_var2(_sys.getFVVariable<Real>(_tid,
-                                            isParamValid("variable2")
-                                                ? getParam<NonlinearVariableName>("variable2")
-                                                : getParam<NonlinearVariableName>("variable1"))),
+    _var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
+    _var2(_sys.getFVVariable<Real>(_tid,
+                                   isParamValid("variable2")
+                                       ? getParam<NonlinearVariableName>("variable2")
+                                       : getParam<NonlinearVariableName>("variable1"))),
     _assembly(_subproblem.assembly(_tid)),
-    _var1(_nonconst_var1),
-    _var2(_nonconst_var2),
     _mesh(_subproblem.mesh())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -89,8 +95,8 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     paramError("use_displaced_mesh", "FV interface kernels do not yet support displaced mesh");
 
   _subproblem.haveADObjects(true);
-  addMooseVariableDependency(&_nonconst_var1);
-  addMooseVariableDependency(&_nonconst_var2);
+  addMooseVariableDependency(&_var1);
+  addMooseVariableDependency(&_var2);
 
   for (const auto & sub_name : getParam<std::vector<SubdomainName>>("subdomain1"))
     _subdomain1.insert(_mesh.getSubdomainID(sub_name));

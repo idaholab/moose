@@ -48,7 +48,6 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     MooseVariableInterface<Real>(this,
