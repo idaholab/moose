@@ -1,4 +1,5 @@
 #include "SolidMaterial.h"
+#include "HeatConductionModel.h"
 
 registerMooseObject("THMApp", SolidMaterial);
 
@@ -16,9 +17,9 @@ SolidMaterial::validParams()
 
 SolidMaterial::SolidMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _thermal_conductivity(declareProperty<Real>("k_solid")),
-    _specific_heat(declareProperty<Real>("cp_solid")),
-    _density(declareProperty<Real>("rho_solid")),
+    _thermal_conductivity(declareProperty<Real>(HeatConductionModel::THERMAL_CONDUCTIVITY)),
+    _specific_heat(declareProperty<Real>(HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE)),
+    _density(declareProperty<Real>(HeatConductionModel::DENSITY)),
     _temp(coupledValue("T")),
     _props(getUserObject<SolidMaterialProperties>("properties"))
 {

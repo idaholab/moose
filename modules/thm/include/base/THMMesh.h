@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MooseMesh.h"
+#include "libmesh/enum_elem_type.h"
 
 /**
  * Mesh for THM
@@ -21,6 +22,7 @@ public:
   Node * addNode(const Point & pt);
 
   /// Add a new element into the mesh
+  Elem * addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> & node_ids);
   Elem * addElementEdge2(dof_id_type node0, dof_id_type node1);
   Elem * addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2);
   Elem *

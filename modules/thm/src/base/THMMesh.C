@@ -91,6 +91,21 @@ THMMesh::addNode(const Point & pt)
 }
 
 Elem *
+THMMesh::addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> & node_ids)
+{
+  const auto pid = _mesh->comm().rank();
+  dof_id_type elem_id = getNextElementId();
+
+  Elem * elem = libMesh::Elem::build(elem_type).release();
+  elem->set_id(elem_id);
+  elem->processor_id() = pid;
+  _mesh->add_elem(elem);
+  for (std::size_t i = 0; i < node_ids.size(); i++)
+    elem->set_node(i) = _mesh->node_ptr(node_ids[i]);
+  return elem;
+}
+
+Elem *
 THMMesh::addElementEdge2(dof_id_type node0, dof_id_type node1)
 {
   const auto pid = _mesh->comm().rank();
