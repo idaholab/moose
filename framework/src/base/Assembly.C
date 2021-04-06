@@ -1358,7 +1358,7 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
   //   - _ad_curvatures
 
   const auto n_qp = qw.size();
-  const Elem * elem = side->parent();
+  const Elem * elem = side->interior_parent();
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   auto side_number = elem->which_side_am_i(side);
 #endif
