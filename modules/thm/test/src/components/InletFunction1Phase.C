@@ -28,9 +28,6 @@ InletFunction1Phase::check() const
 
   if (_flow_model_id != THM::FM_SINGLE_PHASE)
     logModelNotImplementedError(_flow_model_id);
-
-  if (_spatial_discretization != FlowModel::rDG)
-    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void

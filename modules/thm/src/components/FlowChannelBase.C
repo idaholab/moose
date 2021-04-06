@@ -57,8 +57,6 @@ FlowChannelBase::validParams()
       false,
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
   params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
-  params.addParam<UserObjectName>(
-      "stabilization", "", "The name of the local stabilization scheme to use");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addRequiredParam<std::string>("closures", "Closures type");
 
@@ -77,7 +75,6 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
     _PoD(getParam<Real>("PoD")),
     _has_PoD(isParamValid("PoD")),
-    _stabilization_uo_name(getParam<UserObjectName>("stabilization")),
     _temperature_mode(false),
     _n_heat_transfer_connections(0)
 {
@@ -159,11 +156,6 @@ FlowChannelBase::check() const
 
   if (_closures)
     _closures->check(*this);
-
-  // check that stabilization exists
-  if (!_stabilization_uo_name.empty())
-    if (!_sim.hasUserObject(_stabilization_uo_name))
-      logWarning("Requested stabilization '", _stabilization_uo_name, "' does not exist. Typo?");
 
   // check types of heat transfer for all sources; must be all of same type
   if (_temperature_mode)
@@ -351,40 +343,25 @@ FlowChannelBase::addCommonObjects()
   if (!_pipe_pars_transferred)
   {
     // Area
-    if (_spatial_discretization == FlowModel::rDG)
-    {
-      {
-        std::string class_name = "FunctionAux";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<AuxVariableName>("variable") = FlowModel::AREA_LINEAR;
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<FunctionName>("function") = _area_function;
-        params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
-        const std::string aux_kernel_name = genName(name(), "area_linear_aux");
-        _sim.addAuxKernel(class_name, aux_kernel_name, params);
-        makeFunctionControllableIfConstant(_area_function, "Area");
-      }
-      {
-        const std::string class_name = "CopyValueAux";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<AuxVariableName>("variable") = FlowModel::AREA;
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<VariableName>>("source") = {FlowModel::AREA_LINEAR};
-        params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
-        const std::string aux_kernel_name = genName(name(), "area_aux");
-        _sim.addAuxKernel(class_name, aux_kernel_name, params);
-        makeFunctionControllableIfConstant(_area_function, "Area");
-      }
-    }
-    else
     {
       std::string class_name = "FunctionAux";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = FlowModel::AREA;
+      params.set<AuxVariableName>("variable") = FlowModel::AREA_LINEAR;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<FunctionName>("function") = _area_function;
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_linear_aux");
+      _sim.addAuxKernel(class_name, aux_kernel_name, params);
+      makeFunctionControllableIfConstant(_area_function, "Area");
+    }
+    {
+      const std::string class_name = "CopyValueAux";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<AuxVariableName>("variable") = FlowModel::AREA;
+      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+      params.set<std::vector<VariableName>>("source") = {FlowModel::AREA_LINEAR};
+      params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
+      const std::string aux_kernel_name = genName(name(), "area_aux");
       _sim.addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
     }

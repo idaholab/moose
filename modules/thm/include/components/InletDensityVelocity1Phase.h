@@ -15,9 +15,6 @@ public:
 protected:
   virtual void check() const override;
 
-  void setupCG();
-  void setupRDG();
-
   /// True to allow the flow to reverse, otherwise false
   bool _reversible;
 
