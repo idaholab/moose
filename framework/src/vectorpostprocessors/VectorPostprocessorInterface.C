@@ -27,7 +27,7 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & name,
-                                                          const std::string & vector_name)
+                                                          const std::string & vector_name) const
 {
   return getVectorPostprocessorValueByName(_vpi_params.get<VectorPostprocessorName>(name),
                                            vector_name);
@@ -35,14 +35,14 @@ VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & na
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name)
+    const VectorPostprocessorName & name, const std::string & vector_name) const
 {
   return getVectorPostprocessorByNameHelper(name, vector_name, _broadcast_by_default, 0);
 }
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string & name,
-                                                             const std::string & vector_name)
+                                                             const std::string & vector_name) const
 {
   return getVectorPostprocessorValueOldByName(_vpi_params.get<VectorPostprocessorName>(name),
                                               vector_name);
@@ -50,7 +50,7 @@ VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string &
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(
-    const VectorPostprocessorName & name, const std::string & vector_name)
+    const VectorPostprocessorName & name, const std::string & vector_name) const
 {
   return getVectorPostprocessorByNameHelper(name, vector_name, _broadcast_by_default, 1);
 }
@@ -58,7 +58,7 @@ VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & name,
                                                           const std::string & vector_name,
-                                                          bool needs_broadcast)
+                                                          bool needs_broadcast) const
 {
   return getVectorPostprocessorValueByName(
       _vpi_params.get<VectorPostprocessorName>(name), vector_name, needs_broadcast);
@@ -66,7 +66,9 @@ VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & na
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
+    const VectorPostprocessorName & name,
+    const std::string & vector_name,
+    bool needs_broadcast) const
 {
   return getVectorPostprocessorByNameHelper(
       name, vector_name, needs_broadcast || _broadcast_by_default, 0);
@@ -75,7 +77,7 @@ VectorPostprocessorInterface::getVectorPostprocessorValueByName(
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string & name,
                                                              const std::string & vector_name,
-                                                             bool needs_broadcast)
+                                                             bool needs_broadcast) const
 {
   return getVectorPostprocessorValueOldByName(
       _vpi_params.get<VectorPostprocessorName>(name), vector_name, needs_broadcast);
@@ -83,15 +85,17 @@ VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string &
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(
-    const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
+    const VectorPostprocessorName & name,
+    const std::string & vector_name,
+    bool needs_broadcast) const
 {
   return getVectorPostprocessorByNameHelper(
       name, vector_name, needs_broadcast || _broadcast_by_default, 1);
 }
 
 const ScatterVectorPostprocessorValue &
-VectorPostprocessorInterface::getScatterVectorPostprocessorValue(const std::string & name,
-                                                                 const std::string & vector_name)
+VectorPostprocessorInterface::getScatterVectorPostprocessorValue(
+    const std::string & name, const std::string & vector_name) const
 {
   return getScatterVectorPostprocessorValueByName(_vpi_params.get<VectorPostprocessorName>(name),
                                                   vector_name);
@@ -99,15 +103,15 @@ VectorPostprocessorInterface::getScatterVectorPostprocessorValue(const std::stri
 
 const ScatterVectorPostprocessorValue &
 VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(
-    const std::string & name, const std::string & vector_name)
+    const std::string & name, const std::string & vector_name) const
 {
   auto vpp_context_ptr = getVectorPostprocessorContextByNameHelper(name, vector_name);
   return vpp_context_ptr->getScatterValue();
 }
 
 const ScatterVectorPostprocessorValue &
-VectorPostprocessorInterface::getScatterVectorPostprocessorValueOld(const std::string & name,
-                                                                    const std::string & vector_name)
+VectorPostprocessorInterface::getScatterVectorPostprocessorValueOld(
+    const std::string & name, const std::string & vector_name) const
 {
   return getScatterVectorPostprocessorValueOldByName(_vpi_params.get<VectorPostprocessorName>(name),
                                                      vector_name);
@@ -115,7 +119,7 @@ VectorPostprocessorInterface::getScatterVectorPostprocessorValueOld(const std::s
 
 const ScatterVectorPostprocessorValue &
 VectorPostprocessorInterface::getScatterVectorPostprocessorValueOldByName(
-    const std::string & name, const std::string & vector_name)
+    const std::string & name, const std::string & vector_name) const
 {
   auto vpp_context_ptr = getVectorPostprocessorContextByNameHelper(name, vector_name);
   return vpp_context_ptr->getScatterValueOld();

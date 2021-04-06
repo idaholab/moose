@@ -48,7 +48,7 @@ GeneralUserObject::getSuppliedItems()
 }
 
 const PostprocessorValue &
-GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int index)
+GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int index) const
 {
   // is this a vector of pp names, we use the number of default entries
   // to figure that out
@@ -60,7 +60,7 @@ GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int 
 }
 
 const PostprocessorValue &
-GeneralUserObject::getPostprocessorValueByName(const PostprocessorName & name)
+GeneralUserObject::getPostprocessorValueByName(const PostprocessorName & name) const
 {
   _depend_vars.insert(name);
   return UserObject::getPostprocessorValueByName(name);
@@ -68,7 +68,7 @@ GeneralUserObject::getPostprocessorValueByName(const PostprocessorName & name)
 
 const VectorPostprocessorValue &
 GeneralUserObject::getVectorPostprocessorValue(const std::string & name,
-                                               const std::string & vector_name)
+                                               const std::string & vector_name) const
 {
   _depend_vars.insert(_pars.get<VectorPostprocessorName>(name));
   return UserObject::getVectorPostprocessorValue(name, vector_name);
@@ -76,7 +76,7 @@ GeneralUserObject::getVectorPostprocessorValue(const std::string & name,
 
 const VectorPostprocessorValue &
 GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                                     const std::string & vector_name)
+                                                     const std::string & vector_name) const
 {
   _depend_vars.insert(name);
   return UserObject::getVectorPostprocessorValueByName(name, vector_name);
@@ -85,7 +85,7 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
 const VectorPostprocessorValue &
 GeneralUserObject::getVectorPostprocessorValue(const std::string & name,
                                                const std::string & vector_name,
-                                               bool use_broadcast)
+                                               bool use_broadcast) const
 {
   _depend_vars.insert(_pars.get<VectorPostprocessorName>(name));
   return UserObject::getVectorPostprocessorValue(name, vector_name, use_broadcast);
@@ -94,7 +94,7 @@ GeneralUserObject::getVectorPostprocessorValue(const std::string & name,
 const VectorPostprocessorValue &
 GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                                      const std::string & vector_name,
-                                                     bool use_broadcast)
+                                                     bool use_broadcast) const
 {
   _depend_vars.insert(name);
   return UserObject::getVectorPostprocessorValueByName(name, vector_name, use_broadcast);

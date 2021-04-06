@@ -882,9 +882,10 @@ public:
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
+   * @param tid The thread of the user object (defaults to 0)
    * @return Const reference to the user object
    */
-  const UserObject & getUserObjectBase(const std::string & name) const;
+  const UserObject & getUserObjectBase(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
    * Check if there if a user object of given name

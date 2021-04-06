@@ -182,97 +182,127 @@ AuxKernelTempl<ComputeValueType>::getSuppliedItems()
 }
 
 template <typename ComputeValueType>
-const UserObject &
-AuxKernelTempl<ComputeValueType>::getUserObjectBase(const UserObjectName & name)
+void
+AuxKernelTempl<ComputeValueType>::addUserObjectDependencies(const std::string & param_name) const
 {
-  return getUserObjectBaseByName(_pars.get<UserObjectName>(name));
+  addUserObjectDependenciesByName(getUserObjectName(param_name));
+}
+
+template <typename ComputeValueType>
+void
+AuxKernelTempl<ComputeValueType>::addUserObjectDependenciesByName(
+    const UserObjectName & object_name) const
+{
+  const auto & uo = UserObjectInterface::getUserObjectBaseByName(object_name);
+  _depend_uo.insert(uo.name());
+  for (const auto & indirect_dependent : uo.getDependObjects())
+    _depend_uo.insert(indirect_dependent);
 }
 
 template <typename ComputeValueType>
 const UserObject &
-AuxKernelTempl<ComputeValueType>::getUserObjectBaseByName(const UserObjectName & name)
+AuxKernelTempl<ComputeValueType>::getUserObjectBase(const std::string & param_name) const
 {
-  _depend_uo.insert(name);
-  auto & uo = UserObjectInterface::getUserObjectBaseByName(name);
-  auto indirect_dependents = uo.getDependObjects();
-  for (auto & indirect_dependent : indirect_dependents)
-    _depend_uo.insert(indirect_dependent);
+  const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
+  addUserObjectDependencies(param_name);
+  return uo;
+}
+
+template <typename ComputeValueType>
+const UserObject &
+AuxKernelTempl<ComputeValueType>::getUserObjectBaseByName(const UserObjectName & name) const
+{
+  const auto & uo = UserObjectInterface::getUserObjectBaseByName(name);
+  addUserObjectDependenciesByName(name);
   return uo;
 }
 
 template <typename ComputeValueType>
 const PostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & name,
-                                                        unsigned int index)
+                                                        unsigned int index) const
 {
-  if (hasPostprocessor(name, index))
-    getUserObjectBaseByName(_pars.get<PostprocessorName>(name));
-  return PostprocessorInterface::getPostprocessorValue(name);
+  const auto & pp = PostprocessorInterface::getPostprocessorValue(name, index);
+  if (hasPostprocessor(name, index)) // false if default, no dependencies to add
+    addUserObjectDependencies(name);
+  return pp;
 }
 
 template <typename ComputeValueType>
 const PostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getPostprocessorValueByName(const PostprocessorName & name)
+AuxKernelTempl<ComputeValueType>::getPostprocessorValueByName(const PostprocessorName & name) const
 {
-  getUserObjectBaseByName(name);
-  return PostprocessorInterface::getPostprocessorValueByName(name);
+  const auto & pp = PostprocessorInterface::getPostprocessorValueByName(name);
+  addUserObjectDependenciesByName(name);
+  return pp;
 }
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
-                                                              const std::string & vector_name)
+                                                              const std::string & vector_name) const
 {
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+  const auto & vpp = VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+  addUserObjectDependencies(name);
+  return vpp;
 }
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name)
+    const VectorPostprocessorName & name, const std::string & vector_name) const
 {
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+  const auto & vpp =
+      VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+  addUserObjectDependenciesByName(name);
+  return vpp;
 }
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
                                                               const std::string & vector_name,
-                                                              bool needs_broadcast)
+                                                              bool needs_broadcast) const
 {
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(
-      name, vector_name, needs_broadcast);
+  const auto & vpp =
+      VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name, needs_broadcast);
+  addUserObjectDependencies(name);
+  return vpp;
 }
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
-    const VectorPostprocessorName & name, const std::string & vector_name, bool needs_broadcast)
+    const VectorPostprocessorName & name,
+    const std::string & vector_name,
+    bool needs_broadcast) const
 {
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+  const auto & vpp = VectorPostprocessorInterface::getVectorPostprocessorValueByName(
       name, vector_name, needs_broadcast);
+  addUserObjectDependenciesByName(name);
+  return vpp;
 }
 
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValue(
-    const std::string & name, const std::string & vector_name)
+    const std::string & name, const std::string & vector_name) const
 {
-  getUserObjectBaseByName(_pars.get<VectorPostprocessorName>(name));
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
+  const auto & svpp =
+      VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
+  addUserObjectDependencies(name);
+  return svpp;
 }
 
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
-    const std::string & name, const std::string & vector_name)
+    const std::string & name, const std::string & vector_name) const
 {
-  getUserObjectBaseByName(name);
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
+  const auto & svpp =
+      VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
+  addUserObjectDependenciesByName(name);
+  return svpp;
 }
 
 template <typename ComputeValueType>
