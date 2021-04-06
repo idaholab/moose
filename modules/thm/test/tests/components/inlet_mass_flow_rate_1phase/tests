@@ -1,20 +1,9 @@
 [Tests]
-  [./phy:massflowrate_3eqn_cg]
+  [./phy:massflowrate_3eqn]
     type = 'Exodiff'
     input = 'phy.massflowrate_3eqn.i'
-    exodiff = 'phy.massflowrate_3eqn_cg.e'
-    custom_cmp = 'cg_1phase.exodiff'
-  [../]
-  [./phy:massflowrate_3eqn_rdg]
-    type = 'Exodiff'
-    input = 'phy.massflowrate_3eqn.i'
-    exodiff = 'phy.massflowrate_3eqn_rdg.e'
-    custom_cmp = 'rdg_1phase.exodiff'
-    cli_args = "
-      GlobalParams/spatial_discretization=RDG
-      GlobalParams/rdg_slope_reconstruction=MINMOD
-      Outputs/file_base='phy.massflowrate_3eqn_rdg'"
-    group = 'inlet_mass_flow_rate outlet pipe 1phase rdg'
+    exodiff = 'phy.massflowrate_3eqn.e'
+    group = 'inlet_mass_flow_rate outlet pipe 1phase'
     max_time = 1000
   [../]
   [./phy:reversed_flow]
@@ -23,11 +12,6 @@
     exodiff = 'phy.reversed_flow.e'
   [../]
 
-  [./clg:massflowrate_3eqn]
-    type = 'CSVDiff'
-    input = 'clg.massflowrate_3eqn.i'
-    csvdiff = 'clg.massflowrate_3eqn_out.csv'
-  [../]
   [./clg:ctrl_m_dot_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_m_dot_3eqn_rdg.i'
