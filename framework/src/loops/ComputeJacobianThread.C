@@ -254,7 +254,7 @@ ComputeJacobianThread::onBoundary(const Elem * elem,
     if (lower_d_elem)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addJacobianNeighborLowerD(_tid);
+      _fe_problem.addJacobianLowerD(_tid);
     }
   }
 }

@@ -915,6 +915,13 @@ public:
   void addJacobianNeighborLowerD();
 
   /**
+   * Add portions of the Jacobian of LowerLower, LowerSecondary, and SecondaryLower for
+   * boundary conditions. Secondary indicates the boundary element. Lower denotes the
+   * lower-dimensional element living on the boundary side.
+   */
+  void addJacobianLowerD();
+
+  /**
    * Cache *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
    * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
    * PrimaryPrimary for mortar-like objects. Primary indicates the interior parent element on the
