@@ -891,6 +891,12 @@ DisplacedProblem::addJacobianNeighborLowerD(THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addJacobianLowerD(THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianLowerD();
+}
+
+void
 DisplacedProblem::cacheJacobian(THREAD_ID tid)
 {
   _assembly[tid]->cacheJacobian();

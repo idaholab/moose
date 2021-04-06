@@ -1320,6 +1320,7 @@ public:
   virtual void addJacobian(THREAD_ID tid) override;
   virtual void addJacobianNeighbor(THREAD_ID tid) override;
   virtual void addJacobianNeighborLowerD(THREAD_ID tid) override;
+  virtual void addJacobianLowerD(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,

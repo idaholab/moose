@@ -98,7 +98,13 @@ ArrayLowerDIntegratedBC::computeLowerDJacobian(Moose::ConstraintJacobianType typ
                           ? _lowerd_var.number()
                           : _var.number();
 
-  prepareMatrixTagLower(_assembly, ivar, jvar, type);
+  // need to transform the type for assembling Jacobian on boundary to be consistent with
+  // Assembly::addJacobianLowerD() and Assembly::prepareLowerD().
+  Moose::ConstraintJacobianType type_tr =
+      (type == Moose::LowerLower
+           ? type
+           : (type == Moose::LowerPrimary ? Moose::LowerSecondary : Moose::SecondaryLower));
+  prepareMatrixTagLower(_assembly, ivar, jvar, type_tr);
 
   if (_local_ke.n() == 0 || _local_ke.m() == 0)
     return;

@@ -1510,6 +1510,14 @@ FEProblemBase::addJacobianNeighborLowerD(THREAD_ID tid)
 }
 
 void
+FEProblemBase::addJacobianLowerD(THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianLowerD();
+  if (_displaced_problem)
+    _displaced_problem->addJacobianLowerD(tid);
+}
+
+void
 FEProblemBase::addJacobianScalar(THREAD_ID tid /* = 0*/)
 {
   _assembly[tid]->addJacobianScalar();
