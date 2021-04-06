@@ -258,10 +258,15 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
         break;
       }
       case ConstraintUserMeaningEnum::BULK_COMPOSITION:
+      case ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC:
       {
         // convert to mole units and specify correct constraint_meaning
         _constraint_value[i] = GeochemistryUnitConverter::toMoles(
             _constraint_value[i], _constraint_unit[i], name, _mgd);
+        // add contributions from kinetic moles, if necessary
+        if (_constraint_user_meaning[i] == ConstraintUserMeaningEnum::BULK_COMPOSITION)
+          for (unsigned k = 0; k < _mgd.kin_species_name.size(); ++k)
+            _constraint_value[i] += _kin_moles[k] * _mgd.kin_stoichiometry(k, i);
         if (!(_constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::MOLES ||
               _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::KG ||
               _constraint_unit[i] == GeochemistryUnitConverter::GeochemistryUnit::G ||
