@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = '3eqn.i'
     exodiff = '3eqn_out.e'
-    custom_cmp = '3eqn.exodiff'
   [../]
 []
