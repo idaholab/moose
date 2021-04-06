@@ -101,9 +101,7 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = true
-  solve_type = NEWTON
-  eigen_problem_type = GEN_NON_HERMITIAN
+  solve_type = PJFNK
 []
 
 [Postprocessors]

@@ -42,6 +42,9 @@ protected:
   /// The Sup-application solve mode
   const StochasticTools::MultiAppMode _mode;
 
+  /// Override to allow to get correct cli_args
+  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
+
 private:
   /**
    * Helper method for running in mode='batch'

@@ -39,15 +39,19 @@ public:
    */
   virtual bool isActive() { return true; }
 
+  /**
+   * Retrieves the old value of the variable that this ScalarKernel operates on.
+   *
+   * Store this as a _reference_ in the constructor.
+   */
+  const VariableValue & uOld() const;
+
 protected:
   /// Scalar variable
   MooseVariableScalar & _var;
 
   unsigned int _i, _j;
 
-  /// Value(s) of the scalar variable
-  VariableValue & _u;
-
-  /// Old value(s) of the scalar variable
-  VariableValue & _u_old;
+  /// The current solution (old solution if explicit)
+  const VariableValue & _u;
 };

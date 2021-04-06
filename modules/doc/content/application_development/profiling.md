@@ -11,25 +11,29 @@ applications on Mac systems.
 
 MOOSE has support for profiling with
 [gperftools](https://github.com/gperftools/gperftools) built-in.  To use it,
-you must compile MOOSE with profiling support enabled.  If compiling with the
-latest MOOSE environment package, your applications will already be compiled
-with profiling support automatically. To manually control profiling support
+you must compile MOOSE with profiling support enabled.  To add profiling support
 you set the GPERF_DIR environment variable to the location of a gperftools
-install (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  It is also
+installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  It is also
 recommended you compile MOOSE in `oprof` mode to get complete/accurate
 profiling results.  Then you compile MOOSE like normal - it should look
 something like this:
 
 ```
-export GPERF_DIR=/opt/moose/gperftools-2.7   # this should be unnecessary with the latest MOOSE package.
+export GPERF_DIR=$HOME/gperftools/installed
 export METHOD=oprof
 cd [your-moose-app-repository]
 make
 ```
 
 This will compile your application with gperftools profiling support enabled.
-You are welcome to set GPERF_DIR to the location of your own gperftools
-installation as well.
+Note that you will get an error if you attempt to link gperftools (e.g. have
+GPERF_DIR defined in your environment) when building
+in `dbg` or `devel` modes. This is because MOOSE and libmesh insert a number of
+assertions in these modes that may significantly slow down the code and mislead
+the profiler about where hot spots are. Moreover, because gperftools hijacks
+functions like `malloc`, executables that link gperftools cannot be run with
+valgrind and produce meaningful results. Hence it is useful to guarantee some
+methods are available for running valgrind.
 
 ### CPU Profiling
 

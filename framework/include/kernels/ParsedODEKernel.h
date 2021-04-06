@@ -34,7 +34,7 @@ protected:
 
   /// coupled variables
   unsigned int _nargs;
-  std::vector<VariableValue *> _args;
+  std::vector<const VariableValue *> _args;
   std::vector<std::string> _arg_names;
 
   /// function parser object for the residual and on-diagonal Jacobian
