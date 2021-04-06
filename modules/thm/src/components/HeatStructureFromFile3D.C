@@ -157,6 +157,7 @@ HeatStructureFromFile3D::buildMesh()
   // build side sets
   exio_helper.read_sideset_info();
   int offset = 0;
+  std::unordered_map<BoundaryID, BoundaryName> new_ids_to_names;
   for (int i = 0; i < exio_helper.num_side_sets; i++)
   {
     // Compute new offset
@@ -170,8 +171,7 @@ HeatStructureFromFile3D::buildMesh()
 
     unsigned int bc_id = _mesh.getNextBoundaryId();
     thm_bc_id_map[ex_sideset_id] = bc_id;
-
-    _mesh.setBoundaryName(bc_id, genName(_name, sideset_name));
+    new_ids_to_names.emplace(bc_id, sideset_name);
   }
 
   for (auto e : index_range(exio_helper.elem_list))
@@ -188,6 +188,8 @@ HeatStructureFromFile3D::buildMesh()
     unsigned int bc_id = thm_bc_id_map[exio_helper.id_list[e]];
     _mesh.getMesh().boundary_info->add_side(elem, mapped_side, bc_id);
   }
+  for (const auto & pr : new_ids_to_names)
+    _mesh.setBoundaryName(pr.first, genName(_name, pr.second));
 
   _number_of_hs = _names.size();
 }
