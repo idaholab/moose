@@ -476,7 +476,7 @@ SubChannel1PhaseProblemBase::computeH(int iz)
       {
         h_star = (*h_soln)(node_in_i);
       }
-      else
+      else if (Wij(i_gap, iz) < 0.0)
       {
         h_star = (*h_soln)(node_in_j);
       }
@@ -487,21 +487,11 @@ SubChannel1PhaseProblemBase::computeH(int iz)
       counter++;
     }
 
-    if (isTransient())
-    {
-      h_out = std::pow(mdot_out, -1) *
-              (mdot_in * h_in - SumWijh - SumWijPrimeDhij +
-               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0 -
-               ((*rho_soln)(node_out) * (*h_soln)(node_out)-rho_soln->old(node_out) *
-                h_soln->old(node_out)) *
-                   volume / dt());
-    }
-    else
-    {
-      h_out = std::pow(mdot_in, -1) *
-              (mdot_in * h_in - SumWijh - SumWijPrimeDhij +
-               ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0);
-    }
+    h_out = (mdot_in * h_in - SumWijh - SumWijPrimeDhij +
+             ((*q_prime_soln)(node_out) + (*q_prime_soln)(node_in)) * dz / 2.0 +
+             _TR * rho_soln->old(node_out) * h_soln->old(node_out) * volume / _dt) /
+            (mdot_out + _TR * (*rho_soln)(node_out)*volume / _dt);
+
     if (h_out < 0)
     {
       _console << "Wij = : " << Wij << "\n";
