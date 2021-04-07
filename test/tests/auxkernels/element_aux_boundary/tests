@@ -31,5 +31,6 @@
     requirement = "The system shall allow a boundary restricted elemental auxiliary kernel to be evaluated on an element with multiple boundary sides by setting an input parameter."
     issues = '#17424'
     design = 'syntax/AuxKernels/index.md'
+    prereq = 'ho_boundary_restricted_test'
   [../]
 []
