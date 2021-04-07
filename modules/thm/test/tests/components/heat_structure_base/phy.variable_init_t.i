@@ -1,44 +1,40 @@
 # Tests that a function can be used to initialize temperature in a heat structure.
-#
-#
-# @requirement F8.7
 
 [GlobalParams]
-  spatial_discretization = cg
 []
 
 [Functions]
-  [./fn-initial_T]
+  [fn-initial_T]
     type = ParsedFunction
     value = 'baseT + (dT * sin((pi * x) / length))'
     vars = 'baseT   dT    length'
     vals = '560.0  30.0  3.6576'
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./fuel-mat]
+  [fuel-mat]
     type = SolidMaterialProperties
     k = 3.65
     cp = 288.734
     rho = 1.0412e2
-  [../]
-  [./gap-mat]
+  []
+  [gap-mat]
     type = SolidMaterialProperties
     k = 0.1
     cp = 1.0
     rho = 1.0
-  [../]
-  [./clad-mat]
+  []
+  [clad-mat]
     type = SolidMaterialProperties
     k = 16.48672
     cp = 321.384
     rho = 6.6e1
-  [../]
+  []
 []
 
 [Components]
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0 0 0'
     orientation = '1 0 0'
@@ -51,21 +47,21 @@
     materials = 'fuel-mat gap-mat clad-mat'
 
     initial_T = fn-initial_T
-  [../]
+  []
 
-  [./temp_outside]
+  [temp_outside]
     type = HSBoundarySpecifiedTemperature
     hs = hs
     boundary = hs:outer
     T = 580.0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -88,11 +84,11 @@
 
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     execute_scalars_on = none
-  [../]
+  []
 []
