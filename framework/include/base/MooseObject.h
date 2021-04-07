@@ -218,22 +218,28 @@ private:
   template <typename... Args>
   std::string paramErrorMsg(const std::string & param, Args... args) const
   {
-    auto prefix = paramErrorPrefix(_pars, param);
+    auto param_prefix = paramErrorPrefix(_pars, param);
+
+    // With no input location information, append object info (name + type)
+    const std::string object_prefix =
+        _pars.inputLocation(param).empty() ? errorPrefix("parameter error") : "";
+
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
     std::string msg = oss.str();
 
-    // Wrap error message to a separate line from prefix if it is about to
-    // blow past 100 chars.  But only wrap if the prefix is long enough (12
-    // chars) for the wrap to buy us much extra length.
-    if ((prefix.size() > 12 && msg.size() + prefix.size() > 99) ||
+    // Wrap error message to a separate line from param_prefix if it is about to
+    // blow past 100 chars.  But only wrap if the param_prefix is long enough (12
+    // chars) for the wrap to buy us much extra length. We don't check object_prefix
+    // here because it will go before the parameter error
+    if ((param_prefix.size() > 12 && msg.size() + param_prefix.size() > 99) ||
         msg.find("\n") != std::string::npos)
     {
-      if (prefix.size() > 0 && prefix[prefix.size() - 1] != ':')
-        prefix += ":";
-      return prefix + "\n    " + MooseUtils::replaceAll(msg, "\n", "\n    ");
+      if (param_prefix.size() > 0 && param_prefix[param_prefix.size() - 1] != ':')
+        param_prefix += ":";
+      return object_prefix + param_prefix + "\n    " + MooseUtils::replaceAll(msg, "\n", "\n    ");
     }
-    return prefix + " " + msg;
+    return object_prefix + param_prefix + " " + msg;
   }
 };
 
