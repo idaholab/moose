@@ -9,27 +9,26 @@ energy_change = ${fparse power_fraction * power * t}
 
 [GlobalParams]
   scaling_factor_temperature = 1e-3
-  spatial_discretization = cg
 []
 
 [Functions]
-  [./power_shape]
+  [power_shape]
     type = ConstantFunction
     value = 0.4
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./main-material]
+  [main-material]
     type = SolidMaterialProperties
     k = 1e4
     cp = 500.0
     rho = 100.0
-  [../]
+  []
 []
 
 [Components]
-  [./heat_structure]
+  [heat_structure]
     type = HeatStructureCylindrical
     num_rods = ${n_units}
 
@@ -44,47 +43,47 @@ energy_change = ${fparse power_fraction * power * t}
     n_part_elems = '2 2 2'
 
     initial_T = 300
-  [../]
-  [./heat_generation]
+  []
+  [heat_generation]
     type = HeatSourceFromTotalPower
     hs = heat_structure
     regions = 'rgn1 rgn2'
     power = total_power
     power_fraction = ${power_fraction}
-  [../]
-  [./total_power]
+  []
+  [total_power]
     type = TotalPower
     power = ${power}
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./E_tot]
+  [E_tot]
     type = HeatStructureEnergyRZ
     block = 'heat_structure:rgn1 heat_structure:rgn2 heat_structure:rgn3'
     n_units = ${n_units}
     execute_on = 'initial timestep_end'
-  [../]
-  [./E_tot_change]
+  []
+  [E_tot_change]
     type = ChangeOverTimePostprocessor
     change_with_respect_to_initial = true
     postprocessor = E_tot
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./E_tot_change_rel_err]
+  [E_tot_change_rel_err]
     type = RelativeDifferencePostprocessor
     value1 = E_tot_change
     value2 = ${energy_change}
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -106,10 +105,10 @@ energy_change = ${fparse power_fraction * power * t}
 
   abort_on_solve_fail = true
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Outputs]
