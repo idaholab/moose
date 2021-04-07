@@ -4,16 +4,19 @@
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_x.i'
     exodiff = 'phy.T_wall_transfer_3eqn_x_out.e'
+    recover = false
   []
   [phy:T_wall_transfer_3eqn_y]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_y.i'
     exodiff = 'phy.T_wall_transfer_3eqn_y_out.e'
+    recover = false
   []
   [phy:T_wall_transfer_3eqn_z]
     type = Exodiff
     input = 'phy.T_wall_transfer_3eqn_z.i'
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
+    recover = false
   []
   [phy:conservation_1phase_plate]
     type = CSVDiff
