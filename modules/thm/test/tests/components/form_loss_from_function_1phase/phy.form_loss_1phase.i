@@ -16,26 +16,20 @@
 #      = 0.5 * 0.5 * 996.5563397 * 0.5^2
 #      = 62.28477123125 Pa
 #
-# Therefore the inlet pressure should be
-#
-#   p_in = p_out + dp
-#        = 100 kPa + 62.28477123125 Pa
-#        = 100062.28477123125 Pa
-#
-# This value is captured in a post-processor value that is output to CSV.
+# This value is output to CSV.
+
+p_out = 100e3
 
 [GlobalParams]
-  initial_p = 1e5
+  initial_p = ${p_out}
   initial_vel = 0.5
   initial_T = 300.0
 
   gravity_vector = '0 0 0'
 
-  scaling_factor_1phase = '1 1e-2 1e-4'
+  scaling_factor_1phase = '1 1 1e-4'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
@@ -59,7 +53,7 @@
     orientation = '1 0 0'
     length = 2
     A = 1
-    n_elems = 10
+    n_elems = 5
 
     f = 0
   [../]
@@ -77,8 +71,7 @@
   [./outlet]
     type = Outlet1Phase
     input = 'pipe:out'
-    p = 1e5
-    legacy = true
+    p = ${p_out}
   [../]
 []
 
@@ -94,7 +87,6 @@
   scheme = bdf2
   dt = 0.1
   abort_on_solve_fail = true
-  timestep_tolerance = 5e-14
 
   solve_type = 'NEWTON'
   line_search = 'basic'
@@ -106,7 +98,7 @@
   l_max_its = 20
 
   start_time = 0.0
-  end_time = 4.0
+  num_steps = 100
 
   [./Quadrature]
     type = GAUSS
@@ -115,16 +107,30 @@
 []
 
 [Postprocessors]
+  # this is not the right value, should be the value from the inlet ghost cell
   [./p_in]
-    type = NodalMaxValue
+    type = SideAverageValue
+    boundary = inlet
     variable = p
+    execute_on = TIMESTEP_END
+  [../]
+  [./p_out]
+    type = FunctionValuePostprocessor
+    function = ${p_out}
+    execute_on = TIMESTEP_END
+  [../]
+  [./dp]
+    type = DifferencePostprocessor
+     value1 = p_in
+     value2 = p_out
+     execute_on = TIMESTEP_END
   [../]
 []
 
 [Outputs]
   [./out]
     type = CSV
-    show = 'p_in'
+    show = 'dp'
     execute_postprocessors_on = final
   [../]
 []
