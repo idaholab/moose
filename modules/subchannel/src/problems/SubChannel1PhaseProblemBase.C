@@ -270,23 +270,13 @@ SubChannel1PhaseProblemBase::computeMdot(int iz)
     // Find the nodes for the top and bottom of this element.
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    // Copy the variables at the inlet (bottom) of this element.
-    auto mdot_in = (*mdot_soln)(node_in);
     auto volume = dz * (*S_flow_soln)(node_in);
-    auto mdot_out = 0.0;
     // mass damping
     double am = 1.0; // means no damping
+    auto TimeTerm = _TR * ((*rho_soln)(node_out)-rho_soln->old(node_out)) * volume / _dt;
     // Wij positive out of i into j;
-    if (isTransient())
-    {
-      mdot_out = am * (mdot_in - (*SumWij_soln)(node_out) -
-                       ((*rho_soln)(node_in)-rho_soln->old(node_in)) * volume / dt()) +
-                 (1.0 - am) * (*mdot_soln)(node_out);
-    }
-    else
-    {
-      mdot_out = am * (mdot_in - (*SumWij_soln)(node_out)) + (1.0 - am) * (*mdot_soln)(node_out);
-    }
+    auto mdot_out = am * ((*mdot_soln)(node_in) - (*SumWij_soln)(node_out)-TimeTerm) +
+                    (1.0 - am) * (*mdot_soln)(node_out);
     if (mdot_out < 0)
     {
       _console << "Wij = : " << Wij << "\n";
