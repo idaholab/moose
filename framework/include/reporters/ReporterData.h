@@ -60,7 +60,6 @@ public:
     friend class ReporterInterface;
     friend class VectorPostprocessor;
     friend class VectorPostprocessorInterface;
-    friend class PostprocessorInterface;
     friend class ReporterTransferInterface;
   };
 
@@ -97,7 +96,7 @@ public:
   const T & getReporterValue(const ReporterName & reporter_name,
                              const std::string & object_name,
                              const ReporterMode & mode,
-                             const std::size_t time_index = 0);
+                             const std::size_t time_index = 0) const;
 
   /**
    * Method for returning a read-only reference to Reporter values that already exist.
@@ -269,7 +268,7 @@ private:
    *                value is declared multiple times.
    */
   template <typename T>
-  ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare);
+  ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare) const;
   friend class VectorPostprocessorInterface;
 
   /**
@@ -292,12 +291,14 @@ private:
 
   /// Names of objects that have been declared
   std::set<ReporterName> _declare_names;
-  std::set<ReporterName> _get_names;
+  /// Names of objects that have been requested. This is mutable so that names can be requested early
+  /// in const methods before they are declared
+  mutable std::set<ReporterName> _get_names;
 };
 
 template <typename T>
 ReporterState<T> &
-ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool declare)
+ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool declare) const
 {
   // Creates the RestartableData object for storage in the MooseApp restart/recover system
   auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
@@ -311,7 +312,7 @@ const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const std::string & object_name,
                                const ReporterMode & mode,
-                               const std::size_t time_index)
+                               const std::size_t time_index) const
 {
   _get_names.insert(reporter_name);
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);

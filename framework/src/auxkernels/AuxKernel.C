@@ -232,10 +232,9 @@ const PostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & name,
                                                         unsigned int index) const
 {
-  const auto & pp = PostprocessorInterface::getPostprocessorValue(name, index);
-  if (hasPostprocessor(name, index)) // false if default, no dependencies to add
+  if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
     addUserObjectDependencies(name);
-  return pp;
+  return PostprocessorInterface::getPostprocessorValue(name, index);
 }
 
 template <typename ComputeValueType>

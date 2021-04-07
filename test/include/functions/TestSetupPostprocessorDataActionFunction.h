@@ -32,4 +32,6 @@ public:
   static InputParameters validParams();
 
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
+
+  void initialSetup() override;
 };

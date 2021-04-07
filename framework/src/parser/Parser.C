@@ -2120,12 +2120,6 @@ Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
   PostprocessorName pps_name = _root->param<std::string>(full_name);
   param->set() = pps_name;
 
-  Real real_value = -std::numeric_limits<Real>::max();
-  std::istringstream ss(pps_name);
-
-  if (ss >> real_value && ss.eof())
-    _current_params->setDefaultPostprocessorValue(short_name, real_value);
-
   if (in_global)
   {
     global_block->remove(short_name);
@@ -2225,17 +2219,9 @@ Parser::setVectorParameter<PostprocessorName, PostprocessorName>(
   std::vector<std::string> pps_names = _root->param<std::vector<std::string>>(full_name);
   unsigned int n = pps_names.size();
   param->set().resize(n);
-  _current_params->setVectorOfPostprocessors(short_name, true);
-  _current_params->reserveDefaultPostprocessorValueStorage(short_name, n);
 
   for (unsigned int j = 0; j < n; ++j)
-  {
     param->set()[j] = pps_names[j];
-    Real real_value = -std::numeric_limits<Real>::max();
-    std::istringstream ss(pps_names[j]);
-    if (ss >> real_value && ss.eof())
-      _current_params->setDefaultPostprocessorValue(short_name, real_value, j);
-  }
 
   if (in_global)
   {

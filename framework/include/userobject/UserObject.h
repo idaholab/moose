@@ -207,16 +207,8 @@ public:
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
                                                            unsigned int index = 0) const
   {
-    if (hasPostprocessor(name, index))
-    {
-      UserObjectName nm;
-      if (_pars.isSinglePostprocessor(name))
-        nm = _pars.get<PostprocessorName>(name);
-      else
-        nm = _pars.get<std::vector<PostprocessorName>>(name)[index];
-
-      _depend_uo.insert(nm);
-    }
+    if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
+      _depend_uo.insert(getPostprocessorName(name, index));
     return PostprocessorInterface::getPostprocessorValue(name, index);
   }
 
