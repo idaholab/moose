@@ -21,5 +21,5 @@ PumpHeadAux::PumpHeadAux(const InputParameters & parameters)
 Real
 PumpHeadAux::computeValue()
 {
-  return _pump_uo.pumpHead();
+  return _pump_uo.getPumpHead();
 }
