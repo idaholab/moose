@@ -79,6 +79,6 @@ const UserObject &
 InitialConditionBase::getUserObjectBase(const std::string & name) const
 {
   if (!_ignore_uo_dependency)
-    _depend_uo.insert(_pars.get<UserObjectName>(name));
+    _depend_uo.insert(getUserObjectName(name));
   return UserObjectInterface::getUserObjectBase(name);
 }
