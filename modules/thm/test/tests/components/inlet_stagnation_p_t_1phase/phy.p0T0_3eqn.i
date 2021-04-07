@@ -8,12 +8,10 @@
   scaling_factor_1phase = '1 1 1e-5'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -22,11 +20,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -39,29 +37,28 @@
     f = 0.0
 
     fp = eos
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = InletStagnationPressureTemperature1Phase
     input = 'pipe:in'
     p0 = 1e6
     T0 = 453.1
     reversible = false
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 0.5e6
-    legacy = true
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,7 +67,7 @@
   dt = 1.e-2
   abort_on_solve_fail = true
 
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
   line_search = 'basic'
   nl_rel_tol = 1e-5
   nl_abs_tol = 1e-6
@@ -80,16 +77,12 @@
   l_max_its = 100
 
   start_time = 0.0
-  end_time = 1
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
+  end_time = 0.6
 []
 
 [Outputs]
-  [./out]
+  file_base = 'phy.p0T0_3eqn'
+  [out]
     type = Exodus
-  [../]
+  []
 []
