@@ -4,6 +4,7 @@
     input = 'phy.solidwall_outlet_3eqn.i'
     exodiff = 'phy.solidwall_outlet_3eqn.e'
     group = 'solid_wall outlet pipe 1phase'
+    abs_zero = 1e-7
     # see #530 why
     max_threads = 1
   [../]
