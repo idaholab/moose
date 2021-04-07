@@ -1,0 +1,20 @@
+[Tests]
+  design = 'MooseVariableBase.md'
+  issues = '#17471'
+  [restarting]
+    requirement = 'The system shall be able to restart a scalar variable in the presence of other variables with the standard sequence of:'
+    [part1]
+      type = Exodiff
+      input = part1.i
+      exodiff = part1_out.e
+      detail = 'run initial input'
+    []
+    [part2]
+      prereq = 'restarting/part1'
+      type = Exodiff
+      input = part2.i
+      exodiff = part2_out.e
+      detail = 'run restart input'
+    []
+  []
+[]
