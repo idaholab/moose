@@ -355,11 +355,12 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
     // hydraulic diameter in the i direction
     auto Dh_i = 4.0 * S / w_perim;
     auto Time_Term =
-        ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / dt() -
-        dz * 2 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / dt();
+        _TR * ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / _dt -
+        dz * 2.0 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / _dt;
 
-    auto Mass_Term1 = std::pow((*mdot_soln)(node_out), 2.0) * (1 / S / rho_out - 1 / S / rho_in);
-    auto Mass_Term2 = -2 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
+    auto Mass_Term1 =
+        std::pow((*mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
+    auto Mass_Term2 = -2.0 * (*mdot_soln)(node_out) * (*SumWij_soln)(node_out) / S / rho_in;
 
     auto CrossFlow_Term = 0.0;
     auto Turbulent_Term = 0.0;
@@ -404,18 +405,8 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
     auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
                          (S * (*rho_soln)(node_out));
     auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
-    auto DP = 0.0;
-    if (isTransient())
-    {
-      DP = std::pow(S, -1.0) * (Time_Term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
-                                Turbulent_Term + Friction_Term + Gravity_Term); // Pa
-    }
-    else
-    {
-      // enabling the turbulent term in the momentum equation produces a radial pressure gradient
-      DP = std::pow(S, -1.0) * (Mass_Term1 + Mass_Term2 + CrossFlow_Term + Turbulent_Term +
-                                Friction_Term + Gravity_Term); // Pa
-    }
+    auto DP = std::pow(S, -1.0) * (Time_Term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
+                                   Turbulent_Term + Friction_Term + Gravity_Term); // Pa
     // update solution
     DP_soln->set(node_out, DP);
   }
