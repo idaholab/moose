@@ -8,35 +8,35 @@
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  closures = simple
+  scaling_factor_1phase = '1 1 1e-6'
 
-  spatial_discretization = cg
+  closures = simple
 []
 
 [Functions]
-  [./T_fn]
+  [T_fn]
     type = ParsedFunction
     value = '300 + 10 * (cos(2*pi*x + pi))'
-  [../]
+  []
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
-  [../]
+  []
 []
 
 [Components]
-  [./inlet]
+  [inlet]
     type = FreeBoundary1Phase
     input = pipe:in
-  [../]
-  [./pipe]
+  []
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -51,18 +51,18 @@
     f = 0
 
     fp = fp
-  [../]
-  [./outlet]
+  []
+  [outlet]
     type = FreeBoundary1Phase
     input = pipe:out
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -81,137 +81,132 @@
 
   l_tol = 1e-2
   l_max_its = 20
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Postprocessors]
   # MASS
 
-  [./massflux_left]
+  [massflux_left]
     type = MassFluxIntegral
     boundary = inlet
     arhouA = rhouA
-  [../]
-  [./massflux_right]
+  []
+  [massflux_right]
     type = MassFluxIntegral
     boundary = outlet
     arhouA = rhouA
-  [../]
-  [./massflux_difference]
+  []
+  [massflux_difference]
     type = DifferencePostprocessor
     value1 = massflux_right
     value2 = massflux_left
-  [../]
-  [./massflux_integral]
+  []
+  [massflux_integral]
     type = TotalVariableValue
     value = massflux_difference
-  [../]
-  [./mass]
+  []
+  [mass]
     type = ElementIntegralVariablePostprocessor
     variable = rhoA
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_change]
+  []
+  [mass_change]
     type = ChangeOverTimePostprocessor
     postprocessor = mass
     change_with_respect_to_initial = true
     execute_on = 'initial timestep_end'
-  [../]
-  [./mass_conservation]
+  []
+  [mass_conservation]
     type = SumPostprocessor
     values = 'mass_change massflux_integral'
-  [../]
+  []
 
   # MOMENTUM
 
-  [./momentumflux_left]
+  [momentumflux_left]
     type = MomentumFluxIntegral
     boundary = inlet
     arhouA = rhouA
     vel = vel
     p = p
     A = A
-  [../]
-  [./momentumflux_right]
+  []
+  [momentumflux_right]
     type = MomentumFluxIntegral
     boundary = outlet
     arhouA = rhouA
     vel = vel
     p = p
     A = A
-  [../]
-  [./momentumflux_difference]
+  []
+  [momentumflux_difference]
     type = DifferencePostprocessor
     value1 = momentumflux_right
     value2 = momentumflux_left
-  [../]
-  [./momentumflux_integral]
+  []
+  [momentumflux_integral]
     type = TotalVariableValue
     value = momentumflux_difference
-  [../]
-  [./momentum]
+  []
+  [momentum]
     type = ElementIntegralVariablePostprocessor
     variable = rhouA
     execute_on = 'initial timestep_end'
-  [../]
-  [./momentum_change]
+  []
+  [momentum_change]
     type = ChangeOverTimePostprocessor
     postprocessor = momentum
     change_with_respect_to_initial = true
     execute_on = 'initial timestep_end'
-  [../]
-  [./momentum_conservation]
+  []
+  [momentum_conservation]
     type = SumPostprocessor
     values = 'momentum_change momentumflux_integral'
-  [../]
+  []
 
   # ENERGY
 
-  [./energyflux_left]
+  [energyflux_left]
     type = EnergyFluxIntegral
     boundary = inlet
     arhouA = rhouA
     H = H
-  [../]
-  [./energyflux_right]
+  []
+  [energyflux_right]
     type = EnergyFluxIntegral
     boundary = outlet
     arhouA = rhouA
     H = H
-  [../]
-  [./energyflux_difference]
+  []
+  [energyflux_difference]
     type = DifferencePostprocessor
     value1 = energyflux_right
     value2 = energyflux_left
-  [../]
-  [./energyflux_integral]
+  []
+  [energyflux_integral]
     type = TotalVariableValue
     value = energyflux_difference
-  [../]
-  [./energy]
+  []
+  [energy]
     type = ElementIntegralVariablePostprocessor
     variable = rhoEA
     execute_on = 'initial timestep_end'
-  [../]
-  [./energy_change]
+  []
+  [energy_change]
     type = ChangeOverTimePostprocessor
     postprocessor = energy
     change_with_respect_to_initial = true
     execute_on = 'initial timestep_end'
-  [../]
-  [./energy_conservation]
+  []
+  [energy_conservation]
     type = SumPostprocessor
     values = 'energy_change energyflux_integral'
-  [../]
+  []
 []
 
 [Outputs]
-  [./console]
+  [console]
     type = Console
     show = 'mass_conservation momentum_conservation energy_conservation'
-  [../]
+  []
 []
