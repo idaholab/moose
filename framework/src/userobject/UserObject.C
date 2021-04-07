@@ -70,3 +70,117 @@ UserObject::UserObject(const InputParameters & parameters)
     _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {
 }
+
+std::set<UserObjectName>
+UserObject::getDependObjects() const
+{
+  std::set<UserObjectName> all;
+  for (auto & v : _depend_uo)
+  {
+    all.insert(v);
+    auto & uo = UserObjectInterface::getUserObjectBaseByName(v);
+
+    // Add dependencies of other objects, but don't allow it to call itself. This can happen
+    // through the PostprocessorInterface if a Postprocessor calls getPostprocessorValueByName
+    // with it's own name. This happens in the Receiver, which could use the FEProblem version of
+    // the get method, but this is a fix that prevents an infinite loop occurring by accident for
+    // future objects.
+    if (uo.name() != name())
+    {
+      auto uos = uo.getDependObjects();
+      for (auto & t : uos)
+        all.insert(t);
+    }
+  }
+  return all;
+}
+
+const UserObject &
+UserObject::getUserObjectBase(const UserObjectName & param_name) const
+{
+  const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
+  _depend_uo.insert(uo.name());
+  return uo;
+}
+
+const UserObject &
+UserObject::getUserObjectBaseByName(const UserObjectName & object_name) const
+{
+  const auto & uo = UserObjectInterface::getUserObjectBaseByName(object_name);
+  _depend_uo.insert(object_name);
+  return uo;
+}
+
+const PostprocessorValue &
+UserObject::getPostprocessorValue(const std::string & name, unsigned int index /* = 0 */) const
+{
+  if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
+    _depend_uo.insert(getPostprocessorName(name, index));
+  return PostprocessorInterface::getPostprocessorValue(name, index);
+}
+
+const PostprocessorValue &
+UserObject::getPostprocessorValueByName(const PostprocessorName & name) const
+{
+  _depend_uo.insert(name);
+  return PostprocessorInterface::getPostprocessorValueByName(name);
+}
+
+const VectorPostprocessorValue &
+UserObject::getVectorPostprocessorValue(const std::string & name,
+                                        const std::string & vector_name) const
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+}
+
+const VectorPostprocessorValue &
+UserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                              const std::string & vector_name) const
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+}
+
+const VectorPostprocessorValue &
+UserObject::getVectorPostprocessorValue(const std::string & name,
+                                        const std::string & vector_name,
+                                        bool needs_broadcast) const
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(
+      name, vector_name, needs_broadcast);
+}
+
+const VectorPostprocessorValue &
+UserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                              const std::string & vector_name,
+                                              bool needs_broadcast) const
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+      name, vector_name, needs_broadcast);
+}
+
+const ScatterVectorPostprocessorValue &
+UserObject::getScatterVectorPostprocessorValue(const std::string & name,
+                                               const std::string & vector_name) const
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
+}
+
+const ScatterVectorPostprocessorValue &
+UserObject::getScatterVectorPostprocessorValueByName(const std::string & name,
+                                                     const std::string & vector_name) const
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
+}
+
+void
+UserObject::setPrimaryThreadCopy(UserObject * primary)
+{
+  if (!_primary_thread_copy && primary != this)
+    _primary_thread_copy = primary;
+}
