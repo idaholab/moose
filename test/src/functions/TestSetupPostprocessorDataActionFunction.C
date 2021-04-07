@@ -25,6 +25,11 @@ TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFuncti
     const InputParameters & parameters)
   : Function(parameters)
 {
+}
+
+void
+TestSetupPostprocessorDataActionFunction::initialSetup()
+{
   if (hasPostprocessor("postprocessor"))
     mooseError("TestSetupPostprocessorDataActionFunction pass");
   else

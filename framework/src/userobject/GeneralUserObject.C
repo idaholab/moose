@@ -50,12 +50,8 @@ GeneralUserObject::getSuppliedItems()
 const PostprocessorValue &
 GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int index) const
 {
-  // is this a vector of pp names, we use the number of default entries
-  // to figure that out
-  if (_pars.isSinglePostprocessor(name))
-    _depend_vars.insert(_pars.get<PostprocessorName>(name));
-  else
-    _depend_vars.insert(_pars.get<std::vector<PostprocessorName>>(name)[index]);
+  if (!isDefaultPostprocessorValue(name, index))
+    _depend_vars.insert(getPostprocessorName(name, index));
   return UserObject::getPostprocessorValue(name, index);
 }
 

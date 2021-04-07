@@ -42,7 +42,7 @@ public:
   /**
    * doco-normal-methods-begin
    * Retrieve the value of a Postprocessor or one of it's old or older values
-   * @param name The name of the Postprocessor parameter (see below)
+   * @param param_name The name of the Postprocessor parameter (see below)
    * @param index The index of the Postprocessor
    * @return A reference to the desired value
    *
@@ -53,12 +53,12 @@ public:
    *
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                   unsigned int index = 0) const;
-  const PostprocessorValue & getPostprocessorValueOld(const std::string & name,
-                                                      unsigned int index = 0) const;
-  const PostprocessorValue & getPostprocessorValueOlder(const std::string & name,
-                                                        unsigned int index = 0) const;
+  const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
+                                                   const unsigned int index = 0) const;
+  const PostprocessorValue & getPostprocessorValueOld(const std::string & param_name,
+                                                      const unsigned int index = 0) const;
+  const PostprocessorValue & getPostprocessorValueOlder(const std::string & param_name,
+                                                        const unsigned int index = 0) const;
   // doco-normal-methods-end
 
   ///@}
@@ -81,24 +81,27 @@ public:
   const PostprocessorValue & getPostprocessorValueOlderByName(const PostprocessorName & name) const;
   ///@}
 
-  ///@{
   /**
-   * Return the default postprocessor value
-   * @param name The name of the postprocessor parameter
-   * @return A const reference to the default value
+   * Determine whether or not the Postprocessor is a default value. A default value is when
+   * the value is either the value set by addParam, or is a user-set value in input instead of
+   * a name to a postprocessor.
+   * @param param_name The name of the Postprocessor parameter
+   * @param index The index of the postprocessor
+   * @return True if the Postprocessor is a default value, false if the Postprocessor
+   * is the name of a Postprocessor
    */
-  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name) const;
-  ///@}
+  bool isDefaultPostprocessorValue(const std::string & param_name,
+                                   const unsigned int index = 0) const;
 
   /**
    * Determine if the Postprocessor data exists
-   * @param name The name of the Postprocessor parameter
+   * @param param_name The name of the Postprocessor parameter
    * @param index The index of the Postprocessor
    * @return True if the Postprocessor exists
    *
    * @see hasPostprocessorByName getPostprocessorValue
    */
-  bool hasPostprocessor(const std::string & name, unsigned int index = 0) const;
+  bool hasPostprocessor(const std::string & param_name, const unsigned int index = 0) const;
 
   /**
    * Determine if the Postprocessor data exists
@@ -111,14 +114,6 @@ public:
 
   /**
    * Determine if the Postprocessor object exists
-   * @param name The name of the Postprocessor parameter
-   * @param index The index of the Postprocessor
-   * @return True if the Postprocessor exists
-   */
-  bool hasPostprocessorObject(const std::string & name, unsigned int index = 0) const;
-
-  /**
-   * Determine if the Postprocessor object exists
    * @param name The name of the Postprocessor
    * @return True if the Postprocessor exists
    */
@@ -126,26 +121,36 @@ public:
 
   /**
    * Returns number of Postprocessors coupled under parameter name
-   * @param name The name of the Postprocessor parameter
+   * @param param_name The name of the Postprocessor parameter
    * @return Number of coupled post-processors, 1 if it's a single
    *
    */
-  unsigned int coupledPostprocessors(const std::string & name) const;
+  std::size_t coupledPostprocessors(const std::string & param_name) const;
 
   /**
-   * Checks if there is a single postprocessor coupled by parameter name
-   * @param name The name of the Postprocessor parameter
-   * @return Number of coupled post-processors, 1 if it's a single
-   *
+   * Get the name of a postprocessor. This can only be used if the postprocessor
+   * parameter does _not_ have a default value set (see isDefaultPostprocessorValue()),
+   * in which case the "name" is actually the default value.
+   * @param param_name The name of the Postprocessor parameter
+   * @param index The index of the Postprocessor
+   * @return The name of the given Postprocessor
    */
-  bool singlePostprocessor(const std::string & name) const;
+  const PostprocessorName & getPostprocessorName(const std::string & param_name,
+                                                 const unsigned int index = 0) const;
 
 private:
+  /// The MooseObject that uses this interface
+  const MooseObject & _ppi_moose_object;
+
   /// PostprocessorInterface Parameters
   const InputParameters & _ppi_params;
 
   /// Reference the the FEProblemBase class
-  FEProblemBase & _pi_feproblem;
+  const FEProblemBase & _ppi_feproblem;
+
+  /// Holds the default postprocessor values that are requested (key is param name, index)
+  mutable std::map<std::pair<std::string, unsigned int>, std::unique_ptr<PostprocessorValue>>
+      _default_values;
 
   /// Extract the value using parameter name
   const PostprocessorValue & getPostprocessorValueHelper(const std::string & name,
@@ -155,4 +160,11 @@ private:
   /// Extract the value using stored name
   const PostprocessorValue & getPostprocessorValueByNameHelper(const PostprocessorName & name,
                                                                std::size_t t_index) const;
+
+  /**
+   * Checks the parameters relating to a Postprocessor. If \p index is not set, index
+   * checking is not performed.
+   */
+  void checkParam(const std::string & param_name,
+                  const unsigned int index = std::numeric_limits<unsigned int>::max()) const;
 };
