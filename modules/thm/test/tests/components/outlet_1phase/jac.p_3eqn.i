@@ -8,12 +8,10 @@
   scaling_factor_1phase = '1. 1. 1'
 
   closures = simple
-
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     cv = 1816.0
@@ -22,11 +20,11 @@
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     fp = eos
     # geometry
@@ -37,22 +35,22 @@
     f = 0.1
     length = 1
     n_elems = 2
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = Outlet1Phase
     input = 'pipe:out'
     p = 1e5
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
     petsc_options_iname = '-snes_type -snes_test_err'
     petsc_options_value = 'test       1e-11'
-  [../]
+  []
 []
 
 [Executioner]
@@ -70,9 +68,4 @@
 
   l_tol = 1e-3
   l_max_its = 100
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
