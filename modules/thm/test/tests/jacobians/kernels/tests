@@ -1,12 +1,4 @@
 [Tests]
-  [./one_d_3eqn_mass_flux]
-    type = 'PetscJacobianTester'
-    input = 'one_d_3eqn_mass_flux.i'
-    ratio_tol = 8e-12
-    difference_tol = 8e-12
-    max_threads = 1
-    allow_test_objects = true
-  [../]
   [./one_d_3eqn_momentum_flux]
     type = 'PetscJacobianTester'
     input = 'one_d_3eqn_momentum_flux.i'
