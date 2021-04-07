@@ -54,6 +54,8 @@ protected:
   const Real _g_grav;
   /// Flag that activates or deactivates the transient parts of the equations solved
   Real _TR;
+  /// Time step
+  Real _dt;
   SubChannelMeshBase & _subchannel_mesh;
   /// Thermal diffusion coefficient used in turbulent crossflow
   const Real & _abeta;
