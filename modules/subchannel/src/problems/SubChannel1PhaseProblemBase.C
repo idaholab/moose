@@ -29,6 +29,7 @@ SubChannel1PhaseProblemBase::validParams()
 SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters & params)
   : ExternalProblem(params),
     _g_grav(9.87),
+    _TR(0.0),
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
     _abeta(getParam<Real>("abeta")),
     _CT(getParam<Real>("CT")),
@@ -38,16 +39,12 @@ SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters &
   unsigned int nz = _subchannel_mesh.getNumOfAxialNodes();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   // Turbulent crossflow (stuff that live on the gaps)
-  WijPrime.resize(n_gaps);
-  Wij.resize(n_gaps);
-  Wij_old.resize(n_gaps);
-  WijPrime_global.resize(n_gaps, nz + 1);
-  Wij_global.resize(n_gaps, nz + 1);
-  Wij_global_old.resize(n_gaps, nz + 1);
-  Wij_global.setZero();
-  Wij_global_old.setZero();
+  Wij.resize(n_gaps, nz + 1);
+  Wij_old.resize(n_gaps, nz + 1);
+  WijPrime.resize(n_gaps, nz + 1);
+  Wij.setZero();
+  Wij_old.setZero();
   WijPrime.setZero();
-  WijPrime_global.setZero();
 }
 
 void
@@ -57,7 +54,8 @@ SubChannel1PhaseProblemBase::initialSetup()
   // Read in Wij_global for null transient only at the first run of externalSolve
   if (isTransient())
   {
-    std::ifstream file("Wij_global_SS");
+    _TR = 1.0;
+    std::ifstream file("Wij_SS");
     std::string line_str;
     int row_index = 0;
 
@@ -74,8 +72,8 @@ SubChannel1PhaseProblemBase::initialSetup()
         // Finally push it.
         if (tmp.size() != 0)
         {
-          Wij_global(row_index, column_index) = std::stof(tmp);
-          Wij_global_old(row_index, column_index) = std::stof(tmp);
+          Wij(row_index, column_index) = std::stof(tmp);
+          Wij_old(row_index, column_index) = std::stof(tmp);
           column_index += 1;
         }
       }
@@ -128,8 +126,6 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
   auto z_grid = _subchannel_mesh.getZGrid();
   unsigned int n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   const Real & pitch = _subchannel_mesh.getPitch();
-  Wij = Wij_global.col(iz);
-  Wij_old = Wij_global_old.col(iz);
   auto dz = z_grid[iz] - z_grid[iz - 1];
   for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
   {
@@ -142,8 +138,6 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
     auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
     auto rho_i = (*rho_soln)(node_in_i);
     auto rho_j = (*rho_soln)(node_in_j);
-    auto T_i = (*T_soln)(node_in_i);
-    auto T_j = (*T_soln)(node_in_j);
     // area of channel i
     auto Si = (*S_flow_soln)(node_in_i);
     // area of channel j
@@ -166,30 +160,27 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
     auto DPij_in = (*P_soln)(node_in_i) - (*P_soln)(node_in_j);
     auto DPij = (1 - asp) * (DPij_out + DPi - DPj) + asp * DPij_in;
 
-    // Figure out donor cell density,mu
+    // Figure out donor cell density
     auto rho_star = 0.0;
-    auto mu_star = 0.0;
-    if (Wij_global(i_gap, iz) > 0.0)
+    if (Wij(i_gap, iz) > 0.0)
     {
       rho_star = rho_i;
-      mu_star = _fp->mu_from_rho_T(rho_i, T_i);
     }
-    else if (Wij_global(i_gap, iz) == 0.0)
+    else if (Wij(i_gap, iz) < 0.0)
     {
+      rho_star = rho_j;
       rho_star = (rho_i + rho_j) / 2.0;
-      mu_star = (_fp->mu_from_rho_T(rho_j, T_j) + _fp->mu_from_rho_T(rho_i, T_i)) / 2.0;
     }
     else
     {
-      rho_star = rho_j;
-      mu_star = _fp->mu_from_rho_T(rho_j, T_j);
+      rho_star = (rho_i + rho_j) / 2.0;
     }
 
     auto Mass_Term_out =
         (*mdot_soln)(node_out_i) / Si / rho_i + (*mdot_soln)(node_out_j) / Sj / rho_j;
     auto Mass_Term_in = (*mdot_soln)(node_in_i) / Si / rho_i + (*mdot_soln)(node_in_j) / Sj / rho_j;
     auto Term_out = Sij * rho_star * (Lij / dz) * Mass_Term_out;
-    auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * Wij_global(i_gap, iz - 1);
+    auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * Wij(i_gap, iz - 1);
     auto Pressure_Term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
 
     // Set inertia terms to zero
@@ -198,12 +189,12 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
 
     // INITIAL GUESS (eventually the continue statement will be removed)
     auto Wijguess = 0.0;
-    if (Wij(i_gap) == 0.0)
+    if (Wij(i_gap, iz) == 0.0)
     {
       if (isTransient())
-        Wijguess = Wij(i_gap);
+        Wijguess = Wij(i_gap, iz);
       else
-        Wijguess = Wij_global(i_gap, iz - 1);
+        Wijguess = Wij(i_gap, iz - 1);
     }
     else
       continue;
@@ -221,7 +212,7 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
             name(), " CrossFlow Calculation didn't converge, newton_cycles: ", newton_cycles);
       }
 
-      auto derivativeTerm = 2 * (Wijguess - Wij_old(i_gap)) * Lij * Sij * rho_star / dt();
+      auto derivativeTerm = 2 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / dt();
       auto Residual = 0.0;
       auto derivative = 0.0;
       if (isTransient())
@@ -241,9 +232,8 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
     }
     // Wij has a global sign at this point (Positive is from the lower index subchannel to the
     // higher index)
-    Wij(i_gap) = Wijguess;
+    Wij(i_gap, iz) = Wijguess;
   }
-  Wij_global.col(iz) = Wij;
 }
 
 void
@@ -264,7 +254,7 @@ SubChannel1PhaseProblemBase::computeSumWij(int iz)
     unsigned int counter = 0;
     for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
     {
-      SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz);
+      SumWij += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz);
       counter++;
     }
     // The net crossflow coming out of cell i [kg/sec]
@@ -351,15 +341,13 @@ SubChannel1PhaseProblemBase::computeWijPrime(int iz)
     // Calculation of Turbulent Crossflow
     for (unsigned int i_gap = 0; i_gap < n_gaps; i_gap++)
     {
-      WijPrime(i_gap) = _abeta * 0.5 *
-                        (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
-                          (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
-                         (Si + Sj)) *
-                        Sij; // Kg/sec
+      WijPrime(i_gap, iz) = _abeta * 0.5 *
+                            (((*mdot_soln)(node_in_i) + (*mdot_soln)(node_out_i) +
+                              (*mdot_soln)(node_in_j) + (*mdot_soln)(node_out_j)) /
+                             (Si + Sj)) *
+                            Sij; // Kg/sec
     }
   }
-  // Update global Matrix
-  WijPrime_global.col(iz) = WijPrime;
 }
 
 void
@@ -412,7 +400,7 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
       auto Sj = (*S_flow_soln)(node_in_j);
       auto U_star = 0.0;
       // figure out donor axial velocity
-      if (Wij_global(i_gap, iz) > 0.0)
+      if (Wij(i_gap, iz) > 0.0)
       {
         U_star = (*mdot_soln)(node_out_i) / Si / rho_i;
       }
@@ -421,12 +409,11 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
         U_star = (*mdot_soln)(node_out_j) / Sj / rho_j;
       }
 
-      CrossFlow_Term +=
-          _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * U_star;
+      CrossFlow_Term += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz) * U_star;
 
-      Turbulent_Term += WijPrime_global(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
-                                                      (*mdot_soln)(node_out_j) / Sj / rho_j -
-                                                      (*mdot_soln)(node_out_i) / Si / rho_i);
+      Turbulent_Term += WijPrime(i_gap, iz) * (2 * (*mdot_soln)(node_out) / rho_in / S -
+                                               (*mdot_soln)(node_out_j) / Sj / rho_j -
+                                               (*mdot_soln)(node_out_i) / Si / rho_i);
       counter++;
     }
     Turbulent_Term *= _CT;
@@ -514,7 +501,7 @@ SubChannel1PhaseProblemBase::computeH(int iz)
       auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
       // Define donor enthalpy
       auto h_star = 0.0;
-      if (Wij_global(i_gap, iz) > 0.0)
+      if (Wij(i_gap, iz) > 0.0)
       {
         h_star = (*h_soln)(node_in_i);
       }
@@ -523,8 +510,8 @@ SubChannel1PhaseProblemBase::computeH(int iz)
         h_star = (*h_soln)(node_in_j);
       }
       // take care of the sign by applying the map, use donor cell
-      SumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij_global(i_gap, iz) * h_star;
-      SumWijPrimeDhij += WijPrime_global(i_gap, iz) *
+      SumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * Wij(i_gap, iz) * h_star;
+      SumWijPrimeDhij += WijPrime(i_gap, iz) *
                          (2 * (*h_soln)(node_in) - (*h_soln)(node_in_j) - (*h_soln)(node_in_i));
       counter++;
     }
@@ -779,11 +766,11 @@ SubChannel1PhaseProblemBase::externalSolve()
     }
   }
   // update old crossflow matrix
-  Wij_global_old = Wij_global;
+  Wij_old = Wij;
   // Save Wij_global
   std::ofstream myfile1;
   myfile1.open("Wij_global", std::ofstream::trunc);
-  myfile1 << std::setprecision(12) << std::scientific << Wij_global << "\n";
+  myfile1 << std::setprecision(12) << std::scientific << Wij << "\n";
   myfile1.close();
   _console << "Finished executing subchannel solver\n";
   _aux->solution().close();
