@@ -119,12 +119,24 @@ public:
     _communicator.sum(value);
   }
 
+  /**
+   * Gather the parallel max of the variable passed in. It takes care of values across all threads
+   * and CPUs (we DO hybrid parallelism!)
+   *
+   * After calling this, the variable that was passed in will hold the gathered value.
+   */
   template <typename T>
   void gatherMax(T & value)
   {
     _communicator.max(value);
   }
 
+  /**
+   * Gather the parallel min of the variable passed in. It takes care of values across all threads
+   * and CPUs (we DO hybrid parallelism!)
+   *
+   * After calling this, the variable that was passed in will hold the gathered value.
+   */
   template <typename T>
   void gatherMin(T & value)
   {
@@ -132,18 +144,9 @@ public:
   }
 
   template <typename T1, typename T2>
-  void gatherProxyValueMax(T1 & value, T2 & proxy)
-  {
-    unsigned int rank;
-    _communicator.maxloc(value, rank);
-    _communicator.broadcast(proxy, rank);
-  }
+  void gatherProxyValueMax(T1 & value, T2 & proxy);
 
-  void setPrimaryThreadCopy(UserObject * primary)
-  {
-    if (!_primary_thread_copy && primary != this)
-      _primary_thread_copy = primary;
-  }
+  void setPrimaryThreadCopy(UserObject * primary);
 
   UserObject * primaryThreadCopy() { return _primary_thread_copy; }
 
@@ -151,126 +154,43 @@ public:
    * Recursively return a set of user objects this user object depends on
    * Note: this can be called only after all user objects are constructed.
    */
-  std::set<UserObjectName> getDependObjects() const
-  {
-    std::set<UserObjectName> all;
-    for (auto & v : _depend_uo)
-    {
-      all.insert(v);
-      auto & uo = UserObjectInterface::getUserObjectBaseByName(v);
-
-      // Add dependencies of other objects, but don't allow it to call itself. This can happen
-      // through the PostprocessorInterface if a Postprocessor calls getPostprocessorValueByName
-      // with it's own name. This happens in the Receiver, which could use the FEProblem version of
-      // the get method, but this is a fix that prevents an infinite loop occurring by accident for
-      // future objects.
-      if (uo.name() != name())
-      {
-        auto uos = uo.getDependObjects();
-        for (auto & t : uos)
-          all.insert(t);
-      }
-    }
-    return all;
-  }
+  std::set<UserObjectName> getDependObjects() const;
 
   template <typename T>
-  const T & getUserObject(const std::string & param_name) const
-  {
-    const auto & uo = UserObjectInterface::getUserObject<T>(param_name);
-    _depend_uo.insert(_pars.get<UserObjectName>(param_name));
-    return uo;
-  }
-
+  const T & getUserObject(const std::string & param_name) const;
   template <typename T>
-  const T & getUserObjectByName(const UserObjectName & object_name) const
-  {
-    const auto & uo = UserObjectInterface::getUserObjectByName<T>(object_name);
-    _depend_uo.insert(object_name);
-    return uo;
-  }
+  const T & getUserObjectByName(const UserObjectName & object_name) const;
 
-  const UserObject & getUserObjectBase(const UserObjectName & param_name) const
-  {
-    const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
-    _depend_uo.insert(uo.name());
-    return uo;
-  }
-
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const
-  {
-    const auto & uo = UserObjectInterface::getUserObjectBaseByName(object_name);
-    _depend_uo.insert(object_name);
-    return uo;
-  }
+  const UserObject & getUserObjectBase(const UserObjectName & param_name) const;
+  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const;
 
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                           unsigned int index = 0) const
-  {
-    if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
-      _depend_uo.insert(getPostprocessorName(name, index));
-    return PostprocessorInterface::getPostprocessorValue(name, index);
-  }
-
+                                                           unsigned int index = 0) const;
   virtual const PostprocessorValue &
-  getPostprocessorValueByName(const PostprocessorName & name) const
-  {
-    _depend_uo.insert(name);
-    return PostprocessorInterface::getPostprocessorValueByName(name);
-  }
+  getPostprocessorValueByName(const PostprocessorName & name) const;
 
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValue(const std::string & name,
-                              const std::string & vector_name) const override
-  {
-    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
-    return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
-  }
-
+                              const std::string & vector_name) const override;
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name) const override
-  {
-    _depend_uo.insert(name);
-    return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
-  }
+                                    const std::string & vector_name) const override;
 
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValue(const std::string & name,
                               const std::string & vector_name,
-                              bool needs_broadcast) const override
-  {
-    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
-    return VectorPostprocessorInterface::getVectorPostprocessorValue(
-        name, vector_name, needs_broadcast);
-  }
-
+                              bool needs_broadcast) const override;
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name,
-                                    bool needs_broadcast) const override
-  {
-    _depend_uo.insert(name);
-    return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
-        name, vector_name, needs_broadcast);
-  }
+                                    bool needs_broadcast) const override;
 
   const ScatterVectorPostprocessorValue &
   getScatterVectorPostprocessorValue(const std::string & name,
-                                     const std::string & vector_name) const override final
-  {
-    _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
-    return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
-  }
-
+                                     const std::string & vector_name) const override final;
   const ScatterVectorPostprocessorValue &
   getScatterVectorPostprocessorValueByName(const std::string & name,
-                                           const std::string & vector_name) const override final
-  {
-    _depend_uo.insert(name);
-    return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name,
-                                                                                  vector_name);
-  }
+                                           const std::string & vector_name) const override final;
 
   /**
    * Whether or not a threaded copy of this object is needed when obtaining it in
@@ -288,7 +208,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// Thread ID of this postprocessor
-  THREAD_ID _tid;
+  const THREAD_ID _tid;
   Assembly & _assembly;
 
   /// Coordinate system
@@ -302,3 +222,30 @@ private:
   /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
   mutable std::set<UserObjectName> _depend_uo;
 };
+
+template <typename T1, typename T2>
+void
+UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
+{
+  unsigned int rank;
+  _communicator.maxloc(value, rank);
+  _communicator.broadcast(proxy, rank);
+}
+
+template <typename T>
+const T &
+UserObject::getUserObject(const std::string & param_name) const
+{
+  const auto & uo = UserObjectInterface::getUserObject<T>(param_name);
+  _depend_uo.insert(_pars.get<UserObjectName>(param_name));
+  return uo;
+}
+
+template <typename T>
+const T &
+UserObject::getUserObjectByName(const UserObjectName & object_name) const
+{
+  const auto & uo = UserObjectInterface::getUserObjectByName<T>(object_name);
+  _depend_uo.insert(object_name);
+  return uo;
+}
