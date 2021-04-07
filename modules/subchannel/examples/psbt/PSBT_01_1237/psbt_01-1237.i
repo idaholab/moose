@@ -54,7 +54,7 @@ P_out = 4.923e6 # Pa
   fp = water
   abeta = 0.08
   CT = 1.0
-  enforce_uniform_pressure = true
+  enforce_uniform_pressure = false
 []
 
 [ICs]

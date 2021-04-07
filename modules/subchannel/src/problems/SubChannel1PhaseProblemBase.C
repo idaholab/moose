@@ -30,6 +30,7 @@ SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters &
   : ExternalProblem(params),
     _g_grav(9.87),
     _TR(0.0),
+    _dt(1.0),
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
     _abeta(getParam<Real>("abeta")),
     _CT(getParam<Real>("CT")),
@@ -55,6 +56,7 @@ SubChannel1PhaseProblemBase::initialSetup()
   if (isTransient())
   {
     _TR = 1.0;
+    _dt = dt();
     std::ifstream file("Wij_SS");
     std::string line_str;
     int row_index = 0;
@@ -169,7 +171,6 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
     else if (Wij(i_gap, iz) < 0.0)
     {
       rho_star = rho_j;
-      rho_star = (rho_i + rho_j) / 2.0;
     }
     else
     {
@@ -183,7 +184,7 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
     auto Term_in = Sij * rho_star * (Lij / dz) * Mass_Term_in * Wij(i_gap, iz - 1);
     auto Pressure_Term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
 
-    // Set inertia terms to zero
+    // Set inertia terms to zero (need to go away in the future)
     Term_out = 0.0;
     Term_in = 0.0;
 
@@ -211,22 +212,11 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
         mooseError(
             name(), " CrossFlow Calculation didn't converge, newton_cycles: ", newton_cycles);
       }
-
-      auto derivativeTerm = 2 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / dt();
-      auto Residual = 0.0;
-      auto derivative = 0.0;
-      if (isTransient())
-      {
-        Residual = derivativeTerm + Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess -
-                   Term_in - Pressure_Term;
-        derivative = 2.0 * Lij * Sij * rho_star / dt() + 2.0 * Kij * std::abs(Wijguess) + Term_out;
-      }
-      else
-      {
-        Residual =
-            Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess - Term_in - Pressure_Term;
-        derivative = 2.0 * Kij * std::abs(Wijguess) + Term_out;
-      }
+      auto TimeTerm = _TR * 2.0 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
+      auto Residual = TimeTerm + Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess -
+                      Term_in - Pressure_Term;
+      auto derivative =
+          _TR * 2.0 * Lij * Sij * rho_star / _dt + 2.0 * Kij * std::abs(Wijguess) + Term_out;
       Wijguess = Wijguess - Residual / (derivative + 1e-10);
       newton_error = std::abs(Residual);
     }
