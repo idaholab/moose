@@ -53,8 +53,8 @@ public:
    *
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
-                                                   const unsigned int index = 0) const;
+  virtual const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
+                                                           const unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOld(const std::string & param_name,
                                                       const unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOlder(const std::string & param_name,
@@ -76,7 +76,8 @@ public:
    *
    * see getPostprocessorValue getPostprocessorValueOld getPostprocessorValueOlder
    */
-  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name) const;
+  virtual const PostprocessorValue &
+  getPostprocessorValueByName(const PostprocessorName & name) const;
   const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name) const;
   const PostprocessorValue & getPostprocessorValueOlderByName(const PostprocessorName & name) const;
   ///@}
