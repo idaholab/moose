@@ -9,6 +9,7 @@
 
   gravity_vector = '0 -9.8 0'
 
+  scaling_factor_1phase = '1 1 1e-4'
   scaling_factor_temperature = 1e-2
 
   closures = simple
