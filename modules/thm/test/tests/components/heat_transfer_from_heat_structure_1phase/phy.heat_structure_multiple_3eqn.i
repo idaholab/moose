@@ -72,34 +72,33 @@ cp2 = 600
   scaling_factor_1phase = '1e-3 1e-3 1e-8'
 
   closures = simple
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./fp]
+  [fp]
     type = IdealGasFluidProperties
     gamma = 1.0001
     molar_mass = 0.083144598
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./hs1_mat]
+  [hs1_mat]
     type = SolidMaterialProperties
     k = ${k1}
     rho = ${rho1}
     cp = ${cp1}
-  [../]
-  [./hs2_mat]
+  []
+  [hs2_mat]
     type = SolidMaterialProperties
     k = ${k2}
     rho = ${rho2}
     cp = ${cp2}
-  [../]
+  []
 []
 
 [Components]
-  [./pipe]
+  [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
     orientation = '1 0 0'
@@ -108,9 +107,9 @@ cp2 = 600
     A = 1
     f = 0
     fp = fp
-  [../]
+  []
 
-  [./hs1]
+  [hs1]
     type = HeatStructurePlate
     position = '0 -1 0'
     orientation = '1 0 0'
@@ -124,9 +123,9 @@ cp2 = 600
     names = 'solid'
 
     initial_T = ${T1}
-  [../]
+  []
 
-  [./hs2]
+  [hs2]
     type = HeatStructurePlate
     position = '0 -1 0'
     orientation = '1 0 0'
@@ -140,42 +139,42 @@ cp2 = 600
     names = 'solid'
 
     initial_T = ${T2}
-  [../]
+  []
 
-  [./ht1]
+  [ht1]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs1
     hs_side = outer
     flow_channel = pipe
     Hw = 1e5
     P_hf = 0.5
-  [../]
+  []
 
-  [./ht2]
+  [ht2]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs2
     hs_side = outer
     flow_channel = pipe
     Hw = 1e5
     P_hf = 0.5
-  [../]
+  []
 
-  [./left]
+  [left]
     type = SolidWall1Phase
     input = 'pipe:in'
-  [../]
+  []
 
-  [./right]
+  [right]
     type = SolidWall1Phase
     input = 'pipe:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./preconditioner]
+  [preconditioner]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -196,34 +195,34 @@ cp2 = 600
   l_tol = 1e-3
   l_max_its = 100
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./T_steady_state_predicted]
+  [T_steady_state_predicted]
     type = FunctionValuePostprocessor
     # This value is computed in the input file description
     function = 299.6341463414643
-  [../]
-  [./T_fluid_average]
+  []
+  [T_fluid_average]
     type = ElementAverageValue
     variable = T
     block = pipe
-  [../]
-  [./relative_error]
+  []
+  [relative_error]
     type = RelativeDifferencePostprocessor
     value1 = T_steady_state_predicted
     value2 = T_fluid_average
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     show = 'relative_error'
     execute_on = 'final'
-  [../]
+  []
 []

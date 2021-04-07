@@ -9,38 +9,37 @@
   initial_T = 300.
 
   closures = simple
-  spatial_discretization = cg
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
     q = -1167e3
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
-  [../]
+  []
 []
 
 [HeatStructureMaterials]
-  [./wall-mat]
+  [wall-mat]
     type = SolidMaterialProperties
     k = 100.0
     rho = 100.0
     cp = 100.0
-  [../]
+  []
 []
 
 [Functions]
-  [./T_init]
+  [T_init]
     type = ParsedFunction
     value = '290 + sin((1 - y) * pi * 1.4)'
-  [../]
+  []
 []
 
 [Components]
-  [./pipe1]
+  [pipe1]
     type = FlowChannel1Phase
     position = '0.2 0 0'
     orientation = '0 1 0'
@@ -53,9 +52,9 @@
     f = 0.01
 
     fp = eos
-  [../]
+  []
 
-  [./hs]
+  [hs]
     type = HeatStructureCylindrical
     position = '0.1 1 0'
     orientation = '0 -1 0'
@@ -68,33 +67,33 @@
     names = 'wall'
 
     initial_T = T_init
-  [../]
+  []
 
-  [./hxconn]
+  [hxconn]
     type = HeatTransferFromHeatStructure1Phase
     hs = hs
     hs_side = outer
     flow_channel = pipe1
     Hw = 0
     P_hf = 6.2831853072e-01
-  [../]
+  []
 
-  [./inlet]
+  [inlet]
     type = SolidWall1Phase
     input = 'pipe1:in'
-  [../]
+  []
 
-  [./outlet]
+  [outlet]
     type = SolidWall1Phase
     input = 'pipe1:out'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -114,16 +113,12 @@
 
   start_time = 0.0
   num_steps = 1
-
-  [./Quadrature]
-    type = TRAP
-    order = FIRST
-  [../]
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+    show = 'T_wall T_solid'
+  []
   print_linear_residuals = false
 []
