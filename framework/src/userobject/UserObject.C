@@ -96,7 +96,7 @@ UserObject::getDependObjects() const
 }
 
 const UserObject &
-UserObject::getUserObjectBase(const UserObjectName & param_name) const
+UserObject::getUserObjectBase(const std::string & param_name) const
 {
   const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
   _depend_uo.insert(uo.name());

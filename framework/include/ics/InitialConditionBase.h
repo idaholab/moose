@@ -106,7 +106,7 @@ public:
   /**
    * reimplements the getUserObjectBase method from UserObjectInterface
    */
-  const UserObject & getUserObjectBase(const std::string & name);
+  const UserObject & getUserObjectBase(const std::string & name) const override;
 
 protected:
   /// The system object
@@ -117,16 +117,13 @@ protected:
   /// Supplied variables
   std::set<std::string> _supplied_vars;
 
-  /// Depend UserObjects
-  std::set<std::string> _depend_uo;
-
-  /// If set, UOs retrieved by this IC will not be executed before this IC
-  const bool _ignore_uo_dependency;
+  /// Depend UserObjects. Mutable so that the getters can be const and still add dependencies
+  mutable std::set<std::string> _depend_uo;
 };
 
 template <typename T>
 const T &
-InitialConditionBase::getUserObject(const std::string & name)
+InitialConditionBase::getUserObject(const std::string & name) const
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(_pars.get<UserObjectName>(name));
@@ -135,7 +132,7 @@ InitialConditionBase::getUserObject(const std::string & name)
 
 template <typename T>
 const T &
-InitialConditionBase::getUserObjectByName(const UserObjectName & name)
+InitialConditionBase::getUserObjectByName(const UserObjectName & name) const
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(name);

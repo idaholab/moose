@@ -76,7 +76,7 @@ InitialConditionBase::getSuppliedItems()
 }
 
 const UserObject &
-InitialConditionBase::getUserObjectBase(const std::string & name)
+InitialConditionBase::getUserObjectBase(const std::string & name) const
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(_pars.get<UserObjectName>(name));

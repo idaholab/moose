@@ -161,13 +161,13 @@ public:
   template <typename T>
   const T & getUserObjectByName(const UserObjectName & object_name) const;
 
-  const UserObject & getUserObjectBase(const UserObjectName & param_name) const;
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const;
+  const UserObject & getUserObjectBase(const std::string & param_name) const override;
+  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const override;
 
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                           unsigned int index = 0) const;
+                                                           unsigned int index = 0) const override;
   virtual const PostprocessorValue &
-  getPostprocessorValueByName(const PostprocessorName & name) const;
+  getPostprocessorValueByName(const PostprocessorName & name) const override;
 
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValue(const std::string & name,
