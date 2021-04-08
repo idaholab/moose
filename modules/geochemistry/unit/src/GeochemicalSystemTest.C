@@ -13,8 +13,8 @@
 TEST_F(GeochemicalSystemTest, constructWithMultiMooseEnum)
 {
   MultiMooseEnum constraint_user_meaning(
-      "kg_solvent_water bulk_composition free_concentration free_mineral activity log10activity "
-      "fugacity log10fugacity");
+      "kg_solvent_water bulk_composition bulk_composition_with_kinetic free_concentration "
+      "free_mineral activity log10activity fugacity log10fugacity");
   constraint_user_meaning.push_back(
       "activity bulk_composition bulk_composition free_concentration");
   MultiMooseEnum constraint_unit("dimensionless moles molal kg g mg ug kg_per_kg_solvent "
@@ -1623,7 +1623,7 @@ TEST_F(GeochemicalSystemTest, getSolventMassAndFreeMolalityAndMineralMoles)
             _egs_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
 
   EXPECT_EQ(_egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[2], 1.0); // HCO3-
-  EXPECT_EQ(_egs_calcite.getAlgebraicVariableValues()[0],
+  EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicVariableValues()[0],
             _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
   EXPECT_EQ(_egs_kinetic_calcite.getAlgebraicBasisValues()[0],
             _egs_kinetic_calcite.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
@@ -3339,12 +3339,12 @@ TEST_F(GeochemicalSystemTest, bigJac)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC};
   std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
@@ -3415,12 +3415,12 @@ TEST_F(GeochemicalSystemTest, bigJac2)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC,
       GeochemicalSystem::ConstraintUserMeaningEnum::FREE_CONCENTRATION,
       GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC};
   std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
@@ -5064,22 +5064,26 @@ TEST_F(GeochemicalSystemTest, getBulk_with_kinetic)
   const PertinentGeochemicalSystem model_without_calcite(
       _db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd_without_calcite = model_without_calcite.modelGeochemicalDatabase();
-  const GeochemicalSystem egs_without_kinetic(mgd_without_calcite,
-                                              _ac3,
-                                              _is3,
-                                              _swapper4,
-                                              {},
-                                              {},
-                                              "H+",
-                                              {"H2O", "Ca++", "H+", "HCO3-"},
-                                              {1.75, 3.0, 2.0, 1.0},
-                                              _cu_calcite,
-                                              _cm_calcite,
-                                              25,
-                                              0,
-                                              1E-20,
-                                              {},
-                                              {});
+  const GeochemicalSystem egs_without_kinetic(
+      mgd_without_calcite,
+      _ac3,
+      _is3,
+      _swapper4,
+      {},
+      {},
+      "H+",
+      {"H2O", "Ca++", "H+", "HCO3-"},
+      // in _egs_kinetic_calcite, the 1.1 moles of Calcite contributes 1.1 moles of Ca++ and -1.1
+      // moles of H+ (along with 1.1 moles of HCO3-, but this species has a free_concentration
+      // constraint)
+      {1.75, 3.0 + 1.1, 2.0 - 1.1, 1.0},
+      _cu_calcite,
+      _cm_calcite,
+      25,
+      0,
+      1E-20,
+      {},
+      {});
   EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[0],
             egs_without_kinetic.getBulkMolesOld()[0]); // H2O
   EXPECT_EQ(_egs_kinetic_calcite.getBulkMolesOld()[1],
@@ -5518,7 +5522,7 @@ TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC};
   std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
   cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
@@ -5541,10 +5545,10 @@ TEST_F(GeochemicalSystemTest, getBulkOldInOriginalBasis)
                                  1E-20,
                                  {"Calcite"},
                                  {1.1});
-  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(0), 1.75); // H2O
-  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(1), 1.0);  // H+
-  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(2), 5.0);  // HCO3-
-  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(3), 2.0);  // Ca++
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(0), 1.75);        // H2O
+  EXPECT_NEAR(egs_no_swaps.getBulkOldInOriginalBasis()(1), 2.1, 1E-6); // H+ from charge neutrality
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(2), 5.0 + 1.1);   // HCO3-
+  EXPECT_EQ(egs_no_swaps.getBulkOldInOriginalBasis()(3), 2.0);         // Ca++
 
   ModelGeochemicalDatabase my_mgd_calcite = _mgd_calcite;
   GeochemicalSystem egs(my_mgd_calcite,

@@ -50,12 +50,12 @@ This stage adds the NaOH solution and uses a kinetically-controlled quartz.  The
 
 The kinetic rate for Quartz is specified by a [GeochemistryKineticRate](GeochemistryKineticRate.md) UserObject
 
-!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[rate_quartz] end=[./definition]
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.i start=[rate_quartz] end=[definition]
 
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) specifies:
 
 - the swaps;
-- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note this is [different than GWB](theory/gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
+- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note the [difference for Ca++ compared with GWB](theory/gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
 - the temperature;
 - the initial number of moles for Quartz
 - that the kinetic rate should be updated during the Newton process that finds the equilibrium configuration at each time-step (which is unnecessary and computationally inefficient for this example, but is included for illustration)

@@ -20,11 +20,6 @@ In all [benchmarks](geochemistry/tests_and_examples/index.md) run, the `geochemi
 The GWB software calculates the stoichiometric ionic strength (for computing the water activity via the Debye-Huckel model) using the Cl$^{-}$ molality only.  Hence, most of the [tests and examples](geochemistry/tests_and_examples/index.md) use the flag `stoichiometric_ionic_str_using_Cl_only = true`.
 
 
-## Setting bulk composition with kinetic species
-
-When kinetic species are present in the problem, the initial bulk mole composition constraint must include the mole number present in the kinetic species.  This is different from GWB, in which the bulk mole number is refers to the species in the solution without the kinetic species.  A good example (that includes further discussion) is found on the [kinetic dissolution of albite](kinetic_albite.md) page.
-
-
 ## Setting bulk constraints
 
 When the user sets `moles_bulk_species`, this means the mole number in the current basis (after the swaps).  For instance, the following means there is:

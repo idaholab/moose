@@ -124,26 +124,26 @@ The fieldsplit preconditioning is a little more complicated than simply setting 
 
 ```
 [Preconditioning]
-  [./FSP]
+  [FSP]
     type = FSP
     topsplit = 'up' # 'up' should match the following block name
-    [./up]
+    [up]
       splitting = 'u p' # 'u' and 'p' are the names of subsolvers, below
       splitting_type  = multiplicative
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition'
       petsc_options_value = 'full selfp'
-    [../]
-    [./u]
+    []
+    [u]
       vars = 'f_H f_Na f_K f_Ca f_Mg f_SiO2 f_Al f_Cl f_SO4 f_HCO3 temperature'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = ' hypre    gmres'
-    [../]
-    [./p]
+    []
+    [p]
       vars = 'porepressure'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = ' hypre    gmres'
-    [../]
-  [../]
+    []
+  []
 []
 ```
 

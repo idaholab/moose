@@ -4,7 +4,7 @@
   geochemistry_reactor_name = reactor
   charge_balance_species = "Cl-"
   constraint_species = "H2O              H+            Cl-              Na+              SiO2(aq)           Al+++"
-  constraint_value = "  1.0              -1.5          0.1              1.053387         1E-6               1E-6" # note: Na+ appears in Albite
+  constraint_value = "  1.0              -1.5          0.1              0.1              1E-6               1E-6"
   constraint_meaning = "kg_solvent_water log10activity bulk_composition bulk_composition free_concentration free_concentration"
   constraint_unit = "   kg               dimensionless moles            moles            molal              molal"
   initial_temperature = 70.0
