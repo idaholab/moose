@@ -53,7 +53,7 @@ VectorPostprocessor::validParams()
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
   : OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
-    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _vpp_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _parallel_type(parameters.get<MooseEnum>("parallel_type")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _contains_complete_history(parameters.get<bool>("contains_complete_history")),
@@ -78,7 +78,7 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
     mode = REPORTER_MODE_DISTRIBUTED;
 
   ReporterName r_name(_vpp_name, vector_name);
-  return _vpp_fe_problem->getReporterData(ReporterData::WriteKey())
+  return _vpp_fe_problem.getReporterData(ReporterData::WriteKey())
       .declareReporterValue<VectorPostprocessorValue,
                             VectorPostprocessorContext<VectorPostprocessorValue>>(r_name, mode);
 }

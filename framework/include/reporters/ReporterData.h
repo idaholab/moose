@@ -59,7 +59,6 @@ public:
     friend class Reporter;
     friend class ReporterInterface;
     friend class VectorPostprocessor;
-    friend class VectorPostprocessorInterface;
     friend class ReporterTransferInterface;
   };
 
