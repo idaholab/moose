@@ -203,8 +203,11 @@ PostprocessorInterface::getPostprocessorValueHelper(const std::string & param_na
   {
     const auto key = std::make_pair(param_name, index);
     const auto value = _ppi_params.getDefaultPostprocessorValue(param_name, index);
-    return *_default_values.emplace(key, libmesh_make_unique<PostprocessorValue>(value))
-                .first->second; // first is inserted pair, second is value in pair
+    const auto & value_ref =
+        *_default_values.emplace(key, libmesh_make_unique<PostprocessorValue>(value))
+             .first->second; // first is inserted pair, second is value in pair
+    mooseAssert(value == value_ref, "Inconsistent default value");
+    return value_ref;
   }
 
   return getPostprocessorValueByNameHelper(getPostprocessorName(param_name, index), t_index);
