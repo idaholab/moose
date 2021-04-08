@@ -21,5 +21,5 @@ PumpFrictionAux::PumpFrictionAux(const InputParameters & parameters)
 Real
 PumpFrictionAux::computeValue()
 {
-  return _pump_uo.frictionTorque();
+  return _pump_uo.getFrictionTorque();
 }

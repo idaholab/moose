@@ -21,5 +21,5 @@ PumpInertiaAux::PumpInertiaAux(const InputParameters & parameters)
 Real
 PumpInertiaAux::computeValue()
 {
-  return _pump_uo.momentOfInertia();
+  return _pump_uo.getMomentOfInertia();
 }

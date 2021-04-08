@@ -21,5 +21,5 @@ HydraulicTorqueAux::HydraulicTorqueAux(const InputParameters & parameters)
 Real
 HydraulicTorqueAux::computeValue()
 {
-  return _pump_uo.hydraulicTorque();
+  return _pump_uo.getHydraulicTorque();
 }

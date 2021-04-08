@@ -25,13 +25,11 @@ public:
   virtual void execute() override;
 
   /// Hydraulic torque computed in the 1-phase shaft-connected pump
-  Real hydraulicTorque() const;
+  Real getHydraulicTorque() const;
   /// Friction torque computed in the 1-phase shaft-connected pump
-  Real frictionTorque() const;
+  Real getFrictionTorque() const;
   /// Pump head computed in the 1-phase shaft-connected pump
-  Real pumpHead() const;
-  /// Pump moment of inertia computed in the 1-phase shaft-connected pump
-  Real momentOfInertia() const;
+  Real getPumpHead() const;
 
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
@@ -85,8 +83,6 @@ protected:
   Real _friction_torque;
   /// Pump head
   Real _pump_head;
-  /// Pump moment of inertia
-  Real _moment_of_inertia;
 
   /// Jacobian entries of junction variables wrt shaft variables
   std::vector<DenseMatrix<Real>> _residual_jacobian_omega_var;
