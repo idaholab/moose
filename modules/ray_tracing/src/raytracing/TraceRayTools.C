@@ -174,6 +174,16 @@ findPointNeighbors(
                 next_untested_set,
                 active_neighbor_children,
                 contains_point);
+
+#ifndef NDEBUG
+  // In non-opt modes, verify that we found all of the correct neighbors
+  // using the more expensive libMesh routine
+  std::set<const Elem *> point_neighbors;
+  elem->find_point_neighbors(point, point_neighbors);
+  for (const auto & point_neighbor : point_neighbors)
+    if (!neighbor_set.contains(point_neighbor))
+      mooseError("Missed a point neighbor");
+#endif
 }
 
 void
@@ -236,6 +246,17 @@ findNodeNeighbors(
 
   findNeighbors(
       elem, neighbor_set, untested_set, next_untested_set, active_neighbor_children, contains_node);
+
+#ifndef NDEBUG
+  // In non-opt modes, verify that we found all of the correct neighbors
+  // using the more expensive libMesh routine
+  std::set<const Elem *> point_neighbors;
+  elem->find_point_neighbors(*node, point_neighbors);
+  for (const auto & point_neighbor : point_neighbors)
+    for (const auto & neighbor_node : point_neighbor->node_ref_range())
+      if (node == &neighbor_node && !neighbor_set.contains(point_neighbor))
+        mooseError("Missed a node neighbor");
+#endif
 }
 
 void
