@@ -273,7 +273,10 @@ RayTracingMeshOutput::buildSegmentMesh()
     if (_communicator.size() == 1)
       _segment_mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, _mesh_ptr->dimension());
     else
+    {
       _segment_mesh = libmesh_make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
+      _segment_mesh->set_distributed();
+    }
 
     // We don't need neighbors to just create output
     _segment_mesh->allow_find_neighbors(false);

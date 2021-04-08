@@ -56,7 +56,19 @@ TensorMechanicsAction::validParams()
                                   TensorMechanicsActionBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain (will be "
                                   "appended to the list in `generate_output`)");
-  params.addParamNamesToGroup("additional_generate_output", "Output");
+  params.addParam<MultiMooseEnum>(
+      "additional_material_output_order",
+      TensorMechanicsActionBase::materialOutputOrders(),
+      "Specifies the order of the FE shape function to use for this variable.");
+
+  params.addParam<MultiMooseEnum>(
+      "additional_material_output_family",
+      TensorMechanicsActionBase::materialOutputFamilies(),
+      "Specifies the family of FE shape functions to use for this variable.");
+
+  params.addParamNamesToGroup("additional_generate_output additional_material_output_order "
+                              "additional_material_output_family",
+                              "Output");
   params.addParam<std::string>(
       "strain_base_name",
       "The base name used for the strain. If not provided, it will be set equal to base_name");
@@ -165,6 +177,9 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     _generate_output.push_back(lower);
   }
+
+  if (!_generate_output.empty())
+    verifyOrderAndFamilyOutputs();
 
   // Error if volumetric locking correction is true for 1D problems
   if (_ndisp == 1 && getParam<bool>("volumetric_locking_correction"))
@@ -459,15 +474,26 @@ TensorMechanicsAction::actOutputGeneration()
   // Add variables (optional)
   if (_current_task == "add_aux_variable")
   {
-    auto params = _factory.getValidParams("MooseVariableConstMonomial");
-    params.set<MooseEnum>("order") = "CONSTANT";
-    params.set<MooseEnum>("family") = "MONOMIAL";
-    // Loop through output aux variables
+    unsigned int index = 0;
+
     for (auto out : _generate_output)
     {
+      std::string type = "";
+      if (_material_output_order[index] == "CONSTANT")
+        type = "MooseVariableConstMonomial";
+      else
+        type = "MooseVariable";
       // Create output helper aux variables
-      _problem->addAuxVariable("MooseVariableConstMonomial", _base_name + out, params);
+      auto params = _factory.getValidParams(type);
+      params.set<MooseEnum>("order") = _material_output_order[index];
+      params.set<MooseEnum>("family") = _material_output_family[index];
+
+      if (_material_output_family[index] == "MONOMIAL")
+        _problem->addAuxVariable(type, _base_name + out, params);
+      else
+        _problem->addVariable(type, _base_name + out, params);
     }
+    index++;
   }
 
   // Add output AuxKernels
@@ -475,17 +501,35 @@ TensorMechanicsAction::actOutputGeneration()
   {
     std::string ad_prepend = _use_ad ? "AD" : "";
     // Loop through output aux variables
+    unsigned int index = 0;
     for (auto out : _generate_output)
     {
-      InputParameters params = emptyInputParameters();
+      if (_material_output_family[index] == "MONOMIAL")
+      {
+        InputParameters params = emptyInputParameters();
 
-      params = _factory.getValidParams(ad_prepend + "MaterialRealAux");
-      params.applyParameters(parameters());
-      params.set<MaterialPropertyName>("property") = _base_name + out;
-      params.set<AuxVariableName>("variable") = _base_name + out;
-      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      _problem->addAuxKernel(
-          ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
+        params = _factory.getValidParams("MaterialRealAux");
+        params.applyParameters(parameters());
+        params.set<MaterialPropertyName>("property") = _base_name + out;
+        params.set<AuxVariableName>("variable") = _base_name + out;
+        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+
+        _problem->addAuxKernel(
+            ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
+      }
+      else
+      {
+        InputParameters params = emptyInputParameters();
+
+        params = _factory.getValidParams(ad_prepend + "MaterialPropertyValue");
+        params.applyParameters(parameters());
+        params.set<MaterialPropertyName>("prop_name") = _base_name + out;
+        params.set<AuxVariableName>("variable") = _base_name + out;
+
+        _problem->addKernel(
+            ad_prepend + "MaterialPropertyValue", _base_name + out + '_' + name(), params);
+      }
+      index++;
     }
   }
 }
@@ -605,6 +649,59 @@ TensorMechanicsAction::actEigenstrainNames()
              << "\n"
              << _name << ": " << Moose::stringify(_eigenstrain_names) << "\n"
              << COLOR_DEFAULT;
+}
+
+void
+TensorMechanicsAction::verifyOrderAndFamilyOutputs()
+{
+  // Ensure material output order and family vectors are same size as generate output
+  auto order_check = getParam<MultiMooseEnum>("material_output_order");
+  auto family_check = getParam<MultiMooseEnum>("material_output_family");
+  bool order_display_notice = false;
+  bool family_display_notice = false;
+  // Magnitude check
+  if (order_check.size() > 1 && order_check.size() < _generate_output.size())
+    mooseError("The number of orders assigned to material outputs must be: 0 to be assigned "
+               "CONSTANT; 1 to assign all outputs the same value, or the same size as the number "
+               "of generate outputs listed.");
+  if (family_check.size() > 1 && family_check.size() < _generate_output.size())
+    mooseError("The number of families assigned to material outputs must be: 0 to be assigned "
+               "MONOMIAL; 1 to assign all outputs the same value, or the same size as the number "
+               "of generate outputs listed.");
+  // Make sure all outputs are standard constant value
+  if (order_check.size() == 0)
+  {
+    order_display_notice = true;
+    _material_output_order.assign(_generate_output.size(), "CONSTANT");
+  }
+  if (family_check.size() == 0)
+  {
+    family_display_notice = true;
+    _material_output_family.assign(_generate_output.size(), "MONOMIAL");
+  }
+
+  // For only one order, make all orders the same magnitude
+  if (order_check.size() == 1)
+  {
+    order_display_notice = true;
+    _material_output_order.assign(_generate_output.size(), _material_output_order[0]);
+  }
+  if (family_check.size() == 1)
+  {
+    family_display_notice = true;
+    _material_output_family.assign(_generate_output.size(), _material_output_family[0]);
+  }
+
+  if (order_display_notice)
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
+               << "\n"
+               << _name << ": " << Moose::stringify(_material_output_order) << "\n"
+               << COLOR_DEFAULT;
+  if (family_display_notice)
+    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
+               << "\n"
+               << _name << ": " << Moose::stringify(_material_output_family) << "\n"
+               << COLOR_DEFAULT;
 }
 
 void

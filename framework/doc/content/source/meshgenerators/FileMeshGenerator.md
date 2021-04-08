@@ -27,7 +27,13 @@ supports reading and writing a large number of formats and could be extended to 
 | .cpr        | Checkpoint file |
 
 When reading a mesh file in Sandia's ExodusII format, users can use parameter `exodus_extra_element_integers` to load elemental variables for setting extra element integers of the mesh.
-The names of the extra element integers will be the same as the names of the element variables in the mesh file.
+The names of the extra element integers will be the same as the names of the
+element variables in the mesh file. This generator can also be used for
+restarting variables from the Exodus file format. In order to indicate that the
+mesh file can be used to restart variables, simply set the parameter
+`use_for_exodus_restart = true`. The `initial_from_file_var` parameter must also
+be set in the variables sub-block as described in [MooseVariableBase.md#restart]
+in order to perform variable restart.
 
 ## Further FileMeshGenerator Documentation
 
