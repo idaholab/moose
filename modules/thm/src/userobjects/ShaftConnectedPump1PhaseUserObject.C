@@ -94,7 +94,6 @@ ShaftConnectedPump1PhaseUserObject::initialize()
   _hydraulic_torque = 0;
   _friction_torque = 0;
   _pump_head = 0;
-  _moment_of_inertia = 0;
 }
 
 void
@@ -115,7 +114,8 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
 {
   VolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
-  if (c == 0) // inlet c=0 established in component
+  // inlet c=0 established in component
+  if (c == 0)
   {
     Real alpha = _omega[0] / _omega_rated;
     Real dalpha_domega = 1 / _omega_rated;
@@ -199,14 +199,14 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dmoi_domega;
     if (alpha < _speed_cr_I)
     {
-      _moment_of_inertia = _inertia_const;
+      _moment_of_inertia += _inertia_const;
       dmoi_domega = 0;
     }
     else
     {
-      _moment_of_inertia = _inertia_coeff[0] + _inertia_coeff[1] * std::abs(alpha) +
-                           _inertia_coeff[2] * alpha * alpha +
-                           _inertia_coeff[3] * std::abs(alpha * alpha * alpha);
+      _moment_of_inertia += _inertia_coeff[0] + _inertia_coeff[1] * std::abs(alpha) +
+                            _inertia_coeff[2] * alpha * alpha +
+                            _inertia_coeff[3] * std::abs(alpha * alpha * alpha);
       dmoi_domega = _inertia_coeff[1] * dalpha_domega +
                     2 * _inertia_coeff[2] * dalpha_domega * alpha +
                     3 * _inertia_coeff[3] * alpha * alpha * dalpha_domega;
@@ -336,27 +336,21 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
 }
 
 Real
-ShaftConnectedPump1PhaseUserObject::hydraulicTorque() const
+ShaftConnectedPump1PhaseUserObject::getHydraulicTorque() const
 {
   return _hydraulic_torque;
 }
 
 Real
-ShaftConnectedPump1PhaseUserObject::frictionTorque() const
+ShaftConnectedPump1PhaseUserObject::getFrictionTorque() const
 {
   return _friction_torque;
 }
 
 Real
-ShaftConnectedPump1PhaseUserObject::pumpHead() const
+ShaftConnectedPump1PhaseUserObject::getPumpHead() const
 {
   return _pump_head;
-}
-
-Real
-ShaftConnectedPump1PhaseUserObject::momentOfInertia() const
-{
-  return _moment_of_inertia;
 }
 
 void
@@ -380,11 +374,9 @@ ShaftConnectedPump1PhaseUserObject::threadJoin(const UserObject & uo)
   _hydraulic_torque += scpuo._hydraulic_torque;
   _friction_torque += scpuo._friction_torque;
   _pump_head += scpuo._pump_head;
-  _moment_of_inertia += scpuo._moment_of_inertia;
 
   _moi_jacobian_omega_var(0, 0) += scpuo._moi_jacobian_omega_var(0, 0);
 
-  _torque += scpuo._torque;
   _torque_jacobian_omega_var(0, 0) += scpuo._torque_jacobian_omega_var(0, 0);
   _torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX) +=
       scpuo._torque_jacobian_scalar_vars(0, VolumeJunction1Phase::RHOV_INDEX);
