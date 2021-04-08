@@ -115,7 +115,7 @@ FileMesh::buildMesh()
         getMesh().allow_renumbering(false);
       }
 
-      MooseUtils::checkFileReadable(_file_name, /*check DOS line endings*/ false);
+      MooseUtils::checkFileReadable(_file_name);
       getMesh().read(_file_name);
 
       // we also read declared mesh meta data here if there is meta data file

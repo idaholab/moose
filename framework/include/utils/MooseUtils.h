@@ -184,7 +184,7 @@ bool checkFileWriteable(const std::string & filename, bool throw_on_unwritable =
  * (large) files. This can cause odd errors since the file technically exists, is readable,
  * and even has the right name/extension. However, the content of the file will not match
  * the expected content.
- * @param A pointer to the open filestream.
+ * @param file A pointer to the open filestream.
  */
 bool checkForGitLFSPointer(std::ifstream & file);
 
