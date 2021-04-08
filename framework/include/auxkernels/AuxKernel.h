@@ -126,8 +126,8 @@ public:
   const UserObject & getUserObjectBase(const std::string & param_name) const override;
   const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const override;
 
-  const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                   unsigned int index = 0) const override;
+  const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
+                                                   const unsigned int index = 0) const override;
   const PostprocessorValue &
   getPostprocessorValueByName(const PostprocessorName & name) const override;
 

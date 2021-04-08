@@ -229,12 +229,12 @@ AuxKernelTempl<ComputeValueType>::getUserObjectBaseByName(const UserObjectName &
 
 template <typename ComputeValueType>
 const PostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & name,
-                                                        unsigned int index) const
+AuxKernelTempl<ComputeValueType>::getPostprocessorValue(const std::string & param_name,
+                                                        const unsigned int index /* = 0 */) const
 {
-  if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
-    addUserObjectDependencies(name);
-  return PostprocessorInterface::getPostprocessorValue(name, index);
+  if (!isDefaultPostprocessorValue(param_name, index)) // if default, no dependencies to add
+    addUserObjectDependencies(param_name);
+  return PostprocessorInterface::getPostprocessorValue(param_name, index);
 }
 
 template <typename ComputeValueType>

@@ -48,11 +48,12 @@ GeneralUserObject::getSuppliedItems()
 }
 
 const PostprocessorValue &
-GeneralUserObject::getPostprocessorValue(const std::string & name, unsigned int index) const
+GeneralUserObject::getPostprocessorValue(const std::string & param_name,
+                                         const unsigned int index /* = 0 */) const
 {
-  if (!isDefaultPostprocessorValue(name, index))
-    _depend_vars.insert(getPostprocessorName(name, index));
-  return UserObject::getPostprocessorValue(name, index);
+  if (!isDefaultPostprocessorValue(param_name, index))
+    _depend_vars.insert(getPostprocessorName(param_name, index));
+  return UserObject::getPostprocessorValue(param_name, index);
 }
 
 const PostprocessorValue &
