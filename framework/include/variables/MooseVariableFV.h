@@ -273,7 +273,6 @@ public:
     return _element_data->adGradSln();
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
    * method *cannot* call \p getBoundaryFaceValue because that method itself may lead to a call to
@@ -310,8 +309,6 @@ public:
    * value to the face
    */
   const ADReal & getBoundaryFaceValue(const FaceInfo & fi) const;
-
-#endif
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -429,7 +426,6 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Get the solution value for the provided element and seed the derivative for the corresponding
    * dof index
@@ -505,8 +501,6 @@ private:
   const ADReal & getVertexValue(const Node & vertex) const;
 
 public:
-#endif
-
   const MooseArray<OutputType> & nodalValueArray() const override
   {
     mooseError("Finite volume variables do not have defined values at nodes.");
@@ -597,7 +591,6 @@ private:
   const FieldVariablePhiValue & _phi_neighbor;
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
@@ -623,7 +616,6 @@ private:
   /// is false, then the face center value is simply a linear interpolation betweeh the two
   /// neighboring cell center values
   const bool _use_extended_stencil;
-#endif
 };
 
 template <typename OutputType>

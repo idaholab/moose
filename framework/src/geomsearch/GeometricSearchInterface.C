@@ -17,6 +17,12 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
+InputParameters
+GeometricSearchInterface::validParams()
+{
+  return emptyInputParameters();
+}
+
 GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
   : _geometric_search_data(moose_object->parameters()
                                .getCheckedPointerParam<SubProblem *>("_subproblem")

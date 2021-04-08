@@ -64,9 +64,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
         this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    ,
+        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      : false),
@@ -75,7 +73,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
                               ? this->template getParam<bool>("use_extended_stencil")
                               : false)
-#endif
 {
   _element_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
@@ -452,12 +449,14 @@ MooseVariableFV<OutputType>::getFluxBCs(const FaceInfo & fi) const
     return std::make_pair(false, std::vector<const FVFluxBC *>());
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getVertexValue only supported for global AD indexing");
+#endif
+
   auto it = _vertex_to_value.find(&vertex);
 
   if (it != _vertex_to_value.end())
@@ -498,6 +497,10 @@ template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
+#endif
+
   std::vector<dof_id_type> dof_indices;
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
@@ -521,6 +524,10 @@ MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
                                               const FaceInfo & fi,
                                               const ADReal & elem_value) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getNeighborValue only supported for global AD indexing");
+#endif
+
   if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
     return getElemValue(neighbor);
   else
@@ -549,6 +556,10 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
                                                   const FaceInfo & fi,
                                                   const ADReal & elem_value) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getInternalFaceValue only supported for global AD indexing");
+#endif
+
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
   auto pr = _face_to_value.emplace(&fi, 0);
@@ -599,6 +610,11 @@ template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError(
+      "MooseVariableFV::getDirichletBoundaryFaceValue only supported for global AD indexing");
+#endif
+
   mooseAssert(isDirichletBoundaryFace(fi),
               "This function should only be called on Dirichlet boundary faces.");
 
@@ -633,6 +649,11 @@ template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError(
+      "MooseVariableFV::getExtrapolatedBoundaryFaceValue only supported for global AD indexing");
+#endif
+
   mooseAssert(isExtrapolatedBoundaryFace(fi),
               "This function should only be called on extrapolated boundary faces");
 
@@ -664,6 +685,10 @@ template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::getBoundaryFaceValue only supported for global AD indexing");
+#endif
+
   mooseAssert(!isInternalFace(fi), "A boundary face value has been requested on an internal face.");
 
   // Check to see whether it's already in our cache
@@ -683,6 +708,10 @@ template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
+#endif
+
   auto pr = _elem_to_grad.emplace(elem, 0);
 
   if (!pr.second)
@@ -873,6 +902,10 @@ template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
+#endif
+
   auto it = _face_to_unc_grad.find(&fi);
 
   if (it != _face_to_unc_grad.end())
@@ -912,6 +945,10 @@ template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
+#endif
+
   auto it = _face_to_grad.find(&fi);
 
   if (it != _face_to_grad.end())
@@ -945,8 +982,6 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
   return face_grad;
 }
 
-#endif
-
 template <typename OutputType>
 void
 MooseVariableFV<OutputType>::residualSetup()
@@ -965,13 +1000,11 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::clearCaches()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _elem_to_grad.clear();
   _face_to_unc_grad.clear();
   _face_to_grad.clear();
   _vertex_to_value.clear();
   _face_to_value.clear();
-#endif
 }
 
 template <typename OutputType>

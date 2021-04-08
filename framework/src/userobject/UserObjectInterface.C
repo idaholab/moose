@@ -14,6 +14,12 @@
 #include "DiscreteElementUserObject.h"
 #include "ThreadedGeneralUserObject.h"
 
+InputParameters
+UserObjectInterface::validParams()
+{
+  return emptyInputParameters();
+}
+
 UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
   : _uoi_moose_object(*moose_object),
     _uoi_feproblem(*_uoi_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>(

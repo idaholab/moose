@@ -22,6 +22,8 @@ class UserObject;
 class UserObjectInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * @param params The parameters used by the object being instantiated. This
    *        class needs them so it can get the user object named in the input file,
