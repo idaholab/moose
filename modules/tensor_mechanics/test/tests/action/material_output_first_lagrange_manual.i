@@ -1,5 +1,4 @@
 # This input file is designed to test adding extra stress to ADComputeLinearElasticStress
-
 [Mesh]
   type = GeneratedMesh
   dim = 2

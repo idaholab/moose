@@ -108,6 +108,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _cylindrical_axis_point1_valid(params.isParamSetByUser("cylindrical_axis_point1")),
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
     _direction_valid(params.isParamSetByUser("direction")),
+    _verbose(getParam<bool>("verbose")),
     _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names"))
 {
   // determine if incremental strains are to be used
@@ -517,7 +518,17 @@ TensorMechanicsAction::actOutputGeneration()
         _problem->addAuxKernel(
             ad_prepend + "MaterialRealAux", _base_name + out + '_' + name(), params);
       }
-      else
+      index++;
+    }
+  }
+  else if (_current_task == "add_kernel")
+  {
+    std::string ad_prepend = _use_ad ? "AD" : "";
+    // Loop through output aux variables
+    unsigned int index = 0;
+    for (auto out : _generate_output)
+    {
+      if (_material_output_family[index] != "MONOMIAL")
       {
         InputParameters params = emptyInputParameters();
 
@@ -681,10 +692,11 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
     // For only one order, make all orders the same magnitude
     if (order_check.size() == 1)
       _material_output_order.assign(_generate_output.size(), _material_output_order[0]);
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
-               << "\n"
-               << _name << ": " << Moose::stringify(_material_output_order) << "\n"
-               << COLOR_DEFAULT;
+    if (_verbose)
+      Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
+                 << "\n"
+                 << _name << ": " << Moose::stringify(_material_output_order) << "\n"
+                 << COLOR_DEFAULT;
   }
 
   if (family_check.size() == _generate_output.size())
@@ -698,10 +710,11 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
       _material_output_family.assign(_generate_output.size(), "MONOMIAL");
     if (family_check.size() == 1)
       _material_output_family.assign(_generate_output.size(), _material_output_family[0]);
-    Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
-               << "\n"
-               << _name << ": " << Moose::stringify(_material_output_family) << "\n"
-               << COLOR_DEFAULT;
+    if (_verbose)
+      Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
+                 << "\n"
+                 << _name << ": " << Moose::stringify(_material_output_family) << "\n"
+                 << COLOR_DEFAULT;
   }
 }
 
@@ -730,6 +743,7 @@ TensorMechanicsAction::actOutputMatProp()
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q.second;
               params.set<unsigned int>("index_i") = a;
               params.set<unsigned int>("index_j") = b;
+
               params.applyParameters(parameters());
               params.set<std::string>("property_name") = _base_name + out;
             }
