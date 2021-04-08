@@ -135,6 +135,9 @@ ComputeMortarFunctor::operator()()
       custom_xi1_pts[qp] = xi1_eta;
     }
 
+    const auto normals = _amg.getNormals(*msinfo.secondary_elem, custom_xi1_pts);
+    const auto nodal_normals = _amg.getNodalNormals(*msinfo.secondary_elem);
+
     const Elem * reinit_secondary_elem = secondary_ip;
 
     // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
@@ -205,7 +208,10 @@ ComputeMortarFunctor::operator()()
     if (!_fe_problem.currentlyComputingJacobian())
     {
       for (auto && mc : _mortar_constraints)
+      {
+        mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeResidual(_has_primary);
+      }
 
       _assembly.cacheResidual();
       _assembly.cacheResidualNeighbor();
@@ -217,7 +223,10 @@ ComputeMortarFunctor::operator()()
     else
     {
       for (auto && mc : _mortar_constraints)
+      {
+        mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
         mc->computeJacobian(_has_primary);
+      }
 
       _assembly.cacheJacobianMortar();
 

@@ -91,6 +91,18 @@ public:
    */
   bool useDual() const { return _use_dual; }
 
+  /**
+   * Set the normals vector
+   */
+  void setNormals(const std::vector<Point> & normals) { _normals = normals; }
+
+  /**
+   * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
+   * points). If this is set to false, then non-interpolated nodal normals will be used, and then
+   * the _normals member should be indexed with _i instead of _qp
+   */
+  bool interpolateNormals() const { return _interpolate_normals; }
+
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;
@@ -122,8 +134,8 @@ protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 
-  /// the normals along the secondary face
-  const MooseArray<Point> & _normals;
+  /// the normals
+  std::vector<Point> _normals;
 
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
@@ -188,4 +200,7 @@ protected:
 
   /// Whether this object operates on the displaced mesh
   const bool _displaced;
+
+  /// Whether to interpolate the nodal normals
+  const bool _interpolate_normals;
 };

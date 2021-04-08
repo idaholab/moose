@@ -32,4 +32,7 @@ protected:
 
   /// Whether this object is operating on the displaced mesh
   const bool _displaced;
+
+  /// The normal index. This is _qp if we are interpolating the nodal normals, else it is _i
+  const unsigned int & _normal_index;
 };

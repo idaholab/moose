@@ -50,7 +50,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _primary_disp_x(adCoupledNeighborValue("disp_x")),
     _secondary_disp_y(adCoupledValue("disp_y")),
     _primary_disp_y(adCoupledNeighborValue("disp_y")),
-    _displaced(dynamic_cast<DisplacedProblem *>(&_subproblem))
+    _displaced(dynamic_cast<DisplacedProblem *>(&_subproblem)),
+    _normal_index(_interpolate_normals ? _qp : _i)
 {
 }
 
@@ -73,7 +74,10 @@ ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType morta
               _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
         }
 
-        auto gap = gap_vec * _normals[_qp];
+        mooseAssert(_normals.size() == (_interpolate_normals ? _test[_i].size()
+                                                             : _lower_secondary_elem->n_nodes()),
+                    "Making sure that _normals is the expected size");
+        auto gap = gap_vec * _normals[_normal_index];
 
         return _test[_i][_qp] * gap;
       }

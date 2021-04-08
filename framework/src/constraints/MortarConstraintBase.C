@@ -68,6 +68,12 @@ MortarConstraintBase::validParams()
       "compute_primal_residuals", true, "Whether to compute residuals for the primal variable.");
   params.addParam<bool>(
       "compute_lm_residuals", true, "Whether to compute Lagrange Multiplier residuals");
+  params.addParam<bool>(
+      "interpolate_normals",
+      true,
+      "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
+      "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
+      "used, and then the _normals member should be indexed with _i instead of _qp");
   return params;
 }
 
@@ -98,7 +104,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
     _test_dummy(),
     _use_dual(_var ? _var->useDual() : false),
-    _normals(_assembly.normals()),
     _normals_primary(_assembly.neighborNormals()),
     _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),
@@ -116,7 +121,8 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _lower_primary_elem(_assembly.neighborLowerDElem()),
     _lower_secondary_volume(_assembly.lowerDElemVolume()),
     _lower_primary_volume(_assembly.neighborLowerDElemVolume()),
-    _displaced(getParam<bool>("use_displaced_mesh"))
+    _displaced(getParam<bool>("use_displaced_mesh")),
+    _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
 }
 
