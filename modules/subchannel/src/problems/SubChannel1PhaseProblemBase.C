@@ -29,8 +29,10 @@ SubChannel1PhaseProblemBase::validParams()
 SubChannel1PhaseProblemBase::SubChannel1PhaseProblemBase(const InputParameters & params)
   : ExternalProblem(params),
     _g_grav(9.87),
-    _TR(0.0),
-    _dt(1.0),
+    _one(1.0),
+    _zero(0.0),
+    _TR(isTransient() ? _one : _zero),
+    _dt(isTransient() ? dt() : _one),
     _subchannel_mesh(dynamic_cast<SubChannelMeshBase &>(_mesh)),
     _abeta(getParam<Real>("abeta")),
     _CT(getParam<Real>("CT")),
@@ -55,8 +57,6 @@ SubChannel1PhaseProblemBase::initialSetup()
   // Read in Wij_global for null transient only at the first run of externalSolve
   if (isTransient())
   {
-    _TR = 1.0;
-    _dt = dt();
     std::ifstream file("Wij_SS");
     std::string line_str;
     int row_index = 0;
@@ -212,8 +212,8 @@ SubChannel1PhaseProblemBase::computeWij(int iz)
         mooseError(
             name(), " CrossFlow Calculation didn't converge, newton_cycles: ", newton_cycles);
       }
-      auto TimeTerm = _TR * 2.0 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
-      auto Residual = TimeTerm + Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess -
+      auto time_term = _TR * 2.0 * (Wijguess - Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
+      auto Residual = time_term + Kij * Wijguess * std::abs(Wijguess) + Term_out * Wijguess -
                       Term_in - Pressure_Term;
       auto derivative =
           _TR * 2.0 * Lij * Sij * rho_star / _dt + 2.0 * Kij * std::abs(Wijguess) + Term_out;
@@ -273,9 +273,9 @@ SubChannel1PhaseProblemBase::computeMdot(int iz)
     auto volume = dz * (*S_flow_soln)(node_in);
     // mass damping
     double am = 1.0; // means no damping
-    auto TimeTerm = _TR * ((*rho_soln)(node_out)-rho_soln->old(node_out)) * volume / _dt;
+    auto time_term = _TR * ((*rho_soln)(node_out)-rho_soln->old(node_out)) * volume / _dt;
     // Wij positive out of i into j;
-    auto mdot_out = am * ((*mdot_soln)(node_in) - (*SumWij_soln)(node_out)-TimeTerm) +
+    auto mdot_out = am * ((*mdot_soln)(node_in) - (*SumWij_soln)(node_out)-time_term) +
                     (1.0 - am) * (*mdot_soln)(node_out);
     if (mdot_out < 0)
     {
@@ -354,7 +354,7 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
     auto w_perim = (*w_perim_soln)(node_in);
     // hydraulic diameter in the i direction
     auto Dh_i = 4.0 * S / w_perim;
-    auto Time_Term =
+    auto time_term =
         _TR * ((*mdot_soln)(node_out)-mdot_soln->old(node_out)) * dz / _dt -
         dz * 2.0 * (*mdot_soln)(node_out) * (rho_out - rho_soln->old(node_out)) / rho_in / _dt;
 
@@ -405,7 +405,7 @@ SubChannel1PhaseProblemBase::computeDP(int iz)
     auto Friction_Term = (fi * dz / Dh_i) * 0.5 * (std::pow((*mdot_soln)(node_out), 2.0)) /
                          (S * (*rho_soln)(node_out));
     auto Gravity_Term = _g_grav * (*rho_soln)(node_out)*dz * S;
-    auto DP = std::pow(S, -1.0) * (Time_Term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
+    auto DP = std::pow(S, -1.0) * (time_term + Mass_Term1 + Mass_Term2 + CrossFlow_Term +
                                    Turbulent_Term + Friction_Term + Gravity_Term); // Pa
     // update solution
     DP_soln->set(node_out, DP);
