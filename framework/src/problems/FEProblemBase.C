@@ -94,6 +94,7 @@
 #include "FVTimeKernel.h"
 #include "MooseVariableFV.h"
 #include "FVBoundaryCondition.h"
+#include "FVInterfaceKernel.h"
 #include "Reporter.h"
 #include "ADUtils.h"
 
@@ -2769,6 +2770,14 @@ FEProblemBase::addFVBC(const std::string & fv_bc_name,
                        InputParameters & parameters)
 {
   addObject<FVBoundaryCondition>(fv_bc_name, name, parameters);
+}
+
+void
+FEProblemBase::addFVInterfaceKernel(const std::string & fv_ik_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  addObject<FVInterfaceKernel>(fv_ik_name, name, parameters);
 }
 
 // InterfaceKernels ////

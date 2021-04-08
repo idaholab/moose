@@ -14,6 +14,12 @@
 #include "MooseTypes.h"
 #include "UserObject.h"
 
+InputParameters
+VectorPostprocessorInterface::validParams()
+{
+  return emptyInputParameters();
+}
+
 VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * moose_object,
                                                            bool broadcast_by_default)
   : _broadcast_by_default(broadcast_by_default),

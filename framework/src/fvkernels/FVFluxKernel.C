@@ -28,6 +28,10 @@ FVFluxKernel::validParams()
       "boundaries_to_force",
       std::vector<BoundaryName>(),
       "The set of boundaries to force execution of this FVFluxKernel on.");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundaries_to_not_force",
+      std::vector<BoundaryName>(),
+      "The set of boundaries to not force execution of this FVFluxKernel on.");
   return params;
 }
 
@@ -51,9 +55,19 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
         "You cannot set force_boundary_execution to true and set a value for 'boundaries_to_force' "
         "because the former param implies that all boundaries should be forced.");
 
+  if (!_force_boundary_execution && params.isParamSetByUser("boundaries_to_not_force"))
+    paramError("boundaries_to_not_force",
+               "You must set 'force_boundary_execution' to true in order to set a value for "
+               "'boundaries_to_not_force' "
+               "because without the former param, no boundaries are forced.");
+
   const auto & vec = getParam<std::vector<BoundaryName>>("boundaries_to_force");
   for (const auto & name : vec)
     _boundaries_to_force.insert(_mesh.getBoundaryID(name));
+
+  const auto & not_vec = getParam<std::vector<BoundaryName>>("boundaries_to_not_force");
+  for (const auto & name : not_vec)
+    _boundaries_to_not_force.insert(_mesh.getBoundaryID(name));
 }
 
 bool
@@ -72,8 +86,22 @@ FVFluxKernel::onBoundary(const FaceInfo & fi) const
 bool
 FVFluxKernel::skipForBoundary(const FaceInfo & fi) const
 {
-  if (_force_boundary_execution || !onBoundary(fi))
+  if (!onBoundary(fi))
     return false;
+
+  if (_force_boundary_execution)
+  {
+    bool force = true;
+    for (const auto bnd_id : fi.boundaryIDs())
+      if (_boundaries_to_not_force.find(bnd_id) != _boundaries_to_not_force.end())
+      {
+        force = false;
+        break;
+      }
+
+    if (force)
+      return false;
+  }
 
   for (const auto bnd_to_force : _boundaries_to_force)
     if (fi.boundaryIDs().find(bnd_to_force) != fi.boundaryIDs().end())

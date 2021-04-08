@@ -515,6 +515,12 @@ public:
   MooseVariableField<T> & getActualFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
+   * Return a finite volume variable
+   */
+  template <typename T>
+  MooseVariableFV<T> & getFVVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
    * Gets a reference to a scalar variable with specified number
    *
    * @param tid Thread id

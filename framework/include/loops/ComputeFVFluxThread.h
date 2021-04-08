@@ -16,6 +16,7 @@
 #include "MooseVariableFieldBase.h"
 #include "FVFluxKernel.h"
 #include "FVFluxBC.h"
+#include "FVInterfaceKernel.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
 #include "MaterialBase.h"
@@ -359,10 +360,10 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
+  reinitVariables(fi);
+
   if (_fv_flux_kernels.size() == 0)
     return;
-
-  reinitVariables(fi);
 
   for (const auto k : _fv_flux_kernels)
     if (_do_jacobian)
@@ -396,16 +397,27 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .template condition<AttribVectorTags>(_tags)
       .template condition<AttribBoundaries>(bnd_id)
       .queryInto(bcs);
-  if (bcs.size() == 0)
-    return;
-
-  reinitVariables(fi);
 
   for (const auto & bc : bcs)
     if (_do_jacobian)
       bc->computeJacobian(fi);
     else
       bc->computeResidual(fi);
+
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
+      .queryInto(iks);
+
+  for (const auto & ik : iks)
+    if (_do_jacobian)
+      ik->computeJacobian(fi);
+    else
+      ik->computeResidual(fi);
 }
 
 template <typename RangeType>
@@ -489,14 +501,23 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
     fv_kernel_requested_props.insert(mp_deps.begin(), mp_deps.end());
   }
 
-  std::set<unsigned int> same_matprop_name;
+  std::set<std::string> same_matprop_name;
   for (std::shared_ptr<MaterialBase> mat : mats)
   {
     for (const auto prop_id : mat->getSuppliedPropIDs())
     {
       auto pr = supplied_props.insert(prop_id);
       if (!pr.second)
-        same_matprop_name.insert(prop_id);
+      {
+        const auto & prop_ids = MaterialPropertyStorage::propIDs();
+        auto same_matprop_name_it =
+            std::find_if(prop_ids.begin(),
+                         prop_ids.end(),
+                         [prop_id](const std::pair<std::string, unsigned int> & map_pr) {
+                           return map_pr.second == prop_id;
+                         });
+        same_matprop_name.insert(same_matprop_name_it->first);
+      }
     }
 
     const auto & mp_deps = mat->getMatPropDependencies();
@@ -504,16 +525,13 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
   }
 
   // Print a warning if block restricted materials are used
-  std::stringstream same_matprop_name_str;
-  std::copy(same_matprop_name.begin(),
-            same_matprop_name.end(),
-            std::ostream_iterator<int>(same_matprop_name_str, " "));
+  auto same_matprop_name_str = MooseUtils::join(same_matprop_name, " ");
 
   if (same_matprop_name.size() > 0)
     mooseDoOnce(
-        mooseWarning("Multiple objects supply properties of ID ",
-                     same_matprop_name_str.str(),
-                     ".\n Do you have different block-restricted physics *and* different "
+        mooseWarning("Multiple objects supply properties of name ",
+                     same_matprop_name_str,
+                     ".\nDo you have different block-restricted physics *and* different "
                      "block-restricted \nmaterials "
                      "on either side of an interface that define the same "
                      "property name? \nUnfortunately that is not supported in FV because we have "
@@ -716,6 +734,14 @@ ComputeFVFluxThread<RangeType>::pre()
       .template condition<AttribVectorTags>(_tags)
       .queryInto(bcs);
 
+  std::vector<FVInterfaceKernel *> iks;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVInterfaceKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(iks);
+
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
@@ -728,6 +754,8 @@ ComputeFVFluxThread<RangeType>::pre()
   {
     for (auto * bc : bcs)
       bc->jacobianSetup();
+    for (auto * ik : iks)
+      ik->jacobianSetup();
     for (auto * kernel : kernels)
       kernel->jacobianSetup();
   }
@@ -735,6 +763,8 @@ ComputeFVFluxThread<RangeType>::pre()
   {
     for (auto * bc : bcs)
       bc->residualSetup();
+    for (auto * ik : iks)
+      ik->residualSetup();
     for (auto * kernel : kernels)
       kernel->residualSetup();
   }

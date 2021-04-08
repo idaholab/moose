@@ -262,6 +262,8 @@ public:
    */
   void eraseProperty(const Elem * elem);
 
+  static const std::map<std::string, unsigned int> & propIDs() { return _prop_ids; }
+
 protected:
   /// Release all internal data structures
   void releaseProperties();

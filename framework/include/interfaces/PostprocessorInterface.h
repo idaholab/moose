@@ -36,6 +36,8 @@ class PostprocessorInterface
 public:
   PostprocessorInterface(const MooseObject * moose_object);
 
+  static InputParameters validParams();
+
   ///@{
   /**
    * doco-normal-methods-begin

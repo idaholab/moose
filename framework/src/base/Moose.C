@@ -132,6 +132,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);
+  registerMooseObjectTask("add_fv_ik",                    FVInterfaceKernel,      false);
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
   appendMooseObjectTask  ("add_interface_kernel",         VectorInterfaceKernel);
   registerMooseObjectTask("add_constraint",               Constraint,             false);
@@ -315,8 +316,9 @@ addActionTypes(Syntax & syntax)
                                                         // to be after material objects are created.
                            "(add_reporter)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_interface_kernel,"
-                           " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
+                           " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
+                           " add_indicator, add_marker)"
                            "(coupling_functor_check)"
                            "(init_problem)"
                            "(add_control)"
@@ -493,6 +495,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddDGKernelAction", "DGKernels/*");
   registerSyntax("AddFVKernelAction", "FVKernels/*");
   registerSyntax("AddFVBCAction", "FVBCs/*");
+  registerSyntax("AddFVInterfaceKernelAction", "FVInterfaceKernels/*");
   registerSyntax("CheckFVBCAction", "FVBCs");
 
   registerSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");

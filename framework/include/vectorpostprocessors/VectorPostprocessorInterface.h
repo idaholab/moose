@@ -23,6 +23,8 @@ class ReporterData;
 class VectorPostprocessorInterface
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Constructor
    *

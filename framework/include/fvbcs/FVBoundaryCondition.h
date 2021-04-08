@@ -21,7 +21,6 @@
 #include "VectorPostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
-#include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
@@ -50,7 +49,6 @@ class FVBoundaryCondition : public MooseObject,
                             public PostprocessorInterface,
                             public VectorPostprocessorInterface,
                             public GeometricSearchInterface,
-                            public Restartable,
                             public MeshChangedInterface,
                             public TaggingInterface,
                             public MooseVariableInterface<Real>,

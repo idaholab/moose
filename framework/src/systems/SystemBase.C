@@ -171,6 +171,13 @@ SystemBase::getActualFieldVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 template <typename T>
+MooseVariableFV<T> &
+SystemBase::getFVVariable(THREAD_ID tid, const std::string & var_name)
+{
+  return *_vars[tid].getFVVariable<T>(var_name);
+}
+
+template <typename T>
 MooseVariableFE<T> &
 SystemBase::getFieldVariable(THREAD_ID tid, unsigned int var_number)
 {
@@ -1588,3 +1595,6 @@ SystemBase::getActualFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int 
 
 template MooseVariableField<RealEigenVector> &
 SystemBase::getActualFieldVariable<RealEigenVector>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableFV<Real> & SystemBase::getFVVariable<Real>(THREAD_ID tid,
+                                                                 const std::string & var_name);
