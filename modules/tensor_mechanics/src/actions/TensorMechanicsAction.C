@@ -475,10 +475,9 @@ TensorMechanicsAction::actOutputGeneration()
   if (_current_task == "add_aux_variable")
   {
     unsigned int index = 0;
-
     for (auto out : _generate_output)
     {
-      std::string type = "";
+      std::string type;
       if (_material_output_order[index] == "CONSTANT")
         type = "MooseVariableConstMonomial";
       else
@@ -492,8 +491,9 @@ TensorMechanicsAction::actOutputGeneration()
         _problem->addAuxVariable(type, _base_name + out, params);
       else
         _problem->addVariable(type, _base_name + out, params);
+
+      index++;
     }
-    index++;
   }
 
   // Add output AuxKernels
@@ -521,10 +521,10 @@ TensorMechanicsAction::actOutputGeneration()
       {
         InputParameters params = emptyInputParameters();
 
-        params = _factory.getValidParams(ad_prepend + "MaterialPropertyValue");
+        params = _factory.getValidParams("MaterialPropertyValue");
         params.applyParameters(parameters());
         params.set<MaterialPropertyName>("prop_name") = _base_name + out;
-        params.set<AuxVariableName>("variable") = _base_name + out;
+        params.set<NonlinearVariableName>("variable") = _base_name + out;
 
         _problem->addKernel(
             ad_prepend + "MaterialPropertyValue", _base_name + out + '_' + name(), params);
@@ -657,8 +657,7 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
   // Ensure material output order and family vectors are same size as generate output
   auto order_check = getParam<MultiMooseEnum>("material_output_order");
   auto family_check = getParam<MultiMooseEnum>("material_output_family");
-  bool order_display_notice = false;
-  bool family_display_notice = false;
+
   // Magnitude check
   if (order_check.size() > 1 && order_check.size() < _generate_output.size())
     mooseError("The number of orders assigned to material outputs must be: 0 to be assigned "
@@ -668,40 +667,42 @@ TensorMechanicsAction::verifyOrderAndFamilyOutputs()
     mooseError("The number of families assigned to material outputs must be: 0 to be assigned "
                "MONOMIAL; 1 to assign all outputs the same value, or the same size as the number "
                "of generate outputs listed.");
-  // Make sure all outputs are standard constant value
-  if (order_check.size() == 0)
-  {
-    order_display_notice = true;
-    _material_output_order.assign(_generate_output.size(), "CONSTANT");
-  }
-  if (family_check.size() == 0)
-  {
-    family_display_notice = true;
-    _material_output_family.assign(_generate_output.size(), "MONOMIAL");
-  }
 
-  // For only one order, make all orders the same magnitude
-  if (order_check.size() == 1)
+  if (order_check.size() == _generate_output.size())
   {
-    order_display_notice = true;
-    _material_output_order.assign(_generate_output.size(), _material_output_order[0]);
+    for (const auto & out : order_check)
+      _material_output_order.push_back(out);
   }
-  if (family_check.size() == 1)
+  else
   {
-    family_display_notice = true;
-    _material_output_family.assign(_generate_output.size(), _material_output_family[0]);
-  }
-
-  if (order_display_notice)
+    if (order_check.size() == 0)
+      // Make sure all outputs are standard constant value
+      _material_output_order.assign(_generate_output.size(), "CONSTANT");
+    // For only one order, make all orders the same magnitude
+    if (order_check.size() == 1)
+      _material_output_order.assign(_generate_output.size(), _material_output_order[0]);
     Moose::out << COLOR_CYAN << "*** Automatic applied material output orders ***"
                << "\n"
                << _name << ": " << Moose::stringify(_material_output_order) << "\n"
                << COLOR_DEFAULT;
-  if (family_display_notice)
+  }
+
+  if (family_check.size() == _generate_output.size())
+  {
+    for (const auto & out : family_check)
+      _material_output_family.push_back(out);
+  }
+  else
+  {
+    if (family_check.size() == 0)
+      _material_output_family.assign(_generate_output.size(), "MONOMIAL");
+    if (family_check.size() == 1)
+      _material_output_family.assign(_generate_output.size(), _material_output_family[0]);
     Moose::out << COLOR_CYAN << "*** Automatic applied material output families ***"
                << "\n"
                << _name << ": " << Moose::stringify(_material_output_family) << "\n"
                << COLOR_DEFAULT;
+  }
 }
 
 void
@@ -715,7 +716,7 @@ TensorMechanicsAction::actOutputMatProp()
     // Add output Materials
     for (auto out : _generate_output)
     {
-      std::string type = "";
+      std::string type;
       InputParameters params = emptyInputParameters();
 
       // RankTwoCartesianComponent

@@ -142,4 +142,18 @@
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
     requirement = 'The TensorMechanics MasterAction shall error if an the material outputs and or families do not match the number of material outputs.'
   []
+  [material_output_first_lagrange_manual]
+    type = Exodiff
+    input = 'material_output_first_lagrange_manual.i'
+    exodiff = 'material_output_first_lagrange_manual_out.e'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall determine the necessary orders and families to apply to material outputs.'
+  []
+  [material_output_first_lagrange_auto]
+    type = Exodiff
+    input = 'material_output_first_lagrange_automatic.i'
+    exodiff = 'material_output_first_lagrange_automatic_out.e'
+    design = 'syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The TensorMechanics MasterAction shall determine the necessary orders and families to apply to material outputs.'
+  []
 []
