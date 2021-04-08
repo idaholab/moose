@@ -53,7 +53,6 @@ protected:
   Eigen::MatrixXd WijPrime;
   const Real _g_grav;
   Real _one;
-  Real _zero;
   /// Flag that activates or deactivates the transient parts of the equations solved
   Real _TR;
   /// Time step
