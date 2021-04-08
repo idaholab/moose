@@ -171,14 +171,14 @@ public:
   getPostprocessorValueByName(const PostprocessorName & name) const override;
 
   virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name,
+  getVectorPostprocessorValue(const std::string & param_name,
                               const std::string & vector_name) const override;
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name) const override;
 
   virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name,
+  getVectorPostprocessorValue(const std::string & param_name,
                               const std::string & vector_name,
                               bool needs_broadcast) const override;
   virtual const VectorPostprocessorValue &
@@ -187,10 +187,10 @@ public:
                                     bool needs_broadcast) const override;
 
   const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & name,
+  getScatterVectorPostprocessorValue(const std::string & param_name,
                                      const std::string & vector_name) const override final;
   const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueByName(const std::string & name,
+  getScatterVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                            const std::string & vector_name) const override final;
 
   /**

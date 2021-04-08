@@ -57,14 +57,14 @@ public:
   getPostprocessorValueByName(const PostprocessorName & name) const override final;
 
   const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name,
+  getVectorPostprocessorValue(const std::string & param_name,
                               const std::string & vector_name) const override final;
   const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name) const override final;
 
   const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & name,
+  getVectorPostprocessorValue(const std::string & param_name,
                               const std::string & vector_name,
                               bool use_broadcast) const override final;
   const VectorPostprocessorValue &

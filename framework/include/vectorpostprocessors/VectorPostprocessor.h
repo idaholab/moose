@@ -46,7 +46,7 @@ public:
   /**
    * Returns the name of the VectorPostprocessor.
    */
-  std::string PPName() { return _vpp_name; }
+  std::string PPName() const { return _vpp_name; }
 
   /**
    * Return whether or not this VectorPostprocessor contains complete history
@@ -70,10 +70,10 @@ protected:
   VectorPostprocessorValue & declareVector(const std::string & vector_name);
 
   /// The name of the VectorPostprocessor
-  std::string _vpp_name;
+  const std::string _vpp_name;
 
-  /// Pointer to FEProblemBase
-  FEProblemBase * _vpp_fe_problem;
+  /// The FEProblemBase
+  FEProblemBase & _vpp_fe_problem;
 
   /// DISTRIBUTED or REPLICATED
   const MooseEnum & _parallel_type;
@@ -81,7 +81,7 @@ protected:
   friend class SamplerBase;
 
 private:
-  THREAD_ID _vpp_tid;
+  const THREAD_ID _vpp_tid;
 
   const bool _contains_complete_history;
 

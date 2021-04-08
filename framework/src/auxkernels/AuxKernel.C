@@ -248,11 +248,12 @@ AuxKernelTempl<ComputeValueType>::getPostprocessorValueByName(const Postprocesso
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & param_name,
                                                               const std::string & vector_name) const
 {
-  const auto & vpp = VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
-  addUserObjectDependencies(name);
+  const auto & vpp =
+      VectorPostprocessorInterface::getVectorPostprocessorValue(param_name, vector_name);
+  addUserObjectDependencies(param_name);
   return vpp;
 }
 
@@ -269,13 +270,13 @@ AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
 
 template <typename ComputeValueType>
 const VectorPostprocessorValue &
-AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & name,
+AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValue(const std::string & param_name,
                                                               const std::string & vector_name,
                                                               bool needs_broadcast) const
 {
   const auto & vpp =
-      VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name, needs_broadcast);
-  addUserObjectDependencies(name);
+      VectorPostprocessorInterface::getVectorPostprocessorValue(param_name, vector_name, needs_broadcast);
+  addUserObjectDependencies(param_name);
   return vpp;
 }
 
@@ -295,18 +296,18 @@ AuxKernelTempl<ComputeValueType>::getVectorPostprocessorValueByName(
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValue(
-    const std::string & name, const std::string & vector_name) const
+    const std::string & param_name, const std::string & vector_name) const
 {
   const auto & svpp =
-      VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
-  addUserObjectDependencies(name);
+      VectorPostprocessorInterface::getScatterVectorPostprocessorValue(param_name, vector_name);
+  addUserObjectDependencies(param_name);
   return svpp;
 }
 
 template <typename ComputeValueType>
 const ScatterVectorPostprocessorValue &
 AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
-    const std::string & name, const std::string & vector_name) const
+    const VectorPostprocessorName & name, const std::string & vector_name) const
 {
   const auto & svpp =
       VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);

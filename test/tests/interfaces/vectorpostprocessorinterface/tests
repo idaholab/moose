@@ -1,0 +1,97 @@
+[Tests]
+  design = 'VectorPostprocessorInterface.md'
+  issues = '#17512'
+
+  [param_errors]
+    requirement = 'The system shall report a reasonable error when requesting a VectorPostprocessor value from a parameter when'
+
+    [missing_parameter]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_parameter=true'
+      expect_err = 'When getting a VectorPostprocessor, failed to get a parameter with the name \"bad_parameter\".'
+
+      detail = 'the parameter is not found and'
+    []
+    [bad_parameter_type]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/bad_parameter_type=true'
+      expect_err = 'Supplied parameter with name \"real_param\" of type \"double\" is not an expected type for getting a VectorPostprocessor.'
+
+      detail = 'the parameter does not represent a VectorPostprocessor.'
+    []
+  []
+
+  [has_errors]
+    requirement = 'The system shall report a reasonable error when it is too early to request if a VectorPostprocessor exists'
+    [value_param]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/has_value_early=true'
+      expect_err = 'Cannot call hasVectorPostprocessor\(\) until all VectorPostprocessors have been constructed.'
+
+      detail = 'by vector name and parameter name,'
+    []
+    [value_name]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/has_value_early_by_name=true'
+      expect_err = 'Cannot call hasVectorPostprocessorByName\(\) until all VectorPostprocessors have been constructed.'
+
+      detail = 'by vector name and VectorPostprocessor name,'
+    []
+    [param]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/has_early=true'
+      expect_err = 'Cannot call hasVectorPostprocessor\(\) until all VectorPostprocessors have been constructed.'
+
+      detail = 'by parameter name, and'
+    []
+    [name]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/has_early_by_name=true'
+      expect_err = 'Cannot call hasVectorPostprocessorByName\(\) until all VectorPostprocessors have been constructed.'
+
+      detail = 'and by VectorPostprocessor name.'
+    []
+  []
+
+  [missing_errors]
+    requirement = 'The system shall report a reasonable error when requesting a VectorPostprocessor value'
+    [by_param]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_vpp=true UserObjects/error_test/vpp=missing_vpp'
+      expect_err = 'vpp\)\:(.*)A VectorPostprocessor with the name \"missing_vpp\" was not found.'
+
+      detail = 'by parameter and the VectorPostprocessor does not exist,'
+    []
+    [by_param_vector]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_vector=true'
+      expect_err = 'vpp\)\:(.*)The VectorPostprocessor \"constant_vpp\" does not have a vector named \"missing_vector\".'
+
+      detail = 'by parameter and the VectorPostprocessor exists but the requested vector does not,'
+    []
+    [by_name]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_by_name=true'
+      expect_err = 'A VectorPostprocessor with the name \"missing_vpp\" was not found.'
+
+      detail = 'by VectorPostprocessor name and the VectorPostprocessor does not exist, and'
+    []
+    [by_name_vector]
+      type = RunException
+      input = 'vppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_vector_by_name=true'
+      expect_err = 'The VectorPostprocessor \"constant_vpp\" does not have a vector named \"missing_vector\"'
+
+      detail = 'by VectorPostprocessor name and the VectorPostprocessor exists but the requested vector does not.'
+    []
+  []
+[]

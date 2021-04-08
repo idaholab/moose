@@ -38,7 +38,8 @@ LineValueSampler::LineValueSampler(const InputParameters & parameters)
     _num_points(
         declareRestartableData<unsigned int>("num_points", getParam<unsigned int>("num_points"))),
     _line_vector(_end_point - _start_point),
-    _line_vector_norm(_line_vector.norm())
+    _line_vector_norm(_line_vector.norm()),
+    _vpp_value(getVectorPostprocessorValueByName(_vpp_name, _variable_names[0]))
 {
   if (MooseUtils::absoluteFuzzyEqual(_line_vector_norm, 0.0))
     mooseError("LineValueSampler: `start_point` and `end_point` must be different.");
@@ -76,7 +77,7 @@ LineValueSampler::generatePointsAndIDs(const Point & start_point,
 }
 
 Real
-LineValueSampler::getValue(Point p) const
+LineValueSampler::getValue(const Point & p) const
 {
   if (_values.size() != 1)
     mooseError("LineValueSampler: When calling getValue() on LineValueSampler, "
@@ -98,13 +99,10 @@ LineValueSampler::getValue(Point p) const
     unsigned int vec_pos =
         std::lower_bound(_id.begin(), _id.end(), position * _line_vector_norm) - _id.begin();
 
-    VectorPostprocessorValue & value_vector =
-        _vpp_fe_problem->getVectorPostprocessorValue(_vpp_name, _variable_names[0], false);
-
     if (MooseUtils::absoluteFuzzyEqual(_id[vec_pos], position * _line_vector_norm))
-      value = value_vector[vec_pos];
+      value = _vpp_value[vec_pos];
     else
-      value = (value_vector[vec_pos - 1] + value_vector[vec_pos]) * 0.5;
+      value = (_vpp_value[vec_pos - 1] + _vpp_value[vec_pos]) * 0.5;
   }
 
   return value;

@@ -188,7 +188,7 @@ CSV::output(const ExecFlagType & type)
 
       bool include_time_suffix = true;
       bool is_distributed = _reporter_data.hasReporterWithMode(vpp_name, REPORTER_MODE_DISTRIBUTED);
-      if (hasVectorPostprocessorObjectByName(vpp_name))
+      if (hasVectorPostprocessorByName(vpp_name))
       {
         const VectorPostprocessor & vpp_obj =
             _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
