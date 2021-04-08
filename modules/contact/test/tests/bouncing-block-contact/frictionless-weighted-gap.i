@@ -62,6 +62,7 @@ offset = 1e-2
     primary = 20
     variable = normal_lm
     primary_variable = disp_x
+    c = 1
   [../]
   [normal_x]
     type = NormalMortarMechanicalContact

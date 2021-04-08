@@ -372,10 +372,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the primary elems relative to the
     // new mortar segments.
-    Point dxyz_dxi(0);
-    for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
-      dxyz_dxi += Moose::fe_lagrange_1D_shape_deriv(order, n, xi1) * secondary_elem->point(n);
-    auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
+    std::vector<Point> nodal_normals(secondary_elem->n_nodes());
+    for (const auto n : make_range(secondary_elem->n_nodes()))
+      nodal_normals[n] = secondary_node_to_nodal_normal.at(secondary_elem->node_ptr(n));
+    Point normal(0);
+    for (const auto n : make_range(secondary_elem->n_nodes()))
+    {
+      const auto phi = Moose::fe_lagrange_1D_shape(order, n, xi1);
+      normal += phi * nodal_normals[n];
+    }
     if (_periodic)
       normal *= -1;
 

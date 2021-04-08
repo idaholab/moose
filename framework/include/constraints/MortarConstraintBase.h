@@ -185,4 +185,7 @@ protected:
 
   /// The primary face lower dimensional element volume (not the mortar element!)
   const Real & _lower_primary_volume;
+
+  /// Whether this object operates on the displaced mesh
+  const bool _displaced;
 };
