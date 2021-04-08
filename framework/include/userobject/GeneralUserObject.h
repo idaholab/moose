@@ -50,8 +50,9 @@ public:
   /**
    * Store dependency among same object types for proper execution order
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & name,
-                                                   unsigned int index = 0) const override final;
+  const PostprocessorValue &
+  getPostprocessorValue(const std::string & param_name,
+                        const unsigned int index = 0) const override final;
   const PostprocessorValue &
   getPostprocessorValueByName(const PostprocessorName & name) const override final;
 

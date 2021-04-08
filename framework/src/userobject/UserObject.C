@@ -112,11 +112,12 @@ UserObject::getUserObjectBaseByName(const UserObjectName & object_name) const
 }
 
 const PostprocessorValue &
-UserObject::getPostprocessorValue(const std::string & name, unsigned int index /* = 0 */) const
+UserObject::getPostprocessorValue(const std::string & param_name,
+                                  const unsigned int index /* = 0 */) const
 {
-  if (!isDefaultPostprocessorValue(name, index)) // if default, no dependencies to add
-    _depend_uo.insert(getPostprocessorName(name, index));
-  return PostprocessorInterface::getPostprocessorValue(name, index);
+  if (!isDefaultPostprocessorValue(param_name, index)) // if default, no dependencies to add
+    _depend_uo.insert(getPostprocessorName(param_name, index));
+  return PostprocessorInterface::getPostprocessorValue(param_name, index);
 }
 
 const PostprocessorValue &
