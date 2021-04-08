@@ -852,22 +852,6 @@ public:
    */
   ReporterData & getReporterData(ReporterData::WriteKey /*key*/) { return _reporter_data; }
 
-  /**
-   * Requests a reporter value when it has not necessarily been delcared yet.
-   * @param reporter_name The name of the reporter
-   * @param object_name The name of the object; in the case of Postprocessors and
-   * VectorPostprocessors, this is not necessarily the same name as the \p reporter_name. It is used
-   * in error handling when reporters that were requested were not delcared.
-   * @param mode The reporter mode
-   * @param time_index The time index
-   * @returns A const reference to the Reporter value
-   */
-  template <typename T>
-  const T & getReporterValue(const ReporterName & reporter_name,
-                             const std::string & object_name,
-                             const ReporterMode & mode,
-                             const std::size_t time_index = 0) const;
-
   // UserObjects /////
   virtual void addUserObject(const std::string & user_object_name,
                              const std::string & name,
@@ -2432,14 +2416,4 @@ FEProblemBase::addObject(const std::string & type,
   }
 
   return objects;
-}
-
-template <typename T>
-const T &
-FEProblemBase::getReporterValue(const ReporterName & reporter_name,
-                                const std::string & object_name,
-                                const ReporterMode & mode,
-                                const std::size_t time_index /* = 0 */) const
-{
-  return _reporter_data.getReporterValue<T>(reporter_name, object_name, mode, time_index);
 }

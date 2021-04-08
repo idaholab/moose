@@ -219,6 +219,6 @@ PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorNam
 {
   mooseAssert(t_index < 3, "Invalid time index");
 
-  return _ppi_feproblem.getReporterValue<PostprocessorValue>(
+  return _ppi_feproblem.getReporterData().getReporterValue<PostprocessorValue>(
       ReporterName(name, "value"), name, REPORTER_MODE_ROOT, t_index);
 }
