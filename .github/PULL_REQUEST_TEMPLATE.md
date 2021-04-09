@@ -1,6 +1,6 @@
 <!--
 If this PR is associated with an issue be sure to reference it
-by including "refs #<issue>" or "closes #<issue>" (e.g., #closes #1234).
+by including "refs #<issue>" or "closes #<issue>" (e.g., closes #1234).
 
 If this PR implements an enhancement that does not have an existing issue, please add the following:
 
