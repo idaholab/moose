@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#17561'
+  design = 'syntax/DiracKernels/index.md'
+  [skip]
+    type = 'Exodiff'
+    input = 'skip.i'
+    exodiff = 'skip_out.e'
+    requirement = "The system shall support block restricted dirac kernels."
+  []
+[]

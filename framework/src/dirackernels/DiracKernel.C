@@ -23,6 +23,7 @@ DiracKernel::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += MaterialPropertyInterface::validParams();
+  params += BlockRestrictable::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -54,6 +55,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     GeometricSearchInterface(this),
+    BlockRestrictable(this),
     _var(mooseVariableField()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
@@ -199,7 +201,8 @@ DiracKernel::addPoint(Point p, unsigned id)
   // If id == libMesh::invalid_uint (the default), the user is not
   // enabling caching when they add Dirac points.  So all we can do is
   // the PointLocator lookup, and call the other addPoint() method.
-  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+  const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
+                                        : _dirac_kernel_info.findPoint(p, _mesh);
   addPoint(elem, p, id);
   return elem;
 }
@@ -228,7 +231,8 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   // safe, because all processors have the same value of we_found_it.
   if (!we_found_it)
   {
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
+                                          : _dirac_kernel_info.findPoint(p, _mesh);
 
     // Only add the point to the cache on this processor if the Elem is local
     if (elem && (elem->processor_id() == processor_id()))
@@ -374,7 +378,8 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
   if (we_need_find_point)
   {
     // findPoint() is a parallel-only function
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+    const Elem * elem = blockRestricted() ? _dirac_kernel_info.findPoint(p, _mesh, &blockIDs())
+                                          : _dirac_kernel_info.findPoint(p, _mesh);
 
     updateCaches(cached_elem, elem, p, id);
     addPoint(elem, p, id);

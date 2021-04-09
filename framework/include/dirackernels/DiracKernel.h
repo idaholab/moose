@@ -17,6 +17,7 @@
 #include "GeometricSearchInterface.h"
 #include "MooseVariableField.h"
 #include "MooseVariableInterface.h"
+#include "BlockRestrictable.h"
 
 // Forward Declarations
 class DiracKernel;
@@ -35,7 +36,8 @@ class DiracKernel : public ResidualObject,
                     public CoupleableMooseVariableDependencyIntermediateInterface,
                     public MooseVariableInterface<Real>,
                     public MaterialPropertyInterface,
-                    protected GeometricSearchInterface
+                    protected GeometricSearchInterface,
+                    public BlockRestrictable
 {
 public:
   static InputParameters validParams();

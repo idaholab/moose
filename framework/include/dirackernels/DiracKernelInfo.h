@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "MooseTypes.h"
 
 #include <set>
 #include <map>
@@ -78,7 +79,8 @@ public:
    * Used by client DiracKernel classes to determine the Elem in which
    * the Point p resides.  Uses the PointLocator owned by this object.
    */
-  const Elem * findPoint(Point p, const MooseMesh & mesh);
+  const Elem *
+  findPoint(Point p, const MooseMesh & mesh, const std::set<SubdomainID> * blocks = nullptr);
 
 protected:
   /**
@@ -101,4 +103,3 @@ protected:
   /// threshold distance squared below which two points are considered identical
   const Real _point_equal_distance_sq;
 };
-

@@ -108,7 +108,7 @@ DiracKernelInfo::updatePointLocator(const MooseMesh & mesh)
 }
 
 const Elem *
-DiracKernelInfo::findPoint(Point p, const MooseMesh & mesh)
+DiracKernelInfo::findPoint(Point p, const MooseMesh & mesh, const std::set<SubdomainID> * blocks)
 {
   // If the PointLocator has never been created, do so now.  NOTE - WE
   // CAN'T DO THIS if findPoint() is only called on some processors,
@@ -129,7 +129,7 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh & mesh)
   // far as the DiracKernels are concerned: sometimes the Mesh moves
   // out from the Dirac point entirely and in that case the Point just
   // gets "deactivated".
-  const Elem * elem = (*_point_locator)(p);
+  const Elem * elem = (*_point_locator)(p, blocks);
 
   // The processors may not agree on which Elem the point is in.  This
   // can happen if a Dirac point lies on the processor boundary, and
