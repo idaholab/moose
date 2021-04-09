@@ -115,7 +115,8 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _lower_secondary_elem(_assembly.lowerDElem()),
     _lower_primary_elem(_assembly.neighborLowerDElem()),
     _lower_secondary_volume(_assembly.lowerDElemVolume()),
-    _lower_primary_volume(_assembly.neighborLowerDElemVolume())
+    _lower_primary_volume(_assembly.neighborLowerDElemVolume()),
+    _displaced(getParam<bool>("use_displaced_mesh"))
 {
 }
 

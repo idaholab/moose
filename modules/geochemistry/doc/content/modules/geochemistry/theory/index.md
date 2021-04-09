@@ -166,32 +166,32 @@ A constraint must be supplied by the user for each member of the basis in order 
 - For water $A_{w}$:
 
   - the mass of solvent water, $n_{w}$, or
-  - the total bulk composition (as moles or in mass units): this includes the solvent water, as well as water "inside" secondary species and sorbed species, so the total bulk mole number is $n_{w}\left(55.51 + \sum_{j}\nu_{wj}m_{j} + \sum_{q}\nu_{wq}m_{q}\right)$, where $55.51$ is the number of moles of H$_{2}$O in a kg of water, or
+  - the total bulk composition (as moles or in mass units): this includes the solvent water, as well as water "inside" secondary species and sorbed species, so the total bulk mole number is $n_{w}\left(55.51 + \sum_{j}\nu_{wj}m_{j} + \sum_{q}\nu_{wq}m_{q}\right)$ (and possible contributions from kinetic species: see below), where $55.51$ is the number of moles of H$_{2}$O in a kg of water, or
   - the activity, $a_{w}$, or its logarithm, $\log_{10}a_{w}$.
 
 - For aqueous basis species $A_{i}$:
 
   - the free concentration, $m_{i}$ (in molal, g/kg$_{\mathrm{solvent-water}}$, etc, units), or
-  - the total bulk composition (as moles or in mass units), so the total bulk mole number is $n_{w}(m_{i} + \sum_{j}\nu_{ij}m_{j} + \sum_{q}\nu_{iq}m_{q})$, or
+  - the total bulk composition (as moles or in mass units), so the total bulk mole number is $n_{w}(m_{i} + \sum_{j}\nu_{ij}m_{j} + \sum_{q}\nu_{iq}m_{q})$ (and possible contributions from kinetic species: see below), or
   - the activity, $a_{i} = \gamma_{i}m_{i}$, or its logarithm, $\log_{10}a_{i}$ (so that the pH may be controlled, for example).
 
 - For precipitated minerals $A_{k}$:
 
   - the free (precipitated) mole number, $n_{k}$, or free mass or free volume, or
-  - the total bulk mole number $n_{k} + n_{w}(\sum_{j}\nu_{kj}m_{j} + \sum_{q}\nu_{kq}m_{q})$, or total bulk mass.
+  - the total bulk mole number $n_{k} + n_{w}(\sum_{j}\nu_{kj}m_{j} + \sum_{q}\nu_{kq}m_{q})$ (and possible contributions from kinetic species: see below), or total bulk mass.
 
 - For gases with fixed fugacity, $f_{m}$ or $\log_{10}f_{m}$ must be provided.
 
 - For sorbing sites $A_{p}$:
 
   - the free concentration, $m_{p}$, (in molal,  g/kg$_{\mathrm{solvent-water}}$, etc, units), or
-  - the total bulk composition (as moles or in mass units), so the total bulk mole number $n_{w}(m_{p} + \sum_{q}\nu_{pq}m_{q})$.
+  - the total bulk composition (as moles or in mass units), so the total bulk mole number is $n_{w}(m_{p} + \sum_{q}\nu_{pq}m_{q})$ (and possible contributions from kinetic species: see below).
 
 Using the species' molar volume and molar mass, all masses or volumes are converted to mole and molal units, which are used internally within the geochemistry code.
 
 These constraints must ensure charge-neutrality.  In `geochemistry` models, a charge-balance species must be nominated, and its molality will be adjusted by the `geochemistry` module to ensure charge neutrality.
 
-In addition, all kinetic species, $A_{\bar{k}}$, must be provided with an initial mole number.
+In addition, all kinetic species, $A_{\bar{k}}$, must be provided with an initial mole number.  If the `constraint_meaning` for a basis species is set to `bulk_composition_with_kinetic`, then the above sums for total bulk composition will also include contributions from kinetic species.  See the [kinetic_albite page](kinetic_albite.md) for an example.
 
 During any geochemistry-module simulation, the basis may change (in response to precipitation or dissolution, for example), however, the constraints provided by the user are always respected (except for the charge-balance species, as noted above).  For instance, if the total bulk number of H$^{+}$ is constrained and H$^{+}$ is swapped out of the basis, the total mole number of H$^{+}$ is conserved by the new basis.
 

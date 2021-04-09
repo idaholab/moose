@@ -1,0 +1,45 @@
+[Tests]
+  design = 'GapConductanceConstraint.md'
+  issues = '#17252'
+  [thermomechanical_mortar]
+    requirement = 'The system shall be able to solve two-dimensional thermomechanical contact with small-strain tensor mechanics and heat conduction physics with'
+    [first_low_k]
+      type = CSVDiff
+      input = small.i
+      csvdiff = first_low_k.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables'
+      cli_args = 'name=first_low_k'
+      ad_mode = 'sparse'
+    []
+    [first_high_k]
+      type = CSVDiff
+      input = small.i
+      csvdiff = first_high_k.csv
+      heavy = true
+      detail = 'high conductivity in the gap and first order variables'
+      cli_args = 'name=first_high_k Constraints/thermal_contact/k=100'
+      ad_mode = 'sparse'
+    []
+    [second_low_k]
+      type = CSVDiff
+      input = small.i
+      csvdiff = second_low_k.csv
+      heavy = true
+      detail = 'low conductivity in the gap and second order variables'
+      cli_args = 'name=second_low_k Mesh/second_order=true order=SECOND Variables/frictionless_normal_lm/use_dual=false'
+      min_ad_size = '75'
+      ad_mode = 'sparse'
+    []
+    [second_high_k]
+      type = CSVDiff
+      input = small.i
+      csvdiff = second_high_k.csv
+      heavy = true
+      detail = 'high conductivity in the gap and second order variables'
+      cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND Variables/frictionless_normal_lm/use_dual=false Constraints/thermal_contact/k=100'
+      min_ad_size = '75'
+      ad_mode = 'sparse'
+    []
+  []
+[]

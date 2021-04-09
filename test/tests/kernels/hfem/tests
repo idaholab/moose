@@ -8,6 +8,7 @@
     exodiff = 'dirichlet_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions.'
     mesh_mode = replicated
+    mumps = true
   []
   [neumann]
     type = 'Exodiff'
@@ -15,6 +16,7 @@
     exodiff = 'neumann_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions.'
     mesh_mode = replicated
+    mumps = true
   []
   [robin]
     type = 'Exodiff'
@@ -22,6 +24,7 @@
     exodiff = 'robin_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions.'
     mesh_mode = replicated
+    mumps = true
   []
   [high_order]
     type = 'Exodiff'
@@ -30,6 +33,7 @@
     exodiff = 'high_order_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with high order shape functions.'
     mesh_mode = replicated
+    mumps = true
   []
   [variable_robin]
     type = 'Exodiff'
@@ -37,6 +41,7 @@
     exodiff = 'variable_robin_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions through Lagrange multipliers.'
     mesh_mode = replicated
+    mumps = true
   []
   [robin_displaced]
     type = 'Exodiff'
@@ -51,6 +56,7 @@
     expect_err = 'HFEM does not support mesh adaptivity currently'
     requirement = 'The system shall issue an error for unsupported mesh adaptation with hybrid finite element method (HFEM) calculations.'
     mesh_mode = replicated
+    mumps = true
   []
   [variable_dirichlet]
     type = 'Exodiff'
@@ -58,11 +64,13 @@
     exodiff = 'variable_dirichlet_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions with boundary values specified by variables.'
     mesh_mode = replicated
+    mumps = true
   []
   [robin_distributed_mesh]
     type = 'RunException'
     input = 'robin_dist.i'
     expect_err = 'Hybrid finite element method must use replicated mesh'
     requirement = 'The system shall issue an error for not fully supported distributed mesh with hybrid finite element method (HFEM) calculations.'
+    mumps = true
   []
 []

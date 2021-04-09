@@ -31,7 +31,7 @@ const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm4 = {
     GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
     GeochemicalSystem::ConstraintUserMeaningEnum::ACTIVITY,
     GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
-    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+    GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION_WITH_KINETIC};
 const std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu4 = {
     GeochemistryUnitConverter::GeochemistryUnit::KG,
     GeochemistryUnitConverter::GeochemistryUnit::DIMENSIONLESS,
@@ -2425,7 +2425,7 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6 + 2 * 2E-6, 1.0E-15);
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {
@@ -2478,7 +2478,7 @@ TEST(GeochemicalSolverTest, solve_kinetic1)
       res += mgd.kin_stoichiometry(k, i) *
              egs.getKineticMoles(
                  k); // this should be the only important kinetic contribution to this test!
-    EXPECT_LE(std::abs(res), 1E-14);
+    EXPECT_LE(std::abs(res), 1E-13);
   }
 
   // check equilibrium mass balance
@@ -2621,7 +2621,7 @@ TEST(GeochemicalSolverTest, solve_kinetic2)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6 + 2 * 2E-6, 1.0E-15);
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {
@@ -2804,7 +2804,7 @@ TEST(GeochemicalSolverTest, solve_kinetic3)
       EXPECT_FALSE(mgd.basis_species_gas[i]);
       EXPECT_FALSE(mgd.basis_species_mineral[i]);
       EXPECT_FALSE(egs.getBasisActivityKnown()[i]);
-      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5, 1.0E-15);
+      EXPECT_NEAR(egs.getBulkMolesOld()[i], 1E-5 + 1E-6, 1E-15); // 1E-6 from Something
     }
     else if (mgd.basis_species_name[i] == "HCO3-")
     {
