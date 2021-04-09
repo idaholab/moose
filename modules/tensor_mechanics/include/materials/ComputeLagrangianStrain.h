@@ -15,8 +15,8 @@
 #include "RankTwoTensor.h"
 
 /// Calculate strains to use the MOOSE materials with the Lagrangian kernels
-//    This class wraps and alters strain information coming from the
-//    MOOSE material system to make it compatible with the
+//    This class calculates strain measures used by ComputeLagrangianStress
+//    derived materials and used with
 //    UpdatedLagrangianStressDivergence and TotalLagrangianStressDivergence
 //    kernels
 //
@@ -24,7 +24,7 @@
 //    1) Calculate the deformation gradient at time steps n+1 and n
 //       (the MOOSE material system doesn't bother for the SmallStrain case)
 //    2) Calculate the kinematic quantities needed by the kernels:
-//      a) The incremental deformation gradient
+//      a) The incremental inverse deformation gradient
 //      b) The inverse deformation gradient
 //      c) The determinant of the current deformation gradient
 //
@@ -32,12 +32,12 @@
 //    adding in the scalar field representing the macroscale displacement
 //    gradient before calculating strains.
 //
-class CalculateStrainLagrangianKernel : public DerivativeMaterialInterface<Material>
+class ComputeLagrangianStrain : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
-  CalculateStrainLagrangianKernel(const InputParameters & parameters);
-  virtual ~CalculateStrainLagrangianKernel(){};
+  ComputeLagrangianStrain(const InputParameters & parameters);
+  virtual ~ComputeLagrangianStrain(){};
 
 protected:
   virtual void initialSetup() override;
@@ -64,9 +64,7 @@ protected:
   std::vector<const VariableGradient *> _grad_disp_old;
 
   /// If true the equilibrium conditions is calculated with large deformations
-  bool _ld_kernel;
-  /// If true the material model is providing large deformation quantities
-  bool _ld_material;
+  bool _ld;
 
   // The eigenstrains
   std::vector<MaterialPropertyName> _eigenstrain_names;
@@ -81,9 +79,6 @@ protected:
 
   /// Strain increment
   MaterialProperty<RankTwoTensor> & _strain_increment;
-  /// Rotation increment: this kernel sets to zero to make sure the MOOSE
-  /// material system doesn't try to do anything with it
-  MaterialProperty<RankTwoTensor> & _rotation_increment;
 
   /// Deformation gradient
   MaterialProperty<RankTwoTensor> & _def_grad;
@@ -91,7 +86,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _def_grad_old;
 
   /// Inverse incremental deformation gradient
-  MaterialProperty<RankTwoTensor> & _df;
+  MaterialProperty<RankTwoTensor> & _inv_df;
   /// Inverse deformation gradient
   MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// Volume change

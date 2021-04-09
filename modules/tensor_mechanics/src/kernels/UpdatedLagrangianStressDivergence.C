@@ -11,7 +11,7 @@ UpdatedLagrangianStressDivergence::validParams()
   params.addRequiredCoupledVar("displacements", "The displacement components");
 
   // This kernel requires use_displaced_mesh to match large_kinematics
-  params.addParam<bool>("kernel_large_kinematics", false, "Use large displacement kinematics");
+  params.addParam<bool>("large_kinematics", false, "Use large displacement kinematics");
 
   return params;
 }
@@ -19,37 +19,32 @@ UpdatedLagrangianStressDivergence::validParams()
 UpdatedLagrangianStressDivergence::UpdatedLagrangianStressDivergence(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<Kernel>(parameters),
-    _ld(getParam<bool>("kernel_large_kinematics")),
+    _ld(getParam<bool>("large_kinematics")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_nums(_ndisp),
     _disp_vars(_ndisp),
-    _grad_disp(_ndisp),
-    _stress(getMaterialPropertyByName<RankTwoTensor>("cauchy_stress")),
-    _material_jacobian(getMaterialPropertyByName<RankFourTensor>("material_jacobian")),
-    _df(getMaterialPropertyByName<RankTwoTensor>("inc_def_grad"))
+    _stress(getMaterialPropertyByName<RankTwoTensor>("stress")),
+    _material_jacobian(getMaterialPropertyByName<RankFourTensor>("cauchy_jacobian")),
+    _df(getMaterialPropertyByName<RankTwoTensor>("inv_inc_def_grad"))
 
 {
   // This kernel requires used_displaced_mesh to be true if large kinematics
   // is on
-  if ((getParam<bool>("kernel_large_kinematics")) && (!getParam<bool>("use_displaced_mesh")))
+  if (_ld && (!getParam<bool>("use_displaced_mesh")))
     mooseError("The UpdatedLagrangianStressDivergence kernel requires "
                "used_displaced_mesh = true for large_kinematics = true");
 
   // Similarly, if large kinematics is off so should use_displaced_mesh
-  if ((!getParam<bool>("kernel_large_kinematics")) && (getParam<bool>("use_displaced_mesh")))
+  if (!_ld && (getParam<bool>("use_displaced_mesh")))
     mooseError("The UpdatedLagrangianStressDivergence kernel requires "
                "used_displaced_mesh = false for large_kinematics = false");
-}
 
-void
-UpdatedLagrangianStressDivergence::initialSetup()
-{
+  // Do the vector coupling of the displacements
   for (unsigned int i = 0; i < _ndisp; i++)
   {
     _disp_nums[i] = coupled("displacements", i);
     _disp_vars[i] = getVar("displacements", i);
-    _grad_disp[i] = &coupledGradient("displacements", i);
   }
 }
 

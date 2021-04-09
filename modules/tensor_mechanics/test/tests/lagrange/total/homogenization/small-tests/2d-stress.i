@@ -2,11 +2,9 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  kernel_large_kinematics = false
-  material_large_kinematics = false
+  large_kinematics = false
   constraint_types = 'stress stress stress'
   ndim = 2
-  large_kinematics = false
   macro_gradient = hvar
 []
 
@@ -136,7 +134,7 @@
   [./enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
-    integrator = integrator        
+    integrator = integrator
   [../]
 []
 
@@ -208,14 +206,11 @@
     poissons_ratio = 0.4
     block = '3'
   [../]
-  [./stress_base]
-    type = ComputeFiniteStrainElasticStress
+  [./compute_stress]
+    type = ComputeLagrangianElasticSmallStress
   [../]
   [./compute_strain]
-    type = CalculateStrainLagrangianKernel
-  [../]
-  [./wrap_stress]
-    type = WrapStressLagrangianKernel
+    type = ComputeLagrangianStrain
   [../]
 []
 
@@ -261,7 +256,7 @@
 
 [Executioner]
   type = Transient
- 
+
   solve_type = 'newton'
   line_search = none
 

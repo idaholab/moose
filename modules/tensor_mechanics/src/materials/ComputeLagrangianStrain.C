@@ -1,22 +1,17 @@
-#include "CalculateStrainLagrangianKernel.h"
+#include "ComputeLagrangianStrain.h"
 
-registerMooseObject("TensorMechanicsApp", CalculateStrainLagrangianKernel);
+registerMooseObject("TensorMechanicsApp", ComputeLagrangianStrain);
 
 InputParameters
-CalculateStrainLagrangianKernel::validParams()
+ComputeLagrangianStrain::validParams()
 {
   InputParameters params = Material::validParams();
 
   params.addRequiredCoupledVar("displacements", "Displacement variables");
   params.addParam<bool>(
-      "kernel_large_kinematics", false, "Use large displacement kinematics in the kernel.");
-  params.addParam<bool>("material_large_kinematics",
-                        false,
-                        "If true the material returns the Cauchy stress"
-                        " and the derivative with respect to the spatial "
-                        "velocity gradient directly.");
+      "large_kinematics", false, "Use large displacement kinematics in the kernel.");
   params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names",
-                                                     "List of eigenstrains to account for.");
+                                                     "List of eigenstrains to account for");
   params.addCoupledVar("macro_gradient", "Optional scalar field with the macro gradient");
 
   // We rely on this *not* having use_displaced mesh on
@@ -25,13 +20,12 @@ CalculateStrainLagrangianKernel::validParams()
   return params;
 }
 
-CalculateStrainLagrangianKernel::CalculateStrainLagrangianKernel(const InputParameters & parameters)
+ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
-    _ld_kernel(getParam<bool>("kernel_large_kinematics")),
-    _ld_material(getParam<bool>("material_large_kinematics")),
+    _ld(getParam<bool>("large_kinematics")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
     _eigenstrains_old(_eigenstrain_names.size()),
@@ -40,10 +34,9 @@ CalculateStrainLagrangianKernel::CalculateStrainLagrangianKernel(const InputPara
     _mechanical_strain(declareProperty<RankTwoTensor>("mechanical_strain")),
     _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>("mechanical_strain")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-    _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
     _def_grad(declareProperty<RankTwoTensor>("deformation_gradient")),
     _def_grad_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
-    _df(declareProperty<RankTwoTensor>("inc_def_grad")),
+    _inv_df(declareProperty<RankTwoTensor>("inv_inc_def_grad")),
     _inv_def_grad(declareProperty<RankTwoTensor>("inv_def_grad")),
     _detJ(declareProperty<Real>("detJ")),
     _macro_gradient(isCoupledScalar("macro_gradient", 0) ? coupledScalarValue("macro_gradient")
@@ -59,7 +52,7 @@ CalculateStrainLagrangianKernel::CalculateStrainLagrangianKernel(const InputPara
 }
 
 void
-CalculateStrainLagrangianKernel::initialSetup()
+ComputeLagrangianStrain::initialSetup()
 {
   // Grab the actual displacements
   for (unsigned int i = 0; i < _ndisp; i++)
@@ -77,86 +70,58 @@ CalculateStrainLagrangianKernel::initialSetup()
 }
 
 void
-CalculateStrainLagrangianKernel::initQpStatefulProperties()
+ComputeLagrangianStrain::initQpStatefulProperties()
 {
   _total_strain[_qp].zero();
   _mechanical_strain[_qp].zero();
   _strain_increment[_qp].zero();
-  _rotation_increment[_qp] = RankTwoTensor::Identity();
   _def_grad[_qp] = RankTwoTensor::Identity();
-  _df[_qp] = RankTwoTensor::Identity();
+  _inv_df[_qp] = RankTwoTensor::Identity();
   _inv_def_grad[_qp] = RankTwoTensor::Identity();
   _detJ[_qp] = 1.0;
   _homogenization_contribution[_qp].zero();
 }
 
 void
-CalculateStrainLagrangianKernel::computeQpProperties()
+ComputeLagrangianStrain::computeQpProperties()
 {
   // We'll calculate the deformation gradient even for small kinematics
   _def_grad[_qp] =
       (RankTwoTensor::Identity() +
        RankTwoTensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
 
-  // Add in the macorscale gradient contribution
+  // Add in the macroscale gradient contribution
   _homogenization_contribution[_qp] = _homogenizationContribution();
   _def_grad[_qp] += _homogenization_contribution[_qp];
 
   // If the kernel is large deformation then we need the "actual"
   // kinematic quantities
   RankTwoTensor L;
-  if (_ld_kernel)
+  if (_ld)
   {
     _inv_def_grad[_qp] = _def_grad[_qp].inverse();
     _detJ[_qp] = _def_grad[_qp].det();
-    _df[_qp] = _def_grad_old[_qp] * _inv_def_grad[_qp];
-    L = RankTwoTensor::Identity() - _df[_qp];
+    _inv_df[_qp] = _def_grad_old[_qp] * _inv_def_grad[_qp];
+    L = RankTwoTensor::Identity() - _inv_df[_qp];
   }
   // For small deformations we just provide the identity
   else
   {
     _inv_def_grad[_qp] = RankTwoTensor::Identity();
     _detJ[_qp] = 1.0;
-    _df[_qp] = RankTwoTensor::Identity();
+    _inv_df[_qp] = RankTwoTensor::Identity();
     L = _def_grad[_qp] - _def_grad_old[_qp];
   }
 
-  // This is a useful case, but I need to figure out what these MOOSE
-  // models need and return
-  if (_ld_kernel && _ld_material)
-  {
-    mooseError("Strain calculations for material large displacements not"
-               " implemented");
-  }
-  // This is for the objective update
-  else if (_ld_kernel && !_ld_material)
-  {
-    // Supply the deformation rate as the increment in strain
-    _calculateIncrementalStrains(L);
-  }
-  // This case makes no sense
-  else if (!_ld_kernel && _ld_material)
-  {
-    mooseError("Lagrangian kernel small deformations with MOOSE material large"
-               " deformations is not implemented");
-  }
-  // Small strains
-  else
-  {
-    // Need total_strain and mechanical_strain as small strains
-    _calculateIncrementalStrains(L);
-  }
+  _calculateIncrementalStrains(L);
 }
 
 void
-CalculateStrainLagrangianKernel::_calculateIncrementalStrains(RankTwoTensor L)
+ComputeLagrangianStrain::_calculateIncrementalStrains(RankTwoTensor L)
 {
   // Get the deformation increments
   RankTwoTensor D = (L + L.transpose()) / 2.0;
   _strain_increment[_qp] = D - _eigenstrainIncrement();
-
-  // Don't do it MOOSE! The WrapStress object will take care of it
-  _rotation_increment[_qp] = RankTwoTensor::Identity();
 
   // Increment the total strain
   _total_strain[_qp] = _total_strain_old[_qp] + D;
@@ -166,7 +131,7 @@ CalculateStrainLagrangianKernel::_calculateIncrementalStrains(RankTwoTensor L)
 }
 
 RankTwoTensor
-CalculateStrainLagrangianKernel::_eigenstrainIncrement()
+ComputeLagrangianStrain::_eigenstrainIncrement()
 {
   // Sum the eigenstrains
   RankTwoTensor res;
@@ -179,11 +144,11 @@ CalculateStrainLagrangianKernel::_eigenstrainIncrement()
 }
 
 RankTwoTensor
-CalculateStrainLagrangianKernel::_homogenizationContribution()
+ComputeLagrangianStrain::_homogenizationContribution()
 {
   if (isCoupledScalar("macro_gradient", 0))
   {
-    if (_ld_kernel)
+    if (_ld)
     {
       if (_ndisp == 1)
       {

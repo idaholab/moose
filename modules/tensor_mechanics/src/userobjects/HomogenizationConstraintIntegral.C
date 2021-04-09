@@ -18,8 +18,10 @@ HomogenizationConstraintIntegral::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
   params.addRequiredCoupledVar("displacements", "The problem displacements");
-  params.addRequiredParam<std::vector<std::string>>("constraint_types",
-                                                    "Type of each constraint: strain or stress");
+  MultiMooseEnum constraintType("strain stress");
+  params.addRequiredParam<MultiMooseEnum>("constraint_types",
+                                          HomogenizationConstants::mooseConstraintType,
+                                          "Type of each constraint: strain or stress");
   params.addRequiredParam<std::vector<FunctionName>>("targets",
                                                      "Functions giving the targets to hit");
   params.addParam<bool>("large_kinematics", false, "Using large displacements?");
@@ -33,13 +35,9 @@ HomogenizationConstraintIntegral::HomogenizationConstraintIntegral(
     _ld(getParam<bool>("large_kinematics")),
     _ndisp(coupledComponents("displacements")),
     _ncomps(HomogenizationConstants::required.at(_ld)[_ndisp - 1]),
-    _stress(getMaterialPropertyByName<RankTwoTensor>("cauchy_stress")),
-    _material_jacobian(getMaterialPropertyByName<RankFourTensor>("material_jacobian")),
     _F(getMaterialPropertyByName<RankTwoTensor>("deformation_gradient")),
-    _PK1(getMaterialPropertyByName<RankTwoTensor>("PK1")),
-    _J(getMaterialPropertyByName<Real>("detJ")),
-    _invF(getMaterialPropertyByName<RankTwoTensor>("inv_def_grad")),
-    _df(getMaterialPropertyByName<RankTwoTensor>("inc_def_grad")),
+    _pk1_stress(getMaterialPropertyByName<RankTwoTensor>("pk1_stress")),
+    _pk1_jacobian(getMaterialPropertyByName<RankFourTensor>("pk1_jacobian")),
     _indices(HomogenizationConstants::indices.at(_ld)[_ndisp - 1])
 {
   const std::vector<FunctionName> & names = getParam<std::vector<FunctionName>>("targets");
@@ -57,7 +55,7 @@ HomogenizationConstraintIntegral::HomogenizationConstraintIntegral(
     _targets.push_back(f);
   }
 
-  const std::vector<std::string> & types = getParam<std::vector<std::string>>("constraint_types");
+  auto types = getParam<MultiMooseEnum>("constraint_types");
   if (types.size() != _ncomps)
   {
     mooseError("Number of constraint types must match the number of "
@@ -65,7 +63,7 @@ HomogenizationConstraintIntegral::HomogenizationConstraintIntegral(
   }
   for (unsigned int i = 0; i < _ncomps; i++)
   {
-    _ctypes.push_back(HomogenizationConstants::map_string(types[i]));
+    _ctypes.push_back(static_cast<HomogenizationConstants::ConstraintType>(types.get(i)));
   }
 }
 
@@ -135,7 +133,7 @@ HomogenizationConstraintIntegral::computeResidual()
       // PK stress
       if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Stress)
         res(_indices[_h].first, _indices[_h].second) =
-            _PK1[_qp](_indices[_h].first, _indices[_h].second) -
+            _pk1_stress[_qp](_indices[_h].first, _indices[_h].second) -
             _targets[_h]->value(_t, _q_point[_qp]);
       // Deformation gradient
       else if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Strain)
@@ -153,7 +151,7 @@ HomogenizationConstraintIntegral::computeResidual()
       // Small stress
       if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Stress)
         res(_indices[_h].first, _indices[_h].second) =
-            _stress[_qp](_indices[_h].first, _indices[_h].second) -
+            _pk1_stress[_qp](_indices[_h].first, _indices[_h].second) -
             _targets[_h]->value(_t, _q_point[_qp]);
       // Small strain
       else if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Strain)
@@ -187,10 +185,7 @@ HomogenizationConstraintIntegral::computeJacobian()
       unsigned int b = _indices[_hh].second;
       if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Stress)
       {
-        if (_ld)
-          res(i, j, a, b) = ldStressJacobian(i, j, a, b);
-        else
-          res(i, j, a, b) = sdStressJacobian(i, j, a, b);
+        res(i, j, a, b) = stressJacobian(i, j, a, b);
       }
       else if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Strain)
       {
@@ -210,12 +205,12 @@ HomogenizationConstraintIntegral::computeJacobian()
 }
 
 Real
-HomogenizationConstraintIntegral::sdStressJacobian(unsigned int i,
-                                                   unsigned int j,
-                                                   unsigned int a,
-                                                   unsigned int b)
+HomogenizationConstraintIntegral::stressJacobian(unsigned int i,
+                                                 unsigned int j,
+                                                 unsigned int a,
+                                                 unsigned int b)
 {
-  return _material_jacobian[_qp](i, j, a, b);
+  return _pk1_jacobian[_qp](i, j, a, b);
 }
 
 Real
@@ -229,30 +224,6 @@ HomogenizationConstraintIntegral::sdStrainJacobian(unsigned int i,
     res += 0.5;
   if ((i == b) && (j == a))
     res += 0.5;
-  return res;
-}
-
-Real
-HomogenizationConstraintIntegral::ldStressJacobian(unsigned int i,
-                                                   unsigned int j,
-                                                   unsigned int a,
-                                                   unsigned int b)
-{
-  Real res = 0.0;
-  for (unsigned int k = 0; k < _ndisp; k++)
-  {
-    res += _J[_qp] * _stress[_qp](i, k) *
-           (_invF[_qp](b, a) * _invF[_qp](j, k) - _invF[_qp](j, a) * _invF[_qp](b, k));
-    for (unsigned int s = 0; s < _ndisp; s++)
-    {
-      for (unsigned int t = 0; t < _ndisp; t++)
-      {
-        res += _J[_qp] * _material_jacobian[_qp](i, k, s, t) * _df[_qp](s, a) * _invF[_qp](b, t) *
-               _invF[_qp](j, k);
-      }
-    }
-  }
-
   return res;
 }
 

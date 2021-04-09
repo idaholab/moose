@@ -1,0 +1,14 @@
+[Tests]
+  [./cauchy_linear]
+    type = PetscJacobianTester
+    input = 'cauchy-elastic.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./pk_stvenant]
+    type = PetscJacobianTester
+    input = 'stvenantkirchhoff.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+[]

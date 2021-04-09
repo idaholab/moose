@@ -56,9 +56,6 @@ protected:
   /// Number of constraints
   unsigned int _ncomps;
 
-  /// Used to iterate over scalar variable entries
-  unsigned int _i, _j;
-
   /// The user object that does the actual volume integral
   const HomogenizationConstraintIntegral & _integrator;
 

@@ -31,24 +31,14 @@ const std::map<bool, std::vector<index_list>> indices{
 /// problem dimension
 //    Used to validate user input
 const std::map<bool, std::vector<unsigned int>> required{{true, {1, 4, 9}}, {false, {1, 3, 6}}};
-/// Constraint type: stress/PK stress or strain/deformation gardient
+/// Moose constraint type, for input
+const MultiMooseEnum mooseConstraintType("strain stress");
+/// Constraint type: stress/PK stress or strain/deformation gradient
 enum class ConstraintType
 {
-  Stress,
-  Strain
+  Strain,
+  Stress
 };
-
-/// Translate from a string to the enum
-inline ConstraintType
-map_string(std::string input)
-{
-  if ((input == "strain") || (input == "Strain"))
-    return ConstraintType::Strain;
-  else if ((input == "stress") || (input == "Stress"))
-    return ConstraintType::Stress;
-  else
-    mooseError("Constraint type must be either stress or strain");
-}
 }
 
 /// Computes $\int_{V}\left(X_{ij}-\hat{X}_{ij}\right)dV$
@@ -79,12 +69,10 @@ protected:
   /// Total Jacobian assembled as a rank two tensor
   virtual RankFourTensor computeJacobian();
 
-  /// Small deformation stress contribution jacobian entry
-  Real sdStressJacobian(unsigned int i, unsigned int j, unsigned int a, unsigned int b);
+  /// Stress contribution jacobian entry
+  Real stressJacobian(unsigned int i, unsigned int j, unsigned int a, unsigned int b);
   /// Small deformation strain contribution jacobian entry
   Real sdStrainJacobian(unsigned int i, unsigned int j, unsigned int a, unsigned int b);
-  /// Large deformation PK stress contribution jacobian entry
-  Real ldStressJacobian(unsigned int i, unsigned int j, unsigned int a, unsigned int b);
   /// Large deformation deformation gradient contribution jacobian entry
   Real ldStrainJacobian(unsigned int i, unsigned int j, unsigned int a, unsigned int b);
 
@@ -96,20 +84,12 @@ protected:
   /// Number of constraints
   unsigned int _ncomps;
 
-  /// Cauchy stress (or small stress)
-  const MaterialProperty<RankTwoTensor> & _stress;
-  /// Material jacobian
-  const MaterialProperty<RankFourTensor> & _material_jacobian;
   /// Deformation gradient
   const MaterialProperty<RankTwoTensor> & _F;
-  /// 1st PK stress
-  const MaterialProperty<RankTwoTensor> & _PK1;
-  /// Volume change
-  const MaterialProperty<Real> & _J;
-  /// Inverse deformation gradient
-  const MaterialProperty<RankTwoTensor> & _invF;
-  /// Inverse incremental deformation gradient
-  const MaterialProperty<RankTwoTensor> & _df;
+  /// 1st PK (or small) stress
+  const MaterialProperty<RankTwoTensor> & _pk1_stress;
+  /// PK derivative
+  const MaterialProperty<RankFourTensor> & _pk1_jacobian;
 
   /// List of functions giving the targets for each constraint
   std::vector<const Function *> _targets;

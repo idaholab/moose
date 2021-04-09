@@ -18,7 +18,7 @@
 #include "MooseVariableScalar.h"
 
 /// Enforce equilibrium with a total Lagrangian formulation
-//    This class enforces equilibrium when  used in conjunction with
+//    This class enforces equilibrium when used in conjunction with
 //    the corresponding strain calculator (CalculateStrainLagrangianKernel)
 //    and with either a stress calculator that provides the
 //    "cauchy_stress" and the appropriate "material_jacobian",
@@ -42,9 +42,6 @@ public:
   virtual ~TotalLagrangianStressDivergence(){};
 
 protected:
-  ///
-  virtual void initialSetup() override;
-
   /// Implement the
   /// R^{\alpha}=\int_{V}J\sigma_{ij}\phi_{i,K}^{\alpha}F_{Kj}^{-1}dV
   /// residual
@@ -59,26 +56,11 @@ protected:
 private:
   // *** Base kernel ***
 
-  /// Large deformation residual where the deformation gradient isn't I
-  Real largeDeformationResidual(const RealGradient & grad_phi);
-  /// Small deformation residual without the large deformation kinematics
-  Real smallDeformationResidual(const RealGradient & grad_phi);
-
-  /// The material part of the Jacobian for small deformations
-  Real smallDeformationMatJac(unsigned int i,
-                              unsigned int k,
-                              const RealGradient & grad_phi,
-                              const RealGradient & grad_psi);
-  /// The material part of the Jacobian for large deformations
-  Real largeDeformationMatJac(unsigned int i,
-                              unsigned int k,
-                              const RealGradient & grad_phi,
-                              const RealGradient & grad_psi);
-  /// The geometric part of the Jacobian (only applies to large deformations)
-  Real largeDeformationGeoJac(unsigned int i,
-                              unsigned int k,
-                              const RealGradient & grad_phi,
-                              const RealGradient & grad_psi);
+  /// The material part of the Jacobian
+  Real materialJacobian(unsigned int i,
+                        unsigned int k,
+                        const RealGradient & grad_phi,
+                        const RealGradient & grad_psi);
 
   // *** Homogenization-constraint system ***
 
@@ -91,20 +73,16 @@ private:
   //    by element it's best to put it here
   Real computeConstraintJacobian();
 
-  /// Calculate the small deformation displacement-scalar component
-  Real sdBaseJacobian();
-  /// Calculate the large deformation displacement-scalar Jacobian component
-  Real ldBaseJacobian();
+  /// Calculate the material part of the base disp-scalar jacobian
+  Real materialBaseJacobian();
 
   /// Small deformation scalar-displacement component for strain constraints
   Real sdConstraintJacobianStrain();
-  /// Small deformation scalar-displacement component for stress constraints
-  Real sdConstraintJacobianStress();
-
   /// Large deformation scalar-displacement component for strain constraints
   Real ldConstraintJacobianStrain();
-  /// Large deformation scalar-displacement component for stress constraints
-  Real ldConstraintJacobianStress();
+
+  /// Material scalar-displacement component for stress constraints
+  Real materialConstraintJacobianStress();
 
 protected:
   /// If true use large kinematics
@@ -118,22 +96,14 @@ protected:
   // The displacement variables and gradients
   std::vector<unsigned int> _disp_nums;
   std::vector<MooseVariable *> _disp_vars;
-  std::vector<const VariableGradient *> _grad_disp;
 
-  /// The Cauchy stress
-  const MaterialProperty<RankTwoTensor> & _stress;
-  /// The derivative of the Cauchy stress increment with respect to the
-  /// spatial velocity gradient increment
-  const MaterialProperty<RankFourTensor> & _material_jacobian;
+  /// The 1st Piola-Kirchhoff stress
+  const MaterialProperty<RankTwoTensor> & _pk1;
+  /// The derivative of the PK1 stress with respect to the
+  /// deformation gradient
+  const MaterialProperty<RankFourTensor> & _dpk1;
 
-  /// The inverse deformation gradient
-  const MaterialProperty<RankTwoTensor> & _inv_def_grad;
-  /// The determinant of the deformation gradient (volume change)
-  const MaterialProperty<Real> & _detJ;
-  /// The inverse incremental deformation gradient
-  const MaterialProperty<RankTwoTensor> & _df;
-
-  // The scalar variable used to enforce the homogenization constraints
+  /// The scalar variable used to enforce the homogenization constraints
   unsigned int _macro_gradient_num;
   const MooseVariableScalar * _macro_gradient;
 

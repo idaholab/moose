@@ -2,8 +2,7 @@
 
 [GlobalParams]
   displacements = 'disp_x'
-  kernel_large_kinematics = true
-  material_large_kinematics = false
+  large_kinematics = true
 []
 
 [Variables]
@@ -58,13 +57,10 @@
     poissons_ratio = 0.3
   [../]
   [./stress_base]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLagrangianElasticSmallStress
   [../]
   [./compute_strain]
-    type = CalculateStrainLagrangianKernel
-  [../]
-  [./wrap_stress]
-    type = WrapStressLagrangianKernel
+    type = ComputeLagrangianStrain
   [../]
 []
 

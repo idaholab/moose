@@ -2,8 +2,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  kernel_large_kinematics = true
-  material_large_kinematics = false
+  large_kinematics = true
 []
 
 [Variables]
@@ -101,7 +100,7 @@
 [AuxKernels]
   [./stress_zz]
     type = RankTwoAux
-    rank_two_tensor = cauchy_stress
+    rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
@@ -115,14 +114,11 @@
     youngs_modulus = 1000.0
     poissons_ratio = 0.25
   [../]
-  [./stress_base]
-    type = ComputeFiniteStrainElasticStress
+  [./compute_stress]
+    type = ComputeLagrangianElasticSmallStress
   [../]
   [./compute_strain]
-    type = CalculateStrainLagrangianKernel
-  [../]
-  [./wrap_stress]
-    type = WrapStressLagrangianKernel
+    type = ComputeLagrangianStrain
   [../]
 []
 

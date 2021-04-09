@@ -37,8 +37,6 @@ public:
   virtual ~UpdatedLagrangianStressDivergence(){};
 
 protected:
-  virtual void initialSetup() override;
-
   /// Implement the R^{\alpha}=\int_{v}\sigma_{ij}\phi_{i,j}^{\alpha}dv residual
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -71,7 +69,6 @@ protected:
   // The displacements and their gradients
   std::vector<unsigned int> _disp_nums;
   std::vector<MooseVariable *> _disp_vars;
-  std::vector<const VariableGradient *> _grad_disp;
 
   /// The Cauchy stress
   const MaterialProperty<RankTwoTensor> & _stress;

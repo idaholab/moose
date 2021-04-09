@@ -2,11 +2,9 @@
 
 [GlobalParams]
   displacements = 'disp_x'
-  kernel_large_kinematics = true
-  material_large_kinematics = false
+  large_kinematics = true
   constraint_types = 'strain'
   ndim = 1
-  large_kinematics = true
   macro_gradient = hvar
 []
 
@@ -113,63 +111,63 @@
   [./s11]
     type = RankTwoAux
     variable = s11
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
   [../]
   [./s21]
     type = RankTwoAux
     variable = s21
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 0
   [../]
   [./s31]
     type = RankTwoAux
     variable = s31
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 0
   [../]
   [./s12]
     type = RankTwoAux
     variable = s12
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 1
   [../]
   [./s22]
     type = RankTwoAux
     variable = s22
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 1
   [../]
   [./s32]
     type = RankTwoAux
     variable = s32
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 1
   [../]
   [./s13]
     type = RankTwoAux
     variable = s13
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 2
   [../]
   [./s23]
     type = RankTwoAux
     variable = s23
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 2
   [../]
   [./s33]
     type = RankTwoAux
     variable = s33
-    rank_two_tensor = PK1
+    rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 2
   [../]
@@ -311,14 +309,11 @@
     poissons_ratio = 0.11
     block = '4'
   [../]
-  [./stress_base]
-    type = ComputeFiniteStrainElasticStress
+  [./compute_stress]
+    type = ComputeLagrangianElasticSmallStress
   [../]
   [./compute_strain]
-    type = CalculateStrainLagrangianKernel
-  [../]
-  [./wrap_stress]
-    type = WrapStressLagrangianKernel
+    type = ComputeLagrangianStrain
   [../]
 []
 

@@ -2,8 +2,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  kernel_large_kinematics = true
-  material_large_kinematics = false
+  large_kinematics = true
 []
 
 [Variables]
@@ -27,19 +26,22 @@
 
 [Kernels]
   [./sdx]
-      type = TotalLagrangianStressDivergence
+      type = UpdatedLagrangianStressDivergence
       variable = disp_x
       component = 0
+      use_displaced_mesh = true
   [../]
   [./sdy]
-      type = TotalLagrangianStressDivergence
+      type = UpdatedLagrangianStressDivergence
       variable = disp_y
       component = 1
+      use_displaced_mesh = true
   [../]
   [./sdz]
-      type = TotalLagrangianStressDivergence
+      type = UpdatedLagrangianStressDivergence
       variable = disp_z
       component = 2
+      use_displaced_mesh = true
   [../]
 []
 
@@ -106,14 +108,11 @@
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
   [../]
-  [./stress_base]
-    type = ComputeFiniteStrainElasticStress
+  [./compute_stress]
+    type = ComputeLagrangianElasticSmallStress
   [../]
   [./compute_strain]
-    type = CalculateStrainLagrangianKernel
-  [../]
-  [./wrap_stress]
-    type = WrapStressLagrangianKernel
+    type = ComputeLagrangianStrain
   [../]
 []
 
