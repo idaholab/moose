@@ -59,6 +59,7 @@ public:
                    0,
                    1E-20,
                    {},
+                   {},
                    {}),
       _egs_kinetic_calcite(_mgd_kinetic_calcite,
                            _ac3,
@@ -75,7 +76,8 @@ public:
                            0,
                            1E-20,
                            {"Calcite"},
-                           {1.1}),
+                           {1.1},
+                           {GeochemistryUnitConverter::GeochemistryUnit::MOLES}),
       _cm_dummy({}),
       _cu_dummy({}),
       _model_redox(
@@ -120,6 +122,7 @@ public:
           25,
           0,
           1E-20,
+          {},
           {},
           {})
   {

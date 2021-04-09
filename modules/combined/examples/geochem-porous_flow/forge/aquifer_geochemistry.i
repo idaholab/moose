@@ -157,7 +157,8 @@
   initial_temperature = 220
   temperature = temperature
   kinetic_species_name = '         Albite             Anorthite          K-feldspar         Quartz             Phlogopite         Paragonite         Calcite            Anhydrite          Chalcedony         Illite             Kaolinite          Clinochl-7A        Zoisite            Laumontite'
-  kinetic_species_initial_moles = '4.324073236492E+02 4.631370307325E+01 2.685015418378E+02 7.720095013956E+02 1.235192062541E+01 7.545461404965E-01 4.234651808835E-04 4.000485907930E-04 4.407616361072E+00 1.342524904876E+01 1.004823151125E+00 4.728132387707E-01 7.326007326007E-01 4.818116116598E-01'
+  kinetic_species_initial_value = '4.324073236492E+02 4.631370307325E+01 2.685015418378E+02 7.720095013956E+02 1.235192062541E+01 7.545461404965E-01 4.234651808835E-04 4.000485907930E-04 4.407616361072E+00 1.342524904876E+01 1.004823151125E+00 4.728132387707E-01 7.326007326007E-01 4.818116116598E-01'
+  kinetic_species_unit = '         moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles              moles'
   evaluate_kinetic_rates_always = true # otherwise will easily "run out" of dissolving species
   source_species_names = 'H2O H+ Na+ K+ Ca++ Mg++ SiO2(aq) Al+++ Cl- SO4-- HCO3-'
   source_species_rates = 'rate_H2O_per_1l rate_H_per_1l rate_Na_per_1l rate_K_per_1l rate_Ca_per_1l rate_Mg_per_1l rate_SiO2_per_1l rate_Al_per_1l rate_Cl_per_1l rate_SO4_per_1l rate_HCO3_per_1l'

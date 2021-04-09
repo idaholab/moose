@@ -15,7 +15,8 @@
   initial_temperature = 300.0
   temperature = temp_controller
   kinetic_species_name = Quartz
-  kinetic_species_initial_moles = 6.657313 # Quartz has 60.0843g/mol
+  kinetic_species_initial_value = 400
+  kinetic_species_unit = g
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   add_aux_pH = false # there is no H+ in this system
   evaluate_kinetic_rates_always = true # implicit time-marching used for stability

@@ -31,8 +31,9 @@
   constraint_unit = "   kg               moles            moles            molal"
   initial_temperature = 50.0
   kinetic_species_name = QuartzLike
-# Per 1 litre (1000cm^3) of aqueous solution (1kg of solvent water), there is 9000cm^3 of QuartzLike, which means the initial porosity is 0.1.  QuartzLike has 22.688cm^3/mol, so 9000cm^3 corresponds to 396.685 moles
-  kinetic_species_initial_moles = 396.685
+# Per 1 litre (1000cm^3) of aqueous solution (1kg of solvent water), there is 9000cm^3 of QuartzLike, which means the initial porosity is 0.1.
+  kinetic_species_initial_value = 9000
+  kinetic_species_unit = cm3
   temperature = temperature
   source_species_names = 'H2O    Na+   Cl-   SiO2(aq)'
   source_species_rates = 'rate_H2O_per_1l rate_Na_per_1l rate_Cl_per_1l rate_SiO2_per_1l'

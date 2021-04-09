@@ -7,7 +7,8 @@
   constraint_meaning = "kg_solvent_water bulk_composition bulk_composition free_concentration free_concentration free_concentration"
   constraint_unit = "kg moles moles molal molal molal"
   kinetic_species_name = "Fe(OH)3(ppd)"
-  kinetic_species_initial_moles = "1.0"
+  kinetic_species_initial_value = "1.0"
+  kinetic_species_unit = "moles"
   max_ionic_strength = 0.0
   ramp_max_ionic_strength_initial = 0
 []

@@ -19,7 +19,8 @@
   initial_temperature = 70.0
   temperature = 70.0
   kinetic_species_name = Quartz
-  kinetic_species_initial_moles = 226.992243
+  kinetic_species_initial_value = 226.992243
+  kinetic_species_unit = moles
   evaluate_kinetic_rates_always = true # implicit time-marching used for stability
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   close_system_at_time = 0.0
