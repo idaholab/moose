@@ -56,7 +56,7 @@
       cli_args = 'UserObjects/error_test/has_postprocessor_early=true'
       expect_err = 'Cannot call hasPostprocessor\(\) until all postprocessors have been constructed.'
 
-      detail = 'by parameter name,'
+      detail = 'by parameter name'
     []
     [name]
       type = RunException
@@ -64,15 +64,7 @@
       cli_args = 'UserObjects/error_test/has_postprocessor_early_by_name=true'
       expect_err = 'Cannot call hasPostprocessorByName\(\) until all postprocessors have been constructed.'
 
-      detail = 'by postprocessor name,'
-    []
-    [object]
-      type = RunException
-      input = 'ppi_errors.i'
-      cli_args = 'UserObjects/error_test/has_postprocessor_object_early=true'
-      expect_err = 'Cannot call hasPostprocessorObjectByName\(\) until all postprocessors have been constructed.'
-
-      detail = 'and by object.'
+      detail = 'and by postprocessor name.'
     []
   []
 []

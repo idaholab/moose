@@ -98,19 +98,15 @@ PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name) c
     _ppi_moose_object.mooseError(
         "Cannot call hasPostprocessorByName() until all postprocessors have been constructed.");
 
-  return _ppi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(
-      ReporterName(name, "value"));
-}
+  if (_ppi_feproblem.hasUserObject(name) &&
+      dynamic_cast<const Postprocessor *>(&_ppi_feproblem.getUserObjectBase(name)))
+  {
+    mooseAssert(_ppi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(
+                    ReporterName(name, "value")),
+                "Postprocessor does not have an associated Reporter value");
 
-bool
-PostprocessorInterface::hasPostprocessorObjectByName(const PostprocessorName & name) const
-{
-  if (!_ppi_feproblem.getMooseApp().actionWarehouse().isTaskComplete("add_postprocessor"))
-    _ppi_moose_object.mooseError("Cannot call hasPostprocessorObjectByName() until all "
-                                 "postprocessors have been constructed.");
-
-  if (_ppi_feproblem.hasUserObject(name))
-    return dynamic_cast<const Postprocessor *>(&_ppi_feproblem.getUserObjectBase(name));
+    return true;
+  }
 
   return false;
 }

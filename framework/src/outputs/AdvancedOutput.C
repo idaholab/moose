@@ -456,7 +456,7 @@ AdvancedOutput::initAvailableLists()
 
   // Initialize Reporter name list
   for (auto && r_name : _reporter_data.getReporterNames())
-    if ((_postprocessors_as_reporters || !hasPostprocessorObjectByName(r_name.getObjectName())) &&
+    if ((_postprocessors_as_reporters || !hasPostprocessorByName(r_name.getObjectName())) &&
         (_vectorpostprocessors_as_reporters ||
          !hasVectorPostprocessorObjectByName(r_name.getObjectName())))
       _execute_data["reporters"].available.insert(r_name);
@@ -537,7 +537,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
     }
     else if (_problem_ptr->hasScalarVariable(var_name))
       _execute_data["scalars"].show.insert(var_name);
-    else if (hasPostprocessorObjectByName(var_name))
+    else if (hasPostprocessorByName(var_name))
       _execute_data["postprocessors"].show.insert(var_name);
     else if (hasVectorPostprocessorObjectByName(var_name))
       _execute_data["vector_postprocessors"].show.insert(var_name);
