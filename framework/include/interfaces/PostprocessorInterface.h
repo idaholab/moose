@@ -114,13 +114,6 @@ public:
   bool hasPostprocessorByName(const PostprocessorName & name) const;
 
   /**
-   * Determine if the Postprocessor object exists
-   * @param name The name of the Postprocessor
-   * @return True if the Postprocessor exists
-   */
-  bool hasPostprocessorObjectByName(const PostprocessorName & name) const;
-
-  /**
    * Returns number of Postprocessors coupled under parameter name
    * @param param_name The name of the Postprocessor parameter
    * @return Number of coupled post-processors, 1 if it's a single

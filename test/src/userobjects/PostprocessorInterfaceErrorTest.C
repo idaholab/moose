@@ -40,9 +40,6 @@ PostprocessorInterfaceErrorTest::validParams()
   params.addParam<bool>("has_postprocessor_early_by_name",
                         false,
                         "Test the error for seeing if a postprocessor exists by name too early");
-  params.addParam<bool>("has_postprocessor_object_early",
-                        false,
-                        "Test the error for seeing if a postprocessor object exists too early");
 
   return params;
 }
@@ -64,6 +61,4 @@ PostprocessorInterfaceErrorTest::PostprocessorInterfaceErrorTest(const InputPara
     hasPostprocessor("dummy");
   if (getParam<bool>("has_postprocessor_early_by_name"))
     hasPostprocessorByName("dummy");
-  if (getParam<bool>("has_postprocessor_object_early"))
-    hasPostprocessorObjectByName("dummy");
 }
