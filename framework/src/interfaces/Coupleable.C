@@ -492,6 +492,28 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
     return var->vectorTagValue(tag);
 }
 
+const VariableGradient &
+Coupleable::coupledVectorTagGradient(const std::string & var_name,
+                                     TagID tag,
+                                     unsigned int comp) const
+{
+  const auto * var = getVar(var_name, comp);
+  if (!var)
+    mooseError(var_name, ": invalid variable name for coupledVectorTagGradient");
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_c_fe_problem.vectorTagExists(tag))
+    mooseError("Attempting to couple to vector tag with ID ",
+               tag,
+               "in ",
+               _c_name,
+               ", but a vector tag with that ID does not exist");
+
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
+
+  return var->vectorTagGradient(tag);
+}
+
 const VariableValue &
 Coupleable::coupledVectorTagDofValue(const std::string & var_name,
                                      TagID tag,
@@ -1927,6 +1949,15 @@ Coupleable::coupledVectorTagValues(const std::string & var_name, TagID tag) cons
     return &coupledVectorTagValue(var_name, tag, comp);
   };
   return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableGradient *>
+Coupleable::coupledVectorTagGradients(const std::string & var_name, TagID tag) const
+{
+  auto func = [this, &var_name, &tag](unsigned int comp) {
+    return &coupledVectorTagGradient(var_name, tag, comp);
+  };
+  return coupledVectorHelper<const VariableGradient *>(var_name, func);
 }
 
 std::vector<const VariableValue *>

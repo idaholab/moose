@@ -114,6 +114,9 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
   _need_vector_tag_u.resize(num_vector_tags);
   _vector_tag_u.resize(num_vector_tags);
 
+  _need_vector_tag_grad.resize(num_vector_tags);
+  _vector_tag_grad.resize(num_vector_tags);
+
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 
   _matrix_tags_dof_u.resize(num_matrix_tags);
@@ -510,8 +513,12 @@ MooseVariableData<OutputType>::computeValues()
   _grad_u.resize(nqp);
 
   for (auto tag : active_coupleable_vector_tags)
+  {
     if (_need_vector_tag_u[tag])
       _vector_tag_u[tag].resize(nqp);
+    if (_need_vector_tag_grad[tag])
+      _vector_tag_grad[tag].resize(nqp);
+  }
 
   for (auto tag : active_coupleable_matrix_tags)
     if (_need_matrix_tag_u[tag])
@@ -586,8 +593,12 @@ MooseVariableData<OutputType>::computeValues()
     _grad_u[i] = 0;
 
     for (auto tag : active_coupleable_vector_tags)
+    {
       if (_need_vector_tag_u[tag])
         _vector_tag_u[tag][i] = 0;
+      if (_need_vector_tag_grad[tag])
+        _vector_tag_grad[tag][i] = 0;
+    }
 
     for (auto tag : active_coupleable_matrix_tags)
       if (_need_matrix_tag_u[tag])
@@ -749,8 +760,12 @@ MooseVariableData<OutputType>::computeValues()
       }
 
       for (auto tag : active_coupleable_vector_tags)
+      {
         if (_need_vector_tag_u[tag])
           _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
+        if (_need_vector_tag_grad[tag])
+          _vector_tag_grad[tag][qp].add_scaled(dphi_qp, _vector_tags_dof_u[tag][i]);
+      }
 
       for (auto tag : active_coupleable_matrix_tags)
         if (_need_matrix_tag_u[tag])
@@ -815,8 +830,12 @@ MooseVariableData<RealEigenVector>::computeValues()
   _grad_u.resize(nqp);
 
   for (auto tag : active_coupleable_vector_tags)
+  {
     if (_need_vector_tag_u[tag])
       _vector_tag_u[tag].resize(nqp);
+    if (_need_vector_tag_grad[tag])
+      _vector_tag_grad[tag].resize(nqp);
+  }
 
   for (auto tag : active_coupleable_matrix_tags)
     if (_need_matrix_tag_u[tag])
@@ -891,8 +910,12 @@ MooseVariableData<RealEigenVector>::computeValues()
     _grad_u[i].setZero(_count, LIBMESH_DIM);
 
     for (auto tag : active_coupleable_vector_tags)
+    {
       if (_need_vector_tag_u[tag])
         _vector_tag_u[tag][i].setZero(_count);
+      if (_need_vector_tag_grad[tag])
+        _vector_tag_grad[tag][i].setZero(_count, LIBMESH_DIM);
+    }
 
     for (auto tag : active_coupleable_matrix_tags)
       if (_need_matrix_tag_u[tag])
@@ -1067,8 +1090,13 @@ MooseVariableData<RealEigenVector>::computeValues()
       }
 
       for (auto tag : active_coupleable_vector_tags)
+      {
         if (_need_vector_tag_u[tag])
           _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
+        if (_need_vector_tag_grad[tag])
+          for (unsigned int d = 0; d < LIBMESH_DIM; ++d)
+            _vector_tag_grad[tag][qp].col(d) += dphi_qp(d) * _vector_tags_dof_u[tag][i];
+      }
 
       for (auto tag : active_coupleable_matrix_tags)
         if (_need_matrix_tag_u[tag])
@@ -2212,7 +2240,7 @@ MooseVariableData<OutputType>::fetchDoFValues()
   auto & active_coupleable_vector_tags =
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
   for (auto tag : active_coupleable_vector_tags)
-    if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+    if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
       if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
            _sys.subproblem().safeAccessTaggedVectors()) ||
           _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)

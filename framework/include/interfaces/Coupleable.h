@@ -247,6 +247,26 @@ protected:
                                                             TagID tag) const;
 
   /**
+   * Returns gradient of a coupled variable for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  virtual const VariableGradient &
+  coupledVectorTagGradient(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+
+  /**
+   * Returns gradients for all of a coupled variable's components for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @return Vector of VariableGradient pointers for each component of \p var_name
+   */
+  std::vector<const VariableGradient *> coupledVectorTagGradients(const std::string & var_name,
+                                                                  TagID tag) const;
+
+  /**
    * Returns dof value of a coupled variable for a given tag
    * @param var_name Name of coupled variable
    * @param tag vector tag ID
