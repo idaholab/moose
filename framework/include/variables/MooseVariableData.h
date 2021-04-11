@@ -467,21 +467,9 @@ public:
 
   /////////////////////////////// Tags ///////////////////////////////////////////////////
 
-  const FieldVariableValue & vectorTagValue(TagID tag) const
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
-  const FieldVariableGradient & vectorTagGradient(TagID tag) const
-  {
-    _need_vector_tag_grad[tag] = true;
-    return _vector_tag_grad[tag];
-  }
-  const FieldVariableValue & matrixTagValue(TagID tag) const
-  {
-    _need_matrix_tag_u[tag] = true;
-    return _matrix_tag_u[tag];
-  }
+  const FieldVariableValue & vectorTagValue(TagID tag) const;
+  const FieldVariableGradient & vectorTagGradient(TagID tag) const;
+  const FieldVariableValue & matrixTagValue(TagID tag) const;
 
   /**
    * The oldest solution state that is requested for this variable
