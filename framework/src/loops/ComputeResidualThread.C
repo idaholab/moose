@@ -67,6 +67,10 @@ ComputeResidualThread::subdomainChanged()
   std::set<TagID> needed_fe_var_vector_tags;
   _kernels.updateBlockFEVariableCoupledVectorTagDependency(
       _subdomain, needed_fe_var_vector_tags, _tid);
+  _integrated_bcs.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_fe_var_vector_tags, _tid);
 
   // Update material dependencies
   std::set<unsigned int> needed_mat_props;

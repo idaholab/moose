@@ -96,6 +96,16 @@ public:
 
   std::set<TagID> & getFEVariableCoupleableMatrixTags() { return _fe_coupleable_matrix_tags; }
 
+  const std::set<TagID> & getFEVariableCoupleableVectorTags() const
+  {
+    return _fe_coupleable_vector_tags;
+  }
+
+  const std::set<TagID> & getFEVariableCoupleableMatrixTags() const
+  {
+    return _fe_coupleable_matrix_tags;
+  }
+
 protected:
   /**
    * A call-back function provided by the derived object for actions before coupling a variable

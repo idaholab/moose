@@ -761,10 +761,13 @@ MooseVariableData<OutputType>::computeValues()
 
       for (auto tag : active_coupleable_vector_tags)
       {
-        if (_need_vector_tag_u[tag])
-          _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
-        if (_need_vector_tag_grad[tag])
-          _vector_tag_grad[tag][qp].add_scaled(dphi_qp, _vector_tags_dof_u[tag][i]);
+        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+        {
+          if (_need_vector_tag_u[tag])
+            _vector_tag_u[tag][qp] += phi_local * _vector_tags_dof_u[tag][i];
+          if (_need_vector_tag_grad[tag])
+            _vector_tag_grad[tag][qp].add_scaled(dphi_qp, _vector_tags_dof_u[tag][i]);
+        }
       }
 
       for (auto tag : active_coupleable_matrix_tags)
@@ -2181,6 +2184,51 @@ MooseVariableData<OutputType>::nodalMatrixTagValue(TagID tag) const
 }
 
 template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::vectorTagValue(TagID tag) const
+{
+  _need_vector_tag_u[tag] = true;
+
+  if (_sys.hasVector(tag) && tag < _vector_tag_u.size())
+    return _vector_tag_u[tag];
+  else
+    mooseError("Tag is not associated with any vector or there is no any data for tag ",
+               tag,
+               " for variable ",
+               _var.name());
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableGradient &
+MooseVariableData<OutputType>::vectorTagGradient(TagID tag) const
+{
+  _need_vector_tag_grad[tag] = true;
+
+  if (_sys.hasVector(tag) && tag < _vector_tag_grad.size())
+    return _vector_tag_grad[tag];
+  else
+    mooseError("Tag is not associated with any vector or there is no any data for tag ",
+               tag,
+               " for variable ",
+               _var.name());
+}
+
+template <typename OutputType>
+const typename MooseVariableData<OutputType>::FieldVariableValue &
+MooseVariableData<OutputType>::matrixTagValue(TagID tag) const
+{
+  _need_matrix_tag_u[tag] = true;
+
+  if (_sys.hasMatrix(tag) && tag < _matrix_tag_u.size())
+    return _matrix_tag_u[tag];
+  else
+    mooseError("Tag is not associated with any matrix or there is no any data for tag ",
+               tag,
+               " for variable ",
+               _var.name());
+}
+
+template <typename OutputType>
 void
 MooseVariableData<OutputType>::fetchDoFValues()
 {
@@ -2244,6 +2292,7 @@ MooseVariableData<OutputType>::fetchDoFValues()
       if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
            _sys.subproblem().safeAccessTaggedVectors()) ||
           _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+        // tag is defined on problem but may not be used by a system
         if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
           auto & vec = _sys.getVector(tag);
@@ -2339,6 +2388,7 @@ MooseVariableData<RealEigenVector>::fetchDoFValues()
     if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
          _sys.subproblem().safeAccessTaggedVectors()) ||
         _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      // tag is defined on problem but may not be used by a system
       if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
 
