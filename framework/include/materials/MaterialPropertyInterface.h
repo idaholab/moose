@@ -11,16 +11,16 @@
 
 // MOOSE includes
 #include "MaterialProperty.h"
-#include "FEProblemBase.h"
 #include "MooseTypes.h"
 #include "MaterialData.h"
 #include "MathUtils.h"
 #include "MooseObjectName.h"
+#include "InputParameters.h"
 
 // Forward declarations
-class InputParameters;
 class MaterialPropertyInterface;
 class MooseObject;
+class FEProblemBase;
 
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
@@ -345,6 +345,16 @@ protected:
   std::set<unsigned int> _material_property_dependencies;
 
 private:
+  /*
+   * A proxy method for _mi_feproblem.getMaxQps()
+   */
+  unsigned int getMaxQps() const;
+
+  /*
+   * A proxy method for _mi_feproblem.addConsumedPropertyName()
+   */
+  void addConsumedPropertyName(const MooseObjectName & obj_name, const std::string & prop_name);
+
   /// BoundaryRestricted flag
   const bool _mi_boundary_restricted;
 
@@ -476,7 +486,7 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
-  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
+  addConsumedPropertyName(_mi_moose_object_name, name);
 
   return _material_data->getProperty<T>(name);
 }
@@ -497,7 +507,7 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
-  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
+  addConsumedPropertyName(_mi_moose_object_name, name);
 
   return _material_data->getADProperty<T>(name);
 }
@@ -552,10 +562,10 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   // Update consumed properties in MaterialPropertyDebugOutput
-  _mi_feproblem.addConsumedPropertyName(_mi_moose_object_name, name);
+  addConsumedPropertyName(_mi_moose_object_name, name);
 
   return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
-      &_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
+      &_material_data->getProperty<T>(name), getMaterialPropertyBlocks(name));
 }
 
 template <typename T>
@@ -595,7 +605,7 @@ MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::strin
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _mi_feproblem.getMaxQps();
+  unsigned int nqp = getMaxQps();
   if (nqp > zero.size())
     zero.resize(nqp);
 
@@ -615,7 +625,7 @@ MaterialPropertyInterface::getGenericZeroMaterialProperty()
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
-  unsigned int nqp = _mi_feproblem.getMaxQps();
+  unsigned int nqp = getMaxQps();
   if (nqp > zero.size())
     zero.resize(nqp);
 
