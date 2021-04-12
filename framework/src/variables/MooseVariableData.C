@@ -1322,6 +1322,63 @@ MooseVariableData<OutputType>::computeMonomialValues()
         _u_older[qp] = _u_older[qp];
     }
   }
+
+  auto && active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+
+  for (auto tag : active_coupleable_vector_tags)
+  {
+    if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
+      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           _sys.subproblem().safeAccessTaggedVectors()) ||
+          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+        // tag is defined on problem but may not be used by a system
+        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+        {
+          auto & vec = _sys.getVector(tag);
+          _vector_tags_dof_u[tag].resize(1);
+          _vector_tags_dof_u[tag][0] = vec(_dof_indices[0]);
+        }
+
+    if (_need_vector_tag_u[tag])
+    {
+      _vector_tag_u[tag].resize(nqp);
+      auto v = phi * _vector_tags_dof_u[tag][0];
+      for (unsigned int qp = 0; qp < nqp; ++qp)
+        _vector_tag_u[tag][qp] = v;
+    }
+    if (_need_vector_tag_grad[tag])
+      _vector_tag_grad[tag].resize(nqp);
+  }
+
+  if (_sys.subproblem().safeAccessTaggedMatrices())
+  {
+    auto & active_coupleable_matrix_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+    for (auto tag : active_coupleable_matrix_tags)
+    {
+      _matrix_tags_dof_u[tag].resize(1);
+      if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        {
+          auto & mat = _sys.getMatrix(tag);
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            _matrix_tags_dof_u[tag][0] = mat(_dof_indices[0], _dof_indices[0]);
+          }
+        }
+    }
+  }
+  for (auto tag : active_coupleable_matrix_tags)
+    if (_need_matrix_tag_u[tag])
+    {
+      _matrix_tag_u[tag].resize(nqp);
+      auto v = phi * _matrix_tags_dof_u[tag][0];
+      for (unsigned int qp = 0; qp < nqp; ++qp)
+        _matrix_tag_u[tag][qp] = v;
+    }
 }
 
 template <>
