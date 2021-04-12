@@ -686,15 +686,6 @@
     issues = '#1405'
   [../]
 
-  [./wrong_object_test2]
-    type = 'RunException'
-    input = 'nonexistent_pps_test.i'
-    expect_err = "The following Reporter values were not declared"
-
-    requirement = 'The system shall report an error when a Postprocessor value is requested from a non-existent Postprocessor.'
-    issues = '#1405'
-  [../]
-
   [./wrong_input_switch]
     type = 'RunApp'
     input = 'Foo'

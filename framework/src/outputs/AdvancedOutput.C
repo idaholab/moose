@@ -456,7 +456,7 @@ AdvancedOutput::initAvailableLists()
 
   // Initialize Reporter name list
   for (auto && r_name : _reporter_data.getReporterNames())
-    if ((_postprocessors_as_reporters || !hasPostprocessorByName(r_name.getObjectName())) &&
+    if ((_postprocessors_as_reporters || !hasEnabledPostprocessorByName(r_name.getObjectName())) &&
         (_vectorpostprocessors_as_reporters ||
          !hasVectorPostprocessorObjectByName(r_name.getObjectName())))
       _execute_data["reporters"].available.insert(r_name);

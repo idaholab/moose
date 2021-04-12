@@ -21,7 +21,9 @@ public:
 
   PostprocessorInterfaceErrorTest(const InputParameters & params);
 
-  virtual void initialize(){};
-  virtual void execute(){};
-  virtual void finalize(){};
+  void initialSetup() override;
+
+  void initialize() override {};
+  void execute() override {};
+  void finalize()override{};
 };
