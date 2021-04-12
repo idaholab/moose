@@ -18,14 +18,21 @@ FixedPointProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
   params.addParam<TagName>("fp_tag_name", "fp_previous", "Tag name for the fixed point iteration");
+  params.addParam<bool>(
+      "tagged_vector_for_partial_residual",
+      true,
+      "Toggle between parital residual and previous solution for the tagged vector");
   return params;
 }
 
 FixedPointProblem::FixedPointProblem(const InputParameters & params)
   : FEProblem(params),
+    _tagged_vector_for_partial_residual(getParam<bool>("tagged_vector_for_partial_residual")),
     _tag_previous(getParam<TagName>("fp_tag_name")),
-    _tag_id(addVectorTag(_tag_previous)),
-    _residual_previous(_nl->addVector(_tag_id, false, GHOSTED))
+    _tag_id(addVectorTag(_tag_previous,
+                         _tagged_vector_for_partial_residual ? Moose::VECTOR_TAG_RESIDUAL
+                                                             : Moose::VECTOR_TAG_SOLUTION)),
+    _tagged_vector(_nl->addVector(_tag_id, false, GHOSTED))
 {
 }
 
@@ -33,22 +40,27 @@ void
 FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual)
 {
-  // excluding the previous tag evaluation
-  _nl->disassociateVectorFromTag(_residual_previous, _tag_id);
+  if (_tagged_vector_for_partial_residual)
+  {
+    // excluding the previous tag evaluation
+    _nl->disassociateVectorFromTag(_tagged_vector, _tag_id);
 
-  const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+    const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
-  _fe_vector_tags.clear();
+    _fe_vector_tags.clear();
 
-  for (const auto & residual_vector_tag : residual_vector_tags)
-    if (residual_vector_tag._id != _tag_id)
-      _fe_vector_tags.insert(residual_vector_tag._id);
+    for (const auto & residual_vector_tag : residual_vector_tags)
+      if (residual_vector_tag._id != _tag_id)
+        _fe_vector_tags.insert(residual_vector_tag._id);
 
-  computeResidualInternal(soln, residual, _fe_vector_tags);
+    computeResidualInternal(soln, residual, _fe_vector_tags);
 
-  residual += _residual_previous;
+    residual += _tagged_vector;
 
-  _nl->associateVectorToTag(_residual_previous, _tag_id);
+    _nl->associateVectorToTag(_tagged_vector, _tag_id);
+  }
+  else
+    FEProblem::computeResidual(soln, residual);
 }
 
 void
@@ -56,5 +68,15 @@ FixedPointProblem::computeFullResidual(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual)
 {
   FEProblem::computeResidual(soln, residual);
-  residual += _residual_previous;
+  if (_tagged_vector_for_partial_residual)
+    residual += _tagged_vector;
+}
+
+void
+FixedPointProblem::copySolution()
+{
+  // copy current solution to the tagged vector only when the tagged vector is for
+  // storing the solution of previous fixed point iteration
+  if (!_tagged_vector_for_partial_residual)
+    _tagged_vector = _nl->solution();
 }

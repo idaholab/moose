@@ -15,11 +15,13 @@ InputParameters
 ElementL2Diff::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
+  params.addParam<TagName>("tag", Moose::OLD_SOLUTION_TAG, "Tag name of the solution vector");
   return params;
 }
 
 ElementL2Diff::ElementL2Diff(const InputParameters & parameters)
-  : ElementIntegralVariablePostprocessor(parameters), _u_old(coupledValueOld("variable"))
+  : ElementIntegralVariablePostprocessor(parameters),
+    _u_old(coupledVectorTagValue("variable", "tag"))
 {
 }
 
