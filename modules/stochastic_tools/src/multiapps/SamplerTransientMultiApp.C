@@ -50,7 +50,8 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
     _number_of_sampler_rows(_sampler.getNumberOfRows()),
     _perf_solve_step(registerTimedSection("solveStep", 1)),
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
-    _perf_initial_setup(registerTimedSection("initialSetup", 2))
+    _perf_initial_setup(registerTimedSection("initialSetup", 2)),
+    _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
   {
@@ -179,5 +180,74 @@ SamplerTransientMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
 std::string
 SamplerTransientMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
 {
-  return _cli_args[local_app];
+  TIME_SECTION(_perf_command_line_args);
+
+  std::string args;
+
+  // With multiple processors per app, there are no local rows for non-root processors
+  if (isRootProcessor())
+  {
+    // Since we only store param_names in cli_args, we need to find the values for each param from
+    // sampler data and combine them to get full command line option strings.
+    std::vector<Real> row = _sampler.getNextLocalRow();
+
+    std::ostringstream oss;
+    const std::vector<std::string> & cli_args_name =
+        MooseUtils::split(TransientMultiApp::getCommandLineArgsParamHelper(local_app), ";");
+
+    bool has_brackets = false;
+    if (cli_args_name.size())
+    {
+      has_brackets = cli_args_name[0].find("[") != std::string::npos;
+      for (unsigned int i = 1; i < cli_args_name.size(); ++i)
+        if (has_brackets != (cli_args_name[i].find("[") != std::string::npos))
+          mooseError("If the bracket is used, it must be provided to every parameter.");
+    }
+    if (!has_brackets && cli_args_name.size() != _sampler.getNumberOfCols())
+      mooseError("Number of command line arguments does not match number of sampler columns.");
+
+    for (unsigned int i = 0; i < cli_args_name.size(); ++i)
+    {
+      if (has_brackets)
+      {
+        const std::vector<std::string> & vector_param = MooseUtils::split(cli_args_name[i], "[");
+        const std::vector<std::string> & index_string =
+            MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
+
+        oss << vector_param[0] << "='";
+        std::vector<unsigned int> col_count;
+        for (unsigned j = 0; j < index_string.size(); ++j)
+        {
+          if (index_string[j].find("(") != std::string::npos)
+            oss << std::stod(index_string[j].substr(index_string[j].find("(") + 1));
+          else
+          {
+            unsigned int index = MooseUtils::stringToInteger(index_string[j]);
+            if (index >= row.size())
+              mooseError("The provided global column index (",
+                         index,
+                         ") for ",
+                         vector_param[0],
+                         " is out of bound.");
+            oss << Moose::stringify(row[index]);
+            if (std::find(col_count.begin(), col_count.end(), index) == col_count.end())
+              col_count.push_back(index);
+          }
+          if (j != index_string.size() - 1)
+            oss << " ";
+        }
+        oss << "';";
+      }
+      else
+      {
+        oss << cli_args_name[i] << "=" << Moose::stringify(row[i]) << ";";
+      }
+    }
+
+    args = oss.str();
+  }
+
+  _my_communicator.broadcast(args);
+
+  return args;
 }
