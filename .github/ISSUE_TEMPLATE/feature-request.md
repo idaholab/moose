@@ -2,7 +2,7 @@
 name: Feature or Enhancement Request
 about: New Features or enhancements to existing capabilities
 title: ''
-labels: 'T: task, P: normal'
+labels: 'T: task'
 assignees: ''
 
 ---
@@ -11,7 +11,7 @@ assignees: ''
 <!--Why do you need this feature or what is the enhancement?-->
 
 ## Design
-<!--A concise description (design) of what you want to happen.--->
+<!--A concise description (design) of the enhancement.--->
 
 ## Impact
-<!--Will the enhancement change existing public APIs, internal APIs, or add something new?-->
+<!--Will the enhancement change existing APIs or add something new?-->

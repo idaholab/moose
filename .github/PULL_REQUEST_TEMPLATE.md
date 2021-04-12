@@ -8,10 +8,10 @@ If this PR implements an enhancement that does not have an existing issue, pleas
 <!--Why do you need this feature or what is the enhancement?-->
 
 ## Design
-<!--A concise description (design) of the enhanceent.--->
+<!--A concise description (design) of the enhancement.--->
 
 ## Impact
-<!--Does the enhancement change existing public APIs, internal APIs, or add something new?-->
+<!--Will the enhancement change existing APIs or add something new?-->
 
 
 If this PR implements a bug fix, please create an issue for the bug and reference the issue.
