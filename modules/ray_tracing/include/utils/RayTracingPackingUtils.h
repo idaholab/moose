@@ -187,40 +187,13 @@ mixedPack(BufferIter & out, ValueTypes const &... values)
 }
 
 /**
- * Helper for mixedPackSize()
- */
-template <typename BufferType, typename InputType>
-constexpr void
-mixedPackSizeHelper(std::size_t & offset, std::size_t & size)
-{
-  if (offset + sizeof(InputType) > sizeof(BufferType))
-  {
-    ++size;
-    offset = sizeof(InputType);
-  }
-  else
-    offset += sizeof(InputType);
-}
-
-/**
  * Gets the number of BufferType required to store the expanded InputTypes for use with
- * mixedPack() and mixedUnpack()
+ * mixedPack() and mixedUnpack().
+ *
+ * Can be stored as constexpr to evaluate the size at compile time only.
  */
 template <typename BufferType, typename... InputTypes>
-constexpr std::size_t
-mixedPackSize()
-{
-  std::size_t size = 0;
-  std::size_t offset = 0;
-
-  int expander[] = {0, (mixedPackSizeHelper<BufferType, InputTypes>(offset, size), 0)...};
-  (void)expander;
-
-  if (offset)
-    ++size;
-
-  return size;
-}
+constexpr std::size_t mixedPackSize();
 
 /**
  * Packs \p value into a value of type BufferType at a byte level, to be unpacked with
@@ -275,4 +248,45 @@ unpack(const Elem *& elem, const BufferType id_as_buffer_type, MeshBase * mesh_b
 
   elem = (id == DofObject::invalid_id ? nullptr : mesh_base->query_elem_ptr(id));
 }
+
+namespace detail
+{
+
+/**
+ * Helper for mixedPackSize().
+ *
+ * Called after evaluating the last InputType, and increases the size
+ * if any offset remains
+ */
+template <typename BufferType>
+constexpr std::size_t
+mixedPackSizeHelper(const std::size_t offset, const std::size_t size)
+{
+  return offset ? size + 1 : size;
+}
+
+/**
+ * Recursive helper for mixedPackSize().
+ *
+ * Recurses through the types (in InputType and rest), and increments the
+ * offset and size as needed
+ */
+template <typename BufferType, typename InputType, typename... Rest>
+constexpr std::size_t
+mixedPackSizeHelper(std::size_t offset, std::size_t size)
+{
+  return offset + sizeof(InputType) > sizeof(BufferType)
+             ? mixedPackSizeHelper<BufferType, Rest...>(sizeof(InputType), ++size)
+             : mixedPackSizeHelper<BufferType, Rest...>(offset + sizeof(InputType), size);
+}
+}
+
+template <typename BufferType, typename... InputTypes>
+constexpr std::size_t
+mixedPackSize()
+{
+  // Call the recursive helper with an initial offset and size of 0
+  return detail::mixedPackSizeHelper<BufferType, InputTypes...>(/* offset = */ 0, /* size = */ 0);
+}
+
 }
