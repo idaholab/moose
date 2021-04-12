@@ -115,8 +115,7 @@ FileMesh::buildMesh()
         getMesh().allow_renumbering(false);
       }
 
-      if (!MooseUtils::pathExists(_file_name))
-        mooseError("cannot locate mesh file '", _file_name, "'");
+      MooseUtils::checkFileReadable(_file_name);
       getMesh().read(_file_name);
 
       // we also read declared mesh meta data here if there is meta data file
