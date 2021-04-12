@@ -27,7 +27,7 @@ SodiumSaturationFluidProperties::SodiumSaturationFluidProperties(const InputPara
 std::string
 SodiumSaturationFluidProperties::fluidName() const
 {
-  return "sodium";
+  return "sodium_sat";
 }
 
 Real
@@ -126,7 +126,7 @@ SodiumSaturationFluidProperties::e_from_p_T(
   de_dp = -pressure * dv_dp - v;
 
   // definition of e = h - p * v
-  Real cp = cp_from_v_e(v, e);
+  Real cp = cp_from_p_T(pressure, temperature);
   de_dT = cp - pressure * dv_dT;
 }
 
