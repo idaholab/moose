@@ -113,6 +113,8 @@ public:
    */
   bool hasPostprocessorByName(const PostprocessorName & name) const;
 
+  bool hasEnabledPostprocessorByName(const PostprocessorName & name) const;
+
   /**
    * Returns number of Postprocessors coupled under parameter name
    * @param param_name The name of the Postprocessor parameter
@@ -161,4 +163,9 @@ private:
    */
   void checkParam(const std::string & param_name,
                   const unsigned int index = std::numeric_limits<unsigned int>::max()) const;
+
+  /**
+   * @returns True if all pps have been added (the task associated with adding them is complete)
+   */
+  bool postprocessorsAdded() const;
 };

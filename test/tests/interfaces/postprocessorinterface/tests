@@ -3,7 +3,7 @@
   issues = '#17512'
 
   [param_errors]
-    requirement = 'The system shall report a reasonable error when requesting a postprocessor from a parameter when'
+    requirement = 'The system shall report a reasonable error when requesting a Postprocessor from a parameter when'
 
     [missing_parameter]
       type = RunException
@@ -19,23 +19,23 @@
       cli_args = 'UserObjects/error_test/bad_parameter_type=true'
       expect_err = 'Supplied parameter with name \"real_param\" of type \"double\" is not an expected type for getting a Postprocessor.'
 
-      detail = 'the parameter does not represent a postprocessor,'
+      detail = 'the parameter does not represent a Postprocessor,'
     []
     [out_of_range_single]
       type = RunException
       input = 'ppi_errors.i'
       cli_args = 'UserObjects/error_test/out_of_range_single=true'
-      expect_err = 'A postprocessor was requested with index 1 but a single postprocessor is coupled.'
+      expect_err = 'A Postprocessor was requested with index 1 but a single Postprocessor is coupled.'
 
-      detail = 'the parameter is a single postprocessor value and a greater index than zero is requested,'
+      detail = 'the parameter is a single Postprocessor value and a greater index than zero is requested,'
     []
     [out_of_range_vector]
       type = RunException
       input = 'ppi_errors.i'
       cli_args = 'UserObjects/error_test/out_of_range_vector=true'
-      expect_err = 'A postprocessor was requested with index 100 but only 2 postprocessors are coupled.'
+      expect_err = 'A Postprocessor was requested with index 100 but only 2 Postprocessors are coupled.'
 
-      detail = 'and the parameter is a single postprocessor value and a greater index than zero is requested.'
+      detail = 'and the parameter is a single Postprocessor value and a greater index than zero is requested.'
     []
   []
 
@@ -43,28 +43,56 @@
     type = RunException
     input = 'ppi_errors.i'
     cli_args = 'UserObjects/error_test/name_for_default=true'
-    expect_err = 'Cannot get the name because the postprocessor is a defualt value.'
+    expect_err = 'Cannot get the name because the Postprocessor is a defualt value.'
 
-    requirement = 'The system shall report a reasonable error when requesting a postprocessor name from a parameter in which the postprocessor is a default value and not a name.'
+    requirement = 'The system shall report a reasonable error when requesting a Postprocessor name from a parameter in which the postprocessor is a default value and not a name.'
   []
 
-  [has_postprocessor_errors]
+  [has_errors]
     requirement = 'The system shall report a reasonable error when it is too early to request if a postprocesor exists'
     [param]
       type = RunException
       input = 'ppi_errors.i'
-      cli_args = 'UserObjects/error_test/has_postprocessor_early=true'
-      expect_err = 'Cannot call hasPostprocessor\(\) until all postprocessors have been constructed.'
+      cli_args = 'UserObjects/error_test/has_early=true'
+      expect_err = 'Cannot call hasPostprocessor\(\) until all Postprocessors have been constructed.'
 
-      detail = 'by parameter name'
+      detail = 'by parameter name,'
     []
     [name]
       type = RunException
       input = 'ppi_errors.i'
-      cli_args = 'UserObjects/error_test/has_postprocessor_early_by_name=true'
-      expect_err = 'Cannot call hasPostprocessorByName\(\) until all postprocessors have been constructed.'
+      cli_args = 'UserObjects/error_test/has_early_by_name=true'
+      expect_err = 'Cannot call hasPostprocessorByName\(\) until all Postprocessors have been constructed.'
 
-      detail = 'and by postprocessor name.'
+      detail = 'by Postprocessor name, and'
+    []
+    [enabled_name]
+      type = RunException
+      input = 'ppi_errors.i'
+      cli_args = 'UserObjects/error_test/has_enabled_early=true'
+      expect_err = 'Cannot call hasEnabledPostprocessorByName\(\) until all Postprocessors have been constructed.'
+
+      detail = 'by Postprocessor name and if enabled.'
+    []
+  []
+
+  [missing_errors]
+    requirement = 'The system shall report a reasonable error when requesting a Postprocessor value'
+    [by_param]
+      type = RunException
+      input = 'ppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing=true UserObjects/error_test/pp=missing_pp'
+      expect_err = 'pp\)\:(.*)A Postprocessor with the name \"missing_pp\" was not found.'
+
+      detail = 'by parameter and the Postprocessor does not exist and'
+    []
+    [by_name]
+      type = RunException
+      input = 'ppi_errors.i'
+      cli_args = 'UserObjects/error_test/missing_by_name=true'
+      expect_err = 'A Postprocessor with the name \"missing_pp\" was not found.'
+
+      detail = 'by Postprocessor name and the Postprocessor does not exist.'
     []
   []
 []
