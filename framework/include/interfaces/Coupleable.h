@@ -247,6 +247,10 @@ protected:
   virtual const VariableValue &
   coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledVectorTagValue(const std::string & var_name,
+                                                      const std::string & tag_name,
+                                                      unsigned int comp = 0) const;
+
   /**
    * Returns the values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -255,6 +259,9 @@ protected:
    */
   std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
                                                             TagID tag) const;
+
+  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
+                                                            const std::string & tag_name) const;
 
   /**
    * Returns gradient of a coupled variable for a given tag
@@ -267,6 +274,10 @@ protected:
   virtual const VariableGradient &
   coupledVectorTagGradient(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableGradient & coupledVectorTagGradient(const std::string & var_name,
+                                                            const std::string & tag_name,
+                                                            unsigned int comp = 0) const;
+
   /**
    * Returns gradients for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -275,6 +286,9 @@ protected:
    */
   std::vector<const VariableGradient *> coupledVectorTagGradients(const std::string & var_name,
                                                                   TagID tag) const;
+
+  std::vector<const VariableGradient *>
+  coupledVectorTagGradients(const std::string & var_name, const std::string & tag_name) const;
 
   /**
    * Returns dof value of a coupled variable for a given tag
@@ -286,6 +300,10 @@ protected:
   virtual const VariableValue &
   coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledVectorTagDofValue(const std::string & var_name,
+                                                         const std::string & tag_name,
+                                                         unsigned int comp = 0) const;
+
   /**
    * Returns the dof values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -294,6 +312,9 @@ protected:
    */
   std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
                                                                TagID tag) const;
+
+  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
+                                                               const std::string & tag_name) const;
 
   /**
    * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
@@ -306,6 +327,10 @@ protected:
   virtual const VariableValue &
   coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
+  virtual const VariableValue & coupledMatrixTagValue(const std::string & var_name,
+                                                      const std::string & tag_name,
+                                                      unsigned int comp = 0) const;
+
   /**
    * Returns the diagonal matrix values for all of a coupled variable's components for a given tag
    * @param var_name Name of coupled variable
@@ -314,6 +339,9 @@ protected:
    */
   std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
                                                             TagID tag) const;
+
+  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
+                                                            const std::string & tag_name) const;
 
   /**
    * Returns value of a coupled vector variable

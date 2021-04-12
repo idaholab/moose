@@ -17,7 +17,7 @@ InputParameters
 TagMatrixAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
+  params.addParam<TagName>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
@@ -27,9 +27,7 @@ TagMatrixAux::validParams()
 }
 
 TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
-    _v(coupledMatrixTagValue("v", _tag_id))
+  : AuxKernel(parameters), _v(coupledMatrixTagValue("v", "matrix_tag"))
 {
   auto & execute_on = getParam<ExecFlagEnum>("execute_on");
   if (execute_on.size() != 1 || !execute_on.contains(EXEC_TIMESTEP_END))
