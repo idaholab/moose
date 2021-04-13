@@ -1,5 +1,5 @@
 [Tests]
-  [./concentric_circle_mesh_generator_test]
+  [./mesh_only]
     type = 'Exodiff'
     input = 'concentric_circle_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -10,5 +10,16 @@
     requirement = 'The system shall have the capability to generate a mesh pattern consisting of concentric circles contained within a square.'
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#11640'
+  [../]
+  [./winding_order]
+    type = CSVDiff
+    input = 'concentric_circle_mesh2.i'
+    csvdiff = 'concentric_circle_mesh2_out.csv'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The winding order of the elements created by the mesh generator shall be uniform.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#17533'
   [../]
 []
