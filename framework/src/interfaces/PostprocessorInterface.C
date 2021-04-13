@@ -233,6 +233,9 @@ PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorNam
   if (postprocessorsAdded() && !hasPostprocessorByName(name))
     _ppi_moose_object.mooseError("A Postprocessor with the name \"", name, "\" was not found.");
 
+  if (t_index == 0)
+    addPostprocessorDependencyHelper(name);
+
   return _ppi_feproblem.getReporterData().getReporterValue<PostprocessorValue>(
       ReporterName(name, "value"), name, REPORTER_MODE_ROOT, t_index);
 }

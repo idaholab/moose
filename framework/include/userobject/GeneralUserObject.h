@@ -46,38 +46,13 @@ public:
   virtual void subdomainSetup() override;
   ///@}
 
-  ///@{
-  /**
-   * Store dependency among same object types for proper execution order
-   */
-  const PostprocessorValue &
-  getPostprocessorValue(const std::string & param_name,
-                        const unsigned int index = 0) const override final;
-  const PostprocessorValue &
-  getPostprocessorValueByName(const PostprocessorName & name) const override final;
-
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name) const override final;
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name) const override final;
-
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name,
-                              bool use_broadcast) const override final;
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name,
-                                    bool use_broadcast) const override final;
-
-  ///@}
-
-protected:
-  virtual void addReporterDependencyHelper(const ReporterName & state_name) override;
-
 protected:
   mutable std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
+
+private:
+  void addReporterDependencyHelper(const ReporterName & state_name) override final;
+  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
+  void
+  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override final;
 };

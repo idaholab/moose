@@ -10,6 +10,7 @@
 #include "InitialConditionBase.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
+#include "UserObject.h"
 
 defineLegacyParams(InitialConditionBase);
 
@@ -75,10 +76,9 @@ InitialConditionBase::getSuppliedItems()
   return _supplied_vars;
 }
 
-const UserObject &
-InitialConditionBase::getUserObjectBase(const std::string & name) const
+void
+InitialConditionBase::addUserObjectDependencyHelper(const UserObject & uo) const
 {
   if (!_ignore_uo_dependency)
-    _depend_uo.insert(getUserObjectName(name));
-  return UserObjectInterface::getUserObjectBase(name);
+    _depend_uo.insert(uo.name());
 }

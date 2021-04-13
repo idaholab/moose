@@ -67,14 +67,21 @@ public:
    * @param param_name The name of the parameter key of the user object to retrieve
    * @return The user object with name associated with the parameter \p param_name
    */
-  virtual const UserObject & getUserObjectBase(const std::string & param_name) const;
+  const UserObject & getUserObjectBase(const std::string & param_name) const;
 
   /**
    * Get an user object with the name \p object_name
    * @param object_name The name of the user object to retrieve
    * @return The user object with the name \p object_name
    */
-  virtual const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const;
+  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const;
+
+protected:
+  /**
+   * Helper for deriving classes to override to add dependencies when a UserObject
+   * is requested.
+   */
+  virtual void addUserObjectDependencyHelper(const UserObject & /* uo */) const {}
 
 private:
   /**

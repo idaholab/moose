@@ -95,88 +95,22 @@ UserObject::getDependObjects() const
   return all;
 }
 
-const UserObject &
-UserObject::getUserObjectBase(const std::string & param_name) const
+void
+UserObject::addUserObjectDependencyHelper(const UserObject & uo) const
 {
-  const auto & uo = UserObjectInterface::getUserObjectBase(param_name);
   _depend_uo.insert(uo.name());
-  return uo;
 }
 
-const UserObject &
-UserObject::getUserObjectBaseByName(const UserObjectName & object_name) const
-{
-  const auto & uo = UserObjectInterface::getUserObjectBaseByName(object_name);
-  _depend_uo.insert(object_name);
-  return uo;
-}
-
-const PostprocessorValue &
-UserObject::getPostprocessorValue(const std::string & param_name,
-                                  const unsigned int index /* = 0 */) const
-{
-  if (!isDefaultPostprocessorValue(param_name, index)) // if default, no dependencies to add
-    _depend_uo.insert(getPostprocessorName(param_name, index));
-  return PostprocessorInterface::getPostprocessorValue(param_name, index);
-}
-
-const PostprocessorValue &
-UserObject::getPostprocessorValueByName(const PostprocessorName & name) const
+void
+UserObject::addPostprocessorDependencyHelper(const PostprocessorName & name) const
 {
   _depend_uo.insert(name);
-  return PostprocessorInterface::getPostprocessorValueByName(name);
 }
 
-const VectorPostprocessorValue &
-UserObject::getVectorPostprocessorValue(const std::string & param_name,
-                                        const std::string & vector_name) const
-{
-  _depend_uo.insert(getVectorPostprocessorName(param_name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(param_name, vector_name);
-}
-
-const VectorPostprocessorValue &
-UserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                              const std::string & vector_name) const
+void
+UserObject::addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const
 {
   _depend_uo.insert(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
-}
-
-const VectorPostprocessorValue &
-UserObject::getVectorPostprocessorValue(const std::string & param_name,
-                                        const std::string & vector_name,
-                                        bool needs_broadcast) const
-{
-  _depend_uo.insert(getVectorPostprocessorName(param_name));
-  return VectorPostprocessorInterface::getVectorPostprocessorValue(
-      param_name, vector_name, needs_broadcast);
-}
-
-const VectorPostprocessorValue &
-UserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                              const std::string & vector_name,
-                                              bool needs_broadcast) const
-{
-  _depend_uo.insert(name);
-  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
-      name, vector_name, needs_broadcast);
-}
-
-const ScatterVectorPostprocessorValue &
-UserObject::getScatterVectorPostprocessorValue(const std::string & param_name,
-                                               const std::string & vector_name) const
-{
-  _depend_uo.insert(getVectorPostprocessorName(param_name));
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(param_name, vector_name);
-}
-
-const ScatterVectorPostprocessorValue &
-UserObject::getScatterVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                                     const std::string & vector_name) const
-{
-  _depend_uo.insert(name);
-  return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
 }
 
 void

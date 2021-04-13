@@ -53,8 +53,8 @@ public:
    *
    * see getPostprocessorValueByName getPostprocessorValueOldByName getPostprocessorValueOlderByName
    */
-  virtual const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
-                                                           const unsigned int index = 0) const;
+  const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
+                                                   const unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOld(const std::string & param_name,
                                                       const unsigned int index = 0) const;
   const PostprocessorValue & getPostprocessorValueOlder(const std::string & param_name,
@@ -133,6 +133,13 @@ public:
    */
   const PostprocessorName & getPostprocessorName(const std::string & param_name,
                                                  const unsigned int index = 0) const;
+
+protected:
+  /**
+   * Helper for deriving classes to override to add dependencies when a Postprocessor
+   * is requested.
+   */
+  virtual void addPostprocessorDependencyHelper(const PostprocessorName & /* name */) const {}
 
 private:
   /// The MooseObject that uses this interface
