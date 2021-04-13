@@ -156,43 +156,6 @@ public:
    */
   std::set<UserObjectName> getDependObjects() const;
 
-  template <typename T>
-  const T & getUserObject(const std::string & param_name) const;
-  template <typename T>
-  const T & getUserObjectByName(const UserObjectName & object_name) const;
-
-  const UserObject & getUserObjectBase(const std::string & param_name) const override;
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const override;
-
-  virtual const PostprocessorValue &
-  getPostprocessorValue(const std::string & param_name,
-                        const unsigned int index = 0) const override;
-  virtual const PostprocessorValue &
-  getPostprocessorValueByName(const PostprocessorName & name) const override;
-
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name) const override;
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name) const override;
-
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name,
-                              bool needs_broadcast) const override;
-  virtual const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                    const std::string & vector_name,
-                                    bool needs_broadcast) const override;
-
-  const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & param_name,
-                                     const std::string & vector_name) const override final;
-  const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                           const std::string & vector_name) const override final;
-
   /**
    * Whether or not a threaded copy of this object is needed when obtaining it in
    * another object, like via the UserObjectInterface.
@@ -202,6 +165,10 @@ public:
   virtual bool needThreadedCopy() const { return false; }
 
 protected:
+  virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
+  virtual void
+  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override;
+
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
 
@@ -218,6 +185,8 @@ protected:
   const bool _duplicate_initial_execution;
 
 private:
+  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+
   UserObject * _primary_thread_copy = nullptr;
 
   /// Depend UserObjects that to be used by AuxKernel for finding the full UO dependency
@@ -231,22 +200,4 @@ UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
   unsigned int rank;
   _communicator.maxloc(value, rank);
   _communicator.broadcast(proxy, rank);
-}
-
-template <typename T>
-const T &
-UserObject::getUserObject(const std::string & param_name) const
-{
-  const auto & uo = UserObjectInterface::getUserObject<T>(param_name);
-  _depend_uo.insert(_pars.get<UserObjectName>(param_name));
-  return uo;
-}
-
-template <typename T>
-const T &
-UserObject::getUserObjectByName(const UserObjectName & object_name) const
-{
-  const auto & uo = UserObjectInterface::getUserObjectByName<T>(object_name);
-  _depend_uo.insert(object_name);
-  return uo;
 }

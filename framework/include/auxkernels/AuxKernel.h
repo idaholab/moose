@@ -118,43 +118,6 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
-  template <typename T>
-  const T & getUserObject(const std::string & param_name) const;
-  template <typename T>
-  const T & getUserObjectByName(const UserObjectName & object_name) const;
-
-  const UserObject & getUserObjectBase(const std::string & param_name) const override;
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name) const override;
-
-  const PostprocessorValue & getPostprocessorValue(const std::string & param_name,
-                                                   const unsigned int index = 0) const override;
-  const PostprocessorValue &
-  getPostprocessorValueByName(const PostprocessorName & name) const override;
-
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name) const override final;
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName &,
-                                    const std::string & vector_name) const override final;
-
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValue(const std::string & param_name,
-                              const std::string & vector_name,
-                              bool needs_broadcast) const override final;
-  const VectorPostprocessorValue &
-  getVectorPostprocessorValueByName(const VectorPostprocessorName &,
-                                    const std::string & vector_name,
-                                    bool needs_broadcast) const override final;
-
-  const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const std::string & param_name,
-                                     const std::string & vector_name) const override final;
-
-  const ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueByName(const VectorPostprocessorName & name,
-                                           const std::string & vector_name) const override final;
-
 protected:
   /**
    * Compute and return the value of the aux variable.
@@ -274,6 +237,11 @@ protected:
   using MooseVariableInterface<ComputeValueType>::mooseVariableBase;
 
 private:
+  void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
+  void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  void
+  addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override final;
+
   /**
    * Currently only used when the auxiliary variable is a finite volume variable, this helps call
    * through to the variable's \p setDofValue method. This helper is necessary because \p
@@ -282,12 +250,6 @@ private:
    * ComputeValueType is \p RealVectorValue
    */
   void setDofValueHelper(const ComputeValueType & dof_value);
-
-  /**
-   * Helper for adding the UserObject dependencies to _depend_uo.
-   */
-  void addUserObjectDependencies(const std::string & param_name) const;
-  void addUserObjectDependenciesByName(const UserObjectName & object_name) const;
 
   /// Depend AuxKernelTempls
   mutable std::set<std::string> _depend_vars;
@@ -363,24 +325,4 @@ AuxKernelTempl<ComputeValueType>::getMaterialPropertyOlder(const std::string & n
                "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
-}
-
-template <typename ComputeValueType>
-template <typename T>
-const T &
-AuxKernelTempl<ComputeValueType>::getUserObject(const std::string & param_name) const
-{
-  const auto & uo = UserObjectInterface::getUserObject<T>(param_name);
-  addUserObjectDependenciesByName(uo.name());
-  return uo;
-}
-
-template <typename ComputeValueType>
-template <typename T>
-const T &
-AuxKernelTempl<ComputeValueType>::getUserObjectByName(const UserObjectName & object_name) const
-{
-  const auto & uo = UserObjectInterface::getUserObjectByName<T>(object_name);
-  addUserObjectDependenciesByName(object_name);
-  return uo;
 }

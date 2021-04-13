@@ -93,6 +93,8 @@ UserObjectInterface::getUserObjectBaseByName(const UserObjectName & object_name)
         "The requested object with the name \"", object_name, "\" was not found.");
 
   const auto & uo_base_tid0 = _uoi_feproblem.getUserObjectBase(object_name, /* tid = */ 0);
+  addUserObjectDependencyHelper(uo_base_tid0);
+
   const THREAD_ID tid = uo_base_tid0.needThreadedCopy() ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObjectBase(object_name, tid);
 }

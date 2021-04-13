@@ -68,7 +68,7 @@ public:
   /**
    * getter method for dependent user objects
    */
-  const std::set<std::string> & getDependObjects() const { return _depend_uo; }
+  const std::set<UserObjectName> & getDependObjects() const { return _depend_uo; }
 
   /**
    * Workhorse method for projecting the initial conditions for block initial conditions
@@ -92,22 +92,6 @@ public:
 
   virtual const std::set<std::string> & getSuppliedItems() override;
 
-  /**
-   * reimplements the getUserObject method from UserObjectInterface
-   */
-  template <typename T>
-  const T & getUserObject(const std::string & name) const;
-  /**
-   * reimplements the getUserObjectByName method from UserObjectInterface
-   */
-  template <typename T>
-  const T & getUserObjectByName(const UserObjectName & name) const;
-
-  /**
-   * reimplements the getUserObjectBase method from UserObjectInterface
-   */
-  const UserObject & getUserObjectBase(const std::string & name) const override;
-
 protected:
   /// The system object
   SystemBase & _sys;
@@ -116,29 +100,13 @@ protected:
   const bool _ignore_uo_dependency;
 
 private:
+  void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+
   /// Dependent variables
   std::set<std::string> _depend_vars;
   /// Supplied variables
   std::set<std::string> _supplied_vars;
 
   /// Depend UserObjects. Mutable so that the getters can be const and still add dependencies
-  mutable std::set<std::string> _depend_uo;
+  mutable std::set<UserObjectName> _depend_uo;
 };
-
-template <typename T>
-const T &
-InitialConditionBase::getUserObject(const std::string & name) const
-{
-  if (!_ignore_uo_dependency)
-    _depend_uo.insert(getUserObjectName(name));
-  return UserObjectInterface::getUserObject<T>(name);
-}
-
-template <typename T>
-const T &
-InitialConditionBase::getUserObjectByName(const UserObjectName & name) const
-{
-  if (!_ignore_uo_dependency)
-    _depend_uo.insert(name);
-  return UserObjectInterface::getUserObjectByName<T>(name);
-}

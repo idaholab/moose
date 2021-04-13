@@ -273,6 +273,7 @@ VectorPostprocessorInterface::getVectorPostprocessorByNameHelper(
     std::size_t t_index) const
 {
   possiblyCheckHasVectorPostprocessorByName(name, vector_name);
+  addVectorPostprocessorDependencyHelper(name);
 
   const ReporterMode mode = broadcast ? REPORTER_MODE_REPLICATED : REPORTER_MODE_ROOT;
   return _vpi_feproblem.getReporterData().getReporterValue<VectorPostprocessorValue>(
@@ -284,6 +285,7 @@ VectorPostprocessorInterface::getVectorPostprocessorContextByNameHelper(
     const VectorPostprocessorName & name, const std::string & vector_name) const
 {
   possiblyCheckHasVectorPostprocessorByName(name, vector_name);
+  addVectorPostprocessorDependencyHelper(name);
 
   // The complete name of the store Reporter value
   const ReporterName r_name(name, vector_name);
