@@ -19,7 +19,6 @@ PostprocessorInterfaceErrorTest::validParams()
   params.addParam<PostprocessorName>("pp", 1, "Test parameter for a PostprocessorName");
   params.addParam<std::vector<PostprocessorName>>(
       "pps", "Test parameter for a vector of PostprocessorNames");
-  params.addParam<Real>("real_param", 1, "Dummy Real parameter");
   params.addParam<bool>(
       "missing_parameter", false, "True to test the error for a missing parameter");
   params.addParam<bool>(
@@ -56,7 +55,7 @@ PostprocessorInterfaceErrorTest::PostprocessorInterfaceErrorTest(const InputPara
   if (getParam<bool>("missing_parameter"))
     getPostprocessorValue("bad_parameter");
   if (getParam<bool>("bad_parameter_type"))
-    getPostprocessorValue("real_param");
+    getPostprocessorValue("bad_parameter_type");
   if (getParam<bool>("out_of_range_single"))
     getPostprocessorValue("pp", 1);
   if (getParam<bool>("out_of_range_vector"))

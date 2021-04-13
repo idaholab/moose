@@ -6,12 +6,12 @@
 []
 
 [UserObjects]
-  [null_uo]
-    type = NullUserObject
+  [other_uo]
+    type = UserObjectInterfaceErrorTest
   []
   [error_test]
     type = UserObjectInterfaceErrorTest
-    uo = null_uo
+    uo = other_uo
   []
 []
 

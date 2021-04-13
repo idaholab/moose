@@ -3,40 +3,56 @@
   issues = '#17446 #17512'
 
   [errors]
-    requirement = 'The system shall report a reasonable error when requesting a user object when'
+    requirement = 'The system shall report a reasonable error when requesting a UserObject when'
 
     [missing_parameter]
       type = RunException
       input = 'uoi_errors.i'
       cli_args = 'UserObjects/error_test/missing_parameter=true'
-      expect_err = 'Failed to get a parameter with the name "bad_parameter".'
+      expect_err = 'Failed to get a parameter with the name "missing" when getting a UserObjectName.'
 
-      detail = 'getting the user object name from a parameter and the parameter is not found,'
+      detail = 'getting the name from a parameter and the parameter is not found,'
+    []
+    [bad_parameter_type]
+      type = RunException
+      input = 'uoi_errors.i'
+      cli_args = 'UserObjects/error_test/bad_parameter_type=true'
+      expect_err = 'Parameter of type "bool" is not an expected type for getting the name of a UserObject.'
+
+      detail = 'getting the name from a parameter and the parameter does not represent a name,'
     []
     [not_found_by_param]
       type = RunException
       input = 'uoi_errors.i'
       cli_args = 'UserObjects/error_test/not_found_by_param=true
                   UserObjects/error_test/uo=bad_uo'
-      expect_err = 'uo\)\:.*The requested object with the name "bad_uo" was not found.'
+      expect_err = 'uo\)\:.*The requested UserObject with the name "bad_uo" was not found.'
 
-      detail = 'getting the user object name from a parameter and the user object is not found,'
+      detail = 'getting the name from a parameter and the user object is not found,'
     []
     [not_found_by_name]
       type = RunException
       input = 'uoi_errors.i'
       cli_args = 'UserObjects/error_test/not_found_by_name=true'
-      expect_err = 'The requested object with the name "not_found_by_name" was not found.'
+      expect_err = 'The requested UserObject with the name "not_found_by_name" was not found.'
 
-      detail = 'getting the user object by name and the user object is not found,'
+      detail = 'getting the UserObject by name and the user object is not found,'
     []
     [bad_cast]
       type = RunException
       input = 'uoi_errors.i'
       cli_args = 'UserObjects/error_test/bad_cast=true'
-      expect_err = 'The provided object "null_uo" of type NullUserObject is not derived from the required type..*The object must derive from ThreadedGeneralUserObject.'
+      expect_err = 'uo\)\:.*The provided UserObject "other_uo" of type UserObjectInterfaceErrorTest is not derived from the required type..*The UserObject must derive from ThreadedGeneralUserObject.'
 
-      detail = 'and the provided user object is not of the correct type.'
+      detail = 'getting the name from a paremeter and the provided object is not of the correct type, and'
+    []
+    [bad_cast_by_name]
+      type = RunException
+      input = 'uoi_errors.i'
+      cli_args = 'UserObjects/error_test/bad_cast_by_name=true'
+      expect_err = 'The provided UserObject "other_uo" of type UserObjectInterfaceErrorTest is not derived from the required type..*The UserObject must derive from ThreadedGeneralUserObject.'
+
+      detail = 'getting the UserObject by name and the provided object is not of the correct type.'
     []
   []
 []

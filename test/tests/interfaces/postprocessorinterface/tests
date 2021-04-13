@@ -17,7 +17,7 @@
       type = RunException
       input = 'ppi_errors.i'
       cli_args = 'UserObjects/error_test/bad_parameter_type=true'
-      expect_err = 'Supplied parameter with name \"real_param\" of type \"double\" is not an expected type for getting a Postprocessor.'
+      expect_err = 'Supplied parameter with name "bad_parameter_type" of type "bool" is not an expected type for getting a Postprocessor.'
 
       detail = 'the parameter does not represent a Postprocessor,'
     []
