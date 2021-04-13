@@ -81,3 +81,13 @@ protected:
   const Real & _value_declared_in_initial_setup;
   Real & _the_value_of_the_reporter;
 };
+
+class TestDeclareErrorsReporter : public GeneralReporter
+{
+public:
+  static InputParameters validParams();
+  TestDeclareErrorsReporter(const InputParameters & parameters);
+  virtual void initialize() override {}
+  virtual void finalize() override {}
+  virtual void execute() override {}
+};
